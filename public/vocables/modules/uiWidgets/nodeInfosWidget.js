@@ -618,8 +618,7 @@ defaultLang = 'en';*/
                 str += "</table>";
                 $("#nodeInfos_individualsDiv").html(str);
             }
-            if(callback)
-            callback();
+            if (callback) callback();
         });
     };
 

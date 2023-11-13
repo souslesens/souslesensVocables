@@ -25,7 +25,9 @@
       "hiddenLabel": "DocumentReview",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#FFD900",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/ReviewStatus",
@@ -52,7 +54,9 @@
       "hiddenLabel": "ReviewStatus",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/ReviewClass",
@@ -74,7 +78,9 @@
       "hiddenLabel": "ReviewClass",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/Document_Revision_Creation_Date",
@@ -97,7 +103,9 @@
       "hiddenLabel": "Document Revision Creation Date",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/ReviewStatusDeliveryDate",
@@ -125,7 +133,9 @@
       "hiddenLabel": "ReviewStatusDeliveryDate",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/Document_Revision_Received_Date",
@@ -148,7 +158,9 @@
       "hiddenLabel": "Document Revision Received Date",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/Review_Deadline_Date",
@@ -171,7 +183,9 @@
       "hiddenLabel": "Review Deadline Date",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/Review_Finalized_Date",
@@ -194,7 +208,9 @@
       "hiddenLabel": "Review Finalized Date",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/Document_Creation_Date",
@@ -217,7 +233,9 @@
       "hiddenLabel": "Document Creation Date",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card",
@@ -244,7 +262,9 @@
       "hiddenLabel": "Job Card",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#B3B005",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Procurement",
@@ -271,7 +291,9 @@
       "hiddenLabel": "Procurement",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Detailled_Engineering",
@@ -293,7 +315,9 @@
       "hiddenLabel": "Detailled Engineering",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Commissioning",
@@ -315,7 +339,9 @@
       "hiddenLabel": "Offshore Commissioning",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Construction_or_Installation",
@@ -337,7 +363,9 @@
       "hiddenLabel": "Offshore Construction or Installation",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Basic_Engineering",
@@ -359,7 +387,9 @@
       "hiddenLabel": "Basic Engineering",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Pre-commissioning",
@@ -386,7 +416,9 @@
       "hiddenLabel": "Offshore Pre-commissioning",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/PROJECT_-__Onshore_Preparation",
@@ -408,7 +440,9 @@
       "hiddenLabel": "PROJECT -  Onshore Preparation",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Prefabrication",
@@ -430,7 +464,9 @@
       "hiddenLabel": "Prefabrication",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Entity",
@@ -446,7 +482,9 @@
       "hiddenLabel": "Entity",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Task",
@@ -462,7 +500,9 @@
       "hiddenLabel": "Task",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/StartDate",
@@ -490,7 +530,9 @@
       "hiddenLabel": "StartDate",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#a6f1ff",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/EndDate",
@@ -518,7 +560,9 @@
       "hiddenLabel": "EndDate",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#a6f1ff",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Manning",
@@ -545,7 +589,9 @@
       "hiddenLabel": "Manning",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#007DFF",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/ConstructionDiscipline",
@@ -568,7 +614,9 @@
       "hiddenLabel": "ConstructionDiscipline",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Document",
@@ -579,10 +627,7 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Document",
         "label": "Document"
       },
-      "fixed": {
-        "x": true,
-        "y": true
-      },
+      "fixed": true,
       "x": 50,
       "y": -4,
       "color": "#FF7D07",
@@ -595,7 +640,9 @@
       "hiddenLabel": "Document",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#FF7D07",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Discipline",
@@ -622,7 +669,9 @@
       "hiddenLabel": "Discipline",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#B354B3",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/OffshorePOB",
@@ -645,7 +694,9 @@
       "hiddenLabel": "OffshorePOB",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/OffshoreManHours",
@@ -673,7 +724,9 @@
       "hiddenLabel": "OffshoreManHours",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/AssetBreakdownStructure",
@@ -700,7 +753,9 @@
       "hiddenLabel": "AssetBreakdownStructure",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#FFD900",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Equipement_Item",
@@ -727,7 +782,9 @@
       "hiddenLabel": "Equipement Item",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#7fef11",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Quantity",
@@ -750,7 +807,9 @@
       "hiddenLabel": "Quantity",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Cost",
@@ -773,7 +832,9 @@
       "hiddenLabel": "Cost",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Weight",
@@ -796,7 +857,9 @@
       "hiddenLabel": "Weight",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Tag",
@@ -818,7 +881,9 @@
       "hiddenLabel": "Tag",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Package",
@@ -840,7 +905,9 @@
       "hiddenLabel": "Package",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Functional_Location",
@@ -867,7 +934,9 @@
       "hiddenLabel": "Functional Location",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#FFD900",
+      "initialShape": "box"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Unit",
@@ -889,7 +958,9 @@
       "hiddenLabel": "Unit",
       "font": {
         "size": 20
-      }
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box"
     }
   ],
   "edges": [
@@ -2279,11 +2350,6 @@
       },
       "color": "#fdbf01",
       "width": 1
-    },
-    {
-      "id": "http://data.total/resource/tsf/new_prodom/DocumentReview_http://rds.posccaesar.org/ontology/lis14/rdl/isAbout_http://data.total/resource/tsf/dalia-lifex/Document",
-      "color": "#fdbf01",
-      "width": 1
     }
   ],
   "context": {
@@ -2373,12 +2439,12 @@
       "y": 244
     },
     "http://data.total/resource/tsf/dalia-lifex/Entity": {
-      "x": -279,
-      "y": -100
+      "x": -308,
+      "y": -16
     },
     "http://data.total/resource/tsf/dalia-lifex/Task": {
-      "x": -310,
-      "y": -14
+      "x": -269,
+      "y": -91
     },
     "http://data.total/resource/tsf/dalia-lifex/StartDate": {
       "x": -577,
@@ -2397,8 +2463,8 @@
       "y": -425
     },
     "http://data.total/resource/tsf/dalia-lifex/Document": {
-      "x": 50,
-      "y": -4
+      "x": 319,
+      "y": 154
     },
     "http://data.total/resource/tsf/dalia-lifex/Discipline": {
       "x": -294,

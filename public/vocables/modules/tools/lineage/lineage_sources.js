@@ -203,10 +203,9 @@ var Lineage_sources = (function () {
         $("#LineageNodesJsTreeDiv").empty();
         $("#Lineage_propertiesTree").empty();
         self.showHideEditButtons(source);
-        setTimeout(function(){
-            SearchWidget.init()
-        },500)
-
+        setTimeout(function () {
+            SearchWidget.init();
+        }, 500);
 
         $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/linkedData/lineage_linkedData_relations.html", function () {
             Lineage_linkedData_query.init();

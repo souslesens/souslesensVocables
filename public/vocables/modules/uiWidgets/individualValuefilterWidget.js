@@ -15,11 +15,11 @@ var IndividualValueFilterWidget = (function () {
         String: ["rdfs:label", "rdfs:isDefinedBy", "rdfs:comment", "skos:altLabel", "skos:prefLabel", "skos:definition", "skos:example"],
     };
 
-    self.showDialog = function (divId,source, varName, classId, datatype, validateFn) {
+    self.showDialog = function (divId, source, varName, classId, datatype, validateFn) {
         self.varName = varName;
         self.validateFn = validateFn;
         self.classId = classId;
-        self.currentSource=source
+        self.currentSource = source;
 
         if (!divId) {
             divId = "smallDialogDiv";
@@ -183,7 +183,6 @@ var IndividualValueFilterWidget = (function () {
             });
             return callback(null, jstreeData);
         });
-
     };
 
     return self;

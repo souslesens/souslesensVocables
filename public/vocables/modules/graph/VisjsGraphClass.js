@@ -835,7 +835,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         var payload = {
             dir: "graphs/",
             fileName: fileName,
-            data: JSON.stringify(data,null,2),
+            data: JSON.stringify(data, null, 2),
         };
 
         $.ajax({
@@ -844,7 +844,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             data: payload,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
-
                 $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
                 MainController.UI.message("graph saved");
             },

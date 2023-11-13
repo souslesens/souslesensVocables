@@ -303,7 +303,6 @@ var KGcreator_graph = (function () {
         }
     };
 
-
     self.drawDataSourceMappings = function () {
         if (!KGcreator.currentConfig.currentDataSource) {
             return alert("select a source");
@@ -423,28 +422,28 @@ var KGcreator_graph = (function () {
         var visjsData = { nodes: [], edges: [] };
 
         var existingNodes = {};
-        var json={}
+        var json = {};
         var shape = "box";
         for (var table in sourceMappings) {
             if (!tablesToDraw || tablesToDraw.indexOf(table) > -1) {
-            if (!existingNodes[table]) {
-                existingNodes[table] = 1;
-                visjsData.nodes.push({
-                    id: table,
-                    label: table,
-                    shape: "ellipse",
-                    color: "#ddd",
-                    data: {
+                if (!existingNodes[table]) {
+                    existingNodes[table] = 1;
+                    visjsData.nodes.push({
                         id: table,
                         label: table,
-                        fileName: table,
-                        type: "table",
-                    },
-                });
-            }
+                        shape: "ellipse",
+                        color: "#ddd",
+                        data: {
+                            id: table,
+                            label: table,
+                            fileName: table,
+                            type: "table",
+                        },
+                    });
+                }
 
                 var mappings = sourceMappings[table];
-            json[table]=mappings
+                json[table] = mappings;
                 mappings.tripleModels.forEach(function (item, index) {
                     function getNodeAttrs(str) {
                         if (str.indexOf("http") > -1) {
@@ -487,7 +486,7 @@ var KGcreator_graph = (function () {
                             attrs.shape = "box";
                             drawRelation = false;
                         }
-                      /*  if (item.isString) {
+                        /*  if (item.isString) {
                             attrs.shape = "text";
 
                         }*/
@@ -562,27 +561,23 @@ var KGcreator_graph = (function () {
             }
         }
 
-     //   var html = "<div id='KGcreator_mappingsGraphDiv' style='width:1100px;height:750px'></div>";
+        //   var html = "<div id='KGcreator_mappingsGraphDiv' style='width:1100px;height:750px'></div>";
         $("#mainDialogDiv").dialog("open");
-      //  $("#mainDialogDiv").html(html);
+        //  $("#mainDialogDiv").html(html);
         $("#mainDialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function () {
-        self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, {});
-        self.mappingVisjsGraph.draw();
-        var options={
-            mode: 'tree'
-        }
-       self.jsonEditor= new JsonEditor("#KGcreator_mappingsGraphEditor",json);
-           JSONEditor().setMode("tree")
-
-
-
-         });
+            self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, {});
+            self.mappingVisjsGraph.draw();
+            var options = {
+                mode: "tree",
+            };
+            self.jsonEditor = new JsonEditor("#KGcreator_mappingsGraphEditor", json);
+            //  JSONEditor().setMode("tree");
+        });
     };
 
-    self.saveDetailedMappings=function(){
- alert ("coming soon")
-    }
-
+    self.saveDetailedMappings = function () {
+        alert("coming soon");
+    };
 
     self.toSVG = function () {
         self.mappingVisjsGraph.toSVG();

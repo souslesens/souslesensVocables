@@ -234,52 +234,25 @@ and typescript/react.
 ```bash
 # Install the server
 npm ci
-# Install the front
-cd mainapp
-npm ci
-# Build Webpack files
-npm run build
-# Go back to root
-cd ..
+# Build mainapp with vitejs
+npm run mainapp:build
+# Run Express server
+npm start
 ```
 
-### Run souslesens server
+### Run souslesens server (dev mode)
 
 The following command will build and watch the react app and run and watch the node app.
 
 ```bash
-npm run devserver
-```
-
-### Run migration scripts
-
-Certain version need migration of data. Run the script for the following version:
-
-#### Release 1.27
-
-```bash
-node scripts/sources_access_control_migration_treeview.js -c config -w
-```
-
-#### Release 1.30
-
-```bash
-node scripts/controller-migration.js -c config -w
-```
-
-#### Release 1.33
-
-```bash
-node scripts/remove_admin_profile_migration.js -c config -w
-```
-
-#### Release 1.37
-
-```bash
-node scripts/migration_1.37_sources.js -c config -w
+npm run dev:fullstack
 ```
 
 SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
+
+### Run migration scripts
+
+Certain version need migration of data. See `CHANGELOG.md` before upgrading.
 
 ## Contribute to souslesensVocable
 

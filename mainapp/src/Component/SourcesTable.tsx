@@ -25,8 +25,9 @@ import {
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
-import { ServerSource, saveSource, defaultSource, deleteSource, InputSourceSchema } from "../Source";
+import { ServerSource, saveSource, defaultSource, deleteSource, sourceHelp, InputSourceSchema, InputSourceSchemaCreate } from "../Source";
 import { identity, style, joinWhenArray } from "../Utils";
+import { HelpButton } from "./HelpModal";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import TableSortLabel from "@mui/material/TableSortLabel";
@@ -40,6 +41,7 @@ import { Add, Remove } from "@mui/icons-material";
 import CircleIcon from "@mui/icons-material/Circle";
 import { green, pink, grey } from "@mui/material/colors";
 import Tooltip from "@mui/material/Tooltip";
+import * as z from "zod";
 
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
@@ -292,7 +294,9 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const [issues, setIssues] = React.useState<ZodCustomIssueWithMessage[]>([]);
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
 
-    const zo = useZorm("source-form", InputSourceSchema, { setupListeners: false, customIssues: issues });
+    const inputSourceSchema = create ? InputSourceSchemaCreate : InputSourceSchema;
+    const zo = useZorm("source-form", z.object(inputSourceSchema), { setupListeners: false, customIssues: issues });
+
     const [isAfterSubmission, setIsAfterSubmission] = React.useState<boolean>(false);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
@@ -359,7 +363,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     function validateSourceName(sourceName: string) {
         const issues = createCustomIssues(InputSourceSchema);
 
-        if (sources.reduce((acc, s) => (acc ||= s.name === sourceName), false)) {
+        if (sources.reduce((acc, s) => (acc ||= s.id === sourceName), false)) {
             issues.name(`Source's name ${sourceName} is already in use`);
         }
 
@@ -400,14 +404,38 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                     sx={style}
                 >
                     <Grid container spacing={4}>
-                        <Grid item xs={3}>
-                            <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Is this source editable?" />
+                        <Grid item>
+                            <Grid alignItems="center" container wrap="nowrap">
+                                <Grid item flex={1}>
+                                    <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Is this source editable?" />
+                                </Grid>
+                                <Grid item>
+                                    <HelpButton title="Editable" message={sourceHelp.editable} />
+                                </Grid>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={3}>
-                            <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Is it a draft?" />
+                        <Grid item>
+                            <Grid alignItems="center" container wrap="nowrap">
+                                <Grid item flex={1}>
+                                    <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Is it a draft?" />
+                                </Grid>
+                                <Grid item>
+                                    <HelpButton title="isDraft" message={sourceHelp.isDraft} />
+                                </Grid>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={3}>
-                            <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.allowIndividuals} onChange={handleCheckbox("allowIndividuals")} />} label="Allow individuals?" />
+                        <Grid item>
+                            <Grid alignItems="center" container wrap="nowrap">
+                                <Grid item flex={1}>
+                                    <FormControlLabel
+                                        control={<Checkbox checked={sourceModel.sourceForm.allowIndividuals} onChange={handleCheckbox("allowIndividuals")} />}
+                                        label="Allow individuals?"
+                                    />
+                                </Grid>
+                                <Grid item>
+                                    <HelpButton title="allowIndividuals" message={sourceHelp.allowIndividuals} />
+                                </Grid>
+                            </Grid>
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
@@ -424,6 +452,14 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 id={`name`}
                                 label={"Name"}
                                 variant="standard"
+                                disabled={!create}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <HelpButton title="Name" message={sourceHelp.name} />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Grid>
                         <Grid item xs={6}>
@@ -437,6 +473,13 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 id={`graphUris`}
                                 label={"graph' Uris"}
                                 variant="standard"
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <HelpButton title="Graph' Uris" message={sourceHelp.graphUri} />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Grid>
                         <Grid item xs={6}>
@@ -447,6 +490,13 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 id={`sparql_server_Method`}
                                 label={"Sparql server method"}
                                 variant="standard"
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <HelpButton title="Sparql server method" message={sourceHelp.sparql_server.method} />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Grid>
                         <Grid item xs={6}>
@@ -457,6 +507,13 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 id={`sparql_server_url`}
                                 label={"Sparql server url"}
                                 variant="standard"
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <HelpButton title="Sparql server url" message={sourceHelp.sparql_server.url} />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Grid>
                         <Grid container item xs={6}>
@@ -464,7 +521,21 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 <React.Fragment key={headerIdx}>
                                     <Grid container spacing={4}>
                                         <Grid item xs={6}>
-                                            <TextField fullWidth onChange={updateHeaderKey(headerIdx)} value={header.key} id={`sparql_server_headers`} label={"Header key"} variant="standard" />
+                                            <TextField
+                                                fullWidth
+                                                onChange={updateHeaderKey(headerIdx)}
+                                                value={header.key}
+                                                id={`sparql_server_headers`}
+                                                label={"Header key"}
+                                                variant="standard"
+                                                InputProps={{
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <HelpButton title="Header key" message={sourceHelp.sparql_server.headers.key} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
                                         </Grid>
                                         <Grid item xs={6}>
                                             <TextField
@@ -476,11 +547,16 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                                 variant="standard"
                                                 InputProps={{
                                                     endAdornment: (
-                                                        <InputAdornment position="end">
-                                                            <IconButton color="secondary" onClick={() => removeHeader(headerIdx)}>
-                                                                <Remove />
-                                                            </IconButton>
-                                                        </InputAdornment>
+                                                        <>
+                                                            <InputAdornment position="end">
+                                                                <HelpButton title="Header value" message={sourceHelp.sparql_server.headers.value} />
+                                                            </InputAdornment>
+                                                            <InputAdornment position="end">
+                                                                <IconButton color="secondary" onClick={() => removeHeader(headerIdx)}>
+                                                                    <Remove />
+                                                                </IconButton>
+                                                            </InputAdornment>
+                                                        </>
                                                     ),
                                                 }}
                                             />
@@ -502,6 +578,13 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 id={`topClassFilter`}
                                 label={"Top Class filter"}
                                 variant="standard"
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <HelpButton title="Top Class filter" message={sourceHelp.topClassFilter} />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Grid>
 
@@ -517,6 +600,11 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                     style={{ width: "400px" }}
                                     renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                     onChange={handleFieldUpdate("controller")}
+                                    endAdornment={
+                                        <InputAdornment position="end">
+                                            <HelpButton title="Controller" message={sourceHelp.controller} />
+                                        </InputAdornment>
+                                    }
                                 >
                                     {["Sparql_OWL", "Sparql_SKOS", "Sparql_INDIVIDUALS"].map((schemaType) => (
                                         <MenuItem key={schemaType} value={schemaType}>
@@ -537,6 +625,13 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 name={zo.fields.group()}
                                 label={"Group"}
                                 variant="standard"
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <HelpButton title="Group" message={sourceHelp.group} />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Grid>
 
@@ -553,6 +648,11 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                     style={{ width: "400px" }}
                                     renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                     onChange={handleFieldUpdate("imports")}
+                                    endAdornment={
+                                        <InputAdornment position="end">
+                                            <HelpButton title="Imports" message={sourceHelp.imports} />
+                                        </InputAdornment>
+                                    }
                                 >
                                     {sources.map((source) => (
                                         <MenuItem key={source.name} value={source.name}>
@@ -574,7 +674,18 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                     freeSolo
                                     onChange={(e, value) => handleTaxonomyPredicatesUpdate(value)}
                                     style={{ width: "400px" }}
-                                    renderInput={(params) => <TextField {...params} variant="filled" label="Taxonomy Predicates" />}
+                                    renderInput={(params) => {
+                                        if (sourceModel.sourceForm.taxonomyPredicates.length === 0) {
+                                            const endAdornment = (
+                                                <InputAdornment position="end">
+                                                    <HelpButton title="Taxonomy predicates" message={sourceHelp.taxonomyPredicates} />
+                                                </InputAdornment>
+                                            );
+                                            const newInputProps = { ...params.InputProps, endAdornment: endAdornment };
+                                            params.InputProps = newInputProps;
+                                        }
+                                        return <TextField {...params} variant="filled" label="Taxonomy Predicates" />;
+                                    }}
                                 />
                             </FormControl>
                         </Grid>
@@ -590,6 +701,11 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                     style={{ width: "400px" }}
                                     renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                     onChange={handleFieldUpdate("schemaType")}
+                                    endAdornment={
+                                        <InputAdornment position="end">
+                                            <HelpButton title="Schema type" message={sourceHelp.schemaType} />
+                                        </InputAdornment>
+                                    }
                                 >
                                     {schemaTypes.map((schemaType) => (
                                         <MenuItem key={schemaType} value={schemaType}>

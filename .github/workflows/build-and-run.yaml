@@ -22,9 +22,8 @@ jobs:
                   node-version: ${{ matrix.node-version }}
                   cache: "npm"
             - run: npm ci
-            - run: cd mainapp && npm ci && npm run build && cd ..
-            - run: npm run build --if-present
+            - run: npm run mainapp:build
             - run: |
-                  npm start & 
-                  sleep 10s && 
+                  npm start &
+                  sleep 10s &&
                   curl http://localhost:3011

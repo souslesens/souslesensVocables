@@ -1,11 +1,21 @@
 {
   "GEMET": {
-    "controller": "Sparql_SKOS",
+    "name": "GEMET",
+    "_type": "source",
+    "id": "01GKHD23Y6REP3MTPE9CYAWNFK",
+    "graphUri": "http://www.eionet.europa.eu/gemet/",
     "sparql_server": {
       "url": "_default"
     },
-    "graphUri": "http://www.eionet.europa.eu/gemet/",
+    "controller": "Sparql_SKOS",
+    "topClassFilter": "?topConcept rdf:type <http://www.eionet.europa.eu/gemet/2004/06/gemet-schema.rdf#SuperGroup>.",
     "schemaType": "SKOS",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": true,
+    "allowIndividuals": true,
+    "color": "#c7c7c7",
     "predicates": {
       "lang": "en",
       "prefLabel": "rdfs:label|skos:prefLabel",
@@ -13,26 +23,36 @@
       "topConceptFilter": "?topConcept rdf:type <http://www.eionet.europa.eu/gemet/2004/06/gemet-schema.rdf#SuperGroup>.",
       "optionalDepth": 3
     },
-    "color": "#c7c7c7",
-    "imports": [],
-    "topClassFilter": "?topConcept rdf:type <http://www.w3.org/2002/07/owl#Class>",
-    "name": "GEMET"
+    "group": "",
+    "imports": [
+      "GEMET"
+    ],
+    "taxonomyPredicates": []
   },
   "GEOSCMIL": {
-    "controller": "Sparql_SKOS",
+    "name": "GEOSCMIL",
+    "_type": "source",
+    "id": "01H7ASHS2AACT6NWWJ0T2CVKHZ",
+    "graphUri": "http://resource.geosciml.org/",
     "sparql_server": {
       "url": "_default"
     },
-    "graphUri": "http://resource.geosciml.org/",
+    "controller": "Sparql_SKOS",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
     "schemaType": "SKOS",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#c5b0d5",
     "predicates": {
       "broaderPredicate": "^skos:hasTopConcept|skos:broader",
       "lang": "en"
     },
-    "color": "#c5b0d5",
+    "group": "",
     "imports": [],
-    "topClassFilter": "?topConcept rdf:type <http://www.w3.org/2002/07/owl#Class>",
-    "name": "GEOSCMIL"
+    "taxonomyPredicates": []
   },
   "INT_CHRONOSTRATIGRAPHIC_CHART": {
     "controller": "Sparql_SKOS",
@@ -54,49 +74,60 @@
     "name": "INT_CHRONOSTRATIGRAPHIC_CHART"
   },
   "LOTERRE": {
-    "controller": "Sparql_SKOS",
+    "name": "LOTERRE",
+    "_type": "source",
+    "id": "01H7ASHS2B7GM0FCG6RBAYTZN0",
+    "graphUri": "",
     "sparql_server": {
       "url": "https://sparql.loterre.fr/LoterreVocabularies/sparql",
       "method": "GET"
     },
-    "graphUri": "",
+    "controller": "Sparql_SKOS",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
     "schemaType": "SKOS",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#ffbb78",
     "predicates": {
+      "topConceptFilterWW": "  ?topConcept skos:prefLabel ?topConceptLabel.filter (exists {?x <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSCollection> ?topConcept}",
       "topConceptFilter": "  ?topConcept skos:prefLabel ?topConceptLabel.?topConcept <http:xxx> ?x.",
       "lang": "en"
     },
-    "color": "#ffbb78",
+    "group": "",
     "imports": [],
-    "topClassFilter": "?topConcept rdf:type <http://www.w3.org/2002/07/owl#Class>",
-    "name": "LOTERRE"
-  },
-  "ISO_15926-part-14_PCA": {
-    "graphUri": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "controller": "Sparql_OWL",
-    "topClassFilter": " ?topConcept rdf:type <http://www.w3.org/2002/07/owl#Class>  filter (NOT exists {?topConcept rdfs:subClassOf ?y} &&  (!isBlank(?topConcept))  )",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22",
-    "group": "STANDARDS/ABSTRACT ONTOLOGIES",
-    "imports": [],
-    "name": "ISO_15926-part-14_PCA"
+    "taxonomyPredicates": []
   },
   "BFO": {
+    "name": "BFO",
+    "_type": "source",
+    "id": "01H7AS9Q6BN6QHV23K4BCJXHCC",
     "graphUri": "http://purl.obolibrary.org/obo/bfo.owl",
     "sparql_server": {
-      "url": "_default"
+      "url": "_default",
+      "method": "Post"
     },
     "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000001>",
+    "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
     "schemaType": "OWL",
+    "dataSource": null,
     "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
     "color": "#bcbd22",
-    "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "STANDARDS/TOP_ONTOLOGIES",
     "imports": [],
-    "name": "BFO"
+    "taxonomyPredicates": [
+      "rdfs:subClassOf",
+      "rdf:type"
+    ]
   },
   "DOLCE": {
     "graphUri": "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#",
@@ -156,58 +187,58 @@
     "name": "SEMANTIC-SCIENCE"
   },
   "DATA_KNOWLEDGE": {
+    "name": "DATA_KNOWLEDGE",
+    "_type": "source",
+    "id": "01H7ASHS297KZHB4QWQG7PKS23",
     "graphUri": "http://http://www.data-knowledge.org/dk/",
     "sparql_server": {
       "url": "_default"
     },
     "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf ?superClass filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
     "schemaType": "OWL",
+    "dataSource": null,
     "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
     "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
     "group": "STANDARDS/ABSTRACT ONTOLOGIES",
     "imports": [],
-    "name": "DATA_KNOWLEDGE"
+    "taxonomyPredicates": []
   },
-  "ROMAIN": {
-    "editable": false,
-    "graphUri": "http://www.semanticweb.org/hedi/ontologies/2018/11/ROMAIN/",
-    "imports": [],
+  "ISO_15926-part-14_PCA": {
+    "name": "ISO_15926-part-14_PCA",
+    "_type": "source",
+    "id": "01GMDMQXHQKTMYGFSFHW65HV3K",
+    "graphUri": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
     "sparql_server": {
       "url": "_default"
     },
     "controller": "Sparql_OWL",
-    "topClassFilterXX": "?topConcept ?x ?y filter( REGEX(STR(?topConcept),'BFO','i'))",
-    "topClassFilter": "?topConcept rdfs:subClassOf ?r. ?r rdf:type owl:Restriction",
+    "topClassFilter": " ?topConcept rdf:type <http://www.w3.org/2002/07/owl#Class>  filter (NOT exists {?topConcept rdfs:subClassOf ?y} &&  (!isBlank(?topConcept))  )",
     "schemaType": "OWL",
+    "dataSource": null,
     "schema": null,
-    "color": "#bcbd22",
-    "group": "STANDARDS/MAINTENANCE",
-    "name": "ROMAIN"
-  },
-  "QUDT": {
+    "isDraft": false,
     "editable": false,
-    "graphUri": "",
-    "imports": [],
-    "sparql_server": {
-      "url": "http://www.qudt.org/fuseki/qudt/sparql",
-      "method": "GET"
+    "allowIndividuals": false,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
     },
-    "controller": "Sparql_OWL",
-    "topClassFilterXX": "?topConcept ?x ?y filter( REGEX(STR(?topConcept),'BFO','i') )",
-    "topClassFilter": "?topConcept <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://qudt.org/schema/qudt/Datatype>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22",
-    "group": "OTHERS_OWL",
-    "name": "QUDT"
+    "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+    "imports": [],
+    "taxonomyPredicates": []
   },
-  "plant_ontology": {
+  "IOF_core": {
     "editable": false,
-    "graphUri": "http://purl.obolibrary.org/obo/po/",
-    "imports": [
-      "BFO"
-    ],
+    "graphUri": "https://www.industrialontologies.org/core/",
     "sparql_server": {
       "url": "_default"
     },
@@ -216,129 +247,8 @@
     "schemaType": "OWL",
     "schema": null,
     "color": "#bcbd22",
-    "group": "OTHERS_OWL",
-    "name": "plant_ontology"
-  },
-  "cido_coronavirus": {
-    "editable": false,
-    "graphUri": "http://purl.obolibrary.org/obo/cido.owl#",
-    "imports": [
-      "BFO"
-    ],
-    "sparql_server": {
-      "url": "_default"
-    },
-    "controller": "Sparql_OWL",
-    "topClassFilter": " ?topConcept rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000001>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22",
-    "group": "OTHERS_OWL",
-    "name": "cido_coronavirus"
-  },
-  "TSF_GAIA_TEST": {
-    "editable": true,
-    "allowIndividuals": true,
-    "graphUri": "http://data.total.com/resource/tsf/ontology/gaia-test/",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "taxonomyPredicates": [
-      "rdfs:subClassOf",
-      "rdf:type"
-    ],
-    "imports": [
-      "ISO_15926-part-14_PCA"
-    ],
-    "controller": "Sparql_OWL",
-    "topClassFilter": "  ?topConcept rdfs:subClassOf    ?x filter(regex(str(?x),\"lis14\") && ?subjectGraph =<http://data.total.com/resource/tsf/ontology/gaia-test/>)",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22",
-    "group": "TSF/DRAFTS",
-    "name": "TSF_GAIA_TEST"
-  },
-  "TSF_STANDARDS_LANDSCAPE": {
-    "editable": true,
-    "allowIndividuals": true,
-    "graphUri": "http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "taxonomyPredicates": [
-      "rdfs:subClassOf",
-      "rdf:type"
-    ],
-    "imports": [
-      "ISO_15926-part-14_PCA"
-    ],
-    "controller": "Sparql_OWL",
-    "topClassFilter": " ?topConcept rdfs:subClassOf    ?x filter(regex(str(?x),\"lis14\") && ?subjectGraph =<http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/>)",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22",
-    "group": "TSF/DRAFTS",
-    "name": "TSF_STANDARDS_LANDSCAPE"
-  },
-  "ONTOLOGIES_USE_CASES": {
-    "editable": true,
-    "allowIndividuals": true,
-    "graphUri": "http://data.total.com/resource/tsf/ontologies-use-cases/",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "taxonomyPredicates": [
-      "rdfs:subClassOf",
-      "rdf:type"
-    ],
-    "imports": [
-      "ISO_15926-part-14_PCA"
-    ],
-    "controller": "Sparql_OWL",
-    "topClassFilter": "  ?topConcept rdfs:subClassOf    ?x filter(regex(str(?x),\"lis14\") && ?subjectGraph =<http://data.total.com/resource/tsf/ontologies-use-cases/>)",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22",
-    "group": "OTHERS_OWL",
-    "name": "ONTOLOGIES_USE_CASES"
-  },
-  "SLSV": {
-    "editable": true,
-    "allowIndividuals": true,
-    "graphUri": "http://souslesens.org/resources/ontologies/slsv",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "taxonomyPredicates": [
-      "rdfs:subClassOf",
-      "rdf:type"
-    ],
-    "imports": [
-      "ISO_15926-part-14_PCA"
-    ],
-    "controller": "Sparql_OWL",
-    "topClassFilter": "  ?topConcept rdfs:subClassOf    ?x filter(regex(str(?x),\"lis14\") && ?subjectGraph =<http://souslesens.org/resources/ontologies/slsv>)",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22",
-    "group": "OTHERS_OWL",
-    "name": "SLSV"
-  },
-  "IOF_core": {
-    "editable": false,
-    "graphUri": "https://purl.industrialontologies.org/ontology/core/Core/",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "imports": [
-      "BFO"
-    ],
-    "controller": "Sparql_OWL",
-    "topClassFilter": " ?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') && !regex(str(?topConcept),'BFO')  )",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22",
     "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+    "imports": [],
     "name": "IOF_core"
   },
   "IOF_maintenance": {
@@ -357,5 +267,157 @@
     "color": "#bcbd22",
     "group": "STANDARDS/MAINTENANCE",
     "name": "IOF_maintenance"
+  },
+  "ROMAIN": {
+    "editable": false,
+    "graphUri": "http://www.semanticweb.org/hedi/ontologies/2018/11/ROMAIN/",
+    "imports": [],
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilterXX": "?topConcept ?x ?y filter( REGEX(STR(?topConcept),'BFO','i'))",
+    "topClassFilter": "?topConcept rdfs:subClassOf ?r. ?r rdf:type owl:Restriction",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22",
+    "group": "STANDARDS/MAINTENANCE",
+    "name": "ROMAIN"
+  },
+  "QUDT": {
+    "name": "QUDT",
+    "_type": "source",
+    "id": "01GNYJ6AM3W62H2DY48SSBZNSR",
+    "graphUri": "",
+    "sparql_server": {
+      "url": "http://www.qudt.org/fuseki/qudt/sparql",
+      "method": "GET"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://qudt.org/schema/qudt/Datatype>",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "TSF/DRAFTS/OTHERS_OWL",
+    "imports": [],
+    "taxonomyPredicates": []
+  },
+  "plant_ontology": {
+    "name": "plant_ontology",
+    "_type": "source",
+    "id": "01GNYJ9BH858QQD6JXSRWCEZZ6",
+    "graphUri": "http://purl.obolibrary.org/obo/po/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') )",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "TSF/DRAFTS/OTHERS_OWL",
+    "imports": [],
+    "taxonomyPredicates": []
+  },
+  "cido_coronavirus": {
+    "name": "cido_coronavirus",
+    "_type": "source",
+    "id": "01GNYJ7NSK6KK351JEJY9TKNK8",
+    "graphUri": "http://purl.obolibrary.org/obo/cido.owl#",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000001>",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "TSF/DRAFTS/OTHERS_OWL",
+    "imports": [],
+    "taxonomyPredicates": []
+  },
+  "TSF_GAIA_TEST": {
+    "name": "TSF_GAIA_TEST",
+    "_type": "source",
+    "id": "01GH9BYD174FK5Z85D3EX4CMVV",
+    "graphUri": "http://data.total.com/resource/tsf/ontology/gaia-test/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": true,
+    "allowIndividuals": true,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "TSF/DRAFTS",
+    "imports": [
+      "ISO_15926-part-14_PCA"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf",
+      "rdf:type"
+    ]
+  },
+  "TSF_STANDARDS_LANDSCAPE": {
+    "name": "TSF_STANDARDS_LANDSCAPE",
+    "_type": "source",
+    "id": "01GW2ECMJ446HAB9CGSMHEZK1A",
+    "graphUri": "http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type  owl:Class.\n",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": true,
+    "allowIndividuals": true,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "TSF/DRAFTS",
+    "imports": [
+      "ISO_15926-part-14_PCA"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf",
+      "rdf:type"
+    ]
   }
 }

@@ -182,16 +182,8 @@ export const ServerSourceSchema = z.object({
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 });
 
-export const InputSourceSchema = z.object({
+export const InputSourceSchema = {
     id: z.string().default(ulid()),
-    name: z
-        .string()
-        .nonempty({ message: "Required" })
-        .refine((val) => val !== "admin", { message: "Name can't be admin" })
-        .refine((val) => val.match(/.{2,254}/i), { message: "Name can only contain between 2 and 255 chars" })
-        .refine((val) => val.match(/^[a-z0-9]/i), { message: "Name have to start with alphanum char" })
-        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
-
     _type: z.string().optional(),
     graphUri: z.string().optional(),
     sparql_server: SparqlServerSchema,
@@ -205,10 +197,48 @@ export const InputSourceSchema = z.object({
     isDraft: z.boolean().default(false),
     allowIndividuals: z.boolean().default(false),
     predicates: SourcePredicatesSchema,
-    group: z.string().min(3, { message: "Required, 3 chars min" }),
+    group: z
+        .string()
+        .nonempty({ message: "Required" })
+        .min(3, { message: "3 chars min" })
+        .refine((val) => val.match(/^[^\/]/), { message: "Cannot start with /" }),
     imports: z.array(z.string()).default([]),
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
-});
+};
+
+export const InputSourceSchemaCreate = {
+    ...InputSourceSchema,
+    name: z
+        .string()
+        .nonempty({ message: "Required" })
+        .refine((val) => val !== "admin", { message: "Name can't be admin" })
+        .refine((val) => val.match(/.{2,254}/i), { message: "Name can only contain between 2 and 255 chars" })
+        .refine((val) => val.match(/^[a-z0-9]/i), { message: "Name have to start with alphanum char" })
+        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
+};
+
+export const sourceHelp = {
+    name: "The source name can only contain alphanum and - or _ chars and must be uniq",
+    graphUri: "Graph URI is mandatory when using the default SPARQL server",
+    sparql_server: {
+        url: "_default if using the default SPARQL server, else, the URL of the SPARQL server",
+        method: "The HTTP method (GET or POST) used to request the SPARQL server. The default SPARQL server needs POST",
+        headers: { key: "Name of HTTP header added to the SPARQL request", value: "Value of the HTTP header added to the SPARQL request" },
+    },
+    controller: "OWL uses subClassOf for taxonomy queries, SKOS uses narower and broader",
+    topClassFilter: "SPARQL query used to get the top concepts",
+    schemaType: "DEPRECATED, will be removed in future version",
+    dataSource: "",
+    schema: "",
+    editable: "The source can be modified according to the user profile (read & write)",
+    color: "",
+    isDraft: "Mark the source as draft",
+    allowIndividuals: "Allows user to create named individuals",
+    predicates: "",
+    group: "Group and subgroups (AAA/BBB) used to order the sources",
+    imports: "List of imported sources",
+    taxonomyPredicates: "List of properties used to draw the taxonomies of classes and named individuals",
+};
 
 export const defaultSource = (id: string): ServerSource => {
     return ServerSourceSchema.parse({

@@ -116,17 +116,19 @@ dist
 public/vocables/images/descriptionXX.png
 
 /config/
-
 data/**/*.json
 data/**/*.pdf
 data/**/*.zip
 data/**/*.txt
 data/**/*.csv
 
+docker-data/
+
 #React build output
 mainapp/static/*.js
 mainapp/static/*.js.map
 mainapp/lib
+mainapp/static/assets
 
 /public/vocables/customPlugins/TotalEnergies/
 /bin/dump-graphs.js

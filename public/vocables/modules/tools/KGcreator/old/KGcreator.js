@@ -235,7 +235,11 @@ var KGcreator = (function () {
     };
 
     self.displayUploadApp = function () {
-        $.getScript("/kg_upload_app.js");
+        // const kg_upload_script = document.createElement("script");
+        // kg_upload_script.type = "module";
+        // kg_upload_script.src = "/assets/kg_upload_app.js";
+        // document.body.appendChild(kg_upload_script);
+        import("/assets/kg_upload_app.js");
     };
 
     self.loadMappingsList = function (callback) {

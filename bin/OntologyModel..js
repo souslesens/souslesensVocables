@@ -13,7 +13,7 @@ var OntologyModel = {
         var serverUrl;
         var sourceObj = OntologyModel.Config.sources[source];
         if (sourceObj) serverUrl = sourceObj.sparql_server.url;
-        else serverUrl = OntologyModel.Config.default_sparql_url;
+        else serverUrl = OntologyModel.Config.sparql_server.url;
 
         serverUrl += "?format=json&query=";
         var params = {
@@ -362,7 +362,7 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
                 //register source in Config.sources
                 function (callbackSeries) {
                     if (!Config.sources[source]) {
-                        Config.sources[source] = { graphUri: graphUri, controllerName: Sparql_OWL, controller: Sparql_OWL, sparql_server: { url: Config.default_sparql_url } };
+                        Config.sources[source] = { graphUri: graphUri, controllerName: Sparql_OWL, controller: Sparql_OWL, sparql_server: { url: Config.sparql_server.url } };
                     }
                     return callbackSeries();
                 },

@@ -12,7 +12,7 @@ var Lineage_styles = (function () {
             self.isInitialized = true;
             Config.sources[self.stylesSourceLabel] = {
                 graphUri: Config.styles_graphUri,
-                sparql_server: { url: Config.default_sparql_url },
+                sparql_server: { url: Config.sparql_server.url },
                 controller: Sparql_OWL,
             };
         }

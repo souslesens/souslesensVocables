@@ -7,10 +7,11 @@ module.exports = function () {
     };
 
     function GET(req, res, _next) {
+        const { user, password, ...sparql_server } = config.sparql_server;
         const result = {
             auth: config.auth,
             default_lang: config.default_lang,
-            default_sparql_url: config.default_sparql_url,
+            sparql_server: sparql_server,
             formalOntologySourceLabel: config.formalOntologySourceLabel,
             wiki: config.wiki,
             version: process.env.npm_package_version,

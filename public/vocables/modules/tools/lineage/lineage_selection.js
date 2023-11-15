@@ -299,7 +299,7 @@ var Lineage_selection = (function () {
                                         filterStr +
                                         "})} LIMIT 10000";
                                     var sparql_url = Config.sources[source].sparql_server.url;
-                                    if ((sparql_url = "_default")) sparql_url = Config.default_sparql_url;
+                                    if ((sparql_url = "_default")) sparql_url = Config.sparql_server.url;
                                     var url = sparql_url + "?format=json&query=";
                                     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
                                         if (err) return callbackSeries(err);

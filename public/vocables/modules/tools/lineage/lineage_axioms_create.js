@@ -32,7 +32,7 @@ var Lineage_axioms_create = (function () {
                     Config.sources[key] = {
                         imports: [],
                         graphUri: Config.basicVocabularies[key].graphUri,
-                        sparql_server: { url: Config.default_sparql_url },
+                        sparql_server: { url: Config.sparql_server.url },
                     };
                 }
             }

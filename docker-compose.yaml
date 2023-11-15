@@ -17,7 +17,9 @@ services:
         environment:
             USER_USERNAME: admin
             USER_PASSWORD: ${USER_PASSWORD}
-            VOCABLES__default_sparql_url: http://virtuoso:8890/sparql
+            VOCABLES__sparql_server__url: http://virtuoso:8890/sparql
+            VOCABLES__sparql_server__user: dba
+            VOCABLES__sparql_server__password: ${DBA_PASSWORD}
             VOCABLES__formalOntologySourceLabel: ${FORMAL_ONTOLOGY_SOURCE_LABEL}
             VOCABLES__SQLserver__user: SA
             VOCABLES__SQLserver__password: ${SA_PASSWORD}

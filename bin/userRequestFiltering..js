@@ -38,7 +38,7 @@ var UserRequestFiltering = {
 
         for (var key in userSourcesMap) {
             var source = userSourcesMap[key];
-            if ((source.sparql_server.url == "_default" || source.sparql_server.url == ConfigManager.config.default_sparql_url) && source.graphUri) {
+            if ((source.sparql_server.url == "_default" || source.sparql_server.url == ConfigManager.config.sparql_server.url) && source.graphUri) {
                 userGraphUrisMap[source.graphUri] = { source: key, acl: source.accessControl == "readwrite" ? "w" : "r" };
             }
         }

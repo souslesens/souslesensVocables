@@ -21,7 +21,7 @@ module.exports = function () {
             }
 
             if (ConfigManager.config) {
-                var sparqlServerConnection = { url: ConfigManager.config.default_sparql_url };
+                var sparqlServerConnection = { url: ConfigManager.config.sparql_server.url };
                 if (ConfigManager.config.sparql_server.user) {
                     sparqlServerConnection.auth = {
                         user: ConfigManager.config.sparql_server.user,
@@ -34,7 +34,7 @@ module.exports = function () {
                     [
                         // check if source name
                         function (callbackSeries) {
-                            GraphStore.insertSourceInConfig(body.sourceName, body.graphUri, ConfigManager.config.default_sparql_url, body.options, function (err, result) {
+                            GraphStore.insertSourceInConfig(body.sourceName, body.graphUri, ConfigManager.config.sparql_server.url, body.options, function (err, result) {
                                 return callbackSeries(err);
                             });
                         },

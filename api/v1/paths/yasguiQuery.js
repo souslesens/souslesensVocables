@@ -20,7 +20,7 @@ module.exports = function () {
 
                 var params = { query: query };
 
-                if (ConfigManager.config && req.query.url.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                if (ConfigManager.config && req.query.url.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                     params.auth = {
                         user: ConfigManager.config.sparql_server.user,
                         pass: ConfigManager.config.sparql_server.password,

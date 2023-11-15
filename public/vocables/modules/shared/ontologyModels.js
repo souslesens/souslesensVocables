@@ -12,7 +12,7 @@ var OntologyModels = (function () {
             sources = [sources];
         }
 
-        let url = Config.default_sparql_url + "?format=json&query=";
+        let url = Config.sparql_server.url + "?format=json&query=";
 
         var queryP = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + "PREFIX owl: <http://www.w3.org/2002/07/owl#>";
 
@@ -399,7 +399,7 @@ return callbackSeries();
                         //register source in Config.sources
                         function (callbackSeries) {
                             if (!Config.sources[source]) {
-                                Config.sources[source] = { graphUri: graphUri, controllerName: Sparql_OWL, controller: Sparql_OWL, sparql_server: { url: Config.default_sparql_url } };
+                                Config.sources[source] = { graphUri: graphUri, controllerName: Sparql_OWL, controller: Sparql_OWL, sparql_server: { url: Config.sparql_server.url } };
                             }
                             return callbackSeries();
                         },
@@ -882,7 +882,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 "        ?prop  rdf:type  owl:ObjectProperty. optional{?prop rdfs:label ?propLabel} }\n" +
                 "  } LIMIT 10000";
 
-            let url = Config.default_sparql_url + "?format=json&query=";
+            let url = Config.sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                 if (err) {
                     return callback(err);
@@ -919,7 +919,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
             " bind (datatype(?v) as ?datatype)\n" +
             //  "   filter (t != '')\n" +
             "}";
-        let url = Config.default_sparql_url + "?format=json&query=";
+        let url = Config.sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
             if (err) {
                 return callback(err);

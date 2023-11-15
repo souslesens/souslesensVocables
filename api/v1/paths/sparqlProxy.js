@@ -17,7 +17,7 @@ module.exports = function () {
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
 
-                if (ConfigManager.config && req.body.url.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                if (ConfigManager.config && req.body.url.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                     if (ConfigManager.config.sparql_server.user) {
                         body.params.auth = {
                             user: ConfigManager.config.sparql_server.user,

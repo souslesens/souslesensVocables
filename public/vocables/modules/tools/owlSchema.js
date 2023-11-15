@@ -66,7 +66,7 @@ var OwlSchema = (function () {
 
         if (sourceSchema) {
             sourceSchema.type = Config.sources[sourceLabel].schemaType;
-            if (sourceSchema.sparql_url == "_default") sourceSchema.sparql_url = Config.default_sparql_url;
+            if (sourceSchema.sparql_url == "_default") sourceSchema.sparql_url = Config.sparql_server.url;
         }
 
         // for OWL   and not SKOS

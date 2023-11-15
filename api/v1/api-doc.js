@@ -255,9 +255,6 @@ const apiDoc = {
                 default_lang: {
                     type: "string",
                 },
-                default_sparql_url: {
-                    type: "string",
-                },
                 wiki: {
                     type: "object",
                     properties: {

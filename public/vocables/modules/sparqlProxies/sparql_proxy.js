@@ -106,7 +106,7 @@ var Sparql_proxy = (function () {
         query = self.addFromLabelsGraphToQuery(query);
 
         if (url.indexOf("_default") == 0) {
-            url = Config.default_sparql_url;
+            url = Config.sparql_server.url;
         }
         var sourceParams;
         var headers = {};
@@ -138,7 +138,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
         }
 
         var useProxy = false;
-        if (url.indexOf(Config.default_sparql_url) == 0) {
+        if (url.indexOf(Config.sparql_server.url) == 0) {
             useProxy = true;
         }
 
@@ -255,7 +255,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
 
         var serverUrl = Config.sources[source].sparql_server.url;
         if (serverUrl.indexOf("_default") == 0) {
-            serverUrl = Config.default_sparql_url;
+            serverUrl = Config.sparql_server.url;
         }
 
         var body = {

@@ -326,7 +326,7 @@ var Sparql_generic = (function () {
 
     self.getEndPointAllGraphsMap = function (sparqlServerUrl, callback) {
         if (!sparqlServerUrl) {
-            sparqlServerUrl = Config.default_sparql_url + "?format=json&query=";
+            sparqlServerUrl = Config.sparql_server.url + "?format=json&query=";
         }
         var query = "select distinct ?g WHERE {GRAPH ?g{?s ?p ?o}} limit 10000";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
@@ -528,7 +528,7 @@ var Sparql_generic = (function () {
                     return callback(null, query);
                 }
                 // console.log(query)
-                var url = Config.sources[sourceLabel] ? Config.sources[sourceLabel].sparql_server.url : Config.default_sparql_url + "?format=json&query=";
+                var url = Config.sources[sourceLabel] ? Config.sources[sourceLabel].sparql_server.url : Config.sparql_server.url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
                     return callbackEach(err);
                 });

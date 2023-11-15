@@ -33,7 +33,7 @@ var MainController = (function () {
             dataType: "json",
             success: function (serverConfig, _textStatus, _jqXHR) {
                 Config.default_lang = serverConfig.default_lang;
-                Config.default_sparql_url = serverConfig.default_sparql_url;
+                Config.sparql_server = serverConfig.sparql_server;
                 Config.wiki = serverConfig.wiki;
                 Config.sentryDsnJsFront = serverConfig.sentryDsnJsFront;
                 Config.currentTopLevelOntology = serverConfig.currentTopLevelOntology;
@@ -71,7 +71,7 @@ var MainController = (function () {
                 const data = data_.resources;
                 for (var source in data) {
                     if (data[source].sparql_server && data[source].sparql_server.url == "_default") {
-                        data[source].sparql_server.url = Config.default_sparql_url;
+                        data[source].sparql_server.url = Config.sparql_server.url;
                     }
                 }
                 Config.sources = data;
@@ -94,7 +94,7 @@ var MainController = (function () {
 Config.sources = json;
 for(var sourceLabel in Config.sources){
    if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
-       Config.sources[sourceLabel].sparql_server.url=Config.default_sparql_url
+       Config.sources[sourceLabel].sparql_server.url=Config.sparql_server.url
 }
 if (callback)
    return callback()

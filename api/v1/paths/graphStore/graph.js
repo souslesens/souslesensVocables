@@ -11,7 +11,7 @@ module.exports = function () {
 
     function GET(req, res, next) {
         if (ConfigManager.config) {
-            var sparqlServerConnection = { url: ConfigManager.config.default_sparql_url };
+            var sparqlServerConnection = { url: ConfigManager.config.sparql_server.url };
             if (ConfigManager.config.sparql_server.user) {
                 sparqlServerConnection.auth = {
                     user: ConfigManager.config.sparql_server.user,
@@ -62,7 +62,7 @@ module.exports = function () {
             }
             if (userInfo.user.groups.indexOf("admin") < 0) return res.status(403);
             if (ConfigManager.config) {
-                var sparqlServerConnection = { url: ConfigManager.config.default_sparql_url };
+                var sparqlServerConnection = { url: ConfigManager.config.sparql_server.url };
                 if (ConfigManager.config.sparql_server.user) {
                     sparqlServerConnection.auth = {
                         user: ConfigManager.config.sparql_server.user,

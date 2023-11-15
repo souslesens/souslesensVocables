@@ -33,7 +33,6 @@ const config_data = JSON.parse(config_file);
 
 // update config
 const sparql_url = get_sparql_url(compose_data);
-config_data["default_sparql_url"] = sparql_url;
 config_data["sparql_server"]["url"] = sparql_url;
 config_data["ElasticSearch"]["url"] = get_elastic_url(compose_data);
 

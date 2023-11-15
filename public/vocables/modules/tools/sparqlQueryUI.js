@@ -7,7 +7,7 @@ var SparqlQueryUI = (function () {
     self.init = function (sources) {
         $("#graphDiv").html("");
         $("#graphDiv").load("snippets/sparqlQuery.html", function () {
-            $("#sparqlQuery_endPointInput").val(Config.default_sparql_url);
+            $("#sparqlQuery_endPointInput").val(Config.sparql_server.url);
 
             var fromStr = "";
             if (sources) {
@@ -23,7 +23,7 @@ var SparqlQueryUI = (function () {
     };
 
     self.executeQuery = function (query, targetTA) {
-        var url = Config.default_sparql_url + "?format=json&query=";
+        var url = Config.sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {}, function (err, result) {
             if (err) {
                 return $("#" + targetTA).text(JSON.stringify(err, null, 2));

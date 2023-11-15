@@ -34,9 +34,6 @@ describe("ProfileModel", () => {
                 sourcesAccessControl: {},
                 allowedTools: "ALL",
                 forbiddenTools: [],
-                blender: {
-                    contextMenuActionStartLevel: 0,
-                },
             },
         };
         expect(profiles).toStrictEqual(expectedResult);

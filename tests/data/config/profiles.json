@@ -6,9 +6,6 @@
         "allowedSourceSchemas": ["OWL"],
         "allowedTools": "ALL",
         "forbiddenTools": [],
-        "blender": {
-            "contextMenuActionStartLevel": 0
-        },
         "defaultSourceAccessControl": "forbidden",
         "sourcesAccessControl": {}
     },
@@ -19,9 +16,6 @@
         "allowedSourceSchemas": ["OWL"],
         "allowedTools": "ALL",
         "forbiddenTools": [],
-        "blender": {
-            "contextMenuActionStartLevel": 0
-        },
         "defaultSourceAccessControl": "forbidden",
         "sourcesAccessControl": {
             "OWL/FOLDER_1": "read"
@@ -34,9 +28,6 @@
         "allowedSourceSchemas": ["OWL"],
         "allowedTools": "ALL",
         "forbiddenTools": [],
-        "blender": {
-            "contextMenuActionStartLevel": 0
-        },
         "defaultSourceAccessControl": "forbidden",
         "sourcesAccessControl": {
             "OWL/FOLDER_1": "readwrite"

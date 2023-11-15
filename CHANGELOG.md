@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.43.0](https://github.com/souslesens/souslesensVocables/compare/1.42.0...1.43.0) - 2023-11-20
 
+> [!IMPORTANT]
+> Updating to Unrelease require a data migration. Execute the following script after upgrade.
+
+```bash
+node scripts/migrations/migration_1.43_config.js -c config -w
+```
+
 ### Fixed
 
 -   Add trailing / to COPY instruction in Dockerfile
@@ -20,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 -   Replace groups in the Users table with profiles
+-   Remove `blender` from profiles
 
 ### Added
 

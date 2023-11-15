@@ -53,9 +53,6 @@ class ProfileModel {
             sourcesAccessControl: {},
             allowedTools: "ALL",
             forbiddenTools: [],
-            blender: {
-                contextMenuActionStartLevel: 0,
-            },
         };
 
         return { ...profiles, admin: adminProfile };

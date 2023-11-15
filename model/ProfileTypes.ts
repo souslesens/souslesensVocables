@@ -5,9 +5,6 @@ type Profile = {
     allowedSourceSchemas: string[];
     allowedTools: string | string[];
     forbiddenTools: string[];
-    blender: {
-        contextMenuActionStartLevel: number;
-    };
     defaultSourceAccessControl: string;
     sourcesAccessControl: {};
 };

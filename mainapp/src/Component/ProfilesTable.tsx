@@ -77,7 +77,7 @@ const ProfilesTable = () => {
             ),
             success: (gotProfiles: Profile[]) => {
                 const datas = gotProfiles.map((profile) => {
-                    const { allowedSourceSchemas, forbiddenTools, allowedTools, sourcesAccessControl, blender, ...restOfProperties } = profile;
+                    const { allowedSourceSchemas, forbiddenTools, allowedTools, sourcesAccessControl, ...restOfProperties } = profile;
                     const processedData = {
                         ...restOfProperties,
                         forbiddenTools: joinWhenArray(forbiddenTools),
@@ -169,7 +169,6 @@ const enum Type {
     UserUpdatedSourceAccessControl,
     ResetProfile,
     UserClickedCheckAll,
-    UserUpdatedBlenderLevel,
 }
 
 const enum Mode {
@@ -182,8 +181,7 @@ type Msg_ =
     | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
     | { type: Type.UserUpdatedSourceAccessControl; payload: { treeStr: string; newValue: SourceAccessControl | null } }
     | { type: Type.ResetProfile; payload: Profile }
-    | { type: Type.UserClickedCheckAll; payload: { fieldname: string; value: boolean } }
-    | { type: Type.UserUpdatedBlenderLevel; payload: number };
+    | { type: Type.UserClickedCheckAll; payload: { fieldname: string; value: boolean } };
 
 const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): ProfileEditionState => {
     const fieldToUpdate: any = msg.type === Type.UserClickedCheckAll || msg.type === Type.UserUpdatedField ? msg.payload.fieldname : null;
@@ -219,9 +217,6 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
         }
         case Type.UserClickedCheckAll:
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [fieldToUpdate]: msg.payload.value ? "ALL" : [] } };
-
-        case Type.UserUpdatedBlenderLevel:
-            return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, blender: { contextMenuActionStartLevel: msg.payload } } };
 
         case Type.ResetProfile:
             return { ...profileEditionState, profileForm: msg.payload };
@@ -321,7 +316,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
 
     const handleCheckedAll = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } });
-    const handleNewBlenderNumber = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserUpdatedBlenderLevel, payload: parseInt(event.target.value.replace(/\D/g, "")) });
 
     function validateProfileName(profileName: string) {
         const issues = createCustomIssues(ProfileSchema);
@@ -500,17 +494,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                             label={"Name"}
                             variant="standard"
                             disabled={!create}
-                        />
-                        <TextField
-                            name={zo.fields.blender.contextMenuActionStartLevel()}
-                            helperText={errorMessage(zo.errors.blender.contextMenuActionStartLevel)}
-                            fullWidth
-                            onChange={handleNewBlenderNumber}
-                            onBlur={() => zo.validate()}
-                            value={profileModel.profileForm.blender.contextMenuActionStartLevel.toString()}
-                            id={`blender`}
-                            label={"Blender Level"}
-                            variant="standard"
                         />
                         <FormControl>
                             <InputLabel id="allowedSourceSchemas-label">Allowed Source Schemas</InputLabel>

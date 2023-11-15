@@ -6,9 +6,6 @@
         "allowedSourceSchemas": ["SKOS", "OWL", "INDIVIDUAL"],
         "allowedTools": "ALL",
         "forbiddenTools": [],
-        "blender": {
-            "contextMenuActionStartLevel": 0
-        },
         "defaultSourceAccessControl": "read",
         "sourcesAccessControl": {
             "Dbpedia": "forbidden"
@@ -21,9 +18,6 @@
         "allowedSourceSchemas": ["OWL"],
         "allowedTools": "ALL",
         "forbiddenTools": [],
-        "blender": {
-            "contextMenuActionStartLevel": 0
-        },
         "defaultSourceAccessControl": "read",
         "sourcesAccessControl": {
             "Dbpedia": "forbidden"
@@ -36,9 +30,6 @@
         "allowedSourceSchemas": ["SKOS"],
         "allowedTools": "ALL",
         "forbiddenTools": [],
-        "blender": {
-            "contextMenuActionStartLevel": 0
-        },
         "defaultSourceAccessControl": "read",
         "sourcesAccessControl": {
             "Dbpedia": "forbidden"

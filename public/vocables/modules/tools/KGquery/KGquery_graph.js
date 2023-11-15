@@ -19,7 +19,9 @@ var KGquery_graph = (function () {
 
     self.visjsOptions = {
         onclickFn: function (node, point, nodeEvent) {
-            if (!node || node.from) return;
+            if (!node || node.from) {
+                return;
+            }
             self.currentGraphNode = node;
             if (nodeEvent.ctrlKey) {
                 NodeInfosWidget.showNodeInfos(KGquery.currentSource, node, "smallDialogDiv", {});
@@ -44,7 +46,7 @@ var KGquery_graph = (function () {
 
     self.visjsNodeOptions = {
         shape: "box", //Lineage_whiteboard.defaultShape,
-        size: Lineage_whiteboard.defaultShapeSize,
+        //   size: Lineage_whiteboard.defaultShapeSize,
         color: "#ddd", //Lineage_whiteboard.getSourceColor(source)
     };
 
@@ -71,7 +73,9 @@ var KGquery_graph = (function () {
                     self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
                     self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
-                        if (err) return callbackSeries(err);
+                        if (err) {
+                            return callbackSeries("notFound");
+                        }
                         visjsData = result;
                         return callbackSeries();
                     });
@@ -117,15 +121,25 @@ var KGquery_graph = (function () {
                 },
             ],
             function (err) {
-                if (err) return alert(err);
+                if (err) {
+                    if (err == "notFound") {
+                        return self.drawVisjsModel("inferred");
+                    }
+                    return alert(err);
+                }
 
                 KGquery.vicinityArray = [];
                 visjsData.edges.forEach(function (edge) {
-                    if (!edge.data) return;
+                    if (!edge.data) {
+                        return;
+                    }
                     KGquery.vicinityArray.push([edge.from, edge.to, edge.data.propertyId]);
                 });
 
                 visjsData.nodes.forEach(function (item) {
+                    // item.color="#ddd"
+                  if(item.label.indexOf("Date")>-1)
+                    item.color="#96f696"
                     item.initialColor = item.color;
                     item.initialShape = item.shape;
                 });
@@ -207,7 +221,7 @@ var KGquery_graph = (function () {
                     callback("no inferred model for source " + source);
                 }
 
-                var source = self.source;
+
                 inferredModel.forEach(function (item) {
                     item.sClass = item.sClass || item.sparent;
                     item.oClass = item.oClass || item.oparent;
@@ -218,6 +232,7 @@ var KGquery_graph = (function () {
                     if (!existingNodes[item.sClass.value]) {
                         existingNodes[item.sClass.value] = 1;
                         self.visjsNodeOptions.color = common.getResourceColor("class", item.sClass.value, "palette");
+                      self.visjsNodeOptions.color =Lineage_whiteboard.getSourceColor(source)
                         var label = item.sClassLabel ? item.sClassLabel.value : Sparql_common.getLabelFromURI(item.sClass.value);
                         self.visjsNodeOptions.data = { datatype: dataTypes[item.sClass.value], source: source, id: item.sClass.value, label: label };
 
@@ -226,8 +241,9 @@ var KGquery_graph = (function () {
                     if (!existingNodes[item.oClass.value]) {
                         existingNodes[item.oClass.value] = 1;
                         var label = item.oClassLabel ? item.oClassLabel.value : Sparql_common.getLabelFromURI(item.oClass.value);
-                        self.visjsNodeOptions.data = { datatype: dataTypes[item.oClass.value], id: item.oClass.value, label: label };
-                        self.visjsNodeOptions.color = common.getResourceColor("class", item.oClass.value, "palette");
+                        self.visjsNodeOptions.data = {source:source, datatype: dataTypes[item.oClass.value], id: item.oClass.value, label: label };
+                      //  self.visjsNodeOptions.color = common.getResourceColor("class", item.oClass.value, "palette");
+                      self.visjsNodeOptions.color =Lineage_whiteboard.getSourceColor(source)
                         visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, self.visjsNodeOptions));
                     }
                     var edgeId = item.sClass.value + "_" + item.prop.value + "_" + item.oClass.value;
@@ -261,8 +277,8 @@ var KGquery_graph = (function () {
                 return callback(null, visjsData);
                 /*   self.getInterGraphModel(source, visjsData, function(err, result) {
 
-           return callback(null, result);
-         });*/
+ return callback(null, result);
+});*/
             }
         );
     };
@@ -332,7 +348,9 @@ var KGquery_graph = (function () {
                 return callbackSeries(err);
             }
 
-            if (result.results.bindings.length == 0) return alert(" no matching triples between " + edgeData.from + " and " + edgeData.to);
+            if (result.results.bindings.length == 0) {
+                return alert(" no matching triples between " + edgeData.from + " and " + edgeData.to);
+            }
 
             var visjsData = { edges: [] };
             result.results.bindings.forEach(function (item) {
@@ -369,7 +387,9 @@ var KGquery_graph = (function () {
     };
 
     self.setNodeAttr = function (attr, value) {
-        if (!self.currentGraphNode) return;
+        if (!self.currentGraphNode) {
+            return;
+        }
 
         var newNode = {
             id: self.currentGraphNode.id,
@@ -380,7 +400,9 @@ var KGquery_graph = (function () {
 
     self.setAllNodesFontSize = function () {
         var fontSize = prompt("font size");
-        if (!fontSize) return;
+        if (!fontSize) {
+            return;
+        }
         self.setAllNodesAttr("font", { size: parseInt(fontSize) });
     };
 
@@ -397,10 +419,15 @@ var KGquery_graph = (function () {
     };
 
     self.resetVisjNodes = function (nodes) {
-        if (!KGquery_graph.KGqueryGraph) return;
+        if (!KGquery_graph.KGqueryGraph) {
+            return;
+        }
         var newNodes = [];
+
         if (!nodes) {
-            nodes = KGquery_graph.KGqueryGraph.data.nodes.get();
+            nodes = [];
+            if (KGquery_graph.KGqueryGraph.data.nodes.get) nodes = KGquery_graph.KGqueryGraph.data.nodes.get();
+            else return;
         }
         if (!Array.isArray(nodes)) {
             nodes = [nodes];
@@ -416,9 +443,15 @@ var KGquery_graph = (function () {
     };
 
     self.resetVisjEdges = function () {
-        if (!KGquery_graph.KGqueryGraph) return;
+        if (!KGquery_graph.KGqueryGraph) {
+            return;
+        }
         var newVisjsEdges = [];
-        KGquery_graph.KGqueryGraph.data.edges.getIds().forEach(function (edgeId, index) {
+        var edges = [];
+        if (KGquery_graph.KGqueryGraph.data.edges.getIds) edges = KGquery_graph.KGqueryGraph.data.edges.getIds();
+        else return;
+
+        edges.forEach(function (edgeId, index) {
             newVisjsEdges.push({ id: edgeId, color: Lineage_whiteboard.restrictionColor, width: 1 });
         });
         KGquery_graph.KGqueryGraph.data.edges.update(newVisjsEdges);

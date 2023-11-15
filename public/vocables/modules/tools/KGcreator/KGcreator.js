@@ -26,7 +26,17 @@ var KGcreator = (function () {
 
     self.displayUploadApp = function (displayForm) {
         self.uploadFormData.displayForm = displayForm;
-        $.getScript("/kg_upload_app.js");
+   //   return   $.getScript("/kg_upload_app.js");
+        if(!displayForm)
+          return;
+        var html=" <div id=\"mount-kg-upload-app-here\"></div>";
+        $("#smallDialogDiv").html(html)
+        $("#smallDialogDiv").dialog({"open": function( event, ui ) {
+
+                $.getScript("/kg_upload_app.js");
+        }})
+        $("#smallDialogDiv").dialog("open")
+
     };
 
     self.onLoaded = function () {
@@ -241,13 +251,7 @@ var KGcreator = (function () {
                                 KGcreator_mappings.showSourceMappings(node);
                             },
                         };
-                        items.deleteMappings = {
-                            label: "deleteMappings",
-                            action: function (_e) {
-                                // pb avec source
-                                KGcreator.deleteMappings(node);
-                            },
-                        };
+
                         return items;
                     } else if (node.data.type == "csvSource") {
                         items.showSourceMappings = {
@@ -257,20 +261,21 @@ var KGcreator = (function () {
                                 KGcreator_mappings.showSourceMappings(node);
                             },
                         };
-                        items.deleteMappings = {
-                            label: "deleteMappings",
-                            action: function (_e) {
-                                // pb avec source
-                                KGcreator.deleteMappings(node);
-                            },
-                        };
                         items.deleteCsvFile = {
-                            label: "deleteMappings",
+                            label: "deleteFile",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator.deleteCsvFile(node);
                             },
                         };
+                        items.removeColumnMappings = {
+                            label: "removeColumnMappings",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator.removeColumnMappings(node);
+                            },
+                        };
+
                         return items;
                     } else if (node.data.type == "table") {
                         items.showTableMappings = {
@@ -280,13 +285,7 @@ var KGcreator = (function () {
                                 KGcreator_mappings.showTableMappings(node);
                             },
                         };
-                        /*   items.lookups = {
-                            label: "lookups",
-                            action: function (_e) {
-                                // pb avec source
-                                KGcreator_mappings.showLookupsDialog(node);
-                            },
-                        };*/
+
                         items.tranforms = {
                             label: "tranforms",
                             action: function (_e) {
@@ -308,6 +307,7 @@ var KGcreator = (function () {
                                 KGcreator.removeTableMappings(node);
                             },
                         };
+
                         return items;
                     } else if (node.data.type == "tableColumn") {
                         var KGcreatorTab = $("#KGcreator_centralPanelTabs").tabs("option", "active");
@@ -336,6 +336,7 @@ var KGcreator = (function () {
                                 KGcreator.removeColumnMappings(node);
                             },
                         };
+
                         return items;
                     } else if (node.data.type == "csvSource") {
                         items.showTableMappings = {
@@ -665,7 +666,7 @@ var KGcreator = (function () {
         }
         delete self.currentConfig.currentMappings[node.data.id];
         JstreeWidget.setSelectedNodeStyle({ color: "black" });
-        KGcreator_mappings.KGcreator_graph(node);
+        //KGcreator_mappings.KGcreator_graph(node);
         self.saveDataSourceMappings();
     };
 
@@ -785,6 +786,7 @@ var KGcreator = (function () {
     self.createDataBaseSourceMappings = function () {
         // hide uploadApp
         self.displayUploadApp("");
+        $("#smallDialogDiv").dialog("close")
 
         var datasourceName = self.uploadFormData.selectedDatabase;
         if (!datasourceName) {
@@ -807,6 +809,7 @@ var KGcreator = (function () {
     self.createCsvSourceMappings = function () {
         // hide uploadApp
         self.displayUploadApp("");
+        $("#smallDialogDiv").dialog("close")
         var datasourceName = self.uploadFormData.selectedFiles[0];
         if (!datasourceName) {
             return;
@@ -895,7 +898,11 @@ var KGcreator = (function () {
         return alert("coming soon");
     };
     self.deleteMappings = function (node) {
-        return alert("coming soon");
+        var table = node.data.id;
+        if (confirm("delete mappings of table " + table)) {
+            delete self.currentConfig.currentMappings[table];
+            self.saveDataSourceMappings();
+        }
     };
     return self;
 })();

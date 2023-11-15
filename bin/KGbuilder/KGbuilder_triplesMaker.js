@@ -18,6 +18,18 @@ var KGbuilder_triplesMaker = {
      * @param {Function} callback - Node-style async Function called to proccess result or handle error
      **/
     createTriples: function (tableMappings, data, options, callback) {
+        if(!tableMappings || tableMappings.length==0) {
+            KGbuilder_socket.message(options.clientSocketId, "No mappings  in table " + tableMappings.table);
+            return callback()
+
+        }
+        if(!data || data.length==0) {
+            KGbuilder_socket.message(options.clientSocketId, "No data  in table " + tableMappings.table);
+            return callback()
+
+        }
+
+
         //  var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/test/"
         var totalTriples = 0;
         var errors = "";
@@ -47,18 +59,19 @@ var KGbuilder_triplesMaker = {
                 var subjectStr = null;
                 var objectStr = null;
                 var propertyStr = null;
-                var currentBlankNode = null;
                 var lineError = "";
                 KGbuilder_triplesMaker.blankNodesMap = {};
 
                 for (var key in line) {
-                    if (!KGbuilder_triplesMaker.allColumns[key]) {
-                        KGbuilder_triplesMaker.allColumns[key] = 1;
-                    }
-                    line[key] = "" + line[key];
-                    if (line[key] && !KGbuilder_triplesMaker.isUri(line[key])) {
-                        line[key] = util.formatStringForTriple(line[key]);
-                    }
+                   if(line[key]) {
+                       if (!KGbuilder_triplesMaker.allColumns[key]) {
+                           KGbuilder_triplesMaker.allColumns[key] = 1;
+                       }
+                       line[key] = "" + line[key];
+                       if (line[key] && !KGbuilder_triplesMaker.isUri(line[key])) {
+                           line[key] = util.formatStringForTriple(line[key]);
+                       }
+                   }
                 }
 
                 async.eachSeries(
@@ -76,10 +89,12 @@ var KGbuilder_triplesMaker = {
                         if (mapping["if_column_value_not_null"]) {
                             var value = line[mapping["if_column_value_not_null"]];
                             if (!value || value == "null") {
-                                return;
+                                return callbackEachMapping();
                             }
                         }
 
+                        if(mapping.p=="http://rds.posccaesar.org/ontology/lis14/rdl/before")
+                            var x=3
                         async.series(
                             [
                                 function (callbackSeries) {
@@ -164,15 +179,16 @@ var KGbuilder_triplesMaker = {
             } catch (e) {
                 return callback(e);
             }
-        } else if (mapping.s === "_rowIndex") {
+        }
+        else if (mapping.s === "_rowIndex") {
             subjectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
-        } else if (mapping.s.indexOf("$_") == 0) {
+        }
+        else if (mapping.s.indexOf("$_") == 0 || mapping.isSubjectBlankNode) {
             // virtual column
-            if (typeof mapping.o === "string" && mapping.o.indexOf("$_") != 0 && KGbuilder_triplesMaker.allColumns[mapping.o] && !line[mapping.o]) {
+            if (typeof mapping.o === "string" && (mapping.o.indexOf("$_") != 0 && !mapping.isObjectBlankNode) && KGbuilder_triplesMaker.allColumns[mapping.o] && !line[mapping.o]) {
                 // ne pas creer des triplest sans objet
                 return callback(null, null);
             }
-
             subjectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.s);
         } else if (tableMappings.transform && line[mapping.s] && tableMappings.transform[mapping.s]) {
             try {
@@ -222,13 +238,18 @@ var KGbuilder_triplesMaker = {
 
     getTripleObject: function (tableMappings, mapping, line, callback) {
         var objectStr = null;
+
+        if(mapping.o=="$_offshorewlmanhour")
+            var x=3
         //get value for Object
         {
             if (mapping.o === "_rowIndex") {
                 objectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
-            } else if (mapping.objectIsSpecificUri) {
+            }
+            else if (mapping.objectIsSpecificUri) {
                 objectStr = mapping.o;
-            } else if (typeof mapping.o === "function") {
+            }
+            else if (typeof mapping.o === "function") {
                 try {
                     objectStr = mapping.o(line, mapping);
                     objectStr = util.formatStringForTriple(objectStr, false);
@@ -239,14 +260,12 @@ var KGbuilder_triplesMaker = {
                 objectStr = "<" + mapping.o + ">";
             } else if (mapping.o.match(/.+:.+/)) {
                 objectStr = mapping.o;
-            } else {
+            } else if ( mapping.o.indexOf("$_") == 0 || mapping.isObjectBlankNode) {
+                objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
+            }else {
                 if (!line[mapping.o] || line[mapping.o] == "null") {
                     return callback(null, null);
-                }
-
-                if (mapping.isObjectBlankNode) {
-                    objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
-                } else if (mapping.dataType) {
+                }  else if (mapping.dataType) {
                     var str = line[mapping.o];
                     if (!str || str == "null") {
                         return;
@@ -519,13 +538,13 @@ var KGbuilder_triplesMaker = {
     loadData: function (tableMappings, options, callback) {
         var tableData = [];
         if (tableMappings.csvDataFilePath) {
-            KGbuilder_socket.message(options.clientSocketId, "loading data from csv file", false);
+            KGbuilder_socket.message(options.clientSocketId, "loading data from csv file "+tableMappings.table, false);
             KGbuilder_triplesMaker.readCsv(tableMappings.csvDataFilePath, options.sampleSize, function (err, result) {
                 if (err) {
                     KGbuilder_socket.message(options.clientSocketId, err, true);
                     return callback(err);
                 }
-                KGbuilder_socket.message(options.clientSocketId, " data loaded", false);
+                KGbuilder_socket.message(options.clientSocketId, " data loaded from "+tableMappings.table, false);
                 tableData = result.data[0];
                 callback(null, tableData);
             });
@@ -535,13 +554,13 @@ var KGbuilder_triplesMaker = {
                 limitStr = " TOP (" + options.sampleSize + ") ";
             }
             var sqlQuery = "select" + limitStr + " * from " + tableMappings.table;
-            KGbuilder_socket.message(options.clientSocketId, "loading data from sql server", false);
+            KGbuilder_socket.message(options.clientSocketId, "loading data from sql server, table "+tableMappings.table, false);
             sqlServerProxy.getData(tableMappings.datasourceConfig.dbName, sqlQuery, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
                 tableData = result;
-                KGbuilder_socket.message(options.clientSocketId, " data loaded", false);
+                KGbuilder_socket.message(options.clientSocketId, " data loaded ,table "+tableMappings.table, false);
                 return callback(null, tableData);
             });
         }

@@ -51,6 +51,7 @@ var KGbuilder_main = {
                 return callback(err);
             }
 
+
             async.eachSeries(tableMappingsToProcess, function (mappings, callbackEach) {
                 async.series(
                     [
@@ -136,6 +137,10 @@ var KGbuilder_main = {
                         function (callbackSeries) {
                             KGbuilder_triplesMaker.loadData(mappings, options, function (err, result) {
                                 if (err) {
+                                    if(tableMappingsToProcess.length>1){
+                                        KGbuilder_socket.message(options.clientSocketId, "cannot load data for table " + mappings.table,true);
+                                        return callbackEach();
+                                    }
                                     return callbackSeries(err);
                                 }
                                 data = result;
@@ -146,8 +151,9 @@ var KGbuilder_main = {
                         //build triples
                         function (callbackSeries) {
                             options.customMetaData = { [KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table };
+                            KGbuilder_socket.message(options.clientSocketId, "creating triples for mappings " + mappings.table);
                             KGbuilder_triplesMaker.createTriples(mappings, data, options, function (err, result) {
-                                KGbuilder_socket.message(options.clientSocketId, "creating triples for mapping " + mappings.table);
+
                                 if (err) {
                                     return callbackSeries(err);
                                 }
@@ -212,11 +218,13 @@ var KGbuilder_main = {
                     ],
 
                     function (err) {
-                        return callback(err, output);
+                        return callbackEach(err);
                     }
-                ),
-                    function (err) {};
-            });
+                )
+            },
+              function (err) {
+                  return callback(err, output);
+              });
         });
     },
 

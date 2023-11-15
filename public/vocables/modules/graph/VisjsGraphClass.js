@@ -879,11 +879,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-                /*  $.ajax({
-            type: "GET",
-            url: `${Config.apiUrl}/data/file?dir=graphs&name=${fileName}`,
-            dataType: "json",
-            success: function (result, _textStatus, _jqXHR) {*/
                 var data = JSON.parse(result);
                 var positions = data.positions;
                 var options = data.context.options;

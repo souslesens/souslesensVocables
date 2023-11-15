@@ -519,7 +519,7 @@ return alert("missing target node in  path");
 
     self.visjsNodeOptions = {
         shape: "box", //Lineage_whiteboard.defaultShape,
-        size: Lineage_whiteboard.defaultShapeSize,
+        //  size: Lineage_whiteboard.defaultShapeSize,
         color: "#ddd", //Lineage_whiteboard.getSourceColor(source)
     };
 
@@ -748,9 +748,9 @@ return alert("missing target node in  path");
         }
     };
 
-    self.switchRightPanel = function () {
+    self.switchRightPanel = function (forceGraph) {
         var isGraphDisplayed = $("#KGquery_graphDiv").css("display");
-        if (isGraphDisplayed == "block") {
+        if (!forceGraph && isGraphDisplayed == "block") {
             $("#KGquery_graphDiv").css("display", "none");
             $("#KGquery_dataTableDiv").css("display", "block");
         } else {

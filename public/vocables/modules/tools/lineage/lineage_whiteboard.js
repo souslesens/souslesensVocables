@@ -17,6 +17,7 @@ import Clipboard from "../../shared/clipboard.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
+import KGquery_graph from "../KGquery/KGquery_graph.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -2836,7 +2837,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         if (!source) {
             source = Lineage_sources.activeSource;
         }
-        KGqueryWidget.getInferredModelVisjsData(source, function (err, visjsData) {
+        KGquery_graph.getInferredModelVisjsData(source, function (err, visjsData) {
             if (err) {
                 return alert(err.responseText);
             }

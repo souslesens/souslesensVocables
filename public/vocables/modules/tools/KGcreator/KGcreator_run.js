@@ -12,15 +12,17 @@ var KGcreator_run = (function () {
             table = KGcreator.currentTreeNode.data.parent;
         } else if (KGcreator.currentTreeNode.data.type == "table") {
             table = KGcreator.currentTreeNode.data.id;
+            self.showTableMappingsEditor(table);
         } else if (KGcreator.currentTreeNode.data.type == "csvSource") {
             table = KGcreator.currentTreeNode.data.id;
-        } else if (KGcreator.currentTreeNode.data.type == "databaseSource") {
+            self.showTableMappingsEditor(table);
+        } else if (KGcreator.currentTreeNode.data.type == "databaseSource" && allmappings) {
             table = null;
         } else {
             return alert("select a node");
         }
 
-        if (!sampleData) {
+        if (!sampleData && !allmappings) {
             if (!confirm("create triples for " + KGcreator.currentConfig.currentDataSource.name + " " + table || "")) {
                 return;
             }
@@ -66,7 +68,7 @@ var KGcreator_run = (function () {
                         $("#KGcreator_infosDiv").val(result.result);
                         MainController.UI.message(result.result, true);
                     } else {
-                        $("#KGcreator_infosDiv").val(result + " triples created in graph " + KGcreator.currentConfig.graphUri);
+                        $("#KGcreator_infosDiv").val(result.result + " triples created in graph " + KGcreator.currentConfig.graphUri);
                         MainController.UI.message("triples created", true);
                     }
                 }
@@ -84,18 +86,14 @@ var KGcreator_run = (function () {
     };
 
     self.indexGraph = function (callback) {
-        var graphSource = null;
-        for (var source in Config.sources) {
-            if (Config.sources[source].graphUri == self.currentGraphUri) {
-                graphSource = source;
-            }
+        var graphSource = KGcreator.currentSlsvSource;
+        if (!graphSource) {
+            return alert("no source selected");
         }
-        if (!source) {
-            if (callback) {
-                return callback("no source associated to graph " + self.currentGraphUri);
-            }
-            return alert("no source associated to graph " + self.currentGraphUri);
+        if (!Config.sources[graphSource].graphUri) {
+            return alert("no graphUri for source" + KGcreator.currentSlsvSource);
         }
+
         if (callback || confirm("index source " + graphSource)) {
             SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
                 if (err) {
@@ -104,7 +102,7 @@ var KGcreator_run = (function () {
                     }
                     return alert(err.responseText);
                 }
-                $("#KGcreator_infosDiv").val("indexed graph " + mappings.graphUri + " in index " + graphSource.toLowerCase());
+                $("#KGcreator_infosDiv").val("indexed graph " + Config.sources[graphSource].graphUri + " in index " + graphSource.toLowerCase());
                 if (callback) {
                     return callback();
                 }
@@ -151,11 +149,11 @@ var KGcreator_run = (function () {
     };
 
     self.deleteKGcreatorTriples = function (deleteAllKGcreatorTriples, callback) {
-        if (!confirm("Do you really want to delete  triples created with KGCreator in datasource " + KGcreator.currentConfig.currentDataSource.name)) {
-            return;
-        }
         var tables = [];
         if (!deleteAllKGcreatorTriples) {
+            if (!confirm("Do you really want to delete  triples created with KGCreator in datasource " + KGcreator.currentConfig.currentDataSource.name)) {
+                return;
+            }
             if (!KGcreator.currentTreeNode && (KGcreator.currentTreeNode.data.type == "table" || KGcreator.currentTreeNode.data.type == "csvSource")) {
                 if (callback) {
                     return callback("node currentJsonObject selected");
@@ -202,10 +200,12 @@ var KGcreator_run = (function () {
     };
 
     self.createAllMappingsTriples = function () {
-        if (!mappings) {
-            return callback("select any existing  mapping ");
+        if (!KGcreator.currentConfig.currentDataSource) {
+            if (!mappings) {
+                return alert("select a data source ");
+            }
         }
-        if (!confirm("generate KGcreator triples form all mappings. this only will delete all previous  KGcreator triples ")) {
+        if (!confirm("generate KGcreator triples of datasource " + KGcreator.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
             return;
         }
         $("#KGcreator_infosDiv").val("generating KGcreator triples form all mappings ");
@@ -220,7 +220,7 @@ var KGcreator_run = (function () {
                 },
                 function (callbackSeries) {
                     $("#KGcreator_infosDiv").val("creating new triples (can take long...)");
-                    self.createTriples(false, { allMappings: 1 }, function (err, result) {
+                    self.createTriples(false, true, function (err, result) {
                         return callbackSeries(err);
                     });
                 },
@@ -238,6 +238,11 @@ var KGcreator_run = (function () {
                 }
             }
         );
+    };
+
+    self.showTableMappingsEditor = function (table) {
+        var tableMappings = KGcreator.currentConfig.currentMappings[table];
+        self.jsonEditor = new JsonEditor("#KGcreator_run_mappingsGraphEditor", tableMappings);
     };
 
     return self;

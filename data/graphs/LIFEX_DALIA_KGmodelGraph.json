@@ -1,270 +1,444 @@
 {
   "nodes": [
     {
-      "id": "http://data.total/resource/tsf/new_prodom/DocumentReview",
-      "label": "DocumentReview",
+      "id": "http://data.total/resource/tsf/dalia-lifex/DocumentRevision",
+      "label": "DocumentRevision",
       "shape": "box",
-      "color": "#FFD900",
       "size": 5,
       "data": {
-        "id": "http://data.total/resource/tsf/new_prodom/DocumentReview",
-        "label": "DocumentReview"
+        "id": "http://data.total/resource/tsf/dalia-lifex/DocumentRevision",
+        "label": "DocumentRevision"
       },
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": 629,
-      "y": 209,
-      "_graphPosition": {
-        "x": 1168,
-        "y": 585
-      },
-      "setIndex": 0,
-      "originalSize": 14,
-      "hiddenLabel": "DocumentReview",
-      "font": {
-        "size": 20
-      },
-      "initialColor": "#FFD900",
-      "initialShape": "box"
-    },
-    {
-      "id": "http://data.total/resource/tsf/new_prodom/ReviewStatus",
-      "label": "ReviewStatus",
-      "shape": "box",
+      "initialShape": "box",
       "color": "#ddd",
-      "size": 5,
-      "data": {
-        "id": "http://data.total/resource/tsf/new_prodom/ReviewStatus",
-        "label": "ReviewStatus"
+      "initialColor": "#ddd",
+      "font": {
+        "size": 20
       },
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": 583,
-      "y": -10,
-      "_graphPosition": {
-        "x": 1135,
-        "y": 403
-      },
-      "setIndex": 0,
+      "x": 591,
+      "y": -356,
       "originalSize": 5,
-      "hiddenLabel": "ReviewStatus",
-      "font": {
-        "size": 20
-      },
-      "initialColor": "#ddd",
-      "initialShape": "box"
-    },
-    {
-      "id": "http://data.total/resource/tsf/new_prodom/ReviewClass",
-      "label": "ReviewClass",
-      "shape": "box",
-      "color": "#ddd",
-      "size": 5,
-      "data": {
-        "id": "http://data.total/resource/tsf/new_prodom/ReviewClass",
-        "label": "ReviewClass"
-      },
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": 570,
-      "y": 354,
-      "originalSize": 5,
-      "hiddenLabel": "ReviewClass",
-      "font": {
-        "size": 20
-      },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "hiddenLabel": "DocumentRevision"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/Document_Revision_Creation_Date",
       "label": "Document Revision Creation Date",
       "shape": "box",
-      "color": "#ddd",
       "size": 5,
       "data": {
         "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
         "id": "http://data.total/resource/tsf/new_prodom/Document_Revision_Creation_Date",
         "label": "Document Revision Creation Date"
       },
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": 841,
-      "y": -182,
-      "originalSize": 5,
-      "hiddenLabel": "Document Revision Creation Date",
+      "initialShape": "box",
+      "color": "#96f696",
+      "initialColor": "#96f696",
       "font": {
         "size": 20
-      },
-      "initialColor": "#ddd",
-      "initialShape": "box"
-    },
-    {
-      "id": "http://data.total/resource/tsf/new_prodom/ReviewStatusDeliveryDate",
-      "label": "ReviewStatusDeliveryDate",
-      "shape": "box",
-      "color": "#ddd",
-      "size": 5,
-      "data": {
-        "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
-        "id": "http://data.total/resource/tsf/new_prodom/ReviewStatusDeliveryDate",
-        "label": "ReviewStatusDeliveryDate"
       },
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": 878,
-      "y": 15,
-      "_graphPosition": {
-        "x": 1251,
-        "y": 548
-      },
-      "setIndex": 0,
+      "x": 665,
+      "y": -451,
       "originalSize": 5,
-      "hiddenLabel": "ReviewStatusDeliveryDate",
-      "font": {
-        "size": 20
-      },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "hiddenLabel": "Document Revision Creation Date"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/Document_Revision_Received_Date",
       "label": "Document Revision Received Date",
       "shape": "box",
-      "color": "#ddd",
       "size": 5,
       "data": {
         "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
         "id": "http://data.total/resource/tsf/new_prodom/Document_Revision_Received_Date",
         "label": "Document Revision Received Date"
       },
+      "initialShape": "box",
+      "color": "#96f696",
+      "initialColor": "#96f696",
+      "font": {
+        "size": 20
+      },
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": 437,
-      "y": -155,
+      "x": 737,
+      "y": -270,
       "originalSize": 5,
-      "hiddenLabel": "Document Revision Received Date",
+      "hiddenLabel": "Document Revision Received Date"
+    },
+    {
+      "id": "http://data.total/resource/tsf/new_prodom/DocumentReview",
+      "label": "DocumentReview",
+      "shape": "box",
+      "size": 5,
+      "data": {
+        "id": "http://data.total/resource/tsf/new_prodom/DocumentReview",
+        "label": "DocumentReview"
+      },
+      "initialShape": "box",
+      "color": "#ddd",
+      "initialColor": "#ddd",
       "font": {
         "size": 20
       },
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "x": 440,
+      "y": 117,
+      "originalSize": 5,
+      "hiddenLabel": "DocumentReview"
+    },
+    {
+      "id": "http://data.total/resource/tsf/new_prodom/ReviewStatus",
+      "label": "ReviewStatus",
+      "shape": "box",
+      "size": 5,
+      "data": {
+        "id": "http://data.total/resource/tsf/new_prodom/ReviewStatus",
+        "label": "ReviewStatus"
+      },
+      "initialShape": "box",
+      "color": "#ddd",
       "initialColor": "#ddd",
-      "initialShape": "box"
+      "font": {
+        "size": 20
+      },
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "x": 227,
+      "y": 179,
+      "originalSize": 5,
+      "hiddenLabel": "ReviewStatus"
+    },
+    {
+      "id": "http://data.total/resource/tsf/new_prodom/ReviewClass",
+      "label": "ReviewClass",
+      "shape": "box",
+      "size": 5,
+      "data": {
+        "id": "http://data.total/resource/tsf/new_prodom/ReviewClass",
+        "label": "ReviewClass"
+      },
+      "initialShape": "box",
+      "color": "#ddd",
+      "initialColor": "#ddd",
+      "font": {
+        "size": 20
+      },
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "x": 662,
+      "y": 40,
+      "originalSize": 5,
+      "hiddenLabel": "ReviewClass"
+    },
+    {
+      "id": "http://data.total/resource/tsf/dalia-lifex/Document",
+      "label": "Document",
+      "shape": "ellipse",
+      "size": 7.339487852135705,
+      "data": {
+        "id": "http://data.total/resource/tsf/dalia-lifex/Document",
+        "label": "Document"
+      },
+      "initialShape": "ellipse",
+      "color": "#ffc6ff",
+      "initialColor": "#ffc6ff",
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "font": {
+        "size": 20
+      },
+      "x": 272,
+      "y": -181,
+      "_graphPosition": {
+        "x": 1006.9027709960938,
+        "y": 340.70486068725586
+      },
+      "setIndex": 0,
+      "originalSize": 5,
+      "hiddenLabel": "Document"
+    },
+    {
+      "id": "http://data.total/resource/tsf/dalia-lifex/DocumentStatus",
+      "label": "DocumentStatus",
+      "shape": "box",
+      "size": 5,
+      "data": {
+        "id": "http://data.total/resource/tsf/dalia-lifex/DocumentStatus",
+        "label": "DocumentStatus"
+      },
+      "initialShape": "box",
+      "color": "#ddd",
+      "initialColor": "#ddd",
+      "font": {
+        "size": 20
+      },
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "x": 223,
+      "y": -29,
+      "originalSize": 5,
+      "hiddenLabel": "DocumentStatus"
+    },
+    {
+      "id": "http://data.total/resource/tsf/dalia-lifex/DocumentType",
+      "label": "DocumentType",
+      "shape": "box",
+      "size": 5,
+      "data": {
+        "id": "http://data.total/resource/tsf/dalia-lifex/DocumentType",
+        "label": "DocumentType"
+      },
+      "initialShape": "box",
+      "color": "#ddd",
+      "initialColor": "#ddd",
+      "font": {
+        "size": 20
+      },
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "x": 533,
+      "y": -141,
+      "originalSize": 5,
+      "hiddenLabel": "DocumentType"
+    },
+    {
+      "id": "http://data.total/resource/tsf/new_prodom/ReviewStatusDeliveryDate",
+      "label": "ReviewStatusDeliveryDate",
+      "shape": "box",
+      "size": 5,
+      "data": {
+        "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "id": "http://data.total/resource/tsf/new_prodom/ReviewStatusDeliveryDate",
+        "label": "ReviewStatusDeliveryDate"
+      },
+      "initialShape": "box",
+      "color": "#96f696",
+      "initialColor": "#96f696",
+      "font": {
+        "size": 20
+      },
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "x": 303,
+      "y": 257,
+      "originalSize": 5,
+      "hiddenLabel": "ReviewStatusDeliveryDate"
+    },
+    {
+      "id": "http://data.total/resource/tsf/new_prodom/DocumentStep",
+      "label": "DocumentStep",
+      "shape": "box",
+      "size": 5,
+      "data": {
+        "id": "http://data.total/resource/tsf/new_prodom/DocumentStep",
+        "label": "DocumentStep"
+      },
+      "initialShape": "box",
+      "color": "#ddd",
+      "initialColor": "#ddd",
+      "font": {
+        "size": 20
+      },
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "x": 128,
+      "y": -391,
+      "_graphPosition": {
+        "x": 884.9027709960938,
+        "y": 191.70486068725586
+      },
+      "setIndex": 0,
+      "originalSize": 5,
+      "hiddenLabel": "DocumentStep"
+    },
+    {
+      "id": "http://data.total/resource/tsf/new_prodom/DocumentStepDate",
+      "label": "DocumentStepDate",
+      "shape": "box",
+      "size": 5,
+      "data": {
+        "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "id": "http://data.total/resource/tsf/new_prodom/DocumentStepDate",
+        "label": "DocumentStepDate"
+      },
+      "initialShape": "box",
+      "color": "#96f696",
+      "initialColor": "#96f696",
+      "font": {
+        "size": 20
+      },
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "x": 309,
+      "y": -306,
+      "_graphPosition": {
+        "x": 1003.9027709960938,
+        "y": 252.70486068725586
+      },
+      "setIndex": 0,
+      "originalSize": 5,
+      "hiddenLabel": "DocumentStepDate"
+    },
+    {
+      "id": "http://data.total/resource/tsf/new_prodom/DocumentStepStatus",
+      "label": "DocumentStepStatus",
+      "shape": "box",
+      "size": 5,
+      "data": {
+        "id": "http://data.total/resource/tsf/new_prodom/DocumentStepStatus",
+        "label": "DocumentStepStatus"
+      },
+      "initialShape": "box",
+      "color": "#ddd",
+      "initialColor": "#ddd",
+      "font": {
+        "size": 20
+      },
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "x": 341,
+      "y": -417,
+      "_graphPosition": {
+        "x": 1008.9027709960938,
+        "y": 175.70486068725586
+      },
+      "setIndex": 0,
+      "originalSize": 5,
+      "hiddenLabel": "DocumentStepStatus"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/Review_Deadline_Date",
       "label": "Review Deadline Date",
       "shape": "box",
-      "color": "#ddd",
       "size": 5,
       "data": {
         "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
         "id": "http://data.total/resource/tsf/new_prodom/Review_Deadline_Date",
         "label": "Review Deadline Date"
       },
+      "initialShape": "box",
+      "color": "#96f696",
+      "initialColor": "#96f696",
+      "font": {
+        "size": 20
+      },
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": 315,
-      "y": -86,
+      "x": 673,
+      "y": 199,
       "originalSize": 5,
-      "hiddenLabel": "Review Deadline Date",
-      "font": {
-        "size": 20
-      },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "hiddenLabel": "Review Deadline Date"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/Review_Finalized_Date",
       "label": "Review Finalized Date",
       "shape": "box",
-      "color": "#ddd",
       "size": 5,
       "data": {
         "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
         "id": "http://data.total/resource/tsf/new_prodom/Review_Finalized_Date",
         "label": "Review Finalized Date"
       },
+      "initialShape": "box",
+      "color": "#96f696",
+      "initialColor": "#96f696",
+      "font": {
+        "size": 20
+      },
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": 821,
-      "y": -100,
+      "x": 463,
+      "y": 345,
       "originalSize": 5,
-      "hiddenLabel": "Review Finalized Date",
-      "font": {
-        "size": 20
-      },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "hiddenLabel": "Review Finalized Date"
     },
     {
       "id": "http://data.total/resource/tsf/new_prodom/Document_Creation_Date",
       "label": "Document Creation Date",
       "shape": "box",
-      "color": "#ddd",
       "size": 5,
       "data": {
         "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
         "id": "http://data.total/resource/tsf/new_prodom/Document_Creation_Date",
         "label": "Document Creation Date"
       },
+      "initialShape": "box",
+      "color": "#96f696",
+      "initialColor": "#96f696",
+      "font": {
+        "size": 20
+      },
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": 743,
-      "y": 368,
+      "x": 110,
+      "y": -96,
       "originalSize": 5,
-      "hiddenLabel": "Document Creation Date",
-      "font": {
-        "size": 20
-      },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "hiddenLabel": "Document Creation Date"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card",
       "label": "Job Card",
-      "shape": "box",
-      "color": "#B3B005",
-      "size": 5,
+      "shape": "ellipse",
+      "color": "#ff6983",
+      "size": 7.339487852135705,
       "data": {
         "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card",
         "label": "Job Card"
       },
+      "initialColor": "#ff6983",
+      "initialShape": "ellipse",
+      "_graphPosition": {
+        "x": 339.90277099609375,
+        "y": 342.70486068725586
+      },
+      "setIndex": 0,
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -449,
-      "y": -101,
-      "_graphPosition": {
-        "x": 388,
-        "y": 332
-      },
-      "setIndex": 0,
-      "originalSize": 5,
-      "hiddenLabel": "Job Card",
+      "x": -674,
+      "y": -171,
       "font": {
         "size": 20
       },
-      "initialColor": "#B3B005",
-      "initialShape": "box"
+      "originalSize": 5,
+      "hiddenLabel": "Job Card"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Procurement",
@@ -276,173 +450,159 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Procurement",
         "label": "Procurement"
       },
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "_graphPosition": {
-        "x": 571,
-        "y": 695
-      },
-      "setIndex": 0,
-      "x": -684,
-      "y": 271,
-      "originalSize": 5,
-      "hiddenLabel": "Procurement",
+      "initialColor": "#ddd",
+      "initialShape": "box",
+      "fixed": true,
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "x": -171,
+      "y": 33,
+      "originalSize": 5,
+      "hiddenLabel": "Procurement"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Detailled_Engineering",
-      "label": "Detailled Engineering",
+      "label": "Detailled_Engineering",
       "shape": "box",
       "color": "#ddd",
       "size": 5,
       "data": {
         "id": "http://data.total/resource/tsf/dalia-lifex/Detailled_Engineering",
-        "label": "Detailled Engineering"
+        "label": "Detailled_Engineering"
       },
+      "initialColor": "#ddd",
+      "initialShape": "box",
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -755,
-      "y": 308,
-      "originalSize": 5,
-      "hiddenLabel": "Detailled Engineering",
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "x": -385,
+      "y": 102,
+      "originalSize": 5,
+      "hiddenLabel": "Detailled_Engineering"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Commissioning",
-      "label": "Offshore Commissioning",
+      "label": "Offshore_Commissioning",
       "shape": "box",
       "color": "#ddd",
       "size": 5,
       "data": {
         "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Commissioning",
-        "label": "Offshore Commissioning"
+        "label": "Offshore_Commissioning"
       },
+      "initialColor": "#ddd",
+      "initialShape": "box",
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -200,
-      "y": 277,
-      "originalSize": 5,
-      "hiddenLabel": "Offshore Commissioning",
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "x": -560,
+      "y": 258,
+      "originalSize": 5,
+      "hiddenLabel": "Offshore_Commissioning"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Construction_or_Installation",
-      "label": "Offshore Construction or Installation",
+      "label": "Offshore_Construction_or_Installation",
       "shape": "box",
       "color": "#ddd",
       "size": 5,
       "data": {
         "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Construction_or_Installation",
-        "label": "Offshore Construction or Installation"
+        "label": "Offshore_Construction_or_Installation"
       },
+      "initialColor": "#ddd",
+      "initialShape": "box",
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -445,
-      "y": 251,
-      "originalSize": 5,
-      "hiddenLabel": "Offshore Construction or Installation",
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
-    },
-    {
-      "id": "http://data.total/resource/tsf/dalia-lifex/Basic_Engineering",
-      "label": "Basic Engineering",
-      "shape": "box",
-      "color": "#ddd",
-      "size": 5,
-      "data": {
-        "id": "http://data.total/resource/tsf/dalia-lifex/Basic_Engineering",
-        "label": "Basic Engineering"
+      "x": -500,
+      "y": 175,
+      "_graphPosition": {
+        "x": 394,
+        "y": 583
       },
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": -857,
-      "y": 343,
+      "setIndex": 0,
       "originalSize": 5,
-      "hiddenLabel": "Basic Engineering",
-      "font": {
-        "size": 20
-      },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "hiddenLabel": "Offshore_Construction_or_Installation"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Pre-commissioning",
-      "label": "Offshore Pre-commissioning",
+      "label": "Offshore_Pre-commissioning",
       "shape": "box",
       "color": "#ddd",
       "size": 5,
       "data": {
         "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Pre-commissioning",
-        "label": "Offshore Pre-commissioning"
+        "label": "Offshore_Pre-commissioning"
       },
+      "initialColor": "#ddd",
+      "initialShape": "box",
+      "fixed": true,
+      "font": {
+        "size": 20
+      },
+      "x": -244,
+      "y": 121,
+      "originalSize": 5,
+      "hiddenLabel": "Offshore_Pre-commissioning"
+    },
+    {
+      "id": "http://data.total/resource/tsf/dalia-lifex/Basic_Engineering",
+      "label": "Basic_Engineering",
+      "shape": "box",
+      "color": "#ddd",
+      "size": 5,
+      "data": {
+        "id": "http://data.total/resource/tsf/dalia-lifex/Basic_Engineering",
+        "label": "Basic_Engineering"
+      },
+      "initialColor": "#ddd",
+      "initialShape": "box",
       "fixed": {
         "x": true,
         "y": true
       },
-      "_graphPosition": {
-        "x": 518,
-        "y": 675
-      },
-      "setIndex": 0,
-      "x": -329,
-      "y": 277,
-      "originalSize": 5,
-      "hiddenLabel": "Offshore Pre-commissioning",
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "x": -343,
+      "y": 237,
+      "originalSize": 5,
+      "hiddenLabel": "Basic_Engineering"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/PROJECT_-__Onshore_Preparation",
-      "label": "PROJECT -  Onshore Preparation",
+      "label": "Onshore_Preparation",
       "shape": "box",
       "color": "#ddd",
       "size": 5,
       "data": {
         "id": "http://data.total/resource/tsf/dalia-lifex/PROJECT_-__Onshore_Preparation",
-        "label": "PROJECT -  Onshore Preparation"
+        "label": "Onshore_Preparation"
       },
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": -546,
-      "y": 218,
-      "originalSize": 5,
-      "hiddenLabel": "PROJECT -  Onshore Preparation",
+      "initialColor": "#ddd",
+      "initialShape": "box",
+      "fixed": true,
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "x": -298,
+      "y": 58,
+      "originalSize": 5,
+      "hiddenLabel": "Onshore_Preparation"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Prefabrication",
@@ -454,19 +614,19 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Prefabrication",
         "label": "Prefabrication"
       },
+      "initialColor": "#ddd",
+      "initialShape": "box",
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -633,
-      "y": 244,
-      "originalSize": 5,
-      "hiddenLabel": "Prefabrication",
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "x": -423,
+      "y": 137,
+      "originalSize": 5,
+      "hiddenLabel": "Prefabrication"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Entity",
@@ -478,13 +638,24 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Entity",
         "label": "Entity"
       },
-      "originalSize": 5,
-      "hiddenLabel": "Entity",
+      "initialColor": "#ddd",
+      "initialShape": "box",
+      "_graphPosition": {
+        "x": 304,
+        "y": 241
+      },
+      "setIndex": 0,
+      "fixed": {
+        "x": true,
+        "y": true
+      },
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "x": -455,
+      "y": -249,
+      "originalSize": 5,
+      "hiddenLabel": "Entity"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Task",
@@ -496,295 +667,260 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Task",
         "label": "Task"
       },
-      "originalSize": 5,
-      "hiddenLabel": "Task",
+      "initialColor": "#ddd",
+      "initialShape": "box",
+      "fixed": {
+        "x": true,
+        "y": true
+      },
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "x": -205,
+      "y": -108,
+      "originalSize": 5,
+      "hiddenLabel": "Task"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/StartDate",
       "label": "StartDate",
       "shape": "box",
+      "color": "#96f696",
       "size": 5,
       "data": {
         "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
         "id": "http://data.total/resource/tsf/dalia-lifex/StartDate",
         "label": "StartDate"
       },
-      "color": "#a6f1ff",
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": -577,
-      "y": 399,
+      "initialColor": "#96f696",
+      "initialShape": "box",
       "_graphPosition": {
-        "x": 305,
-        "y": 721
+        "x": 586.9027709960938,
+        "y": 712.7048606872559
       },
       "setIndex": 0,
-      "originalSize": 5,
-      "hiddenLabel": "StartDate",
+      "fixed": true,
       "font": {
         "size": 20
       },
-      "initialColor": "#a6f1ff",
-      "initialShape": "box"
+      "x": -314,
+      "y": 366,
+      "originalSize": 5,
+      "hiddenLabel": "StartDate"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/EndDate",
       "label": "EndDate",
       "shape": "box",
+      "color": "#96f696",
       "size": 5,
       "data": {
         "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
         "id": "http://data.total/resource/tsf/dalia-lifex/EndDate",
         "label": "EndDate"
       },
-      "color": "#a6f1ff",
+      "initialColor": "#96f696",
+      "initialShape": "box",
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -496,
-      "y": 391,
-      "_graphPosition": {
-        "x": 371,
-        "y": 717
-      },
-      "setIndex": 0,
-      "originalSize": 14,
-      "hiddenLabel": "EndDate",
       "font": {
         "size": 20
       },
-      "initialColor": "#a6f1ff",
-      "initialShape": "box"
+      "x": -126,
+      "y": 309,
+      "_graphPosition": {
+        "x": 730,
+        "y": 672
+      },
+      "setIndex": 0,
+      "originalSize": 5,
+      "hiddenLabel": "EndDate"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Manning",
       "label": "Manning",
       "shape": "box",
-      "size": 5,
+      "color": "#ddd",
+      "size": 6.070624422376426,
       "data": {
         "id": "http://data.total/resource/tsf/dalia-lifex/Manning",
         "label": "Manning"
       },
-      "color": "#007DFF",
+      "initialColor": "#ddd",
+      "initialShape": "box",
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -361,
-      "y": -364,
-      "_graphPosition": {
-        "x": 467,
-        "y": 172
-      },
-      "setIndex": 0,
-      "originalSize": 14,
-      "hiddenLabel": "Manning",
       "font": {
         "size": 20
       },
-      "initialColor": "#007DFF",
-      "initialShape": "box"
+      "x": -415,
+      "y": -373,
+      "_graphPosition": {
+        "x": 516.9027709960938,
+        "y": 205.70486068725586
+      },
+      "setIndex": 0,
+      "originalSize": 5,
+      "hiddenLabel": "Manning"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/ConstructionDiscipline",
       "label": "ConstructionDiscipline",
       "shape": "box",
+      "color": "#ddd",
       "size": 5,
       "data": {
         "datatype": "http://www.w3.org/2001/XMLSchema#integer",
         "id": "http://data.total/resource/tsf/dalia-lifex/ConstructionDiscipline",
         "label": "ConstructionDiscipline"
       },
-      "color": "#ddd",
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": -442,
-      "y": -425,
-      "originalSize": 5,
-      "hiddenLabel": "ConstructionDiscipline",
-      "font": {
-        "size": 20
-      },
       "initialColor": "#ddd",
-      "initialShape": "box"
-    },
-    {
-      "id": "http://data.total/resource/tsf/dalia-lifex/Document",
-      "label": "Document",
-      "shape": "box",
-      "size": 5,
-      "data": {
-        "id": "http://data.total/resource/tsf/dalia-lifex/Document",
-        "label": "Document"
-      },
+      "initialShape": "box",
       "fixed": true,
-      "x": 50,
-      "y": -4,
-      "color": "#FF7D07",
-      "_graphPosition": {
-        "x": 767,
-        "y": 430
-      },
-      "setIndex": 0,
-      "originalSize": 14,
-      "hiddenLabel": "Document",
       "font": {
         "size": 20
       },
-      "initialColor": "#FF7D07",
-      "initialShape": "box"
+      "x": -496,
+      "y": -429,
+      "originalSize": 5,
+      "hiddenLabel": "ConstructionDiscipline"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Discipline",
       "label": "Discipline",
       "shape": "box",
+      "color": "#ddd",
       "size": 5,
       "data": {
         "id": "http://data.total/resource/tsf/dalia-lifex/Discipline",
         "label": "Discipline"
       },
-      "color": "#B354B3",
-      "_graphPosition": {
-        "x": 515,
-        "y": 266
-      },
-      "setIndex": 0,
+      "initialColor": "#ddd",
+      "initialShape": "box",
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -294,
-      "y": -231,
-      "originalSize": 14,
-      "hiddenLabel": "Discipline",
       "font": {
         "size": 20
       },
-      "initialColor": "#B354B3",
-      "initialShape": "box"
+      "x": -285,
+      "y": -235,
+      "_graphPosition": {
+        "x": 606.9027709960938,
+        "y": 297.70486068725586
+      },
+      "setIndex": 0,
+      "originalSize": 5,
+      "hiddenLabel": "Discipline"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/OffshorePOB",
       "label": "OffshorePOB",
       "shape": "box",
+      "color": "#ddd",
       "size": 5,
       "data": {
         "datatype": "http://www.w3.org/2001/XMLSchema#integer",
         "id": "http://data.total/resource/tsf/dalia-lifex/OffshorePOB",
         "label": "OffshorePOB"
       },
-      "color": "#ddd",
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": -172,
-      "y": -361,
-      "originalSize": 5,
-      "hiddenLabel": "OffshorePOB",
+      "initialColor": "#ddd",
+      "initialShape": "box",
+      "fixed": true,
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "x": -334,
+      "y": -471,
+      "_graphPosition": {
+        "x": 562.9027709960938,
+        "y": 138.70486068725586
+      },
+      "setIndex": 0,
+      "originalSize": 5,
+      "hiddenLabel": "OffshorePOB"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/OffshoreManHours",
       "label": "OffshoreManHours",
       "shape": "box",
+      "color": "#ddd",
       "size": 5,
       "data": {
         "datatype": "http://www.w3.org/2001/XMLSchema#integer",
         "id": "http://data.total/resource/tsf/dalia-lifex/OffshoreManHours",
         "label": "OffshoreManHours"
       },
-      "color": "#ddd",
-      "_graphPosition": {
-        "x": 515,
-        "y": 49
-      },
-      "setIndex": 0,
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": -246,
-      "y": -406,
-      "originalSize": 5,
-      "hiddenLabel": "OffshoreManHours",
+      "initialColor": "#ddd",
+      "initialShape": "box",
+      "fixed": true,
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "x": -257,
+      "y": -398,
+      "originalSize": 5,
+      "hiddenLabel": "OffshoreManHours"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/AssetBreakdownStructure",
       "label": "AssetBreakdownStructure",
       "shape": "box",
+      "color": "#ddd",
       "size": 5,
       "data": {
         "id": "http://data.total/resource/tsf/dalia-lifex/AssetBreakdownStructure",
         "label": "AssetBreakdownStructure"
       },
-      "color": "#FFD900",
+      "initialColor": "#ddd",
+      "initialShape": "box",
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -744,
-      "y": -160,
-      "_graphPosition": {
-        "x": 195,
-        "y": 316
-      },
-      "setIndex": 0,
-      "originalSize": 14,
-      "hiddenLabel": "AssetBreakdownStructure",
       "font": {
         "size": 20
       },
-      "initialColor": "#FFD900",
-      "initialShape": "box"
+      "x": -956,
+      "y": -226,
+      "_graphPosition": {
+        "x": 38.399993896484375,
+        "y": 211.79999923706055
+      },
+      "setIndex": 0,
+      "originalSize": 5,
+      "hiddenLabel": "AssetBreakdownStructure"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Equipement_Item",
       "label": "Equipement Item",
       "shape": "box",
+      "color": "#ddd",
       "size": 5,
       "data": {
         "id": "http://data.total/resource/tsf/dalia-lifex/Equipement_Item",
         "label": "Equipement Item"
       },
-      "color": "#7fef11",
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": 28,
-      "y": -286,
-      "_graphPosition": {
-        "x": 723,
-        "y": 227
-      },
-      "setIndex": 0,
-      "originalSize": 14,
-      "hiddenLabel": "Equipement Item",
+      "initialColor": "#ddd",
+      "initialShape": "box",
       "font": {
         "size": 20
       },
-      "initialColor": "#7fef11",
-      "initialShape": "box"
+      "_graphPosition": {
+        "x": 393.3999938964844,
+        "y": 263.79999923706055
+      },
+      "setIndex": 0,
+      "fixed": true,
+      "x": -852,
+      "y": 111,
+      "originalSize": 5,
+      "hiddenLabel": "Equipement Item"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Quantity",
@@ -796,20 +932,15 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Quantity",
         "label": "Quantity"
       },
+      "initialShape": "box",
       "color": "#ddd",
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": 110,
-      "y": -202,
-      "originalSize": 5,
-      "hiddenLabel": "Quantity",
+      "initialColor": "#ddd",
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "fixed": true,
+      "originalSize": 5,
+      "hiddenLabel": "Quantity"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Cost",
@@ -821,20 +952,15 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Cost",
         "label": "Cost"
       },
+      "initialShape": "box",
       "color": "#ddd",
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": 161,
-      "y": -343,
-      "originalSize": 5,
-      "hiddenLabel": "Cost",
+      "initialColor": "#ddd",
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "fixed": true,
+      "originalSize": 5,
+      "hiddenLabel": "Cost"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Weight",
@@ -846,20 +972,15 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Weight",
         "label": "Weight"
       },
+      "initialShape": "box",
       "color": "#ddd",
-      "fixed": {
-        "x": true,
-        "y": true
-      },
-      "x": 32,
-      "y": -380,
-      "originalSize": 5,
-      "hiddenLabel": "Weight",
+      "initialColor": "#ddd",
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "fixed": true,
+      "originalSize": 5,
+      "hiddenLabel": "Weight"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Tag",
@@ -870,20 +991,25 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Tag",
         "label": "Tag"
       },
+      "initialShape": "box",
       "color": "#ddd",
+      "initialColor": "#ddd",
+      "font": {
+        "size": 20
+      },
+      "_graphPosition": {
+        "x": 152.39999389648438,
+        "y": 213.79999923706055
+      },
+      "setIndex": 0,
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -677,
-      "y": -230,
+      "x": -794,
+      "y": -311,
       "originalSize": 5,
-      "hiddenLabel": "Tag",
-      "font": {
-        "size": 20
-      },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "hiddenLabel": "Tag"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Package",
@@ -894,20 +1020,20 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Package",
         "label": "Package"
       },
+      "initialShape": "box",
       "color": "#ddd",
+      "initialColor": "#ddd",
+      "font": {
+        "size": 20
+      },
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -571,
-      "y": -263,
+      "x": -714,
+      "y": -368,
       "originalSize": 5,
-      "hiddenLabel": "Package",
-      "font": {
-        "size": 20
-      },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "hiddenLabel": "Package"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Functional_Location",
@@ -918,25 +1044,25 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Functional_Location",
         "label": "Functional Location"
       },
-      "color": "#FFD900",
+      "initialShape": "box",
+      "color": "#ddd",
+      "initialColor": "#ddd",
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -763,
-      "y": -326,
-      "_graphPosition": {
-        "x": 165,
-        "y": 198
-      },
-      "setIndex": 0,
-      "originalSize": 5,
-      "hiddenLabel": "Functional Location",
       "font": {
         "size": 20
       },
-      "initialColor": "#FFD900",
-      "initialShape": "box"
+      "x": -967,
+      "y": -389,
+      "_graphPosition": {
+        "x": 77.39999389648438,
+        "y": 133.79999923706055
+      },
+      "setIndex": 0,
+      "originalSize": 5,
+      "hiddenLabel": "Functional Location"
     },
     {
       "id": "http://data.total/resource/tsf/dalia-lifex/Unit",
@@ -947,23 +1073,67 @@
         "id": "http://data.total/resource/tsf/dalia-lifex/Unit",
         "label": "Unit"
       },
+      "initialShape": "box",
       "color": "#ddd",
+      "initialColor": "#ddd",
       "fixed": {
         "x": true,
         "y": true
       },
-      "x": -743,
-      "y": -117,
-      "originalSize": 5,
-      "hiddenLabel": "Unit",
       "font": {
         "size": 20
       },
-      "initialColor": "#ddd",
-      "initialShape": "box"
+      "x": -877,
+      "y": -95,
+      "originalSize": 5,
+      "hiddenLabel": "Unit"
     }
   ],
   "edges": [
+    {
+      "id": "http://data.total/resource/tsf/dalia-lifex/DocumentRevision_http://rds.posccaesar.org/ontology/lis14/rdl/hasPart_http://data.total/resource/tsf/new_prodom/Document_Revision_Creation_Date",
+      "from": "http://data.total/resource/tsf/dalia-lifex/DocumentRevision",
+      "to": "http://data.total/resource/tsf/new_prodom/Document_Revision_Creation_Date",
+      "label": "hasPart",
+      "font": {
+        "color": "#266264"
+      },
+      "data": {
+        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/hasPart",
+        "propertyLabel": "hasPart"
+      },
+      "arrows": {
+        "to": {
+          "enabled": true,
+          "type": "solid",
+          "scaleFactor": 0.5
+        }
+      },
+      "color": "#fdbf01",
+      "width": 1
+    },
+    {
+      "id": "http://data.total/resource/tsf/dalia-lifex/DocumentRevision_http://rds.posccaesar.org/ontology/lis14/rdl/hasPart_http://data.total/resource/tsf/new_prodom/Document_Revision_Received_Date",
+      "from": "http://data.total/resource/tsf/dalia-lifex/DocumentRevision",
+      "to": "http://data.total/resource/tsf/new_prodom/Document_Revision_Received_Date",
+      "label": "hasPart",
+      "font": {
+        "color": "#266264"
+      },
+      "data": {
+        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/hasPart",
+        "propertyLabel": "hasPart"
+      },
+      "arrows": {
+        "to": {
+          "enabled": true,
+          "type": "solid",
+          "scaleFactor": 0.5
+        }
+      },
+      "color": "#fdbf01",
+      "width": 1
+    },
     {
       "id": "http://data.total/resource/tsf/new_prodom/DocumentReview_http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality_http://data.total/resource/tsf/new_prodom/ReviewStatus",
       "from": "http://data.total/resource/tsf/new_prodom/DocumentReview",
@@ -1009,16 +1179,60 @@
       "width": 1
     },
     {
-      "id": "http://data.total/resource/tsf/new_prodom/Document_Revision_Creation_Date_http://rds.posccaesar.org/ontology/lis14/rdl/partOf_http://data.total/resource/tsf/new_prodom/ReviewStatus",
-      "from": "http://data.total/resource/tsf/new_prodom/Document_Revision_Creation_Date",
-      "to": "http://data.total/resource/tsf/new_prodom/ReviewStatus",
-      "label": "partOf",
+      "id": "http://data.total/resource/tsf/dalia-lifex/Document_http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality_http://data.total/resource/tsf/dalia-lifex/DocumentStatus",
+      "from": "http://data.total/resource/tsf/dalia-lifex/Document",
+      "to": "http://data.total/resource/tsf/dalia-lifex/DocumentStatus",
+      "label": "hasQuality",
       "font": {
         "color": "#266264"
       },
       "data": {
-        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/partOf",
-        "propertyLabel": "partOf"
+        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality",
+        "propertyLabel": "hasQuality"
+      },
+      "arrows": {
+        "to": {
+          "enabled": true,
+          "type": "solid",
+          "scaleFactor": 0.5
+        }
+      },
+      "color": "#fdbf01",
+      "width": 1
+    },
+    {
+      "id": "http://data.total/resource/tsf/dalia-lifex/Document_http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality_http://data.total/resource/tsf/dalia-lifex/DocumentType",
+      "from": "http://data.total/resource/tsf/dalia-lifex/Document",
+      "to": "http://data.total/resource/tsf/dalia-lifex/DocumentType",
+      "label": "hasQuality",
+      "font": {
+        "color": "#266264"
+      },
+      "data": {
+        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality",
+        "propertyLabel": "hasQuality"
+      },
+      "arrows": {
+        "to": {
+          "enabled": true,
+          "type": "solid",
+          "scaleFactor": 0.5
+        }
+      },
+      "color": "#fdbf01",
+      "width": 1
+    },
+    {
+      "id": "http://data.total/resource/tsf/new_prodom/DocumentReview_http://rds.posccaesar.org/ontology/lis14/rdl/isAbout_http://data.total/resource/tsf/dalia-lifex/Document",
+      "from": "http://data.total/resource/tsf/new_prodom/DocumentReview",
+      "to": "http://data.total/resource/tsf/dalia-lifex/Document",
+      "label": "isAbout",
+      "font": {
+        "color": "#266264"
+      },
+      "data": {
+        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/isAbout",
+        "propertyLabel": "isAbout"
       },
       "arrows": {
         "to": {
@@ -1053,9 +1267,9 @@
       "width": 1
     },
     {
-      "id": "http://data.total/resource/tsf/new_prodom/Document_Revision_Received_Date_http://rds.posccaesar.org/ontology/lis14/rdl/partOf_http://data.total/resource/tsf/new_prodom/ReviewStatus",
-      "from": "http://data.total/resource/tsf/new_prodom/Document_Revision_Received_Date",
-      "to": "http://data.total/resource/tsf/new_prodom/ReviewStatus",
+      "id": "http://data.total/resource/tsf/new_prodom/DocumentStep_http://rds.posccaesar.org/ontology/lis14/rdl/partOf_http://data.total/resource/tsf/new_prodom/DocumentStepDate",
+      "from": "http://data.total/resource/tsf/new_prodom/DocumentStep",
+      "to": "http://data.total/resource/tsf/new_prodom/DocumentStepDate",
       "label": "partOf",
       "font": {
         "color": "#266264"
@@ -1075,9 +1289,9 @@
       "width": 1
     },
     {
-      "id": "http://data.total/resource/tsf/new_prodom/Review_Deadline_Date_http://rds.posccaesar.org/ontology/lis14/rdl/partOf_http://data.total/resource/tsf/new_prodom/ReviewStatus",
-      "from": "http://data.total/resource/tsf/new_prodom/Review_Deadline_Date",
-      "to": "http://data.total/resource/tsf/new_prodom/ReviewStatus",
+      "id": "http://data.total/resource/tsf/new_prodom/DocumentStepStatus_http://rds.posccaesar.org/ontology/lis14/rdl/partOf_http://data.total/resource/tsf/new_prodom/DocumentStepDate",
+      "from": "http://data.total/resource/tsf/new_prodom/DocumentStepStatus",
+      "to": "http://data.total/resource/tsf/new_prodom/DocumentStepDate",
       "label": "partOf",
       "font": {
         "color": "#266264"
@@ -1097,38 +1311,16 @@
       "width": 1
     },
     {
-      "id": "http://data.total/resource/tsf/new_prodom/Review_Finalized_Date_http://rds.posccaesar.org/ontology/lis14/rdl/partOf_http://data.total/resource/tsf/new_prodom/ReviewStatus",
-      "from": "http://data.total/resource/tsf/new_prodom/Review_Finalized_Date",
-      "to": "http://data.total/resource/tsf/new_prodom/ReviewStatus",
-      "label": "partOf",
+      "id": "http://data.total/resource/tsf/dalia-lifex/DocumentRevision_http://rds.posccaesar.org/ontology/lis14/rdl/qualityOf_http://data.total/resource/tsf/dalia-lifex/Document",
+      "from": "http://data.total/resource/tsf/dalia-lifex/DocumentRevision",
+      "to": "http://data.total/resource/tsf/dalia-lifex/Document",
+      "label": "qualityOf",
       "font": {
         "color": "#266264"
       },
       "data": {
-        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/partOf",
-        "propertyLabel": "partOf"
-      },
-      "arrows": {
-        "to": {
-          "enabled": true,
-          "type": "solid",
-          "scaleFactor": 0.5
-        }
-      },
-      "color": "#fdbf01",
-      "width": 1
-    },
-    {
-      "id": "http://data.total/resource/tsf/new_prodom/Document_Revision_Creation_Date_http://rds.posccaesar.org/ontology/lis14/rdl/representedBy_http://data.total/resource/tsf/new_prodom/DocumentReview",
-      "from": "http://data.total/resource/tsf/new_prodom/Document_Revision_Creation_Date",
-      "to": "http://data.total/resource/tsf/new_prodom/DocumentReview",
-      "label": "representedBy",
-      "font": {
-        "color": "#266264"
-      },
-      "data": {
-        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/representedBy",
-        "propertyLabel": "representedBy"
+        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/qualityOf",
+        "propertyLabel": "qualityOf"
       },
       "arrows": {
         "to": {
@@ -1143,50 +1335,6 @@
     {
       "id": "http://data.total/resource/tsf/new_prodom/ReviewStatusDeliveryDate_http://rds.posccaesar.org/ontology/lis14/rdl/representedBy_http://data.total/resource/tsf/new_prodom/DocumentReview",
       "from": "http://data.total/resource/tsf/new_prodom/ReviewStatusDeliveryDate",
-      "to": "http://data.total/resource/tsf/new_prodom/DocumentReview",
-      "label": "representedBy",
-      "font": {
-        "color": "#266264"
-      },
-      "data": {
-        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/representedBy",
-        "propertyLabel": "representedBy"
-      },
-      "arrows": {
-        "to": {
-          "enabled": true,
-          "type": "solid",
-          "scaleFactor": 0.5
-        }
-      },
-      "color": "#fdbf01",
-      "width": 1
-    },
-    {
-      "id": "http://data.total/resource/tsf/new_prodom/Document_Creation_Date_http://rds.posccaesar.org/ontology/lis14/rdl/representedBy_http://data.total/resource/tsf/new_prodom/DocumentReview",
-      "from": "http://data.total/resource/tsf/new_prodom/Document_Creation_Date",
-      "to": "http://data.total/resource/tsf/new_prodom/DocumentReview",
-      "label": "representedBy",
-      "font": {
-        "color": "#266264"
-      },
-      "data": {
-        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/representedBy",
-        "propertyLabel": "representedBy"
-      },
-      "arrows": {
-        "to": {
-          "enabled": true,
-          "type": "solid",
-          "scaleFactor": 0.5
-        }
-      },
-      "color": "#fdbf01",
-      "width": 1
-    },
-    {
-      "id": "http://data.total/resource/tsf/new_prodom/Document_Revision_Received_Date_http://rds.posccaesar.org/ontology/lis14/rdl/representedBy_http://data.total/resource/tsf/new_prodom/DocumentReview",
-      "from": "http://data.total/resource/tsf/new_prodom/Document_Revision_Received_Date",
       "to": "http://data.total/resource/tsf/new_prodom/DocumentReview",
       "label": "representedBy",
       "font": {
@@ -1239,6 +1387,50 @@
       "data": {
         "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/representedBy",
         "propertyLabel": "representedBy"
+      },
+      "arrows": {
+        "to": {
+          "enabled": true,
+          "type": "solid",
+          "scaleFactor": 0.5
+        }
+      },
+      "color": "#fdbf01",
+      "width": 1
+    },
+    {
+      "id": "http://data.total/resource/tsf/new_prodom/DocumentStepDate_http://rds.posccaesar.org/ontology/lis14/rdl/representedBy_http://data.total/resource/tsf/dalia-lifex/Document",
+      "from": "http://data.total/resource/tsf/new_prodom/DocumentStepDate",
+      "to": "http://data.total/resource/tsf/dalia-lifex/Document",
+      "label": "representedBy",
+      "font": {
+        "color": "#266264"
+      },
+      "data": {
+        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/representedBy",
+        "propertyLabel": "representedBy"
+      },
+      "arrows": {
+        "to": {
+          "enabled": true,
+          "type": "solid",
+          "scaleFactor": 0.5
+        }
+      },
+      "color": "#fdbf01",
+      "width": 1
+    },
+    {
+      "id": "http://data.total/resource/tsf/dalia-lifex/Document_http://rds.posccaesar.org/ontology/lis14/rdl/represents_http://data.total/resource/tsf/new_prodom/Document_Creation_Date",
+      "from": "http://data.total/resource/tsf/dalia-lifex/Document",
+      "to": "http://data.total/resource/tsf/new_prodom/Document_Creation_Date",
+      "label": "represents",
+      "font": {
+        "color": "#266264"
+      },
+      "data": {
+        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/represents",
+        "propertyLabel": "represents"
       },
       "arrows": {
         "to": {
@@ -1339,9 +1531,9 @@
       "width": 1
     },
     {
-      "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card_http://rds.posccaesar.org/ontology/lis14/rdl/hasTemporalExtent_http://data.total/resource/tsf/dalia-lifex/Basic_Engineering",
+      "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card_http://rds.posccaesar.org/ontology/lis14/rdl/hasTemporalExtent_http://data.total/resource/tsf/dalia-lifex/Offshore_Pre-commissioning",
       "from": "http://data.total/resource/tsf/dalia-lifex/Job_Card",
-      "to": "http://data.total/resource/tsf/dalia-lifex/Basic_Engineering",
+      "to": "http://data.total/resource/tsf/dalia-lifex/Offshore_Pre-commissioning",
       "label": "hasTemporalExtent",
       "font": {
         "color": "#266264"
@@ -1361,9 +1553,9 @@
       "width": 1
     },
     {
-      "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card_http://rds.posccaesar.org/ontology/lis14/rdl/hasTemporalExtent_http://data.total/resource/tsf/dalia-lifex/Offshore_Pre-commissioning",
+      "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card_http://rds.posccaesar.org/ontology/lis14/rdl/hasTemporalExtent_http://data.total/resource/tsf/dalia-lifex/Basic_Engineering",
       "from": "http://data.total/resource/tsf/dalia-lifex/Job_Card",
-      "to": "http://data.total/resource/tsf/dalia-lifex/Offshore_Pre-commissioning",
+      "to": "http://data.total/resource/tsf/dalia-lifex/Basic_Engineering",
       "label": "hasTemporalExtent",
       "font": {
         "color": "#266264"
@@ -1889,28 +2081,6 @@
       "width": 1
     },
     {
-      "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card_http://rds.posccaesar.org/ontology/lis14/rdl/hasPart_http://data.total/resource/tsf/dalia-lifex/Document",
-      "from": "http://data.total/resource/tsf/dalia-lifex/Job_Card",
-      "to": "http://data.total/resource/tsf/dalia-lifex/Document",
-      "label": "hasPart",
-      "font": {
-        "color": "#266264"
-      },
-      "data": {
-        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/hasPart",
-        "propertyLabel": "hasPart"
-      },
-      "arrows": {
-        "to": {
-          "enabled": true,
-          "type": "solid",
-          "scaleFactor": 0.5
-        }
-      },
-      "color": "#fdbf01",
-      "width": 1
-    },
-    {
       "id": "http://data.total/resource/tsf/dalia-lifex/Manning_http://rds.posccaesar.org/ontology/lis14/rdl/hasPart_http://data.total/resource/tsf/dalia-lifex/Discipline",
       "from": "http://data.total/resource/tsf/dalia-lifex/Manning",
       "to": "http://data.total/resource/tsf/dalia-lifex/Discipline",
@@ -2329,17 +2499,17 @@
       "width": 1
     },
     {
-      "id": "http://data.total/resource/tsf/new_prodom/DocumentReview_http://rds.posccaesar.org/ontology/lis14/rdl/isAbout_http://data.total/resource/tsf/dalia-lifex/Document",
-      "from": "http://data.total/resource/tsf/new_prodom/DocumentReview",
+      "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card_http://rds.posccaesar.org/ontology/lis14/rdl/hasPart_http://data.total/resource/tsf/dalia-lifex/Document",
+      "from": "http://data.total/resource/tsf/dalia-lifex/Job_Card",
       "to": "http://data.total/resource/tsf/dalia-lifex/Document",
-      "label": "isAbout",
+      "label": "hasPart",
       "font": {
         "color": "#266264"
       },
       "data": {
-        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/isAbout",
+        "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/hasPart",
         "source": "LIFEX_DALIA",
-        "propertyLabel": "isAbout"
+        "propertyLabel": "hasPart"
       },
       "arrows": {
         "to": {
@@ -2366,153 +2536,177 @@
     }
   },
   "positions": {
-    "http://data.total/resource/tsf/new_prodom/DocumentReview": {
-      "x": 629,
-      "y": 209
-    },
-    "http://data.total/resource/tsf/new_prodom/ReviewStatus": {
-      "x": 583,
-      "y": -10
-    },
-    "http://data.total/resource/tsf/new_prodom/ReviewClass": {
-      "x": 570,
-      "y": 354
+    "http://data.total/resource/tsf/dalia-lifex/DocumentRevision": {
+      "x": 591,
+      "y": -356
     },
     "http://data.total/resource/tsf/new_prodom/Document_Revision_Creation_Date": {
-      "x": 841,
-      "y": -182
-    },
-    "http://data.total/resource/tsf/new_prodom/ReviewStatusDeliveryDate": {
-      "x": 878,
-      "y": 15
+      "x": 665,
+      "y": -451
     },
     "http://data.total/resource/tsf/new_prodom/Document_Revision_Received_Date": {
-      "x": 437,
-      "y": -155
+      "x": 737,
+      "y": -270
     },
-    "http://data.total/resource/tsf/new_prodom/Review_Deadline_Date": {
-      "x": 315,
-      "y": -86
+    "http://data.total/resource/tsf/new_prodom/DocumentReview": {
+      "x": 440,
+      "y": 117
     },
-    "http://data.total/resource/tsf/new_prodom/Review_Finalized_Date": {
-      "x": 821,
-      "y": -100
+    "http://data.total/resource/tsf/new_prodom/ReviewStatus": {
+      "x": 227,
+      "y": 179
     },
-    "http://data.total/resource/tsf/new_prodom/Document_Creation_Date": {
-      "x": 743,
-      "y": 368
-    },
-    "http://data.total/resource/tsf/dalia-lifex/Job_Card": {
-      "x": -449,
-      "y": -101
-    },
-    "http://data.total/resource/tsf/dalia-lifex/Procurement": {
-      "x": -684,
-      "y": 271
-    },
-    "http://data.total/resource/tsf/dalia-lifex/Detailled_Engineering": {
-      "x": -755,
-      "y": 308
-    },
-    "http://data.total/resource/tsf/dalia-lifex/Offshore_Commissioning": {
-      "x": -200,
-      "y": 277
-    },
-    "http://data.total/resource/tsf/dalia-lifex/Offshore_Construction_or_Installation": {
-      "x": -445,
-      "y": 251
-    },
-    "http://data.total/resource/tsf/dalia-lifex/Basic_Engineering": {
-      "x": -857,
-      "y": 343
-    },
-    "http://data.total/resource/tsf/dalia-lifex/Offshore_Pre-commissioning": {
-      "x": -329,
-      "y": 277
-    },
-    "http://data.total/resource/tsf/dalia-lifex/PROJECT_-__Onshore_Preparation": {
-      "x": -546,
-      "y": 218
-    },
-    "http://data.total/resource/tsf/dalia-lifex/Prefabrication": {
-      "x": -633,
-      "y": 244
-    },
-    "http://data.total/resource/tsf/dalia-lifex/Entity": {
-      "x": -308,
-      "y": -16
-    },
-    "http://data.total/resource/tsf/dalia-lifex/Task": {
-      "x": -269,
-      "y": -91
-    },
-    "http://data.total/resource/tsf/dalia-lifex/StartDate": {
-      "x": -577,
-      "y": 399
-    },
-    "http://data.total/resource/tsf/dalia-lifex/EndDate": {
-      "x": -496,
-      "y": 391
-    },
-    "http://data.total/resource/tsf/dalia-lifex/Manning": {
-      "x": -361,
-      "y": -364
-    },
-    "http://data.total/resource/tsf/dalia-lifex/ConstructionDiscipline": {
-      "x": -442,
-      "y": -425
+    "http://data.total/resource/tsf/new_prodom/ReviewClass": {
+      "x": 662,
+      "y": 40
     },
     "http://data.total/resource/tsf/dalia-lifex/Document": {
-      "x": 319,
-      "y": 154
+      "x": 272,
+      "y": -181
+    },
+    "http://data.total/resource/tsf/dalia-lifex/DocumentStatus": {
+      "x": 223,
+      "y": -29
+    },
+    "http://data.total/resource/tsf/dalia-lifex/DocumentType": {
+      "x": 533,
+      "y": -141
+    },
+    "http://data.total/resource/tsf/new_prodom/ReviewStatusDeliveryDate": {
+      "x": 303,
+      "y": 257
+    },
+    "http://data.total/resource/tsf/new_prodom/DocumentStep": {
+      "x": 128,
+      "y": -391
+    },
+    "http://data.total/resource/tsf/new_prodom/DocumentStepDate": {
+      "x": 309,
+      "y": -306
+    },
+    "http://data.total/resource/tsf/new_prodom/DocumentStepStatus": {
+      "x": 341,
+      "y": -417
+    },
+    "http://data.total/resource/tsf/new_prodom/Review_Deadline_Date": {
+      "x": 673,
+      "y": 199
+    },
+    "http://data.total/resource/tsf/new_prodom/Review_Finalized_Date": {
+      "x": 463,
+      "y": 345
+    },
+    "http://data.total/resource/tsf/new_prodom/Document_Creation_Date": {
+      "x": 110,
+      "y": -96
+    },
+    "http://data.total/resource/tsf/dalia-lifex/Job_Card": {
+      "x": -674,
+      "y": -171
+    },
+    "http://data.total/resource/tsf/dalia-lifex/Procurement": {
+      "x": -171,
+      "y": 33
+    },
+    "http://data.total/resource/tsf/dalia-lifex/Detailled_Engineering": {
+      "x": -385,
+      "y": 102
+    },
+    "http://data.total/resource/tsf/dalia-lifex/Offshore_Commissioning": {
+      "x": -560,
+      "y": 258
+    },
+    "http://data.total/resource/tsf/dalia-lifex/Offshore_Construction_or_Installation": {
+      "x": -500,
+      "y": 175
+    },
+    "http://data.total/resource/tsf/dalia-lifex/Offshore_Pre-commissioning": {
+      "x": -244,
+      "y": 121
+    },
+    "http://data.total/resource/tsf/dalia-lifex/Basic_Engineering": {
+      "x": -343,
+      "y": 237
+    },
+    "http://data.total/resource/tsf/dalia-lifex/PROJECT_-__Onshore_Preparation": {
+      "x": -298,
+      "y": 58
+    },
+    "http://data.total/resource/tsf/dalia-lifex/Prefabrication": {
+      "x": -423,
+      "y": 137
+    },
+    "http://data.total/resource/tsf/dalia-lifex/Entity": {
+      "x": -455,
+      "y": -249
+    },
+    "http://data.total/resource/tsf/dalia-lifex/Task": {
+      "x": -205,
+      "y": -108
+    },
+    "http://data.total/resource/tsf/dalia-lifex/StartDate": {
+      "x": -314,
+      "y": 366
+    },
+    "http://data.total/resource/tsf/dalia-lifex/EndDate": {
+      "x": -126,
+      "y": 309
+    },
+    "http://data.total/resource/tsf/dalia-lifex/Manning": {
+      "x": -415,
+      "y": -373
+    },
+    "http://data.total/resource/tsf/dalia-lifex/ConstructionDiscipline": {
+      "x": -496,
+      "y": -429
     },
     "http://data.total/resource/tsf/dalia-lifex/Discipline": {
-      "x": -294,
-      "y": -231
+      "x": -285,
+      "y": -235
     },
     "http://data.total/resource/tsf/dalia-lifex/OffshorePOB": {
-      "x": -172,
-      "y": -361
+      "x": -334,
+      "y": -471
     },
     "http://data.total/resource/tsf/dalia-lifex/OffshoreManHours": {
-      "x": -246,
-      "y": -406
+      "x": -257,
+      "y": -398
     },
     "http://data.total/resource/tsf/dalia-lifex/AssetBreakdownStructure": {
-      "x": -744,
-      "y": -160
+      "x": -956,
+      "y": -226
     },
     "http://data.total/resource/tsf/dalia-lifex/Equipement_Item": {
-      "x": 28,
-      "y": -286
+      "x": -852,
+      "y": 111
     },
     "http://data.total/resource/tsf/dalia-lifex/Quantity": {
-      "x": 110,
-      "y": -202
+      "x": -1038,
+      "y": 84
     },
     "http://data.total/resource/tsf/dalia-lifex/Cost": {
-      "x": 161,
-      "y": -343
+      "x": -768,
+      "y": 301
     },
     "http://data.total/resource/tsf/dalia-lifex/Weight": {
-      "x": 32,
-      "y": -380
+      "x": -980,
+      "y": 250
     },
     "http://data.total/resource/tsf/dalia-lifex/Tag": {
-      "x": -677,
-      "y": -230
+      "x": -794,
+      "y": -311
     },
     "http://data.total/resource/tsf/dalia-lifex/Package": {
-      "x": -571,
-      "y": -263
+      "x": -714,
+      "y": -368
     },
     "http://data.total/resource/tsf/dalia-lifex/Functional_Location": {
-      "x": -763,
-      "y": -326
+      "x": -967,
+      "y": -389
     },
     "http://data.total/resource/tsf/dalia-lifex/Unit": {
-      "x": -743,
-      "y": -117
+      "x": -877,
+      "y": -95
     }
   }
 }

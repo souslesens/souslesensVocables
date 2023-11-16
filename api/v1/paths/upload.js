@@ -18,13 +18,15 @@ module.exports = function () {
                 if (!fsSync.existsSync(outputPath)) {
                     await fs.mkdir(outputPath);
                 }
+                console.log(filePath)
                 await file.mv(filePath);
+                return res.status(201).json({ done: true });
             }
         } catch (err) {
             next(err);
             return res.status(500).json({ done: false });
         }
-        return res.status(201).json({ done: true });
+
     }
     POST.apiDoc = {
         summary: "Upload files",

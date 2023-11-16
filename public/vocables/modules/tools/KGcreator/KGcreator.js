@@ -32,8 +32,8 @@ var KGcreator = (function () {
         var html=" <div id=\"mount-kg-upload-app-here\"></div>";
         $("#smallDialogDiv").html(html)
         $("#smallDialogDiv").dialog({"open": function( event, ui ) {
-
-                $.getScript("/kg_upload_app.js");
+                self.uploadFormData.currentSource = self.currentSlsvSource;
+               import ("/assets/kg_upload_app.js");
         }})
         $("#smallDialogDiv").dialog("open")
 

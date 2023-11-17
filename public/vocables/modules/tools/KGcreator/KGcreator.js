@@ -16,7 +16,6 @@ var KGcreator = (function () {
     self.allTriplesMappings = {};
     var mappingsDir = "mappings";
 
-
     self.umountKGUploadApp = null;
     self.createApp = null;
 

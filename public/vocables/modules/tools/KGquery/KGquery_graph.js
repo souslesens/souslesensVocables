@@ -138,8 +138,7 @@ var KGquery_graph = (function () {
 
                 visjsData.nodes.forEach(function (item) {
                     // item.color="#ddd"
-                  if(item.label.indexOf("Date")>-1)
-                    item.color="#96f696"
+                    if (item.label.indexOf("Date") > -1) item.color = "#96f696";
                     item.initialColor = item.color;
                     item.initialShape = item.shape;
                 });
@@ -221,7 +220,6 @@ var KGquery_graph = (function () {
                     callback("no inferred model for source " + source);
                 }
 
-
                 inferredModel.forEach(function (item) {
                     item.sClass = item.sClass || item.sparent;
                     item.oClass = item.oClass || item.oparent;
@@ -232,7 +230,7 @@ var KGquery_graph = (function () {
                     if (!existingNodes[item.sClass.value]) {
                         existingNodes[item.sClass.value] = 1;
                         self.visjsNodeOptions.color = common.getResourceColor("class", item.sClass.value, "palette");
-                      self.visjsNodeOptions.color =Lineage_whiteboard.getSourceColor(source)
+                        self.visjsNodeOptions.color = Lineage_whiteboard.getSourceColor(source);
                         var label = item.sClassLabel ? item.sClassLabel.value : Sparql_common.getLabelFromURI(item.sClass.value);
                         self.visjsNodeOptions.data = { datatype: dataTypes[item.sClass.value], source: source, id: item.sClass.value, label: label };
 
@@ -241,9 +239,9 @@ var KGquery_graph = (function () {
                     if (!existingNodes[item.oClass.value]) {
                         existingNodes[item.oClass.value] = 1;
                         var label = item.oClassLabel ? item.oClassLabel.value : Sparql_common.getLabelFromURI(item.oClass.value);
-                        self.visjsNodeOptions.data = {source:source, datatype: dataTypes[item.oClass.value], id: item.oClass.value, label: label };
-                      //  self.visjsNodeOptions.color = common.getResourceColor("class", item.oClass.value, "palette");
-                      self.visjsNodeOptions.color =Lineage_whiteboard.getSourceColor(source)
+                        self.visjsNodeOptions.data = { source: source, datatype: dataTypes[item.oClass.value], id: item.oClass.value, label: label };
+                        //  self.visjsNodeOptions.color = common.getResourceColor("class", item.oClass.value, "palette");
+                        self.visjsNodeOptions.color = Lineage_whiteboard.getSourceColor(source);
                         visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, self.visjsNodeOptions));
                     }
                     var edgeId = item.sClass.value + "_" + item.prop.value + "_" + item.oClass.value;

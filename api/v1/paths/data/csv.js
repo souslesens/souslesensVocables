@@ -10,7 +10,7 @@ module.exports = function () {
         if (req.query.options) {
             options = JSON.parse(req.query.options);
         }
-        dataController.readCsv(req.query.dir, req.query.name, options, function (err, result) {
+        dataController.readCsv(req.query.dir, req.query.fileName, options, function (err, result) {
             if (err) {
                 next(err);
             } else {
@@ -33,7 +33,7 @@ module.exports = function () {
                 required: true,
             },
             {
-                name: "name",
+                name: "fileName",
                 description: "name",
                 in: "query",
                 type: "string",

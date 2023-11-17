@@ -19,20 +19,22 @@
     }
 
     .KGcreator_fileWithMappings {
-        color: #0000ff;
+        color: #0d6efd;
     }
     .KGcreator_columnWithMappings {
-        color: #3a773a;
+        color: #0d6efd;
+    }
+
+    .ui-widget-content a {
+        color: #0d6efd;
     }
 </style>
 
 <div id="KGcreator_centralPanelTabs" style="width: 100%">
-    <!-- <ul>
-    <li><a href="#KGcreator_triplesDeclarationTab">Declare</a></li>
-    <li><a href="#KGcreator_resourceslinkingTab">Link</a></li>
-  </ul>
-
-  -->
+    <ul>
+        <li><a href="#KGcreator_resourceslinkingTab">Link</a></li>
+        <li><a href="#KGcreator_triplesDeclarationTab">Declare</a></li>
+    </ul>
 
     <div id="KGcreator_triplesDeclarationTab" style="display: flex; flex-direction: row">
         <div style="display: flex; flex-direction: column; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
@@ -63,7 +65,7 @@
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.drawAllMappings()">draw all mappings</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearMappings()">Clear mappings</button>
 
-                <!--   <button onclick="KGcreator.saveMappings(true)">SaveClassmapping</button>-->
+                <button onclick="KGcreator.migrateOldMappings()">migrateOldMappings</button>
 
                 <!--  <button onclick="KGcreator.copyMappings()">Copy</button>-->
             </div>
@@ -91,16 +93,10 @@
         </div>
     </div>
 
-    <!-- <div id="KGcreator_resourceslinkingTab" style="display: flex; flex-direction: row">
-    <div id="KGcreator_resourceLinkGraphDiv" style="height: 800px;width:70%"></div>
-    <div id="KGcreator_resourceLinkRightPanel" style="height: 800px;width:30%">
-      <button onclick="R2Gmappings.drawOntologyModel()">draw model</button>
-
-
+    <div id="KGcreator_resourceslinkingTab" style="display: flex; flex-direction: row">
+        <div id="KGcreator_resourceLinkGraphDiv" style="height: 800px; width: 70%"></div>
+        <div id="KGcreator_resourceLinkRightPanel" style="height: 800px; width: 30%"></div>
     </div>
-
-
-  </div>-->
 </div>
 <div id="KGcreator_dialogDiv"></div>
 

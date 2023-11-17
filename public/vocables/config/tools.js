@@ -1,6 +1,7 @@
 const allTools = {
     lineage: { label: "Lineage", noSource: 0, controller: Lineage_whiteboard, toolDescriptionImg: null },
     KGcreator: { label: "KGcreator", noSource: 1, controller: KGcreator, toolDescriptionImg: null },
+    KGquery: { label: "KGquery", noSource: 0, controller: KGquery, toolDescriptionImg: null },
     Standardizer: { label: "Standardizer", multiSources: 0, controller: Standardizer, toolDescriptionImg: null },
     TSF_Dictionary: { label: "TSF_Dictionary", noSource: 1, controller: Lineage_dictionary, toolDescriptionImg: null },
     SPARQL: { label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null },
@@ -16,7 +17,7 @@ async function loadToolsAndPlugins() {
 
     // We import plugins and register them in the window
     for (const element of plugins) {
-        const plugin = await import(`../../plugins/${element.name}/${element.name}.js`);
+        const plugin = await import(`../../plugins/${element.name}/js/main.js`);
         window[element.name] = plugin.default;
     }
     // We mutate Config.tools with an object merging plugins and tools

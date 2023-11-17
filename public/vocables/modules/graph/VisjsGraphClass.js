@@ -835,7 +835,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         var payload = {
             dir: "graphs/",
             fileName: fileName,
-            data: JSON.stringify(data),
+            data: JSON.stringify(data, null, 2),
         };
 
         $.ajax({
@@ -844,12 +844,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             data: payload,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
-                /* $.ajax({
-            type: "POST",
-            url: Config.apiUrl + "/data",
-            data: payload,
-            dataType: "json",
-            success: function (_result, _textStatus, _jqXHR) {*/
                 $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
                 MainController.UI.message("graph saved");
             },
@@ -876,7 +870,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
         var payload = {
             dir: "graphs/",
-            name: fileName,
+            fileName: fileName,
         };
 
         $.ajax({
@@ -885,11 +879,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-                /*  $.ajax({
-            type: "GET",
-            url: `${Config.apiUrl}/data/file?dir=graphs&name=${fileName}`,
-            dataType: "json",
-            success: function (result, _textStatus, _jqXHR) {*/
                 var data = JSON.parse(result);
                 var positions = data.positions;
                 var options = data.context.options;

@@ -1,3 +1,5 @@
+import KGcreator_run from "../tools/KGcreator/KGcreator_run.js";
+
 const socket = io();
 // client-side
 socket.on("connect", () => {
@@ -10,7 +12,7 @@ socket.on("disconnect", () => {
 });
 
 socket.on("KGcreator", function (message) {
-    KGcreator.socketMessage(message);
+    KGcreator_run.socketMessage(message);
 });
 
 socket.connect("ws://localhost:8080/", "echo-protocol");

@@ -1,4 +1,6 @@
 const path = require("path");
+const fsSync = require("fs");
+const fs = require("fs/promises");
 
 module.exports = function () {
     let operations = {
@@ -13,13 +15,18 @@ module.exports = function () {
                 if (!filePath.startsWith("data/CSV/") && !filePath.startsWith("data\\CSV\\")) {
                     return res.status(403).json({ done: false, message: "forbidden path" });
                 }
-                file.mv(filePath);
+                if (!fsSync.existsSync(outputPath)) {
+                    await fs.mkdir(outputPath);
+                }
+                console.log(filePath)
+                await file.mv(filePath);
+                return res.status(201).json({ done: true });
             }
         } catch (err) {
             next(err);
             return res.status(500).json({ done: false });
         }
-        return res.status(201).json({ done: true });
+
     }
     POST.apiDoc = {
         summary: "Upload files",

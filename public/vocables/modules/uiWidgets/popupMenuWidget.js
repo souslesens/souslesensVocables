@@ -51,7 +51,7 @@ var PopupMenuWidget = (function () {
             return (self.blockHidePopup = false);
         } //one shot
         if (!popupDiv) {
-            popupDiv = "popupDiv";
+            popupDiv = "popupMenuWidgetDiv";
         }
         $("#" + popupDiv).css("display", "none");
     };

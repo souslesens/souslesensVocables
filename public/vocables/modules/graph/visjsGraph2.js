@@ -804,7 +804,7 @@ var visjsGraph = (function () {
         self.message("Loading Graph...");
         $.ajax({
             type: "GET",
-            url: `${Config.apiUrl}/data/file?dir=graphs&name=${fileName}`,
+            url: `${Config.apiUrl}/data/file?dir=graphs&fileName=${fileName}`,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 var data = JSON.parse(result);

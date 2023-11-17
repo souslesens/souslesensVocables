@@ -1,14 +1,15 @@
-const KGtripleBuilder = require("../../../../bin/KGtripleBuilder.");
+const KGbuilder_main = require("../../../../bin/KGbuilder/KGbuilder_main");
 const { processResponse } = require("../utils");
 
 module.exports = function () {
     let operations = {
         POST,
+        DELETE
     };
 
     function POST(req, res, next) {
         try {
-            KGtripleBuilder.createTriplesFromCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
+            KGbuilder_main.importTriplesFromCsvOrTable(req.body.source, req.body.datasource, req.body.table, JSON.parse(req.body.options), function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {
@@ -20,7 +21,7 @@ module.exports = function () {
         security: [{ restrictLoggedUser: [] }],
         summary: "Creates triples from csv file",
         description: "Takes a csv filename and directory and returns triples",
-        operationId: "createTriplesFromCsv",
+        operationId: "createTriplesFromCsvOrTable",
         parameters: [
             {
                 name: "body",
@@ -29,8 +30,9 @@ module.exports = function () {
                 schema: {
                     type: "object",
                     properties: {
-                        dir: { type: "string" },
-                        fileName: { type: "string" },
+                        source: { type: "string" },
+                        datasource: { type: "string" },
+                        table: { type: "string" },
                         options: { type: "string" },
                     },
                 },
@@ -47,6 +49,46 @@ module.exports = function () {
             },
         },
     };
+
+    DELETE.apiDoc = {
+        summary: "delete KGcreator triples",
+        security: [{ restrictLoggedUser: [] }],
+        operationId: "deleteKGcreatorTriples",
+
+        parameters: [
+            {
+                name: "source",
+                description: "source",
+                type: "string",
+                in: "query",
+                required: false,
+            },
+            {
+                name: "tables",
+                description: "tables",
+                type: "string",
+                in: "query",
+                required: false,
+            },
+        ],
+        responses: {
+            200: {
+                description: "Results",
+                schema: {
+                    type: "object",
+                },
+            },
+        },
+    };
+    async function DELETE(req, res, next) {
+        try {
+            KGbuilder_main.deleteKGcreatorTriples(req.body.source, JSON.parse( req.body.tables), function (err, result) {
+                processResponse(res, err, result);
+            });
+        } catch (e) {
+            next(e);
+        }
+    }
 
     return operations;
 };

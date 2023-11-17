@@ -7,10 +7,25 @@ import TreeController from "../shared/treeController.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import common from "../shared/common.js";
 import Export from "../shared/export.js";
+import PromptedSelectWidget from "./promptedSelectWidget.js";
 
 var SearchWidget = (function () {
     var self = {};
 
+    self.init = function () {
+        if (Config.ontologiesVocabularyModels[Lineage_sources.activeSource] && Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classesCount <= Config.ontologyModelMaxClasses) {
+            var classes = [];
+            for (var classId in Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classes) {
+                var classObj = Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classes[classId];
+                classes.push({
+                    id: classObj.id,
+                    label: classObj.label,
+                });
+            }
+            common.fillSelectOptions("GenericTools_searchAllClassSelect", classes, true, "label", "id");
+            $("#GenericTools_searchAllClassSelectPromptBtn").css("display", "none");
+        }
+    };
     /**
      *
      * show in jstree hierarchy of terms found in elastic search  from research UI or options if any
@@ -502,6 +517,10 @@ var SearchWidget = (function () {
 
     self.editThesaurusConceptInfos = function (sourceLabel, node, _callback) {
         NodeInfosWidget.showNodeInfos(sourceLabel, node, "graphDiv");
+    };
+
+    self.onSearchClass = function () {
+        PromptedSelectWidget.prompt("owl:Class", "GenericTools_searchAllClassSelect", self.activeSource);
     };
 
     return self;

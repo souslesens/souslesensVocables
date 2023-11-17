@@ -1,17 +1,18 @@
-import VisjsGraphClass from "../graph/VisjsGraphClass.js";
-import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import OntologyModels from "../shared/ontologyModels.js";
-import Sparql_common from "../sparqlProxies/sparql_common.js";
-import Lineage_relationIndividualsFilter from "../tools/lineage/lineage_relationIndividualsFilter.js";
-import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
-import PopupMenuWidget from "./popupMenuWidget.js";
-import Export from "../shared/export.js";
-import common from "../shared/common.js";
-import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
-import IndividualAggregateWidget from "./individualAggregateWidget.js";
-import IndividualValueFilterWidget from "./individualValuefilterWidget.js";
-import SimpleListSelectorWidget from "./simpleListSelectorWidget.js";
+import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
+import Lineage_sources from "../../tools/lineage/lineage_sources.js";
+import OntologyModels from "../../shared/ontologyModels.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import Lineage_relationIndividualsFilter from "../../tools/lineage/lineage_relationIndividualsFilter.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
+import Export from "../../shared/export.js";
+import common from "../../shared/common.js";
+import Lineage_whiteboard from "../../tools/lineage/lineage_whiteboard.js";
+import IndividualAggregateWidget from "../../uiWidgets/individualAggregateWidget.js";
+import IndividualValueFilterWidget from "../../uiWidgets/individualValuefilterWidget.js";
+import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 import TimeLineWidget from "./timeLineWidget.js";
+import VirtualKGquery from "../KGquery/virtualKGquery.js";
 
 var KGqueryWidget = (function () {
     var self = {};
@@ -29,10 +30,10 @@ var KGqueryWidget = (function () {
     self.showDialog = function () {
         $("#mainDialogDiv2").dialog("open");
         $("#mainDialogDiv2").dialog("option", "title", "Query");
-        if (!self.isLoaded) {
-            $("#mainDialogDiv2").load("snippets/KGqueryWidget.html", function () {
+        if (true || !self.isLoaded) {
+            $("#mainDialogDiv2").load("modules/tools/KGquery/html/KGqueryWidget.html", function () {
                 self.source = Lineage_sources.activeSource;
-                self.drawVisjsModel();
+                KGquery.drawVisjsModel();
                 self.isLoaded = true;
             });
         }
@@ -321,7 +322,7 @@ var KGqueryWidget = (function () {
         var varName = [self.getVarName(aClass, true)];
         var datatype = aClass.data.datatype;
 
-        IndividualValueFilterWidget.showDialog(null, varName, aClass.id, datatype, function (err, filter) {
+        IndividualValueFilterWidget.showDialog(null, self.currentSource, varName, aClass.id, datatype, function (err, filter) {
             if (err) {
                 return alert(err);
             }
@@ -365,6 +366,15 @@ return alert("missing target node in  path");
 
         $("#KGqueryWidget_graphDiv").css("display", "none");
         $("#KGqueryWidget_dataTableDiv").css("display", "block");
+
+        var isVirtualQuery = $("#KGqueryWidget_virtualQueryCBX").prop("checked");
+        if (isVirtualQuery) {
+            return VirtualKGquery.execPathQuery(self.querySets, self.source, "lifex_dalia_db", {}, function (err, result) {
+                if (err) {
+                    return alert(err);
+                }
+            });
+        }
 
         self.execPathQuery(options, function (err, result) {
             self.message("", true);
@@ -577,116 +587,178 @@ return alert("missing target node in  path");
         }
         var inferredModel = [];
         var dataTypes = {};
-
+        var existingNodes = {};
         var visjsData = { nodes: [], edges: [] };
+        var sources = Config.sources[source].imports;
+        if (!sources) {
+            sources = [];
+        }
+        sources.push(source);
 
-        async.series(
-            [
-                //get effective distinct ObjectProperties
-                function (callbackSeries) {
-                    OntologyModels.getInferredModel(source, {}, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-                        inferredModel = result;
+        async.eachSeries(
+            sources,
+            function (source, callbackEach) {
+                async.series(
+                    [
+                        //get effective distinct ObjectProperties
+                        function (callbackSeries) {
+                            OntologyModels.getInferredModel(source, {}, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+                                inferredModel = inferredModel.concat(result);
 
-                        if (inferredModel.length == 0) {
-                            callbackSeries("no inferred model for source " + source);
-                        } else {
-                            callbackSeries();
-                        }
-                    });
-                },
-
-                function (callbackSeries) {
-                    OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-
-                        result.forEach(function (item) {
-                            dataTypes[item.class.value] = item.datatype.value;
-                        });
-                        callbackSeries();
-                    });
-                },
-
-                function (callbackSeries) {
-                    var existingNodes = {};
-
-                    var source = self.source;
-                    inferredModel.forEach(function (item) {
-                        item.sClass = item.sClass || item.sparent;
-                        item.oClass = item.oClass || item.oparent;
-
-                        item.sClassLabel = item.sClassLabel || item.sparentLabel;
-                        item.oClassLabel = item.oClassLabel || item.oparentLabel;
-
-                        if (!existingNodes[item.sClass.value]) {
-                            existingNodes[item.sClass.value] = 1;
-                            self.visjsNodeOptions.color = common.getResourceColor("class", item.sClass.value, "palette");
-                            var label = item.sClassLabel ? item.sClassLabel.value : Sparql_common.getLabelFromURI(item.sClass.value);
-                            self.visjsNodeOptions.data = { datatype: dataTypes[item.sClass.value], source: source, id: item.sClass.value, label: label };
-
-                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, label, null, self.visjsNodeOptions));
-                        }
-                        if (!existingNodes[item.oClass.value]) {
-                            existingNodes[item.oClass.value] = 1;
-                            var label = item.oClassLabel ? item.oClassLabel.value : Sparql_common.getLabelFromURI(item.oClass.value);
-                            self.visjsNodeOptions.data = { datatype: dataTypes[item.oClass.value], id: item.oClass.value, label: label };
-                            self.visjsNodeOptions.color = common.getResourceColor("class", item.oClass.value, "palette");
-                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, self.visjsNodeOptions));
-                        }
-                        var edgeId = item.sClass.value + "_" + item.prop.value + "_" + item.oClass.value;
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1;
-
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.sClass.value,
-                                to: item.oClass.value,
-                                label: item.propLabel.value,
-                                font: { color: Lineage_whiteboard.defaultPredicateEdgeColor },
-                                data: {
-                                    propertyId: item.prop.value,
-                                    source: source,
-                                    propertyLabel: item.propLabel.value,
-                                },
-
-                                arrows: {
-                                    to: {
-                                        enabled: true,
-                                        type: "solid",
-                                        scaleFactor: 0.5,
-                                    },
-                                },
-                                // dashes: true,
-                                color: Lineage_whiteboard.defaultPredicateEdgeColor,
+                                callbackSeries();
                             });
+                        },
+
+                        function (callbackSeries) {
+                            OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+
+                                result.forEach(function (item) {
+                                    dataTypes[item.class.value] = item.datatype.value;
+                                });
+                                callbackSeries();
+                            });
+                        },
+                    ],
+                    function (err) {
+                        if (err) {
+                            return callbackEach(err);
                         }
-                    });
-                    return callbackSeries();
-                },
-            ],
+
+                        return callbackEach(null);
+                    }
+                );
+            },
             function (err) {
                 if (err) {
-                    return callback(err);
+                    return callback();
+                }
+                if (inferredModel.length == 0) {
+                    callback("no inferred model for source " + source);
                 }
 
+                var source = self.source;
+                inferredModel.forEach(function (item) {
+                    item.sClass = item.sClass || item.sparent;
+                    item.oClass = item.oClass || item.oparent;
+
+                    item.sClassLabel = item.sClassLabel || item.sparentLabel;
+                    item.oClassLabel = item.oClassLabel || item.oparentLabel;
+
+                    if (!existingNodes[item.sClass.value]) {
+                        existingNodes[item.sClass.value] = 1;
+                        self.visjsNodeOptions.color = common.getResourceColor("class", item.sClass.value, "palette");
+                        var label = item.sClassLabel ? item.sClassLabel.value : Sparql_common.getLabelFromURI(item.sClass.value);
+                        self.visjsNodeOptions.data = { datatype: dataTypes[item.sClass.value], source: source, id: item.sClass.value, label: label };
+
+                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, label, null, self.visjsNodeOptions));
+                    }
+                    if (!existingNodes[item.oClass.value]) {
+                        existingNodes[item.oClass.value] = 1;
+                        var label = item.oClassLabel ? item.oClassLabel.value : Sparql_common.getLabelFromURI(item.oClass.value);
+                        self.visjsNodeOptions.data = { datatype: dataTypes[item.oClass.value], id: item.oClass.value, label: label };
+                        self.visjsNodeOptions.color = common.getResourceColor("class", item.oClass.value, "palette");
+                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, self.visjsNodeOptions));
+                    }
+                    var edgeId = item.sClass.value + "_" + item.prop.value + "_" + item.oClass.value;
+                    if (!existingNodes[edgeId]) {
+                        existingNodes[edgeId] = 1;
+
+                        visjsData.edges.push({
+                            id: edgeId,
+                            from: item.sClass.value,
+                            to: item.oClass.value,
+                            label: item.propLabel.value,
+                            font: { color: Lineage_whiteboard.defaultPredicateEdgeColor },
+                            data: {
+                                propertyId: item.prop.value,
+                                source: source,
+                                propertyLabel: item.propLabel.value,
+                            },
+
+                            arrows: {
+                                to: {
+                                    enabled: true,
+                                    type: "solid",
+                                    scaleFactor: 0.5,
+                                },
+                            },
+                            // dashes: true,
+                            color: Lineage_whiteboard.defaultPredicateEdgeColor,
+                        });
+                    }
+                });
                 return callback(null, visjsData);
+                /*   self.getInterGraphModel(source, visjsData, function(err, result) {
+
+        return callback(null, result);
+      });*/
             }
         );
+    };
+
+    self.getInterGraphModel = function (source, visjsData, callback) {
+        var query =
+            " PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "      SELECT   distinct ?sparent ?prop ?oparent where {\n" +
+            "{graph  <http://data.total/resource/tsf/new_prodom/> {?s ?x ?y.  ?s rdf:type ?sparent.  ?s rdf:type owl:NamedIndividual.?sparent rdf:type ?sparentType filter (?sparentType!=owl:NamedIndividual)\n" +
+            "  }}\n" +
+            "{graph <http://data.total/resource/tsf/dalia-lifex/> {?o ?x2 ?y2 .  ?o rdf:type ?oparent.?o rdf:type owl:NamedIndividual.?oparent rdf:type ?oparentType filter (?oparentType!=owl:NamedIndividual) } }\n" +
+            "  ?s ?prop ?o. ?p rdf:type  owl:ObjectProperty filter( ?prop !=rdfs:subClassOf)\n" +
+            "}limit 100";
+
+        var url = Config.sources[source].sparql_server.url;
+
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, result) {
+            if (err) {
+                return callbackSeries(err);
+            }
+            result.results.bindings.forEach(function (item) {
+                var label = Sparql_common.getLabelFromURI(item.prop.value);
+                var x = visjsData.edges.push({
+                    id: item.prop.value,
+                    from: item.sparent.value,
+                    to: item.oparent.value,
+
+                    label: label,
+                    font: { color: Lineage_whiteboard.defaultPredicateEdgeColor },
+                    data: {
+                        propertyId: item.prop.value,
+                        source: source,
+                        propertyLabel: label,
+                    },
+
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            type: "solid",
+                            scaleFactor: 0.5,
+                        },
+                    },
+
+                    color: Lineage_whiteboard.defaultPredicateEdgeColor,
+                });
+            });
+            return callback(null, visjsData);
+        });
     };
 
     self.queryResultToVisjsGraph = function (result) {
         var classNodes = self.getAllQueryPathClasses();
 
         /*    var edgesModel={}
-        self.querySets.sets.forEach(function (querySet) {
-            querySet.elements.forEach(function (queryElement, queryElementIndex) {
-                edgesModel[queryElement.fromNode+"_"+queryElement.toNode.id]= {  }
-            })
-        })*/
+    self.querySets.sets.forEach(function (querySet) {
+        querySet.elements.forEach(function (queryElement, queryElementIndex) {
+            edgesModel[queryElement.fromNode+"_"+queryElement.toNode.id]= {  }
+        })
+    })*/
 
         var data = result.results.bindings;
         var visjsData = { nodes: [], edges: [] };
@@ -950,13 +1022,18 @@ return alert("missing target node in  path");
 
         self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", { nodes: [], edges: [] }, visjsOptions);
 
-        if (false) {
+        if (true) {
             self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
-                if (err) visjsData = { nodes: [], edges: [] };
-                else visjsData = result;
+                if (err) {
+                    visjsData = { nodes: [], edges: [] };
+                } else {
+                    visjsData = result;
+                }
                 //  return draw();
                 self.getInferredModelVisjsData(self.source, function (err, result2) {
-                    if (err) return alert(err);
+                    if (err) {
+                        return alert(err);
+                    }
                     var oldNodesMap = {};
                     var oldEdgesMap = {};
                     var newNodes = [];
@@ -994,19 +1071,19 @@ return alert("missing target node in  path");
                 draw();
             });
             /*  self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
-                if (false && result) {
-                    visjsData = result;
-                    return draw();
-                } else {
-                    self.getInferredModelVisjsData(self.source, function (err, result) {
-                        if (err) {
-                            return alert(err.responseText);
-                        }
-                        visjsData = result;
-                        draw();
-                    });
-                }
-            });*/
+          if (false && result) {
+              visjsData = result;
+              return draw();
+          } else {
+              self.getInferredModelVisjsData(self.source, function (err, result) {
+                  if (err) {
+                      return alert(err.responseText);
+                  }
+                  visjsData = result;
+                  draw();
+              });
+          }
+      });*/
         }
     };
 

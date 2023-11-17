@@ -1,5 +1,4 @@
 import common from "../shared/common.js";
-import KGcreator from "../tools/KGcreator.js";
 import PromptedSelectWidget from "./promptedSelectWidget.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import DateWidget from "./dateWidget.js";
@@ -8,6 +7,70 @@ import IndividualValueFilterWidget from "./individualValuefilterWidget.js";
 
 var PredicatesSelectorWidget = (function () {
     var self = {};
+
+    self.usualProperties = [
+        "rdf:type",
+        "rdfs:subClassOf",
+        "rdfs:label",
+        "rdfs:isDefinedBy",
+        "rdfs:comment",
+        "rdfs:member",
+        "slsv:next",
+        "owl:sameAs",
+        "owl:equivalentClass",
+
+        "",
+        "xsd:string",
+        "xsd:dateTime",
+        "xsd:boolean",
+        "xsd:integer",
+        "xsd:float",
+        "xsd:double",
+        "xsd:decimal",
+        "rdf:XMLLiteral",
+
+        "",
+
+        "skos:altLabel",
+        "skos:prefLabel",
+        "skos:definition",
+        "skos:example",
+        "skos:member",
+        "dcterms:format",
+        "",
+        "_function",
+        "_restriction",
+        // "_part14Predefined",
+        "",
+        "owl:onProperty",
+        "owl:someValuesFrom",
+        "owl:allValuesFrom",
+        "owl:hasValue",
+        "rdfs:subPropertyOf",
+        "owl:inverseOf",
+
+        "",
+    ];
+
+    self.usualObjectClasses = [
+        "owl:Thing",
+        "owl:Class",
+        "owl:NamedIndividual",
+        "owl:Thing",
+        "owl:ObjectProperty",
+        "owl:DatatypeProperty",
+        "owl:Restriction",
+        "rdf:Bag",
+        "rdf:List",
+        "skos:Concept",
+        "skos:Collection",
+        "slsv:TopConcept",
+        "_function",
+        // "_blankNode",
+        "_virtualColumn",
+        // "_rowIndex",
+        "",
+    ];
 
     self.predicatesIdsMap = {};
 
@@ -82,16 +145,16 @@ var PredicatesSelectorWidget = (function () {
         var properties = [];
 
         if (vocabulary == "usual") {
-            KGcreator.usualProperties.forEach(function (item) {
+            self.usualProperties.forEach(function (item) {
                 properties.push({ label: item, id: item });
             });
             properties.push({ label: "-------", id: "" });
             common.fillSelectOptions(selectId, properties, true, "label", "id");
-        } else if (Config.ontologiesVocabularyModels[vocabulary]) {
-            properties = OntologyModels.getPropertiesArray(vocabulary);
-            common.fillSelectOptions(selectId, properties, true, "label", "id");
         } else {
-            return PromptedSelectWidget.prompt("owl:ObjectProperty", "editPredicate_currentVocabPredicateSelect", vocabulary);
+            OntologyModels.registerSourcesModel([vocabulary], function (err, result) {
+                properties = OntologyModels.getPropertiesArray(vocabulary);
+                common.fillSelectOptions(selectId, properties, true, "label", "id");
+            });
         }
     };
 
@@ -99,7 +162,7 @@ var PredicatesSelectorWidget = (function () {
         $("#editPredicate_objectSelect").val("");
         $("#editPredicate_objectValue").val("");
         $("#editPredicate_propertyValue").val(value);
-        $("#editPredicate_vocabularySelect2").css("display", "block");
+        $("#editPredicate_vocabularySelect2").css("display", "inline");
         DateWidget.unsetDatePickerOnInput("editPredicate_objectValue");
         if (self.onSelectPropertyFn) {
             self.onSelectPropertyFn(value);
@@ -123,7 +186,7 @@ var PredicatesSelectorWidget = (function () {
             $("#editPredicate_vocabularySelect2").css("display", "none");
             common.fillSelectOptions("editPredicate_objectSelect", self.operators.String);
         } else {
-            $("#editPredicate_vocabularySelect2").css("display", "block");
+            $("#editPredicate_vocabularySelect2").css("display", "inline");
             $("#editPredicate_vocabularySelect2").val("usual");
             self.setCurrentVocabClassesSelect("usual", "editPredicate_objectSelect");
         }
@@ -147,7 +210,7 @@ var PredicatesSelectorWidget = (function () {
         var classes = [];
 
         if (vocabulary == "usual") {
-            KGcreator.usualObjectClasses.forEach(function (item) {
+            self.usualObjectClasses.forEach(function (item) {
                 classes.push({
                     id: item,
                     label: item,

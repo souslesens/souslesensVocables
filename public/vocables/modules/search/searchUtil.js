@@ -615,8 +615,9 @@ indexes.push(source.toLowerCase());
                             };
 
                             var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
-                            // filter+="?id <http://souslesens.org/KGcreator#mappingFile> 'dbo.V_task'"
+                            //  filter+="?id <http://souslesens.org/KGcreator#mappingFile> 'dbo.V_jobcard'"
                             Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100, skosPrefLabel: true }, processor, function (err, result) {
+                                if (err) console.log(err.responseText);
                                 return callbackSeries(err);
                             });
                         },

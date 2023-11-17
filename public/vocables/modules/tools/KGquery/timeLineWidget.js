@@ -1,6 +1,6 @@
-import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
-import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import NodeInfosWidget from "./nodeInfosWidget.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+import Lineage_sources from "../lineage/lineage_sources.js";
+import NodeInfosWidget from "../../uiWidgets/nodeInfosWidget.js";
 
 var TimeLineWidget = (function () {
     var self = {};

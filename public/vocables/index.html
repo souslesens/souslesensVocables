@@ -27,8 +27,8 @@
 
         <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 
-        <script src="js/socketIoProxy.js"></script>
-
+        <!-- <script src="js/socketIoProxy.js"></script>-->
+        <script type="module" src="modules/shared/socketIoProxy.js" charset="utf-8"></script>
         <script type="module" src="modules/shared/common.js" charset="utf-8"></script>
         <script type="module" src="modules/graph/visjsGraph2.js"></script>
         <script type="module" src="modules/graph/canvas2svg.js"></script>
@@ -40,6 +40,11 @@
         <script type="module" src="modules/shared/graphController.js"></script>
         <script type="module" src="modules/shared/treeController.js"></script>
         <script type="module" src="modules/shared/clipboard.js"></script>
+
+        <script type="module" src="modules/tools/KGquery/VirtualKGquery.js"></script>
+
+        <script type="module" src="modules/tools/KGquery/KGquery.js"></script>
+        <script type="module" src="modules/tools/KGquery/KGquery_graph.js"></script>
 
         <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
 
@@ -68,6 +73,7 @@
         <script type="module" src="modules/tools/lineage/lineage_relations.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_relationFilter.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_relationIndividualsFilter.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_rules.js"></script>
 
         <script type="module" src="modules/shared/ontologyModels.js"></script>
 
@@ -82,24 +88,26 @@
         <script type="module" src="modules/uiWidgets/containerSearchWidget.js"></script>
         <script type="module" src="modules/uiWidgets/dateWidget.js"></script>
         <script type="module" src="modules/uiWidgets/popupMenuWidget.js"></script>
-        <script type="module" src="modules/uiWidgets/KGqueryWidget.js"></script>
+
         <script type="module" src="modules/uiWidgets/individualValuefilterWidget.js"></script>
         <script type="module" src="modules/uiWidgets/individualAggregateWidget.js"></script>
         <script type="module" src="modules/uiWidgets/simpleListSelectorWidget.js"></script>
         <script type="module" src="modules/uiWidgets/FOL2graphWidget.js"></script>
-        <script type="module" src="modules/tools/lineage/lineage_rules.js"></script>
 
         <script type="module" src="modules/tools/owlEditor.js"></script>
-
         <script type="module" src="modules/tools/Standardizer.js"></script>
-
         <script type="module" src="modules/tools/SQLquery.js"></script>
-
         <script type="module" src="modules/tools/admin.js"></script>
         <script type="module" src="modules/tools/ConfigEditor.js"></script>
 
-        <script type="module" src="modules/tools/KGcreator.js"></script>
-        <script type="module" src="modules/tools/KGcreatorGraph.js"></script>
+        <script type="module" src="modules/tools/KGcreator/KGcreator.js"></script>
+        <script type="module" src="modules/tools/KGcreator/KGcreator_mappings.js"></script>
+        <script type="module" src="modules/tools/KGcreator/KGcreator_graph.js"></script>
+        <script type="module" src="modules/tools/KGcreator/KGcreator_run.js"></script>
+        <script type="module" src="modules/tools/KGcreator/KGcreator_joinTables.js"></script>
+
+        <!--   <script type="module" src="modules/tools/KGcreatorGraph.js"></script>-->
+
         <script type="module" src="modules/tools/KGpropertyFilter.js"></script>
         <script type="module" src="modules/tools/composer.js"></script>
         <script type="module" src="modules/tools/sparqlQueryUI.js"></script>
@@ -109,8 +117,6 @@
         <script src="config/app_config.js"></script>
 
         <script type="module" src="modules/shared/authentification.js"></script>
-
-        <script type="module" src="modules/shared/R2Gmappings.js"></script>
 
         <script type="module">
             import { allTools, loadToolsAndPlugins } from "./config/tools.js";
@@ -278,211 +284,208 @@
         </script>
         <style>
             body {
-                font-size: 14px;
-                font-family: Arial;
-                overflow: hidden;
+              font-size: 14px;
+              font-family: Arial;
+              overflow: hidden;
             }
 
             .jstreeContainer {
-                width: 100%;
+              width: 100%;
             / / height: 100 %;
-                min-height: 500px;
-                overflow: auto;
+              min-height: 500px;
+              overflow: auto;
             }
 
             .jstreeXX {
-                margin: 2px;
-                max-height: 550px;
+              margin: 2px;
+              max-height: 550px;
 
-                overflow: auto;
-                min-width: 300px;
+              overflow: auto;
+              min-width: 300px;
             }
 
             .jstree-icon {
-                width: 15px !important;
+              width: 15px !important;
             }
 
             .jstree-ocl {
-                width: 24px !important;
+              width: 24px !important;
             }
 
             #actionDiv {
-                width: 385px;
-                max-height: 550px;
+              width: 385px;
+              max-height: 550px;
             }
 
             #accordion {
-                margin-left: 5px;
+              margin-left: 5px;
             }
 
             .ui-accordion .ui-accordion-content {
-                overflow: hidden !important;
-                min-height: 600px !important;
+              overflow: hidden !important;
+              min-height: 600px !important;
             }
 
             .ui-accordion-content-active {
-                margin-left: -5px !important;
-                overflow: hidden;
+              margin-left: -5px !important;
+              overflow: hidden;
             }
 
             #graphDiv {
-                margin: 3px;
-                border: 2px solid #ddd;
+              margin: 3px;
+              border: 2px solid #ddd;
             }
 
             .popupMenuWidgetDiv {
-                z-index: 20;
-                position: absolute;
-                flex-direction: column;
-                padding: 5px;
-                border-radius: 5px;
-                text-align: center;
-                display: flex;
-                background-color: rgb(221, 221, 221);
+              z-index: 20;
+              position: absolute;
+              flex-direction: column;
+              padding: 5px;
+              border-radius: 5px;
+              text-align: center;
+              display: flex;
+              background-color: rgb(221, 221, 221);
 
             }
 
             .jstree-default {
-                min-height: 300px !important;
+              min-height: 300px !important;
             / / height: 600 px;
             / / overflow: auto;
             }
 
             .jstree-node {
-                font-weight: bold;
+              font-weight: bold;
             }
 
             #currentSourceTreeDiv {
-                overflow: auto;
-                height: 600px;
+              overflow: auto;
+              height: 600px;
             }
 
             .jstreeParent {
-                width: 350px;
-                height: 600px;
-                overflow: auto;
-                border: #6e2500 1px groove;
+              width: 350px;
+              height: 600px;
+              overflow: auto;
+              border: #6e2500 1px groove;
             }
 
 
-
-
             .messageDiv {
-                font-weight: normal;
-                font-size: 12px;
+              font-weight: normal;
+              font-size: 12px;
             / / color: #6e2500;
-                color: white;
-                background-color: #00a37f;
-                padding: 2px;
-                margin: 2px;
-                height: 30px;
-                overflow: auto;
+              color: white;
+              background-color: #00a37f;
+              padding: 2px;
+              margin: 2px;
+              height: 30px;
+              overflow: auto;
 
             / / max-width: 1200 px;
             }
 
             .toolDescriptionImg {
-                padding: 5px;
-                margin: 50px;
-                width: 400px;
+              padding: 5px;
+              margin: 50px;
+              width: 400px;
             }
 
             .clipboardSelected {
-                border: #3b13ef 1px solid !important;
-                animation: blinker 1s linear infinite;
+              border: #3b13ef 1px solid !important;
+              animation: blinker 1s linear infinite;
             }
 
             @keyframes blinker {
-                50% {
-                    opacity: 0;
-                }
+              50% {
+                opacity: 0;
+              }
             }
 
             .searched_concept {
-                color: blue;
+              color: blue;
             }
 
             .searched_conceptSource {
-                color: blueviolet;
+              color: blueviolet;
             }
 
             .popupMenuItem {
-                border: #3b13ef 1px solid;
-                border-radius: 3px;
-                padding: 1px;
-                margin: 1px;
-                margin: 1px;
-                background-color: #ddd;
+              border: #3b13ef 1px solid;
+              border-radius: 3px;
+              padding: 1px;
+              margin: 1px;
+              margin: 1px;
+              background-color: #ddd;
             }
 
             .mainDialogDiv {
-                background-color: #ddd;
+              background-color: #ddd;
             }
+
             .mainDialogDiv2 {
-                background-color: #ddd;
+              background-color: #ddd;
             }
 
             .td_title {
-                padding: 3px;
-                font-weight: bold;
+              padding: 3px;
+              font-weight: bold;
             }
 
             .td_value {
-                padding: 3px;
+              padding: 3px;
             }
 
             .jstree-contextmenu {
-                z-index: 300 !important;
+              z-index: 300 !important;
             / / margin-left: - 100 px !important;
             }
 
             .ui-dialog {
-                border-width: 5px !important;
-                border-style: solid !important;
-                border-color: #b8a587 !important;
+              border-width: 5px !important;
+              border-style: solid !important;
+              border-color: #b8a587 !important;
             }
 
             .ui-widget-content {
-                padding: 5px !important;
+              padding: 5px !important;
             }
 
             .max-height {
-                height: 750px !important;
+              height: 750px !important;
             }
 
             .ui-dialog-title {
 
-                color: #337ab7;
+              color: #337ab7;
             }
 
 
             element.style {
-                padding: 3px !important;
-                border: #e1d9bf solid 1px !important;
+              padding: 3px !important;
+              border: #e1d9bf solid 1px !important;
             }
 
             table.dataTable tbody th, table.dataTable tbody td {
-                padding: 3px !important;
-                border: #e1d9bf solid 1px !important;
+              padding: 3px !important;
+              border: #e1d9bf solid 1px !important;
 
             }
 
             .legend_colorDiv {
-                width: 30px;
-                height: 20px;
-                border-radius: 3px;
-                margin: 3px;
+              width: 30px;
+              height: 20px;
+              border-radius: 3px;
+              margin: 3px;
             }
-                .legend_itemDiv{
-                    display: flex;flex-direction: row;
-                    border-width: 1px ;
-                    border-style: solid ;
-                    border-color: #b8a587
-                }
-                .ui-dialog-titlebar-close { background-image: url(https://cdnjs.cloudflare.com/ajax/libs/aui/6.0.1/aui/css/icons/aui-icon-close.png); }
-                .ui-dialog-titlebar-close.btn.btn-sm.my-1.py-0.btn-outline-primary{
-                    top:10%;
-                }
+
+            .legend_itemDiv {
+              display: flex;
+              flex-direction: row;
+              border-width: 1px;
+              border-style: solid;
+              border-color: #b8a587
+            }
         </style>
     </head>
     <body>

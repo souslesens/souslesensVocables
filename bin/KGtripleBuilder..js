@@ -544,7 +544,7 @@ var KGtripleBuilder = {
                                                                     //pass
                                                                 } else {
                                                                     /* if(!item.isString)
-       objectStr=objectStr.replace(/[\-_]/g,"")*/
+objectStr=objectStr.replace(/[\-_]/g,"")*/
                                                                     objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                                                 }
                                                             }
@@ -717,18 +717,18 @@ propertyStr = line[item.p];
                                                         }
 
                                                         /*  if (options.deleteTriples) {
-      KGtripleBuilder.deleteTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
-          if (err) {
-              errors += err + " slice " + sliceIndex + "\n";
-              return callbackEach(err);
-          }
-          sliceIndex += 1;
+KGtripleBuilder.deleteTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
+if (err) {
+errors += err + " slice " + sliceIndex + "\n";
+return callbackEach(err);
+}
+sliceIndex += 1;
 
-          totalTriples += result;
+totalTriples += result;
 
-          callbackEach();
-      });
-  } else {*/
+callbackEach();
+});
+} else {*/
 
                                                         if (false) {
                                                             //check unicity of each triples (takes time)
@@ -996,10 +996,10 @@ propertyStr = line[item.p];
         }
         var metaDataTriples = [];
         /*   metaDataTriples.push({
-       s: subjectUri,
-       p: "<http://purl.org/dc/terms/creator>",
-       o: "'" + creator + "'",
-   });*/
+   s: subjectUri,
+   p: "<http://purl.org/dc/terms/creator>",
+   o: "'" + creator + "'",
+});*/
 
         metaDataTriples.push({
             s: subjectUri,

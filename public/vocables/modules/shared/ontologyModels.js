@@ -80,7 +80,7 @@ var OntologyModels = (function () {
                                 Sparql_common.getVariableLangLabel("prop", true, true) +
                                 "optional{?prop owl:inverseOf ?inverseProp}" +
                                 "optional{?prop rdfs:subPropertyOf ?superProperty}" +
-                                " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty } }";
+                                " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty owl:AnnotationProperty} }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -208,9 +208,7 @@ var OntologyModels = (function () {
                                     var domainLabel = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
                                     var rangeLabel = item.valueLabel ? item.valueLabel.value : Sparql_common.getLabelFromURI(item.value.value);
                                     var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
-                                    // A property used on a restriction not implies that the property need to be added on this source, this will causes
-                                    // the accaparation of a property by another source in most cases
-                                    /*
+
                                     if (!uniqueProperties[item.prop.value]) {
                                         uniqueProperties[item.prop.value] = 1;
                                         Config.ontologiesVocabularyModels[source].properties[item.prop.value] = {
@@ -218,8 +216,6 @@ var OntologyModels = (function () {
                                             label: propLabel,
                                         };
                                     }
-                                    */
-
                                     if (!Config.ontologiesVocabularyModels[source].restrictions[item.prop.value]) {
                                         Config.ontologiesVocabularyModels[source].restrictions[item.prop.value] = [];
                                     }
@@ -243,8 +239,7 @@ var OntologyModels = (function () {
 
                         //set inherited Constraints
                         function (callbackSeries) {
-                            //!Config.sources[source] || !Config.topLevelOntologies[source]
-                            if (!Config.sources[source]) {
+                            if (!Config.sources[source] || !Config.topLevelOntologies[source]) {
                                 return callbackSeries();
                             }
                             var constraints = Config.ontologiesVocabularyModels[source].constraints;
@@ -286,11 +281,11 @@ var OntologyModels = (function () {
                                         var x = 3;
                                     }
                                     var inheritedConstaint = propsMap[propId];
-
                                     if (inheritedConstaint) {
                                         if (!Config.ontologiesVocabularyModels[source].constraints[propId]) {
                                             Config.ontologiesVocabularyModels[source].constraints[propId] = { domain: "", range: "" };
                                         }
+
                                         // inheritance but no overload of constraint
                                         if (inheritedConstaint.domain && !Config.ontologiesVocabularyModels[source].constraints[propId].domain) {
                                             Config.ontologiesVocabularyModels[source].constraints[propId].domain = inheritedConstaint.domain;
@@ -305,12 +300,6 @@ var OntologyModels = (function () {
                                         }
                                     }
                                 }
-                                for (var propNum in props) {
-                                    if (!Config.ontologiesVocabularyModels[source].constraints[props[propNum]]) {
-                                        Config.ontologiesVocabularyModels[source].constraints[props[propNum]] = { domain: "", range: "" };
-                                    }
-                                }
-
                                 return callbackSeries();
                             });
                         },
@@ -501,49 +490,28 @@ return callbackSeries();
         if (!options) {
             options = {};
         }
-
-        if (!options.remove) {
-            options.remove = false;
-        }
-
         for (var entryType in data) {
             for (var id in data[entryType]) {
                 if (entryType == "restrictions") {
-                    if (options.remove) {
-                        delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
-                    } else {
-                        data[entryType][id].forEach((_restriction) => {
-                            Config.ontologiesVocabularyModels[source][entryType][id].push(_restriction);
-                        });
-                    }
+                    Config.ontologiesVocabularyModels[source][entryType][id].push(data[entryType][id]);
                 } else {
-                    if (options.remove) {
-                        delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
-                    } else {
-                        Config.ontologiesVocabularyModels[source][entryType][id] = data[entryType][id];
-                    }
+                    Config.ontologiesVocabularyModels[source][entryType][id] = data[entryType][id];
                 }
             }
         }
         if (!options.noUpdateCache) {
-            self.updateModelOnServerCache(
-                source,
-                data,
-                function (err, result) {
-                    callback(err);
-                },
-                options
-            );
+            self.updateModelOnServerCache(source, data, function (err, result) {
+                callback(err);
+            });
         } else {
             callback(done);
         }
     };
 
-    self.updateModelOnServerCache = function (source, data, callback, options) {
+    self.updateModelOnServerCache = function (source, data, callback) {
         var payload = {
             source: source,
             data: data,
-            options: options,
         };
 
         $.ajax({
@@ -746,50 +714,17 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
 
                 //add existing  restrictions to valid constraints
                 function (callbackSeries) {
-                    /*
+                    // do not use by now
+                    return callbackSeries();
                     allSources.forEach(function (_source) {
                         var sourceRestrictions = Config.ontologiesVocabularyModels[_source].restrictions;
                         if (!sourceRestrictions) {
                             return;
                         }
                         for (var propId in sourceRestrictions) {
-                            var propRestrictions = sourceRestrictions[propId];
-                            if (propRestrictions.length > 0) {
-                                var validrestrictionCounter = 0;
-                                propRestrictions.forEach((_restrction) => {
-                                    if (startNodeAncestorIds.includes(_restrction.domain) || _restrction.domain == startNodeId) {
-                                        if (endNodeAncestorIds.includes(_restrction.range) || _restrction.range == endNodeId) {
-                                            validrestrictionCounter += 1;
-                                        }
-                                    }
-                                });
-                                if (validrestrictionCounter == propRestrictions.length) {
-                                    sourceRestrictions[propId].source = _source;
-                                    validConstraints["both"][propId] = sourceRestrictions[propId];
-                                }
-                            }
+                            validConstraints["both"][propId] = sourceRestrictions[propId];
                         }
                     });
-                    */
-                    // This code section is for restrictions but we have to think how restrictions and constraints need to interact between each others
-                    //For now, we desactivate the function because restrictions are just overcommiting the constraints
-                    callbackSeries();
-                },
-                // Get parents properties
-                function (callbackSeries) {
-                    for (var group in validConstraints) {
-                        for (var propId in validConstraints[group]) {
-                            var propConstraints = validConstraints[group][propId];
-                            allSources.forEach((_source) => {
-                                var sourceOntologyModelProps = Config.ontologiesVocabularyModels[_source].properties;
-                                if (sourceOntologyModelProps[propId]) {
-                                    if (sourceOntologyModelProps[propId].superProp) {
-                                        validConstraints[group][propId]["parent"] = sourceOntologyModelProps[propId].superProp;
-                                    }
-                                }
-                            });
-                        }
-                    }
                     callbackSeries();
                 },
             ],

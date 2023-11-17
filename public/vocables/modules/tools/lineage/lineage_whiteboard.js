@@ -1,9 +1,8 @@
 import common from "../../shared/common.js";
-import KGcreator from "../KGcreator.js";
+import KGcreator from "../KGcreator/KGcreator.js";
 import Lineage_linkedData_mappings from "./linkedData/lineage_linkedData_mappings.js";
 import Lineage_graphTraversal from "./lineage_graphTraversal.js";
 import Lineage_selection from "./lineage_selection.js";
-import KGquery from "./assetQuery.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
@@ -18,6 +17,7 @@ import Clipboard from "../../shared/clipboard.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
+import KGquery_graph from "../KGquery/KGquery_graph.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -136,16 +136,6 @@ var Lineage_whiteboard = (function () {
                             Lineage_properties.init();
                         } else if (divId == "#LineageRelationsTab") {
                             self.currentOwlType = "Relations";
-                        } else if (divId == "#Lineage_mappingsTab") {
-                            $("#Lineage_mappingsTab").load("snippets/lineage/linkedData/lineage_linkedData_mappings.html", function () {
-                                $("#Lineage_tablesTreeDiv").load("snippets/KGcreator/leftPanel.html", function () {
-                                    Lineage_linkedData_mappings.init();
-                                    KGcreator.loadCsvDirs({
-                                        contextualMenuFn: Lineage_linkedData_mappings.getTablesTreeContextMenu,
-                                        selectTreeNodeFn: Lineage_linkedData_mappings.onCsvtreeNodeClicked,
-                                    });
-                                });
-                            });
                         }
                     },
                 });
@@ -317,7 +307,7 @@ var Lineage_whiteboard = (function () {
      *
      * @param source
      */
-    self.drawModel = function (source, graphDiv, options) {
+    self.drawModel = function (source, graphDiv, options, callback) {
         if (!options) {
             options = {};
         }
@@ -370,6 +360,7 @@ var Lineage_whiteboard = (function () {
                 },
             ],
             function (err) {
+                if (callback) return callback(err);
                 if (err) {
                     return alert(err);
                 }
@@ -660,7 +651,9 @@ var Lineage_whiteboard = (function () {
             options.visjsOptions.edges = _options.edges;
         }
 
-        if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+        if (_options.visjsOptions && _options.visjsOptions.manipulation) {
+            options.visjsOptions.manipulation = _options.visjsOptions.manipulation;
+        } else if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.visjsOptions.manipulation = {
                 enabled: true,
@@ -671,8 +664,8 @@ var Lineage_whiteboard = (function () {
                 editEdge: false,
 
                 addEdge: function (edgeData, callback) {
-                    var sourceNode = self.lineageVisjsGraph.data.nodes.get(edgeData.from);
-                    var targetNode = self.lineageVisjsGraph.data.nodes.get(edgeData.to);
+                    var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from);
+                    var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
 
                     if (sourceNode.data && sourceNode.data.type != "container" && targetNode.data && targetNode.data.type == "container") {
                         return Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);
@@ -2844,7 +2837,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         if (!source) {
             source = Lineage_sources.activeSource;
         }
-        KGqueryWidget.getInferredModelVisjsData(source, function (err, visjsData) {
+        KGquery_graph.getInferredModelVisjsData(source, function (err, visjsData) {
             if (err) {
                 return alert(err.responseText);
             }

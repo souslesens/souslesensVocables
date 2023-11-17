@@ -15,7 +15,7 @@ var KGcreator = (function () {
     self.currentSlsvSource = {};
     self.allTriplesMappings = {};
     var mappingsDir = "mappings";
-    // mappingsDir=  "CSV"
+
 
     self.uploadFormData = {
         displayForm: "", // can be database, file or ""

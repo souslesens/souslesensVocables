@@ -17,6 +17,9 @@ var KGcreator = (function () {
     var mappingsDir = "mappings";
     // mappingsDir=  "CSV"
 
+    self.umountKGUploadApp = null;
+    self.createApp = null;
+
     self.uploadFormData = {
         displayForm: "", // can be database, file or ""
         currentSource: "",
@@ -26,17 +29,23 @@ var KGcreator = (function () {
 
     self.displayUploadApp = function (displayForm) {
         self.uploadFormData.displayForm = displayForm;
-   //   return   $.getScript("/kg_upload_app.js");
-        if(!displayForm)
-          return;
-        var html=" <div id=\"mount-kg-upload-app-here\"></div>";
-        $("#smallDialogDiv").html(html)
-        $("#smallDialogDiv").dialog({"open": function( event, ui ) {
+        //   return   $.getScript("/kg_upload_app.js");
+        if (!displayForm) return;
+        var html = ' <div id="mount-kg-upload-app-here"></div>';
+        $("#smallDialogDiv").html(html);
+        $("#smallDialogDiv").dialog({
+            open: function (event, ui) {
+                if (self.createApp === null) {
+                    throw new Error("React app is not ready");
+                }
                 self.uploadFormData.currentSource = self.currentSlsvSource;
-               import ("/assets/kg_upload_app.js");
-        }})
-        $("#smallDialogDiv").dialog("open")
-
+                self.umountKGUploadApp = self.createApp(self.uploadFormData);
+            },
+            beforeClose: function () {
+                self.umountKGUploadApp();
+            },
+        });
+        $("#smallDialogDiv").dialog("open");
     };
 
     self.onLoaded = function () {
@@ -786,7 +795,7 @@ var KGcreator = (function () {
     self.createDataBaseSourceMappings = function () {
         // hide uploadApp
         self.displayUploadApp("");
-        $("#smallDialogDiv").dialog("close")
+        $("#smallDialogDiv").dialog("close");
 
         var datasourceName = self.uploadFormData.selectedDatabase;
         if (!datasourceName) {
@@ -809,7 +818,7 @@ var KGcreator = (function () {
     self.createCsvSourceMappings = function () {
         // hide uploadApp
         self.displayUploadApp("");
-        $("#smallDialogDiv").dialog("close")
+        $("#smallDialogDiv").dialog("close");
         var datasourceName = self.uploadFormData.selectedFiles[0];
         if (!datasourceName) {
             return;
@@ -909,3 +918,5 @@ var KGcreator = (function () {
 
 export default KGcreator;
 window.KGcreator = KGcreator;
+// imports React app
+import("/assets/kg_upload_app.js");

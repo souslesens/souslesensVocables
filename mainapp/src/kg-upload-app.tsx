@@ -11,22 +11,25 @@ import Alert from "react-bootstrap/Alert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile, faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 
+interface UploadFormData {
+    displayForm: "database" | "file" | "";
+    currentSource: string;
+    selectedDatabase: string;
+    selectedFiles: string[];
+}
+
 declare global {
     interface Window {
         KGcreator: {
             createDataBaseSourceMappings: () => void;
             createCsvSourceMappings: () => void;
-            uploadFormData: {
-                displayForm: "database" | "file" | "";
-                currentSource: string;
-                selectedDatabase: string;
-                selectedFiles: string[];
-            };
+            uploadFormData: UploadFormData;
+            createApp: (uploadFormData: UploadFormData) => void;
         };
     }
 }
 
-export default function App({ uploadFormData }: { uploadFormData: any }) {
+export default function App(uploadFormData: UploadFormData) {
     const [databases, setDatabases] = useState<string[]>([]);
     const [files, setFiles] = useState<File[]>([]);
     const [uploadStatus, setUploadStatus] = useState("");
@@ -57,7 +60,7 @@ export default function App({ uploadFormData }: { uploadFormData: any }) {
         if (response.status === 201) {
             setUploadStatus("success");
             // reload
-            window.KGcreator.uploadFormData.selectedFiles = files.map((file) => file.name)
+            window.KGcreator.uploadFormData.selectedFiles = files.map((file) => file.name);
             window.KGcreator.createCsvSourceMappings();
         } else {
             setUploadStatus("error");
@@ -132,6 +135,9 @@ export default function App({ uploadFormData }: { uploadFormData: any }) {
     return <></>;
 }
 
-const container = document.getElementById("mount-kg-upload-app-here");
-const root = createRoot(container!);
-root.render(<App uploadFormData={window.KGcreator.uploadFormData} />);
+window.KGcreator.createApp = function createApp(uploadFormData: UploadFormData) {
+    const container = document.getElementById("mount-kg-upload-app-here");
+    const root = createRoot(container!);
+    root.render(<App {...uploadFormData} />);
+    return root.unmount.bind(root);
+};

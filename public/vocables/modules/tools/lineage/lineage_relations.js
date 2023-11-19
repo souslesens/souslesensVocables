@@ -5,7 +5,6 @@ import Lineage_relationFilter from "./lineage_relationFilter.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Export from "../../shared/export.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
-import Sparql_CRUD from "../../sparqlProxies/sparql_CRUD.js";
 import MainController from "../../shared/mainController.js";
 import Lineage_sources from "./lineage_sources.js";
 import OntologyModels from "../../shared/ontologyModels.js";
@@ -734,7 +733,7 @@ var Lineage_relations = (function () {
         }
     };
     self.loadUserQueries = function () {
-        Sparql_CRUD.list("STORED_QUERIES", null, null, "lineageRelations_savedQueriesSelect");
+        //   Sparql_CRUD.list("STORED_QUERIES", null, null, "lineageRelations_savedQueriesSelect");
     };
     self.onSelectSavedQuery = function (id) {
         $("#lineageRelations_history_deleteBtn").css("display", "inline");

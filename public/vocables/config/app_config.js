@@ -62,13 +62,23 @@ var Config = (function () {
     self.formalOntologySourceLabel = "ISO_15926-part-14_PCA";
 
     self.CRUDsources = {
-        STORED_QUERIES: {
-            graphUri: "http://souslesens.org/resource/stored-queries/",
+        STORED_LINEAGE_QUERIES: {
+            graphUri: "http://souslesens.org/resource/stored-lineage-queries/",
             sparql_server: { url: "_default" },
-            type: "slsv:StoredQuery",
+            type: "slsv:StoredLineageQuery",
         },
-        STORED_GRAPHS: {
-            graphUri: "http://souslesens.org/resource/stored-graphs/",
+        STORED_KGQUERY_QUERIES: {
+            graphUri: "http://souslesens.org/resource/stored-kgqueries-queries/",
+            sparql_server: { url: "_default" },
+            type: "slsv:StoredKGqueryQuery",
+        },
+        STORED_TIMELINE_QUERIES: {
+            graphUri: "http://souslesens.org/resource/stored-timeline-queries/",
+            sparql_server: { url: "_default" },
+            type: "slsv:StoredTimelineQuery",
+        },
+        STORED_VISJS_GRAPHS: {
+            graphUri: "http://souslesens.org/resource/stored-visjs-graphs/",
             sparql_server: { url: "_default" },
             type: "slsv:StoredGraph",
         },

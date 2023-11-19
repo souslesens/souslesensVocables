@@ -45,6 +45,7 @@
 
         <script type="module" src="modules/tools/KGquery/KGquery.js"></script>
         <script type="module" src="modules/tools/KGquery/KGquery_graph.js"></script>
+        <script type="module" src="modules/tools/KGquery/KGquery_myQueries.js"></script>
 
         <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
 
@@ -117,6 +118,7 @@
         <script src="config/app_config.js"></script>
 
         <script type="module" src="modules/shared/authentification.js"></script>
+        <script type="module" src="modules/tools/myDashboard.js"></script>
 
         <script type="module">
             import { allTools, loadToolsAndPlugins } from "./config/tools.js";
@@ -136,8 +138,8 @@
 
         <script type="module" src="modules/sparqlProxies/sparql_common.js"></script>
         <!-- <script type="module" src="modules/sparqlProxies/sparql_schema.js"></script>-->
-        <script type="module" src="modules/sparqlProxies/sparql_CRUD.js"></script>
 
+        <script type="module" src="modules/uiComponents/savedQueriesComponent.js"></script>
         <script type="module" src="modules/search/searchUtil.js"></script>
         <!--  <script type="module" src="modules/tools/ontologyUtil.js"></script>-->
 
@@ -279,6 +281,7 @@
                     });
 
                     MainController.UI.setCredits();
+                    // MyDashboard.init()
                 });
             });
         </script>
@@ -506,7 +509,6 @@
                     <button onclick="MainController.showPart14AxiomsImage()" type="button" class="btn btn-sm py-0 btn-outline-primary">Axioms</button>
                     <!--   <button onclick="OwlEditor.loadUI()" type="button" class="btn btn-sm py-0 btn-outline-primary">OntoEdit</button>-->
                     <!--  <button onclick="MainController.UI.test()" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>-->
-
                     <button onclick="MainController.UI.copyCurrentQuery()" type="button" class="btn btn-sm py-0 btn-outline-primary">cpQy</button>
 
                     <!--   <a class="btn btn-sm py-0 btn-outline-primary" href="/api/v1/api-documentation" role="button">API</a>-->

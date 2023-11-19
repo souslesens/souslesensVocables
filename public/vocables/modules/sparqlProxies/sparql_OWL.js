@@ -601,23 +601,23 @@ var Sparql_OWL = (function () {
             modifier = "+";
         }
         var query =
-          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-          "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-          //  "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
-          "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
-          fromStr +
-          " WHERE {" +
-          " ?class rdf:type ?type." +
-          " ?class rdfs:subClassOf" +
-          modifier +
-          "|rdf:type" +
-          modifier +
-          " ?superClass." +
-          " ?superClass ^rdfs:subClassOf ?subClass." +
-          " ?subClass rdf:type ?subClassType. ?superClass rdf:type ?superClassType" +
-          filterStr +
-          " filter (?superClassType !=owl:Restriction)";
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            //  "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
+            "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
+            fromStr +
+            " WHERE {" +
+            " ?class rdf:type ?type." +
+            " ?class rdfs:subClassOf" +
+            modifier +
+            "|rdf:type" +
+            modifier +
+            " ?superClass." +
+            " ?superClass ^rdfs:subClassOf ?subClass." +
+            " ?subClass rdf:type ?subClassType. ?superClass rdf:type ?superClassType" +
+            filterStr +
+            " filter (?superClassType !=owl:Restriction)";
 
         if (options.filter) {
             query += options.filter;
@@ -646,7 +646,6 @@ var Sparql_OWL = (function () {
 
             var map = {};
             result.results.bindings.forEach(function (item) {
-
                 map[item.subClass.value] = item;
             });
             var hierarchyArray = [];
@@ -659,7 +658,6 @@ var Sparql_OWL = (function () {
                     }
                 }
             }
-
 
             var hierarchies = {};
             classIds.forEach(function (id) {
@@ -702,8 +700,8 @@ var Sparql_OWL = (function () {
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-          "SELECT distinct ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel " +
-         // "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
+            "SELECT distinct ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel " +
+            // "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
             fromStr +
             " WHERE {" +
             " ?class rdf:type ?type." +
@@ -742,16 +740,15 @@ var Sparql_OWL = (function () {
 
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass"], { source: sourceLabel });
 
-
             var hierarchies = {};
             classIds.forEach(function (id) {
-                hierarchies[id]=[]
+                hierarchies[id] = [];
                 result.results.bindings.forEach(function (item) {
-                    if(item.class.value==id){
-                        hierarchies[id].push(item)
+                    if (item.class.value == id) {
+                        hierarchies[id].push(item);
                     }
                 });
-                })
+            });
 
             return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
         });
@@ -2386,7 +2383,7 @@ var Sparql_OWL = (function () {
     };
 
     return self;
-})()
+})();
 
 export default Sparql_OWL;
 

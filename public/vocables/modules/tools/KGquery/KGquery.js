@@ -32,24 +32,22 @@ var KGquery = (function () {
     self.onLoaded = function () {
         $("#actionDivContolPanelDiv").load("modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
             KGquery_graph.init();
-        })
+        });
         $("#graphDiv").load("modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
             self.currentSource = Lineage_sources.activeSource;
             self.showSourcesDialog();
         });
     };
 
-
-        self.init=function(){
-            KGquery_graph.drawVisjsModel("saved");
-            SavedQueriesComponent.showDialog("STORED_KGQUERY_QUERIES","KGquery_myQueriesDiv",self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load,);
-        }
-
+    self.init = function () {
+        KGquery_graph.drawVisjsModel("saved");
+        SavedQueriesComponent.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
+    };
 
     self.showSourcesDialog = function (forceDialog) {
         if (!forceDialog && Config.tools["KGquery"].urlParam_source) {
             self.currentSource = Config.tools["KGquery"].urlParam_source;
-         self.init()
+            self.init();
             return;
         }
 
@@ -60,8 +58,7 @@ var KGquery = (function () {
         var selectTreeNodeFn = function (event, obj) {
             $("#mainDialogDiv").dialog("close");
             self.currentSource = obj.node.id;
-            self.init()
-
+            self.init();
         };
         MainController.UI.showHideRightPanel("hide");
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
@@ -782,12 +779,6 @@ return alert("missing target node in  path");
         self.querySets.sets.splice(setIndex, 1);
         self.querySets.currentIndex = self.querySets.sets.length;
     };
-
-
-
-
-
-
 
     return self;
 })();

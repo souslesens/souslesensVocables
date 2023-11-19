@@ -733,7 +733,7 @@ var Lineage_relations = (function () {
         }
     };
     self.loadUserQueries = function () {
-      //   Sparql_CRUD.list("STORED_QUERIES", null, null, "lineageRelations_savedQueriesSelect");
+        //   Sparql_CRUD.list("STORED_QUERIES", null, null, "lineageRelations_savedQueriesSelect");
     };
     self.onSelectSavedQuery = function (id) {
         $("#lineageRelations_history_deleteBtn").css("display", "inline");

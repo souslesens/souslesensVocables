@@ -62,7 +62,7 @@ var SavedQueriesComponent=(function(){
     }
     var filter = "";
     if (scope) {
-      filter += "?s <" + self.currentCRUDsourceObject.graphUri + self.scopePredicate + "> '" + scope + "'.";
+      filter += "?s <" + self.currentCRUDsourceObject.graphUri + self.scopePredicate + "> ?scope. filter (?scope in ('" + scope + "','public'))\n";
     }
     filter += "?s <" + self.currentCRUDsourceObject.graphUri + self.sourcePredicate + "> '" + slsvSource + "'.";
     filter += "?s rdfs:label ?o";
@@ -167,16 +167,31 @@ self.saveQueryFn(function(err, result) {
       if (callback) return callback(err);
       return alert(err.responseText);
     }
-    if (callback) return callback(null, { id: queryUri, label: label });
-    // $("#SavedQueriesComponent_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
+    if (callback)
+      callback(null, { id: queryUri, label: label });
+   $("#SavedQueriesComponent_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
   });
 
 })
   };
 
   self.delete = function ( uri, callback) {
-    CRUDsource =  self.currentCRUDsourceLabel;
-    Sparql_generic.deleteTriples(CRUDsource, uri, null, null, callback);
+    if(!uri)
+      uri=$("#SavedQueriesComponent_itemsSelect").val()
+    if(!uri)
+      return alert(" nothing to delete")
+    if(confirm("delete selected query")) {
+     var  CRUDsource = self.currentCRUDsourceLabel;
+      Sparql_generic.deleteTriples(CRUDsource, uri, null, null, function(err, result){
+      $("#SavedQueriesComponent_itemsSelect option[value='"+uri+"']").remove();
+      if( callback)
+        return callback()
+      });
+
+
+    }
+
+
   };
   
   return self;

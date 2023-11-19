@@ -586,6 +586,104 @@ var Sparql_OWL = (function () {
         });
     };
 
+    self.getNodesAncestorsOld = function (sourceLabel, classIds, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        if (!Array.isArray(classIds)) {
+            classIds = [classIds];
+        }
+        var filterStr = Sparql_common.setFilter("class", classIds);
+
+        var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
+        var modifier = "*";
+        if (options.excludeItself) {
+            modifier = "+";
+        }
+        var query =
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+          "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+          //  "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
+          "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
+          fromStr +
+          " WHERE {" +
+          " ?class rdf:type ?type." +
+          " ?class rdfs:subClassOf" +
+          modifier +
+          "|rdf:type" +
+          modifier +
+          " ?superClass." +
+          " ?superClass ^rdfs:subClassOf ?subClass." +
+          " ?subClass rdf:type ?subClassType. ?superClass rdf:type ?superClassType" +
+          filterStr +
+          " filter (?superClassType !=owl:Restriction)";
+
+        if (options.filter) {
+            query += options.filter;
+        }
+        if (options.withLabels) {
+            query += "OPTIONAL {?class rdfs: label classLabel }OPTIONAL {?subClass rdfs: label subClassLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
+        }
+        query += filterStr;
+
+        query += "} LIMIT 1000";
+
+        var url = self.sparql_url + "?format=json&query=";
+        self.no_params = true;
+        if (Config.sources[sourceLabel]) {
+            self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
+            if (self.no_params) {
+                url = self.sparql_url;
+            }
+        }
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "subClass"], { source: sourceLabel });
+
+            var map = {};
+            result.results.bindings.forEach(function (item) {
+
+                map[item.subClass.value] = item;
+            });
+            var hierarchyArray = [];
+
+            function recurse(array, itemId) {
+                if (map[itemId] && array.indexOf(itemId) < 0) {
+                    array.push(itemId);
+                    if (map[itemId].superClass && map[itemId].superClass.value) {
+                        recurse(array, map[itemId].superClass.value);
+                    }
+                }
+            }
+
+
+            var hierarchies = {};
+            classIds.forEach(function (id) {
+                hierarchies[id] = [];
+                recurse(hierarchies[id], id);
+            });
+            for (var key in hierarchies) {
+                hierarchies[key].forEach(function (item, index) {
+                    hierarchies[key][index] = map[item];
+                });
+            }
+
+            return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
+        });
+    };
+
+    /**
+     * in this version (see getNodesAncestorsOld ) hierarchy is not ordered , manages multiple hierarchy
+     *
+     * @param sourceLabel
+     * @param classIds
+     * @param options
+     * @param callback
+     */
     self.getNodesAncestors = function (sourceLabel, classIds, options, callback) {
         if (!options) {
             options = {};
@@ -604,7 +702,8 @@ var Sparql_OWL = (function () {
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-            "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
+          "SELECT distinct ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel " +
+         // "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
             fromStr +
             " WHERE {" +
             " ?class rdf:type ?type." +
@@ -641,33 +740,18 @@ var Sparql_OWL = (function () {
                 return callback(err);
             }
 
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "subClass"], { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass"], { source: sourceLabel });
 
-            var map = {};
-            result.results.bindings.forEach(function (item) {
-                map[item.subClass.value] = item;
-            });
-            var hierarchyArray = [];
-
-            function recurse(array, itemId) {
-                if (map[itemId] && array.indexOf(itemId) < 0) {
-                    array.push(itemId);
-                    if (map[itemId].superClass && map[itemId].superClass.value) {
-                        recurse(array, map[itemId].superClass.value);
-                    }
-                }
-            }
 
             var hierarchies = {};
             classIds.forEach(function (id) {
-                hierarchies[id] = [];
-                recurse(hierarchies[id], id);
-            });
-            for (var key in hierarchies) {
-                hierarchies[key].forEach(function (item, index) {
-                    hierarchies[key][index] = map[item];
+                hierarchies[id]=[]
+                result.results.bindings.forEach(function (item) {
+                    if(item.class.value==id){
+                        hierarchies[id].push(item)
+                    }
                 });
-            }
+                })
 
             return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
         });
@@ -2302,7 +2386,7 @@ var Sparql_OWL = (function () {
     };
 
     return self;
-})();
+})()
 
 export default Sparql_OWL;
 

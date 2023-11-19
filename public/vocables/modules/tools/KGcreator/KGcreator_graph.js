@@ -242,6 +242,13 @@ var KGcreator_graph = (function () {
                                 smooth: {
                                     type: "continuous",
                                 },
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: "solid",
+                                        scaleFactor: 0.5,
+                                    },
+                                },
                             });
                         }
                     }

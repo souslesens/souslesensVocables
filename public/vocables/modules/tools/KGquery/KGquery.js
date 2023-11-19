@@ -13,6 +13,8 @@ import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.j
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
 import KGquery_graph from "./KGquery_graph.js";
+import SavedQueriesComponent from "../../uiComponents/savedQueriesComponent.js";
+import KGquery_myQueries from "./KGquery_myQueries.js";
 
 var KGquery = (function () {
     var self = {};
@@ -30,17 +32,24 @@ var KGquery = (function () {
     self.onLoaded = function () {
         $("#actionDivContolPanelDiv").load("modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
             KGquery_graph.init();
-        });
+        })
         $("#graphDiv").load("modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
             self.currentSource = Lineage_sources.activeSource;
             self.showSourcesDialog();
         });
     };
 
+
+        self.init=function(){
+            KGquery_graph.drawVisjsModel("saved");
+            SavedQueriesComponent.showDialog("STORED_KGQUERY_QUERIES","KGquery_myQueriesDiv",self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load,);
+        }
+
+
     self.showSourcesDialog = function (forceDialog) {
         if (!forceDialog && Config.tools["KGquery"].urlParam_source) {
             self.currentSource = Config.tools["KGquery"].urlParam_source;
-            KGquery_graph.drawVisjsModel("saved");
+         self.init()
             return;
         }
 
@@ -51,7 +60,8 @@ var KGquery = (function () {
         var selectTreeNodeFn = function (event, obj) {
             $("#mainDialogDiv").dialog("close");
             self.currentSource = obj.node.id;
-            KGquery_graph.drawVisjsModel("saved");
+            self.init()
+
         };
         MainController.UI.showHideRightPanel("hide");
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
@@ -772,6 +782,12 @@ return alert("missing target node in  path");
         self.querySets.sets.splice(setIndex, 1);
         self.querySets.currentIndex = self.querySets.sets.length;
     };
+
+
+
+
+
+
 
     return self;
 })();

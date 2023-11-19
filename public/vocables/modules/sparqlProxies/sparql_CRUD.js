@@ -33,11 +33,11 @@ var Sparql_CRUD = (function () {
         });
     };
 
-    self.list = function (CRUDsource, dataSource, scope, target) {
+    self.list = function (CRUDsource, dataSource, scope, targetSelect) {
         CRUDsource = CRUDsource || self.currentSourceLabel;
         self.initCRUDsource(CRUDsource);
-        if (!target) {
-            target = "sparql_CRUD_itemsSelect";
+        if (!targetSelect) {
+            targetSelect = "sparql_CRUD_itemsSelect";
         }
         if (!scope) {
             scope = $("#sparql_CRUD_scope").val();
@@ -67,7 +67,7 @@ var Sparql_CRUD = (function () {
             result.forEach(function (item) {
                 data.push({ label: item.o.value, id: item.s.value });
             });
-            common.fillSelectOptions(target, data, false, "label", "id");
+            common.fillSelectOptions(targetSelect, data, false, "label", "id");
         });
     };
 

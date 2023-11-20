@@ -18,6 +18,7 @@ var Lineage_axioms_draw = (function () {
     self.defaultGraphDiv = "axiomsDrawGraphDiv";
     self.defaultNodeColor = "#ccc";
     self.defaultNodeSize = 7;
+    self.currentSourcesAxioms = {};
     var props = [
         "<http://www.w3.org/2002/07/owl#complementOf>",
         "<http://www.w3.org/2002/07/owl#disjointWith>",
@@ -53,6 +54,9 @@ var Lineage_axioms_draw = (function () {
     self.getNodeAxioms = function (sourceLabel, nodeId, depth, options, callback) {
         if (!options) {
             options = {};
+        }
+        if (self.currentSourcesAxioms[sourceLabel]) {
+            return callback(null, self.currentSourcesAxioms[sourceLabel]);
         }
 
         var fromStr = Sparql_common.getFromStr(sourceLabel);
@@ -161,6 +165,7 @@ var Lineage_axioms_draw = (function () {
                 return callback(err);
             }
 
+            self.currentSourcesAxioms[sourceLabel] = result.results.bindings;
             return callback(null, result.results.bindings);
         });
     };
@@ -298,7 +303,6 @@ var Lineage_axioms_draw = (function () {
                         //  var escapeProperties = ["http://www.w3.org/1999/02/22-rdf-syntax-ns#first", "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"];
                         var escapeProperties = ["http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"];
 
-                        0;
                         subject.objects.forEach(function (object, index) {
                             escapeProperties.forEach(function (escapeProperty) {
                                 if (object && object.p == escapeProperty) {
@@ -467,7 +471,7 @@ var Lineage_axioms_draw = (function () {
                                         symbol = Config.Lineage.logicalOperatorsMap[object.p] || null;
                                     }
 
-                                    if (level == 0 && object.p != "http://www.w3.org/2002/07/owl#equivalentClass") {
+                                    if (false && level == 0 && object.p != "http://www.w3.org/2002/07/owl#equivalentClass") {
                                         return;
                                     }
 
@@ -478,10 +482,12 @@ var Lineage_axioms_draw = (function () {
                                     if (false && (object.p.indexOf("Value") > -1 || object.p.indexOf("onProperty") > -1)) {
                                         objectLevel = level;
                                     }
-                                    /* if (object.oType.indexOf("intersection") > -1 || object.oType.indexOf("union") > -1) {
-                     objectLevel = level;
-                   }*/
 
+                                    // stop draw children when subClassof a class
+                                    //   if ( level >0 && object.oType == "http://www.w3.org/2002/07/owl#Class" && object.p.indexOf("subClassOf")>-1) {
+                                    if (false && object.oSource != sourceLabel) {
+                                        return;
+                                    }
                                     recurse(object.o, objectLevel, symbol);
                                 }
                             });
@@ -497,7 +503,7 @@ var Lineage_axioms_draw = (function () {
 
                 //set hide nodes of level > maxLevels
                 function (callbackSeries) {
-                    var maxLevels = 3;
+                    var maxLevels = 10;
                     visjsData.nodes.forEach(function (node, nodeIndex) {
                         if (node.level > maxLevels) {
                             visjsData.nodes[nodeIndex].hidden = true;
@@ -610,12 +616,12 @@ enabled:true},*/
         return;
 
         /*  self.currentGraphNode = node;
-  if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
-    var options = { addToGraph: 1, level: self.currentGraphNode.level };
-    return self.drawNodeAxioms(self.context.sourceLabel, self.currentGraphNode.data.id, self.context.divId, 2, options);
-  }
+if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
+var options = { addToGraph: 1, level: self.currentGraphNode.level };
+return self.drawNodeAxioms(self.context.sourceLabel, self.currentGraphNode.data.id, self.context.divId, 2, options);
+}
 
-  self.showNodeInfos(node, point, options);*/
+self.showNodeInfos(node, point, options);*/
     };
 
     self.expandNode = function (node) {

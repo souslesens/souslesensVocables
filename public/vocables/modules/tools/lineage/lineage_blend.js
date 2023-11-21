@@ -19,36 +19,34 @@ var Lineage_blend = (function () {
             $("#LineagePopup").dialog("option", "title", "Create node in source " + Lineage_sources.activeSource);
 
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-                $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-                    $("#editPredicate_mainDiv").remove();
-                    PredicatesSelectorWidget.load("LineageBlend_commonPredicateObjectDiv", Lineage_sources.activeSource, function () {
-                        $("#editPredicate_propertyDiv").css("display", "none");
-                    });
+                $("#editPredicate_mainDiv").remove();
+                PredicatesSelectorWidget.load("LineageBlend_commonPredicateObjectDiv", Lineage_sources.activeSource, function () {
+                    $("#editPredicate_propertyDiv").css("display", "none");
                 });
-
-                return;
-
-                async.series(
-                    [
-                        function (callbackSeries) {
-                            Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function (err, result) {
-                                if (err) {
-                                    return callbackSeries(err.responseText);
-                                }
-                                common.fillSelectOptions("LineageBlend_creatingNodeObjectsUpperSelect", result, true, "label", "id");
-                                common.fillSelectOptions("LineageBlend_creatingNodeObjectsUpper2Select", result, true, "label", "id");
-
-                                return callbackSeries();
-                            });
-                        },
-                    ],
-                    function (err) {
-                        if (err) {
-                            return alert(err.responseText);
-                        }
-                    }
-                );
             });
+
+            return;
+
+            async.series(
+                [
+                    function (callbackSeries) {
+                        Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err.responseText);
+                            }
+                            common.fillSelectOptions("LineageBlend_creatingNodeObjectsUpperSelect", result, true, "label", "id");
+                            common.fillSelectOptions("LineageBlend_creatingNodeObjectsUpper2Select", result, true, "label", "id");
+
+                            return callbackSeries();
+                        });
+                    },
+                ],
+                function (err) {
+                    if (err) {
+                        return alert(err.responseText);
+                    }
+                }
+            );
         },
         showAddEdgeFromGraphDialog: function (edgeData, callback) {
             $("#LineagePopup").dialog("open");
@@ -432,6 +430,7 @@ var Lineage_blend = (function () {
 
             $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
             $("#LineageBlend_creatingNodeClassParamsDiv").tabs({});
+
             if (Lineage_whiteboard.currentGraphNode && Lineage_whiteboard.currentGraphNode.data) {
                 $("#LineageBlend_creatingNodeObjectsSelect").val(Lineage_whiteboard.currentGraphNode.data.id);
             }

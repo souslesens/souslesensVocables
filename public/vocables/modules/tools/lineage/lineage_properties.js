@@ -430,7 +430,7 @@ var Lineage_properties = (function () {
                 if (!item.property || !item.property.value) {
                     return;
                 }
-                if (targetnodes) {
+                if (targetnodes && targetnodes.length > 0) {
                     if (item.range && targetnodes.indexOf(item.range.value) > -1) {
                         ok = 1;
                     } else if (item.domain && targetnodes.indexOf(item.domain.value) > -1) {
@@ -441,6 +441,7 @@ var Lineage_properties = (function () {
                         return;
                     }
                 }
+
                 if (item.property.value.indexOf("#type") > -1 && item.property.value.indexOf("#label") > -1) {
                     return;
                 }
@@ -753,6 +754,7 @@ var Lineage_properties = (function () {
                     filterNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
                 }
             }
+            if (properties && properties.length > 0) options.filter = Sparql_common.setFilter("prop", properties);
             MainController.UI.message("searching...");
             Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, options, function (err, result) {
                 if (err) {
@@ -766,6 +768,7 @@ var Lineage_properties = (function () {
                 MainController.UI.message("drawing...");
                 for (var propId in result) {
                     var item = result[propId];
+
                     if (filterNodes) {
                         if (filterNodes.indexOf(item.domain) > -1 || filterNodes.indexOf(item.range) > -1) {
                             if (!properties || properties.indexOf(item.prop) > -1) {

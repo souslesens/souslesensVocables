@@ -490,28 +490,49 @@ return callbackSeries();
         if (!options) {
             options = {};
         }
+
+        if (!options.remove) {
+            options.remove = false;
+        }
+
         for (var entryType in data) {
             for (var id in data[entryType]) {
                 if (entryType == "restrictions") {
-                    Config.ontologiesVocabularyModels[source][entryType][id].push(data[entryType][id]);
+                    if (options.remove) {
+                        delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
+                    } else {
+                        data[entryType][id].forEach((_restriction) => {
+                            Config.ontologiesVocabularyModels[source][entryType][id].push(_restriction);
+                        });
+                    }
                 } else {
-                    Config.ontologiesVocabularyModels[source][entryType][id] = data[entryType][id];
+                    if (options.remove) {
+                        delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
+                    } else {
+                        Config.ontologiesVocabularyModels[source][entryType][id] = data[entryType][id];
+                    }
                 }
             }
         }
         if (!options.noUpdateCache) {
-            self.updateModelOnServerCache(source, data, function (err, result) {
-                callback(err);
-            });
+            self.updateModelOnServerCache(
+                source,
+                data,
+                function (err, result) {
+                    callback(err);
+                },
+                options
+            );
         } else {
             callback(done);
         }
     };
 
-    self.updateModelOnServerCache = function (source, data, callback) {
+    self.updateModelOnServerCache = function (source, data, callback, options) {
         var payload = {
             source: source,
             data: data,
+            options: options,
         };
 
         $.ajax({

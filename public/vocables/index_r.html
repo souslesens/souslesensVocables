@@ -198,6 +198,8 @@
         <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 
+        <script type="module" src="./responsive/responsiveUI.js"></script>
+
         <script type="module">
             import MainController from "./modules/shared/mainController.js";
             import authentication from "./modules/shared/authentification.js";
@@ -282,312 +284,156 @@
 
                     MainController.UI.setCredits();
                     // MyDashboard.init();
+
+                    ResponsiveUI.init();
                 });
             });
         </script>
+
+        <title>W3.CSS</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
         <style>
-            body {
-              font-size: 14px;
-              font-family: Arial;
-              overflow: hidden;
+            .w3-theme {
+                color: #fff !important;
+                background-color: #4caf50 !important;
             }
 
-            .jstreeContainer {
-              width: 100%;
-            / / height: 100 %;
-              min-height: 500px;
-              overflow: auto;
+            .w3-btn {
+                background-color: #4caf50;
+                margin-bottom: 4px;
             }
 
-            .jstreeXX {
-              margin: 2px;
-              max-height: 550px;
-
-              overflow: auto;
-              min-width: 300px;
+            .w3-code {
+                border-left: 4px solid #4caf50;
             }
 
-            .jstree-icon {
-              width: 15px !important;
+            .myMenu {
+                margin-bottom: 150px;
             }
 
-            .jstree-ocl {
-              width: 24px !important;
-            }
-
-            #actionDiv {
-              width: 385px;
-              max-height: 550px;
-            }
-
-            #accordion {
-              margin-left: 5px;
-            }
-
-            .ui-accordion .ui-accordion-content {
-              overflow: hidden !important;
-              min-height: 600px !important;
-            }
-
-            .ui-accordion-content-active {
-              margin-left: -5px !important;
-              overflow: hidden;
-            }
-
-            #graphDiv {
-              margin: 3px;
-              border: 2px solid #ddd;
-            }
-
-            .popupMenuWidgetDiv {
-              z-index: 20;
-              position: absolute;
-              flex-direction: column;
-              padding: 5px;
-              border-radius: 5px;
-              text-align: center;
-              display: flex;
-              background-color: rgb(221, 221, 221);
-
-            }
-
-            .jstree-default {
-              min-height: 300px !important;
-            / / height: 600 px;
-            / / overflow: auto;
-            }
-
-            .jstree-node {
-              font-weight: bold;
-            }
-
-            #currentSourceTreeDiv {
-              overflow: auto;
-              height: 600px;
-            }
-
-            .jstreeParent {
-              width: 350px;
-              height: 600px;
-              overflow: auto;
-              border: #6e2500 1px groove;
-            }
-
-
-            .messageDiv {
-              font-weight: normal;
-              font-size: 12px;
-            / / color: #6e2500;
-              color: white;
-              background-color: #00a37f;
-              padding: 2px;
-              margin: 2px;
-              height: 30px;
-              overflow: auto;
-
-            / / max-width: 1200 px;
-            }
-
-            .toolDescriptionImg {
-              padding: 5px;
-              margin: 50px;
-              width: 400px;
-            }
-
-            .clipboardSelected {
-              border: #3b13ef 1px solid !important;
-              animation: blinker 1s linear infinite;
-            }
-
-            @keyframes blinker {
-              50% {
-                opacity: 0;
-              }
-            }
-
-            .searched_concept {
-              color: blue;
-            }
-
-            .searched_conceptSource {
-              color: blueviolet;
-            }
-
-            .popupMenuItem {
-              border: #3b13ef 1px solid;
-              border-radius: 3px;
-              padding: 1px;
-              margin: 1px;
-              margin: 1px;
-              background-color: #ddd;
-            }
-
-            .mainDialogDiv {
-              background-color: #ddd;
-            }
-
-            .mainDialogDiv2 {
-              background-color: #ddd;
-            }
-
-            .td_title {
-              padding: 3px;
-              font-weight: bold;
-            }
-
-            .td_value {
-              padding: 3px;
-            }
-
-            .jstree-contextmenu {
-              z-index: 300 !important;
-            / / margin-left: - 100 px !important;
-            }
-
-            .ui-dialog {
-              border-width: 5px !important;
-              border-style: solid !important;
-              border-color: #b8a587 !important;
-            }
-
-            .ui-widget-content {
-              padding: 5px !important;
-            }
-
-            .max-height {
-              height: 750px !important;
-            }
-
-            .ui-dialog-title {
-
-              color: #337ab7;
-            }
-
-
-            element.style {
-              padding: 3px !important;
-              border: #e1d9bf solid 1px !important;
-            }
-
-            table.dataTable tbody th, table.dataTable tbody td {
-              padding: 3px !important;
-              border: #e1d9bf solid 1px !important;
-
-            }
-
-            .legend_colorDiv {
-              width: 30px;
-              height: 20px;
-              border-radius: 3px;
-              margin: 3px;
-            }
-
-            .legend_itemDiv {
-              display: flex;
-              flex-direction: row;
-              border-width: 1px;
-              border-style: solid;
-              border-color: #b8a587
+            .slsv-tabButton {
+                margin: 5px !important;
+                padding: 5px !important;
             }
         </style>
     </head>
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
     <body>
-        <div class="rowXXX" style="display: flex; flex-direction: column; min-height: 30px">
-            <div style="display: flex; flex-direction: row; justify-content: space-evenly">
-                <div>
-                    <table>
-                        <tr>
-                            <td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none; width: 15px; text-align: justify" /></td>
-                            <td><span class="messageDiv" id="messageDiv"></span></td>
-                        </tr>
-                    </table>
-                </div>
-                <!-- </div>-->
-                <div class="col text-end" style="z-index: 20">
-                    <button onclick=" window.open( './browse.html','_blank');" type="button" class="btn btn-sm py-0 btn-outline-primary" style="font-weight: bold">Search</button>
-                    <button onclick="FOL2graphWidget.parse()" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>
-                    <button onclick="MainController.showPart14AxiomsImage()" type="button" class="btn btn-sm py-0 btn-outline-primary">Axioms</button>
-                    <!--   <button onclick="OwlEditor.loadUI()" type="button" class="btn btn-sm py-0 btn-outline-primary">OntoEdit</button>-->
-                    <!--  <button onclick="MainController.UI.test()" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>-->
-                    <button onclick="MainController.UI.copyCurrentQuery()" type="button" class="btn btn-sm py-0 btn-outline-primary">cpQy</button>
+        <header class="w3-container">
+            <div class="w3-bar w3-theme w3-medium" style="z-index: 4">
+                <div class="w3-bar-item w3-dropdown-hover">
+                    <button class="w3-button">Tool</button>
 
-                    <!--   <a class="btn btn-sm py-0 btn-outline-primary" href="/api/v1/api-documentation" role="button">API</a>-->
-
-                    <a class="btn btn-sm py-0 btn-outline-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user"></i><span id="user-username">...</span>
-                    </a>
-
-                    <ul id="user-account-dropdown" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <li id="manage-account-li"><a id="manage-account" class="dropdown-item" href="#">Manage account</a></li>
-                        <li>
-                            <button id="logout-button" onclick="authentication.logout()" class="dropdown-item">Logout</button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div style="display: flex; flex-direction: row; justify-content: left">
-                <div id="leftPanelDiv" style="max-width: 400px; height: 90vh">
-                    <div id="accordion">
-                        <h3><span id="toolsListPanelDiv" class="title">Tools </span></h3>
-                        <div id="tools-panel" style="margin: 5px" class="max-height">
-                            <div class="max-height" id="toolsTreeDiv" class="jstree"></div>
-                        </div>
-
-                        <h3><span class="title" id="toolPanelLabel"> </span></h3>
-                        <div id="toolPanelDiv" style="margin: 5px; height: 900px !important; overflow: auto" class="max-height">
-                            <div id="actionDivContolPanelDiv"></div>
-                            <div id="actionDiv" class="jstree"></div>
-                        </div>
+                    <div class="w3-dropdown-content w3-bar-block w3-border">
+                        <select id="toolsSelect" size="5" onclick="ResponsiveUI.onToolSelect($(this).val())"></select>
                     </div>
                 </div>
 
-                <div id="centralPanelDiv" style="display: flex; flex-direction: row">
-                    <div id="graphDiv"></div>
+                <div class="w3-bar-item w3-dropdown-hover">
+                    <button class="w3-button" onclick="ResponsiveUI.showSourceDialog()">Source</button>
                 </div>
-                <div id="rightPanelDiv" style="display: flex; flex-direction: row; margin-top: 10px; z-index: 20">
+
+                <div class="w3-bar-item">
+                    <div class="w3-button w3-sand w3-round-xlarge">
+                        <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>
+                        <span class="w3-right-align w3-blue" id="selectedSource"></span>
+                    </div>
+                </div>
+
+                <div class="w3-bar-item">
+                    <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>
+                </div>
+
+                <div class="w3-bar-item w3-right">
+                    <div class="w3-button" id="user-username">User</div>
+                </div>
+
+                <div class="w3-bar-item w3-right">
+                    <button class="w3-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="w3-container">
+            <div class="w3-container w3-col l9" style="height: 85vh">graphdiv</div>
+
+            <div class="w3-container w3-col l3 w3-blue" style="height: 85vh">
+                <div class="w3-bar w3-black">
+                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Whiteboard')">Whiteboard</button>
+                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Classes')">Classes</button>
+                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Properties')">Properties</button>
+                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Containers')">Containers</button>
+                </div>
+                <div id="tabs_Whiteboard" class="w3-container lineage-tab">
+                    <div class="lineage_actionDiv_title">Active Source&nbsp;(s)</div>
                     <div
-                        onclick="MainController.UI.showHideRightPanel()"
-                        style="margin-top: 10px; margin-left: -40px; height: 45px; width: 60px; padding: 5px; background: #fcfcfc; border-radius: 10px; border: 1px solid #ccc"
+                        id="lineage_actionsWrapper"
+                        class="lineage_actionDiv"
+                        style="display: flex; flex-wrap: wrap; widthnpm: 100%; justify-content: space-evenly; gap: 5px 5px; border: #c8c8c8 solid 2px"
                     >
-                        <input id="rightPanelDiv_searchIconInput" type="image" src="./icons/search.png" />
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_whiteboard.drawModel()">Model</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_whiteboard.drawTopConcepts()">TopClasses</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()">Parents</button>
+
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_relations.showDrawRelationsDialog()">Query</button>
+                        <!--    <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" style="font-weight: bold" onclick="KGqueryWidget.showDialog()">Query KG</button>-->
                     </div>
-                    <div id="rightPanelDivInner" style="display: flex; flex-direction: column"></div>
+                    <div class="lineage_actionDiv" style="display: flex; flex-wrap: wrap; width: 100%; justify-content: space-evenly; gap: 5px 5px">
+                        <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.clearSource()">Clear</button>-->
+
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog()">Similars</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">
+                            Equiv Class
+                        </button>
+
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_pathes" onclick="Lineage_graphTraversal.showShortestPathDialog()">Pathes</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_linkedData" onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">
+                            Linked Data
+                        </button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_reasoner" onclick="Lineage_reasoner.showReasonerDialog()" disabled="">Reasoner</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_rules" onclick="Lineage_rules.showRulesDialog()" disabled="">Rules</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_inferredModel" onclick="Lineage_whiteboard.drawInferredClassesModel()">Inferred Model</button>
+
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_newAxiom" onclick="NodeInfosWidget.showCreateEntityDialog()" disabled="" style="display: block">
+                            new Axiom
+                        </button>
+
+                        <!-- <div>   <input type="checkbox" id="Lineage_classes_allWhiteBoardSourcesCBX" onchange="Lineage_sources.setAllWhiteBoardSources($(this).prop('checked'))">-->
+                    </div>
                 </div>
-                <div id="popupMenuWidgetDiv" onclick="  PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
+
+                <div id="tabs_Classes" class="w3-container lineage-tab">tabs_Classes</div>
+
+                <div id="tabs_Properties" class="w3-container lineage-tab">tabs_Properties</div>
+
+                <div id="tabs_Containers" class="w3-container lineage-tab">tabs_Containers</div>
+            </div>
+
+            <footer class="w3-row-padding"></footer>
+
+            <div id="sources_panel" class="w3-modal">
+                <div class="w3-modal-content">
+                    <div class="w3-container l3">
+                        <span onclick="ResponsiveUI.hideDiv('sources_panel')" class="w3-button w3-display-topright">&times;</span>
+                        <div class="w3-row">
+                            Source
+                            <input
+                                id="sourceSelector_searchInput"
+                                class="w3-input w3-border w3-padding"
+                                type="text"
+                                value=""
+                                autocomplete="off"
+                                style="width: 200px; font-size: 12px; margin: 3px; padding: 3px"
+                            />
+                        </div>
+                    </div>
+                    <div id="sourcesSelectorWrapper" style="height: 80vh; overflow: auto">
+                        <div id="sourcesSelectorDiv"></div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div id="loginDiv" style="position: absolute; visibility: hidden; display: flex; justify-content: center; align-items: center">
-            <div>
-                login<input id="loginInput" /> password<input
-                    type="password"
-                    id="passwordInput"
-                    onkeydown="if (event.keyCode == 13 || event.keyCode == 9){document.getElementById('loginButton').click()
-}"
-                />
-                <button id="loginButton" onclick="authentication.doLogin(MainController.onAfterLogin)">OK</button>
-
-                <div id="loginMessage" style="margin: 20px; font-size: 14px; color: saddlebrown"></div>
-            </div>
-        </div>
-
-        <div id="mainDialogDiv"></div>
-        <div id="mainDialogDiv2"></div>
-        <div id="smallDialogDiv"></div>
-
-        <!-- Footer -->
-        <footer class="bg-white">
-            <div class="row px-2">
-                <div class="col">
-                    <a target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"
-                        ><span style="color: Black"><i class="fa-lg fab fa-github"></i></span
-                    ></a>
-                    SouslesensVocables <span id="souslesensversion"></span>
-                </div>
-                <div class="col text-end">
-                    <!-- <a class="" target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"><i class="fab fa-github"></i></a> -->
-                </div>
-            </div>
-        </footer>
     </body>
 </html>

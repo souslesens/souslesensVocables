@@ -1935,6 +1935,8 @@ var Sparql_OWL = (function () {
         if (options.prefLabelAlso) {
             labelProperty = "rdfs:label|skos:prefLabel";
         }
+        var filter = options.filter || "";
+
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -1949,6 +1951,7 @@ var Sparql_OWL = (function () {
             Config.default_lang +
             "' || !lang(?propLabel))" +
             "    ?prop rdf:type owl:ObjectProperty. " +
+            filter +
             "  }" +
             " UNION " +
             "   {" +
@@ -1956,6 +1959,7 @@ var Sparql_OWL = (function () {
             "     ?prop rdfs:domain  ?propDomain.    ?propDomain " +
             labelProperty +
             "  ?propDomainLabel.   FILTER (lang(?propDomainLabel)='en' || !lang(?propDomainLabel))" +
+            filter +
             "  }" +
             " UNION " +
             "  {" +
@@ -1963,12 +1967,14 @@ var Sparql_OWL = (function () {
             "     ?prop rdfs:range  ?propRange.    ?propRange " +
             labelProperty +
             "  ?propRangeLabel.   FILTER (lang(?propRangeLabel)='en' || !lang(?propRangeLabel))" +
+            filter +
             "}" +
             "   UNION " +
             "   {?prop rdf:type owl:ObjectProperty. " +
             "  ?subProp rdfs:subPropertyOf ?prop .   ?subProp " +
             labelProperty +
             "  ?subPropLabel     filter(   lang(?subPropLabel)= 'en' || !lang(?subPropLabel))" +
+            filter +
             "  }" +
             "  UNION " +
             "   {?prop rdf:type owl:ObjectProperty." +
@@ -1976,6 +1982,7 @@ var Sparql_OWL = (function () {
             labelProperty +
             ' ?inversePropLabel    {filter( langMatches( lang(?inversePropLabel), "en" ))} ' +
             "  }" +
+            filter +
             "  } " +
             "} LIMIT 10000";
 

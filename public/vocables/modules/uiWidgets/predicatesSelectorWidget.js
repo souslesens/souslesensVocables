@@ -75,7 +75,9 @@ var PredicatesSelectorWidget = (function () {
     self.predicatesIdsMap = {};
 
     self.load = function (divId, source, configureFn, callback) {
-        $("#" + divId).load("modules/uiWidgets/predicatesSelectorWidgetDialog.html", function () {
+        $("#" + divId).html("ddddddddd");
+        $("#" + divId).load("snippets/predicatesSelectorWidgetDialog.html", function (a, b, c) {
+            var x = a + b + c;
             self.init(source, configureFn, function (err, result) {
                 if (callback) {
                     return callback();

@@ -134,12 +134,11 @@ var SourceSelectorWidget = (function () {
                             text: sourceLabel,
                             type: Config.sources[sourceLabel].schemaType,
                             parent: group,
-                            data:{
-                                type:"source",
-                                label :sourceLabel,
-                                id:sourceLabel
-                            }
-
+                            data: {
+                                type: "source",
+                                label: sourceLabel,
+                                id: sourceLabel,
+                            },
                         });
                     }
                 }

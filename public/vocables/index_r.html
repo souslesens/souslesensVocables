@@ -1,395 +1,439 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <title>SouslesensVocables</title>
-  <link rel="icon" href="../icons/souslesensIcon.png" />
-
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
-  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
-  <script src="./js/external/async.js" charset="utf-8"></script>
-  <script src="./js/external/jsTree/jstree.js" charset="utf-8"></script>
-
-  <script src="js/external/visjs/vis-timeline.min.js"></script>
-  <link href="js/external/visjs/graph2d.min.css" rel="stylesheet" type="text/css" />
+    <head>
+        <meta charset="utf-8" />
+        <title>SouslesensVocables</title>
+        <link rel="icon" href="../icons/souslesensIcon.png" />
+
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+        <script src="./js/external/async.js" charset="utf-8"></script>
+        <script src="./js/external/jsTree/jstree.js" charset="utf-8"></script>
+
+        <script src="js/external/visjs/vis-timeline.min.js"></script>
+        <link href="js/external/visjs/graph2d.min.css" rel="stylesheet" type="text/css" />
 
-  <script type="text/javascript" src="./js/external/visjs/vis-network.min.2.js"></script>
-  <link href="js/external/visjs/vis-network.css" rel="stylesheet" type="text/css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+        <script type="text/javascript" src="./js/external/visjs/vis-network.min.2.js"></script>
+        <link href="js/external/visjs/vis-network.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 
-  <script src="js/external/graph.js"></script>
-  <script src="js/external/download.js"></script>
-  <script src="js/external/sunburst.js"></script>
-  <script src="js/external/d3/d3.js"></script>
+        <script src="js/external/graph.js"></script>
+        <script src="js/external/download.js"></script>
+        <script src="js/external/sunburst.js"></script>
+        <script src="js/external/d3/d3.js"></script>
 
-  <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+        <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 
-  <!-- <script src="js/socketIoProxy.js"></script>-->
-  <script type="module" src="modules/shared/socketIoProxy.js" charset="utf-8"></script>
-  <script type="module" src="modules/shared/common.js" charset="utf-8"></script>
-  <script type="module" src="modules/graph/visjsGraph2.js"></script>
-  <script type="module" src="modules/graph/canvas2svg.js"></script>
-  <script type="module" src="modules/graph/SVGexport.js"></script>
-  <script type="module" src="modules/graph/graphMLexport.js"></script>
-
-  <script type="module" src="modules/shared/mainController.js"></script>
+        <!-- <script src="js/socketIoProxy.js"></script>-->
+        <script type="module" src="modules/shared/socketIoProxy.js" charset="utf-8"></script>
+        <script type="module" src="modules/shared/common.js" charset="utf-8"></script>
+        <script type="module" src="modules/graph/visjsGraph2.js"></script>
+        <script type="module" src="modules/graph/canvas2svg.js"></script>
+        <script type="module" src="modules/graph/SVGexport.js"></script>
+        <script type="module" src="modules/graph/graphMLexport.js"></script>
+
+        <script type="module" src="modules/shared/mainController.js"></script>
 
-  <script type="module" src="modules/shared/graphController.js"></script>
-  <script type="module" src="modules/shared/treeController.js"></script>
-  <script type="module" src="modules/shared/clipboard.js"></script>
+        <script type="module" src="modules/shared/graphController.js"></script>
+        <script type="module" src="modules/shared/treeController.js"></script>
+        <script type="module" src="modules/shared/clipboard.js"></script>
 
-  <script type="module" src="modules/tools/KGquery/VirtualKGquery.js"></script>
-
-  <script type="module" src="modules/tools/KGquery/KGquery.js"></script>
-  <script type="module" src="modules/tools/KGquery/KGquery_graph.js"></script>
-  <script type="module" src="modules/tools/KGquery/KGquery_myQueries.js"></script>
+        <script type="module" src="modules/tools/KGquery/VirtualKGquery.js"></script>
+
+        <script type="module" src="modules/tools/KGquery/KGquery.js"></script>
+        <script type="module" src="modules/tools/KGquery/KGquery_graph.js"></script>
+        <script type="module" src="modules/tools/KGquery/KGquery_myQueries.js"></script>
 
-  <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
+        <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
 
-  <script type="module" src="modules/tools/SPARQL_endpoint.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_whiteboard.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_sources.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_properties.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_common.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_blend.js"></script>
+        <script type="module" src="modules/tools/SPARQL_endpoint.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_whiteboard.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_sources.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_properties.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_common.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_blend.js"></script>
 
-  <script type="module" src="modules/tools/lineage/lineage_dictionary.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_combine.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_dictionary.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_combine.js"></script>
 
-  <script type="module" src="modules/tools/lineage/lineage_decoration.js"></script>
-  <script type="module" src="modules/tools/lineage/linkedData/lineage_linkedData_mappings.js"></script>
-  <script type="module" src="modules/tools/lineage/linkedData/lineage_linkedData_query.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_decoration.js"></script>
+        <script type="module" src="modules/tools/lineage/linkedData/lineage_linkedData_mappings.js"></script>
+        <script type="module" src="modules/tools/lineage/linkedData/lineage_linkedData_query.js"></script>
 
-  <script type="module" src="modules/tools/lineage/lineage_upperOntologies.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_upperOntologies.js"></script>
 
-  <script type="module" src="modules/tools/lineage/lineage_containers.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_containers.js"></script>
 
-  <script type="module" src="modules/tools/lineage/lineage_selection.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_filterBy.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_styles.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_selection.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_filterBy.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_styles.js"></script>
 
-  <script type="module" src="modules/tools/lineage/lineage_relations.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_relationFilter.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_relationIndividualsFilter.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_rules.js"></script>
-
-  <script type="module" src="modules/shared/ontologyModels.js"></script>
-
-  <script type="module" src="modules/uiWidgets/predicatesSelectorWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/promptedSelectWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/sourceSelectorWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/jstreeWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/nodeInfosWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/searchWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/graphDecorationWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/legendWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/containerSearchWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/dateWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/popupMenuWidget.js"></script>
-
-  <script type="module" src="modules/uiWidgets/individualValuefilterWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/individualAggregateWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/simpleListSelectorWidget.js"></script>
-  <script type="module" src="modules/uiWidgets/FOL2graphWidget.js"></script>
-
-  <script type="module" src="modules/tools/owlEditor.js"></script>
-  <script type="module" src="modules/tools/Standardizer.js"></script>
-  <script type="module" src="modules/tools/SQLquery.js"></script>
-  <script type="module" src="modules/tools/admin.js"></script>
-  <script type="module" src="modules/tools/ConfigEditor.js"></script>
-
-  <script type="module" src="modules/tools/KGcreator/KGcreator.js"></script>
-  <script type="module" src="modules/tools/KGcreator/KGcreator_mappings.js"></script>
-  <script type="module" src="modules/tools/KGcreator/KGcreator_graph.js"></script>
-  <script type="module" src="modules/tools/KGcreator/KGcreator_run.js"></script>
-  <script type="module" src="modules/tools/KGcreator/KGcreator_joinTables.js"></script>
-
-  <!--   <script type="module" src="modules/tools/KGcreatorGraph.js"></script>-->
-
-  <script type="module" src="modules/tools/KGpropertyFilter.js"></script>
-  <script type="module" src="modules/tools/composer.js"></script>
-  <script type="module" src="modules/tools/sparqlQueryUI.js"></script>
-
-  <script type="module" src="modules/tools/ontologiesStats.js"></script>
-
-  <script src="config/app_config.js"></script>
-
-  <script type="module" src="modules/shared/authentification.js"></script>
-  <script type="module" src="modules/tools/myDashboard.js"></script>
-
-  <script type="module">
-    import { allTools, loadToolsAndPlugins } from "./config/tools.js";
-
-    try {
-      await loadToolsAndPlugins();
-    } catch (error) {
-      console.error("Failed to load tools and plugins", error);
-    }
-  </script>
-
-  <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
-  <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
-  <script type="module" src="modules/sparqlProxies/sparql_SKOS.js"></script>
-  <script type="module" src="modules/sparqlProxies/sparql_OWL.js"></script>
-  <!--   <script type="module" src="modules/sparqlProxies/sparql_INDIVIDUALS.js"></script>-->
-
-  <script type="module" src="modules/sparqlProxies/sparql_common.js"></script>
-  <!-- <script type="module" src="modules/sparqlProxies/sparql_schema.js"></script>-->
-
-  <script type="module" src="modules/uiComponents/savedQueriesComponent.js"></script>
-  <script type="module" src="modules/search/searchUtil.js"></script>
-  <!--  <script type="module" src="modules/tools/ontologyUtil.js"></script>-->
-
-  <script type="module" src="modules/shared/export.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_graphTraversal.js"></script>
-
-  <script type="module" src="modules/search/elasticSearchProxy.js"></script>
-
-  <script type="module" src="modules/tools/lineage/lineage_reasoner.js"></script>
-
-  <script type="module" src="modules/tools/lineage/lineage_similars.js"></script>
-  <script type="module" src="modules/shared/graphLoader.js"></script>
-
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.css"
-  />
-
-  <script
-    type="text/javascript"
-    src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.js"
-  ></script>
-
-  <!-- Bootstrap -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
-    crossorigin="anonymous"
-  />
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
-    integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
-    crossorigin="anonymous"
-  ></script>
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-    crossorigin="anonymous"
-  ></script>
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-    integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
-
-  <script src="https://browser.sentry-cdn.com/5.5.0/bundle.min.js" crossorigin="anonymous"></script>
-
-  <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
-  <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
-
-  <script type="module" src="./responsive/responsiveUI.js"></script>
-
-  <script type="module">
-    import MainController from "./modules/shared/mainController.js";
-    import authentication from "./modules/shared/authentification.js";
-
-    var leftPanelWidth = 400;
-    var rightPanelWidth = 400;
-    var w;
-    var h;
-    window.leftPanelWidth = leftPanelWidth;
-    window.rightPanelWidth = rightPanelWidth;
-
-    // Redirect 401 to login page
-    $(document).ajaxError(function(e, xhr, settings) {
-      if (xhr.status == 401) {
-        const uri = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
-        location.href = `/login?redirect=${uri}`;
-      }
-    });
-
-    $(function() {
-      MainController.initConfig(function(err) {
-        // sentry/glitchtip
-        if (Config.sentryDsnJsFront) {
-          if (typeof Sentry == "object") {
-            Sentry.init({ dsn: Config.sentryDsnJsFront });
-          }
-          else {
-            console.warn("Sentry DSN found in config, but library could not be loaded and initialized.");
-          }
-        }
-
-        authentication.init();
-
-        //SocketProxy.init()
-
-        if (err) {
-          return console.error(err);
-        }
-
-        w = $(document).width() - leftPanelWidth - 30;
-        h = $(document).height() - 30;
-
-        h = Math.min(h, 1000);
-
-        $("#graphDiv").width(w);
-        MainController.UI.initialGraphDivWitdh = w;
-        $("#graphDiv").height(h - 50);
-
-        $("#accordion").accordion({
-          heightStyle: "fill"
-        });
-        $("#accordion").accordion("option", { active: 0 });
-        $("#accordion").on("accordionbeforeactivate", function(event, ui) {
-        });
-        $("#accordion").on("accordionactivate", function(event, ui) {
-        });
-        $("#mainDialogDiv").dialog({
-          autoOpen: false,
-          height: 800,
-          width: $(document).width() * 0.85,
-          modal: false
-        });
-        $("#mainDialogDiv2").dialog({
-          autoOpen: false,
-          height: 800,
-          width: $(document).width() * 0.85,
-          modal: false
-        });
-
-        $("#smallDialogDiv").dialog({
-          autoOpen: false,
-          height: 600,
-          width: 800,
-          modal: false
-        });
-
-        $(document).on("click", "a", function() {
-          var target = $(this).attr("target");
-          if (target == "_slsvCallback") {
-            var id = $(this).attr("href");
-            event.preventDefault();
-            NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
-          }
-        });
-
-        MainController.UI.setCredits();
-        // MyDashboard.init();
-
-        ResponsiveUI.init();
-      });
-    });
-  </script>
-
-
-  <title>W3.CSS</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <style>
-      .w3-theme {
-          color: #fff !important;
-          background-color: #4CAF50 !important
-      }
-
-      .w3-btn {
-          background-color: #4CAF50;
-          margin-bottom: 4px
-      }
-
-      .w3-code {
-          border-left: 4px solid #4CAF50
-      }
-
-      .myMenu {
-          margin-bottom: 150px
-      }
-  </style>
-</head>
-<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css">
-<body>
-<header class="w3-container">
-  <div class="w3-bar w3-theme w3-medium" style="z-index:4;">
-
-
-    <div class="w3-bar-item w3-dropdown-hover">
-      <button class="w3-button">Tool</button>
-
-      <div class="w3-dropdown-content w3-bar-block w3-border">
-        <select id="toolsSelect" size="5" onclick="ResponsiveUI.onToolSelect($(this).val())"></select>
-      </div>
-    </div>
-
-
-    <div class="w3-bar-item  w3-dropdown-hover">
-      <button class="w3-button" onclick="ResponsiveUI.showSourceDialog()">Source</button>
-    </div>
-
-    <div class="w3-bar-item ">
-      <div class="w3-button  w3-sand  w3-round-xlarge">
-        <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>
-        <span class="w3-right-align w3-blue" id="selectedSource"></span>
-      </div>
-    </div>
-
-    <div class="w3-bar-item ">
-      <div class="w3-button  w3-light-blue " id="lineage_sourcesPanel">Lineage sources
-      </div>
-    </div>
-
-
-    <div class="w3-bar-item w3-right">
-      <div class="w3-button" id="user-username">User</div>
-    </div>
-
-    <div class="w3-bar-item w3-right">
-      <button class="w3-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
-    </div>
-
-
-  </div>
-
-
-</header>
-
-
-<div class="w3-container">
-
-
-</div>
-
-<footer class="w3-row-padding">
-
-</footer>
-
-
-<div id="sources_panel" class="w3-modal ">
-  <div class="w3-modal-content">
-    <div class="w3-container l3">
-
-      <span onclick="ResponsiveUI.hideDiv('sources_panel')" class="w3-button w3-display-topright">&times;</span>
-      <div class="w3-row">Source <input id="sourceSelector_searchInput" class="w3-input w3-border w3-padding" type="text" value="" autocomplete="off" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>
-    </div>
-    <div id="sourcesSelectorWrapper" style="height:80vh; overflow: auto">
-      <div id="sourcesSelectorDiv"></div>
-    </div>
-  </div>
-</div>
-</div>
-
-</header>
-</body>
-
-
+        <script type="module" src="modules/tools/lineage/lineage_relations.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_relationFilter.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_relationIndividualsFilter.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_rules.js"></script>
+
+        <script type="module" src="modules/shared/ontologyModels.js"></script>
+
+        <script type="module" src="modules/uiWidgets/predicatesSelectorWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/promptedSelectWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/sourceSelectorWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/jstreeWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/nodeInfosWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/searchWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/graphDecorationWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/legendWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/containerSearchWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/dateWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/popupMenuWidget.js"></script>
+
+        <script type="module" src="modules/uiWidgets/individualValuefilterWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/individualAggregateWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/simpleListSelectorWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/FOL2graphWidget.js"></script>
+
+        <script type="module" src="modules/tools/owlEditor.js"></script>
+        <script type="module" src="modules/tools/Standardizer.js"></script>
+        <script type="module" src="modules/tools/SQLquery.js"></script>
+        <script type="module" src="modules/tools/admin.js"></script>
+        <script type="module" src="modules/tools/ConfigEditor.js"></script>
+
+        <script type="module" src="modules/tools/KGcreator/KGcreator.js"></script>
+        <script type="module" src="modules/tools/KGcreator/KGcreator_mappings.js"></script>
+        <script type="module" src="modules/tools/KGcreator/KGcreator_graph.js"></script>
+        <script type="module" src="modules/tools/KGcreator/KGcreator_run.js"></script>
+        <script type="module" src="modules/tools/KGcreator/KGcreator_joinTables.js"></script>
+
+        <!--   <script type="module" src="modules/tools/KGcreatorGraph.js"></script>-->
+
+        <script type="module" src="modules/tools/KGpropertyFilter.js"></script>
+        <script type="module" src="modules/tools/composer.js"></script>
+        <script type="module" src="modules/tools/sparqlQueryUI.js"></script>
+
+        <script type="module" src="modules/tools/ontologiesStats.js"></script>
+
+        <script src="config/app_config.js"></script>
+
+        <script type="module" src="modules/shared/authentification.js"></script>
+        <script type="module" src="modules/tools/myDashboard.js"></script>
+
+        <script type="module">
+            import { allTools, loadToolsAndPlugins } from "./config/tools.js";
+
+            try {
+                await loadToolsAndPlugins();
+            } catch (error) {
+                console.error("Failed to load tools and plugins", error);
+            }
+        </script>
+
+        <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
+        <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
+        <script type="module" src="modules/sparqlProxies/sparql_SKOS.js"></script>
+        <script type="module" src="modules/sparqlProxies/sparql_OWL.js"></script>
+        <!--   <script type="module" src="modules/sparqlProxies/sparql_INDIVIDUALS.js"></script>-->
+
+        <script type="module" src="modules/sparqlProxies/sparql_common.js"></script>
+        <!-- <script type="module" src="modules/sparqlProxies/sparql_schema.js"></script>-->
+
+        <script type="module" src="modules/uiComponents/savedQueriesComponent.js"></script>
+        <script type="module" src="modules/search/searchUtil.js"></script>
+        <!--  <script type="module" src="modules/tools/ontologyUtil.js"></script>-->
+
+        <script type="module" src="modules/shared/export.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_graphTraversal.js"></script>
+
+        <script type="module" src="modules/search/elasticSearchProxy.js"></script>
+
+        <script type="module" src="modules/tools/lineage/lineage_reasoner.js"></script>
+
+        <script type="module" src="modules/tools/lineage/lineage_similars.js"></script>
+        <script type="module" src="modules/shared/graphLoader.js"></script>
+
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.css"
+        />
+
+        <script
+            type="text/javascript"
+            src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.js"
+        ></script>
+
+        <!-- Bootstrap -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+            integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+            crossorigin="anonymous"
+        />
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+            integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
+            crossorigin="anonymous"
+        ></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+            crossorigin="anonymous"
+        ></script>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+            integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+
+        <script src="https://browser.sentry-cdn.com/5.5.0/bundle.min.js" crossorigin="anonymous"></script>
+
+        <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
+        <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
+
+        <script type="module" src="./responsive/responsiveUI.js"></script>
+
+        <script type="module">
+            import MainController from "./modules/shared/mainController.js";
+            import authentication from "./modules/shared/authentification.js";
+
+            var leftPanelWidth = 400;
+            var rightPanelWidth = 400;
+            var w;
+            var h;
+            window.leftPanelWidth = leftPanelWidth;
+            window.rightPanelWidth = rightPanelWidth;
+
+            // Redirect 401 to login page
+            $(document).ajaxError(function (e, xhr, settings) {
+                if (xhr.status == 401) {
+                    const uri = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+                    location.href = `/login?redirect=${uri}`;
+                }
+            });
+
+            $(function () {
+                MainController.initConfig(function (err) {
+                    // sentry/glitchtip
+                    if (Config.sentryDsnJsFront) {
+                        if (typeof Sentry == "object") {
+                            Sentry.init({ dsn: Config.sentryDsnJsFront });
+                        } else {
+                            console.warn("Sentry DSN found in config, but library could not be loaded and initialized.");
+                        }
+                    }
+
+                    authentication.init();
+
+                    //SocketProxy.init()
+
+                    if (err) {
+                        return console.error(err);
+                    }
+
+                    w = $(document).width() - leftPanelWidth - 30;
+                    h = $(document).height() - 30;
+
+                    h = Math.min(h, 1000);
+
+                    $("#graphDiv").width(w);
+                    MainController.UI.initialGraphDivWitdh = w;
+                    $("#graphDiv").height(h - 50);
+
+                    $("#accordion").accordion({
+                        heightStyle: "fill",
+                    });
+                    $("#accordion").accordion("option", { active: 0 });
+                    $("#accordion").on("accordionbeforeactivate", function (event, ui) {});
+                    $("#accordion").on("accordionactivate", function (event, ui) {});
+                    $("#mainDialogDiv").dialog({
+                        autoOpen: false,
+                        height: 800,
+                        width: $(document).width() * 0.85,
+                        modal: false,
+                    });
+                    $("#mainDialogDiv2").dialog({
+                        autoOpen: false,
+                        height: 800,
+                        width: $(document).width() * 0.85,
+                        modal: false,
+                    });
+
+                    $("#smallDialogDiv").dialog({
+                        autoOpen: false,
+                        height: 600,
+                        width: 800,
+                        modal: false,
+                    });
+
+                    $(document).on("click", "a", function () {
+                        var target = $(this).attr("target");
+                        if (target == "_slsvCallback") {
+                            var id = $(this).attr("href");
+                            event.preventDefault();
+                            NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
+                        }
+                    });
+
+                    MainController.UI.setCredits();
+                    // MyDashboard.init();
+
+                    ResponsiveUI.init();
+                });
+            });
+        </script>
+
+        <title>W3.CSS</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+        <style>
+            .w3-theme {
+                color: #fff !important;
+                background-color: #4caf50 !important;
+            }
+
+            .w3-btn {
+                background-color: #4caf50;
+                margin-bottom: 4px;
+            }
+
+            .w3-code {
+                border-left: 4px solid #4caf50;
+            }
+
+            .myMenu {
+                margin-bottom: 150px;
+            }
+
+            .slsv-tabButton {
+                margin: 5px !important;
+                padding: 5px !important;
+            }
+        </style>
+    </head>
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
+    <body>
+        <header class="w3-container">
+            <div class="w3-bar w3-theme w3-medium" style="z-index: 4">
+                <div class="w3-bar-item w3-dropdown-hover">
+                    <button class="w3-button">Tool</button>
+
+                    <div class="w3-dropdown-content w3-bar-block w3-border">
+                        <select id="toolsSelect" size="5" onclick="ResponsiveUI.onToolSelect($(this).val())"></select>
+                    </div>
+                </div>
+
+                <div class="w3-bar-item w3-dropdown-hover">
+                    <button class="w3-button" onclick="ResponsiveUI.showSourceDialog()">Source</button>
+                </div>
+
+                <div class="w3-bar-item">
+                    <div class="w3-button w3-sand w3-round-xlarge">
+                        <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>
+                        <span class="w3-right-align w3-blue" id="selectedSource"></span>
+                    </div>
+                </div>
+
+                <div class="w3-bar-item">
+                    <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>
+                </div>
+
+                <div class="w3-bar-item w3-right">
+                    <div class="w3-button" id="user-username">User</div>
+                </div>
+
+                <div class="w3-bar-item w3-right">
+                    <button class="w3-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="w3-container">
+            <div class="w3-container w3-col l9" style="height: 85vh">graphdiv</div>
+
+            <div class="w3-container w3-col l3 w3-blue" style="height: 85vh">
+                <div class="w3-bar w3-black">
+                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Whiteboard')">Whiteboard</button>
+                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Classes')">Classes</button>
+                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Properties')">Properties</button>
+                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Containers')">Containers</button>
+                </div>
+                <div id="tabs_Whiteboard" class="w3-container lineage-tab">
+                    <div class="lineage_actionDiv_title">Active Source&nbsp;(s)</div>
+                    <div
+                        id="lineage_actionsWrapper"
+                        class="lineage_actionDiv"
+                        style="display: flex; flex-wrap: wrap; widthnpm: 100%; justify-content: space-evenly; gap: 5px 5px; border: #c8c8c8 solid 2px"
+                    >
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_whiteboard.drawModel()">Model</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_whiteboard.drawTopConcepts()">TopClasses</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()">Parents</button>
+
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_relations.showDrawRelationsDialog()">Query</button>
+                        <!--    <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" style="font-weight: bold" onclick="KGqueryWidget.showDialog()">Query KG</button>-->
+                    </div>
+                    <div class="lineage_actionDiv" style="display: flex; flex-wrap: wrap; width: 100%; justify-content: space-evenly; gap: 5px 5px">
+                        <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.clearSource()">Clear</button>-->
+
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog()">Similars</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">
+                            Equiv Class
+                        </button>
+
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_pathes" onclick="Lineage_graphTraversal.showShortestPathDialog()">Pathes</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_linkedData" onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">
+                            Linked Data
+                        </button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_reasoner" onclick="Lineage_reasoner.showReasonerDialog()" disabled="">Reasoner</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_rules" onclick="Lineage_rules.showRulesDialog()" disabled="">Rules</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_inferredModel" onclick="Lineage_whiteboard.drawInferredClassesModel()">Inferred Model</button>
+
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_newAxiom" onclick="NodeInfosWidget.showCreateEntityDialog()" disabled="" style="display: block">
+                            new Axiom
+                        </button>
+
+                        <!-- <div>   <input type="checkbox" id="Lineage_classes_allWhiteBoardSourcesCBX" onchange="Lineage_sources.setAllWhiteBoardSources($(this).prop('checked'))">-->
+                    </div>
+                </div>
+
+                <div id="tabs_Classes" class="w3-container lineage-tab">tabs_Classes</div>
+
+                <div id="tabs_Properties" class="w3-container lineage-tab">tabs_Properties</div>
+
+                <div id="tabs_Containers" class="w3-container lineage-tab">tabs_Containers</div>
+            </div>
+
+            <footer class="w3-row-padding"></footer>
+
+            <div id="sources_panel" class="w3-modal">
+                <div class="w3-modal-content">
+                    <div class="w3-container l3">
+                        <span onclick="ResponsiveUI.hideDiv('sources_panel')" class="w3-button w3-display-topright">&times;</span>
+                        <div class="w3-row">
+                            Source
+                            <input
+                                id="sourceSelector_searchInput"
+                                class="w3-input w3-border w3-padding"
+                                type="text"
+                                value=""
+                                autocomplete="off"
+                                style="width: 200px; font-size: 12px; margin: 3px; padding: 3px"
+                            />
+                        </div>
+                    </div>
+                    <div id="sourcesSelectorWrapper" style="height: 80vh; overflow: auto">
+                        <div id="sourcesSelectorDiv"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>

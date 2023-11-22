@@ -709,7 +709,7 @@ sourceDivId +
             const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
             return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
         });
-        if (groups.indexOf("admin")> -1 && Config.sources[source].editable ) {
+        if (groups.indexOf("admin") > -1 && Config.sources[source].editable) {
             return true;
         }
 

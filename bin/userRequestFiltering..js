@@ -117,7 +117,8 @@ var UserRequestFiltering = {
             try {
                 query2 = query.replace(regex, ""); // bug in  parser remove property path cardinality for parsing
                 query3 = query2.replace(/<_:.[^>]*>,*/gm, ""); // cited blank nodes on queries don't pass the parser
-                var json = parser.parse(query3);
+                query4 = query3.replace(/<1>,/gm, ""); // ones for pathes
+                var json = parser.parse(query4);
             } catch (e) {
                 return callback(e);
             }

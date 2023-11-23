@@ -13,11 +13,18 @@ var KGcreator_mappings = (function () {
             triples: [],
         };
         var columnNode = self.currentColumn.node;
-
+        if (!columnNode) {
+            alert("Click on Table column to map it with this class");
+            return;
+        }
         /*   if (columnNode.data.type.indexOf("Column") < 0) {
 return alert("select a field (column)");
 }*/
 
+        if (!columnNode.data.table) {
+            alert("Select a column not a Table");
+            return;
+        }
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
 
@@ -45,11 +52,16 @@ return alert("select a field (column)");
                 });
 
                 self.columnJsonEditor = new JsonEditor("#KGcreator_columnJsonDisplay", {});
-
+                // Add blank nodes $_column-name
                 var existingTriples = KGcreator.getColumnsMappings(columnNode.data.table, columnNode.data.id, "s");
+
                 if (existingTriples[columnNode.data.id]) {
                     self.updateColumnTriplesEditor(existingTriples[columnNode.data.id]);
                 }
+                if (existingTriples["$_" + columnNode.data.id]) {
+                    self.updateColumnTriplesEditor(existingTriples["$_" + columnNode.data.id]);
+                }
+
                 if (addColumnClassType && KGcreator_graph.currentGraphNode.data.id) {
                     var classTypeTriple = {
                         s: columnNode.data.id,
@@ -296,7 +308,9 @@ return alert("select a field (column)");
 
         //concat new triples from editor with other mappings in table
         KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels.forEach(function (triple) {
-            if (triple.s.indexOf(columnNode.data.id) == 0 || triple.s.indexOf(columnNode.data.id) == 1)
+            // indexOf introduce problem for columns which contains a common part in their name
+            // example document document_status
+            if (triple.s.replace("$_", "") == columnNode.data.id)
                 //include "$_ blanknode
                 return;
             newColumnMappings.push(triple);

@@ -657,14 +657,15 @@ var KGcreator = (function () {
         }
 
         var tableTriples = self.currentConfig.currentMappings[node.data.table].tripleModels;
+        var tableTriplesCopy = JSON.parse(JSON.stringify(tableTriples));
         tableTriples.forEach(function (triple, index) {
-            if (triple.s == node.data.id) {
-                tableTriples.splice(index, 1);
+            if (triple.s.replace("$_", "") == node.data.id) {
+                tableTriplesCopy = tableTriplesCopy.filter((element) => JSON.stringify(element) != JSON.stringify(triple));
                 JstreeWidget.setSelectedNodeStyle({ color: "black" });
                 KGcreator_graph.deleteColumnNode(node);
             }
         });
-
+        self.currentConfig.currentMappings[node.data.table].tripleModels = tableTriplesCopy;
         self.saveDataSourceMappings();
     };
 
@@ -781,7 +782,7 @@ var KGcreator = (function () {
         }
 
         self.currentConfig.currentMappings[table].tripleModels.forEach(function (triple) {
-            if ((column && triple[role] == column) || !column) {
+            if ((column && triple[role].replace("$_", "") == column) || !column) {
                 if (!columnTriples[triple[role]]) {
                     columnTriples[triple[role]] = [];
                 }

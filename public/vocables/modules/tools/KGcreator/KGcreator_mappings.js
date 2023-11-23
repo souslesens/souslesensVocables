@@ -45,7 +45,7 @@ return alert("select a field (column)");
                 });
 
                 self.columnJsonEditor = new JsonEditor("#KGcreator_columnJsonDisplay", {});
-
+                // Add blank nodes $_column-name
                 var existingTriples = KGcreator.getColumnsMappings(columnNode.data.table, columnNode.data.id, "s");
                 if (existingTriples[columnNode.data.id]) {
                     self.updateColumnTriplesEditor(existingTriples[columnNode.data.id]);

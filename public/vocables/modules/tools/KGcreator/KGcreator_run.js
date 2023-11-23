@@ -9,7 +9,8 @@ var KGcreator_run = (function () {
     self.createTriples = function (sampleData, allmappings, callback) {
         var table = null;
         if (KGcreator.currentTreeNode.data.type == "tableColumn") {
-            table = KGcreator.currentTreeNode.data.parent;
+            table = KGcreator.currentTreeNode.data.table;
+            self.showTableMappingsEditor(table);
         } else if (KGcreator.currentTreeNode.data.type == "table") {
             table = KGcreator.currentTreeNode.data.id;
             self.showTableMappingsEditor(table);

@@ -10,7 +10,7 @@ var KGcreator_run = (function () {
         var table = null;
         if (KGcreator.currentTreeNode.data.type == "tableColumn") {
             table = KGcreator.currentTreeNode.data.table;
-            self.showTableMappingsEditor(table);
+            self.showTableMappingsEditor(KGcreator.currentTreeNode.data.table);
         } else if (KGcreator.currentTreeNode.data.type == "table") {
             table = KGcreator.currentTreeNode.data.id;
             self.showTableMappingsEditor(table);

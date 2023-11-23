@@ -308,7 +308,9 @@ return alert("select a field (column)");
 
         //concat new triples from editor with other mappings in table
         KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels.forEach(function (triple) {
-            if (triple.s.indexOf(columnNode.data.id) == 0 || triple.s.indexOf(columnNode.data.id) == 2)
+            // indexOf introduce problem for columns which contains a common part in their name
+            // example document document_status
+            if (triple.s.replace("$_", "") == columnNode.data.id)
                 //include "$_ blanknode
                 return;
             newColumnMappings.push(triple);

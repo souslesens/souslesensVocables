@@ -196,9 +196,8 @@
         <script src="https://browser.sentry-cdn.com/5.5.0/bundle.min.js" crossorigin="anonymous"></script>
 
         <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
-        <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 
-        <script type="module" src="./responsive/responsiveUI.js"></script>
+        <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 
         <script type="module">
             import MainController from "./modules/shared/mainController.js";
@@ -238,40 +237,42 @@
                         return console.error(err);
                     }
 
-                    w = $(document).width() - leftPanelWidth - 30;
-                    h = $(document).height() - 30;
+                    if (false) {
+                        w = $(document).width() - leftPanelWidth - 30;
+                        h = $(document).height() - 30;
 
-                    h = Math.min(h, 1000);
+                        h = Math.min(h, 1000);
 
-                    $("#graphDiv").width(w);
-                    MainController.UI.initialGraphDivWitdh = w;
-                    $("#graphDiv").height(h - 50);
+                        $("#graphDiv").width(w);
+                        MainController.UI.initialGraphDivWitdh = w;
+                        $("#graphDiv").height(h - 50);
 
-                    $("#accordion").accordion({
-                        heightStyle: "fill",
-                    });
-                    $("#accordion").accordion("option", { active: 0 });
-                    $("#accordion").on("accordionbeforeactivate", function (event, ui) {});
-                    $("#accordion").on("accordionactivate", function (event, ui) {});
-                    $("#mainDialogDiv").dialog({
-                        autoOpen: false,
-                        height: 800,
-                        width: $(document).width() * 0.85,
-                        modal: false,
-                    });
-                    $("#mainDialogDiv2").dialog({
-                        autoOpen: false,
-                        height: 800,
-                        width: $(document).width() * 0.85,
-                        modal: false,
-                    });
+                        $("#accordion").accordion({
+                            heightStyle: "fill",
+                        });
+                        $("#accordion").accordion("option", { active: 0 });
+                        $("#accordion").on("accordionbeforeactivate", function (event, ui) {});
+                        $("#accordion").on("accordionactivate", function (event, ui) {});
+                        $("#mainDialogDiv").dialog({
+                            autoOpen: false,
+                            height: 800,
+                            width: $(document).width() * 0.85,
+                            modal: false,
+                        });
+                        $("#mainDialogDiv2").dialog({
+                            autoOpen: false,
+                            height: 800,
+                            width: $(document).width() * 0.85,
+                            modal: false,
+                        });
 
-                    $("#smallDialogDiv").dialog({
-                        autoOpen: false,
-                        height: 600,
-                        width: 800,
-                        modal: false,
-                    });
+                        $("#smallDialogDiv").dialog({
+                            autoOpen: false,
+                            height: 600,
+                            width: 800,
+                            modal: false,
+                        });
+                    }
 
                     $(document).on("click", "a", function () {
                         var target = $(this).attr("target");
@@ -290,39 +291,32 @@
             });
         </script>
 
-        <title>W3.CSS</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
-        <style>
-            .w3-theme {
-                color: #fff !important;
-                background-color: #4caf50 !important;
-            }
 
-            .w3-btn {
-                background-color: #4caf50;
-                margin-bottom: 4px;
-            }
+        <link rel="stylesheet" href="./responsive/index.css" />
 
-            .w3-code {
-                border-left: 4px solid #4caf50;
-            }
-
-            .myMenu {
-                margin-bottom: 150px;
-            }
-
-            .slsv-tabButton {
-                margin: 5px !important;
-                padding: 5px !important;
-            }
-        </style>
+        <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
+        <script>
+            less = {
+                env: "development",
+                async: false,
+                fileAsync: false,
+                poll: 1000,
+                functions: {},
+                dumpLineNumbers: "comments",
+                relativeUrls: false,
+                rootpath: ":/a.com/",
+            };
+        </script>
+        <!--  <script src="./responsive/less.min.js"></script>-->
+        <script type="module" src="./responsive/responsiveUI.js"></script>
     </head>
     <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
     <body>
         <header class="w3-container">
-            <div class="w3-bar w3-theme w3-medium" style="z-index: 4">
-                <div class="w3-bar-item w3-dropdown-hover">
+            <div class="w3-bar w3-medium slsv-panel" style="z-index: 4">
+                <div class="w3-bar-item w3-dropdown-hover slsv-top-menu-Button">
                     <button class="w3-button">Tool</button>
 
                     <div class="w3-dropdown-content w3-bar-block w3-border">
@@ -330,19 +324,19 @@
                     </div>
                 </div>
 
-                <div class="w3-bar-item w3-dropdown-hover">
+                <div class="w3-bar-item w3-dropdown-hover slsv-top-menu-Button">
                     <button class="w3-button" onclick="ResponsiveUI.showSourceDialog()">Source</button>
                 </div>
 
                 <div class="w3-bar-item">
                     <div class="w3-button w3-sand w3-round-xlarge">
-                        <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>
+                        <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
                         <span class="w3-right-align w3-blue" id="selectedSource"></span>
                     </div>
                 </div>
 
                 <div class="w3-bar-item">
-                    <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>
+                    <!--  <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>-->
                 </div>
 
                 <div class="w3-bar-item w3-right">
@@ -356,82 +350,30 @@
         </header>
 
         <div class="w3-container">
-            <div class="w3-container w3-col l9" style="height: 85vh">graphdiv</div>
+            <div class="w3-container w3-col l3 slsv-panel-color" style="height: 85vh" id="lateralPanelDiv"></div>
+            <div class="w3-container w3-col l9" style="height: 85vh" id="graphDiv"></div>
+        </div>
 
-            <div class="w3-container w3-col l3 w3-blue" style="height: 85vh">
-                <div class="w3-bar w3-black">
-                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Whiteboard')">Whiteboard</button>
-                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Classes')">Classes</button>
-                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Properties')">Properties</button>
-                    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('tabs_Containers')">Containers</button>
-                </div>
-                <div id="tabs_Whiteboard" class="w3-container lineage-tab">
-                    <div class="lineage_actionDiv_title">Active Source&nbsp;(s)</div>
-                    <div
-                        id="lineage_actionsWrapper"
-                        class="lineage_actionDiv"
-                        style="display: flex; flex-wrap: wrap; widthnpm: 100%; justify-content: space-evenly; gap: 5px 5px; border: #c8c8c8 solid 2px"
-                    >
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_whiteboard.drawModel()">Model</button>
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_whiteboard.drawTopConcepts()">TopClasses</button>
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()">Parents</button>
+        <footer class="w3-row-padding"></footer>
 
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_relations.showDrawRelationsDialog()">Query</button>
-                        <!--    <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" style="font-weight: bold" onclick="KGqueryWidget.showDialog()">Query KG</button>-->
-                    </div>
-                    <div class="lineage_actionDiv" style="display: flex; flex-wrap: wrap; width: 100%; justify-content: space-evenly; gap: 5px 5px">
-                        <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.clearSource()">Clear</button>-->
-
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog()">Similars</button>
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">
-                            Equiv Class
-                        </button>
-
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_pathes" onclick="Lineage_graphTraversal.showShortestPathDialog()">Pathes</button>
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_linkedData" onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">
-                            Linked Data
-                        </button>
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_reasoner" onclick="Lineage_reasoner.showReasonerDialog()" disabled="">Reasoner</button>
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_rules" onclick="Lineage_rules.showRulesDialog()" disabled="">Rules</button>
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_inferredModel" onclick="Lineage_whiteboard.drawInferredClassesModel()">Inferred Model</button>
-
-                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_newAxiom" onclick="NodeInfosWidget.showCreateEntityDialog()" disabled="" style="display: block">
-                            new Axiom
-                        </button>
-
-                        <!-- <div>   <input type="checkbox" id="Lineage_classes_allWhiteBoardSourcesCBX" onchange="Lineage_sources.setAllWhiteBoardSources($(this).prop('checked'))">-->
+        <div id="sources_panel" class="w3-modal">
+            <div class="w3-modal-content">
+                <div class="w3-container l3">
+                    <span onclick="ResponsiveUI.hideDiv('sources_panel')" class="w3-button w3-display-topright">&times;</span>
+                    <div class="w3-row">
+                        Source
+                        <input
+                            id="sourceSelector_searchInput"
+                            class="w3-input w3-border w3-padding"
+                            type="text"
+                            value=""
+                            autocomplete="off"
+                            style="width: 200px; font-size: 12px; margin: 3px; padding: 3px"
+                        />
                     </div>
                 </div>
-
-                <div id="tabs_Classes" class="w3-container lineage-tab">tabs_Classes</div>
-
-                <div id="tabs_Properties" class="w3-container lineage-tab">tabs_Properties</div>
-
-                <div id="tabs_Containers" class="w3-container lineage-tab">tabs_Containers</div>
-            </div>
-
-            <footer class="w3-row-padding"></footer>
-
-            <div id="sources_panel" class="w3-modal">
-                <div class="w3-modal-content">
-                    <div class="w3-container l3">
-                        <span onclick="ResponsiveUI.hideDiv('sources_panel')" class="w3-button w3-display-topright">&times;</span>
-                        <div class="w3-row">
-                            Source
-                            <input
-                                id="sourceSelector_searchInput"
-                                class="w3-input w3-border w3-padding"
-                                type="text"
-                                value=""
-                                autocomplete="off"
-                                style="width: 200px; font-size: 12px; margin: 3px; padding: 3px"
-                            />
-                        </div>
-                    </div>
-                    <div id="sourcesSelectorWrapper" style="height: 80vh; overflow: auto">
-                        <div id="sourcesSelectorDiv"></div>
-                    </div>
+                <div id="sourcesSelectorWrapper" style="height: 80vh; overflow: auto">
+                    <div id="sourcesSelectorDiv"></div>
                 </div>
             </div>
         </div>

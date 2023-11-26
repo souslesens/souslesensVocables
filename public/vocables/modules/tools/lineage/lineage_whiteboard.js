@@ -318,6 +318,9 @@ var Lineage_whiteboard = (function () {
         if (!source) {
             return;
         }
+        if (!graphDiv) {
+            graphDiv = Config.whiteBoardDivId;
+        }
 
         if (!Config.sources[source]) {
             return;

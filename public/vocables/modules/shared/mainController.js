@@ -509,6 +509,7 @@ return;*/
         },
 
         getJstreeConceptsContextMenu: function () {
+            if (!self.currentTool || !Config.tools[self.currentTool]) return;
             var controller = Config.tools[self.currentTool].controller;
             if (controller.jstreeContextMenu) {
                 return controller.jstreeContextMenu();

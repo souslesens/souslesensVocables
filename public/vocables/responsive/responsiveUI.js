@@ -3,6 +3,7 @@ import authentication from "../modules/shared/authentification.js";
 import Clipboard from "../modules/shared/clipboard.js";
 import Lineage_sources from "../modules/tools/lineage/lineage_sources.js";
 import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
+import Lineage_r from "./lineage_r.js";
 
 var ResponsiveUI = (function () {
     var self = {};
@@ -43,24 +44,13 @@ var ResponsiveUI = (function () {
         MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
 
-        var controller = Config.tools[MainController.currentTool].controller;
         /*  $("#currentSourceTreeDiv").html("");
       $("#sourceDivControlPanelDiv").html("");
       $("#actionDivContolPanelDiv").html("");
       $("#rightPanelDivInner").html("");*/
 
         if (toolId == "lineage") {
-            Lineage_sources.loadSources(MainController.currentSource);
-
-            $("#lateralPanelDiv").load("./responsive/html/lineage/controlPanel.html", function (s) {
-                self.openTab("lineage-tab", "tabs_Whiteboard");
-                controller.onLoaded(function (err, result) {
-                    if (callback) {
-                        callback(err, result);
-                    }
-                });
-            });
-            return;
+            return Lineage_r.init();
         } else if (toolId == "KGquery") {
             Lineage_sources.setAllWhiteBoardSources(true);
             //  $("#accordion").accordion("option", { active: 2 });

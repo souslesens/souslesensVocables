@@ -311,31 +311,32 @@
         </script>
         <!--  <script src="./responsive/less.min.js"></script>-->
         <script type="module" src="./responsive/responsiveUI.js"></script>
+        <script type="module" src="./responsive/lineage_r.js"></script>
+        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
     </head>
-    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
+
     <body>
         <header class="w3-container">
-            <div class="w3-bar w3-medium slsv-panel" style="z-index: 4">
-                <div class="w3-bar-item w3-dropdown-hover slsv-top-menu-Button">
-                    <button class="w3-button">Tool</button>
+            <div class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4">
+                <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
+                    <button class="slsv-button">Tool</button>
 
                     <div class="w3-dropdown-content w3-bar-block w3-border">
                         <select id="toolsSelect" size="5" onclick="ResponsiveUI.onToolSelect($(this).val())"></select>
                     </div>
                 </div>
 
-                <div class="w3-bar-item w3-dropdown-hover slsv-top-menu-Button">
-                    <button class="w3-button" onclick="ResponsiveUI.showSourceDialog()">Source</button>
+                <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
+                    <button class="slsv-button" onclick="ResponsiveUI.showSourceDialog()">Source</button>
                 </div>
 
                 <div class="w3-bar-item">
-                    <div class="w3-button w3-sand w3-round-xlarge">
+                    <div class="w3-sand w3-round-xlarge w3-margin" style="display: flex; flex-direction: row" id="index_topContolPanel">
                         <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
-                        <span class="w3-right-align w3-blue" id="selectedSource"></span>
                     </div>
                 </div>
 
-                <div class="w3-bar-item">
+                <div class="w3-bar-item slsv-bg-intense">
                     <!--  <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>-->
                 </div>
 
@@ -350,7 +351,7 @@
         </header>
 
         <div class="w3-container">
-            <div class="w3-container w3-col l3 slsv-panel-color" style="height: 85vh" id="lateralPanelDiv"></div>
+            <div class="w3-container w3-col l3 slsv-bg-pale" style="height: 85vh" id="lateralPanelDiv"></div>
             <div class="w3-container w3-col l9" style="height: 85vh" id="graphDiv"></div>
         </div>
 

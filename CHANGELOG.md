@@ -5,18 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.43.0...master)
+## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.42.0...master)
 
-## [1.43.1](https://github.com/souslesens/souslesensVocables/compare/1.42.0...1.43.1) - 2023-11-22
-
-## [1.43.0](https://github.com/souslesens/souslesensVocables/compare/1.42.0...1.43.0) - 2023-11-20
+## [1.44.0](https://github.com/souslesens/souslesensVocables/compare/1.43.0...master) - 2023-11-27
 
 > [!IMPORTANT]
 > Updating to Unrelease require a data migration. Execute the following script after upgrade.
 
 ```bash
-node scripts/migrations/migration_1.43_config.js -c config -w
+node scripts/migrations/migration_1.44_config.js -c config -w
 ```
+
+### Changed
+
+-   Remove `blender` field from `sources.json`
+-   Remove `default_sparql_url` from `mainConfig.json`
+
+## [1.43.1](https://github.com/souslesens/souslesensVocables/compare/1.42.0...1.43.1) - 2023-11-22
+
+## [1.43.0](https://github.com/souslesens/souslesensVocables/compare/1.42.0...1.43.0) - 2023-11-20
 
 ### Fixed
 

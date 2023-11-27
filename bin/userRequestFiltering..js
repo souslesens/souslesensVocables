@@ -35,6 +35,10 @@ var UserRequestFiltering = {
 
         // add slsvLabels (readonly) for everyone
         userGraphUrisMap["http://souslesens.org/vocables/resource/labels/"] = { source: "slsvLabels", acl: "r" };
+        userGraphUrisMap["http://souslesens.org/resource/stored-timeline-queries/"] = { source: "slsvMyQueriesTimeLine", acl: "w" };
+        userGraphUrisMap["http://souslesens.org/resource/stored-lineage-queries/"] = { source: "slsvMyQueriesLineage", acl: "w" };
+        userGraphUrisMap["http://souslesens.org/resource/stored-kgqueries-queries/"] = { source: "slsvMyQueriesKGCreator", acl: "w" };
+        userGraphUrisMap["http://souslesens.org/resource/stored-visjs-graphs/"] = { source: "slsvMyQueriesVisJsGraph", acl: "w" };
 
         for (var key in userSourcesMap) {
             var source = userSourcesMap[key];

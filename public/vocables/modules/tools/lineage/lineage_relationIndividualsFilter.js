@@ -119,7 +119,7 @@ var Lineage_relationIndividualsFilter = (function () {
             Lineage_relations.currentQueryInfos.filter.value = "Date between " + dateRange.startDate + " and " + dateRange.endDate;
         } else if (filterType == "advanced") {
             $("#lineage_relationIndividuals_LeftDiv").css("display", "none");
-            PredicatesSelectorWidget.load("lineage_relation_predicateSelectorDiv", Lineage_sources.activeSource);
+            PredicatesSelectorWidget.load("lineage_relation_predicateSelectorDiv", Lineage_sources.activeSource, { withOperators: true });
         }
     };
     self.setDateFilter = function (precision) {

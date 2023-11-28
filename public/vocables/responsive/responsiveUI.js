@@ -30,7 +30,7 @@ var ResponsiveUI = (function () {
 
         MainController.currentSource = obj.node.data.id;
         $("#selectedSource").html(MainController.currentSource);
-        self.hideDiv("sources_panel");
+        self.hideDiv("mainDialogDiv");
         self.initTool(MainController.currentTool, function (err, result) {
             if (err) {
                 return self.alert(err.responseText);
@@ -116,8 +116,8 @@ var ResponsiveUI = (function () {
     };
 
     self.showSourceDialog = function () {
-        self.showDiv("sources_panel");
-        $("#sources_panel").css("display", "block");
+        self.showDiv("mainDialogDiv");
+        $("#mainDialogDiv").css("display", "block");
         $("#sourceSelector_searchInput").focus();
         SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: ResponsiveUI.onSourceSelect }, function (err, result) {});
     };

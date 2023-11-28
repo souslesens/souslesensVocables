@@ -10,29 +10,9 @@ var Lineage_r = (function () {
         $("#lateralPanelDiv").load("./responsive/html/lineage/controlPanel.html", function (s) {
             ResponsiveUI.openTab("lineage-tab", "tabs_Whiteboard");
             var controller = Config.tools[MainController.currentTool].controller;
-            //  controller.onLoaded(function (err, result) {
+        });
+        $("#index_topContolPanel").load("./responsive/html/lineage/topMenu.html", function () {
             Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
-
-            var actionDivHtml =
-                ' <div className="lineage_actionDiv">\n' +
-                '                        <div id="lineage_drawnSources" className="Lineage_objectDivContainer"  style="display:flex;flex-direction: row">\n' +
-                '                            <div className="lineage_actionDiv_title">\n' +
-                "                                <span>Sources</span>\n" +
-                '                                <button class="slsv-button" onClick="Lineage_sources.resetAll(true)">R</button>\n' +
-                '                                <button class="slsv-button" onClick="Lineage_sources.showSourcesDialog(true)">+</button>\n' +
-                '                                <button class="slsv-button" id="Lineage_sources.setAllWhiteBoardSources"\n' +
-                '                                        onClick="Lineage_sources.setAllWhiteBoardSources()">A\n' +
-                "                                </button>\n" +
-                "                            </div>\n" +
-                "                        </div>\n" +
-                "                    </div>";
-
-            $("#index_topContolPanel").html(actionDivHtml);
-
-            /*  if (callback) {
-          callback(err, result);
-        }
-      });*/
         });
         return;
     };

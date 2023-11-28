@@ -29,7 +29,6 @@ var Lineage_relations = (function () {
                 activate: function (e, ui) {
                     var divId = ui.newPanel.selector;
                     if (divId == "#lineageRelations_resources2Tab") {
-                        // PredicatesSelectorWidget.load("lineage_relation_predicateSelectorDiv", Lineage_sources.activeSource);
                     }
                 },
             });

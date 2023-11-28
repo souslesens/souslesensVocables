@@ -29,7 +29,9 @@ var KGcreator = (function () {
     self.displayUploadApp = function (displayForm) {
         self.uploadFormData.displayForm = displayForm;
         //   return   $.getScript("/kg_upload_app.js");
-        if (!displayForm) return;
+        if (!displayForm) {
+            return;
+        }
         var html = ' <div id="mount-kg-upload-app-here"></div>';
         $("#smallDialogDiv").html(html);
         $("#smallDialogDiv").dialog({
@@ -330,13 +332,6 @@ var KGcreator = (function () {
                             },
                         };
 
-                        items.showSampleData = {
-                            label: "showSampleData",
-                            action: function (_e) {
-                                // pb avec source
-                                KGcreator.showSampleData(node, false, 200);
-                            },
-                        };
                         items.removeColumnMappings = {
                             label: "removeColumnMappings",
                             action: function (_e) {
@@ -809,7 +804,9 @@ var KGcreator = (function () {
         self.currentConfig.databaseSources[datasourceName] = json;
         self.rawConfig.databaseSources[datasourceName] = json;
         self.saveSlsvSourceConfig(function (err, result) {
-            if (err) return alert(err);
+            if (err) {
+                return alert(err);
+            }
             self.addDataSourceToJstree("databaseSource", datasourceName, sqlType);
         });
     };
@@ -827,10 +824,14 @@ var KGcreator = (function () {
         self.rawConfig.csvSources[datasourceName] = {};
 
         self.saveSlsvSourceConfig(function (err, result) {
-            if (err) return alert(err);
+            if (err) {
+                return alert(err);
+            }
             self.addDataSourceToJstree("csvSource", datasourceName);
             self.loadCsvSource(self.currentSlsvSource, datasourceName, function (err, result) {
-                if (err) return alert(err.responseText);
+                if (err) {
+                    return alert(err.responseText);
+                }
             });
         });
     };
@@ -875,7 +876,59 @@ var KGcreator = (function () {
     };
 
     self.showSampleData = function (node, column, callback) {
-        alert("coming soon");
+        // alert("coming soon");
+
+        function showTable(data) {
+            $("#KGcreator_infosDiv").val("");
+
+            var html = "<table border='1'><tr>";
+            var headers = [];
+            data.forEach(function (item) {
+                for (var key in item)
+                    if (headers.indexOf(key) < 0) {
+                        headers.push(key);
+                        html += "<td>" + key + "</td>";
+                    }
+            });
+            html += "</tr>";
+            data.forEach(function (item) {
+                html += "<tr>";
+                headers.forEach(function (column) {
+                    html += "<td>" + (item[column] || "") + "</td>";
+                });
+                html += "</tr>";
+            });
+            html += "</table>";
+
+            $("#smallDialogDiv").dialog("open");
+            // $("#smallDialogDiv").html("<div style='overflow:auto;height:90%'>"+html+"</div>")
+            $("#smallDialogDiv").html(html);
+        }
+
+        if (node.data.sample) {
+            showTable(node.data.sample);
+        } else if (self.currentConfig.currentDataSource.type == "databaseSource") {
+            var size = 200;
+            var sqlQuery = "select top  " + size + "* from " + node.data.id;
+            const params = new URLSearchParams({
+                type: self.currentConfig.currentDataSource.sqlType,
+                dbName: self.currentConfig.currentDataSource.name,
+                sqlQuery: sqlQuery,
+            });
+
+            $.ajax({
+                type: "GET",
+                url: Config.apiUrl + "/kg/data?" + params.toString(),
+                dataType: "json",
+
+                success: function (data, _textStatus, _jqXHR) {
+                    showTable(data);
+                },
+                error(err) {
+                    return alert(err.responseText);
+                },
+            });
+        }
     };
 
     self.migrateOldMappings = function (slsvSource) {

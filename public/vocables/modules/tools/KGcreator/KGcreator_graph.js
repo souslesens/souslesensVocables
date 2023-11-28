@@ -583,7 +583,9 @@ var KGcreator_graph = (function () {
     };
 
     self.saveDetailedMappings = function () {
-        alert("coming soon");
+        var mappings = self.jsonEditor.get();
+        KGcreator.currentConfig.currentMappings = mappings;
+        KGcreator.saveDataSourceMappings();
     };
 
     self.toSVG = function () {

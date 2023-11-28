@@ -22,14 +22,18 @@ return alert("select a field (column)");
         $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
-            PredicatesSelectorWidget.load("LinkColumn_predicateSelectorDiv", self.currentSlsvSource, function () {
-                $("#editPredicate_mainDiv").css("flex-direction", "column");
+            PredicatesSelectorWidget.load("LinkColumn_predicateSelectorDiv", self.currentSlsvSource, { "flex-direction": "column" }, function () {
                 $("#editPredicate_vocabularySelect2").css("display", "inline");
                 $("#editPredicate_vocabularySelect2").val("usual");
                 PredicatesSelectorWidget.init(self.currentSlsvSource, function () {
                     PredicatesSelectorWidget.onSelectObjectFn = function (value) {};
                     PredicatesSelectorWidget.onSelectPropertyFn = function (value) {};
-
+                    $("#KGcreator_dialogDiv").dialog({
+                        autoOpen: false,
+                        height: 600,
+                        width: 800,
+                        modal: true,
+                    });
                     var html =
                         "<div>isBlankNode<input type='checkbox' id='LinkColumn_isObjectBlankNodeCBX' />" +
                         "is String <input type='checkbox' id='LinkColumn_isObjectStringCBX' /><br> " +
@@ -73,14 +77,20 @@ return alert("select a field (column)");
 
         if (role == "s") {
             if (value == "_selectedColumn") {
-                $("#KGcreator_subjectInput").val(columnNode.id);
+                $("#LinkColumn_subjectInput").val(columnNode.data.id);
+            } else if (value == "_virtualColumn") {
+                $("#LinkColumn_subjectInput").val("$_" + columnNode.data.id);
             } else {
-                $("#KGcreator_subjectInput").val(value);
+                $("#LinkColumn_subjectInput").val(value);
             }
         } else if (role == "p") {
-            $("#editPredicate_propertyValue").val(value);
+            if (value == "_function") {
+                return self.showFunctionDialog(role);
+            } else $("#editPredicate_propertyValue").val(value);
         } else if (role == "o") {
-            if (value == "table_Column") {
+            if (value == "_function") {
+                return self.showFunctionDialog(role);
+            } else if (value == "table_Column") {
                 var table = columnNode.data.table;
                 var columns = KGcreator.currentConfig.currentDataSource.tables[table];
                 common.fillSelectOptions("editPredicate_objectSelect", columns, true);
@@ -122,7 +132,10 @@ return alert("select a field (column)");
         }
     };
     self.addTripleFromPredicateSelectorWidget = function (basicType) {
-        var subject = self.currentColumn.node.data.id;
+        // var subject = self.currentColumn.node.data.id;
+        /*  var subjectType=$("#LinkColumn_subjectSelect").val();
+      if(subjectType!="_selectedColumn")*/
+        var subject = $("#LinkColumn_subjectInput").val();
         var predicate = PredicatesSelectorWidget.getSelectedProperty();
         var object = PredicatesSelectorWidget.getSelectedObjectValue();
         var isSubjectBlankNode = $("#LinkColumn_isSubjectBlankNodeCBX").prop("checked");
@@ -177,11 +190,11 @@ return alert("select a field (column)");
             tripleObj.isRestriction = true;
         }
         /*   if (subject.indexOf("http://") > 0 && object.indexOf("function") < 0) {
-     tripleObj.subjectIsSpecificUri = true;
- }
- if (object.indexOf("http://") > 0 && object.indexOf("function") < 0) {
-     tripleObj.objectIsSpecificUri = true;
- }*/
+ tripleObj.subjectIsSpecificUri = true;
+}
+if (object.indexOf("http://") > 0 && object.indexOf("function") < 0) {
+ tripleObj.objectIsSpecificUri = true;
+}*/
         self.updateColumnTriplesEditor(tripleObj);
     };
     self.addLookup = function () {
@@ -296,9 +309,10 @@ return alert("select a field (column)");
 
         //concat new triples from editor with other mappings in table
         KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels.forEach(function (triple) {
-            if (triple.s.indexOf(columnNode.data.id) == 0 || triple.s.indexOf(columnNode.data.id) == 1)
+            if (triple.s.indexOf(columnNode.data.id) == 0 || triple.s.indexOf(columnNode.data.id) == 1) {
                 //include "$_ blanknode
                 return;
+            }
             newColumnMappings.push(triple);
         });
 

@@ -331,7 +331,7 @@
                 </div>
 
                 <div class="w3-bar-item">
-                    <div class="w3-sand w3-round-xlarge w3-margin" style="display: flex; flex-direction: row" id="index_topContolPanel">
+                    <div class="w3-sand w3-round-xlarge w3-margin" style="display: flex; flex-direction: row; align-items: center" id="index_topContolPanel">
                         <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
                     </div>
                 </div>
@@ -357,10 +357,12 @@
 
         <footer class="w3-row-padding"></footer>
 
-        <div id="sources_panel" class="w3-modal">
+        <!-- popup panel-->
+
+        <div id="mainDialogDiv" class="w3-modal">
             <div class="w3-modal-content">
                 <div class="w3-container l3">
-                    <span onclick="ResponsiveUI.hideDiv('sources_panel')" class="w3-button w3-display-topright">&times;</span>
+                    <span onclick="ResponsiveUI.hideDiv('mainDialogDiv')" class="w3-button w3-display-topright">&times;</span>
                     <div class="w3-row">
                         Source
                         <input

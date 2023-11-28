@@ -20,7 +20,7 @@ var Lineage_blend = (function () {
 
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
                 $("#editPredicate_mainDiv").remove();
-                PredicatesSelectorWidget.load("LineageBlend_commonPredicateObjectDiv", Lineage_sources.activeSource, function () {
+                PredicatesSelectorWidget.load("LineageBlend_commonPredicateObjectDiv", Lineage_sources.activeSource, {}, function () {
                     $("#editPredicate_propertyDiv").css("display", "none");
                 });
             });

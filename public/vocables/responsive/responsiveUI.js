@@ -3,7 +3,7 @@ import authentication from "../modules/shared/authentification.js";
 import Clipboard from "../modules/shared/clipboard.js";
 import Lineage_sources from "../modules/tools/lineage/lineage_sources.js";
 import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
-import Lineage_r from "./lineage_r.js";
+import Lineage_r from "./lineage/lineage_r.js";
 
 var ResponsiveUI = (function () {
     var self = {};
@@ -104,7 +104,7 @@ var ResponsiveUI = (function () {
         $("#" + modalDiv).css("display", "none");
     };
 
-    self.openTab = function (tabGroup, tabId) {
+    self.openTab = function (tabGroup, tabId, actionFn) {
         var i;
         var x = document.getElementsByClassName(tabGroup);
         for (i = 0; i < x.length; i++) {
@@ -112,6 +112,9 @@ var ResponsiveUI = (function () {
         }
         if (tabId) {
             document.getElementById(tabId).style.display = "block";
+        }
+        if (actionFn) {
+            actionFn();
         }
     };
 

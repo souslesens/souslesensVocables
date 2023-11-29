@@ -414,12 +414,10 @@ Lineage_styles.showDialog(self.currentContainer.data);
                         ?parentContainer rdfs:label ?parentContainerLabel.
                         ?parentContainer rdf:type ?type.
                         filter (?type in (rdf:Bag,rdf:List)).
+                       
                         BIND( concat('{','"parentUri":"',str(?parentContainer),'","parentType":"',str(?type),'","parentLabel":"',str(?parentContainerLabel),'","parentChild":"',str(?child),'"}')  AS ?allprop).
                         ${values}        
-        
-                            
-          
-          
+         
                 {
           
                           select distinct *   where {
@@ -1133,58 +1131,61 @@ Lineage_styles.showDialog(self.currentContainer.data);
                             });
                         }
 
-                        var edgeId = containerData.id + "_" + "member" + "_" + item.parent.value;
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1;
+                        if (containerData.id != item.parent.value) {
+                            var edgeId = containerData.id + "_" + "member" + "_" + item.parent.value;
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1;
 
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: containerData.id,
-                                to: item.parent.value,
-                                arrows: {
-                                    middle: {
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: containerData.id,
+                                    to: item.parent.value,
+                                    arrows: {
+                                        middle: {
+                                            enabled: true,
+                                            type: Lineage_whiteboard.defaultEdgeArrowType,
+                                            scaleFactor: 0.5,
+                                        },
+                                    },
+                                    data: {
+                                        from: containerData.id,
+                                        to: item.parent.value,
+                                        source: source,
+                                    },
+                                    //  dashes: true,
+                                    width: 0.5,
+                                    color: memberEdgeColor,
+                                });
+                            }
+                        }
+                        if (item.member.value != item.parent.value) {
+                            var edgeId = item.parent.value + "_" + "member" + "_" + item.member.value;
+
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1;
+                                var type = "container";
+                                if (item.memberTypes.value.indexOf("Bag") < 0) {
+                                    type = "class";
+                                }
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: item.parent.value,
+                                    to: item.member.value,
+                                    arrows: {
                                         enabled: true,
                                         type: Lineage_whiteboard.defaultEdgeArrowType,
                                         scaleFactor: 0.5,
                                     },
-                                },
-                                data: {
-                                    from: containerData.id,
-                                    to: item.parent.value,
-                                    source: source,
-                                },
-                                //  dashes: true,
-                                width: 0.5,
-                                color: memberEdgeColor,
-                            });
-                        }
-
-                        var edgeId = item.parent.value + "_" + "member" + "_" + item.member.value;
-
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1;
-                            var type = "container";
-                            if (item.memberTypes.value.indexOf("Bag") < 0) {
-                                type = "class";
+                                    data: {
+                                        from: item.parent.value,
+                                        to: item.member.value,
+                                        source: source,
+                                    },
+                                    //  dashes: true,
+                                    width: type == "container" ? 1 : 0.5,
+                                    color: memberEdgeColor,
+                                });
                             }
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.parent.value,
-                                to: item.member.value,
-                                arrows: {
-                                    enabled: true,
-                                    type: Lineage_whiteboard.defaultEdgeArrowType,
-                                    scaleFactor: 0.5,
-                                },
-                                data: {
-                                    from: item.parent.value,
-                                    to: item.member.value,
-                                    source: source,
-                                },
-                                //  dashes: true,
-                                width: type == "container" ? 1 : 0.5,
-                                color: memberEdgeColor,
-                            });
                         }
                     });
 

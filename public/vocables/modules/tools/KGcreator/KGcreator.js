@@ -263,8 +263,8 @@ var KGcreator = (function () {
                         };
 
                         return items;
-                    } 
-                    
+                    }
+
                     // file = une table
                     /*
                     else if (node.data.type == "csvSource") {
@@ -280,7 +280,7 @@ var KGcreator = (function () {
 
                         return items;
                     }*/
-                     else if (node.data.type == "table") {
+                    else if (node.data.type == "table") {
                         items.showTableMappings = {
                             label: "showTableMappings",
                             action: function (_e) {
@@ -574,7 +574,7 @@ var KGcreator = (function () {
 
                         var columnMappings = self.getColumnsMappings(fileName, null, "s");
 
-                        if (columnMappings[column]||columnMappings["$_"+column]) {
+                        if (columnMappings[column] || columnMappings["$_" + column]) {
                             label = "<span class='KGcreator_fileWithMappings'>" + column + "</span>";
                         }
                         jstreeData.push({
@@ -930,8 +930,9 @@ var KGcreator = (function () {
                     return alert(err.responseText);
                 },
             });
-        }else if (self.currentConfig.currentDataSource.type == "csvSource") {
-            alert('Comming Soon...')}
+        } else if (self.currentConfig.currentDataSource.type == "csvSource") {
+            alert("Comming Soon...");
+        }
     };
 
     self.migrateOldMappings = function (slsvSource) {

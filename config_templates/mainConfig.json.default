@@ -2,7 +2,6 @@
     "souslesensUrl": "http://localhost:3010",
     "listenPort": "3010",
     "serverUrl": "../slsv",
-    "default_sparql_url": "http://xxxxxxxx:8890/sparql",
     "auth": "local",
     "cookieSameSite": "",
     "cookieSecure": false,

@@ -316,7 +316,7 @@ var GraphStore = {
                     configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
                     jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
                         Config = _config;
-                        sparqlServerUrl = options.sparqlServerUrl || Config.default_sparql_url;
+                        sparqlServerUrl = options.sparqlServerUrl || Config.sparql_server.url;
                         return callbackSeries();
                     });
                 },

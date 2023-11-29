@@ -1,7 +1,6 @@
 {
     "souslesensUrl": "http://localhost:3011",
     "listenPort": "3011",
-    "default_sparql_url": "http://localhost:8899/sparql",
     "auth": "local",
     "defaultGroups": [],
     "logDir": "logs",

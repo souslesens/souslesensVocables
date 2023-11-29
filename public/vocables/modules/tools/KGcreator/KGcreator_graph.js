@@ -107,7 +107,7 @@ var KGcreator_graph = (function () {
         }
         var html = "";
 
-        html = '    <span class="popupMenuItem" onclick="KGcreator.showNodeNodeInfos();"> Node Infos</span>';
+        html = '    <span class="popupMenuItem" onclick="KGcreator_graph.showNodeNodeInfos();"> Node Infos</span>';
         html += '    <span class="popupMenuItem" onclick="KGcreator_mappings.showMappingDialog(true);"> Set column Class</span>';
         $("#popupMenuWidgetDiv").html(html);
         PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");

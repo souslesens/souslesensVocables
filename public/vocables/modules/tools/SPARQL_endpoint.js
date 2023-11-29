@@ -16,7 +16,7 @@ var SPARQL_endpoint = (function () {
     self.onLoaded = function () {
         //  self.currentSource = sourceLabel;
         // self.currentSparql_server = Config.sources[sourceLabel].sparql_server;
-        //  self.currentSparql_server = Config.default_sparql_urlsparql_server;
+        //  self.currentSparql_server = Config.sparql_server.urlsparql_server;
         localStorage.clear();
         $("#graphDiv").html("");
         $("#graphDiv").load("snippets/SPARQLendpoint.html", function () {
@@ -30,7 +30,7 @@ var SPARQL_endpoint = (function () {
         var method = sourceObj.sparql_server.method;
         var graphUri = sourceObj.graphUri;*/
 
-        var url = Config.default_sparql_url;
+        var url = Config.sparql_server.url;
         var method = "POST";
         var graphUri = "";
 

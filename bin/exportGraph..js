@@ -148,7 +148,7 @@ var ExportGraph = {
                                         var fromStr = " FROM <" + graphUri + ">  ";
                                         var url = source.sparql_server.url;
                                         if (url == "_default") {
-                                            url = Config.default_sparql_url;
+                                            url = Config.sparql_server.url;
                                         }
 
                                         var query = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } offset " + offset + " limit " + size + "";

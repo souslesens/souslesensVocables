@@ -806,7 +806,7 @@ callbackEach();
         var query = "";
         query += "with  GRAPH <" + mappings.graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGtripleBuilder.mappingFilePredicate + "> '" + mappings.fileName + "'}";
         var params = { query: query };
-        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
             params.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,
@@ -833,7 +833,7 @@ callbackEach();
         var query = KGtripleBuilder.getSparqlPrefixesStr();
         query += "DELETE DATA {  GRAPH <" + graphUri + "> {  " + insertTriplesStr + " }  } ";
         var params = { query: query };
-        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
             params.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,
@@ -870,7 +870,7 @@ callbackEach();
 
                     var params = { query: query };
 
-                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                         params.auth = {
                             user: ConfigManager.config.sparql_server.user,
                             pass: ConfigManager.config.sparql_server.password,
@@ -905,7 +905,7 @@ callbackEach();
 
                     var params = { query: query };
 
-                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                         params.auth = {
                             user: ConfigManager.config.sparql_server.user,
                             pass: ConfigManager.config.sparql_server.password,
@@ -926,7 +926,7 @@ callbackEach();
                     var query = "clear Graph  <" + tempGraphUri + "> ";
                     var params = { query: query };
 
-                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                         params.auth = {
                             user: ConfigManager.config.sparql_server.user,
                             pass: ConfigManager.config.sparql_server.password,
@@ -969,7 +969,7 @@ callbackEach();
 
         var params = { query: queryGraph };
 
-        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
             params.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,
@@ -1042,7 +1042,7 @@ callbackEach();
                         if (err) {
                             return callbackSeries(err);
                         }
-                        sparqlServerUrl = result.default_sparql_url;
+                        sparqlServerUrl = result.sparql_server.url;
                         callbackSeries();
                     });
                 },
@@ -1050,7 +1050,7 @@ callbackEach();
                     var query = "clear graph   <" + graphUri + ">";
                     var params = { query: query };
 
-                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                         params.auth = {
                             user: ConfigManager.config.sparql_server.user,
                             pass: ConfigManager.config.sparql_server.password,
@@ -1104,7 +1104,7 @@ callbackEach();
                         if (err) {
                             return callbackSeries(err);
                         }
-                        sparqlServerUrl = result.default_sparql_url;
+                        sparqlServerUrl = result.sparql_server.url;
                         callbackSeries();
                     });
                 },

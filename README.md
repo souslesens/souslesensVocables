@@ -263,7 +263,7 @@ To contribute to souslesensVocable, fork the repo and submit Pull Requests.
 #### Style
 
 We use [Prettier](https://prettier.io/) for Javascript code formatting. Please run
-`npm run format` before each commit to format your code.
+`npm run prettier:write` before each commit to format your code.
 
 #### Tests
 

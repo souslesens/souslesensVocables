@@ -89,7 +89,6 @@ type ProfileJson = {
     sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string[] | string;
     forbiddenTools: string[];
-    blender: Blender;
 };
 
 const decodeProfile = (key: string, profile: ProfileJson): Profile => {
@@ -101,14 +100,10 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         sourcesAccessControl: profile.sourcesAccessControl,
         allowedTools: profile.allowedTools,
         forbiddenTools: profile.forbiddenTools,
-        blender: { contextMenuActionStartLevel: profile.blender.contextMenuActionStartLevel },
     };
 };
 
 type Profile = z.infer<typeof ProfileSchema>;
-const BlenderSchema = z.object({
-    contextMenuActionStartLevel: z.coerce.number(),
-});
 
 const SourceAccessControlSchema = z.union([z.literal("forbidden"), z.literal("read"), z.literal("readwrite")]);
 
@@ -122,7 +117,6 @@ const ProfileSchema = {
     sourcesAccessControl: z.record(SourceAccessControlSchema).default({}),
     allowedTools: z.union([z.string(), z.array(z.string())]).default("ALL"),
     forbiddenTools: z.array(z.string()).default([]),
-    blender: BlenderSchema.default({ contextMenuActionStartLevel: 0 }),
 };
 
 export const ProfileSchemaCreate = {
@@ -132,8 +126,6 @@ export const ProfileSchemaCreate = {
         .refine((val) => val !== "admin", { message: "Name can't be admin" })
         .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
 };
-
-type Blender = z.infer<typeof BlenderSchema>;
 
 type SourceAccessControl = z.infer<typeof SourceAccessControlSchema>;
 
@@ -146,7 +138,6 @@ export const defaultProfile = (uuid: string): Profile => {
         sourcesAccessControl: {},
         allowedTools: "ALL",
         forbiddenTools: [],
-        blender: { contextMenuActionStartLevel: 0 },
     };
 };
 export { getProfiles, deleteProfile, Profile, SourceAccessControl, ProfileSchema };

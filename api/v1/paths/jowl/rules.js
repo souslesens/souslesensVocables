@@ -33,7 +33,7 @@ module.exports = function () {
             });
         } else if (req.query.type == "internalGraphUri" && ConfigManager.config) {
             var query = req.query.describeQuery;
-            var url = ConfigManager.config.default_sparql_url + "?query=";
+            var url = ConfigManager.config.sparql_server.url + "?query=";
 
             var requestOptions = {
                 method: "POST",

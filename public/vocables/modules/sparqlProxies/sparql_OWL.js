@@ -1776,7 +1776,7 @@ var Sparql_OWL = (function () {
                 var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph, options.withoutImports);
                 var query = "SELECT distinct ?id ?g " + fromStr + "WHERE {GRAPH ?g{?id ?p ?o. " + filter + "}} limit 10000";
 
-                self.sparql_url = Config.default_sparql_url;
+                self.sparql_url = Config.sparql_server.url;
                 var url = self.sparql_url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {}, function (err, result) {
                     if (err) {
@@ -1796,7 +1796,7 @@ var Sparql_OWL = (function () {
     self.getGraphsByRegex = function (pattern, callback) {
         var query = "SELECT * " + "WHERE {" + '  ?s <http://www.w3.org/2002/07/owl#versionIRI> ?graph. filter (regex(str(?graph),"' + pattern + '"))' + " ?graph ?p ?value." + "}";
 
-        self.sparql_url = Config.default_sparql_url;
+        self.sparql_url = Config.sparql_server.url;
         var url = self.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {}, function (err, result) {
             if (err) {
@@ -1868,7 +1868,7 @@ var Sparql_OWL = (function () {
 
         var url;
         if (!Config.sources[sourceLabel]) {
-            url = Config.default_sparql_url + "?format=json&query=";
+            url = Config.sparql_server.url + "?format=json&query=";
         } else {
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         }
@@ -2195,7 +2195,7 @@ var Sparql_OWL = (function () {
 
         var query = "PREFIX slsv:<" + Config.storedQueries_graphUri + "> \nselect * " + fromStr + ' where {?s ?p ?o.?s slsv:hasScope "' + scope + '"}order by ?label';
 
-        var url = Config.default_sparql_url + "?format=json&query=";
+        var url = Config.sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, _result) {
             if (err) {
                 return callback(err);
@@ -2287,7 +2287,7 @@ var Sparql_OWL = (function () {
             " WHERE {{ ?id rdf:type ?type. " +
             filterStr +
             "?id rdfs:label ?label  }} limit 10000";
-        var url = Config.default_sparql_url + "?format=json&query=";
+        var url = Config.sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             if (err) {
                 return callback(err);
@@ -2306,7 +2306,7 @@ var Sparql_OWL = (function () {
             " WHERE {?sub rdfs:label ?label " +
             filter +
             "  } limit 10000";
-        var url = Config.default_sparql_url + "?query=";
+        var url = Config.sparql_server.url + "?query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: Config._defaultSource }, function (err, result) {
             if (err) {
                 return callback(err);
@@ -2371,7 +2371,7 @@ var Sparql_OWL = (function () {
                         "SELECT    distinct ?sub ?label " +
                         graphUrisStr +
                         " WHERE {?sub rdfs:label ?label } }";
-                    var url = Config.default_sparql_url + "?query=";
+                    var url = Config.sparql_server.url + "?query=";
                     Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, _result) {
                         if (err) {
                             return callback(err);

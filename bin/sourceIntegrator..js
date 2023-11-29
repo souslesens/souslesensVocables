@@ -14,7 +14,7 @@ var SourceIntegrator = {
     creatTriplesFromUrl: function (ontologyUrl, callback) {
         " curl " + "--digest" + " --user dba:dba" + " --verbose" + ' --url "http://example.com/sparql-graph-crud-auth?graph-uri=urn:graph:update:test:put" ' + "/ -T books.ttl";
 
-        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
             params.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,
@@ -84,7 +84,7 @@ var SourceIntegrator = {
             query: strInsert,
         };
 
-        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
             options.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,
@@ -135,7 +135,7 @@ var SourceIntegrator = {
         var sparqlUrl = sparqlServerUrl + "?query=";
 
         var options = { query: strClear };
-        if (ConfigManager.config && sparqlUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+        if (ConfigManager.config && sparqlUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
             options.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,
@@ -252,7 +252,7 @@ var SourceIntegrator = {
                     configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
                     jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
                         Config = _config;
-                        sparqlServerUrl = options.sparqlServerUrl || Config.default_sparql_url;
+                        sparqlServerUrl = options.sparqlServerUrl || Config.sparql_server.url;
                         return callbackSeries();
                     });
                 },

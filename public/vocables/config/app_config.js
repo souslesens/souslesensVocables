@@ -30,6 +30,7 @@ var Config = (function () {
 
     self.appName = "VOCABLES";
 
+    self.whiteBoardDivId = "graphDiv";
     self.debug = { query: 1 };
     self.enableCollections = false;
     self.showAssetQueyMenu = true;

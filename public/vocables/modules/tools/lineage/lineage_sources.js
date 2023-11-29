@@ -103,7 +103,7 @@ var Lineage_sources = (function () {
         return;
     };
 
-    self.loadSources = function (sources) {
+    self.loadSources = function (sources, callback) {
         if (!sources) {
             return alert("no source selected");
         }
@@ -131,16 +131,18 @@ var Lineage_sources = (function () {
             },
             function (err) {
                 if (err) {
-                    alert(err);
+                    if (callback) {
+                        return callback(err);
+                    }
+                    return alert(err);
                 }
                 self.setCurrentSource(firstSource);
                 $("#sourcesSelectionDialogdiv").dialog("close");
                 MainController.UI.showHideRightPanel();
                 $("#lineage_allActions").css("visibility", "visible");
-            },
-            function (err) {
-                if (err) {
-                    return alert(err.responseText);
+
+                if (callback) {
+                    return callback(err);
                 }
             }
         );

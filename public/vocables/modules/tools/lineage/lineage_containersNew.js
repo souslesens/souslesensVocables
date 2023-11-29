@@ -117,7 +117,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
         var filter = "";
         if (term) {
-            filter = Sparql_common.setFilter("member", null, term);
+            filter = Sparql_common.setFilter("parent0", null, term);
         }
 
         var search_on_container = "";
@@ -135,10 +135,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
         }
 
         self.currentContainer = null;
-        /*  self.listContainerResources(source, null, { filter:filter })
 
-
-return;*/
         if ($("#lineage_containers_containersJstree").jstree) {
             $("#lineage_containers_containersJstree").empty();
         }
@@ -368,10 +365,135 @@ var query =
 
         return new_results;
     };
+
+    self.drawContainerJstree = function (source, filter, jstreeDiv, search_on_container, memberType, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        options.depth = 3;
+        if (!options.filter) {
+            options.filter = "";
+        }
+        options.filter += filter || "";
+
+        var data = [];
+
+        async.series(
+            [
+                function (callbackSeries) {
+                    if (search_on_container) {
+                        if (!Array.isArray(search_on_container)) {
+                            search_on_container = [search_on_container];
+                        }
+                        return callbackSeries();
+                    }
+                    // determine top container with members if no search_on_container
+                    self.sparql_queries.getTopContainers(source, function (err, result) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        if (err) {
+                            return callback(err);
+                        }
+                        search_on_container = [];
+
+                        result.results.bindings.forEach(function (item) {
+                            search_on_container.push(item.member.value);
+                        });
+                        callbackSeries();
+                    });
+                },
+                // determine top container without  members if no search_on_container and no  container with members
+                function (callbackSeries) {
+                    callbackSeries();
+                },
+                //prepare parents and members
+                function (callbackSeries) {
+                    self.sparql_queries.getContainerDescendants(source, search_on_container, options, function (err, result) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        var membersMap = {};
+
+                        result.results.bindings.forEach(function (item) {
+                            membersMap[item.member.value] = item.parent.value;
+                        });
+                    });
+                },
+
+                function (callbackSeries) {
+                    var jstreeData = [];
+                    var existingIds = {};
+                    var existingNodes = {};
+
+                    search_on_container.forEach(function (item) {
+                        var id = item.member.value;
+
+                        if (!existingIds[id]) {
+                            existingIds[id] = [];
+                        }
+                        var jstreeId = "_" + common.getRandomHexaId(5);
+                        existingIds[id].push(jstreeId);
+
+                        var node = {
+                            id: jstreeid,
+                            text: item.member.value,
+                            parent: "#",
+                            type: type_icon,
+                            data: {
+                                type: item.types,
+                                source: source,
+                                id: item.id,
+                                label: item.label,
+                                currentParent: parent,
+                                tabId: options.tabId,
+                            },
+                        };
+
+                        jstreeData.push(node);
+                    });
+
+                    data.forEach(function (item) {
+                        var type_icon = JstreeWidget.selectTypeForIconsJstree(item.types, self.add_supplementary_layer_for_types_icon);
+
+                        var node = {
+                            id: item.jstreeid,
+                            text: item.label,
+                            parent: parent,
+                            type: type_icon,
+                            data: {
+                                type: item.types,
+                                source: source,
+                                id: item.id,
+                                label: item.label,
+                                currentParent: parent,
+                                tabId: options.tabId,
+                            },
+                        };
+
+                        jstreeData.push(node);
+
+                        var jstreeOptions;
+                        if (options.jstreeOptions) {
+                            jstreeOptions = options.jstreeOptions;
+                        } else {
+                            jstreeOptions = {
+                                openAll: false,
+                                contextMenu: Lineage_containers.getContextJstreeMenu(),
+                                selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
+                            };
+                        }
+                    });
+                },
+            ],
+            function (err) {}
+        );
+    };
+
     // filter is a clause SPARQL clause filter like FILTER (regex(?memberLabel, "flu", "i"))
     //search_container is an URI chracter chain to indicates the search focus on this container
     //membertype is a list like  in (rdf:Bag,rdf:List) to indicates where type are filtered on the search, he is prefixed at (rdf:Bag,rdf:List) for not filtered clauses
-    self.drawContainerJstree = function (source, filter, jstreeDiv, search_on_container, memberType, options, callback) {
+    self.drawContainerJstreeXX = function (source, filter, jstreeDiv, search_on_container, memberType, options, callback) {
         if (!options) {
             options = {};
         }
@@ -414,12 +536,10 @@ var query =
                         ?parentContainer rdfs:label ?parentContainerLabel.
                         ?parentContainer rdf:type ?type.
                         filter (?type in (rdf:Bag,rdf:List)).
+                       
                         BIND( concat('{','"parentUri":"',str(?parentContainer),'","parentType":"',str(?type),'","parentLabel":"',str(?parentContainerLabel),'","parentChild":"',str(?child),'"}')  AS ?allprop).
                         ${values}        
-        
-                            
-          
-          
+         
                 {
           
                           select distinct *   where {
@@ -1133,58 +1253,61 @@ var query =
                             });
                         }
 
-                        var edgeId = containerData.id + "_" + "member" + "_" + item.parent.value;
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1;
+                        if (containerData.id != item.parent.value) {
+                            var edgeId = containerData.id + "_" + "member" + "_" + item.parent.value;
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1;
 
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: containerData.id,
-                                to: item.parent.value,
-                                arrows: {
-                                    middle: {
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: containerData.id,
+                                    to: item.parent.value,
+                                    arrows: {
+                                        middle: {
+                                            enabled: true,
+                                            type: Lineage_whiteboard.defaultEdgeArrowType,
+                                            scaleFactor: 0.5,
+                                        },
+                                    },
+                                    data: {
+                                        from: containerData.id,
+                                        to: item.parent.value,
+                                        source: source,
+                                    },
+                                    //  dashes: true,
+                                    width: 0.5,
+                                    color: memberEdgeColor,
+                                });
+                            }
+                        }
+                        if (item.member.value != item.parent.value) {
+                            var edgeId = item.parent.value + "_" + "member" + "_" + item.member.value;
+
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1;
+                                var type = "container";
+                                if (item.memberTypes.value.indexOf("Bag") < 0) {
+                                    type = "class";
+                                }
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: item.parent.value,
+                                    to: item.member.value,
+                                    arrows: {
                                         enabled: true,
                                         type: Lineage_whiteboard.defaultEdgeArrowType,
                                         scaleFactor: 0.5,
                                     },
-                                },
-                                data: {
-                                    from: containerData.id,
-                                    to: item.parent.value,
-                                    source: source,
-                                },
-                                //  dashes: true,
-                                width: 0.5,
-                                color: memberEdgeColor,
-                            });
-                        }
-
-                        var edgeId = item.parent.value + "_" + "member" + "_" + item.member.value;
-
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1;
-                            var type = "container";
-                            if (item.memberTypes.value.indexOf("Bag") < 0) {
-                                type = "class";
+                                    data: {
+                                        from: item.parent.value,
+                                        to: item.member.value,
+                                        source: source,
+                                    },
+                                    //  dashes: true,
+                                    width: type == "container" ? 1 : 0.5,
+                                    color: memberEdgeColor,
+                                });
                             }
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.parent.value,
-                                to: item.member.value,
-                                arrows: {
-                                    enabled: true,
-                                    type: Lineage_whiteboard.defaultEdgeArrowType,
-                                    scaleFactor: 0.5,
-                                },
-                                data: {
-                                    from: item.parent.value,
-                                    to: item.member.value,
-                                    source: source,
-                                },
-                                //  dashes: true,
-                                width: type == "container" ? 1 : 0.5,
-                                color: memberEdgeColor,
-                            });
                         }
                     });
 
@@ -1298,6 +1421,29 @@ var query =
     };
 
     self.sparql_queries = {
+        getTopContainers: function (source, callback) {
+            var fromStr = Sparql_common.getFromStr(source, false, false);
+            var query =
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT distinct ?member " +
+                fromStr +
+                "    ?member rdf:type ?memberType. " +
+                " ?member rdfs:label ?memberLabel. " +
+                " FILTER (?memberType in(rdf:Bag,rdf:List))\n" +
+                "  filter (not exists{?parent rdfs:member ?member})\n" +
+                "    }";
+
+            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+
         getContainerDescendants: function (source, containerId, options, callback) {
             var fromStr = Sparql_common.getFromStr(source, false, false);
             var filterContainer0Str = "";
@@ -1306,35 +1452,37 @@ var query =
                 filterContainer0Str = Sparql_common.setFilter("parent0", containerId, null, { useFilterKeyWord: 1 });
             }
 
+            var filter = options.filter || "";
+
+            var filterLeaves = "";
+            if (!options.leaves) {
+                filterLeaves = " FILTER (?memberType in(rdf:Bag,rdf:List))";
+            }
+
             //  var pathOperator = "+";
             var pathOperator = "+";
             if (options.onlyOneLevel) {
                 pathOperator = "";
+            } else if (options.depth) {
+                pathOperator = "{1," + options.depth + "}";
             }
             var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "SELECT distinct ?member ?memberLabel ?parent ?parentLabel" +
-                ' (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes) ' +
-                fromStr +
-                " WHERE {\n" +
+                'SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes)  FROM   <http://souslesens.org/resources/ontology/slsv-ui/>  FROM   <http://rds.posccaesar.org/ontology/lis14/ont/core>  WHERE {?member ^rdfs:member ?parent.\n' +
+                "    ?member rdf:type ?memberType.\n" +
+                filterLeaves +
+                "   ?member rdfs:label ?memberLabel.\n" +
+                "   ?parent rdfs:label ?parentLabel.\n" +
+                "  {select ?member where{\n" +
                 "?parent0  rdfs:member" +
                 pathOperator +
-                " ?member. " +
+                " ?member." +
                 filterContainer0Str +
-                "  ?member ^rdfs:member ?parent.\n" +
-                "?parent0  rdfs:member* ?parent. \n" +
-                "  ?member rdf:type ?memberType.\n" +
-                "   ?member rdfs:label ?memberLabel.\n" +
-                "   ?parent rdfs:label ?parentLabel.\n";
-            if (!options.leaves) {
-                query += " FILTER (?memberType in(rdf:Bag,rdf:List))";
-            }
-
-            if (options.filter) {
-                query += options.filter;
-            }
-            query += "}  group by ?member ?memberLabel ?parent ?parentLabel";
+                filter +
+                "}\n" +
+                "  }\n" +
+                "}  group by ?member ?memberLabel ?parent ?parentLabel";
 
             var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
@@ -1362,7 +1510,9 @@ var query =
         }
         var filter = Sparql_common.setFilter("node", ids);
 
-        if (options.filter) filter += options.filter;
+        if (options.filter) {
+            filter += options.filter;
+        }
 
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +

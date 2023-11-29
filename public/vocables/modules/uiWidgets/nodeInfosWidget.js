@@ -211,7 +211,7 @@ var NodeInfosWidget = (function () {
         $("#" + self.currentNodeIdInfosDivId).prepend(str);
 
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
-            PredicatesSelectorWidget.load("sourceBrowser_addPropertyDiv", self.currentSource, function () {
+            PredicatesSelectorWidget.load("sourceBrowser_addPropertyDiv", self.currentSource, {}, function () {
                 $("#editPredicate_controlsDiv").css("display", "block");
                 $("#sourceBrowser_addPropertyDiv").css("display", "none");
             });

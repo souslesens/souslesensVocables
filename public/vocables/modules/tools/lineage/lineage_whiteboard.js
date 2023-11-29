@@ -318,6 +318,9 @@ var Lineage_whiteboard = (function () {
         if (!source) {
             return;
         }
+        if (!graphDiv) {
+            graphDiv = Config.whiteBoardDivId;
+        }
 
         if (!Config.sources[source]) {
             return;
@@ -667,7 +670,7 @@ var Lineage_whiteboard = (function () {
                     var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from);
                     var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
 
-                    if (sourceNode.data && sourceNode.data.type != "container" && targetNode.data && targetNode.data.type == "container") {
+                    if (false && sourceNode.data && sourceNode.data.type != "container" && targetNode.data && targetNode.data.type == "container") {
                         return Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);
                     }
 

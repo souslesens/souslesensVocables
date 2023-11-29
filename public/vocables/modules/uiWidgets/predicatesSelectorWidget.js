@@ -74,8 +74,9 @@ var PredicatesSelectorWidget = (function () {
 
     self.predicatesIdsMap = {};
 
-    self.load = function (divId, source, configureFn, callback) {
-        $("#" + divId).html("ddddddddd");
+    self.load = function (divId, source, options, configureFn, callback) {
+        self.options = options || {};
+        $("#" + divId).html("");
         $("#" + divId).load("snippets/predicatesSelectorWidgetDialog.html", function (a, b, c) {
             var x = a + b + c;
             self.init(source, configureFn, function (err, result) {
@@ -88,6 +89,9 @@ var PredicatesSelectorWidget = (function () {
 
     self.init = function (source, configureFn, callback) {
         $("#sourceBrowser_addPropertyDiv").css("display", "flex");
+        if (self.options["flex-direction"]) {
+            $("#editPredicate_mainDiv").css("flex-direction", self.options["flex-direction"]);
+        }
 
         $("#editPredicate_currentVocabPredicateSelect").prop("disabled", false);
         $("#editPredicate_vocabularySelect").prop("disabled", false);
@@ -169,6 +173,10 @@ var PredicatesSelectorWidget = (function () {
         if (self.onSelectPropertyFn) {
             self.onSelectPropertyFn(value);
         }
+
+        if (!self.options.withOperators) {
+            return;
+        }
         self.operators = {
             String: ["contains", "not contains", "="],
             Number: ["=", "!=", "<", "<=", ">", ">="],
@@ -221,7 +229,9 @@ var PredicatesSelectorWidget = (function () {
             common.fillSelectOptions(selectId, classes, true, "label", "id");
         } else {
             OntologyModels.registerSourcesModel([vocabulary], function (err, result) {
-                if (err) return alert(err.responseText);
+                if (err) {
+                    return alert(err.responseText);
+                }
                 if (Config.ontologiesVocabularyModels[vocabulary] && Config.ontologiesVocabularyModels[vocabulary].classesCount <= Config.ontologyModelMaxClasses) {
                     var classes = [];
                     for (var classId in Config.ontologiesVocabularyModels[vocabulary].classes) {

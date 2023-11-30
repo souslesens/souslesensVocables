@@ -56,6 +56,31 @@ var Lineage_r = (function () {
             $("#lineage_r_addPanel").css("display", "none");
         }
     };
+    self.addNode=function(){
+        Lineage_blend.graphModification.showAddNodeGraphDialog(function (err, result) {
+            if (err) {
+                return callback(err.responseText);
+            }
+            return null;
+        });
+    }
+    self.addEdge=function(){
+
+    }
+    self.showQueryDialog=function(){
+        //ResponsiveUI.openMainDialogDivForDialogs();
+        $("#mainDialogDiv").parent().show("fast",function(){
+            Lineage_relations.showDrawRelationsDialog();
+        });
+        
+    }
+    self.showPathesDialog=function(){
+        //ResponsiveUI.openMainDialogDivForDialogs();
+        $("#mainDialogDiv").parent().show("fast",function(){
+            Lineage_graphTraversal.showShortestPathDialog();
+        });
+        
+    }
     return self;
 })();
 export default Lineage_r;

@@ -13,6 +13,7 @@ import Table from "react-bootstrap/Table";
 export default function GraphManagement() {
     // sources fetched from server
     const [sources, setSources] = useState<Record<string, any>>({});
+    const [slsApiBaseUrl, setSlsApiBaseUrl] = useState<Record<string, any>>({});
 
     // status of download/upload
     const [currentSource, setCurrentSource] = useState<string | null>(null);
@@ -33,7 +34,22 @@ export default function GraphManagement() {
 
     useEffect(() => {
         void fetchSources();
+        void fetchConfig();
     }, []);
+
+    const fetchConfig = async () => {
+        const response = await fetch("/api/v1/config");
+        const json = (await response.json()) as { resources: Record<string, any> };
+        const slsApi = json.slsApi;
+        if (slsApi !== undefined) {
+            if (slsApi.url) {
+                // force presence of trailing /
+                setSlsApiBaseUrl(json.slsApi.url.replace(/\/$/, "").concat("/"));
+                return;
+            }
+        }
+        setSlsApiBaseUrl("/");
+    };
 
     const fetchSources = async () => {
         const response = await fetch("/api/v1/sources");
@@ -48,7 +64,7 @@ export default function GraphManagement() {
     };
 
     const fetchGraphPart = async (sourceName: string, limit: number, offset: number) => {
-        const response = await fetch(`/api/v1/rdf/graph/?source=${sourceName}&limit=${limit}&offset=${offset}`);
+        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph/?source=${sourceName}&limit=${limit}&offset=${offset}`);
         return await response.text();
     };
 
@@ -93,8 +109,7 @@ export default function GraphManagement() {
         const fileSize = file.size;
 
         // init values
-        let firstChunk = true;
-        let chunkId = null;
+        let chunkId = "";
 
         // iterate over file and send chunks to server
         for (let start = 0; start < fileSize; start += chunkSize) {
@@ -104,7 +119,7 @@ export default function GraphManagement() {
 
             // slice file
             const end = start + chunkSize;
-            const chunk = file.slice(start, end);
+            const chunk = new File([file.slice(start, end)], file.name, { type: file.type });
 
             // last ?
             const lastChunk = start + chunkSize >= fileSize ? true : false;
@@ -115,10 +130,10 @@ export default function GraphManagement() {
             // build formData
             const formData = new FormData();
             Object.entries({
-                source: JSON.stringify(currentSource),
-                last: JSON.stringify(lastChunk),
-                id: JSON.stringify(chunkId),
-                clean: JSON.stringify(false),
+                source: currentSource,
+                last: lastChunk,
+                identifier: chunkId,
+                clean: false,
                 data: chunk,
             }).forEach(([key, value]) => {
                 formData.append(key, value);
@@ -126,13 +141,13 @@ export default function GraphManagement() {
 
             // if cancel button is pressed, remove uploaded file and return
             if (cancelCurrentOperation.current) {
-                formData.set("clean", JSON.stringify(true));
-                await fetch("/api/v1/rdf/graph", { method: "post", body: formData });
+                formData.set("clean", true);
+                await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { "X-Token": "admin" }, body: formData });
                 return;
             }
 
             // POST data
-            const res = await fetch("/api/v1/rdf/graph", { method: "post", body: formData });
+            const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { "X-Token": "admin" }, body: formData });
             if (res.status != 200) {
                 setError(true);
                 const message = await res.json();
@@ -143,8 +158,7 @@ export default function GraphManagement() {
                 const json = await res.json();
 
                 // Set values for next iteration
-                firstChunk = false;
-                chunkId = json.id;
+                chunkId = json.identifier;
             }
         }
         setTransferPercent(100);
@@ -167,6 +181,7 @@ export default function GraphManagement() {
         if (event.currentTarget.files === null) {
             return;
         }
+        console.log(event.currentTarget.files);
         const filesList = Array.from(event.currentTarget.files);
         setUploadFile(filesList);
     };

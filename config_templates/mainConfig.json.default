@@ -50,6 +50,9 @@
             "usersLogPath": "logs/vocables.log"
         },
 
+    "slsApi": {
+        "url": "http://localhost:8008"
+    },
     "authenticationDatabase": {
         "user": "",
         "password": "",

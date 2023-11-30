@@ -4,22 +4,24 @@ import ResponsiveUI from "../responsiveUI.js";
 
 var Lineage_r = (function () {
     var self = {};
-
+    self.isResponsiveLoading=false;
     self.init = function () {
         $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
-            Lineage_sources.loadSources(MainController.currentSource, function (err) {
-                if (err) {
-                    return alert(err.responseText);
-                }
-                $("#lateralPanelDiv").load("./responsive/lineage/html/index.html", function () {
-                    self.initWhiteboardTab();
-                });
-
-                Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
-            });
+            self.loadSources();
         });
     };
+    self.loadSources=function(){
+        Lineage_sources.loadSources(MainController.currentSource, function (err) {
+            if (err) {
+                return alert(err.responseText);
+            }
+            $("#lateralPanelDiv").load("./responsive/lineage/html/index.html", function () {
+                self.initWhiteboardTab();
+            });
 
+            Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
+        });
+    }
     self.initWhiteboardTab = function () {
         $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {});
     };
@@ -49,9 +51,9 @@ var Lineage_r = (function () {
 
         var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
         if (isNodeEditable) {
-            $("#lineage_r_addPanel").css("display", "none");
-        } else {
             $("#lineage_r_addPanel").css("display", "block");
+        } else {
+            $("#lineage_r_addPanel").css("display", "none");
         }
     };
     return self;

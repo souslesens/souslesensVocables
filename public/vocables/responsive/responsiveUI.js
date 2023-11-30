@@ -19,7 +19,12 @@ var ResponsiveUI = (function () {
     self.onToolSelect = function (toolId) {
         $("#selectedTool").html(toolId);
         MainController.currentTool = toolId;
-        ResponsiveUI.showSourceDialog();
+        if(toolId=='lineage'){
+            Lineage_r.isResponsiveLoading=true;
+        }
+        ResponsiveUI.showSourceDialog(true);
+        $('#ChangeSourceButton').show();
+
     };
 
     self.onSourceSelect = function (evt, obj) {
@@ -36,6 +41,18 @@ var ResponsiveUI = (function () {
                 return self.alert(err.responseText);
             }
         });
+    };
+    self.onSourceSelectForAddSource = function (evt, obj) {
+        //  if (!MainController.currentTool) return self.alert("select a tool first");
+        if (!obj.node.data || obj.node.data.type != "source") {
+            return self.alert("select a tool");
+        }
+
+        MainController.currentSource = obj.node.data.id;
+        $("#selectedSource").html(MainController.currentSource);
+        self.hideDiv("mainDialogDiv");
+        Lineage_r.loadSources();
+        
     };
 
     self.initTool = function (toolId, callback) {
@@ -118,11 +135,23 @@ var ResponsiveUI = (function () {
         }
     };
 
-    self.showSourceDialog = function () {
+    self.showSourceDialog = function (resetAll) {
         self.showDiv("mainDialogDiv");
         $("#mainDialogDiv").css("display", "block");
         $("#sourceSelector_searchInput").focus();
-        SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: ResponsiveUI.onSourceSelect }, function (err, result) {});
+        
+        if(resetAll){
+            Lineage_sources.loadedSources={}
+            var onSourceSelect=ResponsiveUI.onSourceSelect;
+        }
+        else{
+            var onSourceSelect=ResponsiveUI.onSourceSelectForAddSource;
+        }
+        SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
+        
+        
+    
+    
     };
 
     self.setSlsvCssClasses = function () {

@@ -263,7 +263,11 @@ var KGcreator = (function () {
                         };
 
                         return items;
-                    } else if (node.data.type == "csvSource") {
+                    }
+
+                    // file = une table
+                    /*
+                    else if (node.data.type == "csvSource") {
                         items.showSourceMappings = {
                             label: "showSourceMappings",
                             action: function (_e) {
@@ -271,30 +275,12 @@ var KGcreator = (function () {
                                 KGcreator_mappings.showSourceMappings(node);
                             },
                         };
-                        items.tranforms = {
-                            label: "tranforms",
-                            action: function (_e) {
-                                // pb avec source
-                                KGcreator_mappings.showTranformsDialog(node);
-                            },
-                        };
-                        items.deleteCsvFile = {
-                            label: "deleteFile",
-                            action: function (_e) {
-                                // pb avec source
-                                KGcreator.deleteCsvFile(node);
-                            },
-                        };
-                        items.removeColumnMappings = {
-                            label: "removeColumnMappings",
-                            action: function (_e) {
-                                // pb avec source
-                                KGcreator.removeColumnMappings(node);
-                            },
-                        };
+                        
+                        
 
                         return items;
-                    } else if (node.data.type == "table") {
+                    }*/
+                    else if (node.data.type == "table") {
                         items.showTableMappings = {
                             label: "showTableMappings",
                             action: function (_e) {
@@ -368,6 +354,14 @@ var KGcreator = (function () {
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showTranformsDialog(node);
+                            },
+                        };
+                        // Table == Fichier pour les CSV donc on met le delete ici
+                        items.deleteCsvFile = {
+                            label: "deleteFile",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator.deleteCsvFile(node);
                             },
                         };
 
@@ -580,7 +574,7 @@ var KGcreator = (function () {
 
                         var columnMappings = self.getColumnsMappings(fileName, null, "s");
 
-                        if (columnMappings[column]) {
+                        if (columnMappings[column] || columnMappings["$_" + column]) {
                             label = "<span class='KGcreator_fileWithMappings'>" + column + "</span>";
                         }
                         jstreeData.push({
@@ -936,6 +930,8 @@ var KGcreator = (function () {
                     return alert(err.responseText);
                 },
             });
+        } else if (self.currentConfig.currentDataSource.type == "csvSource") {
+            alert("Comming Soon...");
         }
     };
 

@@ -37,9 +37,9 @@ module.exports = function () {
     }
 
     async function POST(req, res, next) {
-        const last = JSON.parse(req.body.last);
-        const id = JSON.parse(req.body.id) || ulid();
-        const clean = JSON.parse(req.body.clean);
+        const last = req.body.last;
+        const id = req.body.identifier || ulid();
+        const clean = req.body.clean;
         const file = req.files.data;
 
         const tmpPath = `/tmp/${id}.nt`;
@@ -47,7 +47,7 @@ module.exports = function () {
         const filePathToUpload = `${uploadedPath}/${id}.nt`;
 
         try {
-            const sourceName = JSON.parse(req.body.source);
+            const sourceName = req.body.source;
 
             const userInfo = await userManager.getUser(req.user);
             const userSources = await sourceModel.getUserSources(userInfo.user);
@@ -89,7 +89,9 @@ module.exports = function () {
             res.status(200).send({ id: id });
         } catch (error) {
             // clean
-            fs.rmSync(filePathToUpload);
+            if (fs.existsSync(filePathToUpload)) {
+                fs.rmSync(filePathToUpload);
+            }
             console.error(error);
             return res.status(500).json({ error: error.message });
         }
@@ -101,17 +103,40 @@ module.exports = function () {
         description: "Post a RDF graph",
         parameters: [
             {
-                name: "body",
-                description: "body",
-                in: "body",
-                schema: {
-                    type: "object",
-                    properties: {
-                        last: { type: "string" },
-                        id: { type: "string" },
-                        clean: { type: "string" },
-                    },
-                },
+                name: "last",
+                description: "last",
+                in: "formData",
+                required: true,
+                type: "boolean",
+            },
+            {
+                name: "clean",
+                description: "clean",
+                in: "formData",
+                required: true,
+                type: "boolean",
+            },
+            {
+                name: "data",
+                description: "data",
+                in: "formData",
+                required: true,
+                type: "file",
+                format: "binary",
+            },
+            {
+                name: "source",
+                description: "source",
+                in: "formData",
+                required: true,
+                type: "string",
+            },
+            {
+                name: "identifier",
+                description: "identifier",
+                in: "formData",
+                required: false,
+                type: "string",
             },
         ],
         responses: {

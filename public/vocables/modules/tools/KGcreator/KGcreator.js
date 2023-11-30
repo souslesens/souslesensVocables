@@ -271,6 +271,13 @@ var KGcreator = (function () {
                                 KGcreator_mappings.showSourceMappings(node);
                             },
                         };
+                        items.tranforms = {
+                            label: "tranforms",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_mappings.showTranformsDialog(node);
+                            },
+                        };
                         items.deleteCsvFile = {
                             label: "deleteFile",
                             action: function (_e) {

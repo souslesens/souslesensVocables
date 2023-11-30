@@ -246,10 +246,9 @@ var Lineage_sources = (function () {
     };
 
     self.showHideEditButtons = function (source, hide) {
-        if(Lineage_r.isResponsiveLoading){
-            Lineage_r.showHideEditButtons(source,hide);
-        }
-        else{
+        if (Lineage_r.isResponsiveLoading) {
+            Lineage_r.showHideEditButtons(source, hide);
+        } else {
             if (!Lineage_whiteboard.lineageVisjsGraph.network) {
                 return;
             }
@@ -266,7 +265,6 @@ var Lineage_sources = (function () {
                 $(".vis-edit-mode").css("display", "none");
             }
         }
-       
     };
 
     self.whiteboard_setGraphOpacity = function (source) {

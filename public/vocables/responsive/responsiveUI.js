@@ -7,7 +7,7 @@ import Lineage_r from "./lineage/lineage_r.js";
 
 var ResponsiveUI = (function () {
     var self = {};
-    self.mainDialogDiv=null;
+    self.mainDialogDiv = null;
     self.alert = function (message) {};
 
     self.init = function () {
@@ -19,13 +19,11 @@ var ResponsiveUI = (function () {
     self.onToolSelect = function (toolId) {
         $("#selectedTool").html(toolId);
         MainController.currentTool = toolId;
-        if(toolId=='lineage'){
-            Lineage_r.isResponsiveLoading=true;
-           
+        if (toolId == "lineage") {
+            Lineage_r.isResponsiveLoading = true;
         }
         ResponsiveUI.showSourceDialog(true);
-        $('#ChangeSourceButton').show();
-
+        $("#ChangeSourceButton").show();
     };
 
     self.onSourceSelect = function (evt, obj) {
@@ -36,7 +34,7 @@ var ResponsiveUI = (function () {
 
         MainController.currentSource = obj.node.data.id;
         $("#selectedSource").html(MainController.currentSource);
-        
+
         $("#mainDialogDiv").parent().hide();
 
         self.initTool(MainController.currentTool, function (err, result) {
@@ -44,8 +42,6 @@ var ResponsiveUI = (function () {
                 return self.alert(err.responseText);
             }
         });
-
-
     };
     self.onSourceSelectForAddSource = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
@@ -57,7 +53,6 @@ var ResponsiveUI = (function () {
         $("#selectedSource").html(MainController.currentSource);
         $("#mainDialogDiv").parent().hide();
         Lineage_r.loadSources();
-        
     };
 
     self.initTool = function (toolId, callback) {
@@ -142,34 +137,27 @@ var ResponsiveUI = (function () {
 
     self.showSourceDialog = function (resetAll) {
         self.openMainDialogDivForDialogs();
-        
+
         self.showDiv("mainDialogDiv");
         $("#mainDialogDiv").css("display", "block");
         $("#sourceSelector_searchInput").focus();
-        $('#mainDialogDiv').load("./responsive/lineage/html/SourceDiv.html", function () {
-            if(resetAll){
-                Lineage_sources.loadedSources={};
-                var onSourceSelect=ResponsiveUI.onSourceSelect;
-            }
-            else{
-                var onSourceSelect=ResponsiveUI.onSourceSelectForAddSource;
+        $("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
+            if (resetAll) {
+                Lineage_sources.loadedSources = {};
+                var onSourceSelect = ResponsiveUI.onSourceSelect;
+            } else {
+                var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
             }
             SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
-            
         });
-        
-        
-        
-    
-    
     };
-    self.openMainDialogDivForDialogs=function(){
+    self.openMainDialogDivForDialogs = function () {
         //$("#mainDialogDiv").css('width', 'auto');
         $("#mainDialogDiv").empty();
         $("#mainDialogDiv").dialog();
-        
+
         $("#mainDialogDiv").parent().show();
-    }
+    };
     self.setSlsvCssClasses = function () {
         async.series(
             [

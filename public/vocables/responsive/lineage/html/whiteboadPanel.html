@@ -20,7 +20,7 @@
 </div>
 
 <div class="w3-panel w3-border w3-round-small">
-    <button class="w3-button slsv-button-3" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog()">Similars</button>
+    <button class="w3-button slsv-button-3" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog();">Similars</button>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_pathes" onclick="Lineage_r.showPathesDialog()">Pathes</button>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_linkedData" onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">Linked Data</button>
@@ -29,5 +29,8 @@
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_inferredModel" onclick="Lineage_whiteboard.drawInferredClassesModel()">Inferred Model</button>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="NodeInfosWidget.showCreateEntityDialog()" disabled="" style="display: block">new Axiom</button>
 </div>
+
+<div id="LineagePopup"></div>
+<div id="popupMenuWidgetDiv" onclick="  PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
 
 <!-- <div>   <input type="checkbox" id="Lineage_classes_allWhiteBoardSourcesCBX" onchange="Lineage_sources.setAllWhiteBoardSources($(this).prop('checked'))">-->

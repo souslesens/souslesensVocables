@@ -136,7 +136,7 @@ var ResponsiveUI = (function () {
     };
 
     self.showSourceDialog = function (resetAll) {
-        self.openMainDialogDivForDialogs();
+        self.openDialogDiv("mainDialogDiv");
 
         self.showDiv("mainDialogDiv");
         $("#mainDialogDiv").css("display", "block");
@@ -151,12 +151,13 @@ var ResponsiveUI = (function () {
             SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
         });
     };
-    self.openMainDialogDivForDialogs = function () {
+    self.openDialogDiv = function (div) {
         //$("#mainDialogDiv").css('width', 'auto');
-        $("#mainDialogDiv").empty();
-        $("#mainDialogDiv").dialog();
-
-        $("#mainDialogDiv").parent().show();
+        $("#" + div).empty();
+        $("#" + div).dialog();
+        $("#" + div)
+            .parent()
+            .show();
     };
     self.setSlsvCssClasses = function () {
         async.series(

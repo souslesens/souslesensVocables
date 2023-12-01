@@ -232,7 +232,18 @@
                     authentication.init();
 
                     //SocketProxy.init()
-
+                    $("#smallDialogDiv").dialog({
+                        autoOpen: false,
+                        height: 600,
+                        width: 800,
+                        modal: false,
+                    });
+                    $("#LineagePopup").dialog({
+                        autoOpen: false,
+                        height: 700,
+                        width: 700,
+                        modal: false,
+                    });
                     if (err) {
                         return console.error(err);
                     }
@@ -263,13 +274,6 @@
                             autoOpen: false,
                             height: 800,
                             width: $(document).width() * 0.85,
-                            modal: false,
-                        });
-
-                        $("#smallDialogDiv").dialog({
-                            autoOpen: false,
-                            height: 600,
-                            width: 800,
                             modal: false,
                         });
                     }
@@ -330,7 +334,7 @@
                 </div>
 
                 <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
-                    <button id="ChangeSourceButton" class="slsv-button" onclick="ResponsiveUI.showSourceDialog(true)">Change Source</button>
+                    <button id="ChangeSourceButton" class="slsv-button" onclick="ResponsiveUI.showSourceDialog(true)">Source</button>
                 </div>
 
                 <div class="w3-bar-item">
@@ -363,5 +367,6 @@
         <!-- popup panel-->
 
         <div id="mainDialogDiv" class="w3-modal"></div>
+        <div id="smallDialogDiv"></div>
     </body>
 </html>

@@ -246,24 +246,20 @@ var Lineage_sources = (function () {
     };
 
     self.showHideEditButtons = function (source, hide) {
-        if (typeof Lineage_r != "undefined") {
-            Lineage_r.showHideEditButtons(source, hide);
+        if (!Lineage_whiteboard.lineageVisjsGraph.network) {
+            return;
+        }
+        if (hide) {
+            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
+            $(".vis-edit-mode").css("display", "none");
+        }
+        var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
+        if (isNodeEditable) {
+            Lineage_whiteboard.lineageVisjsGraph.network.enableEditMode();
+            $(".vis-edit-mode").css("display", "block");
         } else {
-            if (!Lineage_whiteboard.lineageVisjsGraph.network) {
-                return;
-            }
-            if (hide) {
-                Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
-                $(".vis-edit-mode").css("display", "none");
-            }
-            var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
-            if (isNodeEditable) {
-                Lineage_whiteboard.lineageVisjsGraph.network.enableEditMode();
-                $(".vis-edit-mode").css("display", "block");
-            } else {
-                Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
-                $(".vis-edit-mode").css("display", "none");
-            }
+            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
+            $(".vis-edit-mode").css("display", "none");
         }
     };
 

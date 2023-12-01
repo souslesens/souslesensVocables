@@ -10,12 +10,12 @@ var Lineage_r = (function () {
     self.oldWhiteboardGraphActions = {};
     self.oldNodeInfosInit = null;
     self.oldAddEdgeDialog = null;
-    self.oldExportTable=null;
+    self.oldExportTable = null;
     self.init = function () {
         SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
         //To Table
-        self.oldExportTable=Export.exportTreeToDataTable;
-        Export.exportTreeToDataTable=self.ExportTableDialog;
+        self.oldExportTable = Export.exportTreeToDataTable;
+        Export.exportTreeToDataTable = self.ExportTableDialog;
         //Nodes Infos overcharge
         self.oldNodeInfosInit = NodesInfosWidget.initDialog;
         NodesInfosWidget.initDialog = self.NodesInfosResponsiveDialog;
@@ -42,9 +42,7 @@ var Lineage_r = (function () {
         });
     };
     self.initWhiteboardTab = function () {
-        $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {
-            
-        });
+        $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {});
     };
 
     self.initClassesTab = function () {
@@ -126,15 +124,13 @@ var Lineage_r = (function () {
                 });
             });
     };
-    self.ExportTableDialog=function(jstreeDiv, nodeId){
+    self.ExportTableDialog = function (jstreeDiv, nodeId) {
         $("#mainDialogDiv")
-        .parent()
-        .show("fast", function () {
-            self.oldExportTable(jstreeDiv, nodeId);
-        });
-        
-    }
-    
+            .parent()
+            .show("fast", function () {
+                self.oldExportTable(jstreeDiv, nodeId);
+            });
+    };
 
     return self;
 })();

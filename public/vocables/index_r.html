@@ -292,6 +292,7 @@
 
                     ResponsiveUI.init();
                     $("#ChangeSourceButton").hide();
+                    $("#index_topContolPanel").hide();
                 });
             });
         </script>
@@ -304,7 +305,7 @@
         <link rel="stylesheet" href="./responsive/index.css" />
 
         <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
-        <script>
+        <!-- <script>
             less = {
                 env: "development",
                 async: false,
@@ -315,16 +316,27 @@
                 relativeUrls: false,
                 rootpath: ":/a.com/",
             };
-        </script>
+        </script>-->
+
         <!--  <script src="./responsive/less.min.js"></script>-->
         <script type="module" src="./responsive/responsiveUI.js"></script>
         <script type="module" src="./responsive/lineage/lineage_r.js"></script>
         <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
+        <!--<link rel="stylesheet" href="./slsv-gray.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-darkGray.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-yellowPurple.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-eco.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-complementaryKGA.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-plant.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-blue.css" />-->
+        <link rel="stylesheet" href="./responsive/css/slsv-bluePurple.css" />
+        <!--<link rel="stylesheet" href="./slsv-cartography1.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-cartography2.css" />-->
     </head>
 
     <body>
         <header class="w3-container">
-            <div class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4;bac">
+            <div class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4; width: 100%">
                 <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
                     <button class="slsv-button">Tool</button>
 
@@ -358,8 +370,8 @@
         </header>
 
         <div class="w3-container">
-            <div class="w3-container w3-col l3 slsv-bg-pale" style="height: 85vh" id="lateralPanelDiv"></div>
-            <div class="w3-container w3-col l9" style="height: 85vh" id="graphDiv"></div>
+            <div class="w3-container w3-col l3 slsv-bg-pale" style="height: 90vh; width: 30%" id="lateralPanelDiv"></div>
+            <div class="w3-container w3-col l9" style="height: 90vh; width: 70%" id="graphDiv"></div>
         </div>
 
         <footer class="w3-row-padding"></footer>

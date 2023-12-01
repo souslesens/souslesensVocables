@@ -1,0 +1,211 @@
+/* LightGrayVersion */ 
+
+
+/* Button Copy Query and Admin */ 
+.w3-button{
+	background-color : #888888;
+	color : white;
+	border-radius : 14px;
+	border: #888888 solid 1px;
+	font-family: Helvetica, sans-serif;
+	font-size: 15px;
+    margin-top:20px;
+	padding: 8px 24px;
+	
+}	
+.w3-button:hover{
+	border-radius : 14px;
+	border: #5A5A5A solid 1px;
+	font-family: Helvetica, sans-serif;
+	font-size: 15px;
+    margin-top: 20px;
+	background-color: #5A5A5A ! important;
+	color : white ! important;
+	padding: 8px 24px;
+	
+}	
+
+
+
+/* Button R+A */
+.slsv-button-source{
+	background-color : #EAEAEA;
+	color : #OAOAOA;
+	border-radius : 14px;
+	border: #888888 solid 1px;
+	font-family: Helvetica, sans-serif;
+	font-size: 16px;
+    margin-top: -5px;
+	padding: 6px 16px;
+}
+.w3-sand, .w3-hover-sand{
+	background-color : #EAEAEA ! important;
+	color : inherit ! important;
+	padding : 10px;
+	margin-top: -2px;
+}
+
+
+
+/* Button TOOL / Source */ 
+.slsv-button{
+	background-color : inherit;
+	color : #3F3F3F;
+	font-family: Helvetica, sans-serif;
+	font-weight : bold;
+	font-size: 16px;
+    margin-top:20px;
+	padding: 8px 24px;
+	border-radius : 14px;
+	border: #3F3F3F solid 0px;
+}
+.slsv-button:hover{
+	background-color : inherit;
+	color : #EAEAEA;
+	font-family: Helvetica, sans-serif;
+	font-weight : bold;
+	font-size: 16px;
+    margin-top:20px;
+	padding: 8px 24px;
+	border-radius : 14px;
+	border: #3F3F3F solid 0px;
+}
+.w3-dropdown-hover:first-child{
+	background-color : inherit;
+	color : white
+}
+.Lineage_sourceLabelDiv{
+	background-color : inherit;
+	color : #3F3F3F! important;
+}
+
+
+
+/* Button WhiteBoard/Classes/Properties/Containers */
+.slsv-tabButton{
+	background-color : inherit;
+	color : #3F3F3F;
+	font-family: Helvetica, sans-serif;
+	font-size: 14px;
+	padding: 8px 12px;
+	border-radius : 14px;
+	border: #3F3F3F solid 2px;
+	margin-left: 17px;
+	font-weight : normal;
+	
+	
+}
+.slsv-tabButton:hover{
+	background-color : #3F3F3F! important;
+	color : white! important;
+	font-family: Helvetica, sans-serif;
+	font-size: 14px;
+	padding: 8px 12px;
+	border-radius : 14px;
+	border: #3F3F3F solid 2px;
+	margin-left: 17px;
+	
+}
+
+
+
+/* Button Family 1 */
+.slsv-button-1{
+	
+	background-color : #3F3F3F;
+	color : white
+	font-family: Helvetica, sans-serif;
+	font-size: 12px;
+	padding: 8px 12px;
+	border-radius : 14px;
+	border: #3F3F3F solid 0px;
+	
+}
+.slsv-button-1:hover{
+	
+	background-color : #888888 ! important;
+	color : black! important;
+	font-family: Helvetica, sans-serif;
+	font-size: 12px;
+	padding: 8px 12px;
+	border-radius : 14px;
+	border: #3F3F3F solid 0px;
+	
+}
+
+
+
+/* Button Family 2 */
+.slsv-button-2{
+	background-color : #5A5A5A;
+	color : white
+	font-family: Helvetica, sans-serif;
+	font-size: 12px;
+	padding: 8px 12px;
+	border-radius : 14px;
+	border: #3F3F3F solid 0px;
+	
+}
+.slsv-button-2:hover{
+	background-color : #888888 ! important;
+	color : black! important;
+	font-family: Helvetica, sans-serif;
+	font-size: 12px;
+	padding: 8px 12px;
+	border-radius : 14px;
+	border: #3F3F3F solid 0px;
+	
+}
+
+
+
+/* Button Family 3 */
+.slsv-button-3{
+	background-color : #888888;
+	color : white
+	font-family: Helvetica, sans-serif;
+	font-size: 12px;
+	padding: 8px 12px;
+	border-radius : 14px;
+	border: #3F3F3F solid 0px;
+}
+.slsv-button-3:hover{
+	background-color : #888888 ! important;
+	color : black ! important;
+	font-family: Helvetica, sans-serif;
+	font-size: 12px;
+	padding: 8px 12px;
+	border-radius : 14px;
+	border: #3F3F3F solid 0px;
+}
+
+
+
+/* Containers */
+.w3-round-small{
+	padding: 14px 12px;
+	border-radius : 14px;
+	border: #3F3F3F solid 2px ! important;
+}
+
+
+
+/* background */
+.w3-bar{
+	background-color : #B9B9B9;
+	
+}
+.w3-barslsv-bg-pale{
+	background-color : #EAEAEA;
+	
+}
+.w3-container{
+	background-color : #EAEAEA;
+	
+}
+.vis-network{
+	background-color : white;
+	
+}
+
+

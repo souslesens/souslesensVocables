@@ -23,7 +23,6 @@ var ResponsiveUI = (function () {
             Lineage_r.isResponsiveLoading = true;
         }
         ResponsiveUI.showSourceDialog(true);
-        $("#ChangeSourceButton").show();
     };
 
     self.onSourceSelect = function (evt, obj) {

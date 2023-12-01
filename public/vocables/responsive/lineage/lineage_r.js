@@ -13,6 +13,8 @@ var Lineage_r = (function () {
     self.oldExportTable = null;
     self.init = function () {
         SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
+        $("#ChangeSourceButton").show();
+        $("#index_topContolPanel").show();
         //To Table
         self.oldExportTable = Export.exportTreeToDataTable;
         Export.exportTreeToDataTable = self.ExportTableDialog;

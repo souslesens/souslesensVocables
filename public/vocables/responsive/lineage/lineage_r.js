@@ -2,6 +2,7 @@ import Lineage_whiteboard from "../../modules/tools/lineage/lineage_whiteboard.j
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import ResponsiveUI from "../responsiveUI.js";
 import NodesInfosWidget from "../../modules/uiWidgets/nodeInfosWidget.js";
+import SearchWidget from "../../modules/uiWidgets/searchWidget.js";
 
 var Lineage_r = (function () {
     var self = {};
@@ -9,7 +10,12 @@ var Lineage_r = (function () {
     self.oldWhiteboardGraphActions = {};
     self.oldNodeInfosInit = null;
     self.oldAddEdgeDialog = null;
+    self.oldExportTable=null;
     self.init = function () {
+        SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
+        //To Table
+        self.oldExportTable=Export.exportTreeToDataTable;
+        Export.exportTreeToDataTable=self.ExportTableDialog;
         //Nodes Infos overcharge
         self.oldNodeInfosInit = NodesInfosWidget.initDialog;
         NodesInfosWidget.initDialog = self.NodesInfosResponsiveDialog;
@@ -36,13 +42,16 @@ var Lineage_r = (function () {
         });
     };
     self.initWhiteboardTab = function () {
-        $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {});
+        $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {
+            
+        });
     };
 
     self.initClassesTab = function () {
         $("#tabs_classes").load("./responsive/lineage/html/classesPanel.html", function (s) {
             SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
             $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html", function () {
+                SearchWidget.init();
                 $("#GenericTools_searchInAllSources").prop("checked", false);
             });
         });
@@ -117,6 +126,15 @@ var Lineage_r = (function () {
                 });
             });
     };
+    self.ExportTableDialog=function(jstreeDiv, nodeId){
+        $("#mainDialogDiv")
+        .parent()
+        .show("fast", function () {
+            self.oldExportTable(jstreeDiv, nodeId);
+        });
+        
+    }
+    
 
     return self;
 })();

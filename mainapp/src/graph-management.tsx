@@ -21,6 +21,7 @@ export default function GraphManagement() {
     const [currentOperation, setCurrentOperation] = useState<string | null>(null);
     const cancelCurrentOperation = useRef(false);
     const [animatedProgressBar, setAnimatedProgressBar] = useState(false);
+    const [currentDownloadFormat, setCurrentDownloadFormat] = useState<string | null>(null);
 
     // error management
     const [error, setError] = useState(false);
@@ -64,8 +65,13 @@ export default function GraphManagement() {
     };
 
     const fetchGraphPart = async (sourceName: string, limit: number, offset: number) => {
-        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph/?source=${sourceName}&limit=${limit}&offset=${offset}`);
+        const response = await fetch(`/api/v1/rdf/graph/?source=${sourceName}&limit=${limit}&offset=${offset}`);
         return await response.text();
+    };
+
+    const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format: string = "nt", identifier: string = "") => {
+        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}`, { headers: { "X-token": "admin" } });
+        return await response.json();
     };
 
     const handleUploadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -74,11 +80,14 @@ export default function GraphManagement() {
         setDisplayModal("upload");
     };
 
+    const handleSetFormat = async (event: React.MouseEvent<HTMLElement>) => {
+        setCurrentDownloadFormat(event.currentTarget.value);
+    };
+
     const handleDownloadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
         setCurrentSource(event.currentTarget.value);
         setCurrentOperation(null);
         setDisplayModal("download");
-        await downloadSource(event.currentTarget.value);
     };
 
     const handleHideModal = () => {
@@ -181,9 +190,33 @@ export default function GraphManagement() {
         if (event.currentTarget.files === null) {
             return;
         }
-        console.log(event.currentTarget.files);
         const filesList = Array.from(event.currentTarget.files);
         setUploadFile(filesList);
+    };
+
+    const recursDownloadSourceUsingPythonApi = async (sourceName: string, offset: number | null, blobParts: any[], identifier: string = "") => {
+        if (offset === 0) {
+            setTransferPercent(100);
+            setAnimatedProgressBar(true);
+        }
+
+        if (cancelCurrentOperation.current) {
+            cancelCurrentOperation.current = false;
+            return [];
+        }
+        if (offset !== null) {
+            const data = await fetchGraphPartUsingPythonApi(sourceName, offset, currentDownloadFormat, identifier);
+
+            // percent
+            const percent = Math.min(100, (offset * 100) / data.filesize);
+            setTransferPercent(percent);
+            setAnimatedProgressBar(false);
+
+            blobParts.push(data.data);
+            blobParts = await recursDownloadSourceUsingPythonApi(sourceName, data.next_offset, blobParts, data.identifier);
+        }
+        setTransferPercent(100);
+        return blobParts;
     };
 
     const recursDownloadSource = async (sourceName: string, offset: number, graphSize: number, pageSize: number, blobParts: any[]) => {
@@ -204,18 +237,23 @@ export default function GraphManagement() {
         return blobParts;
     };
 
-    const downloadSource = async (sourceName: string) => {
+    const downloadSource = async () => {
         try {
-            setCurrentSource(sourceName);
             setTransferPercent(0);
             setCurrentOperation("download");
             cancelCurrentOperation.current = false;
 
-            const graphInfo = await fetchSourceInfo(sourceName);
-            const graphSize = graphInfo.graphSize;
-            const pageSize = graphInfo.pageSize;
+            let blobParts;
+            if (slsApiBaseUrl === "/") {
+                const graphInfo = await fetchSourceInfo(currentSource);
+                const graphSize = graphInfo.graphSize;
+                const pageSize = graphInfo.pageSize;
 
-            const blobParts = await recursDownloadSource(sourceName, 0, graphSize, pageSize, []);
+                blobParts = await recursDownloadSource(currentSource, 0, graphSize, pageSize, []);
+            } else {
+                blobParts = await recursDownloadSourceUsingPythonApi(currentSource, 0, []);
+            }
+
             if (blobParts.length == 0) {
                 return;
             }
@@ -223,7 +261,7 @@ export default function GraphManagement() {
             // create a blob and a link to dwl data, autoclick to autodownload
             const blob = new Blob(blobParts, { type: "text/plain" });
             const link = document.createElement("a");
-            link.download = `${sourceName}.nt`;
+            link.download = `${currentSource}.${currentDownloadFormat}`;
             link.href = URL.createObjectURL(blob);
             link.click();
             URL.revokeObjectURL(link.href);
@@ -234,18 +272,64 @@ export default function GraphManagement() {
     };
 
     const downloadModalContent = (
-        <>
-            <Stack direction="horizontal" gap={1}>
-                {currentOperation == "download" ? (
-                    <ProgressBar label={transferPercent == 100 ? "Completed" : ""} style={{ flex: 1, display: "flex", height: "3.1em" }} id={`progress-bar`} now={transferPercent} />
-                ) : null}
-                {currentOperation == "download" ? (
-                    <Button variant="danger" onClick={handleCancelOperation} disabled={transferPercent == 100}>
-                        Cancel
-                    </Button>
-                ) : null}
-            </Stack>
-        </>
+        <Stack>
+            <Form>
+                <div>
+                    <Form.Check
+                        disabled={currentOperation !== null}
+                        onClick={handleSetFormat}
+                        name="radio-format"
+                        inline
+                        type="radio"
+                        id={`radio-format-nt-${currentSource}`}
+                        label="N-triples"
+                        value="nt"
+                    ></Form.Check>
+                    <Form.Check
+                        disabled={currentOperation !== null || slsApiBaseUrl === "/"}
+                        onClick={handleSetFormat}
+                        name="radio-format"
+                        inline
+                        type="radio"
+                        id={`radio-format-xml-${currentSource}`}
+                        label="RDF/XML"
+                        value="xml"
+                    ></Form.Check>
+                    <Form.Check
+                        disabled={currentOperation !== null || slsApiBaseUrl === "/"}
+                        onClick={handleSetFormat}
+                        name="radio-format"
+                        inline
+                        type="radio"
+                        id={`radio-format-ttl-${currentSource}`}
+                        label="Turtle"
+                        value="ttl"
+                    ></Form.Check>
+                </div>
+
+                <Stack direction="horizontal" gap={1}>
+                    {!currentOperation ? (
+                        <Button disabled={currentDownloadFormat === null} type="submit" onClick={downloadSource} style={{ flex: 1 }}>
+                            Download
+                        </Button>
+                    ) : null}
+                    {currentOperation == "download" ? (
+                        <ProgressBar
+                            animated={animatedProgressBar}
+                            label={transferPercent == 100 ? (animatedProgressBar ? "Preparing data…" : "Completed") : ""}
+                            style={{ flex: 1, display: "flex", height: "3.1em" }}
+                            id={`progress-bar`}
+                            now={transferPercent}
+                        />
+                    ) : null}
+                    {currentOperation == "download" ? (
+                        <Button variant="danger" onClick={handleCancelOperation} disabled={transferPercent == 100}>
+                            Cancel
+                        </Button>
+                    ) : null}
+                </Stack>
+            </Form>
+        </Stack>
     );
 
     const uploadModalContent = (
@@ -265,7 +349,7 @@ export default function GraphManagement() {
                         <ProgressBar
                             animated={animatedProgressBar}
                             label={transferPercent == 100 ? (!error ? "Completed" : "") : animatedProgressBar ? "Uploading to triplestore" : ""}
-                            style={{ flex: 1, display: "flex", height: "3.1em" }}
+                            style={{ flex: 1, display: "flex", height: "3.1em", transition: "none" }}
                             id={`progress-toto`}
                             now={transferPercent}
                         />

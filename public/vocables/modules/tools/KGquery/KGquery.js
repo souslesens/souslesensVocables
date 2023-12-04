@@ -387,9 +387,7 @@ var KGquery = (function () {
         if (!options) {
             options = {};
         }
-        /* if (!self.querySets.toNode) {
-return alert("missing target node in  path");
-}*/
+
 
         $("#KGquery_dataTableDiv").html("");
         self.message("searching...");

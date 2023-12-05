@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.45.0...master)
 
+## [1.45.2](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.45.2) - 2023-12-05
+
+### Fixed
+
+-   Unit tests
+
 ## [1.45.1](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.45.1) - 2023-12-05
 
 > [!IMPORTANT]

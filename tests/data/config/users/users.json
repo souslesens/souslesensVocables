@@ -6,7 +6,8 @@
         "groups": ["admin"],
         "source": "json",
         "_type": "user",
-        "name": "admin"
+        "name": "admin",
+        "token": "2c2a1b2cde965802162108f64ca14d99dcb3563e"
     },
     "owl_user": {
         "id": "owl_user",
@@ -15,7 +16,8 @@
         "groups": ["owl_only"],
         "source": "json",
         "_type": "user",
-        "name": "owl_user"
+        "name": "owl_user",
+        "token": "05b86aa33041d537a529baa27dd5af3ff3cb03b3"
     },
     "skos_user": {
         "id": "skos_user",
@@ -24,6 +26,8 @@
         "groups": ["skos_only"],
         "source": "json",
         "_type": "user",
-        "name": "skos_user"
+        "name": "skos_user",
+        "token": "73b354f70e525adc9cee0e0abfde4444c199c612"
     }
 }
+

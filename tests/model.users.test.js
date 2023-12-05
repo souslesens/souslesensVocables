@@ -47,6 +47,7 @@ describe("UserModelJson", () => {
             groups: ["admin"],
             source: "json",
             _type: "user",
+            token: "2c2a1b2cde965802162108f64ca14d99dcb3563e",
         });
     });
     test("fail to find a user with findUserAccount()", async () => {

@@ -1,4 +1,4 @@
-import VirtualKGquery from "../KGquery/virtualKGquery.js";
+import SQLquery_run from "../KGquery/SQLquery_run.js";
 
 var KGcreator_joinTables = (function () {
     var self = {};
@@ -12,7 +12,7 @@ var KGcreator_joinTables = (function () {
 
             $("#joinTablesWidgetDialog_fromTableId").html(fromTable);
             $("#joinTablesWidgetDialog_toTableId").html(toTable);
-            VirtualKGquery.getDBmodel(dataSourceConfig, function (err, model) {
+            SQLquery_run.getDBmodel(dataSourceConfig, function (err, model) {
                 if (err) {
                     return alert(err);
                 }
@@ -43,12 +43,12 @@ var KGcreator_joinTables = (function () {
 
     self.testJoin = function () {
         var joinObj = self.getJoinObjectFromUI();
-        var sql = "SELECT top 10 * from " + VirtualKGquery.getFromSql(joinObj);
+        var sql = "SELECT top 10 * from " + SQLquery_run.getFromSql(joinObj);
         alert("coming soon");
     };
     self.showJoin = function () {
         var joinObj = self.getJoinObjectFromUI();
-        var sql = "SELECT top 10 * from " + VirtualKGquery.getFromSql(joinObj);
+        var sql = "SELECT top 10 * from " + SQLquery_run.getFromSql(joinObj);
         $("#joinTablesWidgetDialog_sqlJoinDiv").html(sql);
     };
 

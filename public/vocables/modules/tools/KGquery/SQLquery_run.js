@@ -1,7 +1,7 @@
 import KGcreator from "../KGcreator/KGcreator.js";
 import common from "../../shared/common.js";
 
-var VirtualKGquery = (function () {
+var SQLquery_run = (function () {
     var self = {};
 
     self.execPathQuery = function (querySets, slsvSource, dataSource, options, callback) {
@@ -19,22 +19,16 @@ var VirtualKGquery = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    KGcreator.getSlsvSourceConfig(slsvSource, function (err, config) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-                        self.sourceConfig = config;
-                        dataSourceConfig = config.databaseSources[dataSource];
-                        if (!dataSourceConfig) {
-                            return callback("no database source declared");
-                        }
-
+                    self.getSlsvSourceDataBaseSourceConfigs(slsvSource, function (err, dataSourceConfig) {
+                        if (err) return callbackSeries(err);
+                        self.dataSourceConfig = dataSourceConfig[dataSourceConfig];
+                        if (!self.dataSourceConfig) return callbackSeries("no matching database source");
                         callbackSeries();
                     });
                 },
 
                 function (callbackSeries) {
-                    KGcreator.loadSourceMappings(slsvSource, dataSource, function (err, mappings) {
+                    KGcreator.loadDataSourceMappings(slsvSource, dataSource, function (err, mappings) {
                         self.dataSourcemappings = mappings;
                         callbackSeries();
                     });
@@ -42,39 +36,11 @@ var VirtualKGquery = (function () {
 
                 //get columns and tables from predicates
                 function (callbackSeries) {
-                    var pathsMap = {};
-                    querySets.sets.forEach(function (querySet) {
-                        querySet.elements.forEach(function (queryElement, queryElementIndex) {
-                            var classUri = queryElement.fromNode.id;
-                            var matches = KGcreator.getClass2ColumnMapping(self.dataSourcemappings, classUri);
-                            if (matches.length == 0) {
-                                return callbackSeries("no match for class " + classUri);
-                            }
-                            if (matches.length > 1) {
-                                return callbackSeries("multiple matches for class " + classUri + "  :  " + JSON.stringify(matches));
-                            }
-                            var match = matches[0];
-                            var obj = { fromClassUri: classUri, fromColumn: match.column, fromTable: match.table };
-
-                            var classUri = queryElement.toNode.id;
-                            var matches = KGcreator.getClass2ColumnMapping(self.dataSourcemappings, classUri);
-
-                            if (matches.length == 0) {
-                                return callbackSeries("no match for class " + classUri);
-                            }
-                            if (matches.length > 1) {
-                                return callbackSeries("multiple matches for class " + classUri + "  :  " + JSON.stringify(matches));
-                            }
-                            var match = matches[0];
-                            obj.toClassUri = classUri;
-                            obj.toColumn = match.column;
-                            obj.toTable = match.table;
-
-                            paths.push(obj);
-                        });
+                    self.getQuerySetsColumnAndTables(querySets, function (err, result) {
+                        if (err) return callbackSeries(err);
+                        paths = result;
+                        callbackSeries();
                     });
-
-                    callbackSeries();
                 },
 
                 //set joins
@@ -122,20 +88,74 @@ var VirtualKGquery = (function () {
                     sqlQuery = sqlSelect + " " + sqlFrom;
                     callbackSeries();
                 },
-
+                // execute sql
                 function (callbackSeries) {
                     self.execSql(sqlQuery, dataSourceConfig.type, dataSource, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
                         data = result;
+                        callbackSeries();
                     });
                 },
+                //format results
+                function (callbackSeries) {
+                    tableData = self.queryResultToTable(data);
+                    callbackSeries();
+                },
             ],
+
             function (err) {
                 return callback(err, data);
             }
         );
+    };
+    self.getSlsvSourceDataBaseSourceConfigs = function (slsvSource, callback) {
+        KGcreator.getSlsvSourceConfig(slsvSource, function (err, config) {
+            if (err) {
+                return callback(err);
+            }
+            self.sourceConfig = config;
+            if (!dataSourceConfig) {
+                return callback("no database source declared");
+            }
+
+            callback(null, config.databaseSources);
+        });
+    };
+    self.getQuerySetsColumnAndTables = function (querySets, callback) {
+        var paths = [];
+        querySets.sets.forEach(function (querySet) {
+            querySet.elements.forEach(function (queryElement, queryElementIndex) {
+                var classUri = queryElement.fromNode.id;
+                var matches = KGcreator.getClass2ColumnMapping(self.dataSourcemappings, classUri);
+                if (matches.length == 0) {
+                    return callback("no match for class " + classUri);
+                }
+                if (matches.length > 1) {
+                    return callback("multiple matches for class " + classUri + "  :  " + JSON.stringify(matches));
+                }
+                var match = matches[0];
+                var obj = { fromClassUri: classUri, fromColumn: match.column, fromTable: match.table };
+
+                var classUri = queryElement.toNode.id;
+                var matches = KGcreator.getClass2ColumnMapping(self.dataSourcemappings, classUri);
+
+                if (matches.length == 0) {
+                    return callback("no match for class " + classUri);
+                }
+                if (matches.length > 1) {
+                    return callback("multiple matches for class " + classUri + "  :  " + JSON.stringify(matches));
+                }
+                var match = matches[0];
+                obj.toClassUri = classUri;
+                obj.toColumn = match.column;
+                obj.toTable = match.table;
+
+                paths.push(obj);
+            });
+            callback(null, paths);
+        });
     };
 
     self.getDBmodel = function (dataSourceConfig, callback) {
@@ -206,7 +226,7 @@ var VirtualKGquery = (function () {
         });
     };
 
-    self.resultToDataTable = function (data) {
+    self.queryResultToTable = function (data) {
         data.forEach(function (item) {
             if (varName.length < 3) {
                 return;
@@ -240,11 +260,12 @@ var VirtualKGquery = (function () {
             });
             tableData.push(line);
         });
+        return data;
     };
 
     return self;
 })();
 
-export default VirtualKGquery;
+export default SQLquery_run;
 
-window.VirtualKGquery = VirtualKGquery;
+window.VirtualKGquery = SQLquery_run;

@@ -15,6 +15,7 @@ import MainController from "../../shared/mainController.js";
 import KGquery_graph from "./KGquery_graph.js";
 import SavedQueriesComponent from "../../uiComponents/savedQueriesComponent.js";
 import KGquery_myQueries from "./KGquery_myQueries.js";
+import SQLquery_run from "./virtualKGquery.js";
 
 var KGquery = (function () {
     var self = {};
@@ -383,11 +384,10 @@ var KGquery = (function () {
         );
     };
 
-    self.queryKG = function (output, options) {
+    self.queryKG = function (output, options, isVirtualSQLquery) {
         if (!options) {
             options = {};
         }
-
 
         $("#KGquery_dataTableDiv").html("");
         self.message("searching...");
@@ -395,6 +395,15 @@ var KGquery = (function () {
 
         $("#KGquery_graphDiv").css("display", "none");
         $("#KGquery_dataTableDiv").css("display", "block");
+
+        if (isVirtualSQLquery) {
+            return SQLquery_run.execPathQuery(self.querySets, self.currentSource, "lifex_dalia_db", {}, function (err, tableData) {
+                if (err) {
+                    return alert(err);
+                }
+                self.showTableData(tableData);
+            });
+        }
 
         self.execPathQuery(options, function (err, result) {
             self.message("", true);
@@ -686,6 +695,10 @@ var KGquery = (function () {
             tableData.push(line);
         });
 
+        self.showTableData(tableData);
+    };
+
+    self.showTableData = function (tableData) {
         Export.showDataTable("KGquery_dataTableDiv", tableCols, tableData, null, null, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();

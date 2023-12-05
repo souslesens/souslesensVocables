@@ -1,6 +1,5 @@
 const { config } = require("./config");
 const DigestClient = require("digest-fetch");
-const rdf = require("rdflib");
 
 class RdfDataModel {
     /**

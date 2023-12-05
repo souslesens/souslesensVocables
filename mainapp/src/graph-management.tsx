@@ -15,6 +15,9 @@ export default function GraphManagement() {
     const [sources, setSources] = useState<Record<string, any>>({});
     const [slsApiBaseUrl, setSlsApiBaseUrl] = useState<Record<string, any>>({});
 
+    // user info
+    const [currentUserToken, setCurrentUserToken] = useState<string | null>(null);
+
     // status of download/upload
     const [currentSource, setCurrentSource] = useState<string | null>(null);
     const [transferPercent, setTransferPercent] = useState(0);
@@ -36,7 +39,15 @@ export default function GraphManagement() {
     useEffect(() => {
         void fetchSources();
         void fetchConfig();
+        void fetchMe();
     }, []);
+
+    const fetchMe = async () => {
+        const response = await fetch("/api/v1/auth/whoami");
+        const json = await response.json();
+        console.log("token", json.user.token);
+        setCurrentUserToken(json.user.token);
+    };
 
     const fetchConfig = async () => {
         const response = await fetch("/api/v1/config");
@@ -70,7 +81,7 @@ export default function GraphManagement() {
     };
 
     const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format: string = "nt", identifier: string = "") => {
-        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}`, { headers: { "X-token": "admin" } });
+        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}`, { headers: { "X-token": currentUserToken } });
         return await response.json();
     };
 
@@ -151,12 +162,12 @@ export default function GraphManagement() {
             // if cancel button is pressed, remove uploaded file and return
             if (cancelCurrentOperation.current) {
                 formData.set("clean", true);
-                await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { "X-Token": "admin" }, body: formData });
+                await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { "X-Token": currentUserToken }, body: formData });
                 return;
             }
 
             // POST data
-            const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { "X-Token": "admin" }, body: formData });
+            const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { "X-Token": currentUserToken }, body: formData });
             if (res.status != 200) {
                 setError(true);
                 const message = await res.json();

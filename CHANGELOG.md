@@ -5,9 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.42.0...master)
+## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.45.0...master)
 
-## [1.44.0](https://github.com/souslesens/souslesensVocables/compare/1.43.0...master) - 2023-11-27
+## [1.45.2](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.45.2) - 2023-12-05
+
+### Fixed
+
+-   Unit tests
+
+## [1.45.1](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.45.1) - 2023-12-05
+
+> [!IMPORTANT]
+> Updating to Unrelease require a data migration. Execute the following script after upgrade.
+
+```bash
+node scripts/migrations/migration_1.45_users.js -f config/users/users.json -w
+```
+
+### Fixed
+
+-   GraphManagement using `sls-api` use the user token
+
+## [1.46.0](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.46.0) - 2023-12-05
+
+### Added
+
+-   GraphManagement tools: download and upload RDF graph
+-   Add new entries in `mainConfig.json`:
+    -   `souslesensUrlForVirtuoso`: Souslesens URL from virtuoso (optional, will use
+        `souslesensUrl` if not defined)
+    -   `slsApi`: `sls-api` info if an instance of `sls-api` is used.
+
+Example:
+
+```json
+"souslesensUrlForVirtuoso" : "http://host.docker.internal:3010",
+"slsApi": {
+    "url": "http://localhost:8000"
+}
+```
+
+## [1.45.0](https://github.com/souslesens/souslesensVocables/compare/1.44.0...1.45.0) - 2023-12-05
+
+## [1.44.0](https://github.com/souslesens/souslesensVocables/compare/1.43.0...1.44.0) - 2023-11-27
 
 > [!IMPORTANT]
 > Updating to Unrelease require a data migration. Execute the following script after upgrade.

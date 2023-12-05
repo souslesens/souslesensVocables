@@ -92,13 +92,6 @@ var Lineage_containers = (function () {
             },
         };
 
-        /*  items["GraphContainerSetStyle"] = {
-label: "Set Style",
-action: function(_e) {
-Lineage_styles.showDialog(self.currentContainer.data);
-}
-};*/
-
         return items;
     };
 
@@ -155,7 +148,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
         if (!options) {
             options = {};
         }
-        options.depth = 3;
+        options.depth = 2;
         if (!options.filter) {
             options.filter = "";
         }
@@ -971,7 +964,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
             var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                'SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes)  FROM   <http://souslesens.org/resources/ontology/slsv-ui/>  FROM   <http://rds.posccaesar.org/ontology/lis14/ont/core>  WHERE {?member ^rdfs:member ?parent.\n' +
+                'SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes)  ' +
+                fromStr +
+                "  WHERE {?member ^rdfs:member ?parent.\n" +
                 "    ?member rdf:type ?memberType.\n" +
                 filterLeaves +
                 "   ?member rdfs:label ?memberLabel.\n" +

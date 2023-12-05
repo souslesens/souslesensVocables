@@ -172,9 +172,9 @@ var KGquery = (function () {
         }
 
         /**
-       add a new queryElement if formNode and toNodes are registered
-       if a path exist the new node has to be the target (to) Node of a new path and the from node should be the nearest node among the previous paths nodes
-       */
+         add a new queryElement if formNode and toNodes are registered
+         if a path exist the new node has to be the target (to) Node of a new path and the from node should be the nearest node among the previous paths nodes
+         */
         var currentQuerySet = self.querySets.sets[self.querySets.currentIndex];
         var currentQueryElement = currentQuerySet.elements[currentQuerySet.elements.length - 1];
         self.currentGraphNode.setIndex = self.querySets.currentIndex;

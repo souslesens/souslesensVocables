@@ -3,7 +3,7 @@
 
 /* Button Copy Query and Admin */ 
 .w3-button{
-	background-color : #8757DF;
+	
 	color : white;
 	border-radius : 14px;
 	border: #8757DF solid 1px;
@@ -35,7 +35,7 @@
 	border: #e9f0ff solid 2px;
 	font-family: Helvetica, sans-serif;
 	font-size: 16px;
-    
+    display: inline-flex;
 	padding: 6px 16px;
 }
 .slsv-button-source:hover{
@@ -61,7 +61,7 @@
 /* Button TOOL / Source */ 
 .slsv-button{
 	background-color : inherit;
-	color : #1A28BF;
+	color : #8757DF;
 	font-family: Helvetica, sans-serif;
 	font-weight : bold;
 	font-size: 16px;
@@ -94,30 +94,49 @@
 
 /* Button WhiteBoard/Classes/Properties/Containers */
 .slsv-tabButton{
-	background-color : inherit;
-	color : #8757DF;
+	/*background-color : inherit;
+	
+	
+	*/
+	border: 0px;
+	color : #1A28BF ;
 	font-family: Helvetica, sans-serif;
-	font-size: 14px;
+	font-size: 13px;
 	padding: 8px 6px;
 	border-radius : 14px;
-	border: #8757DF solid 2px;
-	margin-left: 17px;
+	
 	font-weight : bold;
 	
 	
 }
 .slsv-tabButton:hover{
+	/*
 	background-color : #8757DF! important;
-	color : white! important;
-	font-family: Helvetica, sans-serif;
-	font-size: 14px;
-	padding: 8px 12px;
-	border-radius : 14px;
 	border: #8757DF solid 2px;
-	margin-left: 17px;
+	*/
+	border: 0px;
+	color : #8757DF ;
+	font-family: Helvetica, sans-serif;
+	font-size: 13px;
+	padding: 8px 6px;
+	border-radius : 14px;
+	
+	font-weight : bold;
+	
+	
 	
 }
-
+.slsv-tabButtonSelected{
+	border: 0px;
+	color : #8757DF ;
+	font-family: Helvetica, sans-serif;
+	font-size: 13px;
+	padding: 8px 6px;
+	border-radius : 14px;
+	
+	font-weight : bold;
+	
+}
 
 
 /* Button Family 1 */
@@ -214,6 +233,7 @@
 }
 .w3-container{
 	background-color : #e9f0ff;
+
 	
 }
 .vis-network{
@@ -222,3 +242,51 @@
 }
 
 
+.toolSelectionBorder{
+	border-radius : 14px;
+	border: #1A28BF solid 1px;
+	margin : 10px;
+
+}
+#currentToolTitle{
+	color : #8757DF;
+	font-family: Helvetica, sans-serif;
+	font-weight : bold;
+	font-size: 16px;
+	margin-right: 10px;
+}
+
+.slsvTabSeparation{
+	Float:left;
+	height:7vh;
+	width:2px; /* edit this if you want */
+	background-color: #1A28BF;
+	margin-left : 5px;
+	margin-right : 5px;
+	position: relative;
+}
+.slsv-tabDiv{
+	
+    background-color : #bed4f4;
+	color : #1A28BF;
+	font-family: Helvetica, sans-serif;
+	font-size: 13px;
+	padding: 1% 1.65% !important;
+	/*
+	border-bottom-left-radius:14px ;
+	border-bottom-right-radius:14px ;
+	*/
+	border-bottom: #1A28BF solid 3px !important;
+    border-right: #1A28BF solid 3px !important;
+	
+    width: 25%!important;
+	height: 10%;
+	font-weight : bold;
+}
+
+.slsv-selectedTabDiv{
+	background: #e9f0ff;
+	border-bottom: 0px !important ;
+	/*border-bottom-left-radius:0px !important;*/
+	
+}

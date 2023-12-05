@@ -1,8 +1,20 @@
-<div class="w3-barslsv-bg-pale w3-bar">
-    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('lineage-tab','tabs_whiteboard', Lineage_r.initWhiteboardTab)">Whiteboard</button>
-    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('lineage-tab','tabs_classes',Lineage_r.initClassesTab)">Classes</button>
-    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('lineage-tab','tabs_properties',Lineage_r.initPropertiesTab)">Properties</button>
-    <button class="w3-bar-item w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('lineage-tab','tabs_containers',Lineage_r.initContainersTab)">Containers</button>
+<div id="lineage-tab-buttons" class="w3-barslsv-bg-pale w3-bar" style="border-bottom: 0px">
+    <div class="w3-bar-item slsv-tabDiv">
+        <button id="WhiteboardTabButton" class="w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('lineage-tab','tabs_whiteboard', Lineage_r.initWhiteboardTab,this)">Whiteboard</button>
+    </div>
+    <!--<div class="slsvTabSeparation"> </div>-->
+
+    <div class="w3-bar-item slsv-tabDiv">
+        <button class="w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('lineage-tab','tabs_classes',Lineage_r.initClassesTab,this)">Classes</button>
+    </div>
+    <!--<div class="slsvTabSeparation"> </div>-->
+    <div class="w3-bar-item slsv-tabDiv">
+        <button class="w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('lineage-tab','tabs_properties',Lineage_r.initPropertiesTab,this)">Properties</button>
+    </div>
+    <!--<div class="slsvTabSeparation"> </div>-->
+    <div class="w3-bar-item slsv-tabDiv" style="border-right: 0px !important">
+        <button class="w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('lineage-tab','tabs_containers',Lineage_r.initContainersTab,this)">Containers</button>
+    </div>
 </div>
 
 <div id="tabs_whiteboard" class="w3-container lineage-tab slsv-bg-pale"></div>

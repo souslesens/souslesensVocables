@@ -289,10 +289,10 @@
 
                     MainController.UI.setCredits();
                     // MyDashboard.init();
-
-                    ResponsiveUI.init();
                     $("#ChangeSourceButton").hide();
                     $("#index_topContolPanel").hide();
+                    $("#Lineage_graphEditionButtons").hide();
+                    ResponsiveUI.init();
                 });
             });
         </script>
@@ -329,7 +329,8 @@
         <!--<link rel="stylesheet" href="./slsv-complementaryKGA.css" />-->
         <!--<link rel="stylesheet" href="./slsv-plant.css" />-->
         <!--<link rel="stylesheet" href="./slsv-blue.css" />-->
-        <link rel="stylesheet" href="./responsive/css/slsv-bluePurple.css" />
+        <link rel="stylesheet" href="./responsive/css/lineage/slsv-bluePurple.css" />
+        <link rel="stylesheet" href="./responsive/css/widget/sourceSelector/Sourceselector-bluePurple.css" />
         <!--<link rel="stylesheet" href="./slsv-cartography1.css" />-->
         <!--<link rel="stylesheet" href="./slsv-cartography2.css" />-->
     </head>
@@ -337,17 +338,29 @@
     <body>
         <header class="w3-container">
             <div class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4; width: 100%">
-                <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
-                    <button class="slsv-button">Tool</button>
+                <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button" style="padding: 23px">
+                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center; margin-top: 0px; padding: 0px">
+                        <div class="toolSelectionBorder">
+                            <button id="selectedTool" class="slsv-button" style="margin-top: 10px; margin-bottom: 10px; padding: 0px; margin-left: 10px">Tool</button>
+                            <input type="image" src="./icons/caret-right.png" style="opacity: 0.5; width: 15px;margin-left: 10px; margin-right: 10px;}" />
+                        </div>
+                        <div id="currentToolTitle"></div>
+                    </div>
 
                     <div class="w3-dropdown-content w3-bar-block w3-border">
                         <select id="toolsSelect" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())"></select>
                     </div>
                 </div>
 
-                <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
-                    <button id="ChangeSourceButton" class="slsv-button" onclick="ResponsiveUI.showSourceDialog(true)">Source</button>
+                <!--<div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
+                    
+                </div>-->
+
+                <!--
+                <div class="w3-bar-item slsv-bg-intense">
+                    <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>
                 </div>
+                -->
 
                 <div class="w3-bar-item">
                     <div class="w3-sand w3-round-xlarge w3-margin" style="display: flex; flex-direction: row; align-items: center" id="index_topContolPanel">
@@ -355,23 +368,31 @@
                     </div>
                 </div>
 
-                <div class="w3-bar-item slsv-bg-intense">
-                    <!--  <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>-->
+                <div class="w3-bar-item">
+                    <div class="w3-sand w3-round-xlarge w3-margin" style="display: flex; flex-direction: row; align-items: center" id="Lineage_graphEditionButtons">
+                        <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
+                        <button class="slsv-button-source" id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
+                            <input type="image" src="../icons/AddNodeEdge.png" style="margin-right: 5px" /><span style="margin-bottom: 5px">Add Node</span>
+                        </button>
+                        <button class="slsv-button-source" style="background-color: #1a28bf" id="lineage_actionDiv_addedge" onclick="Lineage_r.addEdge()">
+                            <input type="image" src="../icons/AddNodeEdge.png" style="margin-right: 5px" /><span style="margin-bottom: 5px">Add Edge</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="w3-bar-item w3-right">
-                    <div class="w3-button" id="user-username">User</div>
+                    <div class="w3-button" style="margin-top: 27px; background-color: #8757df" id="user-username">User</div>
                 </div>
 
                 <div class="w3-bar-item w3-right">
-                    <button class="w3-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
+                    <button class="w3-button" style="margin-top: 27px; background-color: #8757df" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
                 </div>
             </div>
         </header>
 
         <div class="w3-container">
-            <div class="w3-container w3-col l3 slsv-bg-pale" style="height: 90vh; width: 30%" id="lateralPanelDiv"></div>
-            <div class="w3-container w3-col l9" style="height: 90vh; width: 70%" id="graphDiv"></div>
+            <div class="w3-container w3-col l3 slsv-bg-pale" style="height: 90vh; width: 26%" id="lateralPanelDiv"></div>
+            <div class="w3-container w3-col l9" style="height: 90vh; width: 74%" id="graphDiv"></div>
         </div>
 
         <footer class="w3-row-padding"></footer>

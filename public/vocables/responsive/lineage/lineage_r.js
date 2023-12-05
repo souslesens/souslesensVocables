@@ -44,7 +44,10 @@ var Lineage_r = (function () {
         });
     };
     self.initWhiteboardTab = function () {
-        $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {});
+        $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {
+            $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
+            $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
+        });
     };
 
     self.initClassesTab = function () {
@@ -73,9 +76,9 @@ var Lineage_r = (function () {
 
         var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
         if (isNodeEditable) {
-            $("#lineage_r_addPanel").css("display", "block");
+            $("#Lineage_graphEditionButtons").css("display", "block");
         } else {
-            $("#lineage_r_addPanel").css("display", "none");
+            $("#Lineage_graphEditionButtons").css("display", "none");
         }
     };
     self.addNode = function () {

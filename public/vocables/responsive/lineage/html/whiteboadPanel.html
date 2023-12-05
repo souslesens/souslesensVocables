@@ -1,4 +1,5 @@
 <div class="w3-panel w3-border w3-round-small">
+    <div class="titleboxButtons" style="color: #1a28bf">Title 1</div>
     <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()">Model</button>
     <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()">TopClasses</button>
     <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>
@@ -10,6 +11,7 @@
 </div>
 
 <div class="w3-panel w3-border w3-round-small">
+    <div class="titleboxButtons" style="color: #059bbc">Title 2</div>
     <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()">Clear all</button>
     <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()">Clear last</button>
     <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()">Only last</button>
@@ -19,9 +21,10 @@
 </div>
 
 <div class="w3-panel w3-border w3-round-small">
+    <div class="titleboxButtons" style="color: #52c1b9">Title 3</div>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog();">Similars</button>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>
-    <button class="w3-button slsv-button-3" id="lineage_actionDiv_pathes" onclick="Lineage_r.showPathesDialog()">Pathes</button>
+    <button class="w3-button slsv-button-3" id="lineage_actionDiv_pathes" onclick="Lineage_r.showPathesDialog()">Paths</button>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_linkedData" onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">Linked Data</button>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_reasoner" onclick="Lineage_reasoner.showReasonerDialog()" disabled="">Reasoner</button>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_rules" onclick="Lineage_rules.showRulesDialog()" disabled="">Rules</button>

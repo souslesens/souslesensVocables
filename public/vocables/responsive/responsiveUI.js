@@ -17,11 +17,8 @@ var ResponsiveUI = (function () {
     };
 
     self.onToolSelect = function (toolId) {
-        $("#selectedTool").html(toolId);
+        $("#currentToolTitle").html(toolId);
         MainController.currentTool = toolId;
-        if (toolId == "lineage") {
-            Lineage_r.isResponsiveLoading = true;
-        }
         ResponsiveUI.showSourceDialog(true);
     };
 
@@ -119,8 +116,17 @@ var ResponsiveUI = (function () {
     self.hideDiv = function (modalDiv) {
         $("#" + modalDiv).css("display", "none");
     };
+    self.ApplySelectedTabCSS = function (buttonClicked, tabGroup) {
+        var x = $("#" + tabGroup + "-buttons").children();
+        if (x.length > 0) {
+            x.removeClass("slsv-selectedTabDiv");
+            x.children().removeClass("slsv-tabButtonSelected");
+        }
 
-    self.openTab = function (tabGroup, tabId, actionFn) {
+        $(buttonClicked).addClass("slsv-tabButtonSelected");
+        $(buttonClicked).parent().addClass("slsv-selectedTabDiv");
+    };
+    self.openTab = function (tabGroup, tabId, actionFn, buttonClicked) {
         var i;
         var x = document.getElementsByClassName(tabGroup);
         for (i = 0; i < x.length; i++) {
@@ -132,6 +138,7 @@ var ResponsiveUI = (function () {
         if (actionFn) {
             actionFn();
         }
+        self.ApplySelectedTabCSS(buttonClicked, tabGroup);
     };
 
     self.showSourceDialog = function (resetAll) {
@@ -152,11 +159,18 @@ var ResponsiveUI = (function () {
     };
     self.openDialogDiv = function (div) {
         //$("#mainDialogDiv").css('width', 'auto');
+
         $("#" + div).empty();
         $("#" + div).dialog();
         $("#" + div)
             .parent()
             .show();
+        $("#" + div)
+            .parent()
+            .css("top", "20%");
+        $("#" + div)
+            .parent()
+            .css("left", "30%");
     };
     self.setSlsvCssClasses = function () {
         async.series(

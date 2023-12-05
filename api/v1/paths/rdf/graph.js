@@ -62,7 +62,7 @@ module.exports = function () {
 
             if (clean) {
                 fs.rmSync(tmpPath);
-                res.status(200).send({ id: id });
+                res.status(200).send({ identifier: id });
                 return;
             }
 
@@ -86,7 +86,7 @@ module.exports = function () {
                 // clean
                 fs.rmSync(filePathToUpload);
             }
-            res.status(200).send({ id: id });
+            res.status(200).send({ identifier: id });
         } catch (error) {
             // clean
             if (fs.existsSync(filePathToUpload)) {

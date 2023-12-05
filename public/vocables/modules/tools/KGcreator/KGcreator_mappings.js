@@ -241,7 +241,12 @@ if (object.indexOf("http://") > 0 && object.indexOf("function") < 0) {
     };
 
     self.createPrefixTransformFn = function () {
-        var prefix = prompt("Enter Prefix", self.currentTreeNode.data.id);
+        if (!self.currentTreeNode) {
+            var column_selected = $("#KGcreator_transformColumnSelect").val();
+        } else {
+            var column_selected = self.currentTreeNode.data.id;
+        }
+        var prefix = prompt("Enter Prefix", column_selected);
         if (!prefix) {
             return;
         }
@@ -321,7 +326,7 @@ if (object.indexOf("http://") > 0 && object.indexOf("function") < 0) {
 
         //concat new triples from editor with other mappings in table
         KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels.forEach(function (triple) {
-            if (triple.s.indexOf(columnNode.data.id) == 0 || triple.s.indexOf(columnNode.data.id) == 1) {
+            if (triple.s.replace("$_", "") == columnNode.data.id) {
                 //include "$_ blanknode
                 return;
             }

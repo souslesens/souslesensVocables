@@ -92,13 +92,6 @@ var Lineage_containers = (function () {
             },
         };
 
-        /*  items["GraphContainerSetStyle"] = {
-label: "Set Style",
-action: function(_e) {
-Lineage_styles.showDialog(self.currentContainer.data);
-}
-};*/
-
         return items;
     };
 
@@ -117,7 +110,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
         var filter = "";
         if (term) {
-            filter = Sparql_common.setFilter("member", null, term);
+            filter = Sparql_common.setFilter("parent0", null, term);
         }
 
         var search_on_container = "";
@@ -135,10 +128,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
         }
 
         self.currentContainer = null;
-        /*  self.listContainerResources(source, null, { filter:filter })
 
-
-return;*/
         if ($("#lineage_containers_containersJstree").jstree) {
             $("#lineage_containers_containersJstree").empty();
         }
@@ -154,488 +144,169 @@ return;*/
         }
     };
 
-    self.reset_tree = function (source, filter, jstreeDiv, memberType, options, callback) {
-        if (!options) {
-            options = {};
-        }
-
-        var fromStr = Sparql_common.getFromStr(source, null, true);
-        /*
-var query =
-    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-    "select distinct * " +
-    fromStr +
-    "where {?member rdfs:label ?memberLabel.?member rdf:type ?memberType." +
-    memberType +
-    " OPTIONAL {?member ^rdfs:member ?parentContainer.?parentContainer rdf:type ?type.filter (?type in (rdf:Bag,rdf:List)).?parentContainer rdfs:label ?parentContainerLabel}" +
-    " " +
-    filter +
-    "}";
-*/
-
-        var query = `
-            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-            select distinct *   ${fromStr} where {
-              ?firstLevel rdfs:label ?firstLevelLabel.
-              ?firstLevel rdf:type ?firstLevelType.
-              FILTER NOT EXISTS{?firstLevel ^rdfs:member ?noAscendance.}
-              filter(?firstLevelType in (rdf:Bag,rdf:List) ). 
-              ?firstLevel rdfs:member{0, ${Config.Lineage.numberOfContainersLevel} } ?member.
-              ?member rdfs:label ?memberLabel.
-              ?member rdf:type ?memberType.
-              filter (?memberType in (rdf:Bag,rdf:List)).
-                OPTIONAL {
-                ?member ^rdfs:member ?parentContainer.
-                
-                 
-                ?parentContainer rdf:type ?type.
-                filter (?type in (rdf:Bag,rdf:List)).
-                ?parentContainer rdfs:label ?parentContainerLabel
-                
-
-                }
-             
-                
-              
-            }
-
-            `;
-        var sparql_url = Config.sources[source].sparql_server.url;
-        var url = sparql_url + "?format=json&query=";
-
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-
-            var nodesMap = {};
-
-            result.results.bindings.forEach(function (item) {
-                //  var nodeId=item.parent+"_"+item.member.value
-                if (!nodesMap[item.member.value]) {
-                    item.jstreeId = "_" + common.getRandomHexaId(5);
-                    nodesMap[item.member.value] = item;
-                } else {
-                    if (item.parentContainer.value) {
-                        if (Array.isArray(nodesMap[item.member.value].parentContainer.value)) {
-                            nodesMap[item.member.value].parentContainer.value.push(item.parentContainer.value);
-                        } else {
-                            nodesMap[item.member.value].parentContainer.value = [nodesMap[item.member.value].parentContainer.value, item.parentContainer.value];
-                        }
-                    }
-                }
-            });
-
-            var uniqueNodes = {};
-
-            var jstreeData = [];
-            var multiple_parents = [];
-            for (var nodeId in nodesMap) {
-                var item = nodesMap[nodeId];
-                var parent = "#";
-
-                var memberType = "container";
-                var multiple_skip = false;
-                if (item.parentContainer) {
-                    if (Array.isArray(item.parentContainer.value)) {
-                        multiple_parents.push(item);
-                        multiple_skip = true;
-                    }
-                }
-
-                if (!multiple_skip) {
-                    parent = item.parentContainer && nodesMap[item.parentContainer.value] ? nodesMap[item.parentContainer.value].jstreeId : "#";
-                    if (!uniqueNodes[item.jstreeId]) {
-                        uniqueNodes[item.jstreeId] = 1;
-
-                        var node = {
-                            id: item.jstreeId,
-                            text: item.memberLabel.value,
-                            parent: parent,
-                            type: memberType,
-                            data: {
-                                type: memberType,
-                                source: source,
-                                id: item.member.value,
-                                label: item.memberLabel.value,
-                                currentParent: parent,
-                                tabId: options.tabId,
-                            },
-                        };
-                        jstreeData.push(node);
-                    }
-                }
-            }
-            for (var nodeId in multiple_parents) {
-                var item = multiple_parents[nodeId];
-
-                for (var parentId in item.parentContainer.value) {
-                    var parent = item.parentContainer.value[parentId];
-                    if (nodesMap[parent]) {
-                        var node = {
-                            id: "_" + common.getRandomHexaId(5),
-                            text: item.memberLabel.value,
-                            parent: parent,
-                            type: "container",
-                            data: {
-                                type: "container",
-                                source: source,
-                                id: item.member.value,
-                                label: item.memberLabel.value,
-                                currentParent: parent,
-                                tabId: options.tabId,
-                            },
-                        };
-                        jstreeData.push(node);
-                    }
-                }
-            }
-
-            var jstreeOptions;
-            if (options.jstreeOptions) {
-                jstreeOptions = options.jstreeOptions;
-            } else {
-                jstreeOptions = {
-                    openAll: false,
-                    contextMenu: Lineage_containers.getContextJstreeMenu(),
-                    selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
-                    dnd: {
-                        drag_stop: function (data, element, helper, event) {
-                            //  self.onMoveContainer(data, element, helper, event);
-                        },
-                        drag_start: function (data, element, helper, event) {
-                            var sourceNodeId = element.data.nodes[0];
-                            self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
-                        },
-                    },
-                };
-            }
-
-            JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
-                $("#" + jstreeDiv)
-                    .jstree()
-                    .open_node("#");
-                self.bindMoveNode(jstreeDiv);
-                callback(null);
-            });
-        });
-    };
-
-    self.orderResults = function (results) {
-        var new_results = [];
-        results.forEach(function (item) {
-            var current_child = item.member.value;
-            var path_uri_order = [];
-            var label_uri_order = [];
-            var distinct_uris = [];
-            var type_uri_order = [];
-
-            if (item.all.value) {
-                var all_results = item.all.value.split(";;");
-                for (let i = 0; i < all_results.length; i++) {
-                    var result = JSON.parse(all_results[i]);
-                    all_results[i] = result;
-                    if (!distinct_uris.includes(result.parentUri)) {
-                        distinct_uris.push(result.parentUri);
-                    }
-                }
-                distinct_uris.forEach(function (distinct) {
-                    for (let i = 0; i < all_results.length; i++) {
-                        if (all_results[i].parentChild == current_child) {
-                            if (!path_uri_order.includes(all_results[i].parentUri)) {
-                                path_uri_order.push(all_results[i].parentUri);
-                                label_uri_order.push(all_results[i].parentLabel);
-                                type_uri_order.push(all_results[i].parentType);
-                                current_child = all_results[i].parentUri;
-                            }
-                        }
-                    }
-                });
-                path_uri_order = path_uri_order.reverse();
-                item.allparents = { value: "" };
-                item.allparents.value = path_uri_order.toString().replaceAll(",", ";;");
-                label_uri_order = label_uri_order.reverse();
-                item.allparentslabel = { value: "" };
-                item.allparentslabel.value = label_uri_order.toString().replaceAll(",", ";;");
-                type_uri_order = type_uri_order.reverse();
-                item.types = { value: "" };
-                item.types.value = type_uri_order.toString().replaceAll(",", ";;");
-                new_results.push(item);
-            }
-        });
-
-        return new_results;
-    };
-    // filter is a clause SPARQL clause filter like FILTER (regex(?memberLabel, "flu", "i"))
-    //search_container is an URI chracter chain to indicates the search focus on this container
-    //membertype is a list like  in (rdf:Bag,rdf:List) to indicates where type are filtered on the search, he is prefixed at (rdf:Bag,rdf:List) for not filtered clauses
     self.drawContainerJstree = function (source, filter, jstreeDiv, search_on_container, memberType, options, callback) {
         if (!options) {
             options = {};
         }
-        var fromStr = Sparql_common.getFromStr(source, null, true);
-
-        var values = "";
-        var descendants_clause = "";
-        if (search_on_container != "") {
-            var values = `VALUES (?o) {
-                (<${search_on_container}>)
-                
-                
-            }`;
-            var descendants_clause = "?member ^rdfs:member*  ?o.";
+        options.depth = 2;
+        if (!options.filter) {
+            options.filter = "";
         }
+        options.filter += filter || "";
 
-        var memberTypefilter = "";
-        if (memberType) {
-            if (memberType != "") {
-                memberTypefilter = `filter(str(?memberType) ${memberType} ).`;
-            }
-        } else {
-            if (filter == "") {
-                memberTypefilter = `filter(?memberType in (rdf:Bag,rdf:List) ).`;
-            }
-        }
-
-        if (filter == "") {
-            self.reset_tree(source, filter, jstreeDiv, memberTypefilter, options, callback);
-        } else {
-            var query = `
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        SELECT distinct ?member ?memberLabel ?memberType ?subclasstype (GROUP_CONCAT(distinct ?allprop ; separator=";;")  as ?all)  ${fromStr}
-        WHERE{
-        
-        
-                        ?member ^rdfs:member* ?parentContainer.
-                        ?parentContainer rdfs:member ?child.
-                        ?parentContainer rdfs:label ?parentContainerLabel.
-                        ?parentContainer rdf:type ?type.
-                        filter (?type in (rdf:Bag,rdf:List)).
-                        BIND( concat('{','"parentUri":"',str(?parentContainer),'","parentType":"',str(?type),'","parentLabel":"',str(?parentContainerLabel),'","parentChild":"',str(?child),'"}')  AS ?allprop).
-                        ${values}        
-        
-                            
-          
-          
-                {
-          
-                          select distinct *   where {
-        
-                        
-                        
-                        ?member rdfs:label ?memberLabel.
-                        ?member rdf:type ?memberType.
-                        ${descendants_clause}
-                       
-                        ${filter}
-                        OPTIONAL{?member rdfs:subClassOf ?subclasstype.}
-                        ${memberTypefilter}
-                            
+        var data = [];
+        var rootNodes = [];
+        async.series(
+            [
+                function (callbackSeries) {
+                    if (search_on_container) {
+                        if (!Array.isArray(search_on_container)) {
+                            search_on_container = [search_on_container];
                         }
-                        
-                        LIMIT 100
-                        OFFSET 0
-        
-                }	
-        }
-        
-        
-        `;
-
-            var offset = 0;
-            var resultSize = 100;
-
-            self.nbOfancestors_tree_search += 1;
-            if (self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search] == true) {
-                self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search] = false;
-                self.nbOfancestors_tree_search -= 1;
-            }
-            if (self.nbOfancestors_tree_search > 1) {
-                self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search - 1] = false;
-            }
-            self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search] = true;
-            var search_number = self.nbOfancestors_tree_search;
-            async.whilst(
-                function (_test) {
-                    return resultSize > 0 && self.ancestors_tree_search_areRunning[search_number];
-                },
-
-                function differ(callbackWhilst) {
-                    self.flag_search = true;
-                    //iterate
-                    var sparql_url = Config.sources[source].sparql_server.url;
-                    var url = sparql_url + "?format=json&query=";
-                    var query_split = query.split("OFFSET");
-                    var query2 = query_split[0] + " OFFSET " + query_split[1].replace(/(\d+)/, offset);
-
-                    Sparql_proxy.querySPARQL_GET_proxy(url, query2, null, { source: source }, function (err, result) {
+                        return callbackSeries();
+                    }
+                    // determine top container with members if no search_on_container
+                    self.sparql_queries.getTopContainers(source, function (err, result) {
                         if (err) {
-                            return callbackWhilst(err);
+                            return callback(err);
                         }
-
-                        resultSize = result.results.bindings.length;
-                        var nodesMap = {};
-
-                        var ordered_results = self.orderResults(result.results.bindings);
+                        if (err) {
+                            return callback(err);
+                        }
+                        search_on_container = [];
 
                         result.results.bindings.forEach(function (item) {
-                            var node_in_tree = false;
-
-                            if (!nodesMap[item.member.value]) {
-                                if (offset > 0) {
-                                    var node_in_tree = JstreeWidget.getNodeByURI(jstreeDiv, item.member.value);
-                                }
-                                var jstreeId = "_" + common.getRandomHexaId(5);
-                                if (node_in_tree != false) {
-                                    jstreeId = node_in_tree.id;
-                                }
-
-                                var node = { id: item.member.value, jstreeid: jstreeId, label: item.memberLabel.value, types: [], subclass: [], parent: "#" };
-                                if (item.memberType) {
-                                    node.types.push(item.memberType.value);
-                                }
-                                if (item.subclasstype) {
-                                    node.subclass.push(item.subclasstype.value);
-                                }
-
-                                nodesMap[item.member.value] = node;
-                            } else {
-                                if (item.memberType) {
-                                    if (!nodesMap[item.member.value].types.includes(item.memberType.value)) {
-                                        nodesMap[item.member.value].types.push(item.memberType.value);
-                                    }
-                                }
-                                if (item.subclasstype) {
-                                    if (!nodesMap[item.member.value].subclass.includes(item.subclasstype.value)) {
-                                        nodesMap[item.member.value].subclass.push(item.subclasstype.value);
-                                    }
-                                }
-                            }
-
-                            if (item.allparents) {
-                                var parents_iris = item.allparents.value.split(";;");
-                                var parents_labels = item.allparentslabel.value.split(";;");
-                                var parents_types = item.types.value.split(";;");
-
-                                for (let i = parents_iris.length - 1; i >= 0; i--) {
-                                    if (!nodesMap[parents_iris[i]]) {
-                                        var jstreeId = "_" + common.getRandomHexaId(5);
-                                        if (offset > 0) {
-                                            var node_in_tree = JstreeWidget.getNodeByURI(jstreeDiv, parents_iris[i]);
-                                        }
-                                        if (node_in_tree != false) {
-                                            jstreeId = node_in_tree.id;
-                                        }
-
-                                        var node = { id: parents_iris[i], jstreeid: jstreeId, label: parents_labels[i], types: [parents_types[i]], subclass: [], parent: "#" };
-                                    } else {
-                                        var node = nodesMap[parents_iris[i]];
-                                        if (!node.types.includes(parents_types[i])) {
-                                            node.types.push(parents_types[i]);
-                                        }
-                                    }
-
-                                    if (i != 0) {
-                                        if (node.id != parents_iris[i - 1]) {
-                                            node["parent"] = parents_iris[i - 1];
-                                        }
-                                    }
-
-                                    nodesMap[parents_iris[i]] = node;
-
-                                    if (i == parents_iris.length - 1) {
-                                        nodesMap[item.member.value].parent = parents_iris[i];
-                                    }
-                                }
-                            }
+                            search_on_container.push(item.member.value);
+                            rootNodes.push({ id: item.member.value, label: item.memberLabel.value });
                         });
+                        callbackSeries();
+                    });
+                },
+                // determine top container without  members if no search_on_container and no  container with members
+                function (callbackSeries) {
+                    callbackSeries();
+                },
+                //prepare parents and members
+                function (callbackSeries) {
+                    self.sparql_queries.getContainerDescendants(source, search_on_container, options, function (err, result) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        data = result.results.bindings;
+                        callbackSeries();
+                    });
+                },
 
-                        var jstreeData = [];
+                function (callbackSeries) {
+                    var jstreeData = [];
+                    var existingIds = {};
+                    var existingNodes = {};
 
-                        for (var nodeId in nodesMap) {
-                            var item = nodesMap[nodeId];
-                            var parent = "#";
-                            if (!(item.parent == "#")) {
-                                var parent = nodesMap[item.parent].jstreeid;
+                    // set rootnodes
+                    rootNodes.forEach(function (item) {
+                        var id = item.id;
+
+                        if (!existingIds[id]) {
+                            existingIds[id] = [];
+                        }
+                        var jstreeId = "_" + common.getRandomHexaId(5);
+                        existingIds[id].push(jstreeId);
+
+                        if (!existingNodes[jstreeId]) {
+                            existingNodes[jstreeId] = 1;
+                        }
+                        var node = {
+                            id: jstreeId,
+                            text: item.label,
+                            parent: "#",
+                            //  type: type_icon,
+                            data: {
+                                type: "container",
+                                source: source,
+                                id: id,
+                                label: item.label,
+                                parent: "#",
+                                //tabId: options.tabId,
+                            },
+                        };
+
+                        jstreeData.push(node);
+                    });
+
+                    data.forEach(function (item) {
+                        var parentId = item.parent.value;
+
+                        var type = "container";
+                        if (item.memberTypes.value.indexOf("Class") > 0) {
+                            type = "Class";
+                        }
+                        if (item.memberTypes.value.indexOf("Individual") > 0) {
+                            type = "Individual";
+                        }
+
+                        if (!existingIds[parentId]) {
+                            existingIds[parentId] = [];
+                        }
+                        var parentJstreeId = "_" + common.getRandomHexaId(5);
+                        existingIds[parentId].push(parentJstreeId);
+
+                        var id = item.member.value;
+                        if (!existingIds[id]) {
+                            existingIds[id] = [];
+                        }
+                        var jstreeId = "_" + common.getRandomHexaId(5);
+                        existingIds[id].push(jstreeId);
+
+                        // insert into into each parent
+                        var parents = existingIds[parentId];
+                        parents.forEach(function (jsTreeParent) {
+                            if (!existingNodes[jsTreeParent]) {
+                                existingNodes[jsTreeParent] = 1;
                             }
-
-                            var type_icon = JstreeWidget.selectTypeForIconsJstree(item.types, self.add_supplementary_layer_for_types_icon);
-
                             var node = {
-                                id: item.jstreeid,
-                                text: item.label,
-                                parent: parent,
-                                type: type_icon,
+                                id: jstreeId,
+                                text: item.memberLabel.value,
+                                parent: jsTreeParent,
+                                type: type,
                                 data: {
-                                    type: item.types,
+                                    type: type,
                                     source: source,
-                                    id: item.id,
-                                    label: item.label,
-                                    currentParent: parent,
+                                    id: id,
+                                    label: item.memberLabel.value,
+                                    currentParent: jsTreeParent,
                                     tabId: options.tabId,
                                 },
                             };
 
                             jstreeData.push(node);
-                        }
-
-                        var jstreeOptions;
-                        if (options.jstreeOptions) {
-                            jstreeOptions = options.jstreeOptions;
-                        } else {
-                            jstreeOptions = {
-                                openAll: false,
-                                contextMenu: Lineage_containers.getContextJstreeMenu(),
-                                selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
-                                /*  dnd: {
-  drag_stop: function(data, element, helper, event) {
-    //  self.onMoveContainer(data, element, helper, event);
-  },
-  drag_start: function(data, element, helper, event) {
-    var sourceNodeId = element.data.nodes[0];
-    self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
-  }
-}*/
-                            };
-                        }
-
-                        if (offset == 0) {
-                            JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
-                                $("#" + jstreeDiv)
-                                    .jstree()
-                                    .open_node("#");
-                                $("#" + jstreeDiv).jstree("open_all");
-                                self.flag_function();
-
-                                self.bindMoveNode(jstreeDiv);
-                            });
-                        } else {
-                            JstreeWidget.addNodesToJstree(jstreeDiv, null, jstreeData, jstreeOptions, self.flag_function);
-                            callback(null);
-                        }
-
-                        offset += result.results.bindings.length;
-                        callbackWhilst(null, result);
+                        });
                     });
-                },
 
-                function (err, result) {
-                    callback(null);
-                    $("#" + jstreeDiv).jstree("open_all");
-                    self.ancestors_tree_search_areRunning[search_number] = false;
-                    if (!(self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search] == true && self.nbOfancestors_tree_search == 1)) {
-                        self.nbOfancestors_tree_search -= 1;
+                    var jstreeOptions;
+                    if (options.jstreeOptions) {
+                        jstreeOptions = options.jstreeOptions;
+                    } else {
+                        jstreeOptions = {
+                            openAll: false,
+                            contextMenu: Lineage_containers.getContextJstreeMenu(),
+                            selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
+                        };
                     }
-                    if (offset == 0) {
-                        $("#" + jstreeDiv).text("No matches");
-                        self.flag_search = false;
-                    }
-                }
-            );
-        }
+
+                    JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
+                        $("#" + jstreeDiv)
+                            .jstree()
+                            .open_node("#");
+                        $("#" + jstreeDiv).jstree("open_all");
+
+                        self.bindMoveNode(jstreeDiv);
+                    });
+
+                    callbackSeries();
+                },
+            ],
+            function (err) {}
+        );
     };
 
     self.bindMoveNode = function (jstreeDiv) {
@@ -887,64 +558,7 @@ var query =
      *
      * @param callback
      */
-    /*  self.getContainerResources = function(source, containerIds, options, callback) {
-  var containers;
-  var firstContainer;
-  if (!Array.isArray(containerIds)) {
-    containers = [containerIds];
-    firstContainer = containerIds;
-  }
-  else {
-    containers = containerIds;
-    firstContainer = containerIds[0];
-  }
 
-  if (options.allDescendants) {
-    //  $("#lineage_containers_containersJstree").jstree().open_all()
-    var descendantObjs = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", firstContainer, null);
-    var descendantIds = [];
-    descendantObjs.forEach(function(item) {
-      if (item.data.type == "container") {
-        descendantIds.push(item.data.id);
-      }
-    });
-    var containerObj = $("#lineage_containers_containersJstree").jstree().get_node(firstContainer);
-    containers = containers.concat(descendantIds);
-  }
-
-  var subjects = containers;
-  var objects = null;
-  var propFilter = "";
-  var objectTypeFilter;
-  if (options.nodes) {
-    objectTypeFilter = "filter(?objectType not in (rdf:Bag,rdf:List))";
-  }
-  else if (options.containers) {
-    objectTypeFilter = "filter(?objectType in (rdf:Bag,rdf:List))";
-  }
-  else {
-    objectTypeFilter = "";
-  }
-
-  if (options.descendants) {
-    propFilter = "http://www.w3.org/2000/01/rdf-schema#member";
-  }
-  else if (options.ancestors) {
-    var subjects = null;
-    var objects = containers;
-  }
-  else {
-    propFilter = "";
-  }
-
-  if (false && !propFilter && !objectTypeFilter) {
-    return alert("no filter set");
-  }
-
-  Sparql_OWL.getFilteredTriples(source, subjects, propFilter, objects, { filter: objectTypeFilter }, function(err, result) {
-    return callback(err, result);
-  });
-};*/
     self.listContainerResources = function (source, containerNode, options, callback, JstreeDiv) {
         var existingChildren = [];
         if (!JstreeDiv) {
@@ -1133,58 +747,61 @@ var query =
                             });
                         }
 
-                        var edgeId = containerData.id + "_" + "member" + "_" + item.parent.value;
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1;
+                        if (false && containerData.id != item.parent.value) {
+                            var edgeId = containerData.id + "_" + "member" + "_" + item.parent.value;
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1;
 
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: containerData.id,
-                                to: item.parent.value,
-                                arrows: {
-                                    middle: {
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: containerData.id,
+                                    to: item.parent.value,
+                                    arrows: {
+                                        middle: {
+                                            enabled: true,
+                                            type: Lineage_whiteboard.defaultEdgeArrowType,
+                                            scaleFactor: 0.5,
+                                        },
+                                    },
+                                    data: {
+                                        from: containerData.id,
+                                        to: item.parent.value,
+                                        source: source,
+                                    },
+                                    //  dashes: true,
+                                    width: 0.5,
+                                    color: memberEdgeColor,
+                                });
+                            }
+                        }
+                        if (item.member.value != item.parent.value) {
+                            var edgeId = item.parent.value + "_" + "member" + "_" + item.member.value;
+
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1;
+                                var type = "container";
+                                if (item.memberTypes.value.indexOf("Bag") < 0) {
+                                    type = "class";
+                                }
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: item.parent.value,
+                                    to: item.member.value,
+                                    arrows: {
                                         enabled: true,
                                         type: Lineage_whiteboard.defaultEdgeArrowType,
                                         scaleFactor: 0.5,
                                     },
-                                },
-                                data: {
-                                    from: containerData.id,
-                                    to: item.parent.value,
-                                    source: source,
-                                },
-                                //  dashes: true,
-                                width: 0.5,
-                                color: memberEdgeColor,
-                            });
-                        }
-
-                        var edgeId = item.parent.value + "_" + "member" + "_" + item.member.value;
-
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1;
-                            var type = "container";
-                            if (item.memberTypes.value.indexOf("Bag") < 0) {
-                                type = "class";
+                                    data: {
+                                        from: item.parent.value,
+                                        to: item.member.value,
+                                        source: source,
+                                    },
+                                    //  dashes: true,
+                                    width: type == "container" ? 1 : 0.5,
+                                    color: memberEdgeColor,
+                                });
                             }
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.parent.value,
-                                to: item.member.value,
-                                arrows: {
-                                    enabled: true,
-                                    type: Lineage_whiteboard.defaultEdgeArrowType,
-                                    scaleFactor: 0.5,
-                                },
-                                data: {
-                                    from: item.parent.value,
-                                    to: item.member.value,
-                                    source: source,
-                                },
-                                //  dashes: true,
-                                width: type == "container" ? 1 : 0.5,
-                                color: memberEdgeColor,
-                            });
                         }
                     });
 
@@ -1298,6 +915,30 @@ var query =
     };
 
     self.sparql_queries = {
+        getTopContainers: function (source, callback) {
+            var fromStr = Sparql_common.getFromStr(source, false, false);
+            var query =
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT distinct ?member ?memberLabel " +
+                fromStr +
+                " where {" +
+                "    ?member rdf:type ?memberType. " +
+                " ?member rdfs:label ?memberLabel. " +
+                " FILTER (?memberType in(rdf:Bag,rdf:List))\n" +
+                "  filter (not exists{?parent rdfs:member ?member})\n" +
+                "    }";
+
+            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            });
+        },
+
         getContainerDescendants: function (source, containerId, options, callback) {
             var fromStr = Sparql_common.getFromStr(source, false, false);
             var filterContainer0Str = "";
@@ -1306,35 +947,39 @@ var query =
                 filterContainer0Str = Sparql_common.setFilter("parent0", containerId, null, { useFilterKeyWord: 1 });
             }
 
+            var filter = options.filter || "";
+
+            var filterLeaves = "";
+            if (!options.leaves) {
+                filterLeaves = " FILTER (?memberType in(rdf:Bag,rdf:List))";
+            }
+
             //  var pathOperator = "+";
             var pathOperator = "+";
             if (options.onlyOneLevel) {
                 pathOperator = "";
+            } else if (options.depth) {
+                pathOperator = "{1," + options.depth + "}";
             }
             var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "SELECT distinct ?member ?memberLabel ?parent ?parentLabel" +
-                ' (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes) ' +
+                'SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes)  ' +
                 fromStr +
-                " WHERE {\n" +
+                "  WHERE {?member ^rdfs:member ?parent.\n" +
+                "    ?member rdf:type ?memberType.\n" +
+                filterLeaves +
+                "   ?member rdfs:label ?memberLabel.\n" +
+                "   ?parent rdfs:label ?parentLabel.\n" +
+                "  {select ?member where{\n" +
                 "?parent0  rdfs:member" +
                 pathOperator +
-                " ?member. " +
+                " ?member." +
                 filterContainer0Str +
-                "  ?member ^rdfs:member ?parent.\n" +
-                "?parent0  rdfs:member* ?parent. \n" +
-                "  ?member rdf:type ?memberType.\n" +
-                "   ?member rdfs:label ?memberLabel.\n" +
-                "   ?parent rdfs:label ?parentLabel.\n";
-            if (!options.leaves) {
-                query += " FILTER (?memberType in(rdf:Bag,rdf:List))";
-            }
-
-            if (options.filter) {
-                query += options.filter;
-            }
-            query += "}  group by ?member ?memberLabel ?parent ?parentLabel";
+                filter +
+                "}\n" +
+                "  }\n" +
+                "}  group by ?member ?memberLabel ?parent ?parentLabel";
 
             var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
@@ -1362,7 +1007,9 @@ var query =
         }
         var filter = Sparql_common.setFilter("node", ids);
 
-        if (options.filter) filter += options.filter;
+        if (options.filter) {
+            filter += options.filter;
+        }
 
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +

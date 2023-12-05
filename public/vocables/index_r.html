@@ -41,7 +41,7 @@
         <script type="module" src="modules/shared/treeController.js"></script>
         <script type="module" src="modules/shared/clipboard.js"></script>
 
-        <script type="module" src="modules/tools/KGquery/VirtualKGquery.js"></script>
+        <script type="module" src="modules/tools/KGquery/SQLquery_run.js"></script>
 
         <script type="module" src="modules/tools/KGquery/KGquery.js"></script>
         <script type="module" src="modules/tools/KGquery/KGquery_graph.js"></script>
@@ -287,6 +287,7 @@
                     // MyDashboard.init();
 
                     ResponsiveUI.init();
+                    $("#ChangeSourceButton").hide();
                 });
             });
         </script>
@@ -319,17 +320,17 @@
 
     <body>
         <header class="w3-container">
-            <div class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4;bac">
+            <div class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4">
                 <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
                     <button class="slsv-button">Tool</button>
 
                     <div class="w3-dropdown-content w3-bar-block w3-border">
-                        <select id="toolsSelect" size="5" onclick="ResponsiveUI.onToolSelect($(this).val())"></select>
+                        <select id="toolsSelect" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())"></select>
                     </div>
                 </div>
 
                 <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
-                    <button class="slsv-button" onclick="ResponsiveUI.showSourceDialog()">Source</button>
+                    <button id="ChangeSourceButton" class="slsv-button" onclick="ResponsiveUI.showSourceDialog(true)">Change Source</button>
                 </div>
 
                 <div class="w3-bar-item">
@@ -361,26 +362,6 @@
 
         <!-- popup panel-->
 
-        <div id="mainDialogDiv" class="w3-modal">
-            <div class="w3-modal-content">
-                <div class="w3-container l3">
-                    <span onclick="ResponsiveUI.hideDiv('mainDialogDiv')" class="w3-button w3-display-topright">&times;</span>
-                    <div class="w3-row">
-                        Source
-                        <input
-                            id="sourceSelector_searchInput"
-                            class="w3-input w3-border w3-padding"
-                            type="text"
-                            value=""
-                            autocomplete="off"
-                            style="width: 200px; font-size: 12px; margin: 3px; padding: 3px"
-                        />
-                    </div>
-                </div>
-                <div id="sourcesSelectorWrapper" style="height: 80vh; overflow: auto">
-                    <div id="sourcesSelectorDiv"></div>
-                </div>
-            </div>
-        </div>
+        <div id="mainDialogDiv" class="w3-modal"></div>
     </body>
 </html>

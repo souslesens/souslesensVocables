@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.45.0...master)
 
+## [1.45.1](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.45.1) - 2023-12-05
+
+> [!IMPORTANT]
+> Updating to Unrelease require a data migration. Execute the following script after upgrade.
+
+```bash
+node scripts/migrations/migration_1.45_users.js -f config/users/users.json -w
+```
+
+### Fixed
+
+-   GraphManagement using `sls-api` use the user token
+
 ## [1.46.0](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.46.0) - 2023-12-05
 
 ### Added

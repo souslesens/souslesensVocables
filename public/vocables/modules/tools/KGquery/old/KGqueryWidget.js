@@ -12,7 +12,7 @@ import IndividualAggregateWidget from "../../uiWidgets/individualAggregateWidget
 import IndividualValueFilterWidget from "../../uiWidgets/individualValuefilterWidget.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 import TimeLineWidget from "./timeLineWidget.js";
-import VirtualKGquery from "../KGquery/virtualKGquery.js";
+import SQLquery_run from "../SQLquery_run.js";
 
 var KGqueryWidget = (function () {
     var self = {};
@@ -369,7 +369,7 @@ return alert("missing target node in  path");
 
         var isVirtualQuery = $("#KGqueryWidget_virtualQueryCBX").prop("checked");
         if (isVirtualQuery) {
-            return VirtualKGquery.execPathQuery(self.querySets, self.source, "lifex_dalia_db", {}, function (err, result) {
+            return SQLquery_run.execPathQuery(self.querySets, self.source, "lifex_dalia_db", {}, function (err, result) {
                 if (err) {
                     return alert(err);
                 }

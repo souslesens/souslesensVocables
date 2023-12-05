@@ -268,4 +268,4 @@ var SQLquery_run = (function () {
 
 export default SQLquery_run;
 
-window.VirtualKGquery = SQLquery_run;
+window.SQLquery_run = SQLquery_run;

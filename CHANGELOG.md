@@ -25,6 +25,19 @@ node scripts/migrations/migration_1.45_users.js -f config/users/users.json -w
 ### Added
 
 -   GraphManagement tools: download and upload RDF graph
+-   Add new entries in `mainConfig.json`:
+    -   `souslesensUrlForVirtuoso`: Souslesens URL from virtuoso (optional, will use
+        `souslesensUrl` if not defined)
+    -   `slsApi`: `sls-api` info if an instance of `sls-api` is used.
+
+Example:
+
+```json
+"souslesensUrlForVirtuoso" : "http://host.docker.internal:3010",
+"slsApi": {
+    "url": "http://localhost:8000"
+}
+```
 
 ## [1.45.0](https://github.com/souslesens/souslesensVocables/compare/1.44.0...1.45.0) - 2023-12-05
 

@@ -147,7 +147,11 @@ var ResponsiveUI = (function () {
         self.showDiv("mainDialogDiv");
         $("#mainDialogDiv").css("display", "block");
         $("#sourceSelector_searchInput").focus();
+
         $("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
+            $("#"+$("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
+
+
             if (resetAll) {
                 Lineage_sources.loadedSources = {};
                 var onSourceSelect = ResponsiveUI.onSourceSelect;

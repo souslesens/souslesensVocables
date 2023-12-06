@@ -248,6 +248,7 @@
 	margin : 10px;
 
 }
+
 #currentToolTitle{
 	color : #8757DF;
 	font-family: Helvetica, sans-serif;
@@ -289,4 +290,7 @@
 	border-bottom: 0px !important ;
 	/*border-bottom-left-radius:0px !important;*/
 	
+}
+.slsv-right-top-bar-button{
+	margin-top: 27px; background-color: #8757df;
 }

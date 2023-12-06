@@ -186,15 +186,15 @@ var NodeInfosWidget = (function () {
         var str = "<div>";
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             str +=
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
+                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
 
-            str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
+            str += "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
         }
 
         if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
             str +=
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
+                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
         }
 
@@ -202,8 +202,8 @@ var NodeInfosWidget = (function () {
 
         if (self.visitedNodes.length > 1) {
             str +=
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.showVisitedNode(-1)'> previous </button>" +
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.showVisitedNode(+1)'>  next </button>";
+                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(-1)'> previous </button>" +
+                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(+1)'>  next </button>";
         }
 
         str += "</div>";

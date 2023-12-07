@@ -95,12 +95,8 @@ var Lineage_r = (function () {
     };
     self.showQueryDialog = function () {
         //ResponsiveUI.openMainDialogDivForDialogs();
-        $("#mainDialogDiv")
-            .parent()
-            .css("top", "10%");
-        $("#mainDialogDiv")
-            .parent()
-            .css("left", "20%");
+        $("#mainDialogDiv").parent().css("top", "10%");
+        $("#mainDialogDiv").parent().css("left", "20%");
         $("#mainDialogDiv")
             .parent()
             .show("fast", function () {
@@ -119,12 +115,8 @@ var Lineage_r = (function () {
 
     self.NodesInfosResponsiveDialog = function (sourceLabel, divId, options, callback) {
         ResponsiveUI.openDialogDiv(divId);
-        $("#mainDialogDiv")
-        .parent()
-        .css("top", "5%");
-    $("#mainDialogDiv")
-        .parent()
-        .css("left", "35%");
+        $("#mainDialogDiv").parent().css("top", "5%");
+        $("#mainDialogDiv").parent().css("left", "35%");
         $("#" + divId)
             .parent()
             .show("fast", function () {

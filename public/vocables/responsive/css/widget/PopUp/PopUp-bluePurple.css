@@ -1,39 +1,38 @@
-.Lineage_PopUpStyle{
-    background-color: #EAEFFF;
-    color : #8757DE;
+.Lineage_PopUpStyle {
+    background-color: #eaefff;
+    color: #8757de;
     border: 0px;
     border-radius: 14px;
     overflow-y: hidden;
     text-align: center;
-    
 }
-.w3-dropdown-content{
-    min-width : 100px !important;
-    
+.w3-dropdown-content {
+    min-width: 100px !important;
 }
 
-.Lineage_PopUpStyle select option { padding: 6px;margin-top: 4px;
+.Lineage_PopUpStyle select option {
+    padding: 6px;
+    margin-top: 4px;
 }
 
-.Lineage_PopUpStyle select option:hover { 
-    background-color: #BFD4F5;
-    color: #1A27B2;
+.Lineage_PopUpStyle select option:hover {
+    background-color: #bfd4f5;
+    color: #1a27b2;
     border-radius: 14px;
 }
 
-.Lineage_PopUpStyle select option:checked { 
-    background-color: #BFD4F5;
-    color: #1A27B2;
+.Lineage_PopUpStyle select option:checked {
+    background-color: #bfd4f5;
+    color: #1a27b2;
     border-radius: 14px;
 }
-.PopUpBorder{
-    border: 2px solid #1A27B2;
+.PopUpBorder {
+    border: 2px solid #1a27b2;
 }
 
-
-#toolSelectionSection:hover #ToolBorder{
+#toolSelectionSection:hover #ToolBorder {
     border-bottom: 0px !important;
-    
+
     /*border-bottom-right-radius: 0px;
     border-bottom-left-radius: 0px;*/
 }
@@ -43,24 +42,23 @@
 	border: 0px;
 }
 */
-.popupMenuItem{
-    background-color: #EAEFFF;
-    color : #8757DE;
+.popupMenuItem {
+    background-color: #eaefff;
+    color: #8757de;
     /*border-bottom: 2px solid #1A27B2;*/
     border-radius: 14px;
     overflow-y: hidden;
     text-align: center;
 }
 
-.popupMenuWidgetDiv{
-    background-color: #EAEFFF;
-    border: 2px solid #1A27B2;
+.popupMenuWidgetDiv {
+    background-color: #eaefff;
+    border: 2px solid #1a27b2;
     border-radius: 14px;
-
 }
 
-.popupMenuWidgetDiv span:hover { 
-    background-color: #BFD4F5;
-    color: #1A27B2;
+.popupMenuWidgetDiv span:hover {
+    background-color: #bfd4f5;
+    color: #1a27b2;
     border-radius: 14px;
 }

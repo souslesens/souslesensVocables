@@ -15,6 +15,13 @@ var ResponsiveUI = (function () {
         var tools = Config.tools_available;
         common.fillSelectOptions("toolsSelect", tools, false);
     };
+    self.replaceFile=function(file1,file2){
+        Object.keys(file1).forEach(key=>{
+            if(file2[key]){
+                file1[key]=file2[key];
+            }
+        });
+    }
 
     self.onToolSelect = function (toolId) {
         $("#currentToolTitle").html(toolId);

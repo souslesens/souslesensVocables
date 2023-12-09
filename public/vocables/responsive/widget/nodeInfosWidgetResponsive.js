@@ -1,22 +1,31 @@
-import Sparql_generic from "../sparqlProxies/sparql_generic.js";
-import Sparql_common from "../sparqlProxies/sparql_common.js";
-import common from "../shared/common.js";
-import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
-import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
-import ElasticSearchProxy from "../search/elasticSearchProxy.js";
-import SearchUtil from "../search/searchUtil.js";
-import MainController from "../shared/mainController.js";
-import PredicatesSelectorWidget from "./predicatesSelectorWidget.js";
-import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
-import Lineage_axioms_create from "../tools/lineage/lineage_axioms_create.js";
-import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import authentication from "../shared/authentification.js";
+import Sparql_generic from "../../modules/sparqlProxies/sparql_generic.js";
+import Sparql_common from "../../modules/sparqlProxies/sparql_common.js";
+import common from "../../modules/shared/common.js";
+import Sparql_OWL from "../../modules/sparqlProxies/sparql_OWL.js";
+import Sparql_proxy from "../../modules/sparqlProxies/sparql_proxy.js";
+import Lineage_whiteboard from "../../modules/tools/lineage/lineage_whiteboard.js";
+import ElasticSearchProxy from "../../modules/search/elasticSearchProxy.js";
+import SearchUtil from "../../modules/search/searchUtil.js";
+import MainController from "../../modules/shared/mainController.js";
+import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
+import Lineage_axioms_draw from "../../modules/tools/lineage/lineage_axioms_draw.js";
+import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_create.js";
+import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
+import authentication from "../../modules/shared/authentification.js";
 
-var NodeInfosWidget = (function () {
+var NodeInfosWidgetResponsive = (function () {
     var self = {};
-
     self.initDialog = function (sourceLabel, divId, options, callback) {
+        ResponsiveUI.openDialogDiv(divId);
+        $("#mainDialogDiv").parent().css("top", "5%");
+        $("#mainDialogDiv").parent().css("left", "35%");
+        $("#" + divId)
+            .parent()
+            .show("fast", function () {
+                self.oldNodeInfosInit(sourceLabel, divId, options, callback);
+            });
+    };
+    self.oldNodeInfosInit = function (sourceLabel, divId, options, callback) {
         self.currentSource = sourceLabel;
         if (!options.noDialog) {
             $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
@@ -25,18 +34,27 @@ var NodeInfosWidget = (function () {
         $("#" + divId).load("snippets/nodeInfosWidget.html", function () {
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
+
+                load: function( event, ui ) {
+
+                },
                 activate: function (event, ui) {
-                    if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
+                    
+                        $('.nodeInfosWidget_tabDiv').removeClass('nodesInfos-selectedTab');
+                        
                         setTimeout(function () {
-                            var source = self.currentSource;
-                            source = Lineage_sources.mainSource;
-                            Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
-                        }, 1000);
-                    }
+                            $("[aria-selected='true']").addClass('nodesInfos-selectedTab');
+                            if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
+                                var source = self.currentSource;
+                                source = Lineage_sources.mainSource;
+                                Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
+                            }
+                        }, 100);
+                    
                 },
             });
             $("#axiomsDrawGraphDiv").dialog({
-                autoOpen: false,
+                    autoOpen: false,
                 height: 800,
                 width: 1000,
                 modal: false,
@@ -47,11 +65,13 @@ var NodeInfosWidget = (function () {
                 width: 1000,
                 modal: false,
             });
-
+            $('.nodeInfosWidget_tabDiv').css('margin','0px');
+            $("[aria-selected='true']").addClass('nodesInfos-selectedTab');
             callback();
         });
     };
 
+   
     self.showNodeInfos = function (sourceLabel, node, divId, options, callback) {
         self.currentNodeIdInfosSource = sourceLabel;
         self.currentNodeIdInfosDivId = divId;
@@ -146,7 +166,7 @@ var NodeInfosWidget = (function () {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
                         return callbackSeries();
                     }
-                    var html = "<button onclick='NodeInfosWidget.showClassIndividuals()'>Individuals</button>";
+                    var html = "<button id='nodesInfos_individual_button' onclick='NodeInfosWidget.showClassIndividuals()'>Individuals</button>";
                     $("#nodeInfos_individualsDiv").html(html);
                     callbackSeries();
                 },
@@ -186,24 +206,24 @@ var NodeInfosWidget = (function () {
         var str = "<div>";
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             str +=
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
+                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
 
-            str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
+            str += "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
         }
 
         if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
             str +=
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
+                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
         }
 
-        str += "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;background-color: #e1ddd1;padding:5px';display:flex;>";
+        str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
 
         if (self.visitedNodes.length > 1) {
             str +=
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.showVisitedNode(-1)'> previous </button>" +
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.showVisitedNode(+1)'>  next </button>";
+                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(-1)'> previous </button>" +
+                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(+1)'>  next </button>";
         }
 
         str += "</div>";
@@ -350,23 +370,23 @@ defaultLang = 'en';*/
                     }
                 }
 
-                var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
+                var str = "<div class='NodesInfos_tableDiv' style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
                 str +=
-                    "<tr><td class='detailsCellName'>UUID</td><td><a target='" +
+                    "<tr><td class='NodesInfos_CardId'>UUID</td><td><a target='" +
                     self.getUriTarget(nodeId) +
                     "' href='" +
                     nodeId +
                     "'>" +
                     nodeId +
                     "</a>" +
-                    "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' NodeInfosWidget.copyUri(\"" +
+                    "&nbsp;<button class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons ' style='font-size: 10px' onclick=' NodeInfosWidget.copyUri(\"" +
                     nodeId +
                     "\",$(this))'>copy</button>";
                 ("</td></tr>");
                 str +=
-                    "<tr><td class='detailsCellName'>GRAPH</td><td>" +
+                    "<tr><td class='NodesInfos_CardId'>GRAPH</td><td>" +
                     graphUri +
-                    "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' NodeInfosWidget.copyUri(\"" +
+                    "&nbsp;<button class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons ' style='font-size: 10px' onclick=' NodeInfosWidget.copyUri(\"" +
                     graphUri +
                     "\",$(this))'>copy</button>";
                 ("</td></tr>");
@@ -379,11 +399,11 @@ defaultLang = 'en';*/
                         var propUri = self.propertiesMap.properties[key].propUri;
 
                         optionalStr +=
-                            "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' NodeInfosWidget.showModifyPredicateDialog(\"" +
+                            "&nbsp;<button class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons' style='font-size: 10px' onclick=' NodeInfosWidget.showModifyPredicateDialog(\"" +
                             predicateId +
                             "\")'>edit</button>";
                         optionalStr +=
-                            "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" + " onclick='NodeInfosWidget.deletePredicate(\"" + predicateId + "\")'>X</button>";
+                            "&nbsp;<button class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons' style='font-size: 10px'" + " onclick='NodeInfosWidget.deletePredicate(\"" + predicateId + "\")'>X</button>";
                     }
                     return optionalStr;
                 }
@@ -514,19 +534,19 @@ defaultLang = 'en';*/
                         if (err) {
                             return callbackSeries(err);
                         }
-                        str += "<b>Restrictions </b> <div style='    background-color: beige;'> <table>";
+                        str += "<b style='font-size:15px;'>Restrictions </b> <div style=''> <table>";
                         result.forEach(function (item) {
                             str += "<tr class='infos_table'>";
 
-                            var propStr = "<span class='detailsCellName' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
+                            var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
 
-                            str += "<td class='detailsCellName'>" + propStr + "</td>";
+                            str += "<td class=''>" + propStr + "</td>";
 
                             var targetClassStr = "any";
                             if (item.value) {
-                                targetClassStr = "<span class='detailsCellName' onclick=' NodeInfosWidget.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
+                                targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
                             }
-                            str += "<td class='detailsCellValue'>" + targetClassStr + "</td>";
+                            str += "<td class=''>" + targetClassStr + "</td>";
 
                             str += "</tr>";
                         });
@@ -549,19 +569,19 @@ defaultLang = 'en';*/
                             if (err) {
                                 return callbackSeries(err);
                             }
-                            str += "<br><b>Inverse Restrictions </b> <div style='    background-color: beige;'> <table>";
+                            str += "<br><b style='font-size:15px;'>Inverse Restrictions </b> <div style='font-size:15px;'> <table>";
                             result.forEach(function (item) {
                                 str += "<tr class='infos_table'>";
 
-                                var propStr = "<span class='detailsCellName' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
+                                var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
 
-                                str += "<td class='detailsCellName'>" + propStr + "</td>";
+                                str += "<td class=''>" + propStr + "</td>";
 
                                 var targetClassStr = "any";
                                 if (item.value) {
-                                    targetClassStr = "<span class='detailsCellName' onclick=' NodeInfosWidget.onClickLink(\"" + item.subject.value + "\")'>" + item.subjectLabel.value + "</span>";
+                                    targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.subject.value + "\")'>" + item.subjectLabel.value + "</span>";
                                 }
-                                str += "<td class='detailsCellValue'>" + targetClassStr + "</td>";
+                                str += "<td class=''>" + targetClassStr + "</td>";
 
                                 str += "</tr>";
                             });
@@ -1101,5 +1121,5 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     return self;
 })();
 
-export default NodeInfosWidget;
-window.NodeInfosWidget = NodeInfosWidget;
+export default NodeInfosWidgetResponsive;
+window.NodeInfosWidgetResponsive = NodeInfosWidgetResponsive;

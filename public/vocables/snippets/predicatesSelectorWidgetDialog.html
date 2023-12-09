@@ -1,6 +1,4 @@
 <style>
-    
-
     /*
     .editPredicatePanel_groupDiv {
         border: solid 1px brown;
@@ -15,42 +13,40 @@
 </style>
 <div id="editPredicate_mainDiv" style="display: flex; flex-direction: row">
     <div class="editPredicatePanel" id="editPredicate_propertyDiv">
-        
         <div class="editPredicatePanel_groupDiv">
             <div>
-                <b style="font-size:15px">Property</b>
+                <b style="font-size: 15px">Property</b>
             </div>
-            
-            <span>vocabulary</span> 
-            <select id="editPredicate_vocabularySelect" class="PredicatesSelectorWidget-nodesInfos" onchange="PredicatesSelectorWidget.setCurrentVocabPropertiesSelect($(this).val(),'editPredicate_currentVocabPredicateSelect')"></select>
+
+            <span>vocabulary</span>
+            <select
+                id="editPredicate_vocabularySelect"
+                class="PredicatesSelectorWidget-nodesInfos"
+                onchange="PredicatesSelectorWidget.setCurrentVocabPropertiesSelect($(this).val(),'editPredicate_currentVocabPredicateSelect')"
+            ></select>
             <br />
-            <span>choose</span> 
+            <span>choose</span>
             <select id="editPredicate_currentVocabPredicateSelect" onchange="PredicatesSelectorWidget.onSelectPredicateProperty($(this).val())"></select>
 
             <br />
-            <input id="editPredicate_propertyValue" style="width: 95%; background-color: #BFD4F5" /><br />
+            <input id="editPredicate_propertyValue" style="width: 95%; background-color: #bfd4f5" /><br />
             <div id="editPredicate_customPredicateContentDiv"></div>
         </div>
     </div>
 
     <div class="editPredicatePanel" id="editPredicate_objectDiv">
         <div>
-            
-            
-
             <div class="editPredicatePanel_groupDiv">
-                <div id="editPredicate_controlsDiv" style="display: none">
-                    <b style="font-size:15px">Object</b> &nbsp;
-                </div>
-                <span>vocabulary</span> 
+                <div id="editPredicate_controlsDiv" style="display: none"><b style="font-size: 15px">Object</b> &nbsp;</div>
+                <span>vocabulary</span>
                 <select id="editPredicate_vocabularySelect2" onchange="PredicatesSelectorWidget.setCurrentVocabClassesSelect($(this).val(),'editPredicate_objectSelect')"></select>
                 <br />
 
-                <span>choose</span> 
+                <span>choose</span>
                 <select id="editPredicate_objectSelect" onchange="PredicatesSelectorWidget.onSelectCurrentVocabObject($(this).val())"></select>
                 <br />
                 <textarea id="editPredicate_objectValueTA" style="width: 95%; display: none"></textarea>
-                <input id="editPredicate_objectValue" style="width: 95%; background-color: #BFD4F5" />
+                <input id="editPredicate_objectValue" style="width: 95%; background-color: #bfd4f5" />
 
                 <div id="editPredicate_customContentDiv"></div>
                 <button class="w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons" id="editPredicate_savePredicateButton" style="font-size: 10px">

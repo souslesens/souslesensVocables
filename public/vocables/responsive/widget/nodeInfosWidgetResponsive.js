@@ -35,26 +35,22 @@ var NodeInfosWidgetResponsive = (function () {
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
 
-                load: function( event, ui ) {
-
-                },
+                load: function (event, ui) {},
                 activate: function (event, ui) {
-                    
-                        $('.nodeInfosWidget_tabDiv').removeClass('nodesInfos-selectedTab');
-                        
-                        setTimeout(function () {
-                            $("[aria-selected='true']").addClass('nodesInfos-selectedTab');
-                            if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
-                                var source = self.currentSource;
-                                source = Lineage_sources.mainSource;
-                                Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
-                            }
-                        }, 100);
-                    
+                    $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
+
+                    setTimeout(function () {
+                        $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
+                        if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
+                            var source = self.currentSource;
+                            source = Lineage_sources.mainSource;
+                            Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
+                        }
+                    }, 100);
                 },
             });
             $("#axiomsDrawGraphDiv").dialog({
-                    autoOpen: false,
+                autoOpen: false,
                 height: 800,
                 width: 1000,
                 modal: false,
@@ -65,13 +61,12 @@ var NodeInfosWidgetResponsive = (function () {
                 width: 1000,
                 modal: false,
             });
-            $('.nodeInfosWidget_tabDiv').css('margin','0px');
-            $("[aria-selected='true']").addClass('nodesInfos-selectedTab');
+            $(".nodeInfosWidget_tabDiv").css("margin", "0px");
+            $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
             callback();
         });
     };
 
-   
     self.showNodeInfos = function (sourceLabel, node, divId, options, callback) {
         self.currentNodeIdInfosSource = sourceLabel;
         self.currentNodeIdInfosDivId = divId;
@@ -403,7 +398,10 @@ defaultLang = 'en';*/
                             predicateId +
                             "\")'>edit</button>";
                         optionalStr +=
-                            "&nbsp;<button class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons' style='font-size: 10px'" + " onclick='NodeInfosWidget.deletePredicate(\"" + predicateId + "\")'>X</button>";
+                            "&nbsp;<button class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons' style='font-size: 10px'" +
+                            " onclick='NodeInfosWidget.deletePredicate(\"" +
+                            predicateId +
+                            "\")'>X</button>";
                     }
                     return optionalStr;
                 }

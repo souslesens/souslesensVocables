@@ -163,7 +163,7 @@
 }
 
 /* Button Family 3 */
-.slsv-button-3-bis{
+.slsv-button-3-bis {
     background-color: #52c1b9;
     color: white;
     font-family: Helvetica, sans-serif;
@@ -211,7 +211,6 @@
 }
 
 #currentToolTitle {
-	
     color: #8757df;
     font-family: Helvetica, sans-serif;
     font-weight: bold;
@@ -254,5 +253,4 @@
 .slsv-right-top-bar-button {
     margin-top: 27px;
     background-color: #8757df;
-
 }

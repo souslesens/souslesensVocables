@@ -12,7 +12,6 @@ var Lineage_r = (function () {
     self.oldAddEdgeDialog = null;
     self.oldExportTable = null;
     self.init = function () {
-        
         SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
         $("#ChangeSourceButton").show();
         $("#index_topContolPanel").show();
@@ -24,14 +23,14 @@ var Lineage_r = (function () {
         self.oldNodeInfosInit = NodesInfosWidget.initDialog;
         NodesInfosWidget.initDialog = self.NodesInfosResponsiveDialog;
         All file changed
-        */ 
-        ResponsiveUI.replaceFile( NodesInfosWidget,NodeInfosWidgetResponsive);
+        */
+        ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
         //SHowHideButtons overcharge
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
         //AddEdge overcharge
         self.oldAddEdgeDialog = Lineage_blend.graphModification.showAddEdgeFromGraphDialog;
         Lineage_blend.graphModification.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
-        
+
         //Loading
         $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
             self.loadSources();

@@ -717,6 +717,32 @@ if (callback) return callback(err);
         "#B3B005",
     ];
 
+
+    self.paletteIntense=[
+        "#8f52a0",
+        "#00ae8d",
+        "#799b79",
+        "#fbb27b",
+        "#b51d8c",
+        "#2abb9e",
+        "#a0ba8a",
+        "#fec693",
+        "#b382ba",
+        "#97d5ca",
+        "#95cc79",
+        "#fef200",
+        "#d3b5d7",
+        "#e5f2e8",
+        "#afd46b",
+        "#fff9af",
+        "#e86549",
+        "#fdb39a",
+        "#fcf0d6",
+        "#b51d8c",
+        "#f05978",
+        "#f27c96"
+    ]
+
     self.resourceColorPalettes = {};
     self.quantumModelmappingSources = {
         "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity": "ISO_15926-part-14",

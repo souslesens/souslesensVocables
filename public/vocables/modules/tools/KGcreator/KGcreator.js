@@ -732,18 +732,6 @@ var KGcreator = (function () {
         var sql = "select * from " + mapping.table + "where " + mapping.column + " = '" + uri + "'";
     };
 
-    self.getClass2ColumnMapping = function (mappings, classUri) {
-        var matches = [];
-        for (var table in mappings) {
-            mappings[table].tripleModels.forEach(function (triple) {
-                if (triple.p == "rdf:type" && triple.o == classUri) {
-                    matches.push({ table: table, column: triple.s.replace("$_", "") });
-                }
-            });
-        }
-
-        return matches;
-    };
 
     self.loadDataSourceMappings = function (slsvSource, dataSource, callback) {
         var payload = {

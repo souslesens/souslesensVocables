@@ -32,6 +32,7 @@ if (argv.w) {
     // create backup files
     const profilesBackupFilePath = path.resolve(configPath + "/profiles.json.bak");
     fs.cpSync(profilesFilePath, profilesBackupFilePath);
+
     fs.writeFileSync(profilesFilePath, JSON.stringify(newProfilesData, null, 2));
 
     const mainConfigBackupFilePath = path.resolve(configPath + "/mainConfig.json.bak");

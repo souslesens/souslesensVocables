@@ -19,7 +19,7 @@ const user = {
         if (config.auth === "disabled") {
             result = {
                 logged: true,
-                user: { login: "admin", groups: ["admin"] },
+                user: { login: "admin", groups: ["admin"], token: "admin" },
                 authSource: "json",
                 auth: {},
             };
@@ -30,7 +30,7 @@ const user = {
             }
             result = {
                 logged: true,
-                user: { login: findUser.login, groups: findUser.groups },
+                user: { login: findUser.login, groups: findUser.groups, token: findUser.token },
                 authSource: config.auth,
                 auth: auth,
             };

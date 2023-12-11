@@ -50,6 +50,7 @@ class UserModel {
                 login: userAccount.login,
                 groups: userAccount.groups,
                 source: userAccount.source,
+                token: userAccount.token,
                 _type: userAccount._type,
             };
         }

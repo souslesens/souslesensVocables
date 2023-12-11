@@ -4,6 +4,7 @@ type UserAccount = {
     login: string;
     groups: string[];
     source: string;
+    token: string;
 };
 
 type UserAccountWithPassword = UserAccount & {

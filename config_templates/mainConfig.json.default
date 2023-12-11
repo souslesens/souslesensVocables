@@ -1,5 +1,6 @@
 {
     "souslesensUrl": "http://localhost:3010",
+    "souslesensUrlForVirtuoso": "http://host.docker.internal:3010",
     "listenPort": "3010",
     "serverUrl": "../slsv",
     "auth": "local",
@@ -12,7 +13,13 @@
     "sentryDsnNode": "",
     "sentryDsnJsFront": "",
     "formalOntologySourceLabel": "",
-    "tools_available": ["lineage", "KGcreator", "Standardizer", "admin", "ConfigEditor"],
+    "tools_available": [
+        "lineage",
+        "KGcreator",
+        "Standardizer",
+        "admin",
+        "ConfigEditor"
+    ],
     "keycloak": {
         "realm": "master",
         "publicClient": false,
@@ -20,7 +27,10 @@
         "clientSecret": "xxx",
         "authServerURL": "https://xxx"
     },
-    "health_enabled_services": ["virtuoso", "elasticsearch"],
+    "health_enabled_services": [
+        "virtuoso",
+        "elasticsearch"
+    ],
     "SQLserver": {
         "user": "",
         "password": "",
@@ -43,12 +53,13 @@
     "jowlServer": {
         "url": "http://xxx"
     },
-
-       "logger": {
-            "errorsLogPath": "logs/error.log",
-            "usersLogPath": "logs/vocables.log"
-        },
-
+    "slsApi": {
+        "url": "http://localhost:8008"
+    },
+    "logger": {
+        "errorsLogPath": "logs/error.log",
+        "usersLogPath": "logs/vocables.log"
+    },
     "authenticationDatabase": {
         "user": "",
         "password": "",

@@ -5,11 +5,13 @@ services:
         image: askomics/virtuoso:7.2.7
         environment:
             VIRT_SPARQL_DefaultQuery: SELECT DISTINCT ?graph count(?s) as ?number_of_triples WHERE { GRAPH ?graph { ?s ?p ?o . }}
+            SPARQL_UPDATE: "true"
+            VIRT_SPARQL_MaxDataSourceSize: 100000000
         ports:
             - 8890:8890
         volumes:
             - ./tests/data/rdf:/usr/local/virtuoso-opensource/var/lib/virtuoso/db/dumps
-            - ./docker-data/virtuoso:/data  
+            - ./docker-data/virtuoso:/data
         command: |
             sh /virtuoso/virtuoso.sh &
             sleep 10s
@@ -18,6 +20,8 @@ services:
                 rdf_loader_run();
                 exit;
             EOF
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
         networks:
             - dev-backend
 

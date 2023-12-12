@@ -89,6 +89,7 @@ return alert("select a field (column)");
             });
         });
     };
+
     self.onTripleModelSelect = function (role, value) {
         if (!value) {
             return;

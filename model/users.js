@@ -58,6 +58,18 @@ class UserModel {
     };
 
     /**
+     * @param {string} token
+     * @returns {Promise<UserAccount | undefined>} a user account
+     */
+    findUserAccountFromToken = async (token) => {
+        const users = await this._read();
+
+        return Object.entries(users)
+            .map(([_id, user]) => user)
+            .find((user) => user.token !== undefined && user.token === token);
+    }
+
+    /**
      * @param {string} login
      * @param {string} password
      * @returns {boolean} true if login and password match, otherwise false

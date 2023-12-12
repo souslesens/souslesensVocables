@@ -423,7 +423,7 @@ export default function GraphManagement() {
                 <Table>
                     <thead style={{ position: "sticky", top: 0, "z-index": 10, "background-color": "white" }}>
                         <tr>
-                            <th>Source</th>
+                            <th>Sources</th>
                             <th>Graph URI</th>
                             <th>Actions</th>
                         </tr>

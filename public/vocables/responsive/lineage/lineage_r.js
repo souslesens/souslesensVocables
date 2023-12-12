@@ -1,11 +1,39 @@
 import Lineage_whiteboard from "../../modules/tools/lineage/lineage_whiteboard.js";
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import ResponsiveUI from "../responsiveUI.js";
-
+import NodesInfosWidget from "../../modules/uiWidgets/nodeInfosWidget.js";
+import SearchWidget from "../../modules/uiWidgets/searchWidget.js";
+import NodeInfosWidgetResponsive from "../../responsive/widget/nodeInfosWidgetResponsive.js";
+import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
 var Lineage_r = (function () {
     var self = {};
     self.isResponsiveLoading = false;
+    self.oldWhiteboardGraphActions = {};
+    self.oldNodeInfosInit = null;
+    self.oldAddEdgeDialog = null;
+    self.oldExportTable = null;
     self.init = function () {
+        PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
+        SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
+        $("#ChangeSourceButton").show();
+        $("#index_topContolPanel").show();
+        //To Table
+        self.oldExportTable = Export.exportTreeToDataTable;
+        Export.exportTreeToDataTable = self.ExportTableDialog;
+        //Nodes Infos overcharge
+        /*
+        self.oldNodeInfosInit = NodesInfosWidget.initDialog;
+        NodesInfosWidget.initDialog = self.NodesInfosResponsiveDialog;
+        All file changed
+        */
+        ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
+        //SHowHideButtons overcharge
+        Lineage_sources.showHideEditButtons = self.showHideEditButtons;
+        //AddEdge overcharge
+        self.oldAddEdgeDialog = Lineage_blend.graphModification.showAddEdgeFromGraphDialog;
+        Lineage_blend.graphModification.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
+
+        //Loading
         $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
             self.loadSources();
         });
@@ -18,18 +46,33 @@ var Lineage_r = (function () {
             $("#lateralPanelDiv").load("./responsive/lineage/html/index.html", function () {
                 self.initWhiteboardTab();
             });
-
-            Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
+        });
+    };
+    self.loadPredicateSelectorWidgetResponsive = function (divId, source, options, configureFn, callback) {
+        self.options = options || {};
+        $("#" + divId).html("");
+        $("#" + divId).load("./responsive/widget/html/predicatesSelectorWidgetDialogResponsive.html", function (a, b, c) {
+            var x = a + b + c;
+            PredicatesSelectorWidget.init(source, configureFn, function (err, result) {
+                if (callback) {
+                    return callback();
+                }
+            });
         });
     };
     self.initWhiteboardTab = function () {
-        $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {});
+        $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {
+            $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
+            $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
+            Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
+        });
     };
 
     self.initClassesTab = function () {
         $("#tabs_classes").load("./responsive/lineage/html/classesPanel.html", function (s) {
             SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
             $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html", function () {
+                SearchWidget.init();
                 $("#GenericTools_searchInAllSources").prop("checked", false);
             });
         });
@@ -51,12 +94,14 @@ var Lineage_r = (function () {
 
         var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
         if (isNodeEditable) {
-            $("#lineage_r_addPanel").css("display", "block");
+            $("#Lineage_graphEditionButtons").css("display", "block");
         } else {
-            $("#lineage_r_addPanel").css("display", "none");
+            $("#Lineage_graphEditionButtons").css("display", "none");
         }
+        $("#Title1").text($(".Lineage_selectedSourceDiv").text());
     };
     self.addNode = function () {
+        ResponsiveUI.openDialogDiv("LineagePopup");
         Lineage_blend.graphModification.showAddNodeGraphDialog(function (err, result) {
             if (err) {
                 return callback(err.responseText);
@@ -64,9 +109,13 @@ var Lineage_r = (function () {
             return null;
         });
     };
-    self.addEdge = function () {};
+    self.addEdge = function () {
+        Lineage_whiteboard.lineageVisjsGraph.network.addEdgeMode();
+    };
     self.showQueryDialog = function () {
         //ResponsiveUI.openMainDialogDivForDialogs();
+        $("#mainDialogDiv").parent().css("top", "10%");
+        $("#mainDialogDiv").parent().css("left", "20%");
         $("#mainDialogDiv")
             .parent()
             .show("fast", function () {
@@ -75,12 +124,43 @@ var Lineage_r = (function () {
     };
     self.showPathesDialog = function () {
         //ResponsiveUI.openMainDialogDivForDialogs();
+
         $("#mainDialogDiv")
             .parent()
             .show("fast", function () {
                 Lineage_graphTraversal.showShortestPathDialog();
             });
     };
+
+    self.NodesInfosResponsiveDialog = function (sourceLabel, divId, options, callback) {
+        ResponsiveUI.openDialogDiv(divId);
+        $("#mainDialogDiv").parent().css("top", "5%");
+        $("#mainDialogDiv").parent().css("left", "35%");
+        $("#" + divId)
+            .parent()
+            .show("fast", function () {
+                self.oldNodeInfosInit(sourceLabel, divId, options, callback);
+            });
+    };
+    self.responsiveAddEdgeDialog = function (edgeData, callback) {
+        ResponsiveUI.openDialogDiv("LineagePopup");
+        $("#LineagePopup")
+            .parent()
+            .show("fast", function () {
+                self.oldAddEdgeDialog(edgeData, function () {
+                    callback();
+                    self.showHideEditButtons(Lineage_sources.activeSource);
+                });
+            });
+    };
+    self.ExportTableDialog = function (jstreeDiv, nodeId) {
+        $("#mainDialogDiv")
+            .parent()
+            .show("fast", function () {
+                self.oldExportTable(jstreeDiv, nodeId);
+            });
+    };
+
     return self;
 })();
 export default Lineage_r;

@@ -724,6 +724,7 @@ var Lineage_whiteboard = (function () {
 
             Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
         });
+        Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
         return;
     };
 

@@ -232,7 +232,18 @@
                     authentication.init();
 
                     //SocketProxy.init()
-
+                    $("#smallDialogDiv").dialog({
+                        autoOpen: false,
+                        height: 600,
+                        width: 800,
+                        modal: false,
+                    });
+                    $("#LineagePopup").dialog({
+                        autoOpen: false,
+                        height: 700,
+                        width: 700,
+                        modal: false,
+                    });
                     if (err) {
                         return console.error(err);
                     }
@@ -265,13 +276,6 @@
                             width: $(document).width() * 0.85,
                             modal: false,
                         });
-
-                        $("#smallDialogDiv").dialog({
-                            autoOpen: false,
-                            height: 600,
-                            width: 800,
-                            modal: false,
-                        });
                     }
 
                     $(document).on("click", "a", function () {
@@ -285,9 +289,10 @@
 
                     MainController.UI.setCredits();
                     // MyDashboard.init();
-
-                    ResponsiveUI.init();
                     $("#ChangeSourceButton").hide();
+                    $("#index_topContolPanel").hide();
+                    $("#Lineage_graphEditionButtons").hide();
+                    ResponsiveUI.init();
                 });
             });
         </script>
@@ -299,8 +304,7 @@
 
         <link rel="stylesheet" href="./responsive/index.css" />
 
-        <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
-        <script>
+        <!-- <script>
             less = {
                 env: "development",
                 async: false,
@@ -311,27 +315,57 @@
                 relativeUrls: false,
                 rootpath: ":/a.com/",
             };
-        </script>
+        </script>-->
+
         <!--  <script src="./responsive/less.min.js"></script>-->
         <script type="module" src="./responsive/responsiveUI.js"></script>
         <script type="module" src="./responsive/lineage/lineage_r.js"></script>
+        <script type="module" src="./responsive/widget/nodeInfosWidgetResponsive.js"></script>
+
         <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
+        <!--<link rel="stylesheet" href="./slsv-gray.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-darkGray.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-yellowPurple.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-eco.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-complementaryKGA.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-plant.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-blue.css" />-->
+        <link rel="stylesheet" href="./responsive/css/lineage/slsv-bluePurple.css" />
+        <link rel="stylesheet" href="./responsive/css/widget/sourceSelector/Sourceselector-bluePurple.css" />
+        <link rel="stylesheet" href="./responsive/css/widget/PopUp/PopUp-bluePurple.css" />
+        <link rel="stylesheet" href="./responsive/css/widget/NodeInfos/NodesInfos-bluePurple.css" />
+        <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
+        <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
+        <!--<link rel="stylesheet" href="./slsv-cartography1.css" />-->
+        <!--<link rel="stylesheet" href="./slsv-cartography2.css" />-->
     </head>
 
     <body>
         <header class="w3-container">
-            <div class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4">
-                <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
-                    <button class="slsv-button">Tool</button>
+            <div class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4; width: 100%">
+                <div id="toolSelectionSection" class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button" style="padding: 23px">
+                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center; margin-top: 0px; padding: 0px">
+                        <div id="ToolBorder" class="toolSelectionBorder">
+                            <button id="selectedTool" class="slsv-invisible-button" style="margin-top: 10px; margin-bottom: 10px; padding: 0px; margin-left: 10px; font-size: 20px">Tool</button>
+                            <input type="image" src="./icons/caret-right.png" style="width: 15px; margin-left: 25px; margin-right: 10px" />
+                            <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
+                                <select id="toolsSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())"></select>
+                            </div>
+                        </div>
 
-                    <div class="w3-dropdown-content w3-bar-block w3-border">
-                        <select id="toolsSelect" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())"></select>
+                        <div id="currentToolTitle"></div>
                     </div>
                 </div>
 
-                <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
-                    <button id="ChangeSourceButton" class="slsv-button" onclick="ResponsiveUI.showSourceDialog(true)">Change Source</button>
+                <!--<div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
+                    
+                </div>-->
+
+                <!--
+                <div class="w3-bar-item slsv-bg-intense">
+                    <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>
                 </div>
+                -->
 
                 <div class="w3-bar-item">
                     <div class="w3-sand w3-round-xlarge w3-margin" style="display: flex; flex-direction: row; align-items: center" id="index_topContolPanel">
@@ -339,23 +373,31 @@
                     </div>
                 </div>
 
-                <div class="w3-bar-item slsv-bg-intense">
-                    <!--  <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>-->
+                <div class="w3-bar-item">
+                    <div class="w3-sand w3-round-xlarge w3-margin" style="display: flex; flex-direction: row; align-items: center" id="Lineage_graphEditionButtons">
+                        <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
+                        <button class="slsv-button-source" id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
+                            <input type="image" src="../icons/AddNodeEdge.png" style="margin-right: 5px" /><span style="margin-bottom: 5px">Add Node</span>
+                        </button>
+                        <button class="slsv-button-source" style="background-color: #1a28bf" id="lineage_actionDiv_addedge" onclick="Lineage_r.addEdge()">
+                            <input type="image" src="../icons/AddNodeEdge.png" style="margin-right: 5px" /><span style="margin-bottom: 5px">Add Edge</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="w3-bar-item w3-right">
-                    <div class="w3-button" id="user-username">User</div>
+                    <div class="w3-button slsv-right-top-bar-button" id="user-username">User</div>
                 </div>
 
                 <div class="w3-bar-item w3-right">
-                    <button class="w3-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
+                    <button class="w3-button slsv-right-top-bar-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
                 </div>
             </div>
         </header>
 
         <div class="w3-container">
-            <div class="w3-container w3-col l3 slsv-bg-pale" style="height: 85vh" id="lateralPanelDiv"></div>
-            <div class="w3-container w3-col l9" style="height: 85vh" id="graphDiv"></div>
+            <div class="w3-container w3-col l3 slsv-bg-pale" style="height: 90vh; width: 26%" id="lateralPanelDiv"></div>
+            <div class="w3-container w3-col l9" style="height: 90vh; width: 74%" id="graphDiv"></div>
         </div>
 
         <footer class="w3-row-padding"></footer>
@@ -363,5 +405,6 @@
         <!-- popup panel-->
 
         <div id="mainDialogDiv" class="w3-modal"></div>
+        <div id="smallDialogDiv"></div>
     </body>
 </html>

@@ -4,6 +4,7 @@ import ResponsiveUI from "../responsiveUI.js";
 import NodesInfosWidget from "../../modules/uiWidgets/nodeInfosWidget.js";
 import SearchWidget from "../../modules/uiWidgets/searchWidget.js";
 import NodeInfosWidgetResponsive from "../../responsive/widget/nodeInfosWidgetResponsive.js";
+import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
 var Lineage_r = (function () {
     var self = {};
     self.isResponsiveLoading = false;
@@ -12,6 +13,7 @@ var Lineage_r = (function () {
     self.oldAddEdgeDialog = null;
     self.oldExportTable = null;
     self.init = function () {
+        PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
         SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
         $("#ChangeSourceButton").show();
         $("#index_topContolPanel").show();
@@ -44,14 +46,25 @@ var Lineage_r = (function () {
             $("#lateralPanelDiv").load("./responsive/lineage/html/index.html", function () {
                 self.initWhiteboardTab();
             });
-
-            Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
+        });
+    };
+    self.loadPredicateSelectorWidgetResponsive = function (divId, source, options, configureFn, callback) {
+        self.options = options || {};
+        $("#" + divId).html("");
+        $("#" + divId).load("./responsive/widget/html/predicatesSelectorWidgetDialogResponsive.html", function (a, b, c) {
+            var x = a + b + c;
+            PredicatesSelectorWidget.init(source, configureFn, function (err, result) {
+                if (callback) {
+                    return callback();
+                }
+            });
         });
     };
     self.initWhiteboardTab = function () {
         $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {
             $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
             $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
+            Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
         });
     };
 
@@ -85,6 +98,7 @@ var Lineage_r = (function () {
         } else {
             $("#Lineage_graphEditionButtons").css("display", "none");
         }
+        $("#Title1").text($(".Lineage_selectedSourceDiv").text());
     };
     self.addNode = function () {
         ResponsiveUI.openDialogDiv("LineagePopup");

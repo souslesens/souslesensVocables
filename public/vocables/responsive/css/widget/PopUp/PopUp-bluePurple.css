@@ -1,3 +1,12 @@
+.popupMenuWidgetDiv {
+    z-index: 20;
+    position: absolute;
+    flex-direction: column;
+    padding: 5px;
+    text-align: center;
+    display: flex;
+}
+
 .Lineage_PopUpStyle {
     background-color: #eaefff;
     color: #8757de;

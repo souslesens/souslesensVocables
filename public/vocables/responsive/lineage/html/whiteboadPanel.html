@@ -1,5 +1,5 @@
 <div class="w3-panel w3-border w3-round-small">
-    <div class="titleboxButtons" style="color: #1a28bf">Title 1</div>
+    <div id="Title1" class="titleboxButtons" style="color: #1a28bf"></div>
     <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()">Model</button>
     <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()">TopClasses</button>
     <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>
@@ -11,7 +11,7 @@
 </div>
 
 <div class="w3-panel w3-border w3-round-small">
-    <div class="titleboxButtons" style="color: #059bbc">Title 2</div>
+    <div class="titleboxButtons" style="color: #059bbc">Whiteboard</div>
     <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()">Clear all</button>
     <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()">Clear last</button>
     <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()">Only last</button>
@@ -21,7 +21,7 @@
 </div>
 
 <div class="w3-panel w3-border w3-round-small">
-    <div class="titleboxButtons" style="color: #52c1b9">Title 3</div>
+    <div class="titleboxButtons" style="color: #52c1b9">More Actions</div>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog();">Similars</button>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>
     <button class="w3-button slsv-button-3" id="lineage_actionDiv_pathes" onclick="Lineage_r.showPathesDialog()">Paths</button>

@@ -1,58 +1,105 @@
 @import (less) "./css/lineage/slsv-bluePurple.css";
 
-.Lineage_sourceLabelDiv {
-    margin: 3px;
-    padding: 3px;
-    background-color: #e9f0ff;
-}
+/*variables */
+@font-family-theme: Helvetica, sans-serif;
+@padding-button-classic: 8px 24px;
+@font-size-title-big: 20px;
+@font-size-title-classic: 18px;
+@font-size-button: 15px;
+@font-size-button-small: 12px;
+@font-size-text: 10px;
+@border-radius-simple: 14px;
+@margin-small: 3px;
 
-.popupMenuWidgetDiv {
-    z-index: 20;
-    position: absolute;
-    flex-direction: column;
-    padding: 5px;
+/* end variable*/
 
-    text-align: center;
-    display: flex;
-}
+/* common Themes */
 
-.Lineage_selectedSourceDiv {
+.border-classic-color-theme1 {
     border-radius: 14px;
-    border: #1a28bf solid 1px;
+    border: @button1-color solid 1px;
+}
+
+.border-classic-color-theme2 {
+    border-radius: 14px;
+    border: @button2-color solid 1px;
+}
+.border-classic-color-theme3 {
+    border-radius: 14px;
+    border: @button3-color solid 1px;
+}
+.border-classic-color-theme4 {
+    border-radius: 14px;
+    border: @source-color solid 1px;
+}
+.border-none {
+    border-radius: 14px;
+    border: 0px;
+}
+
+.source-border {
+    .border-classic-color-theme1;
     padding: 7px;
 }
-.Lineage_allSelectedSourceDiv {
-    border-radius: 14px;
-    border: #1a28bf solid 1px;
-    padding: 7px;
+.classic-font-title {
+    font-family: @font-family-theme;
+    font-size: @font-size-title-classic;
+    font-weight: bold;
 }
+.button-font {
+    color: white;
+    font-family: @font-family-theme;
+    font-size: @font-size-button;
+    background-color: @source-color;
+}
+.button-font-uncolor {
+    color: white;
+    font-family: @font-family-theme;
+    font-size: @font-size-button;
+}
+
+.button-font-uncolor-small {
+    .button-font-uncolor;
+    font-size: @font-size-button-small;
+}
+.slsv-general-buttons {
+    .border-classic-color-theme4;
+    .button-font;
+}
+.slsv-invisible-button {
+    .button-font;
+    color: @source-color;
+    background-color: inherit;
+    border: 0px;
+}
+.slsv-whiteboard-buttons {
+    .button-font-uncolor-small;
+    padding: 8px 12px;
+    .border-none;
+    margin: 2px;
+    margin-top: 8px;
+}
+.hover-button {
+    background-color: inherit !important;
+    color: @source-color !important;
+}
+
+/*  End Common themes  */
+
+/* source Label Div */
+
+/* Class Specific to some component interactions in SLSV */
 
 .w3-container {
     padding: 0%;
     padding-top: 0px;
 }
-.titleboxButtons {
-    float: left;
-    font-family: Helvetica, sans-serif;
-    font-size: 18px;
-    color: white;
-    margin: -28px 5px 0px 0px;
-    background: #e9f0ff;
-    font-weight: bold;
-    padding-left: 10px;
-    padding-right: 10px;
-}
+
 .w3-panel {
     margin-top: 6%;
 }
 
-#Lineage_graphEditionButtons {
-    margin-left: 15dvh !important;
-}
 .lineage-tab {
     padding-left: 10px;
     padding-right: 10px;
-}
-.slsv-button-3 {
-    .slsv-button-3-bis;
 }

@@ -288,6 +288,13 @@ var KGcreator = (function () {
                                 KGcreator_mappings.showTableMappings(node);
                             },
                         };
+                        items.mapColumn = {
+                            label: "map Rows",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_mappings.showMappingDialog(null, { rowIndex: 1 });
+                            },
+                        };
 
                         items.tranforms = {
                             label: "tranforms",
@@ -340,6 +347,13 @@ var KGcreator = (function () {
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showTableMappings(node);
+                            },
+                        };
+                        items.mapColumn = {
+                            label: "map Rows",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_mappings.showMappingDialog(null, { rowIndex: 1 });
                             },
                         };
                         items.lookups = {
@@ -730,19 +744,6 @@ var KGcreator = (function () {
         var mapping = self.getIndividualMapping(source, className);
 
         var sql = "select * from " + mapping.table + "where " + mapping.column + " = '" + uri + "'";
-    };
-
-    self.getClass2ColumnMapping = function (mappings, classUri) {
-        var matches = [];
-        for (var table in mappings) {
-            mappings[table].tripleModels.forEach(function (triple) {
-                if (triple.p == "rdf:type" && triple.o == classUri) {
-                    matches.push({ table: table, column: triple.s.replace("$_", "") });
-                }
-            });
-        }
-
-        return matches;
     };
 
     self.loadDataSourceMappings = function (slsvSource, dataSource, callback) {

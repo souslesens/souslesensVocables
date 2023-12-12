@@ -15,15 +15,18 @@ var ResponsiveUI = (function () {
         var tools = Config.tools_available;
         common.fillSelectOptions("toolsSelect", tools, false);
     };
+    self.replaceFile = function (file1, file2) {
+        Object.keys(file1).forEach((key) => {
+            if (file2[key]) {
+                file1[key] = file2[key];
+            }
+        });
+    };
 
     self.onToolSelect = function (toolId) {
-        $("#selectedTool").html(toolId);
+        $("#currentToolTitle").html(toolId);
         MainController.currentTool = toolId;
-        if (toolId == "lineage") {
-            Lineage_r.isResponsiveLoading = true;
-        }
         ResponsiveUI.showSourceDialog(true);
-        $("#ChangeSourceButton").show();
     };
 
     self.onSourceSelect = function (evt, obj) {
@@ -120,8 +123,17 @@ var ResponsiveUI = (function () {
     self.hideDiv = function (modalDiv) {
         $("#" + modalDiv).css("display", "none");
     };
+    self.ApplySelectedTabCSS = function (buttonClicked, tabGroup) {
+        var x = $("#" + tabGroup + "-buttons").children();
+        if (x.length > 0) {
+            x.removeClass("slsv-selectedTabDiv");
+            x.children().removeClass("slsv-tabButtonSelected");
+        }
 
-    self.openTab = function (tabGroup, tabId, actionFn) {
+        $(buttonClicked).addClass("slsv-tabButtonSelected");
+        $(buttonClicked).parent().addClass("slsv-selectedTabDiv");
+    };
+    self.openTab = function (tabGroup, tabId, actionFn, buttonClicked) {
         var i;
         var x = document.getElementsByClassName(tabGroup);
         for (i = 0; i < x.length; i++) {
@@ -133,15 +145,19 @@ var ResponsiveUI = (function () {
         if (actionFn) {
             actionFn();
         }
+        self.ApplySelectedTabCSS(buttonClicked, tabGroup);
     };
 
     self.showSourceDialog = function (resetAll) {
-        self.openMainDialogDivForDialogs();
+        self.openDialogDiv("mainDialogDiv");
 
         self.showDiv("mainDialogDiv");
         $("#mainDialogDiv").css("display", "block");
         $("#sourceSelector_searchInput").focus();
+
         $("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
+            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
+
             if (resetAll) {
                 Lineage_sources.loadedSources = {};
                 var onSourceSelect = ResponsiveUI.onSourceSelect;
@@ -151,12 +167,20 @@ var ResponsiveUI = (function () {
             SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
         });
     };
-    self.openMainDialogDivForDialogs = function () {
+    self.openDialogDiv = function (div) {
         //$("#mainDialogDiv").css('width', 'auto');
-        $("#mainDialogDiv").empty();
-        $("#mainDialogDiv").dialog();
 
-        $("#mainDialogDiv").parent().show();
+        $("#" + div).empty();
+        $("#" + div).dialog();
+        $("#" + div)
+            .parent()
+            .show();
+        $("#" + div)
+            .parent()
+            .css("top", "20%");
+        $("#" + div)
+            .parent()
+            .css("left", "30%");
     };
     self.setSlsvCssClasses = function () {
         async.series(

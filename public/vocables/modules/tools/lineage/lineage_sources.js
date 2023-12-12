@@ -246,24 +246,20 @@ var Lineage_sources = (function () {
     };
 
     self.showHideEditButtons = function (source, hide) {
-        if (typeof Lineage_r != "undefined") {
-            Lineage_r.showHideEditButtons(source, hide);
+        if (!Lineage_whiteboard.lineageVisjsGraph.network) {
+            return;
+        }
+        if (hide) {
+            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
+            $(".vis-edit-mode").css("display", "none");
+        }
+        var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
+        if (isNodeEditable) {
+            Lineage_whiteboard.lineageVisjsGraph.network.enableEditMode();
+            $(".vis-edit-mode").css("display", "block");
         } else {
-            if (!Lineage_whiteboard.lineageVisjsGraph.network) {
-                return;
-            }
-            if (hide) {
-                Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
-                $(".vis-edit-mode").css("display", "none");
-            }
-            var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
-            if (isNodeEditable) {
-                Lineage_whiteboard.lineageVisjsGraph.network.enableEditMode();
-                $(".vis-edit-mode").css("display", "block");
-            } else {
-                Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
-                $(".vis-edit-mode").css("display", "none");
-            }
+            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
+            $(".vis-edit-mode").css("display", "none");
         }
     };
 
@@ -411,7 +407,7 @@ var Lineage_sources = (function () {
                 /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
 sourceDivId +
 "\")'>[-]</i>";*/
-                "<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 15px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+                "<input type='image' src='./icons/caret-right.png'  style=' width: 15px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
                 sourceDivId +
                 "\")'/> </div>";
             $("#lineage_drawnSources").append(html);

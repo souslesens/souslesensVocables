@@ -1,83 +1,105 @@
-.slsv-colors {
-    // background-color:  #8cac2c;
-    background-color: #0067a7;
+@import (less) "./css/lineage/slsv-bluePurple.css";
+
+/*variables */
+@font-family-theme: Helvetica, sans-serif;
+@padding-button-classic: 8px 24px;
+@font-size-title-big: 20px;
+@font-size-title-classic: 18px;
+@font-size-button: 15px;
+@font-size-button-small: 12px;
+@font-size-text: 10px;
+@border-radius-simple: 14px;
+@margin-small: 3px;
+
+/* end variable*/
+
+/* common Themes */
+
+.border-classic-color-theme1 {
+    border-radius: 14px;
+    border: @button1-color solid 1px;
+}
+
+.border-classic-color-theme2 {
+    border-radius: 14px;
+    border: @button2-color solid 1px;
+}
+.border-classic-color-theme3 {
+    border-radius: 14px;
+    border: @button3-color solid 1px;
+}
+.border-classic-color-theme4 {
+    border-radius: 14px;
+    border: @source-color solid 1px;
+}
+.border-none {
+    border-radius: 14px;
+    border: 0px;
+}
+
+.source-border {
+    .border-classic-color-theme1;
+    padding: 7px;
+}
+.classic-font-title {
+    font-family: @font-family-theme;
+    font-size: @font-size-title-classic;
+    font-weight: bold;
+}
+.button-font {
     color: white;
-    border-radius: 4px;
+    font-family: @font-family-theme;
+    font-size: @font-size-button;
+    background-color: @source-color;
 }
-
-.slsv-colors-2 {
-    background-color: #7367a7;
+.button-font-uncolor {
     color: white;
-    border-radius: 4px;
-}
-.slsv-colors-3 {
-    background-color: #9f5899;
-    color: white;
-    border-radius: 4px;
+    font-family: @font-family-theme;
+    font-size: @font-size-button;
 }
 
-.slsv-bg-pale {
-    background-color: #caefff;
+.button-font-uncolor-small {
+    .button-font-uncolor;
+    font-size: @font-size-button-small;
 }
-.slsv-bg-intense {
-    background-color: #0067a7;
+.slsv-general-buttons {
+    .border-classic-color-theme4;
+    .button-font;
 }
-.Lineage_selectedSourceDiv {
-    border: solid 3px blue;
+.slsv-invisible-button {
+    .button-font;
+    color: @source-color;
+    background-color: inherit;
+    border: 0px;
 }
-.Lineage_allSelectedSourceDiv {
-    border: solid 3px #0d6efdb3;
+.slsv-whiteboard-buttons {
+    .button-font-uncolor-small;
+    padding: 8px 12px;
+    .border-none;
+    margin: 2px;
+    margin-top: 8px;
 }
-
-.slsv-panel {
-    background-color: #caefff;
-}
-
-.slsv-button {
-    .slsv-colors;
-    margin: 3px !important;
-    padding: 3px !important;
-}
-.slsv-button-2 {
-    .slsv-colors-2;
-    margin: 3px !important;
-    padding: 3px !important;
-}
-.slsv-button-3 {
-    .slsv-colors-3;
-    margin: 3px !important;
-    padding: 3px !important;
+.hover-button {
+    background-color: inherit !important;
+    color: @source-color !important;
 }
 
-.slsv-top-menu-Button {
-    margin: 3px !important;
-    padding: 3px !important;
+/*  End Common themes  */
+
+/* source Label Div */
+
+/* Class Specific to some component interactions in SLSV */
+
+.w3-container {
+    padding: 0%;
+    padding-top: 0px;
 }
 
-.slsv-tabButton {
-    // color: #cb85d4;
-    color: #70309f;
-    background-color: #ffffff;
-    border: #70309f solid 1px !important;
-
-    margin: 1px !important;
-    padding: 6px !important;
-    margin-right: 1px;
-    margin-top: 6px !important;
-    -moz-border-radius-bottomright: 5px;
-    border-radius: 4px;
+.w3-panel {
+    margin-top: 6%;
 }
 
-.slsv-panel-color {
-    background-color: #f6fcec !important;
-}
-.Lineage_sourceLabelDiv {
-    margin: 3px;
-    padding: 3px;
-    background-color: #d0cfcd;
-}
-[role="dialog"] {
-    width: auto !important;
-    top: 12% !important;
-    left: 20% !important;
+.lineage-tab {
+    padding-left: 10px;
+    padding-right: 10px;
 }

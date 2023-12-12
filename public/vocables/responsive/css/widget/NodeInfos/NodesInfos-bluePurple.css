@@ -1,0 +1,185 @@
+.nodeInfos-button {
+    padding: 8px 24px !important;
+    font-size: 10px !important;
+    margin-top: 0px !important;
+    margin-right: 12px !important;
+    margin-bottom: 10px !important;
+}
+
+.infosTable {
+    background-color: #bfd4f5 !important;
+
+    padding: 8px 24px !important;
+    border-collapse: collapse !important;
+    border-spacing: 0px !important;
+}
+/*
+th, td{
+    
+    border-radius: 14px;
+    padding: 8px 24px!important;
+    border-radius: 14px!important;
+    border: #8757DE solid 1px!important;
+    margin-right: 10px!important;
+    
+}
+*/
+.NodesInfos_tableDiv {
+    padding: 24px;
+    background-color: #bfd4f5 !important;
+    border-radius: 14px;
+}
+.detailsCellValue {
+    padding: 8px 24px !important;
+    color: #1a27b2;
+    font-size: 10px;
+    font-family: Helvetica, sans-serif;
+
+    border: #8757de solid 1px !important;
+}
+
+.detailsCellName {
+    text-align: left !important;
+    padding: 8px 24px !important;
+    color: #1a27b2 !important;
+    font-size: 10px;
+    font-family: Helvetica, sans-serif;
+
+    border: #8757de solid 1px !important;
+    background-color: #eaefff !important;
+}
+.NodesInfos_CardId {
+    color: #1a27b2;
+    border: 0px;
+    padding-left: 20px;
+}
+/* color of text links only in nodes infos*/
+.NodesInfos_tableDiv > .ui-widget-content a {
+    color: #1a27b2 !important;
+}
+
+#nodeInfosWidget_InfosTabDiv {
+    background-color: #eaefff;
+    border-radius: 14px;
+    border-top-left-radius: 0px;
+    color: #1a27b2 !important;
+    font-size: 10px;
+    font-family: Helvetica, sans-serif;
+}
+
+#nodeInfos_restrictionsDiv {
+    background-color: #eaefff !important;
+    border-radius: 14px;
+    border: #8757de solid 2px !important;
+    color: #1a27b2 !important;
+    font-size: 10px;
+    font-family: Helvetica, sans-serif;
+}
+
+#nodeInfos_individualsDiv {
+    color: #1a27b2 !important;
+    background-color: #eaefff !important;
+    border-radius: 14px;
+    border: #8757de solid 2px !important;
+    font-size: 10px;
+    font-family: Helvetica, sans-serif;
+}
+#nodesInfos_individual_button {
+    background-color: #eaefff !important;
+    font-size: 15px;
+    font-family: Helvetica, sans-serif;
+    border: 0px;
+    color: #1a27b2 !important;
+    font-weight: bold;
+}
+
+#nodeInfosWidget_tabsDiv {
+    background-color: #bfd4f5 !important;
+    border-radius: 14px !important;
+    border: #8757de solid 1px !important;
+}
+
+#sourceBrowser_addPropertyDiv {
+    background-color: #bfd4f5;
+    border-radius: 14px !important;
+    border: #8757de solid 1px !important;
+    margin-bottom: 20px !important;
+}
+
+#nodeInfosWidget_AxiomsTabDiv {
+    background-color: #eaefff !important;
+    border-radius: 14px !important;
+}
+[role="tablist"] {
+    background-color: #bfd4f5;
+    color: #1a27b2 !important;
+    font-weight: bold;
+    font-size: 15px;
+    padding: 0px !important;
+    border-top-right-radius: 14px;
+    border-top-left-radius: 14px;
+}
+
+.nodeInfosWidget_tabDiv {
+    border: 0px !important;
+    background: #bfd4f5 !important;
+    color: #1a27b2 !important;
+}
+
+.nodesInfos-jquerybuttons {
+    padding: 6px 10px !important;
+    margin-top: 0px !important;
+}
+
+.nodesInfos-selectedTab {
+    background-color: #eaefff !important;
+    border-top-right-radius: 14px;
+    border-top-left-radius: 14px;
+}
+
+.ui-state-active a,
+.ui-state-active a:link,
+.ui-state-active a:visited {
+    color: #8757de !important;
+}
+
+.ui-state-default a,
+.ui-state-default a:link,
+.ui-state-default a:visited,
+a.ui-button,
+a:link.ui-button,
+a:visited.ui-button,
+.ui-button {
+    color: #1a27b2;
+}
+.editPredicatePanel {
+    background-color: white;
+    border-radius: 14px;
+    color: #1a27b2 !important;
+    font-size: 10px;
+    font-family: Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin: 10px;
+    width: 300px;
+    padding: 20px;
+    border: #8757de solid 1px;
+}
+
+.editPredicatePanel input {
+    width: 240px;
+    margin: 3px;
+    padding: 0px;
+    border-radius: 14px !important;
+    background-color: #eaefff !important;
+    color: #1a27b2 !important;
+}
+
+.editPredicatePanel select {
+    background-color: #eaefff !important;
+    min-width: 100px;
+    margin: 2px;
+    color: #1a27b2 !important;
+    border-radius: 14px !important;
+}

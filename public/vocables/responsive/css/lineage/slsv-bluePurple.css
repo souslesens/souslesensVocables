@@ -1,0 +1,196 @@
+/* Cartographie1 */
+
+/* Variable theme Color */
+@source-color: #8757de;
+@button1-color: #1a27b2;
+@light-blue: #bfd4f5;
+@button2-color: #079abe;
+@button3-color: #52c0ba;
+@background-color: #e9f0ff;
+@dark-background-color: #bed4f4;
+
+/* End Variable Color*/
+
+/* Specific interactions of lineage */
+
+/* Source title interactions */
+.Lineage_sourceLabelDiv {
+    background-color: inherit;
+    color: @source-color !important;
+}
+.Lineage_sourceLabelDiv {
+    margin: @margin-small;
+    background-color: @background-color;
+}
+
+.Lineage_selectedSourceDiv {
+    .source-border;
+}
+.Lineage_allSelectedSourceDiv {
+    .source-border;
+}
+
+#Lineage_graphEditionButtons {
+    margin-left: 15dvh !important;
+}
+
+.w3-sand,
+.w3-hover-sand {
+    background-color: @background-color !important;
+    color: inherit !important;
+    padding: 10px;
+    margin-top: -2px;
+}
+
+.w3-dropdown-hover:first-child {
+    background-color: inherit;
+    color: white;
+}
+/* Lineage classes */
+
+.titleboxButtons {
+    float: left;
+    .classic-font-title;
+    background: @background-color;
+    margin: -28px 5px 0px 0px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.slsv-right-top-bar-button {
+    .slsv-general-buttons;
+    margin-top: 27px !important;
+    margin-top: 20px;
+    padding: 8px 24px;
+}
+
+.slsv-right-top-bar-button:hover {
+    .hover-button;
+}
+
+.slsv-button-source {
+    .slsv-general-buttons;
+    display: inline-flex;
+    padding: 6px 16px;
+    border: inherit solid 2px !important;
+    margin: 2px;
+}
+
+.slsv-button-source:hover {
+    .hover-button;
+}
+
+/* Button WhiteBoard/Classes/Properties/Containers */
+.slsv-tabButton {
+    .slsv-invisible-button;
+    font-size: 13px;
+    padding-left: 0px;
+    color: @button1-color;
+}
+.slsv-tabButton:hover {
+    .hover-button;
+    background-color: @source-color;
+}
+.slsv-tabButtonSelected {
+    .slsv-tabButton;
+    color: @source-color;
+}
+
+/* Button Family 1 */
+.slsv-button-1 {
+    background-color: @button1-color;
+    .slsv-whiteboard-buttons;
+    .border-classic-color-theme1;
+}
+.slsv-button-1:hover {
+    .hover-button;
+}
+
+/* Button Family 2 */
+.slsv-button-2 {
+    background-color: @button2-color;
+    .slsv-whiteboard-buttons;
+    .border-classic-color-theme2;
+}
+.slsv-button-2:hover {
+    .hover-button;
+}
+
+/* Button Family 3 */
+.slsv-button-3 {
+    background-color: @button3-color;
+    .slsv-whiteboard-buttons;
+    .border-classic-color-theme3;
+}
+
+.slsv-button-3:hover {
+    .hover-button;
+}
+
+/* Containers */
+.w3-round-small {
+    padding: 14px 12px;
+    border-radius: 14px;
+    border: #3f3f3f solid 2px !important;
+}
+
+/* background */
+.w3-bar {
+    background-color: #bed4f4;
+    border-bottom: #1a28bf 3px solid;
+}
+.w3-barslsv-bg-pale {
+    background-color: #e9f0ff;
+}
+.w3-container {
+    background-color: #e9f0ff;
+}
+.vis-network {
+    background-color: white;
+}
+
+.toolSelectionBorder {
+    border-radius: 14px;
+    border: #1a28bf solid 1px;
+    margin: 10px;
+}
+
+#currentToolTitle {
+    color: #8757df;
+    font-family: Helvetica, sans-serif;
+    font-weight: bold;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.slsvTabSeparation {
+    float: left;
+    height: 7vh;
+    width: 2px; /* edit this if you want */
+    background-color: #1a28bf;
+    margin-left: 5px;
+    margin-right: 5px;
+    position: relative;
+}
+.slsv-tabDiv {
+    background-color: #bed4f4;
+    color: #1a28bf;
+    font-family: Helvetica, sans-serif;
+    font-size: 13px;
+    padding: 1% 1.65% !important;
+    /*
+	border-bottom-left-radius:14px ;
+	border-bottom-right-radius:14px ;
+	*/
+    border-bottom: #1a28bf solid 3px !important;
+    border-right: #1a28bf solid 3px !important;
+
+    width: 25% !important;
+    height: 10%;
+    font-weight: bold;
+}
+
+.slsv-selectedTabDiv {
+    background: #e9f0ff;
+    border-bottom: 0px !important ;
+    /*border-bottom-left-radius:0px !important;*/
+}

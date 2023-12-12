@@ -290,6 +290,15 @@ var Lineage_containers = (function () {
                             openAll: false,
                             contextMenu: Lineage_containers.getContextJstreeMenu(),
                             selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
+                            dnd: {
+                                drag_stop: function (data, element, helper, event) {
+                                    //  self.onMoveContainer(data, element, helper, event);
+                                },
+                                drag_start: function (data, element, helper, event) {
+                                    var sourceNodeId = element.data.nodes[0];
+                                    self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
+                                },
+                            },
                         };
                     }
 
@@ -297,7 +306,7 @@ var Lineage_containers = (function () {
                         $("#" + jstreeDiv)
                             .jstree()
                             .open_node("#");
-                        $("#" + jstreeDiv).jstree("open_all");
+                      //  $("#" + jstreeDiv).jstree("open_all");
 
                         self.bindMoveNode(jstreeDiv);
                     });

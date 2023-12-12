@@ -288,6 +288,13 @@ var KGcreator = (function () {
                                 KGcreator_mappings.showTableMappings(node);
                             },
                         };
+                        items.mapColumn = {
+                            label: "map Rows",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_mappings.showMappingDialog(null,{rowIndex:1});
+                            },
+                        };
 
                         items.tranforms = {
                             label: "tranforms",
@@ -340,6 +347,13 @@ var KGcreator = (function () {
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showTableMappings(node);
+                            },
+                        };
+                        items.mapColumn = {
+                            label: "map Rows",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_mappings.showMappingDialog(null,{rowIndex:1});
                             },
                         };
                         items.lookups = {

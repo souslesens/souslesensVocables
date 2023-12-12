@@ -230,6 +230,22 @@ function sortObjectByKey(obj) {
     return sortedObj;
 }
 
+//manage boolean transformed in strings by jquery
+function fixBooleanInObject(obj){
+    if(typeof obj==="object"){
+        for(var key in obj){
+            if(obj[key]=="false")
+                obj[key]=false
+            if(obj[key]=="true")
+                obj[key]=true
+            else{
+                util.fixBooleanInObject(obj[key])
+            }
+        }
+    }
+    return obj
+}
+
 module.exports = {
     writeResource,
     failure,
@@ -248,4 +264,5 @@ module.exports = {
     getAllowedSources,
     filterSources,
     sortObjectByKey,
+    fixBooleanInObject
 };

@@ -7,13 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.45.0...master)
 
-## [1.45.2](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.45.2) - 2023-12-05
+## [1.47.0](https://github.com/souslesens/souslesensVocables/compare/1.46.2...1.47.0) - 2023-12-12
+
+## [1.46.2](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.46.2) - 2023-12-05
 
 ### Fixed
 
 -   Unit tests
 
-## [1.45.1](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.45.1) - 2023-12-05
+## [1.46.1](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.46.1) - 2023-12-05
 
 > [!IMPORTANT]
 > Updating to Unrelease require a data migration. Execute the following script after upgrade.

@@ -292,7 +292,7 @@ var KGcreator = (function () {
                             label: "map Rows",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_mappings.showMappingDialog(null,{rowIndex:1});
+                                KGcreator_mappings.showMappingDialog(null, { rowIndex: 1 });
                             },
                         };
 
@@ -353,7 +353,7 @@ var KGcreator = (function () {
                             label: "map Rows",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_mappings.showMappingDialog(null,{rowIndex:1});
+                                KGcreator_mappings.showMappingDialog(null, { rowIndex: 1 });
                             },
                         };
                         items.lookups = {
@@ -745,7 +745,6 @@ var KGcreator = (function () {
 
         var sql = "select * from " + mapping.table + "where " + mapping.column + " = '" + uri + "'";
     };
-
 
     self.loadDataSourceMappings = function (slsvSource, dataSource, callback) {
         var payload = {

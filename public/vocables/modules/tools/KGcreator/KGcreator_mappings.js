@@ -4,11 +4,11 @@ import KGcreator_graph from "./KGcreator_graph.js";
 var KGcreator_mappings = (function () {
     var self = {};
 
-    self.showMappingDialog = function (addColumnClassType,options) {
+    self.showMappingDialog = function (addColumnClassType, options) {
         PopupMenuWidget.hidePopup();
 
-        if(!options){
-            options={}
+        if (!options) {
+            options = {};
         }
 
         self.currentSlsvSource = KGcreator.currentSlsvSource;
@@ -18,14 +18,11 @@ var KGcreator_mappings = (function () {
         };
         var columnNode = self.currentColumn.node;
 
-        if(options.rowIndex) {
-            self.currentColumn.rowIndex=1
-            columnNode.data.table=columnNode.data.id
-            columnNode.data.id="_rowIndex"
-
-        }else {
-
-
+        if (options.rowIndex) {
+            self.currentColumn.rowIndex = 1;
+            columnNode.data.table = columnNode.data.id;
+            columnNode.data.id = "_rowIndex";
+        } else {
             if (!columnNode) {
                 alert("Click on Table column to map it with this class");
                 return;
@@ -72,9 +69,7 @@ return alert("select a field (column)");
                 self.columnJsonEditor = new JsonEditor("#KGcreator_columnJsonDisplay", {});
                 // Add blank nodes $_column-name
 
-
-
-                var existingTriples = KGcreator.getColumnsMappings(columnNode.data.table,(options.rowIndex?null: columnNode.data.id), "s");
+                var existingTriples = KGcreator.getColumnsMappings(columnNode.data.table, options.rowIndex ? null : columnNode.data.id, "s");
 
                 if (existingTriples[columnNode.data.id]) {
                     self.updateColumnTriplesEditor(existingTriples[columnNode.data.id]);

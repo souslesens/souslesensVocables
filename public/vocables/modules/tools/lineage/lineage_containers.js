@@ -306,7 +306,7 @@ var Lineage_containers = (function () {
                         $("#" + jstreeDiv)
                             .jstree()
                             .open_node("#");
-                      //  $("#" + jstreeDiv).jstree("open_all");
+                        //  $("#" + jstreeDiv).jstree("open_all");
 
                         self.bindMoveNode(jstreeDiv);
                     });

@@ -470,7 +470,7 @@ var Sparql_OWL = (function () {
         for (var i = 1; i <= ancestorsDepth; i++) {
             if (i == 1) {
                 //  query += "  OPTIONAL{?subject " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
-             //   query += "  ?subject " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel, options) + "  ?broader" + i + ".";
+                //   query += "  ?subject " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel, options) + "  ?broader" + i + ".";
                 query += "  ?subject rdfs:subClassOf|rdf:type ?broader" + i + ".";
                 query += "  OPTIONAL{ ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} " + "filter (?broader1 !=owl:Class)";
                 query += Sparql_common.getVariableLangLabel("broader" + i, true);

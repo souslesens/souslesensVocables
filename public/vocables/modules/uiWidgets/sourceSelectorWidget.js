@@ -73,7 +73,7 @@ var SourceSelectorWidget = (function () {
                     return;
                 }
                 if (Config.sources[sourceLabel].isDraft) {
-                   ;//OK
+                    //OK
                 }
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) {
                     return;

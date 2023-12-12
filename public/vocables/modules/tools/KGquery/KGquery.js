@@ -15,7 +15,7 @@ import MainController from "../../shared/mainController.js";
 import KGquery_graph from "./KGquery_graph.js";
 import SavedQueriesComponent from "../../uiComponents/savedQueriesComponent.js";
 import KGquery_myQueries from "./KGquery_myQueries.js";
-import SQLquery_filters  from "./SQLquery_filters.js";
+import SQLquery_filters from "./SQLquery_filters.js";
 
 var KGquery = (function () {
     var self = {};
@@ -384,7 +384,7 @@ var KGquery = (function () {
         );
     };
 
-    self.queryKG = function (output, options,isVirtualSQLquery) {
+    self.queryKG = function (output, options, isVirtualSQLquery) {
         if (!options) {
             options = {};
         }
@@ -400,8 +400,7 @@ return alert("missing target node in  path");
         $("#KGquery_dataTableDiv").css("display", "block");
 
         if (isVirtualSQLquery) {
-            return SQLquery_filters.showFiltersDialog(self.querySets, self.currentSource) ;
-
+            return SQLquery_filters.showFiltersDialog(self.querySets, self.currentSource);
         }
 
         self.execPathQuery(options, function (err, result) {

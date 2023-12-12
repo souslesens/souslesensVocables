@@ -717,8 +717,7 @@ if (callback) return callback(err);
         "#B3B005",
     ];
 
-
-    self.paletteIntense=[
+    self.paletteIntense = [
         "#8f52a0",
         "#00ae8d",
         "#799b79",
@@ -740,8 +739,8 @@ if (callback) return callback(err);
         "#fcf0d6",
         "#b51d8c",
         "#f05978",
-        "#f27c96"
-    ]
+        "#f27c96",
+    ];
 
     self.resourceColorPalettes = {};
     self.quantumModelmappingSources = {

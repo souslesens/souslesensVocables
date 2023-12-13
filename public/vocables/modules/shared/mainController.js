@@ -203,19 +203,24 @@ if (callback)
         });
     };
 
-    self.initControllers = function () {
+    self.initControllers = function (source) {
         Object.keys(Config.sources)
             .sort()
             .forEach(function (sourceLabel, _index) {
-                if (!Config.sources[sourceLabel].controllerName) {
-                    Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller;
-                    try {
-                        Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller);
-                    } catch (e) {
-                        console.log("cannot parse " + Config.sources[sourceLabel].controller);
+                if (!source || sourceLabel == source) {
+                    if (!Config.sources[sourceLabel].controllerName) {
+                        var controllerName = Config.sources[sourceLabel].controller;
+                        Config.sources[sourceLabel].controllerName = controllerName;
+                        try {
+                            //transform controller name into variable pointing to tool
+                            Config.sources[sourceLabel].controller = eval(controllerName);
+                            Config.tools[controllerName] = eval(controllerName);
+                        } catch (e) {
+                            console.log("cannot parse " + Config.sources[sourceLabel].controller);
+                        }
+                    } else {
+                        //  Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controllerName);
                     }
-                } else {
-                    Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controllerName);
                 }
             });
     };
@@ -655,6 +660,7 @@ return;*/
                 } else {
                     var source = paramsMap["source"];
                     if (source) {
+                        MainController.initControllers(source);
                         Config.tools[tool].urlParam_source = source;
                     }
                     self.UI.initTool(tool, function () {

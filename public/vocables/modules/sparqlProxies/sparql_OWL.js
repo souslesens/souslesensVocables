@@ -419,6 +419,7 @@ var Sparql_OWL = (function () {
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
             //limit at 4 ancestorsDepth when imports
+            if (!ancestorsDepth) ancestorsDepth = 1;
             ancestorsDepth = Math.min(ancestorsDepth, 4);
         }
 
@@ -476,7 +477,7 @@ var Sparql_OWL = (function () {
                 query += Sparql_common.getVariableLangLabel("broader" + i, true);
                 // query += " OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label.}";
             } else {
-                query += "OPTIONAL { ?broader" + (i - 1) + "rdfs:subClassOf|rdf:type" + " ?broader" + i + ".";
+                query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf|rdf:type" + " ?broader" + i + ".";
                 //   "?broader" + i + " rdf:type owl:Class."
                 query += " ?broader" + i + " rdf:type ?broaderType" + i + ". filter(?broaderType" + i + " !=owl:Restriction) ";
                 // query += "OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label."

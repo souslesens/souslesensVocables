@@ -207,20 +207,19 @@ if (callback)
         Object.keys(Config.sources)
             .sort()
             .forEach(function (sourceLabel, _index) {
-                if(! source || sourceLabel==source) {
+                if (!source || sourceLabel == source) {
                     if (!Config.sources[sourceLabel].controllerName) {
-                        var controllerName=Config.sources[sourceLabel].controller;
-                        Config.sources[sourceLabel].controllerName =controllerName;
+                        var controllerName = Config.sources[sourceLabel].controller;
+                        Config.sources[sourceLabel].controllerName = controllerName;
                         try {
                             //transform controller name into variable pointing to tool
                             Config.sources[sourceLabel].controller = eval(controllerName);
-                            Config.tools[controllerName]=eval(controllerName);
+                            Config.tools[controllerName] = eval(controllerName);
                         } catch (e) {
                             console.log("cannot parse " + Config.sources[sourceLabel].controller);
                         }
-                    }
-                    else {
-                      ;//  Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controllerName);
+                    } else {
+                        //  Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controllerName);
                     }
                 }
             });
@@ -661,7 +660,7 @@ return;*/
                 } else {
                     var source = paramsMap["source"];
                     if (source) {
-                        MainController.initControllers (source);
+                        MainController.initControllers(source);
                         Config.tools[tool].urlParam_source = source;
                     }
                     self.UI.initTool(tool, function () {

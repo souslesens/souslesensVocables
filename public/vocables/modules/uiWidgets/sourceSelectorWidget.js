@@ -10,11 +10,10 @@ var SourceSelectorWidget = (function () {
         if (self.currentTreeDiv != null) {
             if ($("#" + self.currentTreeDiv).jstree() != undefined) {
                 try {
-                    $("#" + self.currentTreeDiv) .jstree().destroy();
-                }
-                catch(e){
-
-                }
+                    $("#" + self.currentTreeDiv)
+                        .jstree()
+                        .destroy();
+                } catch (e) {}
             }
         }
 

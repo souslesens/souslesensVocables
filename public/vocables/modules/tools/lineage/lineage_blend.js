@@ -719,7 +719,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                             source: Lineage_sources.activeSource,
                         },
                     };
-                    Lineage_whiteboard.drawNodesAndParents(nodeData,2);
+                    Lineage_whiteboard.drawNodesAndParents(nodeData, 2);
                     SearchUtil.generateElasticIndex(Lineage_sources.activeSource, { ids: [self.graphModification.creatingsourceUri] }, function (err, result) {
                         if (err) {
                             return alert(err.responseText);

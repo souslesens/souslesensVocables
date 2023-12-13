@@ -419,8 +419,7 @@ var Sparql_OWL = (function () {
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
             //limit at 4 ancestorsDepth when imports
-            if(!ancestorsDepth)
-                ancestorsDepth=1
+            if (!ancestorsDepth) ancestorsDepth = 1;
             ancestorsDepth = Math.min(ancestorsDepth, 4);
         }
 

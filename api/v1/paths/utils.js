@@ -231,7 +231,15 @@ function sortObjectByKey(obj) {
 }
 
 //manage boolean transformed in strings by jquery
-function fixBooleanInObject(obj){
+function fixBooleanInObject(obj,depth){
+    if(!depth)
+        depth=0
+    else {
+
+        if(depth++>20)
+            return obj;
+
+    }
     if(typeof obj==="object"){
         for(var key in obj){
             if(obj[key]=="false")
@@ -239,7 +247,7 @@ function fixBooleanInObject(obj){
             if(obj[key]=="true")
                 obj[key]=true
             else{
-                util.fixBooleanInObject(obj[key])
+                fixBooleanInObject(obj[key],depth+1)
             }
         }
     }

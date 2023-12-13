@@ -2656,9 +2656,9 @@ restrictionSource = Config.predicatesSource;
 
         MainController.UI.message("");
 
-        if (ancestorsDepth != 0) {
+       /* if (ancestorsDepth != 0) {
             ancestorsDepth = 5;
-        }
+        }*/
         var memberPredicate = false;
         if (nodes[0].data.type == "container") {
             memberPredicate = true;

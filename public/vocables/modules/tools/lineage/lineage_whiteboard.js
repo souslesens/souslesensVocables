@@ -687,7 +687,7 @@ var Lineage_whiteboard = (function () {
                             return null;
                         });
                     } else {
-                        Lineage_blend.graphModification.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
+                        Lineage_createResource.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
                             if (err) {
                                 return callback(err.responseText);
                             }
@@ -696,7 +696,7 @@ var Lineage_whiteboard = (function () {
                     }
                 },
                 addNode: function (nodeData, callback) {
-                    Lineage_blend.graphModification.showAddNodeGraphDialog(function (err, result) {
+                    Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
                         if (err) {
                             return callback(err.responseText);
                         }

@@ -1,13 +1,21 @@
 /* Cartographie1 */
 
 /* Variable theme Color */
-@source-color: #8757de;
+/*@source-color: #8757de;
 @button1-color: #1a27b2;
 @light-blue: #bfd4f5;
 @button2-color: #079abe;
 @button3-color: #52c0ba;
 @background-color: #e9f0ff;
-@dark-background-color: #bed4f4;
+@dark-background-color: #bed4f4;*/
+
+@source-color: #6b77e5;
+@button1-color: #1f253d;
+@light-blue: #e4e4e4;
+@button2-color: #434e8c;
+@button3-color: #6b77e5;
+@background-color: #f4f4f4;
+@dark-background-color: #e4e4e4;
 
 /* End Variable Color*/
 

@@ -217,6 +217,7 @@ var PredicatesSelectorWidget = (function () {
 
     self.setCurrentVocabClassesSelect = function (vocabulary, selectId) {
         self.currentVocabulary = vocabulary;
+        if (!selectId) selectId = "editPredicate_objectSelect";
         var classes = [];
 
         if (vocabulary == "usual") {

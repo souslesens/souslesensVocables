@@ -870,6 +870,26 @@ if (callback) return callback(err);
         return paramsMap;
     };
 
+    self.getURI = function (label, source, uriType, specific) {
+        var uri = null;
+        if (!source) {
+            source = Lineage_sources.activeSource;
+        }
+        let graphUri = Config.sources[source].graphUri;
+        if (!uriType || uriType == "fromLabel") {
+            uri = graphUri + common.formatStringForTriple(label, true);
+        } else if (uriType == "randomHexaNumber") {
+            uri = graphUri + common.getRandomHexaId(10);
+        } else if (uriType == "specific") {
+            if (specificUri) {
+                uri = specificUri;
+            } else {
+                return alert("no specific uri");
+            }
+        }
+        return uri;
+    };
+
     return self;
 })();
 

@@ -75,7 +75,7 @@
         <script type="module" src="modules/tools/lineage/lineage_relationFilter.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_relationIndividualsFilter.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_rules.js"></script>
-
+        <script type="module" src="modules/tools/lineage/lineage_createSource.js"></script>
         <script type="module" src="modules/shared/ontologyModels.js"></script>
 
         <script type="module" src="modules/uiWidgets/predicatesSelectorWidget.js"></script>
@@ -100,6 +100,7 @@
         <script type="module" src="modules/tools/SQLquery.js"></script>
         <script type="module" src="modules/tools/admin.js"></script>
         <script type="module" src="modules/tools/ConfigEditor.js"></script>
+        <script type="module" src="modules/tools/GraphManagement.js"></script>
 
         <script type="module" src="modules/tools/KGcreator/KGcreator.js"></script>
         <script type="module" src="modules/tools/KGcreator/KGcreator_mappings.js"></script>
@@ -393,14 +394,31 @@
                     <button class="w3-button slsv-right-top-bar-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
                 </div>
             </div>
+            
         </header>
 
         <div class="w3-container">
-            <div class="w3-container w3-col l3 slsv-bg-pale" style="height: 90vh; width: 26%" id="lateralPanelDiv"></div>
-            <div class="w3-container w3-col l9" style="height: 90vh; width: 74%" id="graphDiv"></div>
+            <div class="w3-container w3-col l3 slsv-bg-pale" style="height: 90vh; width: 26%" id="lateralPanelDiv">
+            </div>
+            <div class="w3-container w3-col l9" style="height: 90vh; width: 74%" >
+                <div class="w3-bar left-border-main-dialog-div" style=" height: 20px;">
+                    <div style="margin-top:-5px">
+                        <table>
+                            <tr>
+                                <td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none; width: 15px; text-align: justify" /></td>
+                                <td><span class="messageDiv" id="messageDiv"></span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div  id="graphDiv" style='height: 88vh'>
+                
+                </div>
+            </div>
+            
         </div>
 
-        <footer class="w3-row-padding">gggggg</footer>
+        
 
         <!-- popup panel-->
 

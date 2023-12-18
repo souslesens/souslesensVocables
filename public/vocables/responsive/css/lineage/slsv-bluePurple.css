@@ -213,6 +213,10 @@
     height:30px;
     background-color: white;
 }
+
+.left-border-main-dialog-div{
+    border-left: @button1-color solid 3px !important;
+}
 /* general dialog classes */
 .w3-row {
 

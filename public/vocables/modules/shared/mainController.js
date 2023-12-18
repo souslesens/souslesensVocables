@@ -209,16 +209,7 @@ return callback()
     };
 
     self.initControllers = function (source) {
-        /* for (var controllerName in Config.tools) {
-        try {
-          //transform controller name into variable pointing to tool
-          //  Config.sources[sourceLabel].controller = eval(controllerName);
-         //eval(Config.tools[controllerName]);
-        } catch (e) {
-          return alert("cannot parse controller  " + controllerName);
-        }
 
-    }*/
 
         Object.keys(Config.sources)
             .sort()
@@ -227,6 +218,7 @@ return callback()
                     var controllerName = Config.sources[sourceLabel].controller;
                     Config.sources[sourceLabel].controllerName = controllerName;
                     Config.sources[sourceLabel].controller = window[controllerName];
+                    Config.tools[controllerName] = window[controllerName];
                 }
             });
     };

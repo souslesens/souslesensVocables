@@ -61,7 +61,7 @@
         <div id="lineage_actionsWrapper" class="lineage_actionDiv">
             
             <div >
-                <button class="w3-button slsv-button-2 size-of-button-small" id="lineageProperties_nodesSelectionSelect"  onclick="Lineage_properties.onPropertyActionClick('relations','visj')"><input type="image" src="./icons/MoreOptionsIcon.png"  onclick="Lineage_r.hideShowMoreOptions('show')" style="margin-top: 2;"></button>
+                <button class="slsv-invisible-button" id="lineageProperties_nodesSelectionSelect"  onclick="Lineage_r.changeIconForPropertiesGraphAction(this)"><input type="image" src="./icons/AllProperties.png"   style="margin-bottom: -10px;"></button>
                 
                 <button class="w3-button slsv-button-2 size-of-button-small"  onclick="Lineage_properties.onPropertyActionClick('relations','visj')">Relations</button>
 
@@ -77,7 +77,7 @@
     </div>
 
 
-    <div class="jstreeContainer" style="width: 95%; height: 450px; max-height: 500px; min-height: 400px; margin: 3px; padding: 3px">
+    <div class="jstreeContainer" style="width: 95%; height: 450px; max-height: 45dvh;  margin: 3px; padding: 3px">
         <div class="jstree" id="Lineage_propertiesTree"></div>
     </div>
 

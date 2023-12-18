@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const { config, configUsersPath } = require("./config");
 const { Lock } = require("async-await-mutex-lock");
 const mariadb = require("mariadb");
+const ULID = require("ulid");
+const { createHash } = require("crypto");
 
 /**
  * @typedef {import("./UserTypes").UserAccountWithPassword} UserAccountWithPassword
@@ -33,7 +35,7 @@ class UserModel {
          */
         const usersNoPasswords = {};
         Object.entries(userAccountsWithPassword).map(([key, value]) => {
-            usersNoPasswords[key] = { id: value.id, login: value.login, groups: value.groups, _type: value._type, source: value.source };
+            usersNoPasswords[key] = { id: value.id, login: value.login, groups: value.groups, _type: value._type, source: value.source, token: value.token };
         });
         return usersNoPasswords;
     };
@@ -115,6 +117,23 @@ class UserModel {
         } finally {
             lock.release("UsersThread");
         }
+    };
+
+    /**
+     * @param {string} login - the user login
+     * @returns {Promise<string>} the new user token
+     */
+    generateUserToken = async (login) => {
+        const user = await this.findUserAccount(login);
+        if (user) {
+            const hashedLogin = createHash("sha256").update(login).digest("hex");
+            const ulid = ULID.ulid();
+            const token = `sls-${ulid.toLowerCase()}${hashedLogin.substring(0, 5)}`;
+            user.token = token;
+            await this.updateUserAccount(user);
+            return user.token;
+        }
+        throw Error("UserAccount does not exist");
     };
 
     /**

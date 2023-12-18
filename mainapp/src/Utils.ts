@@ -25,4 +25,10 @@ const style = {
     p: 4,
 };
 
-export { identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style };
+async function fetchMe() {
+    const response = await fetch("/api/v1/auth/whoami");
+    const json = await response.json();
+    return json;
+}
+
+export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style };

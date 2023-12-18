@@ -10,6 +10,8 @@ import ProgressBar from "react-bootstrap/ProgressBar";
 import Stack from "react-bootstrap/Stack";
 import Table from "react-bootstrap/Table";
 
+import { fetchMe } from "./Utils";
+
 export default function GraphManagement() {
     // sources fetched from server
     const [sources, setSources] = useState<Record<string, any>>({});
@@ -39,15 +41,11 @@ export default function GraphManagement() {
     useEffect(() => {
         void fetchSources();
         void fetchConfig();
-        void fetchMe();
+        (async () => {
+            const response = await fetchMe();
+            setCurrentUserToken(response.user.token);
+        })();
     }, []);
-
-    const fetchMe = async () => {
-        const response = await fetch("/api/v1/auth/whoami");
-        const json = await response.json();
-        console.log("token", json.user.token);
-        setCurrentUserToken(json.user.token);
-    };
 
     const fetchConfig = async () => {
         const response = await fetch("/api/v1/config");

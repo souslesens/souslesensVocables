@@ -8,6 +8,7 @@ const allTools = {
     admin: { label: "Admin", multiSources: 0, controller: Admin, toolDescriptionImg: null },
     ConfigEditor: { label: "ConfigEditor", noSource: 1, controller: ConfigEditor, toolDescriptionImg: null },
     GraphManagement: { label: "GraphManagement", noSource: 1, controller: GraphManagement, toolDescriptionImg: null },
+    UserManagement: { label: "UserManagement", noSource: 1, controller: UserManagement, toolDescriptionImg: null },
 
     OntoCreator: { label: "OntoCreator", noSource: 1, controller: Lineage_createSource, toolDescriptionImg: null },
 };

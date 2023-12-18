@@ -9,9 +9,11 @@ var SourceSelectorWidget = (function () {
     self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options) {
         if (self.currentTreeDiv != null) {
             if ($("#" + self.currentTreeDiv).jstree() != undefined) {
-                $("#" + self.currentTreeDiv)
-                    .jstree()
-                    .destroy();
+                try {
+                    $("#" + self.currentTreeDiv)
+                        .jstree()
+                        .destroy();
+                } catch (e) {}
             }
         }
 
@@ -73,7 +75,7 @@ var SourceSelectorWidget = (function () {
                     return;
                 }
                 if (Config.sources[sourceLabel].isDraft) {
-                    return;
+                    //OK
                 }
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) {
                     return;

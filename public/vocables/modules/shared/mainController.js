@@ -94,11 +94,11 @@ var MainController = (function () {
         /*   $.getJSON("config/sources.json", function (json) {
 Config.sources = json;
 for(var sourceLabel in Config.sources){
-   if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
-       Config.sources[sourceLabel].sparql_server.url=Config.sparql_server.url
+if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
+   Config.sources[sourceLabel].sparql_server.url=Config.sparql_server.url
 }
 if (callback)
-   return callback()
+return callback()
 
 });*/
     };
@@ -178,6 +178,11 @@ if (callback)
                         });
                     },
                     function (callbackSeries) {
+                        MainController.initControllers();
+                        callbackSeries(_err);
+                    },
+
+                    function (callbackSeries) {
                         MainController.parseUrlParam(function () {
                             callbackSeries();
                         });
@@ -203,32 +208,30 @@ if (callback)
         });
     };
 
-    self.initControllers = function () {
+    self.initControllers = function (source) {
+        /* for (var controllerName in Config.tools) {
+        try {
+          //transform controller name into variable pointing to tool
+          //  Config.sources[sourceLabel].controller = eval(controllerName);
+         //eval(Config.tools[controllerName]);
+        } catch (e) {
+          return alert("cannot parse controller  " + controllerName);
+        }
+
+    }*/
+
         Object.keys(Config.sources)
             .sort()
-            .forEach(function (sourceLabel, _index) {
+            .forEach(function (sourceLabel) {
                 if (!Config.sources[sourceLabel].controllerName) {
-                    Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller;
-                    try {
-                        Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller);
-                    } catch (e) {
-                        console.log("cannot parse " + Config.sources[sourceLabel].controller);
-                    }
-                } else {
-                    Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controllerName);
+                    var controllerName = Config.sources[sourceLabel].controller;
+                    Config.sources[sourceLabel].controllerName = controllerName;
+                    Config.sources[sourceLabel].controller = window[controllerName];
                 }
             });
     };
 
     self.UI = {
-        test: function () {
-            Lineage_combine.testMerge();
-            //  Orchestrator.createTab()
-            // broadcastChannel.postMessage("eeee")
-            /*   broadcastChannel.postMessage({ from: MainController.currentTool, to: "Lineage" });
-return;*/
-        },
-
         initialGraphDivWitdh: 0,
 
         configureUI: function () {
@@ -268,7 +271,7 @@ return;*/
                 Object.keys(Config.sources)
                     .sort()
                     .forEach(function (sourceLabel, index) {
-                        self.initControllers();
+                        // self.initControllers();
                         if (sources && sources.indexOf(sourceLabel) < 0) {
                             return;
                         }
@@ -451,7 +454,7 @@ return;*/
             self.currentTool = toolId;
             var toolObj = Config.tools[toolId];
             self.currentSource = null;
-            MainController.initControllers();
+            // MainController.initControllers();
             MainController.writeUserLog(authentication.currentUser, self.currentTool, "");
             Clipboard.clear();
             $("#accordion").accordion("option", { active: 1 });
@@ -462,7 +465,7 @@ return;*/
             $("#actionDivContolPanelDiv").html("");
             $("#rightPanelDivInner").html("");
 
-            if (toolId == "lineage" || toolId == "KGquery") {
+            if (true || toolId == "lineage" || toolId == "KGquery") {
                 Lineage_sources.setAllWhiteBoardSources(true);
                 $("#accordion").accordion("option", { active: 2 });
                 MainController.currentSource = null;
@@ -510,7 +513,9 @@ return;*/
         },
 
         getJstreeConceptsContextMenu: function () {
-            if (!self.currentTool || !Config.tools[self.currentTool]) return;
+            if (!self.currentTool || !Config.tools[self.currentTool]) {
+                return;
+            }
             var controller = Config.tools[self.currentTool].controller;
             if (controller.jstreeContextMenu) {
                 return controller.jstreeContextMenu();
@@ -655,6 +660,7 @@ return;*/
                 } else {
                     var source = paramsMap["source"];
                     if (source) {
+                        MainController.initControllers(source);
                         Config.tools[tool].urlParam_source = source;
                     }
                     self.UI.initTool(tool, function () {

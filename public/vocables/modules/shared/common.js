@@ -725,6 +725,31 @@ if (callback) return callback(err);
         "#f27c96",
     ];
 
+    self.paletteIntense = [
+        "#8f52a0",
+        "#00ae8d",
+        "#799b79",
+        "#fbb27b",
+        "#b51d8c",
+        "#2abb9e",
+        "#a0ba8a",
+        "#fec693",
+        "#b382ba",
+        "#97d5ca",
+        "#95cc79",
+        "#fef200",
+        "#d3b5d7",
+        "#e5f2e8",
+        "#afd46b",
+        "#fff9af",
+        "#e86549",
+        "#fdb39a",
+        "#fcf0d6",
+        "#b51d8c",
+        "#f05978",
+        "#f27c96",
+    ];
+
     self.resourceColorPalettes = {};
     self.quantumModelmappingSources = {
         "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity": "ISO_15926-part-14",
@@ -843,6 +868,26 @@ if (callback) return callback(err);
             paramsMap[array[0]] = array[1];
         });
         return paramsMap;
+    };
+
+    self.getURI = function (label, source, uriType, specific) {
+        var uri = null;
+        if (!source) {
+            source = Lineage_sources.activeSource;
+        }
+        let graphUri = Config.sources[source].graphUri;
+        if (!uriType || uriType == "fromLabel") {
+            uri = graphUri + common.formatStringForTriple(label, true);
+        } else if (uriType == "randomHexaNumber") {
+            uri = graphUri + common.getRandomHexaId(10);
+        } else if (uriType == "specific") {
+            if (specificUri) {
+                uri = specificUri;
+            } else {
+                return alert("no specific uri");
+            }
+        }
+        return uri;
     };
 
     return self;

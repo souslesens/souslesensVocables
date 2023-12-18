@@ -445,7 +445,8 @@ var util = {
             });
         }
         return str;
-    },
+    }
+
 };
 
 module.exports = util;

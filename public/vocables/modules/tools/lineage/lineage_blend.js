@@ -6,6 +6,7 @@ import OntologyModels from "../../shared/ontologyModels.js";
 
 self.lineageVisjsGraph;
 import Lineage_whiteboard from "./lineage_whiteboard.js";
+import sourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // !!!!!!!!  const util = require("../../../../../bin/util.");
@@ -440,34 +441,15 @@ var Lineage_blend = (function () {
                 $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
             }
         },
-        getURI: function (label, source, uriType) {
-            var uri = null;
-            if (!uriType) {
-                uriType = $("#LineageBlend_creatingNodeUriType").val();
-            }
-            var specificUri = $("#LineageBlend_creatingNodeSubjectUri").val();
-            if (specificUri) {
-                uriType = "specific";
-            }
-            if (!source) {
-                source = Lineage_sources.activeSource;
-            }
-            let graphUri = Config.sources[source].graphUri;
-            if (!uriType || uriType == "fromLabel") {
-                uri = graphUri + common.formatStringForTriple(label, true);
-            } else if (uriType == "randomHexaNumber") {
-                uri = graphUri + common.getRandomHexaId(10);
-            } else if (uriType == "specific") {
-                if (specificUri) {
-                    uri = specificUri;
-                } else {
-                }
-            }
-            return uri;
-        },
+
         addTripleToCreatingNode: function (predicate, object) {
             if (!self.graphModification.creatingsourceUri) {
-                var uri = self.graphModification.getURI(object);
+                var uriType = $("#LineageBlend_creatingNodeUriType").val();
+                var specificUri = $("#LineageBlend_creatingNodeSubjectUri").val();
+                if (specificUri) {
+                    uriType = "specific";
+                }
+                var uri = common.getUri(object, Lineage_sources.activeSource, uriType, specificUri);
                 self.graphModification.creatingsourceUri = uri;
             }
             if (!predicate) {
@@ -600,7 +582,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                 if (targetUrisMap[label]) {
                     sourceUrisMap[label] = targetUrisMap[label];
                 } else {
-                    var sourceUri = self.graphModification.getURI(label);
+                    var sourceUri = common.getUri(label);
                     sourceUrisMap[label] = sourceUri;
                     sourceUrisArray.push(sourceUri);
                 }
@@ -719,7 +701,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                             source: Lineage_sources.activeSource,
                         },
                     };
-                    Lineage_whiteboard.drawNodesAndParents(nodeData);
+                    Lineage_whiteboard.drawNodesAndParents(nodeData, 2);
                     SearchUtil.generateElasticIndex(Lineage_sources.activeSource, { ids: [self.graphModification.creatingsourceUri] }, function (err, result) {
                         if (err) {
                             return alert(err.responseText);
@@ -953,7 +935,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
     };
 
     self.createSubProperty = function (source, superPropId, subPropertyLabel, callback) {
-        var subPropId = self.graphModification.getURI(subPropertyLabel, source, "fromLabel");
+        var subPropId = common.getUri(subPropertyLabel, source, "fromLabel");
         //  var subPropId = Config.sources[source].graphUri + common.getRandomHexaId(10);
         var triples = [
             {

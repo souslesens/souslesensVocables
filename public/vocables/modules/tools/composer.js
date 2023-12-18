@@ -801,7 +801,7 @@ var Composer = (function () {
                         return self.rightPanelsActions.showAttributesParentsDialog();
                     } else {
                         // create a new individual that is object of the dataContainer  and subject of gidea Attribute and Logical entity
-                        var newUri = Lineage_blend.graphModification.getURI("", self.currentDataContainer.data.source, "randomHexaNumber");
+                        var newUri = common.getUri("", self.currentDataContainer.data.source, "randomHexaNumber");
                         var triples = [
                             {
                                 subject: newUri,

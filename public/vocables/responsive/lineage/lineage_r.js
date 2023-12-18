@@ -110,7 +110,7 @@ var Lineage_r = (function () {
     };
     self.addNode = function () {
         ResponsiveUI.openDialogDiv("LineagePopup");
-        Lineage_blend.graphModification.showAddNodeGraphDialog(function (err, result) {
+        Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
             if (err) {
                 return callback(err.responseText);
             }

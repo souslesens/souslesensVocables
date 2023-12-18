@@ -20,9 +20,13 @@ var SQLquery_run = (function () {
             [
                 function (callbackSeries) {
                     self.getSlsvSourceDataBaseSourceConfigs(slsvSource, function (err, dataSourceConfig) {
-                        if (err) return callbackSeries(err);
+                        if (err) {
+                            return callbackSeries(err);
+                        }
                         self.dataSourceConfig = dataSourceConfig[dataSourceConfig];
-                        if (!self.dataSourceConfig) return callbackSeries("no matching database source");
+                        if (!self.dataSourceConfig) {
+                            return callbackSeries("no matching database source");
+                        }
                         callbackSeries();
                     });
                 },
@@ -37,7 +41,9 @@ var SQLquery_run = (function () {
                 //get columns and tables from predicates
                 function (callbackSeries) {
                     self.getQuerySetsColumnAndTables(querySets, function (err, result) {
-                        if (err) return callbackSeries(err);
+                        if (err) {
+                            return callbackSeries(err);
+                        }
                         paths = result;
                         callbackSeries();
                     });
@@ -110,58 +116,11 @@ var SQLquery_run = (function () {
             }
         );
     };
-    self.getSlsvSourceDataBaseSourceConfigs = function (slsvSource, callback) {
-        KGcreator.getSlsvSourceConfig(slsvSource, function (err, config) {
-            if (err) {
-                return callback(err);
-            }
-            self.sourceConfig = config;
-            if (!dataSourceConfig) {
-                return callback("no database source declared");
-            }
-
-            callback(null, config.databaseSources);
-        });
-    };
-    self.getQuerySetsColumnAndTables = function (querySets, callback) {
-        var paths = [];
-        querySets.sets.forEach(function (querySet) {
-            querySet.elements.forEach(function (queryElement, queryElementIndex) {
-                var classUri = queryElement.fromNode.id;
-                var matches = KGcreator.getClass2ColumnMapping(self.dataSourcemappings, classUri);
-                if (matches.length == 0) {
-                    return callback("no match for class " + classUri);
-                }
-                if (matches.length > 1) {
-                    return callback("multiple matches for class " + classUri + "  :  " + JSON.stringify(matches));
-                }
-                var match = matches[0];
-                var obj = { fromClassUri: classUri, fromColumn: match.column, fromTable: match.table };
-
-                var classUri = queryElement.toNode.id;
-                var matches = KGcreator.getClass2ColumnMapping(self.dataSourcemappings, classUri);
-
-                if (matches.length == 0) {
-                    return callback("no match for class " + classUri);
-                }
-                if (matches.length > 1) {
-                    return callback("multiple matches for class " + classUri + "  :  " + JSON.stringify(matches));
-                }
-                var match = matches[0];
-                obj.toClassUri = classUri;
-                obj.toColumn = match.column;
-                obj.toTable = match.table;
-
-                paths.push(obj);
-            });
-            callback(null, paths);
-        });
-    };
 
     self.getDBmodel = function (dataSourceConfig, callback) {
         const params = new URLSearchParams({
             name: dataSourceConfig.name,
-            type: dataSourceConfig.sqlType,
+            type: dataSourceConfig.sqlType || dataSourceConfig.type,
         });
         $.ajax({
             type: "GET",

@@ -12,6 +12,8 @@ var Lineage_r = (function () {
     self.oldNodeInfosInit = null;
     self.oldAddEdgeDialog = null;
     self.oldExportTable = null;
+    self.MoreActionsShow=false;
+    self.MoreOptionsShow=true;
     self.init = function () {
         PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
         SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
@@ -49,7 +51,7 @@ var Lineage_r = (function () {
         });
     };
     self.loadPredicateSelectorWidgetResponsive = function (divId, source, options, configureFn, callback) {
-        self.options = options || {};
+        PredicatesSelectorWidget.options = options || {};
         $("#" + divId).html("");
         $("#" + divId).load("./responsive/widget/html/predicatesSelectorWidgetDialogResponsive.html", function (a, b, c) {
             var x = a + b + c;
@@ -65,20 +67,26 @@ var Lineage_r = (function () {
             $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
             $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
             Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
+            self.hideShowMoreActions("hide");
         });
     };
 
     self.initClassesTab = function () {
         $("#tabs_classes").load("./responsive/lineage/html/classesPanel.html", function (s) {
             SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
-            $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html", function () {
+            $("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
                 SearchWidget.init();
                 $("#GenericTools_searchInAllSources").prop("checked", false);
+                $('#Lineage_MoreClassesOptions').hide();
+                SearchWidget.showTopConcepts();
             });
         });
     };
     self.initPropertiesTab = function () {
-        $("#tabs_properties").load("./responsive/lineage/html/propertiesPanel.html", function (s) {});
+        $("#tabs_properties").load("./responsive/lineage/html/propertiesPanel.html", function (s) {
+            Lineage_r.hideShowMoreOptions('hide','Lineage_MorePropertiesOptions');
+            Lineage_properties.searchTermInSources();
+        });
     };
     self.initContainersTab = function () {
         $("#tabs_containers").load("./responsive/lineage/html/containersPanel.html", function (s) {});
@@ -160,7 +168,48 @@ var Lineage_r = (function () {
                 self.oldExportTable(jstreeDiv, nodeId);
             });
     };
+    self.hideShowMoreActions=function(hideShowParameter){
+        if(hideShowParameter=="hide"){
+            self.MoreActionsShow=true;
+        }
+        if(hideShowParameter=="show"){
+            self.MoreActionsShow=false;
+        }
+        if(!self.MoreActionsShow){
+            $('#Lineage_MoreActionsButtons').show();
+            self.MoreActionsShow=true;
+            $('#Lineage_MoreActionsDiv').removeClass('TitleBoxLine');
 
+        }
+        else{
+            $('#Lineage_MoreActionsButtons').hide();
+            self.MoreActionsShow=false;
+            $('#Lineage_MoreActionsDiv').addClass('TitleBoxLine');
+            
+        }
+    }
+    self.hideShowMoreOptions=function(hideShowParameter,divId){
+        if(hideShowParameter=="hide"){
+            self.MoreOptionsShow=false;
+        }
+        if(hideShowParameter=="show"){
+            self.MoreOptionsShow=true;
+        }
+        if(self.MoreOptionsShow){
+            $('#'+divId).show();
+            self.MoreOptionsShow=false;
+           
+
+        }
+        else{
+            
+            $('#'+divId).hide();
+            self.MoreOptionsShow=true;
+            
+            
+        }
+    }
+    
     return self;
 })();
 export default Lineage_r;

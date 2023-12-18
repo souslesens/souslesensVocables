@@ -1,0 +1,43 @@
+<div style="display: flex; flex-direction: column; height: 50px">
+    
+    <div class="w3-container" >
+            <div class="input-group mb-3" style="width: 100%;">
+                <div class="input-group-prepend">
+                    <button class="SearchButtonIconLeft border-without-raduis-theme1"><input type="image" src="./icons/SearchIcon.png"  onclick="SearchWidget.searchTermInSources()" style="margin-top: 2;"></button>
+                </div>
+                <input id="searchWidget_searchTermInput" class="border-without-raduis-theme1" autocomplete="off" style="width: 35%;height: 29.5px; " value="" >
+                <div id="Lineage_classes_moreOptionsButtonOnSearchbar" class="input-group-append">
+                    <button class="SearchButtonIconRight border-without-raduis-theme1" onclick="Lineage_r.hideShowMoreOptions(null,'Lineage_MoreClassesOptions')"><input type="image" src="./icons/MoreOptionsIcon.png"   style="margin-top: 2;"></button>
+                    
+                
+                </div>  
+                <div >
+                    <button class="w3-button  classesPannelButton size-of-button-small" onclick="SearchWidget.showTopConcepts();"style="margin-left:20px;" >Reset</button>
+                    <button class="w3-button  classesPannelButton size-of-button-small" onclick="Export.exportTreeToDataTable(null,'#')">Export</button>
+                </div>  
+            </div>
+            
+        
+    </div>
+    
+</div>
+
+
+
+
+
+
+<script>
+    $("#searchWidget_searchTermInput").keypress(function (e) {
+        if (e.which == 13) {
+            SearchWidget.searchTermInSources();
+        }
+    });
+    $("#searchWidget_searchTermInput").focus();
+    $("#sourcesSelectionDialogdiv").dialog({
+        autoOpen: false,
+        height: 750,
+        width: 400,
+        modal: true,
+    });
+</script>

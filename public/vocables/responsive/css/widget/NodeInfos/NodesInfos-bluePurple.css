@@ -7,7 +7,7 @@
 }
 
 .infosTable {
-    background-color: #bfd4f5 !important;
+    background-color: @dark-background-color !important;
 
     padding: 8px 24px !important;
     border-collapse: collapse !important;
@@ -26,95 +26,82 @@ th, td{
 */
 .NodesInfos_tableDiv {
     padding: 24px;
-    background-color: #bfd4f5 !important;
+    background-color: @dark-background-color !important;
     border-radius: 14px;
 }
 .detailsCellValue {
-    padding: 8px 24px !important;
-    color: #1a27b2;
-    font-size: 10px;
-    font-family: Helvetica, sans-serif;
-
-    border: #8757de solid 1px !important;
+    .font-table;
+     
 }
 
 .detailsCellName {
     text-align: left !important;
-    padding: 8px 24px !important;
-    color: #1a27b2 !important;
-    font-size: 10px;
-    font-family: Helvetica, sans-serif;
-
-    border: #8757de solid 1px !important;
-    background-color: #eaefff !important;
+    .font-table;
+    background-color: @background-color !important;
 }
+
 .NodesInfos_CardId {
-    color: #1a27b2;
+    color: @button1-color;
     border: 0px;
     padding-left: 20px;
 }
 /* color of text links only in nodes infos*/
 .NodesInfos_tableDiv > .ui-widget-content a {
-    color: #1a27b2 !important;
+    color: @button1-color !important;
 }
 
 #nodeInfosWidget_InfosTabDiv {
-    background-color: #eaefff;
+    .font-table;
+    border: 0px!important;
+    background-color: @background-color;
     border-radius: 14px;
     border-top-left-radius: 0px;
-    color: #1a27b2 !important;
-    font-size: 10px;
-    font-family: Helvetica, sans-serif;
+   
 }
-
+.nodesInfosAdditionalInfos{
+    
+    background-color: @background-color !important;  
+    border-radius: 14px !important;
+    border: @source-color solid 1px !important;
+}
 #nodeInfos_restrictionsDiv {
-    background-color: #eaefff !important;
-    border-radius: 14px;
-    border: #8757de solid 2px !important;
-    color: #1a27b2 !important;
-    font-size: 10px;
-    font-family: Helvetica, sans-serif;
+    .nodesInfosAdditionalInfos;
+   
 }
 
 #nodeInfos_individualsDiv {
-    color: #1a27b2 !important;
-    background-color: #eaefff !important;
-    border-radius: 14px;
-    border: #8757de solid 2px !important;
-    font-size: 10px;
-    font-family: Helvetica, sans-serif;
+    .nodesInfosAdditionalInfos;
 }
 #nodesInfos_individual_button {
-    background-color: #eaefff !important;
-    font-size: 15px;
-    font-family: Helvetica, sans-serif;
-    border: 0px;
-    color: #1a27b2 !important;
-    font-weight: bold;
-}
 
-#nodeInfosWidget_tabsDiv {
-    background-color: #bfd4f5 !important;
+    .font-table;
+    background-color: @background-color !important; 
+    font-size: 15px;
+    border: 0px!important;
+    font-weight: bold;
+
+}
+.nodesInfos-border{
+    background-color: @dark-background-color !important;
     border-radius: 14px !important;
-    border: #8757de solid 1px !important;
+    border: @source-color solid 1px !important;
+}
+#nodeInfosWidget_tabsDiv {
+    .nodesInfos-border;
 }
 
 #sourceBrowser_addPropertyDiv {
-    background-color: #bfd4f5;
-    border-radius: 14px !important;
-    border: #8757de solid 1px !important;
+    .nodesInfos-border;
     margin-bottom: 20px !important;
 }
 
 #nodeInfosWidget_AxiomsTabDiv {
-    background-color: #eaefff !important;
-    border-radius: 14px !important;
+    .nodesInfos-border;
+    background-color: @background-color !important;
+    border: 0px!important;
 }
 [role="tablist"] {
-    background-color: #bfd4f5;
-    color: #1a27b2 !important;
-    font-weight: bold;
-    font-size: 15px;
+    .button-font-title;
     padding: 0px !important;
     border-top-right-radius: 14px;
     border-top-left-radius: 14px;
@@ -122,17 +109,24 @@ th, td{
 
 .nodeInfosWidget_tabDiv {
     border: 0px !important;
-    background: #bfd4f5 !important;
-    color: #1a27b2 !important;
+    background-color: @dark-background-color!important;
+    color: @button1-color !important;
 }
 
 .nodesInfos-jquerybuttons {
-    padding: 6px 10px !important;
+    background-color: white;
+    border-radius: 12px;
+    padding: 2px 8px !important;
     margin-top: 0px !important;
+    border: @button1-color solid 1px;
+    color:@button1-color;
 }
-
+.nodesInfos-jquerybuttons:hover {
+    .hover-button;
+    background-color: @dark-background-color!important;
+}
 .nodesInfos-selectedTab {
-    background-color: #eaefff !important;
+    background-color: @background-color !important;
     border-top-right-radius: 14px;
     border-top-left-radius: 14px;
 }
@@ -140,7 +134,7 @@ th, td{
 .ui-state-active a,
 .ui-state-active a:link,
 .ui-state-active a:visited {
-    color: #8757de !important;
+    color: @source-color !important;
 }
 
 .ui-state-default a,
@@ -150,21 +144,21 @@ a.ui-button,
 a:link.ui-button,
 a:visited.ui-button,
 .ui-button {
-    color: #1a27b2;
+    color: @button1-color;
 }
 .editPredicatePanel {
+    .button-font-title;
     background-color: white;
-    border-radius: 14px;
-    color: #1a27b2 !important;
     font-size: 10px;
-    font-family: Helvetica, sans-serif;
+    .border-classic-color-theme4;
+    
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     margin: 10px;
     width: 300px;
     padding: 20px;
-    border: #8757de solid 1px;
+    
 }
 
 .editPredicatePanel input {
@@ -172,14 +166,21 @@ a:visited.ui-button,
     margin: 3px;
     padding: 0px;
     border-radius: 14px !important;
-    background-color: #eaefff !important;
+    background-color: #eaefff ;
     color: #1a27b2 !important;
 }
 
 .editPredicatePanel select {
-    background-color: #eaefff !important;
+    
     min-width: 100px;
     margin: 2px;
-    color: #1a27b2 !important;
     border-radius: 14px !important;
+    background-color: @dark-background-color;
+    color: @button1-color !important;
+}
+
+.edit-Predicate-value-chosen{
+    width: 95%; 
+    background-color: @dark-background-color !important;
+
 }

@@ -1,15 +1,3 @@
-/* Cartographie1 */
-
-/* Variable theme Color */
-@source-color: #8757de;
-@button1-color: #1a27b2;
-@light-blue: #bfd4f5;
-@button2-color: #079abe;
-@button3-color: #52c0ba;
-@background-color: #e9f0ff;
-@dark-background-color: #bed4f4;
-
-/* End Variable Color*/
 
 /* Specific interactions of lineage */
 
@@ -31,7 +19,7 @@
 }
 
 #Lineage_graphEditionButtons {
-    margin-left: 15dvh !important;
+    margin-left: 1dvh !important;
 }
 
 .w3-sand,
@@ -46,13 +34,42 @@
     background-color: inherit;
     color: white;
 }
-/* Lineage classes */
 
+.w3-round-small {
+    padding: 14px 12px;
+    border-radius: 14px;
+    border: #3f3f3f solid 2px !important;
+    background-color: @background-color!important;
+}
+.w3-bar {
+    background-color: @dark-background-color;
+    border-bottom: @button1-color 3px solid;
+   
+}
+.w3-bar-item{
+    padding:8px 5px!important;
+}
+.w3-barslsv-bg-pale {
+    background-color: @background-color;
+}
+.w3-container {
+    background-color: @background-color;
+}
+.vis-network {
+    background-color: white;
+}
+
+
+/* Lineage classes */
+.addEdgeButtonColor{
+    background-color: @button1-color!important;
+    border-color:@button1-color!important;
+}
 .titleboxButtons {
     float: left;
     .classic-font-title;
     background: @background-color;
-    margin: -28px 5px 0px 0px;
+    margin: -30px 5px 0px 0px;
     padding-left: 10px;
     padding-right: 10px;
 }
@@ -83,7 +100,8 @@
 .slsv-tabButton {
     .slsv-invisible-button;
     font-size: 13px;
-    padding-left: 0px;
+    padding-left: 0px!important;
+    padding-right: 0px!important;
     color: @button1-color;
 }
 .slsv-tabButton:hover {
@@ -126,71 +144,108 @@
     .hover-button;
 }
 
-/* Containers */
-.w3-round-small {
-    padding: 14px 12px;
-    border-radius: 14px;
-    border: #3f3f3f solid 2px !important;
-}
 
-/* background */
-.w3-bar {
-    background-color: #bed4f4;
-    border-bottom: #1a28bf 3px solid;
-}
-.w3-barslsv-bg-pale {
-    background-color: #e9f0ff;
-}
-.w3-container {
-    background-color: #e9f0ff;
-}
-.vis-network {
-    background-color: white;
-}
 
 .toolSelectionBorder {
-    border-radius: 14px;
-    border: #1a28bf solid 1px;
+    .border-classic-color-theme1;
     margin: 10px;
 }
 
 #currentToolTitle {
-    color: #8757df;
-    font-family: Helvetica, sans-serif;
-    font-weight: bold;
+    .classic-font-title;
+    color: @source-color;
     font-size: 16px;
     margin-right: 10px;
 }
 
-.slsvTabSeparation {
-    float: left;
-    height: 7vh;
-    width: 2px; /* edit this if you want */
-    background-color: #1a28bf;
-    margin-left: 5px;
-    margin-right: 5px;
-    position: relative;
-}
 .slsv-tabDiv {
-    background-color: #bed4f4;
-    color: #1a28bf;
-    font-family: Helvetica, sans-serif;
+    background-color: @dark-background-color;
+    color: @button1-color;
+    .classic-font-title;
     font-size: 13px;
-    padding: 1% 1.65% !important;
-    /*
-	border-bottom-left-radius:14px ;
-	border-bottom-right-radius:14px ;
-	*/
-    border-bottom: #1a28bf solid 3px !important;
-    border-right: #1a28bf solid 3px !important;
 
+   
+    border-bottom: @button1-color solid 3px !important;
+    border-right: @button1-color solid 3px !important;
+
+
+    padding: 1% 1.65% !important;
     width: 25% !important;
     height: 10%;
-    font-weight: bold;
+    
 }
 
 .slsv-selectedTabDiv {
-    background: #e9f0ff;
+    background: @background-color;
     border-bottom: 0px !important ;
-    /*border-bottom-left-radius:0px !important;*/
+   
+}
+
+.classesPannelButton{
+    .slsv-button-1;
+    padding: 5% 10px; 
+    margin-bottom: 10px;
+    margin-top: 0px;
+    margin-right: 6px;
+}
+.classesPannelButton:hover{
+    .hover-button;
+}
+#GenericTools_searchScope{
+    margin: 12px;
+}
+.SearchButtonIconRight{
+    .SearchButtonIcon;
+    border-top-right-radius: 14px;
+    border-bottom-right-radius: 14px;
+}
+.SearchButtonIconLeft{
+    .SearchButtonIcon;
+    border-top-left-radius: 14px;
+    border-bottom-left-radius: 14px;
+}
+.input {
+    display: flex;
+    gap: 1rem;
+    border: 1px solid black;
+    border-radius: 4px;
+    width: 150px;
+    height:30px;
+    background-color: white;
+}
+/* general dialog classes */
+.w3-row {
+
+    .button-font-uncolor; 
+    background-color: white;
+    color: @source-color;
+    .border-classic-color-theme4;
+
+   
+    padding: 8px 30px;
+    display: inline-flex;
+    align-items: center;
+}
+
+[role="dialog"] {
+    width: auto !important;
+    height: auto !important;
+
+    .border-classic-color-theme4;
+    border: @button1-color solid 5px !important;
+}
+
+.ui-dialog-title {
+    color: @source-color;
+    background-color: @background-color;
+    .big-font-title;
+    border: 0px;
+    border-radius: 14px;
+    padding: 8px 24px;
+    margin-top: 20px !important;
+}
+
+.w3-border {
+    background-color: @background-color;
+    border-radius: 14px;
 }

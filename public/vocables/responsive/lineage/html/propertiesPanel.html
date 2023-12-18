@@ -1,18 +1,26 @@
-<div>
-    <div style="display: flex; flex-direction: column">
-        <div class="lineage_actionDiv_title">Search Properties</div>
-        <div class="lineage_button_group">
-            <span>Term type</span>
-            <select id="LineageProperties_searchAllType">
-                <option value="property">property</option>
-                <option value="domain">domain</option>
-                <option value="range">range</option>
-            </select>
+<div style="margin-top:40px; margin-left:10px;">
 
-            <input type="checkbox" id="LineageProperties_allExactMatchSearchCBX" />Exact Match &nbsp; <input type="checkbox" id="LineageProperties_searchInAllSources" />All sources
-        </div>
+   <div class="w3-container" >
+                <div class="input-group mb-3" style="width: 100%;">
+                    <div class="input-group-prepend">
+                        <button class="SearchButtonIconLeft border-without-raduis-theme1"><input type="image" src="./icons/SearchIcon.png"  onclick="Lineage_properties.searchTermInSources()" style="margin-top: 2;"></button>
+                    </div>
+                    <input id="LineageProperties_searchAllSourcesTermInput" style="width: 35%;height: 29.5px;" value="" onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_properties.searchTermInSources()}" >
+                    <div id="Lineage_classes_moreOptionsButtonOnSearchbar" class="input-group-append">
+                        <button class="SearchButtonIconRight border-without-raduis-theme1" onclick="Lineage_r.hideShowMoreOptions(null,'Lineage_MorePropertiesOptions')"><input type="image" src="./icons/MoreOptionsIcon.png"   style="margin-top: 2;"></button>
+                    </div>
+                    <div style="margin-left: 20px;" >
+                        <button class="w3-button  classesPannelButton size-of-button-small" onclick="Export.exportTreeToDataTable('Lineage_propertiesTree','#')">Export</button>
+                    </div>
+                </div>
+              
+            
     </div>
+        
+   
+     <!--
 
+    
     <div class="lineage_button_group">
         <input id="LineageProperties_searchAllSourcesTermInput" style="width: 200px" value="" onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_properties.searchTermInSources()}" />
 
@@ -20,31 +28,59 @@
 
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Export.exportTreeToDataTable('Lineage_propertiesTree','#')">Export</button>
     </div>
+    -->
+
+    <div id="Lineage_MorePropertiesOptions" class="w3-panel w3-border w3-round-small border-classic-color-theme3" style="padding-left: 20px;">
+        <div class="titleboxButtons font-button3-color" style="display: inline-flex;" >Options <button class="slsv-invisible-button "><input type="image" src="./icons/MoreOptionsIcon.png"  onclick="Lineage_r.hideShowMoreOptions('hide','Lineage_MorePropertiesOptions')" style="margin-top: 2;"></button></div>
+        <div id="Lineage_Properties_MoreOptionsButtons" class="font-button3-color" >
+            
+            <div class="lineage_button_group">
+                <span>Term type</span>
+                <select id="LineageProperties_searchAllType" class="select-bar-theme3" style="margin: 10px;">
+                    <option value="property">property</option>
+                    <option value="domain">domain</option>
+                    <option value="range">range</option>
+                </select>
+                <div>
+                    <input type="checkbox" id="LineageProperties_allExactMatchSearchCBX" />Exact Match &nbsp; 
+                    <input type="checkbox" id="LineageProperties_searchInAllSources" />All sources
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+    <div id="Lineage_PropertiesFondamentalButtonsDiv" class="w3-panel w3-border w3-round-small border-classic-color-theme3 font-button3-color">
+        <div class="titleboxButtons font-button3-color" style="display: inline-flex;" >Graph Actions</div>
+        
+        
+        
+        
+        
+
+        <div id="lineage_actionsWrapper" class="lineage_actionDiv">
+            
+            <div >
+                <button class="w3-button slsv-button-2 size-of-button-small" id="lineageProperties_nodesSelectionSelect"  onclick="Lineage_properties.onPropertyActionClick('relations','visj')"><input type="image" src="./icons/MoreOptionsIcon.png"  onclick="Lineage_r.hideShowMoreOptions('show')" style="margin-top: 2;"></button>
+                
+                <button class="w3-button slsv-button-2 size-of-button-small"  onclick="Lineage_properties.onPropertyActionClick('relations','visj')">Relations</button>
+
+                <button class="w3-button slsv-button-2 size-of-button-small"  onclick="Lineage_properties.onPropertyActionClick('predicates','visj')">Predicates</button>
+
+                <button class="w3-button slsv-button-2 size-of-button-small"  onclick="Lineage_properties.onPropertyActionClick('restrictions','visj')">Restrictions</button>
+
+                <button class="w3-button slsv-button-2 size-of-button-small" onclick="Lineage_properties.onPropertyActionClick('rangesAndDomains','visj')">RangesAndDomains</button>
+            </div>
+        </div>
+    </div>
+        
+    </div>
+
 
     <div class="jstreeContainer" style="width: 95%; height: 450px; max-height: 500px; min-height: 400px; margin: 3px; padding: 3px">
         <div class="jstree" id="Lineage_propertiesTree"></div>
     </div>
 
-    <div style="display: flex; flex-direction: column">
-        <div class="lineage_actionDiv_title">Selection</div>
-        <div>
-            <select style="width: 300px" id="lineageProperties_nodesSelectionSelect">
-                <option value="all">All</option>
-                <option value="currentGraphNodes">Current Graph Nodes</option>
-            </select>
-        </div>
-
-        <div id="lineage_actionsWrapper" class="lineage_actionDiv">
-            <div class="lineage_actionDiv_title">Graph</div>
-            <div class="lineage_button_group">
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_properties.onPropertyActionClick('relations','visj')">Relations</button>
-
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_properties.onPropertyActionClick('predicates','visj')">Predicates</button>
-
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_properties.onPropertyActionClick('restrictions','visj')">Restrictions</button>
-
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_properties.onPropertyActionClick('rangesAndDomains','visj')">RangesAndDomains</button>
-            </div>
-        </div>
-    </div>
+    
+        
 </div>

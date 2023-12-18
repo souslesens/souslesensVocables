@@ -8,8 +8,8 @@
 }
 
 .Lineage_PopUpStyle {
-    background-color: #eaefff;
-    color: #8757de;
+    background-color: @background-color;
+    color: @source-color;
     border: 0px;
     border-radius: 14px;
     overflow-y: hidden;
@@ -25,18 +25,18 @@
 }
 
 .Lineage_PopUpStyle select option:hover {
-    background-color: #bfd4f5;
-    color: #1a27b2;
+    background-color: @dark-background-color;
+    color: @button1-color;
     border-radius: 14px;
 }
 
 .Lineage_PopUpStyle select option:checked {
-    background-color: #bfd4f5;
-    color: #1a27b2;
+    background-color: @dark-background-color;
+    color: @button1-color;
     border-radius: 14px;
 }
 .PopUpBorder {
-    border: 2px solid #1a27b2;
+    border: 2px solid @button1-color;
 }
 
 #toolSelectionSection:hover #ToolBorder {
@@ -52,8 +52,8 @@
 }
 */
 .popupMenuItem {
-    background-color: #eaefff;
-    color: #8757de;
+    background-color: @background-color;
+    color: @source-color;
     /*border-bottom: 2px solid #1A27B2;*/
     border-radius: 14px;
     overflow-y: hidden;
@@ -61,13 +61,13 @@
 }
 
 .popupMenuWidgetDiv {
-    background-color: #eaefff;
-    border: 2px solid #1a27b2;
+    background-color: @background-color;
+    border: 2px solid @button1-color;
     border-radius: 14px;
 }
 
 .popupMenuWidgetDiv span:hover {
-    background-color: #bfd4f5;
-    color: #1a27b2;
+    background-color: @dark-background-color;
+    color: @button1-color;
     border-radius: 14px;
 }

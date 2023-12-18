@@ -1,5 +1,5 @@
 <div class="w3-panel w3-border w3-round-small">
-    <div id="Title1" class="titleboxButtons" style="color: #1a28bf"></div>
+    <div id="Title1" class="titleboxButtons font-button1-color" ></div>
     <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()">Model</button>
     <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()">TopClasses</button>
     <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>
@@ -11,7 +11,7 @@
 </div>
 
 <div class="w3-panel w3-border w3-round-small">
-    <div class="titleboxButtons" style="color: #059bbc">Whiteboard</div>
+    <div class="titleboxButtons font-button2-color" >Whiteboard</div>
     <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()">Clear all</button>
     <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()">Clear last</button>
     <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()">Only last</button>
@@ -20,16 +20,24 @@
     <div class="w3-button slsv-button-2" onclick="ContainerSearchWidget.showDialog()">Parent Containers</div>
 </div>
 
-<div class="w3-panel w3-border w3-round-small">
-    <div class="titleboxButtons" style="color: #52c1b9">More Actions</div>
-    <button class="w3-button slsv-button-3" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog();">Similars</button>
-    <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>
-    <button class="w3-button slsv-button-3" id="lineage_actionDiv_pathes" onclick="Lineage_r.showPathesDialog()">Paths</button>
-    <button class="w3-button slsv-button-3" id="lineage_actionDiv_linkedData" onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">Linked Data</button>
-    <button class="w3-button slsv-button-3" id="lineage_actionDiv_reasoner" onclick="Lineage_reasoner.showReasonerDialog()" disabled="">Reasoner</button>
-    <button class="w3-button slsv-button-3" id="lineage_actionDiv_rules" onclick="Lineage_rules.showRulesDialog()" disabled="">Rules</button>
-    <button class="w3-button slsv-button-3" id="lineage_actionDiv_inferredModel" onclick="Lineage_whiteboard.drawInferredClassesModel()">Inferred Model</button>
-    <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="NodeInfosWidget.showCreateEntityDialog()" disabled="" style="display: block">new Axiom</button>
+<div id="Lineage_MoreActionsDiv" class="w3-panel w3-border w3-round-small">
+    <div class="titleboxButtons font-button3-color" style="display: inline-flex;" >More Actions <button class="slsv-invisible-button "><input type="image" src="./icons/MoreOptionsIcon.png"  onclick="Lineage_r.hideShowMoreActions()" style="margin-top: 2;"></button></div>
+    <div id="Lineage_MoreActionsButtons">
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog();">Similars</button>
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_pathes" onclick="Lineage_r.showPathesDialog()">Paths</button>
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_linkedData" onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">Linked Data</button>
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_reasoner" onclick="Lineage_reasoner.showReasonerDialog()" disabled="">Reasoner</button>
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_rules" onclick="Lineage_rules.showRulesDialog()" disabled="">Rules</button>
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_inferredModel" onclick="Lineage_whiteboard.drawInferredClassesModel()">Inferred Model</button>
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="NodeInfosWidget.showCreateEntityDialog()" disabled="" style="display: block">new Axiom</button>
+    </div>
+    
+</div>
+<div id="lineage_legendWrapper" class="w3-panel w3-border w3-round-small">
+    <div class="titleboxButtons font-lengend-color">Upper Ontology Classes</div>
+    <!-- <div id="Lineage_classes_graphDecoration_UpperOntologyDiv"></div>-->
+    <div id="Lineage_classes_graphDecoration_legendDiv" style="flex-wrap: nowrap;  height: 250px" class="lineage_actionDiv"></div>
 </div>
 
 <div id="LineagePopup"></div>

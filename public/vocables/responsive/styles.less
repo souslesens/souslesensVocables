@@ -1,4 +1,8 @@
 @import (less) "./css/lineage/slsv-bluePurple.css";
+@import (css) "./css/widget/sourceSelector/Sourceselector-bluePurple.css";
+@import (less) "./css/widget/PopUp/PopUp-bluePurple.css";
+@import (less) "./css/widget/NodeInfos/NodesInfos-bluePurple.css";
+
 
 /*variables */
 @font-family-theme: Helvetica, sans-serif;
@@ -13,20 +17,88 @@
 
 /* end variable*/
 
+/* Variable theme Color */
+/* Theme  1 */
+@source-color: #8757de;
+@button1-color: #1a27b2;
+@button2-color: #079abe;
+@button3-color: #52c1b9;
+@legend-color: #4CAD8C;
+@background-color: #e9f0ff;
+@dark-background-color: #bed4f4;
+
+/* Theme TotalEnergies 
+@source-color: #ED0000;
+@button1-color: #1424B7;
+@button2-color: #285AFF;
+@button3-color: #0098EA;
+@legend-color: #8AA0A9;
+@background-color: #f2f5f6;
+@dark-background-color: #CCDAE0;
+*/
+
+
+/*Theme 2 
+@source-color: #FFA406;
+@button1-color: #54008C;
+@dark-background-color: #FFFAE9;
+@button2-color: #6600CC;
+@button3-color: #8686D1;
+@legend-color: #4CAD8C;
+@background-color: #FFFAE9;
+@dark-background-color: #FFE964;
+*/
+
+/* Theme 3
+@source-color: #6b77e5;
+@button1-color: #122a68;
+@light-blue: #e4e4e4;
+@button2-color: #434e8c;
+@button3-color: #6b77e5;
+@legend-color: #4CAD8C;
+@background-color: #f4f4f4;
+@dark-background-color: #e4e4e4;
+*/
+/* End Variable Color*/
+
+
 /* common Themes */
 
+/*input with multiple icons*/
+
+
+  
+ 
+.font-button1-color{
+    color: @button1-color;
+}
+.font-button2-color{
+    color: @button2-color;
+}
+.font-button3-color{
+    color: @button3-color;
+}
+.font-lengend-color{
+    color: @legend-color;   
+}
+.select-bar-theme3{
+    color : @button3-color;
+    border-radius: 14px;
+}
 .border-classic-color-theme1 {
     border-radius: 14px;
     border: @button1-color solid 1px;
 }
-
+.border-without-raduis-theme1{
+    border: @button1-color solid 1px;
+}
 .border-classic-color-theme2 {
     border-radius: 14px;
     border: @button2-color solid 1px;
 }
 .border-classic-color-theme3 {
     border-radius: 14px;
-    border: @button3-color solid 1px;
+    border: @button3-color solid 1px!important;
 }
 .border-classic-color-theme4 {
     border-radius: 14px;
@@ -46,6 +118,11 @@
     font-size: @font-size-title-classic;
     font-weight: bold;
 }
+.big-font-title{
+    font-size: @font-size-title-big;
+    font-family: @font-family-theme;
+    font-weight: bold;
+}
 .button-font {
     color: white;
     font-family: @font-family-theme;
@@ -62,6 +139,21 @@
     .button-font-uncolor;
     font-size: @font-size-button-small;
 }
+.button-font-title{
+    font-family: @font-family-theme;
+    font-size: @font-size-button;
+    font-weight: bold;
+    background-color: @dark-background-color;
+    color: @button1-color !important;
+}
+.font-table{
+    font-size: @font-size-text;
+    font-family: @font-family-theme;
+    color: @button1-color;
+    padding: 8px 24px;
+    border: @source-color solid 1px !important;
+}
+
 .slsv-general-buttons {
     .border-classic-color-theme4;
     .button-font;
@@ -83,8 +175,24 @@
     background-color: inherit !important;
     color: @source-color !important;
 }
+.SearchButtonIcon{
+    background-color: @dark-background-color;
+    
+    
+}
+.TitleBoxLine{
+    border-bottom: 0px!important;
+    border-radius: 0px!important;
+    border-right:0px!important;
+    border-left:0px!important;
+}
 
+.size-of-button-small{
+    padding: 2px 8px !important;
+}
 /*  End Common themes  */
+
+
 
 /* source Label Div */
 

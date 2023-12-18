@@ -58,6 +58,7 @@
         "concurrently": "^8.2.1",
         "connect-ensure-login": "^0.1.1",
         "cookie-parser": "~1.4.6",
+        "crypto": "^1.0.1",
         "csv-parser": "^3.0.0",
         "debug": "~4.3.4",
         "digest-fetch": "^2.0.3",

@@ -109,6 +109,8 @@ class UserModel {
                 // hash password
                 newUserAccount.password = bcrypt.hashSync(newUserAccount.password, 10);
             }
+            // add a token
+            newUserAccount.token = this._genToken(newUserAccount.login);
             if (Object.keys(userAccounts).includes(newUserAccount.id)) {
                 throw Error("UserAccount exists already, try updating it.");
             }
@@ -121,15 +123,22 @@ class UserModel {
 
     /**
      * @param {string} login - the user login
+     * @returns {string} a token
+     */
+    _genToken = (login) => {
+        const hashedLogin = createHash("sha256").update(login).digest("hex");
+        const ulid = ULID.ulid();
+        return `sls-${ulid.toLowerCase()}${hashedLogin.substring(0, 5)}`;
+    };
+
+    /**
+     * @param {string} login - the user login
      * @returns {Promise<string>} the new user token
      */
     generateUserToken = async (login) => {
         const user = await this.findUserAccount(login);
         if (user) {
-            const hashedLogin = createHash("sha256").update(login).digest("hex");
-            const ulid = ULID.ulid();
-            const token = `sls-${ulid.toLowerCase()}${hashedLogin.substring(0, 5)}`;
-            user.token = token;
+            user.token = this._genToken(login);
             await this.updateUserAccount(user);
             return user.token;
         }
@@ -344,6 +353,8 @@ class UserModelDatabase extends UserModel {
             if (Object.keys(userAccounts).includes(newUserAccount.id)) {
                 throw Error("UserAccount exists already, try updating it.");
             }
+            // add a token
+            newUserAccount.token = this._genToken(newUserAccount.login);
             await this._writeOne(newUserAccount);
         } finally {
             lock.release("UsersThread");

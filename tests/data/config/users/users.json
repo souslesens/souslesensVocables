@@ -7,7 +7,7 @@
         "source": "json",
         "_type": "user",
         "name": "admin",
-        "token": "2c2a1b2cde965802162108f64ca14d99dcb3563e"
+        "token": "admin-token"
     },
     "owl_user": {
         "id": "owl_user",
@@ -17,7 +17,7 @@
         "source": "json",
         "_type": "user",
         "name": "owl_user",
-        "token": "05b86aa33041d537a529baa27dd5af3ff3cb03b3"
+        "token": "owl-token"
     },
     "skos_user": {
         "id": "skos_user",
@@ -27,7 +27,6 @@
         "source": "json",
         "_type": "user",
         "name": "skos_user",
-        "token": "73b354f70e525adc9cee0e0abfde4444c199c612"
+        "token": "skos-token"
     }
 }
-

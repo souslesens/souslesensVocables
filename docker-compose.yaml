@@ -31,6 +31,20 @@ services:
         networks:
             - backend
 
+    sls-api:
+        image: slsapi:latest
+        ports:
+            - 8080:8000
+        environment:
+            MAIN_SOUSLESENS_CONFIG_DIR: /souslesens_config
+            MAIN_LOG_LEVEL: debug
+            CORS_ORIGINS: "*"
+            RDF_BATCH_SIZE: 100000
+        volumes:
+            - ./config:/souslesens_config:ro
+        networks:
+            - backend
+
     virtuoso:
         image: askomics/virtuoso:7.2.7
         ports:

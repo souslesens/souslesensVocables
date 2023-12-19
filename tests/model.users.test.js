@@ -22,6 +22,7 @@ describe("UserModelJson", () => {
                 groups: ["admin"],
                 source: "json",
                 _type: "user",
+                token: "admin-token",
             },
             owl_user: {
                 id: "owl_user",
@@ -29,6 +30,7 @@ describe("UserModelJson", () => {
                 groups: ["owl_only"],
                 source: "json",
                 _type: "user",
+                token: "owl-token",
             },
             skos_user: {
                 id: "skos_user",
@@ -36,6 +38,7 @@ describe("UserModelJson", () => {
                 groups: ["skos_only"],
                 source: "json",
                 _type: "user",
+                token: "skos-token",
             },
         });
     });
@@ -47,7 +50,7 @@ describe("UserModelJson", () => {
             groups: ["admin"],
             source: "json",
             _type: "user",
-            token: "2c2a1b2cde965802162108f64ca14d99dcb3563e",
+            token: "admin-token",
         });
     });
     test("fail to find a user with findUserAccount()", async () => {
@@ -89,6 +92,7 @@ describe("UserModelJson", () => {
         };
         await tmpUserModelJson.addUserAccount(newUser);
         const users = await tmpUserModelJson.getUserAccounts();
+        expected.token = users.LOGIN.token;
         expect(users).toStrictEqual({ LOGIN: expected });
         tmpDir.removeCallback();
     });
@@ -101,8 +105,9 @@ describe("UserModelJson", () => {
                 groups: [],
                 source: "",
                 _type: "user",
+                token: "login1-token",
             },
-            LOGIN2: { id: "ID2", login: "LOGIN2", password: "pass", groups: [], source: "", _type: "user" },
+            LOGIN2: { id: "ID2", login: "LOGIN2", password: "pass", groups: [], source: "", _type: "user", token: "login2-token" },
         };
         tmpDir = tmp.dirSync({ unsafeCleanup: true });
         fs.mkdirSync(path.join(tmpDir.name, "users"));
@@ -116,16 +121,25 @@ describe("UserModelJson", () => {
             source: "",
             _type: "user",
         };
+        const expectedModifedUser1 = {
+            id: "ID1",
+            login: "LOGIN1",
+            groups: ["test"],
+            source: "",
+            _type: "user",
+            token: "login1-token",
+        };
         const user2WithoutPass = {
             id: "ID2",
             login: "LOGIN2",
             groups: [],
             source: "",
             _type: "user",
+            token: "login2-token",
         };
         await tmpUserModelJson.updateUserAccount(modifiedUser);
         const users = await tmpUserModelJson.getUserAccounts();
-        expect(users).toStrictEqual({ LOGIN1: modifiedUser, LOGIN2: user2WithoutPass });
+        expect(users).toStrictEqual({ LOGIN1: expectedModifedUser1, LOGIN2: user2WithoutPass });
         tmpDir.removeCallback();
     });
 });

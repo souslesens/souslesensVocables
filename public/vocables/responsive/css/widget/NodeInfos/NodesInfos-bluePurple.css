@@ -49,7 +49,9 @@ th, td{
 .NodesInfos_tableDiv > .ui-widget-content a {
     color: @button1-color !important;
 }
-
+.infos_table{
+    font-size: 12px;
+}
 #nodeInfosWidget_InfosTabDiv {
     .font-table;
     border: 0px!important;

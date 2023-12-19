@@ -198,6 +198,8 @@
     .SearchButtonIcon;
     border-top-right-radius: 14px;
     border-bottom-right-radius: 14px;
+    border-left: 0px!important;
+    background-color: white;
 }
 .SearchButtonIconLeft{
     .SearchButtonIcon;
@@ -215,7 +217,9 @@
 }
 
 .left-border-main-dialog-div{
-    border-left: @button1-color solid 3px !important;
+    border-left: @button1-color solid 0px !important;
+    border-bottom:0px!important;
+    background-color: @background-color;
 }
 /* general dialog classes */
 .w3-row {

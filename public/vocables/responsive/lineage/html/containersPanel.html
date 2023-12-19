@@ -3,13 +3,13 @@
     <div class="w3-container" >
         <div class="input-group mb-3" style="width: 100%;">
             <div class="input-group-prepend">
-                <button class="SearchButtonIconLeft border-without-raduis-theme1"><input type="image" src="./icons/SearchIcon.png"  onclick="Lineage_containers.search()" style="margin-top: 2;"></button>
+                <button class="SearchButtonIconLeft border-without-raduis-theme1"><input type="image" src="./icons/SearchIcon.png"  onclick="Lineage_containers.search()" style="margin-top: 4px;"></button>
             </div>
-            <input id="Lineage_containers_searchInput" style="width: 35%;height: 29.5px;border-bottom-right-radius: 14px;border-top-right-radius: 14px;" value="" onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_containers.search()}" >
+            <input id="Lineage_containers_searchInput" style="width: 35%;height: 33.5px;border-bottom-right-radius: 14px;border-top-right-radius: 14px;" value="" onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_containers.search()}" >
             
             <div style="margin-left: 20px;" >
                 <button class="w3-button  classesPannelButton size-of-button-small" onclick="Export.exportTreeToDataTable('lineage_containers_containersJstree','#')">Export</button>
-                <button id="Lineage_addContainer_button" class="w3-button  classesPannelButton size-of-button-small" onclick="Lineage_containers.addContainer()">Add Containers</button>
+                <button id="Lineage_addContainer_button" class="w3-button  classesPannelButton size-of-button-small" onclick="Lineage_containers.addContainer()"> + </button>
             </div>
         </div>
     </div>
@@ -24,7 +24,7 @@
     </div>
 
 
-    <div  style="width: 375px; height: 700px; overflow: auto">
+    <div  style="width: 375px; max-height: 60dvh; overflow: auto">
         <div id="lineage_containers_containersJstree" style="margin-top: 20px;"></div>
     </div>
 </div>

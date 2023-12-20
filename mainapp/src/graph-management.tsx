@@ -80,7 +80,9 @@ export default function GraphManagement() {
     };
 
     const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format: string = "nt", identifier: string = "") => {
-        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}`, { headers: { "Authorization": `Bearer ${currentUserToken}` } });
+        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}`, {
+            headers: { Authorization: `Bearer ${currentUserToken}` },
+        });
         return await response.json();
     };
 
@@ -166,12 +168,12 @@ export default function GraphManagement() {
             // if cancel button is pressed, remove uploaded file and return
             if (cancelCurrentOperation.current) {
                 formData.set("clean", true);
-                await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { "Authorization": `Bearer ${currentUserToken}` }, body: formData });
+                await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken}` }, body: formData });
                 return;
             }
 
             // POST data
-            const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { "Authorization": `Bearer ${currentUserToken}` }, body: formData });
+            const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken}` }, body: formData });
             if (res.status != 200) {
                 setError(true);
                 const message = await res.json();

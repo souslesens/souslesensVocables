@@ -404,24 +404,28 @@ export default function GraphManagement() {
         </Modal>
     );
 
-    const tableBody = Object.entries(sources).map(([sourceName, source]) => {
-        return (
-            <tr>
-                <td>{sourceName}</td>
-                <td>{source.graphUri}</td>
-                <td>
-                    <Stack direction="horizontal" gap={1}>
-                        <Button disabled={source.accessControl != "readwrite"} variant="secondary" value={sourceName} onClick={handleUploadSource}>
-                            Upload
-                        </Button>
-                        <Button variant="primary" value={sourceName} onClick={handleDownloadSource}>
-                            Download
-                        </Button>
-                    </Stack>
-                </td>
-            </tr>
-        );
-    });
+    const tableBody = Object.entries(sources)
+        .sort(([aName, _a], [bName, _b]) => {
+            return aName.toLowerCase() > bName.toLowerCase();
+        })
+        .map(([sourceName, source]) => {
+            return (
+                <tr>
+                    <td>{sourceName}</td>
+                    <td>{source.graphUri}</td>
+                    <td>
+                        <Stack direction="horizontal" gap={1}>
+                            <Button disabled={source.accessControl != "readwrite"} variant="secondary" value={sourceName} onClick={handleUploadSource}>
+                                Upload
+                            </Button>
+                            <Button variant="primary" value={sourceName} onClick={handleDownloadSource}>
+                                Download
+                            </Button>
+                        </Stack>
+                    </td>
+                </tr>
+            );
+        });
 
     return (
         <>

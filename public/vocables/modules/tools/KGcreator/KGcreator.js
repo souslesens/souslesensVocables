@@ -265,21 +265,7 @@ var KGcreator = (function () {
                         return items;
                     }
 
-                    // file = une table
-                    /*
-                    else if (node.data.type == "csvSource") {
-                        items.showSourceMappings = {
-                            label: "showSourceMappings",
-                            action: function (_e) {
-                                // pb avec source
-                                KGcreator_mappings.showSourceMappings(node);
-                            },
-                        };
-                        
-                        
 
-                        return items;
-                    }*/
                     else if (node.data.type == "table") {
                         items.showTableMappings = {
                             label: "showTableMappings",

@@ -80,7 +80,7 @@ var KGbuilder_main = {
                                         return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
                                     }
                                     var fnBody = array.groups["body"];
-                                    fnBody = "try{" + fnBody + "}catch(e){\rreturn console.log(e)\r}";
+                                    fnBody = "try{" + fnBody + "}catch(e){\n\rreturn console.log(e)\n\r}";
                                     var fn = new Function(argsArray, fnBody);
                                     return callback(null, fn);
                                 } catch (err) {

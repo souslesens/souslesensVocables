@@ -425,6 +425,14 @@ var KGcreator_graph = (function () {
         if (tablesToDraw && !Array.isArray(tablesToDraw)) {
             tablesToDraw = [tablesToDraw];
         }
+        $("#KGcreator_mappingsSaveEditorMappingBtn").prop("disabled",true);
+        if(tablesToDraw.length==1) {
+            $("#KGcreator_mappingsSaveEditorMappingBtn").prop("disabled",false);
+            self.currentEditingTable = tablesToDraw[0]
+        }
+        else {
+            self.currentEditingTable = null
+        }
         var sourceMappings = KGcreator.currentConfig.currentMappings;
         var visjsData = { nodes: [], edges: [] };
 
@@ -583,9 +591,11 @@ var KGcreator_graph = (function () {
     };
 
     self.saveDetailedMappings = function () {
+        if(! self.currentEditingTable )
+            return
         var mappings = self.jsonEditor.get();
-        KGcreator.currentConfig.currentMappings = mappings;
-        KGcreator.saveDataSourceMappings();
+
+        KGcreator_mappings.saveTableMappings( self.currentEditingTable ,mappings)
     };
 
     self.toSVG = function () {

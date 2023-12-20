@@ -186,7 +186,7 @@ var KGbuilder_triplesMaker = {
     else if (mapping.s === "_rowIndex") {
       subjectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
     }
-    else if (mapping.s.indexOf("$_") == 0 || mapping.isSubjectBlankNode) {
+    else if (typeof  mapping.s ==="string" &&  mapping.s.indexOf("$_") == 0 || mapping.isSubjectBlankNode) {
       // virtual column
       if (typeof mapping.o === "string" && (mapping.o.indexOf("$_") != 0 && !mapping.isObjectBlankNode) && KGbuilder_triplesMaker.allColumns[mapping.o] && !line[mapping.o]) {
         // ne pas creer des triplest sans objet
@@ -201,10 +201,10 @@ var KGbuilder_triplesMaker = {
         return callback((lineError = e + " " + mapping.s));
       }
     }
-    if (mapping.s.indexOf("http") == 0) {
+    if (typeof  mapping.s ==="string" && mapping.s.indexOf("http") == 0) {
       subjectStr = "<" + mapping.s + ">";
     }
-    else if (mapping.s.match(/.+:.+/)) {
+    else if (typeof  mapping.s ==="string" &&  mapping.s.match(/.+:.+/)) {
       subjectStr = mapping.s;
     }
 
@@ -271,13 +271,13 @@ var KGbuilder_triplesMaker = {
           return callback(e);
         }
       }
-      else if (mapping.o.indexOf("http") == 0) {
+      else if (typeof  mapping.o ==="string" &&  mapping.o.indexOf("http") == 0) {
         objectStr = "<" + mapping.o + ">";
       }
-      else if (mapping.o.match(/.+:.+/)) {
+      else if (typeof  mapping.o ==="string" &&  mapping.o.match(/.+:.+/)) {
         objectStr = mapping.o;
       }
-      else if (mapping.o.indexOf("$_") == 0 || mapping.isObjectBlankNode) {
+      else if (typeof  mapping.o ==="string" && mapping.o.indexOf("$_") == 0 || mapping.isObjectBlankNode) {
         objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
       }
       else {
@@ -387,7 +387,7 @@ objectStr=objectStr.replace(/[\-_]/g,"")*/
     if (!propertyStr) {
       return;
     }
-    if (propertyStr.indexOf("http") == 0) {
+    if (typeof  propertyStr ==="string" &&  propertyStr.indexOf("http") == 0) {
       propertyStr = "<" + propertyStr + ">";
     }
     return callback(null, propertyStr);

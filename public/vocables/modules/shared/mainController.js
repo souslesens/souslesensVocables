@@ -148,7 +148,7 @@ return callback()
         return Object.entries(Config.profiles).filter(([_key, val]) => val.name === valueCheckedAgainst);
     }
 
-    self.onAfterLogin = function () {
+    self.onAfterLogin = function (callback) {
         if (!authentication.currentUser) {
             return alert(" no user identified");
         }
@@ -205,20 +205,12 @@ return callback()
                     MainController.UI.configureUI();
                 }
             );
+            callback(_err)
         });
     };
 
     self.initControllers = function (source) {
-        /* for (var controllerName in Config.tools) {
-        try {
-          //transform controller name into variable pointing to tool
-          //  Config.sources[sourceLabel].controller = eval(controllerName);
-         //eval(Config.tools[controllerName]);
-        } catch (e) {
-          return alert("cannot parse controller  " + controllerName);
-        }
 
-    }*/
 
         Object.keys(Config.sources)
             .sort()
@@ -227,8 +219,10 @@ return callback()
                     var controllerName = Config.sources[sourceLabel].controller;
                     Config.sources[sourceLabel].controllerName = controllerName;
                     Config.sources[sourceLabel].controller = window[controllerName];
+
                 }
             });
+
     };
 
     self.UI = {

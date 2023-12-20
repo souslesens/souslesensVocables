@@ -43,7 +43,7 @@ var IndividualValueFilterWidget = (function () {
                 $("#individualValueFilter_operatorSelect").val("contains");
             }
 
-            $("#individualValueFilter_propertySelect option").eq(1).prop("selected", true);
+            $("#individualValueFilter_propertySelect option").eq(0).prop("selected", true);
             $("#individualValueFilter_objectValue").focus();
         });
     };

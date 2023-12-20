@@ -2,10 +2,11 @@ import MainController from "../../shared/mainController.js";
 import KGcreator from "./KGcreator.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
+import KGcreator_mappings from "./KGcreator_mappings.js";
 
 var KGcreator_run = (function () {
     var self = {};
-
+    self.currentTable=null;
     self.createTriples = function (sampleData, allmappings, callback) {
         var table = null;
         if (KGcreator.currentTreeNode.data.type == "tableColumn") {
@@ -22,6 +23,7 @@ var KGcreator_run = (function () {
         } else {
             return alert("select a node");
         }
+
 
         if (!sampleData && !allmappings) {
             if (!confirm("create triples for " + KGcreator.currentConfig.currentDataSource.name + " " + table || "")) {
@@ -242,8 +244,14 @@ var KGcreator_run = (function () {
     };
 
     self.showTableMappingsEditor = function (table) {
+        self.currentEditingTable=table;
         var tableMappings = KGcreator.currentConfig.currentMappings[table];
         self.jsonEditor = new JsonEditor("#KGcreator_run_mappingsGraphEditor", tableMappings);
+    };
+
+    self.saveDetailedMappings = function () {
+        var mappings = self.jsonEditor.get();
+      KGcreator_mappings.saveTableMappings(self.currentEditingTable,mappings)
     };
 
     return self;

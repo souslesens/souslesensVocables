@@ -18,7 +18,7 @@
 /* end variable*/
 
 /* Variable theme Color */
-/* Theme  1 
+/* Theme  1 */
 @source-color: #8757de;
 @button1-color: #1a27b2;
 @button2-color: #079abe;
@@ -26,17 +26,16 @@
 @legend-color: #4CAD8C;
 @background-color: #e9f0ff;
 @dark-background-color: #bed4f4;
-*/
-/* Theme TotalEnergies */
+
+/* Theme TotalEnergies 
 @source-color: #ED0000;
-@button1-color: #1424B7;
-@button2-color: #285AFF;
-@button3-color: #0098EA;
-@legend-color: #8AA0A9;
-@background-color: #f2f5f6;
-@dark-background-color: #CCDAE0;
-
-
+@button1-color: #285AFF;
+@button2-color: #DB3900;
+@button3-color: #72EAC5; 
+@legend-color: #BCF453;
+@background-color: #F2F5F6;
+@dark-background-color: #B7CBD3;
+*/
 
 /*Theme 2 
 @source-color: #FFA406;
@@ -138,7 +137,10 @@
     font-family: @font-family-theme;
     font-size: @font-size-button;
 }
-
+.button-font-color-button1{
+    .button-font-uncolor;
+    color: @button1-color;
+}
 .button-font-uncolor-small {
     .button-font-uncolor;
     font-size: @font-size-button-small;
@@ -168,6 +170,9 @@
     background-color: inherit;
     border: 0px;
 }
+.slsv-invisible-button:hover{
+    background-color: inherit!important;
+}
 .slsv-whiteboard-buttons {
     .button-font-uncolor-small;
     padding: 8px 12px;
@@ -193,6 +198,9 @@
 
 .size-of-button-small{
     padding: 7px 10px !important;
+}
+.size-of-button-null{
+    padding: 0px 0px !important;
 }
 /*  End Common themes  */
 

@@ -186,3 +186,31 @@ a:visited.ui-button,
     background-color: @dark-background-color !important;
 
 }
+
+.nodesInfos-iconsButtons{
+    .slsv-invisible-button; 
+    .size-of-button-null;
+}
+.nodesInfos-iconsButtons:hover{
+    background-color: inherit!important;
+}
+#nodeInfos_individualsDiv{
+    margin: 10px;
+}
+
+#nodeInfos_restrictionsDiv{
+    margin: 10px;
+}
+
+#nodeInfos_listsDiv{
+    margin: 10px;
+}
+
+#nodeInfosWidget_InfosTabDiv{
+    display: flex;
+    overflow: auto;
+}
+
+#mainDialogDiv{
+    max-height: 620px!important;
+}

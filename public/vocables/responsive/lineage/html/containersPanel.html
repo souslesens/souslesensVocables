@@ -7,7 +7,11 @@
             </div>
             <input id="Lineage_containers_searchInput" style="width: 35%;height: 33.5px;border-bottom-right-radius: 14px;border-top-right-radius: 14px;" value="" onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_containers.search()}" >
             
-            <div style="margin-left: 20px;" >
+            <div style="margin-left: 10px;" >
+                <button class="w3-button  slsv-invisible-button size-of-button-null" style="margin-bottom: 5px;">
+                    <input type="checkbox" id="LineageProperties_searchInAllSources" > <span class="button-font-color-button1" > Current</span>
+                </button>
+                
                 <button class="w3-button  classesPannelButton size-of-button-small" onclick="Export.exportTreeToDataTable('lineage_containers_containersJstree','#')">Export</button>
                 <button id="Lineage_addContainer_button" class="w3-button  classesPannelButton size-of-button-small" onclick="Lineage_containers.addContainer()"> + </button>
             </div>

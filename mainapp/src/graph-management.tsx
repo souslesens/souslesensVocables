@@ -34,6 +34,7 @@ export default function GraphManagement() {
 
     // upload
     const [uploadfile, setUploadFile] = useState<File[]>([]);
+    const [replaceGraph, setReplaceGraph] = useState<boolean>(true);
 
     // modal
     const [displayModal, setDisplayModal] = useState<string | null>(null);
@@ -91,6 +92,10 @@ export default function GraphManagement() {
 
     const handleSetFormat = async (event: React.MouseEvent<HTMLElement>) => {
         setCurrentDownloadFormat(event.currentTarget.value);
+    };
+
+    const handleReplaceGraphCheckbox = async (event: React.MouseEvent<HTMLInputElement>) => {
+        setReplaceGraph(event.currentTarget.value == "false");
     };
 
     const handleDownloadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -152,6 +157,7 @@ export default function GraphManagement() {
                 last: lastChunk,
                 identifier: chunkId,
                 clean: false,
+                replace: replaceGraph,
                 data: chunk,
             }).forEach(([key, value]) => {
                 formData.append(key, value);
@@ -344,10 +350,11 @@ export default function GraphManagement() {
     const uploadModalContent = (
         <Form>
             <Stack>
-                <Form.Group controlId="formUploadGraph" className="mb-3">
+                <Form.Group controlId="formUploadGraph" className="mb-2">
                     <Form.Label>Choose RDF graph to upload</Form.Label>
                     <Form.Control onChange={handleFileChange} required={true} type="file" disabled={currentOperation == "upload"} />
                 </Form.Group>
+                <Form.Check checked={replaceGraph} value={replaceGraph} onClick={handleReplaceGraphCheckbox} className="mb-3" type="switch" id="toto" label="Delete before upload" />
                 <Stack direction="horizontal" gap={1}>
                     {!currentOperation ? (
                         <Button disabled={uploadfile.length < 1 ? true : false} type="submit" onClick={handleUploadGraph} style={{ flex: 1 }}>

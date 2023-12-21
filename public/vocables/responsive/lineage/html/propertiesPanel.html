@@ -3,13 +3,20 @@
    <div class="w3-container" >
                 <div class="input-group mb-3" style="width: 100%;">
                     <div class="input-group-prepend">
-                        <button class="SearchButtonIconLeft border-without-raduis-theme1"><input type="image" src="./icons/SearchIcon.png"  onclick="Lineage_properties.searchTermInSources()" style="margin-top: 4px;"></button>
+                        <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px;padding-left: 7px;padding-right: 5px;">
+                            <button class="search-icon slsv-invisible-button"  onclick="Lineage_properties.searchTermInSources()" style="margin-top: 4px;height: 20px;width: 20px;"></button>
+                        </div>
+                       
                     </div>
                     <input id="LineageProperties_searchAllSourcesTermInput" class="border-without-raduis-theme1" style="width: 35%;height: 33.5px;"  onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_properties.searchTermInSources()}" >
                     <div id="Lineage_classes_moreOptionsButtonOnSearchbar" class="input-group-append">
-                        <button class="SearchButtonIconRight border-without-raduis-theme1" onclick="Lineage_r.hideShowMoreOptions(null,'Lineage_MorePropertiesOptions')"><input type="image" src="./icons/MoreOptionsIcon.png"   style="margin-top: 4px;"></button>
+                        <div class="SearchButtonIconRight border-without-raduis-theme1" onclick="Lineage_r.hideShowMoreOptions(null,'Lineage_MorePropertiesOptions')" style="height: 33.5px;">
+                            <button class="moreOptions-icon slsv-invisible-button" style="width: 20px;height: 20px;margin-top: 5px;margin-right: 5px;"></button>
+                        </div>
+                        
                     </div>
                     <div style="margin-left: 20px;" >
+                        
                         <button class="w3-button  classesPannelButton size-of-button-small" onclick="Export.exportTreeToDataTable('Lineage_propertiesTree','#')">Export</button>
                     </div>
                 </div>
@@ -31,7 +38,10 @@
     -->
 
     <div id="Lineage_MorePropertiesOptions" class="w3-panel w3-border w3-round-small border-classic-color-theme3" style="padding-left: 20px;">
-        <div class="titleboxButtons font-button3-color" style="display: inline-flex;" >Options <button class="slsv-invisible-button "><input type="image" src="./icons/MoreOptionsIcon.png"  onclick="Lineage_r.hideShowMoreOptions('hide','Lineage_MorePropertiesOptions')" style="margin-top: 2;"></button></div>
+        <div class="titleboxButtons font-button3-color" style="display: inline-flex;" >
+            Options 
+            <div class="slsv-invisible-button "><button class="moreOptions-icon slsv-invisible-button"   onclick="Lineage_r.hideShowMoreOptions('hide','Lineage_MorePropertiesOptions')" style="width: 20px;height: 20px;margin-left: 5px;"></div>
+        </div>
         <div id="Lineage_Properties_MoreOptionsButtons" class="font-button3-color" >
             
             <div class="lineage_button_group">

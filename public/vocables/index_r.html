@@ -350,7 +350,7 @@
                             <button id="selectedTool" class="slsv-invisible-button" style="margin-top: 10px; margin-bottom: 10px; padding: 0px; margin-left: 10px; font-size: 20px">Tool</button>
                             <input type="image" src="./icons/caret-right.png" style="width: 15px; margin-left: 25px; margin-right: 10px" />
                             <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                                <select id="toolsSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())"></select>
+                                <select id="toolsSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto;"></select>
                             </div>
                         </div>
 
@@ -377,21 +377,33 @@
                 <div class="w3-bar-item">
                     <div class="w3-sand w3-round-xlarge w3-margin" style="display: flex; flex-direction: row; align-items: center" id="Lineage_graphEditionButtons">
                         <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
-                        <button class="slsv-button-source" id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
-                            <input type="image" src="../icons/AddNodeEdge.png" style="margin-right: 5px" /><span style="margin-bottom: 5px">Add Node</span>
-                        </button>
-                        <button class="slsv-button-source addEdgeButtonColor"  id="lineage_actionDiv_addedge" onclick="Lineage_r.addEdge()">
-                            <input type="image" src="../icons/AddNodeEdge.png" style="margin-right: 5px" /><span style="margin-bottom: 5px">Add Edge</span>
-                        </button>
+                        <div class="slsv-button-source" id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
+                            <button class="slsv-invisible-button add-icon"  style="margin-right: 5px;height: 25px;width: 29px;" ></button><span style="margin-bottom: 5px">Add Node</span>
+                        </div>
+                        <div class="slsv-button-source addEdgeButtonColor"  id="lineage_actionDiv_addedge" onclick="Lineage_r.addEdge()">
+                            <button class="slsv-invisible-button add-icon"  style="margin-right: 5px;height: 25px;width: 29px;" ></button><span style="margin-bottom: 5px">Add Edge</span>
+                        </div>
                     </div>
+                </div>
+
+                <div class="w3-bar-item w3-right slsv-invisible-button"  style="margin-top: 25px;">
+                    <button class="logoInstance-icon slsv-invisible-button" style="height: 50px;width: 50px;"></button>
                 </div>
 
                 <div class="w3-bar-item w3-right" style="margin-right: 10px;">
                     <div class="w3-button slsv-right-top-bar-button" id="user-username">User</div>
                 </div>
-
+                
                 <div class="w3-bar-item w3-right">
-                    <button class="w3-button slsv-right-top-bar-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
+                   
+                   <button class="w3-button slsv-right-top-bar-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
+                </div>
+                <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button w3-right">
+                    <button class="w3-button slsv-right-top-bar-button">Themes</button>
+                    <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
+                        <select id="themeSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.changeTheme($(this).val())"style="overflow: auto;"></select>
+                    </div>
+
                 </div>
             </div>
             
@@ -425,6 +437,6 @@
         <div id="mainDialogDiv" class="w3-modal"></div>
         <div id="smallDialogDiv"></div>
         <div id="LineagePopup"></div>
-        <div id="popupMenuWidgetDiv" onclick="  PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
+        <div id="popupMenuWidgetDiv" onclick="PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
     </body>
 </html>

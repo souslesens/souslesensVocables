@@ -1,0 +1,16 @@
+.arrow-icon{
+    background-image: url(@arrow-icon);
+
+}
+.add-icon{
+    background-image: url(@add-icon);
+}
+.moreOptions-icon{
+    background-image: url(@moreOptions-icon);
+}
+.search-icon{
+    background-image: url(@search-icon);
+}
+.logoInstance-icon{
+    background-image: url(@logoInstance-icon);
+}

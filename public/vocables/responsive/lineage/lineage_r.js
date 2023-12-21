@@ -235,8 +235,18 @@ var Lineage_r = (function () {
             $("#lineageProperties_nodesSelectionSelect").val("");
         }
     };
-    
+    self.checkbox_Lineage_containers=function(){
+        if($('#LineageProperties_searchInAllSources')[0].checked){
+            $('#LineageProperties_searchInAllSources').val("current");
+        }else{
+            $('#LineageProperties_searchInAllSources').val("all");
+        }
+    }
+
+    //less.modifyVars({'@button1-color': '#000'})
+
     return self;
+
 })();
 export default Lineage_r;
 window.Lineage_r = Lineage_r;

@@ -21,7 +21,10 @@
 </div>
 
 <div id="Lineage_MoreActionsDiv" class="w3-panel w3-border w3-round-small">
-    <div class="titleboxButtons font-button3-color" style="display: inline-flex;" >More Actions <button class="slsv-invisible-button "><input type="image" src="./icons/MoreOptionsIcon.png"  onclick="Lineage_r.hideShowMoreActions()" style="margin-top: 2;"></button></div>
+    <div class="titleboxButtons font-button3-color" style="display: inline-flex;" >More Actions <div class="slsv-invisible-button "><button class="moreOptions-icon slsv-invisible-button"  onclick="Lineage_r.hideShowMoreActions()" style="width: 20px;height: 20px;margin-left: 5px;"></div>
+    </div>
+    
+    
     <div id="Lineage_MoreActionsButtons">
         <button class="w3-button slsv-button-3" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog();">Similars</button>
         <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>

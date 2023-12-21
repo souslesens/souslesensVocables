@@ -407,9 +407,9 @@ var Lineage_sources = (function () {
                 /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
 sourceDivId +
 "\")'>[-]</i>";*/
-                "<input type='image' src='./icons/caret-right.png'  style=' width: 15px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+                "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
                 sourceDivId +
-                "\")'/> </div>";
+                "\")'/> </button></div>";
             $("#lineage_drawnSources").append(html);
 
             $("#" + sourceDivId).bind("click", function (e) {

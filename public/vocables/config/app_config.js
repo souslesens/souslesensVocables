@@ -253,21 +253,21 @@ var Config = (function () {
 
     self.topLevelOntologyFixedlegendMap = {
         IDO: {
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Dependent": "#cb6601",
-            "	http://rds.posccaesar.org/ontology/lis14/rdl/Object": "#00AFEF",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#F90EDD",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject": "#00AFEF",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject": "#FDBF01",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#70AC47",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Activity": "#70309f",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#70309f",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Prescriptive": "#703011",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Dependent": "#FCA53D",
+            "	http://rds.posccaesar.org/ontology/lis14/rdl/Object": "#8CC1C7",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#ED008C",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject": "#00B5EC",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject": "#FEF200",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#AFD46B",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Activity": "#00AE8D",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#8F52A0",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Prescriptive": "#E86549",
         },
         "ISO_15926-part-14_PCA": {
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#F90EDD",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject": "#00AFEF",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject": "#FDBF01",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#70AC47",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#ED008C",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject": "#00B5EC",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject": "#FEF200",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#AFD46B",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Activity": "#70309f",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Aspect": "#cb6601",
         },
@@ -292,6 +292,99 @@ var Config = (function () {
             "http://purl.obolibrary.org/obo/BFO_0000008": "#70309f",
         },
         DOLCE: {},
+    };
+
+    self.slsvColorThemes={
+        "Blue and purple":{
+            "@source-color": "#8757de",
+            "@button1-color": "#1A28BF",
+            "@button2-color": "#079abe",
+            "@button3-color": "#52c1b9",
+            "@legend-color": "#4CAD8C",
+            "@background-color": "#e9f0ff",
+            "@dark-background-color": "#BFD4F5",
+        },
+        "KGA":{
+            "@source-color": "#6B77E5",
+            "@button1-color": "#003366",
+            "@button2-color": "#434E8C",
+            "@button3-color": "#6b77e5", 
+            "@legend-color": "#3333ff",
+            "@background-color": "#F4F4F4",
+            "@dark-background-color": "#E4E4E4",
+            "@logoInstance-icon" : "../icons/KGALogo.png",
+        },
+        "Total Energies":{
+            
+                "@source-color": "#ED0000",
+                "@button1-color": "#285AFF",
+                "@button2-color": "#DB3900",
+                "@button3-color": "#72EAC5", 
+                "@legend-color": "#BCF453",
+                "@background-color": "#F7F9FA",
+                "@dark-background-color": "#B7CBD3",
+                "@logoInstance-icon" : "../icons/TotalEnergiesLogo.png",
+        },
+        "DarkTheme - KGA":{
+            "@source-color": "#6EB6ED",
+            "@button1-color": "#0767B7",
+            "@button2-color": "#3798EF",
+            "@button3-color": "#6EB6ED", 
+            "@legend-color": "#A5DCF2",
+            "@background-color": "#424649",
+            "@dark-background-color": "#21262C",
+            "@logoInstance-icon" : "../icons/KGALogo.png",
+        },
+        "Jaune 1 - Confort visuel ":{
+            "@source-color": "#06539C",
+            "@button1-color": "#FA5738",
+            "@button2-color": "#EE964C",
+            "@button3-color": "#F1BD05", 
+            "@legend-color": "#F37A00",  
+            "@background-color": "#FFFCF2",
+            "@dark-background-color": "#FAF1CA",
+        },
+        "Jaune 2 - Confort visuel ":{
+            "@source-color": "#FD5900",
+            "@button1-color": "#005F61",
+            "@button2-color": "#008083",
+            "@button3-color": "#249EA1", 
+            "@legend-color": "#11C4C8",
+            "@background-color": "#FFF8E4",
+            "@dark-background-color": "#FFE49C",
+        },
+        "Felix Bleu Roy - Toile du soleil":{
+            "@source-color": "#9A8A6E",
+            "@button1-color": "#023451",
+            "@button2-color": "#135287",
+            "@button3-color": "#278ECC", 
+            "@legend-color": "#8A8C7D",
+            "@background-color": "#E8E8E8",
+            "@dark-background-color": "#BFB5B4",
+        },
+        "Felix Bleu Roy - Toile du soleil - DARK":{
+            "@source-color": "#278ECC",
+            "@button1-color": "#023451",
+            "@button2-color": "#2F4365",
+            "@button3-color":"#567488", 
+            "@legend-color": "#8A8C7D",
+            "@background-color": "#F2EEE9",
+            "@dark-background-color": "#DBCFBD",
+        },
+       
+        "Jupiter":{
+            "@source-color": "#B64E74",
+            "@button1-color": "#3B3C56",
+            "@button2-color": "#585485",
+            "@button3-color": "#495B99", 
+            "@legend-color": "#9E8E75",
+            "@background-color": "#E9E5E7",
+            "@dark-background-color": "#C9C8C9",
+        },
+
+       
+        
+       
     };
 
     /*****************************************************************************/

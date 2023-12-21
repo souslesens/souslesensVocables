@@ -14,6 +14,7 @@ var ResponsiveUI = (function () {
         self.setSlsvCssClasses();
         var tools = Config.tools_available;
         common.fillSelectOptions("toolsSelect", tools, false);
+        self.themeList();
     };
     self.replaceFile = function (file1, file2) {
         Object.keys(file1).forEach((key) => {
@@ -185,16 +186,7 @@ var ResponsiveUI = (function () {
     self.setSlsvCssClasses = function () {
         async.series(
             [
-                /*   function(callbackSeries){
-
-        $('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', "https://www.w3schools.com/w3css/4/w3.css") );
-    setTimeout(function(){
-      callbackSeries()
-    },2000)
-
-
-
-      },*/
+                
                 function (callbackSeries) {
                     $.getScript("./responsive/less.min.js")
                         .done(function (script, textStatus) {
@@ -210,9 +202,20 @@ var ResponsiveUI = (function () {
                 if (err) return alert(err);
             }
         );
-        /*   $(".slsv-tabButton").addClass("w3-border-white");
-    $(".slsv-tabButton").addClass("w3-border");*/
+   
     };
+    self.themeList=function(){
+        //less.modifyVars({'@button1-color': '#000'});
+        var allThemesNames=Object.keys(Config.slsvColorThemes);
+        common.fillSelectOptions("themeSelect", allThemesNames, false);
+
+
+    };
+
+    self.changeTheme=function(ThemeName){
+        var themeSelected=Config.slsvColorThemes[ThemeName];
+        less.modifyVars(themeSelected);
+    }
 
     return self;
 })();

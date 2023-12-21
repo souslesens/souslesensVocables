@@ -459,6 +459,12 @@ return alert("missing target node in  path");
       var optionalStrs = "";
 
       querySet.elements.forEach(function(queryElement, queryElementIndex) {
+
+
+
+
+
+
         var subjectVarName = self.getVarName(queryElement.fromNode);
         var subjectUri = queryElement.fromNode.id;
         if (!distinctTypesMap[subjectVarName]) {
@@ -466,7 +472,12 @@ return alert("missing target node in  path");
           filterStr += " " + subjectVarName + "  rdf:type <" + subjectUri + ">. ";
         }
 
+
         var objectVarName = self.getVarName(queryElement.toNode);
+
+        if(queryElement.fromNode.id==queryElement.toNode.id)
+          objectVarName=objectVarName+"_2"
+
         var objectUri = queryElement.toNode.id;
         var subjectUri = queryElement.fromNode.id;
         if (!distinctTypesMap[objectVarName]) {
@@ -484,11 +495,18 @@ return alert("missing target node in  path");
           if (pathItem.length == 4) {
             startVarName = self.getVarName({ id: pathItem[1] });
             endVarName = self.getVarName({ id: pathItem[0] });
+
+            if(queryElement.fromNode.id==queryElement.toNode.id)
+              endVarName=endVarName+"_2"
+
             inverseStr = "^";
           }
           else {
             startVarName = self.getVarName({ id: pathItem[0] });
             endVarName = self.getVarName({ id: pathItem[1] });
+
+            if(queryElement.fromNode.id==queryElement.toNode.id)
+              endVarName=endVarName+"_2"
           }
 
           var basicPredicate = startVarName + " " + inverseStr + "<" + pathItem[2] + "> " + endVarName + ".\n";
@@ -496,6 +514,7 @@ return alert("missing target node in  path");
             uniqueBasicPredicatesMap[basicPredicate] = 1;
             predicateStr += basicPredicate;
           }
+
         });
 
         for (var key in querySet.classFiltersMap) {

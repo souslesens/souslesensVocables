@@ -182,8 +182,10 @@ return alert("select a field (column)");
     /*  var subjectType=$("#LinkColumn_subjectSelect").val();
   if(subjectType!="_selectedColumn")*/
     var subject = $("#LinkColumn_subjectInput").val();
-    var predicate = PredicatesSelectorWidget.getSelectedProperty();
-    var object = PredicatesSelectorWidget.getSelectedObjectValue();
+   /* var predicate = PredicatesSelectorWidget.getSelectedProperty();
+    var object = PredicatesSelectorWidget.getSelectedObjectValue();*/
+    var predicate =$("#editPredicate_propertyValue").val();
+    var object = $("#editPredicate_objectValue").val();
     var isSubjectBlankNode = $("#LinkColumn_isSubjectBlankNodeCBX").prop("checked");
     var isObjectBlankNode = $("#LinkColumn_isObjectBlankNodeCBX").prop("checked");
     var isObjectString = $("#LinkColumn_isBlankNode").prop("checked");
@@ -206,6 +208,7 @@ return alert("select a field (column)");
 
     if (predicate.indexOf("xsd:") == 0) {
       tripleObj.dataType = predicate;
+      tripleObj.p = "owl:hasValue";
     }
 
     if (isObjectString) {
@@ -392,11 +395,31 @@ tripleObj.objectIsSpecificUri = true;
 
 
 
-  self.saveTableMappings = function(tableId,someMappingsJson) {
+  self.saveTableMappings = function(tableId,tableMappings) {
+    if (!tableMappings) {
+      return alert("incorrect data");
+    }
+    if(!tableId)
+      return alert("incorrect data");
+    if (!tableMappings[tableId]) {
+      return alert("incorrect data");
+    }
+    var tripleModels = tableMappings[tableId].tripleModels;
+    if (!tripleModels) {
+      return alert("no tripleModels");
+    }
 
-    var tableMappings = self.columnJsonEditor.get();
-    KGcreator.currentConfig.currentMappings[tableId].tripleModels = tableMappings;
+    if (!KGcreator.currentConfig.currentMappings[tableId]) {
+      KGcreator.currentConfig.currentMappings[tableId] = { tripleModels: [], transform: {} };
+    }
+    KGcreator.currentConfig.currentMappings[tableId].tripleModels = tripleModels;
+   /* var transform = tripleModels = data[tableId].transform;
+    if (transform) {
+      KGcreator.currentConfig.currentMappings[self.currentEditingTable].transform = transform;
+    }*/
     KGcreator.saveDataSourceMappings();
+
+
 
   };
 

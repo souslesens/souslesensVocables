@@ -199,6 +199,7 @@ var KGcreator = (function () {
                 selectTreeNodeFn: function (event, obj) {
                     self.currentTreeNode = obj.node;
                     KGcreator.currentTreeNode = obj.node;
+                    KGcreator_run.getTableAndShowMappings()
 
                     if (obj.node.data.type == "databaseSource") {
                         self.currentConfig.currentDataSource = {
@@ -956,6 +957,20 @@ var KGcreator = (function () {
             self.saveDataSourceMappings();
         }
     };
+
+    self.getTextSelection= function () {
+        var t
+        if (window.getSelection) {
+            t = window.getSelection().toString();
+        }
+        else if (document.getSelection) {
+            t = document.getSelection().toString();
+        }
+        else if (document.selection) {
+            t = document.selection.createRange().text;
+        }
+        return t;
+    }
     return self;
 })();
 

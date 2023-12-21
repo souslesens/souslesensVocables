@@ -500,7 +500,7 @@ var Lineage_createRelation = (function () {
     };
 
     self.createSubProperty = function (source, superPropId, subPropertyLabel, callback) {
-        var subPropId = common.getUri(subPropertyLabel, source, "fromLabel");
+        var subPropId = common.getURI(subPropertyLabel, source, "fromLabel");
         //  var subPropId = Config.sources[source].graphUri + common.getRandomHexaId(10);
         var triples = [
             {

@@ -43,7 +43,7 @@
 }
 .w3-bar {
     background-color: @dark-background-color;
-    border-bottom: @button1-color 3px solid;
+    border-bottom: @border-color 3px solid;
    
 }
 .w3-bar-item{
@@ -62,7 +62,7 @@
 
 /* Lineage classes */
 .addEdgeButtonColor{
-    background-color: @button1-color!important;
+    background: if((@isGradient=true),@gradient-color1, @button1-color)!important;
     border-color:@button1-color!important;
 }
 .titleboxButtons {
@@ -78,6 +78,8 @@
     margin-top: 27px !important;
     margin-top: 20px;
     padding: 8px 24px;
+    background: if((@isGradient=true),@gradient-color-source,@source-color);
+    border: if((@isGradient=true),0px,inherit solid 2px)!important;
 }
 
 .slsv-right-top-bar-button:hover {
@@ -88,8 +90,9 @@
     .slsv-general-buttons;
     display: inline-flex;
     padding: 6px 16px;
-    border: inherit solid 2px !important;
+    border:  if((@isGradient=true),0px,inherit solid 2px)!important;
     margin: 2px;
+    background: if((@isGradient=true),@gradient-color-source,@source-color);
 }
 
 .slsv-button-source:hover {
@@ -115,7 +118,10 @@
 
 /* Button Family 1 */
 .slsv-button-1 {
-    background-color: @button1-color;
+    /*
+    if((@isgradient=true),background,background-color) : if((@isgradient=true),@gradient-color1,@button-color1);
+    */
+    background : if((@isGradient=true),@gradient-color1,@button1-color);
     .slsv-whiteboard-buttons;
     .border-classic-color-theme1;
 }
@@ -125,7 +131,7 @@
 
 /* Button Family 2 */
 .slsv-button-2 {
-    background-color: @button2-color;
+    background: if((@isGradient=true),@gradient-color2,@button2-color);
     .slsv-whiteboard-buttons;
     .border-classic-color-theme2;
 }
@@ -135,7 +141,7 @@
 
 /* Button Family 3 */
 .slsv-button-3 {
-    background-color: @button3-color;
+    background:if((@isGradient=true),@gradient-color3,@button3-color);
     .slsv-whiteboard-buttons;
     .border-classic-color-theme3;
 }
@@ -165,8 +171,8 @@
     font-size: 13px;
 
    
-    border-bottom: @button1-color solid 3px !important;
-    border-right: @button1-color solid 3px !important;
+    border-bottom: @border-color solid 3px !important;
+    border-right: @border-color solid 3px !important;
 
 
     padding: 1% 1.65% !important;
@@ -219,7 +225,7 @@
 .left-border-main-dialog-div{
     border-left: @button1-color solid 0px !important;
     border-bottom:0px!important;
-    background-color: @background-color;
+    background-color: @dark-background-color;
 }
 /* general dialog classes */
 .w3-row {

@@ -316,14 +316,20 @@ var Config = (function () {
         },
         "Total Energies":{
             
-                "@source-color": "#ED0000",
-                "@button1-color": "#285AFF",
-                "@button2-color": "#DB3900",
-                "@button3-color": "#72EAC5", 
-                "@legend-color": "#BCF453",
-                "@background-color": "#F7F9FA",
-                "@dark-background-color": "#B7CBD3",
-                "@logoInstance-icon" : "../icons/TotalEnergiesLogo.png",
+            "@source-color": "#374649",
+            "@button1-color": "#3E3EFC",
+            "@button2-color": "#7FD444",
+            "@button3-color": "#00A965", 
+            "@legend-color": "#FFB301",
+            "@background-color": "#F8F8F8",
+            "@dark-background-color": "#E9EEEF",
+            "@logoInstance-icon" : "../icons/TotalEnergiesLogo.png",
+            "@isGradient" : true,
+            "@gradient-color1" : "linear-gradient(to right,#009CEA,#4139FD)",
+            "@gradient-color2" : "linear-gradient(to right,#82D442,#0BC9A5)",
+            "@gradient-color3" : "linear-gradient(to right,#3CA704, #018849)",
+            "@gradient-color-source" : "linear-gradient(to right,#FFBC6D,#ED2C2B)",
+            "@border-color":"#374649",
         },
         "DarkTheme - KGA":{
             "@source-color": "#6EB6ED",
@@ -385,6 +391,10 @@ var Config = (function () {
        
         
        
+    };
+    self.toolsLogo={
+        lineage:  "./icons/lineageLogo.png",
+        KGcreator: "./icons/KGCreatorLogo.png",
     };
 
     /*****************************************************************************/

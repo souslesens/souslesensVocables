@@ -5,6 +5,8 @@ import NodesInfosWidget from "../../modules/uiWidgets/nodeInfosWidget.js";
 import SearchWidget from "../../modules/uiWidgets/searchWidget.js";
 import NodeInfosWidgetResponsive from "../../responsive/widget/nodeInfosWidgetResponsive.js";
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
+import Lineage_createResource from "../../modules/tools/lineage/lineage_createResource.js";
+
 var Lineage_r = (function () {
     var self = {};
     self.isResponsiveLoading = false;

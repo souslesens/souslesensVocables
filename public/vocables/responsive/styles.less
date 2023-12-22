@@ -17,6 +17,8 @@
 
 /* end variable*/
 
+
+
 /* Variable theme Color */
 /* Default theme */
 @source-color: #8757de;
@@ -26,6 +28,9 @@
 @legend-color: #4CAD8C;
 @background-color: #e9f0ff;
 @dark-background-color: #bed4f4;
+@isGradient:false;
+@border-color : @button1-color;
+
 
 /* defaults icons */
 @arrow-icon : "../icons/caret-right.png";
@@ -137,7 +142,7 @@
     border: 0px;
 }
 .slsv-invisible-button:hover{
-    background-color: inherit!important;
+    background-color: unset!important;
 }
 .slsv-whiteboard-buttons {
     .button-font-uncolor-small;
@@ -147,7 +152,7 @@
     margin-top: 8px;
 }
 .hover-button {
-    background-color: inherit !important;
+    background-color: unset !important;
     color: @source-color !important;
 }
 .SearchButtonIcon{

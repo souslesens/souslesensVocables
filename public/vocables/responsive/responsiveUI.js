@@ -13,7 +13,17 @@ var ResponsiveUI = (function () {
     self.init = function () {
         self.setSlsvCssClasses();
         var tools = Config.tools_available;
+       
+
+        
         common.fillSelectOptions("toolsSelect", tools, false);
+        tools.forEach((item,index)=>{
+            if(Config.toolsLogo[item]){
+                $(`#toolsSelect option[value="${item}"]`).html(`<input type="image" src="${Config.toolsLogo[item]}">`);
+                //`<input type="image" src="${Config.toolsLogo[item]}">`
+            }
+            
+        });
         self.themeList();
     };
     self.replaceFile = function (file1, file2) {
@@ -26,6 +36,9 @@ var ResponsiveUI = (function () {
 
     self.onToolSelect = function (toolId) {
         $("#currentToolTitle").html(toolId);
+        if(Config.toolsLogo[toolId]){
+            $("#currentToolTitle").html(`<input type="image" src="${Config.toolsLogo[toolId]}">`);
+        }
         MainController.currentTool = toolId;
         ResponsiveUI.showSourceDialog(true);
     };

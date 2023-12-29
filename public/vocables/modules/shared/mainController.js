@@ -182,11 +182,8 @@ return callback()
                         callbackSeries(_err);
                     },
 
-                    function (callbackSeries) {
-                        MainController.parseUrlParam(function () {
-                            callbackSeries();
-                        });
-                    },
+
+
 
                     function (callbackSeries) {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
@@ -194,6 +191,12 @@ return callback()
 
                         OntologyModels.registerSourcesModel(sources, function (err) {
                             callbackSeries(err);
+                        });
+                    },
+
+                    function (callbackSeries) {
+                        MainController.parseUrlParam(function () {
+                            callbackSeries();
                         });
                     },
                     function (callbackSeries) {
@@ -209,7 +212,7 @@ return callback()
         });
     };
 
-    self.initControllers = function (source) {
+    self.initControllers = function () {
 
 
         Object.keys(Config.sources)
@@ -220,10 +223,16 @@ return callback()
                     Config.sources[sourceLabel].controllerName = controllerName;
                     Config.sources[sourceLabel].controller = window[controllerName];
 
+
                 }
             });
 
+
+
+
     };
+
+
 
     self.UI = {
         initialGraphDivWitdh: 0,
@@ -453,6 +462,7 @@ return callback()
             Clipboard.clear();
             $("#accordion").accordion("option", { active: 1 });
             $("#mainDialogDiv").dialog("close");
+            MainController.initControllers();
             var controller = Config.tools[self.currentTool].controller;
             $("#currentSourceTreeDiv").html("");
             $("#sourceDivControlPanelDiv").html("");

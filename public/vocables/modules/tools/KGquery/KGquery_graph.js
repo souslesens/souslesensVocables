@@ -23,7 +23,7 @@ var KGquery_graph = (function () {
                 return;
             }
             self.currentGraphNode = node;
-            if (nodeEvent.ctrlKey) {
+            if (nodeEvent.altKey) {
                 NodeInfosWidget.showNodeInfos(KGquery.currentSource, node, "smallDialogDiv", {});
             } else {
                 KGquery.addNode(node, nodeEvent);

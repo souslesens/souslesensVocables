@@ -6,18 +6,18 @@ var BotWidget = (function() {
   var self = {};
   self.keywordsMap = {};
 
-  self.init = function(divId, sourceLabel, specificKeywordsMap, basicVocabularies) {
+  self.init = function(divId, sourceLabel, specificKeywordsMap, basicVocabularies,callback) {
     //  $("#"+divId).before(self.getCss(self.getCss()))
     $("#" + divId).html(self.getHtml());
     $("#bot_input").focus();
     $("#bot_resourcesProposalSelect").css("display", "none");
 
-    self.initKeywords(sourceLabel, specificKeywordsMap,basicVocabularies);
+    self.initKeywords(sourceLabel, specificKeywordsMap,basicVocabularies,callback);
 
 
   };
 
-  self.initKeywords = function(sourceLabel, specificKeywordsMap, basicVocabularies) {
+  self.initKeywords = function(sourceLabel, specificKeywordsMap, basicVocabularies,callback) {
 
 
     var sources = [sourceLabel];
@@ -73,6 +73,9 @@ var BotWidget = (function() {
     }
 
     self.currentValidTokens = {};
+
+    if(callback)
+      return callback()
   };
 
 
@@ -109,6 +112,9 @@ var BotWidget = (function() {
 
 
   self.onResourceProposalChange = function(id) {
+    var strArray=id.split("|")
+    if(strArray.length<2)
+      return
     var key = id.split("|")[1].toLowerCase();
     var tokenObj = self.keywordsMap[key];
     self.writeCompletedHtml(tokenObj);
@@ -117,7 +123,8 @@ var BotWidget = (function() {
   };
 
   self.writeCompletedHtml = function(selectedToken) {
-
+if(!selectedToken)
+  return;
     var tokenId = "token_" + common.getRandomHexaId(5);
     selectedToken.index = Object.keys(self.currentValidTokens).length;
     self.currentValidTokens[tokenId] = selectedToken;
@@ -140,7 +147,7 @@ var BotWidget = (function() {
 
     var html = "  <div id=\"botTA\" contenteditable=\"false\">\n" +
       "          <div id=\"bot_inputContainer\" style=\"display: flex;flex-direction: column;border:none;\">\n" +
-      "            <input id=\"bot_input\"  onkeyup=\"BotWidget.analyse($(this).val())\">\n" +
+      "            <input id=\"bot_input\"  autocomplete=\"off\" onkeyup=\"BotWidget.analyse($(this).val())\">\n" +
       "            <select id=\"bot_resourcesProposalSelect\" size=\"4\" onchange=\"BotWidget.onResourceProposalChange($(this).val())\"></select>\n" +
       "          </div>\n" +
       "        </div>"+"<div><button onclick='BotWidget.clear()'>X</button>"+"<button onclick='BotWidget.validate()'>ok</button></div>";

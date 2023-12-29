@@ -181,6 +181,13 @@ var KGquery = (function() {
     self.currentGraphNode.setIndex = self.querySets.currentIndex;
     var color = currentQuerySet.color;
 
+
+    // re init query element if clik on previous node unless ctrlKey
+  /*  if (currentQueryElement.fromNode && currentQueryElement.fromNode.id == node.id && !event.ctrlKey) {
+      currentQueryElement.fromNode = null;
+      currentQueryElement.toNode = null;
+      return;
+    }*/
     if (currentQueryElement.fromNode && currentQueryElement.toNode) {
       self.getNearestNode(self.currentGraphNode.id, currentQuerySet, function(err, nodeId) {
         // var queryElementDivId = "queryElementDiv_" + common.getRandomHexaId(3);
@@ -201,7 +208,7 @@ var KGquery = (function() {
         var fromNode = self.classeMap[nodeId];
         $("#" + newQueryElement.queryElementDivId).append(getClassNodeDivHtml(fromNode, nodeDivId));
         currentQueryElement = newQueryElement;
-        self.addNode(self.currentGraphNode);
+      self.addNode(self.currentGraphNode, nodeEvent);
       });
 
       return;
@@ -216,6 +223,9 @@ var KGquery = (function() {
       currentQueryElement.queryElementDivId = queryElementDivId;
       currentQueryElement.fromNodeDivId = nodeDivId;
       self.classDivsMap[nodeDivId] = self.currentGraphNode;
+      if (nodeEvent && nodeEvent.ctrlKey) {
+        currentQueryElement.fromNode.newInstance = common.getRandomHexaId(3);
+      }
 
       $("#KGquery_setDiv_" + self.querySets.currentIndex).append(getQueryElementHtml(self.querySets.currentIndex, queryElementDivId, elementIndex));
       $("#" + currentQueryElement.queryElementDivId).append(getClassNodeDivHtml(self.currentGraphNode, nodeDivId));
@@ -225,6 +235,9 @@ var KGquery = (function() {
     else if (!currentQueryElement.toNode) {
       self.classeMap[self.currentGraphNode.id] = self.currentGraphNode;
       currentQueryElement.toNode = self.currentGraphNode;
+      if (nodeEvent && nodeEvent.ctrlKey) {
+        currentQueryElement.toNode.newInstance = common.getRandomHexaId(3);
+      }
 
       self.getPathBetweenNodes(currentQueryElement.fromNode.id, currentQueryElement.toNode.id, function(err, path) {
         if (err) {
@@ -233,7 +246,11 @@ var KGquery = (function() {
 
         self.managePathAmbiguousEdges(path, function(unAmbiguousPath) {
           //register queryPath in pathDivsMap
-          var cleanedPath = unAmbiguousPath;
+
+
+          var cleanedPath = self.processPathDuplicateClassIds(unAmbiguousPath, currentQueryElement);
+
+
           currentQueryElement.paths = cleanedPath;
           self.pathDivsMap[queryElementDivId] = currentQueryElement;
 
@@ -262,7 +279,7 @@ var KGquery = (function() {
 
           $("#KGquery_SetsControlsDiv").css("display", "flex");
 
-          if (nodeEvent && nodeEvent.ctrlKey) {
+          if (nodeEvent && nodeEvent.shiftKey) {
             self.addNodeFilter(nodeDivId);
           }
         });
@@ -271,7 +288,7 @@ var KGquery = (function() {
 
     KGquery_graph.outlineNode(self.currentGraphNode.id);
 
-    if (nodeEvent && nodeEvent.ctrlKey) {
+    if (nodeEvent && nodeEvent.shiftKey) {
       self.addNodeFilter(nodeDivId);
     }
   };
@@ -322,6 +339,20 @@ var KGquery = (function() {
     else {
       return callback(path);
     }
+  };
+
+  self.processPathDuplicateClassIds = function(path, currentQueryElement) {//manage multiple instance or sameClass
+    path.forEach(function(pathItem, index) {
+      for (var i = 0; i < 2; i++) {
+        if (pathItem[i] == currentQueryElement.fromNode.id && currentQueryElement.fromNode.newInstance) {
+          path[index][i] = pathItem[i] + "_" + currentQueryElement.fromNode.newInstance;
+        }
+        if (pathItem[i] == currentQueryElement.toNode.id && currentQueryElement.toNode.newInstance) {
+          path[index][i] = pathItem[i] + "_" + currentQueryElement.toNode.newInstance;
+        }
+      }
+    });
+    return path;
   };
 
   /**
@@ -461,10 +492,6 @@ return alert("missing target node in  path");
       querySet.elements.forEach(function(queryElement, queryElementIndex) {
 
 
-
-
-
-
         var subjectVarName = self.getVarName(queryElement.fromNode);
         var subjectUri = queryElement.fromNode.id;
         if (!distinctTypesMap[subjectVarName]) {
@@ -475,8 +502,9 @@ return alert("missing target node in  path");
 
         var objectVarName = self.getVarName(queryElement.toNode);
 
-        if(queryElement.fromNode.id==queryElement.toNode.id)
-          objectVarName=objectVarName+"_2"
+        if (queryElement.fromNode.id == queryElement.toNode.id) {
+          objectVarName = objectVarName + "_2";
+        }
 
         var objectUri = queryElement.toNode.id;
         var subjectUri = queryElement.fromNode.id;
@@ -496,8 +524,9 @@ return alert("missing target node in  path");
             startVarName = self.getVarName({ id: pathItem[1] });
             endVarName = self.getVarName({ id: pathItem[0] });
 
-            if(queryElement.fromNode.id==queryElement.toNode.id)
-              endVarName=endVarName+"_2"
+            if (queryElement.fromNode.id == queryElement.toNode.id) {
+              endVarName = endVarName + "_2";
+            }
 
             inverseStr = "^";
           }
@@ -505,8 +534,9 @@ return alert("missing target node in  path");
             startVarName = self.getVarName({ id: pathItem[0] });
             endVarName = self.getVarName({ id: pathItem[1] });
 
-            if(queryElement.fromNode.id==queryElement.toNode.id)
-              endVarName=endVarName+"_2"
+            if (queryElement.fromNode.id == queryElement.toNode.id) {
+              endVarName = endVarName + "_2";
+            }
           }
 
           var basicPredicate = startVarName + " " + inverseStr + "<" + pathItem[2] + "> " + endVarName + ".\n";
@@ -577,7 +607,7 @@ return alert("missing target node in  path");
 
       });
 
-      return callback(null,pathes);
+      return callback(null, pathes);
     }
 
 
@@ -781,7 +811,12 @@ return alert("missing target node in  path");
   };
 
   self.getVarName = function(node, withoutQuestionMark) {
-    return (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.label || Sparql_common.getLabelFromURI(node.id), true);
+    var varName = (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.label || Sparql_common.getLabelFromURI(node.id), true);
+    if (node.newInstance) {
+      varName += "_" + node.newInstance;
+
+    }
+    return varName;
   };
 
   self.getAllQueryPathClasses = function() {

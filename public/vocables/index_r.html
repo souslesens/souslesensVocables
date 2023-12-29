@@ -219,77 +219,83 @@
                 }
             });
 
-            $(function () {
-                MainController.initConfig(function (err) {
-                    // sentry/glitchtip
-                    if (Config.sentryDsnJsFront) {
-                        if (typeof Sentry == "object") {
-                            Sentry.init({ dsn: Config.sentryDsnJsFront });
-                        } else {
-                            console.warn("Sentry DSN found in config, but library could not be loaded and initialized.");
-                        }
-                    }
+            $(function() {
 
-                    authentication.init();
+                async.series([
+                      function(callBackSeries) {
+                          authentication.init(function(err, result) {
+                              callBackSeries(err);
+                          });
+                      },
+                      function(callBackSeries) {
+                          MainController.initConfig(function(err) {
+                              // sentry/glitchtip
+                              if (Config.sentryDsnJsFront) {
+                                  if (typeof Sentry == "object") {
+                                      Sentry.init({ dsn: Config.sentryDsnJsFront });
+                                  }
+                                  else {
+                                      console.warn("Sentry DSN found in config, but library could not be loaded and initialized.");
+                                  }
+                              }
+                              callBackSeries(err);
+                          });
+                      }, function(callBackSeries) {
+                          MainController.onAfterLogin(function(err) {
+                              callBackSeries(err);
 
-                    //SocketProxy.init()
-                    $("#smallDialogDiv").dialog({
-                        autoOpen: false,
-                        height: 600,
-                        width: 800,
-                        modal: false,
-                    });
-                    $("#LineagePopup").dialog({
-                        autoOpen: false,
-                        height: 700,
-                        width: 700,
-                        modal: false,
-                    });
-                    if (err) {
-                        return console.error(err);
-                    }
+                          })
+                      }
+                  ]
+                  , function(err) {
+                      w = $(document).width() - leftPanelWidth - 30;
+                      h = $(document).height() - 30;
 
-                    if (false) {
-                        w = $(document).width() - leftPanelWidth - 30;
-                        h = $(document).height() - 30;
+                      h = Math.min(h, 1000);
 
-                        h = Math.min(h, 1000);
+                      $("#graphDiv").width(w);
+                      MainController.UI.initialGraphDivWitdh = w;
+                      $("#graphDiv").height(h - 50);
 
-                        $("#graphDiv").width(w);
-                        MainController.UI.initialGraphDivWitdh = w;
-                        $("#graphDiv").height(h - 50);
+                      $("#accordion").accordion({
+                          heightStyle: "fill"
+                      });
+                      $("#accordion").accordion("option", { active: 0 });
+                      $("#accordion").on("accordionbeforeactivate", function(event, ui) {
+                      });
+                      $("#accordion").on("accordionactivate", function(event, ui) {
+                      });
+                      $("#mainDialogDiv").dialog({
+                          autoOpen: false,
+                          height: 800,
+                          width: $(document).width() * 0.85,
+                          modal: false
+                      });
+                      $("#mainDialogDiv2").dialog({
+                          autoOpen: false,
+                          height: 800,
+                          width: $(document).width() * 0.85,
+                          modal: false
+                      });
 
-                        $("#accordion").accordion({
-                            heightStyle: "fill",
-                        });
-                        $("#accordion").accordion("option", { active: 0 });
-                        $("#accordion").on("accordionbeforeactivate", function (event, ui) {});
-                        $("#accordion").on("accordionactivate", function (event, ui) {});
-                        $("#mainDialogDiv").dialog({
-                            autoOpen: false,
-                            height: 800,
-                            width: $(document).width() * 0.85,
-                            modal: false,
-                        });
-                        $("#mainDialogDiv2").dialog({
-                            autoOpen: false,
-                            height: 800,
-                            width: $(document).width() * 0.85,
-                            modal: false,
-                        });
-                    }
+                      $("#smallDialogDiv").dialog({
+                          autoOpen: false,
+                          height: 600,
+                          width: 800,
+                          modal: false
+                      });
 
-                    $(document).on("click", "a", function () {
-                        var target = $(this).attr("target");
-                        if (target == "_slsvCallback") {
-                            var id = $(this).attr("href");
-                            event.preventDefault();
-                            NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
-                        }
-                    });
+                      $(document).on("click", "a", function() {
+                          var target = $(this).attr("target");
+                          if (target == "_slsvCallback") {
+                              var id = $(this).attr("href");
+                              event.preventDefault();
+                              NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
+                          }
+                      });
 
-                    MainController.UI.setCredits();
-                    // MyDashboard.init();
+                      MainController.UI.setCredits();
+
                     $("#ChangeSourceButton").hide();
                     $("#index_topContolPanel").hide();
                     $("#Lineage_graphEditionButtons").hide();

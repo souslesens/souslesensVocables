@@ -735,7 +735,7 @@ var Sparql_OWL = (function () {
                 url = self.sparql_url;
             }
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel,dontCacheCurrentQuery:true }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -786,7 +786,7 @@ var Sparql_OWL = (function () {
                 url = self.sparql_url;
             }
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel,dontCacheCurrentQuery:true }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2283,7 +2283,7 @@ var Sparql_OWL = (function () {
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "SELECT distinct ?label " +
+            "SELECT distinct ?label ?id" +
             fromStr +
             "" +
             " WHERE {{ ?id rdf:type ?type. " +

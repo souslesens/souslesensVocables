@@ -21,7 +21,7 @@ var Lineage_queryBuilder = (function() {
         var html = self.getHtml();
         $("#lineage_queryBotDiv").html(html);
 
-        self.start();
+        self.test();
 
 
       })
@@ -49,7 +49,7 @@ var Lineage_queryBuilder = (function() {
 
 
     };
-    self.showList = function(values, varToFill, returnValue) {
+    self.showList = function(values, varToFill,returnValue) {
 
       values.sort(function(a, b) {
         if (a.label > b.label) {
@@ -95,111 +95,95 @@ var Lineage_queryBuilder = (function() {
 
 
     self.nextStep = function(returnValue) {
-
-
       var keys = Object.keys(self.currentObj);
       if (keys.length == 0) {
         return;
       }
-
-      var key = keys[0];
-
-      if (key == "_OR") {// alternative
-        var alternatives = self.currentObj[key];
-        if (returnValue && alternatives[returnValue]) {
-          var obj = self.currentObj["_OR"][returnValue];
-          var fnName = Object.keys(obj)[0];
-          var fn = self.functions[fnName];
-          if (!fn || typeof fn !== "function") {
-            return alert("function not defined :" + fnName);
-          }
-          self.currentObj=obj[fnName];
-          fn();
-
-
-        }
-
-
-      }
-      else {
-        var fn = self.functions[key];
+      if (keys.length == 1) {
+        var fn = self.functions[keys[0]];
         if (!fn || typeof fn !== "function") {
-          return alert("function not defined :" + key);
+          return alert("function not defined :" + keys[0]);
         }
 
         fn();
-        self.currentObj = self.currentObj[key];
+        self.currentObj = self.currentObj[keys[0]];
       }
+      else {
+        var obj = self.currentObj[returnValue];
+        if (!obj ) {
+          return alert("condition not defined :" + returnValue);
+        }
+        var fnName= Object.keys(obj)[0]
+        var fn = self.functions[fnName];
+        if (!fn || typeof fn !== "function") {
+          return alert("function not defined :" + fnName);
+        }
+
+        fn();
+        self.currentObj = obj;
+      }
+
     };
 
 
-    self.workflow_individualsFilter = {
-      "listFilterTypes": {
-        "_OR":
-          {
-            "label": { "promptIndividualsLabel": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
-            "list": { "listIndividuals": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
-            "advanced": { "promptIndividualsAdvandedFilter": { "listWhiteBoardFilterType": { "executeQuery": {} } } }
-            // }
-          }
-      }
-    };
+
+
+    self.workflow_individualsFilter= {
+    //  "listFilterTypes": {
+        "label": { "promptIndividualsLabel": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
+        "list": { "listIndividuals": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
+        "advanced": { "promptIndividualsAdvandedFilter": { "listWhiteBoardFilterType": { "executeQuery": {} } } }
+     // }
+    }
 
     self.workflow_individualsRole = {
-      "listIndividualFilterType": {
-        "_OR":
-          {
-            "all": {
-              "listWhiteBoardFilterType": {
-                "executeQuery": {}
-              }
-            },
-            "subject": self.workflow_individualsFilter,
-            "object": self.workflow_individualsFilter
-          }
-      }
+    "listIndividualFilterType": {
+        "all": { "listWhiteBoardFilterType": {
+            "executeQuery":{}
+          } },
+        "subject":self.workflow_individualsFilter,
+        "object":self.workflow_individualsFilter
+     }
 
     };
+
+
+
 
 
     self.workflow = {
       "listVocabsFn": {
         "listQueryTypeFn": {
-          "_OR":
-            {
-              "Class": {
-                "listClassesFn": {
-                  "listPredicatePathsFn": {
-                    "_OR":
-                      {
-                        "empty": { "listWhiteBoardFilterType": { "executeQuery": {} } },
-                        "ok": self.workflow_individualsRole
-                      }
-                  }
-                }
-
-              }
-              ,
-
-              "Property": {
-                "listPropertiesFn": {
-                  "listPredicatePathsFn": {
-                    "_OR": {
-                      "empty": { "listWhiteBoardFilterType": { "executeQuery": {} } },
-                      "ok": self.workflow_individualsRole
-                    }
-                  }
-                }
+          "Class": {
+            "listClassesFn": {
+              "listPredicatePathsFn": {
+                "empty":{"listWhiteBoardFilterType":{"executeQuery":{}}} ,
+                "ok": self.workflow_individualsRole
               }
             }
-
-
+          },
+          "Property": {
+            "listPropertiesFn": {
+              "listPredicatePathsFn":  {
+                "empty":{"listWhiteBoardFilterType":{"executeQuery":{}}} ,
+                "ok": self.workflow_individualsRole
+              }
+            }
+          }
         }
       }
+    }
+    ;
+
+
+
+
+    self.test = function() {
+
+      self.currentQuery = {source:Lineage_sources.activeSource};
+      self.currentObj = self.workflow;
+      self.nextStep(self.workflow);
     };
-
-
-   
 
 
     self.functions = {
@@ -258,181 +242,193 @@ var Lineage_queryBuilder = (function() {
           var prop = Config.ontologiesVocabularyModels[vocab].properties[key];
           props.push({ id: prop.id, label: prop.label });
         }
-        self.showList(props, "currentProperty");
+        self.showList(props,"currentProperty");
 
       },
 
 
-      listPredicatePathsFn: function() {
-        var property = self.currentQuery.currentProperty;
-        var fromClass = self.currentQuery.currentClass;
-        var toClass = self.currentQuery.currentClass;
+       listPredicatePathsFn:function() {
+      var property = self.currentQuery.currentProperty;
+      var fromClass = self.currentQuery.currentClass;
+      var toClass = self.currentQuery.currentClass;
 
-        self.getSourceInferredModelVisjsData(self.currentQuery.source + "_KGmodelGraph.json", function(err, visjsData) {
-          if (err) {
-            return alert(err.responseText);
-          }
-          var nodesMap = {};
-          visjsData.nodes.forEach(function(node) {
-            nodesMap[node.id] = node;
-          });
-          var paths = [];
-          visjsData.edges.forEach(function(edge) {
-            var selected = false;
-            if (property && edge.data.propertyId == property) {
-              selected = true;
-            }
-            if (fromClass && edge.from == fromClass) {
-              selected = true;
-            }
-            if (toClass && edge.to == toClass) {
-              selected = true;
-            }
-            if (selected) {
-              edge.fromLabel = nodesMap[edge.from].label;
-              edge.toLabel = nodesMap[edge.to].label,
-                paths.push({
-                  id: edge.from + "|" + edge.data.propertyId + "|" + edge.to,
-                  label: edge.fromLabel + " -" + edge.data.propertyLabel + "-> " + edge.toLabel
-                });
-            }
-          });
-          if (paths.length == 0) {
-            self.nextStep("empty");
-            return;
-          }
-          self.showList(paths, "path", "ok");
-          return;
-
-          showList(paths, function() {
-            self.currentQuery.path = $(this).val();
-            return "ok";
-            var text = $("#bot_resourcesProposalSelect option:selected").text();
-            writeCompletedHtml(text + ":");
-            listIndividualFilterType();
-          });
-
-
+      self.getSourceInferredModelVisjsData(self.currentQuery.source + "_KGmodelGraph.json", function(err, visjsData) {
+        if (err) {
+          return alert(err.responseText);
+        }
+        var nodesMap = {};
+        visjsData.nodes.forEach(function(node) {
+          nodesMap[node.id] = node;
         });
-      },
-
-      listIndividualFilterType: function() {
-        var choices = [
-          { id: "all", label: "all individuals" },
-          { id: "subject", label: "filter subject" },
-          { id: "object", label: "filter object" }
-        ];
-        self.showList(choices, "individualsFilterRole");
+        var paths = [];
+        visjsData.edges.forEach(function(edge) {
+          var selected = false;
+          if (property && edge.data.propertyId == property) {
+            selected = true;
+          }
+          if (fromClass && edge.from == fromClass) {
+            selected = true;
+          }
+          if (toClass && edge.to == toClass) {
+            selected = true;
+          }
+          if (selected) {
+            edge.fromLabel = nodesMap[edge.from].label;
+            edge.toLabel = nodesMap[edge.to].label,
+              paths.push({
+                id: edge.from + "|" + edge.data.propertyId + "|" + edge.to,
+                label: edge.fromLabel + " -" + edge.data.propertyLabel + "-> " + edge.toLabel
+              });
+          }
+        });
+        if (paths.length == 0) {
+          self.nextStep("empty")
+          return
+        }
+        self.showList(paths,"path","ok")
         return;
 
-        showList(choices, function() {
-          var currentChoice = $(this).val();
-          writeCompletedHtml(currentChoice + ":");
-          if (currentChoice == "all") {
-
-            self.currentQuery.individualsFilterRole = null;
-            listWhiteBoardFilterType();
-          }
-          else if (currentChoice == "filterSubject") {
-            self.currentQuery.individualsFilterRole = "subject";
-            listFilterTypes("subject");
-          }
-          else if (currentChoice == "filterObject") {
-            self.currentQuery.individualsFilterRole = "object";
-            listFilterTypes("object");
-          }
+        showList(paths, function() {
+          self.currentQuery.path = $(this).val();
+          return "ok";
+          var text = $("#bot_resourcesProposalSelect option:selected").text();
+          writeCompletedHtml(text + ":");
+          listIndividualFilterType();
         });
 
-      }
-      ,
-      listFilterTypes: function(target) {
-        var choices = [
-          { id: "label", label: "label contains" },
-          { id: "list", label: "choose in list" },
-          { id: "advanced", label: "advanced search" }
-        ];
-        self.showList(choices, "individualsFilterType");
-        return;
-        showList(choices, function() {
-          var currentChoice = $(this).val();
-          writeCompletedHtml(currentChoice + ":");
-          self.currentQuery.individualsFilterType = currentChoice;
-          if (currentChoice == "label") {
-            self.currentQuery.individualsFilterValue = prompt("label contains ");
-            listWhiteBoardFilterType();
-          }
-          else if (currentChoice == "list") {
-            listIndividuals();
-          }
-          else if (currentChoice == "advanced") {
-            Lineage_relationIndividualsFilter.init();
-          }
-        });
-      },
+
+      });
+    },
+
+     listIndividualFilterType:function() {
+      var choices = [
+        { id: "all", label: "all individuals" },
+        { id: "subject", label: "filter subject" },
+        { id: "object", label: "filter object" }
+      ];
+       self.showList(choices,"individualsFilterRole");
+       return;
+
+         showList(choices, function() {
+        var currentChoice = $(this).val();
+        writeCompletedHtml(currentChoice + ":");
+        if (currentChoice == "all") {
+
+          self.currentQuery.individualsFilterRole = null;
+          listWhiteBoardFilterType();
+        }
+        else if (currentChoice == "filterSubject") {
+          self.currentQuery.individualsFilterRole = "subject";
+          listFilterTypes("subject");
+        }
+        else if (currentChoice == "filterObject") {
+          self.currentQuery.individualsFilterRole = "object";
+          listFilterTypes("object");
+        }
+      });
+
+    }
+,
+     listFilterTypes:function(target) {
+      var choices = [
+        { id: "label", label: "label contains" },
+        { id: "list", label: "choose in list" },
+        { id: "advanced", label: "advanced search" }
+      ];
+       self.showList(choices,"individualsFilterType");
+      return;
+      showList(choices, function() {
+        var currentChoice = $(this).val();
+        writeCompletedHtml(currentChoice + ":");
+        self.currentQuery.individualsFilterType = currentChoice;
+        if (currentChoice == "label") {
+          self.currentQuery.individualsFilterValue = prompt("label contains ");
+          listWhiteBoardFilterType();
+        }
+        else if (currentChoice == "list") {
+          listIndividuals();
+        }
+        else if (currentChoice == "advanced") {
+          Lineage_relationIndividualsFilter.init();
+        }
+      });
+    },
 
 
-      listIndividuals: function() {
-        Sparql_OWL.getDistinctClassLabels(self.currentQuery.source, [self.currentQuery.currentClass], {}, function(err, result) {
-          if (err) {
-            return alert(err);
-          }
-          var individuals = [];
-          result.forEach(function(item) {
-            individuals.push({
-              id: item.id.value,
-              label: item.label.value
-            });
-
+     listIndividuals:function() {
+      Sparql_OWL.getDistinctClassLabels(self.currentQuery.source, [self.currentQuery.currentClass], {}, function(err, result) {
+        if (err) {
+          return alert(err);
+        }
+        var individuals = [];
+        result.forEach(function(item) {
+          individuals.push({
+            id: item.label.value,
+            label: item.label.value
           });
-          self.showList(individuals, "individualsFilterValue");
-          return;
 
-          showList(individuals, function() {
-            var individual = $(this).val();
-            writeCompletedHtml(individual + ":");
-            self.currentQuery.individualsFilterValue = individual;
-            listWhiteBoardFilterType();
-          });
         });
-      },
-
-
-      promptIndividualsLabel: function() {
-        self.currentQuery.individualsFilterValue = prompt("label contains ");
-        self.nextStep();
-
-      },
-
-      promptIndividualsAdvandedFilter: function() {
-        IndividualValueFilterWidget.showDialog(null, self.currentQuery.source, varName, aClass.id, datatype, function(err, filter) {
-          self.currentQuery.advancedFilter = filter;
-          self.nextStep("advanced");
-        });
-      },
-
-
-      listWhiteBoardFilterType: function() {
-        var choices = [
-          { id: "selectedNode", label: "selectedNode" },
-          { id: "whiteboardNodes", label: "whiteboard nodes" },
-          { id: "sourceNodes", label: "activeSource" }
-        ];
-        self.showList(choices, "whiteboardFilterType");
+        self.showList(individuals,"individualsFilterValue");
         return;
 
-        showList(choices, function() {
-          var currentChoice = $(this).val();
-          self.currentQuery.whiteboardFilterType = currentChoice;
-          self.executQuery();
+        showList(individuals, function() {
+          var individual = $(this).val();
+          writeCompletedHtml(individual + ":");
+          self.currentQuery.individualsFilterValue = individual;
+          listWhiteBoardFilterType();
         });
+      });
+    },
 
-      },
-      executeQuery: function() {
-        self.executeQuery();
+
+     listIndividuals: function () {
+      self.currentQuery.individualsFilterValue= prompt("label contains ");
+      self.nextStep()
+
+    },
+
+   promptIndividualsAdvandedFilter: function () {
+      IndividualValueFilterWidget.showDialog(null, self.currentQuery.source, varName, aClass.id, datatype, function(err, filter) {
+        self.currentQuery.advancedFilter=filter;
+        self.nextStep()
+      })
+    },
+
+
+    listWhiteBoardFilterType :function() {
+      var choices = [
+        { id: "selectedNode", label: "selectedNode" },
+        { id: "whiteboardNodes", label: "whiteboard nodes" },
+        { id: "sourceNodes", label: "activeSource" }
+      ];
+       self.showList(choices, "whiteboardFilterType")
+       return;
+
+      showList(choices, function() {
+        var currentChoice = $(this).val();
+        self.currentQuery.whiteboardFilterType = currentChoice;
+        self.executQuery();
+      });
+
+    },
+      executeQuery:function(){
+        self.executeQuery()
       }
 
 
     };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     self.getHtml = function() {
@@ -441,10 +437,9 @@ var Lineage_queryBuilder = (function() {
       var html = "  <div id=\"botTA\" contenteditable=\"false\">\n" +
         "          <div id=\"bot_inputContainer\" style=\"display: flex;flex-direction: row;border:none;\">\n" +
         // "            <button style=\"width:10px\" id=\"bot_back\"><</button>"+
-        "            <div id=\"bot_input\" size='3' autocomplete=\"off\" onkeyup=\"BotWidget.analyse($(this).val())\">\n" +
-
-        "            <select id=\"bot_resourcesProposalSelect\" size=\"10\" )\"></select></div>\n" +
+        "            <input id=\"bot_input\"  autocomplete=\"off\" onkeyup=\"BotWidget.analyse($(this).val())\">\n" +
         "          </div>\n" +
+        "            <select id=\"bot_resourcesProposalSelect\" size=\"10\" )\"></select>\n" +
 
         "        </div>" + "<div><button onclick='Lineage_queryBuilder.clear()'>X</button>" + "<button onclick='Lineage_queryBuilder.previousStage()'><ok></button></div>";
 
@@ -453,15 +448,8 @@ var Lineage_queryBuilder = (function() {
 
 
     self.clear = function() {
-       self.start();
+      //   self.test();
 
-    };
-
-    self.start = function() {
-
-      self.currentQuery = { source: Lineage_sources.activeSource };
-      self.currentObj = self.workflow;
-      self.nextStep(self.workflow);
     };
 
 
@@ -474,13 +462,12 @@ var Lineage_queryBuilder = (function() {
       var individualsFilterRole = self.currentQuery.individualsFilterRole;
       var individualsFilterType = self.currentQuery.individualsFilterType;
       var individualsFilterValue = self.currentQuery.individualsFilterValue;
-      var advancedFilter = self.currentQuery.advancedFilter || "";
+      var advancedFilter=self.currentQuery.advancedFilter || "";
 
 
       function getPathFilter() {
-        if (!path) {
+        if(!path)
           return "";
-        }
         var array = path.split("|");
         if (array.length != 3) {
           return "";
@@ -532,7 +519,7 @@ var Lineage_queryBuilder = (function() {
             });
           }
         }
-        else if (whiteboardFilterType == "all") {
+        else if (selection == "all") {
           data = null;
         }
 
@@ -541,13 +528,12 @@ var Lineage_queryBuilder = (function() {
 
 
       var data = getWhiteBoardFilter();
-      var filter = getPathFilter() + " " + getIndividualsFilter() + "" + advancedFilter;
+      var filter = getPathFilter() + " " + getIndividualsFilter()+ ""+ advancedFilter;
       var options = {
         filter: filter
       };
 
       Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);
-      $("#mainDialogDiv").dialog("close")
 
     }
     ;

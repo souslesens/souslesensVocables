@@ -1,16 +1,36 @@
 .arrow-icon{
     background-image: url(@arrow-icon);
+    background-repeat: no-repeat;
 
 }
 .add-icon{
     background-image: url(@add-icon);
+    background-repeat: no-repeat;
 }
 .moreOptions-icon{
     background-image: url(@moreOptions-icon);
+    background-repeat: no-repeat;
 }
 .search-icon{
     background-image: url(@search-icon);
+    background-repeat: no-repeat;
 }
 .logoInstance-icon{
     background-image: url(@logoInstance-icon);
+    background-repeat: no-repeat;
+}
+.lineage-logo{
+    background-image: url(@lineage-logo);
+    background-repeat: no-repeat;
+    height: 30px;
+}
+.KGcreator-logo{
+    background-image: url(@KGcreator-logo);
+    background-repeat: no-repeat;
+    height: 30px;
+}
+.KGquery-logo{
+    background-image: url(@KGquery-logo);
+    background-repeat: no-repeat;
+    height: 30px;
 }

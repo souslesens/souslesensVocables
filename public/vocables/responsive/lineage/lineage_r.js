@@ -40,6 +40,7 @@ var Lineage_r = (function () {
         //Loading
         $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
             self.loadSources();
+            
         });
     };
     self.loadSources = function () {
@@ -70,6 +71,9 @@ var Lineage_r = (function () {
             $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
             Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
             self.hideShowMoreActions("hide");
+            $('#lateralPanelDiv').resizable({
+                maxWidth: 490
+            });
         });
     };
 

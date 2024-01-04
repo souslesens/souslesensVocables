@@ -19,7 +19,8 @@ var ResponsiveUI = (function () {
         common.fillSelectOptions("toolsSelect", tools, false);
         tools.forEach((item,index)=>{
             if(Config.toolsLogo[item]){
-                $(`#toolsSelect option[value="${item}"]`).html(`<input type="image" src="${Config.toolsLogo[item]}">`);
+                $(`#toolsSelect option[value="${item}"]`).html(item);
+                $(`#toolsSelect option[value="${item}"]`).addClass(item+'-logo');
                 //`<input type="image" src="${Config.toolsLogo[item]}">`
             }
             
@@ -37,7 +38,7 @@ var ResponsiveUI = (function () {
     self.onToolSelect = function (toolId) {
         $("#currentToolTitle").html(toolId);
         if(Config.toolsLogo[toolId]){
-            $("#currentToolTitle").html(`<input type="image" src="${Config.toolsLogo[toolId]}">`);
+            $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
         }
         MainController.currentTool = toolId;
         ResponsiveUI.showSourceDialog(true);

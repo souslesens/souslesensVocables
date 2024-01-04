@@ -303,6 +303,14 @@ var Config = (function () {
             "@legend-color": "#4CAD8C",
             "@background-color": "#e9f0ff",
             "@dark-background-color": "#BFD4F5",
+            "@arrow-icon" : "../icons/caret-right.png",
+            "@add-icon" :"../icons/AddNodeEdge.png",
+            "@moreOptions-icon" : "../icons/MoreOptionsIcon.png",
+            "@search-icon": "../icons/SearchIcon.png",
+            "@lineage-logo" : "../icons/lineageLogo-BluePurple.png",
+            "@KGquery-logo" : "../icons/Kgquery-BluePurple.png",
+            "@KGcreator-logo" : "../icons/KGcreatorLogo-BluePurple.png",
+            
         },
         "KGA":{
             "@source-color": "#6B77E5",
@@ -313,6 +321,13 @@ var Config = (function () {
             "@background-color": "#F4F4F4",
             "@dark-background-color": "#E4E4E4",
             "@logoInstance-icon" : "../icons/KGALogo.png",
+            "@add-icon" :"../icons/AddNodeEdge-KGA.png",
+            "@search-icon": "../icons/SearchIcon-KGA.png",
+            "@arrow-icon" : "../icons/caret-right-KGA.png",
+            "@moreOptions-icon" : "../icons/MoreOptionsIcon-KGA.png",
+            "@lineage-logo" : "../icons/lineageLogo-KGA.png",
+            "@KGquery-logo" : "../icons/Kgquery-KGA.png",
+            "@KGcreator-logo" : "../icons/KGcreatorLogo-KGA.png",
         },
         "Total Energies":{
             
@@ -330,44 +345,17 @@ var Config = (function () {
             "@gradient-color3" : "linear-gradient(to right,#3CA704, #018849)",
             "@gradient-color-source" : "linear-gradient(to right,#FFBC6D,#ED2C2B)",
             "@border-color":"#374649",
+            "@add-icon" :"../icons/AddNodeEdge-TotalEnergies.png",
+            "@search-icon": "../icons/SearchIcon-TotalEnergies.png",
+            "@arrow-icon" : "../icons/caret-right-TotalEnergies.png",
+            "@moreOptions-icon" : "../icons/MoreOptionsIcon-TotalEnergies.png",
+            "@lineage-logo" : "../icons/lineageLogo-TotalEnergies.png",
+            "@KGquery-logo" : "../icons/Kgquery-TotalEnergies.png",
+            "@KGcreator-logo" : "../icons/KGcreatorLogo-TotalEnergies.png",
         },
-        "DarkTheme - KGA":{
-            "@source-color": "#6EB6ED",
-            "@button1-color": "#0767B7",
-            "@button2-color": "#3798EF",
-            "@button3-color": "#6EB6ED", 
-            "@legend-color": "#A5DCF2",
-            "@background-color": "#424649",
-            "@dark-background-color": "#21262C",
-            "@logoInstance-icon" : "../icons/KGALogo.png",
-        },
-        "Jaune 1 - Confort visuel ":{
-            "@source-color": "#06539C",
-            "@button1-color": "#FA5738",
-            "@button2-color": "#EE964C",
-            "@button3-color": "#F1BD05", 
-            "@legend-color": "#F37A00",  
-            "@background-color": "#FFFCF2",
-            "@dark-background-color": "#FAF1CA",
-        },
-        "Jaune 2 - Confort visuel ":{
-            "@source-color": "#FD5900",
-            "@button1-color": "#005F61",
-            "@button2-color": "#008083",
-            "@button3-color": "#249EA1", 
-            "@legend-color": "#11C4C8",
-            "@background-color": "#FFF8E4",
-            "@dark-background-color": "#FFE49C",
-        },
-        "Felix Bleu Roy - Toile du soleil":{
-            "@source-color": "#9A8A6E",
-            "@button1-color": "#023451",
-            "@button2-color": "#135287",
-            "@button3-color": "#278ECC", 
-            "@legend-color": "#8A8C7D",
-            "@background-color": "#E8E8E8",
-            "@dark-background-color": "#BFB5B4",
-        },
+        
+        
+       
         "Felix Bleu Roy - Toile du soleil - DARK":{
             "@source-color": "#278ECC",
             "@button1-color": "#023451",
@@ -377,7 +365,43 @@ var Config = (function () {
             "@background-color": "#F2EEE9",
             "@dark-background-color": "#DBCFBD",
         },
-       
+       "DarkTheme":{
+        "@source-color": "#FF5E5E",
+        "@button1-color": "#FF8484",
+        "@button2-color": "#FFA666",
+        "@button3-color": "#CC9AA4", 
+        "@legend-color": "#FFF0E3",
+        "@background-color": "#20262D",
+        "@dark-background-color": "#0F1216",
+       },
+       "DarkTheme2":{
+        "@source-color": "#EE8858",
+        "@button1-color": "#3F8CFF",
+        "@button2-color": "#0033CC",
+        "@button3-color": "#8088FF", 
+        "@legend-color": "#A1C8F3",
+        "@background-color": "#150B3A",
+        "@dark-background-color": "#07101F",
+       },
+       "DarkTheme3":{
+        "@source-color": "#FFAEAD",
+        "@button1-color": "#769EE3",
+        "@button2-color": "#1EBEBB",
+        "@button3-color": "#EECBAB", 
+        "@legend-color": "#D4B9FF",
+        "@background-color": "#2E2E2E",
+        "@dark-background-color": "#141414",
+       },
+       "DarkTheme4":{
+        "@source-color": "#006EFF",
+        "@button1-color": "#B301FF",
+        "@button2-color": "#9D3BFF",
+        "@button3-color": "#3BC4FF", 
+        "@legend-color": "#7D75F8",
+        "@background-color": "#1C1C1C",
+        "@dark-background-color": "#000000",
+       },
+
         "Jupiter":{
             "@source-color": "#B64E74",
             "@button1-color": "#3B3C56",
@@ -386,18 +410,27 @@ var Config = (function () {
             "@legend-color": "#9E8E75",
             "@background-color": "#E9E5E7",
             "@dark-background-color": "#C9C8C9",
+            "@add-icon" :"../icons/AddNodeEdge-Jupiter.png",
+            "@search-icon": "../icons/SearchIcon-Jupiter.png",
+            "@arrow-icon" : "../icons/caret-right-Jupiter.png",
+            "@moreOptions-icon" : "../icons/MoreOptionsIcon-Jupiter.png",
+            "@lineage-logo" : "../icons/lineageLogo-Jupiter.png",
+            "@KGquery-logo" : "../icons/Kgquery-Jupiter.png",
+            "@KGcreator-logo" : "../icons/KGcreatorLogo-Jupiter.png",
         },
 
        
         
        
     };
+    
     self.toolsLogo={
-        lineage:  "./icons/lineageLogo.png",
-        KGcreator: "./icons/KGCreatorLogo.png",
+        lineage:  "./icons/lineageLogo-BluePurple.png",
+        KGcreator: "./icons/KGcreatorLogo-BluePurple.png",
+        KGquery: "./icons/Kgquery-BluePurple.png",
     };
-
-    /*****************************************************************************/
+    
+ 
     self.sources = {};
     self.tools = {};
 

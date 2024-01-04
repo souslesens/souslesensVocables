@@ -17,13 +17,15 @@ var NodeInfosWidgetResponsive = (function () {
     var self = {};
     self.initDialog = function (sourceLabel, divId, options, callback) {
         ResponsiveUI.openDialogDiv(divId);
-        $("#mainDialogDiv").parent().css("top", "1%");
+        $("#mainDialogDiv").parent().css("top", "5%");
         $("#mainDialogDiv").parent().css("left", "5%");
-        $("#" + divId)
-            .parent()
-            .show("fast", function () {
+        $("#" + divId).parent().show("fast", function () {
                 self.oldNodeInfosInit(sourceLabel, divId, options, callback);
-            });
+               
+        });
+        
+
+        //$(".ui-dialog-title")
     };
     self.oldNodeInfosInit = function (sourceLabel, divId, options, callback) {
         self.currentSource = sourceLabel;
@@ -141,6 +143,10 @@ var NodeInfosWidgetResponsive = (function () {
                         return alert(err);
                     }
                     self.showNodeInfosToolbar(options);
+                    $('#deleteButton').insertAfter($(".ui-dialog-title"));
+                    $('#addPredicateButton').insertAfter($(".ui-dialog-title"));
+                    $('#addPredicateButton').css('margin-left',"25px !important");
+                    
                 });
             }
         });
@@ -201,16 +207,16 @@ var NodeInfosWidgetResponsive = (function () {
         var str = "<div>";
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             str +=
-                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
+                "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
 
-            str += "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
+            str += "<button id='deleteButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
             str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
         }
 
         if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
             str +=
-                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
+                "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
             str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
         }

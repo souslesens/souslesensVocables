@@ -452,7 +452,11 @@ var KGquery_graph = (function () {
     };
 
     self.outlineNode = function (nodeId) {
+
+        KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, color: "#b0f5f5" }]);
+       /* setTimeout(function(){
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
+        },500)*/
     };
 
     return self;

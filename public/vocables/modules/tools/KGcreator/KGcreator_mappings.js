@@ -1,5 +1,6 @@
 import KGcreator from "./KGcreator.js";
 import KGcreator_graph from "./KGcreator_graph.js";
+import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 
 var KGcreator_mappings = (function() {
   var self = {};
@@ -182,9 +183,9 @@ return alert("select a field (column)");
     /*  var subjectType=$("#LinkColumn_subjectSelect").val();
   if(subjectType!="_selectedColumn")*/
     var subject = $("#LinkColumn_subjectInput").val();
-   /* var predicate = PredicatesSelectorWidget.getSelectedProperty();
-    var object = PredicatesSelectorWidget.getSelectedObjectValue();*/
-    var predicate =$("#editPredicate_propertyValue").val();
+    /* var predicate = PredicatesSelectorWidget.getSelectedProperty();
+     var object = PredicatesSelectorWidget.getSelectedObjectValue();*/
+    var predicate = $("#editPredicate_propertyValue").val();
     var object = $("#editPredicate_objectValue").val();
     var isSubjectBlankNode = $("#LinkColumn_isSubjectBlankNodeCBX").prop("checked");
     var isObjectBlankNode = $("#LinkColumn_isObjectBlankNodeCBX").prop("checked");
@@ -307,8 +308,9 @@ tripleObj.objectIsSpecificUri = true;
   };
 
   self.addFunction = function(role) {
-    if(!role)
-      role=self.currentMappingRole
+    if (!role) {
+      role = self.currentMappingRole;
+    }
     var fnBody = $("#KGcreator_fnBody").val();
     fnBody = fnBody.replace(/"/g, "'");
 
@@ -393,14 +395,13 @@ tripleObj.objectIsSpecificUri = true;
   };
 
 
-
-
-  self.saveTableMappings = function(tableId,tableMappings) {
+  self.saveTableMappings = function(tableId, tableMappings) {
     if (!tableMappings) {
       return alert("incorrect data");
     }
-    if(!tableId)
+    if (!tableId) {
       return alert("incorrect data");
+    }
     if (!tableMappings[tableId]) {
       return alert("incorrect data");
     }
@@ -413,17 +414,63 @@ tripleObj.objectIsSpecificUri = true;
       KGcreator.currentConfig.currentMappings[tableId] = { tripleModels: [], transform: {} };
     }
     KGcreator.currentConfig.currentMappings[tableId].tripleModels = tripleModels;
-   /* var transform = tripleModels = data[tableId].transform;
-    if (transform) {
-      KGcreator.currentConfig.currentMappings[self.currentEditingTable].transform = transform;
-    }*/
+    /* var transform = tripleModels = data[tableId].transform;
+     if (transform) {
+       KGcreator.currentConfig.currentMappings[self.currentEditingTable].transform = transform;
+     }*/
     KGcreator.saveDataSourceMappings();
-
 
 
   };
 
+  self.setPredicatesBetweenColumnsInTable = function(columnFromData, columnToData, callback) {
+    OntologyModels.registerSourcesModel(KGcreator.currentSlsvSource, function(err, result) {
+      if (err) {
+        return alert(err.responseText);
+      }
 
+      var fromClass = columnFromData.classNode;
+      var toClass = columnToData.classNode;
+      var constraints = OntologyModels.getClassesConstraints(KGcreator.currentSlsvSource, fromClass, toClass);
+      var restrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, fromClass, toClass);
+      var inverseRestrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource,toClass, fromClass);
+
+
+      var allConstraints={}
+      for(var key in constraints){
+        allConstraints[key]=constraints[key]
+      }
+      for(var key in restrictions){
+        allConstraints[key]=restrictions[key]
+      }
+      for(var key in inverseRestrictions){
+        inverseRestrictions[key].inverse=true
+        allConstraints[key]=inverseRestrictions[key]
+      }
+      if(Object.keys(allConstraints).length==0){
+        return alert("no constraints between " +fromClass +" and "+toClass)
+      }else{
+
+        return SimpleListSelectorWidget.showDialog(
+          null,
+          function(callbackLoad) {
+            return callbackLoad(Object.keys(allConstraints));
+          },
+          function(selectedProperty) {
+
+            if(confirm ("link columns "+columnFromData.label+" to"+columnToData.label +" with property "+selectedProperty)){
+              var triple={
+                s:columnFromData.id,
+                p:selectedProperty,
+                o:columnToData.id,
+              }
+            }
+          })
+          }
+
+
+    });
+  };
 
   self.showTableMappings = function(node) {
     KGcreator_graph.drawDetailedMappings(node.data.id);
@@ -476,6 +523,7 @@ tripleObj.objectIsSpecificUri = true;
       self.transformJsonEditor.load(transforms);
     });
   };
+
 
   return self;
 })();

@@ -1,5 +1,5 @@
 import common from "../../shared/common.js";
-import BotWidget from "../../uiWidgets/botWidget.js";
+
 
 var AxiomsEditor = (function() {
 

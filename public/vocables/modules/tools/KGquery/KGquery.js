@@ -18,6 +18,7 @@ import KGquery_myQueries from "./KGquery_myQueries.js";
 import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
+import KGquery_bot from "../../bots/KGquery_bot.js";
 
 var KGquery = (function() {
     var self = {};
@@ -97,19 +98,37 @@ var KGquery = (function() {
         fromNodeDivId: "",
         toNodeDivId: "",
         index: querySet.elements.length,
-        setIndex:querySet.index
+        setIndex: querySet.index
       };
       querySet.elements.push(queryElement);
       self.currentQueryElement = queryElement;
-      self.divsMap[queryElementDivId]=queryElement
+      self.divsMap[queryElementDivId] = queryElement;
       return queryElement;
     };
 
 
-    self.addNodeToQueryElement = function(queryElement, node, role) {
-      self.classeMap[node.id] = node;
-      queryElement[role] = node;
+    self.addNodeToQueryElement = function(queryElement, node, role,newVarName) {
+
+      var node2=JSON.parse(JSON.stringify(node))
+      if(newVarName) {
+        var countVarInSet = KGquery_paths.countNodeVarExistingInSet(node.id, self.currentQuerySet);
+        if (countVarInSet > 0) {
+          node2.varName=node.label+"_"+ countVarInSet;
+        }
+      }else{
+        node2.varName=node.label
+      }
+
+
+      self.classeMap[ node2.varName] = node2;
+      queryElement[role] = node2;
+
+
+
+
       var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId, node.data.label);
+      KGquery_graph.outlineNode(node.id);
+      node.data.queryElement = queryElement;
       self.divsMap[nodeDivId] = node;
 
     };
@@ -119,21 +138,52 @@ var KGquery = (function() {
         return;
       }
 
+      /* if existing path in queryFlement a new one is created
+      with a from Node that is the nearest node from the existing Node of all previous element in the set*/
 
-      if (!self.currentQueryElement.fromNode) {
+      if (self.currentQuerySet.elements.length > 1) {
+        var excludeSelf = false;
+        var countVar=KGquery_paths.countNodeVarExistingInSet(node.id, self.currentQuerySet)
+        if ( countVar> 0 && !nodeEvent.ctrlKey) {
+          excludeSelf = true;
+        }
+        var newVarName=false;
+        if ( countVar> 0 && !nodeEvent.ctrlKey)
+          newVarName=true;
 
+        $("#KGquery_SetsControlsDiv").css("display", "flex");
+        KGquery_paths.getNearestNode(node.id, self.currentQuerySet,excludeSelf, function(err, nearestNodeId) {
+          if (err) {
+            return acllback(err.responseText);
+          }
+
+
+          self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode",newVarName);
+          var nearestNode = self.classeMap[nearestNodeId];
+          self.addNodeToQueryElement(self.currentQueryElement, nearestNode, "toNode");
+
+          KGquery_paths.setQueryElementPath(self.currentQueryElement, function(err, result) {
+            if (err) {
+              return alert(err.responseText);
+            }
+          });
+          self.currentQueryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
+
+        });
+
+      }
+
+
+      else if (!self.currentQueryElement.fromNode) {
 
         self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode");
-        KGquery_graph.outlineNode(node.id);
+
 
       }
       else if (!self.currentQueryElement.toNode) {
-        if (!KGquery_paths.isPathValid(self.currentQuerySet, node.id)) {
-          self.currentQueryElement.fromNode = "";
-          return alert(" nodes  must be linked to existing paths");
 
-        }
         self.addNodeToQueryElement(self.currentQueryElement, node, "toNode");
+
         KGquery_paths.setQueryElementPath(self.currentQueryElement, function(err, result) {
           if (err) {
             return alert(err.responseText);
@@ -150,25 +200,24 @@ var KGquery = (function() {
 
     self.addNodeFilter = function(classDivId) {
       var aClass = self.divsMap[classDivId];
-      var classSetIndex = aClass.setIndex;
-      if (self.querySets.sets[classSetIndex].classFiltersMap[aClass.id]) {
-        delete self.querySets.sets[classSetIndex].classFiltersMap[aClass.id];
+      var classSetIndex = aClass.data.queryElement.setIndex;
+      if (self.querySets.sets[classSetIndex].classFiltersMap[classDivId]) {
+        delete self.querySets.sets[classSetIndex].classFiltersMap[classDivId];
         $("#" + classDivId + "_filter").html("");
         return;
       }
       var varName = [self.getVarName(aClass, true)];
       var datatype = aClass.data.datatype;
 
-      IndividualValueFilterWidget.showDialog(null, self.currentSource, varName, aClass.id, datatype, function(err, filter) {
+      KGquery_bot.init(self.currentSource, "workflow_filterClass", aClass.id, self.getVarName(aClass, true), function(err, result) {
         if (err) {
-          return alert(err);
+          return alert(err.responseText);
         }
-        if (!filter) {
-          return;
-        }
-        self.querySets.sets[classSetIndex].classFiltersMap[aClass.id] = { class: aClass, filter: filter };
-        $("#" + classDivId + "_filter").append(filter);
+        self.querySets.sets[classSetIndex].classFiltersMap[classDivId] = { class: aClass, filter: result.filter };
+        $("#" + classDivId + "_filter").append(result.filterLabel);
+
       });
+
     };
 
     self.aggregateQuery = function() {
@@ -488,7 +537,7 @@ var KGquery = (function() {
         KGquery_graph.resetVisjEdges();
         //   KGquery_graph.drawVisjsModel("saved")
         $("#KGquery_pathsDiv").html("");
-        self.addQuerySet(true);
+        self.addQuerySet();
         $("#KGquery_SetsControlsDiv").css("display", "none");
       }
     };

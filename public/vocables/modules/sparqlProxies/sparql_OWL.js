@@ -2391,6 +2391,21 @@ var Sparql_OWL = (function () {
         );
     };
 
+    self.getClassIndividualsDistinctProperties=function(sourceLabel,classId,callback){
+
+       var fromStr= Sparql_common.getFromStr(sourceLabel)
+        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+
+
+        var query="" +
+          "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+          " Select distinct ?p ?pType   "+fromStr+" where {\n" +
+          " ?s  rdf:type " + "<"+classId+">. " +
+          " ?s  ?p ?o.   ?o rdf:type ?oType"
+    }
+
     return self;
 })();
 

@@ -766,7 +766,7 @@ var KGcreator = (function () {
         }
 
         self.currentConfig.currentMappings[table].tripleModels.forEach(function (triple) {
-            if ((column && triple[role].replace("$_", "") == column) || !column) {
+            if ((column && triple[role].replace("$_", "") == column.replace("$_", "")) || !column) {
                 if (!columnTriples[triple[role]]) {
                     columnTriples[triple[role]] = [];
                 }
@@ -971,6 +971,13 @@ var KGcreator = (function () {
         }
         return t;
     }
+
+
+
+
+
+
+
     return self;
 })();
 

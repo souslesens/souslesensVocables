@@ -88,8 +88,7 @@ var KGquery_paths = (function() {
 
       var color=KGquery.currentQuerySet.color
       newVisjsEdges.push({ id: edgeId, color: color, width: 3 });
-      KGquery_graph.outlineNode(pathItem[0]);
-      KGquery_graph.outlineNode(pathItem[1]);
+
     });
 
     KGquery_graph.KGqueryGraph.data.edges.update(newVisjsEdges);
@@ -142,7 +141,18 @@ var KGquery_paths = (function() {
     });
   };
 
-  self.getNearestNode = function(nodeId, querySet, callback) {
+  self.countNodeVarExistingInSet = function(nodeId, querySet) {
+    var count=0;
+    querySet.elements.forEach(function(queryElement) {
+        if(nodeId==queryElement.fromNode.id)
+          count+=1
+      if(nodeId==queryElement.toNode.id)
+        count+=1
+  })
+    return count;
+  };
+
+  self.getNearestNode = function(nodeId, querySet,excludeSelf, callback) {
     var allCandidateNodesMap = {};
 
     querySet.elements.forEach(function(queryElement) {
@@ -155,7 +165,9 @@ var KGquery_paths = (function() {
       }
       else {
         // only terminaisons of path
+        if(queryElement.fromNode&&(! excludeSelf || queryElement.fromNode.id!=nodeId ))
         allCandidateNodesMap[queryElement.fromNode.id] = 0;
+        if(queryElement.toNode && (! excludeSelf || queryElement.toNode.id!=nodeId ))
         allCandidateNodesMap[queryElement.toNode.id] = 0;
       }
     });

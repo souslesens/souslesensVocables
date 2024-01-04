@@ -19,7 +19,7 @@ var Lineage_queryBuilder = (function() {
 
         //  self.doNext(keywordsTree)
         var html = self.getHtml();
-        $("#lineage_queryBotDiv").html(html);
+        $("#botDiv").html(html);
 
         self.test();
 

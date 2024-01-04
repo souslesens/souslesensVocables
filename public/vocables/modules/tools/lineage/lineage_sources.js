@@ -424,27 +424,13 @@ sourceDivId +
         event.stopPropagation();
         var source = Lineage_sources.sourceDivsMap[sourceDivId];
         var html =
-            '    <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.setSourceOpacity(\'' +
-            source +
-            "');\"> Opacity</span>" +
-            '    <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.closeSource(\'' +
-            source +
-            "');\"> Close</span>" +
-            '    <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.hideSource(\'' +
-            source +
-            "');\"> Hide </span>" +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.showSource(\'' +
-            source +
-            "');\"> Show </span>" +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource(\'' +
-            source +
-            "');\"> Group </span>" +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource(\'' +
-            source +
-            "');\"> ungroup </span>" +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.exportOWL(\'' +
-            source +
-            "');\"> export OWL </span>";
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.setSourceOpacity();"> Opacity</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.closeSource();"> Close</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.hideSource();"> Hide </span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.showSource();"> Show </span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource();"> Group </span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();"> ungroup </span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.exportOWL();"> export OWL </span>';
 
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
     };
@@ -548,6 +534,9 @@ sourceDivId +
 
     self.menuActions = {
         setSourceOpacity: function (source) {
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             var opacity = prompt("opacity %", 100);
             if (!opacity) {
                 return;
@@ -610,10 +599,16 @@ sourceDivId +
             $("#" + sourceDivId).remove();
         },
         hideSource: function (source) {
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, true);
         },
-        showSource: function () {
+        showSource: function (source) {
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, false);
         },
@@ -666,6 +661,9 @@ sourceDivId +
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
         },
         ungroupSource: function (source) {
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -673,6 +671,9 @@ sourceDivId +
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(source);
         },
         exportOWL: function (source) {
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             Sparql_OWL.generateOWL(source, {}, function (err, result) {
                 if (err) {
                     return console.log(err);

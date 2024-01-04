@@ -1,6 +1,6 @@
 import common from "../shared/common.js";
 
-var BotWidget = (function() {
+var ManchesterSyntaxWidget = (function() {
 
 
   var self = {};
@@ -147,10 +147,10 @@ if(!selectedToken)
 
     var html = "  <div id=\"botTA\" contenteditable=\"false\">\n" +
       "          <div id=\"bot_inputContainer\" style=\"display: flex;flex-direction: column;border:none;\">\n" +
-      "            <input id=\"bot_input\"  autocomplete=\"off\" onkeyup=\"BotWidget.analyse($(this).val())\">\n" +
-      "            <select id=\"bot_resourcesProposalSelect\" size=\"4\" onchange=\"BotWidget.onResourceProposalChange($(this).val())\"></select>\n" +
+      "            <input id=\"bot_input\"  autocomplete=\"off\" onkeyup=\"ManchesterSyntaxWidget.analyse($(this).val())\">\n" +
+      "            <select id=\"bot_resourcesProposalSelect\" size=\"4\" onchange=\"ManchesterSyntaxWidget.onResourceProposalChange($(this).val())\"></select>\n" +
       "          </div>\n" +
-      "        </div>"+"<div><button onclick='BotWidget.clear()'>X</button>"+"<button onclick='BotWidget.validate()'>ok</button></div>";
+      "        </div>"+"<div><button onclick='ManchesterSyntaxWidget.clear()'>X</button>"+"<button onclick='ManchesterSyntaxWidget.validate()'>ok</button></div>";
 
     return html;
   };
@@ -197,5 +197,5 @@ if(!selectedToken)
 })
 ();
 
-export default BotWidget;
-window.BotWidget = BotWidget;
+export default ManchesterSyntaxWidget;
+window.ManchesterSyntaxWidget = ManchesterSyntaxWidget;

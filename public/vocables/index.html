@@ -52,7 +52,10 @@
   <script type="module" src="modules/tools/KGquery/KGquery_paths.js"></script>
 
 
-
+  <script type="module" src="modules/bots/botEngine.js"></script>
+  <script type="module" src="modules/bots/KGquery_bot.js"></script>
+  <script type="module" src="modules/bots/manchesterSyntaxWidget.js"></script>
+  <script type="module" src="modules/bots/sparqlQuery_bot.js"></script>
   <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
 
   <script type="module" src="modules/tools/SPARQL_endpoint.js"></script>
@@ -84,7 +87,7 @@
   <script type="module" src="modules/tools/lineage/lineage_createResource.js"></script>
   <script type="module" src="modules/tools/lineage/lineage_createRelation.js"></script>
   <script type="module" src="modules/tools/lineage/axiomsEditor.js"></script>
-  <script type="module" src="modules/tools/lineage/lineage_queryBuilder.js"></script>
+
   <!--   <script type="module" src="modules/tools/lineage/pell/pell.js."></script>
      <link rel="stylesheet" href="modules/tools/lineage/pell/pell.css" />-->
 
@@ -107,7 +110,7 @@
   <script type="module" src="modules/uiWidgets/individualAggregateWidget.js"></script>
   <script type="module" src="modules/uiWidgets/simpleListSelectorWidget.js"></script>
   <!--script type="module" src="modules/uiWidgets/FOL2graphWidget.js"></script-->
-  <script type="module" src="modules/uiWidgets/botWidget.js"></script>
+  <script type="module" src="modules/bots/manchesterSyntaxWidget.js"></script>
   <link rel="stylesheet" href="css/botWidget.css" />
 
   <script type="module" src="modules/tools/owlEditor.js"></script>
@@ -517,6 +520,21 @@
           border-style: solid;
           border-color: #b8a587
       }
+
+      #botPanel{
+         display: none;
+          z-index: 100;
+          width: 400px;
+          height: 500px;
+          position: absolute;
+          background-color: #92d3ec;
+          top: 200px;
+          left: 50%;
+
+
+
+
+      }
   </style>
 </head>
 <body>
@@ -602,6 +620,10 @@
 <div id="mainDialogDiv"></div>
 <div id="mainDialogDiv2"></div>
 <div id="smallDialogDiv"></div>
+
+<div id="botPanel">
+  <div id="botDiv"></div>
+</div>
 
 <!-- Footer -->
 <footer class="bg-white">

@@ -615,6 +615,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
         // select node
         else if (params.nodes.length == 1) {
+            self.network.stopSimulation();
             const options = {
                 dbleClick: isDbleClick,
                 ctrlKey: params.event.srcEvent.ctrlKey ? 1 : 0,

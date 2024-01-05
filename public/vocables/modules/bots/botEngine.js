@@ -5,22 +5,61 @@ var BotEngine = (function() {
 
 
 
-  self.init = function(botModule) {
-    self.currentBot=botModule
+  self.init = function(botModule,callback) {
+    self.currentBot=botModule;
+    self.currentObj=botModule;
    $("#botPanel").css("display","block")
       //  self.doNext(keywordsTree)
    $("#botDiv").load("modules/bots/html/bot.html",function(){
-     self.currentBot.start();
+     $("#botTitle").html(self.currentBot.title)
+     callback()
    })
-
-
-
-
-
-
-
-
   };
+
+
+
+  self.nextStep = function(returnValue) {
+    var keys = Object.keys(self.currentObj);
+
+
+    if (keys.length == 0) {
+      $("#mainDialogDiv").dialog("close");
+      self.currentBot.currentQuery.queryText=self.getQueryText();
+      $("#botPanel").css("display","none")
+      if(self.currentBot.callbackFn) {
+        return self.currentBot.callbackFn()
+      }
+      return;
+    }
+
+    var key = keys[0];
+
+    if (key == "_OR") {// alternative
+      var alternatives = self.currentObj[key];
+      if (returnValue && alternatives[returnValue]) {
+        var obj = self.currentObj["_OR"][returnValue];
+        var fnName = Object.keys(obj)[0];
+        var fn = self.currentBot.functions[fnName];
+        if (!fn || typeof fn !== "function") {
+          return alert("function not defined :" + fnName);
+        }
+        self.currentObj = obj[fnName];
+        fn();
+      }
+    }
+    else {
+      var fn = self.currentBot.functions[key];
+      if (!fn || typeof fn !== "function") {
+        return alert("function not defined :" + key);
+      }
+      self.currentObj = self.currentObj[key];
+      fn();
+
+    }
+  };
+
+
+
 
   self.clear = function() {
     self.currentBot.start();
@@ -84,52 +123,8 @@ var BotEngine = (function() {
 
 
 
-  self.currentObj=null
-  self.nextStep = function(returnValue) {
-    if(!self.currentObj)
-      self.currentObj=returnValue;
-    var keys = Object.keys(self.currentObj);
 
 
-    if (keys.length == 0) {
-      $("#mainDialogDiv").dialog("close");
-      self.currentQuery.queryText=self.getQueryText();
-      if(self.workflowEndCallbackFn) {
-
-        return self.workflowEndCallbackFn(null, self.currentQuery)
-      }
-      return;
-    }
-
-    var key = keys[0];
-
-    if (key == "_OR") {// alternative
-      var alternatives = self.currentObj[key];
-      if (returnValue && alternatives[returnValue]) {
-        var obj = self.currentObj["_OR"][returnValue];
-        var fnName = Object.keys(obj)[0];
-        var fn = self.currentBot.functions[fnName];
-        if (!fn || typeof fn !== "function") {
-          return alert("function not defined :" + fnName);
-        }
-        self.currentObj = obj[fnName];
-        fn();
-
-
-      }
-
-
-    }
-    else {
-      var fn = self.currentBot.functions[key];
-      if (!fn || typeof fn !== "function") {
-        return alert("function not defined :" + key);
-      }
-
-      fn();
-      self.currentObj = self.currentObj[key];
-    }
-  };
 
 
 
@@ -140,10 +135,7 @@ var BotEngine = (function() {
 
   }
 
-  self.clear = function() {
-    //   self.test();
 
-  };
 
 
   return self;

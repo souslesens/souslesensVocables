@@ -1,95 +1,76 @@
 import botEngine from "./botEngine.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
+import KGquery from "../tools/KGquery/KGquery.js";
+import SparqlQuery_bot from "./sparqlQuery_bot.js";
 
 
-var KGquery_bot=(function(){
-  var self={}
+var KGquery_bot = (function() {
+  var self = {};
+  self.title = "Filter Class";
 
+  self.start = function(currentQuery, validateFn) {
+    BotEngine.init(KGquery_bot, function() {
+      self.validateFn = validateFn;
+      self.callbackFn=function(){
+        var filterLabel= BotEngine.getQueryText()
+        return self.validateFn(null, { filter:  self.filter, filterLabel: filterLabel });
+      }
 
+      self.currentQuery = currentQuery;
+      SparqlQuery_bot.currentQuery = currentQuery;
+      BotEngine.currentObj = self.workflow_filterClass;
+      BotEngine.nextStep(self.workflow_filterClass);
 
-  self.init = function(source,workflowName,classId, varName,validateFn) {
-    self.validateFn=validateFn;
-    $("#mainDialogDiv").dialog("open");
-    $("#mainDialogDiv").load("modules/tools/lineage/html/queryBuilder.html", function() {
-
-
-      //  self.doNext(keywordsTree)
-      var html = Lineage_queryBuilder.getHtml();
-      $("#botDiv").html(html);
-
-      self.start(source,workflowName,classId,varName);
-
-
-    })
-    ;
-
-
+    });
   };
-
-  self.start=function(source,workflowName,classId,varName){
-    Lineage_queryBuilder.currentQuery = { source: source };
-    Lineage_queryBuilder.workflowEndCallbackFn =function(err,queryParams){
-      self.setSparqlQueryFilter(queryParams,varName)
-    }
-    Lineage_queryBuilder.currentQuery.currentClass=classId
-    Lineage_queryBuilder.currentObj = self[workflowName];
-
-    Lineage_queryBuilder.nextStep( self[workflowName])
-  }
-
 
 
   self.workflow_filterClass = {
     "listFilterTypes": {
       "_OR":
         {
-          "label": { "promptIndividualsLabel": {} },
-          "list": { "listIndividuals": {  } },
-          "advanced": { "promptIndividualsAdvandedFilter": {  } },
-         "date": { "promptIndividualsAdvandedFilter": {  } },
-          "period": { "promptIndividualsAdvandedFilter": {  } }
+          "label": { "promptIndividualsLabel": { setSparqlQueryFilter: {} } },
+          "list": { "listIndividuals": { setSparqlQueryFilter: {} } },
+          "advanced": { "promptIndividualsAdvandedFilter": { setSparqlQueryFilter: {} } },
+          "date": { "promptIndividualsAdvandedFilter": { setSparqlQueryFilter: {} } },
+          "period": { "promptIndividualsAdvandedFilter": { setSparqlQueryFilter: {} } }
           // }
         }
     }
-  }
+  };
 
 
-self.setSparqlQueryFilter=function(queryParams,varName){
+  self.functions = SparqlQuery_bot.functions;
 
-  var individualsFilterType = queryParams.individualsFilterType;
-  var individualsFilterValue =queryParams.individualsFilterValue;
-  var advancedFilter = queryParams.advancedFilter || "";
-  var filterLabel= queryParams.queryText;
+  self.functions.setSparqlQueryFilter = function(queryParams, varName) {
+    var varName = self.currentQuery.varName;
+    var individualsFilterType = self.currentQuery.individualsFilterType;
+    var individualsFilterValue = self.currentQuery.individualsFilterValue;
+    var advancedFilter = self.currentQuery.advancedFilter || "";
+    var filterLabel = self.currentQuery.queryText;
 
-  var filter=""
-  if (individualsFilterType == "label") {
-    filter = Sparql_common.setFilter(varName, null, individualsFilterValue);
-  }
-  else if (individualsFilterType == "list") {
-    filter = Sparql_common.setFilter(varName, individualsFilterValue, null, { useFilterKeyWord: 1 });
-  }
-  else if (individualsFilterType == "advanced") {
-    filter = advancedFilter;
-  }
-
-  if (self.validateFn) {
-    return self.validateFn(null, {filter:filter,filterLabel:filterLabel});
-  }
-
-
-}
+   self.filter = "";
+    if (individualsFilterType == "label") {
+      self.filter = Sparql_common.setFilter(varName, null, individualsFilterValue);
+    }
+    else if (individualsFilterType == "list") {
+      self.filter = Sparql_common.setFilter(varName, individualsFilterValue, null, { useFilterKeyWord: 1 });
+    }
+    else if (individualsFilterType == "advanced") {
+      self.filter = advancedFilter;
+    }
+    BotEngine.nextStep()
 
 
 
 
+  };
 
 
   return self;
 
 
-
-
-})()
+})();
 
 export default KGquery_bot;
-window.KGquery_bot=KGquery_bot
+window.KGquery_bot = KGquery_bot;

@@ -16,19 +16,46 @@ var SparqlQuery_bot = (function() {
 
 
 
-    self.start = function() {
+self.start=function() {
+  BotEngine.init(SparqlQuery_bot, function() {
+    self.title = "Query graph"
+    self.currentQuery = { source: Lineage_sources.activeSource };
+    BotEngine.currentObj = self.workflow;
+    BotEngine.nextStep(self.workflow);
 
-      self.currentQuery = { source: Lineage_sources.activeSource };
-      BotEngine.currentObj = self.workflow;
-      BotEngine.nextStep(self.workflow);
+  })
+}
+
+
+
+    self.workflow_individualsFilter = {
+      "listFilterTypes": {
+        "_OR":
+          {
+            "label": { "promptIndividualsLabel": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
+            "list": { "listIndividuals": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
+            "advanced": { "promptIndividualsAdvandedFilter": { "listWhiteBoardFilterType": { "executeQuery": {} } } }
+            // }
+          }
+      }
     };
 
 
+    self.workflow_individualsRole = {
+      "listIndividualFilterRole": {
+        "_OR":
+          {
+            "all": {
+              "listWhiteBoardFilterType": {
+                "executeQuery": {}
+              }
+            },
+            "subject": self.workflow_individualsFilter,
+            "object": self.workflow_individualsFilter
+          }
+      }
 
-
-
-
-
+    };
 
 
     self.workflow = {
@@ -66,32 +93,8 @@ var SparqlQuery_bot = (function() {
         }
       }
     };
-    self.workflow_individualsRole = {
-      "listIndividualFilterType": {
-        "_OR":
-          {
-            "all": {
-              "listWhiteBoardFilterType": {
-                "executeQuery": {}
-              }
-            },
-            "subject": self.workflow_individualsFilter,
-            "object": self.workflow_individualsFilter
-          }
-      }
 
-    };
-    self.workflow_individualsFilter = {
-      "listFilterTypes": {
-        "_OR":
-          {
-            "label": { "promptIndividualsLabel": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
-            "list": { "listIndividuals": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
-            "advanced": { "promptIndividualsAdvandedFilter": { "listWhiteBoardFilterType": { "executeQuery": {} } } }
-            // }
-          }
-      }
-    };
+
 
 
 
@@ -109,7 +112,7 @@ var SparqlQuery_bot = (function() {
         for (var key in Config.basicVocabularies) {
           vocabs.push({ id: key, label: key });
         }
-       BotEngine.showList(vocabs, "currentVocab");
+        BotEngine.showList(vocabs, "currentVocab");
 
 
       },
@@ -119,7 +122,7 @@ var SparqlQuery_bot = (function() {
           { id: "Property", label: "Property" }
         ];
 
-       BotEngine.showList(choices, null);
+        BotEngine.showList(choices, null);
         return;
 
       },
@@ -132,7 +135,7 @@ var SparqlQuery_bot = (function() {
           var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
           classes.push({ id: classId.id, label: classId.label });
         }
-       BotEngine.showList(classes, "currentClass");
+        BotEngine.showList(classes, "currentClass");
       },
 
       listPropertiesFn: function() {
@@ -142,7 +145,7 @@ var SparqlQuery_bot = (function() {
           var prop = Config.ontologiesVocabularyModels[vocab].properties[key];
           props.push({ id: prop.id, label: prop.label });
         }
-       BotEngine.showList(props, "currentProperty");
+        BotEngine.showList(props, "currentProperty");
 
       },
 
@@ -186,14 +189,14 @@ var SparqlQuery_bot = (function() {
             BotEngine.nextStep("empty");
             return;
           }
-         BotEngine.showList(paths, "path", "ok");
+          BotEngine.showList(paths, "path", "ok");
           return;
 
 
         });
       },
 
-      listIndividualFilterType: function() {
+      listIndividualFilterRole: function() {
 
         var subject = "subject";
         var object = "object";
@@ -207,9 +210,9 @@ var SparqlQuery_bot = (function() {
         var choices = [
           { id: "all", label: "all individuals" },
           { id: "subject", label: ("filter " + subject) },
-          { id: "object", label: ("filter " + object )}
+          { id: "object", label: ("filter " + object) }
         ];
-       BotEngine.showList(choices, "individualsFilterRole");
+        BotEngine.showList(choices, "individualsFilterRole");
         return;
 
 
@@ -221,7 +224,7 @@ var SparqlQuery_bot = (function() {
           { id: "list", label: "choose in list" },
           { id: "advanced", label: "advanced search" }
         ];
-       BotEngine.showList(choices, "individualsFilterType");
+        BotEngine.showList(choices, "individualsFilterType");
 
       },
 
@@ -239,20 +242,20 @@ var SparqlQuery_bot = (function() {
             });
 
           });
-         BotEngine.showList(individuals, "individualsFilterValue");
+          BotEngine.showList(individuals, "individualsFilterValue");
 
         });
       },
       promptIndividualsLabel: function() {
         self.currentQuery.individualsFilterValue = prompt("label contains ");
-        self.writeCompletedHtml(self.currentQuery.individualsFilterValue)
+        BotEngine.writeCompletedHtml(self.currentQuery.individualsFilterValue)
         BotEngine.nextStep();
 
       },
       promptIndividualsAdvandedFilter: function() {
         IndividualValueFilterWidget.showDialog(null, self.currentQuery.source, self.currentQuery.individualsFilterRole, self.currentQuery.currentClass, null, function(err, filter) {
           self.currentQuery.advancedFilter = filter;
-          self.writeCompletedHtml(self.currentQuery.advancedFilter)
+          BotEngine.writeCompletedHtml(self.currentQuery.advancedFilter)
           BotEngine.nextStep("advanced");
         });
       },
@@ -263,139 +266,124 @@ var SparqlQuery_bot = (function() {
           { id: "whiteboardNodes", label: "whiteboard nodes" },
           { id: "sourceNodes", label: "all Source Nodes" }
         ];
-       BotEngine.showList(choices, "whiteboardFilterType");
+        BotEngine.showList(choices, "whiteboardFilterType");
 
       },
       executeQuery: function() {
-        self.executeQuery();
-      }
 
+        var source = self.currentQuery.source;
+        var currentClass = self.currentQuery.currentClass;
+        var currentProperty = self.currentQuery.currentProperty;
+        var path = self.currentQuery.path;
+        var individualsFilterRole = self.currentQuery.individualsFilterRole;
+        var individualsFilterType = self.currentQuery.individualsFilterType;
+        var individualsFilterValue = self.currentQuery.individualsFilterValue;
+        var advancedFilter = self.currentQuery.advancedFilter || "";
 
-    };
-
-
-
-
-
-
-
-
-    self.executeQuery = function() {
-      var source = self.currentQuery.source;
-      var currentClass = self.currentQuery.currentClass;
-      var currentProperty = self.currentQuery.currentProperty;
-      var path = self.currentQuery.path;
-      var individualsFilterRole = self.currentQuery.individualsFilterRole;
-      var individualsFilterType = self.currentQuery.individualsFilterType;
-      var individualsFilterValue = self.currentQuery.individualsFilterValue;
-      var advancedFilter = self.currentQuery.advancedFilter || "";
-
-      function getPathFilter() {
-        if (!path) {
-          if (currentClass) {
-            return Sparql_common.setFilter("subjectType", currentClass, null, { useFilterKeyWord: 1 });
+        function getPathFilter() {
+          if (!path) {
+            if (currentClass) {
+              return Sparql_common.setFilter("subjectType", currentClass, null, { useFilterKeyWord: 1 });
+            }
+            if (currentProperty) {
+              return Sparql_common.setFilter("prop", currentProperty);
+            }
           }
-          if (currentProperty) {
-            return Sparql_common.setFilter("prop", currentProperty);
+          var array = path.split("|");
+          if (array.length != 3) {
+            return "";
           }
+          var propFilter = Sparql_common.setFilter("prop", array[1]);
+          var subjectClassFilter = Sparql_common.setFilter("subjectType", array[0], null, { useFilterKeyWord: 1 });
+          var objectClassFilter = Sparql_common.setFilter("objectType", array[2], null, { useFilterKeyWord: 1 });
+          return propFilter + " " + subjectClassFilter + " " + objectClassFilter;
         }
-        var array = path.split("|");
-        if (array.length != 3) {
-          return "";
-        }
-        var propFilter = Sparql_common.setFilter("prop", array[1]);
-        var subjectClassFilter = Sparql_common.setFilter("subjectType", array[0], null, { useFilterKeyWord: 1 });
-        var objectClassFilter = Sparql_common.setFilter("objectType", array[2], null, { useFilterKeyWord: 1 });
-        return propFilter + " " + subjectClassFilter + " " + objectClassFilter;
-      }
 
-      function getIndividualsFilter() {
-        var filter = "";
-        if (!individualsFilterRole) {
-          return "";
+        function getIndividualsFilter() {
+          var filter = "";
+          if (!individualsFilterRole) {
+            return "";
+          }
+          if (individualsFilterType == "label") {
+            filter = Sparql_common.setFilter(individualsFilterRole, null, individualsFilterValue);
+          }
+          else if (individualsFilterType == "list") {
+            filter = Sparql_common.setFilter(individualsFilterRole, individualsFilterValue, null, { useFilterKeyWord: 1 });
+          }
+          else if (individualsFilterType == "advanced") {
+            filter = advancedFilter;
+          }
+          return filter;
         }
-        if (individualsFilterType == "label") {
-          filter = Sparql_common.setFilter(individualsFilterRole, null, individualsFilterValue);
-        }
-        else if (individualsFilterType == "list") {
-          filter = Sparql_common.setFilter(individualsFilterRole, individualsFilterValue, null, { useFilterKeyWord: 1 });
-        }
-        else if (individualsFilterType == "advanced") {
-          filter = advancedFilter;
-        }
-        return filter;
-      }
 
-      function getWhiteBoardFilter() {
-        var data;
+        function getWhiteBoardFilter() {
+          var data;
 
-        var whiteboardFilterType = self.currentQuery.whiteboardFilterType;
+          var whiteboardFilterType = self.currentQuery.whiteboardFilterType;
 
-        if (whiteboardFilterType == "selectedNode") {
-          data = Lineage_whiteboard.currentGraphNode.data.id;
+          if (whiteboardFilterType == "selectedNode") {
+            data = Lineage_whiteboard.currentGraphNode.data.id;
 
-        }
-        else if (whiteboardFilterType == "whiteboardNodes") {
-          Lineage_sources.fromAllWhiteboardSources = true;
-          if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+          }
+          else if (whiteboardFilterType == "whiteboardNodes") {
+            Lineage_sources.fromAllWhiteboardSources = true;
+            if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+              data = null;
+            }
+            else {
+              data = [];
+              var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+              nodes.forEach(function(node) {
+                if (node.data && (!node.data.type || node.data.type != "literal")) {
+                  data.push(node.id);
+                }
+              });
+            }
+          }
+          else if (whiteboardFilterType == "all") {
             data = null;
           }
-          else {
-            data = [];
-            var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
-            nodes.forEach(function(node) {
-              if (node.data && (!node.data.type || node.data.type != "literal")) {
-                data.push(node.id);
-              }
-            });
-          }
-        }
-        else if (whiteboardFilterType == "all") {
-          data = null;
+
+          return data;
         }
 
-        return data;
+
+        var data = getWhiteBoardFilter();
+        var filter = getPathFilter() + " " + getIndividualsFilter();
+        var options = {
+          filter: filter
+        };
+
+        Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);
+     BotEngine.nextStep()
+
       }
-
-
-      var data = getWhiteBoardFilter();
-      var filter = getPathFilter() + " " + getIndividualsFilter();
-      var options = {
-        filter: filter
-      };
-
-      Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);
-      $("#mainDialogDiv").dialog("close")
-
-
     }
-    ;
+
 
     self.getSourceInferredModelVisjsData = function(sourceLabel, callback) {
-      if (self.currentQuery.currentSourceInferredModelVijsData) {
-        return callback(null, self.currentQuery.currentSourceInferredModelVijsData);
-      }
-      var visjsGraphFileName = self.currentQuery.source + "_KGmodelGraph.json";
-      $.ajax({
-        type: "GET",
-        url: `${Config.apiUrl}/data/file?dir=graphs&fileName=${visjsGraphFileName}`,
-        dataType: "json",
-        success: function(result, _textStatus, _jqXHR) {
-          self.currentQuery.currentSourceInferredModelVijsData = JSON.parse(result);
+        if (self.currentQuery.currentSourceInferredModelVijsData) {
           return callback(null, self.currentQuery.currentSourceInferredModelVijsData);
-        }, error: function(err) {
-          return callback(err);
         }
-      });
+        var visjsGraphFileName = self.currentQuery.source + "_KGmodelGraph.json";
+        $.ajax({
+          type: "GET",
+          url: `${Config.apiUrl}/data/file?dir=graphs&fileName=${visjsGraphFileName}`,
+          dataType: "json",
+          success: function(result, _textStatus, _jqXHR) {
+            self.currentQuery.currentSourceInferredModelVijsData = JSON.parse(result);
+            return callback(null, self.currentQuery.currentSourceInferredModelVijsData);
+          }, error: function(err) {
+            return callback(err);
+          }
+        });
 
-
-    };
+      }
 
     return self;
 
 
-  }
-)
+  })
 ();
 
 export default SparqlQuery_bot;

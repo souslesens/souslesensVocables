@@ -107,23 +107,22 @@ var KGquery = (function() {
     };
 
 
-    self.addNodeToQueryElement = function(queryElement, node, role,newVarName) {
+    self.addNodeToQueryElement = function(queryElement, node, role, newVarName) {
 
-      var node2=JSON.parse(JSON.stringify(node))
-      if(newVarName) {
+      var node2 = JSON.parse(JSON.stringify(node));
+      if (newVarName) {
         var countVarInSet = KGquery_paths.countNodeVarExistingInSet(node.id, self.currentQuerySet);
         if (countVarInSet > 0) {
-          node2.varName=node.label+"_"+ countVarInSet;
+          node2.varName = node.label + "_" + countVarInSet;
         }
-      }else{
-        node2.varName=node.label
+      }
+      else {
+        node2.varName = node.label;
       }
 
 
-      self.classeMap[ node2.varName] = node2;
+      self.classeMap[node2.varName] = node2;
       queryElement[role] = node2;
-
-
 
 
       var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId, node.data.label);
@@ -143,22 +142,23 @@ var KGquery = (function() {
 
       if (self.currentQuerySet.elements.length > 1) {
         var excludeSelf = false;
-        var countVar=KGquery_paths.countNodeVarExistingInSet(node.id, self.currentQuerySet)
-        if ( countVar> 0 && !nodeEvent.ctrlKey) {
+        var countVar = KGquery_paths.countNodeVarExistingInSet(node.id, self.currentQuerySet);
+        if (countVar > 0 && !nodeEvent.ctrlKey) {
           excludeSelf = true;
         }
-        var newVarName=false;
-        if ( countVar> 0 && !nodeEvent.ctrlKey)
-          newVarName=true;
+        var newVarName = false;
+        if (countVar > 0 && !nodeEvent.ctrlKey) {
+          newVarName = true;
+        }
 
         $("#KGquery_SetsControlsDiv").css("display", "flex");
-        KGquery_paths.getNearestNode(node.id, self.currentQuerySet,excludeSelf, function(err, nearestNodeId) {
+        KGquery_paths.getNearestNode(node.id, self.currentQuerySet, excludeSelf, function(err, nearestNodeId) {
           if (err) {
             return acllback(err.responseText);
           }
 
 
-          self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode",newVarName);
+          self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode", newVarName);
           var nearestNode = self.classeMap[nearestNodeId];
           self.addNodeToQueryElement(self.currentQueryElement, nearestNode, "toNode");
 
@@ -209,7 +209,13 @@ var KGquery = (function() {
       var varName = [self.getVarName(aClass, true)];
       var datatype = aClass.data.datatype;
 
-      KGquery_bot.init(self.currentSource, "workflow_filterClass", aClass.id, self.getVarName(aClass, true), function(err, result) {
+      var currentFilterQuery = {
+        source: self.currentSource,
+        currentClass: aClass.id,
+        varName: self.getVarName(aClass, true)
+      };
+
+      KGquery_bot.start(currentFilterQuery, function(err, result) {
         if (err) {
           return alert(err.responseText);
         }

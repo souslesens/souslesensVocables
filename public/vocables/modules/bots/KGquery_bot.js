@@ -16,8 +16,8 @@ var KGquery_bot = (function() {
         return self.validateFn(null, { filter:  self.filter, filterLabel: filterLabel });
       }
 
-      self.currentQuery = currentQuery;
-      SparqlQuery_bot.currentQuery = currentQuery;
+      self.params = currentQuery;
+      SparqlQuery_bot.params = currentQuery;
       BotEngine.currentObj = self.workflow_filterClass;
       BotEngine.nextStep(self.workflow_filterClass);
 
@@ -43,11 +43,11 @@ var KGquery_bot = (function() {
   self.functions = SparqlQuery_bot.functions;
 
   self.functions.setSparqlQueryFilter = function(queryParams, varName) {
-    var varName = self.currentQuery.varName;
-    var individualsFilterType = self.currentQuery.individualsFilterType;
-    var individualsFilterValue = self.currentQuery.individualsFilterValue;
-    var advancedFilter = self.currentQuery.advancedFilter || "";
-    var filterLabel = self.currentQuery.queryText;
+    var varName = self.params.varName;
+    var individualsFilterType = self.params.individualsFilterType;
+    var individualsFilterValue = self.params.individualsFilterValue;
+    var advancedFilter = self.params.advancedFilter || "";
+    var filterLabel = self.params.queryText;
 
    self.filter = "";
     if (individualsFilterType == "label") {

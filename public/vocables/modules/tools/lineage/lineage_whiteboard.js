@@ -20,6 +20,7 @@ import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Lineage_createResource from "./lineage_createResource.js";
+import CreateResource_bot from "../../bots/CreateResource_bot.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -698,6 +699,9 @@ var Lineage_whiteboard = (function () {
                     }
                 },
                 addNode: function (nodeData, callback) {
+
+                    CreateResource_bot.start()
+                    return;
                     Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
                         if (err) {
                             return callback(err.responseText);

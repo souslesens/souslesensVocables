@@ -6,12 +6,12 @@ import BotEngine from "./botEngine.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 
 
-var CreateResource_bot = (function() {
+var KGcreator_bot = (function() {
   var self = {};
   self.title = "Create Resource";
 
   self.start = function() {
-    BotEngine.init(CreateResource_bot, function() {
+    BotEngine.init(KGcreator_bot, function() {
       self.source = Lineage_sources.activeSource;
       self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
       BotEngine.currentObj = self.workflow;
@@ -22,15 +22,13 @@ var CreateResource_bot = (function() {
 
 
   self.workflow = {
-
     "listResourceTypes": {
       "_OR":
         {
           "Class": { "promptResourceLabel": { listVocabsFn: { listSuperClasses: { _OR: { editResource: {}, drawResource: {} } } } } },
-          "ObjectProperty": { "promptResourceLabel": { listVocabsFn: { listObjectProperties: { _OR: { editResource: {}, drawResource: {} } } } } },
+          "ObjectProperty": { "promptResourceLabel": { listVocabsFn: { listSuperObjectProperties: { _OR: { editResource: {}, drawResource: {} } } } } },
           "AnnotationProperty": { "promptResourceLabel": { listDatatypeProperties: {} } },
           "Individual": { "promptResourceLabel": { listVocabsFn: { listSuperClasses: { _OR: { editResource: {}, drawResource: {} } } } } }
-
 
         }
 
@@ -39,6 +37,7 @@ var CreateResource_bot = (function() {
 
 
   self.functions = {
+
     listResourceTypes: function(queryParams, varName) {
       var choices = [
         { id: "Class", label: "Class" },
@@ -57,20 +56,15 @@ var CreateResource_bot = (function() {
       imports.forEach(function(importSource) {
         vocabs.push({ id: importSource, label: importSource });
       });
-
-
       BotEngine.showList(vocabs, "currentVocab");
-
-
     },
-
 
     promptResourceLabel: function() {
       self.params.resourceLabel = prompt("resource label ");
       BotEngine.writeCompletedHtml(self.params.resourceLabel);
       BotEngine.nextStep();
-
     },
+
     listSuperClasses: function(queryParams, varName) {
         var vocab = self.params.currentVocab;
         var classes = [{ id: "owl:Thing", label: "owl:Thing" }];
@@ -79,15 +73,29 @@ var CreateResource_bot = (function() {
           classes.push({ id: classId.id, label: classId.label });
         }
         BotEngine.showList(classes, "superClass");
-
     },
+    listSuperObjectProperties: function(queryParams, varName) {
+      var vocab = self.params.currentVocab;
+      var classes = [{ id: "owl:Thing", label: "owl:Thing" }];
+      for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
+        var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
+        classes.push({ id: classId.id, label: classId.label });
+      }
+      BotEngine.showList(classes, "superClass");
+    },
+
     listDatatypeProperties: function(queryParams, varName) {
 
+
     },
+
+    editResource: function(queryParams, varName) {
+
+    },
+
     editResource: function(queryParams, varName) {
 
     }
-
   };
 
 
@@ -96,5 +104,5 @@ var CreateResource_bot = (function() {
 
 })();
 
-export default CreateResource_bot;
-window.CreateResource_bot = CreateResource_bot;
+export default KGcreator_bot;
+window.KGcreator_bot = KGcreator_bot;

@@ -24,7 +24,7 @@ var BotEngine = (function() {
 
     if (keys.length == 0) {
       $("#mainDialogDiv").dialog("close");
-      self.currentBot.currentQuery.queryText=self.getQueryText();
+      self.currentBot.params.queryText=self.getQueryText();
       $("#botPanel").css("display","none")
       if(self.currentBot.callbackFn) {
         return self.currentBot.callbackFn()
@@ -67,6 +67,11 @@ var BotEngine = (function() {
   };
 
 
+  self.close = function() {
+    $("#botPanel").css("display","none")
+
+  };
+
 
   self.showList = function(values, varToFill, returnValue) {
 
@@ -91,7 +96,7 @@ var BotEngine = (function() {
 
       var selectedValue = $(this).val();
       if (varToFill) {
-        self.currentBot.currentQuery[varToFill] = selectedValue;
+        self.currentBot.params[varToFill] = selectedValue;
       }
       self.nextStep(returnValue || selectedValue);
     });

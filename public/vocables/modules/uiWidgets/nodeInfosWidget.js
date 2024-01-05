@@ -12,6 +12,7 @@ import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
 import Lineage_axioms_create from "../tools/lineage/lineage_axioms_create.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import authentication from "../shared/authentification.js";
+import AxiomsEditor from "../tools/lineage/axiomsEditor.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
@@ -190,6 +191,7 @@ var NodeInfosWidget = (function () {
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
 
             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
+            str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='AxiomEditor.showDialog()'> Axiomatic Definiton </button>";
         }
 
         if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {

@@ -13,7 +13,7 @@ var CreateSLSVsource_bot = (function() {
   self.start = function(currentQuery, validateFn) {
     BotEngine.init(KGquery_bot, function() {
 
-      SparqlQuery_bot.currentQuery = { source: Lineage_sources.activeSource };
+      SparqlQuery_botparams = { source: Lineage_sources.activeSource };
       self.resource = { resourceType: "", resourceLabel: "" };
       BotEngine.currentObj = self.workflow;
       BotEngine.nextStep(self.workflow);
@@ -27,10 +27,10 @@ var CreateSLSVsource_bot = (function() {
       "listResourceTypes": {
         "_OR":
           {
-            "Class": { "promptResourceLabel": { listSuperClasses: {} } },
-            "Individual": { "promptResourceLabel": { setSparqlQueryFilter: {} } },
-            "ObjectProperty": { "promptResourceLabel": { setSparqlQueryFilter: {} } },
-            "AnnotationProperty": { "promptResourceLabel": { setSparqlQueryFilter: {} } }
+            "Class": { "promptResourceLabel": { listSuperClasses: {_OR:{editResource:{},drawResource:{}} } },
+            "Individual": { "promptResourceLabel": { listSuperClasses: {_OR:{editResource:{},drawResource:{}} } } } },
+            "ObjectProperty": { "promptResourceLabel": { listObjectProperties: {_OR:{editResource:{},drawResource:{}} }  } },
+            "AnnotationProperty": { "promptResourceLabel": { listDatatypeProperties: {} } }
 
 
           }
@@ -38,22 +38,35 @@ var CreateSLSVsource_bot = (function() {
     }
   };
 
-  self.functions = SparqlQuery_bot.function();
-  self.functions.listResourceTypes = function(queryParams, varName) {
-    var choices = [
-      { id: "Class", label: "Class" },
-      { id: "Individual", label: "Individual" },
-      { id: "ObjectProperty", label: "ObjectProperty" },
-      { id: "AnnotationProperty", label: "AnnotationProperty" }
-    ];
-    BotEngine.showList(choices, "resourceType");
-  };
-  self.functions.promptResourceLabel = function() {
-    self.resource.resourceLabel = prompt("label contains ");
-    BotEngine.writeCompletedHtml(self.resource.resourceLabel);
-    BotEngine.nextStep();
 
-  };
+  self.functions= {
+    listResourceTypes: function(queryParams, varName) {
+      var choices = [
+        { id: "Class", label: "Class" },
+        { id: "Individual", label: "Individual" },
+        { id: "ObjectProperty", label: "ObjectProperty" },
+        { id: "AnnotationProperty", label: "AnnotationProperty" }
+      ];
+      BotEngine.showList(choices, "resourceType");
+    },
+
+    promptResourceLabel: function() {
+      self.resource.resourceLabel = prompt("label contains ");
+      BotEngine.writeCompletedHtml(self.resource.resourceLabel);
+      BotEngine.nextStep();
+
+    },
+    listSuperClasses: function(queryParams, varName) {
+
+    },
+    listDatatypeProperties: function(queryParams, varName) {
+
+    },
+    editResource: function(queryParams, varName) {
+
+    },
+
+  }
 
 
   return self;
@@ -61,5 +74,5 @@ var CreateSLSVsource_bot = (function() {
 
 })();
 
-export default KGquery_bot;
-window.KGquery_bot = KGquery_bot;
+export default CreateSLSVsource_bot;
+window.CreateSLSVsource_bot = CreateSLSVsource_bot;

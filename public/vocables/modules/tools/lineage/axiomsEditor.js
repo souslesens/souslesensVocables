@@ -1,30 +1,27 @@
 import common from "../../shared/common.js";
+import ManchesterSyntaxWidget from "../../bots/manchesterSyntaxWidget.js";
 
 
 var AxiomsEditor = (function() {
 
   var self = {};
   self.keywordsMap = null;
-  self.showDialog = function(sourceLabel) {
-    if (!sourceLabel) {
-      sourceLabel = Lineage_sources.activeSource;
-    }
+  self.showDialog = function() {
 
+    var sourceLabel = Lineage_sources.activeSource;
 
     $("#smallDialogDiv").dialog("open");
     $("#smallDialogDiv").load("modules/tools/lineage/html/axiomEditor.html", function() {
-      self.init(sourceLabel);
-    });
-  };
-  self.init = function(sourceLabel) {
-    var keyWords= {
-      "and": { css: "bot-syntax", id: "and", label: "and" },
-      "or": { css: "bot-syntax", id: "or", label: "or" },
-      "(": { css: "bot-syntax", id: "(", label: "(" },
-      ")": { css: "bot-syntax", id: ")", label: ")" }
-    }
 
-      BotWidget.init("axiomTA", sourceLabel,keyWords);
+      var keyWords = {
+        "and": { css: "bot-syntax", id: "and", label: "and" },
+        "or": { css: "bot-syntax", id: "or", label: "or" },
+        "(": { css: "bot-syntax", id: "(", label: "(" },
+        ")": { css: "bot-syntax", id: ")", label: ")" }
+      }
+
+      ManchesterSyntaxWidget.init("axiomInputDiv", sourceLabel, keyWords);
+    })
   };
 
 

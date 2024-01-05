@@ -7,12 +7,15 @@ import Lineage_blend from "./lineage_blend.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Lineage_axioms_draw from "./lineage_axioms_draw.js";
 import AxiomsEditor from "./axiomsEditor.js";
+import CreateResource_bot from "../../bots/CreateResource_bot.js";
+
 
 
 var Lineage_createResource = (function() {
   var self = {};
 
   self.showAddNodeGraphDialog = function() {
+
     self.currentResourceTriples = [];
     self.currentResourceUri = null;
     self.selectedNode = Lineage_whiteboard.currentGraphNode;

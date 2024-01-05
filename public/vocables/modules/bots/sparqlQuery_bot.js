@@ -19,7 +19,7 @@ var SparqlQuery_bot = (function() {
 self.start=function() {
   BotEngine.init(SparqlQuery_bot, function() {
     self.title = "Query graph"
-    self.currentQuery = { source: Lineage_sources.activeSource };
+    self.params = { source: Lineage_sources.activeSource };
     BotEngine.currentObj = self.workflow;
     BotEngine.nextStep(self.workflow);
 
@@ -129,7 +129,7 @@ self.start=function() {
 
 
       listClassesFn: function() {
-        var vocab = self.currentQuery.currentVocab;
+        var vocab = self.params.currentVocab;
         var classes = [];
         for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
           var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
@@ -139,7 +139,7 @@ self.start=function() {
       },
 
       listPropertiesFn: function() {
-        var vocab = self.currentQuery.currentVocab;
+        var vocab = self.params.currentVocab;
         var props = [];
         for (var key in Config.ontologiesVocabularyModels[vocab].properties) {
           var prop = Config.ontologiesVocabularyModels[vocab].properties[key];
@@ -151,11 +151,11 @@ self.start=function() {
 
 
       listPredicatePathsFn: function() {
-        var property = self.currentQuery.currentProperty;
-        var fromClass = self.currentQuery.currentClass;
-        var toClass = self.currentQuery.currentClass;
+        var property = self.params.currentProperty;
+        var fromClass = self.params.currentClass;
+        var toClass = self.params.currentClass;
 
-        self.getSourceInferredModelVisjsData(self.currentQuery.source + "_KGmodelGraph.json", function(err, visjsData) {
+        self.getSourceInferredModelVisjsData(self.params.source + "_KGmodelGraph.json", function(err, visjsData) {
           if (err) {
             console.log(err.responseText);
             return BotEngine.nextStep("empty");
@@ -200,8 +200,8 @@ self.start=function() {
 
         var subject = "subject";
         var object = "object";
-        if (self.currentQuery.path) {
-          var array = self.currentQuery.path.split("|");
+        if (self.params.path) {
+          var array = self.params.path.split("|");
           if (array.length == 3) {
             subject = Sparql_common.getLabelFromURI(array[0]);
             object = Sparql_common.getLabelFromURI(array[2]);
@@ -230,7 +230,7 @@ self.start=function() {
 
 
       listIndividuals: function() {
-        Sparql_OWL.getDistinctClassLabels(self.currentQuery.source, [self.currentQuery.currentClass], {}, function(err, result) {
+        Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], {}, function(err, result) {
           if (err) {
             return alert(err);
           }
@@ -247,15 +247,15 @@ self.start=function() {
         });
       },
       promptIndividualsLabel: function() {
-        self.currentQuery.individualsFilterValue = prompt("label contains ");
-        BotEngine.writeCompletedHtml(self.currentQuery.individualsFilterValue)
+        self.params.individualsFilterValue = prompt("label contains ");
+        BotEngine.writeCompletedHtml(self.params.individualsFilterValue)
         BotEngine.nextStep();
 
       },
       promptIndividualsAdvandedFilter: function() {
-        IndividualValueFilterWidget.showDialog(null, self.currentQuery.source, self.currentQuery.individualsFilterRole, self.currentQuery.currentClass, null, function(err, filter) {
-          self.currentQuery.advancedFilter = filter;
-          BotEngine.writeCompletedHtml(self.currentQuery.advancedFilter)
+        IndividualValueFilterWidget.showDialog(null, self.params.source, self.params.individualsFilterRole, self.params.currentClass, null, function(err, filter) {
+          self.params.advancedFilter = filter;
+          BotEngine.writeCompletedHtml(self.params.advancedFilter)
           BotEngine.nextStep("advanced");
         });
       },
@@ -271,14 +271,14 @@ self.start=function() {
       },
       executeQuery: function() {
 
-        var source = self.currentQuery.source;
-        var currentClass = self.currentQuery.currentClass;
-        var currentProperty = self.currentQuery.currentProperty;
-        var path = self.currentQuery.path;
-        var individualsFilterRole = self.currentQuery.individualsFilterRole;
-        var individualsFilterType = self.currentQuery.individualsFilterType;
-        var individualsFilterValue = self.currentQuery.individualsFilterValue;
-        var advancedFilter = self.currentQuery.advancedFilter || "";
+        var source = self.params.source;
+        var currentClass = self.params.currentClass;
+        var currentProperty = self.params.currentProperty;
+        var path = self.params.path;
+        var individualsFilterRole = self.params.individualsFilterRole;
+        var individualsFilterType = self.params.individualsFilterType;
+        var individualsFilterValue = self.params.individualsFilterValue;
+        var advancedFilter = self.params.advancedFilter || "";
 
         function getPathFilter() {
           if (!path) {
@@ -319,7 +319,7 @@ self.start=function() {
         function getWhiteBoardFilter() {
           var data;
 
-          var whiteboardFilterType = self.currentQuery.whiteboardFilterType;
+          var whiteboardFilterType = self.params.whiteboardFilterType;
 
           if (whiteboardFilterType == "selectedNode") {
             data = Lineage_whiteboard.currentGraphNode.data.id;
@@ -362,17 +362,17 @@ self.start=function() {
 
 
     self.getSourceInferredModelVisjsData = function(sourceLabel, callback) {
-        if (self.currentQuery.currentSourceInferredModelVijsData) {
-          return callback(null, self.currentQuery.currentSourceInferredModelVijsData);
+        if (self.params.currentSourceInferredModelVijsData) {
+          return callback(null, self.params.currentSourceInferredModelVijsData);
         }
-        var visjsGraphFileName = self.currentQuery.source + "_KGmodelGraph.json";
+        var visjsGraphFileName = self.params.source + "_KGmodelGraph.json";
         $.ajax({
           type: "GET",
           url: `${Config.apiUrl}/data/file?dir=graphs&fileName=${visjsGraphFileName}`,
           dataType: "json",
           success: function(result, _textStatus, _jqXHR) {
-            self.currentQuery.currentSourceInferredModelVijsData = JSON.parse(result);
-            return callback(null, self.currentQuery.currentSourceInferredModelVijsData);
+            self.params.currentSourceInferredModelVijsData = JSON.parse(result);
+            return callback(null, self.params.currentSourceInferredModelVijsData);
           }, error: function(err) {
             return callback(err);
           }

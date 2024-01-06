@@ -19,15 +19,16 @@ var Lineage_createResource = (function() {
     self.currentResourceTriples = [];
     self.currentResourceUri = null;
     self.selectedNode = Lineage_whiteboard.currentGraphNode;
+    self.currentSource=Lineage_sources.activeSource
     $("#LineagePopup").dialog("open");
-    $("#LineagePopup").dialog("option", "title", "Create resource in source " + Lineage_sources.activeSource);
+    $("#LineagePopup").dialog("option", "title", "Create resource in source " + self.currentSource);
 
     $("#LineagePopup").load("modules/tools/lineage/html/createResourceDialog.html", function() {
       $("#editPredicate_mainDiv").remove();
     AxiomEditor.init(Lineage_sources.activeSource)
      // $("#lineageCreateResource_labelInput").focus();
 
-      PredicatesSelectorWidget.load("lineageCreateResource_objectDiv", Lineage_sources.activeSource, {}, function() {
+      PredicatesSelectorWidget.load("lineageCreateResource_objectDiv", self.currentSource, {}, function() {
         $("#editPredicate_propertyDiv").css("display", "none");
         $("#editPredicate_controlsDiv").css("display", "none");
 
@@ -56,9 +57,9 @@ var Lineage_createResource = (function() {
     if (type == "owl:Class") {
       self.currentPredicate = "rdfs:subClassOf";
       $("#lineageCreateResource_predicateDiv").html("owl:subClassOf");
-      PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_all");
-      $("#editPredicate_vocabularySelect2").val(Lineage_sources.activeSource);
-      PredicatesSelectorWidget.setCurrentVocabClassesSelect(Lineage_sources.activeSource);
+      PredicatesSelectorWidget.setVocabulariesSelect(self.currentSource, "_all");
+      $("#editPredicate_vocabularySelect2").val(self.currentSource);
+      PredicatesSelectorWidget.setCurrentVocabClassesSelect(self.currentSource);
       if(self.selectedNode){
         $("#editPredicate_objectValue").val(self.selectedNode.id)
       }
@@ -66,16 +67,79 @@ var Lineage_createResource = (function() {
     else if (type == "owl:NamedIndividual") {
       self.currentPredicate = "rdf:type";
       $("#lineageCreateResource_predicateDiv").html("rdf:type");
-      PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_curentSourceAndImports");
-      $("#editPredicate_vocabularySelect2").val(Lineage_sources.activeSource);
-      PredicatesSelectorWidget.setCurrentVocabClassesSelect(Lineage_sources.activeSource);
+      PredicatesSelectorWidget.setVocabulariesSelect(self.currentSource, "_curentSourceAndImports");
+      $("#editPredicate_vocabularySelect2").val(self.currentSource);
+      PredicatesSelectorWidget.setCurrentVocabClassesSelect(self.currentSource);
       if(self.selectedNode){
         $("#editPredicate_objectValue").val(self.selectedNode.id)
       }
     }
   };
+  self.getResourceTriples = function(source,resourceType,resourceUri,label,superClass,predicate,object) {
+    
+    
+    function getTriple(){
+        var triple = {
+          subject: resourceUri,
+          predicate: predicate,
+          object: object
+        };
+        return triple;
+      };
 
-  self.setResourceUri = function() {
+
+
+    var triples=[]
+
+    if(!resourceUri) {
+      var uriType="fromLabel"
+      if(label)
+        uriType="randomHexaNumber"
+
+      resourceUri = common.getURI(label, source,uriType );
+    }
+
+    if(!predicate)
+      predicate = $("#lineageCreateResource_predicateDiv").html() || $("#editPredicate_propertyValue").val();
+    if(!object)
+      object = $("#editPredicate_objectValue").val();
+
+
+    if (predicate) {
+      // additional triple
+     triples.push(getTriple(resourceUri,predicate, object));
+    }
+    else {
+      self.setResourceUri();
+     triples.push(getTriple(resourceUri,"rdfs:label", Sparql_common.formatStringForTriple(label)));
+      if (resourceType== "owl:Class") {
+
+       triples.push(getTriple(resourceUri,"rdf:type", "owl:Class"));
+       triples.push(getTriple(resourceUri,"rdfs:subClassOf", superClass));
+      }
+      else if (resourceType == "owl:NamedIndividual") {
+        var individualTypeClass = $("#editPredicate_objectSelect").val();
+        if (!individualTypeClass) {
+          return alert("owl:Class is mandatory");
+        }
+       triples.push(getTriple(resourceUri,"rdf:type", "owl:NamedIndividual"));
+       triples.push(getTriple(resourceUri,"rdf:type", individualTypeClass));
+      }
+
+      var origin = "Lineage_addNode";
+      var status = "draft";
+      var metaDataTriples = Lineage_blend.getCommonMetaDataTriples(resourceUri, origin, status, null);
+      metaDataTriples.forEach(function(triple) {
+       triples.push(getTriple(resourceUri,triple.predicate, triple.object));
+      });
+      //  $("#lineageCreateResource_basicTripleBtn").css("display", "none");
+      self.basicDone = true;
+    }
+    return triples;
+
+  };
+
+  self.getResourceUri = function() {
     var uriType = $("#lineageCreateResource_creatingNodeUriType").val();
     var specificUri = $("#lineageCreateResource_specificUri").val();
     var label = $("#lineageCreateResource_labelInput").val();
@@ -83,14 +147,16 @@ var Lineage_createResource = (function() {
       uriType = "specific";
     }
 
-    var uri = common.getURI(label, Lineage_sources.activeSource, uriType, specificUri);
+    var uri = common.getURI(label, self.currentSource, uriType, specificUri);
     self.currentResourceUri = uri;
+    return uri;
+
   };
 
   self.getPossibleNamedIndividuals = function(callback) {
     var individuals = {};
     //   return callback(null, individuals);
-    Sparql_OWL.getNamedIndividuals(Lineage_sources.activeSource, null, null, function(err, result) {
+    Sparql_OWL.getNamedIndividuals(self.currentSource, null, null, function(err, result) {
       if (err) {
         return callback(err);
       }
@@ -102,65 +168,45 @@ var Lineage_createResource = (function() {
     });
   };
 
-  self.setResourceTriples = function() {
-    var label = $("#lineageCreateResource_labelInput").val();
 
-    var predicate = $("#lineageCreateResource_predicateDiv").html() || $("#editPredicate_propertyValue").val();
-    var object = $("#editPredicate_objectValue").val();
+  self.setResourceTriplesFromUI = function() {
+   var label = $("#lineageCreateResource_labelInput").val();
+   var predicate = $("#lineageCreateResource_predicateDiv").html() || $("#editPredicate_propertyValue").val();
+   var object = $("#editPredicate_objectValue").val();
 
+    var resourceUri=self.getResourceUri()
+
+    var resourceType=self.currentResourceType;
+    if (!resourceType) {
+      return alert("no value for resourceType");
+    }
+
+    var superClass = $("#editPredicate_objectSelect").val();
+    if (!superClass) {
+      return alert("owl:Class is mandatory");
+    }
     if (!predicate) {
       return alert("no value for predicate");
     }
     if (!object) {
       return alert("no value for object");
     }
-    if (self.currentResourceUri) {
-      // additional triple
-      self.addTriple(predicate, object);
-    }
-    else {
-      self.setResourceUri();
-      self.addTriple("rdfs:label", Sparql_common.formatStringForTriple(label));
-      if (self.currentResourceType == "owl:Class") {
-        var superClass = $("#editPredicate_objectSelect").val();
-        if (!superClass) {
-          return alert("owl:Class is mandatory");
-        }
-        self.addTriple("rdf:type", "owl:Class");
-        self.addTriple("rdfs:subClassOf", superClass);
-      }
-      else if (self.currentResourceType == "owl:NamedIndividual") {
-        var individualTypeClass = $("#editPredicate_objectSelect").val();
-        if (!individualTypeClass) {
-          return alert("owl:Class is mandatory");
-        }
-        self.addTriple("rdf:type", "owl:NamedIndividual");
-        self.addTriple("rdf:type", individualTypeClass);
-      }
 
-      var origin = "Lineage_addNode";
-      var status = "draft";
-      var metaDataTriples = Lineage_blend.getCommonMetaDataTriples(self.currentResourceUri, origin, status, null);
-      metaDataTriples.forEach(function(triple) {
-        self.addTriple(triple.predicate, triple.object);
-      });
-      //  $("#lineageCreateResource_basicTripleBtn").css("display", "none");
-      self.basicDone = true;
-    }
+    var triples= self.getResourceTriples(self.currentSource,resourceType,resourceUri,label,superClass,predicate,object)
     self.showResourceTriples();
     $("#lineageCreateResource_additionalTripleBtn").css("display", "block");
-  };
+  }
 
-  self.addTriple = function(predicate, object) {
-    if (!self.currentResourceUri) {
-    }
-    var triple = {
-      subject: self.currentResourceUri,
-      predicate: predicate,
-      object: object
-    };
-    self.currentResourceTriples.push(triple);
-  };
+
+
+
+
+
+
+
+
+
+ 
 
   self.showResourceTriples = function() {
     var num = 0;
@@ -184,47 +230,46 @@ var Lineage_createResource = (function() {
     $("#lineageCreateResource_newResourceTiplesDiv").html(html);
   };
 
-  self.writeResource = function() {
-    if (!self.currentResourceTriples) {
+
+
+
+  self.writeResourceFromUI = function() {
+    self.writeResource(self.currentSource,  self.currentResourceUri, self.currentResourceTriples, function(err, result) {
+      MainController.UI.message("resource Created");
+      var nodeData = {
+        id: self.currentResourceUri,
+        data: {
+          id: self.currentResourceUri,
+          source: source
+        }
+      };
+      Lineage_whiteboard.drawNodesAndParents(nodeData, 2);
+      self.init()
+    })
+  };
+
+  self.writeResource = function(source,resourceUri,triples,callback) {
+    if (!triples) {
       return alert("no predicates for node");
     }
-    var str = JSON.stringify(self.currentResourceTriples);
 
-    /*    if (str.indexOf("rdf:type") < 0) {
-      return alert("a type must be declared");
-    }
-    if (str.indexOf("owl:Class") > -1 && str.indexOf("rdfs:subClassOf") < 0) {
-      return alert("a class must be a rdfs:subClassOf anotherClass");
-    }
-    if (str.indexOf("owl:Class") > -1 && str.indexOf("rdfs:label") < 0) {
-      return alert("a class must have a rdfs:label");
-    }*/
-
-    Sparql_OWL.getNodeInfos(Lineage_sources.activeSource, self.currentResourceUri, {}, function(err, result) {
+    Sparql_OWL.getNodeInfos(source,resourceUri, {}, function(err, result) {
       if (err) {
         return alert(err.responseText);
       }
       if (result.length > 0) {
-        self.currentResourceUri = null;
+        resourceUri = null;
         $("#lineageCreateResource_creatingNodeUriType").val();
         return alert("this uri already exists, choose a new one");
       }
 
-      Sparql_generic.insertTriples(Lineage_sources.activeSource, self.currentResourceTriples, {}, function(err, _result) {
+      Sparql_generic.insertTriples(source,triples, {}, function(err, _result) {
         if (err) {
           return alert(err.responseText);
         }
-        //  $("#LineagePopup").dialog("close");
-        MainController.UI.message("resource Created");
-        var nodeData = {
-          id: self.currentResourceUri,
-          data: {
-            id: self.currentResourceUri,
-            source: Lineage_sources.activeSource
-          }
-        };
-        Lineage_whiteboard.drawNodesAndParents(nodeData, 2);
-        SearchUtil.generateElasticIndex(Lineage_sources.activeSource, { ids: [self.currentResourceUri] }, function(err, result) {
+
+
+        SearchUtil.generateElasticIndex(source, { ids: [resourceUri] }, function(err, result) {
           if (err) {
             return alert(err.responseText);
           }
@@ -232,7 +277,7 @@ var Lineage_createResource = (function() {
         });
 
         var modelData = {};
-        self.currentResourceTriples.forEach(function(item) {
+       triples.forEach(function(item) {
           if (item.predicate == "rdfs:label") {
             modelData.label = item.object;
             modelData.id = item.subject;
@@ -241,11 +286,10 @@ var Lineage_createResource = (function() {
         var modelData = {
           classes: { [modelData.id]: modelData }
         };
-        OntologyModels.updateModel(Lineage_sources.activeSource, modelData, {}, function(err, result) {
+        OntologyModels.updateModel(source, modelData, {}, function(err, result) {
           console.log(err || "ontologyModelCache updated");
         });
 
-        self.init();
       });
     });
   };
@@ -275,7 +319,7 @@ var Lineage_createResource = (function() {
 
   };
   self.drawNodeAxioms = function() {
-    Lineage_axioms_draw.drawNodeAxioms(Lineage_sources.activeSource, self.currentResourceUri, divId, depth, options, function(err, result) {
+    Lineage_axioms_draw.drawNodeAxioms(self.currentSource, self.currentResourceUri, divId, depth, options, function(err, result) {
     });
   };
 

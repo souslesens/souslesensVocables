@@ -6,18 +6,18 @@ var ManchesterSyntaxWidget = (function() {
   var self = {};
   self.keywordsMap = {};
 
-  self.init = function(divId, sourceLabel, specificKeywordsMap, basicVocabularies,callback) {
+  self.init = function(divId, sourceLabel, specificKeywordsMap, basicVocabularies, callback) {
     //  $("#"+divId).before(self.getCss(self.getCss()))
     $("#" + divId).html(self.getHtml());
     $("#bot_input").focus();
     $("#bot_resourcesProposalSelect").css("display", "none");
 
-    self.initKeywords(sourceLabel, specificKeywordsMap,basicVocabularies,callback);
+    self.initKeywords(sourceLabel, specificKeywordsMap, basicVocabularies, callback);
 
 
   };
 
-  self.initKeywords = function(sourceLabel, specificKeywordsMap, basicVocabularies,callback) {
+  self.initKeywords = function(sourceLabel, specificKeywordsMap, basicVocabularies, callback) {
 
 
     var sources = [sourceLabel];
@@ -74,8 +74,9 @@ var ManchesterSyntaxWidget = (function() {
 
     self.currentValidTokens = {};
 
-    if(callback)
-      return callback()
+    if (callback) {
+      return callback();
+    }
   };
 
 
@@ -112,9 +113,10 @@ var ManchesterSyntaxWidget = (function() {
 
 
   self.onResourceProposalChange = function(id) {
-    var strArray=id.split("|")
-    if(strArray.length<2)
-      return
+    var strArray = id.split("|");
+    if (strArray.length < 2) {
+      return;
+    }
     var key = id.split("|")[1].toLowerCase();
     var tokenObj = self.keywordsMap[key];
     self.writeCompletedHtml(tokenObj);
@@ -123,8 +125,9 @@ var ManchesterSyntaxWidget = (function() {
   };
 
   self.writeCompletedHtml = function(selectedToken) {
-if(!selectedToken)
-  return;
+    if (!selectedToken) {
+      return;
+    }
     var tokenId = "token_" + common.getRandomHexaId(5);
     selectedToken.index = Object.keys(self.currentValidTokens).length;
     self.currentValidTokens[tokenId] = selectedToken;
@@ -150,7 +153,7 @@ if(!selectedToken)
       "            <input id=\"bot_input\"  autocomplete=\"off\" onkeyup=\"ManchesterSyntaxWidget.analyse($(this).val())\">\n" +
       "            <select id=\"bot_resourcesProposalSelect\" size=\"4\" onchange=\"ManchesterSyntaxWidget.onResourceProposalChange($(this).val())\"></select>\n" +
       "          </div>\n" +
-      "        </div>"+"<div><button onclick='ManchesterSyntaxWidget.clear()'>X</button>"+"<button onclick='ManchesterSyntaxWidget.validate()'>ok</button></div>";
+      "        </div>" + "<div><button onclick='ManchesterSyntaxWidget.clear()'>X</button></div>";
 
     return html;
   };
@@ -183,14 +186,19 @@ if(!selectedToken)
   };
 
 
-  self.clear=function(){
-    $(".bot-token").remove()
-    self.currentValidTokens={}
+  self.clear = function() {
+    $(".bot-token").remove();
+    self.currentValidTokens = {};
 
-  }
-  self.validate=function(){
+  };
 
-  }
+  self.getText = function() {
+    var text = "";
+    $(".bot-token").each(function() {
+      text += $(this).html() + "";
+    });
+    return text;
+  };
 
   return self;
 

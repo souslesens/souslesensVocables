@@ -18,6 +18,9 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import KGquery_graph from "../KGquery/KGquery_graph.js";
+import Lineage_createRelation from "./lineage_createRelation.js";
+import Lineage_createResource from "./lineage_createResource.js";
+import CreateResource_bot from "../../bots/CreateResource_bot.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -654,6 +657,7 @@ var Lineage_whiteboard = (function () {
             options.visjsOptions.edges = _options.edges;
         }
 
+
         if (_options.visjsOptions && _options.visjsOptions.manipulation) {
             options.visjsOptions.manipulation = _options.visjsOptions.manipulation;
         } else if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
@@ -687,7 +691,7 @@ var Lineage_whiteboard = (function () {
                             return null;
                         });
                     } else {
-                        Lineage_createResource.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
+                        Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
                             if (err) {
                                 return callback(err.responseText);
                             }
@@ -696,6 +700,9 @@ var Lineage_whiteboard = (function () {
                     }
                 },
                 addNode: function (nodeData, callback) {
+
+                  /*  CreateResource_bot.start()
+                    return;*/
                     Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
                         if (err) {
                             return callback(err.responseText);

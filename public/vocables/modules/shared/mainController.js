@@ -148,7 +148,7 @@ return callback()
         return Object.entries(Config.profiles).filter(([_key, val]) => val.name === valueCheckedAgainst);
     }
 
-    self.onAfterLogin = function () {
+    self.onAfterLogin = function (callback) {
         if (!authentication.currentUser) {
             return alert(" no user identified");
         }
@@ -182,11 +182,8 @@ return callback()
                         callbackSeries(_err);
                     },
 
-                    function (callbackSeries) {
-                        MainController.parseUrlParam(function () {
-                            callbackSeries();
-                        });
-                    },
+
+
 
                     function (callbackSeries) {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
@@ -194,6 +191,12 @@ return callback()
 
                         OntologyModels.registerSourcesModel(sources, function (err) {
                             callbackSeries(err);
+                        });
+                    },
+
+                    function (callbackSeries) {
+                        MainController.parseUrlParam(function () {
+                            callbackSeries();
                         });
                     },
                     function (callbackSeries) {
@@ -205,10 +208,11 @@ return callback()
                     MainController.UI.configureUI();
                 }
             );
+            callback(_err)
         });
     };
 
-    self.initControllers = function (source) {
+    self.initControllers = function () {
 
 
         Object.keys(Config.sources)
@@ -218,10 +222,17 @@ return callback()
                     var controllerName = Config.sources[sourceLabel].controller;
                     Config.sources[sourceLabel].controllerName = controllerName;
                     Config.sources[sourceLabel].controller = window[controllerName];
-                    Config.tools[controllerName] = window[controllerName];
+
+
                 }
             });
+
+
+
+
     };
+
+
 
     self.UI = {
         initialGraphDivWitdh: 0,
@@ -451,6 +462,7 @@ return callback()
             Clipboard.clear();
             $("#accordion").accordion("option", { active: 1 });
             $("#mainDialogDiv").dialog("close");
+            MainController.initControllers();
             var controller = Config.tools[self.currentTool].controller;
             $("#currentSourceTreeDiv").html("");
             $("#sourceDivControlPanelDiv").html("");

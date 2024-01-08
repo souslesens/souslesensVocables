@@ -1118,7 +1118,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                 "",
                                 {
                                     source: sourceLabel,
-                                    skipCurrentQuery: true,
+                                    dontCacheCurrentQuery: true,
                                 },
                                 function (err, result) {
                                     if (err) {

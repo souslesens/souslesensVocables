@@ -185,14 +185,16 @@ var KGbuilder_triplesMaker = {
     }
     else if (mapping.s === "_rowIndex") {
       subjectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
+      return callback(null, subjectStr);
     }
-    else if (mapping.s.indexOf("$_") == 0 || mapping.isSubjectBlankNode) {
+    else if (typeof mapping.s === "string" && mapping.s.indexOf("$_") == 0 || mapping.isSubjectBlankNode) {
       // virtual column
       if (typeof mapping.o === "string" && (mapping.o.indexOf("$_") != 0 && !mapping.isObjectBlankNode) && KGbuilder_triplesMaker.allColumns[mapping.o] && !line[mapping.o]) {
         // ne pas creer des triplest sans objet
         return callback(null, null);
       }
       subjectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.s);
+      return callback(null, subjectStr);
     }
     else if (tableMappings.transform && line[mapping.s] && tableMappings.transform[mapping.s]) {
       try {
@@ -201,15 +203,15 @@ var KGbuilder_triplesMaker = {
         return callback((lineError = e + " " + mapping.s));
       }
     }
-    if (mapping.s.indexOf("http") == 0) {
+    if (typeof mapping.s === "string" && mapping.s.indexOf("http") == 0) {
       subjectStr = "<" + mapping.s + ">";
     }
-    else if (mapping.s.match(/.+:.+/)) {
+    else if (typeof mapping.s === "string" && mapping.s.match(/.+:.+/)) {
       subjectStr = mapping.s;
     }
 
     else {
-      if (!line[mapping.s] || line[mapping.o] == "null") {
+      if (!line[mapping.s] || (mapping.o.indexOf(":") > -1 && line[mapping.o]) == "null") {
         return callback(null, null);
       }
       subjectStr = line[mapping.s];
@@ -259,9 +261,11 @@ var KGbuilder_triplesMaker = {
     {
       if (mapping.o === "_rowIndex") {
         objectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
+        return objectStr;
       }
       else if (mapping.objectIsSpecificUri) {
         objectStr = mapping.o;
+
       }
       else if (typeof mapping.o === "function") {
         try {
@@ -271,14 +275,15 @@ var KGbuilder_triplesMaker = {
           return callback(e);
         }
       }
-      else if (mapping.o.indexOf("http") == 0) {
+      else if (typeof mapping.o === "string" && mapping.o.indexOf("http") == 0) {
         objectStr = "<" + mapping.o + ">";
       }
-      else if (mapping.o.match(/.+:.+/)) {
+      else if (typeof mapping.o === "string" && mapping.o.match(/.+:.+/)) {
         objectStr = mapping.o;
       }
-      else if (mapping.o.indexOf("$_") == 0 || mapping.isObjectBlankNode) {
+      else if (typeof mapping.o === "string" && mapping.o.indexOf("$_") == 0 || mapping.isObjectBlankNode) {
         objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
+        return callback(null, objectStr);
       }
       else {
         if (!line[mapping.o] || line[mapping.o] == "null") {
@@ -387,7 +392,7 @@ objectStr=objectStr.replace(/[\-_]/g,"")*/
     if (!propertyStr) {
       return;
     }
-    if (propertyStr.indexOf("http") == 0) {
+    if (typeof propertyStr === "string" && propertyStr.indexOf("http") == 0) {
       propertyStr = "<" + propertyStr + ">";
     }
     return callback(null, propertyStr);

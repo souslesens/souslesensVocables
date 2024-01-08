@@ -23,7 +23,7 @@ var KGquery_graph = (function () {
                 return;
             }
             self.currentGraphNode = node;
-            if (nodeEvent.ctrlKey) {
+            if (nodeEvent.altKey) {
                 NodeInfosWidget.showNodeInfos(KGquery.currentSource, node, "smallDialogDiv", {});
             } else {
                 KGquery.addNode(node, nodeEvent);
@@ -60,7 +60,7 @@ var KGquery_graph = (function () {
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
 
-        KGquery.clearAll();
+      //  KGquery.clearAll();
 
         async.series(
             [
@@ -128,17 +128,13 @@ var KGquery_graph = (function () {
                     return alert(err);
                 }
 
-                KGquery.vicinityArray = [];
-                visjsData.edges.forEach(function (edge) {
-                    if (!edge.data) {
-                        return;
-                    }
-                    KGquery.vicinityArray.push([edge.from, edge.to, edge.data.propertyId]);
-                });
+
 
                 visjsData.nodes.forEach(function (item) {
                     // item.color="#ddd"
                     if (item.label.indexOf("Date") > -1) item.color = "#96f696";
+                    else
+                        item.color="#f3ebbe"
                     item.initialColor = item.color;
                     item.initialShape = item.shape;
                 });
@@ -456,7 +452,11 @@ var KGquery_graph = (function () {
     };
 
     self.outlineNode = function (nodeId) {
+
+        KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, color: "#b0f5f5" }]);
+       /* setTimeout(function(){
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
+        },500)*/
     };
 
     return self;

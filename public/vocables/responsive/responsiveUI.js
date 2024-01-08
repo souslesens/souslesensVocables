@@ -8,9 +8,11 @@ import Lineage_r from "./lineage/lineage_r.js";
 var ResponsiveUI = (function () {
     var self = {};
     self.mainDialogDiv = null;
+    self.menuBarShowed=true;
+    self.LateralPannelShowed=true;
     self.alert = function (message) {};
-
     self.init = function () {
+        
         self.setSlsvCssClasses();
         var tools = Config.tools_available;
        
@@ -25,8 +27,24 @@ var ResponsiveUI = (function () {
             }
             
         });
+        
+        
+       
+        window.addEventListener('resize',function(event) {
+            self.resetWindowHeight();
+        }, true);
         self.themeList();
     };
+
+    self.resetWindowHeight=function(){
+        var MenuBarHeight=$('#MenuBar').height();
+        var LateralPannelWidth=$('#lateralPanelDiv').width();
+        $('#graphAndCommandScreen').css("height",$(window).height()-MenuBarHeight-1);
+        $('#graphDiv').css("height",$(window).height()-MenuBarHeight-1);
+        $('#graphDiv').css("width",$(window).width()-LateralPannelWidth-1);
+        //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
+
+    }
     self.replaceFile = function (file1, file2) {
         Object.keys(file1).forEach((key) => {
             if (file2[key]) {
@@ -59,6 +77,7 @@ var ResponsiveUI = (function () {
             if (err) {
                 return self.alert(err.responseText);
             }
+            self.resetWindowHeight();
         });
     };
     self.onSourceSelectForAddSource = function (evt, obj) {
@@ -229,6 +248,46 @@ var ResponsiveUI = (function () {
     self.changeTheme=function(ThemeName){
         var themeSelected=Config.slsvColorThemes[ThemeName];
         less.modifyVars(themeSelected);
+    }
+    self.hideShowMenuBar=function(button){
+        if(self.menuBarShowed){
+            $('#MenuBarFooter').hide();
+            $('#MenuBar').css('height','21px');
+            ResponsiveUI.resetWindowHeight();
+            self.menuBarShowed=false;
+            $(button).children().attr('src','./icons/ArrowMenuBarShow.png');
+        }
+        else{
+            $('#MenuBarFooter').show();
+            $('#MenuBar').css('height','90px');
+            ResponsiveUI.resetWindowHeight();
+            self.menuBarShowed=true;
+            $(button).children().attr('src','./icons/ArrowMenuBar.png');
+        }
+       
+    }
+    self.hideShowLateralPannel=function(button){
+        if(self.LateralPannelShowed){
+            $('#lineage-tab-buttons').hide();
+            $('#WhiteboardContent').hide();
+            $('#lateralPanelDiv').css('width','21px');
+            $('#lateralPanelDiv').removeClass('ui-resizable');
+            ResponsiveUI.resetWindowHeight();
+            self.LateralPannelShowed=false;
+            $('#lateralPanelDiv').append(button);
+            $('#lateralPanelDiv button img').attr('src','./icons/ArrowLateralPannelShow.png');
+            
+            
+        }
+        else{
+            $('#lineage-tab-buttons').show();
+            $('#WhiteboardContent').show();
+            $('#lateralPanelDiv').css('width','395px');
+            ResponsiveUI.resetWindowHeight();
+            self.LateralPannelShowed=true;
+            $(button).children().attr('src','./icons/ArrowLateralPannel.png');
+            $('#lateralPanelDiv').addClass('ui-resizable');
+        }
     }
 
     return self;

@@ -75,8 +75,8 @@
 }
 .slsv-right-top-bar-button {
     .slsv-general-buttons;
-    margin-top: 27px !important;
-    margin-top: 20px;
+    font-size: 13px;
+    
     padding: 8px 24px;
     background: if((@isGradient=true),@gradient-color-source,@source-color);
     border: if((@isGradient=true),0px,inherit solid 2px)!important;
@@ -88,8 +88,9 @@
 
 .slsv-button-source {
     .slsv-general-buttons;
+    font-size: 13px;
     display: inline-flex;
-    padding: 6px 16px;
+    padding: 8px 16px;
     border:  if((@isGradient=true),0px,inherit solid 2px)!important;
     margin: 2px;
     background: if((@isGradient=true),@gradient-color-source,@source-color);
@@ -263,4 +264,8 @@
 .w3-border {
     background-color: @background-color;
     border-radius: 14px;
+}
+
+#index_topContolPanel{
+    font-size: 13px;
 }

@@ -342,9 +342,9 @@
     </head>
 
     <body>
-        <header class="w3-container">
-            <div class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4; width: 100%">
-                <div class="left-border-main-dialog-div" style=" height: 20px;">
+        <header  class="w3-container">
+            <div id="MenuBar" class="w3-bar w3-medium slsv-bg-intense " style="z-index: 4; width: 100%;height:90px;">
+                <div id="MenuBarHeader" class="left-border-main-dialog-div w3-display-container" style=" height: 20px;">
                     <div >
                         <table>
                             <tr>
@@ -353,6 +353,9 @@
                             </tr>
                         </table>
                     </div>
+                    <button class="w3-display-bottommiddle slsv-invisible-button"  onclick="ResponsiveUI.hideShowMenuBar(this)"> 
+                            <img  src="./icons/ArrowMenuBar.png">
+                    </button>
                     <div class="w3-display-topright">
                         <a target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"
                             ><span style="color: Black"><i class="fa-lg fab fa-github"></i></span
@@ -360,11 +363,11 @@
                         SouslesensVocables <span id="souslesensversion"></span>
                     </div>
                 </div>
-                
+                <div id="MenuBarFooter">   
                 <div id="toolSelectionSection" class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button" style="padding: 23px">
-                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center; margin-left:10px;margin-top: 15px; padding: 0px">
-                        <div id="ToolBorder" class="toolSelectionBorder" style="margin-top: 7px;margin-bottom: 7px;">
-                            <button id="selectedTool" class="slsv-invisible-button" style="margin-top: 10px; margin-bottom: 10px; padding: 0px; margin-left: 10px; font-size: 20px">Tool</button>
+                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center; margin-left:10px;margin-top: 0px; padding: 0px">
+                        <div id="ToolBorder" class="toolSelectionBorder" style="margin:3px;">
+                            <button id="selectedTool" class="slsv-invisible-button" style="margin-top: 10px; margin-bottom: 10px; padding: 0px; margin-left: 10px; ">Tool</button>
                             <button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;margin-left: 3px; margin-right: 10px'  > </button>
                             <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
                                 <select id="toolsSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto;"></select>
@@ -386,13 +389,13 @@
                 -->
 
                 <div class="w3-bar-item">
-                    <div class="w3-sand w3-round-xlarge w3-margin" style="display: flex; flex-direction: row; align-items: center" id="index_topContolPanel">
+                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center;margin-left: 0px!important;margin-right: 0px!important;padding:3px;" id="index_topContolPanel">
                         <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
                     </div>
                 </div>
 
                 <div class="w3-bar-item">
-                    <div class="w3-sand w3-round-xlarge w3-margin" style="display: flex; flex-direction: row; align-items: center" id="Lineage_graphEditionButtons">
+                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center;margin-left: 0px!important;margin-right: 0px!important;padding:3px;" id="Lineage_graphEditionButtons">
                         <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
                         <div class="slsv-button-source" id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
                             <button class="slsv-invisible-button add-icon"  style="margin-right: 5px;height: 25px;width: 29px;" ></button><span style="margin-bottom: 5px">Add Node</span>
@@ -403,7 +406,7 @@
                     </div>
                 </div>
 
-                <div class="w3-bar-item w3-right slsv-invisible-button"  style="margin-top: 25px;">
+                <div class="w3-bar-item w3-right slsv-invisible-button" >
                     <button class="logoInstance-icon slsv-invisible-button" style="height: 57px;width: 80px;"></button>
                 </div>
 
@@ -423,15 +426,17 @@
 
                 </div>
             </div>
+                
+            </div>
             
         </header>
 
-        <div class="w3-container">
-            <div class="w3-container w3-col l3 slsv-bg-pale" style="height: 90vh; width: 26%" id="lateralPanelDiv">
+        <div id="graphAndCommandScreen" class="w3-container" style="height: 90dvh;" >
+            <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="height: 100%; width: 26%" id="lateralPanelDiv">
             </div>
-            <div class="w3-container w3-col l9" style="height: 90vh; width: 74%" >
+            <div class="w3-container w3-col l9" style="height: 100%; width: 74%" >
                 
-                <div  id="graphDiv" style='height: 88vh'>
+                <div  id="graphDiv" style='height: 100%'>
                 
                 </div>
             </div>
@@ -447,4 +452,9 @@
         <div id="LineagePopup"></div>
         <div id="popupMenuWidgetDiv" onclick="PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
     </body>
+    <script type="module">
+        import ResponsiveUI from "./responsive/responsiveUI.js"
+        ResponsiveUI.resetWindowHeight();
+    </script>
 </html>
+

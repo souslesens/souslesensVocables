@@ -72,7 +72,10 @@ var Lineage_r = (function () {
             Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
             self.hideShowMoreActions("hide");
             $('#lateralPanelDiv').resizable({
-                maxWidth: 490
+                maxWidth: 395,minWidth: 187,stop: function( event, ui ) {
+                    
+                    ResponsiveUI.resetWindowHeight()
+                }
             });
         });
     };

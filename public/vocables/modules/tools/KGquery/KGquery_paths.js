@@ -1,6 +1,7 @@
 import common from "../../shared/common.js";
 import KGquery_graph from "./KGquery_graph.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
 
 var KGquery_paths = (function() {
@@ -15,20 +16,49 @@ var KGquery_paths = (function() {
         return callback(err)
       }
 
+      path=JSON.parse(JSON.stringify(path))
       self.managePathAmbiguousEdges(path, function(unAmbiguousPath) {
         //register queryPath in pathDivsMap
 
 
-        var cleanedPath = self.processPathDuplicateClassIds(unAmbiguousPath, queryElement);
+
+      //  var cleanedPath = self.processPathDuplicateClassIds(unAmbiguousPath, queryElement);
 
 
-        queryElement.paths = cleanedPath;
+
        // self.pathDivsMap[queryElement.divId] = queryElement;
-        self.drawPathOnGraph (cleanedPath)
+        self.drawPathOnGraph (unAmbiguousPath)
+
+       var pathWithVarNames=self.substituteClassIdToVarNameInPath(queryElement,unAmbiguousPath)
+        queryElement.paths = pathWithVarNames;
         return callback(err,queryElement)
       });
     });
   };
+
+  self.substituteClassIdToVarNameInPath=function(queryElement,path){
+    path.forEach(function(item,index){
+      if(item[0]==queryElement.fromNode.id) {
+        item[0] = KGquery.getVarName(queryElement.fromNode)
+        if(item[1]==queryElement.toNode.id)
+          item[1]=KGquery.getVarName(queryElement.toNode)
+        else
+          item[1]= "?"+Sparql_common.formatStringForTriple( Sparql_common.getLabelFromURI( item[1]), true);
+      }
+
+      if(item[1]==queryElement.fromNode.id) {
+        item[1] = KGquery.getVarName(queryElement.fromNode)
+        if(item[0]==queryElement.toNode.id)
+          item[0]=KGquery.getVarName(queryElement.toNode)
+        else
+          item[0]= "?"+Sparql_common.formatStringForTriple( Sparql_common.getLabelFromURI( item[0]), true);
+      }
+
+
+
+    })
+    return path;
+  }
 
   /**
    when we have several paths in a set they  need to intersect
@@ -107,8 +137,9 @@ var KGquery_paths = (function() {
     }
 
 
-    if (fromNodeId == toNodeId) {
+    if ( fromNodeId == toNodeId) {
       var pathes = [];
+
       self.vicinityArray.forEach(function(path) {
         if (path[0] == path[1] && path[1] == fromNodeId) {
           pathes.push(path);
@@ -152,7 +183,7 @@ var KGquery_paths = (function() {
     return count;
   };
 
-  self.getNearestNode = function(nodeId, querySet,excludeSelf, callback) {
+  self.getNearestNodeId = function(nodeId, querySet,excludeSelf, callback) {
     var allCandidateNodesMap = {};
 
     querySet.elements.forEach(function(queryElement) {
@@ -165,7 +196,7 @@ var KGquery_paths = (function() {
       }
       else {
         // only terminaisons of path
-        if(queryElement.fromNode&&(! excludeSelf || queryElement.fromNode.id!=nodeId ))
+        if(queryElement.fromNode &&(! excludeSelf || queryElement.fromNode.id!=nodeId ))
         allCandidateNodesMap[queryElement.fromNode.id] = 0;
         if(queryElement.toNode && (! excludeSelf || queryElement.toNode.id!=nodeId ))
         allCandidateNodesMap[queryElement.toNode.id] = 0;
@@ -179,6 +210,9 @@ var KGquery_paths = (function() {
           if (err) {
             return callbackEach(err);
           }
+
+
+
 
           allCandidateNodesMap[candidateNodeId] = path.length;
           callbackEach();

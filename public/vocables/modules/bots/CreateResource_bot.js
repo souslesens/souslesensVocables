@@ -106,6 +106,9 @@ var CreateResource_bot = (function() {
       listSuperClassesFn: function() {
         var vocab = self.params.currentVocab;
         var classes = [{ id: "owl:Thing", label: "owl:Thing" }];
+
+
+
         for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
           var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
           classes.push({ id: classId.id, label: classId.label });

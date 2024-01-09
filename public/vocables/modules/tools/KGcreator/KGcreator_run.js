@@ -293,6 +293,8 @@ var KGcreator_run = (function() {
   };
 
   self.showTableMappingsEditor = function(table) {
+    if(! KGcreator.currentConfig.currentMappings)
+      return;
     self.currentEditingTable = table;
     var tableMappings = KGcreator.currentConfig.currentMappings[table];
     self.jsonEditor = new JsonEditor("#KGcreator_run_mappingsGraphEditor", {[table]:tableMappings});

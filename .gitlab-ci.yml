@@ -1,0 +1,6 @@
+include:
+  - project: "open-source/gitlab-ci-templates"
+    ref: "branch/v2"
+    file:
+      - "templates/base.yml"
+      - "templates/no-duplicated-ci-pipelines.yml"

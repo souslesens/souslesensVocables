@@ -44,6 +44,8 @@ if (config.auth == "keycloak") {
                     source: "keycloak",
                     _type: "user",
                     groups: config.defaultGroups ? config.defaultGroups : [],
+                    allowSourceCreation: false,
+                    maxNumberCreatedSource: 5,
                 };
                 const user = userAccount ? userAccount : userAccountToAdd;
 

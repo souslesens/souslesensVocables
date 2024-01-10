@@ -35,7 +35,15 @@ class UserModel {
          */
         const usersNoPasswords = {};
         Object.entries(userAccountsWithPassword).map(([key, value]) => {
-            usersNoPasswords[key] = { id: value.id, login: value.login, groups: value.groups, _type: value._type, source: value.source, token: value.token };
+            usersNoPasswords[key] = {
+                id: value.id,
+                login: value.login,
+                groups: value.groups,
+                _type: value._type,
+                source: value.source,
+                token: value.token,
+                allowSourceCreation: value.allowSourceCreation,
+            };
         });
         return usersNoPasswords;
     };
@@ -69,7 +77,7 @@ class UserModel {
         return Object.entries(users)
             .map(([_id, user]) => user)
             .find((user) => user.token !== undefined && user.token === token);
-    }
+    };
 
     /**
      * @param {string} login

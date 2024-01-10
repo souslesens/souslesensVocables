@@ -50,6 +50,22 @@ class SourceModel {
 
     /**
      * @param {Record<string, Source>} sources -  a collection of sources
+     * @param {UserAccount} user -  a user account
+     * @returns {Promise<string[][]>} a collection of sources owned by
+     * the user
+     */
+    _getOwnedSourcesListWithReadWrite = async (sources, user) => {
+        return Object.entries(sources)
+            .filter(([_id, source]) => {
+                return source.owner === user.login;
+            })
+            .map(([id, _source]) => {
+                return [id, "readwrite"];
+            });
+    };
+
+    /**
+     * @param {Record<string, Source>} sources -  a collection of sources
      * @returns {Promise<Record<string, SourceWithAccessControl>>} a collection of sources
      */
     _getAdminSources = async (sources) => {
@@ -106,7 +122,9 @@ class SourceModel {
                     return sourceName;
                 }
             })
-            .concat([[config.formalOntologySourceLabel, "read"]]);
+            .concat([[config.formalOntologySourceLabel, "read"]])
+            .concat(await this._getOwnedSourcesListWithReadWrite(sources, user));
+
         // sort and uniq. If a source have read and readwrite, keep readwrite
         // to keep readwrite, sort read first. fromEntries will keep the last
         const sortedAndReducedAllowedSources = Object.fromEntries(

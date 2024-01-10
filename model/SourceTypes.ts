@@ -25,6 +25,8 @@ type Source = {
     group: string;
     imports: string[];
     taxonomyPredicates: string[];
+    owner: string;
+    published: boolean;
 };
 
 type SourceWithAccessControl = Source & {

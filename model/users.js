@@ -43,6 +43,7 @@ class UserModel {
                 source: value.source,
                 token: value.token,
                 allowSourceCreation: value.allowSourceCreation,
+                maxNumberCreatedSource: value.maxNumberCreatedSource,
             };
         });
         return usersNoPasswords;

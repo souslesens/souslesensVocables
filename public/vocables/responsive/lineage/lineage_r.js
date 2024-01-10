@@ -19,8 +19,6 @@ var Lineage_r = (function () {
     self.init = function () {
         PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
         SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
-        $("#ChangeSourceButton").show();
-        $("#index_topContolPanel").show();
         //To Table
         self.oldExportTable = Export.exportTreeToDataTable;
         Export.exportTreeToDataTable = self.ExportTableDialog;
@@ -36,12 +34,10 @@ var Lineage_r = (function () {
         //AddEdge overcharge
         self.oldAddEdgeDialog = Lineage_blend.graphModification.showAddEdgeFromGraphDialog;
         Lineage_blend.graphModification.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
-
-        //Loading
-        $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
-            self.loadSources();
-            
-        });
+        ResponsiveUI.initMenuBar(self.loadSources);
+        $('KGquery_messageDiv').attr('id','messageDiv');
+        $('KGquery_waitImg').attr('id','waitImg');
+      
     };
     self.loadSources = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {

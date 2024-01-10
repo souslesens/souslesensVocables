@@ -15,13 +15,15 @@ import authentication from "../../modules/shared/authentification.js";
 
 var NodeInfosWidgetResponsive = (function () {
     var self = {};
+    
     self.initDialog = function (sourceLabel, divId, options, callback) {
         ResponsiveUI.openDialogDiv(divId);
         $("#mainDialogDiv").parent().css("top", "5%");
         $("#mainDialogDiv").parent().css("left", "5%");
         $("#" + divId).parent().show("fast", function () {
                 self.oldNodeInfosInit(sourceLabel, divId, options, callback);
-               
+                $('#addPredicateButton').remove();
+                $('#deleteButton').remove();
         });
         
 
@@ -49,7 +51,8 @@ var NodeInfosWidgetResponsive = (function () {
                             Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
                         }
                     }, 100);
-                },
+                }
+                
             });
             $("#axiomsDrawGraphDiv").dialog({
                 autoOpen: false,
@@ -143,9 +146,13 @@ var NodeInfosWidgetResponsive = (function () {
                         return alert(err);
                     }
                     self.showNodeInfosToolbar(options);
+                    
                     $('#deleteButton').insertAfter($(".ui-dialog-title"));
                     $('#addPredicateButton').insertAfter($(".ui-dialog-title"));
                     $('#addPredicateButton').css('margin-left',"25px !important");
+                   
+                    
+                    
                     
                 });
             }

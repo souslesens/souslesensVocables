@@ -72,6 +72,7 @@
     margin: -30px 5px 0px 0px;
     padding-left: 10px;
     padding-right: 10px;
+    width: fit-content;
 }
 .slsv-right-top-bar-button {
     .slsv-general-buttons;
@@ -177,11 +178,18 @@
 
 
     padding: 1% 1.65% !important;
-    width: 25% !important;
+    
     height: 10%;
     
 }
-
+.lineage-tabDiv{
+    .slsv-tabDiv;
+    width: 25% !important;
+}
+.KGquery-tabDiv{
+    .slsv-tabDiv;
+    width: 33.33% !important;
+}
 .slsv-selectedTabDiv {
     background: @background-color;
     border-bottom: 0px !important ;

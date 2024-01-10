@@ -4,9 +4,12 @@ import Clipboard from "../modules/shared/clipboard.js";
 import Lineage_sources from "../modules/tools/lineage/lineage_sources.js";
 import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
 import Lineage_r from "./lineage/lineage_r.js";
+import KGquery from "../modules/tools/KGquery/KGquery.js";
+import KGquery_r from "./KGquery/KGquery_r.js";
 
 var ResponsiveUI = (function () {
     var self = {};
+    self.source=null;
     self.mainDialogDiv = null;
     self.menuBarShowed=true;
     self.LateralPannelShowed=true;
@@ -35,6 +38,15 @@ var ResponsiveUI = (function () {
         }, true);
         self.themeList();
     };
+    self.initMenuBar=function(callback){
+        $("#ChangeSourceButton").show();
+        $("#index_topContolPanel").show();
+        //Loading
+        $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
+            callback();
+                
+        });
+    }
 
     self.resetWindowHeight=function(){
         var MenuBarHeight=$('#MenuBar').height();
@@ -59,7 +71,13 @@ var ResponsiveUI = (function () {
             $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
         }
         MainController.currentTool = toolId;
-        ResponsiveUI.showSourceDialog(true);
+        if(self.source==null){
+            ResponsiveUI.showSourceDialog(true);
+        }
+        else{
+            self.sourceSelect(self.source);
+        }   
+        
     };
 
     self.onSourceSelect = function (evt, obj) {
@@ -67,8 +85,12 @@ var ResponsiveUI = (function () {
         if (!obj.node.data || obj.node.data.type != "source") {
             return self.alert("select a tool");
         }
-
-        MainController.currentSource = obj.node.data.id;
+        var source=obj.node.data.id;
+        self.sourceSelect(source);
+    };
+    self.sourceSelect=function(source){
+        MainController.currentSource = source;
+        ResponsiveUI.source=source;
         $("#selectedSource").html(MainController.currentSource);
 
         $("#mainDialogDiv").parent().hide();
@@ -79,7 +101,7 @@ var ResponsiveUI = (function () {
             }
             self.resetWindowHeight();
         });
-    };
+    }
     self.onSourceSelectForAddSource = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         if (!obj.node.data || obj.node.data.type != "source") {
@@ -97,7 +119,7 @@ var ResponsiveUI = (function () {
         MainController.initControllers();
         MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
-
+        Lineage_sources.loadedSources={};
         /*  $("#currentSourceTreeDiv").html("");
       $("#sourceDivControlPanelDiv").html("");
       $("#actionDivContolPanelDiv").html("");
@@ -106,15 +128,8 @@ var ResponsiveUI = (function () {
         if (toolId == "lineage") {
             return Lineage_r.init();
         } else if (toolId == "KGquery") {
-            Lineage_sources.setAllWhiteBoardSources(true);
+            return KGquery_r.init();
             //  $("#accordion").accordion("option", { active: 2 });
-
-            controller.onLoaded(function (err, result) {
-                if (callback) {
-                    callback(err, result);
-                }
-            });
-            return;
         }
 
         self.UI.updateActionDivLabel();

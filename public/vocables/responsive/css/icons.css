@@ -34,3 +34,15 @@
     background-repeat: no-repeat;
     height: 30px;
 }
+.saveIcon{
+    background-image: url(@saveIcon);
+    background-repeat: no-repeat;
+    height: 30px;
+    width: 30px;
+}
+.deleteIcon{
+    background-image: url(@deleteIcon);
+    background-repeat: no-repeat;
+    height: 30px;
+    width: 30px;
+}

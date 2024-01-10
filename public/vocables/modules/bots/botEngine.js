@@ -2,18 +2,15 @@ var BotEngine = (function() {
   var self = {};
 
 
-
-
-
-  self.init = function(botModule,callback) {
-    self.currentBot=botModule;
-    self.currentObj=botModule;
-   $("#botPanel").css("display","block")
-      //  self.doNext(keywordsTree)
-   $("#botDiv").load("modules/bots/html/bot.html",function(){
-     $("#botTitle").html(self.currentBot.title)
-     callback()
-   })
+  self.init = function(botModule, callback) {
+    self.currentBot = botModule;
+    self.currentObj = botModule;
+    $("#botPanel").css("display", "block");
+    //  self.doNext(keywordsTree)
+    $("#botDiv").load("modules/bots/html/bot.html", function() {
+      $("#botTitle").html(self.currentBot.title);
+      callback();
+    });
   };
 
 
@@ -23,13 +20,7 @@ var BotEngine = (function() {
 
 
     if (keys.length == 0) {
-      $("#mainDialogDiv").dialog("close");
-      self.currentBot.params.queryText=self.getQueryText();
-      $("#botPanel").css("display","none")
-      if(self.currentBot.callbackFn) {
-        return self.currentBot.callbackFn()
-      }
-      return;
+     return self.end()
     }
 
     var key = keys[0];
@@ -39,12 +30,24 @@ var BotEngine = (function() {
       if (returnValue && alternatives[returnValue]) {
         var obj = self.currentObj["_OR"][returnValue];
         var fnName = Object.keys(obj)[0];
+        if(!fnName){
+          return self.end()
+        }
         var fn = self.currentBot.functions[fnName];
         if (!fn || typeof fn !== "function") {
           return alert("function not defined :" + fnName);
         }
         self.currentObj = obj[fnName];
+        self.setStepMessage(fnName)
         fn();
+      }
+
+      else {
+        var choices = [];
+        for(var key in alternatives) {
+          choices.push({ id: key, label: key });
+        };
+        self.showList(choices);
       }
     }
     else {
@@ -53,13 +56,30 @@ var BotEngine = (function() {
         return alert("function not defined :" + key);
       }
       self.currentObj = self.currentObj[key];
+      self.setStepMessage(key)
       fn();
 
     }
   };
+  self.end=function(){
+    self.currentBot.params.queryText = self.getQueryText();
+    $("#botPanel").css("display", "none");
+    if (self.currentBot.callbackFn) {
+      return self.currentBot.callbackFn();
+    }
+  }
 
+  self.setStepMessage=function(step){
+    if(self.currentBot.functionTitles){
+    var message= self.currentBot.functionTitles[step]
+      $("#botMessage").html(message || "")
+    }
+  }
 
-
+  self.abort=function(message){
+    alert(message);
+    self.close()
+  }
 
   self.clear = function() {
     self.currentBot.start();
@@ -68,7 +88,7 @@ var BotEngine = (function() {
 
 
   self.close = function() {
-    $("#botPanel").css("display","none")
+    $("#botPanel").css("display", "none");
 
   };
 
@@ -116,31 +136,18 @@ var BotEngine = (function() {
     return;
   };
 
-  self.getQueryText=function(){
-    var queryText=""
-    $(".bot-token").each(function(){
-      queryText+=$(this).html();
-    })
+  self.getQueryText = function() {
+    var queryText = "";
+    $(".bot-token").each(function() {
+      queryText += $(this).html();
+    });
     return queryText;
-  }
-
-
-
-
-
-
-
-
-
-
-
+  };
 
 
   self.analyse = function(str) {
 
-  }
-
-
+  };
 
 
   return self;

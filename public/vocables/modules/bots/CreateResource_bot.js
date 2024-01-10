@@ -22,51 +22,64 @@ var CreateResource_bot = (function() {
       });
     };
 
-
+    self.workflow_end =
+      {
+          "_OR":
+            {
+              "New Resource": {newResourceFn:{}},
+              "End": {}
+            }
+      };
     self.workflow_saveResource =
-      { saveResourceFn: { _OR: { editResourceFn: {}, drawResourceFn: {} } } };
+      {
+        "saveResourceFn": {
+          "_OR": {
+            "Edit": { editResourceFn: self.workflow_end },
+            "Draw": { drawResourceFn: self.workflow_end }
+
+
+          }
+
+
+        }
+      };
 
     self.workflow = {
 
-      "listResourceTypesFnFn": {
+      "listResourceTypesFn": {
         "_OR":
           {
-            "Class": { "promptResourceLabelFn": { listVocabsFn: { listSuperClassesFn: { axiomaticDefinitionFn: self.workflow_saveResource } } } },
-            "ObjectProperty": { "promptResourceLabelFn": { listVocabsFn: { listObjectProperties: self.workflow_saveResource } } },
-            "AnnotationProperty": { "promptResourceLabelFn": { listDatatypeProperties: self.workflow_saveResource } },
-            "Individual": { "promptResourceLabelFn": { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } }
+            "owl:Class": { "promptResourceLabelFn": { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } },
+            "owl:ObjectProperty": { "promptResourceLabelFn": { listVocabsFn: { listObjectProperties: self.workflow_saveResource } } },
+            "owl:AnnotationProperty": { "promptResourceLabelFn": { listDatatypeProperties: self.workflow_saveResource } },
+            "owl:Individual": { "promptResourceLabelFn": { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } }
 
           }
       }
     };
 
 
-
-
-
     self.functionTitles = {
       _OR: "Select an option",
-      listResourceTypesFnFn: "Choose a resource type",
+      listResourceTypesFn: "Choose a resource type",
       promptResourceLabelFn: " Enter resource label (rdfs:label)",
       listVocabsFn: "Choose a reference ontology",
       listSuperClassesFn: "Choose a  Class as superClass ",
       listClassTypesFn: "Choose a  a class type ",
-      axiomaticDefinitionFn: "",
-      saveResourceFn:" Save Resource",
-      editResourceFn:"EditResource",
-      drawResourceFn:"EditResource",
+      saveResourceFn: " Save Resource",
+
 
 
     };
 
 
     self.functions = {
-      listResourceTypesFnFn: function(queryParams, varName) {
+      listResourceTypesFn: function(queryParams, varName) {
         var choices = [
-          { id: "Class", label: "Class" },
-          { id: "Individual", label: "Individual" },
-          { id: "ObjectProperty", label: "ObjectProperty" },
-          { id: "AnnotationProperty", label: "AnnotationProperty" }
+          { id: "owl:Class", label: "Class" },
+          { id: "owl:Individual", label: "Individual" },
+          { id: "owl:ObjectProperty", label: "ObjectProperty" },
+          { id: "owl:AnnotationProperty", label: "AnnotationProperty" }
         ];
         BotEngine.showList(choices, "resourceType");
       },
@@ -93,6 +106,9 @@ var CreateResource_bot = (function() {
       listSuperClassesFn: function() {
         var vocab = self.params.currentVocab;
         var classes = [{ id: "owl:Thing", label: "owl:Thing" }];
+
+
+
         for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
           var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
           classes.push({ id: classId.id, label: classId.label });
@@ -100,37 +116,52 @@ var CreateResource_bot = (function() {
         BotEngine.showList(classes, "resourceId");
 
       },
-      listClassTypesFn:function() {
-        self.functions.listSuperClassesFn()
+      listClassTypesFn: function() {
+        self.functions.listSuperClassesFn();
       },
       axiomaticDefinitionFn: function() {
-        AxiomsEditor.init(self.params.resourceId,function(err,manchesterText){
-          self.params.manchesterText=manchesterText
-          BotEngine.nextStep()
-        })
+        AxiomsEditor.init(self.params.resourceId, function(err, manchesterText) {
+          self.params.manchesterText = manchesterText;
+          BotEngine.nextStep();
+        });
 
       },
 
 
       saveResourceFn: function() {
+        var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
+        Lineage_createResource.writeResource(self.params.source, triples, function(err, resourceId) {
 
+          if (err) {
+            BotEngine.abort(err.responseText)
+          }
+          self.params.resourceId = resourceId;
+          BotEngine.nextStep();
+
+        });
 
       },
+
       editResourceFn: function() {
-        NodeInfosWidget.showNodeInfos(self.params.source,self.params.resourceId)
+        NodeInfosWidget.showNodeInfos(self.params.source, self.params.resourceId,"mainDialogDiv");
+        BotEngine.nextStep();
 
       },
       drawResourceFn: function() {
         var nodeData = {
-          id:self.params.resourceId,
+          id: self.params.resourceId,
           data: {
             id: self.params.resourceId,
-            source:self.params.source
+            source: self.params.source
           }
         };
         Lineage_whiteboard.drawNodesAndParents(nodeData, 2);
+        BotEngine.nextStep();
 
       },
+      newResourceFn:function(){
+        self.start()
+      }
 
 
     };

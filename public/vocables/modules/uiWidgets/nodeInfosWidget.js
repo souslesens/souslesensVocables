@@ -728,7 +728,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 self.newProperties[property] = value;
 
                 // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
-                self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "nodeInfosWidget_InfosTabDiv", {}, function (err, result) {
+                self.drawCommonInfos(self.currentSource, self.currentNodeId, "nodeInfosWidget_InfosTabDiv", {}, function (err, result) {
                     //  self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.push({

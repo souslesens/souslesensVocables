@@ -25,7 +25,7 @@ var Lineage_createResource = (function() {
 
     $("#LineagePopup").load("modules/tools/lineage/html/createResourceDialog.html", function() {
       $("#editPredicate_mainDiv").remove();
-    AxiomEditor.init(Lineage_sources.activeSource)
+    //AxiomEditor.init(Lineage_sources.activeSource)
      // $("#lineageCreateResource_labelInput").focus();
 
       PredicatesSelectorWidget.load("lineageCreateResource_objectDiv", self.currentSource, {}, function() {
@@ -78,7 +78,7 @@ var Lineage_createResource = (function() {
   self.getResourceTriples = function(source,resourceType,resourceUri,label,superClass,predicate,object) {
     
     
-    function getTriple(){
+    function getTriple(resourceUri,predicate,object){
         var triple = {
           subject: resourceUri,
           predicate: predicate,
@@ -93,7 +93,7 @@ var Lineage_createResource = (function() {
 
     if(!resourceUri) {
       var uriType="fromLabel"
-      if(label)
+      if(!label)
         uriType="randomHexaNumber"
 
       resourceUri = common.getURI(label, source,uriType );
@@ -109,8 +109,7 @@ var Lineage_createResource = (function() {
       // additional triple
      triples.push(getTriple(resourceUri,predicate, object));
     }
-    else {
-      self.setResourceUri();
+
      triples.push(getTriple(resourceUri,"rdfs:label", Sparql_common.formatStringForTriple(label)));
       if (resourceType== "owl:Class") {
 
@@ -134,7 +133,7 @@ var Lineage_createResource = (function() {
       });
       //  $("#lineageCreateResource_basicTripleBtn").css("display", "none");
       self.basicDone = true;
-    }
+
     return triples;
 
   };
@@ -192,7 +191,7 @@ var Lineage_createResource = (function() {
       return alert("no value for object");
     }
 
-    var triples= self.getResourceTriples(self.currentSource,resourceType,resourceUri,label,superClass,predicate,object)
+    self.currentResourceTriples= self.getResourceTriples(self.currentSource,resourceType,resourceUri,label,superClass,predicate,object)
     self.showResourceTriples();
     $("#lineageCreateResource_additionalTripleBtn").css("display", "block");
   }
@@ -234,44 +233,51 @@ var Lineage_createResource = (function() {
 
 
   self.writeResourceFromUI = function() {
-    self.writeResource(self.currentSource,  self.currentResourceUri, self.currentResourceTriples, function(err, result) {
+    self.writeResourceTriples(self.currentSource, self.currentResourceTriples, function(err, result) {
+      if(err){
+        return alert(err.responseText);
+      }
       MainController.UI.message("resource Created");
       var nodeData = {
         id: self.currentResourceUri,
         data: {
           id: self.currentResourceUri,
-          source: source
+          source: self.currentSource
         }
       };
       Lineage_whiteboard.drawNodesAndParents(nodeData, 2);
-      self.init()
+      $("#LineagePopup").dialog("close")
+
     })
   };
 
-  self.writeResource = function(source,resourceUri,triples,callback) {
-    if (!triples) {
-      return alert("no predicates for node");
+  self.writeResource = function(source,triples,callback) {
+    if (!triples || triples.length==0) {
+      return callback({responseText:"no predicates for node"});
     }
+
+    var  resourceUri=triples[0].subject
+
 
     Sparql_OWL.getNodeInfos(source,resourceUri, {}, function(err, result) {
       if (err) {
-        return alert(err.responseText);
+        return callback(err)
       }
       if (result.length > 0) {
         resourceUri = null;
         $("#lineageCreateResource_creatingNodeUriType").val();
-        return alert("this uri already exists, choose a new one");
+        return callback({responseText:"this uri already exists, choose a new one"});
       }
 
       Sparql_generic.insertTriples(source,triples, {}, function(err, _result) {
         if (err) {
-          return alert(err.responseText);
+          return callback(err.responseText)
         }
 
 
         SearchUtil.generateElasticIndex(source, { ids: [resourceUri] }, function(err, result) {
           if (err) {
-            return alert(err.responseText);
+            return callback(err)
           }
           MainController.UI.message("node Created and Indexed");
         });
@@ -287,7 +293,10 @@ var Lineage_createResource = (function() {
           classes: { [modelData.id]: modelData }
         };
         OntologyModels.updateModel(source, modelData, {}, function(err, result) {
-          console.log(err || "ontologyModelCache updated");
+          if(callback)
+            return callback(err,resourceUri)
+         return console.log(err || "ontologyModelCache updated");
+
         });
 
       });

@@ -1,13 +1,12 @@
 import common from "../../shared/common.js";
 
-var KGquery_controlPanel=(function(){
+var KGquery_controlPanel = (function() {
 
-  var self={}
+  var self = {};
   self.vicinityArray = [];
 
 
-
-  self.addQuerySet = function(toDivId,booleanOperator,label,color) {
+  self.addQuerySet = function(toDivId, booleanOperator, label, color) {
     var querySetDivId = "querySetDiv_" + common.getRandomHexaId(5);
     var booleanOperatorHtml = "";
     if (booleanOperator) {
@@ -29,7 +28,7 @@ var KGquery_controlPanel=(function(){
 
     }
     var setHtml =
-      "<div id='" +querySetDivId +"' class='KGquery_setDiv' style='color:" +
+      "<div id='" + querySetDivId + "' class='KGquery_setDiv' style='color:" +
       color +
       ";border-color:" +
       color +
@@ -43,34 +42,38 @@ var KGquery_controlPanel=(function(){
     // "<button onclick='' >save</button>" +
     setHtml += "</div>";
 
-    $("#"+toDivId).append(setHtml);
-    $("#"+querySetDivId).bind("click", function() {
+    $("#" + toDivId).append(setHtml);
+    $("#" + querySetDivId).bind("click", function() {
       var id = $(this).attr("id");
     });
-    
+
     return querySetDivId;
   };
 
 
-  self.addQueryElementToCurrentSet = function(querySetDivId,color) {
+  self.addQueryElementToCurrentSet = function(querySetDivId, color) {
     var queryElementDivId = "queryElementDiv_" + common.getRandomHexaId(5);
     var html =
-      "<div  class='KGquery_pathDiv'  style='border:solid 2px " + color +"' id='" +queryElementDivId + "'>" +
+      "<div  class='KGquery_pathDiv'  style='border:solid 2px " + color + "' id='" + queryElementDivId + "'>" +
       "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary KGquery_smallButton' " +
-      "onclick='KGquery.removeQueryElement( \"" + queryElementDivId +"\") '>X</button>" +
+      "onclick='KGquery.removeQueryElement( \"" + queryElementDivId + "\") '>X</button>" +
       "</div>";
-    $("#"+querySetDivId).append(html);
+    $("#" + querySetDivId).append(html);
     return queryElementDivId;
 
-  }
+  };
 
 
-
-
-  self.addNodeToQueryElementDiv = function(queryElementDivId,label) {
+  self.addNodeToQueryElementDiv = function(queryElementDivId, label, predicateLabel) {
     var nodeDivId = "nodeDiv_" + common.getRandomHexaId(5);
-    var html =
-      "<div  class='KGquery_pathNodeDiv' id='" +
+    var html = "";
+
+
+    if (predicateLabel) {
+      html += "<span>" + predicateLabel + "</span>";
+    }
+
+    html+= "<div  class='KGquery_pathNodeDiv' id='" +
       nodeDivId +
       "'>" +
       "<span style='font:bold 14px'>" +
@@ -89,14 +92,7 @@ var KGquery_controlPanel=(function(){
   };
 
 
-
-
-
-
-
-
-
   return self;
-})()
+})();
 export default KGquery_controlPanel;
-  window.KGquery_controlPanel=KGquery_controlPanel
+window.KGquery_controlPanel = KGquery_controlPanel;

@@ -20,83 +20,32 @@ var KGcreator_bot = (function() {
     });
   };
 
+  self.workflowColumnMappingClass =
+    { "setType": { "listVocabsFn": { "listSuperClassesFn": {"setValue":{}} } } };
+
+  self.workflowColumnMappingType = {
+    "chooseType": {
+      "_OR": {
+        "blankNode": { "setBlankNode": self.workflowColumnMappingClass },
+        "namedIndividual": { "setBlankNode": self.workflowColumnMappingClass }
+
+
+      }
+
+
+    }
+  };
+
 
   self.workflow = {
-    "listResourceTypes": {
-      "_OR":
-        {
-          "Class": { "promptResourceLabel": { listVocabsFn: { listSuperClasses: { _OR: { editResource: {}, drawResource: {} } } } } },
-          "ObjectProperty": { "promptResourceLabel": { listVocabsFn: { listSuperObjectProperties: { _OR: { editResource: {}, drawResource: {} } } } } },
-          "AnnotationProperty": { "promptResourceLabel": { listDatatypeProperties: {} } },
-          "Individual": { "promptResourceLabel": { listVocabsFn: { listSuperClasses: { _OR: { editResource: {}, drawResource: {} } } } } }
-
-        }
+    "chooseSource": {
+      "chooseTable": { "chooseColumn": self.workflowColumnMapping }
 
     }
   };
 
 
-  self.functions = {
-
-    listResourceTypes: function(queryParams, varName) {
-      var choices = [
-        { id: "Class", label: "Class" },
-        { id: "Individual", label: "Individual" },
-        { id: "ObjectProperty", label: "ObjectProperty" },
-        { id: "AnnotationProperty", label: "AnnotationProperty" }
-      ];
-      BotEngine.showList(choices, "resourceType");
-    },
-
-
-    listVocabsFn: function() {
-      var sourceLabel = self.source;
-      var vocabs = [{ id: sourceLabel, label: sourceLabel }];
-      var imports = Config.sources[sourceLabel].imports;
-      imports.forEach(function(importSource) {
-        vocabs.push({ id: importSource, label: importSource });
-      });
-      BotEngine.showList(vocabs, "currentVocab");
-    },
-
-    promptResourceLabel: function() {
-      self.params.resourceLabel = prompt("resource label ");
-      BotEngine.writeCompletedHtml(self.params.resourceLabel);
-      BotEngine.nextStep();
-    },
-
-    listSuperClasses: function(queryParams, varName) {
-        var vocab = self.params.currentVocab;
-        var classes = [{ id: "owl:Thing", label: "owl:Thing" }];
-        for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
-          var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
-          classes.push({ id: classId.id, label: classId.label });
-        }
-        BotEngine.showList(classes, "superClass");
-    },
-    listSuperObjectProperties: function(queryParams, varName) {
-      var vocab = self.params.currentVocab;
-      var classes = [{ id: "owl:Thing", label: "owl:Thing" }];
-      for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
-        var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
-        classes.push({ id: classId.id, label: classId.label });
-      }
-      BotEngine.showList(classes, "superClass");
-    },
-
-    listDatatypeProperties: function(queryParams, varName) {
-
-
-    },
-
-    editResource: function(queryParams, varName) {
-
-    },
-
-    editResource: function(queryParams, varName) {
-
-    }
-  };
+  self.functions = {};
 
 
   return self;

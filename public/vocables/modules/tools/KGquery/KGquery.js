@@ -19,6 +19,7 @@ import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
 import KGquery_bot from "../../bots/KGquery_bot.js";
+import sparql_common from "../../sparqlProxies/sparql_common.js";
 
 var KGquery = (function() {
     var self = {};
@@ -107,58 +108,77 @@ var KGquery = (function() {
     };
 
 
-    self.addNodeToQueryElement = function(queryElement, node, role, newVarName) {
+    self.addNodeToQueryElement = function(queryElement, node, role) {
 
-      var node2 = JSON.parse(JSON.stringify(node));
-      if (newVarName) {
-        var countVarInSet = KGquery_paths.countNodeVarExistingInSet(node.id, self.currentQuerySet);
-        if (countVarInSet > 0) {
-          node2.varName = node.label + "_" + countVarInSet;
-        }
+
+      self.classeMap[node.id] = node;
+      queryElement[role] = node;
+
+      var predicateLabel = "";
+      if (role == "toNode") {
+        queryElement.paths.forEach(function(path, index) {
+          if (index > 0) {
+            predicateLabel += ", ";
+          }
+          if (path.length > 3) {
+            predicateLabel += "^";
+          }
+          predicateLabel += Sparql_common.getLabelFromURI(path[2]);
+        });
+
       }
-      else {
-        node2.varName = node.label;
-      }
 
-
-      self.classeMap[node2.varName] = node2;
-      queryElement[role] = node2;
-
-
-      var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId, node.data.label);
+      var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId, node.data.label, predicateLabel);
       KGquery_graph.outlineNode(node.id);
       node.data.queryElement = queryElement;
       self.divsMap[nodeDivId] = node;
 
     };
 
-    self.addNode = function(node, nodeEvent) {
-      if (!node) {
+    self.addNode = function(selectedNode, nodeEvent) {
+      if (!selectedNode) {
         return;
+      }
+
+      var node = JSON.parse(JSON.stringify(selectedNode));
+
+      if (true || nodeEvent.ctrlKey) {
+        /*  node.data.label +="_"+ (self.currentQueryElement.paths.length+1);
+          node.label +="_"+ (self.currentQueryElement.paths.length+1);*/
+
+        var excludeSelf = false;
+        self.currentQuerySet.elements.forEach(function(queryElement) {
+          if (queryElement.fromNode.id == node.id || queryElement.toNode.id == node.id) {
+            //create new path with the same variable (same varname)
+            if (queryElement.toNode.id && queryElement.fromNode.id != queryElement.toNode.id) {
+              excludeSelf = true;
+            }
+            else
+              //create a new varName (path from class to itself)
+            {
+              node.data.label += "_" + (self.currentQueryElement.paths.length + 1);
+            }
+            node.label += "_" + (self.currentQueryElement.paths.length + 1);
+          }
+        });
+
+
       }
 
       /* if existing path in queryFlement a new one is created
       with a from Node that is the nearest node from the existing Node of all previous element in the set*/
 
       if (self.currentQuerySet.elements.length > 1) {
-        var excludeSelf = false;
-        var countVar = KGquery_paths.countNodeVarExistingInSet(node.id, self.currentQuerySet);
-        if (countVar > 0 && !nodeEvent.ctrlKey) {
-          excludeSelf = true;
-        }
-        var newVarName = false;
-        if (countVar > 0 && !nodeEvent.ctrlKey) {
-          newVarName = true;
-        }
+
 
         $("#KGquery_SetsControlsDiv").css("display", "flex");
-        KGquery_paths.getNearestNode(node.id, self.currentQuerySet, excludeSelf, function(err, nearestNodeId) {
+        KGquery_paths.getNearestNodeId(node.id, self.currentQuerySet, excludeSelf, function(err, nearestNodeId) {
           if (err) {
             return acllback(err.responseText);
           }
 
 
-          self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode", newVarName);
+          self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode");
           var nearestNode = self.classeMap[nearestNodeId];
           self.addNodeToQueryElement(self.currentQueryElement, nearestNode, "toNode");
 
@@ -182,12 +202,13 @@ var KGquery = (function() {
       }
       else if (!self.currentQueryElement.toNode) {
 
-        self.addNodeToQueryElement(self.currentQueryElement, node, "toNode");
 
+        self.currentQueryElement.toNode = node;
         KGquery_paths.setQueryElementPath(self.currentQueryElement, function(err, result) {
           if (err) {
             return alert(err.responseText);
           }
+          self.addNodeToQueryElement(self.currentQueryElement, node, "toNode");
           self.addQueryElementToQuerySet(self.currentQuerySet);
 
         });
@@ -325,9 +346,6 @@ var KGquery = (function() {
 
           var objectVarName = self.getVarName(queryElement.toNode);
 
-          if (queryElement.fromNode.id == queryElement.toNode.id) {
-            objectVarName = objectVarName + "_2";
-          }
 
           var objectUri = queryElement.toNode.id;
           var subjectUri = queryElement.fromNode.id;
@@ -344,22 +362,13 @@ var KGquery = (function() {
             var endVarName;
             var inverseStr = "";
             if (pathItem.length == 4) {
-              startVarName = self.getVarName({ id: pathItem[1] });
-              endVarName = self.getVarName({ id: pathItem[0] });
-
-              if (queryElement.fromNode.id == queryElement.toNode.id) {
-                endVarName = endVarName + "_2";
-              }
-
+              startVarName = pathItem[1]; //self.getVarName({ id: pathItem[1] });
+              endVarName = pathItem[0]; //self.getVarName({ id: pathItem[0] });
               inverseStr = "^";
             }
             else {
-              startVarName = self.getVarName({ id: pathItem[0] });
-              endVarName = self.getVarName({ id: pathItem[1] });
-
-              if (queryElement.fromNode.id == queryElement.toNode.id) {
-                endVarName = endVarName + "_2";
-              }
+              startVarName = pathItem[0];//; self.getVarName({ id: pathItem[0] });
+              endVarName = pathItem[1];// self.getVarName({ id: pathItem[1] });
             }
 
             var basicPredicate = startVarName + " " + inverseStr + "<" + pathItem[2] + "> " + endVarName + ".\n";
@@ -529,8 +538,7 @@ var KGquery = (function() {
     self.clearAll = function(exceptSetQueries) {
       self.querySets = { sets: [], groups: [], currentIndex: -1 };
       self.divsMap = {};
-
-      self.divsMap = {};
+      self.currentQuerySet = self.addQuerySet();
       self.allPathEdges = {};
       $("#KGquery_graphDiv").css("display", "flex");
       $("#KGquery_dataTableDiv").css("display", "none");
@@ -550,10 +558,7 @@ var KGquery = (function() {
 
     self.getVarName = function(node, withoutQuestionMark) {
       var varName = (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.label || Sparql_common.getLabelFromURI(node.id), true);
-      if (node.newInstance) {
-        varName += "_" + node.newInstance;
 
-      }
       return varName;
     };
 

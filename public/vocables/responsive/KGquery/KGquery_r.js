@@ -58,6 +58,7 @@ var KGquery_r = (function () {
     self.initGraph=function(){
         $('#tabs_Graph').load("./responsive/KGquery/html/KgqueryGraphTab.html",function(){
             KGquery_graph.init();
+            KGquery_graph.drawVisjsModel("saved");
         });
     }
     self.SavedQueriesComponentShowDialogResponsive = function (CRUDsource, targetDiv, slsvSource, scope, saveQueryFn, loadQueryFn) {

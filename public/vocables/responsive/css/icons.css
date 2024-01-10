@@ -37,12 +37,12 @@
 .saveIcon{
     background-image: url(@saveIcon);
     background-repeat: no-repeat;
-    height: 30px;
-    width: 30px;
+    height: 20px;
+    width: 20px;
 }
 .deleteIcon{
     background-image: url(@deleteIcon);
     background-repeat: no-repeat;
-    height: 30px;
-    width: 30px;
+    height: 20px;
+    width: 20px;
 }

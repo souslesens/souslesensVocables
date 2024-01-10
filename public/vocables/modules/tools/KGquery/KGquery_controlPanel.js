@@ -13,8 +13,8 @@ var KGquery_controlPanel = (function() {
       var unionStr = booleanOperator == "Union" ? "selected=selected" : "";
       var minusStr = booleanOperator == "Minus" ? "selected=selected" : "";
       booleanOperatorHtml =
-        "<div style='  font-weight: bold;color: brown; '>" +
-        " <select  onchange='KGquery.onBooleanOperatorChange(\"" +
+        "<div class='titleboxButtons' style='font-weight: bold;color: brown;margin:-15px 5px 0px 0px ;'>" +
+        " <select class='select-bar-theme3' style='font-size:14px;' onchange='KGquery.onBooleanOperatorChange(\"" +
         querySetDivId +
         "\",$(this).val())'> " +
         "<option " +
@@ -37,7 +37,7 @@ var KGquery_controlPanel = (function() {
 
 
     if (booleanOperator) {
-      setHtml += "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary KGquery_smallButton' onclick='KGquery.removeSet( \"" + querySetDivId + "\")' >X</button>";
+      setHtml += "&nbsp;<button class=' titleboxButtons KGquery_smallButton  deleteIcon' onclick='KGquery.removeSet( \"" + querySetDivId + "\")' ></button>";
     }
     // "<button onclick='' >save</button>" +
     setHtml += "</div>";
@@ -55,8 +55,8 @@ var KGquery_controlPanel = (function() {
     var queryElementDivId = "queryElementDiv_" + common.getRandomHexaId(5);
     var html =
       "<div  class='KGquery_pathDiv'  style='border:solid 2px " + color + "' id='" + queryElementDivId + "'>" +
-      "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary KGquery_smallButton' " +
-      "onclick='KGquery.removeQueryElement( \"" + queryElementDivId + "\") '>X</button>" +
+      "&nbsp;<button class=' titleboxButtons KGquery_smallButton  deleteIcon' " +
+      "onclick='KGquery.removeQueryElement( \"" + queryElementDivId + "\") '></button>" +
       "</div>";
     $("#" + querySetDivId).append(html);
     return queryElementDivId;

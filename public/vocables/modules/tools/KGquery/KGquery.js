@@ -171,7 +171,7 @@ var KGquery = (function() {
       if (self.currentQuerySet.elements.length > 1) {
 
 
-        $("#KGquery_SetsControlsDiv").css("display", "flex");
+        $("#KGquery_SetsControlsDiv").show();
         KGquery_paths.getNearestNodeId(node.id, self.currentQuerySet, excludeSelf, function(err, nearestNodeId) {
           if (err) {
             return acllback(err.responseText);
@@ -552,7 +552,7 @@ var KGquery = (function() {
         //   KGquery_graph.drawVisjsModel("saved")
         $("#KGquery_pathsDiv").html("");
         self.addQuerySet();
-        $("#KGquery_SetsControlsDiv").css("display", "none");
+        $("#KGquery_SetsControlsDiv").hide();
       }
     };
 

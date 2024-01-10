@@ -12,6 +12,7 @@
         "mainapp:build": "vite build mainapp",
         "mainapp:watch": "vite build mainapp --watch --minify false",
         "mainapp:dev": "vite mainapp",
+        "migrate": "sh scripts/run-migrations.sh",
         "prettier:check": "prettier --check ./public/vocables",
         "prettier:write": "prettier -w ./public/vocables",
         "test:uitest": "CONFIG_PATH=tests/data/config npm start & cypress open",

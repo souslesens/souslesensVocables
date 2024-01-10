@@ -1,11 +1,12 @@
 const fs = require("fs");
+const path = require("path");
 const yargs = require("yargs");
 const ULID = require("ulid");
 const { createHash } = require("crypto");
 
-const argv = yargs.alias("f", "file").describe("f", "Path to users file").demandOption(["f"]).alias("w", "write").describe("w", "Write to the file").boolean("w").help().argv;
+const argv = yargs.alias("c", "config").describe("c", "Path to config directory").demandOption(["c"]).alias("w", "write").describe("w", "Write to the file").boolean("w").help().argv;
 
-const usersFilePath = argv.file;
+const usersFilePath = path.resolve(argv.config + "/users/users.json");
 
 fs.readFile(usersFilePath, (_err, rawData) => {
     const data = JSON.parse(rawData);

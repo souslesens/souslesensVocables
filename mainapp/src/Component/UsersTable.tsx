@@ -208,6 +208,12 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
         if (fieldname === "allowSourceCreation") {
             value = event.target.value === "true" ? false : true;
         }
+        if (fieldname === "maxNumberCreatedSource") {
+            value = parseInt(event.target.value);
+            if (value < 0 || isNaN(value)) {
+                value = 0;
+            }
+        }
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: value } });
     };
     const saveSources = () => {
@@ -283,6 +289,20 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                                     <Checkbox value={userModel.userForm.allowSourceCreation} checked={userModel.userForm.allowSourceCreation} onChange={handleFieldUpdate("allowSourceCreation")} />
                                 }
                                 label="Allow the user to create sources"
+                            />
+                        </FormControl>
+
+                        <FormControl>
+                            <TextField
+                                id="max-allowed-sources"
+                                type="number"
+                                label="Limit the number of source the user can create"
+                                value={userModel.userForm.maxNumberCreatedSource || 0}
+                                disabled={!userModel.userForm.allowSourceCreation}
+                                onChange={handleFieldUpdate("maxNumberCreatedSource")}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
                             />
                         </FormControl>
 

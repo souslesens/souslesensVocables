@@ -8,6 +8,7 @@ import KGcreator_graph from "./KGcreator_graph.js";
 import KGcreator_mappings from "./KGcreator_mappings.js";
 import KGcreator_run from "./KGcreator_run.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
+import KGcreator_bot from "../../bots/KGcreator_bot.js";
 
 var KGcreator = (function () {
     var self = {};
@@ -268,6 +269,7 @@ var KGcreator = (function () {
 
 
                     else if (node.data.type == "table") {
+
                         items.showTableMappings = {
                             label: "showTableMappings",
                             action: function (_e) {
@@ -310,6 +312,14 @@ var KGcreator = (function () {
                         var KGcreatorTab = $("#KGcreator_centralPanelTabs").tabs("option", "active");
 
                         //   return (items = KGcreator.getContextMenu());
+
+                    /*    items.mappingBot = {
+                            label: "mappingBot",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_bot.start(node);
+                            },
+                        };*/
 
                         items.mapColumn = {
                             label: "map Column",

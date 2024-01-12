@@ -1,4 +1,4 @@
-import botEngine from "./botEngine.js";
+
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import KGquery from "../tools/KGquery/KGquery.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
@@ -6,6 +6,7 @@ import BotEngine from "./botEngine.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import AxiomsEditor from "../tools/lineage/axiomsEditor.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
+import CommonBotFunctions from "./commonBotFunctions.js";
 
 
 var CreateResource_bot = (function() {
@@ -69,7 +70,6 @@ var CreateResource_bot = (function() {
       saveResourceFn: " Save Resource",
 
 
-
     };
 
 
@@ -86,13 +86,9 @@ var CreateResource_bot = (function() {
 
 
       listVocabsFn: function() {
-        var sourceLabel = self.source;
-        var vocabs = [{ id: sourceLabel, label: sourceLabel }];
-        var imports = Config.sources[sourceLabel].imports;
-        imports.forEach(function(importSource) {
-          vocabs.push({ id: importSource, label: importSource });
-        });
-        BotEngine.showList(vocabs, "currentVocab");
+
+        CommonBotFunctions.listVocabsFn(self.source,"currentVocab")
+
       },
 
 
@@ -104,16 +100,7 @@ var CreateResource_bot = (function() {
       },
 
       listSuperClassesFn: function() {
-        var vocab = self.params.currentVocab;
-        var classes = [{ id: "owl:Thing", label: "owl:Thing" }];
-
-
-
-        for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
-          var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
-          classes.push({ id: classId.id, label: classId.label });
-        }
-        BotEngine.showList(classes, "resourceId");
+        CommonBotFunctions.listVocabClasses(self.params.currentVocab,"resourceId",true);
 
       },
       listClassTypesFn: function() {

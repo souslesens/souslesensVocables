@@ -7,7 +7,8 @@ import Lineage_relationIndividualsFilter from "../tools/lineage/lineage_relation
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import IndividualValueFilterWidget from "../uiWidgets/individualValuefilterWidget.js";
-import BotEngine from "./BotEngine.js";
+import BotEngine from "./botEngine.js";
+import CommonBotFunctions from "./commonBotFunctions.js";
 
 
 
@@ -32,9 +33,9 @@ self.start=function() {
       "listFilterTypes": {
         "_OR":
           {
-            "label": { "promptIndividualsLabel": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
-            "list": { "listIndividuals": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
-            "advanced": { "promptIndividualsAdvandedFilter": { "listWhiteBoardFilterType": { "executeQuery": {} } } }
+            "label": { "promptIndividualsLabelFn": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
+            "list": { "listIndividualsFn": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
+            "advanced": { "promptIndividualsAdvandedFilterFn": { "listWhiteBoardFilterType": { "executeQuery": {} } } }
             // }
           }
       }
@@ -94,6 +95,15 @@ self.start=function() {
       }
     };
 
+  self.functionTitles = {
+    _OR: "Select an option",
+    listVocabsFn: "Choose a reference ontology",
+    listQueryTypeFn: "what do you want ",
+    listClassesFn: "Choose a  a class ",
+    listPropertiesFn: " Choose a property",
+
+
+  };
 
 
 
@@ -102,19 +112,8 @@ self.start=function() {
     self.functions = {
 
       listVocabsFn: function() {
-        var sourceLabel = Lineage_sources.activeSource;
-        var vocabs = [{ id: sourceLabel, label: sourceLabel }];
-        var imports = Config.sources[sourceLabel].imports;
-        imports.forEach(function(importSource) {
-          vocabs.push({ id: importSource, label: importSource });
-        });
-
-        for (var key in Config.basicVocabularies) {
-          vocabs.push({ id: key, label: key });
-        }
-        BotEngine.showList(vocabs, "currentVocab");
-
-
+        CommonBotFunctions.listVocabsFn( Lineage_sources.activeSource,"currentVocab",true)
+        
       },
       listQueryTypeFn: function() {
         var choices = [
@@ -129,24 +128,12 @@ self.start=function() {
 
 
       listClassesFn: function() {
-        var vocab = self.params.currentVocab;
-        var classes = [];
-        for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
-          var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
-          classes.push({ id: classId.id, label: classId.label });
-        }
-        BotEngine.showList(classes, "currentClass");
+        CommonBotFunctions.listVocabClasses(self.params.currentVocab,"currentClass",true);
       },
 
       listPropertiesFn: function() {
-        var vocab = self.params.currentVocab;
-        var props = [];
-        for (var key in Config.ontologiesVocabularyModels[vocab].properties) {
-          var prop = Config.ontologiesVocabularyModels[vocab].properties[key];
-          props.push({ id: prop.id, label: prop.label });
-        }
-        BotEngine.showList(props, "currentProperty");
-
+        CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab,"currentProperty");
+      
       },
 
 
@@ -229,7 +216,7 @@ self.start=function() {
       },
 
 
-      listIndividuals: function() {
+      listIndividualsFn: function() {
         Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], {}, function(err, result) {
           if (err) {
             return alert(err);
@@ -246,13 +233,13 @@ self.start=function() {
 
         });
       },
-      promptIndividualsLabel: function() {
+      promptIndividualsLabelFn: function() {
         self.params.individualsFilterValue = prompt("label contains ");
         BotEngine.writeCompletedHtml(self.params.individualsFilterValue)
         BotEngine.nextStep();
 
       },
-      promptIndividualsAdvandedFilter: function() {
+      promptIndividualsAdvandedFilterFn: function() {
         IndividualValueFilterWidget.showDialog(null, self.params.source, self.params.individualsFilterRole, self.params.currentClass, null, function(err, filter) {
           self.params.advancedFilter = filter;
           BotEngine.writeCompletedHtml(self.params.advancedFilter)
@@ -262,10 +249,15 @@ self.start=function() {
 
       listWhiteBoardFilterType: function() {
         var choices = [
-          { id: "selectedNode", label: "selectedNode" },
-          { id: "whiteboardNodes", label: "whiteboard nodes" },
-          { id: "sourceNodes", label: "all Source Nodes" }
+          { id: "sourceNodes", label: "active Source " },
+          { id: "allSources", label: "all referenced Sources " }
         ];
+        if(Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()){
+          choices.push( { id: "whiteboardNodes", label: "whiteboard nodes" })
+        }
+        if(Lineage_whiteboard.currentGraphNode){
+          choices .push( { id: "selectedNode", label: "selectedNode" })
+        }
         BotEngine.showList(choices, "whiteboardFilterType");
 
       },
@@ -283,7 +275,7 @@ self.start=function() {
         function getPathFilter() {
           if (!path) {
             if (currentClass) {
-              return Sparql_common.setFilter("subjectType", currentClass, null, { useFilterKeyWord: 1 });
+              return Sparql_common.setFilter("subject", currentClass, null, { useFilterKeyWord: 1 });
             }
             if (currentProperty) {
               return Sparql_common.setFilter("prop", currentProperty);
@@ -313,6 +305,8 @@ self.start=function() {
           else if (individualsFilterType == "advanced") {
             filter = advancedFilter;
           }
+
+          allSources
           return filter;
         }
 
@@ -343,6 +337,12 @@ self.start=function() {
           else if (whiteboardFilterType == "all") {
             data = null;
           }
+          else if (whiteboardFilterType == "allSources") {
+            // use search engine first
+            return alert("coming soon")
+
+          }
+
 
           return data;
         }

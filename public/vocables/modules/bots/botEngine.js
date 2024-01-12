@@ -9,10 +9,10 @@ var BotEngine = (function() {
     //  self.doNext(keywordsTree)
     $("#botDiv").load("modules/bots/html/bot.html", function() {
       $("#botTitle").html(self.currentBot.title);
+      if(callback)
       callback();
     });
   };
-
 
 
   self.nextStep = function(returnValue) {
@@ -20,7 +20,7 @@ var BotEngine = (function() {
 
 
     if (keys.length == 0) {
-     return self.end()
+      return self.end();
     }
 
     var key = keys[0];
@@ -29,24 +29,32 @@ var BotEngine = (function() {
       var alternatives = self.currentObj[key];
       if (returnValue && alternatives[returnValue]) {
         var obj = self.currentObj["_OR"][returnValue];
-        var fnName = Object.keys(obj)[0];
-        if(!fnName){
-          return self.end()
+        var key0 = Object.keys(obj)[0];
+        if (!key0) {
+          return self.end();
         }
-        var fn = self.currentBot.functions[fnName];
+        if (key0 == "_OR") {
+          self.currentObj = obj;
+          return self.nextStep();
+        }
+
+        var fn = self.currentBot.functions[key0];
         if (!fn || typeof fn !== "function") {
-          return alert("function not defined :" + fnName);
+          return alert("function not defined :" + key0);
         }
-        self.currentObj = obj[fnName];
-        self.setStepMessage(fnName)
+        if (obj[key0] != "_self") {
+          self.currentObj = obj[key0];
+        }
+        self.setStepMessage(key0);
         fn();
       }
 
       else {
         var choices = [];
-        for(var key in alternatives) {
+        for (var key in alternatives) {
           choices.push({ id: key, label: key });
-        };
+        }
+        ;
         self.showList(choices);
       }
     }
@@ -56,30 +64,30 @@ var BotEngine = (function() {
         return alert("function not defined :" + key);
       }
       self.currentObj = self.currentObj[key];
-      self.setStepMessage(key)
+      self.setStepMessage(key);
       fn();
 
     }
   };
-  self.end=function(){
+  self.end = function() {
     self.currentBot.params.queryText = self.getQueryText();
     $("#botPanel").css("display", "none");
     if (self.currentBot.callbackFn) {
       return self.currentBot.callbackFn();
     }
-  }
+  };
 
-  self.setStepMessage=function(step){
-    if(self.currentBot.functionTitles){
-    var message= self.currentBot.functionTitles[step]
-      $("#botMessage").html(message || "")
+  self.setStepMessage = function(step) {
+    if (self.currentBot.functionTitles) {
+      var message = self.currentBot.functionTitles[step];
+      $("#botMessage").html(message || "");
     }
-  }
+  };
 
-  self.abort=function(message){
+  self.abort = function(message) {
     alert(message);
-    self.close()
-  }
+    self.close();
+  };
 
   self.clear = function() {
     self.currentBot.start();
@@ -93,18 +101,20 @@ var BotEngine = (function() {
   };
 
 
-  self.showList = function(values, varToFill, returnValue) {
+  self.showList = function(values, varToFill, returnValue, sort) {
+    values = common.StringArrayToIdLabelObjectArray(values);
+    if (sort) {
+      values.sort(function(a, b) {
+        if (a.label > b.label) {
+          return 1;
+        }
+        if (a.label < b.label) {
+          return -1;
+        }
+        return 0;
 
-    values.sort(function(a, b) {
-      if (a.label > b.label) {
-        return 1;
-      }
-      if (a.label < b.label) {
-        return -1;
-      }
-      return 0;
-
-    });
+      });
+    }
 
     $("#bot_resourcesProposalSelect").css("display", "block");
     common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");

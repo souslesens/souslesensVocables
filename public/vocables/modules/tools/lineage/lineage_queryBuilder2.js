@@ -130,9 +130,9 @@ var Lineage_queryBuilder = (function() {
 
     self.workflow_individualsFilter= {
     //  "listFilterTypes": {
-        "label": { "promptIndividualsLabel": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
-        "list": { "listIndividuals": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
-        "advanced": { "promptIndividualsAdvandedFilter": { "listWhiteBoardFilterType": { "executeQuery": {} } } }
+        "label": { "promptIndividualsLabelFn": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
+        "list": { "listIndividualsFn": { "listWhiteBoardFilterType": { "executeQuery": {} } } },
+        "advanced": { "promptIndividualsAdvandedFilterFn": { "listWhiteBoardFilterType": { "executeQuery": {} } } }
      // }
     }
 
@@ -346,7 +346,7 @@ var Lineage_queryBuilder = (function() {
           listWhiteBoardFilterType();
         }
         else if (currentChoice == "list") {
-          listIndividuals();
+          listIndividualsFn();
         }
         else if (currentChoice == "advanced") {
           Lineage_relationIndividualsFilter.init();
@@ -355,7 +355,7 @@ var Lineage_queryBuilder = (function() {
     },
 
 
-     listIndividuals:function() {
+     listIndividualsFn:function() {
       Sparql_OWL.getDistinctClassLabels(self.currentQuery.source, [self.currentQuery.currentClass], {}, function(err, result) {
         if (err) {
           return alert(err);
@@ -381,13 +381,13 @@ var Lineage_queryBuilder = (function() {
     },
 
 
-     listIndividuals: function () {
+     listIndividualsFn: function () {
       self.currentQuery.individualsFilterValue= prompt("label contains ");
       self.nextStep()
 
     },
 
-   promptIndividualsAdvandedFilter: function () {
+   promptIndividualsAdvandedFilterFn: function () {
       IndividualValueFilterWidget.showDialog(null, self.currentQuery.source, varName, aClass.id, datatype, function(err, filter) {
         self.currentQuery.advancedFilter=filter;
         self.nextStep()

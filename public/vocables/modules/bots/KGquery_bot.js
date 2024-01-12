@@ -29,11 +29,11 @@ var KGquery_bot = (function() {
     "listFilterTypes": {
       "_OR":
         {
-          "label": { "promptIndividualsLabel": { setSparqlQueryFilter: {} } },
-          "list": { "listIndividuals": { setSparqlQueryFilter: {} } },
-          "advanced": { "promptIndividualsAdvandedFilter": { setSparqlQueryFilter: {} } },
-          "date": { "promptIndividualsAdvandedFilter": { setSparqlQueryFilter: {} } },
-          "period": { "promptIndividualsAdvandedFilter": { setSparqlQueryFilter: {} } }
+          "label": { "promptIndividualsLabelFn": { setSparqlQueryFilter: {} } },
+          "list": { "listIndividualsFn": { setSparqlQueryFilter: {} } },
+          "advanced": { "promptIndividualsAdvandedFilterFn": { setSparqlQueryFilter: {} } },
+          "date": { "promptIndividualsAdvandedFilterFn": { setSparqlQueryFilter: {} } },
+          "period": { "promptIndividualsAdvandedFilterFn": { setSparqlQueryFilter: {} } }
           // }
         }
     }

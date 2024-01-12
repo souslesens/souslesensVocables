@@ -17,7 +17,8 @@ var KGquery_paths = (function() {
       }
 
       path=JSON.parse(JSON.stringify(path))
-      self.managePathAmbiguousEdges(path, function(unAmbiguousPath) {
+      self.managePathAmbiguousEdges(path,
+        function(unAmbiguousPath) {
         //register queryPath in pathDivsMap
 
 
@@ -38,12 +39,13 @@ var KGquery_paths = (function() {
 
   self.substituteClassIdToVarNameInPath=function(queryElement,path){
     path.forEach(function(item,index){
+
       if(item[0]==queryElement.fromNode.id) {
         item[0] = KGquery.getVarName(queryElement.fromNode)
         if(item[1]==queryElement.toNode.id)
           item[1]=KGquery.getVarName(queryElement.toNode)
         else
-          item[1]= "?"+Sparql_common.formatStringForTriple( Sparql_common.getLabelFromURI( item[1]), true);
+          item[1]= "?"+Sparql_common.getLabelFromURI( item[1]);
       }
 
       if(item[1]==queryElement.fromNode.id) {
@@ -51,8 +53,12 @@ var KGquery_paths = (function() {
         if(item[0]==queryElement.toNode.id)
           item[0]=KGquery.getVarName(queryElement.toNode)
         else
-          item[0]= "?"+Sparql_common.formatStringForTriple( Sparql_common.getLabelFromURI( item[0]), true);
+          item[0]= "?"+ Sparql_common.getLabelFromURI( item[0]);
       }
+      if(item[0].indexOf("?")<0)
+        item[0]= "?"+ Sparql_common.getLabelFromURI( item[0]);
+      if(item[1].indexOf("?")<0)
+        item[1]= "?"+ Sparql_common.getLabelFromURI( item[1]);
 
 
 
@@ -244,43 +250,50 @@ var KGquery_paths = (function() {
       }
       fromToMap[fromTo].push(pathItem[2]);
     });
-    var ambiguousEdges = null;
+    var ambiguousEdges = [];
     for (var key in fromToMap) {
       if (fromToMap[key].length > 1) {
-        ambiguousEdges = { id: key, properties: fromToMap[key] };
+        ambiguousEdges.push( { id: key, properties: fromToMap[key] });
       }
     }
 
-    if (ambiguousEdges && ambiguousEdges.properties.length > 0) {
-      return SimpleListSelectorWidget.showDialog(
-        null,
-        function(callbackLoad) {
-          return callbackLoad(ambiguousEdges.properties);
-        },
-        function(selectedProperty) {
-          ambiguousEdges.selectedProperty = selectedProperty;
-
-          var pathsToDelete = [];
-          path.forEach(function(pathItem, pathIndex) {
-            if (ambiguousEdges.id == [pathItem[0] + "_" + pathItem[1]] || ambiguousEdges.id == [pathItem[1] + "_" + pathItem[0]]) {
-              if (pathItem[2] != ambiguousEdges.selectedProperty) {
-                pathsToDelete.push(pathIndex);
-              }
-            }
-          });
-          var unambiguousPaths = [];
-          path.forEach(function(pathItem, pathIndex) {
-            if (pathsToDelete.indexOf(pathIndex) < 0) {
-              unambiguousPaths.push(pathItem);
-            }
-          });
-          return callback(unambiguousPaths);
-        }
-      );
-    }
-    else {
+    if(ambiguousEdges.length==0)
       return callback(path);
-    }
+    var pathsToDelete = [];
+   async.eachSeries(ambiguousEdges,function(ambiguousEdge,callbackEach){
+      if (ambiguousEdge && ambiguousEdge.properties.length > 0) {
+        return SimpleListSelectorWidget.showDialog(
+          null,
+          function(callbackLoad) {
+            return callbackLoad(ambiguousEdge.properties);
+          },
+          function(selectedProperty) {
+            ambiguousEdge.selectedProperty = selectedProperty;
+            path.forEach(function(pathItem, pathIndex) {
+              if (ambiguousEdge.id == [pathItem[0] + "_" + pathItem[1]] || ambiguousEdge.id == [pathItem[1] + "_" + pathItem[0]]) {
+                if (pathItem[2] != ambiguousEdge.selectedProperty) {
+                  pathsToDelete.push(pathIndex);
+                }
+              }
+            });
+
+            callbackEach()
+
+          }
+        );
+      }
+
+    },function(err) {
+     var unambiguousPaths = [];
+     path.forEach(function(pathItem, pathIndex) {
+       if (pathsToDelete.indexOf(pathIndex) < 0) {
+         unambiguousPaths.push(pathItem);
+       }
+     });
+
+     return callback(unambiguousPaths);
+   })
+
   };
 
 

@@ -21,6 +21,7 @@ import KGquery_paths from "./KGquery_paths.js";
 import KGquery_bot from "../../bots/KGquery_bot.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
 
+
 var KGquery = (function() {
     var self = {};
     self.querySets = { sets: [], groups: [], currentIndex: -1 };
@@ -108,27 +109,13 @@ var KGquery = (function() {
     };
 
 
+
     self.addNodeToQueryElement = function(queryElement, node, role) {
 
 
       self.classeMap[node.id] = node;
       queryElement[role] = node;
-
-      var predicateLabel = "";
-      if (role == "toNode") {
-        queryElement.paths.forEach(function(path, index) {
-          if (index > 0) {
-            predicateLabel += ", ";
-          }
-          if (path.length > 3) {
-            predicateLabel += "^";
-          }
-          predicateLabel += Sparql_common.getLabelFromURI(path[2]);
-        });
-
-      }
-
-      var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId, node.data.label, predicateLabel);
+      var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId,role, node.data.label);
       KGquery_graph.outlineNode(node.id);
       node.data.queryElement = queryElement;
       self.divsMap[nodeDivId] = node;
@@ -142,33 +129,21 @@ var KGquery = (function() {
 
       var node = JSON.parse(JSON.stringify(selectedNode));
 
-      if (true || nodeEvent.ctrlKey) {
-        /*  node.data.label +="_"+ (self.currentQueryElement.paths.length+1);
-          node.label +="_"+ (self.currentQueryElement.paths.length+1);*/
-
-        var excludeSelf = false;
-        self.currentQuerySet.elements.forEach(function(queryElement) {
-          if (queryElement.fromNode.id == node.id || queryElement.toNode.id == node.id) {
-            //create new path with the same variable (same varname)
-            if (queryElement.toNode.id && queryElement.fromNode.id != queryElement.toNode.id) {
-              excludeSelf = true;
-            }
-            else
-              //create a new varName (path from class to itself)
-            {
-              node.data.label += "_" + (self.currentQueryElement.paths.length + 1);
-            }
-            node.label += "_" + (self.currentQueryElement.paths.length + 1);
-          }
-        });
-
-
-      }
 
       /* if existing path in queryFlement a new one is created
       with a from Node that is the nearest node from the existing Node of all previous element in the set*/
 
       if (self.currentQuerySet.elements.length > 1) {
+
+        var excludeSelf = false;
+        self.currentQuerySet.elements.forEach(function(queryElement) {
+          if (queryElement.fromNode.id == node.id || queryElement.toNode.id == node.id) {
+            excludeSelf = true;
+            node.label += "_" + (self.currentQueryElement.paths.length + 1);
+            node.data.label = node.label;
+          }
+
+        });
 
 
         $("#KGquery_SetsControlsDiv").css("display", "flex");
@@ -186,8 +161,13 @@ var KGquery = (function() {
             if (err) {
               return alert(err.responseText);
             }
+
+            var predicateLabel = KGquery_controlPanel.getQueryElementPredicateLabel(self.currentQueryElement);
+            KGquery_controlPanel.addPredicateToQueryElementDiv(self.currentQueryElement.divId,predicateLabel)
+
+            self.currentQueryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
           });
-          self.currentQueryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
+
 
         });
 
@@ -201,6 +181,11 @@ var KGquery = (function() {
 
       }
       else if (!self.currentQueryElement.toNode) {
+        //give new varName to the classId
+        if (self.currentQueryElement.fromNode.id == node.id) {
+          node.label += "_" + (self.currentQueryElement.paths.length + 1);
+          node.data.label = node.label;
+        }
 
 
         self.currentQueryElement.toNode = node;
@@ -209,6 +194,9 @@ var KGquery = (function() {
             return alert(err.responseText);
           }
           self.addNodeToQueryElement(self.currentQueryElement, node, "toNode");
+          var predicateLabel = KGquery_controlPanel.getQueryElementPredicateLabel(self.currentQueryElement);
+          KGquery_controlPanel.addPredicateToQueryElementDiv(self.currentQueryElement.divId,predicateLabel)
+
           self.addQueryElementToQuerySet(self.currentQuerySet);
 
         });

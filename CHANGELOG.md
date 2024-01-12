@@ -5,15 +5,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.45.0...master)
+## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.50.0...master)
 
-## [1.45.2](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.45.2) - 2023-12-05
+> [!IMPORTANT]
+> Updating to Unrelease require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+### Added
+
+-   npm run migrate command to play migrations
+-   Add allowSourceCreation and maxNumberCreatedSource to users.json entries
+-   Add owner and published to sources.json entries
+
+## [1.50.0](https://github.com/souslesens/souslesensVocables/compare/1.49.0...1.50.0) - 2023-12-22
+
+### Added
+
+-   Add a button to copy the token in the clipboard
+
+### Changed
+
+-   Sort the sources list in the GraphManagement tool
+
+## [1.49.0](https://github.com/souslesens/souslesensVocables/compare/1.48.0...1.49.0) - 2023-12-19
+
+### Added
+
+-   Interface to manage token
+
+### Changed
+
+-   token are generated with ulid and hash of login to avoid collision
+
+## [1.48.0](https://github.com/souslesens/souslesensVocables/compare/1.47.0...1.48.0) - 2023-12-18
+
+### Changed
+
+-   Use token to authenticate with API
+-   Use Authorization barear intead of x-token
+
+## [1.47.1](https://github.com/souslesens/souslesensVocables/compare/1.46.2...1.47.0) - 2023-12-12
+
+## [1.47.0](https://github.com/souslesens/souslesensVocables/compare/1.46.2...1.47.0) - 2023-12-12
+
+## [1.46.2](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.46.2) - 2023-12-05
 
 ### Fixed
 
 -   Unit tests
 
-## [1.45.1](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.45.1) - 2023-12-05
+## [1.46.1](https://github.com/souslesens/souslesensVocables/compare/1.45.0...1.46.1) - 2023-12-05
 
 > [!IMPORTANT]
 > Updating to Unrelease require a data migration. Execute the following script after upgrade.

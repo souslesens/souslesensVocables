@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const { config, configUsersPath } = require("./config");
 const { Lock } = require("async-await-mutex-lock");
 const mariadb = require("mariadb");
+const ULID = require("ulid");
+const { createHash } = require("crypto");
 
 /**
  * @typedef {import("./UserTypes").UserAccountWithPassword} UserAccountWithPassword
@@ -33,7 +35,16 @@ class UserModel {
          */
         const usersNoPasswords = {};
         Object.entries(userAccountsWithPassword).map(([key, value]) => {
-            usersNoPasswords[key] = { id: value.id, login: value.login, groups: value.groups, _type: value._type, source: value.source };
+            usersNoPasswords[key] = {
+                id: value.id,
+                login: value.login,
+                groups: value.groups,
+                _type: value._type,
+                source: value.source,
+                token: value.token,
+                allowSourceCreation: value.allowSourceCreation,
+                maxNumberCreatedSource: value.maxNumberCreatedSource,
+            };
         });
         return usersNoPasswords;
     };
@@ -52,9 +63,23 @@ class UserModel {
                 source: userAccount.source,
                 token: userAccount.token,
                 _type: userAccount._type,
+                allowSourceCreation: userAccount.allowSourceCreation,
+                maxNumberCreatedSource: userAccount.maxNumberCreatedSource,
             };
         }
         return undefined;
+    };
+
+    /**
+     * @param {string} token
+     * @returns {Promise<UserAccount | undefined>} a user account
+     */
+    findUserAccountFromToken = async (token) => {
+        const users = await this._read();
+
+        return Object.entries(users)
+            .map(([_id, user]) => user)
+            .find((user) => user.token !== undefined && user.token === token);
     };
 
     /**
@@ -95,6 +120,8 @@ class UserModel {
                 // hash password
                 newUserAccount.password = bcrypt.hashSync(newUserAccount.password, 10);
             }
+            // add a token
+            newUserAccount.token = this._genToken(newUserAccount.login);
             if (Object.keys(userAccounts).includes(newUserAccount.id)) {
                 throw Error("UserAccount exists already, try updating it.");
             }
@@ -103,6 +130,30 @@ class UserModel {
         } finally {
             lock.release("UsersThread");
         }
+    };
+
+    /**
+     * @param {string} login - the user login
+     * @returns {string} a token
+     */
+    _genToken = (login) => {
+        const hashedLogin = createHash("sha256").update(login).digest("hex");
+        const ulid = ULID.ulid();
+        return `sls-${ulid.toLowerCase()}${hashedLogin.substring(0, 5)}`;
+    };
+
+    /**
+     * @param {string} login - the user login
+     * @returns {Promise<string>} the new user token
+     */
+    generateUserToken = async (login) => {
+        const user = await this.findUserAccount(login);
+        if (user) {
+            user.token = this._genToken(login);
+            await this.updateUserAccount(user);
+            return user.token;
+        }
+        throw Error("UserAccount does not exist");
     };
 
     /**
@@ -313,6 +364,8 @@ class UserModelDatabase extends UserModel {
             if (Object.keys(userAccounts).includes(newUserAccount.id)) {
                 throw Error("UserAccount exists already, try updating it.");
             }
+            // add a token
+            newUserAccount.token = this._genToken(newUserAccount.login);
             await this._writeOne(newUserAccount);
         } finally {
             lock.release("UsersThread");

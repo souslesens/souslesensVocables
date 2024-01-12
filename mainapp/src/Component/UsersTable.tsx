@@ -2,6 +2,7 @@ import {
     Button,
     Checkbox,
     FormControl,
+    FormControlLabel,
     InputLabel,
     MenuItem,
     Modal,
@@ -202,9 +203,19 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
-    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
-        update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
-
+    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        let value = event.target.value;
+        if (fieldname === "allowSourceCreation") {
+            value = event.target.value === "true" ? false : true;
+        }
+        if (fieldname === "maxNumberCreatedSource") {
+            value = parseInt(event.target.value);
+            if (value < 0 || isNaN(value)) {
+                value = 0;
+            }
+        }
+        update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: value } });
+    };
     const saveSources = () => {
         if (create) {
             void putUsersBis(userModel.userForm, Mode.Creation, updateModel, update);
@@ -270,6 +281,29 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                                     </MenuItem>
                                 ))}
                             </Select>
+                        </FormControl>
+
+                        <FormControl>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox value={userModel.userForm.allowSourceCreation} checked={userModel.userForm.allowSourceCreation} onChange={handleFieldUpdate("allowSourceCreation")} />
+                                }
+                                label="Allow the user to create sources"
+                            />
+                        </FormControl>
+
+                        <FormControl>
+                            <TextField
+                                id="max-allowed-sources"
+                                type="number"
+                                label="Limit the number of source the user can create"
+                                value={userModel.userForm.maxNumberCreatedSource || 0}
+                                disabled={!userModel.userForm.allowSourceCreation}
+                                onChange={handleFieldUpdate("maxNumberCreatedSource")}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
                         </FormControl>
 
                         <Button id="btn-save-user" color="primary" variant="contained" onClick={saveSources}>

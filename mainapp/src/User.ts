@@ -88,16 +88,18 @@ const decodeUser = (user: UserJSON): User => {
         password: user.password,
         groups: user.groups,
         source: user.source ? user.source : "json",
+        allowSourceCreation: user.allowSourceCreation,
+        maxNumberCreatedSource: user.maxNumberCreatedSource,
         _type: "user",
     };
 };
 
-type UserJSON = { id?: string; login: string; password: string; groups: string[]; source?: string };
+type UserJSON = { id?: string; login: string; password: string; groups: string[]; source?: string; allowSourceCreation: boolean; maxNumberCreatedSource: number };
 
-type User = { id: string; _type: string; login: string; password: string; groups: string[]; source: string };
+type User = { id: string; _type: string; login: string; password: string; groups: string[]; source: string; allowSourceCreation: boolean; maxNumberCreatedSource: number };
 
 const newUser = (key: string): User => {
-    return { id: key, _type: "user", login: "", password: "", groups: [], source: "json" };
+    return { id: key, _type: "user", login: "", password: "", groups: [], source: "json", allowSourceCreation: false, maxNumberCreatedSource: 5 };
 };
 
 export { getUsers, newUser, saveUserBis as putUsersBis, restoreUsers, deleteUser, putUsers, User };

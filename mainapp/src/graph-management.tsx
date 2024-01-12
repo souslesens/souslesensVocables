@@ -10,6 +10,8 @@ import ProgressBar from "react-bootstrap/ProgressBar";
 import Stack from "react-bootstrap/Stack";
 import Table from "react-bootstrap/Table";
 
+import { fetchMe } from "./Utils";
+
 export default function GraphManagement() {
     // sources fetched from server
     const [sources, setSources] = useState<Record<string, any>>({});
@@ -32,6 +34,7 @@ export default function GraphManagement() {
 
     // upload
     const [uploadfile, setUploadFile] = useState<File[]>([]);
+    const [replaceGraph, setReplaceGraph] = useState<boolean>(true);
 
     // modal
     const [displayModal, setDisplayModal] = useState<string | null>(null);
@@ -39,15 +42,11 @@ export default function GraphManagement() {
     useEffect(() => {
         void fetchSources();
         void fetchConfig();
-        void fetchMe();
+        (async () => {
+            const response = await fetchMe();
+            setCurrentUserToken(response.user.token);
+        })();
     }, []);
-
-    const fetchMe = async () => {
-        const response = await fetch("/api/v1/auth/whoami");
-        const json = await response.json();
-        console.log("token", json.user.token);
-        setCurrentUserToken(json.user.token);
-    };
 
     const fetchConfig = async () => {
         const response = await fetch("/api/v1/config");
@@ -81,7 +80,9 @@ export default function GraphManagement() {
     };
 
     const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format: string = "nt", identifier: string = "") => {
-        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}`, { headers: { "X-token": currentUserToken } });
+        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}`, {
+            headers: { Authorization: `Bearer ${currentUserToken}` },
+        });
         return await response.json();
     };
 
@@ -93,6 +94,10 @@ export default function GraphManagement() {
 
     const handleSetFormat = async (event: React.MouseEvent<HTMLElement>) => {
         setCurrentDownloadFormat(event.currentTarget.value);
+    };
+
+    const handleReplaceGraphCheckbox = async (event: React.MouseEvent<HTMLInputElement>) => {
+        setReplaceGraph(event.currentTarget.value == "false");
     };
 
     const handleDownloadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -154,6 +159,7 @@ export default function GraphManagement() {
                 last: lastChunk,
                 identifier: chunkId,
                 clean: false,
+                replace: replaceGraph,
                 data: chunk,
             }).forEach(([key, value]) => {
                 formData.append(key, value);
@@ -162,12 +168,12 @@ export default function GraphManagement() {
             // if cancel button is pressed, remove uploaded file and return
             if (cancelCurrentOperation.current) {
                 formData.set("clean", true);
-                await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { "X-Token": currentUserToken }, body: formData });
+                await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken}` }, body: formData });
                 return;
             }
 
             // POST data
-            const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { "X-Token": currentUserToken }, body: formData });
+            const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken}` }, body: formData });
             if (res.status != 200) {
                 setError(true);
                 const message = await res.json();
@@ -346,10 +352,11 @@ export default function GraphManagement() {
     const uploadModalContent = (
         <Form>
             <Stack>
-                <Form.Group controlId="formUploadGraph" className="mb-3">
+                <Form.Group controlId="formUploadGraph" className="mb-2">
                     <Form.Label>Choose RDF graph to upload</Form.Label>
                     <Form.Control onChange={handleFileChange} required={true} type="file" disabled={currentOperation == "upload"} />
                 </Form.Group>
+                <Form.Check checked={replaceGraph} value={replaceGraph} onClick={handleReplaceGraphCheckbox} className="mb-3" type="switch" id="toto" label="Delete before upload" />
                 <Stack direction="horizontal" gap={1}>
                     {!currentOperation ? (
                         <Button disabled={uploadfile.length < 1 ? true : false} type="submit" onClick={handleUploadGraph} style={{ flex: 1 }}>
@@ -397,24 +404,28 @@ export default function GraphManagement() {
         </Modal>
     );
 
-    const tableBody = Object.entries(sources).map(([sourceName, source]) => {
-        return (
-            <tr>
-                <td>{sourceName}</td>
-                <td>{source.graphUri}</td>
-                <td>
-                    <Stack direction="horizontal" gap={1}>
-                        <Button disabled={source.accessControl != "readwrite"} variant="secondary" value={sourceName} onClick={handleUploadSource}>
-                            Upload
-                        </Button>
-                        <Button variant="primary" value={sourceName} onClick={handleDownloadSource}>
-                            Download
-                        </Button>
-                    </Stack>
-                </td>
-            </tr>
-        );
-    });
+    const tableBody = Object.entries(sources)
+        .sort(([aName, _a], [bName, _b]) => {
+            return aName.toLowerCase() > bName.toLowerCase();
+        })
+        .map(([sourceName, source]) => {
+            return (
+                <tr>
+                    <td>{sourceName}</td>
+                    <td>{source.graphUri}</td>
+                    <td>
+                        <Stack direction="horizontal" gap={1}>
+                            <Button disabled={source.accessControl != "readwrite"} variant="secondary" value={sourceName} onClick={handleUploadSource}>
+                                Upload
+                            </Button>
+                            <Button variant="primary" value={sourceName} onClick={handleDownloadSource}>
+                                Download
+                            </Button>
+                        </Stack>
+                    </td>
+                </tr>
+            );
+        });
 
     return (
         <>

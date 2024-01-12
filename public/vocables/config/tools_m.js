@@ -6,6 +6,7 @@ import SPARQL_endpoint from "../modules/tools/SPARQL_endpoint.js";
 import Admin from "../modules/tools/admin.js";
 import ConfigEditor from "../modules/tools/ConfigEditor.js";
 import GraphManagement from "../modules/tools/GraphManagement.js";
+import UserManagement from "../modules/tools/UserManagement.js";
 import Idcp from "../modules/tools/TSF_plugins/IDCP.js";
 
 var Tools = {};
@@ -94,6 +95,12 @@ Tools["GraphManagement"] = {
     label: "GraphManagement",
     noSource: 1,
     controller: GraphManagement,
+    toolDescriptionImg: null,
+};
+Tools["UserManagement"] = {
+    label: "UserManagement",
+    noSource: 1,
+    controller: UserManagement,
     toolDescriptionImg: null,
 };
 Tools["IDCP"] = {

@@ -445,8 +445,23 @@ var util = {
             });
         }
         return str;
-    }
+    },
 
+    /** Retrieve the authorization scheme and token from the HTTP header
+     *
+     * @param  {string} header
+     *         The content of the HTTP header
+     * @return {(Array|null)}
+     *         The scheme and token from the header
+     */
+    parseAuthorizationFromHeader: function (header) {
+        const regex = new RegExp(/^(?<scheme>[^\s]+)\s+(?<token>[^$]+)/);
+
+        const output = regex.exec(header);
+        if (output !== null) {
+            return [output.groups.scheme, output.groups.token];
+        }
+    },
 };
 
 module.exports = util;

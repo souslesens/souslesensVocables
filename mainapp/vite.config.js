@@ -11,6 +11,7 @@ export default defineConfig({
                 index: path.resolve(__dirname, "src/index.tsx"),
                 kg_upload_app: path.resolve(__dirname, "src/kg-upload-app.tsx"),
                 graph_management: path.resolve(__dirname, "src/graph-management.tsx"),
+                user_management: path.resolve(__dirname, "src/user-management.tsx"),
             },
             output: {
                 entryFileNames: `assets/[name].js`,

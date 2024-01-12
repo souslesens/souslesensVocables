@@ -1,6 +1,6 @@
 {
     "name": "souslesensvocables",
-    "version": "1.46.2",
+    "version": "1.50.0",
     "private": true,
     "workspaces": [
         "mainapp"
@@ -12,6 +12,7 @@
         "mainapp:build": "vite build mainapp",
         "mainapp:watch": "vite build mainapp --watch --minify false",
         "mainapp:dev": "vite mainapp",
+        "migrate": "sh scripts/run-migrations.sh",
         "prettier:check": "prettier --check ./public/vocables",
         "prettier:write": "prettier -w ./public/vocables",
         "test:uitest": "CONFIG_PATH=tests/data/config npm start & cypress open",
@@ -58,6 +59,7 @@
         "concurrently": "^8.2.1",
         "connect-ensure-login": "^0.1.1",
         "cookie-parser": "~1.4.6",
+        "crypto": "^1.0.1",
         "csv-parser": "^3.0.0",
         "debug": "~4.3.4",
         "digest-fetch": "^2.0.3",

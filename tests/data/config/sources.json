@@ -23,7 +23,9 @@
         },
         "group": "FOLDER_1/SUBFOLDER_1",
         "imports": [],
-        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"],
+        "owner": "admin",
+        "published": true
     },
     "SOURCE_2": {
         "name": "SOURCE_2",
@@ -49,7 +51,9 @@
         },
         "group": "FOLDER_1/SUBFOLDER_2",
         "imports": ["SOURCE_1"],
-        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"],
+        "owner": "admin",
+        "published": true
     },
     "SOURCE_3": {
         "name": "SOURCE_3",
@@ -75,6 +79,9 @@
         },
         "group": "FOLDER_2/SUBFOLDER_1",
         "imports": ["SOURCE_1"],
-        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"],
+        "owner": "admin",
+        "published": true
     }
 }
+

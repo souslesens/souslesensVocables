@@ -13,6 +13,7 @@ const userManager = require(path.resolve("bin/user."));
 const querystring = require("querystring");
 require("./bin/authentication.");
 const { config } = require("./model/config");
+const util = require("./bin/util.");
 
 const app = express();
 const Sentry = require("@sentry/node");
@@ -142,8 +143,18 @@ openapi.initialize({
     app: app,
     paths: "./api/v1/paths",
     securityHandlers: {
-        restrictLoggedUser: function (req, _scopes, _definition) {
+        restrictLoggedUser: async function (req, _scopes, _definition) {
             if (config.auth != "disabled") {
+                const token = req.headers.authorization;
+                if (token !== undefined) {
+                    const output = util.parseAuthorizationFromHeader(token);
+
+                    // Only accept the Bearer scheme from the Authorization header
+                    if (output !== null && output[0] === "Bearer") {
+                        req.user = await userModel.findUserAccountFromToken(output[1]);
+                    }
+                }
+
                 if (config.auth == "keycloak") {
                     passport.authenticate("keycloak", { failureRedirect: "/login" });
                 }

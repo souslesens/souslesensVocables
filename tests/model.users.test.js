@@ -22,6 +22,9 @@ describe("UserModelJson", () => {
                 groups: ["admin"],
                 source: "json",
                 _type: "user",
+                token: "admin-token",
+                allowSourceCreation: false,
+                maxNumberCreatedSource: 5,
             },
             owl_user: {
                 id: "owl_user",
@@ -29,6 +32,9 @@ describe("UserModelJson", () => {
                 groups: ["owl_only"],
                 source: "json",
                 _type: "user",
+                token: "owl-token",
+                allowSourceCreation: false,
+                maxNumberCreatedSource: 5,
             },
             skos_user: {
                 id: "skos_user",
@@ -36,6 +42,9 @@ describe("UserModelJson", () => {
                 groups: ["skos_only"],
                 source: "json",
                 _type: "user",
+                token: "skos-token",
+                allowSourceCreation: false,
+                maxNumberCreatedSource: 5,
             },
         });
     });
@@ -47,7 +56,9 @@ describe("UserModelJson", () => {
             groups: ["admin"],
             source: "json",
             _type: "user",
-            token: "2c2a1b2cde965802162108f64ca14d99dcb3563e",
+            token: "admin-token",
+            allowSourceCreation: false,
+            maxNumberCreatedSource: 5,
         });
     });
     test("fail to find a user with findUserAccount()", async () => {
@@ -79,6 +90,8 @@ describe("UserModelJson", () => {
             groups: [],
             source: "",
             _type: "user",
+            allowSourceCreation: false,
+            maxNumberCreatedSource: 5,
         };
         const expected = {
             id: "ID",
@@ -86,9 +99,12 @@ describe("UserModelJson", () => {
             groups: [],
             source: "",
             _type: "user",
+            allowSourceCreation: false,
+            maxNumberCreatedSource: 5,
         };
         await tmpUserModelJson.addUserAccount(newUser);
         const users = await tmpUserModelJson.getUserAccounts();
+        expected.token = users.LOGIN.token;
         expect(users).toStrictEqual({ LOGIN: expected });
         tmpDir.removeCallback();
     });
@@ -101,8 +117,21 @@ describe("UserModelJson", () => {
                 groups: [],
                 source: "",
                 _type: "user",
+                token: "login1-token",
+                allowSourceCreation: false,
+                maxNumberCreatedSource: 5,
             },
-            LOGIN2: { id: "ID2", login: "LOGIN2", password: "pass", groups: [], source: "", _type: "user" },
+            LOGIN2: {
+                id: "ID2",
+                login: "LOGIN2",
+                password: "pass",
+                groups: [],
+                source: "",
+                _type: "user",
+                token: "login2-token",
+                allowSourceCreation: false,
+                maxNumberCreatedSource: 5,
+            },
         };
         tmpDir = tmp.dirSync({ unsafeCleanup: true });
         fs.mkdirSync(path.join(tmpDir.name, "users"));
@@ -115,6 +144,18 @@ describe("UserModelJson", () => {
             groups: ["test"],
             source: "",
             _type: "user",
+            allowSourceCreation: false,
+            maxNumberCreatedSource: 5,
+        };
+        const expectedModifedUser1 = {
+            id: "ID1",
+            login: "LOGIN1",
+            groups: ["test"],
+            source: "",
+            _type: "user",
+            token: "login1-token",
+            allowSourceCreation: false,
+            maxNumberCreatedSource: 5,
         };
         const user2WithoutPass = {
             id: "ID2",
@@ -122,10 +163,13 @@ describe("UserModelJson", () => {
             groups: [],
             source: "",
             _type: "user",
+            token: "login2-token",
+            allowSourceCreation: false,
+            maxNumberCreatedSource: 5,
         };
         await tmpUserModelJson.updateUserAccount(modifiedUser);
         const users = await tmpUserModelJson.getUserAccounts();
-        expect(users).toStrictEqual({ LOGIN1: modifiedUser, LOGIN2: user2WithoutPass });
+        expect(users).toStrictEqual({ LOGIN1: expectedModifedUser1, LOGIN2: user2WithoutPass });
         tmpDir.removeCallback();
     });
 });

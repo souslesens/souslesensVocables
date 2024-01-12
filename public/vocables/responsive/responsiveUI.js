@@ -288,14 +288,14 @@ var ResponsiveUI = (function () {
             $('#MenuBar').css('height','21px');
             ResponsiveUI.resetWindowHeight();
             self.menuBarShowed=false;
-            $(button).children().attr('src','./icons/ArrowMenuBarShow.png');
+            $(button).children().attr('src','./icons/CommonIcons/ArrowMenuBarShow.png');
         }
         else{
             $('#MenuBarFooter').show();
             $('#MenuBar').css('height','90px');
             ResponsiveUI.resetWindowHeight();
             self.menuBarShowed=true;
-            $(button).children().attr('src','./icons/ArrowMenuBar.png');
+            $(button).children().attr('src','./icons/CommonIcons/ArrowMenuBar.png');
         }
        
     }

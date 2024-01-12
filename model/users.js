@@ -63,6 +63,8 @@ class UserModel {
                 source: userAccount.source,
                 token: userAccount.token,
                 _type: userAccount._type,
+                allowSourceCreation: userAccount.allowSourceCreation,
+                maxNumberCreatedSource: userAccount.maxNumberCreatedSource,
             };
         }
         return undefined;

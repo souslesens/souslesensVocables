@@ -3,71 +3,71 @@ var JstreeWidget = (function () {
 
     self.types = {
         tool: {
-            icon: "../icons/tool.png",
+            icon: "../icons/oldIcons/oldIcons/tool.png",
         },
         SKOS: {
-            icon: "../icons/thesaurus.png",
+            icon: "../icons/oldIcons/thesaurus.png",
         },
         OWL: {
-            icon: "../icons/ontology.png",
+            icon: "../icons/oldIcons/ontology.png",
         },
 
         class: {
-            icon: "../icons/class.png",
+            icon: "../icons/oldIcons/class.png",
         },
         concept: {
-            icon: "../icons/concept.png",
+            icon: "../icons/oldIcons/concept.png",
         },
         collection: {
-            icon: "../icons/collection.png",
+            icon: "../icons/oldIcons/collection.png",
         },
         default: {
-            icon: "../icons/default.png",
+            icon: "../icons/oldIcons/default.png",
         },
         "owl:Class": {
             li_attr: { style: "color:black" },
-            icon: "../icons/class.png",
+            icon: "../icons/oldIcons/class.png",
         },
         "owl:ObjectProperty": {
-            icon: "../icons/property.png",
+            icon: "../icons/oldIcons/property.png",
         },
         "owl:Restriction": {
-            icon: "../icons/restriction.png",
+            icon: "../icons/oldIcons/restriction.png",
         },
         "owl:table": {
-            icon: "../icons/table.png",
+            icon: "../icons/oldIcons/table.png",
         },
         importedClass: {
             li_attr: { style: "color:#ccc" },
-            icon: "../icons/externalObject.png",
+            icon: "../icons/oldIcons/externalObject.png",
         },
         importedProperty: {
             li_attr: { style: "color:#ccc" },
-            icon: "../icons/externalObject.png",
+            icon: "../icons/oldIcons/externalObject.png",
         },
         importedRestriction: {
             li_attr: { style: "color:#ccc" },
-            icon: "../icons/externalObject.png",
+            icon: "../icons/oldIcons/externalObject.png",
         },
         Class: {
             li_attr: { style: "color:black" },
-            icon: "../icons/class.png",
+            icon: "../icons/oldIcons/class.png",
         },
         Property: {
             li_attr: { style: "color:black" },
-            icon: "../icons/property.png",
+            icon: "../icons/oldIcons/property.png",
         },
 
         // @ts-ignore
         container: {
-            icon: "../icons/containers.png",
+            icon: "../icons/oldIcons/containers.png",
         },
 
         individual: {
-            icon: "../icons/individual.png",
+            icon: "../icons/oldIcons/individual.png",
         },
         "http://www.w3.org/2002/07/owl#NamedIndividual": {
-            icon: "../icons/individual.png",
+            icon: "../icons/oldIcons/individual.png",
         },
     };
 

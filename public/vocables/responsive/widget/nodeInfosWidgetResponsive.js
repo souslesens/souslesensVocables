@@ -18,8 +18,6 @@ var NodeInfosWidgetResponsive = (function () {
     
     self.initDialog = function (sourceLabel, divId, options, callback) {
         ResponsiveUI.openDialogDiv(divId);
-        $("#mainDialogDiv").parent().css("top", "5%");
-        $("#mainDialogDiv").parent().css("left", "5%");
         $("#" + divId).parent().show("fast", function () {
                 self.oldNodeInfosInit(sourceLabel, divId, options, callback);
                 $('#addPredicateButton').remove();
@@ -34,6 +32,8 @@ var NodeInfosWidgetResponsive = (function () {
         if (!options.noDialog) {
             $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
             $("#" + divId).dialog("open");
+            $("#mainDialogDiv").parent().css("top", "20px");
+            $("#mainDialogDiv").parent().css("left", "20px");
         }
         $("#" + divId).load("snippets/nodeInfosWidget.html", function () {
             $("#nodeInfosWidget_tabsDiv").tabs({

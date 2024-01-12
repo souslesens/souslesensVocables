@@ -338,7 +338,7 @@ triples.push({})
             {
                 id: "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology",
                 text: "Simple Lithology",
-                icon: "../icons/default.png",
+                icon: "../icons/oldIcons/default.png",
                 parent: "GEOSCMIL",
                 parents: ["GEOSCMIL", "#"],
                 children: [],
@@ -372,7 +372,7 @@ triples.push({})
             {
                 id: "GEOSCMIL",
                 text: "GEOSCMIL",
-                icon: "../icons/default.png",
+                icon: "../icons/oldIcons/default.png",
                 parent: "#",
                 parents: ["#"],
                 children: ["http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology"],

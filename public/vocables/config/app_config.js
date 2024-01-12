@@ -309,6 +309,9 @@ var Config = (function () {
             "@lineage-logo" : "../icons/BluishVioletTheme/lineageLogo-bluishViolet.png",
             "@KGquery-logo" : "../icons/BluishVioletTheme/Kgquery-bluishViolet.png",
             "@KGcreator-logo" : "../icons/BluishVioletTheme/Kgcreator-bluishViolet.png",
+            "@saveIcon":"../icons/BluishVioletTheme/SaveIcon-bluishViolet.png",
+            "@deleteIcon":"../icons/BluishVioletTheme/DeleteIcon-bluishViolet.png",
+            "@jqueryClose":"../icons/BluishVioletTheme/CrossIcon-bluishViolet.png",
            
         },
         "KGA":{
@@ -326,6 +329,9 @@ var Config = (function () {
             "@lineage-logo" : "../icons/KGATheme/lineageLogo-KGA.png",
             "@KGquery-logo" : "../icons/KGATheme/Kgquery-KGA.png",
             "@KGcreator-logo" : "../icons/KGATheme/Kgcreator-KGA.png",
+            "@saveIcon":"../icons/KGATheme/SaveIcon-KGA.png",
+            "@deleteIcon":"../icons/KGATheme/DeleteIcon-KGA.png",
+            "@jqueryClose":"../icons/KGATheme/CrossIcon-KGA.png",
            
         },
         "Total Energies":{
@@ -350,6 +356,9 @@ var Config = (function () {
             "@lineage-logo" : "../icons/TotalEnergiesTheme/lineageLogo-TotalEnergies.png",
             "@KGquery-logo" : "../icons/TotalEnergiesTheme/Kgquery-TotalEnergies.png",
             "@KGcreator-logo" : "../icons/TotalEnergiesTheme/Kgcreator-TotalEnergies.png",
+            "@saveIcon":"../icons/TotalEnergiesTheme/SaveIcon-TotalEnergies.png",
+            "@deleteIcon":"../icons/TotalEnergiesTheme/DeleteIcon-TotalEnergies.png",
+            "@jqueryClose":"../icons/TotalEnergiesTheme/CrossIcon-TotalEnergies.png",
            
         },
        
@@ -369,6 +378,9 @@ var Config = (function () {
             "@lineage-logo" : "../icons/SeaBreezeTheme/lineageLogo-SeaBreeze.png",
             "@KGquery-logo" : "../icons/SeaBreezeTheme/Kgquery-SeaBreeze.png",
             "@KGcreator-logo" : "../icons/SeaBreezeTheme/Kgcreator-SeaBreeze.png",
+            "@saveIcon":"../icons/SeaBreezeTheme/SaveIcon-SeaBreeze.png",
+            "@deleteIcon":"../icons/SeaBreezeTheme/DeleteIcon-SeaBreeze.png",
+            "@jqueryClose":"../icons/SeaBreezeTheme/CrossIcon-SeaBreeze.png",
         },
        
         "Fig colors ":{
@@ -385,6 +397,9 @@ var Config = (function () {
             "@lineage-logo" : "../icons/FigColorsTheme/lineageLogo-FigColors.png",
             "@KGquery-logo" : "../icons/FigColorsTheme/Kgquery-FigColors.png",
             "@KGcreator-logo" : "../icons/FigColorsTheme/Kgcreator-FigColors.png",
+            "@saveIcon":"../icons/FigColorsTheme/SaveIcon-FigColors.png",
+            "@deleteIcon":"../icons/FigColorsTheme/DeleteIcon-FigColors.png",
+            "@jqueryClose":"../icons/FigColorsTheme/CrossIcon-FigColors.png",
         },
         "Ocean":{
             "@source-color": "#0099B7",
@@ -400,6 +415,9 @@ var Config = (function () {
             "@lineage-logo" : "../icons/OceanTheme/lineageLogo-Ocean.png",
             "@KGquery-logo" : "../icons/OceanTheme/Kgquery-Ocean.png",
             "@KGcreator-logo" : "../icons/OceanTheme/Kgcreator-Ocean.png",
+            "@saveIcon":"../icons/OceanTheme/SaveIcon-Ocean.png",
+            "@deleteIcon":"../icons/OceanTheme/DeleteIcon-Ocean.png",
+            "@jqueryClose":"../icons/OceanTheme/CrossIcon-Ocean.png",
            },
            "DarkTheme":{
             "@source-color": "#F7606B",
@@ -415,6 +433,9 @@ var Config = (function () {
             "@lineage-logo" : "../icons/DarkTheme/lineageLogo-Dark.png",
             "@KGquery-logo" : "../icons/DarkTheme/Kgquery-Dark.png",
             "@KGcreator-logo" : "../icons/DarkTheme/Kgcreator-Dark.png",
+            "@saveIcon":"../icons/DarkTheme/SaveIcon-Dark.png",
+            "@deleteIcon":"../icons/DarkTheme/DeleteIcon-Dark.png",
+            "@jqueryClose":"../icons/DarkTheme/CrossIcon-Dark.png",
            },
            
            
@@ -432,6 +453,9 @@ var Config = (function () {
             "@lineage-logo" : "../icons/SpatialTheme/lineageLogo-Spatial.png",
             "@KGquery-logo" : "../icons/SpatialTheme/Kgquery-Spatial.png",
             "@KGcreator-logo" : "../icons/SpatialTheme/Kgcreator-Spatial.png",
+            "@saveIcon":"../icons/SpatialTheme/SaveIcon-Spatial.png",
+            "@deleteIcon":"../icons/SpatialTheme/DeleteIcon-Spatial.png",
+            "@jqueryClose":"../icons/SpatialTheme/CrossIcon-Spatial.png",
            },
 
        

@@ -7,7 +7,9 @@
         "source": "json",
         "_type": "user",
         "name": "admin",
-        "token": "admin-token"
+        "token": "admin-token",
+        "allowSourceCreation": false,
+        "maxNumberCreatedSource": 5
     },
     "owl_user": {
         "id": "owl_user",
@@ -17,7 +19,9 @@
         "source": "json",
         "_type": "user",
         "name": "owl_user",
-        "token": "owl-token"
+        "token": "owl-token",
+        "allowSourceCreation": false,
+        "maxNumberCreatedSource": 5
     },
     "skos_user": {
         "id": "skos_user",
@@ -27,6 +31,9 @@
         "source": "json",
         "_type": "user",
         "name": "skos_user",
-        "token": "skos-token"
+        "token": "skos-token",
+        "allowSourceCreation": false,
+        "maxNumberCreatedSource": 5
     }
 }
+

@@ -81,6 +81,7 @@
     padding: 8px 24px;
     background: if((@isGradient=true),@gradient-color-source,@source-color);
     border: if((@isGradient=true),0px,inherit solid 2px)!important;
+    margin-top:13px;
 }
 
 .slsv-right-top-bar-button:hover {
@@ -91,7 +92,7 @@
     .slsv-general-buttons;
     font-size: 13px;
     display: inline-flex;
-    padding: 8px 16px;
+    padding: 6px 16px;
     border:  if((@isGradient=true),0px,inherit solid 2px)!important;
     margin: 2px;
     background: if((@isGradient=true),@gradient-color-source,@source-color);
@@ -164,6 +165,7 @@
     color: @source-color;
     font-size: 16px;
     margin-right: 10px;
+    margin-top:4px;
 }
 
 .slsv-tabDiv {
@@ -185,10 +187,15 @@
 .lineage-tabDiv{
     .slsv-tabDiv;
     width: 25% !important;
+    display: flex!important;
+    justify-content: center;
+    margin-bottom: 5px;
 }
 .KGquery-tabDiv{
     .slsv-tabDiv;
     width: 33.33% !important;
+    display: flex!important;
+    justify-content: center;
 }
 .slsv-selectedTabDiv {
     background: @background-color;

@@ -53,3 +53,24 @@
     height: 20px;
     width: 20px;
 }
+.allPropertyIcon{
+    background-image: url(@allPropertyIcon);
+    background-repeat: no-repeat;
+    height: 30px;
+    width: 30px;
+}
+.currentPropertyIcon{
+    background-image: url(@currentPropertyIcon);
+    background-repeat: no-repeat;
+    height: 30px;
+    width: 30px;
+}
+.ui-dialog-titlebar-close {
+    background-image: url(@jqueryClose);
+    background-repeat: no-repeat;
+    height: 31px !important;
+    width: 31px !important;
+    background-color: white;
+    border: 0px !important;
+    margin-right: 20px!important;
+}

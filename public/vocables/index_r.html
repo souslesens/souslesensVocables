@@ -373,8 +373,8 @@
                 <div id="MenuBarFooter">   
                 <div id="toolSelectionSection" class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button" style="padding: 23px">
                     <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center; margin-left:10px;margin-top: 0px; padding: 0px">
-                        <div id="ToolBorder" class="toolSelectionBorder" style="margin:3px;">
-                            <button id="selectedTool" class="slsv-invisible-button" style="margin-top: 10px; margin-bottom: 10px; padding: 0px; margin-left: 10px; ">Tool</button>
+                        <div id="ToolBorder" class="toolSelectionBorder" style="margin:3px;padding: 5px;display:flex;align-items: flex-start;margin-left:5px;">
+                            <button id="selectedTool" class="slsv-invisible-button" style=" padding: 0px; margin-left: 10px; ">Tool</button>
                             <button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;margin-left: 3px; margin-right: 10px'  > </button>
                             <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
                                 <select id="toolsSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto;"></select>
@@ -396,19 +396,19 @@
                 -->
 
                 <div class="w3-bar-item">
-                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center;margin-left: 0px!important;margin-right: 0px!important;padding:3px;" id="index_topContolPanel">
+                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center;margin-left: 0px!important;margin-right: 0px!important;padding:6px;" id="index_topContolPanel">
                         <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
                     </div>
                 </div>
 
                 <div class="w3-bar-item">
-                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center;margin-left: 0px!important;margin-right: 0px!important;padding:3px;" id="Lineage_graphEditionButtons">
+                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center;margin-left: 0px!important;margin-right: 0px!important;padding:6.5px;" id="Lineage_graphEditionButtons">
                         <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
-                        <div class="slsv-button-source" id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
-                            <button class="slsv-invisible-button add-icon"  style="margin-right: 5px;height: 25px;width: 29px;" ></button><span style="margin-bottom: 5px">Add Node</span>
+                        <div class="slsv-button-source" style='padding: 5px 12px;' id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
+                            <button class="slsv-invisible-button add-icon"  style="margin-right: 5px;height: 25px;width: 29px;" ></button><span style="margin-top: 3px">Add Node</span>
                         </div>
-                        <div class="slsv-button-source addEdgeButtonColor"  id="lineage_actionDiv_addedge" onclick="Lineage_r.addEdge()">
-                            <button class="slsv-invisible-button add-icon"  style="margin-right: 5px;height: 25px;width: 29px;" ></button><span style="margin-bottom: 5px">Add Edge</span>
+                        <div class="slsv-button-source addEdgeButtonColor" style='padding: 5px 12px;' id="lineage_actionDiv_addedge" onclick="Lineage_r.addEdge()">
+                            <button class="slsv-invisible-button add-icon"  style="margin-right: 5px;height: 25px;width: 29px;" ></button><span style="margin-top: 3px">Add Edge</span>
                         </div>
                     </div>
                 </div>

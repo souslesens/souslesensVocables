@@ -35,10 +35,12 @@
 
 /* defaults icons */
 
+
+        
 @arrow-icon : "../icons/caret-right.png";
-@search-icon: "http://localhost:3010/vocables/icons/SearchIcon.png";
+@search-icon: "../icons/SearchIcon.png";
 @add-icon :"../icons/AddNodeEdge.png";
-@moreOptions-icon : "../icons/MoreOptionsIcon.png";
+@moreOptions-icon : "../icons/MoreOptionsIcon-bluishViolet.png";
 @lineage-logo : "../icons/lineageLogo-BluePurple.png";
 @KGquery-logo : "../icons/Kgquery-BluePurple.png";
 @KGcreator-logo : "../icons/KGcreatorLogo-BluePurple.png";
@@ -46,6 +48,9 @@
 @saveIcon:"../icons/saveIcon.png";
 @deleteIcon:"../icons/deleteIcon.png";
 @filterIcon:"../icons/filterIcon.png";
+@allPropertyIcon:"../icons/AllProperties.png";
+@currentPropertyIcon:"../icons/CurrentProperties.png";
+@jqueryClose:"../icons/JqueryClose.png";
 
 .lateralPannelSection-width{
     width:89%;
@@ -63,10 +68,17 @@
     color: @legend-color;   
 }
 .select-bar-theme1{
+    padding: 2px;
     color : @button1-color;
     border-radius: 14px;
 }
+.select-bar-theme2{
+    padding: 2px;
+    color : @button2-color;
+    border-radius: 14px;
+}
 .select-bar-theme3{
+    padding: 2px;
     color : @button3-color;
     border-radius: 14px;
 }
@@ -220,4 +232,7 @@
      top: 100px;
      left: 300px;
      padding: 3px;
+ }
+ .mb-3{
+    margin-bottom: 0px!important;
  }

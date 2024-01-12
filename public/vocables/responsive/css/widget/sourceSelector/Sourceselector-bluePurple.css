@@ -5,14 +5,7 @@
     border: 0px;
     background: white;
 }
-.ui-dialog-titlebar-close {
-    background-image: url("../../../../../icons/JqueryClose.png");
-    height: 31px !important;
-    width: 31px !important;
-    background-color: white;
-    border: 0px !important;
-    margin-right: 20px!important;
-}
+
 
 
 

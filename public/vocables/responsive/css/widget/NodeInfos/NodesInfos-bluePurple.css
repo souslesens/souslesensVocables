@@ -38,6 +38,7 @@ th, td{
     text-align: left !important;
     .font-table;
     background-color: @background-color !important;
+    width:fit-content;
 }
 
 .NodesInfos_CardId {

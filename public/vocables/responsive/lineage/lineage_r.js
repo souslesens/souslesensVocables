@@ -39,6 +39,10 @@ var Lineage_r = (function () {
         $('KGquery_waitImg').attr('id','waitImg');
       
     };
+    self.quit=function(){
+        
+        $('#graphDiv').empty();
+    }
     self.loadSources = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
@@ -46,6 +50,7 @@ var Lineage_r = (function () {
             }
             $("#lateralPanelDiv").load("./responsive/lineage/html/index.html", function () {
                 self.initWhiteboardTab();
+                Lineage_whiteboard.initUI();
             });
         });
     };
@@ -68,9 +73,9 @@ var Lineage_r = (function () {
             Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
             self.hideShowMoreActions("hide");
             $('#lateralPanelDiv').resizable({
-                maxWidth: 395,minWidth: 187,stop: function( event, ui ) {
+                maxWidth: 395,minWidth: 150,stop: function( event, ui ) {
                     
-                    ResponsiveUI.resetWindowHeight()
+                    ResponsiveUI.resetWindowHeight();
                 }
             });
         });
@@ -231,13 +236,13 @@ var Lineage_r = (function () {
         }
     }
     self.changeIconForPropertiesGraphAction=function(div){
-        var icon=$(div).children().attr("src");
-        if(icon=='./icons/AllProperties.png'){
-            $(div).children().attr("src","./icons/CurrentProperties.png");
-            $("#lineageProperties_nodesSelectionSelect").val("currentGraphNodes");
+        var icon=$(div).children().attr("class");
+        if(icon=='allPropertyIcon slsv-invisible-button'||icon=='slsv-invisible-button allPropertyIcon'){
+            $(div).children().removeClass('allPropertyIcon');
+            $(div).children().addClass('currentPropertyIcon');
         }else{
-            $(div).children().attr("src",'./icons/AllProperties.png');
-            $("#lineageProperties_nodesSelectionSelect").val("");
+            $(div).children().removeClass('currentPropertyIcon');
+            $(div).children().addClass('allPropertyIcon');
         }
     };
     self.checkbox_Lineage_containers=function(){

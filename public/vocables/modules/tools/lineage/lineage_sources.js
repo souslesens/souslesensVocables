@@ -413,8 +413,8 @@ var Lineage_sources = (function() {
         sourceDivId +
         "' style='color: " +
         Lineage_whiteboard.getSourceColor(sourceLabel) +
-        "'" +
-        " class='Lineage_sourceLabelDiv' " +
+        ";display:inline-flex;align-items:end;'" +
+        " class='Lineage_sourceLabelDiv'  " +
         ">" +
         sourceLabel +
         "&nbsp;" +

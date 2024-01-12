@@ -389,14 +389,14 @@ defaultLang = 'en';*/
                     "'>" +
                     nodeId +
                     "</a>" +
-                    "&nbsp;<button class='w3-button nodesInfos-iconsButtons ' style='font-size: 10px' onclick=' NodeInfosWidget.copyUri(\"" +
+                    "&nbsp;<button class='w3-button nodesInfos-iconsButtons ' style='font-size: 10px;margin-left:7px;' onclick=' NodeInfosWidget.copyUri(\"" +
                     nodeId +
                     "\",$(this))'><input type='image' src='./icons/Copy.png' ></button>";
                 ("</td></tr>");
                 str +=
                     "<tr><td class='NodesInfos_CardId'>GRAPH</td><td>" +
                     graphUri +
-                    "&nbsp;<button class='w3-button nodesInfos-iconsButtons ' style='font-size: 10px' onclick=' NodeInfosWidget.copyUri(\"" +
+                    "&nbsp;<button class='w3-button nodesInfos-iconsButtons ' style='font-size: 10px;' onclick=' NodeInfosWidget.copyUri(\"" +
                     graphUri +
                     "\",$(this))'><input type='image' src='./icons/Copy.png' ></button>";
                 ("</td></tr>");
@@ -409,11 +409,11 @@ defaultLang = 'en';*/
                         var propUri = self.propertiesMap.properties[key].propUri;
 
                         optionalStr +=
-                            "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px' onclick=' NodeInfosWidget.showModifyPredicateDialog(\"" +
+                            "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px;margin-left:7px;' onclick=' NodeInfosWidget.showModifyPredicateDialog(\"" +
                             predicateId +
                             "\")'><input type='image' src='./icons/Edit.png' ></button>";
                         optionalStr +=
-                            "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px'" +
+                            "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px;'" +
                             " onclick='NodeInfosWidget.deletePredicate(\"" +
                             predicateId +
                             "\")'><input type='image' src='./icons/Erase.png' ></button>";

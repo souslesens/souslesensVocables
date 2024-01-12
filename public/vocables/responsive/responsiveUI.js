@@ -13,6 +13,7 @@ var ResponsiveUI = (function () {
     self.mainDialogDiv = null;
     self.menuBarShowed=true;
     self.LateralPannelShowed=true;
+    self.currentTool=null;
     self.alert = function (message) {};
     self.init = function () {
         
@@ -67,6 +68,20 @@ var ResponsiveUI = (function () {
     };
 
     self.onToolSelect = function (toolId) {
+        if(self.currentTool!='lineage' && self.currentTool!=null){
+            window[self.currentTool+'_r'].quit();
+        }
+
+        if(self.currentTool==toolId){
+            return;
+        }
+        else{
+            self.currentTool=toolId;
+        }
+
+       
+        
+       
         $("#currentToolTitle").html(toolId);
         if(Config.toolsLogo[toolId]){
             $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
@@ -76,6 +91,7 @@ var ResponsiveUI = (function () {
             ResponsiveUI.showSourceDialog(true);
         }
         else{
+           
             self.sourceSelect(self.source);
         }   
         
@@ -86,6 +102,7 @@ var ResponsiveUI = (function () {
         if (!obj.node.data || obj.node.data.type != "source") {
             return self.alert("select a tool");
         }
+       
         var source=obj.node.data.id;
         self.sourceSelect(source);
     };

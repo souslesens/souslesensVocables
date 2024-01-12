@@ -2878,6 +2878,11 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 self.setGraphPopupMenus(node, event);
                 self.currentGraphNode = node;
                 self.currentGraphEdge = null;
+                //start
+                point={};
+                point.x=event.x;
+                point.y=event.y;
+                //end
                 PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
             }
         },

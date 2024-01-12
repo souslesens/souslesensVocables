@@ -5,11 +5,14 @@ import Lineage_r from "../lineage/lineage_r.js";
 import ResponsiveUI from "../responsiveUI.js";
 import KGquery_controlPanel from "../../modules/tools/KGquery/KGquery_controlPanel.js";
 import KGquery_controlPanelResponsive from "./KGquery_controlPanelResponsive.js";
-
+import VisjsGraphClass from "../../modules/graph/VisjsGraphClass.js";
 
 var KGquery_r = (function () {
     var self = {};
-   
+    //changed files and functions
+    self.oldshowHideEditButtons=Lineage_sources.showHideEditButtons;
+    self.oldshowDialog= SavedQueriesComponent.showDialog;
+    self.oldKGquery_controlPanel=window.KGquery_controlPanel;
     self.init = function () {
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
         SavedQueriesComponent.showDialog=self.SavedQueriesComponentShowDialogResponsive;
@@ -18,6 +21,21 @@ var KGquery_r = (function () {
         $('#messageDiv').attr('id','KGquery_messageDiv');
         $('#waitImg').attr('id','KGquery_waitImg');
     };
+    self.quit=function(){
+        //retribute old file and functions
+        Lineage_sources.showHideEditButtons=self.oldshowHideEditButtons;
+        SavedQueriesComponent.showDialog=self.oldshowDialog;
+        window.KGquery_controlPanel=self.oldKGquery_controlPanel;
+        //reapply changed DOM
+       
+        $('#KGquery_messageDiv').attr('id','messageDiv');
+        $('#KGquery_waitImg').attr('id','waitImg');
+        $('#graphDiv').empty();
+        $("#lateralPanelDiv").empty();
+       
+        
+
+    }
     self.loadSource=function(){
         KGquery.currentSource=ResponsiveUI.source;
         Lineage_sources.loadSources(MainController.currentSource, function (err) {

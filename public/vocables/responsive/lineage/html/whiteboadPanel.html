@@ -5,10 +5,10 @@
         <div class="w3-panel w3-border w3-round-small lateralPannelSection-width" >
             <div id="Title1" class="titleboxButtons font-button1-color" ></div>
             <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()">Model</button>
-            <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()">TopClasses</button>
-            <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>
-            <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()">Parents</button>
-            <button class="w3-button slsv-button-1" onclick="Lineage_r.showQueryDialog()">Query</button>
+            <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()">TopClasses<img src="./icons/CommonIcons/TopClassesIcon.png"></button>
+            <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand  <img src="./icons/CommonIcons/ExpandIcon.png" ></button>
+            <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()">Parents<img src="./icons/CommonIcons/ParentIcon.png" ></button>
+            <button class="w3-button slsv-button-1" onclick="Lineage_r.showQueryDialog()"><img src="./icons/CommonIcons/Query.png" >Query</button>
             <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()">QueryBot</button>
             <button class="w3-button slsv-button-1" id="lineage_createResourceBtn" style="font-weight: bold" onclick=" CreateResource_bot.start()">Create Resource</button>
             <!--    <button class="w3-button slsv-button" class="lineage_button" style="font-weight: bold" onclick="KGqueryWidget.showDialog()">Query KG</button>-->
@@ -18,7 +18,7 @@
 
         <div class="w3-panel w3-border w3-round-small lateralPannelSection-width"  >
             <div class="titleboxButtons font-button2-color" >Whiteboard</div>
-            <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()">Clear all</button>
+            <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()">Clear all <img src="./icons/CommonIcons/ClearAllIcon.png" ></button>
             <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()">Clear last</button>
             <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()">Only last</button>
 

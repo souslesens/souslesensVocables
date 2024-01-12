@@ -81,7 +81,7 @@
     padding: 8px 24px;
     background: if((@isGradient=true),@gradient-color-source,@source-color);
     border: if((@isGradient=true),0px,inherit solid 2px)!important;
-    margin-top:13px;
+    margin-top:10px;
 }
 
 .slsv-right-top-bar-button:hover {

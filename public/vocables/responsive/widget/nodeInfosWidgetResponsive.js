@@ -391,14 +391,14 @@ defaultLang = 'en';*/
                     "</a>" +
                     "&nbsp;<button class='w3-button nodesInfos-iconsButtons ' style='font-size: 10px;margin-left:7px;' onclick=' NodeInfosWidget.copyUri(\"" +
                     nodeId +
-                    "\",$(this))'><input type='image' src='./icons/Copy.png' ></button>";
+                    "\",$(this))'><input type='image' src='./icons/CommonIcons/CopyIcon.png' ></button>";
                 ("</td></tr>");
                 str +=
                     "<tr><td class='NodesInfos_CardId'>GRAPH</td><td>" +
                     graphUri +
                     "&nbsp;<button class='w3-button nodesInfos-iconsButtons ' style='font-size: 10px;' onclick=' NodeInfosWidget.copyUri(\"" +
                     graphUri +
-                    "\",$(this))'><input type='image' src='./icons/Copy.png' ></button>";
+                    "\",$(this))'><input type='image' src='./icons/CommonIcons/CopyIcon.png' ></button>";
                 ("</td></tr>");
                 str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
@@ -411,12 +411,12 @@ defaultLang = 'en';*/
                         optionalStr +=
                             "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px;margin-left:7px;' onclick=' NodeInfosWidget.showModifyPredicateDialog(\"" +
                             predicateId +
-                            "\")'><input type='image' src='./icons/Edit.png' ></button>";
+                            "\")'><input type='image' src='./icons/CommonIcons/EditIcon.png' ></button>";
                         optionalStr +=
                             "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px;'" +
                             " onclick='NodeInfosWidget.deletePredicate(\"" +
                             predicateId +
-                            "\")'><input type='image' src='./icons/Erase.png' ></button>";
+                            "\")'><input type='image' src='./icons/CommonIcons/Erase.png' ></button>";
                     }
                     return optionalStr;
                 }

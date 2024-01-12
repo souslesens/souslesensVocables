@@ -308,7 +308,7 @@ var ResponsiveUI = (function () {
             ResponsiveUI.resetWindowHeight();
             self.LateralPannelShowed=false;
             $('#lateralPanelDiv').append(button);
-            $('#lateralPanelDiv button img').attr('src','./icons/ArrowLateralPannelShow.png');
+            $('#lateralPanelDiv button img').attr('src','./icons/CommonIcons/ArrowLateralPannelShow.png');
             
             
         }
@@ -318,7 +318,7 @@ var ResponsiveUI = (function () {
             $('#lateralPanelDiv').css('width','395px');
             ResponsiveUI.resetWindowHeight();
             self.LateralPannelShowed=true;
-            $(button).children().attr('src','./icons/ArrowLateralPannel.png');
+            $(button).children().attr('src','./icons/CommonIcons/ArrowLateralPannel.png');
             $('#lateralPanelDiv').addClass('ui-resizable');
         }
     }

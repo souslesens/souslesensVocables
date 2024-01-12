@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.50.0...master)
 
+> [!IMPORTANT]
+> Updating to Unrelease require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+### Added
+
+-   npm run migrate command to play migrations
+-   Add allowSourceCreation and maxNumberCreatedSource to users.json entries
+-   Add owner and published to sources.json entries
+
 ## [1.50.0](https://github.com/souslesens/souslesensVocables/compare/1.49.0...1.50.0) - 2023-12-22
 
 ### Added

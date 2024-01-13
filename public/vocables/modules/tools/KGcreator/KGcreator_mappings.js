@@ -5,7 +5,7 @@ import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.j
 var KGcreator_mappings = (function() {
   var self = {};
 
-  self.showMappingDialog = function(addColumnClassType, options) {
+  self.showMappingDialog = function(addColumnClassType, options,callback) {
     PopupMenuWidget.hidePopup();
 
     if (!options) {
@@ -99,6 +99,9 @@ return alert("select a field (column)");
           self.updateColumnTriplesEditor(classTypeTriple);
         }
       });
+      if(callback){
+        return callback()
+      }
     });
   };
 

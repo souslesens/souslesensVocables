@@ -153,7 +153,7 @@ var ManchesterSyntaxWidget = (function() {
       "            <input id=\"bot_input\"  autocomplete=\"off\" onkeyup=\"ManchesterSyntaxWidget.analyse($(this).val())\">\n" +
       "            <select id=\"bot_resourcesProposalSelect\" size=\"4\" onchange=\"ManchesterSyntaxWidget.onResourceProposalChange($(this).val())\"></select>\n" +
       "          </div>\n" +
-      "        </div>" + "<div><button onclick='ManchesterSyntaxWidget.clear()'>X</button></div>";
+      "        </div>" + "<div><button onclick='ManchesterSyntaxWidget.reset()'>X</button></div>";
 
     return html;
   };
@@ -186,7 +186,7 @@ var ManchesterSyntaxWidget = (function() {
   };
 
 
-  self.clear = function() {
+  self.reset = function() {
     $(".bot-token").remove();
     self.currentValidTokens = {};
 

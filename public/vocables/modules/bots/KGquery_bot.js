@@ -9,7 +9,7 @@ var KGquery_bot = (function() {
   self.title = "Filter Class";
 
   self.start = function(currentQuery, validateFn) {
-    BotEngine.init(KGquery_bot, function() {
+    BotEngine.init(KGquery_bot, null,function() {
       self.validateFn = validateFn;
       self.callbackFn=function(){
         var filterLabel= BotEngine.getQueryText()

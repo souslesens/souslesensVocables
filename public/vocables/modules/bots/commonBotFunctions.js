@@ -30,6 +30,11 @@ var CommonBotFunctions=(function(){
         vocabs.push({ id: key, label: key });
       }
     }
+    if(vocabs.length==0){
+
+      return BotEngine.previousStep("no values found, try another option")
+    }
+
     BotEngine.showList(vocabs, varToFill);
   }
 
@@ -45,6 +50,11 @@ var CommonBotFunctions=(function(){
         var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
         classes.push({ id: classId.id, label: classId.label });
       }
+
+      if(classes.length==0){
+      return  BotEngine.previousStep("no values found, try another option")
+      }
+
       self.sortList(classes);
       if (includeOwlThing)
         classes.splice(0,0,{ id: "owl:Thing", label: "owl:Thing" });
@@ -59,6 +69,9 @@ var CommonBotFunctions=(function(){
       for (var key in Config.ontologiesVocabularyModels[vocab].properties) {
         var prop = Config.ontologiesVocabularyModels[vocab].properties[key];
         props.push({ id: prop.id, label: prop.label });
+      }
+      if(props.length==0){
+      return  BotEngine.previousStep("no values found, try another option")
       }
       self.sortList(props);
       BotEngine.showList(props, varToFill);

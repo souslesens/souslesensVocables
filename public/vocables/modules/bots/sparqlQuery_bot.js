@@ -18,7 +18,7 @@ var SparqlQuery_bot = (function() {
 
 
 self.start=function() {
-  BotEngine.init(SparqlQuery_bot, function() {
+  BotEngine.init(SparqlQuery_bot,null, function() {
     self.title = "Query graph"
     self.params = { source: Lineage_sources.activeSource };
     BotEngine.currentObj = self.workflow;
@@ -96,7 +96,6 @@ self.start=function() {
     };
 
   self.functionTitles = {
-    _OR: "Select an option",
     listVocabsFn: "Choose a reference ontology",
     listQueryTypeFn: "what do you want ",
     listClassesFn: "Choose a  a class ",

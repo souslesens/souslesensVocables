@@ -360,32 +360,8 @@ var OntologyModels = (function() {
                 return callbackSeries();
               });
 
-              /*
-var filter = Sparql_common.setFilter("id", classes);
-Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, null, function (err, result) {
-if (err) {
-return callbackSeries(err);
-}
-var labelsMap = {};
-result.forEach(function (item) {
-if (item.label) {
-labelsMap[item.id.value] = item.label.value;
-} else {
-labelsMap[item.id.value] = Sparql_common.getLabelFromURI(item.id.value);
-}
-});
-for (var propId in Config.ontologiesVocabularyModels[source].constraints) {
-var constraint = Config.ontologiesVocabularyModels[source].constraints[propId];
-if (labelsMap[constraint.domain]) {
-Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = labelsMap[constraint.domain];
-}
-if (labelsMap[constraint.range]) {
-Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = labelsMap[constraint.range];
-}
-}
 
-return callbackSeries();
-});*/
+
             },
 
             //register source in Config.sources

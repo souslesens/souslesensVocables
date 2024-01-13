@@ -2446,7 +2446,28 @@ var Sparql_OWL = (function() {
       " ?s  ?p ?o.   ?o rdf:type ?oType";
   };
 
-  return self;
+  self.copyUriTriplesFromSourceToSource=function(fromSource,toSource, subjectUri, callback) {
+
+    self.getNodeInfos(fromSource,subjectUri,null,function(err,result){
+      if(err)
+        return callback(err)
+      if(result.length==0)
+        return callback("nothing to copy")
+        var toStr = Sparql_common.getFromStr(toSource);
+
+      var triples=[]
+      result.forEach(function(item){
+        triples.push({
+          subject: subjectUri
+        })
+      })
+
+    })
+
+
+  }
+
+    return self;
 })();
 
 export default Sparql_OWL;

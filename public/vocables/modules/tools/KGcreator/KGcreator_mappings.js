@@ -451,9 +451,15 @@ tripleObj.objectIsSpecificUri = true;
         allConstraints[key]=inverseRestrictions[key]
       }
       if(Object.keys(allConstraints).length==0){
-        return alert("no constraints between " +fromClass +" and "+toClass)
+        var message="no constraints between " +fromClass +" and "+toClass
+        if(callback){
+          return callback(message)
+        }
+        return alert(message)
       }else{
-
+        if(callback){
+          return callback(null,allConstraints)
+        }
         return SimpleListSelectorWidget.showDialog(
           null,
           function(callbackLoad) {

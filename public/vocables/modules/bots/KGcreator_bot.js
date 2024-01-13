@@ -31,23 +31,32 @@ var KGcreator_bot = (function() {
 
       if (self.params.tripleModels.length == 0) {
         workflow = self.workflowColumnMappingType;
-        self.params.tiplesSubject = null;
+        self.params.triplesSubject = null;
 
       }
       else {
-        workflow = self.workflowColumnmMappingOther;
-        self.params.tiplesSubject = self.params.tripleModels[0].s;
+        self.params.tripleModels.predicateSubjectColumnType=CommonBotFunctions.getColumnClass( self.params.tripleModels,self.params.column)
+        if(self.params.tripleModels.predicateSubjectColumnType)
+         workflow = self.workflowColumnmMappingOther;
+        else
+          workflow = self.workflowColumnMappingType;
+        self.params.triplesSubject = self.params.tripleModels[0].s;
       }
     }
     else {
       workflow = self.workflow;
       self.params = { source: self.source, datasource: "", table: "", column: "", tripleModels: [] };
     }
+    CommonBotFunctions.loadSourceOntologyModel(self.params.source,true,function(err){
+      if(err)
+        return alert(err.responseText)
+
     KGcreator_mappings.showMappingDialog(null, null, function() {
       BotEngine.init(KGcreator_bot, { divId: "LinkColumn_botPanel" }, function() {
         BotEngine.currentObj = workflow;
         BotEngine.nextStep(workflow);
       });
+    })
     });
   };
 
@@ -59,10 +68,21 @@ var KGcreator_bot = (function() {
   self.workflowColumnmMappingOther = {
 
     "_OR": {
-      "set RDF type": { "listClassVocabsFn": { "listClassesFn": { "addMappingToModel": {} } } },
-      "set value": { "listValueTypeFn": { "setValueColumnFn": { "addMappingToModel": {} } } },
-      "set predicate": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "listTableColumnsFn": { "addMappingToModel": {} } } } },
-     "save mapping":{ "saveFn": {}},
+      "set RDF type": { "listClassVocabsFn": { "listClassesFn": { "addMappingToModel": {"saveFn":{}} } } },
+      "set value": { "listValueTypeFn": { "setValueColumnFn": { "addMappingToModel":{"saveFn":{}} } } },
+      // "set predicate": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "listTableColumnsFn": { "addMappingToModel": {} } } } },
+      "set predicate": {
+        "listTableColumnsFn": {
+          "checkColumnTypeFn": {
+            "_OR": {
+              "KO": { "targetColumnKoFn": {} },
+            //  "OK": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "addMappingToModel": {} } } }
+              "OK": {  "listFilteredPropertiesFn": { "addMappingToModel":{"saveFn":{}} } }
+            }
+          }
+        }
+      },
+      "save mapping": { "saveFn": {} },
       "new Mapping": {}
 
 
@@ -88,17 +108,17 @@ var KGcreator_bot = (function() {
     }
   };
 
-  self.functionTitles={
-    setUriTypeFn:"Choose column URI type",
-    setRdfType :"Choose column RDF type",
-    listValueTypeFn :"Choose a xsd type",
-    setValueColumnFn :"Choose a column containing value",
+  self.functionTitles = {
+    setUriTypeFn: "Choose column URI type",
+    setRdfType: "Choose column RDF type",
+    listValueTypeFn: "Choose a xsd type",
+    setValueColumnFn: "Choose a column containing value",
     listClassVocabsFn: "Choose a reference ontology",
     listPredicateVocabsFn: "Choose a reference ontology",
     listClassesFn: "Choose a class",
     listPropertiesFn: " Choose a property",
-    listTableColumnsFn: "Choose a  a column for predicate object ",
-  }
+    listTableColumnsFn: "Choose a  a column for predicate object "
+  };
 
 
   self.functions = {
@@ -151,14 +171,49 @@ var KGcreator_bot = (function() {
       BotEngine.showList(columns, "valueColumn");
     },
 
+    listTableColumnsFn: function() {
+      var columns = KGcreator.currentConfig.currentDataSource.tables[self.params.table];
+      BotEngine.showList(columns, "predicateObjectColumn");
+    },
+
+
+    checkColumnTypeFn: function() {
+
+      //check if source  target column is mapped and has a rdf:type that are classes in source and imports
+      var predicateObjectColumnName=self.params.predicateObjectColumn;
+      var predicateObjectColumnType=null;
+      self.params.predicateSubjectColumnType= CommonBotFunctions.getColumnClass(self.params.tripleModels,self.params.column)
+      self.params.predicateObjectColumnType= CommonBotFunctions.getColumnClass(self.params.tripleModels,self.params.predicateObjectColumn)
+
+      var OK= false
+      if( self.params.predicateSubjectColumnType &&  self.params.predicateObjectColumnType)
+        OK=true
+    return BotEngine.nextStep(OK?"OK":"KO")
+    },
+
+
+
+    targetColumnKoFn: function() {
+     alert("target column " +self.params.predicateObjectColumnName +" needs a rdf:type predicate before linking");
+     BotEngine.reset()
+    },
+
+    listFilteredPropertiesFn: function() {
+      OntologyModels.getAllowedPropertiesBetweenNodes(self.params.source,self.params.predicateSubjectColumnType,self.params.predicateObjectColumnType,function(err, result){
+        if(err)
+          return alert(err);
+       var x= result
+      })
+
+    },
+
     listVocabPropertiesFn: function() {
+      // filter properties compatible with
       CommonBotFunctions.listVocabPropertiesFn(self.params.predicateVocab, "propertyId");
     },
 
-    listTableColumnsFn: function() {
-      var columns = KGcreator.currentConfig.currentDataSource.tables[self.params.table];
-      BotEngine.showList(columns, "predicateObjectId");
-    },
+
+
 
     addMappingToModel: function() {
       var source = self.params.source;
@@ -183,7 +238,7 @@ var KGcreator_bot = (function() {
       if (uriType) {
         var str = "";
         if (uriType == "namedIndividual") {
-          self.params.tiplesSubject = column;
+          self.params.triplesSubject = column;
           triple = {
             s: column, p: "rdf:type", o: "ow:NamedIndividual"
           };
@@ -191,7 +246,7 @@ var KGcreator_bot = (function() {
 
         }
         else if (uriType == "blankNode") {
-          self.params.tiplesSubject = "$_" + column;
+          self.params.triplesSubject = "$_" + column;
         }
 
 
@@ -199,14 +254,14 @@ var KGcreator_bot = (function() {
 
       if (resourceId) {
         triple = {
-          s: self.params.tiplesSubject, p: "rdf:type", o: resourceId
+          s: self.params.triplesSubject, p: "rdf:type", o: resourceId
         };
         self.params.tripleModels.push(triple);
 
       }
       if (valueType && valueColumn) {
         triple = {
-          s: self.params.tiplesSubject, p: valueType, o: valueColumn
+          s: self.params.triplesSubject, p: valueType, o: valueColumn
         };
         self.params.tripleModels.push(triple);
 
@@ -214,19 +269,18 @@ var KGcreator_bot = (function() {
 
       if (propertyId && predicateObjectId) {
         triple = {
-          s: self.params.tiplesSubject, p: propertyId, o: predicateObjectId
+          s: self.params.triplesSubject, p: propertyId, o: predicateObjectColumnName
         };
         self.params.tripleModels.push(triple);
       }
-
 
 
       BotEngine.nextStep();
 
 
     },
-    
-    saveFn:function(){
+
+    saveFn: function() {
       KGcreator.currentConfig.currentMappings[self.params.table].tripleModels = self.params.tripleModels;
       KGcreator.saveDataSourceMappings(self.params.source, self.params.datasource.name, KGcreator.currentConfig.currentMappings, function(err, result) {
         if (err) {
@@ -238,9 +292,8 @@ var KGcreator_bot = (function() {
       });
 
 
-     
     }
-     
+
 
   };
 

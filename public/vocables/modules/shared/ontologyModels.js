@@ -750,6 +750,12 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
     );
   };
 
+
+
+
+
+
+
   self.getClassesConstraints = function(source, fromClass, toClass) {
     var constraints = {};
     var objs = Config.ontologiesVocabularyModels[source].constraints;

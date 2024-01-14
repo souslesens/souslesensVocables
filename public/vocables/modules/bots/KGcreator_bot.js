@@ -4,6 +4,7 @@ import CommonBotFunctions from "./commonBotFunctions.js";
 import KGcreator_mappings from "../tools/KGcreator/KGcreator_mappings.js";
 
 
+
 var KGcreator_bot = (function() {
   var self = {};
   self.title = "Create mappings";
@@ -35,11 +36,13 @@ var KGcreator_bot = (function() {
 
       }
       else {
-        self.params.tripleModels.predicateSubjectColumnType=CommonBotFunctions.getColumnClass( self.params.tripleModels,self.params.column)
-        if(self.params.tripleModels.predicateSubjectColumnType)
-         workflow = self.workflowColumnmMappingOther;
-        else
+        self.params.tripleModels.predicateSubjectColumnType = CommonBotFunctions.getColumnClass(self.params.tripleModels, self.params.column);
+        if (self.params.tripleModels.predicateSubjectColumnType) {
+          workflow = self.workflowColumnmMappingOther;
+        }
+        else {
           workflow = self.workflowColumnMappingType;
+        }
         self.params.triplesSubject = self.params.tripleModels[0].s;
       }
     }
@@ -47,16 +50,17 @@ var KGcreator_bot = (function() {
       workflow = self.workflow;
       self.params = { source: self.source, datasource: "", table: "", column: "", tripleModels: [] };
     }
-    CommonBotFunctions.loadSourceOntologyModel(self.params.source,true,function(err){
-      if(err)
-        return alert(err.responseText)
+    CommonBotFunctions.loadSourceOntologyModel(self.params.source, true, function(err) {
+      if (err) {
+        return alert(err.responseText);
+      }
 
-    KGcreator_mappings.showMappingDialog(null, null, function() {
-      BotEngine.init(KGcreator_bot, { divId: "LinkColumn_botPanel" }, function() {
-        BotEngine.currentObj = workflow;
-        BotEngine.nextStep(workflow);
+      KGcreator_mappings.showMappingDialog(null, null, function() {
+        BotEngine.init(KGcreator_bot, { divId: "LinkColumn_botPanel" }, function() {
+          BotEngine.currentObj = workflow;
+          BotEngine.nextStep(workflow);
+        });
       });
-    })
     });
   };
 
@@ -68,16 +72,16 @@ var KGcreator_bot = (function() {
   self.workflowColumnmMappingOther = {
 
     "_OR": {
-      "set RDF type": { "listClassVocabsFn": { "listClassesFn": { "addMappingToModel": {"saveFn":{}} } } },
-      "set value": { "listValueTypeFn": { "setValueColumnFn": { "addMappingToModel":{"saveFn":{}} } } },
+      "set RDF type": { "listClassVocabsFn": { "listClassesFn": { "addMappingToModel": { "saveFn": {} } } } },
+      "set value": { "listValueTypeFn": { "setValueColumnFn": { "addMappingToModel": { "saveFn": {} } } } },
       // "set predicate": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "listTableColumnsFn": { "addMappingToModel": {} } } } },
       "set predicate": {
         "listTableColumnsFn": {
           "checkColumnTypeFn": {
             "_OR": {
               "KO": { "targetColumnKoFn": {} },
-            //  "OK": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "addMappingToModel": {} } } }
-              "OK": {  "listFilteredPropertiesFn": { "addMappingToModel":{"saveFn":{}} } }
+              //  "OK": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "addMappingToModel": {} } } }
+              "OK": { "listFilteredPropertiesFn": { "addMappingToModel": { "saveFn": {} } } }
             }
           }
         }
@@ -180,30 +184,39 @@ var KGcreator_bot = (function() {
     checkColumnTypeFn: function() {
 
       //check if source  target column is mapped and has a rdf:type that are classes in source and imports
-      var predicateObjectColumnName=self.params.predicateObjectColumn;
-      var predicateObjectColumnType=null;
-      self.params.predicateSubjectColumnType= CommonBotFunctions.getColumnClass(self.params.tripleModels,self.params.column)
-      self.params.predicateObjectColumnType= CommonBotFunctions.getColumnClass(self.params.tripleModels,self.params.predicateObjectColumn)
+      var predicateObjectColumnName = self.params.predicateObjectColumn;
+      var predicateObjectColumnType = null;
+      self.params.predicateSubjectColumnType = CommonBotFunctions.getColumnClass(self.params.tripleModels, self.params.column);
+      self.params.predicateObjectColumnType = CommonBotFunctions.getColumnClass(self.params.tripleModels, self.params.predicateObjectColumn);
 
-      var OK= false
-      if( self.params.predicateSubjectColumnType &&  self.params.predicateObjectColumnType)
-        OK=true
-    return BotEngine.nextStep(OK?"OK":"KO")
+      var OK = false;
+      if (self.params.predicateSubjectColumnType && self.params.predicateObjectColumnType) {
+        OK = true;
+      }
+      return BotEngine.nextStep(OK ? "OK" : "KO");
     },
-
 
 
     targetColumnKoFn: function() {
-     alert("target column " +self.params.predicateObjectColumnName +" needs a rdf:type predicate before linking");
-     BotEngine.reset()
+      alert("target column " + self.params.predicateObjectColumnName + " needs a rdf:type predicate before linking");
+      BotEngine.reset();
     },
 
     listFilteredPropertiesFn: function() {
-      OntologyModels.getAllowedPropertiesBetweenNodes(self.params.source,self.params.predicateSubjectColumnType,self.params.predicateObjectColumnType,function(err, result){
-        if(err)
+      OntologyModels.getAllowedPropertiesBetweenNodes(self.params.source, self.params.predicateSubjectColumnType, self.params.predicateObjectColumnType, function(err, result) {
+        if (err) {
           return alert(err);
-       var x= result
-      })
+        }
+       var properties = [];
+        for (var key in result.constraints) {
+          for (var propId in result.constraints[key]) {
+            var prop = result.constraints[key][propId];
+            properties.push({ id: propId, label: prop.source+":"+prop.label });
+          }
+        }
+      //  CommonBotFunctions.sortList(properties)
+        BotEngine.showList(properties, "propertyId");
+      });
 
     },
 
@@ -211,8 +224,6 @@ var KGcreator_bot = (function() {
       // filter properties compatible with
       CommonBotFunctions.listVocabPropertiesFn(self.params.predicateVocab, "propertyId");
     },
-
-
 
 
     addMappingToModel: function() {

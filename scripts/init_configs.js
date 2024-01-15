@@ -22,6 +22,8 @@ if (!fs.existsSync(usersPath)) {
             source: "json",
             _type: "user",
             name: USERNAME,
+            allowSourceCreation: true,
+            maxNumberCreatedSource: 5,
         },
     };
 

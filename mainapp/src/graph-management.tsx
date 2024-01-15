@@ -27,6 +27,7 @@ export default function GraphManagement() {
     const cancelCurrentOperation = useRef(false);
     const [animatedProgressBar, setAnimatedProgressBar] = useState(false);
     const [currentDownloadFormat, setCurrentDownloadFormat] = useState<string | null>(null);
+    const [skipNamedIndividuals, setSkipNamedIndividuals] = useState(false);
 
     // error management
     const [error, setError] = useState(false);
@@ -94,6 +95,10 @@ export default function GraphManagement() {
 
     const handleSetFormat = async (event: React.MouseEvent<HTMLElement>) => {
         setCurrentDownloadFormat(event.currentTarget.value);
+    };
+
+    const handleSetSkipNamedIndividuals = async (event: React.MouseEvent<HTMLElement>) => {
+        setSkipNamedIndividuals(event.currentTarget.value == "false");
     };
 
     const handleReplaceGraphCheckbox = async (event: React.MouseEvent<HTMLInputElement>) => {
@@ -291,7 +296,7 @@ export default function GraphManagement() {
     const downloadModalContent = (
         <Stack>
             <Form>
-                <div>
+                <Stack direction="horizontal">
                     <Form.Check
                         disabled={currentOperation !== null}
                         onClick={handleSetFormat}
@@ -322,7 +327,19 @@ export default function GraphManagement() {
                         label="Turtle"
                         value="ttl"
                     ></Form.Check>
-                </div>
+                </Stack>
+
+                <Stack className="my-2">
+                    <Form.Check
+                        disabled={currentOperation !== null || slsApiBaseUrl === "/"}
+                        id={`check-ignore-namedIndividuals-${currentSource}`}
+                        label="Ignore the namedIndividuals in this download"
+                        name="check-ignore-namedIndividuals"
+                        onClick={handleSetSkipNamedIndividuals}
+                        type="switch"
+                        value={skipNamedIndividuals}
+                    ></Form.Check>
+                </Stack>
 
                 <Stack direction="horizontal" gap={1}>
                     {!currentOperation ? (

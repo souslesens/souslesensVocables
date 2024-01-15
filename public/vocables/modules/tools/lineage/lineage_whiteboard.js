@@ -657,7 +657,6 @@ var Lineage_whiteboard = (function () {
             options.visjsOptions.edges = _options.edges;
         }
 
-
         if (_options.visjsOptions && _options.visjsOptions.manipulation) {
             options.visjsOptions.manipulation = _options.visjsOptions.manipulation;
         } else if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
@@ -700,8 +699,7 @@ var Lineage_whiteboard = (function () {
                     }
                 },
                 addNode: function (nodeData, callback) {
-
-                  /*  CreateResource_bot.start()
+                    /*  CreateResource_bot.start()
                     return;*/
                     Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
                         if (err) {
@@ -2879,9 +2877,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 self.currentGraphNode = node;
                 self.currentGraphEdge = null;
                 //start
-                point={};
-                point.x=event.x;
-                point.y=event.y;
+                point = {};
+                point.x = event.x;
+                point.y = event.y;
                 //end
                 PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
             }

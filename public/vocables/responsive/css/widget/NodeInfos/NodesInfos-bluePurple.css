@@ -3,7 +3,6 @@
     font-size: 10px !important;
     margin: 12px !important;
     margin-top: 25px !important;
-    
 }
 
 .infosTable {
@@ -31,14 +30,13 @@ th, td{
 }
 .detailsCellValue {
     .font-table;
-     
 }
 
 .detailsCellName {
     text-align: left !important;
     .font-table;
     background-color: @background-color !important;
-    width:fit-content;
+    width: fit-content;
 }
 
 .NodesInfos_CardId {
@@ -50,41 +48,36 @@ th, td{
 .NodesInfos_tableDiv > .ui-widget-content a {
     color: @button1-color !important;
 }
-.infos_table{
+.infos_table {
     font-size: 12px;
 }
 #nodeInfosWidget_InfosTabDiv {
     .font-table;
-    border: 0px!important;
+    border: 0px !important;
     background-color: @background-color;
     border-radius: 14px;
     border-top-left-radius: 0px;
-   
 }
-.nodesInfosAdditionalInfos{
-    
-    background-color: @background-color !important;  
+.nodesInfosAdditionalInfos {
+    background-color: @background-color !important;
     border-radius: 14px !important;
     border: @source-color solid 1px !important;
 }
 #nodeInfos_restrictionsDiv {
     .nodesInfosAdditionalInfos;
-   
 }
 
 #nodeInfos_individualsDiv {
     .nodesInfosAdditionalInfos;
 }
 #nodesInfos_individual_button {
-
     .font-table;
-    background-color: @background-color !important; 
+    background-color: @background-color !important;
     font-size: 15px;
-    border: 0px!important;
+    border: 0px !important;
     font-weight: bold;
-
 }
-.nodesInfos-border{
+.nodesInfos-border {
     background-color: @dark-background-color !important;
     border-radius: 14px !important;
     border: @source-color solid 1px !important;
@@ -101,7 +94,7 @@ th, td{
 #nodeInfosWidget_AxiomsTabDiv {
     .nodesInfos-border;
     background-color: @background-color !important;
-    border: 0px!important;
+    border: 0px !important;
 }
 [role="tablist"] {
     .button-font-title;
@@ -122,7 +115,7 @@ th, td{
     padding: 2px 8px !important;
     margin-top: 0px !important;
     border: @button1-color solid 1px;
-    color:@button1-color;
+    color: @button1-color;
 }
 .nodesInfos-jquerybuttons:hover {
     .hover-button;
@@ -154,14 +147,13 @@ a:visited.ui-button,
     background-color: white;
     font-size: 10px;
     .border-classic-color-theme4;
-    
+
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     margin: 10px;
     width: 300px;
     padding: 20px;
-    
 }
 
 .editPredicatePanel input {
@@ -169,12 +161,11 @@ a:visited.ui-button,
     margin: 3px;
     padding: 0px;
     border-radius: 14px !important;
-    background-color: #eaefff ;
+    background-color: #eaefff;
     color: #1a27b2 !important;
 }
 
 .editPredicatePanel select {
-    
     min-width: 100px;
     margin: 2px;
     border-radius: 14px !important;
@@ -182,36 +173,35 @@ a:visited.ui-button,
     color: @button1-color !important;
 }
 
-.edit-Predicate-value-chosen{
-    width: 95%; 
+.edit-Predicate-value-chosen {
+    width: 95%;
     background-color: @dark-background-color !important;
-
 }
 
-.nodesInfos-iconsButtons{
-    .slsv-invisible-button; 
+.nodesInfos-iconsButtons {
+    .slsv-invisible-button;
     .size-of-button-null;
 }
-.nodesInfos-iconsButtons:hover{
-    background-color: inherit!important;
+.nodesInfos-iconsButtons:hover {
+    background-color: inherit !important;
 }
-#nodeInfos_individualsDiv{
+#nodeInfos_individualsDiv {
     margin: 10px;
 }
 
-#nodeInfos_restrictionsDiv{
+#nodeInfos_restrictionsDiv {
     margin: 10px;
 }
 
-#nodeInfos_listsDiv{
+#nodeInfos_listsDiv {
     margin: 10px;
 }
 
-#nodeInfosWidget_InfosTabDiv{
+#nodeInfosWidget_InfosTabDiv {
     display: flex;
     overflow: auto;
 }
 
-#mainDialogDiv{
-    max-height: 620px!important;
+#mainDialogDiv {
+    max-height: 620px !important;
 }

@@ -5,7 +5,6 @@ import OntologyModels from "../../shared/ontologyModels.js";
 import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
-
 var Lineage_createRelation = (function () {
     var self = {};
 
@@ -40,7 +39,6 @@ var Lineage_createRelation = (function () {
                         "</span> -><span onclick='Lineage_createRelation.showNodeInfos(\"end\")'> " +
                         self.targetNode.label
                 ) + "</span>";
-
             }
 
             let sourceNodeTopLevelOntologyAncestors = {};
@@ -262,7 +260,6 @@ var Lineage_createRelation = (function () {
                                         self.domainOntologyProperties.push(newProp);
                                         var propId = newProp.id;
 
-
                                         var superpropConstraints = JSON.parse(
                                             JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]["constraints"][self.currentPropertiesTreeNode.data.id])
                                         );
@@ -462,13 +459,13 @@ var Lineage_createRelation = (function () {
             };
             newEdge.label = "<i>" + propLabel + "</i>";
             (newEdge.font = { multi: true, size: 10 }),
-              (newEdge.arrows = {
-                  to: {
-                      enabled: true,
-                      type: Lineage_whiteboard.defaultEdgeArrowType,
-                      scaleFactor: 0.5,
-                  },
-              });
+                (newEdge.arrows = {
+                    to: {
+                        enabled: true,
+                        type: Lineage_whiteboard.defaultEdgeArrowType,
+                        scaleFactor: 0.5,
+                    },
+                });
             newEdge.dashes = true;
 
             if (result.type == "ObjectProperty") {
@@ -531,36 +528,36 @@ var Lineage_createRelation = (function () {
         }
         var blankNodeId;
         async.series(
-          [
-              function (callbackSeries) {
-                  if (!addImportToCurrentSource) {
-                      return callbackSeries();
-                  }
-                  self.setNewImport(Lineage_sources.activeSource, targetNode.source, function (err, _result) {
-                      callbackSeries(err);
-                  });
-              },
+            [
+                function (callbackSeries) {
+                    if (!addImportToCurrentSource) {
+                        return callbackSeries();
+                    }
+                    self.setNewImport(Lineage_sources.activeSource, targetNode.source, function (err, _result) {
+                        callbackSeries(err);
+                    });
+                },
 
-              function (callbackSeries) {
-                  var relations = { type: type, sourceNode: sourceNode, targetNode: targetNode };
-                  var options = {};
-                  self.createRelationTriples(relations, createInverseRelation, inSource, options, function (err, _result) {
-                      blankNodeId = _result;
-                      callbackSeries(err);
-                  });
-              },
-          ],
-          function (err) {
-              if (err) {
-                  if (callback) {
-                      return callback(err);
-                  }
-                  return alert(err);
-              }
-              if (callback) {
-                  return callback(null, blankNodeId);
-              }
-          }
+                function (callbackSeries) {
+                    var relations = { type: type, sourceNode: sourceNode, targetNode: targetNode };
+                    var options = {};
+                    self.createRelationTriples(relations, createInverseRelation, inSource, options, function (err, _result) {
+                        blankNodeId = _result;
+                        callbackSeries(err);
+                    });
+                },
+            ],
+            function (err) {
+                if (err) {
+                    if (callback) {
+                        return callback(err);
+                    }
+                    return alert(err);
+                }
+                if (callback) {
+                    return callback(null, blankNodeId);
+                }
+            }
         );
     };
     self.createRelationTriples = function (relations, createInverseRelation, inSource, options, callback) {
@@ -648,64 +645,64 @@ var Lineage_createRelation = (function () {
             var inverseRestriction = null;
 
             async.series(
-              [
-                  // delete restriction
-                  function (callbackSeries) {
-                      Sparql_generic.deleteTriples(inSource, restrictionNode.data.bNodeId, null, null, function (_err, _result) {
-                          callbackSeries();
-                      });
-                  },
-                  function (callbackSeries) {
-                      Sparql_generic.deleteTriples(inSource, null, null, restrictionNode.data.bNodeId, function (_err, _result) {
-                          callbackSeries();
-                      });
-                  },
-                  // search if inverse exists
-                  function (callbackSeries) {
-                      Sparql_OWL.getInverseRestriction(inSource, restrictionNode.data.bNodeId, function (err, result) {
-                          if (err) {
-                              return callbackSeries(err);
-                          }
-                          if (result.length == 0) {
-                              return callbackSeries();
-                          }
-                          inverseRestriction = result[0].subject.value;
-                          callbackSeries();
-                      });
-                  },
-                  // delete inverse restriction
-                  function (callbackSeries) {
-                      if (!inverseRestriction) {
-                          return callbackSeries();
-                      }
-                      Sparql_generic.deleteTriples(inSource, inverseRestriction, null, null, function (_err, _result) {
-                          callbackSeries();
-                      });
-                  },
-                  function (callbackSeries) {
-                      if (!inverseRestriction) {
-                          return callbackSeries();
-                      }
-                      Sparql_generic.deleteTriples(inSource, null, null, inverseRestriction, function (_err, _result) {
-                          callbackSeries();
-                      });
-                  },
-                  function (callbackSeries) {
-                      // update OntologyModel by removing restriction
-                      var dataToRemove = { restrictions: [restrictionNode.data.propertyId] };
-                      OntologyModels.updateModel(inSource, dataToRemove, { remove: true }, function (err, result) {
-                          callback(err);
-                      });
-                  },
-              ],
-              function (_err) {
-                  Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(restrictionNode.id);
-                  Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(inverseRestriction);
-                  MainController.UI.message("restriction removed", true);
-                  if (callback) {
-                      return callback(_err);
-                  }
-              }
+                [
+                    // delete restriction
+                    function (callbackSeries) {
+                        Sparql_generic.deleteTriples(inSource, restrictionNode.data.bNodeId, null, null, function (_err, _result) {
+                            callbackSeries();
+                        });
+                    },
+                    function (callbackSeries) {
+                        Sparql_generic.deleteTriples(inSource, null, null, restrictionNode.data.bNodeId, function (_err, _result) {
+                            callbackSeries();
+                        });
+                    },
+                    // search if inverse exists
+                    function (callbackSeries) {
+                        Sparql_OWL.getInverseRestriction(inSource, restrictionNode.data.bNodeId, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err);
+                            }
+                            if (result.length == 0) {
+                                return callbackSeries();
+                            }
+                            inverseRestriction = result[0].subject.value;
+                            callbackSeries();
+                        });
+                    },
+                    // delete inverse restriction
+                    function (callbackSeries) {
+                        if (!inverseRestriction) {
+                            return callbackSeries();
+                        }
+                        Sparql_generic.deleteTriples(inSource, inverseRestriction, null, null, function (_err, _result) {
+                            callbackSeries();
+                        });
+                    },
+                    function (callbackSeries) {
+                        if (!inverseRestriction) {
+                            return callbackSeries();
+                        }
+                        Sparql_generic.deleteTriples(inSource, null, null, inverseRestriction, function (_err, _result) {
+                            callbackSeries();
+                        });
+                    },
+                    function (callbackSeries) {
+                        // update OntologyModel by removing restriction
+                        var dataToRemove = { restrictions: [restrictionNode.data.propertyId] };
+                        OntologyModels.updateModel(inSource, dataToRemove, { remove: true }, function (err, result) {
+                            callback(err);
+                        });
+                    },
+                ],
+                function (_err) {
+                    Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(restrictionNode.id);
+                    Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(inverseRestriction);
+                    MainController.UI.message("restriction removed", true);
+                    if (callback) {
+                        return callback(_err);
+                    }
+                }
             );
         }
     };
@@ -832,8 +829,6 @@ var Lineage_createRelation = (function () {
 
         return metaDataTriples;
     };
-
-
 
     return self;
 })();

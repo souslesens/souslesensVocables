@@ -15,15 +15,16 @@ import authentication from "../../modules/shared/authentification.js";
 
 var NodeInfosWidgetResponsive = (function () {
     var self = {};
-    
+
     self.initDialog = function (sourceLabel, divId, options, callback) {
         ResponsiveUI.openDialogDiv(divId);
-        $("#" + divId).parent().show("fast", function () {
+        $("#" + divId)
+            .parent()
+            .show("fast", function () {
                 self.oldNodeInfosInit(sourceLabel, divId, options, callback);
-                $('#addPredicateButton').remove();
-                $('#deleteButton').remove();
-        });
-        
+                $("#addPredicateButton").remove();
+                $("#deleteButton").remove();
+            });
 
         //$(".ui-dialog-title")
     };
@@ -51,8 +52,7 @@ var NodeInfosWidgetResponsive = (function () {
                             Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
                         }
                     }, 100);
-                }
-                
+                },
             });
             $("#axiomsDrawGraphDiv").dialog({
                 autoOpen: false,
@@ -146,14 +146,10 @@ var NodeInfosWidgetResponsive = (function () {
                         return alert(err);
                     }
                     self.showNodeInfosToolbar(options);
-                    
-                    $('#deleteButton').insertAfter($(".ui-dialog-title"));
-                    $('#addPredicateButton').insertAfter($(".ui-dialog-title"));
-                    $('#addPredicateButton').css('margin-left',"25px !important");
-                   
-                    
-                    
-                    
+
+                    $("#deleteButton").insertAfter($(".ui-dialog-title"));
+                    $("#addPredicateButton").insertAfter($(".ui-dialog-title"));
+                    $("#addPredicateButton").css("margin-left", "25px !important");
                 });
             }
         });
@@ -227,8 +223,6 @@ var NodeInfosWidgetResponsive = (function () {
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
             str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
         }
-
-       
 
         if (self.visitedNodes.length > 1) {
             str +=

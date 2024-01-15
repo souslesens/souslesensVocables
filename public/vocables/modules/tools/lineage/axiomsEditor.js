@@ -1,51 +1,38 @@
 import common from "../../shared/common.js";
 import ManchesterSyntaxWidget from "../../bots/manchesterSyntaxWidget.js";
 
+var AxiomsEditor = (function () {
+    var self = {};
+    self.keywordsMap = null;
 
-var AxiomsEditor = (function() {
+    self.init = function (resourceId, validateFn) {
+        self.resourceId = resourceId;
+        self.validateFn = validateFn;
+        self.showDialog();
+    };
 
-  var self = {};
-  self.keywordsMap = null;
+    self.showDialog = function () {
+        var sourceLabel = Lineage_sources.activeSource;
 
+        $("#smallDialogDiv").dialog("open");
+        $("#smallDialogDiv").load("modules/tools/lineage/html/axiomEditor.html", function () {
+            var keyWords = {
+                and: { css: "bot-syntax", id: "and", label: "and" },
+                or: { css: "bot-syntax", id: "or", label: "or" },
+                "(": { css: "bot-syntax", id: "(", label: "(" },
+                ")": { css: "bot-syntax", id: ")", label: ")" },
+            };
 
-  self.init = function(resourceId, validateFn) {
-    self.resourceId = resourceId;
-    self.validateFn = validateFn;
-    self.showDialog();
+            ManchesterSyntaxWidget.init("axiomInputDiv", sourceLabel, keyWords);
+        });
+    };
 
+    self.validate = function () {
+        var text = ManchesterSyntaxWidget.getText();
+        self.validateFn(null, text);
+    };
 
-  };
-
-
-  self.showDialog = function() {
-
-    var sourceLabel = Lineage_sources.activeSource;
-
-    $("#smallDialogDiv").dialog("open");
-    $("#smallDialogDiv").load("modules/tools/lineage/html/axiomEditor.html", function() {
-
-      var keyWords = {
-        "and": { css: "bot-syntax", id: "and", label: "and" },
-        "or": { css: "bot-syntax", id: "or", label: "or" },
-        "(": { css: "bot-syntax", id: "(", label: "(" },
-        ")": { css: "bot-syntax", id: ")", label: ")" }
-      };
-
-      ManchesterSyntaxWidget.init("axiomInputDiv", sourceLabel, keyWords);
-    });
-  };
-
-  self.validate = function() {
-    var text = ManchesterSyntaxWidget.getText();
-    self.validateFn(null, text);
-
-
-  };
-
-
-  return self;
-
-
+    return self;
 })();
 
 export default AxiomsEditor;

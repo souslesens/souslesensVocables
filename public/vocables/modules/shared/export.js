@@ -413,8 +413,8 @@ var Export = (function () {
             if (false && options && options.columnDefs) {
                 params.columnDefs = options.columnDefs;
             }
-            if(options && options.paging){
-                params.paging=true;
+            if (options && options.paging) {
+                params.paging = true;
             }
             self.dataTable = $("#dataTableDivExport").DataTable(params);
             if (callback) {

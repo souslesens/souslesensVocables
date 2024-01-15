@@ -1,11 +1,11 @@
-#SavedQueriesComponent_itemsSelect{
+#SavedQueriesComponent_itemsSelect {
     background-color: @background-color;
     border-radius: 14px;
-    color : @button1-color;
-    overflow:auto;
-    padding:5px;
-    margin-top:20px;
-    width:90%;
+    color: @button1-color;
+    overflow: auto;
+    padding: 5px;
+    margin-top: 20px;
+    width: 90%;
 }
 .KGquery_pathDiv {
     border: 1px saddlebrown solid;
@@ -49,7 +49,6 @@
 }
 
 .KGquery_setDiv {
-    
     margin: 3px;
     margin-top: 10px;
     padding: 3px;
@@ -64,8 +63,8 @@
     border: 0px;
     padding: 0px;
 }
-#KGquery_dataTableDiv{
+#KGquery_dataTableDiv {
     background-color: white;
     height: 87dvh;
-    width:90%
+    width: 90%;
 }

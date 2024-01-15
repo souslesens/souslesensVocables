@@ -220,88 +220,86 @@
                 }
             });
 
-            $(function() {
+            $(function () {
+                async.series(
+                    [
+                        function (callBackSeries) {
+                            authentication.init(function (err, result) {
+                                callBackSeries(err);
+                            });
+                        },
+                        function (callBackSeries) {
+                            MainController.initConfig(function (err) {
+                                // sentry/glitchtip
+                                if (Config.sentryDsnJsFront) {
+                                    if (typeof Sentry == "object") {
+                                        Sentry.init({ dsn: Config.sentryDsnJsFront });
+                                    } else {
+                                        console.warn("Sentry DSN found in config, but library could not be loaded and initialized.");
+                                    }
+                                }
+                                callBackSeries(err);
+                            });
+                        },
+                        function (callBackSeries) {
+                            MainController.onAfterLogin(function (err) {
+                                callBackSeries(err);
+                            });
+                        },
+                    ],
+                    function (err) {
+                        w = $(document).width() - leftPanelWidth - 30;
+                        h = $(document).height() - 30;
 
-                async.series([
-                      function(callBackSeries) {
-                          authentication.init(function(err, result) {
-                              callBackSeries(err);
-                          });
-                      },
-                      function(callBackSeries) {
-                          MainController.initConfig(function(err) {
-                              // sentry/glitchtip
-                              if (Config.sentryDsnJsFront) {
-                                  if (typeof Sentry == "object") {
-                                      Sentry.init({ dsn: Config.sentryDsnJsFront });
-                                  }
-                                  else {
-                                      console.warn("Sentry DSN found in config, but library could not be loaded and initialized.");
-                                  }
-                              }
-                              callBackSeries(err);
-                          });
-                      }, function(callBackSeries) {
-                          MainController.onAfterLogin(function(err) {
-                              callBackSeries(err);
+                        h = Math.min(h, 1000);
 
-                          })
-                      }
-                  ]
-                  , function(err) {
-                      w = $(document).width() - leftPanelWidth - 30;
-                      h = $(document).height() - 30;
+                        $("#graphDiv").width(w);
+                        MainController.UI.initialGraphDivWitdh = w;
+                        $("#graphDiv").height(h - 50);
 
-                      h = Math.min(h, 1000);
+                        $("#accordion").accordion({
+                            heightStyle: "fill",
+                        });
+                        $("#accordion").accordion("option", { active: 0 });
+                        $("#accordion").on("accordionbeforeactivate", function (event, ui) {});
+                        $("#accordion").on("accordionactivate", function (event, ui) {});
+                        $("#mainDialogDiv").dialog({
+                            autoOpen: false,
+                            height: 800,
+                            width: $(document).width() * 0.85,
+                            modal: false,
+                        });
+                        $("#mainDialogDiv2").dialog({
+                            autoOpen: false,
+                            height: 800,
+                            width: $(document).width() * 0.85,
+                            modal: false,
+                        });
 
-                      $("#graphDiv").width(w);
-                      MainController.UI.initialGraphDivWitdh = w;
-                      $("#graphDiv").height(h - 50);
+                        $("#smallDialogDiv").dialog({
+                            autoOpen: false,
+                            height: 600,
+                            width: 800,
+                            modal: false,
+                        });
 
-                      $("#accordion").accordion({
-                          heightStyle: "fill"
-                      });
-                      $("#accordion").accordion("option", { active: 0 });
-                      $("#accordion").on("accordionbeforeactivate", function(event, ui) {
-                      });
-                      $("#accordion").on("accordionactivate", function(event, ui) {
-                      });
-                      $("#mainDialogDiv").dialog({
-                          autoOpen: false,
-                          height: 800,
-                          width: $(document).width() * 0.85,
-                          modal: false
-                      });
-                      $("#mainDialogDiv2").dialog({
-                          autoOpen: false,
-                          height: 800,
-                          width: $(document).width() * 0.85,
-                          modal: false
-                      });
+                        $(document).on("click", "a", function () {
+                            var target = $(this).attr("target");
+                            if (target == "_slsvCallback") {
+                                var id = $(this).attr("href");
+                                event.preventDefault();
+                                NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
+                            }
+                        });
 
-                      $("#smallDialogDiv").dialog({
-                          autoOpen: false,
-                          height: 600,
-                          width: 800,
-                          modal: false
-                      });
+                        MainController.UI.setCredits();
 
-                      $(document).on("click", "a", function() {
-                          var target = $(this).attr("target");
-                          if (target == "_slsvCallback") {
-                              var id = $(this).attr("href");
-                              event.preventDefault();
-                              NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
-                          }
-                      });
-
-                      MainController.UI.setCredits();
-
-                    $("#ChangeSourceButton").hide();
-                    $("#index_topContolPanel").hide();
-                    $("#Lineage_graphEditionButtons").hide();
-                    ResponsiveUI.init();
-                });
+                        $("#ChangeSourceButton").hide();
+                        $("#index_topContolPanel").hide();
+                        $("#Lineage_graphEditionButtons").hide();
+                        ResponsiveUI.init();
+                    }
+                );
             });
         </script>
 
@@ -344,16 +342,16 @@
         <link rel="stylesheet" href="./responsive/css/widget/PopUp/PopUp-bluePurple.css" />
         <link rel="stylesheet" href="./responsive/css/widget/NodeInfos/NodesInfos-bluePurple.css" />
         <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
-        
+
         <!--<link rel="stylesheet" href="./slsv-cartography1.css" />-->
         <!--<link rel="stylesheet" href="./slsv-cartography2.css" />-->
     </head>
 
     <body>
-        <header  class="w3-container">
-            <div id="MenuBar" class="w3-bar w3-medium slsv-bg-intense " style="z-index: 4; width: 100%;height:90px;">
-                <div id="MenuBarHeader" class="left-border-main-dialog-div w3-display-container" style=" height: 20px;">
-                    <div >
+        <header class="w3-container">
+            <div id="MenuBar" class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4; width: 100%; height: 90px">
+                <div id="MenuBarHeader" class="left-border-main-dialog-div w3-display-container" style="height: 20px">
+                    <div>
                         <table>
                             <tr>
                                 <td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none; width: 15px; text-align: justify" /></td>
@@ -361,8 +359,8 @@
                             </tr>
                         </table>
                     </div>
-                    <button class="w3-display-bottommiddle slsv-invisible-button"  onclick="ResponsiveUI.hideShowMenuBar(this)"> 
-                            <img  src="./icons/CommonIcons/ArrowMenuBar.png">
+                    <button class="w3-display-bottommiddle slsv-invisible-button" onclick="ResponsiveUI.hideShowMenuBar(this)">
+                        <img src="./icons/CommonIcons/ArrowMenuBar.png" />
                     </button>
                     <div class="w3-display-topright">
                         <a target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"
@@ -371,87 +369,84 @@
                         SouslesensVocables <span id="souslesensversion"></span>
                     </div>
                 </div>
-                <div id="MenuBarFooter">   
-                <div id="toolSelectionSection" class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button" style="padding: 23px">
-                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center; margin-left:10px;margin-top: 0px; padding: 0px">
-                        <div id="ToolBorder" class="toolSelectionBorder" style="margin:3px;padding: 5px;display:flex;align-items: flex-start;margin-left:5px;">
-                            <button id="selectedTool" class="slsv-invisible-button" style=" padding: 0px; margin-left: 10px; ">Tool</button>
-                            <button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;margin-left: 3px; margin-right: 10px'  > </button>
-                            <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                                <select id="toolsSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto;"></select>
+                <div id="MenuBarFooter">
+                    <div id="toolSelectionSection" class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button" style="padding: 23px">
+                        <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center; margin-left: 10px; margin-top: 0px; padding: 0px">
+                            <div id="ToolBorder" class="toolSelectionBorder" style="margin: 3px; padding: 5px; display: flex; align-items: flex-start; margin-left: 5px">
+                                <button id="selectedTool" class="slsv-invisible-button" style="padding: 0px; margin-left: 10px">Tool</button>
+                                <button class="arrow-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-left: 3px; margin-right: 10px"></button>
+                                <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
+                                    <select id="toolsSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto"></select>
+                                </div>
                             </div>
+
+                            <div id="currentToolTitle"></div>
                         </div>
-
-                        <div id="currentToolTitle"></div>
                     </div>
-                </div>
 
-                <!--<div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
+                    <!--<div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
                     
                 </div>-->
 
-                <!--
+                    <!--
                 <div class="w3-bar-item slsv-bg-intense">
                     <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>
                 </div>
                 -->
 
-                <div class="w3-bar-item">
-                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center;margin-left: 0px!important;margin-right: 0px!important;padding:6px;" id="index_topContolPanel">
-                        <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
-                    </div>
-                </div>
-
-                <div class="w3-bar-item">
-                    <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center;margin-left: 0px!important;margin-right: 0px!important;padding:6.5px;" id="Lineage_graphEditionButtons">
-                        <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
-                        <div class="slsv-button-source" style='padding: 5px 12px;' id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
-                            <button class="slsv-invisible-button add-icon"  style="margin-right: 5px;height: 25px;width: 29px;" ></button><span style="margin-top: 3px">Add Node</span>
-                        </div>
-                        <div class="slsv-button-source addEdgeButtonColor" style='padding: 5px 12px;' id="lineage_actionDiv_addedge" onclick="Lineage_r.addEdge()">
-                            <button class="slsv-invisible-button add-icon"  style="margin-right: 5px;height: 25px;width: 29px;" ></button><span style="margin-top: 3px">Add Edge</span>
+                    <div class="w3-bar-item">
+                        <div
+                            class="w3-sand w3-round-xlarge"
+                            style="display: flex; flex-direction: row; align-items: center; margin-left: 0px !important; margin-right: 0px !important; padding: 6px"
+                            id="index_topContolPanel"
+                        >
+                            <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
                         </div>
                     </div>
-                </div>
 
-                <div class="w3-bar-item w3-right slsv-invisible-button" >
-                    <button class="logoInstance-icon slsv-invisible-button" style="height: 57px;width: 80px;"></button>
-                </div>
-
-                <div class="w3-bar-item w3-right" style="margin-right: 10px;">
-                    <div class="w3-button slsv-right-top-bar-button" id="user-username">User</div>
-                </div>
-                
-                <div class="w3-bar-item w3-right">
-                   
-                   <button class="w3-button slsv-right-top-bar-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
-                </div>
-                <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button w3-right">
-                    <button class="w3-button slsv-right-top-bar-button">Themes</button>
-                    <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                        <select id="themeSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.changeTheme($(this).val())"style="overflow: auto;"></select>
+                    <div class="w3-bar-item">
+                        <div
+                            class="w3-sand w3-round-xlarge"
+                            style="display: flex; flex-direction: row; align-items: center; margin-left: 0px !important; margin-right: 0px !important; padding: 6.5px"
+                            id="Lineage_graphEditionButtons"
+                        >
+                            <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
+                            <div class="slsv-button-source" style="padding: 5px 12px" id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
+                                <button class="slsv-invisible-button add-icon" style="margin-right: 5px; height: 25px; width: 29px"></button><span style="margin-top: 3px">Add Node</span>
+                            </div>
+                            <div class="slsv-button-source addEdgeButtonColor" style="padding: 5px 12px" id="lineage_actionDiv_addedge" onclick="Lineage_r.addEdge()">
+                                <button class="slsv-invisible-button add-icon" style="margin-right: 5px; height: 25px; width: 29px"></button><span style="margin-top: 3px">Add Edge</span>
+                            </div>
+                        </div>
                     </div>
 
+                    <div class="w3-bar-item w3-right slsv-invisible-button">
+                        <button class="logoInstance-icon slsv-invisible-button" style="height: 57px; width: 80px"></button>
+                    </div>
+
+                    <div class="w3-bar-item w3-right" style="margin-right: 10px">
+                        <div class="w3-button slsv-right-top-bar-button" id="user-username">User</div>
+                    </div>
+
+                    <div class="w3-bar-item w3-right">
+                        <button class="w3-button slsv-right-top-bar-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
+                    </div>
+                    <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button w3-right">
+                        <button class="w3-button slsv-right-top-bar-button">Themes</button>
+                        <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
+                            <select id="themeSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.changeTheme($(this).val())" style="overflow: auto"></select>
+                        </div>
+                    </div>
                 </div>
             </div>
-                
-            </div>
-            
         </header>
 
-        <div id="graphAndCommandScreen" class="w3-container" style="height: 90dvh;" >
-            <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="height: 100%; width: 26%" id="lateralPanelDiv">
+        <div id="graphAndCommandScreen" class="w3-container" style="height: 90dvh">
+            <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="height: 100%; width: 26%" id="lateralPanelDiv"></div>
+            <div class="w3-container w3-col l9" style="height: 100%; width: 74%">
+                <div id="graphDiv" style="height: 100%"></div>
             </div>
-            <div class="w3-container w3-col l9" style="height: 100%; width: 74%" >
-                
-                <div  id="graphDiv" style='height: 100%'>
-                
-                </div>
-            </div>
-            
         </div>
-        
-        
 
         <!-- popup panel-->
 
@@ -462,11 +457,9 @@
         <div id="botPanel">
             <div id="botDiv"></div>
         </div>
-          
     </body>
     <script type="module">
-        import ResponsiveUI from "./responsive/responsiveUI.js"
+        import ResponsiveUI from "./responsive/responsiveUI.js";
         ResponsiveUI.resetWindowHeight();
     </script>
 </html>
-

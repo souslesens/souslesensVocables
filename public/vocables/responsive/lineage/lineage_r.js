@@ -14,8 +14,8 @@ var Lineage_r = (function () {
     self.oldNodeInfosInit = null;
     self.oldAddEdgeDialog = null;
     self.oldExportTable = null;
-    self.MoreActionsShow=false;
-    self.MoreOptionsShow=true;
+    self.MoreActionsShow = false;
+    self.MoreOptionsShow = true;
     self.init = function () {
         PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
         SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
@@ -35,14 +35,12 @@ var Lineage_r = (function () {
         self.oldAddEdgeDialog = Lineage_blend.graphModification.showAddEdgeFromGraphDialog;
         Lineage_blend.graphModification.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
         ResponsiveUI.initMenuBar(self.loadSources);
-        $('KGquery_messageDiv').attr('id','messageDiv');
-        $('KGquery_waitImg').attr('id','waitImg');
-      
+        $("KGquery_messageDiv").attr("id", "messageDiv");
+        $("KGquery_waitImg").attr("id", "waitImg");
     };
-    self.quit=function(){
-        
-        $('#graphDiv').empty();
-    }
+    self.quit = function () {
+        $("#graphDiv").empty();
+    };
     self.loadSources = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
@@ -72,11 +70,12 @@ var Lineage_r = (function () {
             $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
             Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
             self.hideShowMoreActions("hide");
-            $('#lateralPanelDiv').resizable({
-                maxWidth: 395,minWidth: 150,stop: function( event, ui ) {
-                    
+            $("#lateralPanelDiv").resizable({
+                maxWidth: 395,
+                minWidth: 150,
+                stop: function (event, ui) {
                     ResponsiveUI.resetWindowHeight();
-                }
+                },
             });
         });
     };
@@ -87,14 +86,14 @@ var Lineage_r = (function () {
             $("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
                 SearchWidget.init();
                 $("#GenericTools_searchInAllSources").prop("checked", false);
-                $('#Lineage_MoreClassesOptions').hide();
+                $("#Lineage_MoreClassesOptions").hide();
                 SearchWidget.showTopConcepts();
             });
         });
     };
     self.initPropertiesTab = function () {
         $("#tabs_properties").load("./responsive/lineage/html/propertiesPanel.html", function (s) {
-            Lineage_r.hideShowMoreOptions('hide','Lineage_MorePropertiesOptions');
+            Lineage_r.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
             Lineage_properties.searchTermInSources();
         });
     };
@@ -120,20 +119,19 @@ var Lineage_r = (function () {
         }
         $("#Title1").text($(".Lineage_selectedSourceDiv").text());
         self.resetCurrentTab();
-
     };
-    self.resetCurrentTab=function(){
-        var currentTab=$(".slsv-tabButtonSelected").html();
-        if(currentTab=="Classes"){
+    self.resetCurrentTab = function () {
+        var currentTab = $(".slsv-tabButtonSelected").html();
+        if (currentTab == "Classes") {
             SearchWidget.showTopConcepts();
         }
-        if(currentTab=="Properties"){
+        if (currentTab == "Properties") {
             Lineage_properties.searchTermInSources();
         }
-        if(currentTab=="Containers"){
+        if (currentTab == "Containers") {
             Lineage_containers.search();
         }
-    }
+    };
     self.addNode = function () {
         ResponsiveUI.openDialogDiv("LineagePopup");
         Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
@@ -194,69 +192,59 @@ var Lineage_r = (function () {
                 self.oldExportTable(jstreeDiv, nodeId);
             });
     };
-    self.hideShowMoreActions=function(hideShowParameter){
-        if(hideShowParameter=="hide"){
-            self.MoreActionsShow=true;
+    self.hideShowMoreActions = function (hideShowParameter) {
+        if (hideShowParameter == "hide") {
+            self.MoreActionsShow = true;
         }
-        if(hideShowParameter=="show"){
-            self.MoreActionsShow=false;
+        if (hideShowParameter == "show") {
+            self.MoreActionsShow = false;
         }
-        if(!self.MoreActionsShow){
-            $('#Lineage_MoreActionsButtons').show();
-            self.MoreActionsShow=true;
-            $('#Lineage_MoreActionsDiv').removeClass('TitleBoxLine');
-
-        }
-        else{
-            $('#Lineage_MoreActionsButtons').hide();
-            self.MoreActionsShow=false;
-            $('#Lineage_MoreActionsDiv').addClass('TitleBoxLine');
-            
-        }
-    }
-    self.hideShowMoreOptions=function(hideShowParameter,divId){
-        if(hideShowParameter=="hide"){
-            self.MoreOptionsShow=false;
-        }
-        if(hideShowParameter=="show"){
-            self.MoreOptionsShow=true;
-        }
-        if(self.MoreOptionsShow){
-            $('#'+divId).show();
-            self.MoreOptionsShow=false;
-           
-
-        }
-        else{
-            
-            $('#'+divId).hide();
-            self.MoreOptionsShow=true;
-            
-            
-        }
-    }
-    self.changeIconForPropertiesGraphAction=function(div){
-        var icon=$(div).children().attr("class");
-        if(icon=='allPropertyIcon slsv-invisible-button'||icon=='slsv-invisible-button allPropertyIcon'){
-            $(div).children().removeClass('allPropertyIcon');
-            $(div).children().addClass('currentPropertyIcon');
-        }else{
-            $(div).children().removeClass('currentPropertyIcon');
-            $(div).children().addClass('allPropertyIcon');
+        if (!self.MoreActionsShow) {
+            $("#Lineage_MoreActionsButtons").show();
+            self.MoreActionsShow = true;
+            $("#Lineage_MoreActionsDiv").removeClass("TitleBoxLine");
+        } else {
+            $("#Lineage_MoreActionsButtons").hide();
+            self.MoreActionsShow = false;
+            $("#Lineage_MoreActionsDiv").addClass("TitleBoxLine");
         }
     };
-    self.checkbox_Lineage_containers=function(){
-        if($('#LineageProperties_searchInAllSources')[0].checked){
-            $('#LineageProperties_searchInAllSources').val("current");
-        }else{
-            $('#LineageProperties_searchInAllSources').val("all");
+    self.hideShowMoreOptions = function (hideShowParameter, divId) {
+        if (hideShowParameter == "hide") {
+            self.MoreOptionsShow = false;
         }
-    }
+        if (hideShowParameter == "show") {
+            self.MoreOptionsShow = true;
+        }
+        if (self.MoreOptionsShow) {
+            $("#" + divId).show();
+            self.MoreOptionsShow = false;
+        } else {
+            $("#" + divId).hide();
+            self.MoreOptionsShow = true;
+        }
+    };
+    self.changeIconForPropertiesGraphAction = function (div) {
+        var icon = $(div).children().attr("class");
+        if (icon == "allPropertyIcon slsv-invisible-button" || icon == "slsv-invisible-button allPropertyIcon") {
+            $(div).children().removeClass("allPropertyIcon");
+            $(div).children().addClass("currentPropertyIcon");
+        } else {
+            $(div).children().removeClass("currentPropertyIcon");
+            $(div).children().addClass("allPropertyIcon");
+        }
+    };
+    self.checkbox_Lineage_containers = function () {
+        if ($("#LineageProperties_searchInAllSources")[0].checked) {
+            $("#LineageProperties_searchInAllSources").val("current");
+        } else {
+            $("#LineageProperties_searchInAllSources").val("all");
+        }
+    };
 
     //less.modifyVars({'@button1-color': '#000'})
 
     return self;
-
 })();
 export default Lineage_r;
 window.Lineage_r = Lineage_r;

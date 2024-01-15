@@ -200,7 +200,7 @@ var KGcreator = (function () {
                 selectTreeNodeFn: function (event, obj) {
                     self.currentTreeNode = obj.node;
                     KGcreator.currentTreeNode = obj.node;
-                    KGcreator_run.getTableAndShowMappings()
+                    KGcreator_run.getTableAndShowMappings();
 
                     if (obj.node.data.type == "databaseSource") {
                         self.currentConfig.currentDataSource = {
@@ -265,11 +265,7 @@ var KGcreator = (function () {
                         };
 
                         return items;
-                    }
-
-
-                    else if (node.data.type == "table") {
-
+                    } else if (node.data.type == "table") {
                         items.showTableMappings = {
                             label: "showTableMappings",
                             action: function (_e) {
@@ -313,7 +309,7 @@ var KGcreator = (function () {
 
                         //   return (items = KGcreator.getContextMenu());
 
-                      items.mappingBot = {
+                        items.mappingBot = {
                             label: "mappingBot",
                             action: function (_e) {
                                 // pb avec source
@@ -499,12 +495,10 @@ var KGcreator = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 MainController.UI.message(mappingsDir + "/" + source + "config saved");
-                if(callback)
-                    return callback()
+                if (callback) return callback();
             },
             error: function (err) {
-                if(callback)
-                    return callback(err)
+                if (callback) return callback(err);
                 alert(err);
             },
         });
@@ -972,25 +966,17 @@ var KGcreator = (function () {
         }
     };
 
-    self.getTextSelection= function () {
-        var t
+    self.getTextSelection = function () {
+        var t;
         if (window.getSelection) {
             t = window.getSelection().toString();
-        }
-        else if (document.getSelection) {
+        } else if (document.getSelection) {
             t = document.getSelection().toString();
-        }
-        else if (document.selection) {
+        } else if (document.selection) {
             t = document.selection.createRange().text;
         }
         return t;
-    }
-
-
-
-
-
-
+    };
 
     return self;
 })();

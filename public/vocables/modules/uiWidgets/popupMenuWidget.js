@@ -57,22 +57,18 @@ var PopupMenuWidget = (function () {
         var popupW = Math.min(200, $("#" + popupDiv).width());
         var screenHeight = $(window).height();
         var screenWidth = $(window).width();
-        var distanceToWindowH=screenHeight-point.y;
-        var distanceToWindowW=screenWidth-point.x;
-        if(distanceToWindowH>=popupH){
+        var distanceToWindowH = screenHeight - point.y;
+        var distanceToWindowW = screenWidth - point.x;
+        if (distanceToWindowH >= popupH) {
             $("#" + popupDiv).css("top", point.y);
+        } else {
+            $("#" + popupDiv).css("top", point.y - popupH);
         }
-        else{
-            $("#" + popupDiv).css("top", point.y-popupH);
-        }
-        if(distanceToWindowW>=popupW){
+        if (distanceToWindowW >= popupW) {
             $("#" + popupDiv).css("left", point.x);
+        } else {
+            $("#" + popupDiv).css("left", point.x - popupW);
         }
-        else{
-            $("#" + popupDiv).css("left", point.x-popupW);
-        }
-        
-        
     };
     self.hidePopup = function (popupDiv) {
         if (self.blockHidePopup) {

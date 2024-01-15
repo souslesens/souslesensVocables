@@ -294,8 +294,8 @@ var Config = (function () {
         DOLCE: {},
     };
 
-    self.slsvColorThemes={
-        "bluish violet":{
+    self.slsvColorThemes = {
+        "bluish violet": {
             "@source-color": "#8757de",
             "@button1-color": "#1A28BF",
             "@button2-color": "#079abe",
@@ -303,18 +303,17 @@ var Config = (function () {
             "@legend-color": "#4CAD8C",
             "@background-color": "#e9f0ff",
             "@dark-background-color": "#BFD4F5",
-            "@arrow-icon" : "../icons/BluishVioletTheme/caret-right-bluishViolet.png",
-            "@moreOptions-icon" : "../icons/BluishVioletTheme/MoreOptionsIcon-bluishViolet.png",
+            "@arrow-icon": "../icons/BluishVioletTheme/caret-right-bluishViolet.png",
+            "@moreOptions-icon": "../icons/BluishVioletTheme/MoreOptionsIcon-bluishViolet.png",
             "@search-icon": "../icons/BluishVioletTheme/SearchIcon-bluishViolet.png",
-            "@lineage-logo" : "../icons/BluishVioletTheme/lineageLogo-bluishViolet.png",
-            "@KGquery-logo" : "../icons/BluishVioletTheme/Kgquery-bluishViolet.png",
-            "@KGcreator-logo" : "../icons/BluishVioletTheme/Kgcreator-bluishViolet.png",
-            "@saveIcon":"../icons/BluishVioletTheme/SaveIcon-bluishViolet.png",
-            "@deleteIcon":"../icons/BluishVioletTheme/DeleteIcon-bluishViolet.png",
-            "@jqueryClose":"../icons/BluishVioletTheme/CrossIcon-bluishViolet.png",
-           
+            "@lineage-logo": "../icons/BluishVioletTheme/lineageLogo-bluishViolet.png",
+            "@KGquery-logo": "../icons/BluishVioletTheme/Kgquery-bluishViolet.png",
+            "@KGcreator-logo": "../icons/BluishVioletTheme/Kgcreator-bluishViolet.png",
+            "@saveIcon": "../icons/BluishVioletTheme/SaveIcon-bluishViolet.png",
+            "@deleteIcon": "../icons/BluishVioletTheme/DeleteIcon-bluishViolet.png",
+            "@jqueryClose": "../icons/BluishVioletTheme/CrossIcon-bluishViolet.png",
         },
-        "KGA":{
+        KGA: {
             "@source-color": "#6B77E5",
             "@button1-color": "#003366",
             "@button2-color": "#434E8C",
@@ -322,20 +321,18 @@ var Config = (function () {
             "@legend-color": "#7da6de",
             "@background-color": "#F4F4F4",
             "@dark-background-color": "#E4E4E4",
-            "@logoInstance-icon" : "../icons/KGATheme/KGALogo.png",
-            "@arrow-icon" : "../icons/KGATheme/caret-right-KGA.png",
-            "@moreOptions-icon" : "../icons/KGATheme/MoreOptionsIcon-KGA.png",
+            "@logoInstance-icon": "../icons/KGATheme/KGALogo.png",
+            "@arrow-icon": "../icons/KGATheme/caret-right-KGA.png",
+            "@moreOptions-icon": "../icons/KGATheme/MoreOptionsIcon-KGA.png",
             "@search-icon": "../icons/KGATheme/SearchIcon-KGA.png",
-            "@lineage-logo" : "../icons/KGATheme/lineageLogo-KGA.png",
-            "@KGquery-logo" : "../icons/KGATheme/Kgquery-KGA.png",
-            "@KGcreator-logo" : "../icons/KGATheme/Kgcreator-KGA.png",
-            "@saveIcon":"../icons/KGATheme/SaveIcon-KGA.png",
-            "@deleteIcon":"../icons/KGATheme/DeleteIcon-KGA.png",
-            "@jqueryClose":"../icons/KGATheme/CrossIcon-KGA.png",
-           
+            "@lineage-logo": "../icons/KGATheme/lineageLogo-KGA.png",
+            "@KGquery-logo": "../icons/KGATheme/Kgquery-KGA.png",
+            "@KGcreator-logo": "../icons/KGATheme/Kgcreator-KGA.png",
+            "@saveIcon": "../icons/KGATheme/SaveIcon-KGA.png",
+            "@deleteIcon": "../icons/KGATheme/DeleteIcon-KGA.png",
+            "@jqueryClose": "../icons/KGATheme/CrossIcon-KGA.png",
         },
-        "Total Energies":{
-           
+        "Total Energies": {
             "@source-color": "#374649",
             "@button1-color": "#3E3EFC",
             "@button2-color": "#7FD444",
@@ -343,47 +340,44 @@ var Config = (function () {
             "@legend-color": "#FFB301",
             "@background-color": "#F8F8F8",
             "@dark-background-color": "#E9EEEF",
-            "@logoInstance-icon" : "../icons/TotalEnergiesTheme/TotalEnergiesLogo.png",
-            "@isGradient" : true,
-            "@gradient-color1" : "linear-gradient(to right,#009CEA,#4139FD)",
-            "@gradient-color2" : "linear-gradient(to right,#82D442,#0BC9A5)",
-            "@gradient-color3" : "linear-gradient(to right,#3CA704, #018849)",
-            "@gradient-color-source" : "linear-gradient(to right,#FFBC6D,#ED2C2B)",
-            "@border-color":"#374649",
-            "@arrow-icon" : "../icons/TotalEnergiesTheme/caret-right-TotalEnergies.png",
-            "@moreOptions-icon" : "../icons/TotalEnergiesTheme/MoreOptionsIcon-TotalEnergies.png",
+            "@logoInstance-icon": "../icons/TotalEnergiesTheme/TotalEnergiesLogo.png",
+            "@isGradient": true,
+            "@gradient-color1": "linear-gradient(to right,#009CEA,#4139FD)",
+            "@gradient-color2": "linear-gradient(to right,#82D442,#0BC9A5)",
+            "@gradient-color3": "linear-gradient(to right,#3CA704, #018849)",
+            "@gradient-color-source": "linear-gradient(to right,#FFBC6D,#ED2C2B)",
+            "@border-color": "#374649",
+            "@arrow-icon": "../icons/TotalEnergiesTheme/caret-right-TotalEnergies.png",
+            "@moreOptions-icon": "../icons/TotalEnergiesTheme/MoreOptionsIcon-TotalEnergies.png",
             "@search-icon": "../icons/TotalEnergiesTheme/SearchIcon-TotalEnergies.png",
-            "@lineage-logo" : "../icons/TotalEnergiesTheme/lineageLogo-TotalEnergies.png",
-            "@KGquery-logo" : "../icons/TotalEnergiesTheme/Kgquery-TotalEnergies.png",
-            "@KGcreator-logo" : "../icons/TotalEnergiesTheme/Kgcreator-TotalEnergies.png",
-            "@saveIcon":"../icons/TotalEnergiesTheme/SaveIcon-TotalEnergies.png",
-            "@deleteIcon":"../icons/TotalEnergiesTheme/DeleteIcon-TotalEnergies.png",
-            "@jqueryClose":"../icons/TotalEnergiesTheme/CrossIcon-TotalEnergies.png",
-           
+            "@lineage-logo": "../icons/TotalEnergiesTheme/lineageLogo-TotalEnergies.png",
+            "@KGquery-logo": "../icons/TotalEnergiesTheme/Kgquery-TotalEnergies.png",
+            "@KGcreator-logo": "../icons/TotalEnergiesTheme/Kgcreator-TotalEnergies.png",
+            "@saveIcon": "../icons/TotalEnergiesTheme/SaveIcon-TotalEnergies.png",
+            "@deleteIcon": "../icons/TotalEnergiesTheme/DeleteIcon-TotalEnergies.png",
+            "@jqueryClose": "../icons/TotalEnergiesTheme/CrossIcon-TotalEnergies.png",
         },
-       
-       
-       
-        "Sea Breeze":{
+
+        "Sea Breeze": {
             "@source-color": "#278ECC",
             "@button1-color": "#023451",
             "@button2-color": "#2F4365",
-            "@button3-color":"#567488",
+            "@button3-color": "#567488",
             "@legend-color": "#8A8C7D",
             "@background-color": "#F2EEE9",
             "@dark-background-color": "#DBCFBD",
-            "@arrow-icon" : "../icons/SeaBreezeTheme/caret-right-SeaBreeze.png",
-            "@moreOptions-icon" : "../icons/SeaBreezeTheme/MoreOptionsIcon-SeaBreeze.png",
+            "@arrow-icon": "../icons/SeaBreezeTheme/caret-right-SeaBreeze.png",
+            "@moreOptions-icon": "../icons/SeaBreezeTheme/MoreOptionsIcon-SeaBreeze.png",
             "@search-icon": "../icons/SeaBreezeTheme/SearchIcon-SeaBreeze.png",
-            "@lineage-logo" : "../icons/SeaBreezeTheme/lineageLogo-SeaBreeze.png",
-            "@KGquery-logo" : "../icons/SeaBreezeTheme/Kgquery-SeaBreeze.png",
-            "@KGcreator-logo" : "../icons/SeaBreezeTheme/Kgcreator-SeaBreeze.png",
-            "@saveIcon":"../icons/SeaBreezeTheme/SaveIcon-SeaBreeze.png",
-            "@deleteIcon":"../icons/SeaBreezeTheme/DeleteIcon-SeaBreeze.png",
-            "@jqueryClose":"../icons/SeaBreezeTheme/CrossIcon-SeaBreeze.png",
+            "@lineage-logo": "../icons/SeaBreezeTheme/lineageLogo-SeaBreeze.png",
+            "@KGquery-logo": "../icons/SeaBreezeTheme/Kgquery-SeaBreeze.png",
+            "@KGcreator-logo": "../icons/SeaBreezeTheme/Kgcreator-SeaBreeze.png",
+            "@saveIcon": "../icons/SeaBreezeTheme/SaveIcon-SeaBreeze.png",
+            "@deleteIcon": "../icons/SeaBreezeTheme/DeleteIcon-SeaBreeze.png",
+            "@jqueryClose": "../icons/SeaBreezeTheme/CrossIcon-SeaBreeze.png",
         },
-       
-        "Fig colors ":{
+
+        "Fig colors ": {
             "@source-color": "#B64E74",
             "@button1-color": "#3B3C56",
             "@button2-color": "#585485",
@@ -391,17 +385,17 @@ var Config = (function () {
             "@legend-color": "#9E8E75",
             "@background-color": "#E9E5E7",
             "@dark-background-color": "#C9C8C9",
-            "@arrow-icon" : "../icons/FigColorsTheme/caret-right-FigColors.png",
-            "@moreOptions-icon" : "../icons/FigColorsTheme/MoreOptionsIcon-FigColors.png",
+            "@arrow-icon": "../icons/FigColorsTheme/caret-right-FigColors.png",
+            "@moreOptions-icon": "../icons/FigColorsTheme/MoreOptionsIcon-FigColors.png",
             "@search-icon": "../icons/FigColorsTheme/SearchIcon-FigColors.png",
-            "@lineage-logo" : "../icons/FigColorsTheme/lineageLogo-FigColors.png",
-            "@KGquery-logo" : "../icons/FigColorsTheme/Kgquery-FigColors.png",
-            "@KGcreator-logo" : "../icons/FigColorsTheme/Kgcreator-FigColors.png",
-            "@saveIcon":"../icons/FigColorsTheme/SaveIcon-FigColors.png",
-            "@deleteIcon":"../icons/FigColorsTheme/DeleteIcon-FigColors.png",
-            "@jqueryClose":"../icons/FigColorsTheme/CrossIcon-FigColors.png",
+            "@lineage-logo": "../icons/FigColorsTheme/lineageLogo-FigColors.png",
+            "@KGquery-logo": "../icons/FigColorsTheme/Kgquery-FigColors.png",
+            "@KGcreator-logo": "../icons/FigColorsTheme/Kgcreator-FigColors.png",
+            "@saveIcon": "../icons/FigColorsTheme/SaveIcon-FigColors.png",
+            "@deleteIcon": "../icons/FigColorsTheme/DeleteIcon-FigColors.png",
+            "@jqueryClose": "../icons/FigColorsTheme/CrossIcon-FigColors.png",
         },
-        "Ocean":{
+        Ocean: {
             "@source-color": "#0099B7",
             "@button1-color": "#1EBEBB",
             "@button2-color": "#009E68",
@@ -409,17 +403,17 @@ var Config = (function () {
             "@legend-color": "#CBCB41",
             "@background-color": "#002B36",
             "@dark-background-color": "#00212B",
-            "@arrow-icon" : "../icons/OceanTheme/caret-right-Ocean.png",
-            "@moreOptions-icon" : "../icons/OceanTheme/MoreOptionsIcon-Ocean.png",
+            "@arrow-icon": "../icons/OceanTheme/caret-right-Ocean.png",
+            "@moreOptions-icon": "../icons/OceanTheme/MoreOptionsIcon-Ocean.png",
             "@search-icon": "../icons/OceanTheme/SearchIcon-Ocean.png",
-            "@lineage-logo" : "../icons/OceanTheme/lineageLogo-Ocean.png",
-            "@KGquery-logo" : "../icons/OceanTheme/Kgquery-Ocean.png",
-            "@KGcreator-logo" : "../icons/OceanTheme/Kgcreator-Ocean.png",
-            "@saveIcon":"../icons/OceanTheme/SaveIcon-Ocean.png",
-            "@deleteIcon":"../icons/OceanTheme/DeleteIcon-Ocean.png",
-            "@jqueryClose":"../icons/OceanTheme/CrossIcon-Ocean.png",
-           },
-           "DarkTheme":{
+            "@lineage-logo": "../icons/OceanTheme/lineageLogo-Ocean.png",
+            "@KGquery-logo": "../icons/OceanTheme/Kgquery-Ocean.png",
+            "@KGcreator-logo": "../icons/OceanTheme/Kgcreator-Ocean.png",
+            "@saveIcon": "../icons/OceanTheme/SaveIcon-Ocean.png",
+            "@deleteIcon": "../icons/OceanTheme/DeleteIcon-Ocean.png",
+            "@jqueryClose": "../icons/OceanTheme/CrossIcon-Ocean.png",
+        },
+        DarkTheme: {
             "@source-color": "#F7606B",
             "@button1-color": "#FF9A8F",
             "@button2-color": "#769EE3",
@@ -427,19 +421,18 @@ var Config = (function () {
             "@legend-color": "#EECBAB",
             "@background-color": "#2D2D2D",
             "@dark-background-color": "#1E1E1E",
-            "@arrow-icon" : "../icons/DarkTheme/caret-right-Dark.png",
-            "@moreOptions-icon" : "../icons/DarkTheme/MoreOptionsIcon-Dark.png",
+            "@arrow-icon": "../icons/DarkTheme/caret-right-Dark.png",
+            "@moreOptions-icon": "../icons/DarkTheme/MoreOptionsIcon-Dark.png",
             "@search-icon": "../icons/DarkTheme/SearchIcon-Dark.png",
-            "@lineage-logo" : "../icons/DarkTheme/lineageLogo-Dark.png",
-            "@KGquery-logo" : "../icons/DarkTheme/Kgquery-Dark.png",
-            "@KGcreator-logo" : "../icons/DarkTheme/Kgcreator-Dark.png",
-            "@saveIcon":"../icons/DarkTheme/SaveIcon-Dark.png",
-            "@deleteIcon":"../icons/DarkTheme/DeleteIcon-Dark.png",
-            "@jqueryClose":"../icons/DarkTheme/CrossIcon-Dark.png",
-           },
-           
-           
-           "SpatialTheme":{
+            "@lineage-logo": "../icons/DarkTheme/lineageLogo-Dark.png",
+            "@KGquery-logo": "../icons/DarkTheme/Kgquery-Dark.png",
+            "@KGcreator-logo": "../icons/DarkTheme/Kgcreator-Dark.png",
+            "@saveIcon": "../icons/DarkTheme/SaveIcon-Dark.png",
+            "@deleteIcon": "../icons/DarkTheme/DeleteIcon-Dark.png",
+            "@jqueryClose": "../icons/DarkTheme/CrossIcon-Dark.png",
+        },
+
+        SpatialTheme: {
             "@source-color": "#C32A58",
             "@button1-color": "#791A5D",
             "@button2-color": "#ED6269",
@@ -447,29 +440,24 @@ var Config = (function () {
             "@legend-color": "#FCADCC",
             "@background-color": "#180725",
             "@dark-background-color": "#080112",
-            "@arrow-icon" : "../icons/SpatialTheme/caret-right-Spatial.png",
-            "@moreOptions-icon" : "../icons/SpatialTheme/MoreOptionsIcon-Spatial.png",
+            "@arrow-icon": "../icons/SpatialTheme/caret-right-Spatial.png",
+            "@moreOptions-icon": "../icons/SpatialTheme/MoreOptionsIcon-Spatial.png",
             "@search-icon": "../icons/SpatialTheme/SearchIcon-Spatial.png",
-            "@lineage-logo" : "../icons/SpatialTheme/lineageLogo-Spatial.png",
-            "@KGquery-logo" : "../icons/SpatialTheme/Kgquery-Spatial.png",
-            "@KGcreator-logo" : "../icons/SpatialTheme/Kgcreator-Spatial.png",
-            "@saveIcon":"../icons/SpatialTheme/SaveIcon-Spatial.png",
-            "@deleteIcon":"../icons/SpatialTheme/DeleteIcon-Spatial.png",
-            "@jqueryClose":"../icons/SpatialTheme/CrossIcon-Spatial.png",
-           },
-
-       
-        
-       
+            "@lineage-logo": "../icons/SpatialTheme/lineageLogo-Spatial.png",
+            "@KGquery-logo": "../icons/SpatialTheme/Kgquery-Spatial.png",
+            "@KGcreator-logo": "../icons/SpatialTheme/Kgcreator-Spatial.png",
+            "@saveIcon": "../icons/SpatialTheme/SaveIcon-Spatial.png",
+            "@deleteIcon": "../icons/SpatialTheme/DeleteIcon-Spatial.png",
+            "@jqueryClose": "../icons/SpatialTheme/CrossIcon-Spatial.png",
+        },
     };
-    
-    self.toolsLogo={
-        lineage:  "./icons/lineageLogo-BluePurple.png",
+
+    self.toolsLogo = {
+        lineage: "./icons/lineageLogo-BluePurple.png",
         KGcreator: "./icons/KGcreatorLogo-BluePurple.png",
         KGquery: "./icons/Kgquery-BluePurple.png",
     };
-    
- 
+
     self.sources = {};
     self.tools = {};
 

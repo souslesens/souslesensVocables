@@ -73,24 +73,24 @@
 }
 
 /*Right click jstree*/
-.jstree-default-contextmenu{
+.jstree-default-contextmenu {
     background-color: @background-color;
     color: @source-color!important;
-    border: 2px solid @button1-color ;
+    border: 2px solid @button1-color;
     border-radius: 14px;
     overflow-y: hidden;
     text-align: center;
 }
 
-.vakata-contextmenu-sep{
+.vakata-contextmenu-sep {
     border: 0px;
     font-size: 0px;
 }
-.vakata-context li>a{
-    color:@source-color;
+.vakata-context li > a {
+    color: @source-color;
 }
 
-.vakata-context li>a:hover {
+.vakata-context li > a:hover {
     background-color: @dark-background-color;
     color: @button1-color;
     border-radius: 14px;

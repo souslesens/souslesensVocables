@@ -49,10 +49,10 @@ var authentication = (function () {
 
                     if (typeof sparql_abstract !== "undefined") sparql_abstract.initSources();
                 }
-                callback()
+                callback();
             },
             error: function (err) {
-               callback( err);
+                callback(err);
             },
         });
     };

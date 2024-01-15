@@ -84,7 +84,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 //  scaling:{min:1,max:8}
             },
             layout: { improvedLayout: false },
-            
         };
 
         for (var key in _options) {

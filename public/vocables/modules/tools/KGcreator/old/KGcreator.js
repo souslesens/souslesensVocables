@@ -27,7 +27,7 @@ var KGcreator = (function () {
         "rdf:type",
         "rdfs:subClassOf",
         "rdfs:label",
-       // "rdfs:isDefinedBy",
+        // "rdfs:isDefinedBy",
         "rdfs:comment",
         "rdfs:member",
         "slsv:next",

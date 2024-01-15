@@ -5,38 +5,24 @@ import SparqlQuery_bot from "./sparqlQuery_bot.js";
 import BotEngine from "./botEngine.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 
+var CreateSLSVsource_bot = (function () {
+    var self = {};
+    self.title = "Create Resource";
 
-var CreateSLSVsource_bot = (function() {
-  var self = {};
-  self.title = "Create Resource";
+    self.start = function (currentQuery, validateFn) {
+        BotEngine.init(KGquery_bot, null, function () {
+            SparqlQuery_botparams = { source: Lineage_sources.activeSource };
+            self.resource = { resourceType: "", resourceLabel: "" };
+            BotEngine.currentObj = self.workflow;
+            BotEngine.nextStep(self.workflow);
+        });
+    };
 
-  self.start = function(currentQuery, validateFn) {
-    BotEngine.init(KGquery_bot, null,function() {
+    self.workflow = {};
 
-      SparqlQuery_botparams = { source: Lineage_sources.activeSource };
-      self.resource = { resourceType: "", resourceLabel: "" };
-      BotEngine.currentObj = self.workflow;
-      BotEngine.nextStep(self.workflow);
+    self.functions = {};
 
-    });
-  };
-
-
-  self.workflow = {
-
-
-  };
-
-
-  self.functions= {
-
-
-  }
-
-
-  return self;
-
-
+    return self;
 })();
 
 export default CreateSLSVsource_bot;

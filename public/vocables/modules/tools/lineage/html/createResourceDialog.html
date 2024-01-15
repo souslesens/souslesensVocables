@@ -40,52 +40,45 @@
         padding: 3px;
     }
 
-
     #axiomTA {
         border: 1px solid saddlebrown;
         font-weight: bold;
         width: 90%;
-
-
     }
-
 </style>
 <div>
-  <div id="lineageCreateResource_mainDiv">
-    <!--  Top Level Ontology<select id="lineageCreateResource_currentTopLevelOntologyNodesSelect" onchange="Lineage_blend.graphModification.setTopLevelOntology($(this).val())"></select><br>-->
-    <div style="display: flex; flex-direction: row">
-      <div>
-        <select onchange="Lineage_createResource.onSelectResourceType($(this).val())">
-          <option>owl:Class</option>
-          <option>owl:NamedIndividual</option>
-        </select>
-      </div>
-      <div>
-        URI&nbsp;type
-        <select id="lineageCreateResource_creatingNodeUriType" onclick="Lineage_createResource.onselectNodeUriType($(this).val())">
-          <option>fromLabel</option>
-          <option>randomHexaNumber</option>
-          <option>specific</option>
-        </select>
-        <input style="width: 500px; display: none" id="lineageCreateResource_specificUri" />
-      </div>
-    </div>
+    <div id="lineageCreateResource_mainDiv">
+        <!--  Top Level Ontology<select id="lineageCreateResource_currentTopLevelOntologyNodesSelect" onchange="Lineage_blend.graphModification.setTopLevelOntology($(this).val())"></select><br>-->
+        <div style="display: flex; flex-direction: row">
+            <div>
+                <select onchange="Lineage_createResource.onSelectResourceType($(this).val())">
+                    <option>owl:Class</option>
+                    <option>owl:NamedIndividual</option>
+                </select>
+            </div>
+            <div>
+                URI&nbsp;type
+                <select id="lineageCreateResource_creatingNodeUriType" onclick="Lineage_createResource.onselectNodeUriType($(this).val())">
+                    <option>fromLabel</option>
+                    <option>randomHexaNumber</option>
+                    <option>specific</option>
+                </select>
+                <input style="width: 500px; display: none" id="lineageCreateResource_specificUri" />
+            </div>
+        </div>
 
-    <div style="margin-top: 20px">
-      Label <input id="lineageCreateResource_labelInput" />
-      <div id="lineageCreateResource_predicateDiv" style="font-weight: bold"></div>
-      <div id="lineageCreateResource_objectDiv"></div>
+        <div style="margin-top: 20px">
+            Label <input id="lineageCreateResource_labelInput" />
+            <div id="lineageCreateResource_predicateDiv" style="font-weight: bold"></div>
+            <div id="lineageCreateResource_objectDiv"></div>
 
-      <div id="axiomTA"></div>
+            <div id="axiomTA"></div>
 
-      <div style="display: flex;flex-direction: row">
+            <div style="display: flex; flex-direction: row">
+                <button id="lineageCreateResource_basicTripleBtn" class="class=btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_createResource.setResourceTriplesFromUI()">OK</button>
+                <button id="lineageCreateResource_additionalTripleBtn" class="class=btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_createResource.addNewPredicate()">+</button>
 
-
-        <button id="lineageCreateResource_basicTripleBtn" class="class=btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_createResource.setResourceTriplesFromUI()">OK</button>
-        <button id="lineageCreateResource_additionalTripleBtn" class="class=btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_createResource.addNewPredicate()">+</button>
-
-
-        <!-- <button id="lineageCreateResource_creatAxiomBtn" class="class=btn btn-sm my-1 py-0 btn-outline-primary" onclick="AxiomEditor.showDialog()">Axiom</button>
+                <!-- <button id="lineageCreateResource_creatAxiomBtn" class="class=btn btn-sm my-1 py-0 btn-outline-primary" onclick="AxiomEditor.showDialog()">Axiom</button>
 
         <div id="axiomTA" contenteditable="false">
           <div id="axiom_inputContainer" style="display: flex;flex-direction: column;border:none;">
@@ -93,21 +86,19 @@
             <select id="axioms_resourcesProposalSelect" size="4" onchange="AxiomEditor.onResourceProposalChange($(this).val())"></select>
           </div>
         </div>   -->
-
-
-      </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div id="lineageCreateResource_triplesDiv">
-    <div style="">
-      <div id="lineageCreateResource_newResourceTiplesDiv"></div>
+    <div id="lineageCreateResource_triplesDiv">
+        <div style="">
+            <div id="lineageCreateResource_newResourceTiplesDiv"></div>
+        </div>
+        <div id="lineageCreateResource_predicateSelectorWidgetDiv"></div>
+
+        <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_createResource.writeResourceFromUI()">Create</button>
+        <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_createResource.closeDialog()">X</button>
     </div>
-    <div id="lineageCreateResource_predicateSelectorWidgetDiv"></div>
-
-    <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_createResource.writeResourceFromUI()">Create</button>
-    <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_createResource.closeDialog()">X</button>
-  </div>
 </div>
 
 <!--

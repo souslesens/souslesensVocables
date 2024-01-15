@@ -182,9 +182,6 @@ return callback()
                         callbackSeries(_err);
                     },
 
-
-
-
                     function (callbackSeries) {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
                         // return callbackSeries();
@@ -208,13 +205,11 @@ return callback()
                     MainController.UI.configureUI();
                 }
             );
-            callback(_err)
+            callback(_err);
         });
     };
 
     self.initControllers = function () {
-
-
         Object.keys(Config.sources)
             .sort()
             .forEach(function (sourceLabel) {
@@ -222,17 +217,9 @@ return callback()
                     var controllerName = Config.sources[sourceLabel].controller;
                     Config.sources[sourceLabel].controllerName = controllerName;
                     Config.sources[sourceLabel].controller = window[controllerName];
-
-
                 }
             });
-
-
-
-
     };
-
-
 
     self.UI = {
         initialGraphDivWitdh: 0,

@@ -18,7 +18,9 @@
         "KGcreator",
         "Standardizer",
         "admin",
-        "ConfigEditor"
+        "ConfigEditor",
+        "GraphManagement",
+        "UserManagement"
     ],
     "keycloak": {
         "realm": "master",

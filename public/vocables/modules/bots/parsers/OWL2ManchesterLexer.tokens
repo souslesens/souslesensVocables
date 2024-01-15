@@ -1,0 +1,15 @@
+KW_CLASS=1
+KW_SUBCLASSOF=2
+KW_EQUIVALENTTO=3
+KW_DISJOINTWITH=4
+KW_AND=5
+KW_OR=6
+KW_NOT=7
+ID=8
+'Class'=1
+'SubClassOf'=2
+'EquivalentTo'=3
+'DisjointWith'=4
+'and'=5
+'or'=6
+'not'=7

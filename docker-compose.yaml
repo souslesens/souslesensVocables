@@ -91,6 +91,24 @@ services:
         restart: always
         ports:
             - ${JOWL_LISTEN_PORT:-9170}:9170
+    sls-api:
+        image: sls-api:latest
+        build:
+            context: ${SLS_API_PATH}
+            dockerfile: Dockerfile
+        restart: always
+        ports:
+            - ${SLS_API_LISTEN_PORT:-8008}:8000
+        environment:
+            MAIN_SOUSLESENS_CONFIG_DIR: /souslesens_config
+            MAIN_LOG_LEVEL: debug
+            CORS_ORIGINS: "*"
+            RDF_BATCH_SIZE: 100000
+        volumes:
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/config:/souslesens_config:ro"
+        networks:
+            - backend
+
     spacyserver:
         image: neelkamath/spacy-server:2-en_core_web_sm
         ports:

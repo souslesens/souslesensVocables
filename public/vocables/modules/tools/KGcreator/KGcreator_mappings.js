@@ -5,7 +5,7 @@ import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.j
 var KGcreator_mappings = (function() {
   var self = {};
 
-  self.showMappingDialog = function(addColumnClassType, options) {
+  self.showMappingDialog = function(addColumnClassType, options,callback) {
     PopupMenuWidget.hidePopup();
 
     if (!options) {
@@ -99,6 +99,9 @@ return alert("select a field (column)");
           self.updateColumnTriplesEditor(classTypeTriple);
         }
       });
+      if(callback){
+        return callback()
+      }
     });
   };
 
@@ -448,9 +451,15 @@ tripleObj.objectIsSpecificUri = true;
         allConstraints[key]=inverseRestrictions[key]
       }
       if(Object.keys(allConstraints).length==0){
-        return alert("no constraints between " +fromClass +" and "+toClass)
+        var message="no constraints between " +fromClass +" and "+toClass
+        if(callback){
+          return callback(message)
+        }
+        return alert(message)
       }else{
-
+        if(callback){
+          return callback(null,allConstraints)
+        }
         return SimpleListSelectorWidget.showDialog(
           null,
           function(callbackLoad) {

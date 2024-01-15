@@ -51,6 +51,8 @@ var KGbuilder_main = {
       }
 
 
+      if(tableMappingsToProcess.length==0)
+        return callback(" no mappings to process")
       async.eachSeries(tableMappingsToProcess, function(mappings, callbackEach) {
           async.series(
             [

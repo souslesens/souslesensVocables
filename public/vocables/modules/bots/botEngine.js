@@ -2,20 +2,37 @@ var BotEngine = (function() {
   var self = {};
 
 
-  self.init = function(botModule, callback) {
+  self.init = function(botModule,options, callback) {
+    if(!options){
+      options={}
+    }
     self.currentBot = botModule;
     self.currentObj = botModule;
-    $("#botPanel").css("display", "block");
-    //  self.doNext(keywordsTree)
-    $("#botDiv").load("modules/bots/html/bot.html", function() {
-      $("#botTitle").html(self.currentBot.title);
-      if(callback)
-      callback();
-    });
+    self.history=[]
+    self.history.currentIndex=0
+
+    var divId
+    if(options.divId){
+      divId=options.divId
+   //   $("#"+options.divId).html("  <div id='botDiv' style='width:100%;height:350px'></div>")
+    }else{
+      divId="botDiv"
+      $("#botPanel").css("display", "block");
+    }
+
+
+      $("#"+divId).load("modules/bots/html/bot.html", function() {
+        $("#botTitle").html(self.currentBot.title);
+        if (callback)
+          callback();
+      });
+
   };
 
 
-  self.nextStep = function(returnValue) {
+  self.nextStep = function(returnValue,varToFill) {
+    self.history.push( JSON.parse(JSON.stringify(self.currentObj)));
+    self.history.currentIndex+=1
     var keys = Object.keys(self.currentObj);
 
 
@@ -55,7 +72,7 @@ var BotEngine = (function() {
           choices.push({ id: key, label: key });
         }
         ;
-        self.showList(choices);
+        self.showList(choices,varToFill);
       }
     }
     else {
@@ -69,6 +86,24 @@ var BotEngine = (function() {
 
     }
   };
+
+  self.previousStep = function(message) {
+
+    if(message)
+      self.message(message)
+    if(self.history.currentIndex>1){
+      self.history.currentIndex-=2
+      self.currentObj= self.history[self.history.currentIndex]
+      self.nextStep()
+    }
+    else{
+      self.reset()
+    }
+
+  }
+
+
+
   self.end = function() {
     self.currentBot.params.queryText = self.getQueryText();
     $("#botPanel").css("display", "none");
@@ -80,16 +115,23 @@ var BotEngine = (function() {
   self.setStepMessage = function(step) {
     if (self.currentBot.functionTitles) {
       var message = self.currentBot.functionTitles[step];
-      $("#botMessage").html(message || "");
+      $("#botMessage").html(message || "select an option");
+    }else{
+      $("#botMessage").html( "select an option");
     }
   };
+
+
+  self.message=function(message){
+    $("#botMessage").html(message)
+  }
 
   self.abort = function(message) {
     alert(message);
     self.close();
   };
 
-  self.clear = function() {
+  self.reset = function() {
     self.currentBot.start();
 
   };
@@ -101,7 +143,7 @@ var BotEngine = (function() {
   };
 
 
-  self.showList = function(values, varToFill, returnValue, sort) {
+  self.showList = function(values, varToFill, returnValue, sort,callback) {
     values = common.StringArrayToIdLabelObjectArray(values);
     if (sort) {
       values.sort(function(a, b) {
@@ -125,9 +167,13 @@ var BotEngine = (function() {
       self.writeCompletedHtml(text + ":");
 
       var selectedValue = $(this).val();
+      if(callback){
+        return callback(selectedValue)
+      }
       if (varToFill) {
         self.currentBot.params[varToFill] = selectedValue;
       }
+
       self.nextStep(returnValue || selectedValue);
     });
 

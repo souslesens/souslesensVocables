@@ -11,7 +11,7 @@ var CreateSLSVsource_bot = (function() {
   self.title = "Create Resource";
 
   self.start = function(currentQuery, validateFn) {
-    BotEngine.init(KGquery_bot, function() {
+    BotEngine.init(KGquery_bot, null,function() {
 
       SparqlQuery_botparams = { source: Lineage_sources.activeSource };
       self.resource = { resourceType: "", resourceLabel: "" };

@@ -14,7 +14,7 @@ var CreateResource_bot = (function() {
     self.title = "Create Resource";
 
     self.start = function() {
-      BotEngine.init(CreateResource_bot, function() {
+      BotEngine.init(CreateResource_bot, null,function() {
         self.source = Lineage_sources.activeSource;
         self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
         BotEngine.currentObj = self.workflow;
@@ -53,7 +53,9 @@ var CreateResource_bot = (function() {
             "owl:Class": { "promptResourceLabelFn": { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } },
             "owl:ObjectProperty": { "promptResourceLabelFn": { listVocabsFn: { listObjectProperties: self.workflow_saveResource } } },
             "owl:AnnotationProperty": { "promptResourceLabelFn": { listDatatypeProperties: self.workflow_saveResource } },
-            "owl:Individual": { "promptResourceLabelFn": { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } }
+            "owl:Individual": { "promptResourceLabelFn": { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } },
+            "ImportClass":{listVocabsFn: { listSuperClassesFn:self.workflow_saveResource}}
+
 
           }
       }
@@ -79,7 +81,8 @@ var CreateResource_bot = (function() {
           { id: "owl:Class", label: "Class" },
           { id: "owl:Individual", label: "Individual" },
           { id: "owl:ObjectProperty", label: "ObjectProperty" },
-          { id: "owl:AnnotationProperty", label: "AnnotationProperty" }
+          { id: "owl:AnnotationProperty", label: "AnnotationProperty" },
+          { id: "ImportClass", label: "Import Class" }
         ];
         BotEngine.showList(choices, "resourceType");
       },
@@ -116,16 +119,25 @@ var CreateResource_bot = (function() {
 
 
       saveResourceFn: function() {
-        var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
-        Lineage_createResource.writeResource(self.params.source, triples, function(err, resourceId) {
 
-          if (err) {
-            BotEngine.abort(err.responseText)
-          }
-          self.params.resourceId = resourceId;
-          BotEngine.nextStep();
+        if(self.params.resourceType=="ImportClass"){
+          Sparql_OWL.copyUriTriplesFromSourceToSource(self.params.currentVocab,self.params.source,self.params.resourceId,function(err, result){
 
-        });
+          })
+        }else {
+
+
+          var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
+          Lineage_createResource.writeResource(self.params.source, triples, function(err, resourceId) {
+
+            if (err) {
+              BotEngine.abort(err.responseText)
+            }
+            self.params.resourceId = resourceId;
+            BotEngine.nextStep();
+
+          });
+        }
 
       },
 

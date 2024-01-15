@@ -81,7 +81,7 @@ var KGcreator = (function () {
         if (Config.tools["KGcreator"].urlParam_source) {
             self.currentSlsvSource = Config.tools["KGcreator"].urlParam_source;
             self.initSource();
-            return;
+            return callback();
         }
 
         var options = {
@@ -313,13 +313,13 @@ var KGcreator = (function () {
 
                         //   return (items = KGcreator.getContextMenu());
 
-                    /*    items.mappingBot = {
+                      items.mappingBot = {
                             label: "mappingBot",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_bot.start(node);
                             },
-                        };*/
+                        };
 
                         items.mapColumn = {
                             label: "map Column",
@@ -499,8 +499,12 @@ var KGcreator = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 MainController.UI.message(mappingsDir + "/" + source + "config saved");
+                if(callback)
+                    return callback()
             },
             error: function (err) {
+                if(callback)
+                    return callback(err)
                 alert(err);
             },
         });

@@ -237,6 +237,7 @@ var KGcreator_bot = (function() {
       var resourceId = self.params.resourceId;
       var propertyId = self.params.propertyId;
       var predicateObjectId = self.params.predicateObjectId;
+      var predicateObjectColumn=self.params.predicateObjectColumn
 
       var valueType = self.params.valueType;
       var valueColumn = self.params.valueColumn;
@@ -278,14 +279,14 @@ var KGcreator_bot = (function() {
 
       }
 
-      if (propertyId && predicateObjectId) {
+      if (propertyId && predicateObjectColumn) {
         triple = {
-          s: self.params.triplesSubject, p: propertyId, o: predicateObjectColumnName
+          s: self.params.triplesSubject, p: propertyId, o: predicateObjectColumn
         };
         self.params.tripleModels.push(triple);
       }
 
-
+      KGcreator_mappings.updateColumnTriplesEditor( self.params.tripleModels);
       BotEngine.nextStep();
 
 

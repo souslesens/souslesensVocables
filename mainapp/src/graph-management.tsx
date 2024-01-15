@@ -27,7 +27,7 @@ export default function GraphManagement() {
     const cancelCurrentOperation = useRef(false);
     const [animatedProgressBar, setAnimatedProgressBar] = useState(false);
     const [currentDownloadFormat, setCurrentDownloadFormat] = useState<string | null>(null);
-    const [skipNamedIndividuals, setSkipNamedIndividuals] = useState(false);
+    const [skipNamedIndividuals, setSkipNamedIndividuals] = useState<boolean>(false);
 
     // error management
     const [error, setError] = useState(false);
@@ -80,8 +80,8 @@ export default function GraphManagement() {
         return await response.text();
     };
 
-    const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format: string = "nt", identifier: string = "") => {
-        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}`, {
+    const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format: string = "nt", identifier: string = "", skipNamedIndividuals: boolean = false) => {
+        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${skipNamedIndividuals}`, {
             headers: { Authorization: `Bearer ${currentUserToken}` },
         });
         return await response.json();
@@ -227,7 +227,7 @@ export default function GraphManagement() {
             return [];
         }
         if (offset !== null) {
-            const data = await fetchGraphPartUsingPythonApi(sourceName, offset, currentDownloadFormat, identifier);
+            const data = await fetchGraphPartUsingPythonApi(sourceName, offset, currentDownloadFormat, identifier, skipNamedIndividuals);
 
             // percent
             const percent = Math.min(100, (offset * 100) / data.filesize);

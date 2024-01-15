@@ -29,7 +29,7 @@
             <select id="editPredicate_currentVocabPredicateSelect" onchange="PredicatesSelectorWidget.onSelectPredicateProperty($(this).val())"></select>
 
             <br />
-            <input id="editPredicate_propertyValue" style="width: 95%; background-color: #bfd4f5" /><br />
+            <input id="editPredicate_propertyValue" class="edit-Predicate-value-chosen" /><br />
             <div id="editPredicate_customPredicateContentDiv"></div>
         </div>
     </div>
@@ -37,6 +37,9 @@
     <div class="editPredicatePanel" id="editPredicate_objectDiv">
         <div>
             <div class="editPredicatePanel_groupDiv">
+                <div>
+                    <b style="font-size: 15px">Object</b>
+                </div>
                 <div id="editPredicate_controlsDiv" style="display: none"><b style="font-size: 15px">Object</b> &nbsp;</div>
                 <span>vocabulary</span>
                 <select id="editPredicate_vocabularySelect2" onchange="PredicatesSelectorWidget.setCurrentVocabClassesSelect($(this).val(),'editPredicate_objectSelect')"></select>
@@ -46,7 +49,7 @@
                 <select id="editPredicate_objectSelect" onchange="PredicatesSelectorWidget.onSelectCurrentVocabObject($(this).val())"></select>
                 <br />
                 <textarea id="editPredicate_objectValueTA" style="width: 95%; display: none"></textarea>
-                <input id="editPredicate_objectValue" style="width: 95%; background-color: #bfd4f5" />
+                <input id="editPredicate_objectValue" class="edit-Predicate-value-chosen" />
 
                 <div id="editPredicate_customContentDiv"></div>
                 <button class="w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons" id="editPredicate_savePredicateButton" style="font-size: 10px">

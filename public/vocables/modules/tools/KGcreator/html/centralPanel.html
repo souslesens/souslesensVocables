@@ -21,6 +21,7 @@
     .KGcreator_fileWithMappings {
         color: #0d6efd;
     }
+
     .KGcreator_columnWithMappings {
         color: #0d6efd;
     }
@@ -39,15 +40,16 @@
     <div id="KGcreator_runmappingsTab" style="display: flex; flex-direction: row">
         <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
             <!--     <div class="lineage_button_group" style="min-width: 300px">
-                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.saveDataSourceMappings()">Save mappings</button>
-                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_graph.drawMappings()">draw mappings</button>
-                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_graph.drawAllMappings()">draw all mappings</button>
+           <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.saveDataSourceMappings()">Save mappings</button>
+           <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_graph.drawMappings()">draw mappings</button>
+           <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_graph.drawAllMappings()">draw all mappings</button>
 
 
 
-             </div>-->
+       </div>-->
             <div class="lineage_button_group" style="width: 600px">
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createTriples(true)">View Sample triples</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.testSelectedMappings()">test Selected Mappings</button>
                 <!--  <input type="checkbox" id="KGcreator_addAllPredefinedPart14PredicatesTriples" />addPredefinedPart14Triples-->
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createTriples()">Create triples</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.stopCreateTriples()">Abort</button>
@@ -70,7 +72,7 @@
                 <textarea style="width: 700px; height: 740px; overflow: auto" id="KGcreator_infosDiv"></textarea>
                 <div>
                     <pre style="width: 600px; height: 700px" id="KGcreator_run_mappingsGraphEditor"></pre>
-                    <button onclick="KGcreator_graph.saveDetailedMappings()">Save</button>
+                    <button onclick="KGcreator_run.saveDetailedMappings()">Save</button>
                 </div>
             </div>
         </div>

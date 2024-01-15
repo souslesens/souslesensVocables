@@ -1,48 +1,4 @@
-*/ .w3-row {
-    background-color: white;
-    color: #8757de;
-    border-radius: 14px;
-    border: #8757de solid 2px;
-    font-family: Helvetica, sans-serif;
-    font-size: 15px;
-
-    padding: 8px 30px;
-    display: inline-flex;
-    align-items: center;
-}
-
-[role="dialog"] {
-    width: auto !important;
-    height: auto !important;
-
-    border-radius: 14px;
-    border: #1a27b2 solid 5px !important;
-}
 .ui-widget-header {
     border: 0px;
     background: white;
-}
-.ui-dialog-titlebar-close {
-    background-image: url("../../../../../icons/JqueryClose.png");
-    height: 31px !important;
-    width: 31px !important;
-    background-color: white;
-    border: 0px !important;
-}
-
-.w3-border {
-    background-color: #eaefff;
-    border-radius: 14px;
-}
-
-.ui-dialog-title {
-    color: #8757de;
-    background-color: #eaefff;
-    font-size: 20px;
-    font-family: Helvetica, sans-serif;
-    font-weight: bold;
-    border: 0px;
-    border-radius: 14px;
-    padding: 8px 24px;
-    margin-top: 20px !important;
 }

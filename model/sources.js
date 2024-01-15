@@ -88,6 +88,9 @@ class SourceModel {
             if (user.groups.includes(profileName)) {
                 return [profileName, profile];
             }
+            if(profileName==user.login) {
+                return [profileName, profile];
+            }
         });
         // get [[<sourceName>, <accessControl>]] list
         const allAccessControl = userProfilesList.flatMap(([_k, profile]) => {

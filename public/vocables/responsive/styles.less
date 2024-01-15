@@ -1,6 +1,11 @@
 @import (less) "./css/lineage/slsv-bluePurple.css";
+@import (less) "./css/KGquery/KGquerySkin.css";
+@import (css) "./css/widget/sourceSelector/Sourceselector-bluePurple.css";
+@import (less) "./css/widget/PopUp/PopUp-bluePurple.css";
+@import (less) "./css/widget/NodeInfos/NodesInfos-bluePurple.css";
+@import (less) "./css/icons.css";
 
-/*variables */
+/* variables */
 @font-family-theme: Helvetica, sans-serif;
 @padding-button-classic: 8px 24px;
 @font-size-title-big: 20px;
@@ -11,22 +16,81 @@
 @border-radius-simple: 14px;
 @margin-small: 3px;
 
-/* end variable*/
+/* end variables*/
 
-/* common Themes */
+/* Variable theme Color */
+/* Default theme */
+@source-color: #8757de;
+@button1-color: #1a27b2;
+@button2-color: #079abe;
+@button3-color: #52c1b9;
+@legend-color: #4cad8c;
+@background-color: #e9f0ff;
+@dark-background-color: #bed4f4;
+@isGradient: false;
+@border-color: @button1-color;
 
+/* defaults icons */
+
+@arrow-icon: "../icons/BluishVioletTheme/caret-right-bluishViolet.png";
+@search-icon: "../icons/BluishVioletTheme/SearchIcon-bluishViolet.png";
+@add-icon: "../icons/CommonIcons/add-icon.png";
+@moreOptions-icon: "../icons/BluishVioletTheme/MoreOptionsIcon-bluishViolet.png";
+@lineage-logo: "../icons/BluishVioletTheme/lineageLogo-bluishViolet.png";
+@KGquery-logo: "../icons/BluishVioletTheme/Kgquery-bluishViolet.png";
+@KGcreator-logo: "../icons/BluishVioletTheme/Kgcreator-bluishViolet.png";
+@logoInstance-icon: "";
+@saveIcon: "../icons/BluishVioletTheme/SaveIcon-bluishViolet.png";
+@deleteIcon: "../icons/BluishVioletTheme/DeleteIcon-bluishViolet.png";
+@filterIcon: "../icons/CommonIcons/Filtre.png";
+@allPropertyIcon: "../icons/BluishVioletTheme/SelectionAllIcon-bluishViolet.png";
+@currentPropertyIcon: "../icons/BluishVioletTheme/SelectionIcon-bluishViolet.png";
+@jqueryClose: "../icons/BluishVioletTheme/CrossIcon-bluishViolet.png";
+
+.lateralPannelSection-width {
+    width: 89%;
+}
+.font-button1-color {
+    color: @button1-color;
+}
+.font-button2-color {
+    color: @button2-color;
+}
+.font-button3-color {
+    color: @button3-color;
+}
+.font-lengend-color {
+    color: @legend-color;
+}
+.select-bar-theme1 {
+    padding: 2px;
+    color: @button1-color;
+    border-radius: 14px;
+}
+.select-bar-theme2 {
+    padding: 2px;
+    color: @button2-color;
+    border-radius: 14px;
+}
+.select-bar-theme3 {
+    padding: 2px;
+    color: @button3-color;
+    border-radius: 14px;
+}
 .border-classic-color-theme1 {
     border-radius: 14px;
     border: @button1-color solid 1px;
 }
-
+.border-without-raduis-theme1 {
+    border: @button1-color solid 1px;
+}
 .border-classic-color-theme2 {
     border-radius: 14px;
     border: @button2-color solid 1px;
 }
 .border-classic-color-theme3 {
     border-radius: 14px;
-    border: @button3-color solid 1px;
+    border: @button3-color solid 1px !important;
 }
 .border-classic-color-theme4 {
     border-radius: 14px;
@@ -46,6 +110,11 @@
     font-size: @font-size-title-classic;
     font-weight: bold;
 }
+.big-font-title {
+    font-size: @font-size-title-big;
+    font-family: @font-family-theme;
+    font-weight: bold;
+}
 .button-font {
     color: white;
     font-family: @font-family-theme;
@@ -57,11 +126,29 @@
     font-family: @font-family-theme;
     font-size: @font-size-button;
 }
-
+.button-font-color-button1 {
+    .button-font-uncolor;
+    color: @button1-color;
+}
 .button-font-uncolor-small {
     .button-font-uncolor;
     font-size: @font-size-button-small;
 }
+.button-font-title {
+    font-family: @font-family-theme;
+    font-size: @font-size-button;
+    font-weight: bold;
+    background-color: @dark-background-color;
+    color: @button1-color !important;
+}
+.font-table {
+    font-size: @font-size-button-small;
+    font-family: @font-family-theme;
+    color: @button1-color;
+    padding: 8px 24px;
+    border: @source-color solid 1px !important;
+}
+
 .slsv-general-buttons {
     .border-classic-color-theme4;
     .button-font;
@@ -72,6 +159,9 @@
     background-color: inherit;
     border: 0px;
 }
+.slsv-invisible-button:hover {
+    background-color: unset !important;
+}
 .slsv-whiteboard-buttons {
     .button-font-uncolor-small;
     padding: 8px 12px;
@@ -80,10 +170,25 @@
     margin-top: 8px;
 }
 .hover-button {
-    background-color: inherit !important;
+    background-color: unset !important;
     color: @source-color !important;
 }
+.SearchButtonIcon {
+    background-color: @dark-background-color;
+}
+.TitleBoxLine {
+    border-bottom: 0px !important;
+    border-radius: 0px !important;
+    border-right: 0px !important;
+    border-left: 0px !important;
+}
 
+.size-of-button-small {
+    padding: 7px 10px !important;
+}
+.size-of-button-null {
+    padding: 0px 0px !important;
+}
 /*  End Common themes  */
 
 /* source Label Div */
@@ -96,10 +201,27 @@
 }
 
 .w3-panel {
-    margin-top: 6%;
+    margin-top: 7%;
 }
 
 .lineage-tab {
     padding-left: 10px;
-    padding-right: 10px;
+}
+.messageDiv {
+    font-size: 12px;
+}
+#botPanel {
+    display: none;
+    z-index: 100;
+    width: 400px;
+    height: 500px;
+    position: absolute;
+    background-color: #92d3ec;
+    margin: 5px;
+    top: 100px;
+    left: 300px;
+    padding: 3px;
+}
+.mb-3 {
+    margin-bottom: 0px !important;
 }

@@ -9,7 +9,7 @@ var JstreeWidget = (function () {
             icon: "../icons/thesaurus.png",
         },
         OWL: {
-            icon: "../icons/ontology.png",
+            icon: "./icons/CommonIcons/SourceIcon.png",
         },
 
         class: {

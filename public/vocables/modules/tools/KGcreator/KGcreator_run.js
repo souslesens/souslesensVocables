@@ -2,12 +2,41 @@ import MainController from "../../shared/mainController.js";
 import KGcreator from "./KGcreator.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
+import KGcreator_mappings from "./KGcreator_mappings.js";
 
 var KGcreator_run = (function () {
     var self = {};
+    self.currentTable = null;
 
-    self.createTriples = function (sampleData, allmappings, callback) {
+    self.testSelectedMappings = function () {
+        var table = self.currentTable;
+        if (!table) {
+            return alert("select a node");
+        }
+
+        var selectedText = self.currentMappingsSelection;
+        if (!selectedText) return;
+        selectedText = selectedText.replace(/[\r\n]/g, "");
+        selectedText = '{"' + table + '":{"tripleModels":[' + selectedText + '],"transform":{}}}';
+
+        try {
+            var json = JSON.parse(selectedText);
+
+            var options = { mappingsFilter: selectedText };
+            self.createTriples(true, false, options, function (err, result) {
+                if (err) {
+                    throw new Exception(err);
+                }
+            });
+        } catch (e) {
+            return alert(e);
+        }
+        //  var triples=selectedText.split(",")
+    };
+
+    self.getTableAndShowMappings = function (allmappings) {
         var table = null;
+
         if (KGcreator.currentTreeNode.data.type == "tableColumn") {
             table = KGcreator.currentTreeNode.data.table;
             self.showTableMappingsEditor(KGcreator.currentTreeNode.data.table);
@@ -19,7 +48,18 @@ var KGcreator_run = (function () {
             self.showTableMappingsEditor(table);
         } else if (KGcreator.currentTreeNode.data.type == "databaseSource" && allmappings) {
             table = null;
-        } else {
+        }
+        self.currentTable = table;
+        return table;
+    };
+
+    self.createTriples = function (sampleData, allmappings, options, callback) {
+        if (!options) {
+            options = {};
+        }
+
+        var table = self.getTableAndShowMappings(allmappings);
+        if (!table) {
             return alert("select a node");
         }
 
@@ -29,16 +69,11 @@ var KGcreator_run = (function () {
             }
         }
 
-        var options = {};
         if (sampleData) {
-            options = {
-                deleteOldGraph: false,
-                sampleSize: 500,
-            };
+            options.deleteOldGraph = false;
+            options.sampleSize = 500;
         } else {
-            options = {
-                deleteOldGraph: false,
-            };
+            options.deleteOldGraph = false;
         }
 
         if (Config.clientSocketId) {
@@ -242,8 +277,18 @@ var KGcreator_run = (function () {
     };
 
     self.showTableMappingsEditor = function (table) {
+        if (!KGcreator.currentConfig.currentMappings) return;
+        self.currentEditingTable = table;
         var tableMappings = KGcreator.currentConfig.currentMappings[table];
-        self.jsonEditor = new JsonEditor("#KGcreator_run_mappingsGraphEditor", tableMappings);
+        self.jsonEditor = new JsonEditor("#KGcreator_run_mappingsGraphEditor", { [table]: tableMappings });
+        $("#KGcreator_run_mappingsGraphEditor").on("mouseup", function () {
+            self.currentMappingsSelection = KGcreator.getTextSelection();
+        });
+    };
+
+    self.saveDetailedMappings = function () {
+        var mappings = self.jsonEditor.get();
+        KGcreator_mappings.saveTableMappings(self.currentEditingTable, mappings);
     };
 
     return self;

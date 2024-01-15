@@ -126,7 +126,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
 
         $("#waitImg").css("display", "block");
 
-        if (!options.skipCurrentQuery) {
+        if (!options.dontCacheCurrentQuery) {
             self.currentQuery = query;
         }
 

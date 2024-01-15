@@ -170,8 +170,13 @@ var Sparql_common = (function () {
                 if (conceptIdsStr == "") {
                     return "";
                 }
+
                 if (options.useFilterKeyWord) {
-                    filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");
+                    if (ids.length == 1) {
+                        filters.push(" FILTER( ?" + varName + " =" + conceptIdsStr + ")");
+                    } else {
+                        filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");
+                    }
                 } else {
                     filters.push(" VALUES ?" + varName + "{  " + conceptIdsStr + "}");
                 }

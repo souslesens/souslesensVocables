@@ -18,6 +18,9 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import KGquery_graph from "../KGquery/KGquery_graph.js";
+import Lineage_createRelation from "./lineage_createRelation.js";
+import Lineage_createResource from "./lineage_createResource.js";
+import CreateResource_bot from "../../bots/CreateResource_bot.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -687,7 +690,7 @@ var Lineage_whiteboard = (function () {
                             return null;
                         });
                     } else {
-                        Lineage_blend.graphModification.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
+                        Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
                             if (err) {
                                 return callback(err.responseText);
                             }
@@ -696,7 +699,9 @@ var Lineage_whiteboard = (function () {
                     }
                 },
                 addNode: function (nodeData, callback) {
-                    Lineage_blend.graphModification.showAddNodeGraphDialog(function (err, result) {
+                    /*  CreateResource_bot.start()
+                    return;*/
+                    Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
                         if (err) {
                             return callback(err.responseText);
                         }
@@ -2871,6 +2876,11 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 self.setGraphPopupMenus(node, event);
                 self.currentGraphNode = node;
                 self.currentGraphEdge = null;
+                //start
+                point = {};
+                point.x = event.x;
+                point.y = event.y;
+                //end
                 PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
             }
         },

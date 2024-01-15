@@ -419,7 +419,9 @@ var Sparql_OWL = (function () {
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
             //limit at 4 ancestorsDepth when imports
-            if (!ancestorsDepth) ancestorsDepth = 1;
+            if (!ancestorsDepth) {
+                ancestorsDepth = 1;
+            }
             ancestorsDepth = Math.min(ancestorsDepth, 4);
         }
 
@@ -735,7 +737,7 @@ var Sparql_OWL = (function () {
                 url = self.sparql_url;
             }
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, dontCacheCurrentQuery: true }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -786,7 +788,7 @@ var Sparql_OWL = (function () {
                 url = self.sparql_url;
             }
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, dontCacheCurrentQuery: true }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -840,10 +842,15 @@ var Sparql_OWL = (function () {
             if (propertyIds) {
                 filterStr += Sparql_common.setFilter("prop", propertyIds, null, options);
             }
-            self.graphUri = Config.sources[sourceLabel].graphUri;
-            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+            var fromStr = "";
+            if (sourceLabel) {
+                self.graphUri = Config.sources[sourceLabel].graphUri;
+                self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = Sparql_common.getFromStr(sourceLabel, false, true, options);
+                fromStr = Sparql_common.getFromStr(sourceLabel, false, true, options);
+            } else {
+                // to be  implemented
+            }
 
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
 
@@ -1789,7 +1796,9 @@ var Sparql_OWL = (function () {
                 });
             },
             function (err) {
-                if (err) return callback(err);
+                if (err) {
+                    return callback(err);
+                }
                 return callback(null, allResults);
             }
         );
@@ -1859,14 +1868,14 @@ var Sparql_OWL = (function () {
             "} LIMIT 10000";
 
         /*   var query=  "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-     "SELECT distinct * " +
-     fromStr +
-     "WHERE {?prop0 rdfs:subPropertyOf+ ?prop." +
-     "  optional { ?prop rdfs:domain ?domain}" +
-     "  optional{ ?prop rdfs:range ?range }" +
-     filterProps +
-     "} LIMIT 10000"*/
+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+ "SELECT distinct * " +
+ fromStr +
+ "WHERE {?prop0 rdfs:subPropertyOf+ ?prop." +
+ "  optional { ?prop rdfs:domain ?domain}" +
+ "  optional{ ?prop rdfs:range ?range }" +
+ filterProps +
+ "} LIMIT 10000"*/
 
         var url;
         if (!Config.sources[sourceLabel]) {
@@ -2283,7 +2292,7 @@ var Sparql_OWL = (function () {
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "SELECT distinct ?label " +
+            "SELECT distinct ?label ?id" +
             fromStr +
             "" +
             " WHERE {{ ?id rdf:type ?type. " +
@@ -2389,6 +2398,40 @@ var Sparql_OWL = (function () {
                 callback(null, "all Sources labels graph recreated");
             }
         );
+    };
+
+    self.getClassIndividualsDistinctProperties = function (sourceLabel, classId, callback) {
+        var fromStr = Sparql_common.getFromStr(sourceLabel);
+        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+
+        var query =
+            "" +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            " Select distinct ?p ?pType   " +
+            fromStr +
+            " where {\n" +
+            " ?s  rdf:type " +
+            "<" +
+            classId +
+            ">. " +
+            " ?s  ?p ?o.   ?o rdf:type ?oType";
+    };
+
+    self.copyUriTriplesFromSourceToSource = function (fromSource, toSource, subjectUri, callback) {
+        self.getNodeInfos(fromSource, subjectUri, null, function (err, result) {
+            if (err) return callback(err);
+            if (result.length == 0) return callback("nothing to copy");
+            var toStr = Sparql_common.getFromStr(toSource);
+
+            var triples = [];
+            result.forEach(function (item) {
+                triples.push({
+                    subject: subjectUri,
+                });
+            });
+        });
     };
 
     return self;

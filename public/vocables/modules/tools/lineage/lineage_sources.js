@@ -157,12 +157,9 @@ var Lineage_sources = (function () {
             return alert("source" + source + "not found");
         }
 
-        if (true) {
-            Config.Lineage.disabledButtons.forEach(function (buttonId) {
-                $("#" + buttonId).prop("disabled", true);
-            });
-            // $("#Lineage_Tabs").tabs("disable", 3);
-        }
+        Config.Lineage.disabledButtons.forEach(function (buttonId) {
+            $("#" + buttonId).prop("disabled", true);
+        });
 
         function highlightSourceDiv(source) {
             $(".Lineage_sourceLabelDiv").removeClass("Lineage_selectedSourceDiv");
@@ -175,6 +172,12 @@ var Lineage_sources = (function () {
         } else {
             self.activeSource = source;
         }
+
+        var display = "none";
+        if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+            display = "block";
+        }
+        $("#lineage_createResourceBtn").css("display", display);
 
         JstreeWidget.clear("lineage_containers_containersJstree");
         var editable = Lineage_sources.isSourceEditableForUser(source);
@@ -399,17 +402,17 @@ var Lineage_sources = (function () {
                 sourceDivId +
                 "' style='color: " +
                 Lineage_whiteboard.getSourceColor(sourceLabel) +
-                "'" +
-                " class='Lineage_sourceLabelDiv' " +
+                ";display:inline-flex;align-items:end;'" +
+                " class='Lineage_sourceLabelDiv'  " +
                 ">" +
                 sourceLabel +
                 "&nbsp;" +
                 /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
 sourceDivId +
 "\")'>[-]</i>";*/
-                "<input type='image' src='./icons/caret-right.png'  style=' width: 15px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+                "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
                 sourceDivId +
-                "\")'/> </div>";
+                "\")'/> </button></div>";
             $("#lineage_drawnSources").append(html);
 
             $("#" + sourceDivId).bind("click", function (e) {
@@ -424,27 +427,13 @@ sourceDivId +
         event.stopPropagation();
         var source = Lineage_sources.sourceDivsMap[sourceDivId];
         var html =
-            '    <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.setSourceOpacity(\'' +
-            source +
-            "');\"> Opacity</span>" +
-            '    <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.closeSource(\'' +
-            source +
-            "');\"> Close</span>" +
-            '    <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.hideSource(\'' +
-            source +
-            "');\"> Hide </span>" +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.showSource(\'' +
-            source +
-            "');\"> Show </span>" +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource(\'' +
-            source +
-            "');\"> Group </span>" +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource(\'' +
-            source +
-            "');\"> ungroup </span>" +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.exportOWL(\'' +
-            source +
-            "');\"> export OWL </span>";
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.setSourceOpacity();"> Opacity</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.closeSource();"> Close</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.hideSource();"> Hide </span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.showSource();"> Show </span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource();"> Group </span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();"> ungroup </span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.exportOWL();"> export OWL </span>';
 
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
     };
@@ -548,6 +537,9 @@ sourceDivId +
 
     self.menuActions = {
         setSourceOpacity: function (source) {
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             var opacity = prompt("opacity %", 100);
             if (!opacity) {
                 return;
@@ -610,10 +602,16 @@ sourceDivId +
             $("#" + sourceDivId).remove();
         },
         hideSource: function (source) {
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, true);
         },
-        showSource: function () {
+        showSource: function (source) {
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, false);
         },
@@ -666,6 +664,9 @@ sourceDivId +
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
         },
         ungroupSource: function (source) {
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -673,6 +674,9 @@ sourceDivId +
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(source);
         },
         exportOWL: function (source) {
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             Sparql_OWL.generateOWL(source, {}, function (err, result) {
                 if (err) {
                     return console.log(err);

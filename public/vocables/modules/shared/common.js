@@ -11,6 +11,20 @@
 var common = (function () {
     var self = {};
 
+    self.StringArrayToIdLabelObjectArray = function (data) {
+        var data2 = [];
+        if (data.length == 0) {
+            return data;
+        }
+        if (typeof data[0] === "object") {
+            return data;
+        }
+        data.forEach(function (item) {
+            data2.push({ id: item, label: item });
+        });
+        return data2;
+    };
+
     self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
         $("#" + selectId)
             .find("option")
@@ -868,6 +882,26 @@ if (callback) return callback(err);
             paramsMap[array[0]] = array[1];
         });
         return paramsMap;
+    };
+
+    self.getURI = function (label, source, uriType, specific) {
+        var uri = null;
+        if (!source) {
+            source = Lineage_sources.activeSource;
+        }
+        let graphUri = Config.sources[source].graphUri;
+        if (!uriType || uriType == "fromLabel") {
+            uri = graphUri + common.formatStringForTriple(label, true);
+        } else if (uriType == "randomHexaNumber") {
+            uri = graphUri + common.getRandomHexaId(10);
+        } else if (uriType == "specific") {
+            if (specificUri) {
+                uri = specificUri;
+            } else {
+                return alert("no specific uri");
+            }
+        }
+        return uri;
     };
 
     return self;

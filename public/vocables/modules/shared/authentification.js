@@ -17,7 +17,7 @@ var authentication = (function () {
     self.userIndexes = [];
     self.currentUser = {};
 
-    self.init = function (_activate) {
+    self.init = function (callback) {
         if (false && Config.loginMode == "json") {
             var login = prompt("enter login");
             var pss = prompt("enter password");
@@ -47,12 +47,12 @@ var authentication = (function () {
                         $("#manage-account-li").hide();
                     }
 
-                    MainController.onAfterLogin();
                     if (typeof sparql_abstract !== "undefined") sparql_abstract.initSources();
                 }
+                callback();
             },
             error: function (err) {
-                var x = err;
+                callback(err);
             },
         });
     };

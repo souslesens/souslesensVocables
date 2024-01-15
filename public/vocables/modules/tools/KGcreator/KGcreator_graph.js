@@ -87,7 +87,7 @@ var KGcreator_graph = (function () {
             return (self.currentGraphNode = null);
         }
         self.currentGraphNode = node;
-        if (node.data.type == "table") {
+        if (node.data.type == "table" || node.data.type == "column") {
             Lineage_whiteboard.lineageVisjsGraph.network.addEdgeMode();
         } else {
             Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
@@ -144,7 +144,7 @@ var KGcreator_graph = (function () {
                     size: Lineage_whiteboard.defaultShapeSize,
                     color: "#00afef",
                     font: { color: "#00afef" },
-                    data: { id: columnNode.id, table: columnNode.table, type: "column" },
+                    data: columnNode,
                 });
                 //edge to table
                 var edgeId = columnNode.table + "_" + columnNodeId;
@@ -209,7 +209,7 @@ var KGcreator_graph = (function () {
             if (!tables || tables.indexOf(table) > -1) {
                 KGcreator.currentConfig.currentMappings[table].tripleModels.forEach(function (triple) {
                     if (triple.p == "rdf:type" && existingGraphNodes[triple.o]) {
-                        columnsWithClass.push({ id: table + "_" + triple.s, table: table, label: triple.s, type: "tableColumn", classNode: triple.o });
+                        columnsWithClass.push({ id: table + "_" + triple.s, table: table, label: triple.s, type: "column", columnName: triple.s, classNode: triple.o });
                     }
                 });
             }
@@ -305,6 +305,12 @@ var KGcreator_graph = (function () {
                     MainController.UI.message("join saved");
                 });
             });
+        } else if (sourceNode.data && sourceNode.data.type == "column" && targetNode.data && targetNode.data.type == "column") {
+            if (sourceNode.data.table != targetNode.data.table) {
+                Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
+                return alert("can only link columns in the same table");
+            }
+            KGcreator_mappings.setPredicatesBetweenColumnsInTable(sourceNode.data, targetNode.data, function (err) {});
         } else {
             return null;
         }
@@ -425,6 +431,7 @@ var KGcreator_graph = (function () {
         if (tablesToDraw && !Array.isArray(tablesToDraw)) {
             tablesToDraw = [tablesToDraw];
         }
+
         var sourceMappings = KGcreator.currentConfig.currentMappings;
         var visjsData = { nodes: [], edges: [] };
 
@@ -494,9 +501,9 @@ var KGcreator_graph = (function () {
                             drawRelation = false;
                         }
                         /*  if (item.isString) {
-                            attrs.shape = "text";
+                attrs.shape = "text";
 
-                        }*/
+            }*/
 
                         visjsData.nodes.push({
                             id: sId,
@@ -578,14 +585,21 @@ var KGcreator_graph = (function () {
                 mode: "tree",
             };
             self.jsonEditor = new JsonEditor("#KGcreator_mappingsGraphEditor", json);
+            $("#KGcreator_mappingsSaveEditorMappingBtn").prop("disabled", "disabled");
+            if (tablesToDraw && tablesToDraw.length == 1) {
+                $("#KGcreator_mappingsSaveEditorMappingBtn").removeProp("disabled");
+                self.currentEditingTable = tablesToDraw[0];
+            } else {
+                self.currentEditingTable = null;
+            }
             //  JSONEditor().setMode("tree");
         });
     };
 
     self.saveDetailedMappings = function () {
-        var mappings = self.jsonEditor.get();
-        KGcreator.currentConfig.currentMappings = mappings;
-        KGcreator.saveDataSourceMappings();
+        var tableMappings = self.jsonEditor.get();
+
+        KGcreator_mappings.saveTableMappings(self.currentEditingTable, tableMappings);
     };
 
     self.toSVG = function () {

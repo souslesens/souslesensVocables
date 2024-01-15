@@ -42,7 +42,7 @@ var Lineage_decoration = (function () {
             "<div class='legend_colorDiv' style='background-color:" +
             color +
             "'> </div>" +
-            "<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 20px;height: 20px;}' onclick='Lineage_decoration.showLegendDivPopupMenu(" +
+            "<input type='image' src='./icons/oldIcons/caret-right.png'  style='opacity: 0.5; width: 20px;height: 20px;}' onclick='Lineage_decoration.showLegendDivPopupMenu(" +
             index +
             ")'/> " +
             (queryInfos.predicate || "") +

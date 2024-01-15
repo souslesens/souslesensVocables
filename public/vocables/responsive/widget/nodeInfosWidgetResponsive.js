@@ -15,21 +15,26 @@ import authentication from "../../modules/shared/authentification.js";
 
 var NodeInfosWidgetResponsive = (function () {
     var self = {};
+
     self.initDialog = function (sourceLabel, divId, options, callback) {
         ResponsiveUI.openDialogDiv(divId);
-        $("#mainDialogDiv").parent().css("top", "5%");
-        $("#mainDialogDiv").parent().css("left", "35%");
         $("#" + divId)
             .parent()
             .show("fast", function () {
                 self.oldNodeInfosInit(sourceLabel, divId, options, callback);
+                $("#addPredicateButton").remove();
+                $("#deleteButton").remove();
             });
+
+        //$(".ui-dialog-title")
     };
     self.oldNodeInfosInit = function (sourceLabel, divId, options, callback) {
         self.currentSource = sourceLabel;
         if (!options.noDialog) {
             $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
             $("#" + divId).dialog("open");
+            $("#mainDialogDiv").parent().css("top", "20px");
+            $("#mainDialogDiv").parent().css("left", "20px");
         }
         $("#" + divId).load("snippets/nodeInfosWidget.html", function () {
             $("#nodeInfosWidget_tabsDiv").tabs({
@@ -141,6 +146,10 @@ var NodeInfosWidgetResponsive = (function () {
                         return alert(err);
                     }
                     self.showNodeInfosToolbar(options);
+
+                    $("#deleteButton").insertAfter($(".ui-dialog-title"));
+                    $("#addPredicateButton").insertAfter($(".ui-dialog-title"));
+                    $("#addPredicateButton").css("margin-left", "25px !important");
                 });
             }
         });
@@ -178,7 +187,7 @@ var NodeInfosWidgetResponsive = (function () {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
                         return callbackSeries();
                     }
-                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfosWidget_InfosTabDiv", function (_err, _result) {
+                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfos_restrictionsDiv", function (_err, _result) {
                         callbackSeries();
                     });
                 },
@@ -201,19 +210,19 @@ var NodeInfosWidgetResponsive = (function () {
         var str = "<div>";
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             str +=
-                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
+                "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
 
-            str += "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
+            str += "<button id='deleteButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
+            str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
         }
 
         if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
             str +=
-                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
+                "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
+            str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
         }
-
-        str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
 
         if (self.visitedNodes.length > 1) {
             str +=
@@ -374,16 +383,16 @@ defaultLang = 'en';*/
                     "'>" +
                     nodeId +
                     "</a>" +
-                    "&nbsp;<button class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons ' style='font-size: 10px' onclick=' NodeInfosWidget.copyUri(\"" +
+                    "&nbsp;<button class='w3-button nodesInfos-iconsButtons ' style='font-size: 10px;margin-left:7px;' onclick=' NodeInfosWidget.copyUri(\"" +
                     nodeId +
-                    "\",$(this))'>copy</button>";
+                    "\",$(this))'><input type='image' src='./icons/CommonIcons/CopyIcon.png' ></button>";
                 ("</td></tr>");
                 str +=
                     "<tr><td class='NodesInfos_CardId'>GRAPH</td><td>" +
                     graphUri +
-                    "&nbsp;<button class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons ' style='font-size: 10px' onclick=' NodeInfosWidget.copyUri(\"" +
+                    "&nbsp;<button class='w3-button nodesInfos-iconsButtons ' style='font-size: 10px;' onclick=' NodeInfosWidget.copyUri(\"" +
                     graphUri +
-                    "\",$(this))'>copy</button>";
+                    "\",$(this))'><input type='image' src='./icons/CommonIcons/CopyIcon.png' ></button>";
                 ("</td></tr>");
                 str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
@@ -394,14 +403,14 @@ defaultLang = 'en';*/
                         var propUri = self.propertiesMap.properties[key].propUri;
 
                         optionalStr +=
-                            "&nbsp;<button class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons' style='font-size: 10px' onclick=' NodeInfosWidget.showModifyPredicateDialog(\"" +
+                            "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px;margin-left:7px;' onclick=' NodeInfosWidget.showModifyPredicateDialog(\"" +
                             predicateId +
-                            "\")'>edit</button>";
+                            "\")'><input type='image' src='./icons/CommonIcons/EditIcon.png' ></button>";
                         optionalStr +=
-                            "&nbsp;<button class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons' style='font-size: 10px'" +
+                            "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px;'" +
                             " onclick='NodeInfosWidget.deletePredicate(\"" +
                             predicateId +
-                            "\")'>X</button>";
+                            "\")'><input type='image' src='./icons/CommonIcons/Erase.png' ></button>";
                     }
                     return optionalStr;
                 }

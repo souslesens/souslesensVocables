@@ -1,10 +1,11 @@
 import KGcreator from "./KGcreator.js";
 import KGcreator_graph from "./KGcreator_graph.js";
+import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 
 var KGcreator_mappings = (function () {
     var self = {};
 
-    self.showMappingDialog = function (addColumnClassType, options) {
+    self.showMappingDialog = function (addColumnClassType, options, callback) {
         PopupMenuWidget.hidePopup();
 
         if (!options) {
@@ -58,8 +59,16 @@ return alert("select a field (column)");
                         " lookup name <input id='LinkColumn_objectLookupName' style='width:150px;background-color: white'/></div>";
                     $("#editPredicate_customContentDiv").html(html);
 
+                    $("#editPredicate_objectSelect").bind("change", function () {
+                        KGcreator_mappings.onTripleModelSelect("o", $(this).val());
+                    });
+
                     $("#editPredicate_vocabularySelect2").bind("change", function () {
                         KGcreator_mappings.onTripleModelSelect("o", $(this).val());
+                    });
+
+                    $("#editPredicate_currentVocabPredicateSelect").bind("change", function () {
+                        KGcreator_mappings.onTripleModelSelect("p", $(this).val());
                     });
 
                     $("#LinkColumn_subjectInput").val(columnNode.data.id);
@@ -87,6 +96,9 @@ return alert("select a field (column)");
                     self.updateColumnTriplesEditor(classTypeTriple);
                 }
             });
+            if (callback) {
+                return callback();
+            }
         });
     };
 
@@ -94,6 +106,7 @@ return alert("select a field (column)");
         if (!value) {
             return;
         }
+        self.currentMappingRole = role;
         var columnNode = self.currentColumn.node;
 
         if (value == "_function") {
@@ -111,7 +124,9 @@ return alert("select a field (column)");
         } else if (role == "p") {
             if (value == "_function") {
                 return self.showFunctionDialog(role);
-            } else $("#editPredicate_propertyValue").val(value);
+            } else {
+                $("#editPredicate_propertyValue").val(value);
+            }
         } else if (role == "o") {
             if (value == "_function") {
                 return self.showFunctionDialog(role);
@@ -159,10 +174,12 @@ return alert("select a field (column)");
     self.addTripleFromPredicateSelectorWidget = function (basicType) {
         // var subject = self.currentColumn.node.data.id;
         /*  var subjectType=$("#LinkColumn_subjectSelect").val();
-      if(subjectType!="_selectedColumn")*/
+  if(subjectType!="_selectedColumn")*/
         var subject = $("#LinkColumn_subjectInput").val();
-        var predicate = PredicatesSelectorWidget.getSelectedProperty();
-        var object = PredicatesSelectorWidget.getSelectedObjectValue();
+        /* var predicate = PredicatesSelectorWidget.getSelectedProperty();
+     var object = PredicatesSelectorWidget.getSelectedObjectValue();*/
+        var predicate = $("#editPredicate_propertyValue").val();
+        var object = $("#editPredicate_objectValue").val();
         var isSubjectBlankNode = $("#LinkColumn_isSubjectBlankNodeCBX").prop("checked");
         var isObjectBlankNode = $("#LinkColumn_isObjectBlankNodeCBX").prop("checked");
         var isObjectString = $("#LinkColumn_isBlankNode").prop("checked");
@@ -185,6 +202,7 @@ return alert("select a field (column)");
 
         if (predicate.indexOf("xsd:") == 0) {
             tripleObj.dataType = predicate;
+            tripleObj.p = "owl:hasValue";
         }
 
         if (isObjectString) {
@@ -215,10 +233,10 @@ return alert("select a field (column)");
             tripleObj.isRestriction = true;
         }
         /*   if (subject.indexOf("http://") > 0 && object.indexOf("function") < 0) {
- tripleObj.subjectIsSpecificUri = true;
+tripleObj.subjectIsSpecificUri = true;
 }
 if (object.indexOf("http://") > 0 && object.indexOf("function") < 0) {
- tripleObj.objectIsSpecificUri = true;
+tripleObj.objectIsSpecificUri = true;
 }*/
         self.updateColumnTriplesEditor(tripleObj);
     };
@@ -278,6 +296,9 @@ if (object.indexOf("http://") > 0 && object.indexOf("function") < 0) {
     };
 
     self.addFunction = function (role) {
+        if (!role) {
+            role = self.currentMappingRole;
+        }
         var fnBody = $("#KGcreator_fnBody").val();
         fnBody = fnBody.replace(/"/g, "'");
 
@@ -290,7 +311,7 @@ if (object.indexOf("http://") > 0 && object.indexOf("function") < 0) {
         //  var fnObject=JSON.stringify({"_function":fnBody})
 
         if (role == "s") {
-            $("#KGcreator_subjectInput").val(fnObject);
+            $("#LinkColumn_subjectInput").val(fnObject);
         } else if (role == "p") {
             $("#editPredicate_propertyValue").val(fnObject);
         } else if (role == "o") {
@@ -357,6 +378,84 @@ if (object.indexOf("http://") > 0 && object.indexOf("function") < 0) {
             KGcreator_graph.drawColumnToClassGraph([columnNode]);
         }
         $("#smallDialogDiv").dialog("close");
+    };
+
+    self.saveTableMappings = function (tableId, tableMappings) {
+        if (!tableMappings) {
+            return alert("incorrect data");
+        }
+        if (!tableId) {
+            return alert("incorrect data");
+        }
+        if (!tableMappings[tableId]) {
+            return alert("incorrect data");
+        }
+        var tripleModels = tableMappings[tableId].tripleModels;
+        if (!tripleModels) {
+            return alert("no tripleModels");
+        }
+
+        if (!KGcreator.currentConfig.currentMappings[tableId]) {
+            KGcreator.currentConfig.currentMappings[tableId] = { tripleModels: [], transform: {} };
+        }
+        KGcreator.currentConfig.currentMappings[tableId].tripleModels = tripleModels;
+        /* var transform = tripleModels = data[tableId].transform;
+     if (transform) {
+       KGcreator.currentConfig.currentMappings[self.currentEditingTable].transform = transform;
+     }*/
+        KGcreator.saveDataSourceMappings();
+    };
+
+    self.setPredicatesBetweenColumnsInTable = function (columnFromData, columnToData, callback) {
+        OntologyModels.registerSourcesModel(KGcreator.currentSlsvSource, function (err, result) {
+            if (err) {
+                return alert(err.responseText);
+            }
+
+            var fromClass = columnFromData.classNode;
+            var toClass = columnToData.classNode;
+            var constraints = OntologyModels.getClassesConstraints(KGcreator.currentSlsvSource, fromClass, toClass);
+            var restrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, fromClass, toClass);
+            var inverseRestrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, toClass, fromClass);
+
+            var allConstraints = {};
+            for (var key in constraints) {
+                allConstraints[key] = constraints[key];
+            }
+            for (var key in restrictions) {
+                allConstraints[key] = restrictions[key];
+            }
+            for (var key in inverseRestrictions) {
+                inverseRestrictions[key].inverse = true;
+                allConstraints[key] = inverseRestrictions[key];
+            }
+            if (Object.keys(allConstraints).length == 0) {
+                var message = "no constraints between " + fromClass + " and " + toClass;
+                if (callback) {
+                    return callback(message);
+                }
+                return alert(message);
+            } else {
+                if (callback) {
+                    return callback(null, allConstraints);
+                }
+                return SimpleListSelectorWidget.showDialog(
+                    null,
+                    function (callbackLoad) {
+                        return callbackLoad(Object.keys(allConstraints));
+                    },
+                    function (selectedProperty) {
+                        if (confirm("link columns " + columnFromData.label + " to" + columnToData.label + " with property " + selectedProperty)) {
+                            var triple = {
+                                s: columnFromData.id,
+                                p: selectedProperty,
+                                o: columnToData.id,
+                            };
+                        }
+                    }
+                );
+            }
+        });
     };
 
     self.showTableMappings = function (node) {

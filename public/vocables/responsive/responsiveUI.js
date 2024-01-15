@@ -4,16 +4,56 @@ import Clipboard from "../modules/shared/clipboard.js";
 import Lineage_sources from "../modules/tools/lineage/lineage_sources.js";
 import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
 import Lineage_r from "./lineage/lineage_r.js";
+import KGquery from "../modules/tools/KGquery/KGquery.js";
+import KGquery_r from "./KGquery/KGquery_r.js";
 
 var ResponsiveUI = (function () {
     var self = {};
+    self.source = null;
     self.mainDialogDiv = null;
+    self.menuBarShowed = true;
+    self.LateralPannelShowed = true;
+    self.currentTool = null;
     self.alert = function (message) {};
-
     self.init = function () {
         self.setSlsvCssClasses();
         var tools = Config.tools_available;
+
         common.fillSelectOptions("toolsSelect", tools, false);
+        tools.forEach((item, index) => {
+            if (Config.toolsLogo[item]) {
+                $(`#toolsSelect option[value="${item}"]`).html(item);
+                $(`#toolsSelect option[value="${item}"]`).addClass(item + "-logo");
+                //`<input type="image" src="${Config.toolsLogo[item]}">`
+            }
+        });
+
+        window.addEventListener(
+            "resize",
+            function (event) {
+                self.resetWindowHeight();
+            },
+            true
+        );
+        self.themeList();
+    };
+    self.initMenuBar = function (callback) {
+        $("#ChangeSourceButton").show();
+        $("#index_topContolPanel").show();
+        //Loading
+        $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
+            callback();
+        });
+    };
+
+    self.resetWindowHeight = function () {
+        var MenuBarHeight = $("#MenuBar").height();
+        var LateralPannelWidth = $("#lateralPanelDiv").width();
+        $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 1);
+        $("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
+        $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
+
+        //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
     self.replaceFile = function (file1, file2) {
         Object.keys(file1).forEach((key) => {
@@ -24,9 +64,26 @@ var ResponsiveUI = (function () {
     };
 
     self.onToolSelect = function (toolId) {
+        if (self.currentTool != "lineage" && self.currentTool != null) {
+            window[self.currentTool + "_r"].quit();
+        }
+
+        if (self.currentTool == toolId) {
+            return;
+        } else {
+            self.currentTool = toolId;
+        }
+
         $("#currentToolTitle").html(toolId);
+        if (Config.toolsLogo[toolId]) {
+            $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
+        }
         MainController.currentTool = toolId;
-        ResponsiveUI.showSourceDialog(true);
+        if (self.source == null) {
+            ResponsiveUI.showSourceDialog(true);
+        } else {
+            self.sourceSelect(self.source);
+        }
     };
 
     self.onSourceSelect = function (evt, obj) {
@@ -35,7 +92,12 @@ var ResponsiveUI = (function () {
             return self.alert("select a tool");
         }
 
-        MainController.currentSource = obj.node.data.id;
+        var source = obj.node.data.id;
+        self.sourceSelect(source);
+    };
+    self.sourceSelect = function (source) {
+        MainController.currentSource = source;
+        ResponsiveUI.source = source;
         $("#selectedSource").html(MainController.currentSource);
 
         $("#mainDialogDiv").parent().hide();
@@ -44,6 +106,7 @@ var ResponsiveUI = (function () {
             if (err) {
                 return self.alert(err.responseText);
             }
+            self.resetWindowHeight();
         });
     };
     self.onSourceSelectForAddSource = function (evt, obj) {
@@ -63,7 +126,7 @@ var ResponsiveUI = (function () {
         MainController.initControllers();
         MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
-
+        Lineage_sources.loadedSources = {};
         /*  $("#currentSourceTreeDiv").html("");
       $("#sourceDivControlPanelDiv").html("");
       $("#actionDivContolPanelDiv").html("");
@@ -72,15 +135,8 @@ var ResponsiveUI = (function () {
         if (toolId == "lineage") {
             return Lineage_r.init();
         } else if (toolId == "KGquery") {
-            Lineage_sources.setAllWhiteBoardSources(true);
+            return KGquery_r.init();
             //  $("#accordion").accordion("option", { active: 2 });
-
-            controller.onLoaded(function (err, result) {
-                if (callback) {
-                    callback(err, result);
-                }
-            });
-            return;
         }
 
         self.UI.updateActionDivLabel();
@@ -185,16 +241,6 @@ var ResponsiveUI = (function () {
     self.setSlsvCssClasses = function () {
         async.series(
             [
-                /*   function(callbackSeries){
-
-        $('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', "https://www.w3schools.com/w3css/4/w3.css") );
-    setTimeout(function(){
-      callbackSeries()
-    },2000)
-
-
-
-      },*/
                 function (callbackSeries) {
                     $.getScript("./responsive/less.min.js")
                         .done(function (script, textStatus) {
@@ -210,8 +256,51 @@ var ResponsiveUI = (function () {
                 if (err) return alert(err);
             }
         );
-        /*   $(".slsv-tabButton").addClass("w3-border-white");
-    $(".slsv-tabButton").addClass("w3-border");*/
+    };
+    self.themeList = function () {
+        //less.modifyVars({'@button1-color': '#000'});
+        var allThemesNames = Object.keys(Config.slsvColorThemes);
+        common.fillSelectOptions("themeSelect", allThemesNames, false);
+    };
+
+    self.changeTheme = function (ThemeName) {
+        var themeSelected = Config.slsvColorThemes[ThemeName];
+        less.modifyVars(themeSelected);
+    };
+    self.hideShowMenuBar = function (button) {
+        if (self.menuBarShowed) {
+            $("#MenuBarFooter").hide();
+            $("#MenuBar").css("height", "21px");
+            ResponsiveUI.resetWindowHeight();
+            self.menuBarShowed = false;
+            $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBarShow.png");
+        } else {
+            $("#MenuBarFooter").show();
+            $("#MenuBar").css("height", "90px");
+            ResponsiveUI.resetWindowHeight();
+            self.menuBarShowed = true;
+            $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBar.png");
+        }
+    };
+    self.hideShowLateralPannel = function (button) {
+        if (self.LateralPannelShowed) {
+            $("#lineage-tab-buttons").hide();
+            $("#WhiteboardContent").hide();
+            $("#lateralPanelDiv").css("width", "21px");
+            $("#lateralPanelDiv").removeClass("ui-resizable");
+            ResponsiveUI.resetWindowHeight();
+            self.LateralPannelShowed = false;
+            $("#lateralPanelDiv").append(button);
+            $("#lateralPanelDiv button img").attr("src", "./icons/CommonIcons/ArrowLateralPannelShow.png");
+        } else {
+            $("#lineage-tab-buttons").show();
+            $("#WhiteboardContent").show();
+            $("#lateralPanelDiv").css("width", "395px");
+            ResponsiveUI.resetWindowHeight();
+            self.LateralPannelShowed = true;
+            $(button).children().attr("src", "./icons/CommonIcons/ArrowLateralPannel.png");
+            $("#lateralPanelDiv").addClass("ui-resizable");
+        }
     };
 
     return self;

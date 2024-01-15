@@ -1,6 +1,8 @@
 <div id="lineage_drawnSources" className="Lineage_objectDivContainer" style="display: flex; flex-direction: row; align-items: center">
     <button id="ChangeSourceButton" class="slsv-button-source" onclick="ResponsiveUI.showSourceDialog(true)">Reset</button>
-    <button class="slsv-button-source" onclick="ResponsiveUI.showSourceDialog(false)">+</button>
+    <div class="slsv-button-source" style="padding: 4px 12px" onclick="ResponsiveUI.showSourceDialog(false)">
+        <button class="slsv-invisible-button add-icon" style="height: 25px; width: 29px"></button>
+    </div>
     <button class="slsv-button-source" onclick="Lineage_sources.setAllWhiteBoardSources()">All</button>
 </div>
 

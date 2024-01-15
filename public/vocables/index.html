@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <title>SouslesensVocables</title>
-        <link rel="icon" href="../icons/souslesensIcon.png" />
+        <link rel="icon" href="../icons/oldIcons/souslesensIcon.png" />
 
         <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
@@ -47,7 +47,18 @@
         <script type="module" src="modules/tools/KGquery/KGquery.js"></script>
         <script type="module" src="modules/tools/KGquery/KGquery_graph.js"></script>
         <script type="module" src="modules/tools/KGquery/KGquery_myQueries.js"></script>
+        <script type="module" src="modules/tools/KGquery/KGquery_controlPanel.js"></script>
+        <script type="module" src="modules/tools/KGquery/KGquery_paths.js"></script>
 
+        <script type="module" src="modules/bots/botEngine.js"></script>
+        <script type="module" src="modules/bots/KGquery_bot.js"></script>
+        <script type="module" src="modules/bots/KGcreator_bot.js"></script>
+        <script type="module" src="modules/bots/manchesterSyntaxWidget.js"></script>
+        <script type="module" src="modules/bots/sparqlQuery_bot.js"></script>
+        <script type="module" src="modules/bots/manchesterSyntaxWidget.js"></script>
+        <script type="module" src="modules/bots/createResource_bot.js"></script>
+        <script type="module" src="modules/bots/commonBotFunctions.js"></script>
+        <link rel="stylesheet" href="css/botWidget.css" />
         <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
 
         <script type="module" src="modules/tools/SPARQL_endpoint.js"></script>
@@ -55,7 +66,6 @@
         <script type="module" src="modules/tools/lineage/lineage_sources.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_properties.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_common.js"></script>
-        <script type="module" src="modules/tools/lineage/lineage_blend.js"></script>
 
         <script type="module" src="modules/tools/lineage/lineage_dictionary.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_combine.js"></script>
@@ -77,6 +87,14 @@
         <script type="module" src="modules/tools/lineage/lineage_relationIndividualsFilter.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_rules.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_createSource.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_createResource.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_createRelation.js"></script>
+        <script type="module" src="modules/tools/lineage/axiomsEditor.js"></script>
+
+        <!--   <script type="module" src="modules/tools/lineage/pell/pell.js."></script>
+     <link rel="stylesheet" href="modules/tools/lineage/pell/pell.css" />-->
+
+        <script type="module" src="modules/tools/lineage/lineage_blend.js"></script>
 
         <script type="module" src="modules/shared/ontologyModels.js"></script>
         <script type="module" src="modules/uiWidgets/predicatesSelectorWidget.js"></script>
@@ -94,7 +112,7 @@
         <script type="module" src="modules/uiWidgets/individualValuefilterWidget.js"></script>
         <script type="module" src="modules/uiWidgets/individualAggregateWidget.js"></script>
         <script type="module" src="modules/uiWidgets/simpleListSelectorWidget.js"></script>
-        <script type="module" src="modules/uiWidgets/FOL2graphWidget.js"></script>
+        <!--script type="module" src="modules/uiWidgets/FOL2graphWidget.js"></script-->
 
         <script type="module" src="modules/tools/owlEditor.js"></script>
         <script type="module" src="modules/tools/Standardizer.js"></script>
@@ -221,276 +239,303 @@
             });
 
             $(function () {
-                MainController.initConfig(function (err) {
-                    // sentry/glitchtip
-                    if (Config.sentryDsnJsFront) {
-                        if (typeof Sentry == "object") {
-                            Sentry.init({ dsn: Config.sentryDsnJsFront });
-                        } else {
-                            console.warn("Sentry DSN found in config, but library could not be loaded and initialized.");
-                        }
+                async.series(
+                    [
+                        function (callBackSeries) {
+                            authentication.init(function (err, result) {
+                                callBackSeries(err);
+                            });
+                        },
+                        function (callBackSeries) {
+                            MainController.initConfig(function (err) {
+                                // sentry/glitchtip
+                                if (Config.sentryDsnJsFront) {
+                                    if (typeof Sentry == "object") {
+                                        Sentry.init({ dsn: Config.sentryDsnJsFront });
+                                    } else {
+                                        console.warn("Sentry DSN found in config, but library could not be loaded and initialized.");
+                                    }
+                                }
+                                callBackSeries(err);
+                            });
+                        },
+                        function (callBackSeries) {
+                            MainController.onAfterLogin(function (err) {
+                                callBackSeries(err);
+                            });
+                        },
+                    ],
+                    function (err) {
+                        w = $(document).width() - leftPanelWidth - 30;
+                        h = $(document).height() - 30;
+
+                        h = Math.min(h, 1000);
+
+                        $("#graphDiv").width(w);
+                        MainController.UI.initialGraphDivWitdh = w;
+                        $("#graphDiv").height(h - 50);
+
+                        $("#accordion").accordion({
+                            heightStyle: "fill",
+                        });
+                        $("#accordion").accordion("option", { active: 0 });
+                        $("#accordion").on("accordionbeforeactivate", function (event, ui) {});
+                        $("#accordion").on("accordionactivate", function (event, ui) {});
+                        $("#mainDialogDiv").dialog({
+                            autoOpen: false,
+                            height: 800,
+                            width: $(document).width() * 0.85,
+                            modal: false,
+                        });
+                        $("#mainDialogDiv2").dialog({
+                            autoOpen: false,
+                            height: 800,
+                            width: $(document).width() * 0.85,
+                            modal: false,
+                        });
+
+                        $("#smallDialogDiv").dialog({
+                            autoOpen: false,
+                            height: 600,
+                            width: 800,
+                            modal: false,
+                        });
+
+                        $(document).on("click", "a", function () {
+                            var target = $(this).attr("target");
+                            if (target == "_slsvCallback") {
+                                var id = $(this).attr("href");
+                                event.preventDefault();
+                                NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
+                            }
+                        });
+
+                        MainController.UI.setCredits();
+                        // MyDashboard.init();
                     }
-
-                    authentication.init();
-
-                    //SocketProxy.init()
-
-                    if (err) {
-                        return console.error(err);
-                    }
-
-                    w = $(document).width() - leftPanelWidth - 30;
-                    h = $(document).height() - 30;
-
-                    h = Math.min(h, 1000);
-
-                    $("#graphDiv").width(w);
-                    MainController.UI.initialGraphDivWitdh = w;
-                    $("#graphDiv").height(h - 50);
-
-                    $("#accordion").accordion({
-                        heightStyle: "fill",
-                    });
-                    $("#accordion").accordion("option", { active: 0 });
-                    $("#accordion").on("accordionbeforeactivate", function (event, ui) {});
-                    $("#accordion").on("accordionactivate", function (event, ui) {});
-                    $("#mainDialogDiv").dialog({
-                        autoOpen: false,
-                        height: 800,
-                        width: $(document).width() * 0.85,
-                        modal: false,
-                    });
-                    $("#mainDialogDiv2").dialog({
-                        autoOpen: false,
-                        height: 800,
-                        width: $(document).width() * 0.85,
-                        modal: false,
-                    });
-
-                    $("#smallDialogDiv").dialog({
-                        autoOpen: false,
-                        height: 600,
-                        width: 800,
-                        modal: false,
-                    });
-
-                    $(document).on("click", "a", function () {
-                        var target = $(this).attr("target");
-                        if (target == "_slsvCallback") {
-                            var id = $(this).attr("href");
-                            event.preventDefault();
-                            NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
-                        }
-                    });
-
-                    MainController.UI.setCredits();
-                    // MyDashboard.init();
-                });
+                );
             });
         </script>
         <style>
             body {
-              font-size: 14px;
-              font-family: Arial;
-              overflow: hidden;
+                font-size: 14px;
+                font-family: Arial;
+                overflow: hidden;
             }
 
             .jstreeContainer {
-              width: 100%;
+                width: 100%;
             / / height: 100 %;
-              min-height: 500px;
-              overflow: auto;
+                min-height: 500px;
+                overflow: auto;
             }
 
             .jstreeXX {
-              margin: 2px;
-              max-height: 550px;
+                margin: 2px;
+                max-height: 550px;
 
-              overflow: auto;
-              min-width: 300px;
+                overflow: auto;
+                min-width: 300px;
             }
 
             .jstree-icon {
-              width: 15px !important;
+                width: 15px !important;
             }
 
             .jstree-ocl {
-              width: 24px !important;
+                width: 24px !important;
             }
 
             #actionDiv {
-              width: 385px;
-              max-height: 550px;
+                width: 385px;
+                max-height: 550px;
             }
 
             #accordion {
-              margin-left: 5px;
+                margin-left: 5px;
             }
 
             .ui-accordion .ui-accordion-content {
-              overflow: hidden !important;
-              min-height: 600px !important;
+                overflow: hidden !important;
+                min-height: 600px !important;
             }
 
             .ui-accordion-content-active {
-              margin-left: -5px !important;
-              overflow: hidden;
+                margin-left: -5px !important;
+                overflow: hidden;
             }
 
             #graphDiv {
-              margin: 3px;
-              border: 2px solid #ddd;
+                margin: 3px;
+                border: 2px solid #ddd;
             }
 
             .popupMenuWidgetDiv {
-              z-index: 20;
-              position: absolute;
-              flex-direction: column;
-              padding: 5px;
-              border-radius: 5px;
-              text-align: center;
-              display: flex;
-              background-color: rgb(221, 221, 221);
+                z-index: 20;
+                position: absolute;
+                flex-direction: column;
+                padding: 5px;
+                border-radius: 5px;
+                text-align: center;
+                display: flex;
+                background-color: rgb(221, 221, 221);
 
             }
 
             .jstree-default {
-              min-height: 300px !important;
+                min-height: 300px !important;
             / / height: 600 px;
             / / overflow: auto;
             }
 
             .jstree-node {
-              font-weight: bold;
+                font-weight: bold;
             }
 
             #currentSourceTreeDiv {
-              overflow: auto;
-              height: 600px;
+                overflow: auto;
+                height: 600px;
             }
 
             .jstreeParent {
-              width: 350px;
-              height: 600px;
-              overflow: auto;
-              border: #6e2500 1px groove;
+                width: 350px;
+                height: 600px;
+                overflow: auto;
+                border: #6e2500 1px groove;
             }
 
 
             .messageDiv {
-              font-weight: normal;
-              font-size: 12px;
+                font-weight: normal;
+                font-size: 12px;
             / / color: #6e2500;
-              color: white;
-              background-color: #00a37f;
-              padding: 2px;
-              margin: 2px;
-              height: 30px;
-              overflow: auto;
+                color: white;
+                background-color: #00a37f;
+                padding: 2px;
+                margin: 2px;
+                height: 30px;
+                overflow: auto;
 
             / / max-width: 1200 px;
             }
 
             .toolDescriptionImg {
-              padding: 5px;
-              margin: 50px;
-              width: 400px;
+                padding: 5px;
+                margin: 50px;
+                width: 400px;
             }
 
             .clipboardSelected {
-              border: #3b13ef 1px solid !important;
-              animation: blinker 1s linear infinite;
+                border: #3b13ef 1px solid !important;
+                animation: blinker 1s linear infinite;
             }
 
             @keyframes blinker {
-              50% {
-                opacity: 0;
-              }
+                50% {
+                    opacity: 0;
+                }
             }
 
             .searched_concept {
-              color: blue;
+                color: blue;
             }
 
             .searched_conceptSource {
-              color: blueviolet;
+                color: blueviolet;
             }
 
             .popupMenuItem {
-              border: #3b13ef 1px solid;
-              border-radius: 3px;
-              padding: 1px;
-              margin: 1px;
-              margin: 1px;
-              background-color: #ddd;
+                border: #3b13ef 1px solid;
+                border-radius: 3px;
+                padding: 1px;
+                margin: 1px;
+                margin: 1px;
+                background-color: #ddd;
             }
 
             .mainDialogDiv {
-              background-color: #ddd;
+                background-color: #ddd;
             }
 
             .mainDialogDiv2 {
-              background-color: #ddd;
+                background-color: #ddd;
             }
 
             .td_title {
-              padding: 3px;
-              font-weight: bold;
+                padding: 3px;
+                font-weight: bold;
             }
 
             .td_value {
-              padding: 3px;
+                padding: 3px;
             }
 
             .jstree-contextmenu {
-              z-index: 300 !important;
+                z-index: 300 !important;
             / / margin-left: - 100 px !important;
             }
 
             .ui-dialog {
-              border-width: 5px !important;
-              border-style: solid !important;
-              border-color: #b8a587 !important;
+                border-width: 5px !important;
+                border-style: solid !important;
+                border-color: #b8a587 !important;
             }
 
             .ui-widget-content {
-              padding: 5px !important;
+                padding: 5px !important;
             }
 
             .max-height {
-              height: 750px !important;
+                height: 750px !important;
             }
 
             .ui-dialog-title {
 
-              color: #337ab7;
+                color: #337ab7;
             }
 
 
             element.style {
-              padding: 3px !important;
-              border: #e1d9bf solid 1px !important;
+                padding: 3px !important;
+                border: #e1d9bf solid 1px !important;
             }
 
             table.dataTable tbody th, table.dataTable tbody td {
-              padding: 3px !important;
-              border: #e1d9bf solid 1px !important;
+                padding: 3px !important;
+                border: #e1d9bf solid 1px !important;
 
             }
 
             .legend_colorDiv {
-              width: 30px;
-              height: 20px;
-              border-radius: 3px;
-              margin: 3px;
+                width: 30px;
+                height: 20px;
+                border-radius: 3px;
+                margin: 3px;
             }
 
             .legend_itemDiv {
-              display: flex;
-              flex-direction: row;
-              border-width: 1px;
-              border-style: solid;
-              border-color: #b8a587
+                display: flex;
+                flex-direction: row;
+                border-width: 1px;
+                border-style: solid;
+                border-color: #b8a587
+            }
+
+            #botPanel{
+               display: none;
+                z-index: 100;
+                width: 400px;
+                height: 500px;
+                position: absolute;
+                background-color: #92d3ec;
+                margin: 5px;
+                top: 100px;
+                left: 300px;
+                padding: 3px;
+
+
+
+
             }
         </style>
     </head>
@@ -553,7 +598,7 @@
                         onclick="MainController.UI.showHideRightPanel()"
                         style="margin-top: 10px; margin-left: -40px; height: 45px; width: 60px; padding: 5px; background: #fcfcfc; border-radius: 10px; border: 1px solid #ccc"
                     >
-                        <input id="rightPanelDiv_searchIconInput" type="image" src="./icons/search.png" />
+                        <input id="rightPanelDiv_searchIconInput" type="image" src="./icons/oldIcons/search.png" />
                     </div>
                     <div id="rightPanelDivInner" style="display: flex; flex-direction: column"></div>
                 </div>
@@ -577,6 +622,10 @@
         <div id="mainDialogDiv"></div>
         <div id="mainDialogDiv2"></div>
         <div id="smallDialogDiv"></div>
+
+        <div id="botPanel">
+            <div id="botDiv"></div>
+        </div>
 
         <!-- Footer -->
         <footer class="bg-white">

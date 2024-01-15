@@ -1,0 +1,37 @@
+<style>
+    #botTitle {
+        font-weight: bold;
+    }
+
+    #botMessage {
+        font-style: italic;
+    }
+
+    #bot_resourcesProposalSelect {
+        width: 100%;
+        overflow: auto;
+        background-color: #1971e5;
+        color: white;
+    }
+</style>
+
+<div>
+    <div id="botTitle"></div>
+    <div id="botMessage"></div>
+</div>
+<div style="display: flex; flex-direction: column">
+    <div>
+        <select id="bot_resourcesProposalSelect" size="10" style="display: block"></select>
+    </div>
+
+    <div id="botTA" contenteditable="false" style="display: flex; flex-direction: column">
+        <div id="bot_input" style="display: flex; flex-direction: column; border: none"></div>
+    </div>
+</div>
+
+<div>
+    <button onclick="BotEngine.close()">X</button>
+    <button onclick="BotEngine.reset()">Reset</button>
+
+    <button onclick="BotEngine.previousStep()">Previous</button>
+</div>

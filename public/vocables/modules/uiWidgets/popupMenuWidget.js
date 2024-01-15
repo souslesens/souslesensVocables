@@ -15,6 +15,7 @@ var PopupMenuWidget = (function () {
     };
 
     self.showPopup = function (point, popupDiv, absolutePosition) {
+        /*
         $("#" + popupDiv).addClass("popupMenuWidgetDiv");
         $("#" + popupDiv).css("display", "flex");
         var popupH = Math.min(300, $("#" + popupDiv).height());
@@ -43,8 +44,31 @@ var PopupMenuWidget = (function () {
         if (!popupDiv) {
             popupDiv = "popupDiv";
         }
+        
         $("#" + popupDiv).css("left", point.x + (absolutePosition ? 0 : leftPanelWidth) + horOverlap);
         $("#" + popupDiv).css("top", point.y + vertOverlap);
+        */
+        if (!popupDiv) {
+            popupDiv = "popupDiv";
+        }
+        $("#" + popupDiv).addClass("popupMenuWidgetDiv");
+        $("#" + popupDiv).css("display", "flex");
+        var popupH = Math.min(300, $("#" + popupDiv).height());
+        var popupW = Math.min(200, $("#" + popupDiv).width());
+        var screenHeight = $(window).height();
+        var screenWidth = $(window).width();
+        var distanceToWindowH = screenHeight - point.y;
+        var distanceToWindowW = screenWidth - point.x;
+        if (distanceToWindowH >= popupH) {
+            $("#" + popupDiv).css("top", point.y);
+        } else {
+            $("#" + popupDiv).css("top", point.y - popupH);
+        }
+        if (distanceToWindowW >= popupW) {
+            $("#" + popupDiv).css("left", point.x);
+        } else {
+            $("#" + popupDiv).css("left", point.x - popupW);
+        }
     };
     self.hidePopup = function (popupDiv) {
         if (self.blockHidePopup) {

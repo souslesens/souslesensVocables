@@ -501,7 +501,7 @@ var KGquery = (function() {
         tableData.push(line);
       });
 
-      Export.showDataTable("KGquery_dataTableDiv", tableCols, tableData, null, null, function(err, datatable) {
+      Export.showDataTable("KGquery_dataTableDiv", tableCols, tableData, null, {paging:true}, function(err, datatable) {
         $("#dataTableDivExport").on("click", "td", function() {
           var table = $("#dataTableDivExport").DataTable();
 

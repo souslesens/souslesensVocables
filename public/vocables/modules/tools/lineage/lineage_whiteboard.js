@@ -42,6 +42,7 @@ var Lineage_whiteboard = (function () {
     self.showLimit = 1000;
 
     var graphContext = {};
+
     self.propertyColors = {};
     self.defaultShape = "dot";
     self.defaultShapeSize = 5;

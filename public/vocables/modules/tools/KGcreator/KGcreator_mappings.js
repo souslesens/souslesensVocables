@@ -140,7 +140,7 @@ return alert("select a field (column)");
         }
     };
 
-    self.updateColumnTriplesEditor = function (triples) {
+    self.updateColumnTriplesEditor = function (triples, column) {
         if (!Array.isArray(triples)) {
             triples = [triples];
         }

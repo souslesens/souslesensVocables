@@ -21,7 +21,9 @@ var BotEngine = (function () {
 
         $("#" + divId).load("modules/bots/html/bot.html", function () {
             $("#botTitle").html(self.currentBot.title);
-            if (callback) callback();
+            if (callback) {
+                callback();
+            }
         });
     };
 
@@ -78,7 +80,9 @@ var BotEngine = (function () {
     };
 
     self.previousStep = function (message) {
-        if (message) self.message(message);
+        if (message) {
+            self.message(message);
+        }
         if (self.history.currentIndex > 1) {
             self.history.currentIndex -= 2;
             self.currentObj = self.history[self.history.currentIndex];
@@ -148,11 +152,36 @@ var BotEngine = (function () {
                 return callback(selectedValue);
             }
             if (varToFill) {
-                self.currentBot.params[varToFill] = selectedValue;
+                if (Array.isArray(self.currentBot.params[varToFill])) {
+                    self.currentBot.params[varToFill].push(selectedValue);
+                } else {
+                    self.currentBot.params[varToFill] = selectedValue;
+                }
             }
 
             self.nextStep(returnValue || selectedValue);
         });
+    };
+
+    self.promptValue = function (message, varToFill, defaultValue, callback) {
+        $("#botPromptInput").on("keyup", function (key) {
+            if (event.keyCode == 13 || event.keyCode == 9) {
+                $("#botPromptInput").css("display", "none");
+                var value = $(this).val();
+                var varToFill = $("#botVarToFill").val();
+                self.currentBot.params[varToFill] = value;
+                self.writeCompletedHtml(value);
+                if (callback) {
+                    return callback(value);
+                } else {
+                    self.nextStep(returnValue);
+                }
+            }
+        });
+
+        $("#botVarToFill").val(varToFill);
+        $("#botPromptInput").val(defaultValue || "");
+        $("#botPromptInput").css("display", "block");
     };
 
     self.writeCompletedHtml = function (str) {

@@ -13,11 +13,18 @@
         background-color: #1971e5;
         color: white;
     }
+
+    #botPromptInput {
+        width: 100%;
+        display: none;
+        border-color: blue;
+    }
 </style>
 
 <div>
     <div id="botTitle"></div>
     <div id="botMessage"></div>
+    <input id="botPromptInput" /><input type="hidden" id="botVarToFill" />
 </div>
 <div style="display: flex; flex-direction: column">
     <div>

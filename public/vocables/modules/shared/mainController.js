@@ -38,7 +38,7 @@ var MainController = (function () {
                 Config.sentryDsnJsFront = serverConfig.sentryDsnJsFront;
                 Config.currentTopLevelOntology = serverConfig.currentTopLevelOntology;
                 Config.tools_available = serverConfig.tools_available;
-                Config.tools = serverConfig.tools_available;
+                //  Config.tools = serverConfig.tools_available;
 
                 // display version number
                 $("#souslesensversion").html(serverConfig.version);

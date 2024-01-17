@@ -164,7 +164,7 @@ var BotEngine = (function () {
     };
 
     self.promptValue = function (message, varToFill, defaultValue, callback) {
-      self.clearProposalSelect()
+        self.clearProposalSelect();
         $("#botPromptInput").on("keyup", function (key) {
             if (event.keyCode == 13 || event.keyCode == 9) {
                 $("#botPromptInput").css("display", "none");
@@ -205,10 +205,9 @@ var BotEngine = (function () {
         return queryText;
     };
 
-
-    self.clearProposalSelect=function(){
-      $("#bot_resourcesProposalSelect").find('option').remove().end()
-    }
+    self.clearProposalSelect = function () {
+        $("#bot_resourcesProposalSelect").find("option").remove().end();
+    };
 
     self.analyse = function (str) {};
 

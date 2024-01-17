@@ -37,7 +37,7 @@ var CommonBotFunctions = (function () {
         var vocabs = [{ id: sourceLabel, label: sourceLabel }];
         var imports = Config.sources[sourceLabel].imports;
         if (!imports) {
-            return  BotEngine.showList(vocabs, varToFill);
+            return BotEngine.showList(vocabs, varToFill);
         }
         imports.forEach(function (importSource) {
             vocabs.push({ id: importSource, label: importSource });
@@ -66,9 +66,8 @@ var CommonBotFunctions = (function () {
                 classes.push({ id: classId.id, label: classId.label });
             }
 
-
             self.sortList(classes);
-            if (includeOwlThing ||classes.length==0 ) {
+            if (includeOwlThing || classes.length == 0) {
                 classes.splice(0, 0, { id: "owl:Thing", label: "owl:Thing" });
             }
 

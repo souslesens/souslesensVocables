@@ -74,8 +74,8 @@ var CreateResource_bot = (function () {
         },
 
         promptResourceLabelFn: function () {
-            BotEngine.promptValue("resource label ","resourceLabel");
-          /*  self.params.resourceLabel = prompt("resource label ");
+            BotEngine.promptValue("resource label ", "resourceLabel");
+            /*  self.params.resourceLabel = prompt("resource label ");
             BotEngine.writeCompletedHtml(self.params.resourceLabel);
             BotEngine.nextStep();*/
         },

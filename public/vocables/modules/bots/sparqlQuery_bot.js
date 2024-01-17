@@ -191,9 +191,11 @@ var SparqlQuery_bot = (function () {
             });
         },
         promptIndividualsLabelFn: function () {
-            self.params.individualsFilterValue = prompt("label contains ");
+
+            BotEngine.promptValue("label contains ","individualsFilterValue")
+           /* self.params.individualsFilterValue = prompt("label contains ");
             BotEngine.writeCompletedHtml(self.params.individualsFilterValue);
-            BotEngine.nextStep();
+            BotEngine.nextStep();*/
         },
         promptIndividualsAdvandedFilterFn: function () {
             IndividualValueFilterWidget.showDialog(null, self.params.source, self.params.individualsFilterRole, self.params.currentClass, null, function (err, filter) {
@@ -258,7 +260,6 @@ var SparqlQuery_bot = (function () {
                     filter = advancedFilter;
                 }
 
-                allSources;
                 return filter;
             }
 

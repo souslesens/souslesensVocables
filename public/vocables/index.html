@@ -141,7 +141,7 @@
         <script type="module" src="modules/shared/authentification.js"></script>
         <script type="module" src="modules/tools/myDashboard.js"></script>
 
-        <script type="module">
+        <!--  <script type="module">
             import { allTools, loadToolsAndPlugins } from "./config/tools.js";
 
             try {
@@ -149,7 +149,7 @@
             } catch (error) {
                 console.error("Failed to load tools and plugins", error);
             }
-        </script>
+        </script>-->
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
@@ -223,6 +223,8 @@
             import MainController from "./modules/shared/mainController.js";
             import authentication from "./modules/shared/authentification.js";
 
+            import { allTools, loadToolsAndPlugins } from "./config/tools.js";
+
             var leftPanelWidth = 400;
             var rightPanelWidth = 400;
             var w;
@@ -238,9 +240,24 @@
                 }
             });
 
+            async function initPlugins(callback) {
+                try {
+                    await loadToolsAndPlugins();
+                } catch (error) {
+                    console.error("Failed to load tools and plugins", error);
+                }
+                callback();
+            }
+
             $(function () {
                 async.series(
                     [
+                        function (callBackSeries) {
+                            initPlugins(function (err) {
+                                callBackSeries();
+                            });
+                        },
+
                         function (callBackSeries) {
                             authentication.init(function (err, result) {
                                 callBackSeries(err);
@@ -297,7 +314,7 @@
                         $("#smallDialogDiv").dialog({
                             autoOpen: false,
                             height: 600,
-                            width: 800,
+                            width: 1000,
                             modal: false,
                         });
 

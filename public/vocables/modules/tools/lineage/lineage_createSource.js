@@ -1,9 +1,13 @@
 import common from "../../shared/common.js";
 import Authentification from "../../shared/authentification.js";
+import CreateSLSVsource_bot from "../../bots/createSLSVsource_bot.js";
 
 var Lineage_createSource = (function () {
     var self = {};
     self.onLoaded = function () {
+        CreateSLSVsource_bot.start();
+        return;
+
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").load("modules/tools/lineage/html/createSource.html", function () {
             var sources = Object.keys(Config.sources);
@@ -12,10 +16,10 @@ var Lineage_createSource = (function () {
         });
     };
 
-    self.createSource = function () {
-        var sourceName = $("#create_source_name").val();
+    self.createSource = function (sourceName, graphUri, imports, callback) {
+        /*  var sourceName = $("#create_source_name").val();
         var graphUri = $("#create_source_graphUri").val();
-        var imports = $("#create_source_imports").val();
+        var imports = $("#create_source_imports").val();*/
 
         var user = Authentification.currentUser.login;
         if (!sourceName) {
@@ -34,16 +38,7 @@ var Lineage_createSource = (function () {
                         return callbackSeries(err);
                     });
                 },
-                //write private profile if not exists
-                function (callbackSeries) {
-                    var userProfiles = Authentification.currentUser.groupes;
-                    if (userProfiles.indexOf(userPrivateProfile) > -1) {
-                        return callbackSeries();
-                    }
-                    self.writePrivateUser(user, userPrivateProfile, function (err, result) {
-                        return callbackSeries(err);
-                    });
-                },
+
                 //load private source in lineage
                 function (callbackSeries) {
                     var url = window.location.href;
@@ -57,8 +52,10 @@ var Lineage_createSource = (function () {
             ],
             function (err) {
                 if (err) {
+                    if (callback) return callback(err);
                     return alert(err.responseText);
                 }
+                callback();
             }
         );
     };
@@ -99,6 +96,7 @@ var Lineage_createSource = (function () {
             imports: imports,
             taxonomyPredicates: ["rdfs:subClassOf"],
             graphUri: graphUri,
+            owner: Authentification.currentUser.login,
         };
 
         var payload = {
@@ -108,38 +106,6 @@ var Lineage_createSource = (function () {
         $.ajax({
             type: "POST",
             url: `${Config.apiUrl}/sources`,
-            data: payload,
-            dataType: "json",
-            success: function (data, _textStatus, _jqXHR) {
-                return callback(null, data);
-            },
-            error: function (err) {
-                return callback(err);
-            },
-        });
-    };
-
-    self.writePrivateUser = function (user, userPrivateProfile, callback) {
-        var userProfileObject = {
-            name: user,
-            _type: "profile",
-            id: common.getRandomHexaId(12),
-            allowedSourceSchemas: ["OWL"],
-            sourcesAccessControl: {
-                [userPrivateProfile]: "readwrite",
-            },
-            allowedTools: "ALL",
-            forbiddenTools: [],
-        };
-
-        var payload = {
-            body: {
-                [user]: userProfileObject,
-            },
-        };
-        $.ajax({
-            type: "POST",
-            url: `${Config.apiUrl}/profiles`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {

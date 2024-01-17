@@ -36,6 +36,9 @@ var CommonBotFunctions = (function () {
     self.listVocabsFn = function (sourceLabel, varToFill, includBasicVocabs) {
         var vocabs = [{ id: sourceLabel, label: sourceLabel }];
         var imports = Config.sources[sourceLabel].imports;
+        if (!imports) {
+            return BotEngine.showList(vocabs, varToFill);
+        }
         imports.forEach(function (importSource) {
             vocabs.push({ id: importSource, label: importSource });
         });
@@ -63,12 +66,8 @@ var CommonBotFunctions = (function () {
                 classes.push({ id: classId.id, label: classId.label });
             }
 
-            if (classes.length == 0) {
-                return BotEngine.previousStep("no values found, try another option");
-            }
-
             self.sortList(classes);
-            if (includeOwlThing) {
+            if (includeOwlThing || classes.length == 0) {
                 classes.splice(0, 0, { id: "owl:Thing", label: "owl:Thing" });
             }
 

@@ -36,6 +36,7 @@ var ResponsiveUI = (function () {
             true
         );
         self.themeList();
+        self.replaceFile(BotEngine,BotEngineResponsive);
     };
     self.initMenuBar = function (callback) {
         $("#ChangeSourceButton").show();

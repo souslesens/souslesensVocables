@@ -13,8 +13,10 @@ var SparqlQuery_bot = (function () {
     var self = {};
 
     self.start = function () {
+        
+        self.title = "Query graph";
         BotEngine.init(SparqlQuery_bot, null, function () {
-            self.title = "Query graph";
+            
             self.params = { source: Lineage_sources.activeSource };
             BotEngine.currentObj = self.workflow;
             BotEngine.nextStep(self.workflow);

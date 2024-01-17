@@ -9,8 +9,17 @@ var BotEngineResponsive = (function () {
         BotEngine.currentObj = botModule;
         BotEngine.history = [];
         BotEngine.history.currentIndex = 0;
+        
+        var divId;
+        if (options.divId) {
+            divId = options.divId;
+            
+        } else {
+            divId = "botDiv";
+            
+        }
 
-        var divId = "botDiv";
+        
         $("#botPanel").dialog('open');
         $("#botPanel").dialog("option", "title",BotEngine.currentBot.title);
         
@@ -101,10 +110,15 @@ var BotEngineResponsive = (function () {
     self.setStepMessage = function (step) {
         if (BotEngine.currentBot.functionTitles) {
             var message = BotEngine.currentBot.functionTitles[step];
+            // In case 2 questions are asked at the same time erase the last one
+            var last_message=$('#botTA').children().filter('span').slice(-1)[0];
+            if($(last_message).attr('class')=='chat-left'){
+                last_message.remove();
+            }
             BotEngine.writeCompletedHtml(message || "select an option",{question:true});
-            //$("#botMessage").html(message || "select an option");
+           
         } else {
-            //$("#botMessage").html("select an option");
+            
             self.writeCompletedHtml("select an option",{question:true});
         }
     };
@@ -125,7 +139,7 @@ var BotEngineResponsive = (function () {
     };
 
     self.close = function () {
-        $("#botPanel").dialog("close", "none");
+        $("#botPanel").dialog("close");
     };
 
     self.showList = function (values, varToFill, returnValue, sort, callback) {
@@ -154,11 +168,36 @@ var BotEngineResponsive = (function () {
                 return callback(selectedValue);
             }
             if (varToFill) {
-                BotEngine.currentBot.params[varToFill] = selectedValue;
+                if (Array.isArray(BotEngine.currentBot.params[varToFill])) {
+                    BotEngine.currentBot.params[varToFill].push(selectedValue);
+                } else {
+                    BotEngine.currentBot.params[varToFill] = selectedValue;
+                }
             }
 
             self.nextStep(returnValue || selectedValue);
         });
+    };
+    self.promptValue = function (message, varToFill, defaultValue, callback) {
+        self.clearProposalSelect();
+        $("#botPromptInput").on("keyup", function (key) {
+            if (event.keyCode == 13 || event.keyCode == 9) {
+                $("#botPromptInput").css("display", "none");
+                var value = $(this).val();
+                var varToFill = $("#botVarToFill").val();
+                self.currentBot.params[varToFill] = value;
+                self.writeCompletedHtml(value);
+                if (callback) {
+                    return callback(value);
+                } else {
+                    self.nextStep();
+                }
+            }
+        });
+
+        $("#botVarToFill").val(varToFill);
+        $("#botPromptInput").val(defaultValue || "");
+        $("#botPromptInput").css("display", "block");
     };
 
     self.writeCompletedHtml = function (str,options) {
@@ -182,6 +221,7 @@ var BotEngineResponsive = (function () {
         return;
     };
 
+   
     self.getQueryText = function () {
         var queryText = "";
         $(".bot-token").each(function () {

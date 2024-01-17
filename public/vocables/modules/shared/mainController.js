@@ -56,17 +56,9 @@ var MainController = (function () {
             getSources: 1,
         };
 
-        var sourcesFileParam = "";
-        if (sourcesFile) {
-            sourcesFileParam = "?sourcesFile=" + sourcesFile;
-        } else if (Config.currentProfile.sourcesFile) {
-            sourcesFileParam = Config.currentProfile.sourcesFile;
-        } else {
-            // sourcesFileParam = "?sourcesFile=" + "sources.json";
-        }
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/sources" + sourcesFileParam,
+            url: Config.apiUrl + "/sources",
             dataType: "json",
             success: function (data_, _textStatus, _jqXHR) {
                 const data = data_.resources;

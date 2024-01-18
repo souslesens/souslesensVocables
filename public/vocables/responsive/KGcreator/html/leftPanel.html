@@ -1,18 +1,19 @@
-<style>
-    .KGcreator_tree_container {
-        overflow: auto;
-        width: 450px;
-    }
-</style>
-<!--script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script-->
+<div id="lineage-tab-buttons" class="w3-barslsv-bg-pale w3-bar" style="border-bottom: 0px">
+    <div class="w3-bar-item KGcreator-tabDiv">
+        <button id="MapButton" class="w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('lineage-tab','KGcreator_source_tab',KGcreator_r.initLinkTab,this)">Map</button>
+    </div>
+    <!--<div class="slsvTabSeparation"> </div>-->
+
+    <div style='border-right: 0px!important;' class="w3-bar-item KGcreator-tabDiv">
+        <button class="w3-button slsv-tabButton" onclick="ResponsiveUI.openTab('lineage-tab','KGcreator_source_tab',KGcreator_r.initRunTab,this)">Run</button>
+    </div>
+   
+</div>
 <script src="js/external/jquery/jquery.json-editor.min.js"></script>
-    
-<div style="margin-left: 10px">
+
+<div id='KGcreator_source_tab' style="margin-left: 10px">
     <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
-        <div>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.showSourcesDialog()">Source</button>
-            <span style="font-weight: bold" id="KGcreator_slsvSource"></span>
-        </div>
+      
         <!--  <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
             <div>top LevelOntology&nbsp;<span style="font-weight: bold" id="KGcreator_topLevelOntologiesInput"></span></div>
         </div>-->

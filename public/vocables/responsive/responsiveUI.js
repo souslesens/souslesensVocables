@@ -6,6 +6,7 @@ import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
 import Lineage_r from "./lineage/lineage_r.js";
 import KGquery from "../modules/tools/KGquery/KGquery.js";
 import KGquery_r from "./KGquery/KGquery_r.js";
+import KGcreator_r from "./KGcreator/Kgcreator_r.js";
 
 var ResponsiveUI = (function () {
     var self = {};
@@ -14,7 +15,9 @@ var ResponsiveUI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
+    self.tools_available=['lineage','KGquery'];
     self.alert = function (message) {};
+    
     self.init = function () {
         self.setSlsvCssClasses();
         var tools = Config.tools_available;
@@ -43,6 +46,10 @@ var ResponsiveUI = (function () {
         $("#index_topContolPanel").show();
         //Loading
         $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
+            if(self.currentTool!='lineage'){
+                $('#AddSourceButton').remove();
+                $('#AllSourceButton').remove();
+            }
             callback();
         });
     };
@@ -66,7 +73,10 @@ var ResponsiveUI = (function () {
 
     self.onToolSelect = function (toolId) {
         if (self.currentTool != "lineage" && self.currentTool != null) {
-            window[self.currentTool + "_r"].quit();
+            if(self.currentTool in self.tools_available){
+                window[self.currentTool + "_r"].quit();
+            }
+            
         }
 
         if (self.currentTool == toolId) {
@@ -74,6 +84,10 @@ var ResponsiveUI = (function () {
         } else {
             self.currentTool = toolId;
         }
+        if(toolId!='lineage'){
+            Lineage_sources.registerSource=self.registerSourceWithoutImports;
+        }
+        
 
         $("#currentToolTitle").html(toolId);
         if (Config.toolsLogo[toolId]) {
@@ -128,16 +142,16 @@ var ResponsiveUI = (function () {
         MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
-        /*  $("#currentSourceTreeDiv").html("");
-      $("#sourceDivControlPanelDiv").html("");
-      $("#actionDivContolPanelDiv").html("");
-      $("#rightPanelDivInner").html("");*/
-
+      
         if (toolId == "lineage") {
             return Lineage_r.init();
-        } else if (toolId == "KGquery") {
+        }else if (toolId == "KGquery") {
             return KGquery_r.init();
-            //  $("#accordion").accordion("option", { active: 2 });
+           
+        }else if(toolId == 'KGcreator'){
+            return KGcreator_r.init();
+        }else{
+            return(alert('Not available tool, comming soon...'));
         }
 
         self.UI.updateActionDivLabel();
@@ -303,6 +317,54 @@ var ResponsiveUI = (function () {
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };
+    self.registerSourceWithoutImports=function(sourceLabel, callback){
+        if (!callback) {
+            callback = function () {};
+        }
+
+        if (Lineage_sources.loadedSources[sourceLabel]) {
+            return callback();
+        }
+
+        OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            if(sourceLabel==self.source){
+                var sourceDivId = "source_" + common.getRandomHexaId(5);
+                Lineage_sources.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
+                Lineage_sources.sourceDivsMap[sourceDivId] = sourceLabel;
+                var html =
+                    "<div  id='" +
+                    sourceDivId +
+                    "' style='color: " +
+                    Lineage_whiteboard.getSourceColor(sourceLabel) +
+                    ";display:inline-flex;align-items:end;'" +
+                    " class='Lineage_sourceLabelDiv'  " +
+                    ">" +
+                    sourceLabel +
+                    "&nbsp;" +
+                    /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+    sourceDivId +
+    "\")'>[-]</i>";*/
+                    "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+                    sourceDivId +
+                    "\")'/> </button></div>";
+                $("#lineage_drawnSources").append(html);
+    
+                $("#" + sourceDivId).bind("click", function (e) {
+                    var sourceDivId = $(this).attr("id");
+                    var source = self.sourceDivsMap[sourceDivId];
+                    Lineage_sources.setCurrentSource(source);
+                });
+                return callback();
+            }
+            else{
+                return callback();
+            }
+           
+        });
+    }
 
     return self;
 })();

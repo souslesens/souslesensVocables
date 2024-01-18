@@ -357,7 +357,7 @@ var Lineage_sources = (function () {
                         }
                     });
                 }
-                self.indexSourceIfNotIndexed(source);
+                //  self.indexSourceIfNotIndexed(source);
                 callback(null, source);
             });
         });

@@ -23,6 +23,8 @@ var CreateSLSVsource_bot = (function () {
         _OR: {
             "create source": { saveFn: { loadLineage: {} } },
             "add import": { listImportsFn: { afterImportFn: {} } },
+            "upload graph from file": { uploadFromFileFn: { afterImportFn: {} } },
+            "upload graph from URL": { uploadFromUrlFn: { afterImportFn: {} } },
         },
     };
 
@@ -39,13 +41,21 @@ var CreateSLSVsource_bot = (function () {
         promptGraphUriFn: "enter source graphUri",
         listImportsFn: "add import ",
         saveFn: "create source",
+        uploadFromUrlFn:"enter graph URL",
+        uploadFromFileFn:"choose graph file",
     };
     self.functions = {
         createSLSVsourceFn: function () {
             BotEngine.nextStep();
         },
         promptSourceNameFn: function () {
-            BotEngine.promptValue("source label", "sourceLabel");
+            BotEngine.promptValue("source label", "sourceLabel","http://",function(value){
+                if(!value)
+                    BotEngine.previousStep()
+                BotEngine.nextStep()
+
+
+            });
         },
         promptGraphUriFn: function () {
             BotEngine.promptValue("graph Uri", "graphUri", "http://");
@@ -61,13 +71,43 @@ var CreateSLSVsource_bot = (function () {
             BotEngine.previousStep();
         },
 
+
+        uploadFromUrlFn: function () {
+            BotEngine.promptValue("enter graph Url",uploadUrl)
+        },
+        uploadFromFileFn: function () {
+
+           alert( "coming soon")
+            self.params.uploadFile=true
+            BotEngine.nextStep()
+        },
+
         saveFn: function () {
-            Lineage_createSource.createSource(self.params.sourceLabel, self.params.graphUri, self.params.imports, function (err, result) {
-                if (err) {
-                    return alert(err);
+            async.series([
+
+              function(callbackSeries){
+                  Lineage_createSource.createSource(self.params.sourceLabel, self.params.graphUri, self.params.imports, function (err, result) {
+                      if (err) {
+                          return alert(err);
+                      }
+                      callbackSeries()
+
+                  });
+              },
+                function(callbackSeries){
+
                 }
-                return BotEngine.nextStep();
-            });
+
+
+
+              ]
+              ,function(err){
+                if(err)
+                     alert(err.responsetext);
+                  return BotEngine.nextStep();
+
+            })
+
         },
         loadLineage: function () {},
     };

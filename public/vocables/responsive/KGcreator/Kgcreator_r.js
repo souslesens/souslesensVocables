@@ -12,7 +12,7 @@ var KGcreator_r = (function () {
       
     };
     self.quit = function () {
-       
+        Lineage_sources.registerSource=ResponsiveUI.oldRegisterSource;
     };
     self.loadSource = function () {
         
@@ -39,7 +39,7 @@ var KGcreator_r = (function () {
         $(".vis-edit-mode").css("display", "none");
     };
     self.showMenuButtons=function(){
-        
+
     };
     self.initRunTab= function () {
         $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/runTab.html", function () {

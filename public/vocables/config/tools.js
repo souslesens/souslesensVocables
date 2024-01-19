@@ -1,5 +1,5 @@
 const allTools = {
-    lineage: { label: "Lineage", noSource: 0, controller: Lineage_whiteboard, toolDescriptionImg: null },
+    lineage: { label: "lineage", noSource: 0, controller: Lineage_whiteboard, toolDescriptionImg: null },
     KGcreator: { label: "KGcreator", noSource: 1, controller: KGcreator, toolDescriptionImg: null },
     KGquery: { label: "KGquery", noSource: 0, controller: KGquery, toolDescriptionImg: null },
     Standardizer: { label: "Standardizer", multiSources: 0, controller: Standardizer, toolDescriptionImg: null },

@@ -8,11 +8,18 @@ import CommonBotFunctions from "./commonBotFunctions.js";
 
 var CreateSLSVsource_bot = (function () {
     var self = {};
-
+    self.umountKGUploadApp = null;
+    self.createApp = null;
     self.title = "Create Source";
-
+    self.uploadFormData = {
+        displayForm: "file", // can be database, file or ""
+        currentSource: "",
+        selectedDatabase: "",
+        selectedFiles: [],
+        files:[],
+    };
     self.start = function () {
-        BotEngine.init(CreateSLSVsource_bot, null, function () {
+            BotEngine.init(CreateSLSVsource_bot, null, function () {
             self.params = { sourceLabel: "", graphUri: "", imports: [] };
             BotEngine.currentObj = self.workflow;
             BotEngine.nextStep(self.workflow);
@@ -49,7 +56,7 @@ var CreateSLSVsource_bot = (function () {
             BotEngine.nextStep();
         },
         promptSourceNameFn: function () {
-            BotEngine.promptValue("source label", "sourceLabel", "http://", function (value) {
+            BotEngine.promptValue("source label", "sourceLabel", "", function (value) {
                 if (!value) BotEngine.previousStep();
                 BotEngine.nextStep();
             });
@@ -72,9 +79,29 @@ var CreateSLSVsource_bot = (function () {
             BotEngine.promptValue("enter graph Url", uploadUrl);
         },
         uploadFromFileFn: function () {
-            alert("coming soon");
-            self.params.uploadFile = true;
-            BotEngine.nextStep();
+            var answer=window.confirm('This operation will create the source automatically after the file uploading, Make sure you have finished to make your imports');
+            if(!answer){
+                BotEngine.previousStep();
+            }
+            else{
+                var html = ' <div id="mount-upload-here"></div>';
+                $("#smallDialogDiv").html(html);
+                $("#smallDialogDiv").dialog({
+                    open: function (event, ui) {
+                        if (self.createApp === null) {
+                            throw new Error("React app is not ready");
+                        }
+                        self.uploadFormData.currentSource = self.params.sourceLabel;
+                        self.umountKGUploadApp = self.createApp(self.uploadFormData);
+                    },
+                    beforeClose: function () {
+                        self.umountKGUploadApp();
+                    },
+                });
+                $("#smallDialogDiv").dialog("open");
+                BotEngine.nextStep();
+            }
+            
         },
 
         saveFn: function () {
@@ -85,10 +112,13 @@ var CreateSLSVsource_bot = (function () {
                             if (err) {
                                 return alert(err);
                             }
+                            
                             callbackSeries();
                         });
                     },
-                    function (callbackSeries) {},
+                    function (callbackSeries) {
+                        
+                    },
                 ],
                 function (err) {
                     if (err) alert(err.responsetext);
@@ -104,3 +134,6 @@ var CreateSLSVsource_bot = (function () {
 
 export default CreateSLSVsource_bot;
 window.CreateSLSVsource_bot = CreateSLSVsource_bot;
+// imports React app
+import("/assets/SourceCreatorUploading.js");
+

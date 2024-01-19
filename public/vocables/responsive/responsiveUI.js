@@ -15,10 +15,11 @@ var ResponsiveUI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.tools_available=['lineage','KGquery'];
+    self.tools_available=['lineage','KGquery','KGcreator'];
     self.alert = function (message) {};
     
     self.init = function () {
+        self.oldRegisterSource=Lineage_sources.registerSource;
         self.setSlsvCssClasses();
         var tools = Config.tools_available;
 
@@ -72,8 +73,8 @@ var ResponsiveUI = (function () {
     };
 
     self.onToolSelect = function (toolId) {
-        if (self.currentTool != "lineage" && self.currentTool != null) {
-            if(self.currentTool in self.tools_available){
+        if (self.currentTool != 'lineage' && self.currentTool != null) {
+            if(  self.tools_available.includes(self.currentTool)){
                 window[self.currentTool + "_r"].quit();
             }
             
@@ -85,6 +86,7 @@ var ResponsiveUI = (function () {
             self.currentTool = toolId;
         }
         if(toolId!='lineage'){
+            
             Lineage_sources.registerSource=self.registerSourceWithoutImports;
         }
         
@@ -143,7 +145,7 @@ var ResponsiveUI = (function () {
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
       
-        if (toolId == "lineage") {
+        if (toolId == 'lineage') {
             return Lineage_r.init();
         }else if (toolId == "KGquery") {
             return KGquery_r.init();

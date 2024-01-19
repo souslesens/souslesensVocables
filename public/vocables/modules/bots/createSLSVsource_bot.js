@@ -88,7 +88,13 @@ var CreateSLSVsource_bot = (function () {
                             callbackSeries();
                         });
                     },
-                    function (callbackSeries) {},
+                    function (callbackSeries) {
+                        if (self.params.uploadFile) {
+                            callbackSeries();
+                        } else {
+                            callbackSeries();
+                        }
+                    },
                 ],
                 function (err) {
                     if (err) alert(err.responsetext);

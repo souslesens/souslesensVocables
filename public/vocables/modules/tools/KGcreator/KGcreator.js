@@ -229,6 +229,7 @@ var KGcreator = (function () {
                         var table = obj.node.data.id;
                         self.currentConfig.currentDataSource.currentTable = table;
                         self.showTablesColumnTree(table, columns);
+                        self.showTableVirtualColumnsTree(table);
                     } else if (obj.node.data.type == "tableColumn") {
                     } else if (obj.node.data.type == "csvFileColumn") {
                     }
@@ -495,10 +496,14 @@ var KGcreator = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 MainController.UI.message(mappingsDir + "/" + source + "config saved");
-                if (callback) return callback();
+                if (callback) {
+                    return callback();
+                }
             },
             error: function (err) {
-                if (callback) return callback(err);
+                if (callback) {
+                    return callback(err);
+                }
                 alert(err);
             },
         });
@@ -586,6 +591,7 @@ var KGcreator = (function () {
                         if (columnMappings[column] || columnMappings["$_" + column]) {
                             label = "<span class='KGcreator_fileWithMappings'>" + column + "</span>";
                         }
+
                         jstreeData.push({
                             id: fileName + "_" + column,
                             text: label,
@@ -593,9 +599,23 @@ var KGcreator = (function () {
                             data: { id: column, table: fileName, label: column, type: "tableColumn" },
                         });
                     });
+                    self.currentConfig.currentMappings[fileName].virtualColumns.forEach(function (virtualColumn) {
+                        var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
+                        jstreeData.push({
+                            id: fileName + "_" + virtualColumn,
+                            text: label,
+                            parent: fileName,
+                            data: { id: virtualColumn, table: fileName, label: virtualColumn, type: "tableColumn" },
+                        });
+                    });
 
                     JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", fileName, jstreeData);
                     KGcreator_graph.graphColumnToClassPredicates([fileName]);
+                    callbackSeries();
+                },
+
+                function (callbackSeries) {
+                    self.showTableVirtualColumnsTree(fileName);
                     callbackSeries();
                 },
                 function (callbackSeries) {
@@ -643,6 +663,7 @@ var KGcreator = (function () {
             if (columnMappings[column]) {
                 label = "<span class='KGcreator_fileWithMappings'>" + column + "</span>";
             }
+            if (columnMappings[column] && columnMappings[column].indexOf("$V_") == 0) label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
 
             jstreeData.push({
                 id: table + "_" + column,
@@ -652,6 +673,24 @@ var KGcreator = (function () {
             });
         });
 
+        JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", table, jstreeData);
+        KGcreator_graph.graphColumnToClassPredicates([table]);
+    };
+
+    self.showTableVirtualColumnsTree = function (table) {
+        if (!self.currentConfig.currentMappings[table].virtualColumns) {
+            return;
+        }
+        var jstreeData = [];
+        self.currentConfig.currentMappings[table].virtualColumns.forEach(function (virtualColumn) {
+            var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
+            jstreeData.push({
+                id: table + "_" + virtualColumn,
+                text: label,
+                parent: table,
+                data: { id: virtualColumn, table: table, label: virtualColumn, type: "tableColumn" },
+            });
+        });
         JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", table, jstreeData);
         KGcreator_graph.graphColumnToClassPredicates([table]);
     };
@@ -781,6 +820,7 @@ var KGcreator = (function () {
                 columnTriples[triple[role]].push(triple);
             }
         });
+
         return columnTriples;
     };
 

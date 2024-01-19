@@ -98,6 +98,11 @@ var CommonBotFunctions = (function () {
                     columnClass = item.o;
                 }
             }
+            if (item.s == "$V_" + columnName) {
+                if (item.o.indexOf("owl:") < 0) {
+                    columnClass = item.o;
+                }
+            }
         });
         return columnClass;
     };

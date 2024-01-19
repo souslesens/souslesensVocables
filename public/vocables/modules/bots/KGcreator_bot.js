@@ -8,6 +8,7 @@ var KGcreator_bot = (function () {
     self.title = "Create mappings";
 
     self.start = function (columnObj) {
+        self.currentUri = null;
         self.currentColumn = columnObj;
         var workflow = null;
         if (columnObj) {
@@ -123,6 +124,7 @@ var KGcreator_bot = (function () {
 
         setUriTypeFn: function () {
             var choices = ["namedIndividual", "columnBlankNode", "virtualColumnBlankNode"];
+
             BotEngine.showList(choices, "uriType"); /*,null,false,function(value){
         self.params.uriType=value;
         BotEngine.nextStep()
@@ -219,10 +221,7 @@ var KGcreator_bot = (function () {
 
             var tripleModels = self.params.tripleModels;
 
-            var tripleSubject = column;
-            if (self.isColumnBlankNode(column)) {
-                tripleSubject = "$_" + tripleSubject;
-            }
+            if (!self.currentUri) self.currentUri = column;
 
             var triple = null;
 
@@ -235,17 +234,20 @@ var KGcreator_bot = (function () {
                         p: "rdf:type",
                         o: "ow:NamedIndividual",
                     };
+                    self.currentUri = column;
                     self.params.tripleModels.push(triple);
+                    return BotEngine.nextStep();
                 } else if (uriType == "columnBlankNode") {
-                    tripleSubject = "$_" + column;
+                    self.currentUri = column;
                     return BotEngine.nextStep();
                 } else if (uriType == "virtualColumnBlankNode") {
                     if (!KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns) {
                         KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns = [];
                     }
-                    tripleSubject = "$V_" + self.params.virtualColumnBlankNodeName;
-                    if (KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns.indexOf(tripleSubject) < 0) {
-                        KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns.push(tripleSubject);
+                    self.currentUri = "$V_" + self.params.virtualColumnBlankNodeName;
+
+                    if (KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns.indexOf(self.currentUri) < 0) {
+                        KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns.push(self.currentUri);
                     }
                     return BotEngine.nextStep();
                 }
@@ -254,20 +256,24 @@ var KGcreator_bot = (function () {
             if (resourceId) {
                 self.params.resourceId = null;
                 triple = {
-                    s: tripleSubject,
+                    s: self.currentUri,
                     p: "rdf:type",
                     o: resourceId,
                 };
                 self.params.tripleModels.push(triple);
+                self.functions.saveFn();
+                return BotEngine.nextStep();
             }
             if (valueType && valueColumn) {
                 self.params.valueType = null;
                 triple = {
-                    s: tripleSubject,
+                    s: self.currentUri,
                     p: valueType,
                     o: valueColumn,
                 };
                 self.params.tripleModels.push(triple);
+                self.functions.saveFn();
+                return BotEngine.nextStep();
             }
 
             if (propertyId && predicateObjectColumn) {
@@ -278,19 +284,18 @@ var KGcreator_bot = (function () {
                 }
 
                 triple = {
-                    s: tripleSubject,
+                    s: self.currentUri,
                     p: propertyId,
                     o: object,
                 };
                 self.params.tripleModels.push(triple);
+                self.functions.saveFn();
+                return BotEngine.nextStep();
             }
-            self.functions.saveFn();
-            //  KGcreator_mappings.columnJsonEditor.load(self.params.tripleModels);
-            //  KGcreator_mappings.updateColumnTriplesEditor()
-            BotEngine.nextStep();
         },
 
         saveFn: function () {
+            KGcreator_mappings.columnJsonEditor.load(self.params.tripleModels);
             KGcreator.currentConfig.currentMappings[self.params.table].tripleModels = self.params.tripleModels;
             KGcreator.saveDataSourceMappings(self.params.source, self.params.datasource.name, KGcreator.currentConfig.currentMappings, function (err, result) {
                 if (err) {

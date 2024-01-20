@@ -43,7 +43,7 @@ const KGbuilder_triplesWriter = {
 
         var params = { query: queryGraph };
 
-        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
             params.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,
@@ -79,7 +79,7 @@ const KGbuilder_triplesWriter = {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        sparqlServerUrl = result.default_sparql_url;
+                        sparqlServerUrl = result.sparql_server.url;
                         callbackSeries();
                     });
                 },
@@ -87,7 +87,7 @@ const KGbuilder_triplesWriter = {
                     var query = "clear graph   <" + graphUri + ">";
                     var params = { query: query };
 
-                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                         params.auth = {
                             user: ConfigManager.config.sparql_server.user,
                             pass: ConfigManager.config.sparql_server.password,
@@ -117,11 +117,11 @@ const KGbuilder_triplesWriter = {
             query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGbuilder_triplesMaker.mappingFilePredicate + "> '" + table + "'}";
         }
         else{
-            query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGbuilder_triplesMaker.mappingFilePredicate + "> ?table }";
+            query += "with  <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGbuilder_triplesMaker.mappingFilePredicate + "> ?table }";
 
         }
         var params = { query: query };
-        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
             params.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,
@@ -149,7 +149,7 @@ const KGbuilder_triplesWriter = {
         var query = KGbuilder_triplesWriter.getSparqlPrefixesStr();
         query += "DELETE DATA {  GRAPH <" + graphUri + "> {  " + insertTriplesStr + " }  } ";
         var params = { query: query };
-        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
             params.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,

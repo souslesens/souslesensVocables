@@ -238,13 +238,13 @@ var KGcreator_bot = (function () {
                     self.params.tripleModels.push(triple);
                     return BotEngine.nextStep();
                 } else if (uriType == "columnBlankNode") {
-                    self.currentUri = column;
+                    self.currentUri ="$_"+ column;
                     return BotEngine.nextStep();
                 } else if (uriType == "virtualColumnBlankNode") {
                     if (!KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns) {
                         KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns = [];
                     }
-                    self.currentUri = "$V_" + self.params.virtualColumnBlankNodeName;
+                    self.currentUri = "$_V_" + self.params.virtualColumnBlankNodeName;
 
                     if (KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns.indexOf(self.currentUri) < 0) {
                         KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns.push(self.currentUri);
@@ -262,6 +262,7 @@ var KGcreator_bot = (function () {
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();
+                KGcreator.showTableVirtualColumnsTree(self.params.table)
                 return BotEngine.nextStep();
             }
             if (valueType && valueColumn) {

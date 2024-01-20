@@ -19,6 +19,10 @@ var CommonBotFunctions = (function () {
 
     self.loadSourceOntologyModel = function (sourceLabel, withImports, callback) {
         var sources = [sourceLabel];
+        if(!Config.sources[sourceLabel]){
+            alert("Source not recognized")
+           return  BotEngine.previousStep()
+        }
         sources = sources.concat(Config.sources[sourceLabel].imports);
         async.eachSeries(
             sources,
@@ -98,11 +102,7 @@ var CommonBotFunctions = (function () {
                     columnClass = item.o;
                 }
             }
-            if (item.s == "$V_" + columnName) {
-                if (item.o.indexOf("owl:") < 0) {
-                    columnClass = item.o;
-                }
-            }
+
         });
         return columnClass;
     };

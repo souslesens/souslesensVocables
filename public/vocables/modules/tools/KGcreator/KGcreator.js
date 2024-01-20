@@ -663,9 +663,7 @@ var KGcreator = (function () {
             if (columnMappings[column]) {
                 label = "<span class='KGcreator_fileWithMappings'>" + column + "</span>";
             }
-            if (columnMappings[column] && columnMappings[column].indexOf("$V_") == 0) label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
-
-            jstreeData.push({
+              jstreeData.push({
                 id: table + "_" + column,
                 text: label,
                 parent: table,
@@ -710,6 +708,13 @@ var KGcreator = (function () {
             }
         });
         self.currentConfig.currentMappings[node.data.table].tripleModels = tableTriplesCopy;
+
+        var virtualColumns = self.currentConfig.currentMappings[node.data.table].virtualColumns;
+
+        var index=virtualColumns.indexOf(node.data.id)
+        if(index>-1)
+            virtualColumns.splice(index,1)
+
         self.saveDataSourceMappings();
     };
 

@@ -187,7 +187,7 @@ var KGbuilder_triplesMaker = {
       subjectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
       return callback(null, subjectStr);
     }
-    else if (typeof mapping.s === "string" && mapping.s.indexOf("$_") == 0 || mapping.isSubjectBlankNode) {
+    else if (typeof mapping.s === "string" && (mapping.s.indexOf("$_") == 0 ||mapping.s.indexOf("$_") == 0 ) || mapping.isSubjectBlankNode) {
       // virtual column
       if (typeof mapping.o === "string" && (mapping.o.indexOf("$_") != 0 && !mapping.isObjectBlankNode) && KGbuilder_triplesMaker.allColumns[mapping.o] && !line[mapping.o]) {
         // ne pas creer des triplest sans objet
@@ -285,6 +285,7 @@ var KGbuilder_triplesMaker = {
         objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
         return callback(null, objectStr);
       }
+
       else {
         if (!line[mapping.o] || line[mapping.o] == "null") {
           return callback(null, null);

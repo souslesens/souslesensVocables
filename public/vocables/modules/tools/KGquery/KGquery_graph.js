@@ -160,7 +160,7 @@ var KGquery_graph = (function () {
         var dataTypes = {};
         var existingNodes = {};
         var visjsData = { nodes: [], edges: [] };
-        var sources = Config.sources[source].imports;
+        var sources =Config.sources[source].imports;
         if (!sources) {
             sources = [];
         }

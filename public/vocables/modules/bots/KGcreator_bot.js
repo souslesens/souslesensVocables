@@ -63,7 +63,7 @@ var KGcreator_bot = (function () {
         _OR: {
             "set value": { listValueTypeFn: { setValueColumnFn: { addMappingToModelFn: {} } } },
             // "set predicate": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "listTableColumnsFn": { "addMappingToModel": {} } } } },
-            "set predicate": {
+            "set Object predicate": {
                 listTableColumnsFn: {
                     checkColumnTypeFn: {
                         _OR: {
@@ -74,6 +74,8 @@ var KGcreator_bot = (function () {
                     },
                 },
             },
+            "set DataType property": { listTableColumnsFn:{listDataTypeVocabsFn:{listDataTypePropertiesFn: {  addMappingToModelFn: {} } }} },
+
             "save mapping": { saveFn: {} },
             "new Mapping": {},
         },
@@ -90,7 +92,7 @@ var KGcreator_bot = (function () {
             _OR: {
                 columnBlankNode: { addMappingToModelFn: self.workflowRdfType },
                 virtualColumnBlankNode: { virtualColumnBlankNodeFn: { addMappingToModelFn: self.workflowRdfType } },
-                namedIndividual: { addMappingToModelFn: { addMappingToModelFn: self.workflowRdfType } },
+                namedIndividual: { addMappingToModelFn:  self.workflowRdfType  },
             },
         },
     };
@@ -174,6 +176,7 @@ var KGcreator_bot = (function () {
         },
 
         targetColumnKoFn: function () {
+
             alert("target column " + self.params.predicateObjectColumn + " needs a rdf:type predicate before linking");
             BotEngine.reset();
         },
@@ -193,6 +196,16 @@ var KGcreator_bot = (function () {
                 //  CommonBotFunctions.sortList(properties)
                 BotEngine.showList(properties, "propertyId");
             });
+        },
+
+
+        listDataTypeVocabsFn: function () {
+            // filter properties compatible with
+            CommonBotFunctions.listVocabsFn(self.params.source, "dataTypePropVocab",true );
+        },
+        listDataTypePropertiesFn: function () {
+            // filter properties compatible with
+            CommonBotFunctions.listVocabPropertiesFn(self.params.dataTypePropVocab, "propertyId" );
         },
 
         listVocabPropertiesFn: function () {

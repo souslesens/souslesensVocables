@@ -939,6 +939,59 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
         }
     };
 
+
+
+    self.getInferredAnnotationProperties = function (source, options, callback) {
+        if (!options) {
+            options = {};
+        }
+
+        var metaDataProps="&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>)"
+        if(options.withSLSmetadata)
+            metaDataProps= "&& ?prop not in (rdf:type)"
+
+        var sourceGraphUri = Config.sources[source].graphUri;
+        if (!sourceGraphUri) {
+            return callback("source " + source + " not declared");
+        }
+        var sourceGraphUriFrom = Sparql_common.getFromStr(source, false, true);
+        var genericVocabsGraphUriFrom=""
+      for(var vocab in Config.basicVocabularies) {
+          genericVocabsGraphUriFrom+=" "+ Sparql_common.getFromStr(vocab, false, false);
+      }
+
+
+        var query="PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+          "SELECT   distinct ?class ?prop   " +
+          sourceGraphUriFrom+" "+genericVocabsGraphUriFrom+
+          "   where {\n" +
+          " {?class rdfs:label ?classLabel.\n" +
+          "    ?prop rdfs:label ?propLabel.\n" +
+          "  }"+
+          " { GRAPH <"+sourceGraphUri+"> {\n" +
+          "    ?s rdf:type ?class\n" +
+          "  }\n" +
+          " }\n" +
+          " {\n" +
+          "   ?s ?prop ?o.\n" +
+          "    ?prop rdf:type ?type. filter (?type in (rdf:Property,owl:AnnotationProperty)"+metaDataProps+")\n" +
+          "  }\n" +
+          "}"
+        let url = Config.sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "class"] );
+
+            //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
+            return callback(null, result.results.bindings);
+        });
+
+    }
+
     self.getInferredClassValueDataTypes = function (source, options, callback) {
         if (!options) {
             options = {};

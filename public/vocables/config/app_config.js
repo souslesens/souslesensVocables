@@ -103,8 +103,7 @@ var Config = (function () {
         "iof-av": { graphUri: "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/" },
         skos: { graphUri: "http://www.w3.org/2004/02/skos/core/" },
         dcterms: { graphUri: "http://purl.org/dc/terms/" },
-      //  dc: { graphUri: "http://purl.org/dc/elements/1.1/" },
-
+        dc: { graphUri: "http://purl.org/dc/elements/1.1/" },
     };
 
     self.ontologiesVocabularyModels = JSON.parse(JSON.stringify(self.basicVocabularies));

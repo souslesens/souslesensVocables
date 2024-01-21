@@ -62,8 +62,7 @@ var KGcreator_bot = (function () {
     self.workflowColumnmMappingOther = {
         _OR: {
             "set value": { listValueTypeFn: { setValueColumnFn: { addMappingToModelFn: {} } } },
-            // "set predicate": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "listTableColumnsFn": { "addMappingToModel": {} } } } },
-            "set Object predicate": {
+            "set object predicate": {
                 listTableColumnsFn: {
                     checkColumnTypeFn: {
                         _OR: {
@@ -74,7 +73,7 @@ var KGcreator_bot = (function () {
                     },
                 },
             },
-            "set DataType property": { listTableColumnsFn:{listDataTypeVocabsFn:{listDataTypePropertiesFn: {  addMappingToModelFn: {} } }} },
+            "set annotation predicate": { listAnnotationPropertiesVocabsFn: { listAnnotationPropertiesFn: { listTableColumnsFn: { addMappingToModelFn: {} } } } },
 
             "save mapping": { saveFn: {} },
             "new Mapping": {},
@@ -92,7 +91,7 @@ var KGcreator_bot = (function () {
             _OR: {
                 columnBlankNode: { addMappingToModelFn: self.workflowRdfType },
                 virtualColumnBlankNode: { virtualColumnBlankNodeFn: { addMappingToModelFn: self.workflowRdfType } },
-                namedIndividual: { addMappingToModelFn:  self.workflowRdfType  },
+                namedIndividual: { addMappingToModelFn: self.workflowRdfType },
             },
         },
     };
@@ -114,6 +113,8 @@ var KGcreator_bot = (function () {
         listPropertiesFn: " Choose a property",
         listTableColumnsFn: "Choose a  a column for predicate object ",
         virtualColumnBlankNode: "Enter virtual column name",
+        listAnnotationPropertiesVocabsFn: " Choose annnotation property vocabulary",
+        listAnnotationPropertiesVocabsFn: " Choose annnotation property ",
     };
 
     self.functions = {
@@ -138,6 +139,9 @@ var KGcreator_bot = (function () {
         },
         listPredicateVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(self.params.source, "predicateVocab");
+        },
+        listAnnotationPropertiesVocabsFn: function () {
+            CommonBotFunctions.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
         },
         listClassesFn: function () {
             CommonBotFunctions.listVocabClasses(self.params.classVocab, "resourceId");
@@ -176,7 +180,6 @@ var KGcreator_bot = (function () {
         },
 
         targetColumnKoFn: function () {
-
             alert("target column " + self.params.predicateObjectColumn + " needs a rdf:type predicate before linking");
             BotEngine.reset();
         },
@@ -198,14 +201,9 @@ var KGcreator_bot = (function () {
             });
         },
 
-
-        listDataTypeVocabsFn: function () {
+        listAnnotationPropertiesFn: function () {
             // filter properties compatible with
-            CommonBotFunctions.listVocabsFn(self.params.source, "dataTypePropVocab",true );
-        },
-        listDataTypePropertiesFn: function () {
-            // filter properties compatible with
-            CommonBotFunctions.listVocabPropertiesFn(self.params.dataTypePropVocab, "propertyId" );
+            CommonBotFunctions.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
         },
 
         listVocabPropertiesFn: function () {
@@ -228,6 +226,7 @@ var KGcreator_bot = (function () {
             var propertyId = self.params.propertyId;
             var predicateObjectId = self.params.predicateObjectId;
             var predicateObjectColumn = self.params.predicateObjectColumn;
+            var annotationPropertyId = self.params.annotationPropertyId;
 
             var valueType = self.params.valueType;
             var valueColumn = self.params.valueColumn;
@@ -251,7 +250,7 @@ var KGcreator_bot = (function () {
                     self.params.tripleModels.push(triple);
                     return BotEngine.nextStep();
                 } else if (uriType == "columnBlankNode") {
-                    self.currentUri ="$_"+ column;
+                    self.currentUri = "$_" + column;
                     return BotEngine.nextStep();
                 } else if (uriType == "virtualColumnBlankNode") {
                     if (!KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns) {
@@ -275,7 +274,7 @@ var KGcreator_bot = (function () {
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();
-                KGcreator.showTableVirtualColumnsTree(self.params.table)
+                KGcreator.showTableVirtualColumnsTree(self.params.table);
                 return BotEngine.nextStep();
             }
             if (valueType && valueColumn) {
@@ -301,6 +300,18 @@ var KGcreator_bot = (function () {
                     s: self.currentUri,
                     p: propertyId,
                     o: object,
+                };
+                self.params.tripleModels.push(triple);
+                self.functions.saveFn();
+                return BotEngine.nextStep();
+            }
+            if (annotationPropertyId && predicateObjectColumn) {
+                self.params.annotationPropertyId = null;
+                triple = {
+                    s: self.currentUri,
+                    p: annotationPropertyId,
+                    o: predicateObjectColumn,
+                    isString: true,
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();

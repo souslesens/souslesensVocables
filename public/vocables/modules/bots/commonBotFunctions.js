@@ -19,10 +19,9 @@ var CommonBotFunctions = (function () {
 
     self.loadSourceOntologyModel = function (sourceLabel, withImports, callback) {
         var sources = [sourceLabel];
-        if(!Config.sources[sourceLabel]){
-            alert("Source not recognized")
-            return    BotEngine.reset()
-
+        if (!Config.sources[sourceLabel]) {
+            alert("Source not recognized");
+            return; // BotEngine.reset();
         }
         sources = sources.concat(Config.sources[sourceLabel].imports);
         async.eachSeries(
@@ -38,7 +37,7 @@ var CommonBotFunctions = (function () {
         );
     };
 
-    self.listVocabsFn = function (sourceLabel, varToFill, includBasicVocabs) {
+    self.listVocabsFn = function (sourceLabel, varToFill, includeBasicVocabs) {
         var vocabs = [{ id: sourceLabel, label: sourceLabel }];
         var imports = Config.sources[sourceLabel].imports;
         if (!imports) {
@@ -47,7 +46,7 @@ var CommonBotFunctions = (function () {
         imports.forEach(function (importSource) {
             vocabs.push({ id: importSource, label: importSource });
         });
-        if (includBasicVocabs) {
+        if (includeBasicVocabs) {
             for (var key in Config.basicVocabularies) {
                 vocabs.push({ id: key, label: key });
             }
@@ -95,6 +94,33 @@ var CommonBotFunctions = (function () {
         });
     };
 
+    self.listAnnotationPropertiesFn = function (vocabs, varToFill) {
+        if (!vocabs) vocabs = Object.keys(Config.ontologiesVocabularyModels);
+        if (!Array.isArray(vocabs)) {
+            vocabs = [vocabs];
+        }
+        var props = [];
+        async.eachSeries(
+            vocabs,
+            function (vocab, callbackEach) {
+                OntologyModels.registerSourcesModel(vocab, function (err, result) {
+                    for (var key in Config.ontologiesVocabularyModels[vocab].annotationProperties) {
+                        var prop = Config.ontologiesVocabularyModels[vocab].annotationProperties[key];
+                        props.push({ id: prop.id, label: vocab + ":" + prop.label });
+                    }
+                    callbackEach();
+                });
+            },
+            function (err) {
+                if (props.length == 0) {
+                    return BotEngine.previousStep("no values found, try another option");
+                }
+                self.sortList(props);
+                BotEngine.showList(props, varToFill);
+            }
+        );
+    };
+
     self.getColumnClass = function (tripleModels, columnName) {
         var columnClass = null;
         tripleModels.forEach(function (item) {
@@ -103,7 +129,6 @@ var CommonBotFunctions = (function () {
                     columnClass = item.o;
                 }
             }
-
         });
         return columnClass;
     };

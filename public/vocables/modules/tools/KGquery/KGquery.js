@@ -18,7 +18,8 @@ import KGquery_myQueries from "./KGquery_myQueries.js";
 import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
-import KGquery_bot from "../../bots/KGquery_bot.js";
+import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
+import KGquery_annotations_bot from "../../bots/KGquery_annotations_bot.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
 
 var KGquery = (function () {
@@ -196,7 +197,7 @@ var KGquery = (function () {
             varName: self.getVarName(aClass, true),
         };
 
-        KGquery_bot.start(currentFilterQuery, function (err, result) {
+        KGquery_filter_bot.start(currentFilterQuery, function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }

@@ -8,7 +8,7 @@ import KGcreator_graph from "./KGcreator_graph.js";
 import KGcreator_mappings from "./KGcreator_mappings.js";
 import KGcreator_run from "./KGcreator_run.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
-import KGcreator_bot from "../../bots/KGcreator_bot.js";
+import KGcreator_bot_filter from "../../bots/KGcreator_bot.js";
 
 var KGcreator = (function () {
     var self = {};
@@ -314,7 +314,7 @@ var KGcreator = (function () {
                             label: "mappingBot",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_bot.start(node);
+                                KGcreator_bot_filter.start(node);
                             },
                         };
 
@@ -663,7 +663,7 @@ var KGcreator = (function () {
             if (columnMappings[column]) {
                 label = "<span class='KGcreator_fileWithMappings'>" + column + "</span>";
             }
-              jstreeData.push({
+            jstreeData.push({
                 id: table + "_" + column,
                 text: label,
                 parent: table,
@@ -711,9 +711,8 @@ var KGcreator = (function () {
 
         var virtualColumns = self.currentConfig.currentMappings[node.data.table].virtualColumns;
 
-        var index=virtualColumns.indexOf(node.data.id)
-        if(index>-1)
-            virtualColumns.splice(index,1)
+        var index = virtualColumns.indexOf(node.data.id);
+        if (index > -1) virtualColumns.splice(index, 1);
 
         self.saveDataSourceMappings();
     };

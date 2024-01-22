@@ -189,6 +189,12 @@
     display: flex !important;
     justify-content: center;
 }
+.KGcreator-tabDiv{
+    .slsv-tabDiv;
+    width: 50% !important;
+    display: flex !important;
+    justify-content: center;
+}
 .slsv-selectedTabDiv {
     background: @background-color;
     border-bottom: 0px !important ;

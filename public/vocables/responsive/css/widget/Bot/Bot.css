@@ -1,0 +1,48 @@
+#botPanel {
+    background-color: @background-color;
+    margin: 5px;
+    padding: 3px;
+    height: 500px;
+    width: 500px;
+    border-radius: 14px;
+}
+#bot_resourcesProposalSelect {
+    background-color: @background-color;
+    border-radius: 14px;
+    color: @button1-color;
+    overflow: auto;
+    padding: 5px;
+    margin-top: 20px;
+    width: 96%;
+}
+
+.chat-left{
+    background-color: @dark-background-color;
+    border-radius:14px;
+    width: fit-content;
+    color:@button1-color;
+    padding:5px;
+    margin:3px;
+
+}
+.chat{
+    background-color: @dark-background-color;
+    border-radius:14px;
+    width: fit-content;
+    color:@button1-color;
+    padding:5px;
+    margin:3px;
+
+}
+.chat-left{
+    .chat;
+    justify-self: start;
+    margin-left: 10px;
+}
+.chat-right{
+    .chat;
+    justify-self: end;
+    margin-right: 10px;
+}
+
+

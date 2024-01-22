@@ -1,0 +1,35 @@
+
+
+<div id="KGcreator_runmappingsTab" style="display: flex; flex-direction: row">
+    <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
+        <!--
+        <div class="lineage_button_group" style="width: 600px">
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createTriples(true)">View Sample triples</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.testSelectedMappings()">test Selected Mappings</button>
+           
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createTriples()">Create triples</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.stopCreateTriples()">Abort</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createAllMappingsTriples()">Recreate graph</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.indexGraph()">Index graph</button>
+            
+        </div>
+        <div class="lineage_button_group" style="width: 600px">
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.deleteKGcreatorTriples()">delete current file triples</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="KGcreator_deleteKGcreatorTriplesBtn" onclick="KGcreator_run.deleteKGcreatorTriples('all')">
+                delete ALL KGreator triples
+            </button>
+            <button onclick="KGcreator.migrateOldMappings()">migrateOldMappings</button>
+            
+
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="display: none" id="KGcreator_saveFileButton" onclick="KGcreator_run.saveFile()">Save file</button>
+        </div>
+        -->
+        <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
+            <textarea style="width: 700px; height: 740px; overflow: auto" id="KGcreator_infosDiv"></textarea>
+            <div>
+                <pre style="width: 600px; height: 700px" id="KGcreator_run_mappingsGraphEditor"></pre>
+                <button onclick="KGcreator_run.saveDetailedMappings()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>

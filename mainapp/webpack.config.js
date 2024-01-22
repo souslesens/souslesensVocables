@@ -7,6 +7,7 @@ module.exports = {
     entry: {
         mainapp: "./src/index.tsx",
         kg_upload_app: "./src/kg-upload-app.tsx",
+        SourceCreatorUploading: "./src/SourceCreatorUploading.tsx",
     },
     output: {
         path: path.resolve(__dirname, "static/"),

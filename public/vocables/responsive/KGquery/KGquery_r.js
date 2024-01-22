@@ -26,6 +26,7 @@ var KGquery_r = (function () {
         Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
         SavedQueriesComponent.showDialog = self.oldshowDialog;
         window.KGquery_controlPanel = self.oldKGquery_controlPanel;
+        Lineage_sources.registerSource=ResponsiveUI.oldRegisterSource;
         //reapply changed DOM
 
         $("#KGquery_messageDiv").attr("id", "messageDiv");

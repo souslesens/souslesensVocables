@@ -38,8 +38,9 @@ var Lineage_createSource = (function () {
                         return callbackSeries(err);
                     });
                 },
-
+                // load probably need to be after in a separate step or it will erase callback
                 //load private source in lineage
+                /*
                 function (callbackSeries) {
                     var url = window.location.href;
                     var p = url.indexOf("?");
@@ -49,6 +50,7 @@ var Lineage_createSource = (function () {
                     url += "?tool=lineage&source=" + sourceName;
                     window.location.href = url;
                 },
+                */
             ],
             function (err) {
                 if (err) {

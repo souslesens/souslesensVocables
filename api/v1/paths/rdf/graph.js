@@ -67,7 +67,12 @@ module.exports = function () {
             }
 
             // append data to file (create it first time)
-            fs.appendFileSync(tmpPath, file.data);
+            try{
+                fs.appendFileSync(tmpPath, file.data)
+            }
+            catch(error2){
+                console.log(error2);
+            };
 
             // last chunk, upload file to endpoint
             if (last) {

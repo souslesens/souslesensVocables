@@ -41,6 +41,8 @@ var ResponsiveUI = (function () {
         );
         self.themeList();
         self.replaceFile(BotEngine,BotEngineResponsive);
+        
+        
     };
     self.initMenuBar = function (callback) {
         $("#ChangeSourceButton").show();
@@ -282,6 +284,13 @@ var ResponsiveUI = (function () {
 
     self.changeTheme = function (ThemeName) {
         var themeSelected = Config.slsvColorThemes[ThemeName];
+        
+        if(themeSelected['@logoInstance-icon']==undefined || themeSelected['@logoInstance-icon']==''){
+            $('#externalLogoDiv').hide();
+        }
+        else{
+            $('#externalLogoDiv').show();
+        }
         less.modifyVars(themeSelected);
     };
     self.hideShowMenuBar = function (button) {
@@ -367,6 +376,9 @@ var ResponsiveUI = (function () {
            
         });
     }
+
+        
+ 
 
     return self;
 })();

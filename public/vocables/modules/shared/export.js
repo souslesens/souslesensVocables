@@ -17,9 +17,13 @@ var Export = (function () {
 
         var nodesFromMap = {};
 
+        var linkedNodes = {};
+
         edges.forEach(function (edge) {
             if (!nodesFromMap[edge.from]) {
                 nodesFromMap[edge.from] = [];
+                linkedNodes[edge.from] = 1;
+                linkedNodes[edge.to] = 1;
             }
             nodesFromMap[edge.from].push(edge);
         });
@@ -58,6 +62,15 @@ var Export = (function () {
                     dataset.push(line);
                 });
             });
+
+            //nodes without edges
+
+            nodes.forEach(function (node) {
+                if (linkedNodes[node.id]) return;
+                var line = [node.label, "", "", node.id, "edge.id", "edge.to"];
+                dataset.push(line);
+            });
+
             MainController.UI.message("", true);
             var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
             Export.showDataTable(divId, cols, dataset, null, { fixedColumns: 1, columnDefs: columnDefs });

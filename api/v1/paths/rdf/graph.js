@@ -5,6 +5,7 @@ const { sourceModel, SourceModel } = require("../../../../model/sources");
 const { ulid } = require("ulid");
 const path = require("path");
 const fs = require("fs");
+const os = require("node:os");
 
 module.exports = function () {
     let operations = {
@@ -42,9 +43,9 @@ module.exports = function () {
         const clean = req.body.clean;
         const file = req.files.data;
 
-        const tmpPath = `/tmp/${id}.nt`;
-        const uploadedPath = path.resolve("data/uploaded_rdf_data");
-        const filePathToUpload = `${uploadedPath}/${id}.nt`;
+        const tmpPath = path.resolve(os.tmpdir(), `${id}.nt`);
+        const uploadedPath = path.resolve("data", "uploaded_rdf_data");
+        const filePathToUpload = path.resolve(uploadedPath, `${id}.nt`);
 
         try {
             const sourceName = req.body.source;

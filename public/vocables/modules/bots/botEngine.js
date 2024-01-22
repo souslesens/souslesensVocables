@@ -165,6 +165,7 @@ var BotEngine = (function () {
 
     self.promptValue = function (message, varToFill, defaultValue, callback) {
         self.clearProposalSelect();
+        $("#botPromptInput").focus();
         $("#botPromptInput").on("keyup", function (key) {
             if (event.keyCode == 13 || event.keyCode == 9) {
                 $("#botPromptInput").css("display", "none");

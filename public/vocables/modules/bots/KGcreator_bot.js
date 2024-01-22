@@ -8,6 +8,7 @@ var KGcreator_bot = (function () {
     self.title = "Create mappings";
 
     self.start = function (columnObj) {
+        self.currentUri = null;
         self.currentColumn = columnObj;
         var workflow = null;
         if (columnObj) {
@@ -60,8 +61,7 @@ var KGcreator_bot = (function () {
 
     self.workflowColumnmMappingOther = {
         _OR: {
-            "set RDF type": { listClassVocabsFn: { listClassesFn: { addMappingToModel: {} } } },
-            "set value": { listValueTypeFn: { setValueColumnFn: { addMappingToModel: {} } } },
+            "set value": { listValueTypeFn: { setValueColumnFn: { addMappingToModelFn: {} } } },
             // "set predicate": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "listTableColumnsFn": { "addMappingToModel": {} } } } },
             "set predicate": {
                 listTableColumnsFn: {
@@ -69,7 +69,7 @@ var KGcreator_bot = (function () {
                         _OR: {
                             KO: { targetColumnKoFn: {} },
                             //  "OK": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "addMappingToModel": {} } } }
-                            OK: { listFilteredPropertiesFn: { addMappingToModel: {} } },
+                            OK: { listFilteredPropertiesFn: { addMappingToModelFn: {} } },
                         },
                     },
                 },
@@ -78,13 +78,19 @@ var KGcreator_bot = (function () {
             "new Mapping": {},
         },
     };
+    self.workflowRdfType = {
+        _OR: {
+            "set rdf:type": { listClassVocabsFn: { listClassesFn: { addMappingToModelFn: {} } } },
+            "no rdf:type": self.workflowColumnmMappingOther,
+        },
+    };
 
     self.workflowColumnMappingType = {
         setUriTypeFn: {
             _OR: {
-                columnBlankNodeOnColumn: { addMappingToModelFn: self.workflowColumnmMappingOther },
-                joinBlankNode: { joinBlankNodeFn: { addMappingToModelFn: self.workflowColumnmMappingOther } },
-                namedIndividual: { addMappingToModel: self.workflowColumnmMappingOther },
+                columnBlankNode: { addMappingToModelFn: self.workflowRdfType },
+                virtualColumnBlankNode: { virtualColumnBlankNodeFn: { addMappingToModelFn: self.workflowRdfType } },
+                namedIndividual: { addMappingToModelFn: { addMappingToModelFn: self.workflowRdfType } },
             },
         },
     };
@@ -105,6 +111,7 @@ var KGcreator_bot = (function () {
         listClassesFn: "Choose a class",
         listPropertiesFn: " Choose a property",
         listTableColumnsFn: "Choose a  a column for predicate object ",
+        virtualColumnBlankNode: "Enter virtual column name",
     };
 
     self.functions = {
@@ -116,7 +123,8 @@ var KGcreator_bot = (function () {
         },
 
         setUriTypeFn: function () {
-            var choices = ["columnBlankNodeOnColumn", "joinBlankNode", "namedIndividual"];
+            var choices = ["namedIndividual", "columnBlankNode", "virtualColumnBlankNode"];
+
             BotEngine.showList(choices, "uriType"); /*,null,false,function(value){
         self.params.uriType=value;
         BotEngine.nextStep()
@@ -143,6 +151,11 @@ var KGcreator_bot = (function () {
 
         listTableColumnsFn: function () {
             var columns = KGcreator.currentConfig.currentDataSource.tables[self.params.table];
+            var virtualColumns = KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns;
+            if (virtualColumns) {
+                columns = columns.concat(virtualColumns);
+            }
+
             BotEngine.showList(columns, "predicateObjectColumn");
         },
 
@@ -187,8 +200,8 @@ var KGcreator_bot = (function () {
             CommonBotFunctions.listVocabPropertiesFn(self.params.predicateVocab, "propertyId");
         },
 
-        joinBlankNodeFn: function () {
-            BotEngine.promptValue("enter blankNode name", "joinBlankNode", null, function (value) {});
+        virtualColumnBlankNodeFn: function () {
+            BotEngine.promptValue("enter virtualColumn name", "virtualColumnBlankNodeName");
         },
 
         addMappingToModelFn: function () {
@@ -208,14 +221,12 @@ var KGcreator_bot = (function () {
 
             var tripleModels = self.params.tripleModels;
 
-            var tripleSubject = column;
-            if (self.isColumnBlankNode(column)) {
-                tripleSubject = "$_" + tripleSubject;
-            }
+            if (!self.currentUri) self.currentUri = column;
 
             var triple = null;
 
             if (uriType) {
+                self.params.uriType = null;
                 var str = "";
                 if (uriType == "namedIndividual") {
                     triple = {
@@ -223,49 +234,68 @@ var KGcreator_bot = (function () {
                         p: "rdf:type",
                         o: "ow:NamedIndividual",
                     };
+                    self.currentUri = column;
                     self.params.tripleModels.push(triple);
-                } else if (uriType == "blankNode") {
-                    tripleSubject = "$_" + column;
+                    return BotEngine.nextStep();
+                } else if (uriType == "columnBlankNode") {
+                    self.currentUri = column;
+                    return BotEngine.nextStep();
+                } else if (uriType == "virtualColumnBlankNode") {
+                    if (!KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns) {
+                        KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns = [];
+                    }
+                    self.currentUri = "$V_" + self.params.virtualColumnBlankNodeName;
+
+                    if (KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns.indexOf(self.currentUri) < 0) {
+                        KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns.push(self.currentUri);
+                    }
+                    return BotEngine.nextStep();
                 }
             }
 
             if (resourceId) {
+                self.params.resourceId = null;
                 triple = {
-                    s: tripleSubject,
+                    s: self.currentUri,
                     p: "rdf:type",
                     o: resourceId,
                 };
                 self.params.tripleModels.push(triple);
+                self.functions.saveFn();
+                return BotEngine.nextStep();
             }
             if (valueType && valueColumn) {
+                self.params.valueType = null;
                 triple = {
-                    s: tripleSubject,
+                    s: self.currentUri,
                     p: valueType,
                     o: valueColumn,
                 };
                 self.params.tripleModels.push(triple);
+                self.functions.saveFn();
+                return BotEngine.nextStep();
             }
 
             if (propertyId && predicateObjectColumn) {
+                self.params.propertyId = null;
                 var object = predicateObjectColumn;
                 if (self.isColumnBlankNode(predicateObjectColumn)) {
                     object = "$_" + predicateObjectColumn;
                 }
 
                 triple = {
-                    s: tripleSubject,
+                    s: self.currentUri,
                     p: propertyId,
                     o: object,
                 };
                 self.params.tripleModels.push(triple);
+                self.functions.saveFn();
+                return BotEngine.nextStep();
             }
-            self.functions.saveFn();
-            //  KGcreator_mappings.columnJsonEditor.load(self.params.tripleModels);
-            //  KGcreator_mappings.updateColumnTriplesEditor()
-            BotEngine.nextStep();
         },
 
         saveFn: function () {
+            KGcreator_mappings.columnJsonEditor.load(self.params.tripleModels);
             KGcreator.currentConfig.currentMappings[self.params.table].tripleModels = self.params.tripleModels;
             KGcreator.saveDataSourceMappings(self.params.source, self.params.datasource.name, KGcreator.currentConfig.currentMappings, function (err, result) {
                 if (err) {
@@ -278,7 +308,9 @@ var KGcreator_bot = (function () {
     };
     self.isColumnBlankNode = function (columnName, role) {
         var isBlankNode = false;
-        if (!role) role = "s";
+        if (!role) {
+            role = "s";
+        }
         KGcreator.currentConfig.currentMappings[self.params.table].tripleModels.forEach(function (item) {
             if (item[role] == "$_" + columnName) {
                 isBlankNode = true;

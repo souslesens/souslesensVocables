@@ -41,7 +41,7 @@ export default function GraphManagement() {
     const [displayModal, setDisplayModal] = useState<string | null>(null);
 
     useEffect(() => {
-            void fetchSources();
+        void fetchSources();
         void fetchConfig();
         (async () => {
             const response = await fetchMe();

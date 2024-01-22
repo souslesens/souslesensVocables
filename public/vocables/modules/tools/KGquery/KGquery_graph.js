@@ -119,30 +119,30 @@ var KGquery_graph = (function () {
                         callbackSeries();
                     });
                 },
-              // load annotationProperties
+                // load annotationProperties
                 function (callbackSeries) {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
-                OntologyModels.getInferredAnnotationProperties(source,{},function(err, result){
-                    if(err) {
-                        return callbackSeries(err)
-                    }
-                        var annotationPropertiesmap={}
-                        result.forEach(function(item){
-                            if(!annotationPropertiesmap[item.class.value]){
-                                annotationPropertiesmap[item.class.value]={label:item.classLabel.value,id:item.class.value,properties:[]}
-                            }
-                            annotationPropertiesmap[item.class.value].properties.push({label:item.propLabel.value,id:item.prop.value})
-                        })
-                    visjsData.nodes.forEach(function(node){
-                        if( annotationPropertiesmap[node.data.id]){
-                            node.data.annotationProperties=annotationPropertiesmap[node.data.id].properties
+                    OntologyModels.getInferredAnnotationProperties(source, {}, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
                         }
-                    })
-                    callbackSeries();
-                })
-                }
+                        var annotationPropertiesmap = {};
+                        result.forEach(function (item) {
+                            if (!annotationPropertiesmap[item.class.value]) {
+                                annotationPropertiesmap[item.class.value] = { label: item.classLabel.value, id: item.class.value, properties: [] };
+                            }
+                            annotationPropertiesmap[item.class.value].properties.push({ label: item.propLabel.value, id: item.prop.value });
+                        });
+                        visjsData.nodes.forEach(function (node) {
+                            if (annotationPropertiesmap[node.data.id]) {
+                                node.data.annotationProperties = annotationPropertiesmap[node.data.id].properties;
+                            }
+                        });
+                        callbackSeries();
+                    });
+                },
             ],
             function (err) {
                 if (err) {
@@ -184,7 +184,7 @@ var KGquery_graph = (function () {
         var dataTypes = {};
         var existingNodes = {};
         var visjsData = { nodes: [], edges: [] };
-        var sources =[];// Config.sources[source].imports;
+        var sources = []; // Config.sources[source].imports;
         if (!sources) {
             sources = [];
         }

@@ -49,7 +49,7 @@ var CreateSLSVsource_bot = (function () {
             BotEngine.nextStep();
         },
         promptSourceNameFn: function () {
-            BotEngine.promptValue("source label", "sourceLabel", "http://", function (value) {
+            BotEngine.promptValue("source label", "sourceLabel", "", function (value) {
                 if (!value) BotEngine.previousStep();
                 BotEngine.nextStep();
             });

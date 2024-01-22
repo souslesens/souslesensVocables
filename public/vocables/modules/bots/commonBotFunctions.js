@@ -21,7 +21,7 @@ var CommonBotFunctions = (function () {
         var sources = [sourceLabel];
         if (!Config.sources[sourceLabel]) {
             alert("Source not recognized");
-            return; // BotEngine.reset();
+            return BotEngine.end();
         }
         sources = sources.concat(Config.sources[sourceLabel].imports);
         async.eachSeries(

@@ -81,7 +81,7 @@ var KGcreator_bot = (function () {
     };
     self.workflowRdfType = {
         _OR: {
-            "set rdf:type": { listClassVocabsFn: { listClassesFn: { addMappingToModelFn:  self.workflowColumnmMappingOther } } },
+            "set rdf:type": { listClassVocabsFn: { listClassesFn: { addMappingToModelFn: self.workflowColumnmMappingOther } } },
             "no rdf:type": self.workflowColumnmMappingOther,
         },
     };
@@ -89,7 +89,7 @@ var KGcreator_bot = (function () {
     self.workflowColumnMappingType = {
         setUriTypeFn: {
             _OR: {
-             //   columnBlankNode: { addMappingToModelFn: self.workflowRdfType },
+                //   columnBlankNode: { addMappingToModelFn: self.workflowRdfType },
                 virtualColumnBlankNode: { virtualColumnBlankNodeFn: { addMappingToModelFn: self.workflowRdfType } },
                 namedIndividual: { addMappingToModelFn: self.workflowRdfType },
             },
@@ -126,7 +126,7 @@ var KGcreator_bot = (function () {
         },
 
         setUriTypeFn: function () {
-            var choices = ["namedIndividual",  "virtualColumnBlankNode"];//"columnBlankNode",
+            var choices = ["namedIndividual", "virtualColumnBlankNode"]; //"columnBlankNode",
 
             BotEngine.showList(choices, "uriType"); /*,null,false,function(value){
         self.params.uriType=value;
@@ -212,7 +212,7 @@ var KGcreator_bot = (function () {
         },
 
         virtualColumnBlankNodeFn: function () {
-            BotEngine.promptValue("enter virtualColumn name", "virtualColumnBlankNodeName",self.params.column);
+            BotEngine.promptValue("enter virtualColumn name", "virtualColumnBlankNodeName", self.params.column);
         },
 
         addMappingToModelFn: function () {
@@ -281,8 +281,9 @@ var KGcreator_bot = (function () {
                 self.params.valueType = null;
                 triple = {
                     s: self.currentUri,
-                    p: valueType,
+                    p: "rdf:value",
                     o: valueColumn,
+                    dataType: valueType,
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();

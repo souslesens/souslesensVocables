@@ -124,6 +124,14 @@ var GraphDisplayLegend = (function () {
                     color: "#70ac47",
                 },
             },
+            "Row index":{
+
+                type: "node",
+                attrs: {
+                    shape: "star",
+                    color: "#f90edd",
+                },
+            },
             Column: {
                 type: "node",
                 attrs: {
@@ -143,21 +151,100 @@ var GraphDisplayLegend = (function () {
                 },
             },
         },
+        KGcreator_classes: {
+            "owl:Class": {
+                type: "node",
+                attrs: {
+                    shape: "dot",
+                    color: "#799b79",
+                },
+            },
+
+
+            Table: {
+                type: "node",
+                attrs: {
+                    shape: "box",
+                    fill: "#ddd",
+                    color: "black",
+                    label: "a table",
+                },
+            },
+            Column: {
+                type: "node",
+                attrs: {
+                    shape: "box",
+                    color: "black",
+                    fill: "#00afef",
+                    label: "a column",
+                },
+            },
+
+            "owl:Restriction": {
+                type: "edge",
+                attrs: {
+                    color: "#fdbf01",
+                    arrows: { to: { enabled: true, type: "triangle", scaleFactor: 0.5 } },
+                    dashes: [3, 2],
+                },
+            },
+
+            "Tables join": {
+                type: "edge",
+                attrs: {
+                    color: "#70ac47",
+                    arrows:"to"
+                   ,
+                },
+            },
+
+            "Column to Class mapping": {
+                type: "edge",
+                attrs: {
+                    color: "#70ac47",
+                    arrows:"to"
+                    ,
+                },
+            },
+            "Inter columns ObjectProperty": {
+                type: "edge",
+                attrs: {
+                    color: "#ec56da",
+                    arrows:"to"
+                    ,
+                },
+            },
+            "Column to class mapping": {
+                type: "edge",
+                attrs: {
+                    color: "#aed",
+                    arrows:"to"
+                    ,
+                },
+            },
+
+
+
+        },
     };
 
-    self.drawLegend = function (type, legendDiv) {
-        //  type="RangesAndDomains"
-        if (!legendDiv) {
-            legendDiv = "visjsLegendCanvas";
+    self.drawLegend = function (type, legendCanvas) {
+       //  type="KGcreator_classes"
+        if (!legendCanvas) {
+            legendCanvas = "visjsLegendCanvas";
         }
-        $("#" + legendDiv).css("display", "block");
-        $("#" + legendDiv).draggable();
+        $("#" + legendCanvas).css("display", "block");
+        $("#" + legendCanvas).draggable();
+
 
         var legendObj = self.legendsMap[type];
         if (!legendObj) {
             return alert("missing legend description");
         }
-        var c = document.getElementById(legendDiv);
+        var height=Object.keys(legendObj).length*30
+        $("#" + legendCanvas).attr('height',height);
+        $("#" + legendCanvas).attr('width',250);
+        var c = document.getElementById(legendCanvas);
         var ctx = c.getContext("2d");
         var yOffset = 0;
         var xOffset = 130;
@@ -179,6 +266,7 @@ var GraphDisplayLegend = (function () {
             }
 
             if (element.type == "edge") {
+                ctx.beginPath();
                 ctx.strokeStyle = element.attrs.color;
                 ctx.fillStyle = element.attrs.color;
                 if (element.attrs.dashes) {
@@ -189,7 +277,8 @@ var GraphDisplayLegend = (function () {
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                self.drawArrow(ctx, 10, yOffset, xOffset - 15, yOffset, 5);
+
+                self.drawArrow(ctx, 10, yOffset, xOffset - 15, yOffset, 8);
             }
         }
     };
@@ -234,6 +323,12 @@ var GraphDisplayLegend = (function () {
                 ctx.fillStyle = attrs.color || "blue";
                 ctx.fillText(attrs.label, xOffset / 2 - 20, yOffset);
             }
+        }
+
+        if(shape=="star"){
+            ctx.strokeStyle = attrs.color || "blue";
+            ctx.fillStyle = attrs.color || "blue";
+            self.drawStar(ctx, xOffset / 2, yOffset - 5,  5, 9, 4);
         }
     };
 
@@ -309,7 +404,36 @@ var GraphDisplayLegend = (function () {
         context.closePath();
 
         context.fill();
+
     };
+
+    self. drawStar=function(ctx,cx, cy, spikes, outerRadius, innerRadius) {
+        var rot = Math.PI / 2 * 3;
+        var x = cx;
+        var y = cy;
+        var step = Math.PI / spikes;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - outerRadius)
+        for (var i = 0; i < spikes; i++) {
+            x = cx + Math.cos(rot) * outerRadius;
+            y = cy + Math.sin(rot) * outerRadius;
+            ctx.lineTo(x, y)
+            rot += step
+
+            x = cx + Math.cos(rot) * innerRadius;
+            y = cy + Math.sin(rot) * innerRadius;
+            ctx.lineTo(x, y)
+            rot += step
+        }
+        ctx.lineTo(cx, cy - outerRadius)
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fill();
+
+    }
+
+
 
     return self;
 })();

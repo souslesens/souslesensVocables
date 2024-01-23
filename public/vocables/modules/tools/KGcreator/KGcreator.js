@@ -120,7 +120,7 @@ var KGcreator = (function () {
             }
             KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
         });
-        $("#KGcreator_resourceLinkRightPanel").load("./modules/tools/KGcreator/html/graphControlPanel.html", function () {});
+
     };
 
     self.getSlsvSourceConfig = function (source, callback) {
@@ -676,6 +676,8 @@ var KGcreator = (function () {
     };
 
     self.showTableVirtualColumnsTree = function (table) {
+        if(!table)
+            return alert("no table selected")
         if (!self.currentConfig.currentMappings[table].virtualColumns) {
             return;
         }

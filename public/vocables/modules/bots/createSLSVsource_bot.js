@@ -144,4 +144,4 @@ var CreateSLSVsource_bot = (function () {
 export default CreateSLSVsource_bot;
 window.CreateSLSVsource_bot = CreateSLSVsource_bot;
 // imports React app
-import("/assets/SourceCreatorUploading.js");
+//import("/assets/SourceCreatorUploading.js");

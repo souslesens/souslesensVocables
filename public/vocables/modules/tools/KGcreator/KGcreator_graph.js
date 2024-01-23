@@ -79,6 +79,8 @@ var KGcreator_graph = (function () {
             });
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
+            GraphDisplayLegend.drawLegend("KGcreator_classes", "LineageVisjsLegendCanvas");
+            $("#KGcreator_resourceLinkRightPanel").load("./modules/tools/KGcreator/html/graphControlPanel.html", function () {});
         });
     };
 

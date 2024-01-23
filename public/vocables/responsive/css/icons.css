@@ -85,3 +85,7 @@
     border: 0px !important;
     margin-right: 20px !important;
 }
+.slsvLogo-icon {
+    background-image: url(@slsvLogo-icon);
+    background-repeat: no-repeat;
+}

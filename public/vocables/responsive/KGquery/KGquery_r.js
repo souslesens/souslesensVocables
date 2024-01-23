@@ -43,7 +43,7 @@ var KGquery_r = (function () {
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./responsive/KGquery/html/index.html", function () {
                     KGquery_graph.drawVisjsModel("saved");
-                    ResponsiveUI.openTab("lineage-tab", "tabs_myQueries", KGquery_r.initMyQuery, "#myQueriesTabButton");
+                    ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery_r.initQuery, "#QueryTabButton");
                 });
             });
         });

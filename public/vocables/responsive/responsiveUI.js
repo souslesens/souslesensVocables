@@ -15,9 +15,8 @@ var ResponsiveUI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.tools_available = ["lineage", "KGquery", "KGcreator"];
-    self.alert = function (message) {};
-
+    self.tools_available = ["lineage", "KGquery"];
+    self.toolsNeedSource = ["lineage", "KGquery", "TimeLine"];
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
         self.setSlsvCssClasses();
@@ -93,10 +92,14 @@ var ResponsiveUI = (function () {
             $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
         }
         MainController.currentTool = toolId;
-        if (self.source == null) {
-            ResponsiveUI.showSourceDialog(true);
+        if (self.toolsNeedSource.includes(toolId)) {
+            if (self.source == null) {
+                ResponsiveUI.showSourceDialog(true);
+            } else {
+                self.sourceSelect(self.source);
+            }
         } else {
-            self.sourceSelect(self.source);
+            self.initTool(toolId);
         }
     };
 
@@ -146,10 +149,21 @@ var ResponsiveUI = (function () {
             return Lineage_r.init();
         } else if (toolId == "KGquery") {
             return KGquery_r.init();
-        } else if (toolId == "KGcreator") {
+        }
+        /* else if (toolId == "KGcreator") {
             return KGcreator_r.init();
-        } else {
-            return alert("Not available tool, comming soon...");
+        } */else {
+            var answer = confirm("Not available in Responsive interface, redirection to old interface");
+            if (answer) {
+                var url = window.location.href;
+                var p = url.indexOf("?");
+                if (p > -1) {
+                    url = url.substring(0, p);
+                }
+                url = url.replace("index_r.html", "");
+                url += "?tool=" + toolId;
+                window.location.href = url;
+            }
         }
 
         self.UI.updateActionDivLabel();
@@ -278,6 +292,12 @@ var ResponsiveUI = (function () {
 
     self.changeTheme = function (ThemeName) {
         var themeSelected = Config.slsvColorThemes[ThemeName];
+
+        if (themeSelected["@logoInstance-icon"] == undefined || themeSelected["@logoInstance-icon"] == "") {
+            $("#externalLogoDiv").hide();
+        } else {
+            $("#externalLogoDiv").show();
+        }
         less.modifyVars(themeSelected);
     };
     self.hideShowMenuBar = function (button) {
@@ -304,14 +324,14 @@ var ResponsiveUI = (function () {
             ResponsiveUI.resetWindowHeight();
             self.LateralPannelShowed = false;
             $("#lateralPanelDiv").append(button);
-            $("#lateralPanelDiv button img").attr("src", "./icons/CommonIcons/ArrowLateralPannelShow.png");
+            $("#ArrowLateralPannel").attr("src", "./icons/CommonIcons/ArrowLateralPannelShow.png");
         } else {
             $("#lineage-tab-buttons").show();
             $("#WhiteboardContent").show();
             $("#lateralPanelDiv").css("width", "395px");
             ResponsiveUI.resetWindowHeight();
             self.LateralPannelShowed = true;
-            $(button).children().attr("src", "./icons/CommonIcons/ArrowLateralPannel.png");
+            $("#ArrowLateralPannel").attr("src", "./icons/CommonIcons/ArrowLateralPannel.png");
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };

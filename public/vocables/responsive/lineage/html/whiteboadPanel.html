@@ -1,13 +1,13 @@
 <div id="WhiteboardContent">
     <div class="w3-panel w3-border w3-round-small lateralPannelSection-width">
         <div id="Title1" class="titleboxButtons font-button1-color"></div>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()">Model</button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()">TopClasses<img src="./icons/CommonIcons/TopClassesIcon.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand <img src="./icons/CommonIcons/ExpandIcon.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()">Parents<img src="./icons/CommonIcons/ParentIcon.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_r.showQueryDialog()"><img src="./icons/CommonIcons/Query.png" />Query</button>
-        <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()">QueryBot</button>
-        <button class="w3-button slsv-button-1" id="lineage_createResourceBtn" style="font-weight: bold" onclick=" CreateResource_bot.start()">Create Resource</button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" popUpComment="Model"><img src="./icons/CommonIcons/ModelIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()" popUpComment="TopClasses"><img src="./icons/CommonIcons/TopClassesIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" popUpComment="Expand"><img src="./icons/CommonIcons/ExpandIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" popUpComment="Parents"><img src="./icons/CommonIcons/ParentIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_r.showQueryDialog()" popUpComment="Query"><img src="./icons/CommonIcons/Query.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" popUpComment="QueryBot">QueryBot</button>
+        <button class="w3-button slsv-button-1" id="lineage_createResourceBtn" style="font-weight: bold" onclick=" CreateResource_bot.start()" popUpComment="Create Resource">Create Resource</button>
         <!--    <button class="w3-button slsv-button" class="lineage_button" style="font-weight: bold" onclick="KGqueryWidget.showDialog()">Query KG</button>-->
 
         <!--  <button class="w3-button slsv-button" onclick="Lineage_sources.clearSource()">Clear</button>-->
@@ -15,10 +15,27 @@
 
     <div class="w3-panel w3-border w3-round-small lateralPannelSection-width">
         <div class="titleboxButtons font-button2-color">Whiteboard</div>
-        <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()">Clear all <img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
-        <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()">Clear last</button>
-        <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()">Only last</button>
-
+        <div class="input-group mb-3" style="width: 100%">
+            <div class="input-group-prepend">
+                <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+                    <button class="search-icon slsv-invisible-button" onclick="Lineage_whiteboard.graph.searchNode()" style="margin-top: 4px; height: 20px; width: 20px"></button>
+                </div>
+            </div>
+            <input
+                id="visjsGraph_searchInput"
+                style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px"
+                value=""
+                onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_whiteboard.graph.searchNode()}"
+            />
+        </div>
+        <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()" popUpComment="Clear Last">
+            <img src="./icons/CommonIcons/ClearLastIcon.png" />
+        </button>
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()" popUpComment="Only Last">
+            <img src="./icons/CommonIcons/OnlyLastIcon.png" />
+        </button>
+        <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.graph.exportGraphToDataTable()" popUpComment="CSV"><img src="./icons/CommonIcons/CSVIcon.png" /></button>
         <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.showHideIndividuals()">Show/Hide Individuals</button>
         <div class="w3-button slsv-button-2" onclick="ContainerSearchWidget.showDialog()">Parent Containers</div>
     </div>
@@ -32,13 +49,21 @@
         </div>
 
         <div id="Lineage_MoreActionsButtons">
+            <button class="w3-button slsv-button-3" id="lineage_actionDiv_inferredModel" onclick="Lineage_whiteboard.drawInferredClassesModel()">Inferred Model</button>
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog();">Similars</button>
-            <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_pathes" onclick="Lineage_r.showPathesDialog()">Paths</button>
+            <!--WhiteBoard Display Buttons -->
+            <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.showGraphConfig()">Display</button>
+            <span id="visjsConfigureDiv">&nbsp;</span>
+
+            <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.toSVG()">SVG</button>
+            <button class="w3-button slsv-button-3" onclick="GraphDecorationWidget.showDecorateDialog()">decorate nodes</button>
+
+            <!--Inactives Buttons -->
+            <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_linkedData" onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">Linked Data</button>
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_reasoner" onclick="Lineage_reasoner.showReasonerDialog()" disabled="">Reasoner</button>
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_rules" onclick="Lineage_rules.showRulesDialog()" disabled="">Rules</button>
-            <button class="w3-button slsv-button-3" id="lineage_actionDiv_inferredModel" onclick="Lineage_whiteboard.drawInferredClassesModel()">Inferred Model</button>
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="NodeInfosWidget.showCreateEntityDialog()" disabled="" style="display: block">new Axiom</button>
         </div>
     </div>
@@ -49,7 +74,7 @@
     </div>
 
     <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="ResponsiveUI.hideShowLateralPannel(this)">
-        <img src="./icons/CommonIcons/ArrowLateralPannel.png" />
+        <img id="ArrowLateralPannel" src="./icons/CommonIcons/ArrowLateralPannel.png" />
     </button>
 </div>
 

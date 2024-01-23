@@ -6,6 +6,7 @@ import SearchWidget from "../../modules/uiWidgets/searchWidget.js";
 import NodeInfosWidgetResponsive from "../../responsive/widget/nodeInfosWidgetResponsive.js";
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
 import Lineage_createResource from "../../modules/tools/lineage/lineage_createResource.js";
+import PopupMenuWidget from "../../modules/uiWidgets/popupMenuWidget.js";
 
 var Lineage_r = (function () {
     var self = {};
@@ -70,6 +71,7 @@ var Lineage_r = (function () {
             $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
             Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
             self.hideShowMoreActions("hide");
+            self.PopUpOnHoverButtons();
             $("#lateralPanelDiv").resizable({
                 maxWidth: 395,
                 minWidth: 150,
@@ -241,7 +243,23 @@ var Lineage_r = (function () {
             $("#LineageProperties_searchInAllSources").val("all");
         }
     };
+    self.PopUpOnHoverButtons = function () {
+        $(".w3-button").on("mouseenter", function () {
+            var comment = $(this).attr("popupcomment");
+            if (comment) {
+                var html = "<div>" + comment + "</div>";
+                PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv", { Button: this });
+            }
+        });
 
+        $(".w3-bar-item").on("mouseenter", function () {
+            var comment = $(this).attr("popupcomment");
+            if (comment) {
+                var html = "<div>" + comment + "</div>";
+                PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv", { Button: this });
+            }
+        });
+    };
     //less.modifyVars({'@button1-color': '#000'})
 
     return self;

@@ -7,6 +7,8 @@ var KGcreator_r = (function () {
     self.oldshowDialog = SavedQueriesComponent.showDialog;
     self.init = function () {
         ResponsiveUI.initMenuBar(self.loadSource);
+        $("#Lineage_graphEditionButtons").show();
+        $("#Lineage_graphEditionButtons").empty();
     };
     self.quit = function () {
         Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;

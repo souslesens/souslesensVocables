@@ -9,6 +9,9 @@ var KGcreator_r = (function () {
     self.init = function () {
      
         ResponsiveUI.initMenuBar(self.loadSource);
+        $('#Lineage_graphEditionButtons').show();
+        $('#Lineage_graphEditionButtons').empty();
+        
       
     };
     self.quit = function () {

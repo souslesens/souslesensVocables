@@ -86,7 +86,7 @@ module.exports = function () {
                 fs.renameSync(tmpPath, filePathToUpload);
 
                 // Load file into triplestore
-                const slsUrlForTriplestore = config.souslesensUrlForVirtuoso ? config.souslesensUrlForVirtuoso : souslesensUrl;
+                const slsUrlForTriplestore = config.souslesensUrlForVirtuoso ? config.souslesensUrlForVirtuoso : config.souslesensUrl;
                 const fileToUploadUrl = `${slsUrlForTriplestore}/upload/rdf/${id}.nt`;
                 await rdfDataModel.loadGraph(graphUri, fileToUploadUrl);
                 // clean

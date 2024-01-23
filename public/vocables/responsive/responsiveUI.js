@@ -15,10 +15,10 @@ var ResponsiveUI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.tools_available=['lineage','KGquery','KGcreator'];
-    self.toolsNeedSource=['lineage','KGquery','KGcreator','TimeLine'];
+    self.tools_available = ["lineage", "KGquery", "KGcreator"];
+    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
     self.init = function () {
-        self.oldRegisterSource=Lineage_sources.registerSource;
+        self.oldRegisterSource = Lineage_sources.registerSource;
         self.setSlsvCssClasses();
         var tools = Config.tools_available;
 
@@ -39,18 +39,16 @@ var ResponsiveUI = (function () {
             true
         );
         self.themeList();
-        self.replaceFile(BotEngine,BotEngineResponsive);
-        
-        
+        self.replaceFile(BotEngine, BotEngineResponsive);
     };
     self.initMenuBar = function (callback) {
         $("#ChangeSourceButton").show();
         $("#index_topContolPanel").show();
         //Loading
         $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
-            if(self.currentTool!='lineage'){
-                $('#AddSourceButton').remove();
-                $('#AllSourceButton').remove();
+            if (self.currentTool != "lineage") {
+                $("#AddSourceButton").remove();
+                $("#AllSourceButton").remove();
             }
             callback();
         });
@@ -74,11 +72,10 @@ var ResponsiveUI = (function () {
     };
 
     self.onToolSelect = function (toolId) {
-        if (self.currentTool != 'lineage' && self.currentTool != null) {
-            if(  self.tools_available.includes(self.currentTool)){
+        if (self.currentTool != "lineage" && self.currentTool != null) {
+            if (self.tools_available.includes(self.currentTool)) {
                 window[self.currentTool + "_r"].quit();
             }
-            
         }
 
         if (self.currentTool == toolId) {
@@ -86,28 +83,24 @@ var ResponsiveUI = (function () {
         } else {
             self.currentTool = toolId;
         }
-        if(toolId!='lineage'){
-            
-            Lineage_sources.registerSource=self.registerSourceWithoutImports;
+        if (toolId != "lineage") {
+            Lineage_sources.registerSource = self.registerSourceWithoutImports;
         }
-        
 
         $("#currentToolTitle").html(toolId);
         if (Config.toolsLogo[toolId]) {
             $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
         }
         MainController.currentTool = toolId;
-        if(self.toolsNeedSource.includes(toolId)){
+        if (self.toolsNeedSource.includes(toolId)) {
             if (self.source == null) {
                 ResponsiveUI.showSourceDialog(true);
             } else {
                 self.sourceSelect(self.source);
             }
-        }
-        else{
+        } else {
             self.initTool(toolId);
         }
-        
     };
 
     self.onSourceSelect = function (evt, obj) {
@@ -151,24 +144,23 @@ var ResponsiveUI = (function () {
         MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
-      
-        if (toolId == 'lineage') {
+
+        if (toolId == "lineage") {
             return Lineage_r.init();
-        }else if (toolId == "KGquery") {
+        } else if (toolId == "KGquery") {
             return KGquery_r.init();
-           
-        }else if(toolId == 'KGcreator'){
+        } else if (toolId == "KGcreator") {
             return KGcreator_r.init();
-        }else{
-            var answer=confirm('Not available in Responsive interface, redirection to old interface');
-            if(answer){
+        } else {
+            var answer = confirm("Not available in Responsive interface, redirection to old interface");
+            if (answer) {
                 var url = window.location.href;
                 var p = url.indexOf("?");
                 if (p > -1) {
-                        url = url.substring(0, p);
+                    url = url.substring(0, p);
                 }
-                url=url.replace('index_r.html','');
-                url += "?tool="+toolId;
+                url = url.replace("index_r.html", "");
+                url += "?tool=" + toolId;
                 window.location.href = url;
             }
         }
@@ -299,12 +291,11 @@ var ResponsiveUI = (function () {
 
     self.changeTheme = function (ThemeName) {
         var themeSelected = Config.slsvColorThemes[ThemeName];
-        
-        if(themeSelected['@logoInstance-icon']==undefined || themeSelected['@logoInstance-icon']==''){
-            $('#externalLogoDiv').hide();
-        }
-        else{
-            $('#externalLogoDiv').show();
+
+        if (themeSelected["@logoInstance-icon"] == undefined || themeSelected["@logoInstance-icon"] == "") {
+            $("#externalLogoDiv").hide();
+        } else {
+            $("#externalLogoDiv").show();
         }
         less.modifyVars(themeSelected);
     };
@@ -343,7 +334,7 @@ var ResponsiveUI = (function () {
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };
-    self.registerSourceWithoutImports=function(sourceLabel, callback){
+    self.registerSourceWithoutImports = function (sourceLabel, callback) {
         if (!callback) {
             callback = function () {};
         }
@@ -356,7 +347,7 @@ var ResponsiveUI = (function () {
             if (err) {
                 return callback(err);
             }
-            if(sourceLabel==self.source){
+            if (sourceLabel == self.source) {
                 var sourceDivId = "source_" + common.getRandomHexaId(5);
                 Lineage_sources.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
                 Lineage_sources.sourceDivsMap[sourceDivId] = sourceLabel;
@@ -377,23 +368,18 @@ var ResponsiveUI = (function () {
                     sourceDivId +
                     "\")'/> </button></div>";
                 $("#lineage_drawnSources").append(html);
-    
+
                 $("#" + sourceDivId).bind("click", function (e) {
                     var sourceDivId = $(this).attr("id");
                     var source = self.sourceDivsMap[sourceDivId];
                     Lineage_sources.setCurrentSource(source);
                 });
                 return callback();
-            }
-            else{
+            } else {
                 return callback();
             }
-           
         });
-    }
-
-        
- 
+    };
 
     return self;
 })();

@@ -1,24 +1,19 @@
 import KGcreator from "../../modules/tools/KGcreator/KGcreator.js";
 
-
 var KGcreator_r = (function () {
     var self = {};
     //changed files and functions
     self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
     self.oldshowDialog = SavedQueriesComponent.showDialog;
     self.init = function () {
-     
         ResponsiveUI.initMenuBar(self.loadSource);
-        $('#Lineage_graphEditionButtons').show();
-        $('#Lineage_graphEditionButtons').empty();
-        
-      
+        $("#Lineage_graphEditionButtons").show();
+        $("#Lineage_graphEditionButtons").empty();
     };
     self.quit = function () {
-        Lineage_sources.registerSource=ResponsiveUI.oldRegisterSource;
+        Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
     };
     self.loadSource = function () {
-        
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
                 return alert(err.responseText);
@@ -26,8 +21,7 @@ var KGcreator_r = (function () {
             $("#graphDiv").load("./modules/tools/KGcreator/html/centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./responsive/KGcreator/html/leftPanel.html", function () {
                     KGcreator.currentSlsvSource = ResponsiveUI.source;
-                    ResponsiveUI.openTab('lineage-tab','KGcreator_source_tab',KGcreator_r.initLinkTab,'#MapButton');
-                    
+                    ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initLinkTab, "#MapButton");
                 });
             });
         });
@@ -41,13 +35,9 @@ var KGcreator_r = (function () {
         Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
         $(".vis-edit-mode").css("display", "none");
     };
-    self.showMenuButtons=function(){
-
-    };
-    self.initRunTab= function () {
-        $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/runTab.html", function () {
-            
-        });
+    self.showMenuButtons = function () {};
+    self.initRunTab = function () {
+        $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/runTab.html", function () {});
     };
     self.initLinkTab = function () {
         $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/LinkTab.html", function () {

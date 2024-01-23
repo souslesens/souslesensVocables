@@ -64,13 +64,13 @@
     height: 30px;
     width: 30px;
 }
-.resetIcon{
+.resetIcon {
     background-image: url(@resetIcon);
     background-repeat: no-repeat;
     height: 30px;
     width: 30px;
 }
-.previousIcon{
+.previousIcon {
     background-image: url(@previousIcon);
     background-repeat: no-repeat;
     height: 30px;
@@ -85,7 +85,7 @@
     border: 0px !important;
     margin-right: 20px !important;
 }
-.slsvLogo-icon{
+.slsvLogo-icon {
     background-image: url(@slsvLogo-icon);
     background-repeat: no-repeat;
 }

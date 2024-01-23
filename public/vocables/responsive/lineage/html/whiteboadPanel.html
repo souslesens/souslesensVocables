@@ -3,7 +3,7 @@
         <div id="Title1" class="titleboxButtons font-button1-color"></div>
         <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" popUpComment="Model"><img src="./icons/CommonIcons/ModelIcon.png" /></button>
         <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()" popUpComment="TopClasses"><img src="./icons/CommonIcons/TopClassesIcon.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" popUpComment="Expand"> <img src="./icons/CommonIcons/ExpandIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" popUpComment="Expand"><img src="./icons/CommonIcons/ExpandIcon.png" /></button>
         <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" popUpComment="Parents"><img src="./icons/CommonIcons/ParentIcon.png" /></button>
         <button class="w3-button slsv-button-1" onclick="Lineage_r.showQueryDialog()" popUpComment="Query"><img src="./icons/CommonIcons/Query.png" /></button>
         <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" popUpComment="QueryBot">QueryBot</button>
@@ -27,12 +27,14 @@
                 value=""
                 onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_whiteboard.graph.searchNode()}"
             />
-
-           
         </div>
         <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
-        <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()" popUpComment="Clear Last"><img src="./icons/CommonIcons/ClearLastIcon.png" /></button>
-        <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()" popUpComment="Only Last"><img src="./icons/CommonIcons/OnlyLastIcon.png" /></button>
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()" popUpComment="Clear Last">
+            <img src="./icons/CommonIcons/ClearLastIcon.png" />
+        </button>
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()" popUpComment="Only Last">
+            <img src="./icons/CommonIcons/OnlyLastIcon.png" />
+        </button>
         <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.graph.exportGraphToDataTable()" popUpComment="CSV"><img src="./icons/CommonIcons/CSVIcon.png" /></button>
         <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.showHideIndividuals()">Show/Hide Individuals</button>
         <div class="w3-button slsv-button-2" onclick="ContainerSearchWidget.showDialog()">Parent Containers</div>
@@ -53,12 +55,10 @@
             <!--WhiteBoard Display Buttons -->
             <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.showGraphConfig()">Display</button>
             <span id="visjsConfigureDiv">&nbsp;</span>
-            
+
             <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.toSVG()">SVG</button>
             <button class="w3-button slsv-button-3" onclick="GraphDecorationWidget.showDecorateDialog()">decorate nodes</button>
-           
-            
-            
+
             <!--Inactives Buttons -->
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>
             <button class="w3-button slsv-button-3" id="lineage_actionDiv_linkedData" onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">Linked Data</button>
@@ -74,7 +74,7 @@
     </div>
 
     <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="ResponsiveUI.hideShowLateralPannel(this)">
-        <img id='ArrowLateralPannel' src="./icons/CommonIcons/ArrowLateralPannel.png" />
+        <img id="ArrowLateralPannel" src="./icons/CommonIcons/ArrowLateralPannel.png" />
     </button>
 </div>
 

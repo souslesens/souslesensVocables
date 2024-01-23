@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <title>SouslesensVocables</title>
-        
+
         <link rel="icon" href="./icons/CommonIcons/slsvLogo-miniature.png" />
 
         <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
@@ -269,10 +269,10 @@
                             height: 800,
                             width: $(document).width() * 0.85,
                             modal: false,
-                            close:function(event,ui){
+                            close: function (event, ui) {
                                 $("#deleteButton").remove();
                                 $("#addPredicateButton").remove();
-                            }
+                            },
                         });
                         $("#mainDialogDiv2").dialog({
                             autoOpen: false,
@@ -292,10 +292,10 @@
                             height: 600,
                             width: 800,
                             modal: false,
-                            close:function(event,ui){
+                            close: function (event, ui) {
                                 $("#previousButtonBot").remove();
                                 $("#resetButtonBot").remove();
-                            }
+                            },
                         });
 
                         $(document).on("click", "a", function () {
@@ -338,7 +338,6 @@
             };
         </script>-->
 
-        
         <script type="module" src="./responsive/responsiveUI.js"></script>
         <script type="module" src="./responsive/lineage/lineage_r.js"></script>
         <script type="module" src="./responsive/widget/nodeInfosWidgetResponsive.js"></script>
@@ -360,17 +359,13 @@
         <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
         <script src="./responsive/less.min.js"></script>
         <script>
-            less.pageLoadFinished.then(
-               
-            function() {
+            less.pageLoadFinished.then(function () {
                 setTimeout(() => {
-                    ResponsiveUI.changeTheme(Config.defaultTheme); 
+                    ResponsiveUI.changeTheme(Config.defaultTheme);
                 }, "500");
-            }
-        );
-
+            });
         </script>
-        
+
         <!--<link rel="stylesheet" href="./slsv-cartography1.css" />-->
         <!--<link rel="stylesheet" href="./slsv-cartography2.css" />-->
     </head>
@@ -449,15 +444,14 @@
                         </div>
                     </div>
 
-                    
-                    <div id='externalLogoDiv' class="w3-bar-item  slsv-invisible-button w3-right">
-                        <button class="logoInstance-icon slsv-invisible-button " style="height: 57px; width: 80px"></button>
+                    <div id="externalLogoDiv" class="w3-bar-item slsv-invisible-button w3-right">
+                        <button class="logoInstance-icon slsv-invisible-button" style="height: 57px; width: 80px"></button>
                     </div>
                     <div class="w3-bar-item w3-right w3-dropdown-hover" style="margin-right: 10px" id="dropdownMenuLink">
                         <div class="w3-button slsv-right-top-bar-button" id="user-username">User</div>
                         <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                            <select  class="Lineage_PopUpStyle" size="8" onclick="authentication.logout()" style="overflow: auto">
-                                <option>Logout </option>
+                            <select class="Lineage_PopUpStyle" size="8" onclick="authentication.logout()" style="overflow: auto">
+                                <option>Logout</option>
                             </select>
                         </div>
                     </div>
@@ -471,7 +465,6 @@
                             <select id="themeSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.changeTheme($(this).val())" style="overflow: auto"></select>
                         </div>
                     </div>
-                    
                 </div>
             </div>
         </header>
@@ -489,9 +482,8 @@
         <div id="smallDialogDiv"></div>
         <div id="LineagePopup"></div>
         <div id="popupMenuWidgetDiv" onclick="PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
-        <div id="botPanel" >
+        <div id="botPanel">
             <div id="botDiv"></div>
         </div>
     </body>
-    
 </html>

@@ -26,7 +26,7 @@ var KGquery_r = (function () {
         Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
         SavedQueriesComponent.showDialog = self.oldshowDialog;
         window.KGquery_controlPanel = self.oldKGquery_controlPanel;
-        Lineage_sources.registerSource=ResponsiveUI.oldRegisterSource;
+        Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
         //reapply changed DOM
 
         $("#KGquery_messageDiv").attr("id", "messageDiv");
@@ -43,7 +43,7 @@ var KGquery_r = (function () {
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./responsive/KGquery/html/index.html", function () {
                     KGquery_graph.drawVisjsModel("saved");
-                    ResponsiveUI.openTab('lineage-tab','tabs_Query',KGquery_r.initQuery,'#QueryTabButton');
+                    ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery_r.initQuery, "#QueryTabButton");
                 });
             });
         });

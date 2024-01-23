@@ -1,9 +1,8 @@
-
 var PopupMenuWidget = (function () {
     var self = {};
-    self.initAndShow = function (html, popupDivId,options) {
-        if(!options){
-            options={};
+    self.initAndShow = function (html, popupDivId, options) {
+        if (!options) {
+            options = {};
         }
         var e = window.event;
         event.stopPropagation();
@@ -12,21 +11,20 @@ var PopupMenuWidget = (function () {
 
         var point = { x: e.pageX, y: e.pageY };
         //  var point={x:100,y:100}
-        if(options.Button){
-            PopupMenuWidget.showPopup(point, popupDivId,options);
+        if (options.Button) {
+            PopupMenuWidget.showPopup(point, popupDivId, options);
             $(options.Button).on("mouseleave", function () {
                 PopupMenuWidget.hidePopup(popupDivId);
             });
-        }else{
+        } else {
             PopupMenuWidget.showPopup(point, popupDivId);
             $("#" + popupDivId).on("mouseleave", function () {
                 PopupMenuWidget.hidePopup(popupDivId);
             });
         }
-        
     };
 
-    self.showPopup = function (point, popupDiv,options) {
+    self.showPopup = function (point, popupDiv, options) {
         /*
         $("#" + popupDiv).addClass("popupMenuWidgetDiv");
         $("#" + popupDiv).css("display", "flex");
@@ -63,10 +61,9 @@ var PopupMenuWidget = (function () {
         if (!popupDiv) {
             popupDiv = "popupDiv";
         }
-        if(options.Button){
-            point.x=$(options.Button).offset().left+$(options.Button).width()+13;
-            point.y=$(options.Button).offset().top-$(options.Button).height()-13;
-
+        if (options.Button) {
+            point.x = $(options.Button).offset().left + $(options.Button).width() + 13;
+            point.y = $(options.Button).offset().top - $(options.Button).height() - 13;
         }
         $("#" + popupDiv).addClass("popupMenuWidgetDiv");
         $("#" + popupDiv).css("display", "flex");

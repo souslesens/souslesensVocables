@@ -16,33 +16,29 @@
     width: 96%;
 }
 
-.chat-left{
+.chat-left {
     background-color: @dark-background-color;
-    border-radius:14px;
+    border-radius: 14px;
     width: fit-content;
-    color:@button1-color;
-    padding:5px;
-    margin:3px;
-
+    color: @button1-color;
+    padding: 5px;
+    margin: 3px;
 }
-.chat{
+.chat {
     background-color: @dark-background-color;
-    border-radius:14px;
+    border-radius: 14px;
     width: fit-content;
-    color:@button1-color;
-    padding:5px;
-    margin:3px;
-
+    color: @button1-color;
+    padding: 5px;
+    margin: 3px;
 }
-.chat-left{
+.chat-left {
     .chat;
     justify-self: start;
     margin-left: 10px;
 }
-.chat-right{
+.chat-right {
     .chat;
     justify-self: end;
     margin-right: 10px;
 }
-
-

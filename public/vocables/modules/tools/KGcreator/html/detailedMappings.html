@@ -3,6 +3,19 @@
     <head>
         <meta charset="UTF-8" />
         <title>Title</title>
+        <style>
+            #KGcreatorVisjsLegendCanvas{
+                display: none;
+                z-index: 100;
+                position: absolute;
+                background-color: white;
+                border: blue 1px solid;
+                margin: 5px;
+                bottom: 10px;
+                right: 100px;
+                padding: 5px;
+            }
+        </style>
     </head>
     <body>
         <div style="display: flex; flex-direction: row">
@@ -11,6 +24,7 @@
                 <pre style="width: 600px; height: 700px" id="KGcreator_mappingsGraphEditor"></pre>
                 <button id="KGcreator_mappingsSaveEditorMappingBtn" onclick="KGcreator_graph.saveDetailedMappings()">Save</button>
             </div>
+            <canvas id="KGcreatorVisjsLegendCanvas" height="150" ></canvas>
         </div>
     </body>
 </html>

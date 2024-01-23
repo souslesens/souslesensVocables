@@ -81,10 +81,14 @@ var Lineage_similars = (function () {
                             return callbackEach(err);
                         }
 
+                        var error=false
                         result.forEach(function (item, index) {
                             if (item.error) {
-                                return callbackEach(err);
+                               error=true
                             }
+                            if(error)
+                                return callbackEach(item.error);
+
                             var actual_word_label = words[index];
                             item.hits.hits.forEach(function (hit) {
                                 hit._source.index = hit._index;

@@ -6,6 +6,7 @@ import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 import KGcreator from "./KGcreator.js";
 import KGcreator_mappings from "./KGcreator_mappings.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
+import GraphDisplayLegend from "../../shared/graphDisplayLegend.js";
 
 var KGcreator_graph = (function () {
     var self = {};
@@ -82,6 +83,7 @@ var KGcreator_graph = (function () {
     };
 
     self.onNodeClick = function (node, point, event) {
+        console.log(JSON.stringify(node))
         PopupMenuWidget.hidePopup();
         if (!node || !node.data) {
             return (self.currentGraphNode = null);
@@ -581,6 +583,7 @@ var KGcreator_graph = (function () {
         $("#mainDialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function () {
             self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, {});
             self.mappingVisjsGraph.draw();
+            GraphDisplayLegend.drawLegend("KGcreatorMappings","KGcreatorVisjsLegendCanvas")
             var options = {
                 mode: "tree",
             };

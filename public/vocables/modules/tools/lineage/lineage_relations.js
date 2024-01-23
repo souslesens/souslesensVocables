@@ -650,8 +650,8 @@ var Lineage_relations = (function () {
                                 });
                             }
                             distinctProps[item.prop.value].push({
-                                domain: { id: item.sparent.value, label: item.sparentLabel.value },
-                                range: { id: item.oparent.value, label: item.oparentLabel.value },
+                                domain: { id: item.sClass.value, label: item.sClassLabel.value },
+                                range: { id: item.oClass.value, label: item.oClassLabel.value },
                             });
                         });
                         return callbackSeries();

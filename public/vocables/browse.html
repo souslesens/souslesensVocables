@@ -147,7 +147,7 @@
                     var options = { parentlabels: true, skosLabels: true };
                     if (!term || term == "") return alert(" enter a word ");
                     SearchUtil.getSimilarLabelsInSources(null, null, [term], null, mode, options, function (_err, result) {
-                        if (_err) return alert(err);
+                        if (_err) return alert(err.responseText);
                         currentSearchResult = result[0].matches;
                         currentSearchResult.parentIdsLabelsMap = result.parentIdsLabelsMap;
 

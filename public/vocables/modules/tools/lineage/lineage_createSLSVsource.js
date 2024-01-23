@@ -2,7 +2,7 @@ import common from "../../shared/common.js";
 import Authentification from "../../shared/authentification.js";
 import CreateSLSVsource_bot from "../../bots/createSLSVsource_bot.js";
 
-var Lineage_createSource = (function () {
+var Lineage_createSLSVsource = (function () {
     var self = {};
     self.onLoaded = function () {
         CreateSLSVsource_bot.start();
@@ -54,7 +54,8 @@ var Lineage_createSource = (function () {
             ],
             function (err) {
                 if (err) {
-                    if (callback) return callback(err);
+                    if (callback)
+                        callback(err);
                     return alert(err.responseText);
                 }
                 callback();
@@ -121,5 +122,5 @@ var Lineage_createSource = (function () {
 
     return self;
 })();
-export default Lineage_createSource;
-window.Lineage_createSource = Lineage_createSource;
+export default Lineage_createSLSVsource;
+window.Lineage_createSLSVsource = Lineage_createSLSVsource;

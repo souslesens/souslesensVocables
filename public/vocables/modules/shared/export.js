@@ -67,7 +67,7 @@ var Export = (function () {
 
             nodes.forEach(function (node) {
                 if (linkedNodes[node.id]) return;
-                var line = [node.label, "", "", node.id, "edge.id", "edge.to"];
+                var line = [node.label, "", "", node.id, "", ""];
                 dataset.push(line);
             });
 

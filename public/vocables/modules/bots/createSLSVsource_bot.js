@@ -6,6 +6,8 @@ import BotEngine from "./botEngine.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import CommonBotFunctions from "./commonBotFunctions.js";
 
+
+
 var CreateSLSVsource_bot = (function () {
     var self = {};
     self.umountKGUploadApp = null;
@@ -106,10 +108,11 @@ var CreateSLSVsource_bot = (function () {
             async.series(
                 [
                     function (callbackSeries) {
-                        Lineage_createSource.createSource(self.params.sourceLabel, self.params.graphUri, self.params.imports, function (err, result) {
+                        Lineage_createSLSVsource.createSource(self.params.sourceLabel, self.params.graphUri, self.params.imports, function (err, result) {
                             if (err) {
                                 return alert(err);
                             }
+
 
                             callbackSeries();
                         });

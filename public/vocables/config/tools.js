@@ -10,7 +10,7 @@ const allTools = {
     GraphManagement: { label: "GraphManagement", noSource: 1, controller: GraphManagement, toolDescriptionImg: null },
     UserManagement: { label: "UserManagement", noSource: 1, controller: UserManagement, toolDescriptionImg: null },
 
-    OntoCreator: { label: "OntoCreator", noSource: 1, controller: Lineage_createSource, toolDescriptionImg: null },
+    OntoCreator: { label: "OntoCreator", noSource: 1, controller: Lineage_createSLSVsource, toolDescriptionImg: null },
 };
 
 async function loadToolsAndPlugins() {

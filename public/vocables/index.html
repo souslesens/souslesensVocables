@@ -87,7 +87,7 @@
         <script type="module" src="modules/tools/lineage/lineage_relationFilter.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_relationIndividualsFilter.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_rules.js"></script>
-        <script type="module" src="modules/tools/lineage/lineage_createSource.js"></script>
+        <script type="module" src="modules/tools/lineage/Lineage_createSLSVsource.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_createResource.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_createRelation.js"></script>
         <script type="module" src="modules/tools/lineage/axiomsEditor.js"></script>
@@ -105,6 +105,8 @@
         <script type="module" src="modules/uiWidgets/nodeInfosWidget.js"></script>
         <script type="module" src="modules/uiWidgets/searchWidget.js"></script>
         <script type="module" src="modules/uiWidgets/graphDecorationWidget.js"></script>
+        <script type="module" src="modules/shared/graphDisplayLegend.js"></script>
+
         <script type="module" src="modules/uiWidgets/legendWidget.js"></script>
         <script type="module" src="modules/uiWidgets/containerSearchWidget.js"></script>
         <script type="module" src="modules/uiWidgets/dateWidget.js"></script>
@@ -555,6 +557,17 @@
 
 
             }
+            #LineageVisjsLegendCanvas{
+                display: none;
+                z-index: 100;
+                position: absolute;
+                background-color: white;
+                border: blue 1px solid;
+                margin: 5px;
+                bottom: 10px;
+                right: 10px;
+                padding: 5px;
+            }
         </style>
     </head>
     <body>
@@ -644,6 +657,9 @@
         <div id="botPanel">
             <div id="botDiv"></div>
         </div>
+
+
+        <canvas id="LineageVisjsLegendCanvas" height="300"></canvas>
 
         <!-- Footer -->
         <footer class="bg-white">

@@ -166,7 +166,7 @@ var SearchWidget = (function () {
 
         SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
             if (_err) {
-                return alert(_err.responseText);
+                return alert(_err.responseText || err);
             }
             if (Object.keys(result[0].matches).length == 0) {
                 return $("#" + (options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>");
@@ -174,7 +174,7 @@ var SearchWidget = (function () {
 
             self.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
                 if (err) {
-                    return alert(err.responseText);
+                    return alert(err.responseText || err);
                 }
             });
         });

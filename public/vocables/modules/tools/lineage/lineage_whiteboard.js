@@ -734,7 +734,11 @@ var Lineage_whiteboard = (function () {
             Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
         });
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-        GraphDisplayLegend.drawLegend("Lineage","LineageVisjsLegendCanvas")
+
+        if(self.lineageVisjsGraph.isGraphNotEmpty()) {
+            GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas")
+        }
+
         return;
     };
 

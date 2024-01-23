@@ -46,6 +46,17 @@ services:
         networks:
             - backend
 
+    postgres:
+        image: postgres:16
+        ports:
+            - ${POSTGRES_LISTEN_PORT:-5432}:5432
+        environment:
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        volumes:
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/postgres:/var/lib/postgresql/data"
+        networks:
+            - backend
+
     sqlserver:
         image: mcr.microsoft.com/mssql/server:2019-latest
         environment:

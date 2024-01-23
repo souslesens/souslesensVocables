@@ -166,8 +166,6 @@ var Lineage_whiteboard = (function () {
     self.onGraphOrTreeNodeClick = function (node, nodeEvent, options) {
         //  console.trace("onGraphOrTreeNodeClick");
 
-
-
         if (!node.data || !node.data.source) {
             return console.log("no data.source in node");
         }
@@ -495,9 +493,8 @@ var Lineage_whiteboard = (function () {
                         result = Lineage_whiteboard.truncateResultToVisGraphLimit(result);
                     }
 
-
                     var ids = [];
-                    result.forEach(function ( item) {
+                    result.forEach(function (item) {
                         ids.push(item.topConcept.value);
                     });
 
@@ -728,15 +725,14 @@ var Lineage_whiteboard = (function () {
 
         self.lineageVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
         self.lineageVisjsGraph.draw(function () {
-
             MainController.UI.message("", true);
 
             Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
         });
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
 
-        if(self.lineageVisjsGraph.isGraphNotEmpty()) {
-            GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas")
+        if (self.lineageVisjsGraph.isGraphNotEmpty()) {
+            GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
         }
 
         return;
@@ -2009,13 +2005,12 @@ var Lineage_whiteboard = (function () {
                 var color = Lineage_whiteboard.getSourceColor(source);
 
                 var toNodesMap = [];
-                if(result2.length==0){
-                    if(callback){
-                        return callback("no data found")
+                if (result2.length == 0) {
+                    if (callback) {
+                        return callback("no data found");
                     }
-                    return MainController.UI.message("no data found")
+                    return MainController.UI.message("no data found");
                 }
-
 
                 result2.forEach(function (item) {
                     if (!existingNodes[item.subject.value]) {
@@ -2146,8 +2141,6 @@ var Lineage_whiteboard = (function () {
                         });
                     }
                 });
-
-
 
                 if (callback && options.returnVisjsData) {
                     return callback(null, visjsData);

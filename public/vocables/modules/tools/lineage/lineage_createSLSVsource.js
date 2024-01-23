@@ -54,8 +54,7 @@ var Lineage_createSLSVsource = (function () {
             ],
             function (err) {
                 if (err) {
-                    if (callback)
-                        callback(err);
+                    if (callback) callback(err);
                     return alert(err.responseText);
                 }
                 callback();

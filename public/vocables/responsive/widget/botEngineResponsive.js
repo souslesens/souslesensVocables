@@ -1,6 +1,6 @@
 var BotEngineResponsive = (function () {
     var self = {};
-    self.firstLoad=true;
+    self.firstLoad = true;
     self.init = function (botModule, options, callback) {
         if (!options) {
             options = {};
@@ -9,25 +9,22 @@ var BotEngineResponsive = (function () {
         BotEngine.currentObj = botModule;
         BotEngine.history = [];
         BotEngine.history.currentIndex = 0;
-        
+
         var divId;
         if (options.divId) {
             divId = options.divId;
-            
         } else {
             divId = "botDiv";
-            
         }
 
-        
-        $("#botPanel").dialog('open');
-        $("#botPanel").dialog("option", "title",BotEngine.currentBot.title);
-        
-        $("#botPanel").parent().css('top','13%');
-        $("#botPanel").parent().css('left','30%');
+        $("#botPanel").dialog("open");
+        $("#botPanel").dialog("option", "title", BotEngine.currentBot.title);
+
+        $("#botPanel").parent().css("top", "13%");
+        $("#botPanel").parent().css("left", "30%");
         $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
-            $('#resetButtonBot').insertAfter($('#botPanel').parent().find(".ui-dialog-titlebar-close"));
-            $('#previousButtonBot').insertAfter($('#botPanel').parent().find(".ui-dialog-titlebar-close"));
+            $("#resetButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+            $("#previousButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
             if (callback) callback();
         });
     };
@@ -90,9 +87,9 @@ var BotEngineResponsive = (function () {
             BotEngine.history.currentIndex -= 2;
             BotEngine.currentObj = BotEngine.history[BotEngine.history.currentIndex];
             //delete last 3 message sended
-            var childrens=$('#botTA').children();
+            var childrens = $("#botTA").children();
             // last is bot_input --> don't count
-            $('#botTA').children().slice(-4).filter('span').remove();
+            $("#botTA").children().slice(-4).filter("span").remove();
             self.nextStep();
         } else {
             self.reset();
@@ -101,7 +98,7 @@ var BotEngineResponsive = (function () {
 
     self.end = function () {
         BotEngine.currentBot.params.queryText = self.getQueryText();
-        $("#botPanel").dialog('close');
+        $("#botPanel").dialog("close");
         if (BotEngine.currentBot.callbackFn) {
             return BotEngine.currentBot.callbackFn();
         }
@@ -111,15 +108,13 @@ var BotEngineResponsive = (function () {
         if (BotEngine.currentBot.functionTitles) {
             var message = BotEngine.currentBot.functionTitles[step];
             // In case 2 questions are asked at the same time erase the last one
-            var last_message=$('#botTA').children().filter('span').slice(-1)[0];
-            if($(last_message).attr('class')=='chat-left'){
+            var last_message = $("#botTA").children().filter("span").slice(-1)[0];
+            if ($(last_message).attr("class") == "chat-left") {
                 last_message.remove();
             }
-            BotEngine.writeCompletedHtml(message || "select an option",{question:true});
-           
+            BotEngine.writeCompletedHtml(message || "select an option", { question: true });
         } else {
-            
-            self.writeCompletedHtml("select an option",{question:true});
+            self.writeCompletedHtml("select an option", { question: true });
         }
     };
 
@@ -133,8 +128,8 @@ var BotEngineResponsive = (function () {
     };
 
     self.reset = function () {
-        $('#resetButtonBot').remove();
-        $('#previousButtonBot').remove();
+        $("#resetButtonBot").remove();
+        $("#previousButtonBot").remove();
         BotEngine.currentBot.start();
     };
 
@@ -200,28 +195,26 @@ var BotEngineResponsive = (function () {
         $("#botPromptInput").css("display", "block");
     };
 
-    self.writeCompletedHtml = function (str,options) {
+    self.writeCompletedHtml = function (str, options) {
         if (!str) {
             return;
         }
         if (!options) {
-            options={};
+            options = {};
         }
-        if(options.question){
-            var chat_class='chat-left';
-        }
-        else{
-            var chat_class='chat-right';
+        if (options.question) {
+            var chat_class = "chat-left";
+        } else {
+            var chat_class = "chat-right";
         }
         var tokenId = "token_" + common.getRandomHexaId(5);
-        var html = "<span class='"+chat_class + "' id='" + tokenId + "'>" + str + "</span>";
+        var html = "<span class='" + chat_class + "' id='" + tokenId + "'>" + str + "</span>";
         $(html).insertBefore("#bot_input");
         $("#bot_input").val("");
         $("#bot_input").focus();
         return;
     };
 
-   
     self.getQueryText = function () {
         var queryText = "";
         $(".bot-token").each(function () {

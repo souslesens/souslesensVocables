@@ -64,13 +64,13 @@
     height: 30px;
     width: 30px;
 }
-.resetIcon{
+.resetIcon {
     background-image: url(@resetIcon);
     background-repeat: no-repeat;
     height: 30px;
     width: 30px;
 }
-.previousIcon{
+.previousIcon {
     background-image: url(@previousIcon);
     background-repeat: no-repeat;
     height: 30px;

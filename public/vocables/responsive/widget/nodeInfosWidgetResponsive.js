@@ -147,8 +147,8 @@ var NodeInfosWidgetResponsive = (function () {
                     }
                     self.showNodeInfosToolbar(options);
 
-                    $("#deleteButton").insertAfter($('#mainDialogDiv').parent().find(".ui-dialog-title"));
-                    $("#addPredicateButton").insertAfter($('#mainDialogDiv').parent().find(".ui-dialog-title"));
+                    $("#deleteButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
+                    $("#addPredicateButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
                     $("#addPredicateButton").css("margin-left", "25px !important");
                 });
             }

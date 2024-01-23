@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <title>SouslesensVocables</title>
-        
+
         <link rel="icon" href="./icons/CommonIcons/slsvLogo.png" />
 
         <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
@@ -269,10 +269,10 @@
                             height: 800,
                             width: $(document).width() * 0.85,
                             modal: false,
-                            close:function(event,ui){
+                            close: function (event, ui) {
                                 $("#deleteButton").remove();
                                 $("#addPredicateButton").remove();
-                            }
+                            },
                         });
                         $("#mainDialogDiv2").dialog({
                             autoOpen: false,
@@ -292,10 +292,10 @@
                             height: 600,
                             width: 800,
                             modal: false,
-                            close:function(event,ui){
+                            close: function (event, ui) {
                                 $("#previousButtonBot").remove();
                                 $("#resetButtonBot").remove();
-                            }
+                            },
                         });
 
                         $(document).on("click", "a", function () {
@@ -386,7 +386,7 @@
                     </div>
                 </div>
                 <div id="MenuBarFooter">
-                    <div class="w3-bar-item  slsv-invisible-button">
+                    <div class="w3-bar-item slsv-invisible-button">
                         <button class="logoInstance-icon slsv-invisible-button" style="height: 57px; width: 80px"></button>
                     </div>
                     <div id="toolSelectionSection" class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button" style="padding: 23px">
@@ -439,8 +439,6 @@
                         </div>
                     </div>
 
-                    
-
                     <div class="w3-bar-item w3-right" style="margin-right: 10px">
                         <div class="w3-button slsv-right-top-bar-button" id="user-username">User</div>
                     </div>
@@ -471,9 +469,8 @@
         <div id="smallDialogDiv"></div>
         <div id="LineagePopup"></div>
         <div id="popupMenuWidgetDiv" onclick="PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
-        <div id="botPanel" >
+        <div id="botPanel">
             <div id="botDiv"></div>
         </div>
     </body>
-    
 </html>

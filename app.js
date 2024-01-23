@@ -170,6 +170,11 @@ openapi.initialize({
         restrictAdmin: async function (req, _scopes, _definition) {
             const currentUser = await userManager.getUser(req.user);
 
+            if (req.url.indexOf("/sources")>0 && currentUser.allowSourceCreation) {
+                return Promise.resolve(true);
+            }
+
+
             if (!currentUser.logged) {
                 throw {
                     status: 401,

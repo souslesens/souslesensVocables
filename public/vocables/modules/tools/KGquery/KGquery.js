@@ -18,7 +18,8 @@ import KGquery_myQueries from "./KGquery_myQueries.js";
 import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
-import KGquery_bot from "../../bots/KGquery_bot.js";
+import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
+import KGquery_annotations_bot from "../../bots/KGquery_annotations_bot.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
 
 var KGquery = (function () {
@@ -123,7 +124,7 @@ var KGquery = (function () {
         var node = JSON.parse(JSON.stringify(selectedNode));
 
         /* if existing path in queryFlement a new one is created
-      with a from Node that is the nearest node from the existing Node of all previous element in the set*/
+  with a from Node that is the nearest node from the existing Node of all previous element in the set*/
 
         if (self.currentQuerySet.elements.length > 1) {
             var excludeSelf = false;
@@ -196,7 +197,7 @@ var KGquery = (function () {
             varName: self.getVarName(aClass, true),
         };
 
-        KGquery_bot.start(currentFilterQuery, function (err, result) {
+        KGquery_filter_bot.start(currentFilterQuery, function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -228,8 +229,8 @@ var KGquery = (function () {
             options = {};
         }
         /* if (!self.querySets.toNode) {
-  return alert("missing target node in  path");
-  }*/
+return alert("missing target node in  path");
+}*/
 
         $("#KGquery_dataTableDiv").html("");
         self.message("searching...");
@@ -345,10 +346,24 @@ var KGquery = (function () {
                 }
 
                 var optionalStr = "";
-                optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " owl:hasValue " + subjectVarName + "Value}\n", optionalStr);
-                optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " owl:hasValue " + objectVarName + "Value}\n", optionalStr);
-                optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", optionalStr);
-                optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " rdfs:label " + objectVarName + "Label}\n", optionalStr);
+                if (queryElement.fromNode.data.annotationProperties) {
+                    queryElement.fromNode.data.annotationProperties.forEach(function (property) {
+                        optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " <" + property.id + "> " + subjectVarName + "_" + property.label + "}\n", optionalStr);
+                        optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " rdf:value " + subjectVarName + "_value}\n", optionalStr);
+                    });
+                } else {
+                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " owl:hasValue " + subjectVarName + "Value}\n", optionalStr);
+                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", optionalStr);
+                }
+                if (queryElement.toNode.data.annotationProperties) {
+                    queryElement.toNode.data.annotationProperties.forEach(function (property) {
+                        optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " <" + property.id + "> " + objectVarName + "_" + property.label + "}\n", optionalStr);
+                        optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " rdf:value " + objectVarName + "_value}\n", optionalStr);
+                    });
+                } else {
+                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " owl:hasValue " + objectVarName + "Value}\n", optionalStr);
+                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " rdfs:label " + objectVarName + "Label}\n", optionalStr);
+                }
                 optionalStrs += " \n" + optionalStr;
             });
 
@@ -383,11 +398,11 @@ var KGquery = (function () {
         var classNodes = self.getAllQueryPathClasses();
 
         /*    var edgesModel={}
-    self.querySets.sets.forEach(function (querySet) {
-        querySet.elements.forEach(function (queryElement, queryElementIndex) {
-            edgesModel[queryElement.fromNode+"_"+queryElement.toNode.id]= {  }
-        })
-    })*/
+self.querySets.sets.forEach(function (querySet) {
+    querySet.elements.forEach(function (queryElement, queryElementIndex) {
+        edgesModel[queryElement.fromNode+"_"+queryElement.toNode.id]= {  }
+    })
+})*/
 
         var data = result.results.bindings;
         var visjsData = { nodes: [], edges: [] };

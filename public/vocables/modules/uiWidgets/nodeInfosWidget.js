@@ -602,13 +602,17 @@ defaultLang = 'en';*/
         var url = sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
             if (err) {
-                return callback(err);
+                if (callback) {
+                    return callback(err);
+                }
             }
 
             var data = result.results.bindings;
 
             if (data.length == 0) {
-                return callback();
+                if (callback) {
+                    return callback();
+                }
             } else {
                 var str = "<b>TypeOf </b><br><table>";
 
@@ -620,7 +624,9 @@ defaultLang = 'en';*/
                 str += "</table>";
                 $("#nodeInfos_individualsDiv").html(str);
             }
-            if (callback) callback();
+            if (callback) {
+                callback();
+            }
         });
     };
 

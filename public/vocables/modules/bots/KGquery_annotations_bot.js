@@ -3,12 +3,12 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import KGquery from "../tools/KGquery/KGquery.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
 
-var KGquery_bot = (function () {
+var KGquery_annotations_bot = (function () {
     var self = {};
     self.title = "Filter Class";
 
     self.start = function (currentQuery, validateFn) {
-        BotEngine.init(KGquery_bot, null, function () {
+        BotEngine.init(KGquery_annotations_bot, null, function () {
             self.validateFn = validateFn;
             self.callbackFn = function () {
                 var filterLabel = BotEngine.getQueryText();
@@ -17,20 +17,17 @@ var KGquery_bot = (function () {
 
             self.params = currentQuery;
             SparqlQuery_bot.params = currentQuery;
-            BotEngine.currentObj = self.workflow_filterClass;
-            BotEngine.nextStep(self.workflow_filterClass);
+            BotEngine.currentObj = self.workflow_selectproperties;
+            BotEngine.nextStep(self.workflow_selectproperties);
         });
     };
 
-    self.workflow_filterClass = {
-        listFilterTypes: {
+    self.workflow_selectproperties = {
+        listSelectvariablesTypes: {
             _OR: {
-                label: { promptIndividualsLabelFn: { setSparqlQueryFilter: {} } },
-                list: { listIndividualsFn: { setSparqlQueryFilter: {} } },
-                advanced: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
-                date: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
-                period: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
-                // }
+                "all properties": { setAllSelectVariables: { setSparqlQuerySelect: {} } },
+                "select a class": { listClasses: { setClassSelectVariables: {} } },
+                "execute query": { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
             },
         },
     };
@@ -58,5 +55,5 @@ var KGquery_bot = (function () {
     return self;
 })();
 
-export default KGquery_bot;
-window.KGquery_bot = KGquery_bot;
+export default KGquery_annotations_bot;
+window.KGquery_annotations_bot = KGquery_annotations_bot;

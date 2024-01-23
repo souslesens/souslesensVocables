@@ -187,7 +187,7 @@ var KGbuilder_triplesMaker = {
       subjectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
       return callback(null, subjectStr);
     }
-    else if (typeof mapping.s === "string" && mapping.s.indexOf("$_") == 0 || mapping.isSubjectBlankNode) {
+    else if (typeof mapping.s === "string" && (mapping.s.indexOf("$_") == 0 ||mapping.s.indexOf("$_") == 0 ) || mapping.isSubjectBlankNode) {
       // virtual column
       if (typeof mapping.o === "string" && (mapping.o.indexOf("$_") != 0 && !mapping.isObjectBlankNode) && KGbuilder_triplesMaker.allColumns[mapping.o] && !line[mapping.o]) {
         // ne pas creer des triplest sans objet
@@ -285,16 +285,17 @@ var KGbuilder_triplesMaker = {
         objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
         return callback(null, objectStr);
       }
+
       else {
         if (!line[mapping.o] || line[mapping.o] == "null") {
           return callback(null, null);
         }
-        else if (mapping.dataType) {
+        else if (mapping.xsdType) {
           var str = line[mapping.o];
           if (!str || str == "null") {
             return;
           }
-          if (mapping.dataType == "xsd:dateTime") {
+          if (mapping.xsdType == "dateTime") {
             var isDate = function(date) {
               return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
             };
@@ -317,9 +318,9 @@ var KGbuilder_triplesMaker = {
             }
           }
 
-          mapping.p = "owl:hasValue";
+          mapping.p = "rdf:value";
 
-          objectStr = "'" + str + "'^^" + mapping.dataType;
+          objectStr = "'" + str + "'^^xsd:" + mapping.xsdType;
         }
         else if (tableMappings.transform && line[mapping.o] && tableMappings.transform[mapping.o]) {
           try {
@@ -357,7 +358,7 @@ var KGbuilder_triplesMaker = {
       if (objectStr.indexOf && objectStr.indexOf("http") == 0) {
         objectStr = "<" + objectStr + ">";
       }
-      else if (mapping.datatype) {
+      else if (mapping.xsdType) {
         //pass
       }
       else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
@@ -366,9 +367,7 @@ var KGbuilder_triplesMaker = {
       else if (mapping.isString) {
         objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
       }
-      else if (objectStr.indexOf("xsd:") > -1) {
-        //pass
-      }
+
       else {
         /* if(!mapping.isString)
 objectStr=objectStr.replace(/[\-_]/g,"")*/

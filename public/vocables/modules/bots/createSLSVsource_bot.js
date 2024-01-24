@@ -23,7 +23,7 @@ var CreateSLSVsource_bot = (function () {
         _OR: {
             "create source": { saveFn: { loadLineage: {} } },
             "add import": { listImportsFn: { afterImportFn: {} } },
-            //  "upload graph from file": { uploadFromFileFn: { afterImportFn: {} } },
+             "upload graph from file": { uploadFromFileFn: { afterImportFn: {} } },
             //  "upload graph from URL": { uploadFromUrlFn: { afterImportFn: {} } }
         },
     };
@@ -77,13 +77,14 @@ var CreateSLSVsource_bot = (function () {
             $("#smallDialogDiv").dialog("open");
 
             var html =
-                "<form method='POST' id='uploadForm' enctype=\"multipart/form-data\" action=\"/api/v1/jowl/uploadGraph\">\n" +
+                "<form method='POST' id='uploadForm' name='uploadForm' enctype=\"multipart/form-data\"" +
+              " onSubmit=\"return CreateSLSVsource_bot.uploadFile(this)\"'>\n" +
                 '                <input type="file" id="rdfFile" name="importRDF">\n' +
-                '  <input type="hidden" name="graphUri" value="' +
-                self.params.graphUri +
-                '">' +
-                ' <button type="submit" >Upload </input>';
-            "            </form>" + " <sript>" + " $('uploadForm').submit(function() {\n" + "      BotEngine.nextStep();" + "        return false;\n" + "    });" + "</sript>";
+
+                '  <input type="hidden" name="graphUri" value="' +  self.params.graphUri +  '">' +
+              ' <input type="submit"/>'+
+              "</form>"
+              //  ' <button onclick="CreateSLSVsource_bot.uploadFile()" >Upload </input>';
 
             $("#smallDialogDiv").html(html);
 
@@ -154,6 +155,7 @@ var CreateSLSVsource_bot = (function () {
                 alert("Files Uploaded!");
             },
         });
+        return false;
     };
 
     return self;
@@ -161,4 +163,4 @@ var CreateSLSVsource_bot = (function () {
 
 export default CreateSLSVsource_bot;
 window.CreateSLSVsource_bot = CreateSLSVsource_bot;
-import("/assets/kg_upload_app.js");
+//import("/assets/kg_upload_app.js");

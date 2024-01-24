@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script>
+
+    function submitFormData(formData) {
+      fetch('/api/v1/jowl/uploadGraph', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          if(data.result==-1)
+          if("graph already exist ")
+          // Handle response data
+        })
+        .catch(error => {
+          // Handle errors
+        });
+    }
+
+    function submitForm() {
+      const form = document.querySelector('#myForm');
+      /*   form.action="/api/v1/jowl/uploadGraph";
+         form.submit(function(err,result){
+
+         })
+
+         return false;*/
+      const formData = new FormData(form);
+      var input = document.getElementById("file");
+      var files = input.files;
+      for (var i = 0; i != files.length; i++) {
+        formData.append("files", files[i]);
+      }
+
+      submitFormData(formData);
+      return false;
+    }
+
+   upload= function () {
+    var input = document.getElementById("files");
+    var files = input.files;
+    var formData = new FormData();
+
+    for (var i = 0; i != files.length; i++) {
+    formData.append("files", files[i]);
+    }
+    formData.append("graphUri", self.params.graphUri);
+
+    $.ajax({
+    url: "/api/v1/jowl/uploadGraph",
+    data: formData,
+    processData: false,
+    contentType: false,
+    type: "POST",
+    success: function () {
+    alert("Files Uploaded!");
+    },
+    });
+    return false;
+    };
+  </script>
+
+</head>
+<body>
+<form id="myForm" enctype="multipart/form-data" method='POST'>
+  <input type="hidden" name="graphUri"  value="http://testUpload/" >
+  <input type="file" id="file" name="importRDF">
+  <button type="submit">Submit</button>
+</form>
+</body>
+<script>
+  const form = document.querySelector('#myForm');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitForm();
+  });
+</script>
+</html>

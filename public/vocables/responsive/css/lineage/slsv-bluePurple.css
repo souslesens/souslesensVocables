@@ -279,7 +279,7 @@
 #index_topContolPanel {
     font-size: 13px;
 }
-#LineageVisjsLegendCanvas{
+#LineageVisjsLegendCanvas {
     display: none;
     z-index: 100;
     position: absolute;

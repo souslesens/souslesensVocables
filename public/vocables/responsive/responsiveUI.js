@@ -149,10 +149,10 @@ var ResponsiveUI = (function () {
             return Lineage_r.init();
         } else if (toolId == "KGquery") {
             return KGquery_r.init();
-        }
+        } else {
         /* else if (toolId == "KGcreator") {
             return KGcreator_r.init();
-        } */else {
+        } */
             var answer = confirm("Not available in Responsive interface, redirection to old interface");
             if (answer) {
                 var url = window.location.href;

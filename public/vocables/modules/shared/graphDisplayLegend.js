@@ -124,8 +124,7 @@ var GraphDisplayLegend = (function () {
                     color: "#70ac47",
                 },
             },
-            "Row index":{
-
+            "Row index": {
                 type: "node",
                 attrs: {
                     shape: "star",
@@ -160,7 +159,6 @@ var GraphDisplayLegend = (function () {
                 },
             },
 
-
             Table: {
                 type: "node",
                 attrs: {
@@ -193,8 +191,7 @@ var GraphDisplayLegend = (function () {
                 type: "edge",
                 attrs: {
                     color: "#70ac47",
-                    arrows:"to"
-                   ,
+                    arrows: "to",
                 },
             },
 
@@ -202,48 +199,41 @@ var GraphDisplayLegend = (function () {
                 type: "edge",
                 attrs: {
                     color: "#70ac47",
-                    arrows:"to"
-                    ,
+                    arrows: "to",
                 },
             },
             "Inter columns ObjectProperty": {
                 type: "edge",
                 attrs: {
                     color: "#ec56da",
-                    arrows:"to"
-                    ,
+                    arrows: "to",
                 },
             },
             "Column to class mapping": {
                 type: "edge",
                 attrs: {
                     color: "#aed",
-                    arrows:"to"
-                    ,
+                    arrows: "to",
                 },
             },
-
-
-
         },
     };
 
     self.drawLegend = function (type, legendCanvas) {
-       //  type="KGcreator_classes"
+        //  type="KGcreator_classes"
         if (!legendCanvas) {
             legendCanvas = "visjsLegendCanvas";
         }
         $("#" + legendCanvas).css("display", "block");
         $("#" + legendCanvas).draggable();
 
-
         var legendObj = self.legendsMap[type];
         if (!legendObj) {
             return alert("missing legend description");
         }
-        var height=Object.keys(legendObj).length*30
-        $("#" + legendCanvas).attr('height',height);
-        $("#" + legendCanvas).attr('width',250);
+        var height = Object.keys(legendObj).length * 30;
+        $("#" + legendCanvas).attr("height", height);
+        $("#" + legendCanvas).attr("width", 250);
         var c = document.getElementById(legendCanvas);
         var ctx = c.getContext("2d");
         var yOffset = 0;
@@ -276,7 +266,6 @@ var GraphDisplayLegend = (function () {
                 ctx.lineTo(xOffset - 15, yOffset);
                 ctx.stroke();
                 ctx.setLineDash([]);
-
 
                 self.drawArrow(ctx, 10, yOffset, xOffset - 15, yOffset, 8);
             }
@@ -325,10 +314,10 @@ var GraphDisplayLegend = (function () {
             }
         }
 
-        if(shape=="star"){
+        if (shape == "star") {
             ctx.strokeStyle = attrs.color || "blue";
             ctx.fillStyle = attrs.color || "blue";
-            self.drawStar(ctx, xOffset / 2, yOffset - 5,  5, 9, 4);
+            self.drawStar(ctx, xOffset / 2, yOffset - 5, 5, 9, 4);
         }
     };
 
@@ -404,36 +393,32 @@ var GraphDisplayLegend = (function () {
         context.closePath();
 
         context.fill();
-
     };
 
-    self. drawStar=function(ctx,cx, cy, spikes, outerRadius, innerRadius) {
-        var rot = Math.PI / 2 * 3;
+    self.drawStar = function (ctx, cx, cy, spikes, outerRadius, innerRadius) {
+        var rot = (Math.PI / 2) * 3;
         var x = cx;
         var y = cy;
         var step = Math.PI / spikes;
 
         ctx.beginPath();
-        ctx.moveTo(cx, cy - outerRadius)
+        ctx.moveTo(cx, cy - outerRadius);
         for (var i = 0; i < spikes; i++) {
             x = cx + Math.cos(rot) * outerRadius;
             y = cy + Math.sin(rot) * outerRadius;
-            ctx.lineTo(x, y)
-            rot += step
+            ctx.lineTo(x, y);
+            rot += step;
 
             x = cx + Math.cos(rot) * innerRadius;
             y = cy + Math.sin(rot) * innerRadius;
-            ctx.lineTo(x, y)
-            rot += step
+            ctx.lineTo(x, y);
+            rot += step;
         }
-        ctx.lineTo(cx, cy - outerRadius)
+        ctx.lineTo(cx, cy - outerRadius);
         ctx.closePath();
         ctx.stroke();
         ctx.fill();
-
-    }
-
-
+    };
 
     return self;
 })();

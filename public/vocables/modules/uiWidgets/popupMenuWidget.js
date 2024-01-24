@@ -58,8 +58,8 @@ var PopupMenuWidget = (function () {
         $("#" + popupDiv).css("left", point.x + (absolutePosition ? 0 : leftPanelWidth) + horOverlap);
         $("#" + popupDiv).css("top", point.y + vertOverlap);
         */
-        if(!options){
-            options={};
+        if (!options) {
+            options = {};
         }
         if (!popupDiv) {
             popupDiv = "popupDiv";

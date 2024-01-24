@@ -120,7 +120,6 @@ var KGcreator = (function () {
             }
             KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
         });
-
     };
 
     self.getSlsvSourceConfig = function (source, callback) {
@@ -676,8 +675,7 @@ var KGcreator = (function () {
     };
 
     self.showTableVirtualColumnsTree = function (table) {
-        if(!table)
-            return alert("no table selected")
+        if (!table) return alert("no table selected");
         if (!self.currentConfig.currentMappings[table].virtualColumns) {
             return;
         }

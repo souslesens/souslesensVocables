@@ -6,22 +6,13 @@ import BotEngine from "./botEngine.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import CommonBotFunctions from "./commonBotFunctions.js";
 
-
-
 var CreateSLSVsource_bot = (function () {
     var self = {};
-    self.umountKGUploadApp = null;
-    self.createApp = null;
+
     self.title = "Create Source";
-    self.uploadFormData = {
-        displayForm: "file", // can be database, file or ""
-        currentSource: "",
-        selectedDatabase: "",
-        selectedFiles: [],
-        files:[],
-    };
+
     self.start = function () {
-            BotEngine.init(CreateSLSVsource_bot, null, function () {
+        BotEngine.init(CreateSLSVsource_bot, null, function () {
             self.params = { sourceLabel: "", graphUri: "", imports: [] };
             BotEngine.currentObj = self.workflow;
             BotEngine.nextStep(self.workflow);
@@ -32,8 +23,8 @@ var CreateSLSVsource_bot = (function () {
         _OR: {
             "create source": { saveFn: { loadLineage: {} } },
             "add import": { listImportsFn: { afterImportFn: {} } },
-            "upload graph from file": { uploadFromFileFn: { afterImportFn: {} } },
-            "upload graph from URL": { uploadFromUrlFn: { afterImportFn: {} } },
+            //  "upload graph from file": { uploadFromFileFn: { afterImportFn: {} } },
+            //  "upload graph from URL": { uploadFromUrlFn: { afterImportFn: {} } }
         },
     };
 
@@ -59,7 +50,9 @@ var CreateSLSVsource_bot = (function () {
         },
         promptSourceNameFn: function () {
             BotEngine.promptValue("source label", "sourceLabel", "", function (value) {
-                if (!value) BotEngine.previousStep();
+                if (!value) {
+                    BotEngine.previousStep();
+                }
                 BotEngine.nextStep();
             });
         },
@@ -81,29 +74,39 @@ var CreateSLSVsource_bot = (function () {
             BotEngine.promptValue("enter graph Url", uploadUrl);
         },
         uploadFromFileFn: function () {
-            var answer=window.confirm('This operation will create the source automatically after the file uploading, Make sure you have finished to make your imports');
-            if(!answer){
-                BotEngine.previousStep();
-            }
-            else{
-                var html = ' <div id="mount-upload-here"></div>';
-                $("#smallDialogDiv").html(html);
-                $("#smallDialogDiv").dialog({
-                    open: function (event, ui) {
-                        if (self.createApp === null) {
-                            throw new Error("React app is not ready");
-                        }
-                        self.uploadFormData.currentSource = self.params.sourceLabel;
-                        self.umountKGUploadApp = self.createApp(self.uploadFormData);
-                    },
-                    beforeClose: function () {
-                        self.umountKGUploadApp();
-                    },
-                });
-                $("#smallDialogDiv").dialog("open");
-                BotEngine.nextStep();
-            }
+            $("#smallDialogDiv").dialog("open");
 
+            var html =
+                "<form method='POST' id='uploadForm' enctype=\"multipart/form-data\" action=\"/api/v1/jowl/uploadGraph\">\n" +
+                '                <input type="file" id="rdfFile" name="importRDF">\n' +
+                '  <input type="hidden" name="graphUri" value="' +
+                self.params.graphUri +
+                '">' +
+                ' <button type="submit" >Upload </input>';
+            "            </form>" + " <sript>" + " $('uploadForm').submit(function() {\n" + "      BotEngine.nextStep();" + "        return false;\n" + "    });" + "</sript>";
+
+            $("#smallDialogDiv").html(html);
+
+            /*     var answer = window.confirm("This operation will create the source automatically after the file uploading, Make sure you have finished to make your imports");
+           if (!answer) {
+               BotEngine.previousStep();
+           } else {
+               var html = ' <div id="mount-upload-here"></div>';
+               $("#smallDialogDiv").html(html);
+               $("#smallDialogDiv").dialog({
+                   open: function (event, ui) {
+                       if (self.createApp === null) {
+                           throw new Error("React app is not ready");
+                       }
+                       self.uploadFormData.currentSource = self.params.sourceLabel;
+                       self.umountKGUploadApp = self.createApp(self.uploadFormData);
+                   },
+                   beforeClose: function () {
+                       self.umountKGUploadApp();
+                   },
+               });
+               $("#smallDialogDiv").dialog("open");
+               BotEngine.nextStep();*/
         },
 
         saveFn: function () {
@@ -118,24 +121,39 @@ var CreateSLSVsource_bot = (function () {
                             callbackSeries();
                         });
                     },
-                    function (callbackSeries) {
-                        if (self.params.uploadFile) {
-                            callbackSeries();
-                        } else {
-                            callbackSeries();
-                        }
-                    },
-                    function (callbackSeries) {
-
-                    },
+                    function (callbackSeries) {},
                 ],
                 function (err) {
-                    if (err) alert(err.responsetext);
+                    if (err) {
+                        alert(err.responsetext);
+                    }
                     return BotEngine.nextStep();
                 }
             );
         },
+
         loadLineage: function () {},
+    };
+    self.uploadFile = function () {
+        var input = document.getElementById("files");
+        var files = input.files;
+        var formData = new FormData();
+
+        for (var i = 0; i != files.length; i++) {
+            formData.append("files", files[i]);
+        }
+        formData.append("graphUri", self.params.graphUri);
+
+        $.ajax({
+            url: "/api/v1/jowl/uploadGraph",
+            data: formData,
+            processData: false,
+            contentType: false,
+            type: "POST",
+            success: function () {
+                alert("Files Uploaded!");
+            },
+        });
     };
 
     return self;
@@ -143,5 +161,4 @@ var CreateSLSVsource_bot = (function () {
 
 export default CreateSLSVsource_bot;
 window.CreateSLSVsource_bot = CreateSLSVsource_bot;
-// imports React app
-//import("/assets/SourceCreatorUploading.js");
+import("/assets/kg_upload_app.js");

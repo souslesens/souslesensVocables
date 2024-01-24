@@ -446,6 +446,7 @@ return callback()
 
 
             }
+            
             self.currentTool = toolId;
             var toolObj = Config.tools[toolId];
             self.currentSource = null;

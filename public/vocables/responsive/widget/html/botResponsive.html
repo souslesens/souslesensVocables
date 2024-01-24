@@ -5,10 +5,12 @@
     <div style="display: flex; justify-content: center; width: 100%; margin-bottom: 20px">
         <select id="bot_resourcesProposalSelect" size="10"></select>
     </div>
-
+    <input id="botPromptInput" class="w3-input w3-border w3-padding" style="width:80%;margin-left: 10px;display:none;">
+    <input type="hidden" id="botVarToFill">
     <div>
         <button id="resetButtonBot" class="slsv-invisible-button resetIcon" style="margin-top: 30px" onclick="BotEngine.reset()"></button>
 
         <button id="previousButtonBot" class="slsv-invisible-button previousIcon" style="margin-top: 30px; margin-left: 150px" onclick="BotEngine.previousStep()"></button>
     </div>
+    
 </div>

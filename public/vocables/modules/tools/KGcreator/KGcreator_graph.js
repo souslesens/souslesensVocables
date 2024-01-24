@@ -79,11 +79,13 @@ var KGcreator_graph = (function () {
             });
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
+            GraphDisplayLegend.drawLegend("KGcreator_classes", "LineageVisjsLegendCanvas");
+            $("#KGcreator_resourceLinkRightPanel").load("./modules/tools/KGcreator/html/graphControlPanel.html", function () {});
         });
     };
 
-    self.onNodeClick = function (node, point, event) {
-        console.log(JSON.stringify(node))
+    self.onNodeClick = function (node, point, event, caller) {
+        console.log(JSON.stringify(node));
         PopupMenuWidget.hidePopup();
         if (!node || !node.data) {
             return (self.currentGraphNode = null);
@@ -581,9 +583,9 @@ var KGcreator_graph = (function () {
         $("#mainDialogDiv").dialog("open");
         //  $("#mainDialogDiv").html(html);
         $("#mainDialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function () {
-            self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, {});
+            self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, { onclickFn: KGcreator_graph.onNodeClick });
             self.mappingVisjsGraph.draw();
-            GraphDisplayLegend.drawLegend("KGcreatorMappings","KGcreatorVisjsLegendCanvas")
+            GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas");
             var options = {
                 mode: "tree",
             };

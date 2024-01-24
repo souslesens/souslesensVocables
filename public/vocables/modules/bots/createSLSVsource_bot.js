@@ -18,10 +18,10 @@ var CreateSLSVsource_bot = (function () {
         currentSource: "",
         selectedDatabase: "",
         selectedFiles: [],
-        files: [],
+        files:[],
     };
     self.start = function () {
-        BotEngine.init(CreateSLSVsource_bot, null, function () {
+            BotEngine.init(CreateSLSVsource_bot, null, function () {
             self.params = { sourceLabel: "", graphUri: "", imports: [] };
             BotEngine.currentObj = self.workflow;
             BotEngine.nextStep(self.workflow);
@@ -81,10 +81,11 @@ var CreateSLSVsource_bot = (function () {
             BotEngine.promptValue("enter graph Url", uploadUrl);
         },
         uploadFromFileFn: function () {
-            var answer = window.confirm("This operation will create the source automatically after the file uploading, Make sure you have finished to make your imports");
-            if (!answer) {
+            var answer=window.confirm('This operation will create the source automatically after the file uploading, Make sure you have finished to make your imports');
+            if(!answer){
                 BotEngine.previousStep();
-            } else {
+            }
+            else{
                 var html = ' <div id="mount-upload-here"></div>';
                 $("#smallDialogDiv").html(html);
                 $("#smallDialogDiv").dialog({
@@ -102,6 +103,7 @@ var CreateSLSVsource_bot = (function () {
                 $("#smallDialogDiv").dialog("open");
                 BotEngine.nextStep();
             }
+
         },
 
         saveFn: function () {
@@ -113,11 +115,19 @@ var CreateSLSVsource_bot = (function () {
                                 return alert(err);
                             }
 
-
                             callbackSeries();
                         });
                     },
-                    function (callbackSeries) {},
+                    function (callbackSeries) {
+                        if (self.params.uploadFile) {
+                            callbackSeries();
+                        } else {
+                            callbackSeries();
+                        }
+                    },
+                    function (callbackSeries) {
+
+                    },
                 ],
                 function (err) {
                     if (err) alert(err.responsetext);
@@ -134,4 +144,4 @@ var CreateSLSVsource_bot = (function () {
 export default CreateSLSVsource_bot;
 window.CreateSLSVsource_bot = CreateSLSVsource_bot;
 // imports React app
-import("/assets/SourceCreatorUploading.js");
+//import("/assets/SourceCreatorUploading.js");

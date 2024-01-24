@@ -1,9 +1,7 @@
-
-
 var BotEngineResponsive = (function () {
     var self = {};
     self.firstLoad = true;
-    self.OrReturnValues=[];
+    self.OrReturnValues = [];
     self.init = function (botModule, options, callback) {
         if (!options) {
             options = {};
@@ -92,23 +90,20 @@ var BotEngineResponsive = (function () {
             BotEngine.history.currentIndex -= 2;
 
             BotEngine.currentObj = BotEngine.history[BotEngine.history.currentIndex];
-            
-            
+
             //delete last 3 message sended
             var childrens = $("#botTA").children();
             // last is bot_input --> don't count
             $("#botTA").children().slice(-4).filter("span").remove();
-            if(BotEngine.currentObj._OR!=undefined){
-                if(self.OrReturnValues!=[]){
-                    var lastOrReturnValue=self.OrReturnValues.slice(-1);
+            if (BotEngine.currentObj._OR != undefined) {
+                if (self.OrReturnValues != []) {
+                    var lastOrReturnValue = self.OrReturnValues.slice(-1);
                     self.OrReturnValues.pop();
                     self.nextStep(lastOrReturnValue);
                 }
-            }
-            else{
+            } else {
                 self.nextStep();
             }
-            
         } else {
             self.reset();
         }
@@ -192,7 +187,6 @@ var BotEngineResponsive = (function () {
         });
     };
     self.promptValue = function (message, varToFill, defaultValue, callback) {
-        
         $("#botPromptInput").on("keyup", function (key) {
             if (event.keyCode == 13 || event.keyCode == 9) {
                 $("#botPromptInput").css("display", "none");
@@ -210,7 +204,7 @@ var BotEngineResponsive = (function () {
         self.clearProposalSelect();
         $("#botVarToFill").val(varToFill);
         $("#botPromptInput").val(defaultValue || "");
-        $("#botPromptInput").css("display", "block");   
+        $("#botPromptInput").css("display", "block");
         $("#botPromptInput").focus();
     };
 
@@ -231,12 +225,9 @@ var BotEngineResponsive = (function () {
         $(html).insertBefore("#bot_input");
         $("#bot_input").val("");
         $("#bot_input").focus();
-        if($('#botDiv')[0].scrollHeight>500){
+        if ($("#botDiv")[0].scrollHeight > 500) {
             $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
         }
-
-        
-
 
         return;
     };
@@ -251,7 +242,6 @@ var BotEngineResponsive = (function () {
     self.clearProposalSelect = function () {
         $("#bot_resourcesProposalSelect").find("option").remove().end();
     };
-
 
     self.analyse = function (str) {};
 

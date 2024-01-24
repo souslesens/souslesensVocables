@@ -150,7 +150,7 @@ var ResponsiveUI = (function () {
         } else if (toolId == "KGquery") {
             return KGquery_r.init();
         } else {
-        /* else if (toolId == "KGcreator") {
+            /* else if (toolId == "KGcreator") {
             return KGcreator_r.init();
         } */
             var answer = confirm("Not available in Responsive interface, redirection to old interface");

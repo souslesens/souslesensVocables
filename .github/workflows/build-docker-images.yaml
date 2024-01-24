@@ -57,9 +57,14 @@ jobs:
             - name: Install deps
               run: |
                   mkdir -p ~/.bin
+                  # sops
                   curl -LO https://github.com/getsops/sops/releases/download/v3.8.1/sops-v3.8.1.linux.amd64
                   mv sops-v3.8.1.linux.amd64 ~/.bin/sops
                   chmod +x ~/.bin/sops
+                  # age
+                  wget https://github.com/FiloSottile/age/releases/download/v1.1.1/age-v1.1.1-linux-amd64.tar.gz
+                  tar -xvf age-v1.1.1-linux-amd64.tar.gz
+                  cp age/age ~/.bin/sops
                   echo ~/.bin >> $GITHUB_PATH
             - name: Configure
               run: |

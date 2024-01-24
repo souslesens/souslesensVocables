@@ -60,6 +60,7 @@ jobs:
                   curl -LO https://github.com/getsops/sops/releases/download/v3.8.1/sops-v3.8.1.linux.amd64
                   mv sops-v3.8.1.linux.amd64 ~/.bin/sops
                   chmod +x ~/.bin/sops
+                  echo ~/.bin >> $GITHUB_PATH
             - name: Configure
               run: |
                   mkdir -p ~/.kube
@@ -72,7 +73,6 @@ jobs:
                       https://github.com/jkroepke/helm-secrets
                   helmfile-args: apply --file deploy/helmfile.yaml --set image.tag=${{ github.ref }}
               env:
-                  PATH: $PATH:~/.bin
                   KUBECONFIG: ~/.kube/config
                   SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

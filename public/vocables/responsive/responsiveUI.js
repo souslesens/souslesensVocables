@@ -16,7 +16,7 @@ var ResponsiveUI = (function () {
     self.LateralPannelShowed = true;
     self.currentTool = null;
     self.tools_available = ["lineage", "KGquery"];
-    self.toolsNeedSource = ["lineage", "KGquery", "TimeLine"];
+    self.toolsNeedSource = ["lineage", "KGquery"];
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
         self.setSlsvCssClasses();

@@ -8,6 +8,7 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_SKOS from "../sparqlProxies/sparql_SKOS.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import GraphLoader from "./graphLoader.js";
+import ResponsiveUI from  "../../responsive/responsiveUI.js"  
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -182,16 +183,16 @@ return callback()
                             callbackSeries(err);
                         });
                     },
-
+                    function (callbackSeries) {
+                        MainController.UI.showToolsList("toolsTreeDiv");
+                        callbackSeries();
+                    },
                     function (callbackSeries) {
                         MainController.parseUrlParam(function () {
                             callbackSeries();
                         });
                     },
-                    function (callbackSeries) {
-                        MainController.UI.showToolsList("toolsTreeDiv");
-                        callbackSeries();
-                    },
+                    
                 ],
                 function (_err) {
                     MainController.UI.configureUI();
@@ -433,6 +434,18 @@ return callback()
             });
         },
         initTool: function (toolId, callback) {
+            if(ResponsiveUI.tools_available.includes(toolId)){
+                var url = window.location.href;
+                url=url.replace('index_old.html','');
+                var p = url.indexOf("?");
+                if (p > -1) {
+                    url = url.substring(0, p);
+                }
+                url=url+"?tool="+toolId;
+                window.location.href=url;
+
+
+            }
             self.currentTool = toolId;
             var toolObj = Config.tools[toolId];
             self.currentSource = null;
@@ -612,44 +625,65 @@ return callback()
 
     self.parseUrlParam = function (callback) {
         var paramsMap = common.getUrlParamsMap();
-
+        
+        // old or new url
         if (paramsMap.tool) {
             var tool = paramsMap["tool"];
 
             if (tool) {
-                var rdfUrl = paramsMap["rdfUrl"];
-                if (rdfUrl) {
-                    var source = paramsMap["source"];
-                    rdfUrl = decodeURIComponent(rdfUrl);
-                    var reload = paramsMap["reload"];
-                    var editable = paramsMap["editable"];
-                    var graphUri = paramsMap["graphUri"];
-                    var group = paramsMap["group"];
-                    var options = {};
-                    $("#waitImg").css("display", "block");
-                    MainController.UI.message("loading ontology ...");
-                    GraphLoader.loadGraphFromUrl(source, rdfUrl, graphUri, reload, editable, group, options, function (err, result) {
-                        if (err) {
-                            alert(err);
-                            callback(err);
-                        }
+              
+                
+                    
+                var source = paramsMap["source"];
 
-                        Config.tools[tool].urlParam_source = source;
-                        self.UI.initTool(tool, function () {
-                            //   MainController.UI.message("loading ontology ...")
-                            return callback();
+                var url = window.location.href;
+                if(ResponsiveUI.tools_available.includes(tool)){
+                        // if tool available load it in responsive
+                        if (source) {
+                            
+                            /*
+                            MainController.initControllers(source);
+                            Config.tools[tool].urlParam_source = source;
+                            */
+                            ResponsiveUI.source=source;
+                            
+                        }
+                        /*self.UI.initTool(tool, function () {
+                            callback();
                         });
-                    });
-                } else {
-                    var source = paramsMap["source"];
+                        */
+                        ResponsiveUI.onToolSelect(tool);
+                }
+                else if(url.includes('index_old.html')){
+                    //if the old index is already launched we have just to init the tool
                     if (source) {
-                        MainController.initControllers(source);
-                        Config.tools[tool].urlParam_source = source;
+                    MainController.initControllers(source);
+                    Config.tools[tool].urlParam_source = source;
+                        
                     }
                     self.UI.initTool(tool, function () {
                         callback();
                     });
+                    
                 }
+                else{
+                    // if not and index_old is not launched,load the old url with same params
+                    var p = url.indexOf("?");
+                    if (p > -1) {
+                        var params=url.substring(p);
+                        url = url.substring(0, p);
+                    }
+                    
+                    url =  url+ 'index_old.html'+params;
+                    window.location.assign(url);
+                   
+                    
+                }
+                    
+                        
+
+                    
+                
             }
         } else {
             callback();

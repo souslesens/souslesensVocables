@@ -1,0 +1,30 @@
+appName: souslesens
+host: souslesens.demo-dedibox.logilab.fr
+
+port: 3010
+
+image:
+  repo: registry.logilab.fr/totalenergies/souslesensvocables
+  # tag: 1.52.0
+  pullPolicy: Always
+
+ingress:
+  noindex: true
+  clusterIssuer: letsencrypt-prod
+
+volume:
+  name: data
+  mountPath: /app/config
+  size: 5Mi
+  accessMode: ReadWriteOnce
+
+registryCred:
+  registry: registry.logilab.fr
+  username: token
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 250Mi
+  limits:
+    memory: 250Mi

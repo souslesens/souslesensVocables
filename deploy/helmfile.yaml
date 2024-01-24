@@ -1,0 +1,14 @@
+repositories:
+  - name: logilab
+    url: https://helm.logilab.fr
+
+releases:
+  - name: souslesens
+    namespace: souslesens
+    chart: logilab/web-app
+    version: 0.2.0
+    values:
+      - values.yml
+    secrets:
+      - secrets.yml
+

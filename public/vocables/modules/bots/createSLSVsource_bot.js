@@ -21,9 +21,9 @@ var CreateSLSVsource_bot = (function () {
 
     self.workflowUpload = {
         _OR: {
-            Finish: { loadLineageFn: {} },
             "Upload graph from file": { uploadFromFileFn: { loadLineageFn: {} } },
-            //  "Upload graph from URL": { uploadFromUrlFn: {  loadLineageFn: {} }}
+            //  "Upload graph from URL": { uploadFromUrlFn: {  loadLineageFn: {} }},
+            Finish: { loadLineageFn: {} },
         },
     };
 

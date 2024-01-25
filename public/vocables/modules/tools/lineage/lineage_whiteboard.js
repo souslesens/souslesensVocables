@@ -21,6 +21,7 @@ import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Lineage_createResource from "./lineage_createResource.js";
 import CreateResource_bot from "../../bots/createResource_bot.js";
+import GraphDisplayLegend from "../../shared/graphDisplayLegend.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -164,6 +165,7 @@ var Lineage_whiteboard = (function () {
 
     self.onGraphOrTreeNodeClick = function (node, nodeEvent, options) {
         //  console.trace("onGraphOrTreeNodeClick");
+
         if (!node.data || !node.data.source) {
             return console.log("no data.source in node");
         }
@@ -491,16 +493,13 @@ var Lineage_whiteboard = (function () {
                         result = Lineage_whiteboard.truncateResultToVisGraphLimit(result);
                     }
 
-                    /**
-                     * @type {any[]}
-                     */
                     var ids = [];
-                    result.forEach(function (/** @type {{ topConcept: { value: any; }; }} */ item) {
+                    result.forEach(function (item) {
                         ids.push(item.topConcept.value);
                     });
 
                     var shape = self.defaultShape;
-                    result.forEach(function (/** @type {{ topConcept: { value: string; }; topConceptLabel: { value: any; }; }} */ item) {
+                    result.forEach(function (item) {
                         var nodeSource = item.subjectGraph ? Sparql_common.getSourceFromGraphUri(item.subjectGraph.value, source) : source;
                         //  var color = self.getSourceColor(nodeSource);
                         var attrs = self.getNodeVisjAttrs(item.topConcept, null, nodeSource);
@@ -731,6 +730,11 @@ var Lineage_whiteboard = (function () {
             Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
         });
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
+
+        if (self.lineageVisjsGraph.isGraphNotEmpty()) {
+            GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
+        }
+
         return;
     };
 
@@ -866,7 +870,7 @@ var Lineage_whiteboard = (function () {
 
         SearchUtil.getSimilarLabelsInSources(fromSource, [toSource], labels, ids, "exactMatch", null, function (/** @type {any} */ err, /** @type {any[]} */ result) {
             if (err) {
-                return alert(err);
+                return alert(err.responseText);
             }
 
             var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
@@ -2001,6 +2005,12 @@ var Lineage_whiteboard = (function () {
                 var color = Lineage_whiteboard.getSourceColor(source);
 
                 var toNodesMap = [];
+                if (result2.length == 0) {
+                    if (callback) {
+                        return callback("no data found");
+                    }
+                    return MainController.UI.message("no data found");
+                }
 
                 result2.forEach(function (item) {
                     if (!existingNodes[item.subject.value]) {
@@ -2131,38 +2141,6 @@ var Lineage_whiteboard = (function () {
                         });
                     }
                 });
-
-                /*    var fromNodesMap={}
-        var leafNodesMap={}
-        visjsData.edges.forEach(function(item){
-            fromNodesMap[item.from]=1
-
-        })
-
-        var leafNodes=[]
-        visjsData.edges.forEach(function(item){
-            if(!fromNodesMap[item.to]){
-                var shape,label,color;
-                var str=""
-                if ( item.id.indexOf("union")>-1  || item.id.indexOf("intersection")>-1){
-                    shape = "circle";
-                    label = "V";
-                    color = "#eee";
-                    leafNodesMap[item.to]={shape:shape,label:label,color:color}
-
-                }
-
-            }
-        })
-
-        visjsData.nodes.forEach(function(item,index){
-            if(leafNodesMap[item.id]){
-                visjsData.nodes[index].shape=leafNodesMap[item.id].shape;
-                visjsData.nodes[index].color=leafNodesMap[item.id].color;
-                visjsData.nodes[index].label=leafNodesMap[item.id].label;
-            }
-
-        })*/
 
                 if (callback && options.returnVisjsData) {
                     return callback(null, visjsData);

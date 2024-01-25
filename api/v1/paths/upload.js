@@ -1,6 +1,7 @@
 const path = require("path");
 const fsSync = require("fs");
 const fs = require("fs/promises");
+const UploadGraph= require("./jowl/uploadGraph")
 
 module.exports = function () {
     let operations = {
@@ -9,6 +10,7 @@ module.exports = function () {
 
     async function POST(req, res, next) {
         try {
+
             const outputPath = path.join("data/CSV", req.body.path);
             for (const file of Object.values(req.files)) {
                 const filePath = path.join(outputPath, file.name);

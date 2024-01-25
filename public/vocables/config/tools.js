@@ -1,5 +1,5 @@
 const allTools = {
-    lineage: { label: "Lineage", noSource: 0, controller: Lineage_whiteboard, toolDescriptionImg: null },
+    lineage: { label: "lineage", noSource: 0, controller: Lineage_whiteboard, toolDescriptionImg: null },
     KGcreator: { label: "KGcreator", noSource: 1, controller: KGcreator, toolDescriptionImg: null },
     KGquery: { label: "KGquery", noSource: 0, controller: KGquery, toolDescriptionImg: null },
     Standardizer: { label: "Standardizer", multiSources: 0, controller: Standardizer, toolDescriptionImg: null },
@@ -10,7 +10,7 @@ const allTools = {
     GraphManagement: { label: "GraphManagement", noSource: 1, controller: GraphManagement, toolDescriptionImg: null },
     UserManagement: { label: "UserManagement", noSource: 1, controller: UserManagement, toolDescriptionImg: null },
 
-    OntoCreator: { label: "OntoCreator", noSource: 1, controller: Lineage_createSource, toolDescriptionImg: null },
+    OntoCreator: { label: "OntoCreator", noSource: 1, controller: Lineage_createSLSVsource, toolDescriptionImg: null },
 };
 
 async function loadToolsAndPlugins() {

@@ -102,6 +102,8 @@ var Config = (function () {
         owl: { graphUri: "https://www.w3.org/2002/07/owl" },
         "iof-av": { graphUri: "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/" },
         skos: { graphUri: "http://www.w3.org/2004/02/skos/core/" },
+        dcterms: { graphUri: "http://purl.org/dc/terms/" },
+        dc: { graphUri: "http://purl.org/dc/elements/1.1/" },
     };
 
     self.ontologiesVocabularyModels = JSON.parse(JSON.stringify(self.basicVocabularies));
@@ -314,7 +316,7 @@ var Config = (function () {
             "@jqueryClose": "../icons/BluishVioletTheme/CrossIcon-bluishViolet.png",
         },
         KGA: {
-            "@source-color": "#6B77E5",
+            "@source-color": "#0767b7",
             "@button1-color": "#003366",
             "@button2-color": "#434E8C",
             "@button3-color": "#6b77e5",
@@ -457,7 +459,7 @@ var Config = (function () {
         KGcreator: "./icons/KGcreatorLogo-BluePurple.png",
         KGquery: "./icons/Kgquery-BluePurple.png",
     };
-
+    self.defaultTheme = "Sea Breeze";
     self.sources = {};
     self.tools = {};
 

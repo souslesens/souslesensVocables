@@ -8,7 +8,7 @@ import KGcreator_graph from "./KGcreator_graph.js";
 import KGcreator_mappings from "./KGcreator_mappings.js";
 import KGcreator_run from "./KGcreator_run.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
-import KGcreator_bot from "../../bots/KGcreator_bot.js";
+import KGcreator_bot_filter from "../../bots/KGcreator_bot.js";
 
 var KGcreator = (function () {
     var self = {};
@@ -120,7 +120,6 @@ var KGcreator = (function () {
             }
             KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
         });
-        $("#KGcreator_resourceLinkRightPanel").load("./modules/tools/KGcreator/html/graphControlPanel.html", function () {});
     };
 
     self.getSlsvSourceConfig = function (source, callback) {
@@ -314,7 +313,7 @@ var KGcreator = (function () {
                             label: "mappingBot",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_bot.start(node);
+                                KGcreator_bot_filter.start(node);
                             },
                         };
 
@@ -599,15 +598,17 @@ var KGcreator = (function () {
                             data: { id: column, table: fileName, label: column, type: "tableColumn" },
                         });
                     });
-                    self.currentConfig.currentMappings[fileName].virtualColumns.forEach(function (virtualColumn) {
-                        var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
-                        jstreeData.push({
-                            id: fileName + "_" + virtualColumn,
-                            text: label,
-                            parent: fileName,
-                            data: { id: virtualColumn, table: fileName, label: virtualColumn, type: "tableColumn" },
+                    if (self.currentConfig.currentMappings[fileName].virtualColumns) {
+                        self.currentConfig.currentMappings[fileName].virtualColumns.forEach(function (virtualColumn) {
+                            var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
+                            jstreeData.push({
+                                id: fileName + "_" + virtualColumn,
+                                text: label,
+                                parent: fileName,
+                                data: { id: virtualColumn, table: fileName, label: virtualColumn, type: "tableColumn" },
+                            });
                         });
-                    });
+                    }
 
                     JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", fileName, jstreeData);
                     KGcreator_graph.graphColumnToClassPredicates([fileName]);
@@ -663,8 +664,6 @@ var KGcreator = (function () {
             if (columnMappings[column]) {
                 label = "<span class='KGcreator_fileWithMappings'>" + column + "</span>";
             }
-            if (columnMappings[column] && columnMappings[column].indexOf("$V_") == 0) label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
-
             jstreeData.push({
                 id: table + "_" + column,
                 text: label,
@@ -678,6 +677,7 @@ var KGcreator = (function () {
     };
 
     self.showTableVirtualColumnsTree = function (table) {
+        if (!table) return alert("no table selected");
         if (!self.currentConfig.currentMappings[table].virtualColumns) {
             return;
         }
@@ -710,6 +710,12 @@ var KGcreator = (function () {
             }
         });
         self.currentConfig.currentMappings[node.data.table].tripleModels = tableTriplesCopy;
+
+        var virtualColumns = self.currentConfig.currentMappings[node.data.table].virtualColumns;
+
+        var index = virtualColumns.indexOf(node.data.id);
+        if (index > -1) virtualColumns.splice(index, 1);
+
         self.saveDataSourceMappings();
     };
 

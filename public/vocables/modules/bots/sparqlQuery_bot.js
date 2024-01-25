@@ -13,8 +13,8 @@ var SparqlQuery_bot = (function () {
     var self = {};
 
     self.start = function () {
+        self.title = "Query graph";
         BotEngine.init(SparqlQuery_bot, null, function () {
-            self.title = "Query graph";
             self.params = { source: Lineage_sources.activeSource };
             BotEngine.currentObj = self.workflow;
             BotEngine.nextStep(self.workflow);
@@ -47,10 +47,10 @@ var SparqlQuery_bot = (function () {
     };
 
     self.workflow = {
-        listVocabsFn: {
-            listQueryTypeFn: {
-                _OR: {
-                    Class: {
+        listQueryTypeFn: {
+            _OR: {
+                "By Class": {
+                    listVocabsFn: {
                         listClassesFn: {
                             listPredicatePathsFn: {
                                 _OR: {
@@ -60,12 +60,25 @@ var SparqlQuery_bot = (function () {
                             },
                         },
                     },
-                    Property: {
+                },
+                "By Object Property": {
+                    listVocabsFn: {
                         listPropertiesFn: {
                             listPredicatePathsFn: {
                                 _OR: {
                                     empty: { listWhiteBoardFilterType: { executeQuery: {} } },
                                     ok: self.workflow_individualsRole,
+                                },
+                            },
+                        },
+                    },
+                },
+                "By Annotation property": {
+                    listAnnotationPropertiesVocabsFn: {
+                        listAnnotationPropertiesFn: {
+                            promptAnnotationPropertyValue: {
+                                listWhiteBoardFilterType: {
+                                    executeQuery: {},
                                 },
                             },
                         },
@@ -77,9 +90,12 @@ var SparqlQuery_bot = (function () {
 
     self.functionTitles = {
         listVocabsFn: "Choose a reference ontology",
-        listQueryTypeFn: "what do you want ",
+        listQueryTypeFn: "Choose a query type ",
         listClassesFn: "Choose a  a class ",
-        listPropertiesFn: " Choose a property",
+        listPropertiesFn: "Choose a property",
+        listAnnotationPropertiesVocabsFn: "Choose a reference ontology",
+        listAnnotationPropertiesFn: "Choose a property",
+        promptAnnotationPropertyValue: "Filter value ",
     };
 
     self.functions = {
@@ -87,10 +103,7 @@ var SparqlQuery_bot = (function () {
             CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
         },
         listQueryTypeFn: function () {
-            var choices = [
-                { id: "Class", label: "Class" },
-                { id: "Property", label: "Property" },
-            ];
+            var choices = ["By Class", "By Object Property", "By Annotation property"];
 
             BotEngine.showList(choices, null);
             return;
@@ -148,6 +161,19 @@ var SparqlQuery_bot = (function () {
             });
         },
 
+        listAnnotationPropertiesVocabsFn: function () {
+            CommonBotFunctions.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
+        },
+
+        listAnnotationPropertiesFn: function () {
+            // filter properties compatible with
+            CommonBotFunctions.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
+        },
+
+        promptAnnotationPropertyValue: function () {
+            BotEngine.promptValue("value contains ", "annotationValue");
+        },
+
         listIndividualFilterRole: function () {
             var subject = "subject";
             var object = "object";
@@ -193,8 +219,8 @@ var SparqlQuery_bot = (function () {
         promptIndividualsLabelFn: function () {
             BotEngine.promptValue("label contains ", "individualsFilterValue");
             /* self.params.individualsFilterValue = prompt("label contains ");
-            BotEngine.writeCompletedHtml(self.params.individualsFilterValue);
-            BotEngine.nextStep();*/
+      BotEngine.writeCompletedHtml(self.params.individualsFilterValue);
+      BotEngine.nextStep();*/
         },
         promptIndividualsAdvandedFilterFn: function () {
             IndividualValueFilterWidget.showDialog(null, self.params.source, self.params.individualsFilterRole, self.params.currentClass, null, function (err, filter) {
@@ -226,6 +252,17 @@ var SparqlQuery_bot = (function () {
             var individualsFilterType = self.params.individualsFilterType;
             var individualsFilterValue = self.params.individualsFilterValue;
             var advancedFilter = self.params.advancedFilter || "";
+            var annotationPropertyId = self.params.annotationPropertyId;
+            var annotationValue = self.params.annotationValue;
+
+            function setAnnotationPropertyFilter() {
+                if (!annotationPropertyId) {
+                    return "";
+                }
+                var filterProp = "FILTER (?prop=<" + annotationPropertyId + ">)";
+                var filterValue = annotationValue ? 'FILTER(regex(?object, "' + annotationValue + '", "i"))' : "";
+                return filterProp + "" + filterValue;
+            }
 
             function getPathFilter() {
                 if (!path) {
@@ -235,6 +272,9 @@ var SparqlQuery_bot = (function () {
                     if (currentProperty) {
                         return Sparql_common.setFilter("prop", currentProperty);
                     }
+                }
+                if (!path) {
+                    return "";
                 }
                 var array = path.split("|");
                 if (array.length != 3) {
@@ -293,7 +333,7 @@ var SparqlQuery_bot = (function () {
             }
 
             var data = getWhiteBoardFilter();
-            var filter = getPathFilter() + " " + getIndividualsFilter();
+            var filter = setAnnotationPropertyFilter() || getPathFilter() + " " + getIndividualsFilter();
             var options = {
                 filter: filter,
             };

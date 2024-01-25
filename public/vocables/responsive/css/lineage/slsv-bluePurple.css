@@ -189,6 +189,12 @@
     display: flex !important;
     justify-content: center;
 }
+.KGcreator-tabDiv {
+    .slsv-tabDiv;
+    width: 50% !important;
+    display: flex !important;
+    justify-content: center;
+}
 .slsv-selectedTabDiv {
     background: @background-color;
     border-bottom: 0px !important ;
@@ -272,4 +278,15 @@
 
 #index_topContolPanel {
     font-size: 13px;
+}
+#LineageVisjsLegendCanvas {
+    display: none;
+    z-index: 100;
+    position: absolute;
+    background-color: white;
+    border: blue 1px solid;
+    margin: 5px;
+    bottom: 10px;
+    right: 10px;
+    padding: 5px;
 }

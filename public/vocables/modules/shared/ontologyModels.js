@@ -37,6 +37,7 @@ var OntologyModels = (function () {
                 Config.ontologiesVocabularyModels[source].restrictions = {};
                 Config.ontologiesVocabularyModels[source].classes = {};
                 Config.ontologiesVocabularyModels[source].properties = {};
+                Config.ontologiesVocabularyModels[source].annotationProperties = {};
 
                 var uniqueProperties = {};
                 var propsWithoutDomain = [];
@@ -60,6 +61,9 @@ var OntologyModels = (function () {
                                     }
                                     if (!Config.ontologiesVocabularyModels[source].properties) {
                                         Config.ontologiesVocabularyModels[source].properties = {};
+                                    }
+                                    if (!Config.ontologiesVocabularyModels[source].annotationProperties) {
+                                        Config.ontologiesVocabularyModels[source].annotationProperties = {};
                                     }
 
                                     return callbackEach();
@@ -103,6 +107,34 @@ var OntologyModels = (function () {
                                         inversePropsMap[item.prop.value] = item.inverseProp.value;
 
                                         inversePropsMap[item.inverseProp.value] = item.prop.value;
+                                    }
+                                });
+
+                                callbackSeries();
+                            });
+                        },
+                        //set AnnotationProperties
+                        function (callbackSeries) {
+                            var query =
+                                queryP +
+                                " SELECT distinct ?prop ?propLabel from <" +
+                                graphUri +
+                                ">  WHERE {\n" +
+                                " ?prop rdf:type ?type. filter (?type in (rdf:Property,<http://www.w3.org/2002/07/owl#AnnotationProperty>))  " +
+                                Sparql_common.getVariableLangLabel("prop", true, true) +
+                                "} limit 10000";
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+
+                                result.results.bindings.forEach(function (item) {
+                                    if (true || !uniqueProperties[item.prop.value]) {
+                                        uniqueProperties[item.prop.value] = 1;
+                                        Config.ontologiesVocabularyModels[source].annotationProperties[item.prop.value] = {
+                                            id: item.prop.value,
+                                            label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                                        };
                                     }
                                 });
 
@@ -555,7 +587,7 @@ var OntologyModels = (function () {
         var propertiesMatchingBoth = [];
         var propertiesMatchingStartNode = [];
         var propertiesMatchingEndNode = [];
-        var filter = "filter (?superClass not in (<http://purl.obolibrary.org/obo/BFO_0000001>,<http://purl.obolibrary.org/obo/BFO_0000002>,<http://purl.obolibrary.org/obo/BFO_0000003>))";
+        var filter = ""; // "filter (?superClass not in (<http://purl.obolibrary.org/obo/BFO_0000001>,<http://purl.obolibrary.org/obo/BFO_0000002>,<http://purl.obolibrary.org/obo/BFO_0000003>))";
         var duplicateProps = [];
 
         var validConstraints = {};
@@ -764,7 +796,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
         return restrictions;
     };
 
-    self.getInferredModel = function (source, options, callback) {
+    self.getInferredModelOld = function (source, options, callback) {
         if (!options) {
             options = {};
         }
@@ -848,6 +880,118 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 return callback(null, result.results.bindings);
             });
         }
+    };
+
+    self.getInferredModel = function (source, options, callback) {
+        if (!options) {
+            options = {};
+        }
+
+        var filterStr = options.filter || "";
+
+        {
+            var sourceGraphUriFrom = Sparql_common.getFromStr(source, false, true);
+            var sourceGraphUri = Config.sources[source].graphUri;
+            if (!sourceGraphUri) {
+                return callback("source " + source + " not declared");
+            }
+            var importGraphUriFrom = Sparql_common.getFromStr(source, false, false);
+
+            var queryNew =
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT   distinct ?prop ?sClass ?oClass ?sClassLabel ?oClassLabel ?propLabel ?g\n" +
+                importGraphUriFrom +
+                " where " +
+                " {\n" +
+                "   {\n" +
+                "       ?sClass rdfs:label ?sClassLabel .\n" +
+                "        ?oClass rdfs:label ?oClassLabel .\n" +
+                "      ?prop rdfs:label ?propLabel .\n" +
+                "      \n" +
+                "  }\n" +
+                " { select ?prop  ?sClass ?oClass where {\n" +
+                "  graph <" +
+                sourceGraphUri +
+                "> {\n" +
+                "   ?s ?prop ?o.\n" +
+                "  ?s rdf:type ?sClass.\n" +
+                "  ?o rdf:type ?oClass. \n" +
+                '  filter (!regex(str(?prop),"rdf","i"))\n' +
+                "    }\n" +
+                "    }\n" +
+                "  }\n" +
+                "\n" +
+                "    }\n" +
+                "  ";
+
+            let url = Config.sparql_server.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
+
+                //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
+                return callback(null, result.results.bindings);
+            });
+        }
+    };
+
+    self.getInferredAnnotationProperties = function (source, options, callback) {
+        if (!options) {
+            options = {};
+        }
+
+        var metaDataProps = "&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>)";
+        if (options.withSLSmetadata) metaDataProps = "&& ?prop not in (rdf:type)";
+
+        var sourceGraphUri = Config.sources[source].graphUri;
+        if (!sourceGraphUri) {
+            return callback("source " + source + " not declared");
+        }
+        var sourceGraphUriFrom = Sparql_common.getFromStr(source, false, true);
+        var genericVocabsGraphUriFrom = "";
+        for (var vocab in Config.basicVocabularies) {
+            genericVocabsGraphUriFrom += " " + Sparql_common.getFromStr(vocab, false, false);
+        }
+
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT   distinct ?class ?prop   " +
+            sourceGraphUriFrom +
+            " " +
+            genericVocabsGraphUriFrom +
+            "   where {\n" +
+            " {?class rdfs:label ?classLabel.\n" +
+            "    ?prop rdfs:label ?propLabel.\n" +
+            "  }" +
+            " { GRAPH <" +
+            sourceGraphUri +
+            "> {\n" +
+            "    ?s rdf:type ?class\n" +
+            "  }\n" +
+            " }\n" +
+            " {\n" +
+            "   ?s ?prop ?o.\n" +
+            "    ?prop rdf:type ?type. filter (?type in (rdf:Property,owl:AnnotationProperty)" +
+            metaDataProps +
+            ")\n" +
+            "  }\n" +
+            "}";
+        let url = Config.sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "class"]);
+
+            //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
+            return callback(null, result.results.bindings);
+        });
     };
 
     self.getInferredClassValueDataTypes = function (source, options, callback) {

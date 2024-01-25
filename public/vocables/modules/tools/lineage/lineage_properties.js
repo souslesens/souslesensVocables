@@ -1,10 +1,9 @@
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-
-self.lineageVisjsGraph;
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import common from "../../shared/common.js";
 import Export from "../../shared/export.js";
+import GraphDisplayLegend from "../../shared/graphDisplayLegend.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -717,7 +716,7 @@ var Lineage_properties = (function () {
                 Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                 Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
             }
-
+            GraphDisplayLegend.drawLegend("RangesAndDomains", "LineageVisjsLegendCanvas");
             /*  Lineage_whiteboard.lineageVisjsGraph.network.fit();
 
 */

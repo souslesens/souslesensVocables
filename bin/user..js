@@ -32,6 +32,8 @@ const user = {
                 logged: true,
                 user: { login: findUser.login, groups: findUser.groups, token: findUser.token },
                 authSource: config.auth,
+                allowSourceCreation:findUser.allowSourceCreation,
+                maxNumberCreatedSource:findUser.maxNumberCreatedSource,
                 auth: auth,
             };
         } else {

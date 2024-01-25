@@ -65,6 +65,7 @@ var Export = (function () {
 
             //nodes without edges
 
+
             nodes.forEach(function (node) {
                 if (linkedNodes[node.id]) return;
                 var line = [node.label, "", "", node.id, "", ""];

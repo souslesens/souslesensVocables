@@ -1,0 +1,20 @@
+<div style="width:600px">
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createTriples(true)">View Sample triples</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.testSelectedMappings()">test Selected Mappings</button>
+    <!--  <input type="checkbox" id="KGcreator_addAllPredefinedPart14PredicatesTriples" />addPredefinedPart14Triples-->
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createTriples()">Create triples</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.stopCreateTriples()">Abort</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createAllMappingsTriples()">Recreate graph</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.indexGraph()">Index graph</button>
+    <!--  <input type="checkbox" id="KGcreator_onlySelectionCBX"/>only selection-->
+</div>
+<div style="width:600px">
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.deleteKGcreatorTriples()">delete current file triples</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="KGcreator_deleteKGcreatorTriplesBtn" onclick="KGcreator_run.deleteKGcreatorTriples('all')">
+        delete ALL KGreator triples
+    </button>
+    <button onclick="KGcreator.migrateOldMappings()">migrateOldMappings</button>
+    <!--<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearGraph()" style="background-color: #fbcb09 !important">Clear entire graph</button>-->
+
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="display: none" id="KGcreator_saveFileButton" onclick="KGcreator_run.saveFile()">Save file</button>
+</div>

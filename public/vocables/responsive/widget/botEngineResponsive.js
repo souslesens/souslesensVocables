@@ -1,7 +1,9 @@
+
+
 var BotEngineResponsive = (function () {
     var self = {};
     self.firstLoad = true;
-    self.OrReturnValues = [];
+    self.OrReturnValues=[];
     self.init = function (botModule, options, callback) {
         if (!options) {
             options = {};
@@ -19,11 +21,20 @@ var BotEngineResponsive = (function () {
         }
 
         $("#botPanel").dialog("open");
+        $($('#botPanel').parent()[0]).on('dialogclose', function(event) {
+            
+            self.firstLoad=true;
+        });
         $("#botPanel").dialog("option", "title", BotEngine.currentBot.title);
 
         $("#botPanel").parent().css("top", "13%");
         $("#botPanel").parent().css("left", "30%");
         $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
+            if(!self.firstLoad){
+                $("#resetButtonBot").remove();
+                $("#previousButtonBot").remove();
+            }
+            self.firstLoad=false;
             $("#resetButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
             $("#previousButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
             if (callback) callback();
@@ -90,20 +101,23 @@ var BotEngineResponsive = (function () {
             BotEngine.history.currentIndex -= 2;
 
             BotEngine.currentObj = BotEngine.history[BotEngine.history.currentIndex];
-
+            
+            
             //delete last 3 message sended
             var childrens = $("#botTA").children();
             // last is bot_input --> don't count
             $("#botTA").children().slice(-4).filter("span").remove();
-            if (BotEngine.currentObj._OR != undefined) {
-                if (self.OrReturnValues != []) {
-                    var lastOrReturnValue = self.OrReturnValues.slice(-1);
+            if(BotEngine.currentObj._OR!=undefined){
+                if(self.OrReturnValues!=[]){
+                    var lastOrReturnValue=self.OrReturnValues.slice(-1);
                     self.OrReturnValues.pop();
                     self.nextStep(lastOrReturnValue);
                 }
-            } else {
+            }
+            else{
                 self.nextStep();
             }
+            
         } else {
             self.reset();
         }
@@ -187,8 +201,10 @@ var BotEngineResponsive = (function () {
         });
     };
     self.promptValue = function (message, varToFill, defaultValue, callback) {
+        $('#bot_resourcesProposalSelect').hide();
         $("#botPromptInput").on("keyup", function (key) {
             if (event.keyCode == 13 || event.keyCode == 9) {
+                $('#bot_resourcesProposalSelect').show();
                 $("#botPromptInput").css("display", "none");
                 var value = $(this).val();
                 var varToFill = $("#botVarToFill").val();
@@ -204,8 +220,9 @@ var BotEngineResponsive = (function () {
         self.clearProposalSelect();
         $("#botVarToFill").val(varToFill);
         $("#botPromptInput").val(defaultValue || "");
-        $("#botPromptInput").css("display", "block");
+        $("#botPromptInput").css("display", "block");   
         $("#botPromptInput").focus();
+        
     };
 
     self.writeCompletedHtml = function (str, options) {
@@ -225,9 +242,12 @@ var BotEngineResponsive = (function () {
         $(html).insertBefore("#bot_input");
         $("#bot_input").val("");
         $("#bot_input").focus();
-        if ($("#botDiv")[0].scrollHeight > 500) {
+        if($('#botDiv')[0].scrollHeight>500){
             $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
         }
+
+        
+
 
         return;
     };
@@ -242,6 +262,7 @@ var BotEngineResponsive = (function () {
     self.clearProposalSelect = function () {
         $("#bot_resourcesProposalSelect").find("option").remove().end();
     };
+
 
     self.analyse = function (str) {};
 

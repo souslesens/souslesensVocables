@@ -599,15 +599,18 @@ var KGcreator = (function () {
                             data: { id: column, table: fileName, label: column, type: "tableColumn" },
                         });
                     });
-                    self.currentConfig.currentMappings[fileName].virtualColumns.forEach(function (virtualColumn) {
-                        var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
-                        jstreeData.push({
-                            id: fileName + "_" + virtualColumn,
-                            text: label,
-                            parent: fileName,
-                            data: { id: virtualColumn, table: fileName, label: virtualColumn, type: "tableColumn" },
+                    if(self.currentConfig.currentMappings[fileName].virtualColumns){
+                        self.currentConfig.currentMappings[fileName].virtualColumns.forEach(function (virtualColumn) {
+                            var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
+                            jstreeData.push({
+                                id: fileName + "_" + virtualColumn,
+                                text: label,
+                                parent: fileName,
+                                data: { id: virtualColumn, table: fileName, label: virtualColumn, type: "tableColumn" },
+                            });
                         });
-                    });
+                    }   
+                    
 
                     JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", fileName, jstreeData);
                     KGcreator_graph.graphColumnToClassPredicates([fileName]);

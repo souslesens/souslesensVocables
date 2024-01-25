@@ -129,7 +129,7 @@ var CreateSLSVsource_bot = (function () {
 
         loadLineageFn: function () {
             var url = window.location.href;
-            url = url.replace("_old", "");
+            url = url.replace("index_old.html", "");
             var p = url.indexOf("?");
             if (p > -1) {
                 url = url.substring(0, p);

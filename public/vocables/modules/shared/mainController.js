@@ -538,7 +538,7 @@ return callback()
         },
 
         setCredits: function () {
-            var html = "<div>" + " " + " <img  src=\"images/souslesensVocables.png\" style='display: block; margin-left: auto; margin-right: auto width: 50%;margin: auto;'>" + "</div>";
+            var html = "<div>" + " " + " <img  src=\"images/souslesensVocables.gif\" style='display: block; margin-left: auto; margin-right: auto width: 50%;margin: auto;'>" + "</div>";
             $("#graphDiv").html(html);
         },
 

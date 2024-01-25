@@ -316,7 +316,7 @@ var Config = (function () {
             "@jqueryClose": "../icons/BluishVioletTheme/CrossIcon-bluishViolet.png",
         },
         KGA: {
-            "@source-color": "#6B77E5",
+            "@source-color": "#0767b7",
             "@button1-color": "#003366",
             "@button2-color": "#434E8C",
             "@button3-color": "#6b77e5",

@@ -19,7 +19,7 @@ import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
-import KGquery_annotations_bot from "../../bots/KGquery_annotations_bot.js";
+//import KGquery_annotations_bot from "../../bots/KGquery_annotations_bot.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
 
 var KGquery = (function () {
@@ -202,7 +202,7 @@ var KGquery = (function () {
                 return alert(err.responseText);
             }
             self.querySets.sets[classSetIndex].classFiltersMap[classDivId] = { class: aClass, filter: result.filter };
-            $("#" + classDivId + "_filter").append(result.filterLabel);
+            $("#" + classDivId + "_filter").append(result.filterLabel || result.filter);
         });
     };
 

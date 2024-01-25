@@ -13,8 +13,10 @@ module.exports = function () {
     };
 
     async function POST(req, res, next) {
+if(req.body.uploadUrl){
 
-        if (req.files && req.files["importRDF"]) {
+}
+     if (req.files && req.files["importRDF"]) {
             var graphUri = req.body.graphUri
             var data = "" + req.files["importRDF"].data;
             var uploadFromUrl=false

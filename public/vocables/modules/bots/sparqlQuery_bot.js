@@ -95,7 +95,7 @@ var SparqlQuery_bot = (function () {
         listPropertiesFn: "Choose a property",
         listAnnotationPropertiesVocabsFn: "Choose a reference ontology",
         listAnnotationPropertiesFn: "Choose a property",
-        promptAnnotationPropertyValue: "Filter",
+        promptAnnotationPropertyValue: "Filter value ",
     };
 
     self.functions = {

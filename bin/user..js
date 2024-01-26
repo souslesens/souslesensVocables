@@ -19,7 +19,7 @@ const user = {
         if (config.auth === "disabled") {
             result = {
                 logged: true,
-                user: { login: "admin", groups: ["admin"], token: "admin" },
+                user: { login: "admin", id: "admin", source: "disabled", name: "admin", groups: ["admin"], token: "admin", allowSourceCreation: true, maxNumberCreatedSource: 999 },
                 authSource: "json",
                 auth: {},
             };

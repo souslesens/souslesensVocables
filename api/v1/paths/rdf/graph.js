@@ -5,7 +5,7 @@ const { sourceModel, SourceModel } = require("../../../../model/sources");
 const { ulid } = require("ulid");
 const path = require("path");
 const fs = require("fs");
-//const os = require("node:os");
+const os = require("node:os");
 
 module.exports = function () {
     let operations = {
@@ -68,12 +68,11 @@ module.exports = function () {
             }
 
             // append data to file (create it first time)
-            try{
-                fs.appendFileSync(tmpPath, file.data)
-            }
-            catch(error2){
+            try {
+                fs.appendFileSync(tmpPath, file.data);
+            } catch (error2) {
                 console.log(error2);
-            };
+            }
 
             // last chunk, upload file to endpoint
             if (last) {

@@ -27,6 +27,7 @@ export default function GraphManagement() {
     const cancelCurrentOperation = useRef(false);
     const [animatedProgressBar, setAnimatedProgressBar] = useState(false);
     const [currentDownloadFormat, setCurrentDownloadFormat] = useState<string | null>(null);
+    const [skipNamedIndividuals, setSkipNamedIndividuals] = useState<boolean>(false);
 
     // error management
     const [error, setError] = useState(false);
@@ -40,7 +41,7 @@ export default function GraphManagement() {
     const [displayModal, setDisplayModal] = useState<string | null>(null);
 
     useEffect(() => {
-            void fetchSources();
+        void fetchSources();
         void fetchConfig();
         (async () => {
             const response = await fetchMe();
@@ -79,8 +80,8 @@ export default function GraphManagement() {
         return await response.text();
     };
 
-    const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format: string = "nt", identifier: string = "") => {
-        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}`, {
+    const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format: string = "nt", identifier: string = "", skipNamedIndividuals: boolean = false) => {
+        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${skipNamedIndividuals}`, {
             headers: { Authorization: `Bearer ${currentUserToken}` },
         });
         return await response.json();
@@ -94,6 +95,10 @@ export default function GraphManagement() {
 
     const handleSetFormat = async (event: React.MouseEvent<HTMLElement>) => {
         setCurrentDownloadFormat(event.currentTarget.value);
+    };
+
+    const handleSetSkipNamedIndividuals = async (event: React.MouseEvent<HTMLElement>) => {
+        setSkipNamedIndividuals(event.currentTarget.value == "false");
     };
 
     const handleReplaceGraphCheckbox = async (event: React.MouseEvent<HTMLInputElement>) => {
@@ -223,7 +228,7 @@ const handleUploadGraph = async () => {
             return [];
         }
         if (offset !== null) {
-            const data = await fetchGraphPartUsingPythonApi(sourceName, offset, currentDownloadFormat, identifier);
+            const data = await fetchGraphPartUsingPythonApi(sourceName, offset, currentDownloadFormat, identifier, skipNamedIndividuals);
 
             // percent
             const percent = Math.min(100, (offset * 100) / data.filesize);
@@ -292,7 +297,7 @@ const handleUploadGraph = async () => {
     const downloadModalContent = (
         <Stack>
             <Form>
-                <div>
+                <Stack direction="horizontal">
                     <Form.Check
                         disabled={currentOperation !== null}
                         onClick={handleSetFormat}
@@ -323,7 +328,19 @@ const handleUploadGraph = async () => {
                         label="Turtle"
                         value="ttl"
                     ></Form.Check>
-                </div>
+                </Stack>
+
+                <Stack className="my-2">
+                    <Form.Check
+                        disabled={currentOperation !== null || slsApiBaseUrl === "/"}
+                        id={`check-ignore-namedIndividuals-${currentSource}`}
+                        label="Ignore the namedIndividuals in this download"
+                        name="check-ignore-namedIndividuals"
+                        onClick={handleSetSkipNamedIndividuals}
+                        type="switch"
+                        value={skipNamedIndividuals}
+                    ></Form.Check>
+                </Stack>
 
                 <Stack direction="horizontal" gap={1}>
                     {!currentOperation ? (

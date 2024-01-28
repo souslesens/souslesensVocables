@@ -86,9 +86,6 @@ var CreateSLSVsource_bot = (function () {
 
             var html =
                 '<form id="myForm" enctype="multipart/form-data" method="POST">\n' +
-                '  <input type="hidden" name="graphUri" value="' +
-                "..." +
-                '">\n' +
                 '  <input type="file" id="file" name="importRDF">\n' +
                 '  <button type="submit">Submit</button>\n' +
                 "</form>\n" +

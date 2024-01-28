@@ -1,0 +1,129 @@
+{
+  "dbo.V_jobcard": {
+    "tripleModels": [
+      {
+        "s": "JCnumber",
+        "p": "http://rds.posccaesar.org/ontology/lis14/rdl/hasTemporalExtent",
+        "o": "_rowIndex"
+      },
+      {
+        "s": "_rowIndex",
+        "p": "rdf:type",
+        "o": "'http://data.total/resource/tsf/dalia-lifex/Periode"
+      },
+      {
+        "s": "_rowIndex",
+        "p": "http://rds.posccaesar.org/ontology/lis14/rdl/after",
+        "o": "$_startdate",
+        "if_column_value_not_null": "startdate"
+      },
+      {
+        "s": "_rowIndex",
+        "p": "http://rds.posccaesar.org/ontology/lis14/rdl/before",
+        "o": "$_enddate",
+        "if_column_value_not_null": "enddate"
+      },
+      {
+        "s": "$_startdate",
+        "p": "xsd:dateTime",
+        "o": "startdate",
+        "dataType": "xsd:dateTime",
+        "if_column_value_not_null": "startdate"
+      },
+      {
+        "s": "$_enddate",
+        "p": "xsd:dateTime",
+        "o": "enddate",
+        "dataType": "xsd:dateTime",
+        "if_column_value_not_null": "enddate"
+      },
+      {
+        "s": "$_startdate",
+        "p": "rdf:type",
+        "o": "http://data.total/resource/tsf/dalia-lifex/StartDate",
+        "if_column_value_not_null": "startdate"
+      },
+      {
+        "s": "$_enddate",
+        "p": "rdf:type",
+        "o": "http://data.total/resource/tsf/dalia-lifex/EndDate",
+        "if_column_value_not_null": "enddate"
+      },
+      {
+        "s": "number",
+        "p": "skos:prefLabel",
+        "o": "title",
+        "isString": true
+      },
+      {
+        "s": "number",
+        "p": "rdfs:comment",
+        "o": "description",
+        "isString": true
+      },
+      {
+        "s": "number",
+        "p": "rdf:type",
+        "o": "http://data.total/resource/tsf/dalia-lifex/Job_Card"
+      },
+      {
+        "s": "number",
+        "p": "rdfs:label",
+        "o": "number",
+        "isString": true
+      },
+      {
+        "s": "number",
+        "p": "rdf:type",
+        "o": "owl:NamedIndividual"
+      },
+      {
+        "s": "disciplineName",
+        "p": "http://rds.posccaesar.org/ontology/lis14/rdl/realizes",
+        "o": "number"
+      },
+      {
+        "s": "disciplineName",
+        "p": "rdf:type",
+        "o": "owl:NamedIndividual"
+      },
+      {
+        "s": "disciplineName",
+        "p": "rdfs:label",
+        "o": "disciplineName",
+        "isString": true
+      },
+      {
+        "s": "disciplineName",
+        "p": "rdf:type",
+        "o": "http://data.total/resource/tsf/dalia-lifex/Discipline"
+      },
+      {
+        "s": "DepartmentName",
+        "p": "rdf:type",
+        "o": "owl:NamedIndividual"
+      },
+      {
+        "s": "DepartmentName",
+        "p": "rdfs:label",
+        "o": "DepartmentName",
+        "isString": true
+      },
+      {
+        "s": "DepartmentName",
+        "p": "http://rds.posccaesar.org/ontology/lis14/rdl/primaryParticipantIn",
+        "o": "number"
+      },
+      {
+        "s": "DepartmentName",
+        "p": "rdf:type",
+        "o": "http://data.total/resource/tsf/dalia-lifex/Entity"
+      }
+    ],
+    "transform": {},
+    "lookups": [],
+    "prefixes": {
+      "ido": "http://rds.posccaesar.org/ontology/lis14/rdl/"
+    }
+  }
+}

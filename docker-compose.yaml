@@ -100,12 +100,7 @@ services:
         networks:
             - backend
 
-    spacyserver:
-        image: neelkamath/spacy-server:2-en_core_web_sm
-        ports:
-            - 8000:8000
-        networks:
-            - backend
+
 networks:
     backend:
         driver: "bridge"

@@ -84,6 +84,7 @@ if(req.body.uploadUrl){
                       }
                       else{
                           ontologyContentEncoded64 = Buffer.from(data).toString("base64");
+                          console.info("---------ontology contentOK");
                         callbackSeries();
                       }
                       },
@@ -120,6 +121,7 @@ if(req.body.uploadUrl){
                               if (allTriples.length == 0) {
                                   return callbackSeries("no triples generated for url " + body.rdfUrl);
                               }
+                              console.info("---------ontology transformed-OK");
                               callbackSeries();
                           });
                       },
@@ -169,7 +171,7 @@ if(req.body.uploadUrl){
                                         return callbackEach(err);
                                     }
                                     totalImportedTriples += triples.length;
-
+                                    console.info("---------ontology import-OK"+totalImportedTriples);
                                     return callbackEach();
                                 });
                             },

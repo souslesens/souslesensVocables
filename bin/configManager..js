@@ -102,6 +102,7 @@ var ConfigManager = {
                             };
                         }
 
+                        // @ts-ignore
                         jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, _sources) {
                             callbackSeries(err);
                         });
@@ -113,6 +114,7 @@ var ConfigManager = {
             }
         );
     },
+
     // TODO move to model/blenderSources
     deleteResource: function (sourceName, graphUri, targetSparqlServerUrl, callback) {
         async.series(

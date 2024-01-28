@@ -83,7 +83,6 @@ var CreateSLSVsource_bot = (function () {
         },
         uploadFromFileFn: function () {
             $("#smallDialogDiv").dialog("open");
-
             var html =
                 '<form id="myForm" enctype="multipart/form-data" method="POST">\n' +
                 '  <input type="file" id="file" name="importRDF">\n' +

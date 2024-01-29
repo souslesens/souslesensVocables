@@ -85,7 +85,9 @@ var CreateSLSVsource_bot = (function() {
             $("#smallDialogDiv").dialog("open");
             var html =
                 "<form id=\"myForm\" enctype=\"multipart/form-data\" method=\"POST\">\n" +
-                "  <input type=\"file\" id=\"file\" name=\"data\">\n" +
+              //  "  <input type=\"file\" id=\"file\" name=\"data\">\n" +
+                "  <input type=\"file\" id=\"file\" name=\"importRDF\">\n" +
+
                 "  <button type=\"submit\">Submit</button>\n" +
                 "</form>\n" +
                 "</body>\n" +
@@ -153,14 +155,14 @@ var CreateSLSVsource_bot = (function() {
         for (var i = 0; i != files.length; i++) {
             formData.append("files", files[i]);
         }
-
-        formData.append("source", self.params.sourceLabel);
+        formData.append("graphUri", self.params.graphUri);
+        self.upload_CF(formData);
+     /*   formData.append("source", self.params.sourceLabel);
         formData.append("last", true);
         formData.append("identifier", "");
         formData.append("clean", false);
         formData.append("replace", true);
-
-        self.upload(formData);
+        self.upload(formData);*/
         return false;
     };
 

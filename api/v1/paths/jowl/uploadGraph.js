@@ -13,10 +13,12 @@ module.exports = function () {
     };
 
     async function POST(req, res, next) {
+        console.log("---------POST");
 if(req.body.uploadUrl){
 
 }
      if (req.files && req.files["importRDF"]) {
+         console.log("---------1");
             var graphUri = req.body.graphUri
             var data = "" + req.files["importRDF"].data;
             var uploadFromUrl=false
@@ -48,6 +50,7 @@ if(req.body.uploadUrl){
 
                       // check if graphExists
                       function(callbackSeries) {
+                          console.log("---------2");
                           GraphStore.graphExists(sparqlServerConnection, graphUri, function(err, result) {
                               graphExists = result;
                               return callbackSeries(err);
@@ -56,6 +59,7 @@ if(req.body.uploadUrl){
 
                       //clear graph  if reload
                       function(callbackSeries) {
+                          console.log("---------3");
                           if (clearOldGraph !== "true") {
                               return callbackSeries();
                           }
@@ -83,8 +87,9 @@ if(req.body.uploadUrl){
                           });
                       }
                       else{
+                          console.log("---------4");
                           ontologyContentEncoded64 = Buffer.from(data).toString("base64");
-                          console.info("---------ontology contentOK");
+                          console.log("---------ontology contentOK");
                         callbackSeries();
                       }
                       },
@@ -107,6 +112,7 @@ if(req.body.uploadUrl){
                               },
                               url: jowlConfig.url + "jena/rdftriple",
                           };
+                          console.log("---------5");
                           request(options, function(error, response, body) {
                               if (error) {
                                   return callbackSeries(error);
@@ -121,13 +127,14 @@ if(req.body.uploadUrl){
                               if (allTriples.length == 0) {
                                   return callbackSeries("no triples generated for url " + body.rdfUrl);
                               }
-                              console.info("---------ontology transformed-OK");
+                              console.log("---------ontology transformed-OK");
                               callbackSeries();
                           });
                       },
 
                       //writeTriples
                       function(callbackSeries) {
+                          console.log("---------6");
                           if (graphExists) {
                               return callbackSeries();
                           }
@@ -164,14 +171,14 @@ if(req.body.uploadUrl){
                                 }
 
                                 sparqlServerUrl = sparqlServerConnection.url;
-
+                                console.log("---------7");
                                 httpProxy.post(sparqlServerUrl, null, params, function(err, _result) {
                                     if (err) {
                                         var x = queryGraph;
                                         return callbackEach(err);
                                     }
                                     totalImportedTriples += triples.length;
-                                    console.info("---------ontology import-OK"+totalImportedTriples);
+                                    console.log("---------ontology import-OK"+totalImportedTriples);
                                     return callbackEach();
                                 });
                             },
@@ -182,6 +189,7 @@ if(req.body.uploadUrl){
                       },
                   ],
                   function(err) {
+                      console.log("---------8");
                       processResponse(res, err, { result: totalImportedTriples });
                   }
                 );

@@ -24,6 +24,9 @@ if(req.body.uploadUrl){
             var uploadFromUrl=false
 
             var jowlConfig = ConfigManager.config.jowlServer;
+            console.log("CONFIG --- "+JSON.stringify(jowlConfig,null,2))
+
+
             ConfigManager.getUser(req, res, function(err, userInfo) {
                 if (err) {
                     return res.status(400).json({ error: err });

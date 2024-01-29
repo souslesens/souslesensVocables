@@ -199,7 +199,8 @@ var CreateSLSVsource_bot = (function() {
     self.upload_CF = function(body) {
         MainController.UI.message("Importing graph...");
         $("#waitImg").css("display", "block");
-        fetch("/api/v1/jowl/uploadGraph", {
+
+            fetch(`${Config.apiUrl}/jowl/uploadGraph`, {
             method: "POST",
             body: body
         })

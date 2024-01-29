@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.53.0...master)
 
+### Changed
+
+-   Configure default theme in `mainConfig.json`
+-   Show/Hide theme selector in `mainConfig.json`
+
+> [!IMPORTANT]
+> Updating to Unrelease require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
 ## [1.53.0](https://github.com/souslesens/souslesensVocables/compare/1.52.0...1.53.0)
 
 ## [1.52.0](https://github.com/souslesens/souslesensVocables/compare/1.51.0...1.52.0)

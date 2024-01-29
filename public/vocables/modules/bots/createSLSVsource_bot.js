@@ -95,8 +95,11 @@ var CreateSLSVsource_bot = (function () {
         },
 
         uploadFromUrlFn: function () {
-            BotEngine.promptValue("enter remote Url", "uploadUrl", "http", function (value) {
-                if (!value) return BotEngine.reset();
+            BotEngine.promptValue("enter remote Url", "uploadUrl", "", function (value) {
+                if (!value) {
+                    alert("enter a value ");
+                    return BotEngine.previousStep();
+                }
                 self.uploadGraphFromUrl(function (err, result) {
                     if (err) {
                         return alert(err.responseText || err);

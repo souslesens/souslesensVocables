@@ -361,7 +361,10 @@
         <script>
             less.pageLoadFinished.then(function () {
                 setTimeout(() => {
-                    ResponsiveUI.changeTheme(Config.defaultTheme);
+                    ResponsiveUI.changeTheme(Config.theme.defaultTheme);
+                    if (Config.theme.selector) {
+                        $("#theme-selector-btn").show();
+                    }
                 }, "500");
             });
         </script>
@@ -409,7 +412,7 @@
                     </div>
 
                     <!--<div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
-                    
+
                 </div>-->
 
                     <!--
@@ -460,7 +463,7 @@
                         <button class="w3-button slsv-right-top-bar-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
                     </div>
                     <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button w3-right">
-                        <button class="w3-button slsv-right-top-bar-button">Themes</button>
+                        <button style="display: none" id="theme-selector-btn" class="w3-button slsv-right-top-bar-button">Themes</button>
                         <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
                             <select id="themeSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.changeTheme($(this).val())" style="overflow: auto"></select>
                         </div>

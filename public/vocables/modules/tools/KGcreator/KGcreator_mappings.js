@@ -41,7 +41,11 @@ return alert("select a field (column)");
         $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
+            $('#LinkColumn_rightPanel').show();
+            $('#LinkColumn_basicTypeSelect').show();
+            $('#LinkColumn_basicTypeSelect').parent().find('span').show();
             PredicatesSelectorWidget.load("LinkColumn_predicateSelectorDiv", self.currentSlsvSource, { "flex-direction": "column" }, function () {
+                
                 $("#editPredicate_vocabularySelect2").css("display", "inline");
                 $("#editPredicate_vocabularySelect2").val("usual");
                 PredicatesSelectorWidget.init(self.currentSlsvSource, function () {

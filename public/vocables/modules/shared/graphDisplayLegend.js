@@ -2,9 +2,12 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 
 var GraphDisplayLegend = (function () {
     var self = {};
-
+    self.isRetractedLegend={};
+    self.currentListenerDiv=null;
+    self.lastDraw={'type':null,'legendDIv':null};
     self.legendsMap = {
         Lineage: {
+          
             "owl:Class": {
                 type: "node",
                 attrs: {
@@ -226,6 +229,7 @@ var GraphDisplayLegend = (function () {
 
 
         },
+        
     };
 
     self.drawLegend = function (type, legendCanvas) {
@@ -233,21 +237,68 @@ var GraphDisplayLegend = (function () {
         if (!legendCanvas) {
             legendCanvas = "visjsLegendCanvas";
         }
+        self.lastDraw={'type':type,'legendDIv':legendCanvas};
+      
         $("#" + legendCanvas).css("display", "block");
         $("#" + legendCanvas).draggable();
-
-
-        var legendObj = self.legendsMap[type];
-        if (!legendObj) {
-            return alert("missing legend description");
+        if(self.isRetractedLegend[legendCanvas]==undefined){
+            $("#" + legendCanvas)[0].addEventListener('click', function(event) { 
+                if(self.isRetractedLegend[legendCanvas] ){
+                    $("#" + legendCanvas).css('height',height);
+                    $("#" + legendCanvas).css('width',width);
+                    self.isRetractedLegend[legendCanvas]=false;
+                    self.drawLegend(self.lastDraw.type,self.lastDraw.legendDIv);
+                }else{
+                    if(event.offsetX>200){
+                        if(event.offsetY<30){
+                            $("#" + legendCanvas).css('height',30);
+                            $("#" + legendCanvas).css('width',50);
+                            self.drawLegend(null,legendCanvas);
+                            self.isRetractedLegend[legendCanvas]=true;
+                            self.lastDraw={'type':type,'legendDIv':legendCanvas};
+                        }
+                    }   
+                }
+                
+                
+    
+            },false);
         }
-        var height=Object.keys(legendObj).length*30
+        
+        if(self.isRetractedLegend[legendCanvas]==undefined){
+            self.isRetractedLegend[legendCanvas]=false;
+        }
+        var legendObj = self.legendsMap[type];
+        
+        if (!legendObj) {
+            var width=50;
+            var height=30;
+            $("#" + legendCanvas).attr('width',width);
+            var yOffset = 0;
+        }else{
+            var height=Object.keys(legendObj).length*30+30;
+            var width=290;
+            $("#" + legendCanvas).attr('width',width);
+            var yOffset = 30;
+        }
+        
         $("#" + legendCanvas).attr('height',height);
-        $("#" + legendCanvas).attr('width',250);
         var c = document.getElementById(legendCanvas);
         var ctx = c.getContext("2d");
-        var yOffset = 0;
+        ctx.clearRect(0, 0, width, height)
         var xOffset = 130;
+        if (!legendObj) {
+            ctx.font = "25px arial";
+            ctx.fillText('Legend',0,20,width);
+            return;
+        }else{
+            ctx.font = "25px arial";
+            ctx.fillText('Legend',120,20);
+            self.drawX(ctx,280,10,7);
+        }
+        
+        
+
         for (var key in legendObj) {
             yOffset += 25;
             var element = legendObj[key];
@@ -431,7 +482,17 @@ var GraphDisplayLegend = (function () {
         ctx.stroke();
         ctx.fill();
 
-    }
+    };
+    self.drawX=function (ctx,x, y,length) {
+        ctx.beginPath();
+    
+        ctx.moveTo(x - length, y - length);
+        ctx.lineTo(x + length, y + length);
+    
+        ctx.moveTo(x + length, y - length);
+        ctx.lineTo(x - length, y + length);
+        ctx.stroke();
+    };
 
 
 

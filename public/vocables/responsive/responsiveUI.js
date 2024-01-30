@@ -15,7 +15,7 @@ var ResponsiveUI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.tools_available = ["lineage", "KGquery"];
+    self.tools_available = ["lineage", "KGquery","KGcreator"];
     self.toolsNeedSource = ["lineage", "KGquery","KGcreator"];
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
@@ -150,11 +150,11 @@ var ResponsiveUI = (function () {
         } else if (toolId == "KGquery") {
             return KGquery_r.init();
         }
-        /*
+        
         else if (toolId == "KGcreator") {
             return KGcreator_r.init();
         }
-        */
+     
        else {
             var answer = confirm("Not available in Responsive interface, redirection to old interface");
             if (answer) {

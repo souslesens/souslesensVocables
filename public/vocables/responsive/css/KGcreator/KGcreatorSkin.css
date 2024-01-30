@@ -1,0 +1,33 @@
+#LinkColumn_rightPanel{
+    .button-font-title;
+    background-color: white;
+    font-size: 10px;
+    .border-classic-color-theme4;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin: 10px;
+    margin-left: 30px;
+    width: 400px;
+    padding: 20px;
+}
+#KGcreator_classicMappingDiv input{
+    width: 240px;
+    margin: 3px;
+    padding: 0px;
+    border-radius: 14px !important;
+    background-color: @dark-background-color;
+    color: @button1-color !important;
+    margin-left:0px;
+}
+#KGcreator_classicMappingDiv select {
+    min-width: 100px;
+    margin: 2px;
+    border-radius: 14px !important;
+    background-color: @dark-background-color;
+    color: @button1-color !important;
+}
+input[type="checkbox"] {
+    width: 30px!important;
+}

@@ -39,7 +39,9 @@ return alert("select a field (column)");
         }
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
-
+        $("#smallDialogDiv").css('height','700px');
+       /* $("#smallDialogDiv").css('top','10%');
+        $("#smallDialogDiv").css('left','10%');*/
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
             $('#LinkColumn_rightPanel').show();
             $('#LinkColumn_basicTypeSelect').show();
@@ -60,7 +62,7 @@ return alert("select a field (column)");
                     var html =
                         "<div>isBlankNode<input type='checkbox' id='LinkColumn_isObjectBlankNodeCBX' />" +
                         "is String <input type='checkbox' id='LinkColumn_isObjectStringCBX' /><br> " +
-                        " lookup name <input id='LinkColumn_objectLookupName' style='width:150px;background-color: white'/></div>";
+                        " lookup name <input id='LinkColumn_objectLookupName'/></div>";
                     $("#editPredicate_customContentDiv").html(html);
 
                     $("#editPredicate_objectSelect").bind("change", function () {

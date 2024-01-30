@@ -171,7 +171,7 @@ a:visited.ui-button,
     padding: 0px;
     border-radius: 14px !important;
     background-color: #eaefff;
-    color: #1a27b2 !important;
+    color: @button1-color !important;
 }
 
 .editPredicatePanel select {

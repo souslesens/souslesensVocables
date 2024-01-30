@@ -288,13 +288,13 @@ var GraphDisplayLegend = (function () {
         ctx.clearRect(0, 0, width, height)
         var xOffset = 130;
         if (!legendObj) {
-            ctx.font = "25px arial";
+            ctx.font = "18px arial";
             ctx.fillText('Legend',0,20,width);
             return;
         }else{
-            ctx.font = "25px arial";
+            ctx.font = "18px arial";
             ctx.fillText('Legend',120,20);
-            self.drawX(ctx,280,10,7);
+            self.drawX(ctx,280,10,5);
         }
         
         

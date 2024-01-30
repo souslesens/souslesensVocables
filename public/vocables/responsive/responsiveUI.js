@@ -156,7 +156,7 @@ var ResponsiveUI = (function () {
         }
      
        else {
-            var answer = confirm("Not available in Responsive interface, redirection to old interface");
+            var answer = true; //confirm("Not available in Responsive interface, redirection to old interface");
             if (answer) {
                 var url = window.location.href;
                 var p = url.indexOf("?");

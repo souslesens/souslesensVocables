@@ -125,7 +125,7 @@ var KGcreator_bot = (function () {
         listTableColumnsFn: "Choose a  a column for predicate object ",
         virtualColumnBlankNode: "Enter virtual column name",
         listAnnotationPropertiesVocabsFn: " Choose annnotation property vocabulary",
-        listAnnotationPropertiesVocabsFn: " Choose annnotation property ",
+        listAnnotationPropertiesFn: " Choose annnotation property ",
     };
 
     self.functions = {

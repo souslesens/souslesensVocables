@@ -18,6 +18,7 @@ module.exports = function () {
             sentryDsnJsFront: config.sentryDsnJsFront,
             tools_available: config.tools_available,
             slsApi: config.slsApi,
+            theme: config.theme,
         };
 
         res.status(200).json(result);

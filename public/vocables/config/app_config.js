@@ -475,7 +475,6 @@ var Config = (function () {
         KGcreator: "./icons/KGcreatorLogo-BluePurple.png",
         KGquery: "./icons/Kgquery-BluePurple.png",
     };
-    self.defaultTheme = "Sea Breeze";
     self.sources = {};
     self.tools = {};
 

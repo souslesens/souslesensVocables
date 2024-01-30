@@ -29,6 +29,8 @@ var OntologyModels = (function () {
                         return callback();
                     }
                     Config.ontologiesVocabularyModels[source] = { graphUri: graphUri };
+                } else {
+                    return callbackEach();
                 }
 
                 graphUri = Config.ontologiesVocabularyModels[source].graphUri;

@@ -24,11 +24,6 @@ var Lineage_r = (function () {
         self.oldExportTable = Export.exportTreeToDataTable;
         Export.exportTreeToDataTable = self.ExportTableDialog;
         //Nodes Infos overcharge
-        /*
-        self.oldNodeInfosInit = NodesInfosWidget.initDialog;
-        NodesInfosWidget.initDialog = self.NodesInfosResponsiveDialog;
-        All file changed
-        */
         ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
         //SHowHideButtons overcharge
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
@@ -36,6 +31,7 @@ var Lineage_r = (function () {
         self.oldAddEdgeDialog = Lineage_blend.graphModification.showAddEdgeFromGraphDialog;
         Lineage_blend.graphModification.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
         ResponsiveUI.initMenuBar(self.loadSources);
+        $("#Lineage_graphEditionButtons").load("./responsive/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
     };
@@ -116,8 +112,11 @@ var Lineage_r = (function () {
         var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
         if (isNodeEditable) {
             $("#Lineage_graphEditionButtons").css("display", "block");
+
+            $("#lineage_createResourceBtn").show();
         } else {
             $("#Lineage_graphEditionButtons").css("display", "none");
+            $("#lineage_createResourceBtn").hide();
         }
         $("#Title1").text($(".Lineage_selectedSourceDiv").text());
         self.resetCurrentTab();

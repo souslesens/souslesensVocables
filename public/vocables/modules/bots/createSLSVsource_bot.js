@@ -22,7 +22,7 @@ var CreateSLSVsource_bot = (function () {
     self.workflowUpload = {
         _OR: {
             "Upload graph from file": { uploadFromFileFn: { loadLineageFn: {} } },
-            //  "Upload graph from URL": { uploadFromUrlFn: {  loadLineageFn: {} }},
+            "Upload graph from URL": { uploadFromUrlFn: { loadLineageFn: {} } },
             Finish: { loadLineageFn: {} },
         },
     };
@@ -42,6 +42,21 @@ var CreateSLSVsource_bot = (function () {
         },
     };
 
+    self.workflowTest = {
+        initFn: {
+            _OR: {
+                "create source": {
+                    createSLSVsourceFn: {
+                        promptSourceNameFn: {
+                            promptGraphUriFn: self.workflow2,
+                        },
+                    },
+                },
+                "import ontology": { uploadFromUrlFn: {} },
+            },
+        },
+    };
+
     self.functionTitles = {
         promptSourceNameFn: "Enter source label",
         promptGraphUriFn: "Enter source graphUri",
@@ -51,6 +66,9 @@ var CreateSLSVsource_bot = (function () {
         uploadFromFileFn: "Choose graph file",
     };
     self.functions = {
+        initFn: function () {
+            BotEngine.nextStep();
+        },
         createSLSVsourceFn: function () {
             BotEngine.nextStep();
         },
@@ -68,6 +86,7 @@ var CreateSLSVsource_bot = (function () {
 
         listImportsFn: function () {
             var sources = Object.keys(Config.sources);
+            86;
             sources.sort();
             BotEngine.showList(sources, "imports");
         },
@@ -77,18 +96,24 @@ var CreateSLSVsource_bot = (function () {
         },
 
         uploadFromUrlFn: function () {
-            BotEngine.promptValue("enter graph Url", uploadUrl, "http", function (value) {
-                if (!value) return BotEngine.nextStep();
+            BotEngine.promptValue("enter remote Url", "uploadUrl", "", function (value) {
+                if (!value) {
+                    alert("enter a value ");
+                    return BotEngine.previousStep();
+                }
+                self.uploadGraphFromUrl(function (err, result) {
+                    if (err) {
+                        return alert(err.responseText || err);
+                    }
+                    return BotEngine.nextStep();
+                });
             });
         },
         uploadFromFileFn: function () {
             $("#smallDialogDiv").dialog("open");
-
             var html =
                 '<form id="myForm" enctype="multipart/form-data" method="POST">\n' +
-                '  <input type="hidden" name="graphUri" value="' +
-                "..." +
-                '">\n' +
+                //  "  <input type=\"file\" id=\"file\" name=\"data\">\n" +
                 '  <input type="file" id="file" name="importRDF">\n' +
                 '  <button type="submit">Submit</button>\n' +
                 "</form>\n" +
@@ -140,13 +165,15 @@ var CreateSLSVsource_bot = (function () {
         },
     };
 
-    self.uploadGraphFromUrl = function () {
-        var body = {
-            graphUri: self.params.graphUri,
-            sourceUrl: self.params.uploadUrl,
-        };
-        self.upload(body);
-        return false;
+    self.uploadGraphFromUrl = function (callback) {
+        const formData = new FormData();
+
+        formData.append("graphUri", self.params.graphUri || "http://testCFxxx");
+        formData.append("uploadUrl", self.params.uploadUrl);
+
+        self.upload(formData, function (err, result) {
+            return callback(err);
+        });
     };
 
     self.uploadGraphFromFile = function () {
@@ -158,15 +185,51 @@ var CreateSLSVsource_bot = (function () {
             formData.append("files", files[i]);
         }
         formData.append("graphUri", self.params.graphUri);
-        self.upload(formData);
-        return false;
+        self.upload(formData, function (err, result) {
+            if (err) {
+                alert(err.responseText);
+                return BotEngine.reset();
+            }
+            return false;
+        });
     };
-    self.upload = function (body) {
+
+    self.upload = function (body, callback) {
         MainController.UI.message("Importing graph...");
         $("#waitImg").css("display", "block");
-        fetch("/api/v1/jowl/uploadGraph", {
+
+        fetch(`${Config.apiUrl}/jowl/uploadGraph`, {
             method: "POST",
             body: body,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                $("#smallDialogDiv").dialog("close");
+
+                if (data.result == -1) {
+                    MainController.UI.message("", true);
+                    alert("graph already exist ");
+                    return BotEngine.reset();
+                } else {
+                    MainController.UI.message("imported triples :" + data.result, true);
+                    botEngine.nextStep();
+                }
+                callback();
+            })
+            .catch((error) => {
+                callback(error);
+            });
+    };
+
+    // using api/rdf from Logilab
+    self.uploadXXX = function (formData) {
+        MainController.UI.message("Importing graph...");
+        $("#waitImg").css("display", "block");
+        var currentUserToken = authentication.currentUser.currentUserToken;
+        fetch("/api/v1/rdf/graph", {
+            method: "post",
+            headers: { Authorization: `Bearer ${currentUserToken}` },
+            body: formData,
         })
             .then((response) => response.json())
             .then((data) => {

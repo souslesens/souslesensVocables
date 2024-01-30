@@ -14,18 +14,19 @@ var BotEngineResponsive = (function () {
         var divId;
         if (options.divId) {
             divId = options.divId;
+            self.divId = options.divId;
         } else {
             divId = "botDiv";
+            $("#botPanel").dialog("open");
+            $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
+                self.firstLoad = true;
+            });
+            $("#botPanel").dialog("option", "title", BotEngine.currentBot.title);
+
+            $("#botPanel").parent().css("top", "13%");
+            $("#botPanel").parent().css("left", "30%");
         }
 
-        $("#botPanel").dialog("open");
-        $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
-            self.firstLoad = true;
-        });
-        $("#botPanel").dialog("option", "title", BotEngine.currentBot.title);
-
-        $("#botPanel").parent().css("top", "13%");
-        $("#botPanel").parent().css("left", "30%");
         $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
             if (!self.firstLoad) {
                 $("#resetButtonBot").remove();
@@ -34,6 +35,23 @@ var BotEngineResponsive = (function () {
             self.firstLoad = false;
             $("#resetButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
             $("#previousButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+            if (divId != "botDiv") {
+                var dialogWindow = $("#" + divId)
+                    .parents()
+                    .filter('div[role="dialog"]')[0];
+                var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
+                var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
+                $(idDialog).parent().css("top", "13%");
+                $(idDialog).parent().css("left", "10%");
+                $("#resetButtonBot").insertAfter(titleDialog);
+                $("#previousButtonBot").insertAfter(titleDialog);
+                $(dialogWindow).on("dialogclose", function (event) {
+                    $("#" + self.divId).empty();
+                    $(dialogWindow).find("#resetButtonBot").remove();
+                    $(dialogWindow).find("#previousButtonBot").remove();
+                    self.firstLoad = true;
+                });
+            }
             if (callback) callback();
         });
     };
@@ -119,7 +137,15 @@ var BotEngineResponsive = (function () {
 
     self.end = function () {
         BotEngine.currentBot.params.queryText = self.getQueryText();
-        $("#botPanel").dialog("close");
+        if (self.divId) {
+            var dialogWindow = $("#" + self.divId)
+                .parents()
+                .filter('div[role="dialog"]')[0];
+            var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
+            $(idDialog).dialog("close");
+        } else {
+            $("#botPanel").dialog("close");
+        }
         if (BotEngine.currentBot.callbackFn) {
             return BotEngine.currentBot.callbackFn();
         }
@@ -149,8 +175,11 @@ var BotEngineResponsive = (function () {
     };
 
     self.reset = function () {
-        $("#resetButtonBot").remove();
-        $("#previousButtonBot").remove();
+        if (!self.divId) {
+            $("#resetButtonBot").remove();
+            $("#previousButtonBot").remove();
+        }
+
         BotEngine.currentBot.start();
     };
 

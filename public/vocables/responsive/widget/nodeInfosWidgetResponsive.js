@@ -236,7 +236,7 @@ var NodeInfosWidgetResponsive = (function () {
 
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             PredicatesSelectorWidget.load("sourceBrowser_addPropertyDiv", self.currentSource, {}, function () {
-                $("#editPredicate_controlsDiv").css("display", "block");
+                //$("#editPredicate_controlsDiv").css("display", "block");
                 $("#sourceBrowser_addPropertyDiv").css("display", "none");
             });
         }
@@ -374,7 +374,7 @@ defaultLang = 'en';*/
                     }
                 }
 
-                var str = "<div class='NodesInfos_tableDiv' style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
+                var str = "<div class='NodesInfos_tableDiv'>" + "<table class='infosTable'>";
                 str +=
                     "<tr><td class='NodesInfos_CardId'>UUID</td><td><a target='" +
                     self.getUriTarget(nodeId) +

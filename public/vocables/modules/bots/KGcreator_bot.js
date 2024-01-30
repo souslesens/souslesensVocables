@@ -6,12 +6,13 @@ import KGcreator_mappings from "../tools/KGcreator/KGcreator_mappings.js";
 var KGcreator_bot = (function () {
     var self = {};
     self.title = "Create mappings";
-
+    self.lastColumnObj = null;
     self.start = function (columnObj) {
         self.currentUri = null;
         self.currentColumn = columnObj;
         var workflow = null;
         if (columnObj) {
+            self.lastColumnObj = columnObj;
             self.params = {
                 source: KGcreator.currentSlsvSource,
                 datasource: KGcreator.currentConfig.currentDataSource,
@@ -38,8 +39,13 @@ var KGcreator_bot = (function () {
                 }
             }
         } else {
-            workflow = self.workflow;
+            if (self.lastColumnObj) {
+                return self.start(self.lastColumnObj);
+            }
+
+            /* workflow = self.workflow;
             self.params = { source: self.source, datasource: "", table: "", column: "", tripleModels: [] };
+            */
         }
         CommonBotFunctions.loadSourceOntologyModel(self.params.source, true, function (err) {
             if (err) {
@@ -47,7 +53,12 @@ var KGcreator_bot = (function () {
             }
 
             KGcreator_mappings.showMappingDialog(null, null, function () {
+                $("#LinkColumn_botPanel").show();
+                $("#LinkColumn_rightPanel").hide();
+                $("#LinkColumn_basicTypeSelect").hide();
+                $("#LinkColumn_basicTypeSelect").parent().find("span").hide();
                 BotEngine.init(KGcreator_bot, { divId: "LinkColumn_botPanel" }, function () {
+                    $("#previousButtonBot").css("margin-left", "450px");
                     BotEngine.currentObj = workflow;
                     BotEngine.nextStep(workflow);
                 });
@@ -114,7 +125,7 @@ var KGcreator_bot = (function () {
         listTableColumnsFn: "Choose a  a column for predicate object ",
         virtualColumnBlankNode: "Enter virtual column name",
         listAnnotationPropertiesVocabsFn: " Choose annnotation property vocabulary",
-        listAnnotationPropertiesVocabsFn: " Choose annnotation property ",
+        listAnnotationPropertiesFn: " Choose annnotation property ",
     };
 
     self.functions = {

@@ -114,6 +114,8 @@ var KGcreator_graph = (function () {
         html = '    <span class="popupMenuItem" onclick="KGcreator_graph.showNodeNodeInfos();"> Node Infos</span>';
         html += '    <span class="popupMenuItem" onclick="KGcreator_mappings.showMappingDialog(true);"> Set column Class</span>';
         $("#popupMenuWidgetDiv").html(html);
+        point.x = event.x;
+        point.y = event.y;
         PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
     };
 
@@ -581,6 +583,9 @@ var KGcreator_graph = (function () {
 
         //   var html = "<div id='KGcreator_mappingsGraphDiv' style='width:1100px;height:750px'></div>";
         $("#mainDialogDiv").dialog("open");
+        $("#mainDialogDiv").parent().css("top", "10%");
+        $("#mainDialogDiv").parent().css("left", "10%");
+        $("#mainDialogDiv").dialog("option", "title", " Mappings");
         //  $("#mainDialogDiv").html(html);
         $("#mainDialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function () {
             self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, { onclickFn: KGcreator_graph.onNodeClick });

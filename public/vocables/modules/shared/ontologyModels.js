@@ -6,6 +6,7 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
 // eslint-disable-next-line no-global-assign
 var OntologyModels = (function () {
+    self.loadedSources = {};
     self.registerSourcesModel = function (sources, callback) {
         MainController.UI.message("loading ontology models");
         if (!Array.isArray(sources)) {
@@ -30,7 +31,7 @@ var OntologyModels = (function () {
                     }
                     Config.ontologiesVocabularyModels[source] = { graphUri: graphUri };
                 } else {
-                    return callbackEach();
+                    if (self.loadedSources[source]) return callbackEach();
                 }
 
                 graphUri = Config.ontologiesVocabularyModels[source].graphUri;
@@ -50,6 +51,7 @@ var OntologyModels = (function () {
                     [
                         function (callbackSeries) {
                             self.readModelOnServerCache(source, function (err, result) {
+                                self.loadedSources[source] = 1;
                                 if (result) {
                                     Config.ontologiesVocabularyModels[source] = result;
                                     if (!Config.ontologiesVocabularyModels[source].constraints) {

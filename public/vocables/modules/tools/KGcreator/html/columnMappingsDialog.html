@@ -16,7 +16,7 @@
         </div>
 
         <div id="KGcreator_classicMappingDiv">
-            <div style="margin-left: 30px;">
+            <div style="margin-left: 30px">
                 <span>Basic</span>
                 <select id="LinkColumn_basicTypeSelect" onchange="KGcreator_mappings.addBasicMapping($(this).val())">
                     <option></option>
@@ -24,14 +24,14 @@
                     <option value="owl:Class">addBasicClass</option>
                     <option value="rdf:Bag">addBasicBag</option>
                 </select>
-                <button style="margin: 5px" class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons' onclick="KGcreator_mappings.saveColumnMappings()">Save mappings</button>
+                <button style="margin: 5px" class="w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons" onclick="KGcreator_mappings.saveColumnMappings()">Save mappings</button>
             </div>
             <!--    <div><span id="LinkColumn_subjectDiv"></span>&nbsp; <input type="checkbox" id="LinkColumn_isBlankNode" />isBlankNode</div>-->
             <div>
-                <div  id="LinkColumn_botPanel"></div>
-                <div  id="LinkColumn_rightPanel">
+                <div id="LinkColumn_botPanel"></div>
+                <div id="LinkColumn_rightPanel">
                     <div class="linkColumn_tripleDiv" style="width: 300px">
-                        <b style="font-size: 15px;"> Subject</b>
+                        <b style="font-size: 15px"> Subject</b>
                         <div class="editPredicatePanel_groupDiv">
                             <select id="LinkColumn_subjectSelect" onchange="KGcreator_mappings.onTripleModelSelect('s',$(this).val())">
                                 <option value=""></option>
@@ -41,7 +41,7 @@
                                 <option value="_virtualColumn">_virtualColumn</option>
                                 <option value=""></option>
                             </select>
-                            <input id="LinkColumn_subjectInput" class="KGcreator_tripleInput"  />
+                            <input id="LinkColumn_subjectInput" class="KGcreator_tripleInput" />
                             isBlankNode<input type="checkbox" id="LinkColumn_isSubjectBlankNodeCBX" /><br />
                             lookup name<input id="LinkColumn_subjectLookupName" />
                         </div>
@@ -56,10 +56,9 @@
                             <option></option>
                             <option value="if_column_value_not_null">column not null</option>
                         </select>
-                        <button class='w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons' onclick="KGcreator_mappings.addTripleFromPredicateSelectorWidget()">add triple</button>
+                        <button class="w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons" onclick="KGcreator_mappings.addTripleFromPredicateSelectorWidget()">add triple</button>
                     </div>
                 </div>
-                
             </div>
         </div>
     </div>

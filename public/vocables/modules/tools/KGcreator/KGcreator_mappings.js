@@ -39,8 +39,8 @@ return alert("select a field (column)");
         }
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
-        $("#smallDialogDiv").css('height','700px');
-       /* $("#smallDialogDiv").css('top','10%');
+        $("#smallDialogDiv").css("height", "700px");
+        /* $("#smallDialogDiv").css('top','10%');
         $("#smallDialogDiv").css('left','10%');*/
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
             $("#LinkColumn_rightPanel").show();

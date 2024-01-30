@@ -15,6 +15,9 @@ module.exports = function() {
 
     function transformToTriples(ontologyContentEncoded64,callback){
         var jowlConfig = ConfigManager.config.jowlServer;
+        if(!jowlConfig.url.endsWith("/")) {
+            jowlConfig+="/";
+        }
         var payload = {
             ontologyContentEncoded64: ontologyContentEncoded64
         };

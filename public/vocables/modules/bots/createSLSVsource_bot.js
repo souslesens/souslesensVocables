@@ -85,7 +85,8 @@ var CreateSLSVsource_bot = (function () {
         },
 
         listImportsFn: function () {
-            var sources = Object.keys(Config.sources);86
+            var sources = Object.keys(Config.sources);
+            86;
             sources.sort();
             BotEngine.showList(sources, "imports");
         },

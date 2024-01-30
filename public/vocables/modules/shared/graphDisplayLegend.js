@@ -2,12 +2,11 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 
 var GraphDisplayLegend = (function () {
     var self = {};
-    self.isRetractedLegend={};
-    self.currentListenerDiv=null;
-    self.lastDraw={'type':null,'legendDIv':null};
+    self.isRetractedLegend = {};
+    self.currentListenerDiv = null;
+    self.lastDraw = { type: null, legendDIv: null };
     self.legendsMap = {
         Lineage: {
-          
             "owl:Class": {
                 type: "node",
                 attrs: {
@@ -127,8 +126,7 @@ var GraphDisplayLegend = (function () {
                     color: "#70ac47",
                 },
             },
-            "Row index":{
-
+            "Row index": {
                 type: "node",
                 attrs: {
                     shape: "star",
@@ -163,7 +161,6 @@ var GraphDisplayLegend = (function () {
                 },
             },
 
-
             Table: {
                 type: "node",
                 attrs: {
@@ -196,8 +193,7 @@ var GraphDisplayLegend = (function () {
                 type: "edge",
                 attrs: {
                     color: "#70ac47",
-                    arrows:"to"
-                   ,
+                    arrows: "to",
                 },
             },
 
@@ -205,99 +201,91 @@ var GraphDisplayLegend = (function () {
                 type: "edge",
                 attrs: {
                     color: "#70ac47",
-                    arrows:"to"
-                    ,
+                    arrows: "to",
                 },
             },
             "Inter columns ObjectProperty": {
                 type: "edge",
                 attrs: {
                     color: "#ec56da",
-                    arrows:"to"
-                    ,
+                    arrows: "to",
                 },
             },
             "Column to class mapping": {
                 type: "edge",
                 attrs: {
                     color: "#aed",
-                    arrows:"to"
-                    ,
+                    arrows: "to",
                 },
             },
-
-
-
         },
-        
     };
 
     self.drawLegend = function (type, legendCanvas) {
-       //  type="KGcreator_classes"
+        //  type="KGcreator_classes"
         if (!legendCanvas) {
             legendCanvas = "visjsLegendCanvas";
         }
-        self.lastDraw={'type':type,'legendDIv':legendCanvas};
-      
+        self.lastDraw = { type: type, legendDIv: legendCanvas };
+
         $("#" + legendCanvas).css("display", "block");
         $("#" + legendCanvas).draggable();
-        if(self.isRetractedLegend[legendCanvas]==undefined){
-            $("#" + legendCanvas)[0].addEventListener('click', function(event) { 
-                if(self.isRetractedLegend[legendCanvas] ){
-                    $("#" + legendCanvas).css('height',height);
-                    $("#" + legendCanvas).css('width',width);
-                    self.isRetractedLegend[legendCanvas]=false;
-                    self.drawLegend(self.lastDraw.type,self.lastDraw.legendDIv);
-                }else{
-                    if(event.offsetX>200){
-                        if(event.offsetY<30){
-                            $("#" + legendCanvas).css('height',30);
-                            $("#" + legendCanvas).css('width',50);
-                            self.drawLegend(null,legendCanvas);
-                            self.isRetractedLegend[legendCanvas]=true;
-                            self.lastDraw={'type':type,'legendDIv':legendCanvas};
+        if (self.isRetractedLegend[legendCanvas] == undefined) {
+            $("#" + legendCanvas)[0].addEventListener(
+                "click",
+                function (event) {
+                    if (self.isRetractedLegend[legendCanvas]) {
+                        $("#" + legendCanvas).css("height", height);
+                        $("#" + legendCanvas).css("width", width);
+                        self.isRetractedLegend[legendCanvas] = false;
+                        self.drawLegend(self.lastDraw.type, self.lastDraw.legendDIv);
+                    } else {
+                        if (event.offsetX > 200) {
+                            if (event.offsetY < 30) {
+                                $("#" + legendCanvas).css("height", 30);
+                                $("#" + legendCanvas).css("width", 50);
+                                self.drawLegend(null, legendCanvas);
+                                self.isRetractedLegend[legendCanvas] = true;
+                                self.lastDraw = { type: type, legendDIv: legendCanvas };
+                            }
                         }
-                    }   
-                }
-                
-                
-    
-            },false);
+                    }
+                },
+                false
+            );
         }
-        
-        if(self.isRetractedLegend[legendCanvas]==undefined){
-            self.isRetractedLegend[legendCanvas]=false;
+
+        if (self.isRetractedLegend[legendCanvas] == undefined) {
+            self.isRetractedLegend[legendCanvas] = false;
         }
         var legendObj = self.legendsMap[type];
-        
+
         if (!legendObj) {
-            var width=50;
-            var height=30;
-            $("#" + legendCanvas).attr('width',width);
+            var width = 50;
+            var height = 30;
+            $("#" + legendCanvas).attr("width", width);
             var yOffset = 0;
-        }else{
-            var height=Object.keys(legendObj).length*30+30;
-            var width=290;
-            $("#" + legendCanvas).attr('width',width);
+        } else {
+            var height = Object.keys(legendObj).length * 30 + 30;
+            var width = 290;
+            $("#" + legendCanvas).attr("width", width);
             var yOffset = 30;
         }
-        
-        $("#" + legendCanvas).attr('height',height);
+
+        $("#" + legendCanvas).attr("height", height);
         var c = document.getElementById(legendCanvas);
         var ctx = c.getContext("2d");
-        ctx.clearRect(0, 0, width, height)
+        ctx.clearRect(0, 0, width, height);
         var xOffset = 130;
         if (!legendObj) {
             ctx.font = "18px arial";
-            ctx.fillText('Legend',0,20,width);
+            ctx.fillText("Legend", 0, 20, width);
             return;
-        }else{
+        } else {
             ctx.font = "18px arial";
-            ctx.fillText('Legend',120,20);
-            self.drawX(ctx,280,10,5);
+            ctx.fillText("Legend", 120, 20);
+            self.drawX(ctx, 280, 10, 5);
         }
-        
-        
 
         for (var key in legendObj) {
             yOffset += 25;
@@ -327,7 +315,6 @@ var GraphDisplayLegend = (function () {
                 ctx.lineTo(xOffset - 15, yOffset);
                 ctx.stroke();
                 ctx.setLineDash([]);
-
 
                 self.drawArrow(ctx, 10, yOffset, xOffset - 15, yOffset, 8);
             }
@@ -376,10 +363,10 @@ var GraphDisplayLegend = (function () {
             }
         }
 
-        if(shape=="star"){
+        if (shape == "star") {
             ctx.strokeStyle = attrs.color || "blue";
             ctx.fillStyle = attrs.color || "blue";
-            self.drawStar(ctx, xOffset / 2, yOffset - 5,  5, 9, 4);
+            self.drawStar(ctx, xOffset / 2, yOffset - 5, 5, 9, 4);
         }
     };
 
@@ -455,46 +442,42 @@ var GraphDisplayLegend = (function () {
         context.closePath();
 
         context.fill();
-
     };
 
-    self. drawStar=function(ctx,cx, cy, spikes, outerRadius, innerRadius) {
-        var rot = Math.PI / 2 * 3;
+    self.drawStar = function (ctx, cx, cy, spikes, outerRadius, innerRadius) {
+        var rot = (Math.PI / 2) * 3;
         var x = cx;
         var y = cy;
         var step = Math.PI / spikes;
 
         ctx.beginPath();
-        ctx.moveTo(cx, cy - outerRadius)
+        ctx.moveTo(cx, cy - outerRadius);
         for (var i = 0; i < spikes; i++) {
             x = cx + Math.cos(rot) * outerRadius;
             y = cy + Math.sin(rot) * outerRadius;
-            ctx.lineTo(x, y)
-            rot += step
+            ctx.lineTo(x, y);
+            rot += step;
 
             x = cx + Math.cos(rot) * innerRadius;
             y = cy + Math.sin(rot) * innerRadius;
-            ctx.lineTo(x, y)
-            rot += step
+            ctx.lineTo(x, y);
+            rot += step;
         }
-        ctx.lineTo(cx, cy - outerRadius)
+        ctx.lineTo(cx, cy - outerRadius);
         ctx.closePath();
         ctx.stroke();
         ctx.fill();
-
     };
-    self.drawX=function (ctx,x, y,length) {
+    self.drawX = function (ctx, x, y, length) {
         ctx.beginPath();
-    
+
         ctx.moveTo(x - length, y - length);
         ctx.lineTo(x + length, y + length);
-    
+
         ctx.moveTo(x + length, y - length);
         ctx.lineTo(x - length, y + length);
         ctx.stroke();
     };
-
-
 
     return self;
 })();

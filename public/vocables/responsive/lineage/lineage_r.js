@@ -31,7 +31,7 @@ var Lineage_r = (function () {
         self.oldAddEdgeDialog = Lineage_blend.graphModification.showAddEdgeFromGraphDialog;
         Lineage_blend.graphModification.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
         ResponsiveUI.initMenuBar(self.loadSources);
-        $('#Lineage_graphEditionButtons').load('./responsive/lineage/html/AddNodeEdgeButtons.html');
+        $("#Lineage_graphEditionButtons").load("./responsive/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
     };
@@ -112,7 +112,7 @@ var Lineage_r = (function () {
         var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
         if (isNodeEditable) {
             $("#Lineage_graphEditionButtons").css("display", "block");
-            
+
             $("#lineage_createResourceBtn").show();
         } else {
             $("#Lineage_graphEditionButtons").css("display", "none");

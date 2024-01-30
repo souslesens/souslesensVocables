@@ -1,9 +1,7 @@
-
-
 var BotEngineResponsive = (function () {
     var self = {};
     self.firstLoad = true;
-    self.OrReturnValues=[];
+    self.OrReturnValues = [];
     self.init = function (botModule, options, callback) {
         if (!options) {
             options = {};
@@ -16,17 +14,12 @@ var BotEngineResponsive = (function () {
         var divId;
         if (options.divId) {
             divId = options.divId;
-            self.divId= options.divId;
-            
-        
-        }
-           
-         else {
+            self.divId = options.divId;
+        } else {
             divId = "botDiv";
             $("#botPanel").dialog("open");
-            $($('#botPanel').parent()[0]).on('dialogclose', function(event) {
-                
-                self.firstLoad=true;
+            $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
+                self.firstLoad = true;
             });
             $("#botPanel").dialog("option", "title", BotEngine.currentBot.title);
 
@@ -34,33 +27,30 @@ var BotEngineResponsive = (function () {
             $("#botPanel").parent().css("left", "30%");
         }
 
-    
-       
         $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
-            if(!self.firstLoad){
+            if (!self.firstLoad) {
                 $("#resetButtonBot").remove();
                 $("#previousButtonBot").remove();
             }
-            self.firstLoad=false;
+            self.firstLoad = false;
             $("#resetButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
             $("#previousButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
-            if(divId!="botDiv"){
-                var dialogWindow=$("#"+divId).parents().filter('div[role="dialog"]')[0];
-                var titleDialog=$(dialogWindow).find(".ui-dialog-titlebar-close");
-                var idDialog="#"+$(dialogWindow).attr('aria-describedby');
+            if (divId != "botDiv") {
+                var dialogWindow = $("#" + divId)
+                    .parents()
+                    .filter('div[role="dialog"]')[0];
+                var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
+                var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
                 $(idDialog).parent().css("top", "13%");
                 $(idDialog).parent().css("left", "10%");
                 $("#resetButtonBot").insertAfter(titleDialog);
                 $("#previousButtonBot").insertAfter(titleDialog);
-                $(dialogWindow).on('dialogclose', function(event) {
-                
-                    $("#"+self.divId).empty();
+                $(dialogWindow).on("dialogclose", function (event) {
+                    $("#" + self.divId).empty();
                     $(dialogWindow).find("#resetButtonBot").remove();
                     $(dialogWindow).find("#previousButtonBot").remove();
-                    self.firstLoad=true;
+                    self.firstLoad = true;
                 });
-                
-
             }
             if (callback) callback();
         });
@@ -126,23 +116,20 @@ var BotEngineResponsive = (function () {
             BotEngine.history.currentIndex -= 2;
 
             BotEngine.currentObj = BotEngine.history[BotEngine.history.currentIndex];
-            
-            
+
             //delete last 3 message sended
             var childrens = $("#botTA").children();
             // last is bot_input --> don't count
             $("#botTA").children().slice(-4).filter("span").remove();
-            if(BotEngine.currentObj._OR!=undefined){
-                if(self.OrReturnValues!=[]){
-                    var lastOrReturnValue=self.OrReturnValues.slice(-1);
+            if (BotEngine.currentObj._OR != undefined) {
+                if (self.OrReturnValues != []) {
+                    var lastOrReturnValue = self.OrReturnValues.slice(-1);
                     self.OrReturnValues.pop();
                     self.nextStep(lastOrReturnValue);
                 }
-            }
-            else{
+            } else {
                 self.nextStep();
             }
-            
         } else {
             self.reset();
         }
@@ -150,12 +137,13 @@ var BotEngineResponsive = (function () {
 
     self.end = function () {
         BotEngine.currentBot.params.queryText = self.getQueryText();
-        if(self.divId){
-            var dialogWindow=$("#"+self.divId).parents().filter('div[role="dialog"]')[0];
-            var idDialog="#"+$(dialogWindow).attr('aria-describedby');
+        if (self.divId) {
+            var dialogWindow = $("#" + self.divId)
+                .parents()
+                .filter('div[role="dialog"]')[0];
+            var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
             $(idDialog).dialog("close");
-            
-        }else{
+        } else {
             $("#botPanel").dialog("close");
         }
         if (BotEngine.currentBot.callbackFn) {
@@ -187,11 +175,11 @@ var BotEngineResponsive = (function () {
     };
 
     self.reset = function () {
-        if(!self.divId){
+        if (!self.divId) {
             $("#resetButtonBot").remove();
             $("#previousButtonBot").remove();
         }
-       
+
         BotEngine.currentBot.start();
     };
 
@@ -236,10 +224,10 @@ var BotEngineResponsive = (function () {
         });
     };
     self.promptValue = function (message, varToFill, defaultValue, callback) {
-        $('#bot_resourcesProposalSelect').hide();
+        $("#bot_resourcesProposalSelect").hide();
         $("#botPromptInput").on("keyup", function (key) {
             if (event.keyCode == 13 || event.keyCode == 9) {
-                $('#bot_resourcesProposalSelect').show();
+                $("#bot_resourcesProposalSelect").show();
                 $("#botPromptInput").css("display", "none");
                 var value = $(this).val();
                 var varToFill = $("#botVarToFill").val();
@@ -255,9 +243,8 @@ var BotEngineResponsive = (function () {
         self.clearProposalSelect();
         $("#botVarToFill").val(varToFill);
         $("#botPromptInput").val(defaultValue || "");
-        $("#botPromptInput").css("display", "block");   
+        $("#botPromptInput").css("display", "block");
         $("#botPromptInput").focus();
-        
     };
 
     self.writeCompletedHtml = function (str, options) {
@@ -277,12 +264,9 @@ var BotEngineResponsive = (function () {
         $(html).insertBefore("#bot_input");
         $("#bot_input").val("");
         $("#bot_input").focus();
-        if($('#botDiv')[0].scrollHeight>500){
+        if ($("#botDiv")[0].scrollHeight > 500) {
             $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
         }
-
-        
-
 
         return;
     };
@@ -297,7 +281,6 @@ var BotEngineResponsive = (function () {
     self.clearProposalSelect = function () {
         $("#bot_resourcesProposalSelect").find("option").remove().end();
     };
-
 
     self.analyse = function (str) {};
 

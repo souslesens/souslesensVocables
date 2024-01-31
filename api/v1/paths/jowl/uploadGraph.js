@@ -119,11 +119,13 @@ module.exports = function() {
                 }
                 if (userInfo.user.groups.indexOf("admin") < 0) {
                     console.log(("------userInfo.user.maxNumberCreatedSource----------"+userInfo.user.maxNumberCreatedSource))
+                    console.log(("------userInfo----------"+JSON.stringify(userInfo)))
                     var countUserprivateSource=0
-                    if(!userInfo.user.allowSourceCreation ||  !userInfo.user.maxNumberCreatedSource || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
-                        processResponse(res, err, { result: "not authorized" });
-                    console.log(("--------------3---------"))
-                    return res.status(403);
+                    if(!userInfo.user.allowSourceCreation) {//} ||  !userInfo.user.maxNumberCreatedSource || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
+                        return processResponse(res, err, { result: "not authorized" });
+                        /* console.log(("--------------3---------"))
+                         return res.status(403);*/
+                    }
 
                 }
                 var sparqlServerConnection = { url: ConfigManager.config.sparql_server.url };
@@ -220,13 +222,15 @@ console.log(("--------------1---------"))
                 }
                 console.log(("--------------2---------"))
                 if (userInfo.user.groups.indexOf("admin") < 0) {
-                    console.log(("------userInfo.user.maxNumberCreatedSource----------"+userInfo.user.maxNumberCreatedSource))
-                    var countUserprivateSource=0
-                    if(!userInfo.user.allowSourceCreation ||  !userInfo.user.maxNumberCreatedSource || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
-                        processResponse(res, err, { result: "not authorized" });
-                    console.log(("--------------3---------"))
-                        return res.status(403);
+                    console.log(("------userInfo.user.maxNumberCreatedSource----------" + userInfo.user.maxNumberCreatedSource))
+                    console.log(("------userInfo----------" + JSON.stringify(userInfo)))
+                    var countUserprivateSource = 0
+                    if (!userInfo.user.allowSourceCreation) {//} ||  !userInfo.user.maxNumberCreatedSource || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
+                        return processResponse(res, err, { result: "not authorized" });
+                        /* console.log(("--------------3---------"))
+                         return res.status(403);*/
 
+                    }
                 }
                 var sparqlServerConnection = { url: ConfigManager.config.sparql_server.url };
                 if (ConfigManager.config.sparql_server.user) {

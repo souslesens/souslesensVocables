@@ -208,15 +208,19 @@ module.exports = function() {
             var uploadFromUrl = false;
 
 
-
+console.log(("--------------1---------"))
 
             ConfigManager.getUser(req, res, function(err, userInfo) {
                 if (err) {
                     return res.status(400).json({ error: err });
                 }
+                console.log(("--------------2---------"))
                 if (userInfo.user.groups.indexOf("admin") < 0) {
+                    console.log(("------userInfo.user.maxNumberCreatedSource----------"+userInfo.user.maxNumberCreatedSource))
                     var countUserprivateSource=0
                     if(!userInfo.user.allowSourceCreation || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
+                        processResponse(res, err, { result: "not authorized" });
+                    console.log(("--------------3---------"))
                         return res.status(403);
 
                 }
@@ -279,8 +283,9 @@ module.exports = function() {
                                 return callbackSeries();
                             }
                             // call jowl to transform data in triples
-
+                            console.log(("--------------4---------"))
                                 transformToTriples(ontologyContentEncoded64, function(err, triples) {
+                                    console.log(("--------------5---------"))
                                     if (err) return callbackSeries(err);
                                     allTriples=triples
                                     callbackSeries()
@@ -295,8 +300,10 @@ module.exports = function() {
                             if (graphExists) {
                                 return callbackSeries();
                             }
+                            console.log(("--------------6---------"))
                             writeTriples(sparqlServerConnection,graphUri, allTriples, function(err,countTriples) {
                                 totalImportedTriples=countTriples;
+                                console.log(("--------------7---------"))
                                 callbackSeries(err)
                             })
 
@@ -304,6 +311,7 @@ module.exports = function() {
                         }
                     ],
                     function(err) {
+                        console.log(("--------------8---------"))
                         processResponse(res, err, { result: totalImportedTriples });
                     }
                 );

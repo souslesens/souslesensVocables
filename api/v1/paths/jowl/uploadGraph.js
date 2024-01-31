@@ -215,7 +215,10 @@ module.exports = function() {
                     return res.status(400).json({ error: err });
                 }
                 if (userInfo.user.groups.indexOf("admin") < 0) {
-                    return res.status(403);
+                    var countUserprivateSource=0
+                    if(!userInfo.user.allowSourceCreation || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
+                        return res.status(403);
+
                 }
                 var sparqlServerConnection = { url: ConfigManager.config.sparql_server.url };
                 if (ConfigManager.config.sparql_server.user) {

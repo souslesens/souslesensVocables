@@ -44,6 +44,7 @@ var KGquery_r = (function () {
                 $("#lateralPanelDiv").load("./responsive/KGquery/html/index.html", function () {
                     KGquery_graph.drawVisjsModel("saved");
                     ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery_r.initQuery, "#QueryTabButton");
+                    ResponsiveUI.resetWindowHeight();
                 });
             });
         });

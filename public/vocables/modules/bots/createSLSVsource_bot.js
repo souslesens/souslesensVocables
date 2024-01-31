@@ -92,7 +92,9 @@ var CreateSLSVsource_bot = (function () {
         },
 
         afterImportFn: function () {
-            BotEngine.previousStep();
+            //BotEngine.previousStep();
+            BotEngine.currentObj = self.workflow2;
+            BotEngine.nextStep(self.workflow2);
         },
 
         uploadFromUrlFn: function () {

@@ -74,3 +74,28 @@ Cypress.Commands.add("waitForProfilesAndSources", () => {
     cy.intercept("http://localhost:3011/api/v1/profiles").as("getProfiles");
     cy.wait("@getProfiles");
 });
+
+
+/*  Karim test */
+// Verify the state of The source selector and capacity to launch sources
+Cypress.Commands.add("loadLineageAndGraph",()=>{
+    cy.visit("http://localhost:3010/vocables/?tool=lineage");
+    cy.intercept('/vocables/responsive/css/KGcreator/KGcreatorSkin.css').as('getLessSkin')
+    cy.wait('@getLessSkin').then(
+        (interception)=>{
+            cy.wait(500);
+            cy.get('#sourceSelector_searchInput').type('IDO');
+            cy.get('#sourceSelector_searchInput').type('{enter}');
+            cy.get('#'+'IDO'+'_anchor').click();
+            //enter on lineage inerface in source IDO if is available
+            cy.get('.slsv-button-1').first().click();
+            cy.wait(500);
+            cy.window().then(window => {
+                const graphIsHere=window.Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty();
+                cy.log(graphIsHere);
+            });
+            
+        }
+    );
+    
+})

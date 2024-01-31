@@ -15,6 +15,7 @@ var Lineage_createSLSVsource = (function () {
             common.fillSelectOptions("create_source_imports", sources, false);
         });
     };
+  
 
     self.createSource = function (sourceName, graphUri, imports, callback) {
         /*  var sourceName = $("#create_source_name").val();

@@ -97,6 +97,7 @@ var BotEngineResponsive = (function () {
                     choices.push({ id: key, label: key });
                 }
                 self.showList(choices, varToFill);
+                self.setStepMessage();
             }
         } else {
             var fn = BotEngine.currentBot.functions[key];
@@ -175,11 +176,11 @@ var BotEngineResponsive = (function () {
     };
 
     self.reset = function () {
-        if (!self.divId) {
+       /* if (!self.divId) {
             $("#resetButtonBot").remove();
             $("#previousButtonBot").remove();
         }
-
+        */
         BotEngine.currentBot.start();
     };
 
@@ -233,6 +234,7 @@ var BotEngineResponsive = (function () {
                 var varToFill = $("#botVarToFill").val();
                 BotEngine.currentBot.params[varToFill] = value;
                 self.writeCompletedHtml(value);
+                $("#botPromptInput").off();
                 if (callback) {
                     return callback(value);
                 } else {

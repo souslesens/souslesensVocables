@@ -197,6 +197,7 @@ var BotEngine = (function () {
         return;
     };
 
+
     self.getQueryText = function () {
         var queryText = "";
         $(".bot-token").each(function () {
@@ -210,6 +211,12 @@ var BotEngine = (function () {
     };
 
     self.analyse = function (str) {};
+
+
+
+    self.exportToGraph=function(workflow){
+
+    }
 
     return self;
 })();

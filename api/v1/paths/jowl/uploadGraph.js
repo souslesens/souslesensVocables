@@ -119,7 +119,7 @@ module.exports = function() {
                 }
                 if (userInfo.user.groups.indexOf("admin") < 0) {
                     var countUserprivateSource=0
-                    if(!userInfo.user.allowSourceCreation || countUserprivateSource>maxNumberCreatedSource)
+                    if(!userInfo.user.allowSourceCreation || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
                     return res.status(403);
                 }
                 var sparqlServerConnection = { url: ConfigManager.config.sparql_server.url };

@@ -118,9 +118,13 @@ module.exports = function() {
                     return res.status(400).json({ error: err });
                 }
                 if (userInfo.user.groups.indexOf("admin") < 0) {
+                    console.log(("------userInfo.user.maxNumberCreatedSource----------"+userInfo.user.maxNumberCreatedSource))
                     var countUserprivateSource=0
-                    if(!userInfo.user.allowSourceCreation || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
+                    if(!userInfo.user.allowSourceCreation ||  !userInfo.user.maxNumberCreatedSource || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
+                        processResponse(res, err, { result: "not authorized" });
+                    console.log(("--------------3---------"))
                     return res.status(403);
+
                 }
                 var sparqlServerConnection = { url: ConfigManager.config.sparql_server.url };
                 if (ConfigManager.config.sparql_server.user) {
@@ -218,7 +222,7 @@ console.log(("--------------1---------"))
                 if (userInfo.user.groups.indexOf("admin") < 0) {
                     console.log(("------userInfo.user.maxNumberCreatedSource----------"+userInfo.user.maxNumberCreatedSource))
                     var countUserprivateSource=0
-                    if(!userInfo.user.allowSourceCreation || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
+                    if(!userInfo.user.allowSourceCreation ||  !userInfo.user.maxNumberCreatedSource || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
                         processResponse(res, err, { result: "not authorized" });
                     console.log(("--------------3---------"))
                         return res.status(403);

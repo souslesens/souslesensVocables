@@ -13,10 +13,10 @@ module.exports = function() {
     };
 
 
-    function transformToTriples(ontologyContentEncoded64,callback){
+    function transformToTriples(ontologyContentEncoded64, callback) {
         var jowlConfig = ConfigManager.config.jowlServer;
-        if(!jowlConfig.url.endsWith("/")) {
-            jowlConfig.url+="/";
+        if (!jowlConfig.url.endsWith("/")) {
+            jowlConfig.url += "/";
         }
         var payload = {
             ontologyContentEncoded64: ontologyContentEncoded64
@@ -40,16 +40,16 @@ module.exports = function() {
             if (!Array.isArray(body)) {
                 return callback(body);
             }
-           var allTriples = body;
+            var allTriples = body;
             if (allTriples.length == 0) {
                 return callback("no triples generated for url " + body.rdfUrl);
             }
 
-            callback(null,allTriples);
+            callback(null, allTriples);
         });
     }
 
-    function writeTriples(sparqlServerConnection,graphUri,allTriples,callback){
+    function writeTriples(sparqlServerConnection, graphUri, allTriples, callback) {
         var slices = Util.sliceArray(allTriples, 200);
         var totalImportedTriples = -1;
         async2.eachSeries(
@@ -92,15 +92,27 @@ module.exports = function() {
                 });
             },
             function(err) {
-                return callback(err,totalImportedTriples);
+                return callback(err, totalImportedTriples);
             }
         );
     }
 
+    function isUserAuthorizedToUpload(userInfo) {
+        if (userInfo.user.groups.indexOf("admin") < 0) {
+            console.log(("------userInfo.user.maxNumberCreatedSource----------" + userInfo.maxNumberCreatedSource));
+            console.log(("------userInfo----------" + JSON.stringify(userInfo)));
+            var countUserprivateSource = 0;
+            if (!userInfo.allowSourceCreation || countUserprivateSource > userInfo.maxNumberCreatedSource) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        return true;
+    }
+
 
     async function POST(req, res, next) {
-
-
 
 
         // upload from URL
@@ -117,17 +129,10 @@ module.exports = function() {
                 if (err) {
                     return res.status(400).json({ error: err });
                 }
-                if (userInfo.user.groups.indexOf("admin") < 0) {
-                    console.log(("------userInfo.user.maxNumberCreatedSource----------"+userInfo.user.maxNumberCreatedSource))
-                    console.log(("------userInfo----------"+JSON.stringify(userInfo)))
-                    var countUserprivateSource=0
-                    if(!userInfo.user.allowSourceCreation) {//} ||  !userInfo.user.maxNumberCreatedSource || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
-                        return processResponse(res, err, { result: "not authorized" });
-                        /* console.log(("--------------3---------"))
-                         return res.status(403);*/
-                    }
-
+                if (!isUserAuthorizedToUpload(userInfo)) {
+                    return processResponse(res, err, { result: "not authorized" });
                 }
+
                 var sparqlServerConnection = { url: ConfigManager.config.sparql_server.url };
                 if (ConfigManager.config.sparql_server.user) {
                     sparqlServerConnection.auth = {
@@ -139,8 +144,8 @@ module.exports = function() {
                 var clearOldGraph = false;
                 var graphExists = false;
                 var allTriples = [];
-                var totalImportedTriples=0
-                var ontologyContentEncoded64=null;
+                var totalImportedTriples = 0;
+                var ontologyContentEncoded64 = null;
                 async2.series(
                     [
                         // check if graphExists
@@ -172,38 +177,40 @@ module.exports = function() {
                             });
                         },
                         // get url content and encode it
-                        function (callbackSeries) {
-                            request(uploadUrl, {}, function (error, request, body) {
-                                if (error) return callbackSeries(error);
+                        function(callbackSeries) {
+                            request(uploadUrl, {}, function(error, request, body) {
+                                if (error) {
+                                    return callbackSeries(error);
+                                }
                                 ontologyContentEncoded64 = Buffer.from(body).toString("base64");
 
                                 callbackSeries();
                             });
                         },
                         // call jowl to transform data in triples
-                        function (callbackSeries) {
+                        function(callbackSeries) {
                             transformToTriples(ontologyContentEncoded64, function(err, triples) {
-                                if (err) return callbackSeries(err);
-                                allTriples=triples
-                                callbackSeries()
-                            })
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+                                allTriples = triples;
+                                callbackSeries();
+                            });
                         },
 
                         //writeTriples
-                        function (callbackSeries) {
-                            writeTriples(sparqlServerConnection, graphUri,allTriples, function(err,countTriples) {
-                                totalImportedTriples=countTriples;
-                                callbackSeries(err)
-                            })
+                        function(callbackSeries) {
+                            writeTriples(sparqlServerConnection, graphUri, allTriples, function(err, countTriples) {
+                                totalImportedTriples = countTriples;
+                                callbackSeries(err);
+                            });
                         }
-
 
 
                     ], function(err) {
                         processResponse(res, err, { result: totalImportedTriples });
                     });
-            })
-
+            });
 
 
             // upload from GRAPH
@@ -214,24 +221,19 @@ module.exports = function() {
             var uploadFromUrl = false;
 
 
-console.log(("--------------1---------"))
+            console.log(("--------------1---------"));
 
             ConfigManager.getUser(req, res, function(err, userInfo) {
                 if (err) {
                     return res.status(400).json({ error: err });
                 }
-                console.log(("--------------2---------"))
-                if (userInfo.user.groups.indexOf("admin") < 0) {
-                    console.log(("------userInfo.user.maxNumberCreatedSource----------" + userInfo.user.maxNumberCreatedSource))
-                    console.log(("------userInfo----------" + JSON.stringify(userInfo)))
-                    var countUserprivateSource = 0
-                    if (!userInfo.user.allowSourceCreation) {//} ||  !userInfo.user.maxNumberCreatedSource || countUserprivateSource>userInfo.user.maxNumberCreatedSource)
-                        return processResponse(res, err, { result: "not authorized" });
-                        /* console.log(("--------------3---------"))
-                         return res.status(403);*/
+                console.log(("--------------2---------"));
 
-                    }
+
+                if (!isUserAuthorizedToUpload(userInfo)) {
+                    return processResponse(res, err, { result: "not authorized" });
                 }
+
                 var sparqlServerConnection = { url: ConfigManager.config.sparql_server.url };
                 if (ConfigManager.config.sparql_server.user) {
                     sparqlServerConnection.auth = {
@@ -280,8 +282,8 @@ console.log(("--------------1---------"))
 
                         function(callbackSeries) {
 
-                                ontologyContentEncoded64 = Buffer.from(data).toString("base64");
-                                callbackSeries();
+                            ontologyContentEncoded64 = Buffer.from(data).toString("base64");
+                            callbackSeries();
 
                         },
 
@@ -291,14 +293,15 @@ console.log(("--------------1---------"))
                                 return callbackSeries();
                             }
                             // call jowl to transform data in triples
-                            console.log(("--------------4---------"))
-                                transformToTriples(ontologyContentEncoded64, function(err, triples) {
-                                    console.log(("--------------5---------"))
-                                    if (err) return callbackSeries(err);
-                                    allTriples=triples
-                                    callbackSeries()
-                                })
-
+                            console.log(("--------------4---------"));
+                            transformToTriples(ontologyContentEncoded64, function(err, triples) {
+                                console.log(("--------------5---------"));
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+                                allTriples = triples;
+                                callbackSeries();
+                            });
 
 
                         },
@@ -308,18 +311,18 @@ console.log(("--------------1---------"))
                             if (graphExists) {
                                 return callbackSeries();
                             }
-                            console.log(("--------------6---------"))
-                            writeTriples(sparqlServerConnection,graphUri, allTriples, function(err,countTriples) {
-                                totalImportedTriples=countTriples;
-                                console.log(("--------------7---------"))
-                                callbackSeries(err)
-                            })
+                            console.log(("--------------6---------"));
+                            writeTriples(sparqlServerConnection, graphUri, allTriples, function(err, countTriples) {
+                                totalImportedTriples = countTriples;
+                                console.log(("--------------7---------"));
+                                callbackSeries(err);
+                            });
 
 
                         }
                     ],
                     function(err) {
-                        console.log(("--------------8---------"))
+                        console.log(("--------------8---------"));
                         processResponse(res, err, { result: totalImportedTriples });
                     }
                 );

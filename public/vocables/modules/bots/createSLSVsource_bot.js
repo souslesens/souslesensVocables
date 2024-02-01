@@ -97,8 +97,6 @@ var CreateSLSVsource_bot = (function () {
             BotEngine.nextStep(self.workflow2);
         },
 
-
-
         uploadFromUrlFn: function () {
             BotEngine.promptValue("enter remote Url", "uploadUrl", "", function (value) {
                 if (!value) {

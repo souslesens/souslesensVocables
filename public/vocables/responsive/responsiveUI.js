@@ -15,7 +15,7 @@ var ResponsiveUI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.tools_available = ["lineage", "KGquery", "KGcreator","OntoCreator"];
+    self.tools_available = ["lineage", "KGquery", "KGcreator", "OntoCreator"];
     self.toolsNeedSource = ["lineage", "KGquery", "KGcreator"];
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
@@ -30,7 +30,7 @@ var ResponsiveUI = (function () {
                 //`<input type="image" src="${Config.toolsLogo[item]}">`
             }
         });
-        
+
         window.addEventListener(
             "resize",
             function (event) {
@@ -38,7 +38,7 @@ var ResponsiveUI = (function () {
             },
             true
         );
-        
+
         self.themeList();
         self.replaceFile(BotEngine, BotEngineResponsive);
     };
@@ -75,10 +75,9 @@ var ResponsiveUI = (function () {
     self.onToolSelect = function (toolId) {
         if (self.currentTool != "lineage" && self.currentTool != null) {
             if (self.tools_available.includes(self.currentTool)) {
-                if(window[self.currentTool + "_r"]){
+                if (window[self.currentTool + "_r"]) {
                     window[self.currentTool + "_r"].quit();
                 }
-                
             }
         }
 
@@ -155,12 +154,9 @@ var ResponsiveUI = (function () {
             return KGquery_r.init();
         } else if (toolId == "KGcreator") {
             return KGcreator_r.init();
-        }
-        else if(toolId=='OntoCreator'){
-            return(Lineage_createSLSVsource.onLoaded())
-        } 
-        
-        else {
+        } else if (toolId == "OntoCreator") {
+            return Lineage_createSLSVsource.onLoaded();
+        } else {
             //var answer = confirm("Not available in Responsive interface, redirection to old interface");
             if (true) {
                 var url = window.location.href;

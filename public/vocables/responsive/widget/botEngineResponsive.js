@@ -176,7 +176,7 @@ var BotEngineResponsive = (function () {
     };
 
     self.reset = function () {
-       /* if (!self.divId) {
+        /* if (!self.divId) {
             $("#resetButtonBot").remove();
             $("#previousButtonBot").remove();
         }

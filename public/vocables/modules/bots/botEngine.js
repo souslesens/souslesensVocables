@@ -197,7 +197,6 @@ var BotEngine = (function () {
         return;
     };
 
-
     self.getQueryText = function () {
         var queryText = "";
         $(".bot-token").each(function () {
@@ -212,11 +211,54 @@ var BotEngine = (function () {
 
     self.analyse = function (str) {};
 
+    self.exportToGraph = function () {
+        var functionTitles = self.currentBot.functionTitles;
+        var workflow = self.currentObj;
 
+        var visjsData = { nodes: [], edges: [] };
 
-    self.exportToGraph=function(workflow){
+        var existingNodes = {};
+        var recurse = function (obj, parentId, level) {
+            if (typeof obj == "object") {
+                for (var key in obj) {
+                    var nodeId = common.getRandomHexaId(5);
 
-    }
+                    visjsData.nodes.push({
+                        id: nodeId,
+                        label: key == "_OR" ? "" : functionTitles[key] || key,
+                        shape: key == "_OR" ? "diamond" : "box",
+                        size: 10,
+                        level: level,
+                        data: {
+                            id: nodeId,
+                            label: functionTitles[key] || key,
+                        },
+                    });
+                    if (parentId) {
+                        visjsData.edges.push({
+                            id: common.getRandomHexaId(5),
+                            from: nodeId,
+                            to: parentId,
+                            color: Lineage_whiteboard.defaultEdgeColor,
+                            arrows: {
+                                from: {
+                                    enabled: true,
+                                    type: Lineage_whiteboard.defaultEdgeArrowType,
+                                    scaleFactor: 0.5,
+                                },
+                            },
+                        });
+                    }
+                    recurse(obj[key], nodeId, level + 1);
+                }
+            }
+        };
+
+        recurse(workflow, null, 1);
+        var x = visjsData;
+
+        Lineage_whiteboard.drawNewGraph(visjsData, null, { layoutHierarchical: { vertical: true, levelSeparation: 50 } });
+    };
 
     return self;
 })();

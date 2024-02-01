@@ -193,7 +193,8 @@ var UserRequestFiltering = {
     }
   },
 
-  validateElasticSearchIndices: function(userGroups, indices, userSourcesMap, acl, callback) {
+  validateElasticSearchIndices: function(userInfo, indices, userSourcesMap, acl, callback) {
+   var userGroups= userInfo.user.groups;
     if (userGroups && userGroups.indexOf("admin") > -1) {
       return callback(null, indices);
     }
@@ -202,8 +203,11 @@ var UserRequestFiltering = {
     for (var source in userSourcesMap) {
       indicesMap[source.toLowerCase()] = { source: source, acl: source.accessControl == "readwrite" ? "w" : "r" };
     }
+
+
     var error = null;
     indices.forEach(function(indexName) {
+
       if (!indicesMap[indexName]) {
         error = "DATA PROTECTION : index  " + indexName + " not allowed to current user";
       }

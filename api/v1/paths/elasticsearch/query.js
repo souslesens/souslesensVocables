@@ -16,7 +16,7 @@ module.exports = function () {
                     return res.status(400).json({ error: err });
                 }
                 ConfigManager.getUserSources(req, res, function (err, userSources) {
-                    UserRequestFiltering.validateElasticSearchIndices(userInfo.user.groups, req.body.indexes, userSources, "r", function (parsingError, filteredQuery) {
+                    UserRequestFiltering.validateElasticSearchIndices(userInfo, req.body.indexes, userSources, "r", function (parsingError, filteredQuery) {
                         if (parsingError) {
                             return processResponse(res, parsingError, null);
                         }

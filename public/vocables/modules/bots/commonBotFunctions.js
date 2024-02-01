@@ -40,12 +40,11 @@ var CommonBotFunctions = (function () {
     self.listVocabsFn = function (sourceLabel, varToFill, includeBasicVocabs) {
         var vocabs = [{ id: sourceLabel, label: sourceLabel }];
         var imports = Config.sources[sourceLabel].imports;
-        if (!imports) {
-            return BotEngine.showList(vocabs, varToFill);
+        if (imports) {
+            imports.forEach(function (importSource) {
+                vocabs.push({ id: importSource, label: importSource });
+            });
         }
-        imports.forEach(function (importSource) {
-            vocabs.push({ id: importSource, label: importSource });
-        });
         if (includeBasicVocabs) {
             for (var key in Config.basicVocabularies) {
                 vocabs.push({ id: key, label: key });

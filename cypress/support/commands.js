@@ -78,9 +78,9 @@ Cypress.Commands.add("waitForProfilesAndSources", () => {
 
 /*  Karim test */
 // Verify the state of The source selector and capacity to launch sources
-Cypress.Commands.add("loadLineageAndGraph",()=>{
+Cypress.Commands.add("enterLineageOnIDO",()=>{
     cy.visit("http://localhost:3010/vocables/?tool=lineage");
-    cy.intercept('/vocables/responsive/css/KGcreator/KGcreatorSkin.css').as('getLessSkin')
+    cy.intercept('/vocables/responsive/css/KGcreator/KGcreatorSkin.css').as('getLessSkin');
     cy.wait('@getLessSkin').then(
         (interception)=>{
             cy.wait(500);
@@ -98,4 +98,23 @@ Cypress.Commands.add("loadLineageAndGraph",()=>{
         }
     );
     
-})
+});
+
+Cypress.Commands.add("modelTestDisplay",()=>{
+  
+    cy.wait('@getLessSkin').then(
+        (interception)=>{
+            cy.wait(500);
+            //enter click on graph
+            cy.get('.slsv-button-1').first().click();
+            cy.wait(500);
+            cy.window().then(window => {
+                // Test graph display
+                const graphIsHere=window.Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty();
+                cy.log(graphIsHere);
+            });
+            
+        }
+    );
+    
+});

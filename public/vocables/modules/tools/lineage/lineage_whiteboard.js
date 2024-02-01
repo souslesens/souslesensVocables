@@ -251,6 +251,7 @@ var Lineage_whiteboard = (function () {
         self.lineageVisjsGraph.clearGraph();
         self.queriesStack = [];
         LegendWidget.clearLegend();
+        Lineage_decoration.initLegend();
 
         if (clearTree) {
             $("#lineage_drawnSources").html("");
@@ -584,10 +585,6 @@ var Lineage_whiteboard = (function () {
         }
     };
 
-
-
-
-
     self.drawNewGraph = function (visjsData, graphDiv, _options) {
         if (!_options) {
             _options = {};
@@ -640,7 +637,7 @@ var Lineage_whiteboard = (function () {
                         if (true) {
                             //!self.lineageVisjsGraph.skipColorGraphNodesByType) {
                             var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
-                            Lineage_decoration.decorateNodeAndDrawLegend(nodes);
+                            //    Lineage_decoration.decorateNodeAndDrawLegend(nodes);
                         }
                     }
                 },
@@ -731,7 +728,7 @@ var Lineage_whiteboard = (function () {
         self.lineageVisjsGraph.draw(function () {
             MainController.UI.message("", true);
 
-            Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
+            //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
         });
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
 
@@ -741,7 +738,6 @@ var Lineage_whiteboard = (function () {
 
         return;
     };
-
 
     self.getGraphIdsFromSource = function (/** @type {any} */ source) {
         if (!self.lineageVisjsGraph.isGraphNotEmpty()) {

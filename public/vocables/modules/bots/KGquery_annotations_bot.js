@@ -8,7 +8,7 @@ var KGquery_annotations_bot = (function () {
     self.title = "Filter Class";
 
     self.start = function (currentQuery, validateFn) {
-        BotEngine.init(KGquery_annotations_bot, self.workflow_selectproperties,null, function () {
+        BotEngine.init(KGquery_annotations_bot, self.workflow_selectproperties, null, function () {
             self.validateFn = validateFn;
             self.callbackFn = function () {
                 var filterLabel = BotEngine.getQueryText();

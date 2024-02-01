@@ -2,13 +2,13 @@ var BotEngineResponsive = (function () {
     var self = {};
     self.firstLoad = true;
     self.OrReturnValues = [];
-    self.init = function (botModule,initialWorkflow, options, callback) {
+    self.init = function (botModule, initialWorkflow, options, callback) {
         if (!options) {
             options = {};
         }
         BotEngine.currentBot = botModule;
         BotEngine.currentObj = initialWorkflow;
-        BotEngine.initialWorkflow=initialWorkflow;
+        BotEngine.initialWorkflow = initialWorkflow;
         BotEngine.history = [];
         BotEngine.history.currentIndex = 0;
 

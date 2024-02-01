@@ -14,7 +14,7 @@ var SparqlQuery_bot = (function () {
 
     self.start = function () {
         self.title = "Query graph";
-        BotEngine.init(SparqlQuery_bot, self.workflow,null, function () {
+        BotEngine.init(SparqlQuery_bot, self.workflow, null, function () {
             self.params = { source: Lineage_sources.activeSource };
             BotEngine.nextStep();
         });
@@ -95,6 +95,7 @@ var SparqlQuery_bot = (function () {
         listAnnotationPropertiesVocabsFn: "Choose a reference ontology",
         listAnnotationPropertiesFn: "Choose a property",
         promptAnnotationPropertyValue: "Filter value ",
+        listWhiteBoardFilterType: "Choose a scope",
     };
 
     self.functions = {
@@ -338,7 +339,7 @@ var SparqlQuery_bot = (function () {
             };
 
             Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);
-            
+
             BotEngine.nextStep();
         },
     };

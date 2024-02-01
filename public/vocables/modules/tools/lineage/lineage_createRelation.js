@@ -9,9 +9,9 @@ var Lineage_createRelation = (function () {
     var self = {};
 
     self.showAddEdgeFromGraphDialog = function (edgeData, callback) {
-        $("#LineagePopup").dialog("open");
-        $("#LineagePopup").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
-        $("#LineagePopup").load("snippets/lineage/lineageAddEdgeDialog.html", function () {
+        $("#mainDialogDiv").dialog("open");
+        $("#mainDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
+        $("#mainDialogDiv").load("snippets/lineage/lineageAddEdgeDialog.html", function () {
             self.sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
             self.targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
@@ -350,7 +350,7 @@ var Lineage_createRelation = (function () {
         if (!confirm("create Relation " + sourceNode.label + "-" + Sparql_common.getLabelFromURI(propId) + "->" + targetNode.label + " in Graph " + inSource)) {
             return;
         }
-        $("#LineagePopup").dialog("close");
+        $("#mainDialogDiv").dialog("close");
 
         var isRestriction = true;
         if (propId == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" || propId == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
@@ -727,7 +727,7 @@ var Lineage_createRelation = (function () {
         }
 
         self.addImportToCurrentSource(mainSourceLabel, importedSourceLabel, function (_err, _result) {
-            Lineage_whiteboard.registerSource(importedSourceLabel);
+            OntologyModels.registerSourcesModel(importedSourceLabel);
             callback();
         });
     };

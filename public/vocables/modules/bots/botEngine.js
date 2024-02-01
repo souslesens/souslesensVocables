@@ -1,12 +1,12 @@
 var BotEngine = (function () {
     var self = {};
 
-    self.init = function (botModule, initialWorkflow,options, callback) {
+    self.init = function (botModule, initialWorkflow, options, callback) {
         if (!options) {
             options = {};
         }
         self.currentObj = initialWorkflow;
-        self.initialWorkflow=initialWorkflow;
+        self.initialWorkflow = initialWorkflow;
         self.currentBot = botModule;
         self.currentObj = botModule;
         self.history = [];
@@ -30,7 +30,6 @@ var BotEngine = (function () {
     };
 
     self.nextStep = function (returnValue, varToFill) {
-
         self.history.push(JSON.parse(JSON.stringify(self.currentObj)));
         self.history.currentIndex += 1;
         var keys = Object.keys(self.currentObj);
@@ -216,7 +215,7 @@ var BotEngine = (function () {
 
     self.exportToGraph = function () {
         var functionTitles = self.currentBot.functionTitles;
-        var workflow =  self.initialWorkflow;
+        var workflow = self.initialWorkflow;
 
         var visjsData = { nodes: [], edges: [] };
 
@@ -259,30 +258,30 @@ var BotEngine = (function () {
             }
         };
 
-        var title=self.currentBot.title
+        var title = self.currentBot.title;
         visjsData.nodes.push({
             id: title,
             label: title,
-            shape:"ellipse",
-            color:"#117de8",
-            font: {color:"white",size:18},
+            shape: "ellipse",
+            color: "#117de8",
+            font: { color: "white", size: 18 },
 
             level: 0,
             data: {
-                id:title,
+                id: title,
                 label: title,
             },
         });
 
-        recurse(workflow, title, 1)
+        recurse(workflow, title, 1);
         var x = visjsData;
 
-        $("#mainDialogDiv").dialog("open")
-      $("#mainDialogDiv").html("<div id='botGraphDiv' style='width:1200px;height:800px'></div>");
+        $("#mainDialogDiv").dialog("open");
+        $("#mainDialogDiv").html("<div id='botGraphDiv' style='width:1200px;height:800px'></div>");
 
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
-            layoutHierarchical: { vertical: true, levelSeparation: 150,nodeSpacing:50,direction:"LR"},
-            physics:{enabled:true}
+            layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
+            physics: { enabled: true },
         });
     };
 

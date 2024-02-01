@@ -200,9 +200,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             .on("controlNodeDragging", function (params) {
                 self.currentDraggingMousePosition = params.pointer.DOM;
             })
-            .on("dragging", function (_params) {
-
-            })
+            .on("dragging", function (_params) {})
             .on("dragEnd", function (/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
                 if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
                     var dropCtrlNodeId = self.network.getNodeAt(params.pointer.DOM);
@@ -233,11 +231,11 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     var newNode = { id: nodeId, fixed: fixed };
 
                     newNodes.push(newNode);
-                    if ( !self.currentContext.options["layoutHierarchical"]) {
+                    if (!self.currentContext.options["layoutHierarchical"]) {
                         self.data.nodes.update(newNodes);
                     }
                 }
-            })
+            });
 
         if (callback) {
             var intervalIncrement = 0;

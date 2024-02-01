@@ -598,7 +598,7 @@ var KGcreator = (function () {
                             data: { id: column, table: fileName, label: column, type: "tableColumn" },
                         });
                     });
-                    if (self.currentConfig.currentMappings[fileName].virtualColumns) {
+                    if (self.currentConfig.currentMappings && self.currentConfig.currentMappings[fileName] && self.currentConfig.currentMappings[fileName].virtualColumns) {
                         self.currentConfig.currentMappings[fileName].virtualColumns.forEach(function (virtualColumn) {
                             var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
                             jstreeData.push({
@@ -678,7 +678,7 @@ var KGcreator = (function () {
 
     self.showTableVirtualColumnsTree = function (table) {
         if (!table) return alert("no table selected");
-        if (!self.currentConfig.currentMappings[table].virtualColumns) {
+        if (!self.currentConfig.currentMappings || !self.currentConfig.currentMappings[table] || !self.currentConfig.currentMappings[table].virtualColumns) {
             return;
         }
         var jstreeData = [];

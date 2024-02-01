@@ -13,17 +13,24 @@ import Lineage_containers from "./lineage_containers.js";
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
     var self = {};
+    self.legendColorsMap = {};
 
+    self.initLegend = function () {
+        $("#Lineage_classes_graphDecoration_legendDiv").html("");
+        self.legendColorsMap = {};
+    };
     self.topOntologiesClassesMap = {};
     self.legendMap = {};
     self.currentVisjGraphNodesMap = {};
     self.decorateNodeAndDrawLegend = function (visjsNodes) {
-        if (Lineage_relations.currentQueryInfos) {
-            self.decorateByQueryInfos(visjsNodes, Lineage_relations.currentQueryInfos);
-            Lineage_relations.currentQueryInfos = null;
-        } else {
-            self.decorateByUpperOntologyByClass(visjsNodes);
-        }
+        self.drawIndividualTypesLegend(visjsNodes, function () {
+            if (Lineage_relations.currentQueryInfos) {
+                self.decorateByQueryInfos(visjsNodes, Lineage_relations.currentQueryInfos);
+                Lineage_relations.currentQueryInfos = null;
+            } else {
+                self.decorateByUpperOntologyByClass(visjsNodes);
+            }
+        });
     };
 
     self.decorateByQueryInfos = function (visjsNodes, queryInfos) {
@@ -91,6 +98,97 @@ var Lineage_decoration = (function () {
         }
     };
 
+    self.drawIndividualTypesLegend = function (visjsNodes, callback) {
+        if (!visjsNodes) {
+            visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+        }
+
+        if (visjsNodes.length == 0) {
+            return;
+        }
+        var nodeIds = [];
+        visjsNodes.forEach(function (node) {
+            nodeIds.push(node.id);
+        });
+
+        var newNodes = [];
+        var legendClassColorsMap = self.legendColorsMap;
+
+        async.series(
+            [
+                // get node types
+                function (callbackSeries) {
+                    var slices = common.array.slice(nodeIds, Config.slicedArrayLength);
+                    async.eachSeries(
+                        slices,
+                        function (slice, callbackEach) {
+                            Sparql_OWL.getNodesTypesMap(Lineage_sources.activeSource, slice, {}, function (err, result) {
+                                if (err) {
+                                    return callbackEach(err);
+                                }
+                                for (var nodeId in result) {
+                                    var newNode = { id: nodeId };
+                                    var types = result[nodeId].trim().split(";");
+
+                                    types.forEach(function (type) {
+                                        if (type && type.indexOf("/owl") < 0 && type.indexOf("/rdf") < 0) {
+                                            if (slice.indexOf(type) < 0 && !legendClassColorsMap[type]) {
+                                                if (!legendClassColorsMap[type]) {
+                                                    legendClassColorsMap[type] = common.getResourceColor("individualtypesLegend", type);
+                                                }
+                                            }
+                                            newNode.color = legendClassColorsMap[type];
+                                        } else {
+                                            if (type.indexOf("Individual") > -1) {
+                                                newNode.shape = "triangle";
+                                            } else if (type.indexOf("Bag") > -1) {
+                                                newNode.shape = Lineage_containers.containerStyle.shape;
+
+                                                newNode.font = { color: Lineage_containers.containerStyle.color };
+                                            } else {
+                                            }
+                                        }
+                                        newNodes.push(newNode);
+                                    });
+                                }
+
+                                callbackEach();
+                            });
+                        },
+                        function (err) {
+                            callbackSeries();
+                        }
+                    );
+                },
+                function (callbackSeries) {
+                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
+                    callbackSeries();
+                },
+                function (callbackSeries) {
+                    var jstreeData = [];
+                    for (var classId in legendClassColorsMap) {
+                        var label = Sparql_common.getLabelFromURI(classId);
+                        var color = legendClassColorsMap[classId];
+                        jstreeData.push({
+                            id: classId,
+                            text: "<span  style='font-size:10px;background-color:" + color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + label,
+                            parent: "#",
+                            color: color,
+                        });
+                    }
+                    $("#Lineage_classes_graphDecoration_legendDiv").html(
+                        "<div  class='jstreeContainer' style='height: 350px;width:90%;max-height:22dvh;'>" + "<div id='legendJstreeDivId' style='height: 25px;width:100%'></div></div>"
+                    );
+                    JstreeWidget.loadJsTree("legendJstreeDivId", jstreeData, {}, function () {});
+                    callbackSeries();
+                },
+            ],
+            function (err) {
+                callback();
+            }
+        );
+    };
+
     self.decorateByUpperOntologyByClass = function (visjsNodes) {
         if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
             return $("#lineage_legendWrapper").css("display", "none");
@@ -99,7 +197,7 @@ var Lineage_decoration = (function () {
         var nonTopLevelOntologynodeIds = [];
         var topLevelOntologynodeIds = [];
         var individualNodes = {};
-        if (true || !visjsNodes) {
+        if (!visjsNodes) {
             visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         }
 
@@ -193,6 +291,8 @@ var Lineage_decoration = (function () {
         }
 
         var nodeTypesMap = {};
+        var nodeOwlTypesMap = {};
+        var legendOwlTypeColorsMap = {};
         var legendTreeNode = {};
         async.series(
             [
@@ -218,6 +318,11 @@ var Lineage_decoration = (function () {
                                                 uniqueTypes[type] = 1;
                                                 slice.push(type);
                                             }
+                                        } else {
+                                            if (!legendOwlTypeColorsMap[type]) {
+                                                legendOwlTypeColorsMap[type] = Lineage_whiteboard.getPropertyColor("individualtypesLegend");
+                                            }
+                                            nodeOwlTypesMap[nodeId] = type;
                                         }
                                         nodeTypesMap[nodeId] = obj;
                                     });
@@ -260,10 +365,10 @@ var Lineage_decoration = (function () {
                         // var obj = { id: nodeId, color: color,legendType: legendTreeNode.id  };
                         var obj = { id: nodeId, color: color };
 
-                        if (nodeTypesMap[nodeId] && nodeTypesMap[nodeId].allTypes.indexOf("Individual") > -1) {
+                        if (nodeOwlTypesMap[nodeId] && nodeOwlTypesMap[nodeId].indexOf("Individual") > -1) {
                             obj.shape = "triangle";
                         }
-                        if (nodeTypesMap[nodeId] && nodeTypesMap[nodeId].allTypes.indexOf("Bag") > -1) {
+                        if (nodeOwlTypesMap[nodeId] && nodeOwlTypesMap[nodeId].indexOf("Bag") > -1) {
                             obj.shape = Lineage_containers.containerStyle.shape;
                             obj.color = Lineage_containers.containerStyle.color;
                             obj.font = { color: color };

@@ -13,7 +13,7 @@ const allTools = {
     OntoCreator: { label: "OntoCreator", noSource: 1, controller: Lineage_createSLSVsource, toolDescriptionImg: null },
 };
 
-async function loadToolsAndPlugins() {
+async function loadToolsAndPlugins(callback) {
     const request = await fetch("../../api/v1/tools");
     const allowedTools = await request.json();
 
@@ -26,6 +26,7 @@ async function loadToolsAndPlugins() {
     }
     // We mutate Config.tools with an object merging plugins and tools
     Config.tools = mergeToolsAndPlugins(allTools, plugins);
+    return callback()
 }
 
 function mergeToolsAndPlugins(tools, plugins) {

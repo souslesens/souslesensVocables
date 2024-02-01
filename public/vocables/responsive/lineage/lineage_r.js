@@ -67,9 +67,9 @@ var Lineage_r = (function () {
             $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
             Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
             self.hideShowMoreActions("hide");
-            self.PopUpOnHoverButtons();
+            ResponsiveUI.PopUpOnHoverButtons();
             $("#lateralPanelDiv").resizable({
-                maxWidth: 395,
+                maxWidth: 495,
                 minWidth: 150,
                 stop: function (event, ui) {
                     ResponsiveUI.resetWindowHeight();
@@ -242,23 +242,7 @@ var Lineage_r = (function () {
             $("#LineageProperties_searchInAllSources").val("all");
         }
     };
-    self.PopUpOnHoverButtons = function () {
-        $(".w3-button").on("mouseenter", function () {
-            var comment = $(this).attr("popupcomment");
-            if (comment) {
-                var html = "<div>" + comment + "</div>";
-                PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv", { Button: this });
-            }
-        });
 
-        $(".w3-bar-item").on("mouseenter", function () {
-            var comment = $(this).attr("popupcomment");
-            if (comment) {
-                var html = "<div>" + comment + "</div>";
-                PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv", { Button: this });
-            }
-        });
-    };
     //less.modifyVars({'@button1-color': '#000'})
 
     return self;

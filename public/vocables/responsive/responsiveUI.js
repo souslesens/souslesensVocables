@@ -22,8 +22,7 @@ var ResponsiveUI = (function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
         self.setSlsvCssClasses();
         var tools = [];
-        
-        
+
         for (var key in Config.tools) {
             if (Config.tools_available.indexOf(key) > -1) {
                 if ((Config.tools[key].label == "ConfigEditor" || Config.tools[key].label == "Admin") && authentication.currentUser.groupes.indexOf("admin") === -1) {

@@ -7,7 +7,7 @@ export default defineConfig({
         setupNodeEvents(on, config) {
             return require("./cypress/plugins/index.js")(on, config);
         },
-        baseUrl: "http://localhost:3011",
+        baseUrl: "http://localhost:3010",
         defaultCommandTimeout: 6000,
     },
 });

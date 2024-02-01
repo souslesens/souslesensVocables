@@ -201,7 +201,7 @@ var Lineage_createResource = (function () {
     };
 
     self.writeResourceFromUI = function () {
-        self.writeResourceTriples(self.currentSource, self.currentResourceTriples, function (err, result) {
+        self.writeResource(self.currentSource, self.currentResourceTriples, function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }

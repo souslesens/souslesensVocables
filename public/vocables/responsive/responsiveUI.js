@@ -15,12 +15,24 @@ var ResponsiveUI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.tools_available = ["lineage", "KGquery", "KGcreator"];
+    self.tools_available = ["lineage", "KGquery", "KGcreator", "OntoCreator"];
     self.toolsNeedSource = ["lineage", "KGquery", "KGcreator"];
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
         self.setSlsvCssClasses();
-        var tools = Config.tools_available;
+        var tools = [];
+
+        for (var key in Config.tools) {
+            if (Config.tools_available.indexOf(key) > -1) {
+                if ((Config.tools[key].label == "ConfigEditor" || Config.tools[key].label == "Admin") && authentication.currentUser.groupes.indexOf("admin") === -1) {
+                    continue;
+                }
+                if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1) {
+                } else {
+                    tools.push(key);
+                }
+            }
+        }
 
         common.fillSelectOptions("toolsSelect", tools, false);
         tools.forEach((item, index) => {
@@ -38,6 +50,7 @@ var ResponsiveUI = (function () {
             },
             true
         );
+
         self.themeList();
         self.replaceFile(BotEngine, BotEngineResponsive);
     };
@@ -74,7 +87,9 @@ var ResponsiveUI = (function () {
     self.onToolSelect = function (toolId) {
         if (self.currentTool != "lineage" && self.currentTool != null) {
             if (self.tools_available.includes(self.currentTool)) {
-                window[self.currentTool + "_r"].quit();
+                if (window[self.currentTool + "_r"]) {
+                    window[self.currentTool + "_r"].quit();
+                }
             }
         }
 
@@ -151,6 +166,8 @@ var ResponsiveUI = (function () {
             return KGquery_r.init();
         } else if (toolId == "KGcreator") {
             return KGcreator_r.init();
+        } else if (toolId == "OntoCreator") {
+            return Lineage_createSLSVsource.onLoaded();
         } else {
             //var answer = confirm("Not available in Responsive interface, redirection to old interface");
             if (true) {
@@ -279,7 +296,9 @@ var ResponsiveUI = (function () {
                 },
             ],
             function (err) {
-                if (err) return alert(err);
+                if (err) {
+                    return alert(err);
+                }
             }
         );
     };
@@ -377,6 +396,25 @@ var ResponsiveUI = (function () {
                 return callback();
             } else {
                 return callback();
+            }
+        });
+    };
+    self.PopUpOnHoverButtons = function () {
+        $(".w3-button").off();
+        $(".w3-bar-item").off();
+        $(".w3-button").on("mouseenter", function () {
+            var comment = $(this).attr("popupcomment");
+            if (comment) {
+                var html = "<div>" + comment + "</div>";
+                PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv", { Button: this });
+            }
+        });
+
+        $(".w3-bar-item").on("mouseenter", function () {
+            var comment = $(this).attr("popupcomment");
+            if (comment) {
+                var html = "<div>" + comment + "</div>";
+                PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv", { Button: this });
             }
         });
     };

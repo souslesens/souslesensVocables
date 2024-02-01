@@ -27,7 +27,7 @@ module.exports = function () {
                         return res.status(400).json({ error: "error 1 " + err });
                     }
                     console.log("usersOurcesOK");
-                    UserRequestFiltering.validateElasticSearchIndices(userInfo.user.groups, req.body.indexes, userSources, "r", function (parsingError, filteredQuery) {
+                    UserRequestFiltering.validateElasticSearchIndices(userInfo, req.body.indexes, userSources, "r", function (parsingError, filteredQuery) {
                         if (parsingError) {
                             console.log("validateElasticSearchIndicesError");
 

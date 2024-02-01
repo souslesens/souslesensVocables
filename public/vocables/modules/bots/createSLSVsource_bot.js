@@ -92,7 +92,9 @@ var CreateSLSVsource_bot = (function () {
         },
 
         afterImportFn: function () {
-            BotEngine.previousStep();
+            //BotEngine.previousStep();
+            BotEngine.currentObj = self.workflow2;
+            BotEngine.nextStep(self.workflow2);
         },
 
         uploadFromUrlFn: function () {
@@ -110,6 +112,25 @@ var CreateSLSVsource_bot = (function () {
             });
         },
         uploadFromFileFn: function () {
+            $("#smallDialogDiv").dialog("open");
+            var html =
+                '<form id="myForm" enctype="multipart/form-data" method="POST">\n' +
+                //  "  <input type=\"file\" id=\"file\" name=\"data\">\n" +
+                '  <input type="file" id="file" name="importRDF">\n' +
+                '  <button type="submit">Submit</button>\n' +
+                "</form>\n" +
+                "</body>\n" +
+                "<script>\n" +
+                '  const form = document.querySelector("#myForm");\n' +
+                '  form.addEventListener("submit", (e) => {\n' +
+                "    e.preventDefault();\n" +
+                "    CreateSLSVsource_bot.uploadGraphFromFile();\n" +
+                "  });\n" +
+                "</script>";
+
+            $("#smallDialogDiv").html(html);
+        },
+        uploadFromFileFnResonsive: function () {
             $("#smallDialogDiv").dialog("open");
             var html =
                 '<form id="myForm" enctype="multipart/form-data" method="POST">\n' +

@@ -123,15 +123,7 @@
         <script type="module" src="modules/shared/authentification.js"></script>
         <script type="module" src="modules/tools/myDashboard.js"></script>
 
-        <script type="module">
-            import { allTools, loadToolsAndPlugins } from "./config/tools.js";
-
-            try {
-                await loadToolsAndPlugins();
-            } catch (error) {
-                console.error("Failed to load tools and plugins", error);
-            }
-        </script>
+       
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
@@ -201,18 +193,24 @@
         <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
 
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
-
+       
         <script type="module">
             import MainController from "./modules/shared/mainController.js";
             import authentication from "./modules/shared/authentification.js";
-
+            import { allTools, loadToolsAndPlugins } from "./config/tools.js";
             var leftPanelWidth = 400;
             var rightPanelWidth = 400;
             var w;
             var h;
             window.leftPanelWidth = leftPanelWidth;
             window.rightPanelWidth = rightPanelWidth;
-
+            try {
+                            await loadToolsAndPlugins();
+                                                
+            } catch (error) {
+                            console.error("Failed to load tools and plugins", error);
+                                                
+            }
             // Redirect 401 to login page
             $(document).ajaxError(function (e, xhr, settings) {
                 if (xhr.status == 401) {
@@ -247,6 +245,7 @@
                                 callBackSeries(err);
                             });
                         },
+                        
                     ],
                     function (err) {
                         w = $(document).width() - leftPanelWidth - 30;

@@ -12,11 +12,10 @@ var CreateResource_bot = (function () {
     self.title = "Create Resource";
 
     self.start = function () {
-        BotEngine.init(CreateResource_bot, null, function () {
+        BotEngine.init(CreateResource_bot,  self.workflow,null, function () {
             self.source = Lineage_sources.activeSource;
             self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
-            BotEngine.currentObj = self.workflow;
-            BotEngine.nextStep(self.workflow);
+            BotEngine.nextStep();
         });
     };
 

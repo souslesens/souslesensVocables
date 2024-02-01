@@ -12,10 +12,11 @@ var CreateSLSVsource_bot = (function () {
     self.title = "Create Source";
 
     self.start = function () {
-        BotEngine.init(CreateSLSVsource_bot, null, function () {
+        BotEngine.init(CreateSLSVsource_bot, self.workflow,null, function () {
             self.params = { sourceLabel: "", graphUri: "", imports: [] };
-            BotEngine.currentObj = self.workflow;
-            BotEngine.nextStep(self.workflow);
+
+
+            BotEngine.nextStep();
         });
     };
 
@@ -35,27 +36,14 @@ var CreateSLSVsource_bot = (function () {
     };
 
     self.workflow = {
-        createSLSVsourceFn: {
+
             promptSourceNameFn: {
                 promptGraphUriFn: self.workflow2,
             },
-        },
+
     };
 
-    self.workflowTest = {
-        initFn: {
-            _OR: {
-                "create source": {
-                    createSLSVsourceFn: {
-                        promptSourceNameFn: {
-                            promptGraphUriFn: self.workflow2,
-                        },
-                    },
-                },
-                "import ontology": { uploadFromUrlFn: {} },
-            },
-        },
-    };
+
 
     self.functionTitles = {
         promptSourceNameFn: "Enter source label",

@@ -57,10 +57,9 @@ var KGcreator_bot = (function () {
                 $("#LinkColumn_rightPanel").hide();
                 $("#LinkColumn_basicTypeSelect").hide();
                 $("#LinkColumn_basicTypeSelect").parent().find("span").hide();
-                BotEngine.init(KGcreator_bot, { divId: "LinkColumn_botPanel" }, function () {
+                BotEngine.init(KGcreator_bot, workflow,{ divId: "LinkColumn_botPanel" }, function () {
                     $("#previousButtonBot").css("margin-left", "450px");
-                    BotEngine.currentObj = workflow;
-                    BotEngine.nextStep(workflow);
+                    BotEngine.nextStep();
                 });
             });
         });

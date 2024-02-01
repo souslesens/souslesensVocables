@@ -1,10 +1,12 @@
 var BotEngine = (function () {
     var self = {};
 
-    self.init = function (botModule, options, callback) {
+    self.init = function (botModule, initialWorkflow,options, callback) {
         if (!options) {
             options = {};
         }
+        self.currentObj = initialWorkflow;
+        self.initialWorkflow=initialWorkflow;
         self.currentBot = botModule;
         self.currentObj = botModule;
         self.history = [];
@@ -28,6 +30,7 @@ var BotEngine = (function () {
     };
 
     self.nextStep = function (returnValue, varToFill) {
+
         self.history.push(JSON.parse(JSON.stringify(self.currentObj)));
         self.history.currentIndex += 1;
         var keys = Object.keys(self.currentObj);
@@ -213,7 +216,7 @@ var BotEngine = (function () {
 
     self.exportToGraph = function () {
         var functionTitles = self.currentBot.functionTitles;
-        var workflow = self.currentObj;
+        var workflow =  self.initialWorkflow;
 
         var visjsData = { nodes: [], edges: [] };
 
@@ -221,43 +224,66 @@ var BotEngine = (function () {
         var recurse = function (obj, parentId, level) {
             if (typeof obj == "object") {
                 for (var key in obj) {
-                    var nodeId = common.getRandomHexaId(5);
+                    if (true || key != parentId) {
+                        var nodeId = common.getRandomHexaId(5);
 
-                    visjsData.nodes.push({
-                        id: nodeId,
-                        label: key == "_OR" ? "" : functionTitles[key] || key,
-                        shape: key == "_OR" ? "diamond" : "box",
-                        size: 10,
-                        level: level,
-                        data: {
+                        visjsData.nodes.push({
                             id: nodeId,
-                            label: functionTitles[key] || key,
-                        },
-                    });
-                    if (parentId) {
-                        visjsData.edges.push({
-                            id: common.getRandomHexaId(5),
-                            from: nodeId,
-                            to: parentId,
-                            color: Lineage_whiteboard.defaultEdgeColor,
-                            arrows: {
-                                from: {
-                                    enabled: true,
-                                    type: Lineage_whiteboard.defaultEdgeArrowType,
-                                    scaleFactor: 0.5,
-                                },
+                            label: key == "_OR" ? "" : functionTitles[key] || key,
+                            shape: key == "_OR" ? "diamond" : "box",
+                            size: 10,
+                            level: level,
+                            data: {
+                                id: nodeId,
+                                label: functionTitles[key] || key,
                             },
                         });
+                        if (parentId) {
+                            visjsData.edges.push({
+                                id: common.getRandomHexaId(5),
+                                from: nodeId,
+                                to: parentId,
+                                color: Lineage_whiteboard.defaultEdgeColor,
+                                arrows: {
+                                    from: {
+                                        enabled: true,
+                                        type: Lineage_whiteboard.defaultEdgeArrowType,
+                                        scaleFactor: 0.5,
+                                    },
+                                },
+                            });
+                        }
+                        recurse(obj[key], nodeId, level + 1);
                     }
-                    recurse(obj[key], nodeId, level + 1);
                 }
             }
         };
 
-        recurse(workflow, null, 1);
+        var title=self.currentBot.title
+        visjsData.nodes.push({
+            id: title,
+            label: title,
+            shape:"ellipse",
+            color:"#117de8",
+            font: {color:"white",size:18},
+
+            level: 0,
+            data: {
+                id:title,
+                label: title,
+            },
+        });
+
+        recurse(workflow, title, 1)
         var x = visjsData;
 
-        Lineage_whiteboard.drawNewGraph(visjsData, null, { layoutHierarchical: { vertical: true, levelSeparation: 50 } });
+        $("#mainDialogDiv").dialog("open")
+      $("#mainDialogDiv").html("<div id='botGraphDiv' style='width:1200px;height:800px'></div>");
+
+        Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
+            layoutHierarchical: { vertical: true, levelSeparation: 150,nodeSpacing:50,direction:"LR"},
+            physics:{enabled:true}
+        });
     };
 
     return self;

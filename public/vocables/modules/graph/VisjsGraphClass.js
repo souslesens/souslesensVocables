@@ -193,8 +193,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 //   var nodes = self.data.nodes.getIds();
                 var newNodes = [];
                 var fixed = false;
-                /*  if (params.event.srcEvent.altKey)
-    fixed = false;*/
+
                 newNodes.push({ id: nodeId, fixed: fixed });
                 self.data.nodes.update(newNodes);
             })
@@ -202,9 +201,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 self.currentDraggingMousePosition = params.pointer.DOM;
             })
             .on("dragging", function (_params) {
-                /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
-    return false;
-    }*/
+
             })
             .on("dragEnd", function (/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
                 if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
@@ -236,11 +233,11 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     var newNode = { id: nodeId, fixed: fixed };
 
                     newNodes.push(newNode);
-                    if (!self.currentContext.options["layoutHierarchical"]) {
+                    if ( !self.currentContext.options["layoutHierarchical"]) {
                         self.data.nodes.update(newNodes);
                     }
                 }
-            });
+            })
 
         if (callback) {
             var intervalIncrement = 0;

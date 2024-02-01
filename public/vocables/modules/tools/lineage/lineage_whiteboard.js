@@ -584,6 +584,10 @@ var Lineage_whiteboard = (function () {
         }
     };
 
+
+
+
+
     self.drawNewGraph = function (visjsData, graphDiv, _options) {
         if (!_options) {
             _options = {};
@@ -737,6 +741,7 @@ var Lineage_whiteboard = (function () {
 
         return;
     };
+
 
     self.getGraphIdsFromSource = function (/** @type {any} */ source) {
         if (!self.lineageVisjsGraph.isGraphNotEmpty()) {

@@ -124,13 +124,7 @@
         <script type="module" src="modules/tools/myDashboard.js"></script>
 
         <script type="module">
-            import { allTools, loadToolsAndPlugins } from "./config/tools.js";
 
-            try {
-                await loadToolsAndPlugins();
-            } catch (error) {
-                console.error("Failed to load tools and plugins", error);
-            }
         </script>
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
@@ -205,6 +199,7 @@
         <script type="module">
             import MainController from "./modules/shared/mainController.js";
             import authentication from "./modules/shared/authentification.js";
+            import { allTools, loadToolsAndPlugins } from "./config/tools.js";
 
             var leftPanelWidth = 400;
             var rightPanelWidth = 400;
@@ -222,8 +217,21 @@
             });
 
             $(function () {
+
                 async.series(
                     [
+
+                        function(callbackSeries){
+
+
+                            try {
+                                 loadToolsAndPlugins(function(){
+                                     callbackSeries();
+                                 });
+                            } catch (error) {
+                                console.error("Failed to load tools and plugins", error);
+                            }
+                        },
                         function (callBackSeries) {
                             authentication.init(function (err, result) {
                                 callBackSeries(err);

@@ -14,10 +14,9 @@ var SparqlQuery_bot = (function () {
 
     self.start = function () {
         self.title = "Query graph";
-        BotEngine.init(SparqlQuery_bot, null, function () {
+        BotEngine.init(SparqlQuery_bot, self.workflow,null, function () {
             self.params = { source: Lineage_sources.activeSource };
-            BotEngine.currentObj = self.workflow;
-            BotEngine.nextStep(self.workflow);
+            BotEngine.nextStep();
         });
     };
 
@@ -339,6 +338,7 @@ var SparqlQuery_bot = (function () {
             };
 
             Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);
+            
             BotEngine.nextStep();
         },
     };

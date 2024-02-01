@@ -8,6 +8,7 @@ import KGquery from "../modules/tools/KGquery/KGquery.js";
 import KGquery_r from "./KGquery/KGquery_r.js";
 import KGcreator_r from "./KGcreator/Kgcreator_r.js";
 
+
 var ResponsiveUI = (function () {
     var self = {};
     self.source = null;
@@ -41,6 +42,7 @@ var ResponsiveUI = (function () {
         
         self.themeList();
         self.replaceFile(BotEngine, BotEngineResponsive);
+        
     };
     self.initMenuBar = function (callback) {
         $("#ChangeSourceButton").show();
@@ -273,6 +275,7 @@ var ResponsiveUI = (function () {
             .parent()
             .css("left", "30%");
     };
+   
     self.setSlsvCssClasses = function () {
         async.series(
             [
@@ -281,6 +284,14 @@ var ResponsiveUI = (function () {
                         .done(function (script, textStatus) {
                             callbackSeries();
                             //your remaining code
+                            less.pageLoadFinished.then(function () {
+                                //setTimeout(() => {}, "500");
+                                    ResponsiveUI.changeTheme(Config.theme.defaultTheme);
+                                    if (Config.theme.selector) {
+                                        $("#theme-selector-btn").show();
+                                    }
+                                
+                            });
                         })
                         .fail(function (jqxhr, settings, exception) {
                             callbackSeries(err);
@@ -292,6 +303,7 @@ var ResponsiveUI = (function () {
             }
         );
     };
+    
     self.themeList = function () {
         //less.modifyVars({'@button1-color': '#000'});
         var allThemesNames = Object.keys(Config.slsvColorThemes);

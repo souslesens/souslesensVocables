@@ -36,7 +36,7 @@
     border-radius: 14px;
 }
 .PopUpBorder {
-    border: 2px solid @button1-color;
+    border: 2px solid @button1-color!important;
 }
 
 #toolSelectionSection:hover #ToolBorder {

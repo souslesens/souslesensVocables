@@ -34,11 +34,18 @@
     color: white;
 }
 
+
 .w3-round-small {
     padding: 14px 12px;
     border-radius: 14px;
     border: #3f3f3f solid 2px !important;
     background-color: @background-color!important;
+}
+.TitleBoxLine {
+    border-bottom: 0px !important;
+    border-radius: 0px !important;
+    border-right: 0px !important;
+    border-left: 0px !important;
 }
 .w3-bar {
     background-color: @dark-background-color;

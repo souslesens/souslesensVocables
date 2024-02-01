@@ -58,8 +58,8 @@
 
 .KGquery_smallButton {
     font-size: 4px;
-    float: right;
-    margin: -10px -3px 0px 0px;
+    float: right!important;
+    margin: -10px -3px 0px 0px!important;
     border: 0px;
     padding: 0px;
 }

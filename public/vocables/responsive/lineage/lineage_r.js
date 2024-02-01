@@ -242,7 +242,7 @@ var Lineage_r = (function () {
             $("#LineageProperties_searchInAllSources").val("all");
         }
     };
-    
+
     //less.modifyVars({'@button1-color': '#000'})
 
     return self;

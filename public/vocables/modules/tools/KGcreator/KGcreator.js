@@ -105,7 +105,6 @@ var KGcreator = (function () {
     };
 
     self.initSource = function () {
-        
         $("#KGcreator_centralPanelTabs").tabs({
             activate: function (e, ui) {
                 var divId = ui.newPanel.selector;
@@ -114,7 +113,7 @@ var KGcreator = (function () {
                 }
             },
         });
-        
+
         self.initSlsvSourceConfig(self.currentSlsvSource, function (err, result) {
             if (err) {
                 return alert(err);

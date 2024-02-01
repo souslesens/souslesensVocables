@@ -18,7 +18,7 @@ module.exports = function () {
                         return res.status(400).json({ error: err });
                     }
 
-                    UserRequestFiltering.validateElasticSearchIndices(userInfo.user.groups, [req.body.indexName], userSources, "w", function (parsingError, filteredQuery) {
+                    UserRequestFiltering.validateElasticSearchIndices(userInfo, [req.body.indexName], userSources, "w", function (parsingError, filteredQuery) {
                         if (parsingError) {
                             return processResponse(res, parsingError, null);
                         }

@@ -42,7 +42,6 @@ var KGcreator_r = (function () {
                     KGcreator.currentSlsvSource = ResponsiveUI.source;
                     ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initLinkTab, "#MapButton");
                     ResponsiveUI.resetWindowHeight();
-                    
                 });
             });
         });
@@ -74,14 +73,13 @@ var KGcreator_r = (function () {
     self.initLinkTab = function () {
         $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/LinkTab.html", function () {
             KGcreator.initSource();
-            
+
             $("#KGcreator_topButtons").load("./responsive/KGcreator/html/linkButtons.html", function () {
                 $("#KGcreator_topButtons").css("padding", "4px");
                 $("#MenuBar").css("height", "90px");
                 $("#KGcreator_topButtons").css("flex-direction", "row");
                 $("#MenuBarFooter").css("display", "block");
                 ResponsiveUI.PopUpOnHoverButtons();
-                
             });
         });
     };

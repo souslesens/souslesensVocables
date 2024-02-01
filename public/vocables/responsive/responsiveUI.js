@@ -94,12 +94,8 @@ var ResponsiveUI = (function () {
                 }
             }
         }
-
-        if (self.currentTool == toolId) {
-            return;
-        } else {
-            self.currentTool = toolId;
-        }
+        self.currentTool = toolId;
+       
         if (toolId != "lineage") {
             Lineage_sources.registerSource = self.registerSourceWithoutImports;
         }
@@ -251,13 +247,17 @@ var ResponsiveUI = (function () {
 
     self.showSourceDialog = function (resetAll) {
         self.openDialogDiv("mainDialogDiv");
-
+        /*
         self.showDiv("mainDialogDiv");
-        $("#mainDialogDiv").css("display", "block");
+        $("#mainDialogDiv").css("display", "block");*/
+        $("#" + "mainDialogDiv").parent().show();
         $("#sourceSelector_searchInput").focus();
 
         $("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
+            $('#mainDialogDiv').parent().find('.ui-dialog-titlebar-close').on('click',function(){
+                $('#mainDialogDiv').parent().hide();
+            });
 
             if (resetAll) {
                 Lineage_sources.loadedSources = {};

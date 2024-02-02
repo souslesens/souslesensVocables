@@ -27,7 +27,7 @@ async function loadToolsAndPlugins(callback) {
     }
     // We mutate Config.tools with an object merging plugins and tools
     Config.tools = mergeToolsAndPlugins(allTools, plugins);
-    return callback()
+    return callback();
 }
 
 function mergeToolsAndPlugins(tools, plugins) {

@@ -102,12 +102,8 @@ var Lineage_createResource = (function () {
             triples.push(getTriple(resourceUri, "rdf:type", "owl:Class"));
             triples.push(getTriple(resourceUri, "rdfs:subClassOf", superClass));
         } else if (resourceType == "owl:NamedIndividual") {
-            var individualTypeClass = $("#editPredicate_objectSelect").val();
-            if (!individualTypeClass) {
-                return alert("owl:Class is mandatory");
-            }
             triples.push(getTriple(resourceUri, "rdf:type", "owl:NamedIndividual"));
-            triples.push(getTriple(resourceUri, "rdf:type", individualTypeClass));
+            triples.push(getTriple(resourceUri, "rdf:type", superClass));
         }
 
         var origin = "Lineage_addNode";

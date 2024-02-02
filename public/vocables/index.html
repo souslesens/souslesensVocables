@@ -123,9 +123,7 @@
         <script type="module" src="modules/shared/authentification.js"></script>
         <script type="module" src="modules/tools/myDashboard.js"></script>
 
-        <script type="module">
-
-        </script>
+        <script type="module"></script>
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
@@ -217,17 +215,13 @@
             });
 
             $(function () {
-
                 async.series(
                     [
-
-                        function(callbackSeries){
-
-
+                        function (callbackSeries) {
                             try {
-                                 loadToolsAndPlugins(function(){
-                                     callbackSeries();
-                                 });
+                                loadToolsAndPlugins(function () {
+                                    callbackSeries();
+                                });
                             } catch (error) {
                                 console.error("Failed to load tools and plugins", error);
                             }
@@ -364,6 +358,13 @@
         <script>
             less.pageLoadFinished.then(function () {
                 setTimeout(() => {
+                    if (!Config.theme) {
+                        Config.theme= {
+                            defaultTheme: "KGA",
+                            selector: false
+                        }
+                    }
+
                     ResponsiveUI.changeTheme(Config.theme.defaultTheme);
                     if (Config.theme.selector) {
                         $("#theme-selector-btn").show();

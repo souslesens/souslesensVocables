@@ -172,7 +172,6 @@ var KGcreator = (function () {
             success: function (result, _textStatus, _jqXHR) {
                 KGcreator.rawConfig = newJson;
                 return callback(null, newJson);
-
             },
             error: function (err) {
                 return callback(null, newJson);

@@ -108,6 +108,7 @@ th, td{
     padding: 0px !important;
     border-top-right-radius: 14px;
     border-top-left-radius: 14px;
+    background-color: @dark-background-color!important;
 }
 
 .nodeInfosWidget_tabDiv {

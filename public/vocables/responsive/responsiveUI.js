@@ -87,11 +87,11 @@ var ResponsiveUI = (function () {
     };
 
     self.onToolSelect = function (toolId) {
-        if (self.currentTool != "lineage" && self.currentTool != null) {
-            if (self.tools_available.includes(self.currentTool)) {
-                if (window[self.currentTool + "_r"]) {
-                    window[self.currentTool + "_r"].quit();
-                }
+        if ( self.currentTool != null) {
+            if (Config.tools[self.currentTool].controller.quit) {
+                
+                Config.tools[self.currentTool].controller.quit();
+                
             }
         }
         self.currentTool = toolId;
@@ -157,7 +157,7 @@ var ResponsiveUI = (function () {
         MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
-
+        /*
         if (toolId == "lineage") {
             return Lineage_r.init();
         } else if (toolId == "KGquery") {
@@ -168,6 +168,10 @@ var ResponsiveUI = (function () {
             return Lineage_createSLSVsource.onLoaded();
         } else {
             //var answer = confirm("Not available in Responsive interface, redirection to old interface");
+            
+            
+
+
             if (true) {
                 var url = window.location.href;
                 var p = url.indexOf("?");
@@ -179,8 +183,31 @@ var ResponsiveUI = (function () {
                 window.location.href = url;
             }
         }
+        */
+        // test config tool id function
 
-        self.UI.updateActionDivLabel();
+        if(Config.tools[toolId].controller.onLoaded){
+            MainController.writeUserLog(authentication.currentUser, toolId, "");
+            Config.tools[toolId].controller.onLoaded();
+            
+        }else {
+            //var answer = confirm("Not available in Responsive interface, redirection to old interface");
+            
+            
+
+
+            if (true) {
+                var url = window.location.href;
+                var p = url.indexOf("?");
+                if (p > -1) {
+                    url = url.substring(0, p);
+                }
+                url = url.replace("index_r.html", "");
+                url += "?tool=" + toolId;
+                window.location.href = url;
+            }
+        }
+        /*self.UI.updateActionDivLabel();
         SearchWidget.targetDiv = "currentSourceTreeDiv";
         if (toolObj.noSource) {
             MainController.UI.onSourceSelect();
@@ -210,7 +237,7 @@ var ResponsiveUI = (function () {
                     callback(err, result);
                 }
             });
-        }
+        }*/
     };
 
     self.showDiv = function (modalDiv) {

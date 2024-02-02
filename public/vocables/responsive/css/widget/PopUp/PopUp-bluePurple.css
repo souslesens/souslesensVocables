@@ -22,7 +22,9 @@
 .Lineage_PopUpStyle select option {
     padding: 6px;
     margin-top: 4px;
+    color: @source-color;
 }
+
 
 .Lineage_PopUpStyle select option:hover {
     background-color: @dark-background-color;

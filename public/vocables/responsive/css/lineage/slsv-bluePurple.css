@@ -66,8 +66,18 @@
 
 /* Lineage classes */
 .addEdgeButtonColor {
+    .slsv-button-source;
     background: if((@isGradient=true), @gradient-color1, @button1-color) !important;
     border-color: @button1-color!important;
+}
+.addEdgeButtonColor:hover {
+    .slsv-button-source;
+    .hover-button;
+    background: if((@isGradient=true), @gradient-color1, @button1-color) !important;
+    border-color: @button1-color!important;
+}
+.addEdgeButtonColor span{
+   color : white;
 }
 .titleboxButtons {
     float: left;
@@ -89,6 +99,7 @@
 }
 
 .slsv-right-top-bar-button:hover {
+    background: if((@isGradient=true), @gradient-color-source, @source-color)!important;
     .hover-button;
 }
 
@@ -103,6 +114,7 @@
 }
 
 .slsv-button-source:hover {
+    background: if((@isGradient=true), @gradient-color-source, @source-color)!important;
     .hover-button;
 }
 
@@ -116,7 +128,7 @@
 }
 .slsv-tabButton:hover {
     .hover-button;
-    background-color: @source-color;
+    background-color: unset!important;
 }
 .slsv-tabButtonSelected {
     .slsv-tabButton;
@@ -133,6 +145,7 @@
     .border-classic-color-theme1;
 }
 .slsv-button-1:hover {
+    background: if((@isGradient=true), @gradient-color1, @button1-color)!important;
     .hover-button;
 }
 
@@ -143,6 +156,7 @@
     .border-classic-color-theme2;
 }
 .slsv-button-2:hover {
+    background: if((@isGradient=true), @gradient-color2, @button2-color)!important;
     .hover-button;
 }
 
@@ -154,6 +168,7 @@
 }
 
 .slsv-button-3:hover {
+    background: if((@isGradient=true), @gradient-color3, @button3-color)!important;
     .hover-button;
 }
 
@@ -215,6 +230,7 @@
     margin-right: 6px;
 }
 .classesPannelButton:hover {
+    background: if((@isGradient=true), @gradient-color1, @button1-color)!important;
     .hover-button;
 }
 #GenericTools_searchScope {

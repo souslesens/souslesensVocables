@@ -17,7 +17,7 @@ var Lineage_r = (function () {
     self.oldExportTable = null;
     self.MoreActionsShow = false;
     self.MoreOptionsShow = true;
-    self.init = function () {
+    self.onLoaded = function () {
         PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
         SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
         //To Table

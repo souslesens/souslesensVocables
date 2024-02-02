@@ -52,7 +52,13 @@
 @jqueryClose: "../icons/BluishVioletTheme/CrossIcon-bluishViolet.png";
 @resetIcon: "../icons/BluishVioletTheme/ResetIcon-bluishViolet.png";
 @previousIcon: "../icons/BluishVioletTheme/PreviousIcon-bluishViolet.png";
-
+@isDarkTheme: false;
+* {
+    color:if((@isDarkTheme=true), white, black);
+}
+.vis-network{
+    background-color: if((@isDarkTheme=true), black, white);
+}
 .lateralPannelSection-width {
     width: 89%;
 }
@@ -176,8 +182,12 @@
     margin-top: 8px;
 }
 .hover-button {
-    background-color: unset !important;
-    color: @source-color !important;
+    //background-color:unset !important;
+    opacity: 70%;
+    //color: @source-color !important;
+}
+.hover-button-transparent{
+    background-color:unset !important;
 }
 .SearchButtonIcon {
     background-color: @dark-background-color;
@@ -210,8 +220,11 @@
 .messageDiv {
     font-size: 12px;
     font-family: Helvetica, sans-serif;
+    color : @source-color;
 }
-
+#SouslesensVocables_Github{
+    color : @source-color;
+}
 .mb-3 {
     margin-bottom: 0px !important;
 }

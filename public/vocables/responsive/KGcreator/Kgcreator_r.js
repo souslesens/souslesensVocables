@@ -14,7 +14,7 @@ var KGcreator_r = (function () {
     self.oldshowDialog = SavedQueriesComponent.showDialog;
 
     //self.oldshowMappingDialog=KGcreator_mappings.showMappingDialog;
-    self.init = function () {
+    self.onLoaded = function () {
         PredicatesSelectorWidget.load = Lineage_r.loadPredicateSelectorWidgetResponsive;
         ResponsiveUI.initMenuBar(self.loadSource);
         ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);

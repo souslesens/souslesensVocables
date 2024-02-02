@@ -9,7 +9,7 @@ import CommonBotFunctions from "./commonBotFunctions.js";
 var CreateSLSVsource_bot = (function () {
     var self = {};
 
-    self.title = "Create Source";
+    self.title = "OntoCreator";
 
     self.start = function () {
         BotEngine.init(CreateSLSVsource_bot, self.workflow,null, function () {
@@ -19,12 +19,17 @@ var CreateSLSVsource_bot = (function () {
             BotEngine.nextStep();
         });
     };
-
+    self.loadingWorkflow = {
+        _OR: {
+        "Launch Ontology" : {loadLineageFn:{}},
+        "Launch Semantic Knowledge Graph" : { loadKGqueryFn:{} },
+        },
+    };
     self.workflowUpload = {
         _OR: {
-            "Upload graph from file": { uploadFromFileFn: { loadLineageFn: {} } },
-            "Upload graph from URL": { uploadFromUrlFn: { loadLineageFn: {} } },
-            Finish: { loadLineageFn: {} },
+            "Upload graph from file": { uploadFromFileFn: self.loadingWorkflow  },
+            "Upload graph from URL": { uploadFromUrlFn: self.loadingWorkflow  },
+            "Finish":  self.loadingWorkflow ,
         },
     };
 
@@ -42,7 +47,7 @@ var CreateSLSVsource_bot = (function () {
             },
 
     };
-
+    
 
 
     self.functionTitles = {
@@ -172,6 +177,17 @@ var CreateSLSVsource_bot = (function () {
             url += "?tool=lineage&source=" + self.params.sourceLabel;
             window.location.href = url;
         },
+        loadKGqueryFn:function() {
+            var url = window.location.href;
+            url = url.replace("index_old.html", "");
+            var p = url.indexOf("?");
+            if (p > -1) {
+                url = url.substring(0, p);
+            }
+
+            url += "?tool=KGquery&source=" + self.params.sourceLabel;
+            window.location.href = url;
+        }
     };
 
     self.uploadGraphFromUrl = function (callback) {

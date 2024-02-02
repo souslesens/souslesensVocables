@@ -633,21 +633,9 @@ return callback()
                 var source = paramsMap["source"];
 
                 var url = window.location.href;
-                if (ResponsiveUI.tools_available.includes(tool)) {
-                    // if tool available load it in responsive
-                    if (source) {
-                        /*
-                            MainController.initControllers(source);
-                            Config.tools[tool].urlParam_source = source;
-                            */
-                        ResponsiveUI.source = source;
-                    }
-                    /*self.UI.initTool(tool, function () {
-                            callback();
-                        });
-                        */
-                    ResponsiveUI.onToolSelect(tool);
-                } else if (url.includes("index_old.html")) {
+               
+                   
+                if (url.includes("index_old.html")) {
                     //if the old index is already launched we have just to init the tool
                     if (source) {
                         MainController.initControllers(source);
@@ -657,7 +645,14 @@ return callback()
                         callback();
                     });
                 } else {
-                    // if not and index_old is not launched,load the old url with same params
+                     // if tool available load it in responsive
+                     if (source) {
+                  
+                        ResponsiveUI.source = source;
+                    }
+                  
+                    ResponsiveUI.onToolSelect(tool);
+                   /*
                     var p = url.indexOf("?");
                     if (p > -1) {
                         var params = url.substring(p);
@@ -666,6 +661,7 @@ return callback()
 
                     url = url + "index_old.html" + params;
                     window.location.assign(url);
+                    */
                 }
             }
         } else {

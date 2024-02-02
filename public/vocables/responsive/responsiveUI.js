@@ -16,7 +16,6 @@ var ResponsiveUI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.tools_available = ["lineage", "KGquery", "KGcreator", "OntoCreator"];
     self.toolsNeedSource = ["lineage", "KGquery", "KGcreator"];
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;

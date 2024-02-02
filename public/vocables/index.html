@@ -272,9 +272,8 @@
                             width: $(document).width() * 0.85,
                             modal: false,
                             close: function (event, ui) {
-                               
-                                //$("#deleteButton").remove();
-                                //$("#addPredicateButton").remove();
+                                window.scrollTo(0, 0);
+                                
                             },
                         });
                         $("#mainDialogDiv2").dialog({
@@ -347,7 +346,7 @@
         <script src="https://cdn.jsdelivr.net/npm/less" ></script>-->
         <script type="module" src="./responsive/responsiveUI.js"></script>
         <script type="module" src="./responsive/lineage/lineage_r.js"></script>
-        <script type="module" src="./responsive/widget/nodeInfosWidgetResponsive.js"></script>
+        
         <script type="module" src="./responsive/widget/botEngineResponsive.js"></script>
         <script type="module" src="./responsive/KGquery/KGquery_r.js"></script>
         <script type="module" src="./responsive/KGcreator/Kgcreator_r.js"></script>

@@ -3,7 +3,7 @@ import KGcreator_mappings from "../../modules/tools/KGcreator/KGcreator_mappings
 import KGcreator_run from "../../modules/tools/KGcreator/KGcreator_run.js";
 import ResponsiveUI from "../../responsive/responsiveUI.js";
 import NodesInfosWidget from "../../modules/uiWidgets/nodeInfosWidget.js";
-import NodeInfosWidgetResponsive from "../../responsive/widget/nodeInfosWidgetResponsive.js";
+
 
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
 import Lineage_r from "../lineage/lineage_r.js";
@@ -17,7 +17,7 @@ var KGcreator_r = (function () {
     self.onLoaded = function () {
         PredicatesSelectorWidget.load = Lineage_r.loadPredicateSelectorWidgetResponsive;
         ResponsiveUI.initMenuBar(self.loadSource);
-        ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
+        //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
         $("#Lineage_graphEditionButtons").show();
         $("#Lineage_graphEditionButtons").empty();
         $("#Lineage_graphEditionButtons").attr("id", "KGcreator_topButtons");

@@ -669,7 +669,7 @@ var Lineage_whiteboard = (function () {
                 deleteEdge: false,
                 editNode: false,
                 editEdge: false,
-
+                
                 addEdge: function (edgeData, callback) {
                     var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from);
                     var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
@@ -699,9 +699,10 @@ var Lineage_whiteboard = (function () {
                         });
                     }
                 },
+                /*
                 addNode: function (nodeData, callback) {
-                    /*  CreateResource_bot.start()
-                    return;*/
+                     CreateResource_bot.start()
+                    return;
                     Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
                         if (err) {
                             return callback(err.responseText);
@@ -709,6 +710,7 @@ var Lineage_whiteboard = (function () {
                         return null;
                     });
                 },
+                */
             };
             if (false) {
                 options.visjsOptions.interaction = {

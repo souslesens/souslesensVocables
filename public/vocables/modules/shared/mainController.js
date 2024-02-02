@@ -434,7 +434,7 @@ return callback()
             });
         },
         initTool: function (toolId, callback) {
-            if (ResponsiveUI.tools_available.includes(toolId)) {
+            /*if (ResponsiveUI.tools_available.includes(toolId)) {
                 var url = window.location.href;
                 url = url.replace("index_old.html", "");
                 var p = url.indexOf("?");
@@ -444,7 +444,7 @@ return callback()
                 url = url + "?tool=" + toolId;
                 window.location.href = url;
             }
-
+            */
             self.currentTool = toolId;
             var toolObj = Config.tools[toolId];
             self.currentSource = null;

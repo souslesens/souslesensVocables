@@ -3,7 +3,7 @@ import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import ResponsiveUI from "../responsiveUI.js";
 import NodesInfosWidget from "../../modules/uiWidgets/nodeInfosWidget.js";
 import SearchWidget from "../../modules/uiWidgets/searchWidget.js";
-import NodeInfosWidgetResponsive from "../../responsive/widget/nodeInfosWidgetResponsive.js";
+
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
 import Lineage_createResource from "../../modules/tools/lineage/lineage_createResource.js";
 import PopupMenuWidget from "../../modules/uiWidgets/popupMenuWidget.js";
@@ -24,7 +24,7 @@ var Lineage_r = (function () {
         self.oldExportTable = Export.exportTreeToDataTable;
         Export.exportTreeToDataTable = self.ExportTableDialog;
         //Nodes Infos overcharge
-        ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
+        //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
         //SHowHideButtons overcharge
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
         //AddEdge overcharge

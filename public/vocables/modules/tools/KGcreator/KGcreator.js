@@ -171,13 +171,8 @@ var KGcreator = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 KGcreator.rawConfig = newJson;
-                self.saveSlsvSourceConfig(function (err, result) {
-                    callback(err);
-                    if (err) {
-                        return callback(err);
-                    }
-                    return callback(null, newJson);
-                });
+                return callback(null, newJson);
+
             },
             error: function (err) {
                 return callback(null, newJson);

@@ -316,6 +316,7 @@ var Config = (function () {
             "@jqueryClose": "../icons/BluishVioletTheme/CrossIcon-bluishViolet.png",
             "@resetIcon": "../icons/BluishVioletTheme/ResetIcon-bluishViolet.png",
             "@previousIcon": "../icons/BluishVioletTheme/PreviousIcon-bluishViolet.png",
+            '@isDarkTheme': false,
         },
         KGA: {
             "@source-color": "#0767b7",
@@ -337,6 +338,7 @@ var Config = (function () {
             "@jqueryClose": "../icons/KGATheme/CrossIcon-KGA.png",
             "@resetIcon": "../icons/KGATheme/ResetIcon-KGA.png",
             "@previousIcon": "../icons/KGATheme/PreviousIcon-KGA.png",
+            '@isDarkTheme': false,
         },
         "Total Energies": {
             "@source-color": "#374649",
@@ -364,6 +366,7 @@ var Config = (function () {
             "@jqueryClose": "../icons/TotalEnergiesTheme/CrossIcon-TotalEnergies.png",
             "@resetIcon": "../icons/TotalEnergiesTheme/ResetIcon-TotalEnergies.png",
             "@previousIcon": "../icons/TotalEnergiesTheme/PreviousIcon-TotalEnergies.png",
+            '@isDarkTheme': false,
         },
 
         "Sea Breeze": {
@@ -385,6 +388,7 @@ var Config = (function () {
             "@jqueryClose": "../icons/SeaBreezeTheme/CrossIcon-SeaBreeze.png",
             "@resetIcon": "../icons/SeaBreezeTheme/ResetIcon-SeaBreeze.png",
             "@previousIcon": "../icons/SeaBreezeTheme/PreviousIcon-SeaBreeze.png",
+            '@isDarkTheme': false,
         },
 
         "Fig colors ": {
@@ -406,6 +410,7 @@ var Config = (function () {
             "@jqueryClose": "../icons/FigColorsTheme/CrossIcon-FigColors.png",
             "@resetIcon": "../icons/FigColorsTheme/ResetIcon-FigColors.png",
             "@previousIcon": "../icons/FigColorsTheme/PreviousIcon-FigColors.png",
+            '@isDarkTheme': false,
         },
         Ocean: {
             "@source-color": "#0099B7",
@@ -426,6 +431,7 @@ var Config = (function () {
             "@jqueryClose": "../icons/OceanTheme/CrossIcon-Ocean.png",
             "@resetIcon": "../icons/OceanTheme/ResetIcon-Ocean.png",
             "@previousIcon": "../icons/OceanTheme/PreviousIcon-Ocean.png",
+            '@isDarkTheme': false,
         },
         DarkTheme: {
             "@source-color": "#F7606B",
@@ -446,6 +452,7 @@ var Config = (function () {
             "@jqueryClose": "../icons/DarkTheme/CrossIcon-Dark.png",
             "@resetIcon": "../icons/DarkTheme/ResetIcon-Dark.png",
             "@previousIcon": "../icons/DarkTheme/PreviousIcon-Dark.png",
+            '@isDarkTheme': true,
         },
 
         SpatialTheme: {
@@ -467,6 +474,7 @@ var Config = (function () {
             "@jqueryClose": "../icons/SpatialTheme/CrossIcon-Spatial.png",
             "@resetIcon": "../icons/SpatialTheme/ResetIcon-Spatial.png",
             "@previousIcon": "../icons/SpatialTheme/PreviousIcon-Spatial.png",
+            '@isDarkTheme': true,
         },
     };
 

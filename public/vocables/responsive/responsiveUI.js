@@ -252,7 +252,7 @@ var ResponsiveUI = (function () {
 
         self.showDiv("mainDialogDiv");
         $("#mainDialogDiv").css("display", "block");
-        $("#sourceSelector_searchInput").trigger("focus");
+        $("#sourceSelector_searchInput").focus();
 
         $("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
@@ -291,6 +291,7 @@ var ResponsiveUI = (function () {
                             //your remaining code
                         })
                         .fail(function (jqxhr, settings, exception) {
+                         console.log("eeee")
                             callbackSeries(err);
                         });
                 },
@@ -301,6 +302,8 @@ var ResponsiveUI = (function () {
                 }
             }
         );
+
+
     };
     self.themeList = function () {
         //less.modifyVars({'@button1-color': '#000'});

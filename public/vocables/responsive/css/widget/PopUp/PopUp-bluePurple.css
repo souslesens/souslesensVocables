@@ -22,7 +22,9 @@
 .Lineage_PopUpStyle select option {
     padding: 6px;
     margin-top: 4px;
+    color: @source-color;
 }
+
 
 .Lineage_PopUpStyle select option:hover {
     background-color: @dark-background-color;
@@ -36,7 +38,7 @@
     border-radius: 14px;
 }
 .PopUpBorder {
-    border: 2px solid @button1-color;
+    border: 2px solid @button1-color!important;
 }
 
 #toolSelectionSection:hover #ToolBorder {

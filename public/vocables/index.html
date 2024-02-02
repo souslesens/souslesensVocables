@@ -272,8 +272,9 @@
                             width: $(document).width() * 0.85,
                             modal: false,
                             close: function (event, ui) {
-                                $("#deleteButton").remove();
-                                $("#addPredicateButton").remove();
+                               
+                                //$("#deleteButton").remove();
+                                //$("#addPredicateButton").remove();
                             },
                         });
                         $("#mainDialogDiv2").dialog({
@@ -339,7 +340,11 @@
                 rootpath: ":/a.com/",
             };
         </script>-->
-
+        
+        
+        <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
+        <!--<script src="./responsive/less.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/less" ></script>-->
         <script type="module" src="./responsive/responsiveUI.js"></script>
         <script type="module" src="./responsive/lineage/lineage_r.js"></script>
         <script type="module" src="./responsive/widget/nodeInfosWidgetResponsive.js"></script>
@@ -347,19 +352,9 @@
         <script type="module" src="./responsive/KGquery/KGquery_r.js"></script>
         <script type="module" src="./responsive/KGcreator/Kgcreator_r.js"></script>
         <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
-        <!--<link rel="stylesheet" href="./slsv-gray.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-darkGray.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-yellowPurple.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-eco.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-complementaryKGA.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-plant.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-blue.css" />-->
-        <link rel="stylesheet" href="./responsive/css/lineage/slsv-bluePurple.css" />
-        <link rel="stylesheet" href="./responsive/css/widget/sourceSelector/Sourceselector-bluePurple.css" />
-        <link rel="stylesheet" href="./responsive/css/widget/PopUp/PopUp-bluePurple.css" />
-        <link rel="stylesheet" href="./responsive/css/widget/NodeInfos/NodesInfos-bluePurple.css" />
-        <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
-        <script src="./responsive/less.min.js"></script>
+   
+      
+        <!--
         <script>
             less.pageLoadFinished.then(function () {
                 setTimeout(() => {
@@ -377,7 +372,7 @@
                 }, "500");
             });
         </script>
-
+        -->
         <!--<link rel="stylesheet" href="./slsv-cartography1.css" />-->
         <!--<link rel="stylesheet" href="./slsv-cartography2.css" />-->
     </head>
@@ -397,7 +392,7 @@
                     <button class="w3-display-bottommiddle slsv-invisible-button" onclick="ResponsiveUI.hideShowMenuBar(this)">
                         <img src="./icons/CommonIcons/ArrowMenuBar.png" />
                     </button>
-                    <div class="w3-display-topright">
+                    <div id="SouslesensVocables_Github" class="w3-display-topright" style="font-size: 12px;">
                         <a target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"
                             ><span style="color: Black"><i class="fa-lg fab fa-github"></i></span
                         ></a>
@@ -461,7 +456,7 @@
                     </div>
                     <div class="w3-bar-item w3-right w3-dropdown-hover" style="margin-right: 10px" id="dropdownMenuLink">
                         <div class="w3-button slsv-right-top-bar-button" id="user-username">User</div>
-                        <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
+                        <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder" style="max-height: 40px;">
                             <select class="Lineage_PopUpStyle" size="8" onclick="authentication.logout()" style="overflow: auto">
                                 <option>Logout</option>
                             </select>
@@ -490,7 +485,7 @@
 
         <!-- popup panel-->
 
-        <div id="mainDialogDiv" class="w3-modal"></div>
+        <div id="mainDialogDiv" ></div>
         <div id="smallDialogDiv"></div>
         <div id="LineagePopup"></div>
         <div id="popupMenuWidgetDiv" onclick="PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>

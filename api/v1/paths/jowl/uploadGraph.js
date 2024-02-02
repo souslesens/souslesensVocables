@@ -6,6 +6,7 @@ const async2 = require("async");
 const request = require("request");
 const httpProxy = require("../../../../bin/httpProxy.");
 const Util = require("../../../../bin/util.");
+const { sourceModel } = require("../../../../model/sources");
 
 module.exports = function() {
     let operations = {
@@ -97,18 +98,17 @@ module.exports = function() {
         );
     }
 
-    function isUserAuthorizedToUpload(userInfo) {
-        if (userInfo.user.groups.indexOf("admin") < 0) {
-            console.log(("------userInfo.user.maxNumberCreatedSource----------" + userInfo.maxNumberCreatedSource));
-            console.log(("------userInfo----------" + JSON.stringify(userInfo)));
-            var countUserprivateSource = 0;
-            if (!userInfo.allowSourceCreation || countUserprivateSource > userInfo.maxNumberCreatedSource) {
-                return false;
-            } else {
-                return true;
-            }
+    async function isUserAuthorizedToUpload(userInfo) {
+        const ownedSources = await sourceModel.getOwnedSources(userInfo)
+        const numberOfOwnedSources = Object.keys(ownedSources).length
+
+        if (userInfo.user.groups.includes("admin") &&
+            numberOfOwnedSources < userInfo.maxNumberCreatedSource &&
+            userInfo.allowSourceCreation
+        ) {
+            return true
         }
-        return true;
+        return false
     }
 
 

@@ -657,7 +657,7 @@ var OntologyModels = (function () {
 
                                 if (constraint.domain) {
                                     if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
-                                        if (!constraint.range || !endNodeId) {
+                                        if (!constraint.range ||  constraint.range.indexOf("http")<0 || !endNodeId ) {
                                             propertiesMatchingStartNode.push(property);
                                         } else {
                                             domainOK = true;
@@ -669,7 +669,7 @@ var OntologyModels = (function () {
                                         if (domainOK) {
                                             propertiesMatchingBoth.push(property);
                                         } else {
-                                            if (!constraint.domain) {
+                                            if (!constraint.domain || constraint.domain.indexOf("http")<0) {
                                                 propertiesMatchingEndNode.push(property);
                                             }
                                         }

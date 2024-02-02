@@ -700,7 +700,7 @@ var Sparql_OWL = (function () {
         if (options.excludeItself) {
             modifier = "+";
         }
-        var query =
+        var queryOld =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
@@ -719,11 +719,26 @@ var Sparql_OWL = (function () {
             filterStr +
             " filter (?superClassType !=owl:Restriction)";
 
+
+        var filterStr = Sparql_common.setFilter("subject", classIds);
+
+        var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "SELECT distinct ?subject ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel  " +
+            fromStr +
+            "WHERE { \n" +
+            "  ?class rdf:type ?type. ?class rdfs:subClassOf*|rdf:type* ?superClass.\n" +
+            "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
+            "  ?subject  rdfs:subClassOf|rdf:type ?class." +
+            filterStr ;
+
+
         if (options.filter) {
             query += options.filter;
         }
-        if (options.withLabels) {
-            query += "OPTIONAL {?class rdfs: label classLabel }OPTIONAL {?subClass rdfs: label subClassLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
+       if (options.withLabels) {
+            query += "OPTIONAL {?class rdfs: label classLabel }OPTIONAL {?superClass rdfs: label superClassLabel }";
         }
         query += filterStr;
 
@@ -748,7 +763,7 @@ var Sparql_OWL = (function () {
             classIds.forEach(function (id) {
                 hierarchies[id] = [];
                 result.results.bindings.forEach(function (item) {
-                    if (item.class.value == id) {
+                    if (item.subject.value == id) {
                         hierarchies[id].push(item);
                     }
                 });

@@ -9,12 +9,12 @@ import IndividualValueFilterWidget from "../uiWidgets/individualValuefilterWidge
 import BotEngine from "./botEngine.js";
 import CommonBotFunctions from "./commonBotFunctions.js";
 
-var SparqlQuery_bot = (function () {
+var SparqlQuery_bot = (function() {
     var self = {};
 
-    self.start = function () {
+    self.start = function() {
         self.title = "Query graph";
-        BotEngine.init(SparqlQuery_bot, self.workflow, null, function () {
+        BotEngine.init(SparqlQuery_bot, self.workflow, null, function() {
             self.params = { source: Lineage_sources.activeSource };
             BotEngine.nextStep();
         });
@@ -25,10 +25,10 @@ var SparqlQuery_bot = (function () {
             _OR: {
                 label: { promptIndividualsLabelFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
                 list: { listIndividualsFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
-                advanced: { promptIndividualsAdvandedFilterFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
+                advanced: { promptIndividualsAdvandedFilterFn: { listWhiteBoardFilterType: { executeQuery: {} } } }
                 // }
-            },
-        },
+            }
+        }
     };
 
     self.workflow_individualsRole = {
@@ -36,13 +36,13 @@ var SparqlQuery_bot = (function () {
             _OR: {
                 all: {
                     listWhiteBoardFilterType: {
-                        executeQuery: {},
-                    },
+                        executeQuery: {}
+                    }
                 },
                 subject: self.workflow_individualsFilter,
-                object: self.workflow_individualsFilter,
-            },
-        },
+                object: self.workflow_individualsFilter
+            }
+        }
     };
 
     self.workflow = {
@@ -54,11 +54,11 @@ var SparqlQuery_bot = (function () {
                             listPredicatePathsFn: {
                                 _OR: {
                                     empty: { listWhiteBoardFilterType: { executeQuery: {} } },
-                                    ok: self.workflow_individualsRole,
-                                },
-                            },
-                        },
-                    },
+                                    ok: self.workflow_individualsRole
+                                }
+                            }
+                        }
+                    }
                 },
                 "By Object Property": {
                     listVocabsFn: {
@@ -66,25 +66,27 @@ var SparqlQuery_bot = (function () {
                             listPredicatePathsFn: {
                                 _OR: {
                                     empty: { listWhiteBoardFilterType: { executeQuery: {} } },
-                                    ok: self.workflow_individualsRole,
-                                },
-                            },
-                        },
-                    },
+                                    ok: self.workflow_individualsRole
+                                }
+                            }
+                        }
+                    }
                 },
                 "By Annotation property": {
                     listAnnotationPropertiesVocabsFn: {
                         listAnnotationPropertiesFn: {
                             promptAnnotationPropertyValue: {
                                 listWhiteBoardFilterType: {
-                                    executeQuery: {},
-                                },
-                            },
-                        },
-                    },
+                                    executeQuery: {}
+                                }
+                            }
+                        }
+                    }
                 },
-            },
-        },
+                "Sample of Classes": { promptClassesSampleSizeFn: { executeQuery: {} } },
+                "Sample of Individuals": { promptIndividualsSampleSizeFn: { executeQuery: {} } }
+            }
+        }
     };
 
     self.functionTitles = {
@@ -95,44 +97,45 @@ var SparqlQuery_bot = (function () {
         listAnnotationPropertiesVocabsFn: "Choose a reference ontology",
         listAnnotationPropertiesFn: "Choose a property",
         promptAnnotationPropertyValue: "Filter value ",
-        listWhiteBoardFilterType: "Choose a scope",
+        listWhiteBoardFilterType: "Choose a scope"
+
     };
 
     self.functions = {
-        listVocabsFn: function () {
+        listVocabsFn: function() {
             CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
         },
-        listQueryTypeFn: function () {
-            var choices = ["By Class", "By Object Property", "By Annotation property"];
+        listQueryTypeFn: function() {
+            var choices = ["By Class", "By Object Property", "By Annotation property", "Sample of Classes", "Sample of Individuals"];
 
             BotEngine.showList(choices, null);
             return;
         },
 
-        listClassesFn: function () {
+        listClassesFn: function() {
             CommonBotFunctions.listVocabClasses(self.params.currentVocab, "currentClass", true);
         },
 
-        listPropertiesFn: function () {
+        listPropertiesFn: function() {
             CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "currentProperty");
         },
 
-        listPredicatePathsFn: function () {
+        listPredicatePathsFn: function() {
             var property = self.params.currentProperty;
             var fromClass = self.params.currentClass;
             var toClass = self.params.currentClass;
 
-            self.getSourceInferredModelVisjsData(self.params.source + "_KGmodelGraph.json", function (err, visjsData) {
+            self.getSourceInferredModelVisjsData(self.params.source + "_KGmodelGraph.json", function(err, visjsData) {
                 if (err) {
                     console.log(err.responseText);
                     return BotEngine.nextStep("empty");
                 }
                 var nodesMap = {};
-                visjsData.nodes.forEach(function (node) {
+                visjsData.nodes.forEach(function(node) {
                     nodesMap[node.id] = node;
                 });
                 var paths = [];
-                visjsData.edges.forEach(function (edge) {
+                visjsData.edges.forEach(function(edge) {
                     var selected = false;
                     if (property && edge.data.propertyId == property) {
                         selected = true;
@@ -148,7 +151,7 @@ var SparqlQuery_bot = (function () {
                         (edge.toLabel = nodesMap[edge.to].label),
                             paths.push({
                                 id: edge.from + "|" + edge.data.propertyId + "|" + edge.to,
-                                label: edge.fromLabel + " -" + edge.data.propertyLabel + "-> " + edge.toLabel,
+                                label: edge.fromLabel + " -" + edge.data.propertyLabel + "-> " + edge.toLabel
                             });
                     }
                 });
@@ -161,20 +164,20 @@ var SparqlQuery_bot = (function () {
             });
         },
 
-        listAnnotationPropertiesVocabsFn: function () {
+        listAnnotationPropertiesVocabsFn: function() {
             CommonBotFunctions.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
         },
 
-        listAnnotationPropertiesFn: function () {
+        listAnnotationPropertiesFn: function() {
             // filter properties compatible with
             CommonBotFunctions.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
         },
 
-        promptAnnotationPropertyValue: function () {
+        promptAnnotationPropertyValue: function() {
             BotEngine.promptValue("value contains ", "annotationValue");
         },
 
-        listIndividualFilterRole: function () {
+        listIndividualFilterRole: function() {
             var subject = "subject";
             var object = "object";
             if (self.params.path) {
@@ -187,53 +190,53 @@ var SparqlQuery_bot = (function () {
             var choices = [
                 { id: "all", label: "all individuals" },
                 { id: "subject", label: "filter " + subject },
-                { id: "object", label: "filter " + object },
+                { id: "object", label: "filter " + object }
             ];
             BotEngine.showList(choices, "individualsFilterRole");
             return;
         },
-        listFilterTypes: function (target) {
+        listFilterTypes: function(target) {
             var choices = [
                 { id: "label", label: "label contains" },
                 { id: "list", label: "choose in list" },
-                { id: "advanced", label: "advanced search" },
+                { id: "advanced", label: "advanced search" }
             ];
             BotEngine.showList(choices, "individualsFilterType");
         },
 
-        listIndividualsFn: function () {
-            Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], {}, function (err, result) {
+        listIndividualsFn: function() {
+            Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], {}, function(err, result) {
                 if (err) {
                     return alert(err);
                 }
                 var individuals = [];
-                result.forEach(function (item) {
+                result.forEach(function(item) {
                     individuals.push({
                         id: item.id.value,
-                        label: item.label.value,
+                        label: item.label.value
                     });
                 });
                 BotEngine.showList(individuals, "individualsFilterValue");
             });
         },
-        promptIndividualsLabelFn: function () {
+        promptIndividualsLabelFn: function() {
             BotEngine.promptValue("label contains ", "individualsFilterValue");
             /* self.params.individualsFilterValue = prompt("label contains ");
       BotEngine.writeCompletedHtml(self.params.individualsFilterValue);
       BotEngine.nextStep();*/
         },
-        promptIndividualsAdvandedFilterFn: function () {
-            IndividualValueFilterWidget.showDialog(null, self.params.source, self.params.individualsFilterRole, self.params.currentClass, null, function (err, filter) {
+        promptIndividualsAdvandedFilterFn: function() {
+            IndividualValueFilterWidget.showDialog(null, self.params.source, self.params.individualsFilterRole, self.params.currentClass, null, function(err, filter) {
                 self.params.advancedFilter = filter;
                 BotEngine.writeCompletedHtml(self.params.advancedFilter);
                 BotEngine.nextStep("advanced");
             });
         },
 
-        listWhiteBoardFilterType: function () {
+        listWhiteBoardFilterType: function() {
             var choices = [
                 { id: "sourceNodes", label: "active Source " },
-                { id: "allSources", label: "all referenced Sources " },
+                { id: "allSources", label: "all referenced Sources " }
             ];
             if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                 choices.push({ id: "whiteboardNodes", label: "whiteboard nodes" });
@@ -243,7 +246,20 @@ var SparqlQuery_bot = (function () {
             }
             BotEngine.showList(choices, "whiteboardFilterType");
         },
-        executeQuery: function () {
+
+        promptClassesSampleSizeFn: function() {
+            self.params.sampleType = "ow:Class";
+            BotEngine.promptValue("enter sample size", "sampleSize", 20);
+
+        },
+        promptIndividualsSampleSizeFn: function() {
+            self.params.sampleType = "owl:NamedIndividual";
+            BotEngine.promptValue("enter sample size", "sampleSize", 20);
+
+        },
+
+
+        executeQuery: function() {
             var source = self.params.source;
             var currentClass = self.params.currentClass;
             var currentProperty = self.params.currentProperty;
@@ -254,13 +270,15 @@ var SparqlQuery_bot = (function () {
             var advancedFilter = self.params.advancedFilter || "";
             var annotationPropertyId = self.params.annotationPropertyId;
             var annotationValue = self.params.annotationValue;
+            var sampleType = self.params.sampleType;
+            var sampleSize = self.params.sampleSize;
 
             function setAnnotationPropertyFilter() {
                 if (!annotationPropertyId) {
                     return "";
                 }
                 var filterProp = "FILTER (?prop=<" + annotationPropertyId + ">)";
-                var filterValue = annotationValue ? 'FILTER(regex(?object, "' + annotationValue + '", "i"))' : "";
+                var filterValue = annotationValue ? "FILTER(regex(?object, \"" + annotationValue + "\", \"i\"))" : "";
                 return filterProp + "" + filterValue;
             }
 
@@ -316,7 +334,7 @@ var SparqlQuery_bot = (function () {
                     } else {
                         data = [];
                         var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
-                        nodes.forEach(function (node) {
+                        nodes.forEach(function(node) {
                             if (node.data && (!node.data.type || node.data.type != "literal")) {
                                 data.push(node.id);
                             }
@@ -333,18 +351,31 @@ var SparqlQuery_bot = (function () {
             }
 
             var data = getWhiteBoardFilter();
-            var filter = setAnnotationPropertyFilter() || getPathFilter() + " " + getIndividualsFilter();
+            var filter="";
+            var limit=null;
+            if(sampleType){
+                filter=" ?subject rdf:type "+sampleType+". "
+                try{
+                 limit=  parseInt(sampleSize)
+                }catch(e){
+                    alert("wrong number for sampleSize")
+                    return BotEngine.reset()
+                }
+            }else {
+                filter = setAnnotationPropertyFilter() || getPathFilter() + " " + getIndividualsFilter();
+            }
             var options = {
                 filter: filter,
+                limit:limit
             };
 
             Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);
 
             BotEngine.nextStep();
-        },
+        }
     };
 
-    self.getSourceInferredModelVisjsData = function (sourceLabel, callback) {
+    self.getSourceInferredModelVisjsData = function(sourceLabel, callback) {
         if (self.params.currentSourceInferredModelVijsData) {
             return callback(null, self.params.currentSourceInferredModelVijsData);
         }
@@ -353,13 +384,13 @@ var SparqlQuery_bot = (function () {
             type: "GET",
             url: `${Config.apiUrl}/data/file?dir=graphs&fileName=${visjsGraphFileName}`,
             dataType: "json",
-            success: function (result, _textStatus, _jqXHR) {
+            success: function(result, _textStatus, _jqXHR) {
                 self.params.currentSourceInferredModelVijsData = JSON.parse(result);
                 return callback(null, self.params.currentSourceInferredModelVijsData);
             },
-            error: function (err) {
+            error: function(err) {
                 return callback(err);
-            },
+            }
         });
     };
 

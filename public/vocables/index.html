@@ -363,6 +363,11 @@
         <script>
             less.pageLoadFinished.then(function () {
                 setTimeout(() => {
+                    if (!Config.theme) {
+                        Config.theme.defaultTheme = "KGA";
+                        Config.theme.selector = false;
+                    }
+
                     ResponsiveUI.changeTheme(Config.theme.defaultTheme);
                     if (Config.theme.selector) {
                         $("#theme-selector-btn").show();

@@ -85,6 +85,7 @@ var SparqlQuery_bot = (function () {
                 },
                 "Sample of Classes": { promptClassesSampleSizeFn: { executeQuery: {} } },
                 "Sample of Individuals": { promptIndividualsSampleSizeFn: { executeQuery: {} } },
+                "Sample of Predicates": { promptPredicatesSampleSizeFn: { executeQuery: {} } },
             },
         },
     };
@@ -98,6 +99,7 @@ var SparqlQuery_bot = (function () {
         listAnnotationPropertiesFn: "Choose a property",
         promptAnnotationPropertyValue: "Filter value ",
         listWhiteBoardFilterType: "Choose a scope",
+
     };
 
     self.functions = {
@@ -105,7 +107,7 @@ var SparqlQuery_bot = (function () {
             CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
         },
         listQueryTypeFn: function () {
-            var choices = ["By Class", "By Object Property", "By Annotation property", "Sample of Classes", "Sample of Individuals"];
+            var choices = ["By Class", "By Object Property", "By Annotation property", "Sample of Classes", "Sample of Individuals","Sample of Predicates"];
 
             BotEngine.showList(choices, null);
             return;
@@ -254,6 +256,10 @@ var SparqlQuery_bot = (function () {
             self.params.sampleType = "owl:NamedIndividual";
             BotEngine.promptValue("enter sample size", "sampleSize", 500);
         },
+        promptPredicatesSampleSizeFn: function () {
+            self.params.sampleType = "Predicates";
+            BotEngine.promptValue("enter sample size", "sampleSize", 500);
+        },
 
         executeQuery: function () {
             var source = self.params.source;
@@ -350,7 +356,11 @@ var SparqlQuery_bot = (function () {
             var filter = "";
             var limit = null;
             if (sampleType) {
+                if(sampleType=="Predicates"){
+                    filter=" filter(?prop not in (rdf:type,rdfs:subClassOf ))"
+                }else{
                 filter = " ?subject rdf:type " + sampleType + ". filter(?object!=" + sampleType + ") filter(?prop=rdf:type || ?prop=rdfs:subClassOf )  ";
+                }
                 try {
                     limit = parseInt(sampleSize);
                 } catch (e) {

@@ -39,7 +39,7 @@ var NodeInfosWidgetResponsive = (function () {
                 },
             });
             $("#mainDialogDiv").parent().css("top", "20px");
-            $("#mainDialogDiv").parent().css("left", "20px");
+          //  $("#mainDialogDiv").parent().css("left", "20px");
         }
         $("#" + divId).load("snippets/nodeInfosWidget.html", function () {
             $("#nodeInfosWidget_tabsDiv").tabs({

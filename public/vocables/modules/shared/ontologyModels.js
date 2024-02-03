@@ -124,7 +124,7 @@ var OntologyModels = (function () {
                                 " SELECT distinct ?prop ?propLabel from <" +
                                 graphUri +
                                 ">  WHERE {\n" +
-                                " ?prop rdf:type ?type. filter (?type in (rdf:Property,<http://www.w3.org/2002/07/owl#AnnotationProperty>))  " +
+                                " ?prop rdf:type ?type. filter (?type in (rdf:Property,<http://www.w3.org/2002/07/owl#AnnotationProperty>,owl:DatatypeProperty))  " +
                                 Sparql_common.getVariableLangLabel("prop", true, true) +
                                 "} limit 10000";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
@@ -467,7 +467,7 @@ var OntologyModels = (function () {
         return array;
     };
 
-    self.getAnnotationProperties = function (source) {
+    self.getAnnotationProperties= function (source) {
         var array = [];
         for (var prop in Config.ontologiesVocabularyModels[source].annotationProperties) {
             array.push(Config.ontologiesVocabularyModels[source].annotationProperties[prop]);
@@ -665,7 +665,7 @@ var OntologyModels = (function () {
 
                                 if (constraint.domain) {
                                     if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
-                                        if (!constraint.range || constraint.range.indexOf("http") < 0 || !endNodeId) {
+                                        if (!constraint.range ||  constraint.range.indexOf("http")<0 || !endNodeId ) {
                                             propertiesMatchingStartNode.push(property);
                                         } else {
                                             domainOK = true;
@@ -677,7 +677,7 @@ var OntologyModels = (function () {
                                         if (domainOK) {
                                             propertiesMatchingBoth.push(property);
                                         } else {
-                                            if (!constraint.domain || constraint.domain.indexOf("http") < 0) {
+                                            if (!constraint.domain || constraint.domain.indexOf("http")<0) {
                                                 propertiesMatchingEndNode.push(property);
                                             }
                                         }
@@ -751,6 +751,8 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                     });
                     callbackSeries();
                 },
+
+
             ],
             function (err) {
                 if (duplicateProps.length > 0) {
@@ -814,6 +816,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 importGraphUriFrom +
                 "  \n" +
                 " WHERE {";
+
 
             query +=
                 "      graph ?g2{\n" +
@@ -887,6 +890,8 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 "   ?s ?prop ?o.\n" +
                 "  ?s rdf:type ?sClass.\n" +
                 "  ?o rdf:type ?oClass. \n" +
+                "filter(?sClass not in (owl:Class,owl:NamedIndividual,owl:Restriction)) \n" +
+                " filter(?oClass not in (owl:Class,owl:NamedIndividual,owl:Restriction)) "+
                 '  filter (!regex(str(?prop),"rdf","i"))\n' +
                 "    }\n" +
                 "    }\n" +

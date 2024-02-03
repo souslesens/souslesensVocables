@@ -139,7 +139,7 @@ var CreateResource_bot = (function () {
                     source: self.params.source,
                 },
             };
-            Lineage_whiteboard.drawNodesAndParents(nodeData, 2);
+            Lineage_whiteboard.drawNodesAndParents(nodeData, 1, { legendType: "individualClasses" });
             BotEngine.nextStep();
         },
         newResourceFn: function () {

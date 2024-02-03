@@ -1,5 +1,4 @@
 import common from "../../shared/common.js";
-import KGcreator from "../KGcreator/KGcreator.js";
 import Lineage_linkedData_mappings from "./linkedData/lineage_linkedData_mappings.js";
 import Lineage_graphTraversal from "./lineage_graphTraversal.js";
 import Lineage_selection from "./lineage_selection.js";
@@ -15,13 +14,10 @@ import MainController from "../../shared/mainController.js";
 import authentication from "../../shared/authentification.js";
 import Clipboard from "../../shared/clipboard.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
-import OntologyModels from "../../shared/ontologyModels.js";
 import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Lineage_createResource from "./lineage_createResource.js";
-import CreateResource_bot from "../../bots/createResource_bot.js";
-import GraphDisplayLegend from "../../shared/graphDisplayLegend.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -635,9 +631,9 @@ var Lineage_whiteboard = (function () {
                             Lineage_sources.activeSource = node.data.source;
                         }
                         if (true) {
+                            Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
                             //!self.lineageVisjsGraph.skipColorGraphNodesByType) {
-                            var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
-                            //    Lineage_decoration.decorateNodeAndDrawLegend(nodes);
+                            //  var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                         }
                     }
                 },
@@ -663,8 +659,8 @@ var Lineage_whiteboard = (function () {
         } else if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.visjsOptions.manipulation = {
-                enabled: true,
-                initiallyActive: true,
+                enabled: false,
+                initiallyActive: false,
                 deleteNode: false,
                 deleteEdge: false,
                 editNode: false,
@@ -729,12 +725,13 @@ var Lineage_whiteboard = (function () {
             MainController.UI.message("", true);
 
             //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
+
+            if (self.lineageVisjsGraph.isGraphNotEmpty()) {
+                Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
+                //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
+            }
         });
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-
-        if (self.lineageVisjsGraph.isGraphNotEmpty()) {
-            GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
-        }
 
         return;
     };
@@ -1303,7 +1300,7 @@ var Lineage_whiteboard = (function () {
 
                     var shape = self.defaultShape;
 
-                    result.forEach(function (/** @type {{ broader1: { value: string; }; broader1Label: { value: any; }; concept: { value: string; }; }} */ item) {
+                    result.forEach(function (item) {
                         if (item.broader1) {
                             let nodeSource = item.broader1Graph ? Sparql_common.getSourceFromGraphUri(item.broader1Graph.value, source) : source;
                             let nodeColor = self.getSourceColor(nodeSource);
@@ -2149,8 +2146,9 @@ var Lineage_whiteboard = (function () {
                 if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                     Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                     Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                    Lineage_decoration.drawLegend("individuals");
                 } else {
-                    Lineage_whiteboard.drawNewGraph(visjsData);
+                    Lineage_whiteboard.drawNewGraph(visjsData, null, { legendType: "individualClasses" });
                 }
 
                 $("#waitImg").css("display", "none");
@@ -2806,7 +2804,7 @@ restrictionSource = Config.predicatesSource;
             Lineage_sources.registerSource(source);
 
             if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
-                self.drawNewGraph(visjsData);
+                self.drawNewGraph(visjsData, null, options);
             } else {
                 self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                 self.lineageVisjsGraph.data.edges.add(visjsData.edges);
@@ -3053,7 +3051,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (edge.data.bNodeId) {
                 //restriction
                 if (confirm("delete selected relation ?")) {
-                    Lineage_blend.deleteRestriction(edge.data.source, edge, function (err, result) {
+                    Lineage_createRelation.deleteRestriction(edge.data.source, edge, function (err, result) {
                         if (err) {
                             return alert(err.responseText);
                         }

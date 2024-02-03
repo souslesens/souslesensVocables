@@ -12,24 +12,23 @@ var CreateSLSVsource_bot = (function () {
     self.title = "OntoCreator";
 
     self.start = function () {
-        BotEngine.init(CreateSLSVsource_bot, self.workflow,null, function () {
+        BotEngine.init(CreateSLSVsource_bot, self.workflow, null, function () {
             self.params = { sourceLabel: "", graphUri: "", imports: [] };
-
 
             BotEngine.nextStep();
         });
     };
     self.loadingWorkflow = {
         _OR: {
-        "Launch Ontology" : {loadLineageFn:{}},
-        "Launch Semantic Knowledge Graph" : { loadKGqueryFn:{} },
+            "Launch Ontology": { loadLineageFn: {} },
+            "Launch Semantic Knowledge Graph": { loadKGqueryFn: {} },
         },
     };
     self.workflowUpload = {
         _OR: {
-            "Upload graph from file": { uploadFromFileFn: self.loadingWorkflow  },
-            "Upload graph from URL": { uploadFromUrlFn: self.loadingWorkflow  },
-            "Finish":  self.loadingWorkflow ,
+            "Upload graph from file": { uploadFromFileFn: self.loadingWorkflow },
+            "Upload graph from URL": { uploadFromUrlFn: self.loadingWorkflow },
+            Finish: self.loadingWorkflow,
         },
     };
 
@@ -41,14 +40,10 @@ var CreateSLSVsource_bot = (function () {
     };
 
     self.workflow = {
-
-            promptSourceNameFn: {
-                promptGraphUriFn: self.workflow2,
-            },
-
+        promptSourceNameFn: {
+            promptGraphUriFn: self.workflow2,
+        },
     };
-    
-
 
     self.functionTitles = {
         promptSourceNameFn: "Enter source label",
@@ -177,7 +172,7 @@ var CreateSLSVsource_bot = (function () {
             url += "?tool=lineage&source=" + self.params.sourceLabel;
             window.location.href = url;
         },
-        loadKGqueryFn:function() {
+        loadKGqueryFn: function () {
             var url = window.location.href;
             url = url.replace("index_old.html", "");
             var p = url.indexOf("?");
@@ -187,7 +182,7 @@ var CreateSLSVsource_bot = (function () {
 
             url += "?tool=KGquery&source=" + self.params.sourceLabel;
             window.location.href = url;
-        }
+        },
     };
 
     self.uploadGraphFromUrl = function (callback) {

@@ -33,7 +33,7 @@ var MainController = (function () {
             url: Config.apiUrl + "/config",
             dataType: "json",
             success: function (serverConfig, _textStatus, _jqXHR) {
-                Config.default_lang = serverConfig.default_lang;
+                Config.default_lang = serverConfig.default_lang || "en";
                 Config.sparql_server = serverConfig.sparql_server;
                 Config.wiki = serverConfig.wiki;
                 Config.sentryDsnJsFront = serverConfig.sentryDsnJsFront;

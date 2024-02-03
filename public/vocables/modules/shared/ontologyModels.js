@@ -467,6 +467,14 @@ var OntologyModels = (function () {
         return array;
     };
 
+    self.getAnnotationProperties = function (source) {
+        var array = [];
+        for (var prop in Config.ontologiesVocabularyModels[source].annotationProperties) {
+            array.push(Config.ontologiesVocabularyModels[source].annotationProperties[prop]);
+        }
+        return array;
+    };
+
     self.unRegisterSourceModel = function () {
         var basicsSources = Object.keys(Config.basicVocabularies);
         for (var source in Config.ontologiesVocabularyModels) {
@@ -657,7 +665,7 @@ var OntologyModels = (function () {
 
                                 if (constraint.domain) {
                                     if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
-                                        if (!constraint.range ||  constraint.range.indexOf("http")<0 || !endNodeId ) {
+                                        if (!constraint.range || constraint.range.indexOf("http") < 0 || !endNodeId) {
                                             propertiesMatchingStartNode.push(property);
                                         } else {
                                             domainOK = true;
@@ -669,7 +677,7 @@ var OntologyModels = (function () {
                                         if (domainOK) {
                                             propertiesMatchingBoth.push(property);
                                         } else {
-                                            if (!constraint.domain || constraint.domain.indexOf("http")<0) {
+                                            if (!constraint.domain || constraint.domain.indexOf("http") < 0) {
                                                 propertiesMatchingEndNode.push(property);
                                             }
                                         }
@@ -743,22 +751,6 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                     });
                     callbackSeries();
                 },
-
-                //add existing  restrictions to valid constraints
-                function (callbackSeries) {
-                    // do not use by now
-                    return callbackSeries();
-                    allSources.forEach(function (_source) {
-                        var sourceRestrictions = Config.ontologiesVocabularyModels[_source].restrictions;
-                        if (!sourceRestrictions) {
-                            return;
-                        }
-                        for (var propId in sourceRestrictions) {
-                            validConstraints["both"][propId] = sourceRestrictions[propId];
-                        }
-                    });
-                    callbackSeries();
-                },
             ],
             function (err) {
                 if (duplicateProps.length > 0) {
@@ -822,33 +814,6 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 importGraphUriFrom +
                 "  \n" +
                 " WHERE {";
-
-            if (false) {
-                query +=
-                    "   graph ?g3 {\n" +
-                    "      ?sparent rdf:type ?stype filter (?stype in (owl:Class))\n" +
-                    "    optional { ?sparent rdfs:subClassOf ?sparentClass filter (!isBlank(?sparentClass))}\n" +
-                    //  "    optional { ?sparent rdfs:subClassOf ?sparentClass. filter (not exists {?sparentClass ref:type owl:Restriction })}\n" +
-                    "   optional { ?sparent rdfs:label ?sparentLabel}\n" +
-                    "    bind (if(bound(?sparentClass) && ?g3=<" +
-                    sourceGraphUri +
-                    ">,?sparentClass,?sparent) as ?sClass)  optional{?sClass rdfs:label ?sClassLabel}\n" +
-                    " filter (?sClass!=<http://www.w3.org/2002/07/owl#Restriction>)" +
-                    "    \n" +
-                    "    \n" +
-                    "       ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
-                    "   optional { ?oparent rdfs:label ?oparentLabel}\n" +
-                    "    optional { ?oparent rdfs:subClassOf ?oparentClass filter (!isBlank(?oparentClass))}\n" +
-                    // "     optional { ?oparent rdfs:subClassOf ?oparentClass filter (not exists {oparentClass ref:type owl:Restriction })}\n" +
-                    "    bind (if(bound(?oparentClass) && ?g3=<" +
-                    sourceGraphUri +
-                    ">,?oparentClass,?oparent) as ?oClass)  optional{?oClass rdfs:label ?oClassLabel}\n" +
-                    " filter (?oClass!=<http://www.w3.org/2002/07/owl#Restriction>)" +
-                    "    \n" +
-                    "  }\n" +
-                    "  \n" +
-                    "  \n";
-            }
 
             query +=
                 "      graph ?g2{\n" +

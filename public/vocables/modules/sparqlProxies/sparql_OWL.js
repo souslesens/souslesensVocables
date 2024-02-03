@@ -444,8 +444,8 @@ var Sparql_OWL = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
 
         var selectStr = " * ";
-        if (options.excludeType) {
-            selectStr = " ?subject ?subjectLabel";
+        if (true || options.excludeType) {
+            selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes)';
             for (var i = 1; i <= ancestorsDepth; i++) {
                 selectStr += " ?broader" + i + " ?broader" + i + "Label";
             }
@@ -719,25 +719,24 @@ var Sparql_OWL = (function () {
             filterStr +
             " filter (?superClassType !=owl:Restriction)";
 
-
         var filterStr = Sparql_common.setFilter("subject", classIds);
 
-        var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-            "SELECT distinct ?subject ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel  " +
+            'SELECT distinct ?subject ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) ' +
             fromStr +
             "WHERE { \n" +
             "  ?class rdf:type ?type. ?class rdfs:subClassOf*|rdf:type* ?superClass.\n" +
             "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
-            "  ?subject  rdfs:subClassOf|rdf:type ?class." +
-            filterStr ;
-
+            "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType " +
+            filterStr;
 
         if (options.filter) {
             query += options.filter;
         }
-       if (options.withLabels) {
+        if (options.withLabels) {
             query += "OPTIONAL {?class rdfs: label classLabel }OPTIONAL {?superClass rdfs: label superClassLabel }";
         }
         query += filterStr;
@@ -1481,6 +1480,46 @@ var Sparql_OWL = (function () {
             },
             function (err) {
                 return callback(err, allData);
+            }
+        );
+    };
+    self.getNodesOwlTypeMap = function (source, ids, callback) {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        var slices = common.array.slice(ids, 200);
+        var typesMap = [];
+        async.eachSeries(
+            slices,
+            function (slice, callbackEach) {
+                var filterStr = Sparql_common.setFilter("subject", slice);
+                var query = ' select  distinct ?subject (GROUP_CONCAT( distinct ?type;separator=",") as ?types)' + "   WHERE { ?subject rdf:type ?type. " + filterStr + " }";
+
+                query += " limit " + 10000 + " ";
+                self.sparql_url = Config.sources[source].sparql_server.url;
+                var url = self.sparql_url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, result) {
+                    if (err) {
+                        return callbackEach(err);
+                    }
+                    result.results.bindings.forEach(function (item) {
+                        var type = null;
+                        if (item.types.value.indexOf("NamedIndividual") > -1) {
+                            type = "NamedIndividual";
+                        }
+                        if (item.types.value.indexOf("Class") > -1) {
+                            type = "Class";
+                        }
+                        if (item.types.value.indexOf("Restriction") > -1) {
+                            type = "Restriction";
+                        }
+                        typesMap[item.subject.value] = type;
+                    });
+                    callbackEach();
+                });
+            },
+            function (err) {
+                return callback(err, typesMap);
             }
         );
     };

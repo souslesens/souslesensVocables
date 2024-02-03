@@ -1,6 +1,6 @@
 .nodeInfos-button {
     padding: 8px 24px !important;
-    font-size: 10px !important;
+    font-size: 12px !important;
     margin: 12px !important;
     margin-top: 25px !important;
 }
@@ -153,7 +153,7 @@ a:visited.ui-button,
 .editPredicatePanel {
     .button-font-title;
     background-color: white;
-    font-size: 10px;
+    font-size: 12px;
     .border-classic-color-theme4;
 
     display: flex;
@@ -167,8 +167,8 @@ a:visited.ui-button,
 .editPredicatePanel input {
     width: 240px;
     margin: 3px;
-    padding: 0px;
-    border-radius: 14px !important;
+    padding: 3px;
+    border-radius: 8px !important;
     background-color: #eaefff;
     color: @button1-color !important;
 }
@@ -176,7 +176,8 @@ a:visited.ui-button,
 .editPredicatePanel select {
     min-width: 100px;
     margin: 2px;
-    border-radius: 14px !important;
+    padding: 3px;
+    border-radius: 8px !important;
     background-color: @dark-background-color;
     color: @button1-color !important;
 }

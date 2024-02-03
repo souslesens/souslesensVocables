@@ -220,8 +220,12 @@ var Lineage_createRelation = (function () {
                             }
 
                             array.sort(function (a, b) {
-                                if (a.data.propLabel > b.data.propLabel) return 1;
-                                if (a.data.propLabel < b.data.propLabel) return -1;
+                                if (a.data.propLabel > b.data.propLabel) {
+                                    return 1;
+                                }
+                                if (a.data.propLabel < b.data.propLabel) {
+                                    return -1;
+                                }
                                 return 0;
                             });
 
@@ -271,26 +275,34 @@ var Lineage_createRelation = (function () {
                                         propertiesToAdd[propId] = newProp;
                                         var constraintsToAdd = {};
                                         constraintsToAdd[propId] = superpropConstraints;
-                                        OntologyModels.updateModel(Lineage_sources.activeSource, { properties: propertiesToAdd, constraints: constraintsToAdd }, null, function (err, result2) {
-                                            if (err) {
-                                                return alert(err.responsetext);
-                                            }
+                                        OntologyModels.updateModel(
+                                            Lineage_sources.activeSource,
+                                            {
+                                                properties: propertiesToAdd,
+                                                constraints: constraintsToAdd,
+                                            },
+                                            null,
+                                            function (err, result2) {
+                                                if (err) {
+                                                    return alert(err.responsetext);
+                                                }
 
-                                            var jstreeData = [
-                                                {
-                                                    id: result.uri,
-                                                    text: subPropertyLabel,
-                                                    parent: self.currentPropertiesTreeNode.data.id,
-                                                    data: {
+                                                var jstreeData = [
+                                                    {
                                                         id: result.uri,
-                                                        label: subPropertyLabel,
-                                                        source: Lineage_sources.activeSource,
+                                                        text: subPropertyLabel,
+                                                        parent: self.currentPropertiesTreeNode.data.id,
+                                                        data: {
+                                                            id: result.uri,
+                                                            label: subPropertyLabel,
+                                                            source: Lineage_sources.activeSource,
+                                                        },
                                                     },
-                                                },
-                                            ];
+                                                ];
 
-                                            JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
-                                        });
+                                                JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                                            }
+                                        );
                                     });
                                 },
                             },
@@ -429,7 +441,8 @@ var Lineage_createRelation = (function () {
         //dispatch of sources to write in depending on relation type and editable
         var inSource;
         var options = {};
-        if (obj.node.data.id == "http://www.w3.org/2002/07/owl#sameAs" || obj.node.data.id == "http://www.w3.org/2002/07/owl#equivalentClass") {
+        var propId = obj.node.data.id;
+        if (propId == "http://www.w3.org/2002/07/owl#sameAs" || propId == "http://www.w3.org/2002/07/owl#equivalentClass") {
             // le sameAs sont tous dans le dictionaire
             inSource = Config.dictionarySource;
         } else {
@@ -445,55 +458,139 @@ var Lineage_createRelation = (function () {
             }
         }
 
-        Lineage_createRelation.createRelationFromGraph(inSource, self.sourceNode, self.targetNode, obj.node.data.id, options, function (err, result) {
-            if (err) {
-                return callback(err);
+        if (!confirm("create Relation " + self.sourceNode.label + "-" + Sparql_common.getLabelFromURI(propId) + "->" + self.targetNode.label + " in Graph " + inSource)) {
+            return;
+        }
+        $("#mainDialogDiv").dialog("close");
+
+        var relationType;
+        var relationId;
+        async.series(
+            [
+                //get relationType
+                function (callbackSeries) {
+                    Sparql_OWL.getNodesOwlTypeMap(self.sourceNode.source, self.sourceNode.id, function (err, result) {
+                        if (err) {
+                            return callback(err.responseText);
+                        }
+                        if (result[self.sourceNode.id] == "Class") {
+                            relationType = "Restriction";
+                        } else if (result[self.sourceNode.id] == "NamedIndividual") {
+                            relationType = "Predicate";
+                        } else {
+                            callbackSeries("no compatible type");
+                        }
+                        if (propId == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" || propId == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+                            relationType = "Predicate";
+                        }
+                        callbackSeries();
+                    });
+                },
+
+                //create restriction
+                function (callbackSeries) {
+                    if (relationType != "Restriction") {
+                        return callbackSeries();
+                    }
+
+                    var oldRelations = Lineage_whiteboard.lineageVisjsGraph.getNodeEdges(self.sourceNode.id, self.targetNode.id);
+                    self.createRestrictionRelation(inSource, propId, self.sourceNode, self.targetNode, true, true, {}, function (err, blankNodeId) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        MainController.UI.message("relation added", true);
+
+                        if (oldRelations.length > 0) {
+                            if (confirm("delete previous relation " + oldRelations[0].data.propertyLabel)) {
+                                Lineage_createRelation.deleteRestriction(Lineage_sources.activeSource, oldRelations[0], function (err) {
+                                    if (err) {
+                                        alert(err);
+                                    }
+                                });
+                            }
+                        }
+                        relationId = blankNodeId;
+                        callbackSeries();
+                        //  return callback(null, { type: "Restriction", id: blankNodeId });
+                    });
+                },
+
+                // create predicate
+                function (callbackSeries) {
+                    if (relationType != "Predicate") {
+                        return callbackSeries();
+                    }
+                    var triples = [];
+                    triples.push({
+                        subject: self.sourceNode.id,
+                        predicate: propId,
+                        object: self.targetNode.id,
+                    });
+
+                    Sparql_generic.insertTriples(inSource, triples, {}, function (err, _result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        callbackSeries();
+                    });
+                },
+
+                //draw relation
+
+                function (callbackSeries) {
+                    relationId = relationId || "<_:b" + common.getRandomHexaId(10) + ">";
+                    let propLabel = obj.node.data.propLabel || Sparql_common.getLabelFromURI(obj.node.data.id);
+
+                    let newEdge = {
+                        id: relationId,
+                        from: self.sourceNode.id,
+                        to: self.targetNode.id,
+                    };
+                    newEdge.label = "<i>" + propLabel + "</i>";
+                    newEdge.font = { multi: true, size: 10 };
+                    newEdge.arrows = {
+                        to: {
+                            enabled: true,
+                            type: Lineage_whiteboard.defaultEdgeArrowType,
+                            scaleFactor: 0.5,
+                        },
+                    };
+                    newEdge.dashes = true;
+
+                    if (relationType == "Predicate") {
+                        newEdge.color = Lineage_whiteboard.defaultPredicateEdgeColor;
+                        newEdge.font = { color: Lineage_whiteboard.defaultPredicateEdgeColor };
+                        newEdge.data = {
+                            id: relationId,
+                            type: "ObjectProperty",
+                            propLabel: propLabel,
+                            from: self.sourceNode.id,
+                            to: self.targetNode.id,
+                            prop: obj.node.data.id,
+                            source: inSource,
+                        };
+                    } else if (relationType == "Restriction") {
+                        newEdge.color = Lineage_whiteboard.restrictionColor;
+                        newEdge.font = { color: Lineage_whiteboard.restrictionColor };
+                        newEdge.data = {
+                            source: inSource,
+                            bNodeId: relationId,
+                            propertyLabel: propLabel,
+                            propertyId: obj.node.data.id,
+                        };
+                        OntologyModels.updateModel;
+                    }
+
+                    Lineage_whiteboard.lineageVisjsGraph.data.edges.add([newEdge]);
+                    callbackSeries();
+                },
+            ],
+            function (err) {
+                if (err) {
+                    return alert(err);
+                }
             }
-            var relationId = result.id || "<_:b" + common.getRandomHexaId(10) + ">";
-            let propLabel = obj.node.data.label || Sparql_common.getLabelFromURI(obj.node.data.id);
-
-            let newEdge = {
-                id: relationId,
-                from: self.sourceNode.id,
-                to: self.targetNode.id,
-            };
-            newEdge.label = "<i>" + propLabel + "</i>";
-            (newEdge.font = { multi: true, size: 10 }),
-                (newEdge.arrows = {
-                    to: {
-                        enabled: true,
-                        type: Lineage_whiteboard.defaultEdgeArrowType,
-                        scaleFactor: 0.5,
-                    },
-                });
-            newEdge.dashes = true;
-
-            if (result.type == "ObjectProperty") {
-                newEdge.color = Lineage_whiteboard.defaultPredicateEdgeColor;
-                newEdge.font = { color: Lineage_whiteboard.defaultPredicateEdgeColor };
-                newEdge.data = {
-                    id: relationId,
-                    type: "ObjectProperty",
-                    propLabel: propLabel,
-                    from: self.sourceNode.id,
-                    to: self.targetNode.id,
-                    prop: obj.node.data.id,
-                    source: inSource,
-                };
-            } else if (result.type == "Restriction") {
-                newEdge.color = Lineage_whiteboard.restrictionColor;
-                newEdge.font = { color: Lineage_whiteboard.restrictionColor };
-                newEdge.data = {
-                    source: inSource,
-                    bNodeId: relationId,
-                    propertyLabel: propLabel,
-                    propertyId: obj.node.data.id,
-                };
-                OntologyModels.updateModel;
-            }
-
-            Lineage_whiteboard.lineageVisjsGraph.data.edges.add([newEdge]);
-        });
+        );
     };
 
     self.createSubProperty = function (source, superPropId, subPropertyLabel, callback) {
@@ -522,7 +619,7 @@ var Lineage_createRelation = (function () {
         });
     };
 
-    self.createRelation = function (inSource, type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, options, callback) {
+    self.createRestrictionRelation = function (inSource, type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, options, callback) {
         if (type != "http://www.w3.org/2002/07/owl#sameAs" && type != "http://www.w3.org/2002/07/owl#equivalentClass") {
             createInverseRelation = false;
         }

@@ -19,10 +19,11 @@ var CreateSLSVsource_bot = (function () {
         });
     };
     self.loadingWorkflow = {
-        _OR: {
-            "Launch Ontology": { loadLineageFn: {} },
-            "Launch Semantic Knowledge Graph": { loadKGqueryFn: {} },
-        },
+     loadLineageFn: {}
+      /*  _OR: {
+            "Launch Lineage": { loadLineageFn: {} },
+            "Launch KGquery": { loadKGqueryFn: {} },
+        },*/
     };
     self.workflowUpload = {
         _OR: {

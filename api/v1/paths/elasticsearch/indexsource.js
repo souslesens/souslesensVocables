@@ -11,6 +11,7 @@ module.exports = function () {
     };
 
     function POST(req, res, _next) {
+        // to be fixed PB with PRIVATE sources
         if (ConfigManager.config && ConfigManager.config.ElasticSearch.user) {
             ConfigManager.getUserSources(req, res, function (err, userSources) {
                 ConfigManager.getUser(req, res, function (err, userInfo) {

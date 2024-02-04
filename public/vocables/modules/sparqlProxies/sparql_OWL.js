@@ -817,74 +817,74 @@ var Sparql_OWL = (function() {
 
     self.getFilteredTriples2 = function(sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
 
-            var filterStr = "";
+        var filterStr = "";
 
-            if (subjectIds) {
-                filterStr += Sparql_common.setFilter("subject", subjectIds, null, options);
+        if (subjectIds) {
+            filterStr += Sparql_common.setFilter("subject", subjectIds, null, options);
+        }
+        if (objectIds) {
+            filterStr += Sparql_common.setFilter("object", objectIds, null, options);
+        }
+        if (propertyIds) {
+            filterStr += Sparql_common.setFilter("prop", propertyIds, null, options);
+        }
+        var fromStr = "";
+        if (sourceLabel) {
+            self.graphUri = Config.sources[sourceLabel].graphUri;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+
+            fromStr = Sparql_common.getFromStr(sourceLabel, false, false, options);
+        } else {
+            // to be  implemented
+        }
+        var sourceGraphUri = Config.sources[sourceLabel].graphUri;
+
+        var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
+
+        if (options.distinct) {
+            query += "select distinct " + options.distinct + " ";
+        } else {
+            query += "select distinct * ";
+        }
+
+        if (options.filter) {
+            filterStr += " " + options.filter;
+        }
+
+
+        var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "select distinct ?subject ?prop ?object ?subjectLabel ?propLabel ?objectLabel ?subjectType ?objectType " +
+            fromStr +
+            " WHERE{\n" +
+            "  { graph ?g{ ?object rdf:type ?objectType. OPTIONAL { ?object rdfs:label ?objectLabel.}}}\n" +
+            "   { graph ?g{  ?subject rdf:type ?subjectType. OPTIONAL { ?subject rdfs:label ?subjectLabel.}}}\n" +
+            // "    { graph ?g{ ?prop rdf:type ?propType. OPTIONAL {?prop rdfs:label ?propLabel.}}\n" +
+            "  \n" +
+            "  {graph <" + sourceGraphUri + ">" +
+            "{?subject ?prop ?object.  " +
+            filterStr +
+            "  } " +
+            "}" +
+            "} ";
+        var limit = options.limit || Config.queryLimit;
+        query += " limit " + limit;
+
+        var url = self.sparql_url + "?format=json&query=";
+        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
+        if (self.no_params) {
+            url = self.sparql_url;
+        }
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
+            if (err) {
+                return callback(err);
             }
-            if (objectIds) {
-                filterStr += Sparql_common.setFilter("object", objectIds, null, options);
-            }
-            if (propertyIds) {
-                filterStr += Sparql_common.setFilter("prop", propertyIds, null, options);
-            }
-            var fromStr = "";
-            if (sourceLabel) {
-                self.graphUri = Config.sources[sourceLabel].graphUri;
-                self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+            return callback(null, result.results.bindings);
+        });
 
-                fromStr = Sparql_common.getFromStr(sourceLabel, false, false, options);
-            } else {
-                // to be  implemented
-            }
-            var sourceGraphUri = Config.sources[sourceLabel].graphUri;
-
-            var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
-
-            if (options.distinct) {
-                query += "select distinct " + options.distinct + " ";
-            } else {
-                query += "select distinct * ";
-            }
-
-            if (options.filter) {
-                filterStr += " " + options.filter;
-            }
-
-
-            var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                "select distinct ?subject ?prop ?object ?subjectLabel ?propLabel ?objectLabel ?subjectType ?objectType " +
-                fromStr +
-                " WHERE{\n" +
-                "  { graph ?g{ ?object rdf:type ?objectType. OPTIONAL { ?object rdfs:label ?objectLabel.}}}\n" +
-                "   { graph ?g{  ?subject rdf:type ?subjectType. OPTIONAL { ?subject rdfs:label ?subjectLabel.}}}\n" +
-               // "    { graph ?g{ ?prop rdf:type ?propType. OPTIONAL {?prop rdfs:label ?propLabel.}}\n" +
-                "  \n" +
-                "  {graph <" + sourceGraphUri +">"+
-                "{?subject ?prop ?object.  " +
-                filterStr +
-                "  } " +
-                "}" +
-                "} ";
-            var limit = options.limit || Config.queryLimit;
-            query += " limit " + limit;
-
-            var url = self.sparql_url + "?format=json&query=";
-            self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
-            if (self.no_params) {
-                url = self.sparql_url;
-            }
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel  }, function(err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                return callback(null, result.results.bindings);
-            });
-
-    }
+    };
 
 
     /**
@@ -1568,7 +1568,10 @@ var Sparql_OWL = (function() {
             slices,
             function(slice, callbackEach) {
                 var filterStr = Sparql_common.setFilter("subject", slice);
-                var query = " select  distinct ?subject (GROUP_CONCAT( distinct ?type;separator=\",\") as ?types)" + "   WHERE { ?subject rdf:type ?type. " + filterStr + " }";
+                var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                    "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                    "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
+                    " select  distinct ?subject (GROUP_CONCAT( distinct ?type;separator=\",\") as ?types)" + "   WHERE { ?subject rdf:type ?type. " + filterStr + " }";
 
                 query += " limit " + 10000 + " ";
                 self.sparql_url = Config.sources[source].sparql_server.url;

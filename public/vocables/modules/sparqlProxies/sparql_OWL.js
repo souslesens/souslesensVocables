@@ -1568,10 +1568,13 @@ var Sparql_OWL = (function() {
             slices,
             function(slice, callbackEach) {
                 var filterStr = Sparql_common.setFilter("subject", slice);
+                var fromStr = Sparql_common.getFromStr(source);
                 var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                     "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
                     "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
-                    " select  distinct ?subject (GROUP_CONCAT( distinct ?type;separator=\",\") as ?types)" + "   WHERE { ?subject rdf:type ?type. " + filterStr + " }";
+                    " select  distinct ?subject (GROUP_CONCAT( distinct ?type;separator=\",\") as ?types) "+
+                    fromStr+
+                    "   WHERE { ?subject rdf:type ?type. " + filterStr + " }";
 
                 query += " limit " + 10000 + " ";
                 self.sparql_url = Config.sources[source].sparql_server.url;

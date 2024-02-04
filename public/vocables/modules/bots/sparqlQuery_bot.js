@@ -355,11 +355,14 @@ var SparqlQuery_bot = (function () {
             var data = getWhiteBoardFilter();
             var filter = "";
             var limit = null;
+            var getFilteredTriples2=null;
             if (sampleType) {
+                getFilteredTriples2=true
+
                 if(sampleType=="Predicates"){
                     filter=" filter(?prop not in (rdf:type,rdfs:subClassOf ))"
                 }else{
-                filter = " ?subject rdf:type " + sampleType + ". filter(?object!=" + sampleType + ") filter(?prop=rdf:type || ?prop=rdfs:subClassOf )  ";
+                filter = " ?subject rdf:type " + sampleType + ". ";//filter(?object!=" + sampleType + ") filter(?prop=rdf:type || ?prop=rdfs:subClassOf )  ";
                 }
                 try {
                     limit = parseInt(sampleSize);
@@ -373,6 +376,7 @@ var SparqlQuery_bot = (function () {
             var options = {
                 filter: filter,
                 limit: limit,
+                getFilteredTriples2:getFilteredTriples2
             };
 
             Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);

@@ -816,7 +816,7 @@ var Sparql_OWL = (function() {
 
 
     self.getFilteredTriples2 = function(sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
-        function query(subjectIds, propertyIds, objectIds, callbackQuery) {
+
             var filterStr = "";
 
             if (subjectIds) {
@@ -833,7 +833,7 @@ var Sparql_OWL = (function() {
                 self.graphUri = Config.sources[sourceLabel].graphUri;
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-                fromStr = Sparql_common.getFromStr(sourceLabel, false, true, options);
+                fromStr = Sparql_common.getFromStr(sourceLabel, false, false, options);
             } else {
                 // to be  implemented
             }
@@ -856,14 +856,14 @@ var Sparql_OWL = (function() {
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                "select distinct ?subject ?prop ?object ?subjectLabel ?propLabel ?objectLabel  " +
+                "select distinct ?subject ?prop ?object ?subjectLabel ?propLabel ?objectLabel ?subjectType ?objectType " +
                 fromStr +
                 " WHERE{\n" +
-                "  { graph ?g{ ?object rdfs:label ?objectLabel. ?object rdf:type ?objectType}}\n" +
-                "   { graph ?g{ ?subject rdfs:label ?subjectLabel. ?subject rdf:type ?subjectType}}\n" +
-                "    { graph ?g{ ?prop rdfs:label ?propLabel.}}\n" +
+                "  { graph ?g{ ?object rdf:type ?objectType. OPTIONAL { ?object rdfs:label ?objectLabel.}}}\n" +
+                "   { graph ?g{  ?subject rdf:type ?subjectType. OPTIONAL { ?subject rdfs:label ?subjectLabel.}}}\n" +
+               // "    { graph ?g{ ?prop rdf:type ?propType. OPTIONAL {?prop rdfs:label ?propLabel.}}\n" +
                 "  \n" +
-                "  {graph " + sourceGraphUri +
+                "  {graph <" + sourceGraphUri +">"+
                 "{?subject ?prop ?object.  " +
                 filterStr +
                 "  } " +
@@ -883,8 +883,8 @@ var Sparql_OWL = (function() {
                 }
                 return callback(null, result.results.bindings);
             });
-        }
-    };
+
+    }
 
 
     /**

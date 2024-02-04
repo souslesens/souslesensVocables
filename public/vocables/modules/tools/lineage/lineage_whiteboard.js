@@ -1993,8 +1993,27 @@ var Lineage_whiteboard = (function() {
             var data = [];
             async.series([
                 function(callbackSeries) {
-                    Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function(err, result) {
+                if(!options.getFilteredTriples2)
+                    return callbackSeries()
+                    Sparql_OWL.getFilteredTriples2(source, subjectIds, properties, objectIds, options, function(err, result) {
                     //Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function(err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        if (options.output == "graph") {
+                            result = Lineage_whiteboard.truncateResultToVisGraphLimit(result);
+                        }
+                        data = result;
+                        callbackSeries();
+                    });
+
+
+                },
+                function(callbackSeries) {
+                    if(options.getFilteredTriples2)
+                        return callbackSeries()
+                    Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function(err, result) {
+                        //Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function(err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -2009,13 +2028,14 @@ var Lineage_whiteboard = (function() {
                 },
 
                 function(callbackSeries) {
-                    if (true) {
+                    if (false) {
                         return callbackSeries();
                     }
-                    Sparql_common.setSparqlResultPropertiesLabels(source, result, "prop", function(err, result2) {
+                    Sparql_common.setSparqlResultPropertiesLabels(source, data, "prop", function(err, result2) {
                         if (err) {
                             return callback(err);
                         }
+                        callbackSeries()
 
                     });
                 },
@@ -2122,6 +2142,7 @@ var Lineage_whiteboard = (function() {
                                 edgeColor = "#3c8fe1";
                                 dashes = [6, 2, 3];
                             }
+                            var propLabel=item.propLabel?item.propLabel.value:Sparql_common.getLabelFromURI(item.prop.value)
 
                             visjsData.edges.push({
                                 id: edgeId,
@@ -2130,13 +2151,13 @@ var Lineage_whiteboard = (function() {
                                 data: {
                                     id: edgeId,
                                     type: "ObjectProperty",
-                                    propLabel: item.propLabel.value,
+                                    propLabel: propLabel,
                                     from: item.subject.value,
                                     to: item.object.value,
                                     prop: item.prop.value,
                                     source: nodeSource
                                 },
-                                label: item.propLabel.value,
+                                label: propLabel,
                                 font: { edgeColor },
                                 arrows: {
                                     to: {

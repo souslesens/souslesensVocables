@@ -13,6 +13,7 @@ import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
+import Authentification from "../../shared/authentification.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -716,6 +717,10 @@ sourceDivId +
             return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
         });
         if (groups.indexOf("admin") > -1 && Config.sources[source].editable) {
+            return true;
+        }
+
+        if( Config.sourceOwner && Authentification.currentUser.login== Config.sourceOwner){
             return true;
         }
 

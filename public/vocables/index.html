@@ -219,7 +219,6 @@
                 async.series(
                     [
                         function (callbackSeries) {
-                            ResponsiveUI.init();
                             try {
                                 loadToolsAndPlugins(function () {
                                     callbackSeries();
@@ -316,7 +315,7 @@
                         $("#ChangeSourceButton").hide();
                         $("#index_topContolPanel").hide();
                         $("#Lineage_graphEditionButtons").hide();
-                      ResponsiveUI.init();
+                        ResponsiveUI.init();
                     }
                 );
             });

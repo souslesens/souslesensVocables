@@ -83,6 +83,9 @@ var SparqlQuery_bot = (function () {
                         },
                     },
                 },
+                "Sample of Classes": { promptClassesSampleSizeFn: { executeQuery: {} } },
+                "Sample of Individuals": { promptIndividualsSampleSizeFn: { executeQuery: {} } },
+                "Sample of Predicates": { promptPredicatesSampleSizeFn: { executeQuery: {} } },
             },
         },
     };
@@ -96,6 +99,7 @@ var SparqlQuery_bot = (function () {
         listAnnotationPropertiesFn: "Choose a property",
         promptAnnotationPropertyValue: "Filter value ",
         listWhiteBoardFilterType: "Choose a scope",
+
     };
 
     self.functions = {
@@ -103,7 +107,7 @@ var SparqlQuery_bot = (function () {
             CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
         },
         listQueryTypeFn: function () {
-            var choices = ["By Class", "By Object Property", "By Annotation property"];
+            var choices = ["By Class", "By Object Property", "By Annotation property", "Sample of Classes", "Sample of Individuals","Sample of Predicates"];
 
             BotEngine.showList(choices, null);
             return;
@@ -243,6 +247,20 @@ var SparqlQuery_bot = (function () {
             }
             BotEngine.showList(choices, "whiteboardFilterType");
         },
+
+        promptClassesSampleSizeFn: function () {
+            self.params.sampleType = "owl:Class";
+            BotEngine.promptValue("enter sample size", "sampleSize", 500);
+        },
+        promptIndividualsSampleSizeFn: function () {
+            self.params.sampleType = "owl:NamedIndividual";
+            BotEngine.promptValue("enter sample size", "sampleSize", 500);
+        },
+        promptPredicatesSampleSizeFn: function () {
+            self.params.sampleType = "Predicates";
+            BotEngine.promptValue("enter sample size", "sampleSize", 500);
+        },
+
         executeQuery: function () {
             var source = self.params.source;
             var currentClass = self.params.currentClass;
@@ -254,6 +272,8 @@ var SparqlQuery_bot = (function () {
             var advancedFilter = self.params.advancedFilter || "";
             var annotationPropertyId = self.params.annotationPropertyId;
             var annotationValue = self.params.annotationValue;
+            var sampleType = self.params.sampleType;
+            var sampleSize = self.params.sampleSize;
 
             function setAnnotationPropertyFilter() {
                 if (!annotationPropertyId) {
@@ -333,9 +353,30 @@ var SparqlQuery_bot = (function () {
             }
 
             var data = getWhiteBoardFilter();
-            var filter = setAnnotationPropertyFilter() || getPathFilter() + " " + getIndividualsFilter();
+            var filter = "";
+            var limit = null;
+            var getFilteredTriples2=null;
+            if (sampleType) {
+                getFilteredTriples2=true
+
+                if(sampleType=="Predicates"){
+                    filter=" filter(?prop not in (rdf:type,rdfs:subClassOf ))"
+                }else{
+                filter = " ?subject rdf:type " + sampleType + ". ";//filter(?object!=" + sampleType + ") filter(?prop=rdf:type || ?prop=rdfs:subClassOf )  ";
+                }
+                try {
+                    limit = parseInt(sampleSize);
+                } catch (e) {
+                    alert("wrong number for sampleSize");
+                    return BotEngine.reset();
+                }
+            } else {
+                filter = setAnnotationPropertyFilter() || getPathFilter() + " " + getIndividualsFilter();
+            }
             var options = {
                 filter: filter,
+                limit: limit,
+                getFilteredTriples2:getFilteredTriples2
             };
 
             Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);

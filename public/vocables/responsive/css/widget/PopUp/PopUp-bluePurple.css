@@ -25,7 +25,6 @@
     color: @source-color;
 }
 
-
 .Lineage_PopUpStyle select option:hover {
     background-color: @dark-background-color;
     color: @button1-color;

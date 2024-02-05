@@ -422,7 +422,7 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
                 "Label. filter(regex( lang(?" +
                 variable +
                 "Label), '" +
-                OntologyModel.Config.default_lang +
+                OntologyModel.Config.default_lang || 'en' +
                 "') || !lang(?" +
                 variable +
                 "Label))";

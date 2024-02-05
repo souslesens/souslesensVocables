@@ -1,9 +1,6 @@
-import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "./lineage_sources.js";
 import common from "../../shared/common.js";
-import OntologyModels from "../../shared/ontologyModels.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_relations from "./lineage_relations.js";
@@ -22,15 +19,17 @@ var Lineage_decoration = (function () {
     self.topOntologiesClassesMap = {};
     self.legendMap = {};
     self.currentVisjGraphNodesMap = {};
-    self.decorateNodeAndDrawLegend = function (visjsNodes) {
-        self.drawIndividualTypesLegend(visjsNodes, function () {
-            if (Lineage_relations.currentQueryInfos) {
-                self.decorateByQueryInfos(visjsNodes, Lineage_relations.currentQueryInfos);
-                Lineage_relations.currentQueryInfos = null;
-            } else {
-                self.decorateByUpperOntologyByClass(visjsNodes);
-            }
-        });
+
+    self.decorateNodeAndDrawLegend = function (visjsNodes, legendType) {
+        if (!visjsNodes) visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+        if (legendType == "individualClasses") {
+            self.drawIndividualTypesLegend(visjsNodes, function () {});
+        } else if (legendType == "queryInfos") {
+            self.decorateByQueryInfos(visjsNodes, Lineage_relations.currentQueryInfos);
+            Lineage_relations.currentQueryInfos = null;
+        } else {
+            self.decorateByUpperOntologyByClass(visjsNodes);
+        }
     };
 
     self.decorateByQueryInfos = function (visjsNodes, queryInfos) {
@@ -132,10 +131,8 @@ var Lineage_decoration = (function () {
 
                                     types.forEach(function (type) {
                                         if (type && type.indexOf("/owl") < 0 && type.indexOf("/rdf") < 0) {
-                                            if (slice.indexOf(type) < 0 && !legendClassColorsMap[type]) {
-                                                if (!legendClassColorsMap[type]) {
-                                                    legendClassColorsMap[type] = common.getResourceColor("individualtypesLegend", type);
-                                                }
+                                            if (!legendClassColorsMap[type]) {
+                                                legendClassColorsMap[type] = common.getResourceColor("individualtypesLegend", type);
                                             }
                                             newNode.color = legendClassColorsMap[type];
                                         } else {

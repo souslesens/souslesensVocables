@@ -19,16 +19,17 @@ var CreateSLSVsource_bot = (function () {
         });
     };
     self.loadingWorkflow = {
-        _OR: {
-        "Launch Ontology" : {loadLineageFn:{}},
-        "Launch Semantic Knowledge Graph" : { loadKGqueryFn:{} },
-        },
+     loadLineageFn: {}
+      /*  _OR: {
+            "Launch Lineage": { loadLineageFn: {} },
+            "Launch KGquery": { loadKGqueryFn: {} },
+        },*/
     };
     self.workflowUpload = {
         _OR: {
-            "Upload graph from file": { uploadFromFileFn: self.loadingWorkflow  },
-            "Upload graph from URL": { uploadFromUrlFn: self.loadingWorkflow  },
-            "Finish":  self.loadingWorkflow ,
+            "Upload graph from file": { uploadFromFileFn: self.loadingWorkflow },
+            "Upload graph from URL": { uploadFromUrlFn: self.loadingWorkflow },
+            Finish: self.loadingWorkflow,
         },
     };
 
@@ -174,7 +175,7 @@ var CreateSLSVsource_bot = (function () {
             url += "?tool=lineage&source=" + self.params.sourceLabel;
             window.location.href = url;
         },
-        loadKGqueryFn:function() {
+        loadKGqueryFn: function () {
             var url = window.location.href;
             url = url.replace("index_old.html", "");
             var p = url.indexOf("?");
@@ -184,7 +185,7 @@ var CreateSLSVsource_bot = (function () {
 
             url += "?tool=KGquery&source=" + self.params.sourceLabel;
             window.location.href = url;
-        }
+        },
     };
 
     self.uploadGraphFromUrl = function (callback) {

@@ -291,7 +291,6 @@ var Lineage_dictionary = (function () {
                     var cols = [];
 
                     cols.push({
-                        title: "Selection",
                         defaultContent: "",
                         title: "Selection",
                         className: "select-checkbox",

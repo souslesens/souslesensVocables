@@ -159,6 +159,10 @@ var PredicatesSelectorWidget = (function () {
         } else {
             OntologyModels.registerSourcesModel([vocabulary], function (err, result) {
                 properties = OntologyModels.getPropertiesArray(vocabulary);
+                var datatypeProperties = OntologyModels.getAnnotationProperties(vocabulary);
+                properties = properties.concat(datatypeProperties);
+                common.array.sort(properties, "label");
+
                 common.fillSelectOptions(selectId, properties, true, "label", "id");
             });
         }
@@ -217,7 +221,9 @@ var PredicatesSelectorWidget = (function () {
 
     self.setCurrentVocabClassesSelect = function (vocabulary, selectId) {
         self.currentVocabulary = vocabulary;
-        if (!selectId) selectId = "editPredicate_objectSelect";
+        if (!selectId) {
+            selectId = "editPredicate_objectSelect";
+        }
         var classes = [];
 
         if (vocabulary == "usual") {

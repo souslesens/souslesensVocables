@@ -1,5 +1,3 @@
-
-
 const allTools = {
     lineage: { label: "lineage", noSource: 0, controller: Lineage_r, toolDescriptionImg: null },
     KGcreator: { label: "KGcreator", noSource: 1, controller: KGcreator_r, toolDescriptionImg: null },

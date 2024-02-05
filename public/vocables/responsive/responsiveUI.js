@@ -114,11 +114,7 @@ var ResponsiveUI = (function () {
 
     self.onSourceSelect = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
-        var p= obj.node.parents.indexOf("PRIVATE")
-        if(p>0){
-           Config.sourceOwner= obj.node.parents[p-1]
 
-        }
 
 
 

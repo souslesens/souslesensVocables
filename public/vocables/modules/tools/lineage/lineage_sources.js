@@ -720,7 +720,7 @@ sourceDivId +
             return true;
         }
 
-        if( Config.sourceOwner && Authentification.currentUser.login== Config.sourceOwner){
+        if(Config.sources[source].accessControl=="readwrite"){
             return true;
         }
 

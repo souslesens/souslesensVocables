@@ -99,6 +99,7 @@ var Lineage_createSLSVsource = (function () {
             taxonomyPredicates: ["rdfs:subClassOf"],
             graphUri: graphUri,
             owner: Authentification.currentUser.login,
+            published:false
         };
 
         var payload = {

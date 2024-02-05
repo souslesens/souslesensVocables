@@ -35,12 +35,14 @@ module.exports = function () {
                                 if (err) {
                                     return res.status(400).json({ error: err });
                                 }
+
+
                                 if (userInfo.user.groups.includes("admin")) {
                                     httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
                                         return processResponse(res, err, result);
                                     });
                                 } else {
-                                    UserRequestFiltering.filterSparqlRequest(body.params.query, userSources, function (parsingError, filteredQuery) {
+                                    UserRequestFiltering.filterSparqlRequest(body.params.query, userSources,userInfo, function (parsingError, filteredQuery) {
                                         if (parsingError) {
                                             return processResponse(res, parsingError, null);
                                         }

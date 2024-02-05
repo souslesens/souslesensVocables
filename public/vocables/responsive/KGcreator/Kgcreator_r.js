@@ -4,7 +4,6 @@ import KGcreator_run from "../../modules/tools/KGcreator/KGcreator_run.js";
 import ResponsiveUI from "../../responsive/responsiveUI.js";
 import NodesInfosWidget from "../../modules/uiWidgets/nodeInfosWidget.js";
 
-
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
 import Lineage_r from "../lineage/lineage_r.js";
 var KGcreator_r = (function () {

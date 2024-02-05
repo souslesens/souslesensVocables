@@ -19,8 +19,8 @@ var ResponsiveUI = (function () {
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
         //self.setSlsvCssClasses();
-         //your remaining code
-        
+        //your remaining code
+
         var tools = [];
 
         for (var key in Config.tools) {
@@ -115,9 +115,6 @@ var ResponsiveUI = (function () {
 
     self.onSourceSelect = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
-
-
-
 
         if (!obj.node.data || obj.node.data.type != "source") {
             return self.alert("select a tool");
@@ -314,7 +311,6 @@ var ResponsiveUI = (function () {
     };
 
     self.setSlsvCssClasses = function (callback) {
-        
         less.pageLoadFinished.then(function () {
             //setTimeout(() => {}, "500");
             ResponsiveUI.changeTheme(Config.theme.defaultTheme);
@@ -323,7 +319,6 @@ var ResponsiveUI = (function () {
             }
             callback();
         });
-           
     };
 
     self.themeList = function () {

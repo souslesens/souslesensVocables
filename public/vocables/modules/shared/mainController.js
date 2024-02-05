@@ -633,8 +633,7 @@ return callback()
                 var source = paramsMap["source"];
 
                 var url = window.location.href;
-               
-                   
+
                 if (url.includes("index_old.html")) {
                     //if the old index is already launched we have just to init the tool
                     if (source) {
@@ -645,14 +644,13 @@ return callback()
                         callback();
                     });
                 } else {
-                     // if tool available load it in responsive
-                     if (source) {
-                  
+                    // if tool available load it in responsive
+                    if (source) {
                         ResponsiveUI.source = source;
                     }
-                  
+
                     ResponsiveUI.onToolSelect(tool);
-                   /*
+                    /*
                     var p = url.indexOf("?");
                     if (p > -1) {
                         var params = url.substring(p);

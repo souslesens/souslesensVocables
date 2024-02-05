@@ -34,12 +34,11 @@ var NodeInfosWidget = (function () {
             $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
             $("#" + divId).dialog("open");
             $("#" + divId).dialog({
-                close:function(event,ui){
+                close: function (event, ui) {
                     window.scrollTo(0, 0);
-                    $('#addPredicateButton').remove();
-                    $('#deleteButton').remove();
-
-                }
+                    $("#addPredicateButton").remove();
+                    $("#deleteButton").remove();
+                },
             });
             $("#mainDialogDiv").parent().css("top", "20px");
             $("#mainDialogDiv").parent().css("left", "20px");

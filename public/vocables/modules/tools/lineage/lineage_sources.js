@@ -720,7 +720,7 @@ sourceDivId +
             return true;
         }
 
-        if(Config.sources[source].accessControl=="readwrite"){
+        if (Config.sources[source].accessControl == "readwrite") {
             return true;
         }
 

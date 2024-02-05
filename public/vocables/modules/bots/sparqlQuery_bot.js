@@ -99,7 +99,6 @@ var SparqlQuery_bot = (function () {
         listAnnotationPropertiesFn: "Choose a property",
         promptAnnotationPropertyValue: "Filter value ",
         listWhiteBoardFilterType: "Choose a scope",
-
     };
 
     self.functions = {
@@ -107,7 +106,7 @@ var SparqlQuery_bot = (function () {
             CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
         },
         listQueryTypeFn: function () {
-            var choices = ["By Class", "By Object Property", "By Annotation property", "Sample of Classes", "Sample of Individuals","Sample of Predicates"];
+            var choices = ["By Class", "By Object Property", "By Annotation property", "Sample of Classes", "Sample of Individuals", "Sample of Predicates"];
 
             BotEngine.showList(choices, null);
             return;
@@ -355,14 +354,14 @@ var SparqlQuery_bot = (function () {
             var data = getWhiteBoardFilter();
             var filter = "";
             var limit = null;
-            var getFilteredTriples2=null;
+            var getFilteredTriples2 = null;
             if (sampleType) {
-                getFilteredTriples2=true
+                getFilteredTriples2 = true;
 
-                if(sampleType=="Predicates"){
-                    filter=" filter(?prop not in (rdf:type,rdfs:subClassOf ))"
-                }else{
-                filter = " ?subject rdf:type " + sampleType + ". ";//filter(?object!=" + sampleType + ") filter(?prop=rdf:type || ?prop=rdfs:subClassOf )  ";
+                if (sampleType == "Predicates") {
+                    filter = " filter(?prop not in (rdf:type,rdfs:subClassOf ))";
+                } else {
+                    filter = " ?subject rdf:type " + sampleType + ". "; //filter(?object!=" + sampleType + ") filter(?prop=rdf:type || ?prop=rdfs:subClassOf )  ";
                 }
                 try {
                     limit = parseInt(sampleSize);
@@ -376,7 +375,7 @@ var SparqlQuery_bot = (function () {
             var options = {
                 filter: filter,
                 limit: limit,
-                getFilteredTriples2:getFilteredTriples2
+                getFilteredTriples2: getFilteredTriples2,
             };
 
             Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);

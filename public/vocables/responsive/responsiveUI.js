@@ -15,11 +15,12 @@ var ResponsiveUI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.tools_available = ["lineage", "KGquery", "KGcreator", "OntoCreator"];
     self.toolsNeedSource = ["lineage", "KGquery", "KGcreator"];
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
-        self.setSlsvCssClasses();
+        //self.setSlsvCssClasses();
+         //your remaining code
+        
         var tools = [];
 
         for (var key in Config.tools) {
@@ -312,34 +313,17 @@ var ResponsiveUI = (function () {
             .css("left", "30%");
     };
 
-    self.setSlsvCssClasses = function () {
-        async.series(
-            [
-                function (callbackSeries) {
-                    $.getScript("./responsive/less.min.js")
-                        .done(function (script, textStatus) {
-                            callbackSeries();
-                            //your remaining code
-                            less.pageLoadFinished.then(function () {
-                                //setTimeout(() => {}, "500");
-                                ResponsiveUI.changeTheme(Config.theme.defaultTheme);
-                                if (Config.theme.selector) {
-                                    $("#theme-selector-btn").show();
-                                }
-                            });
-                        })
-                        .fail(function (jqxhr, settings, exception) {
-                            console.log("eeee");
-                            callbackSeries(err);
-                        });
-                },
-            ],
-            function (err) {
-                if (err) {
-                    return alert(err);
-                }
+    self.setSlsvCssClasses = function (callback) {
+        
+        less.pageLoadFinished.then(function () {
+            //setTimeout(() => {}, "500");
+            ResponsiveUI.changeTheme(Config.theme.defaultTheme);
+            if (Config.theme.selector) {
+                $("#theme-selector-btn").show();
             }
-        );
+            callback();
+        });
+           
     };
 
     self.themeList = function () {

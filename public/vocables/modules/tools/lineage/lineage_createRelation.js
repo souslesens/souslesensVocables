@@ -4,13 +4,14 @@ import Lineage_whiteboard from "./lineage_whiteboard.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-
+import Lineage_sources from "./lineage_sources.js";
 var Lineage_createRelation = (function () {
     var self = {};
 
     self.showAddEdgeFromGraphDialog = function (edgeData, callback) {
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
+        Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
         $("#mainDialogDiv").load("snippets/lineage/lineageAddEdgeDialog.html", function () {
             self.sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
             self.targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;

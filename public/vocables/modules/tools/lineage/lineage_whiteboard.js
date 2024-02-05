@@ -657,21 +657,21 @@ var Lineage_whiteboard = (function() {
                 options.visjsOptions.edges = _options.edges;
             }
 
-            if (_options.visjsOptions && _options.visjsOptions.manipulation) {
-                options.visjsOptions.manipulation = _options.visjsOptions.manipulation;
-            } else if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
-                // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
-                options.visjsOptions.manipulation = {
-                    enabled: false,
-                    initiallyActive: false,
-                    deleteNode: false,
-                    deleteEdge: false,
-                    editNode: false,
-                    editEdge: false,
-
-                    addEdge: function(edgeData, callback) {
-                        var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from);
-                        var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
+        if (_options.visjsOptions && _options.visjsOptions.manipulation) {
+            options.visjsOptions.manipulation = _options.visjsOptions.manipulation;
+        } else if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+            // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
+            options.visjsOptions.manipulation = {
+                enabled: true,
+                initiallyActive: true,
+                deleteNode: false,
+                deleteEdge: false,
+                editNode: false,
+                editEdge: false,
+                
+                addEdge: function (edgeData, callback) {
+                    var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from);
+                    var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
 
                         if (false && sourceNode.data && sourceNode.data.type != "container" && targetNode.data && targetNode.data.type == "container") {
                             return Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);
@@ -682,38 +682,40 @@ var Lineage_whiteboard = (function() {
                             return Lineage_graphTraversal.drawShortestpath(Lineage_sources.activeSource, edgeData.from, edgeData.to);
                         }
 
-                        if (sourceNode.data.context == Lineage_linkedData_mappings.context || targetNode.data.context == Lineage_linkedData_mappings.context) {
-                            Lineage_linkedData_mappings.onAddEdgeDropped(edgeData, function(err, result) {
-                                if (err) {
-                                    return callback(err.responseText);
-                                }
-                                return null;
-                            });
-                        } else {
-                            Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function(err, result) {
-                                if (err) {
-                                    return callback(err.responseText);
-                                }
-                                return null;
-                            });
-                        }
-                    },
-                    addNode: function(nodeData, callback) {
-                        /*  CreateResource_bot.start()
-                    return;*/
-                        Lineage_createResource.showAddNodeGraphDialog(function(err, result) {
+                    if (sourceNode.data.context == Lineage_linkedData_mappings.context || targetNode.data.context == Lineage_linkedData_mappings.context) {
+                        Lineage_linkedData_mappings.onAddEdgeDropped(edgeData, function (err, result) {
+                            if (err) {
+                                return callback(err.responseText);
+                            }
+                            return null;
+                        });
+                    } else {
+                        Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
                             if (err) {
                                 return callback(err.responseText);
                             }
                             return null;
                         });
                     }
+                },
+                /*
+                addNode: function (nodeData, callback) {
+                     CreateResource_bot.start()
+                    return;
+                    Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
+                        if (err) {
+                            return callback(err.responseText);
+                        }
+                        return null;
+                    });
+                },
+                */
+            };
+            if (false) {
+                options.visjsOptions.interaction = {
+                    navigationButtons: true,
                 };
-                if (false) {
-                    options.visjsOptions.interaction = {
-                        navigationButtons: true
-                    };
-                }
+            }
 
                 Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
             } else {

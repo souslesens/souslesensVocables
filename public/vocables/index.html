@@ -195,6 +195,25 @@
 
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 
+        
+        <!----------------------------RESPONSIVE UI--------------------->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+
+        <link rel="stylesheet" href="./responsive/index.css" />
+
+        
+        <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
+        <script src="./responsive/less.min.js"></script>
+        <!--<script src="https://cdn.jsdelivr.net/npm/less" ></script>-->
+        <script type="module" src="./responsive/responsiveUI.js"></script>
+        <script type="module" src="./responsive/lineage/lineage_r.js"></script>
+        
+        <script type="module" src="./responsive/widget/botEngineResponsive.js"></script>
+        <script type="module" src="./responsive/KGquery/KGquery_r.js"></script>
+        <script type="module" src="./responsive/KGcreator/Kgcreator_r.js"></script>
+        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
         <script type="module">
             import MainController from "./modules/shared/mainController.js";
             import authentication from "./modules/shared/authentification.js";
@@ -217,21 +236,8 @@
 
             $(function () {
                 async.series(
-                    [
-                        function (callbackSeries) {
-                            try {
-                                loadToolsAndPlugins(function () {
-                                    callbackSeries();
-                                });
-                            } catch (error) {
-                                console.error("Failed to load tools and plugins", error);
-                            }
-                        },
-                        function (callBackSeries) {
-                            authentication.init(function (err, result) {
-                                callBackSeries(err);
-                            });
-                        },
+                    [   
+                        
                         function (callBackSeries) {
                             MainController.initConfig(function (err) {
                                 // sentry/glitchtip
@@ -244,12 +250,37 @@
                                 }
                                 callBackSeries(err);
                             });
+                        },  
+                       
+                        function(callBackSeries){
+                            ResponsiveUI.setSlsvCssClasses(function(){
+                                callBackSeries();
+                            });
+
+                        },
+                        
+                        function (callBackSeries) {
+                            authentication.init(function (err, result) {
+                                callBackSeries(err);
+                            });
                         },
                         function (callBackSeries) {
                             MainController.onAfterLogin(function (err) {
                                 callBackSeries(err);
                             });
                         },
+
+                      
+                        function (callbackSeries) {
+                            try {
+                                loadToolsAndPlugins(function () {
+                                    callbackSeries();
+                                });
+                            } catch (error) {
+                                console.error("Failed to load tools and plugins", error);
+                            }
+                        },
+                        
                     ],
                     function (err) {
                         w = $(document).width() - leftPanelWidth - 30;
@@ -273,8 +304,8 @@
                             width: $(document).width() * 0.85,
                             modal: false,
                             close: function (event, ui) {
-                                //$("#deleteButton").remove();
-                                //$("#addPredicateButton").remove();
+                                window.scrollTo(0, 0);
+                                
                             },
                         });
                         $("#mainDialogDiv2").dialog({
@@ -321,58 +352,7 @@
             });
         </script>
 
-        <!----------------------------RESPONSIVE UI--------------------->
-
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
-
-        <link rel="stylesheet" href="./responsive/index.css" />
-
-        <!-- <script>
-            less = {
-                env: "development",
-                async: false,
-                fileAsync: false,
-                poll: 1000,
-                functions: {},
-                dumpLineNumbers: "comments",
-                relativeUrls: false,
-                rootpath: ":/a.com/",
-            };
-        </script>-->
-
-        <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
-        <!--<script src="./responsive/less.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/less" ></script>-->
-        <script type="module" src="./responsive/responsiveUI.js"></script>
-        <script type="module" src="./responsive/lineage/lineage_r.js"></script>
-        <script type="module" src="./responsive/widget/nodeInfosWidgetResponsive.js"></script>
-        <script type="module" src="./responsive/widget/botEngineResponsive.js"></script>
-        <script type="module" src="./responsive/KGquery/KGquery_r.js"></script>
-        <script type="module" src="./responsive/KGcreator/Kgcreator_r.js"></script>
-        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
-
-        <!--
-        <script>
-            less.pageLoadFinished.then(function () {
-                setTimeout(() => {
-                    if (!Config.theme) {
-                        Config.theme= {
-                            defaultTheme: "KGA",
-                            selector: false
-                        }
-                    }
-
-                    ResponsiveUI.changeTheme(Config.theme.defaultTheme);
-                    if (Config.theme.selector) {
-                        $("#theme-selector-btn").show();
-                    }
-                }, "500");
-            });
-        </script>
-        -->
-        <!--<link rel="stylesheet" href="./slsv-cartography1.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-cartography2.css" />-->
+       
     </head>
 
     <body>
@@ -439,13 +419,14 @@
                             style="display: flex; flex-direction: row; align-items: center; margin-left: 0px !important; margin-right: 0px !important; padding: 6.5px"
                             id="Lineage_graphEditionButtons"
                         >
-                            <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
+                            <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>
                             <div class="slsv-button-source" style="padding: 5px 12px" id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
                                 <button class="slsv-invisible-button add-icon" style="margin-right: 5px; height: 25px; width: 29px"></button><span style="margin-top: 3px">Add Node</span>
                             </div>
                             <div class="slsv-button-source addEdgeButtonColor" style="padding: 5px 12px" id="lineage_actionDiv_addedge" onclick="Lineage_r.addEdge()">
                                 <button class="slsv-invisible-button add-icon" style="margin-right: 5px; height: 25px; width: 29px"></button><span style="margin-top: 3px">Add Edge</span>
                             </div>
+                            -->
                         </div>
                     </div>
 

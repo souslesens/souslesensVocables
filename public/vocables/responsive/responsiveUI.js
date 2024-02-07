@@ -91,24 +91,27 @@ var ResponsiveUI = (function () {
         });
     };
 
-    self.onToolSelect = function (event) {
-        var clickedElement = event.target;
-        // if class
-        if(clickedElement.className=='Lineage_PopUpStyleDiv'){
-            var toolId=$(clickedElement).children()[1].innerHTML;
-        }
-        else {
-            if(clickedElement.innerHTML){
-                var toolId=clickedElement.innerHTML;
-            }else{
-                
-                var toolId=clickedElement.nextSibling.innerHTML;
-            }
-            
+    self.onToolSelect = function (toolId,event) {
+        if(event){
 
-        }
         
+            var clickedElement = event.target;
+            // if class
+            if(clickedElement.className=='Lineage_PopUpStyleDiv'){
+                var toolId=$(clickedElement).children()[1].innerHTML;
+            }
+            else {
+                if(clickedElement.innerHTML){
+                    var toolId=clickedElement.innerHTML;
+                }else{
+                    
+                    var toolId=clickedElement.nextSibling.innerHTML;
+                }
+                
 
+            }
+        
+        }
 
         if (self.currentTool != null) {
             if (Config.tools[self.currentTool].controller.quit) {
@@ -335,21 +338,29 @@ var ResponsiveUI = (function () {
     self.hideShowLateralPannel = function (button) {
         if (self.LateralPannelShowed) {
             $("#lineage-tab-buttons").hide();
-            $("#WhiteboardContent").hide();
+            $(button).parent().hide();
             $("#lateralPanelDiv").css("width", "21px");
             $("#lateralPanelDiv").removeClass("ui-resizable");
             ResponsiveUI.resetWindowHeight();
             self.LateralPannelShowed = false;
-            $("#lateralPanelDiv").append(button);
-            $("#ArrowLateralPannel").attr("src", "./icons/CommonIcons/ArrowLateralPannelShow.png");
+            var buttonclone=button.cloneNode(true);
+            $("#lateralPanelDiv").append(buttonclone);
+            $(buttonclone).find("#ArrowLateralPannel").attr("src", "./icons/CommonIcons/ArrowLateralPannelShow.png");
+            //$("#lateralPanelDiv").find("#ArrowLateralPannel");
         } else {
+            $(button).remove();
             $("#lineage-tab-buttons").show();
             $("#WhiteboardContent").show();
             $("#lateralPanelDiv").css("width", "395px");
             ResponsiveUI.resetWindowHeight();
             self.LateralPannelShowed = true;
-            $("#ArrowLateralPannel").attr("src", "./icons/CommonIcons/ArrowLateralPannel.png");
+            var currentTabId='#tabs_'+$(".slsv-selectedTabDiv").attr('popupcomment').toLowerCase();
+            $(currentTabId).children().show();
+
+            /*$(button).parent().show();
+            //$(button).parent().find("#ArrowLateralPannel").attr("src", "./icons/CommonIcons/ArrowLateralPannel.png");*/
             $("#lateralPanelDiv").addClass("ui-resizable");
+
         }
     };
     self.registerSourceWithoutImports = function (sourceLabel, callback) {

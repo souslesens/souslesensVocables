@@ -18,6 +18,7 @@ import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Lineage_createResource from "./lineage_createResource.js";
+import ResponsiveUI from "../../../responsive/responsiveUI.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -737,7 +738,7 @@ var Lineage_whiteboard = (function() {
                 }
             });
             Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-
+            ResponsiveUI.resetWindowHeight();
             return;
         };
 

@@ -592,6 +592,7 @@ var KGcreator = (function () {
                             data: { id: column, table: fileName, label: column, type: "tableColumn" },
                         });
                     });
+                    
                     if (self.currentConfig.currentMappings && self.currentConfig.currentMappings[fileName] && self.currentConfig.currentMappings[fileName].virtualColumns) {
                         self.currentConfig.currentMappings[fileName].virtualColumns.forEach(function (virtualColumn) {
                             var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";

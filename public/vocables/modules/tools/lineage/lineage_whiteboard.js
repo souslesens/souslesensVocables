@@ -733,7 +733,7 @@ var Lineage_whiteboard = (function() {
 
                 if (self.lineageVisjsGraph.isGraphNotEmpty()) {
                     Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
-                    //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
+                    GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
                 }
             });
             Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);

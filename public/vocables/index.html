@@ -385,7 +385,10 @@
                                 <button id="selectedTool" class="slsv-invisible-button" style="padding: 0px; margin-left: 10px">Tool</button>
                                 <button class="arrow-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-left: 3px; margin-right: 10px"></button>
                                 <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                                    <select id="toolsSelect" style="min-width:150px" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto"></select>
+                                   <!-- <select id="toolsSelect" style="min-width:150px" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto"></select>-->
+                                   <div id="toolsSelect" style="min-width:150px;display: flex;flex-direction: column;overflow: auto;max-height: 300px;" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect(event)">
+                                        
+                                   </div>
                                 </div>
                             </div>
 

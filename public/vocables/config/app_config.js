@@ -476,6 +476,26 @@ var Config = (function () {
             "@previousIcon": "../icons/SpatialTheme/PreviousIcon-Spatial.png",
             "@isDarkTheme": true,
         },
+        IOGP1 : {
+            "@source-color": "#781E77",
+            "@button1-color": "#DD8736",
+            "@button2-color": "#3A609E",
+            "@button3-color": "#4C287F",
+            "@legend-color": "#62656B",
+            "@background-color": "#EEE4F7",
+            "@dark-background-color": "#C8C2E1",
+        },
+        cfihos1 : {
+            "@source-color": "#DD8736",
+            "@button1-color": "#3A609E",
+            "@button2-color": "#F79D1F",
+            "@button3-color": "#781E77",
+            "@legend-color": "#62656B",
+            "@background-color": "#F2F2F2",
+            "@dark-background-color": "#C8C2E1",
+        },
+        
+
     };
 
     self.toolsLogo = {

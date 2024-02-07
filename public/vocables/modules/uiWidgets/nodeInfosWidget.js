@@ -231,14 +231,14 @@ var NodeInfosWidget = (function () {
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
             str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
         }
-
+        /*
         if (self.visitedNodes.length > 1) {
             str +=
                 "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(-1)'> previous </button>" +
                 "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(+1)'>  next </button>";
         }
         str += '  <span class="popupMenuItem" onclick="Lineage_axioms_create.showAdAxiomDialog (\'axioms_dialogDiv\');"> <b>Add Axiom</b></span>';
-
+        */
         str += "</div>";
 
         $("#" + self.currentNodeIdInfosDivId).prepend(str);

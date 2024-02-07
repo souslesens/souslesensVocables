@@ -831,7 +831,7 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            fromStr = Sparql_common.getFromStr(sourceLabel, false, false, options);
+            fromStr = Sparql_common.getFromStr(sourceLabel, false, !options.withImports, options);
         } else {
             // to be  implemented
         }
@@ -932,7 +932,7 @@ var Sparql_OWL = (function () {
                 self.graphUri = Config.sources[sourceLabel].graphUri;
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-                fromStr = Sparql_common.getFromStr(sourceLabel, false, true, options);
+                fromStr = Sparql_common.getFromStr(sourceLabel, false, !options.withImports, options);
             } else {
                 // to be  implemented
             }

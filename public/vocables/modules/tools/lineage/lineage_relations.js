@@ -25,19 +25,8 @@ var Lineage_relations = (function () {
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").dialog("option", "title", "Query");
         $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function () {
-            $("#lineageRelations_tabs").tabs({
-                activate: function (e, ui) {
-                    var divId = ui.newPanel.selector;
-                    if (divId == "#lineageRelations_resources2Tab") {
-                    }
-                },
-            });
-            $("#lineageRelations_history_previousBtn").css("display", self.previousQuery ? "inline" : "none");
-            $("#lineageRelations_history_deleteBtn").css("display", "none");
-            $("#Lineage_relation_filterText2").val("");
-            //   $("#LineageRelations_searchJsTreeInput").focus();
-            Lineage_relationFilter.showAddFilterDiv(true);
-            Lineage_relationIndividualsFilter.filter = "";
+          
+        
 
             //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
             $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
@@ -77,50 +66,7 @@ var Lineage_relations = (function () {
             var vocabulariesPropertiesMap = {};
             async.series(
                 [
-                    function (callbackSeries) {
-                        var vocabularies = ["usual", Lineage_sources.activeSource];
-                        if (Config.sources[Lineage_sources.activeSource].imports) {
-                            vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
-                        }
 
-                        vocabularies = vocabularies.concat(Object.keys(Config.ontologiesVocabularyModels));
-
-                        async.eachSeries(
-                            vocabularies,
-                            function (vocabulary, callbackEach) {
-                                if (vocabulary == "usual") {
-                                    return callbackEach();
-                                    var properties = [];
-                                    KGcreator.usualProperties.forEach(function (item) {
-                                        properties.push({ label: item, id: item });
-                                    });
-
-                                    vocabulariesPropertiesMap[vocabulary] = properties;
-                                    return callbackEach();
-                                } else if (Config.ontologiesVocabularyModels[vocabulary]) {
-                                    properties = OntologyModels.getPropertiesArray(vocabulary);
-                                    vocabulariesPropertiesMap[vocabulary] = properties;
-                                    return callbackEach();
-                                } else {
-                                    Sparql_OWL.getObjectProperties(vocabulary, { withoutImports: 1 }, function (err, result) {
-                                        if (err) {
-                                            callbackEach(err);
-                                        }
-
-                                        var properties = [];
-                                        result.forEach(function (item) {
-                                            properties.push({ label: item.propertyLabel.value, id: item.property.value });
-                                        });
-                                        vocabulariesPropertiesMap[vocabulary] = properties;
-                                        return callbackEach();
-                                    });
-                                }
-                            },
-                            function (err) {
-                                callbackSeries(err);
-                            }
-                        );
-                    },
 
                     function (callbackSeries) {
                         for (var vocabulary in vocabulariesPropertiesMap) {
@@ -148,6 +94,15 @@ var Lineage_relations = (function () {
                         }
                         callbackSeries();
                     },
+                    function (callbackSeries) {
+                        if (Config.UIprofile == "KG") {
+                          Lineage_relations.getInferredProperties(Lineage_sources.activeSource,function(err, result){
+                              jstreeData=result
+                              return callbackSeries();
+                          });
+                        }
+
+                    },
 
                     function (callbackSeries) {
                         jstreeData.sort(function (a, b) {
@@ -174,12 +129,7 @@ var Lineage_relations = (function () {
                             return callbackSeries();
                         });
                     },
-                    function (callbackSeries) {
-                        if (Config.UIprofile == "KG") {
-                            Lineage_relations.showInferredProperties();
-                        }
-                        return callbackSeries();
-                    },
+                  
                 ],
                 function (err) {
                     if (err) {
@@ -189,6 +139,7 @@ var Lineage_relations = (function () {
             );
         });
     };
+
 
     self.getPropertiesJstreeMenu = function () {
         var items = {};
@@ -611,7 +562,7 @@ var Lineage_relations = (function () {
         );
     };
 
-    self.showInferredProperties = function (source) {
+    self.getInferredProperties = function (source,callback) {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
@@ -621,6 +572,7 @@ var Lineage_relations = (function () {
         var options = {};
         var inferredProps = [];
         var distinctProps = {};
+        var jstreeData=[]
         async.series(
             [
                 function (callbackSeries) {
@@ -659,7 +611,7 @@ var Lineage_relations = (function () {
                 },
 
                 function (callbackSeries) {
-                    var jstreeData = [
+                 jstreeData = [
                         {
                             id: "proposed",
                             text: "Proposed",
@@ -696,14 +648,12 @@ var Lineage_relations = (function () {
                             });
                         });
                     });
-                    JstreeWidget.addNodesToJstree("lineageRelations_propertiesJstreeDiv", null, jstreeData);
+                   // JstreeWidget.addNodesToJstree("lineageRelations_propertiesJstreeDiv", null, jstreeData);
                     return callbackSeries();
                 },
             ],
             function (err) {
-                if (err) {
-                    return alert(err);
-                }
+               return callback(err, jstreeData)
             }
         );
     };

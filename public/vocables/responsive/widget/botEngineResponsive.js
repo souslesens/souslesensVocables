@@ -84,7 +84,12 @@ var BotEngineResponsive = (function () {
                 }
 
                 var fn = BotEngine.currentBot.functions[key0];
+
+                if(!fn &&  BotEngine.currentBot.functions["_DEFAULT"])
+                   fn= BotEngine.currentBot.functions["_DEFAULT"]
+
                 if (!fn || typeof fn !== "function") {
+
                     return alert("function not defined :" + key0);
                 }
                 if (obj[key0] != "_self") {
@@ -102,6 +107,8 @@ var BotEngineResponsive = (function () {
             }
         } else {
             var fn = BotEngine.currentBot.functions[key];
+            if(!fn &&  BotEngine.currentBot.functions["_DEFAULT"])
+                fn= BotEngine.currentBot.functions["_DEFAULT"]
             if (!fn || typeof fn !== "function") {
                 return alert("function not defined :" + key);
             }

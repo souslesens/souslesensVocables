@@ -2072,7 +2072,7 @@ var Lineage_whiteboard = (function () {
                         if (options.skipLiterals && item.object.type && item.object.type.indexOf("literal") > -1) {
                             return;
                         }
-                        if (!existingNodes[item.object.value]) {
+                        if (!options.OnlySubjects && !existingNodes[item.object.value]) {
                             existingNodes[item.object.value] = 1;
                             var label = "";
                             if (item.objectValue) {
@@ -2110,55 +2110,57 @@ var Lineage_whiteboard = (function () {
 
                             visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.object.value, label, predicateUri, { shape: shape }));
                         }
-                        var edgeId = item.subject.value + "_" + item.prop.value + "_" + item.object.value;
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1;
+                        if(!options.OnlySubjects) {
+                            var edgeId = item.subject.value + "_" + item.prop.value + "_" + item.object.value;
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1;
 
-                            //specific case of equivalentClass and sameAs
-                            {
-                                var nodeSource = source;
-                                var prop = item.prop.value;
-                                if (
-                                    options.includeSources &&
-                                    options.includeSources.length > 0 &&
-                                    (prop == "http://www.w3.org/2002/07/owl#sameAs" || prop == "http://www.w3.org/2002/07/owl#equivalentClass")
-                                ) {
-                                    nodeSource = options.includeSources[0];
+                                //specific case of equivalentClass and sameAs
+                                {
+                                    var nodeSource = source;
+                                    var prop = item.prop.value;
+                                    if (
+                                        options.includeSources &&
+                                        options.includeSources.length > 0 &&
+                                        (prop == "http://www.w3.org/2002/07/owl#sameAs" || prop == "http://www.w3.org/2002/07/owl#equivalentClass")
+                                    ) {
+                                        nodeSource = options.includeSources[0];
+                                    }
                                 }
-                            }
-                            var dashes = false;
-                            var edgeColor = options.edgesColor || Lineage_whiteboard.defaultPredicateEdgeColor;
-                            if (item.object.type.indexOf("literal") > -1) {
-                                edgeColor = "#3c8fe1";
-                                dashes = [6, 2, 3];
-                            }
-                            var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
+                                var dashes = false;
+                                var edgeColor = options.edgesColor || Lineage_whiteboard.defaultPredicateEdgeColor;
+                                if (item.object.type.indexOf("literal") > -1) {
+                                    edgeColor = "#3c8fe1";
+                                    dashes = [6, 2, 3];
+                                }
+                                var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
 
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.subject.value,
-                                to: item.object.value,
-                                data: {
+                                visjsData.edges.push({
                                     id: edgeId,
-                                    type: "ObjectProperty",
-                                    propLabel: propLabel,
                                     from: item.subject.value,
                                     to: item.object.value,
-                                    prop: item.prop.value,
-                                    source: nodeSource,
-                                },
-                                label: propLabel,
-                                font: { edgeColor },
-                                arrows: {
-                                    to: {
-                                        enabled: true,
-                                        type: "solid",
-                                        scaleFactor: 0.5,
+                                    data: {
+                                        id: edgeId,
+                                        type: "ObjectProperty",
+                                        propLabel: propLabel,
+                                        from: item.subject.value,
+                                        to: item.object.value,
+                                        prop: item.prop.value,
+                                        source: nodeSource,
                                     },
-                                },
-                                dashes: dashes,
-                                color: edgeColor,
-                            });
+                                    label: propLabel,
+                                    font: { edgeColor },
+                                    arrows: {
+                                        to: {
+                                            enabled: true,
+                                            type: "solid",
+                                            scaleFactor: 0.5,
+                                        },
+                                    },
+                                    dashes: dashes,
+                                    color: edgeColor,
+                                });
+                            }
                         }
                     });
 

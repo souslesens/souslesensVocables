@@ -265,15 +265,16 @@ var SearchWidget = (function () {
             var jstreeOptions = {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
-                    SearchWidget.currentTreeNode = obj.node;
 
-                    if (_options.selectTreeNodeFn) {
+                    SearchWidget.currentTreeNode = obj.node;
+                    return;
+                  /*  if (_options.selectTreeNodeFn) {
                         return _options.selectTreeNodeFn(event, obj);
                     } else if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
                         return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
                     }
 
-                    self.editThesaurusConceptInfos(obj.node.data.source, obj.node);
+                    self.editThesaurusConceptInfos(obj.node.data.source, obj.node);*/
                 },
                 contextMenu: function () {
                     var contextMenuFn = null;

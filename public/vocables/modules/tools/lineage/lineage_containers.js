@@ -742,7 +742,7 @@ var Lineage_containers = (function () {
                                 id: item.member.value,
                                 label: item.memberLabel.value,
                                 shadow: self.nodeShadow,
-                                shape: type == "container" ? "box" : Lineage_containers.containerStyle.shape,
+                                shape: type == "container" ? Lineage_containers.containerStyle.shape: Lineage_whiteboard.defaultShape,
                                 size: size,
                                 font: type == "container" ? { color: color2, size: 10 } : null,
                                 color: Lineage_containers.containerStyle.color,

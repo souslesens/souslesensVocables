@@ -548,13 +548,13 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
         if (!type) {
             if (types.includes(uri_bag)) {
-                type = "container";
+                type = "Container";
             } else {
                 if (types.includes(uri_named)) {
-                    type = "individual";
+                    type = "Individual";
                 }
                 if (types.includes(uri_class)) {
-                    type = "class";
+                    type = "Class";
                 }
             }
         }

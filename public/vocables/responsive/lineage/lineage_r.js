@@ -17,7 +17,9 @@ var Lineage_r = (function () {
     self.oldExportTable = null;
     self.MoreActionsShow = false;
     self.MoreOptionsShow = true;
+   
     self.onLoaded = function () {
+        self.controller=Lineage_whiteboard;
         PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
         SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
         //To Table

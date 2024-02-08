@@ -220,7 +220,6 @@ var Lineage_containers = (function () {
                             text: item.label,
                             parent: "#",
                             type: "Container",
-                            //  type: type_icon,
                             data: {
                                 type: "Container",
                                 source: source,

@@ -133,7 +133,7 @@ var SourceSelectorWidget = (function () {
                     if (!types || types.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
                         var type=Config.sources[sourceLabel].schemaType;
                         if(type=="OWL"){
-                            type='Ontology';
+                            type='Source';
                         }
                         if(type=='SKOS'){
                             type='Thesaurus'

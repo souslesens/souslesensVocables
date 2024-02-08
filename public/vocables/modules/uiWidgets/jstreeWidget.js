@@ -37,7 +37,7 @@ var JstreeWidget = (function () {
             icon: "../icons/thesaurus.png",
         },
         // Ontology
-        Ontology: {
+        Source: {
             icon: "./icons/CommonIcons/SourceIcon.png",
         },
         
@@ -48,7 +48,7 @@ var JstreeWidget = (function () {
         
         Property: {
             li_attr: { style: "color:black" },
-            icon: "../icons/property.png",
+            icon: "./icons/JstreeIcons/Property.png",
         },
         Container: {
             icon: "./icons/JstreeIcons/Container.png",

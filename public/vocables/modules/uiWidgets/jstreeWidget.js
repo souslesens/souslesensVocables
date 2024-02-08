@@ -2,40 +2,20 @@ var JstreeWidget = (function () {
     var self = {};
 
     self.types = {
+        /*
+        deprecated
         tool: {
             icon: "../icons/tool.png",
         },
-        SKOS: {
-            icon: "../icons/thesaurus.png",
-        },
-        OWL: {
-            icon: "./icons/CommonIcons/SourceIcon.png",
-        },
-
-        class: {
-            icon: "../icons/class.png",
+       
+        "owl:Restriction": {
+            icon: "../icons/restriction.png",
         },
         concept: {
             icon: "../icons/concept.png",
         },
         collection: {
             icon: "../icons/collection.png",
-        },
-        default: {
-            icon: "../icons/default.png",
-        },
-        "owl:Class": {
-            li_attr: { style: "color:black" },
-            icon: "../icons/class.png",
-        },
-        "owl:ObjectProperty": {
-            icon: "../icons/property.png",
-        },
-        "owl:Restriction": {
-            icon: "../icons/restriction.png",
-        },
-        "owl:table": {
-            icon: "../icons/table.png",
         },
         importedClass: {
             li_attr: { style: "color:#ccc" },
@@ -49,25 +29,75 @@ var JstreeWidget = (function () {
             li_attr: { style: "color:#ccc" },
             icon: "../icons/externalObject.png",
         },
+        */
+
+        // Web semantic objects
+        //Thesaurus
+        Thesaurus: {
+            icon: "../icons/thesaurus.png",
+        },
+        // Ontology
+        Ontology: {
+            icon: "./icons/CommonIcons/SourceIcon.png",
+        },
+        
         Class: {
             li_attr: { style: "color:black" },
-            icon: "../icons/class.png",
+            icon: "./icons/JstreeIcons/Classes.png",
         },
+        
         Property: {
             li_attr: { style: "color:black" },
             icon: "../icons/property.png",
         },
+        Container: {
+            icon: "./icons/JstreeIcons/Container.png",
+        },
+        Individual: {
+            icon: "./icons/JstreeIcons/Individual.png",
+        },
+        /* KG creator */
+        "table": {
+            icon: "./icons/JstreeIcons/Table.png",
+        },
+         /* Lack */
+        // Columns
+        //DataSource
+        //CSV
+        //Folder
 
-        // @ts-ignore
-        container: {
-            icon: "../icons/containers.png",
+
+        // Classic items
+        default: {
+            icon: "./icons/JstreeIcons/default.png",
+        },
+        
+        Folder: {
+            icon: "./icons/JstreeIcons/Folder.png",
         },
 
-        individual: {
-            icon: "../icons/individual.png",
+
+        
+       
+
+
+        /* To delete */
+        //double
+        class: {
+            icon: "./icons/JstreeIcons/Classes.png",
         },
+        //double
+        "owl:ObjectProperty": {
+            icon: "./icons/JstreeIcons/Property.png",
+        },
+        // Triple
+        "owl:Class": {
+            li_attr: { style: "color:black" },
+            icon: "./icons/JstreeIcons/Classes.png",
+        },
+        // double
         "http://www.w3.org/2002/07/owl#NamedIndividual": {
-            icon: "../icons/individual.png",
+            icon: "./icons/JstreeIcons/Individual.png",
         },
     };
 

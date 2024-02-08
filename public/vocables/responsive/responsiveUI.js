@@ -57,6 +57,7 @@ var ResponsiveUI = (function () {
             },
             true
         );
+        
 
         self.themeList();
         self.replaceFile(BotEngine, BotEngineResponsive);
@@ -151,7 +152,8 @@ var ResponsiveUI = (function () {
 
 
         if (!obj.node.data || obj.node.data.type != "source") {
-            return self.alert("select a tool");
+            $(obj.event.currentTarget).siblings().click();
+            return;
         }
 
         var source = obj.node.data.id;
@@ -351,7 +353,7 @@ var ResponsiveUI = (function () {
             $(button).remove();
             $("#lineage-tab-buttons").show();
             $("#WhiteboardContent").show();
-            $("#lateralPanelDiv").css("width", "395px");
+            $("#lateralPanelDiv").css("width", "435px");
             ResponsiveUI.resetWindowHeight();
             self.LateralPannelShowed = true;
             var currentTabId='#tabs_'+$(".slsv-selectedTabDiv").attr('popupcomment').toLowerCase();

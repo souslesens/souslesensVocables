@@ -63,7 +63,7 @@ var SourceSelectorWidget = (function () {
                     id: item,
                     text: item,
                     parent: "#",
-                    type: item,
+                    type: 'Folder',
                 });
             }
         });
@@ -86,15 +86,7 @@ var SourceSelectorWidget = (function () {
 
                 var othersGroup = "OTHERS";
 
-                if (!types && !distinctGroups[othersGroup]) {
-                    distinctGroups[othersGroup] = 1;
-                    treeData.push({
-                        id: othersGroup + "_" + parent,
-                        text: "OTHERS",
-                        type: "group",
-                        parent: "#",
-                    });
-                }
+               
 
                 var group = Config.sources[sourceLabel].group;
                 if (group) {
@@ -108,7 +100,7 @@ var SourceSelectorWidget = (function () {
                             treeData.push({
                                 id: subGroup,
                                 text: subGroup,
-                                type: "group",
+                                type: "Folder",
                                 parent: parent,
                             });
                         }
@@ -122,7 +114,15 @@ var SourceSelectorWidget = (function () {
                         group = Config.sources[sourceLabel].schemaType;
                     }
                 }
-
+                if (!types && !distinctGroups[othersGroup]) {
+                    distinctGroups[othersGroup] = 1;
+                    treeData.push({
+                        id: othersGroup + "_" + parent,
+                        text: "OTHERS",
+                        type: "Folder",
+                        parent: "#",
+                    });
+                }
                 if (!distinctNodes[sourceLabel]) {
                     distinctNodes[sourceLabel] = 1;
 
@@ -131,10 +131,17 @@ var SourceSelectorWidget = (function () {
                     }
                     //  console.log(JSON.stringify(jstreeData,null,2))
                     if (!types || types.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                        var type=Config.sources[sourceLabel].schemaType;
+                        if(type=="OWL"){
+                            type='Ontology';
+                        }
+                        if(type=='SKOS'){
+                            type='Thesaurus'
+                        }
                         treeData.push({
                             id: sourceLabel,
                             text: sourceLabel,
-                            type: Config.sources[sourceLabel].schemaType,
+                            type: type,
                             parent: group,
                             data: {
                                 type: "source",

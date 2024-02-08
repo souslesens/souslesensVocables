@@ -135,7 +135,14 @@ var JstreeWidget = (function () {
         if (options.dnd) {
             plugins.push("dnd");
         }
-        plugins.push("types");
+
+        if(options.notTypes){
+            var icons=false;
+        }else{
+            var icons=true;
+            plugins.push("types");
+        }
+        
 
         var check_callbackFn = function (op, node, parent, position, more) {
             if (op == "move_node" && options.dropAllowedFn) {
@@ -157,6 +164,10 @@ var JstreeWidget = (function () {
                 core: {
                     data: jstreeData,
                     check_callback: check_callbackFn,
+                    themes:{
+                        icons: icons,
+                    }
+                    
                 },
                 dnd: options.dnd,
                 search: options.searchPlugin,
@@ -165,7 +176,7 @@ var JstreeWidget = (function () {
                     whole_node: false,
                 },
                 types: JstreeWidget.types,
-
+                
                 contextmenu: { items: options.contextMenu },
             })
             .on("loaded.jstree", function () {

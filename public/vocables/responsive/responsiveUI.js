@@ -120,7 +120,7 @@ var ResponsiveUI = (function () {
         }
 
         $("#currentToolTitle").html(toolId);
-        if (Config.toolsLogo[toolId]) {
+        if (self.currentTheme['@'+toolId+'-logo']) {
             $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
         }
         MainController.currentTool = toolId;
@@ -307,7 +307,7 @@ var ResponsiveUI = (function () {
 
     self.changeTheme = function (ThemeName) {
         var themeSelected = Config.slsvColorThemes[ThemeName];
-        
+        self.currentTheme=themeSelected;
         if (themeSelected["@logoInstance-icon"] == undefined || themeSelected["@logoInstance-icon"] == "") {
             $("#externalLogoDiv").hide();
         } else {

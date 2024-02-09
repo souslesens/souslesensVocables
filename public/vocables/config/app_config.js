@@ -322,6 +322,8 @@ var Config = (function () {
             "@jqueryClose": "../icons/BluishVioletTheme/CrossIcon-bluishViolet.png",
             "@resetIcon": "../icons/BluishVioletTheme/ResetIcon-bluishViolet.png",
             "@previousIcon": "../icons/BluishVioletTheme/PreviousIcon-bluishViolet.png",
+            "@allPropertyIcon": "../icons/BluishVioletTheme/SelectionAllIcon-bluishViolet.png",
+            "@currentPropertyIcon": "../icons/BluishVioletTheme/SelectionIcon-bluishViolet.png",
             "@isDarkTheme": false,
         },
         KGA: {
@@ -350,6 +352,8 @@ var Config = (function () {
             "@jqueryClose": "../icons/KGATheme/CrossIcon-KGA.png",
             "@resetIcon": "../icons/KGATheme/ResetIcon-KGA.png",
             "@previousIcon": "../icons/KGATheme/PreviousIcon-KGA.png",
+            "@allPropertyIcon": "../icons/KGATheme/SelectionAllIcon-KGA.png",
+            "@currentPropertyIcon": "../icons/KGATheme/SelectionIcon-KGA.png",
             "@isDarkTheme": false,
         },
         "Total Energies": {
@@ -384,6 +388,8 @@ var Config = (function () {
             "@jqueryClose": "../icons/TotalEnergiesTheme/CrossIcon-TotalEnergies.png",
             "@resetIcon": "../icons/TotalEnergiesTheme/ResetIcon-TotalEnergies.png",
             "@previousIcon": "../icons/TotalEnergiesTheme/PreviousIcon-TotalEnergies.png",
+            "@allPropertyIcon": "../icons/TotalEnergiesTheme/SelectionAllIcon-TotalEnergies.png",
+            "@currentPropertyIcon": "../icons/TotalEnergiesTheme/SelectionIcon-TotalEnergies.png",
             "@isDarkTheme": false,
         },
 
@@ -412,6 +418,8 @@ var Config = (function () {
             "@jqueryClose": "../icons/SeaBreezeTheme/CrossIcon-SeaBreeze.png",
             "@resetIcon": "../icons/SeaBreezeTheme/ResetIcon-SeaBreeze.png",
             "@previousIcon": "../icons/SeaBreezeTheme/PreviousIcon-SeaBreeze.png",
+            "@allPropertyIcon": "../icons/SeaBreezeTheme/SelectionAllIcon-SeaBreeze.png",
+            "@currentPropertyIcon": "../icons/SeaBreezeTheme/SelectionIcon-SeaBreeze.png",
             "@isDarkTheme": false,
         },
 
@@ -440,6 +448,8 @@ var Config = (function () {
             "@jqueryClose": "../icons/FigColorsTheme/CrossIcon-FigColors.png",
             "@resetIcon": "../icons/FigColorsTheme/ResetIcon-FigColors.png",
             "@previousIcon": "../icons/FigColorsTheme/PreviousIcon-FigColors.png",
+            "@allPropertyIcon": "../icons/FigColorsTheme/SelectionAllIcon-FigColors.png",
+            "@currentPropertyIcon": "../icons/FigColorsTheme/SelectionIcon-FigColors.png",
             "@isDarkTheme": false,
         },
         Ocean: {
@@ -467,6 +477,8 @@ var Config = (function () {
             "@jqueryClose": "../icons/OceanTheme/CrossIcon-Ocean.png",
             "@resetIcon": "../icons/OceanTheme/ResetIcon-Ocean.png",
             "@previousIcon": "../icons/OceanTheme/PreviousIcon-Ocean.png",
+            "@allPropertyIcon": "../icons/OceanTheme/SelectionAllIcon-Ocean.png",
+            "@currentPropertyIcon": "../icons/OceanTheme/SelectionIcon-Ocean.png",
             "@isDarkTheme": false,
         },
         DarkTheme: {
@@ -494,6 +506,8 @@ var Config = (function () {
             "@jqueryClose": "../icons/DarkTheme/CrossIcon-Dark.png",
             "@resetIcon": "../icons/DarkTheme/ResetIcon-Dark.png",
             "@previousIcon": "../icons/DarkTheme/PreviousIcon-Dark.png",
+            "@allPropertyIcon": "../icons/DarkTheme/SelectionAllIcon-Dark.png",
+            "@currentPropertyIcon": "../icons/DarkTheme/SelectionIcon-Dark.png",
             "@isDarkTheme": true,
         },
 
@@ -522,6 +536,8 @@ var Config = (function () {
             "@jqueryClose": "../icons/SpatialTheme/CrossIcon-Spatial.png",
             "@resetIcon": "../icons/SpatialTheme/ResetIcon-Spatial.png",
             "@previousIcon": "../icons/SpatialTheme/PreviousIcon-Spatial.png",
+            "@allPropertyIcon": "../icons/SpatialTheme/SelectionAllIcon-Spatial.png",
+            "@currentPropertyIcon": "../icons/SpatialTheme/SelectionIcon-Spatial.png",
             "@isDarkTheme": true,
         },
         IOGP : {

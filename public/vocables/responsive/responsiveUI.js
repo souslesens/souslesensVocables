@@ -36,14 +36,8 @@ var ResponsiveUI = (function () {
             }
         }
         tools.forEach((item, index) => {
-            
-            if (Config.toolsLogo[item]) {
-                var logoTool=`<div style='height:30px;width:37px;' class='${item}-logo' ></div>`;
-                 
-            }
-            else{
-                var logoTool=`<div  style='height:30px;width:37px;'  ></div>`;
-            }
+            var logoTool=`<div style='height:35px;width:37px;' class='${item}-logo' ></div>`;
+           
             var strTool=`<div class='Lineage_PopUpStyleDiv' style='display:flex;flex-direction:row;align-items:center;' >${logoTool}<div  value="${item}">${item}</div></div>`;
             
             $('#toolsSelect').append(strTool);

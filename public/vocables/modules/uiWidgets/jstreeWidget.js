@@ -57,14 +57,25 @@ var JstreeWidget = (function () {
             icon: "./icons/JstreeIcons/Individual.png",
         },
         /* KG creator */
-        "table": {
+        Table: {
             icon: "./icons/JstreeIcons/Table.png",
         },
-         /* Lack */
-        // Columns
-        //DataSource
-        //CSV
-        //Folder
+        Column: {
+            icon: "./icons/JstreeIcons/Columns.png",
+        },
+        databaseSources: {
+            icon: "./icons/JstreeIcons/databaseSources.png",
+        },
+        DataSource: {
+            icon: "./icons/JstreeIcons/DataSource.png",
+        },
+        CSV:{
+            icon: "./icons/JstreeIcons/FileCSV.png",
+        },
+        CSVS:{
+            icon: "./icons/JstreeIcons/CSVS.png",
+        },
+        
 
 
         // Classic items

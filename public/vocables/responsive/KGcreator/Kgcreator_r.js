@@ -23,7 +23,7 @@ var KGcreator_r = (function () {
         $("#Lineage_graphEditionButtons").attr("id", "KGcreator_topButtons");
         //KGcreator_mappings.showMappingDialog=self.showMappingDialogResponsive;
     };
-    self.quit = function () {
+    self.unload = function () {
         Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
         $("#KGcreator_topButtons").css("flex-direction", "row");
         $("#KGcreator_topButtons").attr("id", "Lineage_graphEditionButtons");

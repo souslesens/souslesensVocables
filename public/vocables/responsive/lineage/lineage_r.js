@@ -37,7 +37,7 @@ var Lineage_r = (function () {
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
     };
-    self.quit = function () {
+    self.unload = function () {
         $("#graphDiv").empty();
         $("#lateralPanelDiv").off();
         $("#lateralPanelDiv").css('width','435px');

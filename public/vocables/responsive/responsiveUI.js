@@ -115,8 +115,8 @@ var ResponsiveUI = (function () {
         }
 
         if (self.currentTool != null) {
-            if (Config.tools[self.currentTool].controller.quit) {
-                Config.tools[self.currentTool].controller.quit();
+            if (Config.tools[self.currentTool].controller.unload) {
+                Config.tools[self.currentTool].controller.unload();
             }
         }
         self.currentTool = toolId;

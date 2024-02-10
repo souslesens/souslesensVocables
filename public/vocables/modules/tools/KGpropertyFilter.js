@@ -489,7 +489,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
                         self.currentRightpanelNode.parentLogicalEntity = null;
                     }
-                    triples = triples.concat(Lineage_blend.getCommonMetaDataTriples(newUri));
+                    triples = triples.concat(Lineage_createRelation.getCommonMetaDataTriples(newUri));
                 } else if (self.currentRightpanelNode.parent.indexOf("LogicalEntity") > 0 || self.currentRightpanelNode.parent.indexOf("BusinessObject") > 0) {
                     var triples = [
                         {

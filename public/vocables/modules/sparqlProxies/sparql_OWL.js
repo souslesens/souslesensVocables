@@ -3,7 +3,8 @@
 import Sparql_common from "./sparql_common.js";
 import Sparql_generic from "./sparql_generic.js";
 import Sparql_proxy from "./sparql_proxy.js";
-import Lineage_blend from "../tools/lineage/lineage_blend.js";
+import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
+
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -1961,7 +1962,7 @@ var Sparql_OWL = (function () {
             var triples = [];
             result.forEach(function (item) {
                 if (item.value && item.subject) {
-                    triples = triples.concat(Lineage_blend.getRestrictionTriples(item.value.value, item.subject.value, inversePropId));
+                    triples = triples.concat(Lineage_createRelation.getRestrictionTriples(item.value.value, item.subject.value, inversePropId));
                 }
             });
             var totalItems = 0;

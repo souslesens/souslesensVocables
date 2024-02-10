@@ -30,8 +30,8 @@ var Lineage_r = (function () {
         //SHowHideButtons overcharge
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
         //AddEdge overcharge
-        self.oldAddEdgeDialog = Lineage_blend.graphModification.showAddEdgeFromGraphDialog;
-        Lineage_blend.graphModification.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
+        self.oldAddEdgeDialog = Lineage_createRelation.showAddEdgeFromGraphDialog;
+        Lineage_createRelation.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
         ResponsiveUI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").load("./responsive/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");

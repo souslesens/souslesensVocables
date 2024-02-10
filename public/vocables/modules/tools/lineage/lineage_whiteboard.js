@@ -3107,7 +3107,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 if (!subPropertyLabel) {
                     return;
                 }
-                Lineage_blend.createSubProperty(Lineage_sources.activeSource, edge.data.propertyId, subPropertyLabel, function (err, result) {
+                Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, edge.data.propertyId, subPropertyLabel, function (err, result) {
                     if (err) {
                         return alert(err);
                     }
@@ -3118,22 +3118,22 @@ self.zoomGraphOnNode(node.data[0].id, false);
                     var sourceNode = { id: sourceVisjsNode.data.id, source: sourceVisjsNode.data.source };
                     var targetNode = { id: targetVisjsNode.data.id, source: targetVisjsNode.data.source };
 
-                    if (!Lineage_blend.currentSpecificObjectPropertiesMap) {
-                        Lineage_blend.currentSpecificObjectPropertiesMap = {};
+                    if (!Lineage_createRelation.currentSpecificObjectPropertiesMap) {
+                        Lineage_createRelation.currentSpecificObjectPropertiesMap = {};
                     }
-                    if (!Lineage_blend.currentSpecificObjectPropertiesMap[edge.data.propertyId]) {
-                        Lineage_blend.currentSpecificObjectPropertiesMap[edge.data.propertyId] = [];
+                    if (!Lineage_createRelation.currentSpecificObjectPropertiesMap[edge.data.propertyId]) {
+                        Lineage_createRelation.currentSpecificObjectPropertiesMap[edge.data.propertyId] = [];
                     }
-                    Lineage_blend.currentSpecificObjectPropertiesMap[item.superProp.value].push({
+                    Lineage_createRelation.currentSpecificObjectPropertiesMap[item.superProp.value].push({
                         id: subPropertyId,
                         label: subPropertyLabel,
                     });
 
-                    Lineage_blend.createRelation(Lineage_sources.activeSource, subPropertyId, sourceNode, targetNode, true, true, {}, function (err, _result) {
+                    Lineage_createRelation.createRelation(Lineage_sources.activeSource, subPropertyId, sourceNode, targetNode, true, true, {}, function (err, _result) {
                         if (err) {
                             alert(err);
                         }
-                        Lineage_blend.deleteRestriction(Lineage_sources.activeSource, self.currentGraphEdge, function (err) {
+                        Lineage_createRelation.deleteRestriction(Lineage_sources.activeSource, self.currentGraphEdge, function (err) {
                             if (err) {
                                 alert(err);
                             }

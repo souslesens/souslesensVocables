@@ -3,7 +3,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../../shared/ontologyModels.js";
-import Lineage_blend from "./lineage_blend.js";
+import Lineage_createRelation from "./lineage_createRelation.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Lineage_axioms_draw from "./lineage_axioms_draw.js";
 import AxiomsEditor from "./axiomsEditor.js";
@@ -108,7 +108,7 @@ var Lineage_createResource = (function () {
 
         var origin = "Lineage_addNode";
         var status = "draft";
-        var metaDataTriples = Lineage_blend.getCommonMetaDataTriples(resourceUri, origin, status, null);
+        var metaDataTriples = Lineage_createRelation.getCommonMetaDataTriples(resourceUri, origin, status, null);
         metaDataTriples.forEach(function (triple) {
             triples.push(getTriple(resourceUri, triple.predicate, triple.object));
         });

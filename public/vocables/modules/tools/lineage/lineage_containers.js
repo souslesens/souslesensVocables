@@ -219,9 +219,9 @@ var Lineage_containers = (function () {
                             id: jstreeId,
                             text: item.label,
                             parent: "#",
-                            //  type: type_icon,
+                            type: "Container",
                             data: {
-                                type: "container",
+                                type: "Container",
                                 source: source,
                                 id: id,
                                 label: item.label,
@@ -236,7 +236,7 @@ var Lineage_containers = (function () {
                     data.forEach(function (item) {
                         var parentId = item.parent.value;
 
-                        var type = "container";
+                        var type = "Container";
                         if (item.memberTypes.value.indexOf("Class") > 0) {
                             type = "Class";
                         }
@@ -891,7 +891,7 @@ var Lineage_containers = (function () {
 
     self.onSelectedNodeTreeclick = function (event, obj) {
         self.currentContainer = obj.node;
-        console.log(obj.event);
+        
         if (obj.event.button != 2) {
             self.listContainerResources(Lineage_sources.activeSource, self.currentContainer, { onlyOneLevel: true, leaves: true });
         }

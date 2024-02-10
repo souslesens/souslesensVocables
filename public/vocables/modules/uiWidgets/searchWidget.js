@@ -270,8 +270,8 @@ var SearchWidget = (function () {
                     return;
                   /*  if (_options.selectTreeNodeFn) {
                         return _options.selectTreeNodeFn(event, obj);
-                    } else if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
-                        return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
+                    } else if (Config.tools[MainController.currentTool].controller.controller.selectTreeNodeFn) {
+                        return Config.tools[MainController.currentTool].controller.controller.selectTreeNodeFn(event, obj);
                     }
 
                     self.editThesaurusConceptInfos(obj.node.data.source, obj.node);*/
@@ -282,8 +282,8 @@ var SearchWidget = (function () {
                         return _options.contextMenu;
                     } else if (_options.contextMenuFn) {
                         return _options.contextMenuFn();
-                    } else if (Config.tools[MainController.currentTool].controller.contextMenuFn) {
-                        return Config.tools[MainController.currentTool].controller.contextMenuFn;
+                    } else if (Config.tools[MainController.currentTool].controller.controller.contextMenuFn) {
+                        return Config.tools[MainController.currentTool].controller.controller.contextMenuFn;
                     } else {
                         return self.getJstreeConceptsContextMenu();
                     }
@@ -364,7 +364,7 @@ var SearchWidget = (function () {
                 jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
             }
             if (!options.selectTreeNodeFn) {
-                jsTreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn;
+                jsTreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.controller.selectTreeNodeFn;
             }
 
             jsTreeOptions.source = sourceLabel;

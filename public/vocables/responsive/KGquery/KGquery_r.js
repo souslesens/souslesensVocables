@@ -21,7 +21,7 @@ var KGquery_r = (function () {
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
     };
-    self.quit = function () {
+    self.unload = function () {
         //retribute old file and functions
         Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
         SavedQueriesComponent.showDialog = self.oldshowDialog;

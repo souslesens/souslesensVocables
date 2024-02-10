@@ -9,10 +9,10 @@ var Lineage_createRelation = (function () {
     var self = {};
 
     self.showAddEdgeFromGraphDialog = function (edgeData, callback) {
-        $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
+        $("#smallDialogDiv").dialog("open");
+        $("#smallDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-        $("#mainDialogDiv").load("snippets/lineage/lineageAddEdgeDialog.html", function () {
+        $("#smallDialogDiv").load("snippets/lineage/lineageAddEdgeDialog.html", function () {
             self.sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
             self.targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
@@ -62,28 +62,33 @@ var Lineage_createRelation = (function () {
                                 id: "http://www.w3.org/2002/07/owl#sameAs",
                                 text: "owl:sameAs",
                                 parent: "#",
+                                type:'Property',
                                 data: {
                                     id: "http://www.w3.org/2002/07/owl#sameAs",
                                     inSource: Config.dictionarySource,
                                 },
                             });
                         }
+                        /*
                         if (self.sourceNode.rdfType != "NamedIndividual" && self.targetNode.rdfType != "NamedIndividual") {
                             jstreeData.push({
                                 id: "http://www.w3.org/2002/07/owl#equivalentClass",
                                 text: "owl:equivalentClass",
                                 parent: "#",
+                                type:'Property',
                                 data: {
                                     id: "http://www.w3.org/2002/07/owl#equivalentClass",
                                     inSource: Config.dictionarySource,
                                 },
                             });
                         }
+                        */
                         if (true) {
                             jstreeData.push({
                                 id: "http://www.w3.org/2002/07/owl#equivalentClass",
                                 text: "owl:equivalentClass",
                                 parent: "#",
+                                type:'Property',
                                 data: {
                                     id: "http://www.w3.org/2002/07/owl#equivalentClass",
                                     inSource: Config.dictionarySource,
@@ -94,9 +99,10 @@ var Lineage_createRelation = (function () {
                         if (true || self.sourceNode.rdfType == "NamedIndividual") {
                             jstreeData.push({
                                 id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-
+                                type:'Property',
                                 text: "rdf:type",
                                 parent: "#",
+
                                 data: {
                                     id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
                                     inSource: source,
@@ -109,6 +115,7 @@ var Lineage_createRelation = (function () {
                                 id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
                                 text: "rdfs:subClassOf",
                                 parent: "#",
+                                type:'Property',
                                 data: {
                                     id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
                                     inSource: source,
@@ -120,6 +127,7 @@ var Lineage_createRelation = (function () {
                                 id: "http://www.w3.org/2000/01/rdf-schema#member",
                                 text: "rdfs:member",
                                 parent: "#",
+                                type:'Property',
                                 data: {
                                     id: "http://www.w3.org/2000/01/rdf-schema#member",
                                     inSource: source,
@@ -181,6 +189,7 @@ var Lineage_createRelation = (function () {
                                 id: _source,
                                 text: _source,
                                 parent: "#",
+                                type:'Source',
                                 data: {
                                     id: _source,
                                     text: _source,
@@ -207,7 +216,7 @@ var Lineage_createRelation = (function () {
                                                 id: propId,
                                                 text: "<span class='" + cssClass + "'>" + label + "</span>",
                                                 parent: parent,
-
+                                                type:'Property',
                                                 data: {
                                                     propLabel: property.label,
                                                     id: propId,

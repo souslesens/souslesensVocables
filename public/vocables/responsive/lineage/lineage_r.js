@@ -17,7 +17,9 @@ var Lineage_r = (function () {
     self.oldExportTable = null;
     self.MoreActionsShow = false;
     self.MoreOptionsShow = true;
+   
     self.onLoaded = function () {
+        self.controller=Lineage_whiteboard;
         PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
         SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
         //To Table
@@ -35,8 +37,11 @@ var Lineage_r = (function () {
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
     };
-    self.quit = function () {
+    self.unload = function () {
         $("#graphDiv").empty();
+        $("#lateralPanelDiv").off();
+        $("#lateralPanelDiv").css('width','435px');
+
     };
     self.loadSources = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
@@ -69,7 +74,7 @@ var Lineage_r = (function () {
             self.hideShowMoreActions("hide");
             ResponsiveUI.PopUpOnHoverButtons();
             $("#lateralPanelDiv").resizable({
-                maxWidth: 495,
+                maxWidth: 435,
                 minWidth: 150,
                 stop: function (event, ui) {
                     ResponsiveUI.resetWindowHeight();
@@ -86,6 +91,14 @@ var Lineage_r = (function () {
                 $("#GenericTools_searchInAllSources").prop("checked", false);
                 $("#Lineage_MoreClassesOptions").hide();
                 SearchWidget.showTopConcepts();
+                $("#lateralPanelDiv").resizable({
+                    maxWidth: 435,
+                    minWidth: 150,
+                    stop: function (event, ui) {
+                        ResponsiveUI.resetWindowHeight();
+                    },
+                });
+                
             });
         });
     };

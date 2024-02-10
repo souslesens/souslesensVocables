@@ -394,6 +394,7 @@ var KGcreator = (function () {
                 id: "databaseSources",
                 text: "databaseSources",
                 parent: "#",
+                type:'databaseSources',
                 data: {
                     type: "sourceType",
                 },
@@ -402,6 +403,7 @@ var KGcreator = (function () {
                 id: "csvSources",
                 text: "csvSources",
                 parent: "#",
+                type:'CSVS',
                 data: {
                     type: "sourceType",
                 },
@@ -414,6 +416,7 @@ var KGcreator = (function () {
                     id: datasource,
                     text: datasource,
                     parent: "databaseSources",
+                    type:'DataSource',
                     data: { id: datasource, type: "databaseSource", sqlType: sqlType },
                 });
             }
@@ -422,6 +425,7 @@ var KGcreator = (function () {
                     id: datasource,
                     text: datasource,
                     parent: "csvSources",
+                    type:'CSV',
                     data: { id: datasource, type: "csvSource" },
                 });
             }
@@ -588,16 +592,19 @@ var KGcreator = (function () {
                         jstreeData.push({
                             id: fileName + "_" + column,
                             text: label,
+                            type:'Column',
                             parent: fileName,
                             data: { id: column, table: fileName, label: column, type: "tableColumn" },
                         });
                     });
+                    
                     if (self.currentConfig.currentMappings && self.currentConfig.currentMappings[fileName] && self.currentConfig.currentMappings[fileName].virtualColumns) {
                         self.currentConfig.currentMappings[fileName].virtualColumns.forEach(function (virtualColumn) {
                             var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
                             jstreeData.push({
                                 id: fileName + "_" + virtualColumn,
                                 text: label,
+                                type:'Column',
                                 parent: fileName,
                                 data: { id: virtualColumn, table: fileName, label: virtualColumn, type: "tableColumn" },
                             });
@@ -636,6 +643,7 @@ var KGcreator = (function () {
             jstreeData.push({
                 id: table,
                 text: label,
+                type:'Table',
                 parent: datasourceConfig.dataSource,
                 data: {
                     id: table,
@@ -662,6 +670,7 @@ var KGcreator = (function () {
                 id: table + "_" + column,
                 text: label,
                 parent: table,
+                type:'Column',
                 data: { id: column, table: table, label: column, type: "tableColumn" },
             });
         });
@@ -680,6 +689,7 @@ var KGcreator = (function () {
             var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
             jstreeData.push({
                 id: table + "_" + virtualColumn,
+                type:'Column',
                 text: label,
                 parent: table,
                 data: { id: virtualColumn, table: table, label: virtualColumn, type: "tableColumn" },
@@ -879,6 +889,7 @@ var KGcreator = (function () {
             {
                 id: datasourceName,
                 text: datasourceName,
+                type:'DataSource',
                 parent: type + "s",
                 data: { id: datasourceName, type: type, sqlType: sqlType },
             },

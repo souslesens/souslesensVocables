@@ -376,14 +376,10 @@
                                 <button id="selectedTool" class="slsv-invisible-button" style="padding: 0px; margin-left: 10px">Tool</button>
                                 <button class="arrow-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-left: 3px; margin-right: 10px"></button>
                                 <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                                    <select
-                                        id="toolsSelect"
-                                        style="min-width: 150px"
-                                        class="Lineage_PopUpStyle"
-                                        size="8"
-                                        onclick="ResponsiveUI.onToolSelect($(this).val())"
-                                        style="overflow: auto"
-                                    ></select>
+                                   <!-- <select id="toolsSelect" style="min-width:150px" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto"></select>-->
+                                   <div id="toolsSelect" style="min-width:150px;display: flex;flex-direction: column;overflow: auto;max-height: 300px;" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect(null,event)">
+
+                                   </div>
                                 </div>
                             </div>
 
@@ -454,8 +450,10 @@
         </header>
 
         <div id="graphAndCommandScreen" class="w3-container" style="height: 92.5dvh">
-            <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="height: 100%; width: 26%" id="lateralPanelDiv"></div>
-            <div class="w3-container w3-col l9" style="height: 100%; width: 74%">
+            <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="height: 100%; width: 435px;" id="lateralPanelDiv">
+
+            </div>
+            <div class="w3-container w3-col l9" style="height: 100%; width: auto;">
                 <div id="graphDiv" style="height: 100%"></div>
             </div>
         </div>

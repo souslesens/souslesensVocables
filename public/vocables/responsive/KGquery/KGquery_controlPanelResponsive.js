@@ -1,5 +1,6 @@
 import common from "../../modules/shared/common.js";
 
+
 var KGquery_controlPanelResponsive = (function () {
     var self = {};
     self.vicinityArray = [];
@@ -7,7 +8,7 @@ var KGquery_controlPanelResponsive = (function () {
     self.addQuerySet = function (toDivId, booleanOperator, label, color) {
         var querySetDivId = "querySetDiv_" + common.getRandomHexaId(5);
         var booleanOperatorHtml = "";
-        if (booleanOperator) {
+        if (true || booleanOperator) {
             var unionStr = booleanOperator == "Union" ? "selected=selected" : "";
             var minusStr = booleanOperator == "Minus" ? "selected=selected" : "";
             booleanOperatorHtml =

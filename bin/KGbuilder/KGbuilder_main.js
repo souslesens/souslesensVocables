@@ -237,7 +237,7 @@ var KGbuilder_main = {
       var mainJsonPath = sourceMappingsDir + "main.json";
       var sourceMainJson = JSON.parse("" + fs.readFileSync(mainJsonPath));
       if (sourceMainJson.sparqlServerUrl == "_default") {
-        sourceMainJson.sparqlServerUrl = ConfigManager.config.default_sparql_url;
+        sourceMainJson.sparqlServerUrl = ConfigManager.config.sparql_server.url;
       }
     } catch (e) {
       return callback(e);

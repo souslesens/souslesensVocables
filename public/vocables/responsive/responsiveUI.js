@@ -4,9 +4,7 @@ import Clipboard from "../modules/shared/clipboard.js";
 import Lineage_sources from "../modules/tools/lineage/lineage_sources.js";
 import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
 import Lineage_r from "./lineage/lineage_r.js";
-import KGquery from "../modules/tools/KGquery/KGquery.js";
-import KGquery_r from "./KGquery/KGquery_r.js";
-import KGcreator_r from "./KGcreator/Kgcreator_r.js";
+
 import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
 
 var ResponsiveUI = (function () {

@@ -255,15 +255,15 @@ var Config = (function () {
 
     self.topLevelOntologyFixedlegendMap = {
         IDO: {
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Dependent": "#FCA53D",
-            "	http://rds.posccaesar.org/ontology/lis14/rdl/Object": "#8CC1C7",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Dependent": "#cb6601",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Object": "#00B5EC",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#ED008C",
             "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject": "#00B5EC",
             "http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject": "#FEF200",
             "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#AFD46B",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Activity": "#00AE8D",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#8F52A0",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Prescriptive": "#E86549",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Activity": "#70309f",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#70309f",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Prescriptive": "#00B5EC",
         },
         "ISO_15926-part-14_PCA": {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#ED008C",
@@ -292,6 +292,8 @@ var Config = (function () {
             "http://purl.obolibrary.org/obo/BFO_0000203": "#70309f",
             "http://purl.obolibrary.org/obo/BFO_0000015": "#70309f",
             "http://purl.obolibrary.org/obo/BFO_0000008": "#70309f",
+
+
         },
         DOLCE: {},
     };

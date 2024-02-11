@@ -174,7 +174,7 @@ var Lineage_relations = (function () {
                 '          <input id="lineageQuery_value" size="20" value="" />\n' +
                 "        </div>";
         }
-        domainValue = valueStr;
+        var domainValue = valueStr;
     };
 
     self.onshowDrawRelationsDialogValidate = function (action, _type) {
@@ -256,21 +256,6 @@ var Lineage_relations = (function () {
                 options.filter += Sparql_common.setFilter("prop", properties);
             }
 
-            /*   if (properties.length > 0) {
-           // if active source selected take all properties( ==no filter on props)
-           var filter = "";
-           var filterProp = "";
-           if (properties.indexOf(Config.sources[Lineage_sources.activeSource].graphUri) < 0) {
-             filterProp = Sparql_common.setFilter("prop", properties);
-           }
-
-           options.filter += filterProp;
-         }
-   */
-            /*   var propFilter = $("#Lineage_relation_filterText2").val();
-      if (propFilter) {
-        options.filter += propFilter;
-      }*/
 
             if (propDomainFilter.length > 0) {
                 options.filter += Sparql_common.setFilter("subjectType", propDomainFilter, null, { useFilterKeyWord: 1 });

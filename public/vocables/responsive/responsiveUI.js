@@ -4,9 +4,7 @@ import Clipboard from "../modules/shared/clipboard.js";
 import Lineage_sources from "../modules/tools/lineage/lineage_sources.js";
 import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
 import Lineage_r from "./lineage/lineage_r.js";
-import KGquery from "../modules/tools/KGquery/KGquery.js";
-import KGquery_r from "./KGquery/KGquery_r.js";
-import KGcreator_r from "./KGcreator/Kgcreator_r.js";
+
 import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
 
 var ResponsiveUI = (function () {
@@ -37,11 +35,11 @@ var ResponsiveUI = (function () {
         }
         tools.forEach((item, index) => {
             var logoTool=`<div style='height:35px;width:37px;' class='${item}-logo' ></div>`;
-           
+
             var strTool=`<div class='Lineage_PopUpStyleDiv' style='display:flex;flex-direction:row;align-items:center;' >${logoTool}<div  value="${item}">${item}</div></div>`;
-            
+
             $('#toolsSelect').append(strTool);
-           
+
         });
 
         window.addEventListener(
@@ -51,7 +49,7 @@ var ResponsiveUI = (function () {
             },
             true
         );
-        
+
 
         self.themeList();
         self.replaceFile(BotEngine, BotEngineResponsive);
@@ -89,7 +87,7 @@ var ResponsiveUI = (function () {
     self.onToolSelect = function (toolId,event) {
         if(event){
 
-        
+
             var clickedElement = event.target;
             // if class
             if(clickedElement.className=='Lineage_PopUpStyleDiv'){
@@ -99,13 +97,13 @@ var ResponsiveUI = (function () {
                 if(clickedElement.innerHTML){
                     var toolId=clickedElement.innerHTML;
                 }else{
-                    
+
                     var toolId=clickedElement.nextSibling.innerHTML;
                 }
-                
+
 
             }
-        
+
         }
 
         if (self.currentTool != null) {
@@ -137,6 +135,13 @@ var ResponsiveUI = (function () {
 
     self.onSourceSelect = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
+        var p= obj.node.parents.indexOf("PRIVATE")
+        if(p>0){
+            Config.sourceOwner= obj.node.parents[p-1]
+
+        }
+
+
 
         if (!obj.node.data || obj.node.data.type != "source") {
             $(obj.event.currentTarget).siblings().click();
@@ -178,14 +183,14 @@ var ResponsiveUI = (function () {
         MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
-        
-       
+
+
 
         if (Config.tools[toolId].controller.onLoaded) {
             MainController.writeUserLog(authentication.currentUser, toolId, "");
             Config.tools[toolId].controller.onLoaded();
         } else {
-            
+
 
             if (true) {
                 var url = window.location.href;
@@ -198,7 +203,7 @@ var ResponsiveUI = (function () {
                 window.location.href = url;
             }
         }
-        
+
     };
 
     self.showDiv = function (modalDiv) {
@@ -278,16 +283,18 @@ var ResponsiveUI = (function () {
     };
 
     self.setSlsvCssClasses = function (callback) {
+
         less.pageLoadFinished.then(function () {
             //setTimeout(() => {}, "500");
             ResponsiveUI.changeTheme(Config.theme.defaultTheme);
-            
+
             if (Config.theme.selector) {
                 $("#theme-selector-btn").show();
             }
 
             callback();
         });
+
     };
 
     self.themeList = function () {
@@ -420,7 +427,7 @@ var ResponsiveUI = (function () {
         if(theme){
             if(theme['@isDarkTheme']){
                 Lineage_whiteboard.defaultNodeFontColor='white';
-                
+
             }
             else{
                 Lineage_whiteboard.defaultNodeFontColor="#343434";

@@ -131,16 +131,18 @@ var CommonBotFunctions = (function() {
         );
     };
 
-    self.getColumnClass = function(tripleModels, columnName) {
-        var columnClass = null;
+    self.getColumnClasses = function(tripleModels, columnName) {
+        var columnClasses =null;
         tripleModels.forEach(function(item) {
             if ((item.s == columnName || item.s == "$_" + columnName) && item.p == "rdf:type") {
                 if (item.o.indexOf("owl:") < 0) {
-                    columnClass = item.o;
+                    if(!columnClasses)
+                        columnClasses=[]
+                    columnClasses.push(item.o);
                 }
             }
         });
-        return columnClass;
+        return columnClasses;
     };
 
     return self;

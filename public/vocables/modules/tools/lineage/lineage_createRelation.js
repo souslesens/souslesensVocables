@@ -417,7 +417,7 @@ var Lineage_createRelation = (function() {
         if (!confirm("create Relation " + self.sourceNode.label + "-" + Sparql_common.getLabelFromURI(propId) + "->" + self.targetNode.label + " in Graph " + inSource)) {
             return;
         }
-        $("#mainDialogDiv").dialog("close");
+        $("#smallDialogDiv").dialog("close");
 
         var relationType;
         var relationId;
@@ -542,6 +542,7 @@ var Lineage_createRelation = (function() {
                 }
             ],
             function(err) {
+                $("#smallDialogDiv").dialog("close");
                 if (err) {
                     return alert(err);
                 }

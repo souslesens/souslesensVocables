@@ -31,7 +31,7 @@ var KGcreator_bot = (function () {
             if (self.params.tripleModels.length == 0) {
                 workflow = self.workflowColumnMappingType;
             } else {
-                self.params.tripleModels.predicateSubjectColumnType = CommonBotFunctions.getColumnClass(self.params.tripleModels, self.params.column);
+                self.params.tripleModels.predicateSubjectColumnType = CommonBotFunctions.getColumnClasses(self.params.tripleModels, self.params.column);
                 if (self.params.tripleModels.predicateSubjectColumnType) {
                     workflow = self.workflowColumnmMappingOther;
                 } else {
@@ -179,8 +179,8 @@ var KGcreator_bot = (function () {
             //check if source  target column is mapped and has a rdf:type that are classes in source and imports
             var predicateObjectColumnName = self.params.predicateObjectColumn;
             var predicateObjectColumnType = null;
-            self.params.predicateSubjectColumnType = CommonBotFunctions.getColumnClass(self.params.tripleModels, self.params.column);
-            self.params.predicateObjectColumnType = CommonBotFunctions.getColumnClass(self.params.tripleModels, self.params.predicateObjectColumn);
+            self.params.predicateSubjectColumnType = CommonBotFunctions.getColumnClasses(self.params.tripleModels, self.params.column);
+            self.params.predicateObjectColumnType = CommonBotFunctions.getColumnClasses(self.params.tripleModels, self.params.predicateObjectColumn);
 
             var OK = false;
             if (self.params.predicateSubjectColumnType && self.params.predicateObjectColumnType) {
@@ -254,7 +254,7 @@ var KGcreator_bot = (function () {
                     triple = {
                         s: column,
                         p: "rdf:type",
-                        o: "ow:NamedIndividual",
+                        o: "owl:NamedIndividual",
                     };
                     self.currentUri = column;
                     self.params.tripleModels.push(triple);

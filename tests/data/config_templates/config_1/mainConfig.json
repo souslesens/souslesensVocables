@@ -13,13 +13,6 @@
         "clientSecret": "",
         "authServerURL": ""
     },
-    "SQLserver": {
-        "user": "sa",
-        "password": "superSecretP4ssword",
-        "server": "localhost",
-        "database": "master",
-        "trustServerCertificate": true
-    },
     "sparql_server": {
         "url": "http://localhost:8899/sparql"
     },
@@ -37,3 +30,4 @@
         "url": ""
     }
 }
+

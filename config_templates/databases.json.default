@@ -1,0 +1,12 @@
+[
+    {
+        "id": "sqlserver-1",
+        "driver": "sqlserver",
+        "host": "",
+        "port": 1433,
+        "database": "",
+        "user": "",
+        "password": ""
+    }
+]
+

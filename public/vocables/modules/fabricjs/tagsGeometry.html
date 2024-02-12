@@ -1,7 +1,20 @@
-<canvas id="canvas" width="300" height="300"></canvas>
+<div style="display: flex;flex-direction: row;">
 
-<script src="https://cdn.jsdelivr.net/npm/fabric"></script>
+    <div style="display: flex;flex-direction: column;">
+        <div id="tagsGeometryTreeDiv" style="width:300px;height:500px; overflow: auto"></div>
+
+        <div>
+            <button onclick="TagsGeometry.drawTest()">Draw</button>
+        </div>
+
+
+    </div>
+    <canvas id="canvas" width="900" height="800"></canvas>
+    <div id="tagsGeometryInfosDiv" style="width:300px;height:500px;"></div>
+</div>
+<!--script src="https://cdn.jsdelivr.net/npm/fabric"></script>
 <script>
+    return
     const canvas = new fabric.Canvas('canvas', {
       // selection :false,
         backgroundColor: 'rgb(100,100,200)',
@@ -10,7 +23,7 @@
         width: 800,
         height: 800
     });
- /*   canvas.on('mouse:wheel', function(opt) {
+  canvas.on('mouse:wheel', function(opt) {
         var delta = opt.e.deltaY;
         var zoom = canvas.getZoom();
         zoom *= 0.999 ** delta;
@@ -57,7 +70,7 @@
         canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
         opt.e.preventDefault();
         opt.e.stopPropagation();
-    });*/
+    })
 
 
     canvas.on('mouse:down', function(opt) {
@@ -77,4 +90,4 @@ var x=canvas.getActiveObject()
         id:1354
     });
     canvas.add(rect);
-</script>
+</script-->

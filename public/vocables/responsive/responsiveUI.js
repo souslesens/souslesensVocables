@@ -74,6 +74,7 @@ var ResponsiveUI = (function () {
         $("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
 
+
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
     self.replaceFile = function (file1, file2) {

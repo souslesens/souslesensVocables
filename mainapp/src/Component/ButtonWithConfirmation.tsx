@@ -5,11 +5,11 @@ const ButtonWithConfirmation = (props: { msg: () => void; label: string; disable
     const [hasBeenClicked, userClickedButton] = React.useState(false);
 
     return !hasBeenClicked ? (
-        <Button disabled={props.disabled} color="secondary" onClick={() => userClickedButton(true)}>
+        <Button disabled={props.disabled} variant="outlined" color="error" onClick={() => userClickedButton(true)}>
             {props.label}
         </Button>
     ) : (
-        <Button color="secondary" onClick={props.msg}>
+        <Button variant="contained" color="error" onClick={props.msg}>
             Confirm?
         </Button>
     );

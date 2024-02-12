@@ -67,30 +67,13 @@ var Lineage_r = (function () {
         });
     };
     self.initWhiteboardTab = function () {
-        $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {
-            $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
-            $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
-            Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
-            self.hideShowMoreActions("hide");
-            ResponsiveUI.PopUpOnHoverButtons();
-            $("#lateralPanelDiv").resizable({
-                maxWidth: 435,
-                minWidth: 150,
-                stop: function (event, ui) {
-                    ResponsiveUI.resetWindowHeight();
-                },
-            });
-        });
-    };
-
-    self.initClassesTab = function () {
-        $("#tabs_classes").load("./responsive/lineage/html/classesPanel.html", function (s) {
-            SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
-            $("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
-                SearchWidget.init();
-                $("#GenericTools_searchInAllSources").prop("checked", false);
-                $("#Lineage_MoreClassesOptions").hide();
-                SearchWidget.showTopConcepts();
+        if($("#tabs_whiteboard").children().length==0){
+            $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {
+                $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
+                $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
+                Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
+                self.hideShowMoreActions("hide");
+                ResponsiveUI.PopUpOnHoverButtons();
                 $("#lateralPanelDiv").resizable({
                     maxWidth: 435,
                     minWidth: 150,
@@ -98,20 +81,48 @@ var Lineage_r = (function () {
                         ResponsiveUI.resetWindowHeight();
                     },
                 });
-                
             });
-        });
+        }
+       
+        
+    };
+
+    self.initClassesTab = function () {
+        
+        if($("#tabs_classes").children().length==0){
+            $("#tabs_classes").load("./responsive/lineage/html/classesPanel.html", function (s) {
+                SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
+                $("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
+                    SearchWidget.init();
+                    $("#GenericTools_searchInAllSources").prop("checked", false);
+                    $("#Lineage_MoreClassesOptions").hide();
+                    SearchWidget.showTopConcepts();
+                    $("#lateralPanelDiv").resizable({
+                        maxWidth: 435,
+                        minWidth: 150,
+                        stop: function (event, ui) {
+                            ResponsiveUI.resetWindowHeight();
+                        },
+                    });
+                    
+                });
+            });
+        }
     };
     self.initPropertiesTab = function () {
-        $("#tabs_properties").load("./responsive/lineage/html/propertiesPanel.html", function (s) {
-            Lineage_r.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
-            Lineage_properties.searchTermInSources();
-        });
+        if($("#tabs_properties").children().length==0){
+            $("#tabs_properties").load("./responsive/lineage/html/propertiesPanel.html", function (s) {
+                Lineage_r.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
+                Lineage_properties.searchTermInSources();
+            });
+        }
     };
     self.initContainersTab = function () {
-        $("#tabs_containers").load("./responsive/lineage/html/containersPanel.html", function (s) {
-            Lineage_containers.search();
-        });
+        if($("#tabs_containers").children().length==0){
+            $("#tabs_containers").load("./responsive/lineage/html/containersPanel.html", function (s) {
+                Lineage_containers.search();
+            });
+        }
     };
 
     self.showHideEditButtons = function (source, hide) {

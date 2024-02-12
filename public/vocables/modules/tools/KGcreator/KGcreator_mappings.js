@@ -46,9 +46,11 @@ return alert("select a field (column)");
             $("#LinkColumn_rightPanel").show();
             $("#LinkColumn_basicTypeSelect").show();
             $("#LinkColumn_basicTypeSelect").parent().find("span").show();
+        
             PredicatesSelectorWidget.load("LinkColumn_predicateSelectorDiv", self.currentSlsvSource, { "flex-direction": "column" }, function() {
                 $("#editPredicate_vocabularySelect2").css("display", "inline");
                 $("#editPredicate_vocabularySelect2").val("usual");
+                $('#smallDialogDiv').find('#editPredicate_mainDiv').css('flex-direction','column');
                 PredicatesSelectorWidget.init(self.currentSlsvSource, function() {
                     PredicatesSelectorWidget.onSelectObjectFn = function(value) {
                     };

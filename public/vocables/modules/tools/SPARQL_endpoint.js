@@ -18,11 +18,10 @@ var SPARQL_endpoint = (function () {
         // self.currentSparql_server = Config.sources[sourceLabel].sparql_server;
         //  self.currentSparql_server = Config.sparql_server.urlsparql_server;
         localStorage.clear();
-        $("#mainDialogDiv").dialog("open")
+        $("#mainDialogDiv").dialog("open");
 
-        $("#mainDialogDiv").dialog("option","title","SPARQL endpoint")
-        $("#mainDialogDiv").parent().css("left","100px")
-
+        $("#mainDialogDiv").dialog("option", "title", "SPARQL endpoint");
+        $("#mainDialogDiv").parent().css("left", "100px");
 
         $("#graphDiv").html("");
         $("#mainDialogDiv").load("snippets/SPARQLendpoint.html", function () {

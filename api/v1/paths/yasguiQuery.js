@@ -40,7 +40,7 @@ module.exports = function () {
                                     processResponse(res, err, result);
                                 });
                             } else {
-                                UserRequestFiltering.filterSparqlRequest(req.body.query, userSources, function (parsingError, filteredQuery) {
+                                UserRequestFiltering.filterSparqlRequest(req.body.query, userSources, userInfo,function (parsingError, filteredQuery) {
                                     if (parsingError) {
                                         return processResponse(res, parsingError, null);
                                     }

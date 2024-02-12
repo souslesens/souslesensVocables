@@ -4,6 +4,7 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Export from "../../shared/export.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
+import Lineage_createRelation from "./lineage_createRelation.js";
 
 var Lineage_dictionary = (function () {
     var self = {};
@@ -532,7 +533,7 @@ targets: [0]
             async.eachSeries(
                 restrictions,
                 function (restrictionNode, callbackEach) {
-                    Lineage_blend.deleteRestriction(Config.dictionarySource, restrictionNode, function (err, result) {
+                    Lineage_createRelation.deleteRestriction(Config.dictionarySource, restrictionNode, function (err, result) {
                         if (err) return callbackEach(err);
                         callbackEach();
                     });

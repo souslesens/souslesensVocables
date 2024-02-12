@@ -16,6 +16,7 @@ const SparqlParser = require("sparqljs").Parser;
 const parser = new SparqlParser({ skipValidation: true });
 const fs = require("fs");
 
+
 var UserRequestFiltering = {
   existingSources: null,
 
@@ -112,7 +113,7 @@ var UserRequestFiltering = {
           error = " DATA PROTECTION : graphUri not allowed for user  " + graphUri + "\n";
         }
         else {// to be fixed PB with PRIVATE sources
-          if (false && userGraphUrisMap[graphUri].acl != "w") {
+          if ( userGraphUrisMap[graphUri].acl != "w") {
             error = " DATA PROTECTION : current  user cannot execute " + operation + " on graph " + graphUri + "\n";
           }
         }
@@ -168,7 +169,7 @@ var UserRequestFiltering = {
     callback(error, query);
   },
 
-  filterSparqlRequest: function(query, userSourcesMap, callback) {
+  filterSparqlRequest: function(query, userSourcesMap,userInfo, callback) {
     var error = "";
     var filteredQuery = query;
     var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
@@ -184,6 +185,11 @@ var UserRequestFiltering = {
       });
     }
     else {
+      for(var key in userSourcesMap){
+        if(userInfo.user.login == userSourcesMap[key].owner)
+          return callback(null,query);
+      }
+
       UserRequestFiltering.checkQueryByRegex(query, userGraphUrisMap, function(err, result) {
         if (err) {
           return callback(err);

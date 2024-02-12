@@ -1,7 +1,7 @@
 import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
-import Lineage_blend from "./lineage_blend.js";
+import Lineage_createRelation from "./lineage_createRelation.js";
 
 var Lineage_styles = (function () {
     var self = {};
@@ -138,7 +138,7 @@ var Lineage_styles = (function () {
                 object: icon,
             });
         }
-        triples = triples.concat(Lineage_blend.getCommonMetaDataTriples(subjectUri));
+        triples = triples.concat(Lineage_createRelation.getCommonMetaDataTriples(subjectUri));
         Sparql_generic.insertTriples(self.stylesSourceLabel, triples, {}, function (err, result) {
             if (err) return alert(err);
             MainController.UI.message("style saved", true);

@@ -828,7 +828,9 @@ var Lineage_properties = (function () {
     };
 
     self.searchTermInSources = function () {
-        var term = $("#LineageProperties_searchTermInSourcesInput").val();
+       // var term = $("#LineageProperties_searchTermInSourcesInput").val();
+        var term = $("#LineageProperties_searchAllSourcesTermInput").val();
+
         var exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked");
         var searchAllSources = $("#LineageProperties_searchInAllSources").prop("checked");
         var searchType = $("#LineageProperties_searchAllType").val();

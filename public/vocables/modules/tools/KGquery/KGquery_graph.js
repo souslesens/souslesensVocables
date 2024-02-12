@@ -177,6 +177,7 @@ var KGquery_graph = (function () {
     };
 
     self.getInferredModelVisjsData = function (source, callback) {
+        MainController.UI.message("creating graph")
         if (!source) {
             source = self.source;
         }
@@ -289,7 +290,9 @@ var KGquery_graph = (function () {
                         });
                     }
                 });
+                MainController.UI.message("",true)
                 return callback(null, visjsData);
+
                 /*   self.getInterGraphModel(source, visjsData, function(err, result) {
 
  return callback(null, result);

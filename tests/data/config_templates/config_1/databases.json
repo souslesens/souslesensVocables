@@ -1,0 +1,12 @@
+[
+    {
+        "id": "01HQAQ980F46TMRVNH1DJDDQ8C",
+        "name": "sqlserver-1",
+        "driver": "sqlserver",
+        "host": "localhost",
+        "port": 1433,
+        "database": "master",
+        "user": "sa",
+        "password": "superSecretP4ssword"
+    }
+]

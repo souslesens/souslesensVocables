@@ -200,8 +200,8 @@ var Lineage_r = (function () {
             });
     };
     self.responsiveAddEdgeDialog = function (edgeData, callback) {
-        ResponsiveUI.openDialogDiv("LineagePopup");
-        $("#LineagePopup")
+        ResponsiveUI.openDialogDiv("smallDialogDiv");
+        $("#smallDialogDiv")
             .parent()
             .show("fast", function () {
                 self.oldAddEdgeDialog(edgeData, function () {

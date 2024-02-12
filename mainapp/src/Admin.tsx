@@ -10,8 +10,10 @@ import { Profile } from "./Profile";
 import { SourcesTable } from "./Component/SourcesTable";
 import { UsersTable } from "./Component/UsersTable";
 import { LogsTable } from "./Component/LogsTable";
+import { DatabasesTable } from "./Component/DatabasesTable";
 import { ServerSource, getSources, getIndices, getGraphs } from "./Source";
 import { Config, getConfig } from "./Config";
+import { Database, getDatabases } from "./Database";
 import { Log, getLogs } from "./Log";
 
 type Model = {
@@ -20,13 +22,14 @@ type Model = {
     sources: RD<string, ServerSource[]>;
     indices: RD<string, string[]>;
     graphs: RD<string, string[]>;
+    databases: RD<Database[]>;
     logs: RD<string, Log[]>;
     config: RD<string, Config>;
     isModalOpen: boolean;
     currentEditionTab: EditionTab;
 };
 
-type EditionTab = "UsersEdition" | "ProfilesEdition" | "SourcesEdition" | "Logs";
+type EditionTab = "UsersEdition" | "ProfilesEdition" | "SourcesEdition" | "DatabaseManagement" | "Logs";
 
 const editionTabToNumber = (editionTab: EditionTab) => {
     switch (editionTab) {
@@ -36,8 +39,10 @@ const editionTabToNumber = (editionTab: EditionTab) => {
             return 1;
         case "SourcesEdition":
             return 2;
-        case "Logs":
+        case "DatabaseManagement":
             return 3;
+        case "Logs":
+            return 4;
         default:
             0;
     }
@@ -52,6 +57,8 @@ const editionTabToString = (editionTab: number): EditionTab => {
         case 2:
             return "SourcesEdition";
         case 3:
+            return "DatabaseManagement";
+        case 4:
             return "Logs";
         default:
             return "UsersEdition";
@@ -66,6 +73,7 @@ const initialModel: Model = {
     sources: loading(),
     indices: loading(),
     graphs: loading(),
+    databases: loading(),
     logs: loading(),
     config: loading(),
     isModalOpen: false,
@@ -89,6 +97,7 @@ type Msg =
     | { type: "ServerRespondedWithIndices"; payload: RD<string, string[]> }
     | { type: "ServerRespondedWithGraphs"; payload: RD<string, string[]> }
     | { type: "ServerRespondedWithConfig"; payload: RD<string, Config> }
+    | { type: "ServerRespondedWithDatabases"; payload: RD<Database[]> }
     | { type: "ServerRespondedWithLogs"; payload: RD<string, Log[]> }
     | { type: "UserUpdatedField"; payload: UpadtedFieldPayload }
     | { type: "UserClickedSaveChanges"; payload: {} }
@@ -116,6 +125,10 @@ function update(model: Model, msg: Msg): Model {
 
         case "ServerRespondedWithConfig":
             return { ...model, config: msg.payload };
+
+        case "ServerRespondedWithDatabases":
+            return { ...model, databases: msg.payload };
+
         case "ServerRespondedWithLogs":
             return { ...model, logs: msg.payload };
 
@@ -182,6 +195,12 @@ const Admin = () => {
     }, []);
 
     React.useEffect(() => {
+        getDatabases()
+            .then((databases) => updateModel({ type: "ServerRespondedWithDatabases", payload: success(databases) }))
+            .catch((err: { message: string }) => failure(err.message));
+    }, []);
+
+    React.useEffect(() => {
         getLogs()
             .then((logs) => updateModel({ type: "ServerRespondedWithLogs", payload: success(logs) }))
             .catch((err: { message: string }) => failure(err.message));
@@ -198,6 +217,7 @@ const Admin = () => {
                     <Tab label="Users" />
                     <Tab label="Profiles" />
                     <Tab label="Sources" />
+                    <Tab label="Databases" />
                     <Tab label="Logs" />
                 </Tabs>
             </Box>
@@ -214,6 +234,8 @@ const Dispatcher = (props: { model: Model }) => {
             return <ProfilesTable />;
         case "SourcesEdition":
             return <SourcesTable />;
+        case "DatabaseManagement":
+            return <DatabasesTable />;
         case "Logs":
             return <LogsTable />;
         default:

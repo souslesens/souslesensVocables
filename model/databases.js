@@ -46,6 +46,26 @@ class DatabaseModel {
     };
 
     /**
+     * @param {Database} newDatabase -  the new database to insert
+     */
+    addDatabase = async (newDatabase) => {
+        const databases = await this._read();
+
+        if (databases.map((db) => db.id).includes(newDatabase.id)) {
+            throw Error("This identifier already exists in the storage");
+        }
+
+        databases.push(newDatabase);
+
+        await lock.acquire("DatabasesThread");
+        try {
+            await this._write(databases);
+        } finally {
+            lock.release("DatabasesThread");
+        }
+    };
+
+    /**
      * @param {string} identifier -  a database identifier
      */
     deleteDatabase = async (identifier) => {
@@ -65,6 +85,24 @@ class DatabaseModel {
      */
     getAllDatabases = async () => {
         return await this._read();
+    };
+
+    /**
+     * @param {string} identifier -  a database identifier
+     */
+    updateDatabase = async (updatedDatabase) => {
+        const databases = await this._read();
+
+        const updatedDatabases = databases.map((database) => {
+            return (database.id == updatedDatabase.id) ? updatedDatabase : database;
+        });
+
+        await lock.acquire("DatabasesThread");
+        try {
+            await this._write(updatedDatabases);
+        } finally {
+            lock.release("DatabasesThread");
+        }
     };
 }
 

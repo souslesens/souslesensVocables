@@ -40,15 +40,19 @@ import * as z from "zod";
 import { useModel } from "../Admin";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import {
+    addDatabase,
     Database,
     DatabaseSchema,
     defaultDatabase,
     deleteDatabase,
+    editDatabase,
     SourceAccessControl,
 } from "../Database";
 import { style } from "../Utils";
 
 const enum Type {
+    ResetDatabase,
+    ServerRespondedWithDatabases,
     UserUpdatedField,
 }
 
@@ -72,6 +76,9 @@ type Msg_ =
 
 const updateDatabase = (databaseEditionState: DatabaseEditionState, msg: Msg_): DatabaseEditionState => {
     switch (msg.type) {
+        case Type.ResetDatabase:
+            return { form: msg.payload };
+        case Type.ServerRespondedWithDatabases:
         case Type.UserUpdatedField:
             return {
                 form: {
@@ -94,12 +101,17 @@ const validateForm = (form: DatabaseFormProps) => {
 };
 
 const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false }: DatabaseFormProps) => {
+    const { model, updateModel } = useModel();
     const [databaseModel, update] = React.useReducer(updateDatabase, { form: database });
     const [displayPassword, setDisplayPassword] = React.useState(false);
     const [currentErrors, setErrors] = React.useState({});
     const [open, setOpen] = React.useState(false);
 
-    const handleOpen = () => setOpen(true);
+    const handleOpen = () => {
+        update({ type: Type.ResetDatabase, payload: database})
+        setErrors({});
+        setOpen(true);
+    };
     const handleClose = () => setOpen(false);
     const handleClickShowPassword = () => setDisplayPassword(!displayPassword);
     const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault();
@@ -111,6 +123,12 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
         if (Object.keys(errors).length === 0) {
             event.preventDefault();
             handleClose();
+            if (create) {
+                void addDatabase(databaseModel.form, updateModel);
+            } else {
+                void editDatabase(databaseModel.form, updateModel);
+            }
+
         }
     };
 
@@ -123,8 +141,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
         }
 
         const errors = validateForm({ ...databaseModel.form, [fieldName]: fieldValue });
-        // TODO: Find a way to only raise the error related to the field instead of the all form
-        setErrors(errors);
+        setErrors({ ...currentErrors, [fieldName]: errors[fieldName] });
 
         update({ type: Type.UserUpdatedField, payload: { id: fieldName, value: fieldValue } });
     };
@@ -282,14 +299,13 @@ const DatabasesTable = () => {
                     const right: string = b[orderBy] as string;
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
-                console.log("renderDatabases");
 
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
                         <Autocomplete
                             disablePortal
                             id="filter databases"
-                            options={sortedDatabases.map((database: Database) => { return database.id })}
+                            options={sortedDatabases.map((database: Database) => { return database.name })}
                             onInputChange={(event, newInputValue) => setFilteringChars(newInputValue)}
                             renderInput={(params) => <TextField {...params} label="Search Databases by name" />}
                         />
@@ -298,7 +314,7 @@ const DatabasesTable = () => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                            <TableSortLabel active={orderBy === "id"} direction={order} onClick={() => handleRequestSort("id")}>Name</TableSortLabel>
+                                            <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>Name</TableSortLabel>
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -307,8 +323,8 @@ const DatabasesTable = () => {
                                         .filter((database: Database) => database.id.includes(filteringChars))
                                         .map((database: Database) => {
                                             return (
-                                                <TableRow key={database.id}>
-                                                    <TableCell>{database.id}</TableCell>
+                                                <TableRow key={database.name}>
+                                                    <TableCell>{database.name}</TableCell>
                                                     <TableCell align="center">
                                                         <Chip label={database.driver} size="small" />
                                                     </TableCell>

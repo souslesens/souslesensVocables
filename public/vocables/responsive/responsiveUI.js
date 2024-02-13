@@ -18,8 +18,8 @@ var ResponsiveUI = (function () {
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
         //self.setSlsvCssClasses();
-         //your remaining code
-        
+        //your remaining code
+
         var tools = [];
 
         for (var key in Config.tools) {
@@ -35,11 +35,11 @@ var ResponsiveUI = (function () {
         }
         tools.forEach((item, index) => {
             var logoTool=`<div style='height:35px;width:37px;' class='${item}-logo' ></div>`;
-           
+
             var strTool=`<div class='Lineage_PopUpStyleDiv' style='display:flex;flex-direction:row;align-items:center;' >${logoTool}<div  value="${item}">${item}</div></div>`;
-            
+
             $('#toolsSelect').append(strTool);
-           
+
         });
 
         window.addEventListener(
@@ -49,10 +49,11 @@ var ResponsiveUI = (function () {
             },
             true
         );
-        
+
 
         self.themeList();
-        self.replaceFile(BotEngine, BotEngineResponsive);
+        self.replaceFile(BotEngine, BotEngineResponsive);   
+        ResponsiveUI.resetWindowHeight();
     };
     self.initMenuBar = function (callback) {
         $("#ChangeSourceButton").show();
@@ -74,6 +75,7 @@ var ResponsiveUI = (function () {
         $("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
 
+
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
     self.replaceFile = function (file1, file2) {
@@ -87,7 +89,7 @@ var ResponsiveUI = (function () {
     self.onToolSelect = function (toolId,event) {
         if(event){
 
-        
+
             var clickedElement = event.target;
             // if class
             if(clickedElement.className=='Lineage_PopUpStyleDiv'){
@@ -97,13 +99,13 @@ var ResponsiveUI = (function () {
                 if(clickedElement.innerHTML){
                     var toolId=clickedElement.innerHTML;
                 }else{
-                    
+
                     var toolId=clickedElement.nextSibling.innerHTML;
                 }
-                
+
 
             }
-        
+
         }
 
         if (self.currentTool != null) {
@@ -137,7 +139,7 @@ var ResponsiveUI = (function () {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         var p= obj.node.parents.indexOf("PRIVATE")
         if(p>0){
-           Config.sourceOwner= obj.node.parents[p-1]
+            Config.sourceOwner= obj.node.parents[p-1]
 
         }
 
@@ -183,14 +185,14 @@ var ResponsiveUI = (function () {
         MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
-        
-       
+
+
 
         if (Config.tools[toolId].controller.onLoaded) {
             MainController.writeUserLog(authentication.currentUser, toolId, "");
             Config.tools[toolId].controller.onLoaded();
         } else {
-            
+
 
             if (true) {
                 var url = window.location.href;
@@ -203,7 +205,7 @@ var ResponsiveUI = (function () {
                 window.location.href = url;
             }
         }
-        
+
     };
 
     self.showDiv = function (modalDiv) {
@@ -283,18 +285,18 @@ var ResponsiveUI = (function () {
     };
 
     self.setSlsvCssClasses = function (callback) {
-        
+
         less.pageLoadFinished.then(function () {
             //setTimeout(() => {}, "500");
             ResponsiveUI.changeTheme(Config.theme.defaultTheme);
-            
+
             if (Config.theme.selector) {
                 $("#theme-selector-btn").show();
             }
 
             callback();
         });
-           
+
     };
 
     self.themeList = function () {
@@ -427,7 +429,7 @@ var ResponsiveUI = (function () {
         if(theme){
             if(theme['@isDarkTheme']){
                 Lineage_whiteboard.defaultNodeFontColor='white';
-                
+
             }
             else{
                 Lineage_whiteboard.defaultNodeFontColor="#343434";

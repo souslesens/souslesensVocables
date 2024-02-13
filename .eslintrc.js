@@ -78,7 +78,6 @@ module.exports = {
                 KGmappings: "readable",
                 KGpropertyFilter: "readable",
                 KGquery: "readable",
-                Lineage_blend: "readable",
                 Lineage_whiteboard: "readable",
                 Lineage_common: "readable",
                 Lineage_decoration: "readable",

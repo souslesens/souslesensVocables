@@ -13,7 +13,7 @@ import authentication from "../shared/authentification.js";
  */
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-var Sparql_proxy = (function() {
+var Sparql_proxy = (function () {
     var self = {};
     self.queriesHistory = {};
 
@@ -24,12 +24,12 @@ var Sparql_proxy = (function() {
      * @param {Object} options - NOT USED
      * @param {Function} callback - Function called to process the result of the query
      */
-    self.querySPARQL_GET_proxy_cursor = function(url, query, queryOptions, options, callback) {
+    self.querySPARQL_GET_proxy_cursor = function (url, query, queryOptions, options, callback) {
         var offset = 0;
         var limit = Config.queryLimit;
         var resultSize = 1;
         var allData = {
-            results: { bindings: [] }
+            results: { bindings: [] },
         };
 
         var p = query.toLowerCase().indexOf("limit");
@@ -40,10 +40,10 @@ var Sparql_proxy = (function() {
 
         // XXX rewrite this data generator with fetch + async + await
         async.whilst(
-            function(_callbackTest) {
+            function (_callbackTest) {
                 return resultSize > 0;
             },
-            function(callbackWhilst) {
+            function (callbackWhilst) {
                 //iterate
                 var queryCursor = query + " OFFSET " + offset;
 
@@ -51,8 +51,8 @@ var Sparql_proxy = (function() {
                     params: { query: queryCursor },
                     headers: {
                         Accept: "application/sparql-results+json",
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    }
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
                 };
 
                 $("#waitImg").css("display", "block");
@@ -60,20 +60,20 @@ var Sparql_proxy = (function() {
                 var payload = {
                     url: url,
                     body: body,
-                    POST: true
+                    POST: true,
                 };
                 $.ajax({
                     type: "POST",
                     url: `${Config.apiUrl}/sparqlProxy`,
                     data: payload,
                     dataType: "json",
-                    success: function(data, _textStatus, _jqXHR) {
+                    success: function (data, _textStatus, _jqXHR) {
                         callbackWhilst(null, data);
                         resultSize = data.results.bindings.length;
                         allData.results.bindings = allData.results.bindings.concat(data.results.bindings);
                         offset += limit;
                     },
-                    error: function(err) {
+                    error: function (err) {
                         $("#messageDiv").html(err.responseText);
                         $("#waitImg").css("display", "none");
                         // eslint-disable-next-line no-console
@@ -81,10 +81,10 @@ var Sparql_proxy = (function() {
                         // eslint-disable-next-line no-console
                         console.log(JSON.stringify(query));
                         return callbackWhilst(err);
-                    }
+                    },
                 });
             },
-            function(err) {
+            function (err) {
                 callback(err, allData);
             }
         );
@@ -97,7 +97,7 @@ var Sparql_proxy = (function() {
      * @param {Object} options - options.source is the name of the source being queried
      * @param {Function} callback - Function called to process the result of the query
      */
-    self.querySPARQL_GET_proxy = function(url, query, queryOptions, options, callback) {
+    self.querySPARQL_GET_proxy = function (url, query, queryOptions, options, callback) {
         if (!options) {
             options = {};
         }
@@ -132,7 +132,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
         }
 
         var payload = {
-            options: {}
+            options: {},
         };
         if (!queryOptions) {
             queryOptions = "";
@@ -171,7 +171,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             var body = {
                 params: { query: query, useProxy: useProxy },
                 headers: headers,
-                user: authentication.currentUser
+                user: authentication.currentUser,
             };
 
             payload.body = JSON.stringify(body);
@@ -190,7 +190,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             url: `${Config.apiUrl}/sparqlProxy`,
             data: payload,
             dataType: "json",
-            success: function(data, _textStatus, _jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 if (headers["Accept"] && headers["Accept"].indexOf("json") < 0) {
                     return callback(null, data);
                 }
@@ -210,7 +210,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
 
                 callback(null, data);
             },
-            error: function(err) {
+            error: function (err) {
                 console.error(err);
                 if (Config.logSparqlQueries) {
                     console.error("------QUERY ERROR--------");
@@ -235,11 +235,11 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                     return callback(err);
                 }
                 return err;
-            }
+            },
         });
     };
 
-    self.exportGraph = function(source) {
+    self.exportGraph = function (source) {
         var graphUri = Config.sources[source].graphUri;
         var graphUriStr = "";
         if (graphUri) {
@@ -261,7 +261,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
 
         var body = {
             params: { query: query, useProxy: false },
-            headers: headers
+            headers: headers,
         };
         var payload = {};
         payload.body = JSON.stringify(body);
@@ -278,7 +278,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             url: `${Config.apiUrl}/sparqlProxy`,
             data: payload,
             dataType: "json",
-            success: function(data, _textStatus, _jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 var str = data.result;
                 common.copyTextToClipboard(str);
             },
@@ -286,13 +286,13 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 if (err) {
                     return alert(err.responseText);
                 }
-            }
+            },
         });
     };
 
-    self.executeAsyncQuery = async function(url, query, queryOptions, options) {
-        let promise = new Promise(function(resolve, reject) {
-            self.querySPARQL_GET_proxy(url, query, queryOptions, options, function(err, result) {
+    self.executeAsyncQuery = async function (url, query, queryOptions, options) {
+        let promise = new Promise(function (resolve, reject) {
+            self.querySPARQL_GET_proxy(url, query, queryOptions, options, function (err, result) {
                 if (err) {
                     reject(err);
                 } else {
@@ -304,7 +304,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
         return promise;
     };
 
-    self.addFromLabelsGraphToQuery = function(query) {
+    self.addFromLabelsGraphToQuery = function (query) {
         var p = query.toLowerCase().indexOf("where");
         if (p < 0) {
             return query;
@@ -314,7 +314,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
         var array = [];
         var varNames = [];
         while ((array = regex.exec(query)) != null) {
-            array.forEach(function(item) {
+            array.forEach(function (item) {
                 if (varNames.indexOf(item) < 0) {
                     varNames.push(item);
                 }

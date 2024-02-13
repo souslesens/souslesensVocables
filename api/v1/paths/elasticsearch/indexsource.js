@@ -4,44 +4,124 @@ const ConfigManager = require("../../../../bin/configManager.");
 const UserRequestFiltering = require("../../../../bin/userRequestFiltering.");
 const { processResponse } = require("../utils");
 const userManager = require("../../../../bin/user..js");
+const { sourceModel } = require("../../../../model/sources");
+const async = require("async");
 
-module.exports = function () {
+module.exports = function() {
     let operations = {
-        POST,
+        POST
     };
 
+
     function POST(req, res, _next) {
-        // to be fixed PB with PRIVATE sources
-        if (ConfigManager.config && ConfigManager.config.ElasticSearch.user) {
-            ConfigManager.getUserSources(req, res, function (err, userSources) {
-                ConfigManager.getUser(req, res, function (err, userInfo) {
-                    if (err) {
-                        return res.status(400).json({ error: err });
-                    }
 
-                    UserRequestFiltering.validateElasticSearchIndices(userInfo, [req.body.indexName], userSources, "w", function (parsingError, filteredQuery) {
-                        if (parsingError) {
-                            return processResponse(res, parsingError, null);
+        async function isIndexPrivate(userInfo, indexName, callback) {
+            const sources = await sourceModel.getAllSources();
+
+            var sourceObj = null;
+            for (var key in sources) {
+                if (indexName == key.toLowerCase()) {
+                    sourceObj = sources[key];
+                }
+            }
+            if (!sourceObj) {
+                return callback("source not exists ");
+
+            }
+            callback(null, (userInfo.user.login == sourceObj.owner));
+        }
+
+
+        var parsingError = null;
+        var result = null;
+        var userInfo = null;
+        async.series([
+
+                //get UserInfo
+                function(callbackSeries) {
+                    ConfigManager.getUser(req, res, function(err, _userInfo) {
+                        if (err) {
+                            return callbackSeries(err);
                         }
+                        userInfo = _userInfo;
+                        callbackSeries();
+                    });
+                }
+                ,
+                // is source private
+                function(callbackSeries) {
+                    isIndexPrivate(userInfo, req.body.indexName, function(err, isPrivate) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        if (isPrivate) {
+                            elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function(err, result) {
+                                callbackSeries(err);
+                            });
+                        } else {
+                            callbackSeries();
+                        }
+                    });
 
-                        elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, result) {
+                }
+                //normal source and ConfigManager
+                , function(callbackSeries) {
+                    if (!ConfigManager.config) {
+                        return callbackSeries();
+                    } else {
+                        ConfigManager.getUserSources(req, res, function(err, userSources) {
+
+
+                            UserRequestFiltering.validateElasticSearchIndices(userInfo, [req.body.indexName], userSources, "w", function(_parsingError, filteredQuery) {
+                                if (_parsingError) {
+                                    parsingError = _parsingError;
+                                    return callbackSeries();
+                                    // return processResponse(res, parsingError, null);
+                                }
+
+                                elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function(err, _result) {
+                                    if (err) {
+                                        return callbackSeries(err);
+                                    }
+                                    result = _result;
+                                });
+                            });
+
+                        });
+                    }
+                },
+
+                function(callbackSeries) {
+                    if (!ConfigManager.config) {
+                        return callbackSeries();
+                    } else {
+                        elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function(err, result) {
                             if (err) {
                                 return res.status(400).json({ error: err });
                             }
                             return res.status(200).json(result);
                         });
-                    });
-                });
-            });
-        } else {
-            elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, result) {
+                    }
+                }
+
+            ],
+
+            function(err) {
                 if (err) {
                     return res.status(400).json({ error: err });
                 }
+                if (parsingError) {
+                    return processResponse(res, parsingError, null);
+                }
+                if (result) {
+                    return res.status(200).json(result);
+                }
                 return res.status(200).json(result);
-            });
-        }
+            }
+        )
+        ;
     }
+
 
     POST.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
@@ -57,7 +137,7 @@ module.exports = function () {
                     type: "object",
                     properties: {
                         indexName: {
-                            type: "string",
+                            type: "string"
                         },
                         data: {
                             type: "array",
@@ -68,30 +148,30 @@ module.exports = function () {
                                     label: { type: "string" },
                                     type: { type: "string" },
                                     parents: { type: "array", items: { type: "string" } },
-                                    skosLabel: { type: "array", items: { type: "string" } },
-                                },
-                            },
+                                    skosLabel: { type: "array", items: { type: "string" } }
+                                }
+                            }
                         },
                         options: {
                             type: "object",
                             properties: {
                                 owlType: { type: "string" },
-                                replaceIndex: { type: "boolean" },
-                            },
-                        },
-                    },
-                },
-            },
+                                replaceIndex: { type: "boolean" }
+                            }
+                        }
+                    }
+                }
+            }
         ],
 
         responses: {
             200: {
                 description: "Results",
                 schema: {
-                    type: "object",
-                },
-            },
-        },
+                    type: "object"
+                }
+            }
+        }
     };
 
     return operations;

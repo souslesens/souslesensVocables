@@ -43,7 +43,7 @@ const KGbuilder_triplesWriter = {
 
         var params = { query: queryGraph };
 
-        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
+        if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
             params.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,
@@ -87,7 +87,7 @@ const KGbuilder_triplesWriter = {
                     var query = "clear graph   <" + graphUri + ">";
                     var params = { query: query };
 
-                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
+                    if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
                         params.auth = {
                             user: ConfigManager.config.sparql_server.user,
                             pass: ConfigManager.config.sparql_server.password,
@@ -121,7 +121,7 @@ const KGbuilder_triplesWriter = {
 
         }
         var params = { query: query };
-        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
+        if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
             params.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,
@@ -149,7 +149,7 @@ const KGbuilder_triplesWriter = {
         var query = KGbuilder_triplesWriter.getSparqlPrefixesStr();
         query += "DELETE DATA {  GRAPH <" + graphUri + "> {  " + insertTriplesStr + " }  } ";
         var params = { query: query };
-        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.sparql_server.url) == 0) {
+        if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
             params.auth = {
                 user: ConfigManager.config.sparql_server.user,
                 pass: ConfigManager.config.sparql_server.password,

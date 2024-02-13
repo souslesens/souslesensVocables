@@ -110,7 +110,7 @@ var Lineage_containers = (function () {
 
         var filter = "";
         if (term) {
-            filter = Sparql_common.setFilter("parent0", null, term);
+            filter = Sparql_common.setFilter("parent", null, term);
         }
 
         var search_on_container = "";
@@ -148,7 +148,7 @@ var Lineage_containers = (function () {
         if (!options) {
             options = {};
         }
-        options.depth = 2;
+        options.depth = 5;
         if (!options.filter) {
             options.filter = "";
         }
@@ -977,15 +977,16 @@ var Lineage_containers = (function () {
                 fromStr +
                 "  WHERE {?member ^rdfs:member ?parent.\n" +
                 "    ?member rdf:type ?memberType.\n" +
+
                 filterLeaves +
                 "   ?member rdfs:label ?memberLabel.\n" +
                 "   ?parent rdfs:label ?parentLabel.\n" +
+                filter +
                 "  {select ?member where{\n" +
                 "?parent0  rdfs:member" +
                 pathOperator +
                 " ?member." +
                 filterContainer0Str +
-                filter +
                 "}\n" +
                 "  }\n" +
                 "}  group by ?member ?memberLabel ?parent ?parentLabel";

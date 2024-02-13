@@ -56,7 +56,7 @@ return alert("select a field (column)");
                     };
                     PredicatesSelectorWidget.onSelectPropertyFn = function(value) {
                     };
-                    $("#editPredicate_savePredicateButton").css("display", "none");
+                    $('#smallDialogDiv').find("#editPredicate_savePredicateButton").css("display", "none");
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
                         height: 600,

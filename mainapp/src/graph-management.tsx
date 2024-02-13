@@ -12,6 +12,14 @@ import Table from "react-bootstrap/Table";
 
 import { fetchMe } from "./Utils";
 
+
+declare global {
+    interface Window {
+        GraphManagement: {
+            createApp: () => void;
+        } 
+    }
+}
 export default function GraphManagement() {
     // sources fetched from server
     const [sources, setSources] = useState<Record<string, any>>({});
@@ -464,6 +472,12 @@ const handleUploadGraph = async () => {
     );
 }
 
-const container = document.getElementById("mount-graph-management-here");
-const root = createRoot(container!);
-root.render(<GraphManagement />);
+
+
+
+window.GraphManagement.createApp = function createApp() {
+    const container = document.getElementById("mount-graph-management-here");
+    const root = createRoot(container!);
+    root.render(<GraphManagement />);
+    return root.unmount.bind(root);
+};

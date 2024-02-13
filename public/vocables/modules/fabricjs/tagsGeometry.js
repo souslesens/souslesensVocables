@@ -185,7 +185,7 @@ var TagsGeometry = (function() {
                 var h=item.xMax - item.xMin;
                 item.index = index;
 
-                if(( w<10 || h<10)) {
+                if(( w<1 || h<1)) {
                   var dot=  new fabric.Circle({
                         radius: 1,
                       fill: self.disciplineColors[item.disciplineName]|| "#bbb",
@@ -411,6 +411,7 @@ var TagsGeometry = (function() {
 
                     let delta = new fabric.Point(deltaX, deltaY);
                     this.relativePan(delta);
+                    if(this.trigger)
                     this.trigger("moved");
                 }
             });

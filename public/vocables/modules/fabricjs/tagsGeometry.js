@@ -82,6 +82,7 @@ var TagsGeometry = (function() {
 
     };self.onSelectTreeNode=  function(evt,obj){
         if(obj.node.parent="JobCard"){
+            self.unSelectObjects()
             self.selectObject("number",obj.node.id)
         }
     }
@@ -106,6 +107,7 @@ var TagsGeometry = (function() {
     }
 
     self.draw = function() {
+       self.selectedObjects=[]
         self.canvas.clear();
         var filterDeck = "";
         var filterDisicipline = "";
@@ -124,7 +126,8 @@ var TagsGeometry = (function() {
                 if (filterDisicipline != "") {
                     filterDisicipline += ",";
                 }
-                filterDisicipline += "'" + item.text + "'";
+                var str=item.text.replace(/<[^>]*>/g, "");
+                filterDisicipline += "'" + str + "'";
             }
             if (item.parent == "JobCard") {
 
@@ -144,6 +147,7 @@ var TagsGeometry = (function() {
             if (allFilter != "") {
                 allFilter += " and ";
             }
+
             allFilter += "disciplineName in (" + filterDisicipline + ")";
         }
         if (filterJC != "") {
@@ -231,11 +235,17 @@ var TagsGeometry = (function() {
     self.showObjectInfos = function(object) {
         var html = "";
         for (var key in object.data) {
-            html += key + ":" + object.data[key] + "<br>";
+        var buttonStr="";
+        if(key=="number"){
+            buttonStr="<button onclick=\"TagsGeometry.selectObject('number','"+object.data[key]+"');\">G</button>"
+        }
+
+            html += key + ":" + object.data[key] + buttonStr+"<br>";
         }
 
 
         $("#tagsGeometryInfosDiv").html(html);
+        $( "#tagsGeometryTabs" ).tabs( "option", "active", 1 );
     };
 
 
@@ -421,18 +431,35 @@ var TagsGeometry = (function() {
         }
     };
 
-   self.selectObject = function (key,value) {
+   self.selectObject = function (key,value,unselect) {
         self.canvas.getObjects().forEach(function(o) {
+            if(unselect){
+                self.canvas.setActiveObject(o);
+                o.set("stroke","black")
+                o.set("fill","black")
+                o.set("strokeWidth",0.1)
+            }
             if(o.data[key] === value) {
                 var stroke=o.get("stroke")
                 var strokeW=o.get("strokeWidth")
                 self.canvas.setActiveObject(o);
                 o.set("stroke","red")
                 o.set("fill","red")
-                o.set("strokeWidth",10)
+                o.set("strokeWidth",4)
+
             }
+            self.selectedObjects.push(o)
         })
        self.canvas.renderAll();
+    }
+    self.unSelectObjects = function () {
+        self.selectedObjects.forEach(function(o) {
+
+
+            o.set("stroke", "black")
+           // o.set("fill", "black")
+            o.set("strokeWidth", 0.1)
+        })
     }
 
     return self;

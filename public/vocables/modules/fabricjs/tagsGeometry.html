@@ -1,17 +1,29 @@
 <div style="display: flex;flex-direction: row;">
 
-    <div style="display: flex;flex-direction: column;">
-        <div id="tagsGeometryTreeDiv" style="width:300px;height:500px; overflow: auto"></div>
+    <div id="tagsGeometryTabs">
+        <ul>
+            <li class="nodeInfosWidget_tabDiv"><a href="#tagsGeometryControlPanelTab">Filter</a></li>
+            <li class="nodeInfosWidget_tabDiv"><a href="#tagsGeometryInfosPanelTab">Infos</a></li>
+        </ul>
+        <div id="tagsGeometryControlPanelTab" style="display: flex;flex-direction: column;">
+            <div id="tagsGeometryTreeDiv" style="width:300px;height:500px; overflow: auto"></div>
 
-        <div>
-            <button onclick="TagsGeometry.drawTest()">Draw</button>
+            <div>
+                <button onclick="TagsGeometry.draw()">Draw</button>
+            </div>
         </div>
-
-
+        <div id="tagsGeometryInfosPanelTab">
+            <div id="tagsGeometryInfosDiv" style="width:300px;height:500px;"></div>
+        </div>
     </div>
-    <canvas id="canvas" width="900" height="800"></canvas>
-    <div id="tagsGeometryInfosDiv" style="width:300px;height:500px;"></div>
+    <div>
+        <canvas id="canvas" width="800" height="800" style="border:1px solid black"></canvas>
+    </div>
+
 </div>
+<script>
+    $("#tagsGeometryTabs").tabs({})
+</script>
 <!--script src="https://cdn.jsdelivr.net/npm/fabric"></script>
 <script>
     return

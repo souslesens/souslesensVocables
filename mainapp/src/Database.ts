@@ -33,8 +33,28 @@ function mapDatabases(resources: DatabaseJson[]) {
 
 async function addDatabase(database: Database, updateModel: React.Dispatch<Msg>) {
     try {
-        const response = await fetch(`${endpoint}/databases`, { method: "post" });
+
+        const body = { 'database': database }
+
+        const response = await fetch(endpoint,
+            {
+                method: "post",
+                body: JSON.stringify(body, null, "\t"),
+                headers: { "Content-Type": "application/json" },
+            });
         const { message, resources } = (await response.json()) as Response;
+
+        if (response.status === 200) {
+            updateModel({
+                type: "ServerRespondedWithDatabases",
+                payload: success(mapDatabases(resources))
+            });
+        } else {
+            updateModel({
+                type: "ServerRespondedWithDatabases",
+                payload: failure(`${response.status}, ${message}`)
+            });
+        }
 
     } catch (error) {
         updateModel({
@@ -68,7 +88,37 @@ async function deleteDatabase(database: Database, updateModel: React.Dispatch<Ms
     }
 }
 
-async function updateDatabase(database: Database, updateModel: React.Dispatch<Msg>) {
+async function editDatabase(database: Database, updateModel: React.Dispatch<Msg>) {
+    try {
+
+        const body = { 'database': database }
+
+        const response = await fetch(`${endpoint}/${database.id}`,
+            {
+                method: "put",
+                body: JSON.stringify(body, null, "\t"),
+                headers: { "Content-Type": "application/json" },
+            });
+        const { message, resources } = (await response.json()) as Response;
+
+        if (response.status === 200) {
+            updateModel({
+                type: "ServerRespondedWithDatabases",
+                payload: success(mapDatabases(resources))
+            });
+        } else {
+            updateModel({
+                type: "ServerRespondedWithDatabases",
+                payload: failure(`${response.status}, ${message}`)
+            });
+        }
+
+    } catch (error) {
+        updateModel({
+            type: "ServerRespondedWithDatabases",
+            payload: failure(error)
+        });
+    }
 }
 
 type DatabaseJson = {
@@ -86,7 +136,7 @@ const decodeDatabase = (key: string, database: DatabaseJson): Database => {
     return {
         _type: "database",
         id: database.id ? database.id : ulid(),
-        name: database.name ? database.name : key,
+        name: database.name ? database.name : database.id,
         driver: database.driver,
         host: database.host,
         port: database.port,
@@ -124,4 +174,4 @@ export const defaultDatabase = (uuid: string): Database => {
         password: "",
     };
 };
-export { Database, DatabaseSchema, deleteDatabase, getDatabases };
+export { addDatabase, Database, DatabaseSchema, deleteDatabase, editDatabase, getDatabases };

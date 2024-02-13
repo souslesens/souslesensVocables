@@ -1,7 +1,7 @@
 const { databaseModel } = require("../../../../model/databases");
 
 module.exports = function () {
-    let operations = { DELETE, GET };
+    let operations = { DELETE, GET, PUT };
 
     async function GET(req, res, next) {
         res.status(400).json({ message: `Database with id ${req.params.id} was not found` });
@@ -52,6 +52,49 @@ module.exports = function () {
         responses: {
             200: {
                 description: "The specified database was deleted successfully",
+                schema: {
+                    $ref: "#/definitions/Database",
+                },
+            },
+            400: {
+                description: "The database identifier was missing from the request",
+                schema: {
+                    $ref: "#/definitions/Database",
+                },
+            }
+        }
+    };
+
+    async function PUT(req, res, next) {
+        if (!req.body.database) {
+            res.status(400).json({
+                message: "The database object is missing from this request"
+            });
+        } else {
+            const database = req.body.database;
+
+            try {
+                await databaseModel.updateDatabase(database);
+
+                const databases = await databaseModel.getAllDatabases();
+                res.status(200).json({
+                    message: `The database ${database.id} was successfully updated`,
+                    resources: databases,
+                });
+            } catch (err) {
+                next(err);
+            }
+        }
+    }
+
+    PUT.apiDoc = {
+        summary: "Update a specific database",
+        security: [{ restrictAdmin: [] }],
+        operationId: "UpdateOneDatabase",
+        parameters: [],
+        responses: {
+            200: {
+                description: "The specified database was updated successfully",
                 schema: {
                     $ref: "#/definitions/Database",
                 },

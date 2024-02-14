@@ -69,12 +69,27 @@ var ResponsiveUI = (function () {
     };
 
     self.resetWindowHeight = function () {
+        
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPannelWidth = $("#lateralPanelDiv").width();
+         // Case that lateral bar take all the screen
+         if(LateralPannelWidth>=$(window).width()){
+            $("#graphDiv").css("width",'100%');
+            $("#lateralPanelDiv").css('width',$(window).width());
+        }
+        else{
+            
+            LateralPannelWidth=435;
+            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
+            $("#lateralPanelDiv").css('width','435px');
+            
+        }
+        
         $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 1);
         $("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
-        $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
-
+       
+       
+        
 
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };

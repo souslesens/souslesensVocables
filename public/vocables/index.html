@@ -296,10 +296,11 @@
                     h = $(document).height() - 30;
 
                     h = Math.min(h, 1000);
-
+                    /*
                     $("#graphDiv").width(w);
                     MainController.UI.initialGraphDivWitdh = w;
                     $("#graphDiv").height(h - 50);
+                    */
 
                     $("#accordion").accordion({
                         heightStyle: "fill",
@@ -470,11 +471,11 @@
 </header>
 
 <div id="graphAndCommandScreen" class="w3-container" style="height: 92.5dvh">
-    <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="height: 100%; width: 435px;" id="lateralPanelDiv">
+    <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="height: 100%;width: 435px; " id="lateralPanelDiv">
 
     </div>
-    <div class="w3-container w3-col l9" style="height: 100%; width: auto;">
-        <div id="graphDiv" style="height: 100%"></div>
+    <div class="w3-container w3-col l9" style="height: 100%;width:auto;">
+        <div id="graphDiv" class="w3-container" style="height: 100%"></div>
     </div>
 </div>
 

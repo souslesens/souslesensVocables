@@ -19,6 +19,7 @@ var ContainerSearchWidget = (function () {
 
             $("#smallDialogDiv").html(html);
             $("#smallDialogDiv").dialog("open");
+            $("#smallDialogDiv").parent().css('left','30%');
             types.splice(0, 0, { id: "all", label: "all" });
 
             common.fillSelectOptions("containerSearchWidget_typesSelect", types, true, "label", "id");

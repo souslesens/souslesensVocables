@@ -11,6 +11,7 @@ var Lineage_similars = (function () {
 
     self.showDialog = function () {
         $("#smallDialogDiv").dialog("open");
+        $("#smallDialogDiv").parent().css('left','30%');
         $("#smallDialogDiv").dialog("option", "title", "Similars");
         $("#smallDialogDiv").load("snippets/lineage/lineageSimilarsDialog.html");
     };

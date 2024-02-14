@@ -950,6 +950,7 @@ var KGcreator = (function () {
             html += "</table>";
 
             $("#smallDialogDiv").dialog("open");
+            $("#smallDialogDiv").parent().css('left','10%');
             // $("#smallDialogDiv").html("<div style='overflow:auto;height:90%'>"+html+"</div>")
             $("#smallDialogDiv").html(html);
         }

@@ -15,6 +15,7 @@ var ResponsiveUI = (function () {
     self.LateralPannelShowed = true;
     self.currentTool = null;
     self.toolsNeedSource = ["lineage", "KGquery", "KGcreator"];
+    self.smartPhoneScreen=null;
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
         //self.setSlsvCssClasses();
@@ -72,16 +73,20 @@ var ResponsiveUI = (function () {
         
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPannelWidth = $("#lateralPanelDiv").width();
-         // Case that lateral bar take all the screen
-         if(LateralPannelWidth>=$(window).width()){
-            $("#graphDiv").css("width",'100%');
+         // Mobile format graph div reset
+        if($(window).width()<=435){
+            $("#graphDiv").css("width",$(window).width());
             $("#lateralPanelDiv").css('width',$(window).width());
+            self.smartPhoneScreen=true;
         }
         else{
+            if(self.smartPhoneScreen){
+                LateralPannelWidth=435;
+            }
+            self.smartPhoneScreen=false;
             
-            LateralPannelWidth=435;
-            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
-            $("#lateralPanelDiv").css('width','435px');
+            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 20);
+            $("#lateralPanelDiv").css('width',LateralPannelWidth);
             
         }
         
@@ -347,6 +352,9 @@ var ResponsiveUI = (function () {
         }
     };
     self.hideShowLateralPannel = function (button) {
+        if(self.smartPhoneScreen){
+            return
+        }
         if (self.LateralPannelShowed) {
             $("#lineage-tab-buttons").hide();
             $(button).parent().hide();

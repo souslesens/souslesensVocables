@@ -74,7 +74,7 @@ var ResponsiveUI = (function () {
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPannelWidth = $("#lateralPanelDiv").width();
          // Mobile format graph div reset
-        if($(window).width()<=435){
+        if($(window).width()<=500){
             $("#graphDiv").css("width",$(window).width());
             $("#lateralPanelDiv").css('width',$(window).width());
             self.smartPhoneScreen=true;
@@ -90,8 +90,8 @@ var ResponsiveUI = (function () {
             
         }
         
-        $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 1);
-        $("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
+        /*$("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 1);
+        $("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);*/
        
        
         

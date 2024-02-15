@@ -296,10 +296,11 @@
                     h = $(document).height() - 30;
 
                     h = Math.min(h, 1000);
-
+                    /*
                     $("#graphDiv").width(w);
                     MainController.UI.initialGraphDivWitdh = w;
                     $("#graphDiv").height(h - 50);
+                    */
 
                     $("#accordion").accordion({
                         heightStyle: "fill",
@@ -366,7 +367,7 @@
 
 <body>
 <header class="w3-container" id="mainOuterDiv">
-    <div id="MenuBar" class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4; width: 100%; height: 90px">
+    <div id="MenuBar" class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4; width: 100%;">
         <div id="MenuBarHeader" class="left-border-main-dialog-div w3-display-container" style="height: 20px">
             <div>
                 <table>
@@ -420,7 +421,7 @@
             <div class="w3-bar-item">
                 <div
                     class="w3-sand w3-round-xlarge"
-                    style="display: flex; flex-direction: row; align-items: center; margin-left: 0px !important; margin-right: 0px !important; padding: 6px"
+                    style="display: flex; flex-direction: row; align-items: center; margin-left: 0px !important; margin-right: 0px !important; padding: 1px;"
                     id="index_topContolPanel"
                 >
                     <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
@@ -470,11 +471,11 @@
 </header>
 
 <div id="graphAndCommandScreen" class="w3-container" style="height: 92.5dvh">
-    <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="height: 100%; width: 435px;" id="lateralPanelDiv">
+    <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="height: 100%;width: 435px; " id="lateralPanelDiv">
 
     </div>
-    <div class="w3-container w3-col l9" style="height: 100%; width: auto;">
-        <div id="graphDiv" style="height: 100%"></div>
+    <div class="w3-container w3-col l9" style="height: 100%;width:auto;">
+        <div id="graphDiv" class="w3-container" style="height: 100%"></div>
     </div>
 </div>
 

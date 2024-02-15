@@ -85,7 +85,7 @@ var ResponsiveUI = (function () {
             }
             self.smartPhoneScreen=false;
             
-            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 20);
+            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
             $("#lateralPanelDiv").css('width',LateralPannelWidth);
             
         }
@@ -116,7 +116,10 @@ var ResponsiveUI = (function () {
                 var toolId=$(clickedElement).children()[1].innerHTML;
             }
             else {
-                if(clickedElement.innerHTML){
+                if(clickedElement.id=='toolsSelect'){
+                    return
+                }
+                else if(clickedElement.innerHTML){
                     var toolId=clickedElement.innerHTML;
                 }else{
 

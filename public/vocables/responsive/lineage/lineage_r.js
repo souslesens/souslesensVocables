@@ -185,6 +185,7 @@ var Lineage_r = (function () {
         $("#mainDialogDiv")
             .parent()
             .show("fast", function () {
+                
                 Lineage_graphTraversal.showShortestPathDialog();
             });
     };

@@ -10,6 +10,7 @@ var GraphDecorationWidget = (function () {
 
     self.showDecorateDialog = function (nodeSelectorFn) {
         $("#smallDialogDiv").dialog("open");
+        $("#smallDialogDiv").parent().css('left','30%');
         $("#smallDialogDiv").load("snippets/lineage/lineage_decorateDialog.html", function () {
             self.currentNodeSelectorFn = null;
             if (nodeSelectorFn) {

@@ -278,7 +278,7 @@ var BotEngine = (function () {
 
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").html("<div id='botGraphDiv' style='width:1200px;height:800px'></div>");
-
+        
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
             layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
             physics: { enabled: true },

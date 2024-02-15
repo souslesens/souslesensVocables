@@ -15,6 +15,7 @@ var ResponsiveUI = (function () {
     self.LateralPannelShowed = true;
     self.currentTool = null;
     self.toolsNeedSource = ["lineage", "KGquery", "KGcreator"];
+    self.smartPhoneScreen=null;
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
         //self.setSlsvCssClasses();
@@ -69,12 +70,31 @@ var ResponsiveUI = (function () {
     };
 
     self.resetWindowHeight = function () {
+        
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPannelWidth = $("#lateralPanelDiv").width();
-        $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 1);
-        $("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
-        $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
-
+         // Mobile format graph div reset
+        if($(window).width()<=500){
+            $("#graphDiv").css("width",$(window).width());
+            $("#lateralPanelDiv").css('width',$(window).width());
+            self.smartPhoneScreen=true;
+        }
+        else{
+            if(self.smartPhoneScreen){
+                LateralPannelWidth=435;
+            }
+            self.smartPhoneScreen=false;
+            
+            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
+            $("#lateralPanelDiv").css('width',LateralPannelWidth);
+            
+        }
+        
+        /*$("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 1);
+        $("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);*/
+       
+       
+        
 
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
@@ -96,7 +116,10 @@ var ResponsiveUI = (function () {
                 var toolId=$(clickedElement).children()[1].innerHTML;
             }
             else {
-                if(clickedElement.innerHTML){
+                if(clickedElement.id=='toolsSelect'){
+                    return
+                }
+                else if(clickedElement.innerHTML){
                     var toolId=clickedElement.innerHTML;
                 }else{
 
@@ -332,6 +355,9 @@ var ResponsiveUI = (function () {
         }
     };
     self.hideShowLateralPannel = function (button) {
+        if(self.smartPhoneScreen){
+            return
+        }
         if (self.LateralPannelShowed) {
             $("#lineage-tab-buttons").hide();
             $(button).parent().hide();

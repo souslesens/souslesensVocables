@@ -390,7 +390,7 @@ var TagsGeometry = (function() {
                 lastClientX = e.e.clientX;
                 lastClientY = e.e.clientY;
             });
-            // When the mouse moves, and we're panning (mouse down), we continue
+            // When--------------- the mouse moves, and we're panning (mouse down), we continue
             this.on("mouse:move", (e) => {
                 if (state === STATE_PANNING && e && e.e) {
                     // let delta = new fabric.Point(e.e.movementX, e.e.movementY); // No Safari support for movementX and movementY

@@ -2110,7 +2110,7 @@ var Lineage_whiteboard = (function () {
 
                             visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.object.value, label, predicateUri, { shape: shape }));
                         }
-                        if(!options.OnlySubjects) {
+                        if (!options.OnlySubjects) {
                             var edgeId = item.subject.value + "_" + item.prop.value + "_" + item.object.value;
                             if (!existingNodes[edgeId]) {
                                 existingNodes[edgeId] = 1;

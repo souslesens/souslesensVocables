@@ -25,7 +25,7 @@ var LegendWidget = (function () {
             },
             tie_selection: false,
             contextMenu: LegendWidget.getLegendJstreeContextMenu(),
-            notTypes:true
+            notTypes: true,
         };
         $("#Lineage_classes_graphDecoration_legendDiv").jstree("destroy").empty();
         $("#Lineage_classes_graphDecoration_legendDiv").html(

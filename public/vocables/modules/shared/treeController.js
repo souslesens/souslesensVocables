@@ -1,4 +1,3 @@
-
 import common from "./common.js";
 
 /** The MIT License
@@ -44,10 +43,10 @@ var TreeController = (function () {
                     //if (true || jsTreeOptions.labelClass) {
                     var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>";
                     //}
-                    var type_icon=JstreeWidget.selectTypeForIconsJstree(type);
-                    if(type_icon=='default' ){
+                    var type_icon = JstreeWidget.selectTypeForIconsJstree(type);
+                    if (type_icon == "default") {
                         // blank node case
-                        type_icon='Individual';
+                        type_icon = "Individual";
                     }
 
                     var child = {

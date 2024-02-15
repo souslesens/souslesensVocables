@@ -742,7 +742,7 @@ var Lineage_containers = (function () {
                                 id: item.member.value,
                                 label: item.memberLabel.value,
                                 shadow: self.nodeShadow,
-                                shape: type == "container" ? Lineage_containers.containerStyle.shape: Lineage_whiteboard.defaultShape,
+                                shape: type == "container" ? Lineage_containers.containerStyle.shape : Lineage_whiteboard.defaultShape,
                                 size: size,
                                 font: type == "container" ? { color: color2, size: 10 } : null,
                                 color: Lineage_containers.containerStyle.color,
@@ -891,7 +891,7 @@ var Lineage_containers = (function () {
 
     self.onSelectedNodeTreeclick = function (event, obj) {
         self.currentContainer = obj.node;
-        
+
         if (obj.event.button != 2) {
             self.listContainerResources(Lineage_sources.activeSource, self.currentContainer, { onlyOneLevel: true, leaves: true });
         }
@@ -977,7 +977,6 @@ var Lineage_containers = (function () {
                 fromStr +
                 "  WHERE {?member ^rdfs:member ?parent.\n" +
                 "    ?member rdf:type ?memberType.\n" +
-
                 filterLeaves +
                 "   ?member rdfs:label ?memberLabel.\n" +
                 "   ?parent rdfs:label ?parentLabel.\n" +

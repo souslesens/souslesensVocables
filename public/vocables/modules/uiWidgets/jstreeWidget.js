@@ -40,12 +40,12 @@ var JstreeWidget = (function () {
         Source: {
             icon: "./icons/CommonIcons/SourceIcon.png",
         },
-        
+
         Class: {
             li_attr: { style: "color:black" },
             icon: "./icons/JstreeIcons/Classes.png",
         },
-        
+
         Property: {
             li_attr: { style: "color:black" },
             icon: "./icons/JstreeIcons/Property.png",
@@ -69,28 +69,21 @@ var JstreeWidget = (function () {
         DataSource: {
             icon: "./icons/JstreeIcons/DataSource.png",
         },
-        CSV:{
+        CSV: {
             icon: "./icons/JstreeIcons/FileCSV.png",
         },
-        CSVS:{
+        CSVS: {
             icon: "./icons/JstreeIcons/CSVS.png",
         },
-        
-
 
         // Classic items
         default: {
             icon: "./icons/JstreeIcons/default.png",
         },
-        
+
         Folder: {
             icon: "./icons/JstreeIcons/Folder.png",
         },
-
-
-        
-       
-
 
         /* To delete */
         //double
@@ -147,13 +140,12 @@ var JstreeWidget = (function () {
             plugins.push("dnd");
         }
 
-        if(options.notTypes){
-            var icons=false;
-        }else{
-            var icons=true;
+        if (options.notTypes) {
+            var icons = false;
+        } else {
+            var icons = true;
             plugins.push("types");
         }
-        
 
         var check_callbackFn = function (op, node, parent, position, more) {
             if (op == "move_node" && options.dropAllowedFn) {
@@ -175,10 +167,9 @@ var JstreeWidget = (function () {
                 core: {
                     data: jstreeData,
                     check_callback: check_callbackFn,
-                    themes:{
+                    themes: {
                         icons: icons,
-                    }
-                    
+                    },
                 },
                 dnd: options.dnd,
                 search: options.searchPlugin,
@@ -187,7 +178,7 @@ var JstreeWidget = (function () {
                     whole_node: false,
                 },
                 types: JstreeWidget.types,
-                
+
                 contextmenu: { items: options.contextMenu },
             })
             .on("loaded.jstree", function () {

@@ -25,9 +25,6 @@ var Lineage_relations = (function () {
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").dialog("option", "title", "Query");
         $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function () {
-          
-        
-
             //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
             $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
                 if (e.which == 13 || e.which == 9) {
@@ -66,8 +63,6 @@ var Lineage_relations = (function () {
             var vocabulariesPropertiesMap = {};
             async.series(
                 [
-
-
                     function (callbackSeries) {
                         for (var vocabulary in vocabulariesPropertiesMap) {
                             var properties = vocabulariesPropertiesMap[vocabulary];
@@ -96,12 +91,11 @@ var Lineage_relations = (function () {
                     },
                     function (callbackSeries) {
                         if (Config.UIprofile == "KG") {
-                          Lineage_relations.getInferredProperties(Lineage_sources.activeSource,function(err, result){
-                              jstreeData=result
-                              return callbackSeries();
-                          });
+                            Lineage_relations.getInferredProperties(Lineage_sources.activeSource, function (err, result) {
+                                jstreeData = result;
+                                return callbackSeries();
+                            });
                         }
-
                     },
 
                     function (callbackSeries) {
@@ -129,7 +123,6 @@ var Lineage_relations = (function () {
                             return callbackSeries();
                         });
                     },
-                  
                 ],
                 function (err) {
                     if (err) {
@@ -139,7 +132,6 @@ var Lineage_relations = (function () {
             );
         });
     };
-
 
     self.getPropertiesJstreeMenu = function () {
         var items = {};
@@ -255,7 +247,6 @@ var Lineage_relations = (function () {
             if (properties.length > 0) {
                 options.filter += Sparql_common.setFilter("prop", properties);
             }
-
 
             if (propDomainFilter.length > 0) {
                 options.filter += Sparql_common.setFilter("subjectType", propDomainFilter, null, { useFilterKeyWord: 1 });
@@ -547,7 +538,7 @@ var Lineage_relations = (function () {
         );
     };
 
-    self.getInferredProperties = function (source,callback) {
+    self.getInferredProperties = function (source, callback) {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
@@ -557,7 +548,7 @@ var Lineage_relations = (function () {
         var options = {};
         var inferredProps = [];
         var distinctProps = {};
-        var jstreeData=[]
+        var jstreeData = [];
         async.series(
             [
                 function (callbackSeries) {
@@ -596,7 +587,7 @@ var Lineage_relations = (function () {
                 },
 
                 function (callbackSeries) {
-                 jstreeData = [
+                    jstreeData = [
                         {
                             id: "proposed",
                             text: "Proposed",
@@ -633,12 +624,12 @@ var Lineage_relations = (function () {
                             });
                         });
                     });
-                   // JstreeWidget.addNodesToJstree("lineageRelations_propertiesJstreeDiv", null, jstreeData);
+                    // JstreeWidget.addNodesToJstree("lineageRelations_propertiesJstreeDiv", null, jstreeData);
                     return callbackSeries();
                 },
             ],
             function (err) {
-               return callback(err, jstreeData)
+                return callback(err, jstreeData);
             }
         );
     };

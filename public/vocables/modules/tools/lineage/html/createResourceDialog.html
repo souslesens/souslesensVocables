@@ -48,7 +48,7 @@
 </style>
 <div>
     <div id="lineageCreateResource_mainDiv">
-          <div style="display: flex; flex-direction: row">
+        <div style="display: flex; flex-direction: row">
             <div>
                 <select onchange="Lineage_createResource.onSelectResourceType($(this).val())">
                     <option>owl:Class</option>
@@ -100,19 +100,17 @@
     </div>
 </div>
 
-
-
-
 <script>
-  $("#KGcreator_tripleInput").keypress(function(e) {
-    if (e.which == 13) {
-   ;//   Lineage_createRelation.addTripleToCreatingNode();
-    }
-  });
-  $("#lineageCreateResource_creatingNodeClassParamsDiv").dialog({
-    autoOpen: false,
-    height: 600,
-    width: 600,
-    modal: true
-  });
-</script>-->
+    $("#KGcreator_tripleInput").keypress(function (e) {
+        if (e.which == 13) {
+            //   Lineage_createRelation.addTripleToCreatingNode();
+        }
+    });
+    $("#lineageCreateResource_creatingNodeClassParamsDiv").dialog({
+        autoOpen: false,
+        height: 600,
+        width: 600,
+        modal: true,
+    });
+</script>
+-->

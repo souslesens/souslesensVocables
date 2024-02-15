@@ -63,7 +63,7 @@ var SourceSelectorWidget = (function () {
                     id: item,
                     text: item,
                     parent: "#",
-                    type: 'Folder',
+                    type: "Folder",
                 });
             }
         });
@@ -85,8 +85,6 @@ var SourceSelectorWidget = (function () {
                 var parent = Config.sources[sourceLabel].schemaType;
 
                 var othersGroup = "OTHERS";
-
-               
 
                 var group = Config.sources[sourceLabel].group;
                 if (group) {
@@ -131,12 +129,12 @@ var SourceSelectorWidget = (function () {
                     }
                     //  console.log(JSON.stringify(jstreeData,null,2))
                     if (!types || types.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                        var type=Config.sources[sourceLabel].schemaType;
-                        if(type=="OWL"){
-                            type='Source';
+                        var type = Config.sources[sourceLabel].schemaType;
+                        if (type == "OWL") {
+                            type = "Source";
                         }
-                        if(type=='SKOS'){
-                            type='Thesaurus'
+                        if (type == "SKOS") {
+                            type = "Thesaurus";
                         }
                         treeData.push({
                             id: sourceLabel,

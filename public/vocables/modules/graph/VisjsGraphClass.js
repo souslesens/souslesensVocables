@@ -999,7 +999,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
             setTimeout(function () {
                 $("#graphDisplay_theme").remove();
-                $("#visjsConfigureDiv").parent().css('left','20%');
+                $("#visjsConfigureDiv").parent().css("left", "20%");
                 $("#visjsConfigureDiv").prepend(
                     "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
                         "<select onchange='Lineage_sources.setTheme($(this).val())' >" +

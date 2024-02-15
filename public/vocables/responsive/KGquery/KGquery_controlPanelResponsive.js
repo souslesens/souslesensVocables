@@ -1,6 +1,5 @@
 import common from "../../modules/shared/common.js";
 
-
 var KGquery_controlPanelResponsive = (function () {
     var self = {};
     self.vicinityArray = [];

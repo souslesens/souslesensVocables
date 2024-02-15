@@ -30,16 +30,15 @@
     color: @button1-color;
     border-radius: 14px;
 }
-.Lineage_PopUpStyleDiv{
+.Lineage_PopUpStyleDiv {
     padding: 3px;
     margin-top: 4px;
     color: @source-color;
 }
-.Lineage_PopUpStyleDiv div{
-    
+.Lineage_PopUpStyleDiv div {
     color: @source-color;
 }
-.Lineage_PopUpStyleDiv:hover{
+.Lineage_PopUpStyleDiv:hover {
     background-color: @dark-background-color;
     color: @button1-color;
     border-radius: 14px;

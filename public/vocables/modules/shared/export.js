@@ -379,7 +379,7 @@ var Export = (function () {
         if (!div) {
             $("#mainDialogDiv").dialog("open");
             $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
-            $("#mainDialogDiv").parent().css('left','10%');
+            $("#mainDialogDiv").parent().css("left", "10%");
             div = "dataTableDiv";
         } else {
             try {

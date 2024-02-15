@@ -5,7 +5,6 @@ import Sparql_generic from "./sparql_generic.js";
 import Sparql_proxy from "./sparql_proxy.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 
-
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -705,7 +704,7 @@ var Sparql_OWL = (function () {
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>"+
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
             "SELECT distinct ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel " +
             // "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
             fromStr +
@@ -717,7 +716,7 @@ var Sparql_OWL = (function () {
             modifier +
             " ?superClass." +
             " ?superClass ^rdfs:subClassOf ?subClass." +
-            "optional{?superClass rdfs:label|skos:prefLabel ?superClassLabel}"+
+            "optional{?superClass rdfs:label|skos:prefLabel ?superClassLabel}" +
             " ?subClass rdf:type ?subClassType. ?superClass rdf:type ?superClassType" +
             filterStr +
             " filter (?superClassType !=owl:Restriction)";
@@ -728,14 +727,13 @@ var Sparql_OWL = (function () {
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>"+
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
             'SELECT distinct ?subject ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) ' +
             fromStr +
             "WHERE { \n" +
             "  ?class rdf:type ?type. ?class rdfs:subClassOf*|rdf:type* ?superClass.\n" +
             "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
-            "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType "
-
+            "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
 
         if (options.filter) {
             query += options.filter;

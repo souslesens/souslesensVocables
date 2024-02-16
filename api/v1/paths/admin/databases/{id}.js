@@ -1,4 +1,4 @@
-const { databaseModel } = require("../../../../model/databases");
+const { databaseModel } = require("../../../../../model/databases");
 
 module.exports = function () {
     let operations = { DELETE, GET, PUT };
@@ -18,14 +18,14 @@ module.exports = function () {
                 },
             },
         },
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictAdmin: [] }],
         summary: "Get a specific database",
     };
 
     async function DELETE(req, res, next) {
         if (!req.params.id) {
             res.status(400).json({
-                message: "The database identifier is missing from this request"
+                message: "The database identifier is missing from this request",
             });
         } else {
             const identifier = req.params.id;
@@ -61,14 +61,14 @@ module.exports = function () {
                 schema: {
                     $ref: "#/definitions/Database",
                 },
-            }
-        }
+            },
+        },
     };
 
     async function PUT(req, res, next) {
         if (!req.body.database) {
             res.status(400).json({
-                message: "The database object is missing from this request"
+                message: "The database object is missing from this request",
             });
         } else {
             const database = req.body.database;
@@ -104,8 +104,8 @@ module.exports = function () {
                 schema: {
                     $ref: "#/definitions/Database",
                 },
-            }
-        }
+            },
+        },
     };
 
     return operations;

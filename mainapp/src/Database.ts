@@ -2,7 +2,7 @@ import { failure, success } from "srd";
 import { ulid } from "ulid";
 import { z } from "zod";
 
-const endpoint = "/api/v1/databases";
+const endpoint = "/api/v1/admin/databases";
 
 async function getDatabases(): Promise<Database[]> {
     const response = await fetch(endpoint);
@@ -33,33 +33,30 @@ function mapDatabases(resources: DatabaseJson[]) {
 
 async function addDatabase(database: Database, updateModel: React.Dispatch<Msg>) {
     try {
+        const body = { database: database };
 
-        const body = { 'database': database }
-
-        const response = await fetch(endpoint,
-            {
-                method: "post",
-                body: JSON.stringify(body, null, "\t"),
-                headers: { "Content-Type": "application/json" },
-            });
+        const response = await fetch(endpoint, {
+            method: "post",
+            body: JSON.stringify(body, null, "\t"),
+            headers: { "Content-Type": "application/json" },
+        });
         const { message, resources } = (await response.json()) as Response;
 
         if (response.status === 200) {
             updateModel({
                 type: "ServerRespondedWithDatabases",
-                payload: success(mapDatabases(resources))
+                payload: success(mapDatabases(resources)),
             });
         } else {
             updateModel({
                 type: "ServerRespondedWithDatabases",
-                payload: failure(`${response.status}, ${message}`)
+                payload: failure(`${response.status}, ${message}`),
             });
         }
-
     } catch (error) {
         updateModel({
             type: "ServerRespondedWithDatabases",
-            payload: failure(error)
+            payload: failure(error),
         });
     }
 }
@@ -72,51 +69,48 @@ async function deleteDatabase(database: Database, updateModel: React.Dispatch<Ms
         if (response.status === 200) {
             updateModel({
                 type: "ServerRespondedWithDatabases",
-                payload: success(mapDatabases(resources))
+                payload: success(mapDatabases(resources)),
             });
         } else {
             updateModel({
                 type: "ServerRespondedWithDatabases",
-                payload: failure(`${response.status}, ${message}`)
+                payload: failure(`${response.status}, ${message}`),
             });
         }
     } catch (error) {
         updateModel({
             type: "ServerRespondedWithDatabases",
-            payload: failure(`Unknown error have occured: ${error}`)
+            payload: failure(`Unknown error have occured: ${error}`),
         });
     }
 }
 
 async function editDatabase(database: Database, updateModel: React.Dispatch<Msg>) {
     try {
+        const body = { database: database };
 
-        const body = { 'database': database }
-
-        const response = await fetch(`${endpoint}/${database.id}`,
-            {
-                method: "put",
-                body: JSON.stringify(body, null, "\t"),
-                headers: { "Content-Type": "application/json" },
-            });
+        const response = await fetch(`${endpoint}/${database.id}`, {
+            method: "put",
+            body: JSON.stringify(body, null, "\t"),
+            headers: { "Content-Type": "application/json" },
+        });
         const { message, resources } = (await response.json()) as Response;
 
         if (response.status === 200) {
             updateModel({
                 type: "ServerRespondedWithDatabases",
-                payload: success(mapDatabases(resources))
+                payload: success(mapDatabases(resources)),
             });
         } else {
             updateModel({
                 type: "ServerRespondedWithDatabases",
-                payload: failure(`${response.status}, ${message}`)
+                payload: failure(`${response.status}, ${message}`),
             });
         }
-
     } catch (error) {
         updateModel({
             type: "ServerRespondedWithDatabases",
-            payload: failure(error)
+            payload: failure(error),
         });
     }
 }
@@ -152,9 +146,7 @@ const DatabaseSchema = z.object({
     name: z.string().optional(),
     driver: z.enum(["postgres", "sqlserver"]),
     host: z.string().min(1),
-    port: z.number().int()
-        .positive(0, { message: "Invalid port" })
-        .lte(65535, { message: "Out of range" }),
+    port: z.number().int().positive(0, { message: "Invalid port" }).lte(65535, { message: "Out of range" }),
     database: z.string().min(1),
     user: z.string().min(1),
     password: z.string().optional(),

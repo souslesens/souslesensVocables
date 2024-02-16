@@ -1,5 +1,5 @@
-const { databaseModel } = require("../../../model/databases");
-const { resourceFetched, responseSchema } = require("./utils");
+const { databaseModel } = require("../../../../model/databases");
+const { resourceFetched, responseSchema } = require("../utils");
 
 module.exports = function () {
     let operations = { GET, POST };
@@ -17,16 +17,15 @@ module.exports = function () {
     GET.apiDoc = {
         operationId: "getDatabases",
         responses: responseSchema("Databases", "GET"),
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictAdmin: [] }],
         summary: "Returns all the databases from the configuration",
     };
-
 
     // POST /api/v1/databases
     async function POST(req, res, next) {
         if (!req.body.database) {
             res.status(400).json({
-                message: "The database object is missing from this request"
+                message: "The database object is missing from this request",
             });
         } else {
             try {
@@ -43,7 +42,7 @@ module.exports = function () {
     POST.apiDoc = {
         operationId: "addDatabase",
         responses: responseSchema("Databases", "POST"),
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictAdmin: [] }],
         summary: "Add a new database in the configuration",
     };
 

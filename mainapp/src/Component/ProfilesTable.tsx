@@ -29,7 +29,7 @@ import {
 import clsx from "clsx";
 import { alpha, styled } from "@mui/material/styles";
 // import Grid from '@mui/material/Grid';
-import { TreeView, TreeItem, TreeItemProps, treeItemClasses, TreeItemContentProps, useTreeItem } from "@mui/lab";
+import { TreeView, TreeItem, TreeItemProps, treeItemClasses, TreeItemContentProps, useTreeItem } from "@mui/x-tree-view";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useZorm, createCustomIssues } from "react-zorm";

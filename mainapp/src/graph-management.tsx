@@ -125,7 +125,7 @@ export default function GraphManagement() {
         }
     };
 
-const handleUploadGraph = async () => {
+    const handleUploadGraph = async () => {
         // init progress bar
         setCurrentOperation("upload");
         setTransferPercent(0);

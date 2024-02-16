@@ -102,7 +102,7 @@ class DatabaseModel {
         const databases = await this._read();
 
         const updatedDatabases = databases.map((database) => {
-            return (database.id == updatedDatabase.id) ? updatedDatabase : database;
+            return database.id == updatedDatabase.id ? updatedDatabase : database;
         });
 
         await lock.acquire("DatabasesThread");

@@ -39,15 +39,7 @@ import * as z from "zod";
 
 import { useModel } from "../Admin";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
-import {
-    addDatabase,
-    Database,
-    DatabaseSchema,
-    defaultDatabase,
-    deleteDatabase,
-    editDatabase,
-    SourceAccessControl,
-} from "../Database";
+import { addDatabase, Database, DatabaseSchema, defaultDatabase, deleteDatabase, editDatabase, SourceAccessControl } from "../Database";
 import { style } from "../Utils";
 
 const enum Type {
@@ -70,9 +62,7 @@ type DatabaseFormProps = {
     create?: boolean;
 };
 
-type Msg_ =
-    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
-
+type Msg_ = { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } };
 
 const updateDatabase = (databaseEditionState: DatabaseEditionState, msg: Msg_): DatabaseEditionState => {
     switch (msg.type) {
@@ -84,17 +74,17 @@ const updateDatabase = (databaseEditionState: DatabaseEditionState, msg: Msg_): 
                 form: {
                     ...databaseEditionState.form,
                     [msg.payload.id]: msg.payload.value,
-                }
+                },
             };
     }
-}
+};
 
 const validateForm = (form: DatabaseFormProps) => {
     const validation = DatabaseSchema.safeParse(form);
 
     let errors = {};
     if (!validation.success) {
-        validation.error.issues.map(item => item.path.map(path => errors[path] = item.message));
+        validation.error.issues.map((item) => item.path.map((path) => (errors[path] = item.message)));
     }
 
     return errors;
@@ -108,7 +98,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
     const [open, setOpen] = React.useState(false);
 
     const handleOpen = () => {
-        update({ type: Type.ResetDatabase, payload: database})
+        update({ type: Type.ResetDatabase, payload: database });
         setErrors({});
         setOpen(true);
     };
@@ -128,7 +118,6 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
             } else {
                 void editDatabase(databaseModel.form, updateModel);
             }
-
         }
     };
 
@@ -151,13 +140,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
             <Button variant="contained" color="primary" onClick={handleOpen}>
                 {create ? "Create Database" : "Edit"}
             </Button>
-            <Dialog
-                fullWidth={true}
-                maxWidth="md"
-                onClose={handleClose}
-                open={open}
-                PaperProps={{ component: "form" }}
-            >
+            <Dialog fullWidth={true} maxWidth="md" onClose={handleClose} open={open} PaperProps={{ component: "form" }}>
                 <DialogContent sx={{ marginTop: "1em" }}>
                     <Stack spacing={4}>
                         <TextField
@@ -230,12 +213,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                         <TextField
                             endAdornment={
                                 <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={handleClickShowPassword}
-                                        onMouseDown={handleMouseDownPassword}
-                                        edge="end"
-                                    >
+                                    <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
                                         {displayPassword ? <VisibilityOff /> : <Visibility />}
                                     </IconButton>
                                 </InputAdornment>
@@ -252,14 +230,9 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button
-                        color="primary"
-                        component="label"
-                        onClick={handleValidation}
-                        startIcon={<Done />}
-                        type="submit"
-                        variant="contained"
-                    >Submit</Button>
+                    <Button color="primary" component="label" onClick={handleValidation} startIcon={<Done />} type="submit" variant="contained">
+                        Submit
+                    </Button>
                 </DialogActions>
             </Dialog>
         </>
@@ -306,7 +279,9 @@ const DatabasesTable = () => {
                         <Autocomplete
                             disablePortal
                             id="filter databases"
-                            options={sortedDatabases.map((database: Database) => { return database.name })}
+                            options={sortedDatabases.map((database: Database) => {
+                                return database.name;
+                            })}
                             onInputChange={(event, newInputValue) => setFilteringChars(newInputValue)}
                             renderInput={(params) => <TextField {...params} label="Search Databases by name" />}
                         />
@@ -315,10 +290,16 @@ const DatabasesTable = () => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                            <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>Name</TableSortLabel>
+                                            <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                                                Name
+                                            </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Driver</TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Driver
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Actions
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody sx={{ width: "100%", overflow: "visible" }}>
@@ -333,7 +314,9 @@ const DatabasesTable = () => {
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <Button variant="contained" color="success">Test</Button>
+                                                            <Button variant="contained" color="success">
+                                                                Test
+                                                            </Button>
                                                             <DatabaseFormDialog database={database} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => deleteDatabase(database, updateModel)} />
                                                         </Stack>

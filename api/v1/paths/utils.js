@@ -231,27 +231,21 @@ function sortObjectByKey(obj) {
 }
 
 //manage boolean transformed in strings by jquery
-function fixBooleanInObject(obj,depth){
-    if(!depth)
-        depth=0
+function fixBooleanInObject(obj, depth) {
+    if (!depth) depth = 0;
     else {
-
-        if(depth++>20)
-            return obj;
-
+        if (depth++ > 20) return obj;
     }
-    if(typeof obj==="object"){
-        for(var key in obj){
-            if(obj[key]=="false")
-                obj[key]=false
-            if(obj[key]=="true")
-                obj[key]=true
-            else{
-                fixBooleanInObject(obj[key],depth+1)
+    if (typeof obj === "object") {
+        for (var key in obj) {
+            if (obj[key] == "false") obj[key] = false;
+            if (obj[key] == "true") obj[key] = true;
+            else {
+                fixBooleanInObject(obj[key], depth + 1);
             }
         }
     }
-    return obj
+    return obj;
 }
 
 module.exports = {
@@ -272,5 +266,5 @@ module.exports = {
     getAllowedSources,
     filterSources,
     sortObjectByKey,
-    fixBooleanInObject
+    fixBooleanInObject,
 };

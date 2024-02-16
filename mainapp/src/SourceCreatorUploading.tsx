@@ -1,7 +1,6 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
-import { useState, useEffect,useRef } from "react";
-
+import { useState, useEffect, useRef } from "react";
 
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
@@ -19,7 +18,6 @@ interface UploadFormData {
     currentSource: string;
     selectedDatabase: string;
     selectedFiles: string[];
-    
 }
 
 declare global {
@@ -29,14 +27,11 @@ declare global {
             createCsvSourceMappings: () => void;
             uploadFormData: UploadFormData;
             createApp: (uploadFormData: UploadFormData) => void;
-            
         };
     }
 }
 
 export default function App(uploadFormData: UploadFormData) {
-  
-   
     // Use Graph Management variables necessary in Uploading module
     const [currentOperation, setCurrentOperation] = useState<string | null>(null);
     const [replaceGraph, setReplaceGraph] = useState<boolean>(true);
@@ -46,11 +41,11 @@ export default function App(uploadFormData: UploadFormData) {
     const cancelCurrentOperation = useRef(false);
     // user info
     const [currentUserToken, setCurrentUserToken] = useState<string | null>(null);
-    
+
     const [slsApiBaseUrl, setSlsApiBaseUrl] = useState<Record<string, any>>({});
 
     useEffect(() => {
-            void fetchSources();
+        void fetchSources();
         void fetchConfig();
         (async () => {
             const response = await fetchMe();
@@ -78,7 +73,6 @@ export default function App(uploadFormData: UploadFormData) {
         setSources(json.resources);
     };
 
-
     const handleCancelOperation = () => {
         cancelCurrentOperation.current = true;
         setCurrentOperation(null);
@@ -90,7 +84,7 @@ export default function App(uploadFormData: UploadFormData) {
         setErrorMessage("");
         setAnimatedProgressBar(false);
     };
-    
+
     const handleUploadGraph = async () => {
         // init progress bar
         setCurrentOperation("upload");
@@ -125,8 +119,6 @@ export default function App(uploadFormData: UploadFormData) {
 
             // build formData
             const formData = new FormData();
-          
-
 
             Object.entries({
                 source: window.CreateSLSVsource_bot.params.sourceLabel,
@@ -178,7 +170,7 @@ export default function App(uploadFormData: UploadFormData) {
         const filesList = Array.from(event.currentTarget.files);
         setFiles(filesList);
     };
-    
+
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.currentTarget.files === null) {
             return;
@@ -187,42 +179,38 @@ export default function App(uploadFormData: UploadFormData) {
         setUploadFile(filesList);
     };
 
-   
-
     if (window.CreateSLSVsource_bot.uploadFormData.displayForm == "file") {
         return (
-            
-                <Form>
-                    <Stack>
-                        <Form.Group controlId="formUploadGraph" className="mb-2">
-                            <Form.Label>Choose RDF graph to upload</Form.Label>
-                            <Form.Control onChange={handleFileChange} required={true} type="file" disabled={currentOperation == "upload"} />
-                        </Form.Group>
-                        <Form.Check checked={replaceGraph} value={replaceGraph} onClick={handleReplaceGraphCheckbox} className="mb-3" type="switch" id="toto" label="Delete before upload" />
-                        <Stack direction="horizontal" gap={1}>
-                            {!currentOperation ? (
-                                <Button disabled={uploadfile.length < 1 ? true : false} type="submit" onClick={handleUploadGraph} style={{ flex: 1 }}>
-                                    Upload
-                                </Button>
-                            ) : null}
-                            {currentOperation == "upload" ? (
-                                <ProgressBar
-                                    animated={animatedProgressBar}
-                                    label={transferPercent == 100 ? (!error ? "Completed" : "") : animatedProgressBar ? "Uploading to triplestore" : ""}
-                                    style={{ flex: 1, display: "flex", height: "3.1em", transition: "none" }}
-                                    id={`progress-toto`}
-                                    now={transferPercent}
-                                />
-                            ) : null}
-                            {currentOperation == "upload" ? (
-                                <Button variant="danger" onClick={handleCancelOperation} disabled={transferPercent == 100}>
-                                    Cancel
-                                </Button>
-                            ) : null}
-                        </Stack>
+            <Form>
+                <Stack>
+                    <Form.Group controlId="formUploadGraph" className="mb-2">
+                        <Form.Label>Choose RDF graph to upload</Form.Label>
+                        <Form.Control onChange={handleFileChange} required={true} type="file" disabled={currentOperation == "upload"} />
+                    </Form.Group>
+                    <Form.Check checked={replaceGraph} value={replaceGraph} onClick={handleReplaceGraphCheckbox} className="mb-3" type="switch" id="toto" label="Delete before upload" />
+                    <Stack direction="horizontal" gap={1}>
+                        {!currentOperation ? (
+                            <Button disabled={uploadfile.length < 1 ? true : false} type="submit" onClick={handleUploadGraph} style={{ flex: 1 }}>
+                                Upload
+                            </Button>
+                        ) : null}
+                        {currentOperation == "upload" ? (
+                            <ProgressBar
+                                animated={animatedProgressBar}
+                                label={transferPercent == 100 ? (!error ? "Completed" : "") : animatedProgressBar ? "Uploading to triplestore" : ""}
+                                style={{ flex: 1, display: "flex", height: "3.1em", transition: "none" }}
+                                id={`progress-toto`}
+                                now={transferPercent}
+                            />
+                        ) : null}
+                        {currentOperation == "upload" ? (
+                            <Button variant="danger" onClick={handleCancelOperation} disabled={transferPercent == 100}>
+                                Cancel
+                            </Button>
+                        ) : null}
                     </Stack>
-                </Form>
-            
+                </Stack>
+            </Form>
         );
     }
     return <></>;

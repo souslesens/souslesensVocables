@@ -230,6 +230,7 @@ const apiDoc = {
                 },
             },
         },
+        DatabaseNames: { type: "array", items: { type: "string" } },
         Database: {
             type: "object",
             properties: {

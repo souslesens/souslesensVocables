@@ -79,8 +79,13 @@ th, td{
     .font-table;
     background-color: @background-color !important;
     font-size: 15px;
+    color: @source-color;
     border: 0px !important;
     font-weight: bold;
+}
+.nodesInfos_tiltles{
+    color: @source-color;
+    font-size: 15px;
 }
 .nodesInfos-border {
     background-color: @dark-background-color !important;

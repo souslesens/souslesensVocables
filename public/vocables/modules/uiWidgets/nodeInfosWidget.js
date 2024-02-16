@@ -525,7 +525,7 @@ defaultLang = 'en';*/
                 str += "</table></div>";
 
                 str +=
-                    " <br><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;justify-content: space-evenly';>" +
+                    " <br><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;'>" +
                     "<div id='nodeInfos_restrictionsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
                     "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
                     "</div>";
@@ -549,7 +549,7 @@ defaultLang = 'en';*/
                         if (err) {
                             return callbackSeries(err);
                         }
-                        str += "<b style='font-size:15px;'>Restrictions </b> <div style=''> <table>";
+                        str += "<b class='nodesInfos_tiltles'>Restrictions </b> <div style=''> <table>";
                         result.forEach(function (item) {
                             str += "<tr class='infos_table'>";
 
@@ -584,7 +584,7 @@ defaultLang = 'en';*/
                             if (err) {
                                 return callbackSeries(err);
                             }
-                            str += "<br><b style='font-size:15px;'>Inverse Restrictions </b> <div style='font-size:15px;'> <table>";
+                            str += "<br><b class='nodesInfos_tiltles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table>";
                             result.forEach(function (item) {
                                 str += "<tr class='infos_table'>";
 

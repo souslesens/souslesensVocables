@@ -32,8 +32,8 @@ var ConfigEditor = (function () {
                     <div id="mount-app-here"></div>
                 `);
 
-            self.umountKGUploadApp = self.createApp();
-        }, 200);
+           self.umountKGUploadApp = self.createApp();
+        }, 2000);
     };
 
     return self;

@@ -33,7 +33,7 @@ var ConfigEditor = (function () {
                 `);
 
            self.umountKGUploadApp = self.createApp();
-        }, 2000);
+        }, 2001);
     };
 
     return self;

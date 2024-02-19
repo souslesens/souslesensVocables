@@ -39,6 +39,10 @@ import * as z from "zod";
 
 import { useModel } from "../Admin";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
+<<<<<<< HEAD
+=======
+import { PasswordField } from "./PasswordField";
+>>>>>>> 571e7551 (feat(mainapp): add the PasswordField component to the configEditor)
 import {
     addDatabase,
     Database,
@@ -226,26 +230,11 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             required
                             value={databaseModel.form.user}
                         />
-                        <TextField
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={handleClickShowPassword}
-                                        onMouseDown={handleMouseDownPassword}
-                                        edge="end"
-                                    >
-                                        {displayPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                </InputAdornment>
-                            }
+                        <PasswordField
                             error={currentErrors.password}
-                            fullWidth
-                            helperText={currentErrors.password}
                             id="password"
                             label="Password"
                             onChange={handleFieldUpdate("password")}
-                            type={displayPassword ? "text" : "password"}
                             value={databaseModel.form.password}
                         />
                     </Stack>

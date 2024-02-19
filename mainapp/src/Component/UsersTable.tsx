@@ -33,6 +33,7 @@ import { identity, style } from "../Utils";
 import { newUser, deleteUser, putUsersBis, User } from "../User";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
+import { PasswordField } from "./PasswordField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CsvDownloader from "react-csv-downloader";
 
@@ -243,25 +244,14 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                             <OutlinedInput fullWidth onChange={handleFieldUpdate("login")} value={userModel.userForm.login} id={`login`} label={"Login"} disabled={create ? false : true} />
                         </FormControl>
 
-                        <FormControl>
-                            <InputLabel id="password-label">Password</InputLabel>
-                            <OutlinedInput
-                                fullWidth
-                                onChange={handleFieldUpdate("password")}
-                                value={userModel.userForm.password}
-                                type={displayPassword ? "text" : "password"}
-                                id={`password`}
-                                label={"Password"}
-                                disabled={user.source != "keycloak" ? false : true}
-                                endAdornment={
-                                    <InputAdornment position="end">
-                                        <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
-                                            {displayPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                }
-                            />
-                        </FormControl>
+                        <PasswordField
+                            disabled={user.source != "keycloak" ? false : true}
+                            id={`password`}
+                            label={"Password"}
+                            onChange={handleFieldUpdate("password")}
+                            value={userModel.userForm.password}
+                        />
+
                         <FormControl>
                             <InputLabel id="select-groups-label">Profiles</InputLabel>
                             <Select

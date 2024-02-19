@@ -39,7 +39,16 @@ import * as z from "zod";
 
 import { useModel } from "../Admin";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
-import { addDatabase, Database, DatabaseSchema, defaultDatabase, deleteDatabase, editDatabase, SourceAccessControl } from "../Database";
+import { PasswordField } from "./PasswordField";
+import {
+    addDatabase,
+    Database,
+    DatabaseSchema,
+    defaultDatabase,
+    deleteDatabase,
+    editDatabase,
+    SourceAccessControl,
+} from "../Database";
 import { style } from "../Utils";
 
 const enum Type {
@@ -210,21 +219,11 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             required
                             value={databaseModel.form.user}
                         />
-                        <TextField
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
-                                        {displayPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                </InputAdornment>
-                            }
+                        <PasswordField
                             error={currentErrors.password}
-                            fullWidth
-                            helperText={currentErrors.password}
                             id="password"
                             label="Password"
                             onChange={handleFieldUpdate("password")}
-                            type={displayPassword ? "text" : "password"}
                             value={databaseModel.form.password}
                         />
                     </Stack>

@@ -1,12 +1,20 @@
 var TagsGeometry = (function () {
     var self = {};
 
-    self.showDialog = function () {
-        $("#mainDialogDiv").load("modules/fabricjs/tagsGeometry.html", function (x, y) {
-            $("#mainDialogDiv").dialog("open");
-            self.initCanvas("canvas");
-            self.initControls();
-        });
+
+
+
+
+    self.onLoaded=function(){
+
+
+        $("#lateralPanelDiv").load("modules/tools/fabricjs/tagsGeometry_leftPanel.html",function() {
+            $("#graphDiv").load("modules/tools/fabricjs/tagsGeometry_rightPanel.html", function(x, y) {
+                //   $("#mainDialogDiv").dialog("open");
+                self.initCanvas("canvas");
+                self.initControls();
+            });
+        })
     };
 
     self.deckColors = {
@@ -432,6 +440,8 @@ var TagsGeometry = (function () {
             o.set("strokeWidth", 0.1);
         });
     };
+
+
 
     return self;
 })();

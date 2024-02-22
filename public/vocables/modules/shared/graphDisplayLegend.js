@@ -220,25 +220,25 @@ var GraphDisplayLegend = (function () {
             },
         },
     };
-self.showHideLegend=function(legendCanvas,height,width){
-    if ( self.isRetractedLegend[legendCanvas]) {
-        $("#" + legendCanvas).css("height", height);
-        $("#" + legendCanvas).css("width", width);
-        self.isRetractedLegend[legendCanvas] = false;
-        self.drawLegend(self.lastDraw.type, self.lastDraw.legendDIv);
-    } else {
-        if (event.offsetX > 200) {
-            if (event.offsetY < 30) {
-                $("#" + legendCanvas).css("height", 30);
-                $("#" + legendCanvas).css("width", 50);
-                self.drawLegend(null, legendCanvas);
-                self.isRetractedLegend[legendCanvas] = true;
-                self.lastDraw = { type: type, legendDIv: legendCanvas };
+    self.showHideLegend = function (legendCanvas, height, width) {
+        if (self.isRetractedLegend[legendCanvas]) {
+            $("#" + legendCanvas).css("height", height);
+            $("#" + legendCanvas).css("width", width);
+            self.isRetractedLegend[legendCanvas] = false;
+            self.drawLegend(self.lastDraw.type, self.lastDraw.legendDIv);
+        } else {
+            if (event.offsetX > 200) {
+                if (event.offsetY < 30) {
+                    $("#" + legendCanvas).css("height", 30);
+                    $("#" + legendCanvas).css("width", 50);
+                    self.drawLegend(null, legendCanvas);
+                    self.isRetractedLegend[legendCanvas] = true;
+                    self.lastDraw = { type: type, legendDIv: legendCanvas };
+                }
             }
         }
-    }
-}
-    self.drawLegend = function (type, legendCanvas,expand) {
+    };
+    self.drawLegend = function (type, legendCanvas, expand) {
         //  type="KGcreator_classes"
         if (!legendCanvas) {
             legendCanvas = "visjsLegendCanvas";
@@ -251,17 +251,17 @@ self.showHideLegend=function(legendCanvas,height,width){
             $("#" + legendCanvas)[0].addEventListener(
                 "click",
                 function (event) {
-                 self.showHideLegend(legendCanvas)
+                    self.showHideLegend(legendCanvas);
                 },
                 false
             );
-            self.isRetractedLegend[legendCanvas]=expand
+            self.isRetractedLegend[legendCanvas] = expand;
         }
 
-      /*  if(!expand)
+        /*  if(!expand)
             self.showHideLegend(legendCanvas)*/
-      //  self.isRetractedLegend[legendCanvas]=expand
-       if (self.isRetractedLegend[legendCanvas] == undefined) {
+        //  self.isRetractedLegend[legendCanvas]=expand
+        if (self.isRetractedLegend[legendCanvas] == undefined) {
             self.isRetractedLegend[legendCanvas] = false;
         }
         var legendObj = self.legendsMap[type];

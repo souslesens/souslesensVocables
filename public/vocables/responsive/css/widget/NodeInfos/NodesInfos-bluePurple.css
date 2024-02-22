@@ -83,7 +83,7 @@ th, td{
     border: 0px !important;
     font-weight: bold;
 }
-.nodesInfos_tiltles{
+.nodesInfos_tiltles {
     color: @source-color;
     font-size: 15px;
 }

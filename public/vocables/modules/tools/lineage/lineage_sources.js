@@ -717,13 +717,11 @@ sourceDivId +
             return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
         });
 
-      /*  if(currentAccessControls=="readwrite")
+        /*  if(currentAccessControls=="readwrite")
             return true;
         return false;*/
 
-
-
-       if (groups.indexOf("admin") > -1 && Config.sources[source].editable) {
+        if (groups.indexOf("admin") > -1 && Config.sources[source].editable) {
             return true;
         }
 

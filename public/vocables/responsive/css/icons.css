@@ -33,32 +33,32 @@
     background-repeat: no-repeat;
     height: 30px;
 }
-.SPARQL-logo{
+.SPARQL-logo {
     background-image: url(@SPARQL-logo);
     background-repeat: no-repeat;
     height: 35px;
 }
-.admin-logo{
+.admin-logo {
     background-image: url(@admin-logo);
     background-repeat: no-repeat;
     height: 35px;
 }
-.ConfigEditor-logo{
+.ConfigEditor-logo {
     background-image: url(@ConfigEditor-logo);
     background-repeat: no-repeat;
     height: 35px;
 }
-.GraphManagement-logo{
+.GraphManagement-logo {
     background-image: url(@GraphManagement-logo);
     background-repeat: no-repeat;
     height: 35px;
 }
-.OntoCreator-logo{
+.OntoCreator-logo {
     background-image: url(@OntoCreator-logo);
     background-repeat: no-repeat;
     height: 35px;
 }
-.TimeLine-logo{
+.TimeLine-logo {
     background-image: url(@TimeLine-logo);
     background-repeat: no-repeat;
     height: 35px;

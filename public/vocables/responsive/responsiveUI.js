@@ -15,7 +15,7 @@ var ResponsiveUI = (function () {
     self.LateralPannelShowed = true;
     self.currentTool = null;
     self.toolsNeedSource = ["lineage", "KGquery", "KGcreator"];
-    self.smartPhoneScreen=null;
+    self.smartPhoneScreen = null;
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
         //self.setSlsvCssClasses();
@@ -35,12 +35,11 @@ var ResponsiveUI = (function () {
             }
         }
         tools.forEach((item, index) => {
-            var logoTool=`<div style='height:35px;width:37px;' class='${item}-logo' ></div>`;
+            var logoTool = `<div style='height:35px;width:37px;' class='${item}-logo' ></div>`;
 
-            var strTool=`<div class='Lineage_PopUpStyleDiv' style='display:flex;flex-direction:row;align-items:center;' >${logoTool}<div  value="${item}">${item}</div></div>`;
+            var strTool = `<div class='Lineage_PopUpStyleDiv' style='display:flex;flex-direction:row;align-items:center;' >${logoTool}<div  value="${item}">${item}</div></div>`;
 
-            $('#toolsSelect').append(strTool);
-
+            $("#toolsSelect").append(strTool);
         });
 
         window.addEventListener(
@@ -51,9 +50,8 @@ var ResponsiveUI = (function () {
             true
         );
 
-
         self.themeList();
-        self.replaceFile(BotEngine, BotEngineResponsive);   
+        self.replaceFile(BotEngine, BotEngineResponsive);
         ResponsiveUI.resetWindowHeight();
     };
     self.initMenuBar = function (callback) {
@@ -70,31 +68,25 @@ var ResponsiveUI = (function () {
     };
 
     self.resetWindowHeight = function () {
-        
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPannelWidth = $("#lateralPanelDiv").width();
-         // Mobile format graph div reset
-        if($(window).width()<=500){
-            $("#graphDiv").css("width",$(window).width());
-            $("#lateralPanelDiv").css('width',$(window).width());
-            self.smartPhoneScreen=true;
-        }
-        else{
-            if(self.smartPhoneScreen){
-                LateralPannelWidth=435;
+        // Mobile format graph div reset
+        if ($(window).width() <= 500) {
+            $("#graphDiv").css("width", $(window).width());
+            $("#lateralPanelDiv").css("width", $(window).width());
+            self.smartPhoneScreen = true;
+        } else {
+            if (self.smartPhoneScreen) {
+                LateralPannelWidth = 435;
             }
-            self.smartPhoneScreen=false;
-            
+            self.smartPhoneScreen = false;
+
             $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
-            $("#lateralPanelDiv").css('width',LateralPannelWidth);
-            
+            $("#lateralPanelDiv").css("width", LateralPannelWidth);
         }
-        
+
         /*$("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 1);
         $("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);*/
-       
-       
-        
 
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
@@ -106,29 +98,21 @@ var ResponsiveUI = (function () {
         });
     };
 
-    self.onToolSelect = function (toolId,event) {
-        if(event){
-
-
+    self.onToolSelect = function (toolId, event) {
+        if (event) {
             var clickedElement = event.target;
             // if class
-            if(clickedElement.className=='Lineage_PopUpStyleDiv'){
-                var toolId=$(clickedElement).children()[1].innerHTML;
-            }
-            else {
-                if(clickedElement.id=='toolsSelect'){
-                    return
+            if (clickedElement.className == "Lineage_PopUpStyleDiv") {
+                var toolId = $(clickedElement).children()[1].innerHTML;
+            } else {
+                if (clickedElement.id == "toolsSelect") {
+                    return;
+                } else if (clickedElement.innerHTML) {
+                    var toolId = clickedElement.innerHTML;
+                } else {
+                    var toolId = clickedElement.nextSibling.innerHTML;
                 }
-                else if(clickedElement.innerHTML){
-                    var toolId=clickedElement.innerHTML;
-                }else{
-
-                    var toolId=clickedElement.nextSibling.innerHTML;
-                }
-
-
             }
-
         }
 
         if (self.currentTool != null) {
@@ -143,7 +127,7 @@ var ResponsiveUI = (function () {
         }
 
         $("#currentToolTitle").html(toolId);
-        if (self.currentTheme['@'+toolId+'-logo']) {
+        if (self.currentTheme["@" + toolId + "-logo"]) {
             $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
         }
         MainController.currentTool = toolId;
@@ -160,13 +144,10 @@ var ResponsiveUI = (function () {
 
     self.onSourceSelect = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
-        var p= obj.node.parents.indexOf("PRIVATE")
-        if(p>0){
-            Config.sourceOwner= obj.node.parents[p-1]
-
+        var p = obj.node.parents.indexOf("PRIVATE");
+        if (p > 0) {
+            Config.sourceOwner = obj.node.parents[p - 1];
         }
-
-
 
         if (!obj.node.data || obj.node.data.type != "source") {
             $(obj.event.currentTarget).siblings().click();
@@ -209,14 +190,10 @@ var ResponsiveUI = (function () {
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
 
-
-
         if (Config.tools[toolId].controller.onLoaded) {
             MainController.writeUserLog(authentication.currentUser, toolId, "");
             Config.tools[toolId].controller.onLoaded();
         } else {
-
-
             if (true) {
                 var url = window.location.href;
                 var p = url.indexOf("?");
@@ -228,7 +205,6 @@ var ResponsiveUI = (function () {
                 window.location.href = url;
             }
         }
-
     };
 
     self.showDiv = function (modalDiv) {
@@ -308,7 +284,6 @@ var ResponsiveUI = (function () {
     };
 
     self.setSlsvCssClasses = function (callback) {
-
         less.pageLoadFinished.then(function () {
             //setTimeout(() => {}, "500");
             ResponsiveUI.changeTheme(Config.theme.defaultTheme);
@@ -319,7 +294,6 @@ var ResponsiveUI = (function () {
 
             callback();
         });
-
     };
 
     self.themeList = function () {
@@ -330,7 +304,7 @@ var ResponsiveUI = (function () {
 
     self.changeTheme = function (ThemeName) {
         var themeSelected = Config.slsvColorThemes[ThemeName];
-        self.currentTheme=themeSelected;
+        self.currentTheme = themeSelected;
         if (themeSelected["@logoInstance-icon"] == undefined || themeSelected["@logoInstance-icon"] == "") {
             $("#externalLogoDiv").hide();
         } else {
@@ -355,8 +329,8 @@ var ResponsiveUI = (function () {
         }
     };
     self.hideShowLateralPannel = function (button) {
-        if(self.smartPhoneScreen){
-            return
+        if (self.smartPhoneScreen) {
+            return;
         }
         if (self.LateralPannelShowed) {
             $("#lineage-tab-buttons").hide();
@@ -365,7 +339,7 @@ var ResponsiveUI = (function () {
             $("#lateralPanelDiv").removeClass("ui-resizable");
             ResponsiveUI.resetWindowHeight();
             self.LateralPannelShowed = false;
-            var buttonclone=button.cloneNode(true);
+            var buttonclone = button.cloneNode(true);
             $("#lateralPanelDiv").append(buttonclone);
             $(buttonclone).find("#ArrowLateralPannel").attr("src", "./icons/CommonIcons/ArrowLateralPannelShow.png");
             //$("#lateralPanelDiv").find("#ArrowLateralPannel");
@@ -376,13 +350,12 @@ var ResponsiveUI = (function () {
             $("#lateralPanelDiv").css("width", "435px");
             ResponsiveUI.resetWindowHeight();
             self.LateralPannelShowed = true;
-            var currentTabId='#tabs_'+$(".slsv-selectedTabDiv").attr('popupcomment').toLowerCase();
+            var currentTabId = "#tabs_" + $(".slsv-selectedTabDiv").attr("popupcomment").toLowerCase();
             $(currentTabId).children().show();
 
             /*$(button).parent().show();
             //$(button).parent().find("#ArrowLateralPannel").attr("src", "./icons/CommonIcons/ArrowLateralPannel.png");*/
             $("#lateralPanelDiv").addClass("ui-resizable");
-
         }
     };
     self.registerSourceWithoutImports = function (sourceLabel, callback) {
@@ -450,18 +423,16 @@ var ResponsiveUI = (function () {
             }
         });
     };
-    self.darkThemeParams=function(theme){
+    self.darkThemeParams = function (theme) {
         // pas suffisant mettre  a jour graph
-        if(theme){
-            if(theme['@isDarkTheme']){
-                Lineage_whiteboard.defaultNodeFontColor='white';
-
-            }
-            else{
-                Lineage_whiteboard.defaultNodeFontColor="#343434";
+        if (theme) {
+            if (theme["@isDarkTheme"]) {
+                Lineage_whiteboard.defaultNodeFontColor = "white";
+            } else {
+                Lineage_whiteboard.defaultNodeFontColor = "#343434";
             }
         }
-    }
+    };
 
     return self;
 })();

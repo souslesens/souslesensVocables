@@ -1,9 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var ConfigEditor = (function () {
     var self = {};
-    self.createApp=null;
-    self.umountKGUploadApp =null;
-    self.unload= function(){
+    self.createApp = null;
+    self.umountKGUploadApp = null;
+    self.unload = function () {
         self.umountKGUploadApp();
     };
 
@@ -16,26 +16,24 @@ var ConfigEditor = (function () {
         import("/assets/index.js");
 
         setTimeout(function () {
-            $("#mainDialogDiv").dialog("open")
+            $("#mainDialogDiv").dialog("open");
 
-            $("#mainDialogDiv").dialog("option","title","Config Editor");
-            $("#mainDialogDiv").parent().css("left","100px")
+            $("#mainDialogDiv").dialog("option", "title", "Config Editor");
+            $("#mainDialogDiv").parent().css("left", "100px");
 
             $("#mainDialogDiv").dialog({
-
                 close: function (event, ui) {
                     self.umountKGUploadApp();
-                    
                 },
             });
-             $("#mainDialogDiv").html("");
-            
+            $("#mainDialogDiv").html("");
+
             $("#mainDialogDiv").html(`
                     <div id="mount-app-here"></div>
                 `);
-           
-            self.umountKGUploadApp = self.createApp();
-        }, 200);
+
+           self.umountKGUploadApp = self.createApp();
+        }, 2001);
     };
 
     return self;

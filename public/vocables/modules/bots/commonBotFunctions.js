@@ -2,11 +2,11 @@ import BotEngine from "./botEngine.js";
 import KGcreator from "../tools/KGcreator/KGcreator.js";
 import OntologyModels from "../shared/ontologyModels.js";
 
-var CommonBotFunctions = (function() {
+var CommonBotFunctions = (function () {
     var self = {};
 
-    self.sortList = function(list) {
-        list.sort(function(a, b) {
+    self.sortList = function (list) {
+        list.sort(function (a, b) {
             if (a.label.indexOf("_") == 0) {
                 return 1;
             }
@@ -20,7 +20,7 @@ var CommonBotFunctions = (function() {
         });
     };
 
-    self.loadSourceOntologyModel = function(sourceLabel, withImports, callback) {
+    self.loadSourceOntologyModel = function (sourceLabel, withImports, callback) {
         var sources = [sourceLabel];
         if (!Config.sources[sourceLabel]) {
             alert("Source not recognized");
@@ -31,22 +31,22 @@ var CommonBotFunctions = (function() {
         }
         async.eachSeries(
             sources,
-            function(source, callbackEach) {
-                OntologyModels.registerSourcesModel(source, function(err, result) {
+            function (source, callbackEach) {
+                OntologyModels.registerSourcesModel(source, function (err, result) {
                     callbackEach(err);
                 });
             },
-            function(err) {
+            function (err) {
                 return callback(err);
             }
         );
     };
 
-    self.listVocabsFn = function(sourceLabel, varToFill, includeBasicVocabs) {
+    self.listVocabsFn = function (sourceLabel, varToFill, includeBasicVocabs) {
         var vocabs = [{ id: sourceLabel, label: sourceLabel }];
         var imports = Config.sources[sourceLabel].imports;
         if (imports) {
-            imports.forEach(function(importSource) {
+            imports.forEach(function (importSource) {
                 vocabs.push({ id: importSource, label: importSource });
             });
         }
@@ -62,8 +62,8 @@ var CommonBotFunctions = (function() {
         BotEngine.showList(vocabs, varToFill);
     };
 
-    self.listVocabClasses = function(vocab, varToFill, includeOwlThing, classes) {
-        OntologyModels.registerSourcesModel(vocab, function(err, result) {
+    self.listVocabClasses = function (vocab, varToFill, includeOwlThing, classes) {
+        OntologyModels.registerSourcesModel(vocab, function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -85,8 +85,8 @@ var CommonBotFunctions = (function() {
         });
     };
 
-    self.listVocabPropertiesFn = function(vocab, varToFill, props) {
-        OntologyModels.registerSourcesModel(vocab, function(err, result) {
+    self.listVocabPropertiesFn = function (vocab, varToFill, props) {
+        OntologyModels.registerSourcesModel(vocab, function (err, result) {
             if (!props) {
                 props = [];
             }
@@ -102,7 +102,7 @@ var CommonBotFunctions = (function() {
         });
     };
 
-    self.listAnnotationPropertiesFn = function(vocabs, varToFill) {
+    self.listAnnotationPropertiesFn = function (vocabs, varToFill) {
         if (!vocabs) {
             vocabs = Object.keys(Config.ontologiesVocabularyModels);
         }
@@ -112,8 +112,8 @@ var CommonBotFunctions = (function() {
         var props = [];
         async.eachSeries(
             vocabs,
-            function(vocab, callbackEach) {
-                OntologyModels.registerSourcesModel(vocab, function(err, result) {
+            function (vocab, callbackEach) {
+                OntologyModels.registerSourcesModel(vocab, function (err, result) {
                     for (var key in Config.ontologiesVocabularyModels[vocab].annotationProperties) {
                         var prop = Config.ontologiesVocabularyModels[vocab].annotationProperties[key];
                         props.push({ id: prop.id, label: vocab + ":" + prop.label });
@@ -121,7 +121,7 @@ var CommonBotFunctions = (function() {
                     callbackEach();
                 });
             },
-            function(err) {
+            function (err) {
                 if (props.length == 0) {
                     return BotEngine.previousStep("no values found, try another option");
                 }
@@ -130,8 +130,6 @@ var CommonBotFunctions = (function() {
             }
         );
     };
-
-
 
     return self;
 })();

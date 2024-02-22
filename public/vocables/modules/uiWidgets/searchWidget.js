@@ -265,10 +265,9 @@ var SearchWidget = (function () {
             var jstreeOptions = {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
-
                     SearchWidget.currentTreeNode = obj.node;
                     return;
-                  /*  if (_options.selectTreeNodeFn) {
+                    /*  if (_options.selectTreeNodeFn) {
                         return _options.selectTreeNodeFn(event, obj);
                     } else if (Config.tools[MainController.currentTool].controller.controller.selectTreeNodeFn) {
                         return Config.tools[MainController.currentTool].controller.controller.selectTreeNodeFn(event, obj);

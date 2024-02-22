@@ -828,7 +828,7 @@ var Lineage_properties = (function () {
     };
 
     self.searchTermInSources = function () {
-       // var term = $("#LineageProperties_searchTermInSourcesInput").val();
+        // var term = $("#LineageProperties_searchTermInSourcesInput").val();
         var term = $("#LineageProperties_searchAllSourcesTermInput").val();
 
         var exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked");
@@ -885,15 +885,14 @@ var Lineage_properties = (function () {
                             if (!uniqueIds[item.id]) {
                                 uniqueIds[item.id] = 1;
                                 item.parent = sourceLabel;
-                                item.type='Property';
+                                item.type = "Property";
                                 jstreeData.push(item);
                             }
-                            
                         });
 
                         if (result.length > 0) {
                             var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>";
-                            jstreeData.push({ id: sourceLabel, text: text, type:'Source',parent: "#", data: { source: sourceLabel } });
+                            jstreeData.push({ id: sourceLabel, text: text, type: "Source", parent: "#", data: { source: sourceLabel } });
                         }
 
                         callbackEach();

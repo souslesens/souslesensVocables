@@ -110,7 +110,7 @@ var Lineage_containers = (function () {
 
         var filter = "";
         if (term) {
-            filter = Sparql_common.setFilter("parent", null, term);
+            filter =  Sparql_common.setFilter('searchValue',null,term);
         }
 
         var search_on_container = "";
@@ -303,10 +303,13 @@ var Lineage_containers = (function () {
                     }
 
                     JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
-                        $("#" + jstreeDiv)
-                            .jstree()
-                            .open_node("#");
-                        //  $("#" + jstreeDiv).jstree("open_all");
+                        if(options.filter){
+                            $("#" + jstreeDiv).jstree("open_all");
+                        }else{
+                            $("#" + jstreeDiv).jstree().open_node("#");
+                        }
+                        
+                        
 
                         self.bindMoveNode(jstreeDiv);
                     });
@@ -971,16 +974,27 @@ var Lineage_containers = (function () {
                 pathOperator = "{1," + options.depth + "}";
             }
             var query =
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                'SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes)  ' +
-                fromStr +
-                "  WHERE {?member ^rdfs:member ?parent.\n" +
-                "    ?member rdf:type ?memberType.\n" +
-
-                filterLeaves +
-                "   ?member rdfs:label ?memberLabel.\n" +
-                "   ?parent rdfs:label ?parentLabel.\n" +
+                `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+                 SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes)  ${fromStr}
+                 WHERE {?searchValue ^rdfs:member* ?member.
+                    ?member ^rdfs:member ?parent.
+                    ?member rdf:type ?memberType.
+                    ?member rdfs:label ?memberLabel.
+                    ?parent rdfs:label ?parentLabel.
+                    
+                    {select ?searchValue where{
+                        ?parent0  rdfs:member${pathOperator} ?searchValue.
+                        ?searchValue rdfs:label ?searchValueLabel.
+                        ${filterContainer0Str}
+                        ${filter}
+                        }
+                    }
+                }  group by   ?member ?memberLabel ?parent ?parentLabel ?searchValue   
+                `
+                
+                
+               /*
                 filter +
                 "  {select ?member where{\n" +
                 "?parent0  rdfs:member" +
@@ -990,7 +1004,7 @@ var Lineage_containers = (function () {
                 "}\n" +
                 "  }\n" +
                 "}  group by ?member ?memberLabel ?parent ?parentLabel";
-
+                    */
             var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {

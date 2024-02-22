@@ -81,11 +81,13 @@ class DatabaseModel {
     };
 
     /**
-     * @returns {Promise<string[]>} - a list of database name
+     * @returns {Promise<Record<string, string>[]>} - a list of database name
      */
     getDatabasesName = async () => {
         const databases = await this._read();
-        return databases.map((db) => db.name);
+        return databases.map((db) => {
+            return { id: db.id, name: db.name };
+        });
     };
 
     /**

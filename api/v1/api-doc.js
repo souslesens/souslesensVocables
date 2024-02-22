@@ -227,7 +227,16 @@ const apiDoc = {
                 },
             },
         },
-        DatabaseNames: { type: "array", items: { type: "string" } },
+        DatabaseNames: {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    id: { type: "string" },
+                    name: { type: "string" },
+                },
+            },
+        },
         Database: {
             type: "object",
             properties: {

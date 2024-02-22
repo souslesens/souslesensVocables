@@ -413,16 +413,14 @@ var KGcreator = (function () {
                 },
             });
 
-            for (var datasource in self.currentConfig.databaseSources) {
-                var sqlType = self.currentConfig.databaseSources[datasource].type;
-
+            Object.entries(self.currentConfig.databaseSources).forEach(([key, datasource])=> {
                 jstreeData.push({
-                    id: datasource,
-                    text: datasource,
+                    id: key,
+                    text: datasource.name,
                     parent: "databaseSources",
-                    data: { id: datasource, type: "databaseSource", sqlType: sqlType },
+                    data: { id: datasource.name, type: "databaseSource" },
                 });
-            }
+            })
             for (var datasource in self.currentConfig.csvSources) {
                 jstreeData.push({
                     id: datasource,
@@ -835,23 +833,17 @@ var KGcreator = (function () {
         self.displayUploadApp("");
         $("#smallDialogDiv").dialog("close");
 
-        var datasourceName = self.uploadFormData.selectedDatabase;
-        if (!datasourceName) {
+        var datasource = self.uploadFormData.selectedDatabase;
+        if (!datasource) {
             return;
         }
-        var sqlType = "sql.sqlserver";
-        var json = {
-            type: sqlType,
-            connection: "_default",
-            tableJoins: [],
-        };
-        self.currentConfig.databaseSources[datasourceName] = json;
-        self.rawConfig.databaseSources[datasourceName] = json;
+        self.currentConfig.databaseSources[datasource.id]={'name': datasource.name};
+        self.rawConfig.databaseSources[datasource.id]={'name': datasource.name};
         self.saveSlsvSourceConfig(function (err, result) {
             if (err) {
                 return alert(err);
             }
-            self.addDataSourceToJstree("databaseSource", datasourceName, sqlType);
+            self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
         });
     };
 
@@ -880,13 +872,13 @@ var KGcreator = (function () {
         });
     };
 
-    self.addDataSourceToJstree = function (type, datasourceName, sqlType) {
+    self.addDataSourceToJstree = function (type, datasource, sqlType) {
         var jstreeData = [
             {
-                id: datasourceName,
-                text: datasourceName,
+                id: datasource.id,
+                text: datasource.name,
                 parent: type + "s",
-                data: { id: datasourceName, type: type, sqlType: sqlType },
+                data: { id:  datasource.name, type: type },
             },
         ];
 

@@ -128,7 +128,6 @@ type DatabaseJson = {
 
 const decodeDatabase = (key: string, database: DatabaseJson): Database => {
     return {
-        _type: "database",
         id: database.id ? database.id : ulid(),
         name: database.name ? database.name : database.id,
         driver: database.driver,
@@ -141,7 +140,6 @@ const decodeDatabase = (key: string, database: DatabaseJson): Database => {
 };
 
 const DatabaseSchema = z.object({
-    _type: z.string(),
     id: z.string().min(1),
     name: z.string().optional(),
     driver: z.enum(["postgres", "sqlserver"]),
@@ -155,7 +153,6 @@ type Database = z.infer<typeof DatabaseSchema>;
 
 export const defaultDatabase = (uuid: string): Database => {
     return {
-        _type: "database",
         id: uuid,
         name: "",
         driver: "postgres",

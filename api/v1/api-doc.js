@@ -240,9 +240,6 @@ const apiDoc = {
         Database: {
             type: "object",
             properties: {
-                _type: {
-                    type: "string",
-                },
                 id: {
                     type: "string",
                 },

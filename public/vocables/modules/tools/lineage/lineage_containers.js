@@ -4,6 +4,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import common from "../../shared/common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
+import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
 self.lineageVisjsGraph;
 
@@ -205,18 +206,18 @@ var Lineage_containers = (function () {
                     // set rootnodes
                     rootNodes.forEach(function (item) {
                         var id = item.id;
-
-                        if (!existingIds[id]) {
-                            existingIds[id] = [];
-                        }
                         var jstreeId = "_" + common.getRandomHexaId(5);
-                        existingIds[id].push(jstreeId);
+                        if (!existingIds[id]) {
+                            existingIds[id] = jstreeId;
+                        }
+                        
+                        //existingIds[id].push(jstreeId);
 
                         if (!existingNodes[jstreeId]) {
                             existingNodes[jstreeId] = 1;
                         }
                         var node = {
-                            id: jstreeId,
+                            id: existingIds[id],
                             text: item.label,
                             parent: "#",
                             type: "Container",
@@ -235,7 +236,12 @@ var Lineage_containers = (function () {
 
                     data.forEach(function (item) {
                         var parentId = item.parent.value;
-
+                        var types=item.memberTypes.value.split(',')
+                        
+                        
+                        
+                        var type=JstreeWidget.selectTypeForIconsJstree(types);
+                        /*
                         var type = "Container";
                         if (item.memberTypes.value.indexOf("Class") > 0) {
                             type = "Class";
@@ -243,7 +249,6 @@ var Lineage_containers = (function () {
                         if (item.memberTypes.value.indexOf("Individual") > 0) {
                             type = "Individual";
                         }
-
                         if (!existingIds[parentId]) {
                             existingIds[parentId] = [];
                         }
@@ -280,8 +285,37 @@ var Lineage_containers = (function () {
 
                             jstreeData.push(node);
                         });
-                    });
+                        */
+                        var id = item.member.value;
+                        var jstreeId = "_" + common.getRandomHexaId(5);
+                        if (!existingIds[id]) {
+                            existingIds[id] =jstreeId ;
+                        }
+                        var parentJstreeId = "_" + common.getRandomHexaId(5);
+                        if (!existingIds[parentId]) {
+                            existingIds[parentId] = parentJstreeId;
+                        }
+                        
+                        var node = {
+                            id: existingIds[id],
+                            text: item.memberLabel.value,
+                            parent: existingIds[parentId],
+                            type: type,
+                            data: {
+                                type: type,
+                                source: source,
+                                id: id,
+                                label: item.memberLabel.value,
+                                currentParent: existingIds[parentId],
+                                tabId: options.tabId,
+                            },
+                        };
 
+                        jstreeData.push(node);
+
+
+                    });
+                    
                     var jstreeOptions;
                     if (options.jstreeOptions) {
                         jstreeOptions = options.jstreeOptions;

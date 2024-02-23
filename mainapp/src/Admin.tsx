@@ -13,6 +13,7 @@ import { LogsTable } from "./Component/LogsTable";
 import { ServerSource, getSources, getIndices, getGraphs } from "./Source";
 import { Config, getConfig } from "./Config";
 import { Log, getLogs } from "./Log";
+import { HelpButton } from "./Component/HelpModal";
 
 type Model = {
     users: RD<string, User[]>;
@@ -191,19 +192,31 @@ const Admin = () => {
         <ModelContext.Provider value={{ model, updateModel }}>
             <Box sx={{ width: "100%", bgcolor: "Background.paper" }}>
                 <Tabs
-                    onChange={(event: React.SyntheticEvent, newValue: number) => updateModel({ type: "UserClickedNewTab", payload: newValue })}
+                    onChange={(event: React.SyntheticEvent, newValue: number) => {
+                        // deactivate tab update when clicking on help icon
+                        if (event.target.value !== undefined) {
+                            updateModel({ type: "UserClickedNewTab", payload: newValue });
+                        }
+                    }}
                     value={editionTabToNumber(model.currentEditionTab)}
                     centered
                 >
-                    <Tab label="Users" />
-                    <Tab label="Profiles" />
-                    <Tab label="Sources" />
-                    <Tab label="Logs" />
+                    <Tab icon={<HelpButton title="Users" message={AdminHelp.users} />} iconPosition="end" label="Users" />
+                    <Tab icon={<HelpButton title="Profiles" message={AdminHelp.profiles} />} iconPosition="end" label="Profiles" />
+                    <Tab icon={<HelpButton title="Sources" message={AdminHelp.sources} />} iconPosition="end" label="Sources" />
+                    <Tab icon={<HelpButton title="Logs" message={AdminHelp.logs} />} iconPosition="end" label="Logs" />
                 </Tabs>
             </Box>
             <Dispatcher model={model} />
         </ModelContext.Provider>
     );
+};
+
+const AdminHelp = {
+    users: "Users…",
+    profiles: "Profiles…",
+    sources: "Sources…",
+    logs: "Logs…",
 };
 
 const Dispatcher = (props: { model: Model }) => {

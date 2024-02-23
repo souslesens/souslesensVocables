@@ -144,6 +144,10 @@ node scripts/migrations/migration_1.44_config.js -c config -w
 
 -   help button on all fields of the source form
 
+### Added
+
+-   help button on all fields of the source form
+
 ## [1.42.3](https://github.com/souslesens/souslesensVocables/compare/1.42.2...1.42.3) - 2023-10-11
 
 ### Fixed

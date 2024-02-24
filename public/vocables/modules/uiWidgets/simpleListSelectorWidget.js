@@ -9,12 +9,15 @@ var SimpleListSelectorWidget = (function () {
             options = { size: 10, multiple: false };
         }
 
+
+        var multipleStr=""
+        if(options.multiple){
+            multipleStr=" multiple='multiple'"
+        }
         var html =
-            "<div><select id='SimpleListSelectorWidget_select' size='" +
-            options.size +
-            "' multiple='" +
-            options.multiple +
-            "'>" +
+            "<div><select id='SimpleListSelectorWidget_select' size='" + options.size + "'" +
+            multipleStr+
+            ">" +
             " </select> <br> <button onclick='SimpleListSelectorWidget.onOKbutton()'>OK</button></div>";
 
         var divId = "smallDialogDiv";
@@ -34,6 +37,7 @@ var SimpleListSelectorWidget = (function () {
 
     self.onOKbutton = function () {
         var value = $("#SimpleListSelectorWidget_select").val();
+
         $("#" + self.divId).dialog("close");
         return self.validateFn(value);
     };

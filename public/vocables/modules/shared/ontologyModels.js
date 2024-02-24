@@ -23,11 +23,12 @@ var OntologyModels = (function () {
                 var graphUri;
                 if (!Config.ontologiesVocabularyModels[source]) {
                     if (!Config.sources[source]) {
-                        return MainController.UI.message("source " + source + " not allowed for user ");
+                         MainController.UI.message("source " + source + " not allowed for user ");
+                      return  callbackEach()
                     }
                     graphUri = Config.sources[source].graphUri;
                     if (!graphUri) {
-                        return callback();
+                        return callbackEach();
                     }
                     Config.ontologiesVocabularyModels[source] = { graphUri: graphUri };
                 } else {
@@ -786,6 +787,9 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
         var objs = Config.ontologiesVocabularyModels[source].constraints;
         for (var prop in objs) {
             var constraintsArray = objs[prop];
+            if(!Array.isArray(constraintsArray)){
+                constraintsArray=[constraintsArray]
+            }
             constraintsArray.forEach(function (constraint) {
                 if ((!fromClass || constraint.domain == fromClass) && (!toClass || constraint.range == toClass)) {
                     constraints[prop] = constraint;
@@ -906,6 +910,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 "filter(?sClass not in (owl:Class,owl:NamedIndividual,owl:Restriction)) \n" +
                 " filter(?oClass not in (owl:Class,owl:NamedIndividual,owl:Restriction)) " +
                 '  filter (!regex(str(?prop),"rdf","i"))\n' +
+                '  filter (?s != ?o)\n' +
                 "    }\n" +
                 "    }\n" +
                 "  }\n" +

@@ -20,7 +20,7 @@ const fs = require("fs");
 var UserRequestFiltering = {
   existingSources: null,
 
-  getUserGraphUrisMap: function(userSourcesMap) {
+  getUserGraphUrisMap: function(userSourcesMap,userInfos) {
 
 
     var basicVocabularies = basicVocabularies = {
@@ -172,7 +172,7 @@ var UserRequestFiltering = {
   filterSparqlRequest: function(query, userSourcesMap,userInfo, callback) {
     var error = "";
     var filteredQuery = query;
-    var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
+    var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap,userInfo);
 
     selectRegex = /(SELECT)/gim;
     var array = selectRegex.exec(query);

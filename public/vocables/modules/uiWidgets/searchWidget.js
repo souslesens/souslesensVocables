@@ -342,7 +342,7 @@ var SearchWidget = (function () {
             }
 
             if (result.length == 0) {
-                Collection.currentCollectionFilter = null;
+               // Collection.currentCollectionFilter = null;
                 $("#waitImg").css("display", "none");
 
                 var html = "<div id='" + self.currentTargetDiv + "'>no data found</div>";

@@ -929,28 +929,26 @@ var KGcreator = (function () {
 
         function showTable(data) {
             var headers = [];
-            var tableCols=[]
+            var tableCols = [];
             data.forEach(function (item) {
                 for (var key in item)
                     if (headers.indexOf(key) < 0) {
                         headers.push(key);
                         tableCols.push({ title: key, defaultContent: "", width: "15%" });
-
                     }
             });
-            var lines=[]
+            var lines = [];
             data.forEach(function (item) {
-               var line=[]
+                var line = [];
                 headers.forEach(function (column) {
-                    line.push(item[column] || "")
+                    line.push(item[column] || "");
                 });
-                lines.push(line)
-
+                lines.push(line);
             });
             $("#smallDialogDiv").dialog("open");
             $("#smallDialogDiv").parent().css("left", "10%");
 
-            Export.showDataTable("smallDialogDiv",tableCols,lines)
+            Export.showDataTable("smallDialogDiv", tableCols, lines);
             return;
             $("#KGcreator_infosDiv").val("");
 

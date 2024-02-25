@@ -4,11 +4,11 @@ import CommonBotFunctions from "./commonBotFunctions.js";
 import KGcreator_mappings from "../tools/KGcreator/KGcreator_mappings.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 
-var KGcreator_bot = (function() {
+var KGcreator_bot = (function () {
     var self = {};
     self.title = "Create mappings";
     self.lastColumnObj = null;
-    self.start = function(columnObj) {
+    self.start = function (columnObj) {
         self.currentUri = null;
         self.currentColumn = columnObj;
         var workflow = null;
@@ -20,7 +20,7 @@ var KGcreator_bot = (function() {
                 table: columnObj.data.table,
                 column: columnObj.data.id,
 
-                tripleModels: []
+                tripleModels: [],
             };
             if (KGcreator.currentConfig.currentMappings && KGcreator.currentConfig.currentMappings[columnObj.data.table]) {
                 self.params.tripleModels = KGcreator.currentConfig.currentMappings[columnObj.data.table].tripleModels || [];
@@ -48,17 +48,17 @@ var KGcreator_bot = (function() {
                 self.params = { source: self.source, datasource: "", table: "", column: "", tripleModels: [] };
                 */
         }
-        CommonBotFunctions.loadSourceOntologyModel(self.params.source, true, function(err) {
+        CommonBotFunctions.loadSourceOntologyModel(self.params.source, true, function (err) {
             if (err) {
                 return alert(err.responseText);
             }
 
-            KGcreator_mappings.showMappingDialog(null, null, function() {
+            KGcreator_mappings.showMappingDialog(null, null, function () {
                 $("#LinkColumn_botPanel").show();
                 $("#LinkColumn_rightPanel").hide();
                 $("#LinkColumn_basicTypeSelect").hide();
                 $("#LinkColumn_basicTypeSelect").parent().find("span").hide();
-                BotEngine.init(KGcreator_bot, workflow, { divId: "LinkColumn_botPanel" }, function() {
+                BotEngine.init(KGcreator_bot, workflow, { divId: "LinkColumn_botPanel" }, function () {
                     $("#previousButtonBot").css("margin-left", "450px");
                     BotEngine.nextStep();
                 });
@@ -66,7 +66,7 @@ var KGcreator_bot = (function() {
         });
     };
 
-    self.callbackFn = function() {
+    self.callbackFn = function () {
         self.start(self.currentColumn);
     };
 
@@ -78,25 +78,25 @@ var KGcreator_bot = (function() {
                     checkColumnTypeFn: {
                         _OR: {
                             KO: {
-                                promptTargetColumnType: { listFilteredPropertiesFn: { addMappingToModelFn: {} } }
+                                promptTargetColumnType: { listFilteredPropertiesFn: { addMappingToModelFn: {} } },
                             },
                             //  "OK": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "addMappingToModel": {} } } }
-                            OK: { listFilteredPropertiesFn: { addMappingToModelFn: {} } }
-                        }
-                    }
-                }
+                            OK: { listFilteredPropertiesFn: { addMappingToModelFn: {} } },
+                        },
+                    },
+                },
             },
 
-            "set annotation predicate": { listAnnotationPropertiesVocabsFn: { listAnnotationPropertiesFn: { listTableColumnsFn: { addMappingToModelFn: {} } } } }
+            "set annotation predicate": { listAnnotationPropertiesVocabsFn: { listAnnotationPropertiesFn: { listTableColumnsFn: { addMappingToModelFn: {} } } } },
         },
         "save mapping": { saveFn: {} },
-        "new Mapping": {}
+        "new Mapping": {},
     };
     self.workflowRdfType = {
         _OR: {
             "set rdf:type": { listClassVocabsFn: { listClassesFn: { addMappingToModelFn: self.workflowColumnmMappingOther } } },
-            "no rdf:type": self.workflowColumnmMappingOther
-        }
+            "no rdf:type": self.workflowColumnmMappingOther,
+        },
     };
 
     self.workflowColumnMappingType = {
@@ -104,15 +104,15 @@ var KGcreator_bot = (function() {
             _OR: {
                 //   columnBlankNode: { addMappingToModelFn: self.workflowRdfType },
                 virtualColumnBlankNode: { virtualColumnBlankNodeFn: { addMappingToModelFn: self.workflowRdfType } },
-                namedIndividual: { addMappingToModelFn: self.workflowRdfType }
-            }
-        }
+                namedIndividual: { addMappingToModelFn: self.workflowRdfType },
+            },
+        },
     };
 
     self.workflowMapping = {
         chooseSourceFn: {
-            chooseTableFn: { chooseColumnFn: self.workflowColumnMappingType }
-        }
+            chooseTableFn: { chooseColumnFn: self.workflowColumnMappingType },
+        },
     };
 
     self.functionTitles = {
@@ -128,21 +128,18 @@ var KGcreator_bot = (function() {
         virtualColumnBlankNode: "Enter virtual column name",
         listAnnotationPropertiesVocabsFn: " Choose annnotation property vocabulary",
         listAnnotationPropertiesFn: " Choose annnotation property ",
-        promptTargetColumnType:" Enter Column class"
+        promptTargetColumnType: " Enter Column class",
     };
 
     self.functions = {
-        chooseSourceFn: function() {
-        },
-        chooseTableFn: function() {
-        },
-        chooseColumnFn: function() {
-        },
-        columnMappingFn: function() {
+        chooseSourceFn: function () {},
+        chooseTableFn: function () {},
+        chooseColumnFn: function () {},
+        columnMappingFn: function () {
             BotEngine.nextStep();
         },
 
-        setUriTypeFn: function() {
+        setUriTypeFn: function () {
             var choices = ["namedIndividual", "virtualColumnBlankNode"]; //"columnBlankNode",
 
             BotEngine.showList(choices, "uriType"); /*,null,false,function(value){
@@ -151,28 +148,28 @@ var KGcreator_bot = (function() {
       });*/
         },
 
-        listClassVocabsFn: function() {
+        listClassVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(self.params.source, "classVocab");
         },
-        listPredicateVocabsFn: function() {
+        listPredicateVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(self.params.source, "predicateVocab");
         },
-        listAnnotationPropertiesVocabsFn: function() {
+        listAnnotationPropertiesVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
         },
-        listClassesFn: function() {
+        listClassesFn: function () {
             CommonBotFunctions.listVocabClasses(self.params.classVocab, "resourceId");
         },
-        listValueTypeFn: function() {
+        listValueTypeFn: function () {
             var choices = ["xsd:string", "xsd:int", "xsd:float", "xsd:datetime"];
             BotEngine.showList(choices, "valueType");
         },
-        setValueColumnFn: function() {
+        setValueColumnFn: function () {
             var columns = KGcreator.currentConfig.currentDataSource.tables[self.params.table];
             BotEngine.showList(columns, "valueColumn");
         },
 
-        listTableColumnsFn: function() {
+        listTableColumnsFn: function () {
             var columns = KGcreator.currentConfig.currentDataSource.tables[self.params.table];
             var virtualColumns = KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns;
             if (virtualColumns) {
@@ -182,7 +179,7 @@ var KGcreator_bot = (function() {
             BotEngine.showList(columns, "predicateObjectColumn");
         },
 
-        checkColumnTypeFn: function() {
+        checkColumnTypeFn: function () {
             //check if source  target column is mapped and has a rdf:type that are classes in source and imports
             var predicateObjectColumnName = self.params.predicateObjectColumn;
             var predicateObjectColumnType = null;
@@ -196,24 +193,24 @@ var KGcreator_bot = (function() {
             return BotEngine.nextStep(OK ? "OK" : "KO");
         },
 
-        targetColumnKoFn: function() {
+        targetColumnKoFn: function () {
             alert("target column " + self.params.predicateObjectColumn + " needs a rdf:type predicate before linking");
             BotEngine.reset();
         },
-        promptTargetColumnType: function() {
+        promptTargetColumnType: function () {
             var choices = [];
             var classes = Config.ontologiesVocabularyModels[self.params.source].classes;
             for (var classId in classes) {
                 choices.push({
                     id: classId,
-                    label: classes[classId].label || Sparql_common.getLabelFromURI(classId)
+                    label: classes[classId].label || Sparql_common.getLabelFromURI(classId),
                 });
             }
             BotEngine.showList(choices, "predicateObjectColumnType", "Assert target column type", true);
         },
 
-        listFilteredPropertiesFn: function() {
-            OntologyModels.getAllowedPropertiesBetweenNodes(self.params.source, self.params.predicateSubjectColumnType, self.params.predicateObjectColumnType, function(err, result) {
+        listFilteredPropertiesFn: function () {
+            OntologyModels.getAllowedPropertiesBetweenNodes(self.params.source, self.params.predicateSubjectColumnType, self.params.predicateObjectColumnType, function (err, result) {
                 if (err) {
                     return alert(err);
                 }
@@ -229,21 +226,21 @@ var KGcreator_bot = (function() {
             });
         },
 
-        listAnnotationPropertiesFn: function() {
+        listAnnotationPropertiesFn: function () {
             // filter properties compatible with
             CommonBotFunctions.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
         },
 
-        listVocabPropertiesFn: function() {
+        listVocabPropertiesFn: function () {
             // filter properties compatible with
             CommonBotFunctions.listVocabPropertiesFn(self.params.predicateVocab, "propertyId");
         },
 
-        virtualColumnBlankNodeFn: function() {
+        virtualColumnBlankNodeFn: function () {
             BotEngine.promptValue("enter virtualColumn name", "virtualColumnBlankNodeName", self.params.column);
         },
 
-        addMappingToModelFn: function() {
+        addMappingToModelFn: function () {
             var source = self.params.source;
             var datasource = self.params.datasource;
             var table = self.params.table;
@@ -274,7 +271,7 @@ var KGcreator_bot = (function() {
                     triple = {
                         s: column,
                         p: "rdf:type",
-                        o: "owl:NamedIndividual"
+                        o: "owl:NamedIndividual",
                     };
                     self.currentUri = column;
                     self.params.tripleModels.push(triple);
@@ -300,7 +297,7 @@ var KGcreator_bot = (function() {
                 triple = {
                     s: self.currentUri,
                     p: "rdf:type",
-                    o: resourceId
+                    o: resourceId,
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();
@@ -313,7 +310,7 @@ var KGcreator_bot = (function() {
                     s: self.currentUri,
                     p: "rdf:value",
                     o: valueColumn,
-                    dataType: valueType
+                    dataType: valueType,
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();
@@ -330,7 +327,7 @@ var KGcreator_bot = (function() {
                 triple = {
                     s: self.currentUri,
                     p: propertyId,
-                    o: object
+                    o: object,
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();
@@ -342,7 +339,7 @@ var KGcreator_bot = (function() {
                     s: self.currentUri,
                     p: annotationPropertyId,
                     o: predicateObjectColumn,
-                    isString: true
+                    isString: true,
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();
@@ -350,33 +347,33 @@ var KGcreator_bot = (function() {
             }
         },
 
-        saveFn: function() {
+        saveFn: function () {
             KGcreator_mappings.columnJsonEditor.load(self.params.tripleModels);
             KGcreator.currentConfig.currentMappings[self.params.table].tripleModels = self.params.tripleModels;
-            KGcreator.saveDataSourceMappings(self.params.source, self.params.datasource.name, KGcreator.currentConfig.currentMappings, function(err, result) {
+            KGcreator.saveDataSourceMappings(self.params.source, self.params.datasource.name, KGcreator.currentConfig.currentMappings, function (err, result) {
                 if (err) {
                     return alert(err);
                 }
                 BotEngine.message("mapping Saved");
                 BotEngine.nextStep();
             });
-        }
+        },
     };
-    self.isColumnBlankNode = function(columnName, role) {
+    self.isColumnBlankNode = function (columnName, role) {
         var isBlankNode = false;
         if (!role) {
             role = "s";
         }
-        KGcreator.currentConfig.currentMappings[self.params.table].tripleModels.forEach(function(item) {
+        KGcreator.currentConfig.currentMappings[self.params.table].tripleModels.forEach(function (item) {
             if (item[role] == "$_" + columnName) {
                 isBlankNode = true;
             }
         });
         return isBlankNode;
     };
-    self.getColumnClasses = function(tripleModels, columnName) {
+    self.getColumnClasses = function (tripleModels, columnName) {
         var columnClasses = null;
-        tripleModels.forEach(function(item) {
+        tripleModels.forEach(function (item) {
             if ((item.s == columnName || item.s == "$_" + columnName) && item.p == "rdf:type") {
                 if (item.o.indexOf("owl:") < 0) {
                     if (!columnClasses) {

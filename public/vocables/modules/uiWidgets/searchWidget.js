@@ -343,7 +343,7 @@ var SearchWidget = (function () {
             }
 
             if (result.length == 0) {
-               // Collection.currentCollectionFilter = null;
+                // Collection.currentCollectionFilter = null;
                 $("#waitImg").css("display", "none");
 
                 var html = "<div id='" + self.currentTargetDiv + "'>no data found</div>";
@@ -416,8 +416,8 @@ var SearchWidget = (function () {
             items.relations = {
                 label: "Relations...",
                 action: function (e) {
-                    NodeRelations_bot.start()
-                   // Lineage_relations.showDrawRelationsDialog("Tree");
+                    NodeRelations_bot.start();
+                    // Lineage_relations.showDrawRelationsDialog("Tree");
                 },
             };
 

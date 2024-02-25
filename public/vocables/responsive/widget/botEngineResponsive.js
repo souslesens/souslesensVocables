@@ -11,7 +11,7 @@ var BotEngineResponsive = (function () {
         BotEngine.initialWorkflow = initialWorkflow;
         BotEngine.history = [];
         BotEngine.history.currentIndex = 0;
-        BotEngine.currentList=[];
+        BotEngine.currentList = [];
 
         var divId;
         if (options.divId) {
@@ -34,7 +34,7 @@ var BotEngineResponsive = (function () {
                 $("#resetButtonBot").remove();
                 $("#previousButtonBot").remove();
             }
-            $("#botFilterProposalInput").on("keyup",self.filterList)
+            $("#botFilterProposalInput").on("keyup", self.filterList);
             self.firstLoad = false;
             $("#resetButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
             $("#previousButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
@@ -60,7 +60,7 @@ var BotEngineResponsive = (function () {
     };
 
     self.nextStep = function (returnValue, varToFill) {
-        $("#botFilterProposalDiv").css("display","none")
+        $("#botFilterProposalDiv").css("display", "none");
         BotEngine.history.push(JSON.parse(JSON.stringify(BotEngine.currentObj)));
         BotEngine.history.currentIndex += 1;
         var keys = Object.keys(BotEngine.currentObj);
@@ -211,9 +211,8 @@ var BotEngineResponsive = (function () {
         }
 
         $("#bot_resourcesProposalSelect").css("display", "block");
-        self.currentList=values
-        if(values.length>20)
-            $("#botFilterProposalDiv").css("display","block")
+        self.currentList = values;
+        if (values.length > 20) $("#botFilterProposalDiv").css("display", "block");
         common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
         $("#bot_resourcesProposalSelect").unbind("change");
         $("#bot_resourcesProposalSelect").bind("change", function () {
@@ -236,20 +235,18 @@ var BotEngineResponsive = (function () {
         });
     };
 
-    self.filterList=function(evt){
-        var str=$(this).val();
-        if(!str || str.length<2)
-            return;
-str=str.toLowerCase()
-            var selection=[]
-        self.currentList.forEach(function(item){
-            if(item.label.toLowerCase().indexOf(str)>-1){
-                selection.push(item)
+    self.filterList = function (evt) {
+        var str = $(this).val();
+        if (!str || str.length < 2) return;
+        str = str.toLowerCase();
+        var selection = [];
+        self.currentList.forEach(function (item) {
+            if (item.label.toLowerCase().indexOf(str) > -1) {
+                selection.push(item);
             }
-        })
+        });
         common.fillSelectOptions("bot_resourcesProposalSelect", selection, false, "label", "id");
-    }
-
+    };
 
     self.promptValue = function (message, varToFill, defaultValue, callback) {
         $("#bot_resourcesProposalSelect").hide();

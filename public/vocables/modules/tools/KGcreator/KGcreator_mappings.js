@@ -421,22 +421,19 @@ tripleObj.objectIsSpecificUri = true;
         KGcreator.saveDataSourceMappings();
     };
 
-    self.joinColumns=function(columnFromData, columnToData,foreignKey,callback){
+    self.joinColumns = function (columnFromData, columnToData, foreignKey, callback) {
+        var joins = {
+            fromTable: columnFromData.table,
+            toTable: columnToData.table,
+            fromColumn: foreignKey,
+            toColumn: columnToData.columnName,
+        };
+        KGcreator.rawConfig.databaseSources[KGcreator.currentConfig.currentDataSource.name].tableJoins.push(joins);
+        KGcreator.saveSlsvSourceConfig();
+        return callback();
+    };
 
-       var joins=
-            {
-                "fromTable": columnFromData.table,
-                "toTable": columnToData.table,
-                "fromColumn": foreignKey,
-                "toColumn": columnToData.columnName
-            }
-        KGcreator.rawConfig.databaseSources[KGcreator.currentConfig.currentDataSource.name].tableJoins.push(joins)
-        KGcreator.saveSlsvSourceConfig()
-        return callback()
-
-       }
-
-    self.setPredicatesBetweenColumnsInTable = function (columnFromData, columnToData,foreignKey, callback) {
+    self.setPredicatesBetweenColumnsInTable = function (columnFromData, columnToData, foreignKey, callback) {
         OntologyModels.registerSourcesModel(KGcreator.currentSlsvSource, function (err, result) {
             if (err) {
                 return alert(err.responseText);
@@ -448,10 +445,8 @@ tripleObj.objectIsSpecificUri = true;
             var restrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, fromClass, toClass);
             var inverseRestrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, toClass, fromClass);
 
-
-            var targetColumnInTable=columnToData.columnName
-            if(foreignKey)
-                targetColumnInTable=foreignKey
+            var targetColumnInTable = columnToData.columnName;
+            if (foreignKey) targetColumnInTable = foreignKey;
 
             var allConstraints = {};
             for (var key in constraints) {
@@ -471,39 +466,23 @@ tripleObj.objectIsSpecificUri = true;
                 }
                 return alert(message);
             } else {
-
                 return SimpleListSelectorWidget.showDialog(
                     null,
                     function (callbackLoad) {
                         return callbackLoad(Object.keys(allConstraints));
                     },
 
-
                     function (selectedProperty) {
-
-
-
-
-
-                        if(!selectedProperty)
-                            return;
-
+                        if (!selectedProperty) return;
 
                         //write the join between tables if foreignKey
-                        if(foreignKey){
-                            self.joinColumns(columnFromData, columnToData,foreignKey,function(err,result){
-                                if(err)
-                                    return callback(err)
-                            })
+                        if (foreignKey) {
+                            self.joinColumns(columnFromData, columnToData, foreignKey, function (err, result) {
+                                if (err) return callback(err);
+                            });
                         }
 
-
-
-
-
-
-
-                        if(inverseRestrictions[selectedProperty] && inverseRestrictions[selectedProperty].inverse){
+                        if (inverseRestrictions[selectedProperty] && inverseRestrictions[selectedProperty].inverse) {
                             if (confirm("link columns " + columnToData.label + " to" + columnFromData.label + " with property " + selectedProperty)) {
                                 var triple = {
                                     s: targetColumnInTable,
@@ -511,13 +490,14 @@ tripleObj.objectIsSpecificUri = true;
                                     o: columnFromData.columnName,
                                 };
                                 KGcreator.currentConfig.currentMappings[columnFromData.table].tripleModels.push(triple);
-                                KGcreator.saveDataSourceMappings(KGcreator.currentSlsvSource, KGcreator.currentConfig.currentDataSource.name, KGcreator.currentConfig.currentMappings, function(err, result) {
-
-                                })
+                                KGcreator.saveDataSourceMappings(
+                                    KGcreator.currentSlsvSource,
+                                    KGcreator.currentConfig.currentDataSource.name,
+                                    KGcreator.currentConfig.currentMappings,
+                                    function (err, result) {}
+                                );
                             }
-                        }
-                        else {
-
+                        } else {
                             if (confirm("link columns " + columnFromData.label + " to" + columnToData.label + " with property " + selectedProperty)) {
                                 var triple = {
                                     s: columnFromData.columnName,
@@ -525,9 +505,12 @@ tripleObj.objectIsSpecificUri = true;
                                     o: targetColumnInTable,
                                 };
                                 KGcreator.currentConfig.currentMappings[columnFromData.table].tripleModels.push(triple);
-                                KGcreator.saveDataSourceMappings(KGcreator.currentSlsvSource, KGcreator.currentConfig.currentDataSource.name, KGcreator.currentConfig.currentMappings, function(err, result) {
-
-                                })
+                                KGcreator.saveDataSourceMappings(
+                                    KGcreator.currentSlsvSource,
+                                    KGcreator.currentConfig.currentDataSource.name,
+                                    KGcreator.currentConfig.currentMappings,
+                                    function (err, result) {}
+                                );
                             }
                         }
                     }

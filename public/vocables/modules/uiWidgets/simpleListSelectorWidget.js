@@ -9,14 +9,15 @@ var SimpleListSelectorWidget = (function () {
             options = { size: 10, multiple: false };
         }
 
-
-        var multipleStr=""
-        if(options.multiple){
-            multipleStr=" multiple='multiple'"
+        var multipleStr = "";
+        if (options.multiple) {
+            multipleStr = " multiple='multiple'";
         }
         var html =
-            "<div><select id='SimpleListSelectorWidget_select' size='" + options.size + "'" +
-            multipleStr+
+            "<div><select id='SimpleListSelectorWidget_select' size='" +
+            options.size +
+            "'" +
+            multipleStr +
             ">" +
             " </select> <br> <button onclick='SimpleListSelectorWidget.onOKbutton()'>OK</button></div>";
 

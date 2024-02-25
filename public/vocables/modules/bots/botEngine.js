@@ -11,6 +11,7 @@ var BotEngine = (function () {
         self.currentObj = botModule;
         self.history = [];
         self.history.currentIndex = 0;
+        self.currentList=[]
 
         var divId;
         if (options.divId) {
@@ -23,6 +24,9 @@ var BotEngine = (function () {
 
         $("#" + divId).load("modules/bots/html/bot.html", function () {
             $("#botTitle").html(self.currentBot.title);
+
+
+
             if (callback) {
                 callback();
             }
@@ -130,6 +134,7 @@ var BotEngine = (function () {
 
     self.showList = function (values, varToFill, returnValue, sort, callback) {
         values = common.StringArrayToIdLabelObjectArray(values);
+
         if (sort) {
             values.sort(function (a, b) {
                 if (a.label > b.label) {
@@ -141,7 +146,7 @@ var BotEngine = (function () {
                 return 0;
             });
         }
-
+        self.currentList=values;
         $("#bot_resourcesProposalSelect").css("display", "block");
         common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
         $("#bot_resourcesProposalSelect").unbind("change");
@@ -284,6 +289,8 @@ var BotEngine = (function () {
             physics: { enabled: true },
         });
     };
+
+
 
     return self;
 })();

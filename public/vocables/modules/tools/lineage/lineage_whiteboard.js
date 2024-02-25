@@ -2315,7 +2315,7 @@ restrictionSource = Config.predicatesSource;
 
                     if (item.propLabel.value == "sameAs") {
                         shape = "hexagon";
-                        color = "#f5ef39";
+                        color = "#fdac00";
                     }
                     var label = item.valueLabel.value;
                     if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
@@ -2367,7 +2367,7 @@ restrictionSource = Config.predicatesSource;
                                         scaleFactor: 0.5,
                                     },
                                 },
-                                dashes: true,
+                               // dashes: true,
                                 color: options.edgesColor || Lineage_whiteboard.restrictionColor,
                                 physics: physics,
                             });
@@ -2582,7 +2582,9 @@ restrictionSource = Config.predicatesSource;
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawParents();"> Parents</span>' +
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
-                '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +
+                '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' +
+
+               // '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +
                 //  "   <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('direct',null,'Graph');\">Relations</span>" +
                 //   "    <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('inverse',null,'Graph');\">Inverse Rels</span>" +
                 //  "    <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.graphNodeNeighborhood('all');\">ObjectProperties</span>" +

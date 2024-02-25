@@ -841,10 +841,10 @@ var Sparql_OWL = (function () {
 
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
 
+
+        var selectStr= "select distinct * ";
         if (options.distinct) {
-            query += "select distinct " + options.distinct + " ";
-        } else {
-            query += "select distinct * ";
+            selectStr = "select distinct " + options.distinct + " ";
         }
 
         if (options.filter) {
@@ -856,11 +856,12 @@ var Sparql_OWL = (function () {
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "select distinct ?subject ?prop ?object ?subjectLabel ?propLabel ?objectLabel ?subjectType ?objectType " +
+            selectStr+
             fromStr +
             " WHERE{\n" +
             "  { graph ?g{ ?object rdf:type ?objectType. OPTIONAL { ?object rdfs:label ?objectLabel.}}}\n" +
             "   { graph ?g{  ?subject rdf:type ?subjectType. OPTIONAL { ?subject rdfs:label ?subjectLabel.}}}\n" +
+            "   { graph ?g{ ?prop ?x ?propType. OPTIONAL { ?prop rdfs:label ?propLabel.}}}\n"+
             // "    { graph ?g{ ?prop rdf:type ?propType. OPTIONAL {?prop rdfs:label ?propLabel.}}\n" +
             "  \n" +
             "  {graph <" +

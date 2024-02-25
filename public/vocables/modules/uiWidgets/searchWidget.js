@@ -8,6 +8,7 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import common from "../shared/common.js";
 import Export from "../shared/export.js";
 import PromptedSelectWidget from "./promptedSelectWidget.js";
+import NodeRelations_bot from "../bots/nodeRelations_bot.js";
 
 var SearchWidget = (function () {
     var self = {};
@@ -415,7 +416,8 @@ var SearchWidget = (function () {
             items.relations = {
                 label: "Relations...",
                 action: function (e) {
-                    Lineage_relations.showDrawRelationsDialog("Tree");
+                    NodeRelations_bot.start()
+                   // Lineage_relations.showDrawRelationsDialog("Tree");
                 },
             };
 

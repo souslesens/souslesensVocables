@@ -1,5 +1,5 @@
 const { responseSchema, processResponse } = require("./utils");
-const fflate = require("fflate");
+
 var ontologyModelsCache = {};
 module.exports = function() {
     let operations = {

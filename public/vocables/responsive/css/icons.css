@@ -120,7 +120,7 @@
     background-repeat: no-repeat;
 }
 
-.whiteBoardIcon{
+.whiteBoardIcon {
     background-image: url(@whiteBoardIcon);
     background-repeat: no-repeat;
     margin-top: 10px;
@@ -128,21 +128,21 @@
     width: 40px;
 }
 
-.classesIcon{
+.classesIcon {
     background-image: url(@classesIcon);
     background-repeat: no-repeat;
     height: 50px;
     width: 40px;
     margin-top: 10px;
 }
-.containersIcon{
+.containersIcon {
     background-image: url(@containersIcon);
     background-repeat: no-repeat;
     height: 50px;
     width: 40px;
     margin-top: 10px;
 }
-.propertiesIcon{
+.propertiesIcon {
     background-image: url(@propertiesIcon);
     background-repeat: no-repeat;
     height: 50px;

@@ -638,7 +638,7 @@ var Config = (function () {
             "@containersIcon": "../icons/CFIHOS/ContainerIcon-cfihos.png",
             "@classesIcon": "../icons/CFIHOS/ClassesIcon-cfihos.png",
         },
-        DeepOffShore : {
+        DeepOffShore: {
             "@source-color": "#1D82FF",
             "@button1-color": "#CC092F",
             "@button2-color": "#1A65FE",
@@ -672,7 +672,7 @@ var Config = (function () {
             "@previousIcon": "../icons/DeepOffShore/PreviousIcon-DeepOffShore.png",
             "@allPropertyIcon": "../icons/DeepOffShore/SelectionAllIcon-DeepOffShore.png",
             "@currentPropertyIcon": "../icons/DeepOffShore/SelectionIcon-DeepOffShore.png",
-             "@whiteBoardIcon": "../icons/DeepOffShore/WhiteboardIcon-DeepOffShore.png",
+            "@whiteBoardIcon": "../icons/DeepOffShore/WhiteboardIcon-DeepOffShore.png",
             "@propertiesIcon": "../icons/DeepOffShore/PropertiesIcon-DeepOffShore.png",
             "@containersIcon": "../icons/DeepOffShore/ContainerIcon-DeepOffShore.png",
             "@classesIcon": "../icons/DeepOffShore/ClassesIcon-DeepOffShore.png",

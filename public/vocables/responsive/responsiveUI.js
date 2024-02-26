@@ -429,18 +429,16 @@ var ResponsiveUI = (function () {
             if (theme["@isDarkTheme"]) {
                 Lineage_whiteboard.defaultNodeFontColor = "white";
 
-                if(Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()){
-                    Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color='white'
-                    Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions)
+                if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                    Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color = "white";
+                    Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
                     Lineage_r.showHideEditButtons(self.source);
                 }
-                
-
             } else {
                 Lineage_whiteboard.defaultNodeFontColor = "#343434";
-                if(Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()){
-                    Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color='#343434'
-                    Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions)
+                if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                    Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color = "#343434";
+                    Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
                     Lineage_r.showHideEditButtons(self.source);
                 }
             }

@@ -22,12 +22,11 @@ var SPARQL_endpoint = (function () {
 
         $("#mainDialogDiv").dialog("option", "title", "SPARQL endpoint");
         $("#mainDialogDiv").parent().css("left", "100px");
-        $("#mainDialogDiv").css("width",'1000px');
+        $("#mainDialogDiv").css("width", "1000px");
 
         $("#graphDiv").html("");
         $("#mainDialogDiv").load("snippets/SPARQLendpoint.html", function () {
             self.initYasGui();
-
         });
     };
 

@@ -111,7 +111,7 @@ var Lineage_containers = (function () {
 
         var filter = "";
         if (term) {
-            filter =  Sparql_common.setFilter('searchValue',null,term);
+            filter = Sparql_common.setFilter("searchValue", null, term);
         }
 
         var search_on_container = "";
@@ -210,7 +210,7 @@ var Lineage_containers = (function () {
                         if (!existingIds[id]) {
                             existingIds[id] = jstreeId;
                         }
-                        
+
                         //existingIds[id].push(jstreeId);
 
                         if (!existingNodes[jstreeId]) {
@@ -236,11 +236,9 @@ var Lineage_containers = (function () {
 
                     data.forEach(function (item) {
                         var parentId = item.parent.value;
-                        var types=item.memberTypes.value.split(',')
-                        
-                        
-                        
-                        var type=JstreeWidget.selectTypeForIconsJstree(types);
+                        var types = item.memberTypes.value.split(",");
+
+                        var type = JstreeWidget.selectTypeForIconsJstree(types);
                         /*
                         var type = "Container";
                         if (item.memberTypes.value.indexOf("Class") > 0) {
@@ -289,13 +287,13 @@ var Lineage_containers = (function () {
                         var id = item.member.value;
                         var jstreeId = "_" + common.getRandomHexaId(5);
                         if (!existingIds[id]) {
-                            existingIds[id] =jstreeId ;
+                            existingIds[id] = jstreeId;
                         }
                         var parentJstreeId = "_" + common.getRandomHexaId(5);
                         if (!existingIds[parentId]) {
                             existingIds[parentId] = parentJstreeId;
                         }
-                        
+
                         var node = {
                             id: existingIds[id],
                             text: item.memberLabel.value,
@@ -312,10 +310,8 @@ var Lineage_containers = (function () {
                         };
 
                         jstreeData.push(node);
-
-
                     });
-                    
+
                     var jstreeOptions;
                     if (options.jstreeOptions) {
                         jstreeOptions = options.jstreeOptions;
@@ -337,13 +333,13 @@ var Lineage_containers = (function () {
                     }
 
                     JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
-                        if(options.filter){
+                        if (options.filter) {
                             $("#" + jstreeDiv).jstree("open_all");
-                        }else{
-                            $("#" + jstreeDiv).jstree().open_node("#");
+                        } else {
+                            $("#" + jstreeDiv)
+                                .jstree()
+                                .open_node("#");
                         }
-                        
-                        
 
                         self.bindMoveNode(jstreeDiv);
                     });
@@ -1007,8 +1003,7 @@ var Lineage_containers = (function () {
             } else if (options.depth) {
                 pathOperator = "{1," + options.depth + "}";
             }
-            var query =
-                `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+            var query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
                  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
                  SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes)  ${fromStr}
                  WHERE {?searchValue ^rdfs:member* ?member.
@@ -1025,10 +1020,9 @@ var Lineage_containers = (function () {
                         }
                     }
                 }  group by   ?member ?memberLabel ?parent ?parentLabel ?searchValue   
-                `
-                
-                
-               /*
+                `;
+
+            /*
                 filter +
                 "  {select ?member where{\n" +
                 "?parent0  rdfs:member" +

@@ -119,6 +119,13 @@ var GraphDisplayLegend = (function () {
                     color: "#b0f5f5",
                 },
             },
+            "owl:NamedIndividual": {
+                type: "node",
+                attrs: {
+                    shape: "triangle",
+                    color: "#00afef",
+                },
+            },
             "owl:Class": {
                 type: "node",
                 attrs: {

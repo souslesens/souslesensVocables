@@ -51,8 +51,8 @@ var SparqlQuery_bot = (function () {
                 listVocabsFn: {
                     listClassesFn: {
                         _OR: {
-                            AnyClass: { listWhiteBoardFilterType: { executeQuery: {} } },
-                            _DEFAULT: {
+                            "Any Predicate": { listWhiteBoardFilterType: { executeQuery: {} } },
+                            "Choose Predicate": {
                                 listPredicatePathsFn: {
                                     _OR: {
                                         empty: { listWhiteBoardFilterType: { executeQuery: {} } },
@@ -60,6 +60,8 @@ var SparqlQuery_bot = (function () {
                                     },
                                 },
                             },
+                            " Restrictions": { listWhiteBoardFilterType: { drawRestrictions: {} } },
+                            "Inverse Restrictions": { listWhiteBoardFilterType: { drawInverseRestrictions: {} } },
                         },
                     },
                 },
@@ -68,8 +70,10 @@ var SparqlQuery_bot = (function () {
                 listVocabsFn: {
                     listPropertiesFn: {
                         _OR: {
-                            AnyProperty: { listWhiteBoardFilterType: { executeQuery: {} } },
-                            _DEFAULT: {
+                            AnyPredicate: { listWhiteBoardFilterType: { executeQuery: {} } },
+
+                            //  _DEFAULT: {
+                            Predicate: {
                                 listPredicatePathsFn: {
                                     _OR: {
                                         empty: { listWhiteBoardFilterType: { executeQuery: {} } },
@@ -77,11 +81,15 @@ var SparqlQuery_bot = (function () {
                                     },
                                 },
                             },
+                            Restrictions: { listWhiteBoardFilterType: { drawRestrictions: {} } },
+                            "Inverse Restrictions": { listWhiteBoardFilterType: { drawInverseRestrictions: {} } },
+
+                            // },
                         },
                     },
                 },
             },
-            "By Annotation/Datatype property": {
+            "Annotation/Datatype property": {
                 listAnnotationPropertiesVocabsFn: {
                     listAnnotationPropertiesFn: {
                         promptAnnotationPropertyValue: {
@@ -120,11 +128,11 @@ var SparqlQuery_bot = (function () {
         },
 
         listClassesFn: function () {
-            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "currentClass", true, [{ label: "_Any Class", id: "AnyClass" }]);
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "currentClass", true, [{ label: ".Any Class", id: "AnyClass" }]);
         },
 
         listPropertiesFn: function () {
-            CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "currentProperty", [{ label: "_Any property", id: "AnyProperty" }]);
+            CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "currentProperty", [{ label: ".Any property", id: "AnyProperty" }]);
         },
 
         listPredicatePathsFn: function () {
@@ -275,6 +283,42 @@ var SparqlQuery_bot = (function () {
             BotEngine.promptValue("enter sample size", "sampleSize", 500);
         },
 
+        drawRestrictions: function (inverse) {
+            var options = {};
+            var whiteboardFilterType = self.params.whiteboardFilterType;
+            var nodeIds = null;
+            if (whiteboardFilterType == "whiteboardNodes") {
+                Lineage_sources.fromAllWhiteboardSources = true;
+                if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                    data = null;
+                } else {
+                    data = [];
+                    var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+                    nodes.forEach(function (node) {
+                        if (node.data && (!node.data.type || node.data.type != "literal")) {
+                            data.push(node.id);
+                        }
+                    });
+                }
+            } else {
+                options.allNodes = true;
+            }
+            if (self.params.currentProperty && self.params.currentProperty != "AnyProperty") {
+                options.filter = Sparql_common.setFilter("prop", self.params.currentProperty);
+            }
+            if (self.params.currentClass && self.params.currentClass != "AnyClass") {
+                options.filter = Sparql_common.setFilter(inverse ? "value" : "subject", self.params.currentClass);
+            }
+            if (inverse) options.inverseRestriction = true;
+            Lineage_whiteboard.drawRestrictions(self.params.source, nodeIds, null, null, options, function (err, result) {
+                if (err) {
+                }
+                BotEngine.nextStep();
+            });
+        },
+        drawInverseRestrictions: function () {
+            self.functions.drawRestrictions(true);
+        },
         executeQuery: function () {
             var source = self.params.source;
             var currentClass = self.params.currentClass;

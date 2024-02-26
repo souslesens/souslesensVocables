@@ -7,9 +7,6 @@ var CommonBotFunctions = (function () {
 
     self.sortList = function (list) {
         list.sort(function (a, b) {
-            if (a.label.indexOf("_") == 0) {
-                return 1;
-            }
             if (a.label > b.label) {
                 return 1;
             }

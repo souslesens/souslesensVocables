@@ -86,9 +86,9 @@ var KGcreator_bot = (function () {
                     },
                 },
             },
-        },
-        "set annotation predicate": { listAnnotationPropertiesVocabsFn: { listAnnotationPropertiesFn: { listTableColumnsFn: { addMappingToModelFn: {} } } } },
 
+            "set annotation predicate": { listAnnotationPropertiesVocabsFn: { listAnnotationPropertiesFn: { listTableColumnsFn: { addMappingToModelFn: {} } } } },
+        },
         "save mapping": { saveFn: {} },
         "new Mapping": {},
     };
@@ -128,6 +128,7 @@ var KGcreator_bot = (function () {
         virtualColumnBlankNode: "Enter virtual column name",
         listAnnotationPropertiesVocabsFn: " Choose annnotation property vocabulary",
         listAnnotationPropertiesFn: " Choose annnotation property ",
+        promptTargetColumnType: " Enter Column class",
     };
 
     self.functions = {

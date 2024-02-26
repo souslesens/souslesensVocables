@@ -659,7 +659,7 @@ var KGcreator = (function () {
         var jstreeData = [];
 
         var columnMappings = self.getColumnsMappings(table, null, "s");
-
+        tableColumns.sort();
         tableColumns.forEach(function (column) {
             var label = column;
 
@@ -928,6 +928,28 @@ var KGcreator = (function () {
         // alert("coming soon");
 
         function showTable(data) {
+            var headers = [];
+            var tableCols = [];
+            data.forEach(function (item) {
+                for (var key in item)
+                    if (headers.indexOf(key) < 0) {
+                        headers.push(key);
+                        tableCols.push({ title: key, defaultContent: "", width: "15%" });
+                    }
+            });
+            var lines = [];
+            data.forEach(function (item) {
+                var line = [];
+                headers.forEach(function (column) {
+                    line.push(item[column] || "");
+                });
+                lines.push(line);
+            });
+            $("#smallDialogDiv").dialog("open");
+            $("#smallDialogDiv").parent().css("left", "10%");
+
+            Export.showDataTable("smallDialogDiv", tableCols, lines);
+            return;
             $("#KGcreator_infosDiv").val("");
 
             var html = "<table border='1'><tr>";

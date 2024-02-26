@@ -3,7 +3,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import common from "../../shared/common.js";
 import Export from "../../shared/export.js";
-import GraphDisplayLegend from "../../shared/graphDisplayLegend.js";
+import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

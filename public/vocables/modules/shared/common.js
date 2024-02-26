@@ -904,6 +904,32 @@ if (callback) return callback(err);
         return uri;
     };
 
+    self.zipJson=function(json) {
+        import {
+            BlobReader,
+            BlobWriter,
+            TextReader,
+            TextWriter,
+            ZipReader,
+            ZipWriter,
+        } from "https://deno.land/x/zipjs/index.js";
+        async function zip(json) {
+
+        const zipFileWriter = new BlobWriter();
+        const reader = new TextReader(JSON.stringify(json));
+
+        const zipWriter = new ZipWriter(zipFileWriter);
+        await zipWriter.add(JSON.stringify(json), reader);
+        await zipWriter.close();
+            const zipFileBlob = await zipFileWriter.getData();
+            return  zipFileBlob
+    }
+
+var zippedJson=zip(json)
+        return zippedJson
+
+    }
+
     return self;
 })();
 

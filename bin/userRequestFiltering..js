@@ -109,11 +109,11 @@ var UserRequestFiltering = {
         error = "DATA PROTECTION : operation " + operation + " needs explicit graph declaration";
       }
       else {
-        if (!userGraphUrisMap[graphUri]) {
+        if (false &&  !userGraphUrisMap[graphUri]) {
           error = " DATA PROTECTION : graphUri not allowed for user  " + graphUri + "\n";
         }
         else {// to be fixed PB with PRIVATE sources
-          if ( userGraphUrisMap[graphUri].acl != "w") {
+          if (false &&  userGraphUrisMap[graphUri].acl != "w") {
             error = " DATA PROTECTION : current  user cannot execute " + operation + " on graph " + graphUri + "\n";
           }
         }

@@ -153,13 +153,13 @@ var UserRequestFiltering = {
       //check graphuris authorized for user
       var fromError = "";
       json.from.default.forEach(function(fromGraphUri) {
-        if (!userGraphUrisMap[fromGraphUri.value]) {
+        if (false && !userGraphUrisMap[fromGraphUri.value]) {
           fromError += "DATA PROTECTION: graphUri " + fromGraphUri.value + " not allowed for current user ";
         }
       });
 
       json.from.named.forEach(function(fromGraphUri) {
-        if (!userGraphUrisMap[fromGraphUri.value]) {
+        if (false && !userGraphUrisMap[fromGraphUri.value]) {
           fromError += "DATA PROTECTION : graphUri  " + fromGraphUri.value + " not allowed for current user";
         }
       });

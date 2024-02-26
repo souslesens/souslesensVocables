@@ -74,6 +74,7 @@
         "express-fileupload": "^1.4.1",
         "express-openapi": "^11.1.0",
         "express-session": "^1.17.3",
+        "fflate": "^0.8.2",
         "http-errors": "~2.0.0",
         "inflected": "^2.1.0",
         "latest": "^0.2.0",

@@ -3,6 +3,8 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
+//import fflate from "fflate";
+
 
 // eslint-disable-next-line no-global-assign
 var OntologyModels = (function () {
@@ -576,6 +578,24 @@ var OntologyModels = (function () {
     };
 
     self.writeModelOnServerCache = function (source, model, callback) {
+
+
+
+        /*  const buf = fflate.strToU8(JSON.stringify(model));
+          const compressed = fflate.compressSync(buf, { level: 6, mem: 8 });
+
+           var xx=fflate.strToU8(compressed)
+           const decompressed = fflate.decompressSync(xx);
+           model = { compressed:JSON.parse(decompressed)};*/
+
+// Creates a TextReader object storing the text of the entry to add in the zip
+// (i.e. "Hello world!").
+        /*   var xx=JSON.stringify(model)
+
+       const zipWriter = new ZipWriter(zipFileWriter);
+        zipWriter.add(xx, helloWorldReader);
+        zipWriter.close();*/
+
         var payload = {
             source: source,
             model: model,

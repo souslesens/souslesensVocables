@@ -119,3 +119,33 @@
     background-image: url(@slsvLogo-icon);
     background-repeat: no-repeat;
 }
+
+.whiteBoardIcon{
+    background-image: url(@whiteBoardIcon);
+    background-repeat: no-repeat;
+    margin-top: 10px;
+    height: 50px;
+    width: 40px;
+}
+
+.classesIcon{
+    background-image: url(@classesIcon);
+    background-repeat: no-repeat;
+    height: 50px;
+    width: 40px;
+    margin-top: 10px;
+}
+.containersIcon{
+    background-image: url(@containersIcon);
+    background-repeat: no-repeat;
+    height: 50px;
+    width: 40px;
+    margin-top: 10px;
+}
+.propertiesIcon{
+    background-image: url(@propertiesIcon);
+    background-repeat: no-repeat;
+    height: 50px;
+    width: 40px;
+    margin-top: 10px;
+}

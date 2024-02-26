@@ -716,7 +716,7 @@ var Lineage_properties = (function () {
                 Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                 Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
             }
-            GraphDisplayLegend.drawLegend("RangesAndDomains", "LineageVisjsLegendCanvas");
+            GraphDisplayLegend.drawLegend("RangesAndDomains", "LineageVisjsLegendCanvas",false);
             /*  Lineage_whiteboard.lineageVisjsGraph.network.fit();
 
 */

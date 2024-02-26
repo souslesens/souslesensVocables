@@ -227,22 +227,34 @@ var GraphDisplayLegend = (function () {
             },
         },
     };
-    self.showHideLegend = function (legendCanvas, height, width) {
+    self.showHideLegend = function (legendCanvas,type,height,width,hide) {
         if (self.isRetractedLegend[legendCanvas]) {
             $("#" + legendCanvas).css("height", height);
             $("#" + legendCanvas).css("width", width);
             self.isRetractedLegend[legendCanvas] = false;
             self.drawLegend(self.lastDraw.type, self.lastDraw.legendDIv);
         } else {
-            if (event.offsetX > 200) {
-                if (event.offsetY < 30) {
-                    $("#" + legendCanvas).css("height", 30);
-                    $("#" + legendCanvas).css("width", 50);
-                    self.drawLegend(null, legendCanvas);
-                    self.isRetractedLegend[legendCanvas] = true;
-                    self.lastDraw = { type: type, legendDIv: legendCanvas };
-                }
+             
+            if(hide){
+                
+                $("#" + legendCanvas).css("height", 30);
+                $("#" + legendCanvas).css("width", 50);
+                self.drawLegend(null, legendCanvas);
+                self.isRetractedLegend[legendCanvas] = true;
+                self.lastDraw = { type: type, legendDIv: legendCanvas };
+                return
             }
+            if (event.offsetX > 200) {
+                    if (event.offsetY < 30) {
+                        $("#" + legendCanvas).css("height", 30);
+                        $("#" + legendCanvas).css("width", 50);
+                        self.drawLegend(null, legendCanvas);
+                        self.isRetractedLegend[legendCanvas] = true;
+                        self.lastDraw = { type: type, legendDIv: legendCanvas };
+                    }
+            }
+           
+            
         }
     };
     self.drawLegend = function (type, legendCanvas, expand) {
@@ -258,7 +270,7 @@ var GraphDisplayLegend = (function () {
             $("#" + legendCanvas)[0].addEventListener(
                 "click",
                 function (event) {
-                    self.showHideLegend(legendCanvas);
+                    self.showHideLegend(legendCanvas,type,height,width);
                 },
                 false
             );
@@ -331,6 +343,11 @@ var GraphDisplayLegend = (function () {
 
                 self.drawArrow(ctx, 10, yOffset, xOffset - 15, yOffset, 8);
             }
+        }
+        if(!expand && expand!=undefined){
+          
+
+            self.showHideLegend(legendCanvas,type,height,width,true);
         }
     };
 

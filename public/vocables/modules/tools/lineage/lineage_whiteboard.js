@@ -424,7 +424,7 @@ var Lineage_whiteboard = (function () {
             }
         }
         if (imports) {
-            imports.forEach(function(/** @type {string} */ importedSource) {
+            imports.forEach(function (/** @type {string} */ importedSource) {
                 if (!Config.sources[importedSource]) {
                     return;
                 }
@@ -444,7 +444,7 @@ var Lineage_whiteboard = (function () {
                             level: 1,
                             size: Lineage_whiteboard.defaultShapeSize,
                             data: { source: importedSource },
-                            color: color
+                            color: color,
                         };
                         importGraphUrisMap[graphUri] = importedSource;
 
@@ -460,7 +460,7 @@ var Lineage_whiteboard = (function () {
                             to: source,
                             arrows: " middle",
                             color: color,
-                            width: 6
+                            width: 6,
                         };
                         visjsData.edges.push(edge);
                     }
@@ -484,10 +484,9 @@ var Lineage_whiteboard = (function () {
                         return callbackEach(err);
                     }
 
-                    if(! Lineage_whiteboard.isResultAcceptable(result)){
+                    if (!Lineage_whiteboard.isResultAcceptable(result)) {
                         return callback();
                     }
-
 
                     var ids = [];
                     result.forEach(function (item) {
@@ -562,7 +561,7 @@ var Lineage_whiteboard = (function () {
         );
     };
 
-    self.isResultAcceptable = function(result) {
+    self.isResultAcceptable = function (result) {
         if (result.length > self.showLimit) {
             alert("Too may nodes (" + result.length + "). Use a filering Query instead ");
             return false;
@@ -1997,7 +1996,7 @@ var Lineage_whiteboard = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        if(! Lineage_whiteboard.isResultAcceptable(result)){
+                        if (!Lineage_whiteboard.isResultAcceptable(result)) {
                             return callbackSeries("no data found");
                         }
                         data = result;
@@ -2011,7 +2010,7 @@ var Lineage_whiteboard = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        if(! Lineage_whiteboard.isResultAcceptable(result)){
+                        if (!Lineage_whiteboard.isResultAcceptable(result)) {
                             return callbackSeries("no data found");
                         }
                         data = result;
@@ -2020,7 +2019,6 @@ var Lineage_whiteboard = (function () {
                 },
 
                 function (callbackSeries) {
-
                     Sparql_common.setSparqlResultPropertiesLabels(source, data, "prop", function (err, result2) {
                         if (err) {
                             return callback(err);
@@ -2269,7 +2267,7 @@ var Lineage_whiteboard = (function () {
                         return callback(null, result);
                     }
                 }
-                if(! Lineage_whiteboard.isResultAcceptable(result)){
+                if (!Lineage_whiteboard.isResultAcceptable(result)) {
                     return callback("no data found");
                 }
                 var visjsData = { nodes: [], edges: [] };

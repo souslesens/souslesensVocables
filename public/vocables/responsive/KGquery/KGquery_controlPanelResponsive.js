@@ -58,29 +58,29 @@ var KGquery_controlPanelResponsive = (function () {
         return queryElementDivId;
     };
 
-
-
     self.addNodeToQueryElementDiv = function (queryElementDivId, role, label) {
         $("#" + queryElementDivId).css("display", "block");
         var nodeDivId = "nodeDiv_" + common.getRandomHexaId(5);
         var html = "";
 
         html +=
-            "<div  class='KGquery_pathNodeDiv' id='" + nodeDivId + "'>" +
+            "<div  class='KGquery_pathNodeDiv' id='" +
+            nodeDivId +
+            "'>" +
             "<span style='font:bold 14px'>" +
             label +
-            "</span>" + "&nbsp;&nbsp;" +
+            "</span>" +
+            "&nbsp;&nbsp;" +
             "<button  class='slsv-invisible-button filterIcon' about='add filter' onclick='KGquery.addNodeFilter(\"" +
-            nodeDivId +"\");'</button>";
+            nodeDivId +
+            "\");'</button>";
 
         html += "<div style='font-size: 10px;' id='" + nodeDivId + "_filter'></div> " + "</div>" + "</div>";
 
-
         $("#" + queryElementDivId).append(html);
-      //  $("#" + queryElementDivId) .find(".queryElement_" + role).html(html);
+        //  $("#" + queryElementDivId) .find(".queryElement_" + role).html(html);
         return nodeDivId;
     };
-
 
     self.addNodeToQueryElementDivX = function (queryElementDivId, label, predicateLabel) {
         var nodeDivId = "nodeDiv_" + common.getRandomHexaId(5);
@@ -91,7 +91,9 @@ var KGquery_controlPanelResponsive = (function () {
         }
 
         html +=
-            "<div  class='KGquery_pathNodeDiv' id='" +nodeDivId + "'>" +
+            "<div  class='KGquery_pathNodeDiv' id='" +
+            nodeDivId +
+            "'>" +
             "<span style='font:bold 14px'>" +
             label +
             "&nbsp;&nbsp;" +

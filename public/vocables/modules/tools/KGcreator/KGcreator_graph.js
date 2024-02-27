@@ -267,32 +267,26 @@ var KGcreator_graph = (function () {
     };
 
     self.graphInterTablesColumnPredicates = function () {
-
-    /*    function getIntertablespaths(tableJoins) {
+        /*    function getIntertablespaths(tableJoins) {
             KGcreator.currentConfig.currentMappings[tableJoins.fromTable].tripleModels.forEach(function(triple) {
                 if (triple.s == tableJoins.fromColumn)
             })
         }*/
-
-
-
-
-
 
         var edges = [];
         var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
         var tableJoins = KGcreator.rawConfig.databaseSources[KGcreator.currentConfig.currentDataSource.name].tableJoins;
 
-        tableJoins.forEach(function(item){
-            var fromId=item.fromTable + "_" + item.fromColumn;
-            var toId=item.toTable + "_" + item.toColumn;
-            var edgeId = fromId + "_" +toId;
+        tableJoins.forEach(function (item) {
+            var fromId = item.fromTable + "_" + item.fromColumn;
+            var toId = item.toTable + "_" + item.toColumn;
+            var edgeId = fromId + "_" + toId;
             edges.push({
                 id: edgeId,
                 from: fromId,
-                to:toId,
-              //  label: Sparql_common.getLabelFromURI(triple.p),
+                to: toId,
+                //  label: Sparql_common.getLabelFromURI(triple.p),
                 color: "#000efd",
                 dashes: true,
 
@@ -301,7 +295,7 @@ var KGcreator_graph = (function () {
                 smooth: {
                     type: "continuous",
                 },
-              /*  arrows: {
+                /*  arrows: {
                     to: {
                         enabled: true,
                         type: "solid",
@@ -309,11 +303,10 @@ var KGcreator_graph = (function () {
                     },
                 },*/
             });
-
-        })
+        });
 
         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(edges);
-    }
+    };
     self.graphTablesJoins = function (dataSource) {
         var tableJoins = KGcreator.rawConfig.databaseSources[dataSource].tableJoins;
         if (!tableJoins) {

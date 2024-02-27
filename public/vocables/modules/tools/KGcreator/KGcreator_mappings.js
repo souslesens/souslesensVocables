@@ -548,9 +548,7 @@ tripleObj.objectIsSpecificUri = true;
         });
     };
 
-
-
-        self.showTransformDialog = function (node) {
+    self.showTransformDialog = function (node) {
         PopupMenuWidget.hidePopup();
         self.currentSlsvSource = KGcreator.currentSlsvSource;
         var table = node.data.id;

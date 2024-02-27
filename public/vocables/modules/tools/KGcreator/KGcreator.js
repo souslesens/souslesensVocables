@@ -283,7 +283,6 @@ var KGcreator = (function () {
                             },
                         };
 
-
                         items.showSampleData = {
                             label: "showSampleData",
                             action: function (_e) {

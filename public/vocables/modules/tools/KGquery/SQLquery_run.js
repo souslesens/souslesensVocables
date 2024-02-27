@@ -106,7 +106,7 @@ var SQLquery_run = (function () {
                 },
                 //format results
                 function (callbackSeries) {
-                   var tableData = self.queryResultToTable(data);
+                    var tableData = self.queryResultToTable(data);
                     callbackSeries();
                 },
             ],

@@ -24,10 +24,12 @@ var SourceSelectorWidget = (function () {
         var jsTreeOptions = options;
         jsTreeOptions.selectTreeNodeFn = selectTreeNodeFn;
         MainController.UI.showHideRightPanel("hide");
+      //  $("#sourceSelector_searchInput").remove()
         $("#" + targetDivId).load("snippets/sourceSelector.html", function (err) {
+
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
             $("#sourceSelector_searchInput").focus();
-            //  $("#sourceSelector_SearchSourceInput");
+          //  $("#sourceSelector_searchInput").unbind("keydown");
             $("#sourceSelector_validateButton").bind("click", function () {
                 okButtonValidateFn();
                 if (isDialog) {
@@ -165,7 +167,7 @@ var SourceSelectorWidget = (function () {
      */
     self.loadSourcesTreeDiv = function (treeDiv, jstreeOptions, callback) {
         if (!jstreeOptions) {
-            optiojstreeOptionsns = {};
+           jstreeOptions = {};
         }
 
         var treeData = self.getSourcesJstreeData();
@@ -184,6 +186,10 @@ var SourceSelectorWidget = (function () {
         if (!jstreeOptions.onOpenNodeFn) {
             jstreeOptions.onOpenNodeFn = self.defaultOpenNodeFn;
         }
+
+        $("#sourceSelector_searchInput").focus()
+
+
 
         $("#sourceSelector_searchInput").bind("keydown", null, function () {
             if (event.keyCode != 13 && event.keyCode != 9) {

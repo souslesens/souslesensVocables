@@ -62,6 +62,7 @@ var SparqlQuery_bot = (function () {
                             },
                             " Restrictions": { listWhiteBoardFilterType: { drawRestrictions: {} } },
                             "Inverse Restrictions": { listWhiteBoardFilterType: { drawInverseRestrictions: {} } },
+                            "Individuals": { setIndividualsTypeFilter:{ executeQuery: {} } },
                         },
                     },
                 },
@@ -70,10 +71,10 @@ var SparqlQuery_bot = (function () {
                 listVocabsFn: {
                     listPropertiesFn: {
                         _OR: {
-                            AnyPredicate: { listWhiteBoardFilterType: { executeQuery: {} } },
+                            "Any Predicate": { listWhiteBoardFilterType: { executeQuery: {} } },
 
                             //  _DEFAULT: {
-                            Predicate: {
+                            "Choose Predicate": {
                                 listPredicatePathsFn: {
                                     _OR: {
                                         empty: { listWhiteBoardFilterType: { executeQuery: {} } },
@@ -81,8 +82,9 @@ var SparqlQuery_bot = (function () {
                                     },
                                 },
                             },
-                            Restrictions: { listWhiteBoardFilterType: { drawRestrictions: {} } },
+                            "Restrictions": { listWhiteBoardFilterType: { drawRestrictions: {} } },
                             "Inverse Restrictions": { listWhiteBoardFilterType: { drawInverseRestrictions: {} } },
+                            "Individuals": { setIndividualsTypeFilter:{ executeQuery: {} } },
 
                             // },
                         },
@@ -282,6 +284,10 @@ var SparqlQuery_bot = (function () {
             self.params.sampleType = "Predicates";
             BotEngine.promptValue("enter sample size", "sampleSize", 500);
         },
+        setIndividualsTypeFilter:function(){
+            self.params.allindividuals=true
+            BotEngine.nextStep()
+        },
 
         drawRestrictions: function (inverse) {
             var options = {};
@@ -327,9 +333,11 @@ var SparqlQuery_bot = (function () {
             var individualsFilterRole = self.params.individualsFilterRole;
             var individualsFilterType = self.params.individualsFilterType;
             var individualsFilterValue = self.params.individualsFilterValue;
+            var allindividuals=self.params.allindividuals;
             var advancedFilter = self.params.advancedFilter || "";
             var annotationPropertyId = self.params.annotationPropertyId;
             var annotationValue = self.params.annotationValue;
+
             var sampleType = self.params.sampleType;
             var sampleSize = self.params.sampleSize;
             var OnlySubjects = false;
@@ -347,7 +355,11 @@ var SparqlQuery_bot = (function () {
             function getPathFilter() {
                 var filterPath = "";
                 if (!path) {
-                    if (currentClass && currentClass != "AnyClass") {
+
+                   if (currentClass && currentClass != "AnyClass") {
+                       if(  allindividuals){
+                           return "filter(?prop=rdf:type)"+Sparql_common.setFilter("object", currentClass, null, { useFilterKeyWord: 1 });
+                       }
                         filterPath = Sparql_common.setFilter("subject", currentClass, null, { useFilterKeyWord: 1 });
                     } else {
                         withImports = false;
@@ -378,6 +390,10 @@ var SparqlQuery_bot = (function () {
 
             function getIndividualsFilter() {
                 var filter = "";
+
+
+
+
                 if (!individualsFilterRole) {
                     return "";
                 }

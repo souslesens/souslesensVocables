@@ -266,6 +266,54 @@ var KGcreator_graph = (function () {
         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(edges);
     };
 
+    self.graphInterTablesColumnPredicates = function () {
+
+    /*    function getIntertablespaths(tableJoins) {
+            KGcreator.currentConfig.currentMappings[tableJoins.fromTable].tripleModels.forEach(function(triple) {
+                if (triple.s == tableJoins.fromColumn)
+            })
+        }*/
+
+
+
+
+
+
+        var edges = [];
+        var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+
+        var tableJoins = KGcreator.rawConfig.databaseSources[KGcreator.currentConfig.currentDataSource.name].tableJoins;
+
+        tableJoins.forEach(function(item){
+            var fromId=item.fromTable + "_" + item.fromColumn;
+            var toId=item.toTable + "_" + item.toColumn;
+            var edgeId = fromId + "_" +toId;
+            edges.push({
+                id: edgeId,
+                from: fromId,
+                to:toId,
+              //  label: Sparql_common.getLabelFromURI(triple.p),
+                color: "#000efd",
+                dashes: true,
+
+                physics: true,
+                width: 1,
+                smooth: {
+                    type: "continuous",
+                },
+              /*  arrows: {
+                    to: {
+                        enabled: true,
+                        type: "solid",
+                        scaleFactor: 0.5,
+                    },
+                },*/
+            });
+
+        })
+
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(edges);
+    }
     self.graphTablesJoins = function (dataSource) {
         var tableJoins = KGcreator.rawConfig.databaseSources[dataSource].tableJoins;
         if (!tableJoins) {
@@ -348,6 +396,7 @@ var KGcreator_graph = (function () {
         }
         self.graphColumnToClassPredicates(null);
         self.graphColumnToColumnPredicates(null);
+        self.graphInterTablesColumnPredicates();
         //  self.graphTablesJoins(KGcreator.currentConfig.currentDataSource.name);
     };
 

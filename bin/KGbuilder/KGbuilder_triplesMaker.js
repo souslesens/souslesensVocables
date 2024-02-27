@@ -203,7 +203,7 @@ var KGbuilder_triplesMaker = {
         return callback((lineError = e + " " + mapping.s));
       }
     }
-    if (typeof mapping.s === "string" && mapping.s.indexOf("http") == 0) {
+    else if (typeof mapping.s === "string" && mapping.s.indexOf("http") == 0) {
       subjectStr = "<" + mapping.s + ">";
     }
     else if (typeof mapping.s === "string" && mapping.s.match(/.+:.+/)) {
@@ -601,6 +601,10 @@ objectStr=objectStr.replace(/[\-_]/g,"")*/
         return callback(null, tableData);
       });
     }
-  }
+  },
+
+
+
+
 };
 module.exports = KGbuilder_triplesMaker;

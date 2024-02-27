@@ -45,7 +45,7 @@ var KGquery = (function () {
         KGquery_graph.drawVisjsModel("saved");
         SavedQueriesComponent.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
 
-        self.addQuerySet();
+      //  self.addQuerySet();
     };
 
     self.showSourcesDialog = function (forceDialog) {
@@ -110,7 +110,11 @@ var KGquery = (function () {
     self.addNodeToQueryElement = function (queryElement, node, role) {
         self.classeMap[node.id] = node;
         queryElement[role] = node;
+        if(role=="toNode"){
+         // to be finished
+        }
         var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId, role, node.data.label);
+
         KGquery_graph.outlineNode(node.id);
         node.data.queryElement = queryElement;
         self.divsMap[nodeDivId] = node;
@@ -236,8 +240,8 @@ return alert("missing target node in  path");
         self.message("searching...");
         $("#KGquery_waitImg").css("display", "block");
 
-        $("#KGquery_graphDiv").css("display", "none");
-        $("#KGquery_dataTableDiv").css("display", "block");
+     /*   $("#KGquery_graphDiv").css("display", "none");
+        $("#KGquery_dataTableDiv").css("display", "block");*/
 
         if (isVirtualSQLquery) {
             return SQLquery_filters.showFiltersDialog(self.querySets, self.currentSource);
@@ -479,6 +483,11 @@ self.querySets.sets.forEach(function (querySet) {
             tableData.push(line);
         });
 
+       $("#KGquery_dataTableDialogDiv").dialog("open");
+
+        $("#KGquery_dataTableDialogDiv").css("left","10px")
+        $("#KGquery_dataTableDiv").width("90vW")
+      //  $("#mainDialogDiv").html("<div id='KGquery_dataTableDiv' style='width:100vW;heigth:100vH'></div>")
         Export.showDataTable("KGquery_dataTableDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();
@@ -506,8 +515,8 @@ self.querySets.sets.forEach(function (querySet) {
         self.divsMap = {};
         self.currentQuerySet = self.addQuerySet();
         self.allPathEdges = {};
-        $("#KGquery_graphDiv").css("display", "flex");
-        $("#KGquery_dataTableDiv").css("display", "none");
+       /* $("#KGquery_graphDiv").css("display", "flex");
+        $("#KGquery_dataTableDiv").css("display", "none");*/
         if (!exceptSetQueries) {
             self.classeMap = {};
             self.SetQueries = [];
@@ -549,6 +558,7 @@ self.querySets.sets.forEach(function (querySet) {
     };
 
     self.switchRightPanel = function (forceGraph) {
+        return;
         var isGraphDisplayed = $("#KGquery_graphDiv").css("display");
         if (!forceGraph && isGraphDisplayed == "block") {
             $("#KGquery_graphDiv").css("display", "none");

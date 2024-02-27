@@ -18,6 +18,8 @@
 .KGquery_pathNodeDiv {
     display: flex;
     flex-direction: row;
+    margin-left: 15px;
+
 }
 
 .KGquery_classDiv {

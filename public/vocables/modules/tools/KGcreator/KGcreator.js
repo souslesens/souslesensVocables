@@ -275,13 +275,15 @@ var KGcreator = (function () {
                             },
                         };
 
-                        items.tranforms = {
-                            label: "tranforms",
+                        items.transforms = {
+                            label: "transforms",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_mappings.showTranformsDialog(node);
+                                KGcreator_mappings.showTransformDialog(node);
                             },
                         };
+
+
                         items.showSampleData = {
                             label: "showSampleData",
                             action: function (_e) {
@@ -354,7 +356,7 @@ var KGcreator = (function () {
                             label: "tranforms",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_mappings.showTranformsDialog(node);
+                                KGcreator_mappings.showTransformDialog(node);
                             },
                         };
                         // Table == Fichier pour les CSV donc on met le delete ici

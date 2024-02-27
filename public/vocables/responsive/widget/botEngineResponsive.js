@@ -2,14 +2,17 @@ var BotEngineResponsive = (function () {
     var self = {};
     self.firstLoad = true;
     self.OrReturnValues = [];
-    self.init = function (botModule, options, callback) {
+    self.lastFilterListStr = "";
+    self.init = function (botModule, initialWorkflow, options, callback) {
         if (!options) {
             options = {};
         }
         BotEngine.currentBot = botModule;
-        BotEngine.currentObj = botModule;
+        BotEngine.currentObj = initialWorkflow;
+        BotEngine.initialWorkflow = initialWorkflow;
         BotEngine.history = [];
         BotEngine.history.currentIndex = 0;
+        BotEngine.currentList = [];
 
         var divId;
         if (options.divId) {
@@ -32,6 +35,7 @@ var BotEngineResponsive = (function () {
                 $("#resetButtonBot").remove();
                 $("#previousButtonBot").remove();
             }
+            $("#botFilterProposalInput").on("keyup", self.filterList);
             self.firstLoad = false;
             $("#resetButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
             $("#previousButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
@@ -57,6 +61,7 @@ var BotEngineResponsive = (function () {
     };
 
     self.nextStep = function (returnValue, varToFill) {
+        $("#botFilterProposalDiv").hide();
         BotEngine.history.push(JSON.parse(JSON.stringify(BotEngine.currentObj)));
         BotEngine.history.currentIndex += 1;
         var keys = Object.keys(BotEngine.currentObj);
@@ -83,6 +88,9 @@ var BotEngineResponsive = (function () {
                 }
 
                 var fn = BotEngine.currentBot.functions[key0];
+
+                if (!fn && BotEngine.currentBot.functions["_DEFAULT"]) fn = BotEngine.currentBot.functions["_DEFAULT"];
+
                 if (!fn || typeof fn !== "function") {
                     return alert("function not defined :" + key0);
                 }
@@ -101,6 +109,7 @@ var BotEngineResponsive = (function () {
             }
         } else {
             var fn = BotEngine.currentBot.functions[key];
+            if (!fn && BotEngine.currentBot.functions["_DEFAULT"]) fn = BotEngine.currentBot.functions["_DEFAULT"];
             if (!fn || typeof fn !== "function") {
                 return alert("function not defined :" + key);
             }
@@ -203,13 +212,19 @@ var BotEngineResponsive = (function () {
         }
 
         $("#bot_resourcesProposalSelect").css("display", "block");
+        self.currentList = values;
+        if (values.length > 20) $("#botFilterProposalDiv").show();
         common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
-        $("#bot_resourcesProposalSelect").unbind("change");
-        $("#bot_resourcesProposalSelect").bind("change", function () {
+        $("#bot_resourcesProposalSelect").unbind("click");
+
+        $("#bot_resourcesProposalSelect").bind("click", function (evt) {
+            var x = evt;
+
             var text = $("#bot_resourcesProposalSelect option:selected").text();
             self.writeCompletedHtml(text + ":");
 
             var selectedValue = $(this).val();
+            if (evt.ctrlKey) return;
             if (callback) {
                 return callback(selectedValue);
             }
@@ -224,6 +239,26 @@ var BotEngineResponsive = (function () {
             self.nextStep(returnValue || selectedValue);
         });
     };
+
+    self.filterList = function (evt) {
+        //var str = $(this).val();
+        var str = $(evt.currentTarget).val();
+        if (!str && self.lastFilterListStr.length < str.length) return;
+        else {
+            common.fillSelectOptions("bot_resourcesProposalSelect", self.currentList, false, "label", "id");
+        }
+        if (str.length < 2 && self.lastFilterListStr.length < str.length) return;
+        self.lastFilterListStr = str;
+        str = str.toLowerCase();
+        var selection = [];
+        self.currentList.forEach(function (item) {
+            if (item.label.toLowerCase().indexOf(str) > -1) {
+                selection.push(item);
+            }
+        });
+        common.fillSelectOptions("bot_resourcesProposalSelect", selection, false, "label", "id");
+    };
+
     self.promptValue = function (message, varToFill, defaultValue, callback) {
         $("#bot_resourcesProposalSelect").hide();
         $("#botPromptInput").on("keyup", function (key) {

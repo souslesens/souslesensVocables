@@ -3,7 +3,7 @@ import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import ResponsiveUI from "../responsiveUI.js";
 import NodesInfosWidget from "../../modules/uiWidgets/nodeInfosWidget.js";
 import SearchWidget from "../../modules/uiWidgets/searchWidget.js";
-import NodeInfosWidgetResponsive from "../../responsive/widget/nodeInfosWidgetResponsive.js";
+
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
 import Lineage_createResource from "../../modules/tools/lineage/lineage_createResource.js";
 import PopupMenuWidget from "../../modules/uiWidgets/popupMenuWidget.js";
@@ -17,26 +17,30 @@ var Lineage_r = (function () {
     self.oldExportTable = null;
     self.MoreActionsShow = false;
     self.MoreOptionsShow = true;
-    self.init = function () {
+
+    self.onLoaded = function () {
+        self.controller = Lineage_whiteboard;
         PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
         SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
         //To Table
         self.oldExportTable = Export.exportTreeToDataTable;
         Export.exportTreeToDataTable = self.ExportTableDialog;
         //Nodes Infos overcharge
-        ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
+        //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
         //SHowHideButtons overcharge
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
         //AddEdge overcharge
-        self.oldAddEdgeDialog = Lineage_blend.graphModification.showAddEdgeFromGraphDialog;
-        Lineage_blend.graphModification.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
+        self.oldAddEdgeDialog = Lineage_createRelation.showAddEdgeFromGraphDialog;
+        Lineage_createRelation.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
         ResponsiveUI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").load("./responsive/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
     };
-    self.quit = function () {
+    self.unload = function () {
         $("#graphDiv").empty();
+        $("#lateralPanelDiv").off();
+        $("#lateralPanelDiv").css("width", "435px");
     };
     self.loadSources = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
@@ -62,43 +66,58 @@ var Lineage_r = (function () {
         });
     };
     self.initWhiteboardTab = function () {
-        $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {
-            $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
-            $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
-            Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
-            self.hideShowMoreActions("hide");
-            ResponsiveUI.PopUpOnHoverButtons();
-            $("#lateralPanelDiv").resizable({
-                maxWidth: 495,
-                minWidth: 150,
-                stop: function (event, ui) {
-                    ResponsiveUI.resetWindowHeight();
-                },
+        if ($("#tabs_whiteboard").children().length == 0) {
+            $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {
+                $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
+                $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
+                Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
+                self.hideShowMoreActions("hide");
+                ResponsiveUI.PopUpOnHoverButtons();
+                $("#lateralPanelDiv").resizable({
+                    maxWidth: 435,
+                    minWidth: 150,
+                    stop: function (event, ui) {
+                        ResponsiveUI.resetWindowHeight();
+                    },
+                });
             });
-        });
+        }
     };
 
     self.initClassesTab = function () {
-        $("#tabs_classes").load("./responsive/lineage/html/classesPanel.html", function (s) {
-            SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
-            $("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
-                SearchWidget.init();
-                $("#GenericTools_searchInAllSources").prop("checked", false);
-                $("#Lineage_MoreClassesOptions").hide();
-                SearchWidget.showTopConcepts();
+        if ($("#tabs_classes").children().length == 0) {
+            $("#tabs_classes").load("./responsive/lineage/html/classesPanel.html", function (s) {
+                SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
+                $("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
+                    SearchWidget.init();
+                    $("#GenericTools_searchInAllSources").prop("checked", false);
+                    $("#Lineage_MoreClassesOptions").hide();
+                    SearchWidget.showTopConcepts();
+                    $("#lateralPanelDiv").resizable({
+                        maxWidth: 435,
+                        minWidth: 150,
+                        stop: function (event, ui) {
+                            ResponsiveUI.resetWindowHeight();
+                        },
+                    });
+                });
             });
-        });
+        }
     };
     self.initPropertiesTab = function () {
-        $("#tabs_properties").load("./responsive/lineage/html/propertiesPanel.html", function (s) {
-            Lineage_r.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
-            Lineage_properties.searchTermInSources();
-        });
+        if ($("#tabs_properties").children().length == 0) {
+            $("#tabs_properties").load("./responsive/lineage/html/propertiesPanel.html", function (s) {
+                Lineage_r.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
+                Lineage_properties.searchTermInSources();
+            });
+        }
     };
     self.initContainersTab = function () {
-        $("#tabs_containers").load("./responsive/lineage/html/containersPanel.html", function (s) {
-            Lineage_containers.search();
-        });
+        if ($("#tabs_containers").children().length == 0) {
+            $("#tabs_containers").load("./responsive/lineage/html/containersPanel.html", function (s) {
+                Lineage_containers.search();
+            });
+        }
     };
 
     self.showHideEditButtons = function (source, hide) {
@@ -148,7 +167,7 @@ var Lineage_r = (function () {
     self.showQueryDialog = function () {
         //ResponsiveUI.openMainDialogDivForDialogs();
         $("#mainDialogDiv").parent().css("top", "10%");
-        $("#mainDialogDiv").parent().css("left", "20%");
+        //  $("#mainDialogDiv").parent().css("left", "20%");
         $("#mainDialogDiv")
             .parent()
             .show("fast", function () {
@@ -168,7 +187,7 @@ var Lineage_r = (function () {
     self.NodesInfosResponsiveDialog = function (sourceLabel, divId, options, callback) {
         ResponsiveUI.openDialogDiv(divId);
         $("#mainDialogDiv").parent().css("top", "5%");
-        $("#mainDialogDiv").parent().css("left", "35%");
+        //  $("#mainDialogDiv").parent().css("left", "35%");
         $("#" + divId)
             .parent()
             .show("fast", function () {
@@ -176,8 +195,8 @@ var Lineage_r = (function () {
             });
     };
     self.responsiveAddEdgeDialog = function (edgeData, callback) {
-        ResponsiveUI.openDialogDiv("LineagePopup");
-        $("#LineagePopup")
+        ResponsiveUI.openDialogDiv("smallDialogDiv");
+        $("#smallDialogDiv")
             .parent()
             .show("fast", function () {
                 self.oldAddEdgeDialog(edgeData, function () {

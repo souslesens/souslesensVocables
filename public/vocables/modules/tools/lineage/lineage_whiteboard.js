@@ -1,5 +1,4 @@
 import common from "../../shared/common.js";
-import KGcreator from "../KGcreator/KGcreator.js";
 import Lineage_linkedData_mappings from "./linkedData/lineage_linkedData_mappings.js";
 import Lineage_graphTraversal from "./lineage_graphTraversal.js";
 import Lineage_selection from "./lineage_selection.js";
@@ -15,13 +14,10 @@ import MainController from "../../shared/mainController.js";
 import authentication from "../../shared/authentification.js";
 import Clipboard from "../../shared/clipboard.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
-import OntologyModels from "../../shared/ontologyModels.js";
 import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Lineage_createResource from "./lineage_createResource.js";
-import CreateResource_bot from "../../bots/createResource_bot.js";
-import GraphDisplayLegend from "../../shared/graphDisplayLegend.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -251,6 +247,7 @@ var Lineage_whiteboard = (function () {
         self.lineageVisjsGraph.clearGraph();
         self.queriesStack = [];
         LegendWidget.clearLegend();
+        Lineage_decoration.initLegend();
 
         if (clearTree) {
             $("#lineage_drawnSources").html("");
@@ -369,7 +366,9 @@ var Lineage_whiteboard = (function () {
                 },
             ],
             function (err) {
-                if (callback) return callback(err);
+                if (callback) {
+                    return callback(err);
+                }
                 if (err) {
                     return alert(err);
                 }
@@ -484,13 +483,9 @@ var Lineage_whiteboard = (function () {
                     if (err) {
                         return callbackEach(err);
                     }
-                    if (result.length == 0) {
-                        MainController.UI.message("No result ", true);
-                        return callbackEach();
-                    }
 
-                    if (options.output != "table") {
-                        result = Lineage_whiteboard.truncateResultToVisGraphLimit(result);
+                    if (!Lineage_whiteboard.isResultAcceptable(result)) {
+                        return callback();
                     }
 
                     var ids = [];
@@ -566,16 +561,16 @@ var Lineage_whiteboard = (function () {
         );
     };
 
-    self.truncateResultToVisGraphLimit = function (result) {
+    self.isResultAcceptable = function (result) {
         if (result.length > self.showLimit) {
-            var ok = confirm("Too may nodes (" + result.length + ")  .Only  " + Lineage_whiteboard.showLimit + " will be displayed", true);
-            if (ok) {
-                result = result.slice(0, self.showLimit);
-            } else {
-                result = [];
-            }
+            alert("Too may nodes (" + result.length + "). Use a filering Query instead ");
+            return false;
         }
-        return result;
+        if (result.length == 0) {
+            MainController.UI.message("no data found", true);
+            return false;
+        }
+        return true;
     };
 
     self.initWhiteBoard = function (force) {
@@ -634,9 +629,9 @@ var Lineage_whiteboard = (function () {
                             Lineage_sources.activeSource = node.data.source;
                         }
                         if (true) {
+                            Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
                             //!self.lineageVisjsGraph.skipColorGraphNodesByType) {
-                            var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
-                            Lineage_decoration.decorateNodeAndDrawLegend(nodes);
+                            //  var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                         }
                     }
                 },
@@ -698,9 +693,10 @@ var Lineage_whiteboard = (function () {
                         });
                     }
                 },
+                /*
                 addNode: function (nodeData, callback) {
-                    /*  CreateResource_bot.start()
-                    return;*/
+                     CreateResource_bot.start()
+                    return;
                     Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
                         if (err) {
                             return callback(err.responseText);
@@ -708,6 +704,7 @@ var Lineage_whiteboard = (function () {
                         return null;
                     });
                 },
+                */
             };
             if (false) {
                 options.visjsOptions.interaction = {
@@ -727,13 +724,14 @@ var Lineage_whiteboard = (function () {
         self.lineageVisjsGraph.draw(function () {
             MainController.UI.message("", true);
 
-            Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
+            //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
+
+            if (self.lineageVisjsGraph.isGraphNotEmpty()) {
+                Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
+                //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
+            }
         });
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-
-        if (self.lineageVisjsGraph.isGraphNotEmpty()) {
-            GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
-        }
 
         return;
     };
@@ -1302,7 +1300,7 @@ var Lineage_whiteboard = (function () {
 
                     var shape = self.defaultShape;
 
-                    result.forEach(function (/** @type {{ broader1: { value: string; }; broader1Label: { value: any; }; concept: { value: string; }; }} */ item) {
+                    result.forEach(function (item) {
                         if (item.broader1) {
                             let nodeSource = item.broader1Graph ? Sparql_common.getSourceFromGraphUri(item.broader1Graph.value, source) : source;
                             let nodeColor = self.getSourceColor(nodeSource);
@@ -1988,176 +1986,196 @@ var Lineage_whiteboard = (function () {
 
         options.filter = (options.filter || "") + " " + filter;
 
-        Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (options.output == "graph") {
-                result = Lineage_whiteboard.truncateResultToVisGraphLimit(result);
-            }
-            Sparql_common.setSparqlResultPropertiesLabels(source, result, "prop", function (err, result2) {
-                if (err) {
-                    return callback(err);
-                }
-
-                var visjsData = { nodes: [], edges: [] };
-                var existingNodes = options.output == "table" ? {} : Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-                var color = Lineage_whiteboard.getSourceColor(source);
-
-                var toNodesMap = [];
-                if (result2.length == 0) {
-                    if (callback) {
-                        return callback("no data found");
-                    }
-                    return MainController.UI.message("no data found", true);
-                }
-
-                result2.forEach(function (item) {
-                    if (!existingNodes[item.subject.value]) {
-                        existingNodes[item.subject.value] = 1;
-
-                        var label = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
-                        var shape = Lineage_whiteboard.defaultShape;
-                        var size = Lineage_whiteboard.defaultShapeSize;
-
-                        var type = item.subjectType ? item.subjectType.value : "?";
-                        if (type.indexOf("NamedIndividual") > -1) {
-                            shape = Lineage_whiteboard.namedIndividualShape;
+        var data = [];
+        async.series(
+            [
+                function (callbackSeries) {
+                    if (!options.getFilteredTriples2) return callbackSeries();
+                    Sparql_OWL.getFilteredTriples2(source, subjectIds, properties, objectIds, options, function (err, result) {
+                        //Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function(err, result) {
+                        if (err) {
+                            return callbackSeries(err);
                         }
-
-                        if (item.subject.type == "bnode") {
-                            label = "";
-                            shape = "hexagon";
-                            color = "#EEE";
-                            size = 2;
+                        if (!Lineage_whiteboard.isResultAcceptable(result)) {
+                            return callbackSeries("no data found");
                         }
-
-                        var predicateUri = options.inversePredicate ? null : item.prop.value;
-                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, label, predicateUri, { shape: shape }));
-                    }
-                    if (options.skipLiterals && item.object.type && item.object.type.indexOf("literal") > -1) {
-                        return;
-                    }
-                    if (!existingNodes[item.object.value]) {
-                        existingNodes[item.object.value] = 1;
-                        var label = "";
-                        if (item.objectValue) {
-                            label = item.objectValue.value.replace(/T[\d:]*Z/, "");
-                        } else {
-                            label = item.objectLabel ? item.objectLabel.value : Sparql_common.getLabelFromURI(item.object.value);
-                        }
-                        var shape = Lineage_whiteboard.defaultShape;
-
-                        var type = item.objectType ? item.objectType.value : "?";
-
-                        var size = Lineage_whiteboard.defaultShapeSize;
-                        if (type.indexOf("NamedIndividual") > -1) {
-                            shape = Lineage_whiteboard.namedIndividualShape;
-                        }
-
-                        if (item.object.type == "bnode") {
-                            label = "";
-                            shape = "hexagon";
-                            color = "#EEE";
-                            size = 2;
-                        }
-
-                        var font = null;
-                        if (item.object.type == "literal") {
-                            shape = "text";
-                            if (label.length > Config.whiteBoardMaxLabelLength) {
-                                label = label.substring(0, Config.whiteBoardMaxLabelLength) + "...";
-                            }
-
-                            font = "12px arial #3c8fe1";
-                        }
-
-                        var predicateUri = options.inversePredicate ? item.prop.value : null;
-
-                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.object.value, label, predicateUri, { shape: shape }));
-
-                        /*   visjsData.nodes.push({
-                id: item.object.value,
-                label: label,
-                shape: shape,
-                size: size,
-                color: color,
-                font: font,
-                data: {
-                    source: source,
-                    id: item.object.value,
-                    label: item.objectLabel.value,
-                    type: item.object.type,
+                        data = result;
+                        callbackSeries();
+                    });
                 },
-            });*/
-                    }
-                    var edgeId = item.subject.value + "_" + item.prop.value + "_" + item.object.value;
-                    if (!existingNodes[edgeId]) {
-                        existingNodes[edgeId] = 1;
+                function (callbackSeries) {
+                    if (options.getFilteredTriples2) return callbackSeries();
+                    Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function (err, result) {
+                        //Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function(err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        if (!Lineage_whiteboard.isResultAcceptable(result)) {
+                            return callbackSeries("no data found");
+                        }
+                        data = result;
+                        callbackSeries();
+                    });
+                },
 
-                        //specific case of equivalentClass and sameAs
-                        {
-                            var nodeSource = source;
-                            var prop = item.prop.value;
-                            if (
-                                options.includeSources &&
-                                options.includeSources.length > 0 &&
-                                (prop == "http://www.w3.org/2002/07/owl#sameAs" || prop == "http://www.w3.org/2002/07/owl#equivalentClass")
-                            ) {
-                                nodeSource = options.includeSources[0];
+                function (callbackSeries) {
+                    Sparql_common.setSparqlResultPropertiesLabels(source, data, "prop", function (err, result2) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    var visjsData = { nodes: [], edges: [] };
+                    var existingNodes = options.output == "table" ? {} : Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+                    var color = Lineage_whiteboard.getSourceColor(source);
+
+                    var toNodesMap = [];
+                    if (data.length == 0) {
+                        if (callback) {
+                            return callback("no data found");
+                        }
+                        return MainController.UI.message("no data found", true);
+                    }
+
+                    data.forEach(function (item) {
+                        if (!existingNodes[item.subject.value]) {
+                            existingNodes[item.subject.value] = 1;
+
+                            var label = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
+                            var shape = Lineage_whiteboard.defaultShape;
+                            var size = Lineage_whiteboard.defaultShapeSize;
+
+                            var type = item.subjectType ? item.subjectType.value : "?";
+                            if (type.indexOf("NamedIndividual") > -1) {
+                                shape = Lineage_whiteboard.namedIndividualShape;
+                            }
+
+                            if (item.subject.type == "bnode") {
+                                label = "";
+                                shape = "hexagon";
+                                color = "#EEE";
+                                size = 2;
+                            }
+
+                            var predicateUri = options.inversePredicate ? null : item.prop.value;
+                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, label, predicateUri, { shape: shape }));
+                        }
+                        if (options.skipLiterals && item.object.type && item.object.type.indexOf("literal") > -1) {
+                            return;
+                        }
+                        if (!options.OnlySubjects && !existingNodes[item.object.value]) {
+                            existingNodes[item.object.value] = 1;
+                            var label = "";
+                            if (item.objectValue) {
+                                label = item.objectValue.value.replace(/T[\d:]*Z/, "");
+                            } else {
+                                label = item.objectLabel ? item.objectLabel.value : Sparql_common.getLabelFromURI(item.object.value);
+                            }
+                            var shape = Lineage_whiteboard.defaultShape;
+
+                            var type = item.objectType ? item.objectType.value : "?";
+
+                            var size = Lineage_whiteboard.defaultShapeSize;
+                            if (type.indexOf("NamedIndividual") > -1) {
+                                shape = Lineage_whiteboard.namedIndividualShape;
+                            }
+
+                            if (item.object.type == "bnode") {
+                                label = "";
+                                shape = "hexagon";
+                                color = "#EEE";
+                                size = 2;
+                            }
+
+                            var font = null;
+                            if (item.object.type == "literal") {
+                                shape = "text";
+                                if (label.length > Config.whiteBoardMaxLabelLength) {
+                                    label = label.substring(0, Config.whiteBoardMaxLabelLength) + "...";
+                                }
+
+                                font = "12px arial #3c8fe1";
+                            }
+
+                            var predicateUri = options.inversePredicate ? item.prop.value : null;
+
+                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.object.value, label, predicateUri, { shape: shape }));
+                        }
+                        if (!options.OnlySubjects) {
+                            var edgeId = item.subject.value + "_" + item.prop.value + "_" + item.object.value;
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1;
+
+                                //specific case of equivalentClass and sameAs
+                                {
+                                    var nodeSource = source;
+                                    var prop = item.prop.value;
+                                    if (
+                                        options.includeSources &&
+                                        options.includeSources.length > 0 &&
+                                        (prop == "http://www.w3.org/2002/07/owl#sameAs" || prop == "http://www.w3.org/2002/07/owl#equivalentClass")
+                                    ) {
+                                        nodeSource = options.includeSources[0];
+                                    }
+                                }
+                                var dashes = false;
+                                var edgeColor = options.edgesColor || Lineage_whiteboard.defaultPredicateEdgeColor;
+                                if (item.object.type.indexOf("literal") > -1) {
+                                    edgeColor = "#3c8fe1";
+                                    dashes = [6, 2, 3];
+                                }
+                                var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
+
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: item.subject.value,
+                                    to: item.object.value,
+                                    data: {
+                                        id: edgeId,
+                                        type: "ObjectProperty",
+                                        propLabel: propLabel,
+                                        from: item.subject.value,
+                                        to: item.object.value,
+                                        prop: item.prop.value,
+                                        source: nodeSource,
+                                    },
+                                    label: propLabel,
+                                    font: { edgeColor },
+                                    arrows: {
+                                        to: {
+                                            enabled: true,
+                                            type: "solid",
+                                            scaleFactor: 0.5,
+                                        },
+                                    },
+                                    dashes: dashes,
+                                    color: edgeColor,
+                                });
                             }
                         }
-                        var dashes = false;
-                        var edgeColor = options.edgesColor || Lineage_whiteboard.defaultPredicateEdgeColor;
-                        if (item.object.type.indexOf("literal") > -1) {
-                            edgeColor = "#3c8fe1";
-                            dashes = [6, 2, 3];
-                        }
+                    });
 
-                        visjsData.edges.push({
-                            id: edgeId,
-                            from: item.subject.value,
-                            to: item.object.value,
-                            data: {
-                                id: edgeId,
-                                type: "ObjectProperty",
-                                propLabel: item.propLabel.value,
-                                from: item.subject.value,
-                                to: item.object.value,
-                                prop: item.prop.value,
-                                source: nodeSource,
-                            },
-                            label: item.propLabel.value,
-                            font: { edgeColor },
-                            arrows: {
-                                to: {
-                                    enabled: true,
-                                    type: "solid",
-                                    scaleFactor: 0.5,
-                                },
-                            },
-                            dashes: dashes,
-                            color: edgeColor,
-                        });
+                    if (callbackSeries && options.returnVisjsData) {
+                        return callbackSeries(null, visjsData);
                     }
-                });
+                    if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                        Lineage_decoration.drawLegend("individuals");
+                    } else {
+                        Lineage_whiteboard.drawNewGraph(visjsData, null, { legendType: "individualClasses" });
+                    }
 
-                if (callback && options.returnVisjsData) {
-                    return callback(null, visjsData);
-                }
-                if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                    Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
-                } else {
-                    Lineage_whiteboard.drawNewGraph(visjsData);
-                }
-
-                $("#waitImg").css("display", "none");
-                if (callback) {
-                    return callback(null, visjsData);
-                }
-            });
-        });
+                    $("#waitImg").css("display", "none");
+                    if (callbackSeries) {
+                        return callbackSeries(null, visjsData);
+                    }
+                },
+            ],
+            function (err) {}
+        );
     };
 
     self.reSpatializeGraph = function (mode) {
@@ -2249,8 +2267,8 @@ var Lineage_whiteboard = (function () {
                         return callback(null, result);
                     }
                 }
-                if (options.output != "table") {
-                    result = Lineage_whiteboard.truncateResultToVisGraphLimit(result);
+                if (!Lineage_whiteboard.isResultAcceptable(result)) {
+                    return callback("no data found");
                 }
                 var visjsData = { nodes: [], edges: [] };
                 var existingNodes = options.output == "table" ? {} : self.lineageVisjsGraph.getExistingIdsMap();
@@ -2290,7 +2308,7 @@ restrictionSource = Config.predicatesSource;
 
                     if (item.propLabel.value == "sameAs") {
                         shape = "hexagon";
-                        color = "#f5ef39";
+                        color = "#fdac00";
                     }
                     var label = item.valueLabel.value;
                     if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
@@ -2342,7 +2360,7 @@ restrictionSource = Config.predicatesSource;
                                         scaleFactor: 0.5,
                                     },
                                 },
-                                dashes: true,
+                                // dashes: true,
                                 color: options.edgesColor || Lineage_whiteboard.restrictionColor,
                                 physics: physics,
                             });
@@ -2557,7 +2575,8 @@ restrictionSource = Config.predicatesSource;
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawParents();"> Parents</span>' +
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
-                '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +
+                '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' +
+                // '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +
                 //  "   <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('direct',null,'Graph');\">Relations</span>" +
                 //   "    <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('inverse',null,'Graph');\">Inverse Rels</span>" +
                 //  "    <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.graphNodeNeighborhood('all');\">ObjectProperties</span>" +
@@ -2805,7 +2824,7 @@ restrictionSource = Config.predicatesSource;
             Lineage_sources.registerSource(source);
 
             if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
-                self.drawNewGraph(visjsData);
+                self.drawNewGraph(visjsData, null, options);
             } else {
                 self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                 self.lineageVisjsGraph.data.edges.add(visjsData.edges);
@@ -3052,7 +3071,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (edge.data.bNodeId) {
                 //restriction
                 if (confirm("delete selected relation ?")) {
-                    Lineage_blend.deleteRestriction(edge.data.source, edge, function (err, result) {
+                    Lineage_createRelation.deleteRestriction(edge.data.source, edge, function (err, result) {
                         if (err) {
                             return alert(err.responseText);
                         }
@@ -3082,7 +3101,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 if (!subPropertyLabel) {
                     return;
                 }
-                Lineage_blend.createSubProperty(Lineage_sources.activeSource, edge.data.propertyId, subPropertyLabel, function (err, result) {
+                Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, edge.data.propertyId, subPropertyLabel, function (err, result) {
                     if (err) {
                         return alert(err);
                     }
@@ -3093,22 +3112,22 @@ self.zoomGraphOnNode(node.data[0].id, false);
                     var sourceNode = { id: sourceVisjsNode.data.id, source: sourceVisjsNode.data.source };
                     var targetNode = { id: targetVisjsNode.data.id, source: targetVisjsNode.data.source };
 
-                    if (!Lineage_blend.currentSpecificObjectPropertiesMap) {
-                        Lineage_blend.currentSpecificObjectPropertiesMap = {};
+                    if (!Lineage_createRelation.currentSpecificObjectPropertiesMap) {
+                        Lineage_createRelation.currentSpecificObjectPropertiesMap = {};
                     }
-                    if (!Lineage_blend.currentSpecificObjectPropertiesMap[edge.data.propertyId]) {
-                        Lineage_blend.currentSpecificObjectPropertiesMap[edge.data.propertyId] = [];
+                    if (!Lineage_createRelation.currentSpecificObjectPropertiesMap[edge.data.propertyId]) {
+                        Lineage_createRelation.currentSpecificObjectPropertiesMap[edge.data.propertyId] = [];
                     }
-                    Lineage_blend.currentSpecificObjectPropertiesMap[item.superProp.value].push({
+                    Lineage_createRelation.currentSpecificObjectPropertiesMap[item.superProp.value].push({
                         id: subPropertyId,
                         label: subPropertyLabel,
                     });
 
-                    Lineage_blend.createRelation(Lineage_sources.activeSource, subPropertyId, sourceNode, targetNode, true, true, {}, function (err, _result) {
+                    Lineage_createRelation.createRelation(Lineage_sources.activeSource, subPropertyId, sourceNode, targetNode, true, true, {}, function (err, _result) {
                         if (err) {
                             alert(err);
                         }
-                        Lineage_blend.deleteRestriction(Lineage_sources.activeSource, self.currentGraphEdge, function (err) {
+                        Lineage_createRelation.deleteRestriction(Lineage_sources.activeSource, self.currentGraphEdge, function (err) {
                             if (err) {
                                 alert(err);
                             }

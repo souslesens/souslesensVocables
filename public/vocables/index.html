@@ -55,7 +55,6 @@
         <script type="module" src="modules/tools/lineage/lineage_sources.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_properties.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_common.js"></script>
-        <script type="module" src="modules/tools/lineage/lineage_blend.js"></script>
 
         <script type="module" src="modules/tools/lineage/lineage_dictionary.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_combine.js"></script>
@@ -123,20 +122,14 @@
         <script type="module" src="modules/shared/authentification.js"></script>
         <script type="module" src="modules/tools/myDashboard.js"></script>
 
-        <script type="module">
-            import { allTools, loadToolsAndPlugins } from "./config/tools.js";
-
-            try {
-                await loadToolsAndPlugins();
-            } catch (error) {
-                console.error("Failed to load tools and plugins", error);
-            }
-        </script>
+        <script type="module"></script>
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_SKOS.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_OWL.js"></script>
+        <script type="module" src="modules/bots/addPredicate_bot.js"></script>
+        <script type="module" src="modules/bots/nodeRelations_bot.js"></script>
         <!--   <script type="module" src="modules/sparqlProxies/sparql_INDIVIDUALS.js"></script>-->
 
         <script type="module" src="modules/sparqlProxies/sparql_common.js"></script>
@@ -155,6 +148,9 @@
 
         <script type="module" src="modules/tools/lineage/lineage_similars.js"></script>
         <script type="module" src="modules/shared/graphLoader.js"></script>
+
+        <script type="module" src="modules/tools/fabricjs/tagsGeometry.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
         <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
@@ -202,9 +198,28 @@
 
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 
+        <!----------------------------RESPONSIVE UI--------------------->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+
+        <link rel="stylesheet" href="./responsive/index.css" />
+
+        <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
+        <script src="./responsive/less.min.js"></script>
+        <!--<script src="https://cdn.jsdelivr.net/npm/less" ></script>-->
+        <script type="module" src="./responsive/responsiveUI.js"></script>
+        <script type="module" src="./responsive/lineage/lineage_r.js"></script>
+
+        <script type="module" src="./responsive/widget/botEngineResponsive.js"></script>
+        <script type="module" src="./responsive/KGquery/KGquery_r.js"></script>
+        <script type="module" src="./responsive/KGcreator/Kgcreator_r.js"></script>
+        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
+
         <script type="module">
             import MainController from "./modules/shared/mainController.js";
             import authentication from "./modules/shared/authentification.js";
+            import { allTools, loadToolsAndPlugins } from "./config/tools.js";
 
             var leftPanelWidth = 400;
             var rightPanelWidth = 400;
@@ -225,11 +240,6 @@
                 async.series(
                     [
                         function (callBackSeries) {
-                            authentication.init(function (err, result) {
-                                callBackSeries(err);
-                            });
-                        },
-                        function (callBackSeries) {
                             MainController.initConfig(function (err) {
                                 // sentry/glitchtip
                                 if (Config.sentryDsnJsFront) {
@@ -242,10 +252,32 @@
                                 callBackSeries(err);
                             });
                         },
+
+                        function (callBackSeries) {
+                            ResponsiveUI.setSlsvCssClasses(function () {
+                                callBackSeries();
+                            });
+                        },
+
+                        function (callBackSeries) {
+                            authentication.init(function (err, result) {
+                                callBackSeries(err);
+                            });
+                        },
                         function (callBackSeries) {
                             MainController.onAfterLogin(function (err) {
                                 callBackSeries(err);
                             });
+                        },
+
+                        function (callbackSeries) {
+                            try {
+                                loadToolsAndPlugins(function () {
+                                    callbackSeries();
+                                });
+                            } catch (error) {
+                                console.error("Failed to load tools and plugins", error);
+                            }
                         },
                     ],
                     function (err) {
@@ -253,10 +285,11 @@
                         h = $(document).height() - 30;
 
                         h = Math.min(h, 1000);
-
-                        $("#graphDiv").width(w);
-                        MainController.UI.initialGraphDivWitdh = w;
-                        $("#graphDiv").height(h - 50);
+                        /*
+                    $("#graphDiv").width(w);
+                    MainController.UI.initialGraphDivWitdh = w;
+                    $("#graphDiv").height(h - 50);
+                    */
 
                         $("#accordion").accordion({
                             heightStyle: "fill",
@@ -270,8 +303,7 @@
                             width: $(document).width() * 0.85,
                             modal: false,
                             close: function (event, ui) {
-                                $("#deleteButton").remove();
-                                $("#addPredicateButton").remove();
+                                window.scrollTo(0, 0);
                             },
                         });
                         $("#mainDialogDiv2").dialog({
@@ -317,65 +349,11 @@
                 );
             });
         </script>
-
-        <!----------------------------RESPONSIVE UI--------------------->
-
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
-
-        <link rel="stylesheet" href="./responsive/index.css" />
-
-        <!-- <script>
-            less = {
-                env: "development",
-                async: false,
-                fileAsync: false,
-                poll: 1000,
-                functions: {},
-                dumpLineNumbers: "comments",
-                relativeUrls: false,
-                rootpath: ":/a.com/",
-            };
-        </script>-->
-
-        <script type="module" src="./responsive/responsiveUI.js"></script>
-        <script type="module" src="./responsive/lineage/lineage_r.js"></script>
-        <script type="module" src="./responsive/widget/nodeInfosWidgetResponsive.js"></script>
-        <script type="module" src="./responsive/widget/botEngineResponsive.js"></script>
-        <script type="module" src="./responsive/KGquery/KGquery_r.js"></script>
-        <script type="module" src="./responsive/KGcreator/Kgcreator_r.js"></script>
-        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
-        <!--<link rel="stylesheet" href="./slsv-gray.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-darkGray.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-yellowPurple.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-eco.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-complementaryKGA.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-plant.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-blue.css" />-->
-        <link rel="stylesheet" href="./responsive/css/lineage/slsv-bluePurple.css" />
-        <link rel="stylesheet" href="./responsive/css/widget/sourceSelector/Sourceselector-bluePurple.css" />
-        <link rel="stylesheet" href="./responsive/css/widget/PopUp/PopUp-bluePurple.css" />
-        <link rel="stylesheet" href="./responsive/css/widget/NodeInfos/NodesInfos-bluePurple.css" />
-        <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
-        <script src="./responsive/less.min.js"></script>
-        <script>
-            less.pageLoadFinished.then(function () {
-                setTimeout(() => {
-                    ResponsiveUI.changeTheme(Config.theme.defaultTheme);
-                    if (Config.theme.selector) {
-                        $("#theme-selector-btn").show();
-                    }
-                }, "500");
-            });
-        </script>
-
-        <!--<link rel="stylesheet" href="./slsv-cartography1.css" />-->
-        <!--<link rel="stylesheet" href="./slsv-cartography2.css" />-->
     </head>
 
     <body>
-        <header class="w3-container">
-            <div id="MenuBar" class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4; width: 100%; height: 90px">
+        <header class="w3-container" id="mainOuterDiv">
+            <div id="MenuBar" class="w3-bar w3-medium slsv-bg-intense" style="z-index: 4; width: 100%">
                 <div id="MenuBarHeader" class="left-border-main-dialog-div w3-display-container" style="height: 20px">
                     <div>
                         <table>
@@ -388,12 +366,14 @@
                     <button class="w3-display-bottommiddle slsv-invisible-button" onclick="ResponsiveUI.hideShowMenuBar(this)">
                         <img src="./icons/CommonIcons/ArrowMenuBar.png" />
                     </button>
-                    <div class="w3-display-topright">
+
+                    <div id="SouslesensVocables_Github" class="w3-display-topright" style="font-size: 12px">
                         <a target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"
                             ><span style="color: Black"><i class="fa-lg fab fa-github"></i></span
                         ></a>
                         SouslesensVocables <span id="souslesensversion"></span>
                     </div>
+                    <!-- <button onclick="TagsGeometry.showDialog()">tagsGeo</button>-->
                 </div>
                 <div id="MenuBarFooter">
                     <button class="slsvLogo-icon slsv-invisible-button w3-left" style="height: 57px; width: 80px"></button>
@@ -403,7 +383,14 @@
                                 <button id="selectedTool" class="slsv-invisible-button" style="padding: 0px; margin-left: 10px">Tool</button>
                                 <button class="arrow-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-left: 3px; margin-right: 10px"></button>
                                 <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                                    <select id="toolsSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto"></select>
+                                    <!-- <select id="toolsSelect" style="min-width:150px" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto"></select>-->
+                                    <div
+                                        id="toolsSelect"
+                                        style="min-width: 150px; display: flex; flex-direction: column; overflow: auto; max-height: 300px"
+                                        class="Lineage_PopUpStyle"
+                                        size="8"
+                                        onclick="ResponsiveUI.onToolSelect(null,event)"
+                                    ></div>
                                 </div>
                             </div>
 
@@ -413,18 +400,18 @@
 
                     <!--<div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
 
-                </div>-->
+        </div>-->
 
                     <!--
-                <div class="w3-bar-item slsv-bg-intense">
-                    <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>
-                </div>
-                -->
+        <div class="w3-bar-item slsv-bg-intense">
+            <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>
+        </div>
+        -->
 
                     <div class="w3-bar-item">
                         <div
                             class="w3-sand w3-round-xlarge"
-                            style="display: flex; flex-direction: row; align-items: center; margin-left: 0px !important; margin-right: 0px !important; padding: 6px"
+                            style="display: flex; flex-direction: row; align-items: center; margin-left: 0px !important; margin-right: 0px !important; padding: 1px"
                             id="index_topContolPanel"
                         >
                             <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
@@ -437,13 +424,14 @@
                             style="display: flex; flex-direction: row; align-items: center; margin-left: 0px !important; margin-right: 0px !important; padding: 6.5px"
                             id="Lineage_graphEditionButtons"
                         >
-                            <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
-                            <div class="slsv-button-source" style="padding: 5px 12px" id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
-                                <button class="slsv-invisible-button add-icon" style="margin-right: 5px; height: 25px; width: 29px"></button><span style="margin-top: 3px">Add Node</span>
-                            </div>
-                            <div class="slsv-button-source addEdgeButtonColor" style="padding: 5px 12px" id="lineage_actionDiv_addedge" onclick="Lineage_r.addEdge()">
-                                <button class="slsv-invisible-button add-icon" style="margin-right: 5px; height: 25px; width: 29px"></button><span style="margin-top: 3px">Add Edge</span>
-                            </div>
+                            <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>
+                    <div class="slsv-button-source" style="padding: 5px 12px" id="lineage_actionDiv_addNode" onclick="Lineage_r.addNode()">
+                        <button class="slsv-invisible-button add-icon" style="margin-right: 5px; height: 25px; width: 29px"></button><span style="margin-top: 3px">Add Node</span>
+                    </div>
+                    <div class="slsv-button-source addEdgeButtonColor" style="padding: 5px 12px" id="lineage_actionDiv_addedge" onclick="Lineage_r.addEdge()">
+                        <button class="slsv-invisible-button add-icon" style="margin-right: 5px; height: 25px; width: 29px"></button><span style="margin-top: 3px">Add Edge</span>
+                    </div>
+                    -->
                         </div>
                     </div>
 
@@ -452,7 +440,7 @@
                     </div>
                     <div class="w3-bar-item w3-right w3-dropdown-hover" style="margin-right: 10px" id="dropdownMenuLink">
                         <div class="w3-button slsv-right-top-bar-button" id="user-username">User</div>
-                        <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
+                        <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder" style="max-height: 40px">
                             <select class="Lineage_PopUpStyle" size="8" onclick="authentication.logout()" style="overflow: auto">
                                 <option>Logout</option>
                             </select>
@@ -471,17 +459,17 @@
                 </div>
             </div>
         </header>
-
+        <!-- style="height: 92.5dvh"-->
         <div id="graphAndCommandScreen" class="w3-container" style="height: 92.5dvh">
-            <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="height: 100%; width: 26%" id="lateralPanelDiv"></div>
-            <div class="w3-container w3-col l9" style="height: 100%; width: 74%">
-                <div id="graphDiv" style="height: 100%"></div>
+            <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="width: 435px; height: 99%" id="lateralPanelDiv"></div>
+            <div class="w3-container w3-col l9" style="height: 100%; width: auto">
+                <div id="graphDiv" class="w3-container" style="height: 100%"></div>
             </div>
         </div>
 
         <!-- popup panel-->
 
-        <div id="mainDialogDiv" class="w3-modal"></div>
+        <div id="mainDialogDiv"></div>
         <div id="smallDialogDiv"></div>
         <div id="LineagePopup"></div>
         <div id="popupMenuWidgetDiv" onclick="PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>

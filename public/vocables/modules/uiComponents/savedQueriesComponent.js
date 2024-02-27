@@ -1,6 +1,6 @@
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import common from "../shared/common.js";
-import Lineage_blend from "../tools/lineage/lineage_blend.js";
+import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
 var SavedQueriesComponent = (function () {
@@ -162,7 +162,7 @@ var SavedQueriesComponent = (function () {
                 predicate: "slsv:" + self.scopePredicate,
                 object: scope,
             });
-            triples = triples.concat(Lineage_blend.getCommonMetaDataTriples(queryUri, self.currentCRUDsourceLabel));
+            triples = triples.concat(Lineage_createRelation.getCommonMetaDataTriples(queryUri, self.currentCRUDsourceLabel));
             var options = {
                 sparqlPrefixes: { slsv: self.currentCRUDsourceObject.graphUri },
             };

@@ -33,6 +33,36 @@
     background-repeat: no-repeat;
     height: 30px;
 }
+.SPARQL-logo {
+    background-image: url(@SPARQL-logo);
+    background-repeat: no-repeat;
+    height: 35px;
+}
+.admin-logo {
+    background-image: url(@admin-logo);
+    background-repeat: no-repeat;
+    height: 35px;
+}
+.ConfigEditor-logo {
+    background-image: url(@ConfigEditor-logo);
+    background-repeat: no-repeat;
+    height: 35px;
+}
+.GraphManagement-logo {
+    background-image: url(@GraphManagement-logo);
+    background-repeat: no-repeat;
+    height: 35px;
+}
+.OntoCreator-logo {
+    background-image: url(@OntoCreator-logo);
+    background-repeat: no-repeat;
+    height: 35px;
+}
+.TimeLine-logo {
+    background-image: url(@TimeLine-logo);
+    background-repeat: no-repeat;
+    height: 35px;
+}
 .saveIcon {
     background-image: url(@saveIcon);
     background-repeat: no-repeat;
@@ -88,4 +118,34 @@
 .slsvLogo-icon {
     background-image: url(@slsvLogo-icon);
     background-repeat: no-repeat;
+}
+
+.whiteBoardIcon {
+    background-image: url(@whiteBoardIcon);
+    background-repeat: no-repeat;
+    margin-top: 10px;
+    height: 50px;
+    width: 40px;
+}
+
+.classesIcon {
+    background-image: url(@classesIcon);
+    background-repeat: no-repeat;
+    height: 50px;
+    width: 40px;
+    margin-top: 10px;
+}
+.containersIcon {
+    background-image: url(@containersIcon);
+    background-repeat: no-repeat;
+    height: 50px;
+    width: 40px;
+    margin-top: 10px;
+}
+.propertiesIcon {
+    background-image: url(@propertiesIcon);
+    background-repeat: no-repeat;
+    height: 50px;
+    width: 40px;
+    margin-top: 10px;
 }

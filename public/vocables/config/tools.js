@@ -1,7 +1,7 @@
 const allTools = {
-    lineage: { label: "lineage", noSource: 0, controller: Lineage_whiteboard, toolDescriptionImg: null },
-    KGcreator: { label: "KGcreator", noSource: 1, controller: KGcreator, toolDescriptionImg: null },
-    KGquery: { label: "KGquery", noSource: 0, controller: KGquery, toolDescriptionImg: null },
+    lineage: { label: "lineage", noSource: 0, controller: Lineage_r, toolDescriptionImg: null },
+    KGcreator: { label: "KGcreator", noSource: 1, controller: KGcreator_r, toolDescriptionImg: null },
+    KGquery: { label: "KGquery", noSource: 0, controller: KGquery_r, toolDescriptionImg: null },
     Standardizer: { label: "Standardizer", multiSources: 0, controller: Standardizer, toolDescriptionImg: null },
     TSF_Dictionary: { label: "TSF_Dictionary", noSource: 1, controller: Lineage_dictionary, toolDescriptionImg: null },
     SPARQL: { label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null },
@@ -9,11 +9,11 @@ const allTools = {
     ConfigEditor: { label: "ConfigEditor", noSource: 1, controller: ConfigEditor, toolDescriptionImg: null },
     GraphManagement: { label: "GraphManagement", noSource: 1, controller: GraphManagement, toolDescriptionImg: null },
     UserManagement: { label: "UserManagement", noSource: 1, controller: UserManagement, toolDescriptionImg: null },
-
     OntoCreator: { label: "OntoCreator", noSource: 1, controller: Lineage_createSLSVsource, toolDescriptionImg: null },
+    TagsGeometry: { label: "TagsGeometry", noSource: 1, controller: TagsGeometry, toolDescriptionImg: null },
 };
 
-async function loadToolsAndPlugins() {
+async function loadToolsAndPlugins(callback) {
     const request = await fetch("../../api/v1/tools");
     const allowedTools = await request.json();
 
@@ -26,6 +26,7 @@ async function loadToolsAndPlugins() {
     }
     // We mutate Config.tools with an object merging plugins and tools
     Config.tools = mergeToolsAndPlugins(allTools, plugins);
+    return callback();
 }
 
 function mergeToolsAndPlugins(tools, plugins) {

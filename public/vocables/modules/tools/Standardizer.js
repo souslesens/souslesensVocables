@@ -7,7 +7,6 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import Lineage_whiteboard from "./lineage/lineage_whiteboard.js";
 import Export from "../shared/export.js";
-import Lineage_blend from "./lineage/lineage_blend.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 
 var Standardizer = (function () {
@@ -2000,7 +1999,7 @@ sortMethod: "hubsize",
                                 status: "candidate",
                             };
 
-                            Lineage_blend.createRelationTriples(slice, true, dictionarySourceLabel, options, function (err, _result) {
+                            Lineage_createRelation.createRelationTriples(slice, true, dictionarySourceLabel, options, function (err, _result) {
                                 if (err) return callbackEach(err);
 
                                 totalCreated += sliceLength;

@@ -1,4 +1,7 @@
 <div id="WhiteboardContent">
+    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="ResponsiveUI.hideShowLateralPannel(this)">
+        <img id="ArrowLateralPannel" src="./icons/CommonIcons/ArrowLateralPannel.png" />
+    </button>
     <div class="w3-panel w3-border w3-round-small lateralPannelSection-width">
         <div id="Title1" class="titleboxButtons font-button1-color"></div>
         <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" popUpComment="Model"><img src="./icons/CommonIcons/ModelIcon.png" /></button>
@@ -9,8 +12,8 @@
         <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" popUpComment="QueryBot">QueryBot</button>-->
         <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" popUpComment="Query"><img src="./icons/CommonIcons/Query.png" /></button>
 
-        <button class="w3-button slsv-button-1" id="lineage_createResourceBtn" style="font-weight: bold" onclick=" CreateResource_bot.start()" popUpComment="Create Resource">Create Resource</button>
-        <!--    <button class="w3-button slsv-button" class="lineage_button" style="font-weight: bold" onclick="KGqueryWidget.showDialog()">Query KG</button>-->
+        <!-- <button class="w3-button slsv-button-1" id="lineage_createResourceBtn" style="font-weight: bold" onclick=" CreateResource_bot.start()" popUpComment="Create Resource">Create Resource</button>
+           <button class="w3-button slsv-button" class="lineage_button" style="font-weight: bold" onclick="KGqueryWidget.showDialog()">Query KG</button>-->
 
         <!--  <button class="w3-button slsv-button" onclick="Lineage_sources.clearSource()">Clear</button>-->
     </div>
@@ -70,14 +73,10 @@
         </div>
     </div>
     <div id="lineage_legendWrapper" class="w3-panel w3-border w3-round-small lateralPannelSection-width" style="max-height: 26dvh">
-        <div class="titleboxButtons font-lengend-color">Upper Ontology Classes</div>
+        <div class="titleboxButtons font-lengend-color">Query Legend</div>
         <!-- <div id="Lineage_classes_graphDecoration_UpperOntologyDiv"></div>-->
         <div id="Lineage_classes_graphDecoration_legendDiv" style="flex-wrap: nowrap; height: auto" class="lineage_actionDiv"></div>
     </div>
-
-    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="ResponsiveUI.hideShowLateralPannel(this)">
-        <img id="ArrowLateralPannel" src="./icons/CommonIcons/ArrowLateralPannel.png" />
-    </button>
 </div>
 
 <!-- <div>   <input type="checkbox" id="Lineage_classes_allWhiteBoardSourcesCBX" onchange="Lineage_sources.setAllWhiteBoardSources($(this).prop('checked'))">-->

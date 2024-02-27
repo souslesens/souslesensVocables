@@ -23,7 +23,9 @@ var CommonBotFunctions = (function () {
             alert("Source not recognized");
             return BotEngine.end();
         }
-        sources = sources.concat(Config.sources[sourceLabel].imports);
+        if (Config.sources[sourceLabel].imports) {
+            sources = sources.concat(Config.sources[sourceLabel].imports);
+        }
         async.eachSeries(
             sources,
             function (source, callbackEach) {
@@ -57,12 +59,14 @@ var CommonBotFunctions = (function () {
         BotEngine.showList(vocabs, varToFill);
     };
 
-    self.listVocabClasses = function (vocab, varToFill, includeOwlThing) {
+    self.listVocabClasses = function (vocab, varToFill, includeOwlThing, classes) {
         OntologyModels.registerSourcesModel(vocab, function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
-            var classes = [];
+            if (!classes) {
+                classes = [];
+            }
 
             for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
                 var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
@@ -78,9 +82,11 @@ var CommonBotFunctions = (function () {
         });
     };
 
-    self.listVocabPropertiesFn = function (vocab, varToFill) {
+    self.listVocabPropertiesFn = function (vocab, varToFill, props) {
         OntologyModels.registerSourcesModel(vocab, function (err, result) {
-            var props = [];
+            if (!props) {
+                props = [];
+            }
             for (var key in Config.ontologiesVocabularyModels[vocab].properties) {
                 var prop = Config.ontologiesVocabularyModels[vocab].properties[key];
                 props.push({ id: prop.id, label: prop.label });
@@ -94,7 +100,9 @@ var CommonBotFunctions = (function () {
     };
 
     self.listAnnotationPropertiesFn = function (vocabs, varToFill) {
-        if (!vocabs) vocabs = Object.keys(Config.ontologiesVocabularyModels);
+        if (!vocabs) {
+            vocabs = Object.keys(Config.ontologiesVocabularyModels);
+        }
         if (!Array.isArray(vocabs)) {
             vocabs = [vocabs];
         }
@@ -118,18 +126,6 @@ var CommonBotFunctions = (function () {
                 BotEngine.showList(props, varToFill);
             }
         );
-    };
-
-    self.getColumnClass = function (tripleModels, columnName) {
-        var columnClass = null;
-        tripleModels.forEach(function (item) {
-            if ((item.s == columnName || item.s == "$_" + columnName) && item.p == "rdf:type") {
-                if (item.o.indexOf("owl:") < 0) {
-                    columnClass = item.o;
-                }
-            }
-        });
-        return columnClass;
     };
 
     return self;

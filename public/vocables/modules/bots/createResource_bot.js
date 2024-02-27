@@ -6,17 +6,17 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import AxiomsEditor from "../tools/lineage/axiomsEditor.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import CommonBotFunctions from "./commonBotFunctions.js";
+import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 
 var CreateResource_bot = (function () {
     var self = {};
     self.title = "Create Resource";
 
     self.start = function () {
-        BotEngine.init(CreateResource_bot, null, function () {
+        BotEngine.init(CreateResource_bot, self.workflow, null, function () {
             self.source = Lineage_sources.activeSource;
             self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
-            BotEngine.currentObj = self.workflow;
-            BotEngine.nextStep(self.workflow);
+            BotEngine.nextStep();
         });
     };
 
@@ -39,10 +39,11 @@ var CreateResource_bot = (function () {
         listResourceTypesFn: {
             _OR: {
                 "owl:Class": { promptResourceLabelFn: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } },
-                "owl:ObjectProperty": { promptResourceLabelFn: { listVocabsFn: { listObjectProperties: self.workflow_saveResource } } },
-                "owl:AnnotationProperty": { promptResourceLabelFn: { listDatatypeProperties: self.workflow_saveResource } },
-                "owl:Individual": { promptResourceLabelFn: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } },
+                // "owl:ObjectProperty": { promptResourceLabelFn: { listVocabsFn: { listObjectPropertiesfn: self.workflow_saveResource } } },
+                // "owl:AnnotationProperty": { promptResourceLabelFn: { listDatatypeProperties: self.workflow_saveResource } },
+                "owl:NamedIndividual": { promptResourceLabelFn: { listVocabsFn: { listClassTypesFn: self.workflow_saveResource } } },
                 ImportClass: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
+                ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } },
             },
         },
     };
@@ -52,19 +53,21 @@ var CreateResource_bot = (function () {
         listResourceTypesFn: "Choose a resource type",
         promptResourceLabelFn: " Enter resource label (rdfs:label)",
         listVocabsFn: "Choose a reference ontology",
-        listSuperClassesFn: "Choose a  Class as superClass ",
+        listSuperClassesFn: "Choose a  class as superClass ",
         listClassTypesFn: "Choose a  a class type ",
-        saveResourceFn: " Save Resource",
+        saveResourceFn: " Save resource",
+        listImportsFn: "Add import to source",
     };
 
     self.functions = {
         listResourceTypesFn: function (queryParams, varName) {
             var choices = [
                 { id: "owl:Class", label: "Class" },
-                { id: "owl:Individual", label: "Individual" },
-                { id: "owl:ObjectProperty", label: "ObjectProperty" },
-                { id: "owl:AnnotationProperty", label: "AnnotationProperty" },
+                { id: "owl:NamedIndividual", label: "Individual" },
+                // { id: "owl:ObjectProperty", label: "ObjectProperty" },
+                // { id: "owl:AnnotationProperty", label: "AnnotationProperty" },
                 { id: "ImportClass", label: "Import Class" },
+                { id: "ImportSource", label: "Add import source " },
             ];
             BotEngine.showList(choices, "resourceType");
         },
@@ -89,6 +92,22 @@ var CreateResource_bot = (function () {
         axiomaticDefinitionFn: function () {
             AxiomsEditor.init(self.params.resourceId, function (err, manchesterText) {
                 self.params.manchesterText = manchesterText;
+                BotEngine.nextStep();
+            });
+        },
+
+        listImportsFn: function () {
+            var choices = Object.keys(Config.sources);
+            choices.sort();
+            BotEngine.showList(choices, "importSource");
+        },
+        saveImportSource: function () {
+            var importSource = self.params.importSource;
+            if (!importSource) {
+                alert("no source selected for import");
+                return BotEngine.reset();
+            }
+            Lineage_createRelation.setNewImport(self.params.source, importSource, function (err, result) {
                 BotEngine.nextStep();
             });
         },
@@ -120,7 +139,7 @@ var CreateResource_bot = (function () {
                     source: self.params.source,
                 },
             };
-            Lineage_whiteboard.drawNodesAndParents(nodeData, 2);
+            Lineage_whiteboard.drawNodesAndParents(nodeData, 1, { legendType: "individualClasses" });
             BotEngine.nextStep();
         },
         newResourceFn: function () {

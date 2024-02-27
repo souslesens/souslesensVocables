@@ -2,40 +2,20 @@ var JstreeWidget = (function () {
     var self = {};
 
     self.types = {
+        /*
+        deprecated
         tool: {
             icon: "../icons/tool.png",
         },
-        SKOS: {
-            icon: "../icons/thesaurus.png",
-        },
-        OWL: {
-            icon: "./icons/CommonIcons/SourceIcon.png",
-        },
-
-        class: {
-            icon: "../icons/class.png",
+       
+        "owl:Restriction": {
+            icon: "../icons/restriction.png",
         },
         concept: {
             icon: "../icons/concept.png",
         },
         collection: {
             icon: "../icons/collection.png",
-        },
-        default: {
-            icon: "../icons/default.png",
-        },
-        "owl:Class": {
-            li_attr: { style: "color:black" },
-            icon: "../icons/class.png",
-        },
-        "owl:ObjectProperty": {
-            icon: "../icons/property.png",
-        },
-        "owl:Restriction": {
-            icon: "../icons/restriction.png",
-        },
-        "owl:table": {
-            icon: "../icons/table.png",
         },
         importedClass: {
             li_attr: { style: "color:#ccc" },
@@ -49,25 +29,79 @@ var JstreeWidget = (function () {
             li_attr: { style: "color:#ccc" },
             icon: "../icons/externalObject.png",
         },
+        */
+
+        // Web semantic objects
+        //Thesaurus
+        Thesaurus: {
+            icon: "../icons/thesaurus.png",
+        },
+        // Ontology
+        Source: {
+            icon: "./icons/CommonIcons/SourceIcon.png",
+        },
+
         Class: {
             li_attr: { style: "color:black" },
-            icon: "../icons/class.png",
+            icon: "./icons/JstreeIcons/Classes.png",
         },
+
         Property: {
             li_attr: { style: "color:black" },
-            icon: "../icons/property.png",
+            icon: "./icons/JstreeIcons/Property.png",
+        },
+        Container: {
+            icon: "./icons/JstreeIcons/Container.png",
+        },
+        Individual: {
+            icon: "./icons/JstreeIcons/Individual.png",
+        },
+        /* KG creator */
+        Table: {
+            icon: "./icons/JstreeIcons/Table.png",
+        },
+        Column: {
+            icon: "./icons/JstreeIcons/Columns.png",
+        },
+        databaseSources: {
+            icon: "./icons/JstreeIcons/databaseSources.png",
+        },
+        DataSource: {
+            icon: "./icons/JstreeIcons/DataSource.png",
+        },
+        CSV: {
+            icon: "./icons/JstreeIcons/FileCSV.png",
+        },
+        CSVS: {
+            icon: "./icons/JstreeIcons/CSVS.png",
         },
 
-        // @ts-ignore
-        container: {
-            icon: "../icons/containers.png",
+        // Classic items
+        default: {
+            icon: "./icons/JstreeIcons/default.png",
         },
 
-        individual: {
-            icon: "../icons/individual.png",
+        Folder: {
+            icon: "./icons/JstreeIcons/Folder.png",
         },
+
+        /* To delete */
+        //double
+        class: {
+            icon: "./icons/JstreeIcons/Classes.png",
+        },
+        //double
+        "owl:ObjectProperty": {
+            icon: "./icons/JstreeIcons/Property.png",
+        },
+        // Triple
+        "owl:Class": {
+            li_attr: { style: "color:black" },
+            icon: "./icons/JstreeIcons/Classes.png",
+        },
+        // double
         "http://www.w3.org/2002/07/owl#NamedIndividual": {
-            icon: "../icons/individual.png",
+            icon: "./icons/JstreeIcons/Individual.png",
         },
     };
 
@@ -105,7 +139,13 @@ var JstreeWidget = (function () {
         if (options.dnd) {
             plugins.push("dnd");
         }
-        plugins.push("types");
+
+        if (options.notTypes) {
+            var icons = false;
+        } else {
+            var icons = true;
+            plugins.push("types");
+        }
 
         var check_callbackFn = function (op, node, parent, position, more) {
             if (op == "move_node" && options.dropAllowedFn) {
@@ -127,6 +167,9 @@ var JstreeWidget = (function () {
                 core: {
                     data: jstreeData,
                     check_callback: check_callbackFn,
+                    themes: {
+                        icons: icons,
+                    },
                 },
                 dnd: options.dnd,
                 search: options.searchPlugin,
@@ -507,14 +550,13 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
         if (!type) {
             if (types.includes(uri_bag)) {
-                type = "container";
-            } else {
-                if (types.includes(uri_named)) {
-                    type = "individual";
-                }
-                if (types.includes(uri_class)) {
-                    type = "class";
-                }
+                type = "Container";
+            }
+            if (types.includes(uri_named)) {
+                type = "Individual";
+            }
+            if (types.includes(uri_class)) {
+                type = "Class";
             }
         }
 

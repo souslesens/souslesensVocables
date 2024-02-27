@@ -48,7 +48,6 @@
 </style>
 <div>
     <div id="lineageCreateResource_mainDiv">
-        <!--  Top Level Ontology<select id="lineageCreateResource_currentTopLevelOntologyNodesSelect" onchange="Lineage_blend.graphModification.setTopLevelOntology($(this).val())"></select><br>-->
         <div style="display: flex; flex-direction: row">
             <div>
                 <select onchange="Lineage_createResource.onSelectResourceType($(this).val())">
@@ -101,43 +100,17 @@
     </div>
 </div>
 
-<!--
-<br />
-<input style="width: 500px; display: none" id="lineageCreateResource_creatingNodeSubjectUri" />
-</div>
-
-<div id="lineageCreateResource_creatingNodeClassParamsDiv">
-  <ul>
-    <li style="background-color: #d9bb73"><a href="#lineageCreateResource_creatingNodeSingleTab">SingleNode</a></li>
-    <li style="background-color: beige"><a href="#lineageCreateResource_creatingNodeListTab">List</a></li>
-    <li style="background-color: beige"><a href="#lineageCreateResource_creatingNodeListJournalTab">journal</a></li>
-  </ul>
-
-
-  <div id="lineageCreateResource_creatingNodeListTab" style="display: flex; flex-direction: column; height: 400px">
-    <span><b>Paste table data here:</b> column1 = Label, column2= Class Label; separator tab or ,</span>
-    <span><i>References to upper ontology have to be prefixed (part14: , bfo: ,dul:)</i></span>
-    <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.addClassesOrIndividualsTriples()" style="width: 100px">OK</button>
-
-    <textarea id="lineageCreateResource_creatingNode_nodeListTA" style="width: 540px; height: 350px"></textarea>
-  </div>
-  <div id="lineageCreateResource_creatingNodeListJournalTab" style="display: flex; flex-direction: column">
-    <div id="lineageCreateResource_creatingNodeListJournalDiv"></div>
-  </div>
-</div>
-
-
-
 <script>
-  $("#KGcreator_tripleInput").keypress(function(e) {
-    if (e.which == 13) {
-      Lineage_blend.graphModification.addTripleToCreatingNode();
-    }
-  });
-  $("#lineageCreateResource_creatingNodeClassParamsDiv").dialog({
-    autoOpen: false,
-    height: 600,
-    width: 600,
-    modal: true
-  });
-</script>-->
+    $("#KGcreator_tripleInput").keypress(function (e) {
+        if (e.which == 13) {
+            //   Lineage_createRelation.addTripleToCreatingNode();
+        }
+    });
+    $("#lineageCreateResource_creatingNodeClassParamsDiv").dialog({
+        autoOpen: false,
+        height: 600,
+        width: 600,
+        modal: true,
+    });
+</script>
+-->

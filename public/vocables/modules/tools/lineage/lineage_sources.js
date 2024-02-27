@@ -13,6 +13,7 @@ import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
+import Authentification from "../../shared/authentification.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -707,7 +708,7 @@ sourceDivId +
 
     self.isSourceEditableForUser = function (source) {
         if (!Config.sources[source]) {
-            return; // console.log("no source " + source);
+            return false; // console.log("no source " + source);
         }
         const groups = authentication.currentUser.groupes;
         const currentAccessControls = groups.map((group) => {
@@ -715,7 +716,16 @@ sourceDivId +
             const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
             return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
         });
+
+        /*  if(currentAccessControls=="readwrite")
+            return true;
+        return false;*/
+
         if (groups.indexOf("admin") > -1 && Config.sources[source].editable) {
+            return true;
+        }
+
+        if (Config.sources[source].accessControl == "readwrite") {
             return true;
         }
 

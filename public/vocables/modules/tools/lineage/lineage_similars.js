@@ -11,8 +11,11 @@ var Lineage_similars = (function () {
 
     self.showDialog = function () {
         $("#smallDialogDiv").dialog("open");
+        $("#smallDialogDiv").parent().css("left", "30%");
         $("#smallDialogDiv").dialog("option", "title", "Similars");
-        $("#smallDialogDiv").load("snippets/lineage/lineageSimilarsDialog.html");
+        $("#smallDialogDiv").load("snippets/lineage/lineageSimilarsDialog.html", function () {
+            self.mode = "whiteboard";
+        });
     };
 
     self.onChangeSelection = function (value) {
@@ -42,12 +45,17 @@ var Lineage_similars = (function () {
     self.onValidateSources = function () {};
 
     self.drawSimilars = function () {
-        if ((self.mode = "source")) {
-            if (!self.currentSource) return alert("no source selected");
+        if (!Lineage_whiteboard.lineageVisjsGraph.data) {
+            return alert("no nodes to compare");
+        }
+        if (self.mode == "source") {
+            if (!self.currentSource) {
+                return alert("no source selected");
+            }
             self.drawSourceSimilars(self.currentSource);
             $("#smallDialogDiv").dialog("close");
         }
-        if ((self.mode = "whiteboard")) {
+        if (self.mode == "whiteboard") {
             self.drawWhiteBoardSimilars();
             $("#smallDialogDiv").dialog("close");
         }
@@ -86,7 +94,9 @@ var Lineage_similars = (function () {
                             if (item.error) {
                                 error = true;
                             }
-                            if (error) return callbackEach(item.error);
+                            if (error) {
+                                return callbackEach(item.error);
+                            }
 
                             var actual_word_label = words[index];
                             item.hits.hits.forEach(function (hit) {
@@ -184,14 +194,18 @@ var Lineage_similars = (function () {
     self.getStartingNodes = function () {
         var nodes = null;
         var selectMode = $("#lineageSimilars_fromSelect").val();
-        if (selectMode == "AllWhiteboardNodes") return Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+        if (selectMode == "AllWhiteboardNodes") {
+            return Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+        }
     };
     self.drawWhiteBoardSimilars = function (output) {
         var commonNodes = [];
         var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
         var nodes = self.getStartingNodes();
-        if (!nodes) return alert("no nodes to process");
+        if (!nodes) {
+            return alert("no nodes to process");
+        }
         nodes.forEach(function (node1) {
             if (!node1.data && !node1.data.label) {
                 return;

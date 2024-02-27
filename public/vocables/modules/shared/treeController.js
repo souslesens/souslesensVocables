@@ -43,12 +43,17 @@ var TreeController = (function () {
                     //if (true || jsTreeOptions.labelClass) {
                     var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>";
                     //}
+                    var type_icon = JstreeWidget.selectTypeForIconsJstree(type);
+                    if (type_icon == "default") {
+                        // blank node case
+                        type_icon = "Individual";
+                    }
 
                     var child = {
                         parent: parentNodeId,
                         id: childNodeId + "_" + common.getRandomHexaId(4),
                         text: label,
-                        type: jstreeType,
+                        type: type_icon,
                         data: { type: type, source: jsTreeOptions.source, label: childNodeLabel, id: childNodeId },
                     };
                     if (jsTreeOptions.optionalData) {

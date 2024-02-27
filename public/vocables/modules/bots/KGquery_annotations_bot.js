@@ -8,7 +8,7 @@ var KGquery_annotations_bot = (function () {
     self.title = "Filter Class";
 
     self.start = function (currentQuery, validateFn) {
-        BotEngine.init(KGquery_annotations_bot, null, function () {
+        BotEngine.init(KGquery_annotations_bot, self.workflow_selectproperties, null, function () {
             self.validateFn = validateFn;
             self.callbackFn = function () {
                 var filterLabel = BotEngine.getQueryText();
@@ -17,8 +17,7 @@ var KGquery_annotations_bot = (function () {
 
             self.params = currentQuery;
             SparqlQuery_bot.params = currentQuery;
-            BotEngine.currentObj = self.workflow_selectproperties;
-            BotEngine.nextStep(self.workflow_selectproperties);
+            BotEngine.nextStep();
         });
     };
 

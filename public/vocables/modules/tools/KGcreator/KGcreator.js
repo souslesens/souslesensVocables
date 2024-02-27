@@ -171,13 +171,7 @@ var KGcreator = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 KGcreator.rawConfig = newJson;
-                self.saveSlsvSourceConfig(function (err, result) {
-                    callback(err);
-                    if (err) {
-                        return callback(err);
-                    }
-                    return callback(null, newJson);
-                });
+                return callback(null, newJson);
             },
             error: function (err) {
                 return callback(null, newJson);
@@ -281,13 +275,14 @@ var KGcreator = (function () {
                             },
                         };
 
-                        items.tranforms = {
-                            label: "tranforms",
+                        items.transforms = {
+                            label: "transforms",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_mappings.showTranformsDialog(node);
+                                KGcreator_mappings.showTransformDialog(node);
                             },
                         };
+
                         items.showSampleData = {
                             label: "showSampleData",
                             action: function (_e) {
@@ -360,7 +355,7 @@ var KGcreator = (function () {
                             label: "tranforms",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_mappings.showTranformsDialog(node);
+                                KGcreator_mappings.showTransformDialog(node);
                             },
                         };
                         // Table == Fichier pour les CSV donc on met le delete ici
@@ -400,6 +395,7 @@ var KGcreator = (function () {
                 id: "databaseSources",
                 text: "databaseSources",
                 parent: "#",
+                type: "databaseSources",
                 data: {
                     type: "sourceType",
                 },
@@ -408,6 +404,7 @@ var KGcreator = (function () {
                 id: "csvSources",
                 text: "csvSources",
                 parent: "#",
+                type: "CSVS",
                 data: {
                     type: "sourceType",
                 },
@@ -420,6 +417,7 @@ var KGcreator = (function () {
                     id: datasource,
                     text: datasource,
                     parent: "databaseSources",
+                    type: "DataSource",
                     data: { id: datasource, type: "databaseSource", sqlType: sqlType },
                 });
             }
@@ -428,6 +426,7 @@ var KGcreator = (function () {
                     id: datasource,
                     text: datasource,
                     parent: "csvSources",
+                    type: "CSV",
                     data: { id: datasource, type: "csvSource" },
                 });
             }
@@ -594,16 +593,19 @@ var KGcreator = (function () {
                         jstreeData.push({
                             id: fileName + "_" + column,
                             text: label,
+                            type: "Column",
                             parent: fileName,
                             data: { id: column, table: fileName, label: column, type: "tableColumn" },
                         });
                     });
-                    if (self.currentConfig.currentMappings[fileName].virtualColumns) {
+
+                    if (self.currentConfig.currentMappings && self.currentConfig.currentMappings[fileName] && self.currentConfig.currentMappings[fileName].virtualColumns) {
                         self.currentConfig.currentMappings[fileName].virtualColumns.forEach(function (virtualColumn) {
                             var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
                             jstreeData.push({
                                 id: fileName + "_" + virtualColumn,
                                 text: label,
+                                type: "Column",
                                 parent: fileName,
                                 data: { id: virtualColumn, table: fileName, label: virtualColumn, type: "tableColumn" },
                             });
@@ -642,6 +644,7 @@ var KGcreator = (function () {
             jstreeData.push({
                 id: table,
                 text: label,
+                type: "Table",
                 parent: datasourceConfig.dataSource,
                 data: {
                     id: table,
@@ -657,7 +660,7 @@ var KGcreator = (function () {
         var jstreeData = [];
 
         var columnMappings = self.getColumnsMappings(table, null, "s");
-
+        tableColumns.sort();
         tableColumns.forEach(function (column) {
             var label = column;
 
@@ -668,6 +671,7 @@ var KGcreator = (function () {
                 id: table + "_" + column,
                 text: label,
                 parent: table,
+                type: "Column",
                 data: { id: column, table: table, label: column, type: "tableColumn" },
             });
         });
@@ -678,7 +682,7 @@ var KGcreator = (function () {
 
     self.showTableVirtualColumnsTree = function (table) {
         if (!table) return alert("no table selected");
-        if (!self.currentConfig.currentMappings[table].virtualColumns) {
+        if (!self.currentConfig.currentMappings || !self.currentConfig.currentMappings[table] || !self.currentConfig.currentMappings[table].virtualColumns) {
             return;
         }
         var jstreeData = [];
@@ -686,6 +690,7 @@ var KGcreator = (function () {
             var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
             jstreeData.push({
                 id: table + "_" + virtualColumn,
+                type: "Column",
                 text: label,
                 parent: table,
                 data: { id: virtualColumn, table: table, label: virtualColumn, type: "tableColumn" },
@@ -885,6 +890,7 @@ var KGcreator = (function () {
             {
                 id: datasourceName,
                 text: datasourceName,
+                type: "DataSource",
                 parent: type + "s",
                 data: { id: datasourceName, type: type, sqlType: sqlType },
             },
@@ -923,6 +929,28 @@ var KGcreator = (function () {
         // alert("coming soon");
 
         function showTable(data) {
+            var headers = [];
+            var tableCols = [];
+            data.forEach(function (item) {
+                for (var key in item)
+                    if (headers.indexOf(key) < 0) {
+                        headers.push(key);
+                        tableCols.push({ title: key, defaultContent: "", width: "15%" });
+                    }
+            });
+            var lines = [];
+            data.forEach(function (item) {
+                var line = [];
+                headers.forEach(function (column) {
+                    line.push(item[column] || "");
+                });
+                lines.push(line);
+            });
+            $("#smallDialogDiv").dialog("open");
+            $("#smallDialogDiv").parent().css("left", "10%");
+
+            Export.showDataTable("smallDialogDiv", tableCols, lines);
+            return;
             $("#KGcreator_infosDiv").val("");
 
             var html = "<table border='1'><tr>";
@@ -945,6 +973,7 @@ var KGcreator = (function () {
             html += "</table>";
 
             $("#smallDialogDiv").dialog("open");
+            $("#smallDialogDiv").parent().css("left", "10%");
             // $("#smallDialogDiv").html("<div style='overflow:auto;height:90%'>"+html+"</div>")
             $("#smallDialogDiv").html(html);
         }

@@ -12,9 +12,8 @@
 
             <div class="lineageSimilars_div">
                 In <br />
-                <select onchange="Lineage_similars.onChangeSelection($(this).val())" size="3">
-                    <option></option>
-                    <option value="whiteboard">Whiteboard nodes</option>
+                <select id="lineageSimilars_modeSelect" onchange="Lineage_similars.onChangeSelection($(this).val())" size="3">
+                    <option value="whiteboard" selected="selected">Whiteboard nodes</option>
                     <option value="chooseSource">Select source</option>
                 </select>
             </div>
@@ -33,7 +32,7 @@
             </div>
         </div>
 
-        <div id="lineageSimilars_sourcesTreeContainer" style="width: 300px; height: 400px">
+        <div id="lineageSimilars_sourcesTreeContainer" style="margin-left: 20px; width: 400px; height: 400px">
             <div id="lineageSimilars_sourcesTreeDiv"></div>
         </div>
     </div>

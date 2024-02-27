@@ -13,7 +13,7 @@ var KGquery_r = (function () {
     self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
     self.oldshowDialog = SavedQueriesComponent.showDialog;
     self.oldKGquery_controlPanel = window.KGquery_controlPanel;
-    self.init = function () {
+    self.onLoaded = function () {
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
         SavedQueriesComponent.showDialog = self.SavedQueriesComponentShowDialogResponsive;
         ResponsiveUI.replaceFile(KGquery_controlPanel, KGquery_controlPanelResponsive);
@@ -21,7 +21,7 @@ var KGquery_r = (function () {
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
     };
-    self.quit = function () {
+    self.unload = function () {
         //retribute old file and functions
         Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
         SavedQueriesComponent.showDialog = self.oldshowDialog;

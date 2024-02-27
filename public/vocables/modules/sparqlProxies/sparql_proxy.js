@@ -102,8 +102,9 @@ var Sparql_proxy = (function () {
             options = {};
         }
         // query=query.replace(/[\n\r]/g," ")
-
-        query = self.addFromLabelsGraphToQuery(query);
+        if (false) {
+            query = self.addFromLabelsGraphToQuery(query);
+        }
 
         if (url.indexOf("_default") == 0) {
             url = Config.sparql_server.url;

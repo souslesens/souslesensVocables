@@ -15,14 +15,17 @@
 
             <div style="margin-left: 10px">
                 <button class="w3-button slsv-invisible-button size-of-button-null" style="margin-bottom: 5px">
-                    <input type="checkbox" id="LineageProperties_searchInAllSources" value="all" onclick="Lineage_r.checkbox_Lineage_containers()" />
-                    <span class="button-font-color-button1"> Current</span>
+                    <!--<input type="checkbox" id="LineageProperties_searchInAllSources" value="all" onclick="Lineage_r.checkbox_Lineage_containers()" />
+                    <span class="button-font-color-button1"> Current</span>-->
                 </button>
 
                 <button class="w3-button classesPannelButton size-of-button-small" onclick="Export.exportTreeToDataTable('lineage_containers_containersJstree','#')">Export</button>
                 <div id="Lineage_addContainer_button" class="w3-button classesPannelButton size-of-button-small" style="padding: 3px 5px !important" onclick="Lineage_containers.addContainer()">
-                    <button class="slsv-invisible-button add-icon" style="margin-right: 5px; height: 25px; width: 29px"></button>
+                    <button class="slsv-invisible-button add-icon" style="height: 25px; width: 29px"></button>
                 </div>
+                <button class="w3-button classesPannelButton size-of-button-small" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all">
+                    <img src="./icons/CommonIcons/ClearAllIcon.png" />
+                </button>
             </div>
         </div>
     </div>
@@ -30,4 +33,7 @@
     <div style="width: 375px; max-height: 60dvh; overflow: auto">
         <div id="lineage_containers_containersJstree" style="margin-top: 20px"></div>
     </div>
+    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="ResponsiveUI.hideShowLateralPannel(this)">
+        <img id="ArrowLateralPannel" src="./icons/CommonIcons/ArrowLateralPannel.png" />
+    </button>
 </div>

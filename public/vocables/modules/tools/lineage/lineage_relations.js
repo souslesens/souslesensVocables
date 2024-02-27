@@ -25,20 +25,6 @@ var Lineage_relations = (function () {
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").dialog("option", "title", "Query");
         $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function () {
-            $("#lineageRelations_tabs").tabs({
-                activate: function (e, ui) {
-                    var divId = ui.newPanel.selector;
-                    if (divId == "#lineageRelations_resources2Tab") {
-                    }
-                },
-            });
-            $("#lineageRelations_history_previousBtn").css("display", self.previousQuery ? "inline" : "none");
-            $("#lineageRelations_history_deleteBtn").css("display", "none");
-            $("#Lineage_relation_filterText2").val("");
-            //   $("#LineageRelations_searchJsTreeInput").focus();
-            Lineage_relationFilter.showAddFilterDiv(true);
-            Lineage_relationIndividualsFilter.filter = "";
-
             //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
             $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
                 if (e.which == 13 || e.which == 9) {
@@ -78,51 +64,6 @@ var Lineage_relations = (function () {
             async.series(
                 [
                     function (callbackSeries) {
-                        var vocabularies = ["usual", Lineage_sources.activeSource];
-                        if (Config.sources[Lineage_sources.activeSource].imports) {
-                            vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
-                        }
-
-                        vocabularies = vocabularies.concat(Object.keys(Config.ontologiesVocabularyModels));
-
-                        async.eachSeries(
-                            vocabularies,
-                            function (vocabulary, callbackEach) {
-                                if (vocabulary == "usual") {
-                                    return callbackEach();
-                                    var properties = [];
-                                    KGcreator.usualProperties.forEach(function (item) {
-                                        properties.push({ label: item, id: item });
-                                    });
-
-                                    vocabulariesPropertiesMap[vocabulary] = properties;
-                                    return callbackEach();
-                                } else if (Config.ontologiesVocabularyModels[vocabulary]) {
-                                    properties = OntologyModels.getPropertiesArray(vocabulary);
-                                    vocabulariesPropertiesMap[vocabulary] = properties;
-                                    return callbackEach();
-                                } else {
-                                    Sparql_OWL.getObjectProperties(vocabulary, { withoutImports: 1 }, function (err, result) {
-                                        if (err) {
-                                            callbackEach(err);
-                                        }
-
-                                        var properties = [];
-                                        result.forEach(function (item) {
-                                            properties.push({ label: item.propertyLabel.value, id: item.property.value });
-                                        });
-                                        vocabulariesPropertiesMap[vocabulary] = properties;
-                                        return callbackEach();
-                                    });
-                                }
-                            },
-                            function (err) {
-                                callbackSeries(err);
-                            }
-                        );
-                    },
-
-                    function (callbackSeries) {
                         for (var vocabulary in vocabulariesPropertiesMap) {
                             var properties = vocabulariesPropertiesMap[vocabulary];
                             if (!properties) {
@@ -147,6 +88,14 @@ var Lineage_relations = (function () {
                             });
                         }
                         callbackSeries();
+                    },
+                    function (callbackSeries) {
+                        if (Config.UIprofile == "KG") {
+                            Lineage_relations.getInferredProperties(Lineage_sources.activeSource, function (err, result) {
+                                jstreeData = result;
+                                return callbackSeries();
+                            });
+                        }
                     },
 
                     function (callbackSeries) {
@@ -173,12 +122,6 @@ var Lineage_relations = (function () {
                             //  $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(Lineage_sources.activeSource);
                             return callbackSeries();
                         });
-                    },
-                    function (callbackSeries) {
-                        if (Config.UIprofile == "KG") {
-                            Lineage_relations.showInferredProperties();
-                        }
-                        return callbackSeries();
                     },
                 ],
                 function (err) {
@@ -223,7 +166,7 @@ var Lineage_relations = (function () {
                 '          <input id="lineageQuery_value" size="20" value="" />\n' +
                 "        </div>";
         }
-        domainValue = valueStr;
+        var domainValue = valueStr;
     };
 
     self.onshowDrawRelationsDialogValidate = function (action, _type) {
@@ -304,22 +247,6 @@ var Lineage_relations = (function () {
             if (properties.length > 0) {
                 options.filter += Sparql_common.setFilter("prop", properties);
             }
-
-            /*   if (properties.length > 0) {
-           // if active source selected take all properties( ==no filter on props)
-           var filter = "";
-           var filterProp = "";
-           if (properties.indexOf(Config.sources[Lineage_sources.activeSource].graphUri) < 0) {
-             filterProp = Sparql_common.setFilter("prop", properties);
-           }
-
-           options.filter += filterProp;
-         }
-   */
-            /*   var propFilter = $("#Lineage_relation_filterText2").val();
-      if (propFilter) {
-        options.filter += propFilter;
-      }*/
 
             if (propDomainFilter.length > 0) {
                 options.filter += Sparql_common.setFilter("subjectType", propDomainFilter, null, { useFilterKeyWord: 1 });
@@ -611,7 +538,7 @@ var Lineage_relations = (function () {
         );
     };
 
-    self.showInferredProperties = function (source) {
+    self.getInferredProperties = function (source, callback) {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
@@ -621,6 +548,7 @@ var Lineage_relations = (function () {
         var options = {};
         var inferredProps = [];
         var distinctProps = {};
+        var jstreeData = [];
         async.series(
             [
                 function (callbackSeries) {
@@ -659,7 +587,7 @@ var Lineage_relations = (function () {
                 },
 
                 function (callbackSeries) {
-                    var jstreeData = [
+                    jstreeData = [
                         {
                             id: "proposed",
                             text: "Proposed",
@@ -696,14 +624,12 @@ var Lineage_relations = (function () {
                             });
                         });
                     });
-                    JstreeWidget.addNodesToJstree("lineageRelations_propertiesJstreeDiv", null, jstreeData);
+                    // JstreeWidget.addNodesToJstree("lineageRelations_propertiesJstreeDiv", null, jstreeData);
                     return callbackSeries();
                 },
             ],
             function (err) {
-                if (err) {
-                    return alert(err);
-                }
+                return callback(err, jstreeData);
             }
         );
     };

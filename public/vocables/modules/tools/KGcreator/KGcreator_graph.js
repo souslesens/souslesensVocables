@@ -6,7 +6,8 @@ import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 import KGcreator from "./KGcreator.js";
 import KGcreator_mappings from "./KGcreator_mappings.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
-import GraphDisplayLegend from "../../shared/graphDisplayLegend.js";
+import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
+import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 
 var KGcreator_graph = (function () {
     var self = {};
@@ -79,13 +80,13 @@ var KGcreator_graph = (function () {
             });
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
-            GraphDisplayLegend.drawLegend("KGcreator_classes", "LineageVisjsLegendCanvas");
+            GraphDisplayLegend.drawLegend("KGcreator_classes", "LineageVisjsLegendCanvas", false);
             $("#KGcreator_resourceLinkRightPanel").load("./modules/tools/KGcreator/html/graphControlPanel.html", function () {});
         });
     };
 
     self.onNodeClick = function (node, point, event, caller) {
-        console.log(JSON.stringify(node));
+        // console.log(JSON.stringify(node));
         PopupMenuWidget.hidePopup();
         if (!node || !node.data) {
             return (self.currentGraphNode = null);
@@ -126,7 +127,7 @@ var KGcreator_graph = (function () {
         columnNodes.forEach(function (columnNode, index) {
             var columnNodeId = columnNode.id;
             var classNode = columnNode.classNode;
-            if (!existingNodes[columnNode.table]) {
+            if (false && !existingNodes[columnNode.table]) {
                 existingNodes[columnNode.table] = 1;
                 visjsData.nodes.push({
                     id: columnNode.table,
@@ -154,7 +155,7 @@ var KGcreator_graph = (function () {
                 });
                 //edge to table
                 var edgeId = columnNode.table + "_" + columnNodeId;
-                if (!existingNodes[edgeId]) {
+                if (false && !existingNodes[edgeId]) {
                     existingNodes[edgeId] = 1;
 
                     var physics = true;
@@ -195,7 +196,8 @@ var KGcreator_graph = (function () {
                         },
                         color: "#aed",
                         width: 2,
-                        physics: physics,
+                        physics: true,
+                        distance: 10,
                         smooth: {
                             type: "continuous",
                         },
@@ -230,7 +232,7 @@ var KGcreator_graph = (function () {
         for (var table in KGcreator.currentConfig.currentMappings) {
             if (!tables || tables.indexOf(table > -1)) {
                 KGcreator.currentConfig.currentMappings[table].tripleModels.forEach(function (triple) {
-                    if (triple.p.indexOf("http://") > -1) {
+                    if (triple.p.indexOf("http://") > -1 && !triple.isString) {
                         // && existingGraphNodes[triple.o]) {
                         var edgeId = table + "_" + triple.s + "_" + triple.p + "_" + triple.o;
                         if (!existingGraphNodes[edgeId]) {
@@ -264,6 +266,47 @@ var KGcreator_graph = (function () {
         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(edges);
     };
 
+    self.graphInterTablesColumnPredicates = function () {
+        /*    function getIntertablespaths(tableJoins) {
+            KGcreator.currentConfig.currentMappings[tableJoins.fromTable].tripleModels.forEach(function(triple) {
+                if (triple.s == tableJoins.fromColumn)
+            })
+        }*/
+
+        var edges = [];
+        var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+
+        var tableJoins = KGcreator.rawConfig.databaseSources[KGcreator.currentConfig.currentDataSource.name].tableJoins;
+
+        tableJoins.forEach(function (item) {
+            var fromId = item.fromTable + "_" + item.fromColumn;
+            var toId = item.toTable + "_" + item.toColumn;
+            var edgeId = fromId + "_" + toId;
+            edges.push({
+                id: edgeId,
+                from: fromId,
+                to: toId,
+                //  label: Sparql_common.getLabelFromURI(triple.p),
+                color: "#000efd",
+                dashes: true,
+
+                physics: true,
+                width: 1,
+                smooth: {
+                    type: "continuous",
+                },
+                /*  arrows: {
+                    to: {
+                        enabled: true,
+                        type: "solid",
+                        scaleFactor: 0.5,
+                    },
+                },*/
+            });
+        });
+
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(edges);
+    };
     self.graphTablesJoins = function (dataSource) {
         var tableJoins = KGcreator.rawConfig.databaseSources[dataSource].tableJoins;
         if (!tableJoins) {
@@ -314,9 +357,27 @@ var KGcreator_graph = (function () {
         } else if (sourceNode.data && sourceNode.data.type == "column" && targetNode.data && targetNode.data.type == "column") {
             if (sourceNode.data.table != targetNode.data.table) {
                 Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
-                return alert("can only link columns in the same table");
+                if (!confirm("choose column that is the foreign key for the tartget table in the source table")) {
+                    return;
+                }
+                var columns = KGcreator.currentConfig.currentDataSource.tables[sourceNode.data.table];
+                SimpleListSelectorWidget.showDialog(
+                    null,
+                    function (callbackLoad) {
+                        return callbackLoad(columns);
+                    },
+
+                    function (selectedColumn) {
+                        if (!selectedColumn) {
+                            return;
+                        }
+
+                        KGcreator_mappings.setPredicatesBetweenColumnsInTable(sourceNode.data, targetNode.data, selectedColumn);
+                    }
+                );
+            } else {
+                KGcreator_mappings.setPredicatesBetweenColumnsInTable(sourceNode.data, targetNode.data, null);
             }
-            KGcreator_mappings.setPredicatesBetweenColumnsInTable(sourceNode.data, targetNode.data, function (err) {});
         } else {
             return null;
         }
@@ -328,7 +389,8 @@ var KGcreator_graph = (function () {
         }
         self.graphColumnToClassPredicates(null);
         self.graphColumnToColumnPredicates(null);
-        self.graphTablesJoins(KGcreator.currentConfig.currentDataSource.name);
+        self.graphInterTablesColumnPredicates();
+        //  self.graphTablesJoins(KGcreator.currentConfig.currentDataSource.name);
     };
 
     self.groupByFile = function () {
@@ -345,6 +407,7 @@ var KGcreator_graph = (function () {
                     id: node.data.fileName,
                     label: node.data.fileName,
                     shape: "dot",
+                    size: Lineage_whiteboard.defaultShapeSize,
                     color: node.color,
                 });
             }
@@ -391,7 +454,7 @@ var KGcreator_graph = (function () {
                 id: "_classes",
                 label: "classes",
                 shape: "dot",
-                size: 5,
+                size: Lineage_whiteboard.defaultShapeSize,
             });
         }
         if (!existingGraphNodes["mappings"]) {
@@ -400,7 +463,7 @@ var KGcreator_graph = (function () {
                 id: "_mappings",
                 label: "mappings",
                 shape: "dot",
-                size: 5,
+                size: Lineage_whiteboard.defaultShapeSize,
             });
         }
         nodes.forEach(function (node) {
@@ -452,6 +515,7 @@ var KGcreator_graph = (function () {
                         id: table,
                         label: table,
                         shape: "ellipse",
+                        size: Lineage_whiteboard.defaultShapeSize,
                         color: "#ddd",
                         data: {
                             id: table,
@@ -516,6 +580,7 @@ var KGcreator_graph = (function () {
                             label: label,
                             shape: attrs.shape,
                             color: attrs.color,
+                            size: Lineage_whiteboard.defaultShapeSize,
                             data: {
                                 id: item.s,
                                 label: label,
@@ -535,6 +600,7 @@ var KGcreator_graph = (function () {
                                 label: label,
                                 shape: attrs.shape,
                                 color: attrs.color,
+                                size: Lineage_whiteboard.defaultShapeSize,
                                 data: {
                                     id: item.s,
                                     label: label,
@@ -581,6 +647,8 @@ var KGcreator_graph = (function () {
             }
         }
 
+        visjsData = self.addInterTableJoinsToVisjsData(KGcreator.currentConfig.currentDataSource.name, visjsData);
+
         //   var html = "<div id='KGcreator_mappingsGraphDiv' style='width:1100px;height:750px'></div>";
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").parent().css("top", "10%");
@@ -590,7 +658,7 @@ var KGcreator_graph = (function () {
         $("#mainDialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function () {
             self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, { onclickFn: KGcreator_graph.onNodeClick });
             self.mappingVisjsGraph.draw();
-            GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas");
+            GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas", false);
             var options = {
                 mode: "tree",
             };
@@ -604,6 +672,30 @@ var KGcreator_graph = (function () {
             }
             //  JSONEditor().setMode("tree");
         });
+    };
+
+    self.addInterTableJoinsToVisjsData = function (dataSource, visjsData) {
+        var edges = [];
+        var existingEdges = {};
+        visjsData.edges.forEach(function (edge) {
+            existingEdges[edge.id] = 1;
+        });
+        KGcreator.rawConfig.databaseSources[dataSource].tableJoins.forEach(function (item) {
+            var sId = item.fromTable + "_" + item.fromColumn;
+            var oId = item.toTable + "_" + item.toColumn;
+            var edgeId = sId + "_" + oId;
+            if (!existingEdges[edgeId]) {
+                existingEdges[edgeId] = 1;
+                visjsData.edges.push({
+                    id: edgeId,
+                    from: sId,
+                    to: oId,
+                    color: "#f90edd",
+                    dashes: true,
+                });
+            }
+        });
+        return visjsData;
     };
 
     self.saveDetailedMappings = function () {

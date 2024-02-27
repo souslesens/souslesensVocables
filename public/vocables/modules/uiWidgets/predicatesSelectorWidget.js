@@ -77,6 +77,7 @@ var PredicatesSelectorWidget = (function () {
     self.load = function (divId, source, options, configureFn, callback) {
         self.options = options || {};
         $("#" + divId).html("");
+        $("#editPredicate_mainDiv").parent().empty();
         $("#" + divId).load("snippets/predicatesSelectorWidgetDialog.html", function (a, b, c) {
             var x = a + b + c;
             self.init(source, configureFn, function (err, result) {
@@ -159,6 +160,10 @@ var PredicatesSelectorWidget = (function () {
         } else {
             OntologyModels.registerSourcesModel([vocabulary], function (err, result) {
                 properties = OntologyModels.getPropertiesArray(vocabulary);
+                var datatypeProperties = OntologyModels.getAnnotationProperties(vocabulary);
+                properties = properties.concat(datatypeProperties);
+                common.array.sort(properties, "label");
+
                 common.fillSelectOptions(selectId, properties, true, "label", "id");
             });
         }
@@ -217,7 +222,9 @@ var PredicatesSelectorWidget = (function () {
 
     self.setCurrentVocabClassesSelect = function (vocabulary, selectId) {
         self.currentVocabulary = vocabulary;
-        if (!selectId) selectId = "editPredicate_objectSelect";
+        if (!selectId) {
+            selectId = "editPredicate_objectSelect";
+        }
         var classes = [];
 
         if (vocabulary == "usual") {

@@ -24,8 +24,25 @@ var SourceSelectorWidget = (function () {
         var jsTreeOptions = options;
         jsTreeOptions.selectTreeNodeFn = selectTreeNodeFn;
         MainController.UI.showHideRightPanel("hide");
-        $("#" + targetDivId).load("snippets/sourceSelector.html", function (err) {
-            self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
+        /*$("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
+            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
+            $("#mainDialogDiv")
+                .parent()
+                .find(".ui-dialog-titlebar-close")
+                .on("click", function () {
+                    $("#mainDialogDiv").parent().hide();
+                });
+
+            if (resetAll) {
+                Lineage_sources.loadedSources = {};
+                var onSourceSelect = ResponsiveUI.onSourceSelect;
+            } else {
+                var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
+            }
+            SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
+        });*/
+        $("#" + targetDivId).load("./responsive/lineage/html/SourceDiv.html", function (err) {
+            self.loadSourcesTreeDiv("sourcesSelectorDiv", jsTreeOptions);
             $("#sourceSelector_searchInput").focus();
             //  $("#sourceSelector_SearchSourceInput");
             $("#sourceSelector_validateButton").bind("click", function () {
@@ -63,7 +80,7 @@ var SourceSelectorWidget = (function () {
                     id: item,
                     text: item,
                     parent: "#",
-                    type: item,
+                    type: "Folder",
                 });
             }
         });
@@ -86,16 +103,6 @@ var SourceSelectorWidget = (function () {
 
                 var othersGroup = "OTHERS";
 
-                if (!types && !distinctGroups[othersGroup]) {
-                    distinctGroups[othersGroup] = 1;
-                    treeData.push({
-                        id: othersGroup + "_" + parent,
-                        text: "OTHERS",
-                        type: "group",
-                        parent: "#",
-                    });
-                }
-
                 var group = Config.sources[sourceLabel].group;
                 if (group) {
                     var subGroups = group.split("/");
@@ -108,7 +115,7 @@ var SourceSelectorWidget = (function () {
                             treeData.push({
                                 id: subGroup,
                                 text: subGroup,
-                                type: "group",
+                                type: "Folder",
                                 parent: parent,
                             });
                         }
@@ -122,7 +129,15 @@ var SourceSelectorWidget = (function () {
                         group = Config.sources[sourceLabel].schemaType;
                     }
                 }
-
+                if (!types && !distinctGroups[othersGroup]) {
+                    distinctGroups[othersGroup] = 1;
+                    treeData.push({
+                        id: othersGroup + "_" + parent,
+                        text: "OTHERS",
+                        type: "Folder",
+                        parent: "#",
+                    });
+                }
                 if (!distinctNodes[sourceLabel]) {
                     distinctNodes[sourceLabel] = 1;
 
@@ -131,10 +146,17 @@ var SourceSelectorWidget = (function () {
                     }
                     //  console.log(JSON.stringify(jstreeData,null,2))
                     if (!types || types.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                        var type = Config.sources[sourceLabel].schemaType;
+                        if (type == "OWL") {
+                            type = "Source";
+                        }
+                        if (type == "SKOS") {
+                            type = "Thesaurus";
+                        }
                         treeData.push({
                             id: sourceLabel,
                             text: sourceLabel,
-                            type: Config.sources[sourceLabel].schemaType,
+                            type: type,
                             parent: group,
                             data: {
                                 type: "source",

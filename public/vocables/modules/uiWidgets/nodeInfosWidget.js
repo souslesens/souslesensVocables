@@ -1,39 +1,64 @@
-import Sparql_generic from "../sparqlProxies/sparql_generic.js";
-import Sparql_common from "../sparqlProxies/sparql_common.js";
-import common from "../shared/common.js";
-import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
-import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
-import ElasticSearchProxy from "../search/elasticSearchProxy.js";
-import SearchUtil from "../search/searchUtil.js";
-import MainController from "../shared/mainController.js";
-import PredicatesSelectorWidget from "./predicatesSelectorWidget.js";
-import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
-import Lineage_axioms_create from "../tools/lineage/lineage_axioms_create.js";
-import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import authentication from "../shared/authentification.js";
-import AxiomsEditor from "../tools/lineage/axiomsEditor.js";
-
+import Sparql_generic from "../../modules/sparqlProxies/sparql_generic.js";
+import Sparql_common from "../../modules/sparqlProxies/sparql_common.js";
+import common from "../../modules/shared/common.js";
+import Sparql_OWL from "../../modules/sparqlProxies/sparql_OWL.js";
+import Sparql_proxy from "../../modules/sparqlProxies/sparql_proxy.js";
+import Lineage_whiteboard from "../../modules/tools/lineage/lineage_whiteboard.js";
+import ElasticSearchProxy from "../../modules/search/elasticSearchProxy.js";
+import SearchUtil from "../../modules/search/searchUtil.js";
+import MainController from "../../modules/shared/mainController.js";
+import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
+import Lineage_axioms_draw from "../../modules/tools/lineage/lineage_axioms_draw.js";
+import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_create.js";
+import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
+import authentication from "../../modules/shared/authentification.js";
+import ResponsiveUI from "../../responsive/responsiveUI.js";
 var NodeInfosWidget = (function () {
     var self = {};
 
     self.initDialog = function (sourceLabel, divId, options, callback) {
+        ResponsiveUI.openDialogDiv(divId);
+        $("#" + divId)
+            .parent()
+            .show("fast", function () {
+                self.oldNodeInfosInit(sourceLabel, divId, options, callback);
+                $("#addPredicateButton").remove();
+                $("#deleteButton").remove();
+            });
+
+        //$(".ui-dialog-title")
+    };
+    self.oldNodeInfosInit = function (sourceLabel, divId, options, callback) {
         self.currentSource = sourceLabel;
         if (!options.noDialog) {
             $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
             $("#" + divId).dialog("open");
+            $("#" + divId).dialog({
+                close: function (event, ui) {
+                    window.scrollTo(0, 0);
+                    $("#addPredicateButton").remove();
+                    $("#deleteButton").remove();
+                },
+            });
+            $("#mainDialogDiv").parent().css("top", "20px");
+            $("#mainDialogDiv").parent().css("left", "20px");
         }
         $("#" + divId).load("snippets/nodeInfosWidget.html", function () {
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
+
+                load: function (event, ui) {},
                 activate: function (event, ui) {
-                    if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
-                        setTimeout(function () {
+                    $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
+
+                    setTimeout(function () {
+                        $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
+                        if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                             var source = self.currentSource;
                             source = Lineage_sources.mainSource;
                             Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
-                        }, 1000);
-                    }
+                        }
+                    }, 100);
                 },
             });
             $("#axiomsDrawGraphDiv").dialog({
@@ -48,7 +73,8 @@ var NodeInfosWidget = (function () {
                 width: 1000,
                 modal: false,
             });
-
+            $(".nodeInfosWidget_tabDiv").css("margin", "0px");
+            $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
             callback();
         });
     };
@@ -127,6 +153,10 @@ var NodeInfosWidget = (function () {
                         return alert(err);
                     }
                     self.showNodeInfosToolbar(options);
+
+                    $("#deleteButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
+                    $("#addPredicateButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
+                    $("#addPredicateButton").css("margin-left", "25px !important");
                 });
             }
         });
@@ -147,7 +177,7 @@ var NodeInfosWidget = (function () {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
                         return callbackSeries();
                     }
-                    var html = "<button onclick='NodeInfosWidget.showClassIndividuals()'>Individuals</button>";
+                    var html = "<button id='nodesInfos_individual_button' onclick='NodeInfosWidget.showClassIndividuals()'>Individuals</button>";
                     $("#nodeInfos_individualsDiv").html(html);
                     callbackSeries();
                 },
@@ -164,7 +194,7 @@ var NodeInfosWidget = (function () {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
                         return callbackSeries();
                     }
-                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfosWidget_InfosTabDiv", function (_err, _result) {
+                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfos_restrictionsDiv", function (_err, _result) {
                         callbackSeries();
                     });
                 },
@@ -187,34 +217,34 @@ var NodeInfosWidget = (function () {
         var str = "<div>";
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             str +=
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
+                "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
 
-            str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
-            str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='AxiomEditor.showDialog()'> Axiomatic Definiton </button>";
+            str += "<button id='deleteButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
+            str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
         }
 
         if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
             str +=
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
+                "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
+            str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
         }
-
-        str += "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;background-color: #e1ddd1;padding:5px';display:flex;>";
-
+        /*
         if (self.visitedNodes.length > 1) {
             str +=
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.showVisitedNode(-1)'> previous </button>" +
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.showVisitedNode(+1)'>  next </button>";
+                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(-1)'> previous </button>" +
+                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(+1)'>  next </button>";
         }
-
+        str += '  <span class="popupMenuItem" onclick="Lineage_axioms_create.showAdAxiomDialog (\'axioms_dialogDiv\');"> <b>Add Axiom</b></span>';
+        */
         str += "</div>";
 
         $("#" + self.currentNodeIdInfosDivId).prepend(str);
 
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             PredicatesSelectorWidget.load("sourceBrowser_addPropertyDiv", self.currentSource, {}, function () {
-                $("#editPredicate_controlsDiv").css("display", "block");
+                //$("#editPredicate_controlsDiv").css("display", "block");
                 $("#sourceBrowser_addPropertyDiv").css("display", "none");
             });
         }
@@ -352,25 +382,25 @@ defaultLang = 'en';*/
                     }
                 }
 
-                var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
+                var str = "<div class='NodesInfos_tableDiv'>" + "<table class='infosTable'>";
                 str +=
-                    "<tr><td class='detailsCellName'>UUID</td><td><a target='" +
+                    "<tr><td class='NodesInfos_CardId'>UUID</td><td><a target='" +
                     self.getUriTarget(nodeId) +
                     "' href='" +
                     nodeId +
                     "'>" +
                     nodeId +
                     "</a>" +
-                    "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' NodeInfosWidget.copyUri(\"" +
+                    "&nbsp;<button class='w3-button nodesInfos-iconsButtons ' style='font-size: 10px;margin-left:7px;' onclick=' NodeInfosWidget.copyUri(\"" +
                     nodeId +
-                    "\",$(this))'>copy</button>";
+                    "\",$(this))'><input type='image' src='./icons/CommonIcons/CopyIcon.png' ></button>";
                 ("</td></tr>");
                 str +=
-                    "<tr><td class='detailsCellName'>GRAPH</td><td>" +
+                    "<tr><td class='NodesInfos_CardId'>GRAPH</td><td>" +
                     graphUri +
-                    "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' NodeInfosWidget.copyUri(\"" +
+                    "&nbsp;<button class='w3-button nodesInfos-iconsButtons ' style='font-size: 10px;' onclick=' NodeInfosWidget.copyUri(\"" +
                     graphUri +
-                    "\",$(this))'>copy</button>";
+                    "\",$(this))'><input type='image' src='./icons/CommonIcons/CopyIcon.png' ></button>";
                 ("</td></tr>");
                 str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
@@ -381,11 +411,14 @@ defaultLang = 'en';*/
                         var propUri = self.propertiesMap.properties[key].propUri;
 
                         optionalStr +=
-                            "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' NodeInfosWidget.showModifyPredicateDialog(\"" +
+                            "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px;margin-left:7px;' onclick=' NodeInfosWidget.showModifyPredicateDialog(\"" +
                             predicateId +
-                            "\")'>edit</button>";
+                            "\")'><input type='image' src='./icons/CommonIcons/EditIcon.png' ></button>";
                         optionalStr +=
-                            "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" + " onclick='NodeInfosWidget.deletePredicate(\"" + predicateId + "\")'>X</button>";
+                            "&nbsp;<button class='w3-button nodesInfos-iconsButtons' style='font-size: 10px;'" +
+                            " onclick='NodeInfosWidget.deletePredicate(\"" +
+                            predicateId +
+                            "\")'><input type='image' src='./icons/CommonIcons/Erase.png' ></button>";
                     }
                     return optionalStr;
                 }
@@ -492,7 +525,7 @@ defaultLang = 'en';*/
                 str += "</table></div>";
 
                 str +=
-                    " <br><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;justify-content: space-evenly';>" +
+                    " <br><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;'>" +
                     "<div id='nodeInfos_restrictionsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
                     "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
                     "</div>";
@@ -516,19 +549,19 @@ defaultLang = 'en';*/
                         if (err) {
                             return callbackSeries(err);
                         }
-                        str += "<b>Restrictions </b> <div style='    background-color: beige;'> <table>";
+                        str += "<b class='nodesInfos_tiltles'>Restrictions </b> <div style=''> <table>";
                         result.forEach(function (item) {
                             str += "<tr class='infos_table'>";
 
-                            var propStr = "<span class='detailsCellName' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
+                            var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
 
-                            str += "<td class='detailsCellName'>" + propStr + "</td>";
+                            str += "<td class=''>" + propStr + "</td>";
 
                             var targetClassStr = "any";
                             if (item.value) {
-                                targetClassStr = "<span class='detailsCellName' onclick=' NodeInfosWidget.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
+                                targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
                             }
-                            str += "<td class='detailsCellValue'>" + targetClassStr + "</td>";
+                            str += "<td class=''>" + targetClassStr + "</td>";
 
                             str += "</tr>";
                         });
@@ -551,19 +584,19 @@ defaultLang = 'en';*/
                             if (err) {
                                 return callbackSeries(err);
                             }
-                            str += "<br><b>Inverse Restrictions </b> <div style='    background-color: beige;'> <table>";
+                            str += "<br><b class='nodesInfos_tiltles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table>";
                             result.forEach(function (item) {
                                 str += "<tr class='infos_table'>";
 
-                                var propStr = "<span class='detailsCellName' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
+                                var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
 
-                                str += "<td class='detailsCellName'>" + propStr + "</td>";
+                                str += "<td class=''>" + propStr + "</td>";
 
                                 var targetClassStr = "any";
                                 if (item.value) {
-                                    targetClassStr = "<span class='detailsCellName' onclick=' NodeInfosWidget.onClickLink(\"" + item.subject.value + "\")'>" + item.subjectLabel.value + "</span>";
+                                    targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.subject.value + "\")'>" + item.subjectLabel.value + "</span>";
                                 }
-                                str += "<td class='detailsCellValue'>" + targetClassStr + "</td>";
+                                str += "<td class=''>" + targetClassStr + "</td>";
 
                                 str += "</tr>";
                             });
@@ -602,17 +635,13 @@ defaultLang = 'en';*/
         var url = sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
             if (err) {
-                if (callback) {
-                    return callback(err);
-                }
+                return callback(err);
             }
 
             var data = result.results.bindings;
 
             if (data.length == 0) {
-                if (callback) {
-                    return callback();
-                }
+                return callback();
             } else {
                 var str = "<b>TypeOf </b><br><table>";
 
@@ -624,9 +653,7 @@ defaultLang = 'en';*/
                 str += "</table>";
                 $("#nodeInfos_individualsDiv").html(str);
             }
-            if (callback) {
-                callback();
-            }
+            if (callback) callback();
         });
     };
 
@@ -734,7 +761,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 self.newProperties[property] = value;
 
                 // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
-                self.drawCommonInfos(self.currentSource, self.currentNodeId, "nodeInfosWidget_InfosTabDiv", {}, function (err, result) {
+                self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "nodeInfosWidget_InfosTabDiv", {}, function (err, result) {
                     //  self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.push({

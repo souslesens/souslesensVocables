@@ -27,10 +27,15 @@ if (config.sentryDsnNode) {
 }
 
 // body parsers
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+
 //app.use(express.urlencoded({ extended: true }));
 //ajout CF
 app.use(express.urlencoded({ extended: true, limit: "20mb", parameterLimit: 10000 }));
+
+
+
+
 /*
 const bodyParser = require('body-parser');
 app.use(bodyParser.json({

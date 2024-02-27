@@ -3,7 +3,7 @@
 import Sparql_common from "./sparql_common.js";
 import Sparql_generic from "./sparql_generic.js";
 import Sparql_proxy from "./sparql_proxy.js";
-import Lineage_blend from "../tools/lineage/lineage_blend.js";
+import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -444,8 +444,8 @@ var Sparql_OWL = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
 
         var selectStr = " * ";
-        if (options.excludeType) {
-            selectStr = " ?subject ?subjectLabel";
+        if (true || options.excludeType) {
+            selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes)';
             for (var i = 1; i <= ancestorsDepth; i++) {
                 selectStr += " ?broader" + i + " ?broader" + i + "Label";
             }
@@ -700,10 +700,11 @@ var Sparql_OWL = (function () {
         if (options.excludeItself) {
             modifier = "+";
         }
-        var query =
+        var queryOld =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
             "SELECT distinct ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel " +
             // "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
             fromStr +
@@ -715,15 +716,30 @@ var Sparql_OWL = (function () {
             modifier +
             " ?superClass." +
             " ?superClass ^rdfs:subClassOf ?subClass." +
+            "optional{?superClass rdfs:label|skos:prefLabel ?superClassLabel}" +
             " ?subClass rdf:type ?subClassType. ?superClass rdf:type ?superClassType" +
             filterStr +
             " filter (?superClassType !=owl:Restriction)";
+
+        var filterStr = Sparql_common.setFilter("subject", classIds);
+
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
+            'SELECT distinct ?subject ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) ' +
+            fromStr +
+            "WHERE { \n" +
+            "  ?class rdf:type ?type. ?class rdfs:subClassOf*|rdf:type* ?superClass.\n" +
+            "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
+            "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
 
         if (options.filter) {
             query += options.filter;
         }
         if (options.withLabels) {
-            query += "OPTIONAL {?class rdfs: label classLabel }OPTIONAL {?subClass rdfs: label subClassLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
+            query += "OPTIONAL {?class rdfs:label|skos:prefLabel ?classLabel } OPTIONAL {?superClass rdfs:label|skos:prefLabel ?superClassLabel }";
         }
         query += filterStr;
 
@@ -748,7 +764,7 @@ var Sparql_OWL = (function () {
             classIds.forEach(function (id) {
                 hierarchies[id] = [];
                 result.results.bindings.forEach(function (item) {
-                    if (item.class.value == id) {
+                    if (item.subject.value == id) {
                         hierarchies[id].push(item);
                     }
                 });
@@ -800,6 +816,77 @@ var Sparql_OWL = (function () {
         });
     };
 
+    self.getFilteredTriples2 = function (sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
+        var filterStr = "";
+
+        if (subjectIds) {
+            filterStr += Sparql_common.setFilter("subject", subjectIds, null, options);
+        }
+        if (objectIds) {
+            filterStr += Sparql_common.setFilter("object", objectIds, null, options);
+        }
+        if (propertyIds) {
+            filterStr += Sparql_common.setFilter("prop", propertyIds, null, options);
+        }
+        var fromStr = "";
+        if (sourceLabel) {
+            self.graphUri = Config.sources[sourceLabel].graphUri;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+
+            fromStr = Sparql_common.getFromStr(sourceLabel, false, !options.withImports, options);
+        } else {
+            // to be  implemented
+        }
+        var sourceGraphUri = Config.sources[sourceLabel].graphUri;
+
+        var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
+
+        var selectStr = "select distinct * ";
+        if (options.distinct) {
+            selectStr = "select distinct " + options.distinct + " ";
+        }
+
+        if (options.filter) {
+            filterStr += " " + options.filter;
+        }
+
+        var query =
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            selectStr +
+            fromStr +
+            " WHERE{\n" +
+            "  { graph ?g{ ?object rdf:type ?objectType. OPTIONAL { ?object rdfs:label ?objectLabel.}}}\n" +
+            "   { graph ?g{  ?subject rdf:type ?subjectType. OPTIONAL { ?subject rdfs:label ?subjectLabel.}}}\n" +
+            "   { graph ?g{ ?prop ?x ?propType. OPTIONAL { ?prop rdfs:label ?propLabel.}}}\n" +
+            // "    { graph ?g{ ?prop rdf:type ?propType. OPTIONAL {?prop rdfs:label ?propLabel.}}\n" +
+            "  \n" +
+            "  {graph <" +
+            sourceGraphUri +
+            ">" +
+            "{?subject ?prop ?object.  " +
+            filterStr +
+            "  } " +
+            "}" +
+            "} ";
+        var limit = options.limit || Config.queryLimit;
+        query += " limit " + limit;
+
+        var url = self.sparql_url + "?format=json&query=";
+        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
+        if (self.no_params) {
+            url = self.sparql_url;
+        }
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, result.results.bindings);
+        });
+    };
+
     /**
      *
      *
@@ -847,10 +934,11 @@ var Sparql_OWL = (function () {
                 self.graphUri = Config.sources[sourceLabel].graphUri;
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-                fromStr = Sparql_common.getFromStr(sourceLabel, false, true, options);
+                fromStr = Sparql_common.getFromStr(sourceLabel, false, !options.withImports, options);
             } else {
                 // to be  implemented
             }
+            var sourceGraphUri = Config.sources[sourceLabel].graphUri;
 
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
 
@@ -1469,6 +1557,55 @@ var Sparql_OWL = (function () {
             }
         );
     };
+    self.getNodesOwlTypeMap = function (source, ids, callback) {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        var slices = common.array.slice(ids, 200);
+        var typesMap = [];
+        async.eachSeries(
+            slices,
+            function (slice, callbackEach) {
+                var filterStr = Sparql_common.setFilter("subject", slice);
+                var fromStr = Sparql_common.getFromStr(source);
+                var query =
+                    " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                    "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                    "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
+                    ' select  distinct ?subject (GROUP_CONCAT( distinct ?type;separator=",") as ?types) ' +
+                    fromStr +
+                    "   WHERE { ?subject rdf:type ?type. " +
+                    filterStr +
+                    " }";
+
+                query += " limit " + 10000 + " ";
+                self.sparql_url = Config.sources[source].sparql_server.url;
+                var url = self.sparql_url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, result) {
+                    if (err) {
+                        return callbackEach(err);
+                    }
+                    result.results.bindings.forEach(function (item) {
+                        var type = null;
+                        if (item.types.value.indexOf("NamedIndividual") > -1) {
+                            type = "NamedIndividual";
+                        }
+                        if (item.types.value.indexOf("Class") > -1) {
+                            type = "Class";
+                        }
+                        if (item.types.value.indexOf("Restriction") > -1) {
+                            type = "Restriction";
+                        }
+                        typesMap[item.subject.value] = type;
+                    });
+                    callbackEach();
+                });
+            },
+            function (err) {
+                return callback(err, typesMap);
+            }
+        );
+    };
 
     /**
      *
@@ -1826,7 +1963,7 @@ var Sparql_OWL = (function () {
             var triples = [];
             result.forEach(function (item) {
                 if (item.value && item.subject) {
-                    triples = triples.concat(Lineage_blend.getRestrictionTriples(item.value.value, item.subject.value, inversePropId));
+                    triples = triples.concat(Lineage_createRelation.getRestrictionTriples(item.value.value, item.subject.value, inversePropId));
                 }
             });
             var totalItems = 0;
@@ -2421,8 +2558,12 @@ var Sparql_OWL = (function () {
 
     self.copyUriTriplesFromSourceToSource = function (fromSource, toSource, subjectUri, callback) {
         self.getNodeInfos(fromSource, subjectUri, null, function (err, result) {
-            if (err) return callback(err);
-            if (result.length == 0) return callback("nothing to copy");
+            if (err) {
+                return callback(err);
+            }
+            if (result.length == 0) {
+                return callback("nothing to copy");
+            }
             var toStr = Sparql_common.getFromStr(toSource);
 
             var triples = [];

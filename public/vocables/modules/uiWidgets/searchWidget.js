@@ -8,6 +8,7 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import common from "../shared/common.js";
 import Export from "../shared/export.js";
 import PromptedSelectWidget from "./promptedSelectWidget.js";
+import NodeRelations_bot from "../bots/nodeRelations_bot.js";
 
 var SearchWidget = (function () {
     var self = {};
@@ -266,14 +267,14 @@ var SearchWidget = (function () {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
                     SearchWidget.currentTreeNode = obj.node;
-
-                    if (_options.selectTreeNodeFn) {
+                    return;
+                    /*  if (_options.selectTreeNodeFn) {
                         return _options.selectTreeNodeFn(event, obj);
-                    } else if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
-                        return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
+                    } else if (Config.tools[MainController.currentTool].controller.controller.selectTreeNodeFn) {
+                        return Config.tools[MainController.currentTool].controller.controller.selectTreeNodeFn(event, obj);
                     }
 
-                    self.editThesaurusConceptInfos(obj.node.data.source, obj.node);
+                    self.editThesaurusConceptInfos(obj.node.data.source, obj.node);*/
                 },
                 contextMenu: function () {
                     var contextMenuFn = null;
@@ -281,8 +282,8 @@ var SearchWidget = (function () {
                         return _options.contextMenu;
                     } else if (_options.contextMenuFn) {
                         return _options.contextMenuFn();
-                    } else if (Config.tools[MainController.currentTool].controller.contextMenuFn) {
-                        return Config.tools[MainController.currentTool].controller.contextMenuFn;
+                    } else if (Config.tools[MainController.currentTool].controller.controller.contextMenuFn) {
+                        return Config.tools[MainController.currentTool].controller.controller.contextMenuFn;
                     } else {
                         return self.getJstreeConceptsContextMenu();
                     }
@@ -342,7 +343,7 @@ var SearchWidget = (function () {
             }
 
             if (result.length == 0) {
-                Collection.currentCollectionFilter = null;
+                // Collection.currentCollectionFilter = null;
                 $("#waitImg").css("display", "none");
 
                 var html = "<div id='" + self.currentTargetDiv + "'>no data found</div>";
@@ -363,7 +364,7 @@ var SearchWidget = (function () {
                 jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
             }
             if (!options.selectTreeNodeFn) {
-                jsTreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn;
+                jsTreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.controller.selectTreeNodeFn;
             }
 
             jsTreeOptions.source = sourceLabel;
@@ -415,7 +416,8 @@ var SearchWidget = (function () {
             items.relations = {
                 label: "Relations...",
                 action: function (e) {
-                    Lineage_relations.showDrawRelationsDialog("Tree");
+                    NodeRelations_bot.start();
+                    // Lineage_relations.showDrawRelationsDialog("Tree");
                 },
             };
 

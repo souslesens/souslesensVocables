@@ -193,19 +193,14 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 //   var nodes = self.data.nodes.getIds();
                 var newNodes = [];
                 var fixed = false;
-                /*  if (params.event.srcEvent.altKey)
-    fixed = false;*/
+
                 newNodes.push({ id: nodeId, fixed: fixed });
                 self.data.nodes.update(newNodes);
             })
             .on("controlNodeDragging", function (params) {
                 self.currentDraggingMousePosition = params.pointer.DOM;
             })
-            .on("dragging", function (_params) {
-                /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
-    return false;
-    }*/
-            })
+            .on("dragging", function (_params) {})
             .on("dragEnd", function (/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
                 if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
                     var dropCtrlNodeId = self.network.getNodeAt(params.pointer.DOM);
@@ -1004,6 +999,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
             setTimeout(function () {
                 $("#graphDisplay_theme").remove();
+                $("#visjsConfigureDiv").parent().css("left", "20%");
                 $("#visjsConfigureDiv").prepend(
                     "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
                         "<select onchange='Lineage_sources.setTheme($(this).val())' >" +

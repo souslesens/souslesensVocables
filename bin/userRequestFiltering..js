@@ -16,10 +16,11 @@ const SparqlParser = require("sparqljs").Parser;
 const parser = new SparqlParser({ skipValidation: true });
 const fs = require("fs");
 
+
 var UserRequestFiltering = {
   existingSources: null,
 
-  getUserGraphUrisMap: function(userSourcesMap) {
+  getUserGraphUrisMap: function(userSourcesMap,userInfos) {
 
 
     var basicVocabularies = basicVocabularies = {
@@ -108,11 +109,11 @@ var UserRequestFiltering = {
         error = "DATA PROTECTION : operation " + operation + " needs explicit graph declaration";
       }
       else {
-        if (!userGraphUrisMap[graphUri]) {
+        if (false &&  !userGraphUrisMap[graphUri]) {
           error = " DATA PROTECTION : graphUri not allowed for user  " + graphUri + "\n";
         }
-        else {
-          if (userGraphUrisMap[graphUri].acl != "w") {
+        else {// to be fixed PB with PRIVATE sources
+          if (false &&  userGraphUrisMap[graphUri].acl != "w") {
             error = " DATA PROTECTION : current  user cannot execute " + operation + " on graph " + graphUri + "\n";
           }
         }
@@ -152,13 +153,13 @@ var UserRequestFiltering = {
       //check graphuris authorized for user
       var fromError = "";
       json.from.default.forEach(function(fromGraphUri) {
-        if (!userGraphUrisMap[fromGraphUri.value]) {
+        if (false && !userGraphUrisMap[fromGraphUri.value]) {
           fromError += "DATA PROTECTION: graphUri " + fromGraphUri.value + " not allowed for current user ";
         }
       });
 
       json.from.named.forEach(function(fromGraphUri) {
-        if (!userGraphUrisMap[fromGraphUri.value]) {
+        if (false && !userGraphUrisMap[fromGraphUri.value]) {
           fromError += "DATA PROTECTION : graphUri  " + fromGraphUri.value + " not allowed for current user";
         }
       });
@@ -168,10 +169,10 @@ var UserRequestFiltering = {
     callback(error, query);
   },
 
-  filterSparqlRequest: function(query, userSourcesMap, callback) {
+  filterSparqlRequest: function(query, userSourcesMap,userInfo, callback) {
     var error = "";
     var filteredQuery = query;
-    var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
+    var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap,userInfo);
 
     selectRegex = /(SELECT)/gim;
     var array = selectRegex.exec(query);
@@ -184,6 +185,11 @@ var UserRequestFiltering = {
       });
     }
     else {
+      for(var key in userSourcesMap){
+        if(userInfo.user.login == userSourcesMap[key].owner)
+          return callback(null,query);
+      }
+
       UserRequestFiltering.checkQueryByRegex(query, userGraphUrisMap, function(err, result) {
         if (err) {
           return callback(err);

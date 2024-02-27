@@ -1,6 +1,7 @@
 import KGcreator from "./KGcreator.js";
 import KGcreator_graph from "./KGcreator_graph.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
+import kgcreator_r from "../../../responsive/KGcreator/Kgcreator_r.js";
 
 var KGcreator_mappings = (function () {
     var self = {};
@@ -40,18 +41,21 @@ return alert("select a field (column)");
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
         $("#smallDialogDiv").css("height", "700px");
-        /* $("#smallDialogDiv").css('top','10%');
-        $("#smallDialogDiv").css('left','10%');*/
+        $("#smallDialogDiv").parent().css("left", "10%");
+        /*$("#smallDialogDiv").css('left','10%');*/
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
             $("#LinkColumn_rightPanel").show();
             $("#LinkColumn_basicTypeSelect").show();
             $("#LinkColumn_basicTypeSelect").parent().find("span").show();
+
             PredicatesSelectorWidget.load("LinkColumn_predicateSelectorDiv", self.currentSlsvSource, { "flex-direction": "column" }, function () {
                 $("#editPredicate_vocabularySelect2").css("display", "inline");
                 $("#editPredicate_vocabularySelect2").val("usual");
+                $("#smallDialogDiv").find("#editPredicate_mainDiv").css("flex-direction", "column");
                 PredicatesSelectorWidget.init(self.currentSlsvSource, function () {
                     PredicatesSelectorWidget.onSelectObjectFn = function (value) {};
                     PredicatesSelectorWidget.onSelectPropertyFn = function (value) {};
+                    $("#smallDialogDiv").find("#editPredicate_savePredicateButton").css("display", "none");
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
                         height: 600,
@@ -63,6 +67,7 @@ return alert("select a field (column)");
                         "is String <input type='checkbox' id='LinkColumn_isObjectStringCBX' /><br> " +
                         " lookup name <input id='LinkColumn_objectLookupName'/></div>";
                     $("#editPredicate_customContentDiv").html(html);
+                    //
 
                     $("#editPredicate_objectSelect").bind("change", function () {
                         KGcreator_mappings.onTripleModelSelect("o", $(this).val());
@@ -246,6 +251,7 @@ if (object.indexOf("http://") > 0 && object.indexOf("function") < 0) {
 tripleObj.objectIsSpecificUri = true;
 }*/
         self.updateColumnTriplesEditor(tripleObj);
+        self.saveColumnMappings(true);
     };
     self.addLookup = function () {
         var lookup = {
@@ -288,7 +294,7 @@ tripleObj.objectIsSpecificUri = true;
         if (!prefix) {
             return;
         }
-        var str = "if(mapping.isString && role=='o') return value; else return '" + prefix + "_'+value;";
+        var str = "if(mapping.isString && role=='o') return value; else return '" + prefix + "-'+value;";
         $("#KGcreator_fnBody").val(str);
     };
     self.testFunction = function () {
@@ -355,10 +361,10 @@ tripleObj.objectIsSpecificUri = true;
         var json = self.transformJsonEditor.get();
         KGcreator.currentConfig.currentMappings[self.currentTable].transform = json;
         KGcreator.saveDataSourceMappings();
-        $("#KGcreator_dialogDiv").dialog("close");
+        $("#smallDialogDiv").dialog("close");
     };
 
-    self.saveColumnMappings = function () {
+    self.saveColumnMappings = function (keepDialogOpen) {
         var columnNode = self.currentColumn.node;
         if (!KGcreator.currentConfig.currentMappings[columnNode.data.table]) {
             KGcreator.currentConfig.currentMappings[columnNode.data.table] = { tripleModels: [], transforms: [] };
@@ -384,7 +390,9 @@ tripleObj.objectIsSpecificUri = true;
             columnNode.data.classNode = KGcreator_graph.currentGraphNode.id;
             KGcreator_graph.drawColumnToClassGraph([columnNode]);
         }
-        $("#smallDialogDiv").dialog("close");
+        if (!keepDialogOpen) {
+            $("#smallDialogDiv").dialog("close");
+        }
     };
 
     self.saveTableMappings = function (tableId, tableMappings) {
@@ -413,7 +421,19 @@ tripleObj.objectIsSpecificUri = true;
         KGcreator.saveDataSourceMappings();
     };
 
-    self.setPredicatesBetweenColumnsInTable = function (columnFromData, columnToData, callback) {
+    self.joinColumns = function (columnFromData, columnToData, foreignKey, callback) {
+        var joins = {
+            fromTable: columnFromData.table,
+            toTable: columnToData.table,
+            fromColumn: foreignKey,
+            toColumn: columnToData.columnName,
+        };
+        KGcreator.rawConfig.databaseSources[KGcreator.currentConfig.currentDataSource.name].tableJoins.push(joins);
+        KGcreator.saveSlsvSourceConfig();
+        return callback();
+    };
+
+    self.setPredicatesBetweenColumnsInTable = function (columnFromData, columnToData, foreignKey, callback) {
         OntologyModels.registerSourcesModel(KGcreator.currentSlsvSource, function (err, result) {
             if (err) {
                 return alert(err.responseText);
@@ -424,6 +444,9 @@ tripleObj.objectIsSpecificUri = true;
             var constraints = OntologyModels.getClassesConstraints(KGcreator.currentSlsvSource, fromClass, toClass);
             var restrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, fromClass, toClass);
             var inverseRestrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, toClass, fromClass);
+
+            var targetColumnInTable = columnToData.columnName;
+            if (foreignKey) targetColumnInTable = foreignKey;
 
             var allConstraints = {};
             for (var key in constraints) {
@@ -443,21 +466,52 @@ tripleObj.objectIsSpecificUri = true;
                 }
                 return alert(message);
             } else {
-                if (callback) {
-                    return callback(null, allConstraints);
-                }
                 return SimpleListSelectorWidget.showDialog(
                     null,
                     function (callbackLoad) {
                         return callbackLoad(Object.keys(allConstraints));
                     },
+
                     function (selectedProperty) {
-                        if (confirm("link columns " + columnFromData.label + " to" + columnToData.label + " with property " + selectedProperty)) {
-                            var triple = {
-                                s: columnFromData.id,
-                                p: selectedProperty,
-                                o: columnToData.id,
-                            };
+                        if (!selectedProperty) return;
+
+                        //write the join between tables if foreignKey
+                        if (foreignKey) {
+                            self.joinColumns(columnFromData, columnToData, foreignKey, function (err, result) {
+                                if (err) return callback(err);
+                            });
+                        }
+
+                        if (inverseRestrictions[selectedProperty] && inverseRestrictions[selectedProperty].inverse) {
+                            if (confirm("link columns " + columnToData.label + " to" + columnFromData.label + " with property " + selectedProperty)) {
+                                var triple = {
+                                    s: targetColumnInTable,
+                                    p: selectedProperty,
+                                    o: columnFromData.columnName,
+                                };
+                                KGcreator.currentConfig.currentMappings[columnFromData.table].tripleModels.push(triple);
+                                KGcreator.saveDataSourceMappings(
+                                    KGcreator.currentSlsvSource,
+                                    KGcreator.currentConfig.currentDataSource.name,
+                                    KGcreator.currentConfig.currentMappings,
+                                    function (err, result) {}
+                                );
+                            }
+                        } else {
+                            if (confirm("link columns " + columnFromData.label + " to" + columnToData.label + " with property " + selectedProperty)) {
+                                var triple = {
+                                    s: columnFromData.columnName,
+                                    p: selectedProperty,
+                                    o: targetColumnInTable,
+                                };
+                                KGcreator.currentConfig.currentMappings[columnFromData.table].tripleModels.push(triple);
+                                KGcreator.saveDataSourceMappings(
+                                    KGcreator.currentSlsvSource,
+                                    KGcreator.currentConfig.currentDataSource.name,
+                                    KGcreator.currentConfig.currentMappings,
+                                    function (err, result) {}
+                                );
+                            }
                         }
                     }
                 );
@@ -478,6 +532,7 @@ tripleObj.objectIsSpecificUri = true;
         self.currentSlsvSource = KGcreator.currentSlsvSource;
         var table = node.data.id;
         $("#smallDialogDiv").dialog("open");
+        $("#smallDialogDiv").parent().css("left", "10%");
         $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/lookupDialog.html", function () {
@@ -493,12 +548,13 @@ tripleObj.objectIsSpecificUri = true;
         });
     };
 
-    self.showTranformsDialog = function (node) {
+    self.showTransformDialog = function (node) {
         PopupMenuWidget.hidePopup();
         self.currentSlsvSource = KGcreator.currentSlsvSource;
         var table = node.data.id;
         self.currentTable = table;
         $("#smallDialogDiv").dialog("open");
+        $("#smallDialogDiv").parent().css("left", "10%");
         $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/transformDialog.html", function () {

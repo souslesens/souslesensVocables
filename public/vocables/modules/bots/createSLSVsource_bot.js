@@ -9,21 +9,27 @@ import CommonBotFunctions from "./commonBotFunctions.js";
 var CreateSLSVsource_bot = (function () {
     var self = {};
 
-    self.title = "Create Source";
+    self.title = "OntoCreator";
 
     self.start = function () {
-        BotEngine.init(CreateSLSVsource_bot, null, function () {
+        BotEngine.init(CreateSLSVsource_bot, self.workflow, null, function () {
             self.params = { sourceLabel: "", graphUri: "", imports: [] };
-            BotEngine.currentObj = self.workflow;
-            BotEngine.nextStep(self.workflow);
+
+            BotEngine.nextStep();
         });
     };
-
+    self.loadingWorkflow = {
+        loadLineageFn: {},
+        /*  _OR: {
+            "Launch Lineage": { loadLineageFn: {} },
+            "Launch KGquery": { loadKGqueryFn: {} },
+        },*/
+    };
     self.workflowUpload = {
         _OR: {
-            "Upload graph from file": { uploadFromFileFn: { loadLineageFn: {} } },
-            "Upload graph from URL": { uploadFromUrlFn: { loadLineageFn: {} } },
-            Finish: { loadLineageFn: {} },
+            "Upload graph from file": { uploadFromFileFn: self.loadingWorkflow },
+            "Upload graph from URL": { uploadFromUrlFn: self.loadingWorkflow },
+            Finish: self.loadingWorkflow,
         },
     };
 
@@ -35,25 +41,8 @@ var CreateSLSVsource_bot = (function () {
     };
 
     self.workflow = {
-        createSLSVsourceFn: {
-            promptSourceNameFn: {
-                promptGraphUriFn: self.workflow2,
-            },
-        },
-    };
-
-    self.workflowTest = {
-        initFn: {
-            _OR: {
-                "create source": {
-                    createSLSVsourceFn: {
-                        promptSourceNameFn: {
-                            promptGraphUriFn: self.workflow2,
-                        },
-                    },
-                },
-                "import ontology": { uploadFromUrlFn: {} },
-            },
+        promptSourceNameFn: {
+            promptGraphUriFn: self.workflow2,
         },
     };
 
@@ -182,6 +171,17 @@ var CreateSLSVsource_bot = (function () {
             }
 
             url += "?tool=lineage&source=" + self.params.sourceLabel;
+            window.location.href = url;
+        },
+        loadKGqueryFn: function () {
+            var url = window.location.href;
+            url = url.replace("index_old.html", "");
+            var p = url.indexOf("?");
+            if (p > -1) {
+                url = url.substring(0, p);
+            }
+
+            url += "?tool=KGquery&source=" + self.params.sourceLabel;
             window.location.href = url;
         },
     };

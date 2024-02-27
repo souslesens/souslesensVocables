@@ -81,6 +81,21 @@ class DatabaseModel {
     };
 
     /**
+     * @param {string} identifier - a database identifier
+     * @returns {Database} - the database related to the specified identifier
+     */
+    getDatabase = async (identifier) => {
+        const databases = await this._read();
+
+        const filteredDatabases = databases.filter((db) => db.id === identifier);
+        if (filteredDatabases.length === 0) {
+            throw new Error("The database cannot be found", { cause: 404 });
+        }
+
+        return filteredDatabases[0];
+    };
+
+    /**
      * @returns {Promise<Record<string, string>[]>} - a list of database name
      */
     getDatabasesName = async () => {

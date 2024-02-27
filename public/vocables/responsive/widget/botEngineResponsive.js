@@ -217,14 +217,13 @@ var BotEngineResponsive = (function () {
         $("#bot_resourcesProposalSelect").unbind("click");
 
         $("#bot_resourcesProposalSelect").bind("click", function (evt) {
-            var x=evt
+            var x = evt;
 
             var text = $("#bot_resourcesProposalSelect option:selected").text();
             self.writeCompletedHtml(text + ":");
 
             var selectedValue = $(this).val();
-            if(evt.ctrlKey)
-                return;
+            if (evt.ctrlKey) return;
             if (callback) {
                 return callback(selectedValue);
             }

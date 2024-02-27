@@ -484,10 +484,9 @@ var Lineage_whiteboard = (function () {
                         return callbackEach(err);
                     }
 
-                    if(! Lineage_whiteboard.isResultAcceptable(result)){
+                    if (!Lineage_whiteboard.isResultAcceptable(result)) {
                         return callback();
                     }
-
 
                     var ids = [];
                     result.forEach(function (item) {
@@ -564,12 +563,12 @@ var Lineage_whiteboard = (function () {
 
     self.isResultAcceptable = function (result) {
         if (result.length > self.showLimit) {
-          alert("Too may nodes (" + result.length + "). Use a filering Query instead ");
-         return false
+            alert("Too may nodes (" + result.length + "). Use a filering Query instead ");
+            return false;
         }
-        if (result.length ==0) {
-            MainController.UI.message("no data found",true)
-            return false
+        if (result.length == 0) {
+            MainController.UI.message("no data found", true);
+            return false;
         }
         return true;
     };
@@ -729,7 +728,7 @@ var Lineage_whiteboard = (function () {
 
             if (self.lineageVisjsGraph.isGraphNotEmpty()) {
                 Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
-                GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas",false);
+                GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas", false);
             }
         });
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
@@ -1997,7 +1996,7 @@ var Lineage_whiteboard = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        if(! Lineage_whiteboard.isResultAcceptable(result)){
+                        if (!Lineage_whiteboard.isResultAcceptable(result)) {
                             return callbackSeries("no data found");
                         }
                         data = result;
@@ -2011,7 +2010,7 @@ var Lineage_whiteboard = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        if(! Lineage_whiteboard.isResultAcceptable(result)){
+                        if (!Lineage_whiteboard.isResultAcceptable(result)) {
                             return callbackSeries("no data found");
                         }
                         data = result;
@@ -2020,7 +2019,6 @@ var Lineage_whiteboard = (function () {
                 },
 
                 function (callbackSeries) {
-
                     Sparql_common.setSparqlResultPropertiesLabels(source, data, "prop", function (err, result2) {
                         if (err) {
                             return callback(err);
@@ -2269,7 +2267,7 @@ var Lineage_whiteboard = (function () {
                         return callback(null, result);
                     }
                 }
-                if(! Lineage_whiteboard.isResultAcceptable(result)){
+                if (!Lineage_whiteboard.isResultAcceptable(result)) {
                     return callback("no data found");
                 }
                 var visjsData = { nodes: [], edges: [] };

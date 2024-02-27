@@ -904,9 +904,6 @@ if (callback) return callback(err);
         return uri;
     };
 
-
-
-
     return self;
 })();
 

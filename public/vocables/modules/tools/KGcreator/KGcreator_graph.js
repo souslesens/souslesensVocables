@@ -616,7 +616,7 @@ var KGcreator_graph = (function () {
         $("#mainDialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function () {
             self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, { onclickFn: KGcreator_graph.onNodeClick });
             self.mappingVisjsGraph.draw();
-            GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas",false);
+            GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas", false);
             var options = {
                 mode: "tree",
             };

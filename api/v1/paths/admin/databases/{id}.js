@@ -4,7 +4,12 @@ module.exports = function () {
     let operations = { DELETE, GET, PUT };
 
     async function GET(req, res, next) {
-        res.status(400).json({ message: `Database with id ${req.params.id} was not found` });
+        try {
+            const database = await databaseModel.getDatabase(req.params.id);
+            res.status(200).json(database);
+        } catch (err) {
+            res.status(500).json({ message: err.message, status: err.cause });
+        }
     }
 
     GET.apiDoc = {

@@ -4,7 +4,6 @@
     </div>
     <input id="botPromptInput" autocomplete="off" class="w3-input w3-border w3-padding" style="width: 80%; margin-left: 10px; display: none" />
     <input type="hidden" id="botVarToFill" />
-    
 
     <div>
         <button id="resetButtonBot" class="slsv-invisible-button resetIcon" style="margin-top: 30px" onclick="BotEngine.reset()"></button>
@@ -14,14 +13,19 @@
     </div>
     <div style="display: flex; flex-direction: column; justify-content: center; width: 100%; margin-bottom: 20px">
         <!--<div id="botFilterProposalDiv">filter <input id="botFilterProposalInput" /></div>-->
-        
-        <div id="botFilterProposalDiv" class="input-group mb-3" style="width: 100%;margin-top: 20px;">
+
+        <div id="botFilterProposalDiv" class="input-group mb-3" style="width: 100%; margin-top: 20px">
             <div class="input-group-prepend">
                 <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
                     <button class="search-icon slsv-invisible-button" onclick="BotEngineResponsive.filterList(event)" style="margin-top: 4px; height: 20px; width: 20px"></button>
                 </div>
             </div>
-            <input id="botFilterProposalInput" style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px" value="" onkeyup="BotEngineResponsive.filterList(event)">
+            <input
+                id="botFilterProposalInput"
+                style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px"
+                value=""
+                onkeyup="BotEngineResponsive.filterList(event)"
+            />
         </div>
         <select id="bot_resourcesProposalSelect" size="10" multiple="multiple"></select>
     </div>

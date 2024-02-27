@@ -2,7 +2,7 @@ var BotEngineResponsive = (function () {
     var self = {};
     self.firstLoad = true;
     self.OrReturnValues = [];
-    self.lastFilterListStr='';
+    self.lastFilterListStr = "";
     self.init = function (botModule, initialWorkflow, options, callback) {
         if (!options) {
             options = {};
@@ -242,11 +242,13 @@ var BotEngineResponsive = (function () {
 
     self.filterList = function (evt) {
         //var str = $(this).val();
-        var str=$(evt.currentTarget).val();
-        if (!str && self.lastFilterListStr.length<str.length) return;
-        else{common.fillSelectOptions("bot_resourcesProposalSelect", self.currentList, false, "label", "id");}
-        if(str.length < 2 && self.lastFilterListStr.length<str.length)  return;
-        self.lastFilterListStr=str;
+        var str = $(evt.currentTarget).val();
+        if (!str && self.lastFilterListStr.length < str.length) return;
+        else {
+            common.fillSelectOptions("bot_resourcesProposalSelect", self.currentList, false, "label", "id");
+        }
+        if (str.length < 2 && self.lastFilterListStr.length < str.length) return;
+        self.lastFilterListStr = str;
         str = str.toLowerCase();
         var selection = [];
         self.currentList.forEach(function (item) {

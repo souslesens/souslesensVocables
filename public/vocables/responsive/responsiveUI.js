@@ -14,7 +14,7 @@ var ResponsiveUI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator"];
+    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
     self.smartPhoneScreen = null;
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
@@ -68,7 +68,6 @@ var ResponsiveUI = (function () {
     };
 
     self.resetWindowHeight = function () {
-        
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPannelWidth = $("#lateralPanelDiv").width();
         // Mobile format graph div reset
@@ -82,7 +81,7 @@ var ResponsiveUI = (function () {
             }
             self.smartPhoneScreen = false;
 
-            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth );
+            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth);
             $("#lateralPanelDiv").css("width", LateralPannelWidth);
         }
 
@@ -244,7 +243,9 @@ var ResponsiveUI = (function () {
         /*
         self.showDiv("mainDialogDiv");
         $("#mainDialogDiv").css("display", "block");*/
-        $("#" + "mainDialogDiv").parent().show();
+        $("#" + "mainDialogDiv")
+            .parent()
+            .show();
         $("#sourceSelector_searchInput").focus();
         if (resetAll) {
             Lineage_sources.loadedSources = {};
@@ -252,7 +253,7 @@ var ResponsiveUI = (function () {
         } else {
             var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
         }
-        SourceSelectorWidget.initWidget(null,"mainDialogDiv",true,onSourceSelect,null,null,function(){
+        SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
             /*$("#mainDialogDiv")
                 .parent()

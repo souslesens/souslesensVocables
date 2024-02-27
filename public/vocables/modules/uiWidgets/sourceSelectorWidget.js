@@ -6,7 +6,7 @@ var SourceSelectorWidget = (function () {
     var self = {};
     self.currentTreeDiv = null;
 
-    self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options,callback) {
+    self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options, callback) {
         if (self.currentTreeDiv != null) {
             if ($("#" + self.currentTreeDiv).jstree() != undefined) {
                 try {
@@ -60,8 +60,8 @@ var SourceSelectorWidget = (function () {
 
             if (isDialog) {
                 $("#" + targetDivId).dialog("open");
-            } 
-            if(callback){
+            }
+            if (callback) {
                 callback();
             }
         });
@@ -86,10 +86,9 @@ var SourceSelectorWidget = (function () {
                 });
             }
         });
-        var sources=Object.assign({}, Config.sources);
+        var sources = Object.assign({}, Config.sources);
         delete sources._defaultSource;
-        
-        
+
         Object.keys(sources)
             .sort()
             .forEach(function (sourceLabel, index) {

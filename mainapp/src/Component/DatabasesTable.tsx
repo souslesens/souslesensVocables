@@ -39,10 +39,8 @@ import * as z from "zod";
 
 import { useModel } from "../Admin";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
-<<<<<<< HEAD
-=======
 import { PasswordField } from "./PasswordField";
->>>>>>> 571e7551 (feat(mainapp): add the PasswordField component to the configEditor)
+import { TestingButton } from "./TestingButton";
 import {
     addDatabase,
     Database,
@@ -303,7 +301,18 @@ const DatabasesTable = () => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                            <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>Name</TableSortLabel>
+                                            <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                                                Name
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Driver
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Test
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Actions
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -318,8 +327,10 @@ const DatabasesTable = () => {
                                                         <Chip label={database.driver} size="small" />
                                                     </TableCell>
                                                     <TableCell align="center">
+                                                        <TestingButton id={database.id} variant="contained" />
+                                                    </TableCell>
+                                                    <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <Button variant="contained" color="success">Test</Button>
                                                             <DatabaseFormDialog database={database} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => deleteDatabase(database, updateModel)} />
                                                         </Stack>

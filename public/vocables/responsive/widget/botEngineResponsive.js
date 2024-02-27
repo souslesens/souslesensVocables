@@ -2,6 +2,7 @@ var BotEngineResponsive = (function () {
     var self = {};
     self.firstLoad = true;
     self.OrReturnValues = [];
+    self.lastFilterListStr='';
     self.init = function (botModule, initialWorkflow, options, callback) {
         if (!options) {
             options = {};
@@ -60,7 +61,7 @@ var BotEngineResponsive = (function () {
     };
 
     self.nextStep = function (returnValue, varToFill) {
-        $("#botFilterProposalDiv").css("display", "none");
+        $("#botFilterProposalDiv").hide();
         BotEngine.history.push(JSON.parse(JSON.stringify(BotEngine.currentObj)));
         BotEngine.history.currentIndex += 1;
         var keys = Object.keys(BotEngine.currentObj);
@@ -212,7 +213,7 @@ var BotEngineResponsive = (function () {
 
         $("#bot_resourcesProposalSelect").css("display", "block");
         self.currentList = values;
-        if (values.length > 20) $("#botFilterProposalDiv").css("display", "block");
+        if (values.length > 20) $("#botFilterProposalDiv").show();
         common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
         $("#bot_resourcesProposalSelect").unbind("click");
 
@@ -240,8 +241,12 @@ var BotEngineResponsive = (function () {
     };
 
     self.filterList = function (evt) {
-        var str = $(this).val();
-        if (!str || str.length < 2) return;
+        //var str = $(this).val();
+        var str=$(evt.currentTarget).val();
+        if (!str && self.lastFilterListStr.length<str.length) return;
+        else{common.fillSelectOptions("bot_resourcesProposalSelect", self.currentList, false, "label", "id");}
+        if(str.length < 2 && self.lastFilterListStr.length<str.length)  return;
+        self.lastFilterListStr=str;
         str = str.toLowerCase();
         var selection = [];
         self.currentList.forEach(function (item) {

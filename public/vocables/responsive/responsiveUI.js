@@ -244,12 +244,24 @@ var ResponsiveUI = (function () {
         /*
         self.showDiv("mainDialogDiv");
         $("#mainDialogDiv").css("display", "block");*/
-        $("#" + "mainDialogDiv")
-            .parent()
-            .show();
+        $("#" + "mainDialogDiv").parent().show();
         $("#sourceSelector_searchInput").focus();
-
-        $("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
+        if (resetAll) {
+            Lineage_sources.loadedSources = {};
+            var onSourceSelect = ResponsiveUI.onSourceSelect;
+        } else {
+            var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
+        }
+        SourceSelectorWidget.initWidget(null,"mainDialogDiv",true,onSourceSelect,null,null,function(){
+            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
+            /*$("#mainDialogDiv")
+                .parent()
+                .find(".ui-dialog-titlebar-close")
+                .on("click", function () {
+                    $("#mainDialogDiv").parent().hide();
+                });*/
+        });
+        /*$("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
             $("#mainDialogDiv")
                 .parent()
@@ -265,7 +277,7 @@ var ResponsiveUI = (function () {
                 var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
             }
             SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
-        });
+        });*/
     };
     self.openDialogDiv = function (div) {
         //$("#mainDialogDiv").css('width', 'auto');

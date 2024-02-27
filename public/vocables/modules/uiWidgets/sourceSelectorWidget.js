@@ -6,7 +6,7 @@ var SourceSelectorWidget = (function () {
     var self = {};
     self.currentTreeDiv = null;
 
-    self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options) {
+    self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options,callback) {
         if (self.currentTreeDiv != null) {
             if ($("#" + self.currentTreeDiv).jstree() != undefined) {
                 try {
@@ -24,8 +24,25 @@ var SourceSelectorWidget = (function () {
         var jsTreeOptions = options;
         jsTreeOptions.selectTreeNodeFn = selectTreeNodeFn;
         MainController.UI.showHideRightPanel("hide");
-        $("#" + targetDivId).load("snippets/sourceSelector.html", function (err) {
-            self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
+        /*$("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
+            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
+            $("#mainDialogDiv")
+                .parent()
+                .find(".ui-dialog-titlebar-close")
+                .on("click", function () {
+                    $("#mainDialogDiv").parent().hide();
+                });
+
+            if (resetAll) {
+                Lineage_sources.loadedSources = {};
+                var onSourceSelect = ResponsiveUI.onSourceSelect;
+            } else {
+                var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
+            }
+            SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
+        });*/
+        $("#" + targetDivId).load("./responsive/lineage/html/SourceDiv.html", function (err) {
+            self.loadSourcesTreeDiv("sourcesSelectorDiv", jsTreeOptions);
             $("#sourceSelector_searchInput").focus();
             //  $("#sourceSelector_SearchSourceInput");
             $("#sourceSelector_validateButton").bind("click", function () {
@@ -43,7 +60,9 @@ var SourceSelectorWidget = (function () {
 
             if (isDialog) {
                 $("#" + targetDivId).dialog("open");
-            } else {
+            } 
+            if(callback){
+                callback();
             }
         });
     };

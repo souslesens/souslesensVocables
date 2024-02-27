@@ -44,16 +44,14 @@ module.exports = function() {
 
     ///// POST api/v1/sources
     async function POST(req, res, next) {
-        var model;
-        if (req.body.model.compressed) {
-var xx=fflate.strToU8(req.body.model.compressed)
-            const decompressed = fflate.decompressSync(xx);
-            model = JSON.parse(decompressed);
-
+        if (req.body.key) {
+            if (!ontologyModelsCache[req.body.source]) {
+                ontologyModelsCache[req.body.source] = {};
+            }
+            ontologyModelsCache[req.body.source][req.body.key] =JSON.parse( req.body.model);
         } else {
-            model = req.body.model;
+            ontologyModelsCache[req.body.source] = req.body.model;
         }
-        ontologyModelsCache[req.body.source] = model;
 
 
         return processResponse(res, null, "done");
@@ -75,8 +73,12 @@ var xx=fflate.strToU8(req.body.model.compressed)
                             type: "string"
                         },
                         model: {
-                            type: "object"
-                        }
+                            type: "string"
+                        },
+                        key: {
+                            type: "string"
+                        },
+
                     }
                 }
             }

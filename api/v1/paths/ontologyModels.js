@@ -1,11 +1,12 @@
 const { responseSchema, processResponse } = require("./utils");
+
 var ontologyModelsCache = {};
-module.exports = function () {
+module.exports = function() {
     let operations = {
         GET,
         POST,
         DELETE,
-        PUT,
+        PUT
     };
 
     ///// GET api/v1/sources
@@ -28,22 +29,31 @@ module.exports = function () {
                 description: "source",
                 type: "string",
                 in: "query",
-                required: true,
-            },
+                required: true
+            }
         ],
         responses: {
             200: {
                 description: "Results",
                 schema: {
-                    type: "object",
-                },
-            },
-        },
+                    type: "object"
+                }
+            }
+        }
     };
 
     ///// POST api/v1/sources
     async function POST(req, res, next) {
-        ontologyModelsCache[req.body.source] = req.body.model;
+        if (req.body.key) {
+            if (!ontologyModelsCache[req.body.source]) {
+                ontologyModelsCache[req.body.source] = {};
+            }
+            ontologyModelsCache[req.body.source][req.body.key] =JSON.parse( req.body.model);
+        } else {
+            ontologyModelsCache[req.body.source] = req.body.model;
+        }
+
+
         return processResponse(res, null, "done");
     }
 
@@ -60,24 +70,28 @@ module.exports = function () {
                     type: "object",
                     properties: {
                         source: {
-                            type: "string",
+                            type: "string"
                         },
                         model: {
-                            type: "object",
+                            type: "string"
                         },
-                    },
-                },
-            },
+                        key: {
+                            type: "string"
+                        },
+
+                    }
+                }
+            }
         ],
 
         responses: {
             200: {
                 description: "Results",
                 schema: {
-                    type: "object",
-                },
-            },
-        },
+                    type: "object"
+                }
+            }
+        }
     };
     DELETE.apiDoc = {
         summary: "delete ontology model",
@@ -90,17 +104,17 @@ module.exports = function () {
                 description: "source",
                 type: "string",
                 in: "query",
-                required: false,
-            },
+                required: false
+            }
         ],
         responses: {
             200: {
                 description: "Results",
                 schema: {
-                    type: "object",
-                },
-            },
-        },
+                    type: "object"
+                }
+            }
+        }
     };
 
     ///// POST api/v1/sources
@@ -127,27 +141,27 @@ module.exports = function () {
                     type: "object",
                     properties: {
                         source: {
-                            type: "string",
+                            type: "string"
                         },
 
                         data: {
-                            type: "object",
+                            type: "object"
                         },
                         options: {
-                            type: "object",
-                        },
-                    },
-                },
-            },
+                            type: "object"
+                        }
+                    }
+                }
+            }
         ],
         responses: {
             200: {
                 description: "Results",
                 schema: {
-                    type: "object",
-                },
-            },
-        },
+                    type: "object"
+                }
+            }
+        }
     };
 
     async function PUT(req, res, next) {
@@ -156,7 +170,7 @@ module.exports = function () {
         } else {
             for (var entryType in req.body.data) {
                 for (var id in req.body.data[entryType]) {
-                    if (req.body.options  && req.body.options.remove == "true") {
+                    if (req.body.options && req.body.options.remove == "true") {
                         delete ontologyModelsCache[req.body.source][entryType][req.body.data[entryType][id]];
                     } else {
                         if (!ontologyModelsCache[req.body.source][entryType]) {

@@ -214,12 +214,17 @@ var BotEngineResponsive = (function () {
         self.currentList = values;
         if (values.length > 20) $("#botFilterProposalDiv").css("display", "block");
         common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
-        $("#bot_resourcesProposalSelect").unbind("change");
-        $("#bot_resourcesProposalSelect").bind("change", function () {
+        $("#bot_resourcesProposalSelect").unbind("click");
+
+        $("#bot_resourcesProposalSelect").bind("click", function (evt) {
+            var x=evt
+
             var text = $("#bot_resourcesProposalSelect option:selected").text();
             self.writeCompletedHtml(text + ":");
 
             var selectedValue = $(this).val();
+            if(evt.ctrlKey)
+                return;
             if (callback) {
                 return callback(selectedValue);
             }

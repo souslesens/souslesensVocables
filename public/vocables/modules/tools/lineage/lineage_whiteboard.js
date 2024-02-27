@@ -483,14 +483,11 @@ var Lineage_whiteboard = (function () {
                     if (err) {
                         return callbackEach(err);
                     }
-                    if (result.length == 0) {
-                        MainController.UI.message("No result ", true);
-                        return callbackEach();
+
+                    if(! Lineage_whiteboard.isResultAcceptable(result)){
+                        return callback();
                     }
 
-                    if (options.output != "table") {
-                        result = Lineage_whiteboard.truncateResultToVisGraphLimit(result);
-                    }
 
                     var ids = [];
                     result.forEach(function (item) {
@@ -565,16 +562,16 @@ var Lineage_whiteboard = (function () {
         );
     };
 
-    self.truncateResultToVisGraphLimit = function (result) {
+    self.isResultAcceptable = function (result) {
         if (result.length > self.showLimit) {
-            var ok = confirm("Too may nodes (" + result.length + ")  .Only  " + Lineage_whiteboard.showLimit + " will be displayed", true);
-            if (ok) {
-                result = result.slice(0, self.showLimit);
-            } else {
-                result = [];
-            }
+          alert("Too may nodes (" + result.length + "). Use a filering Query instead ");
+         return false
         }
-        return result;
+        if (result.length ==0) {
+            MainController.UI.message("no data found",true)
+            return false
+        }
+        return true;
     };
 
     self.initWhiteBoard = function (force) {
@@ -2000,8 +1997,8 @@ var Lineage_whiteboard = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        if (options.output == "graph") {
-                            result = Lineage_whiteboard.truncateResultToVisGraphLimit(result);
+                        if(! Lineage_whiteboard.isResultAcceptable(result)){
+                            return callbackSeries("no data found");
                         }
                         data = result;
                         callbackSeries();
@@ -2014,8 +2011,8 @@ var Lineage_whiteboard = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        if (options.output == "graph") {
-                            result = Lineage_whiteboard.truncateResultToVisGraphLimit(result);
+                        if(! Lineage_whiteboard.isResultAcceptable(result)){
+                            return callbackSeries("no data found");
                         }
                         data = result;
                         callbackSeries();
@@ -2023,9 +2020,7 @@ var Lineage_whiteboard = (function () {
                 },
 
                 function (callbackSeries) {
-                    if (false) {
-                        return callbackSeries();
-                    }
+
                     Sparql_common.setSparqlResultPropertiesLabels(source, data, "prop", function (err, result2) {
                         if (err) {
                             return callback(err);
@@ -2274,8 +2269,8 @@ var Lineage_whiteboard = (function () {
                         return callback(null, result);
                     }
                 }
-                if (options.output != "table") {
-                    result = Lineage_whiteboard.truncateResultToVisGraphLimit(result);
+                if(! Lineage_whiteboard.isResultAcceptable(result)){
+                    return callback("no data found");
                 }
                 var visjsData = { nodes: [], edges: [] };
                 var existingNodes = options.output == "table" ? {} : self.lineageVisjsGraph.getExistingIdsMap();

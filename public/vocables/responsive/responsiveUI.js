@@ -68,6 +68,7 @@ var ResponsiveUI = (function () {
     };
 
     self.resetWindowHeight = function () {
+        
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPannelWidth = $("#lateralPanelDiv").width();
         // Mobile format graph div reset
@@ -81,13 +82,12 @@ var ResponsiveUI = (function () {
             }
             self.smartPhoneScreen = false;
 
-            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
+            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth );
             $("#lateralPanelDiv").css("width", LateralPannelWidth);
         }
 
-        /*$("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 1);
-        $("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);*/
-
+        $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 7);
+        //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
     self.replaceFile = function (file1, file2) {

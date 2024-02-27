@@ -122,7 +122,7 @@ var ResponsiveUI = (function () {
         }
         self.currentTool = toolId;
 
-        if (toolId != "lineage") {
+        if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
             Lineage_sources.registerSource = self.registerSourceWithoutImports;
         }
 

@@ -40,16 +40,8 @@ import * as z from "zod";
 import { useModel } from "../Admin";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
-import {
-    addDatabase,
-    Database,
-    DatabaseSchema,
-    defaultDatabase,
-    deleteDatabase,
-    editDatabase,
-    SourceAccessControl,
-} from "../Database";
-import { style } from "../Utils";
+import { addDatabase, Database, DatabaseSchema, defaultDatabase, deleteDatabase, editDatabase, SourceAccessControl } from "../Database";
+import { TestingButton } from "./TestingButton";
 
 const enum Type {
     ResetDatabase,
@@ -297,6 +289,9 @@ const DatabasesTable = () => {
                                             Driver
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Test
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
                                             Actions
                                         </TableCell>
                                     </TableRow>
@@ -312,10 +307,10 @@ const DatabasesTable = () => {
                                                         <Chip label={database.driver} size="small" />
                                                     </TableCell>
                                                     <TableCell align="center">
+                                                        <TestingButton id={database.id} variant="contained" />
+                                                    </TableCell>
+                                                    <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <Button variant="contained" color="success">
-                                                                Test
-                                                            </Button>
                                                             <DatabaseFormDialog database={database} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => deleteDatabase(database, updateModel)} />
                                                         </Stack>

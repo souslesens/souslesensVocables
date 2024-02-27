@@ -86,7 +86,11 @@ var SourceSelectorWidget = (function () {
                 });
             }
         });
-        Object.keys(Config.sources)
+        var sources=Object.assign({}, Config.sources);
+        delete sources._defaultSource;
+        
+        
+        Object.keys(sources)
             .sort()
             .forEach(function (sourceLabel, index) {
                 //  self.initControllers();

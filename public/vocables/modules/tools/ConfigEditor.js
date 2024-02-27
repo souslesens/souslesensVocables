@@ -20,7 +20,7 @@ var ConfigEditor = (function () {
 
             $("#mainDialogDiv").dialog("option", "title", "Config Editor");
             $("#mainDialogDiv").parent().css("left", "100px");
-
+            $("#mainDialogDiv").css("width", "1100px");
             $("#mainDialogDiv").dialog({
                 close: function (event, ui) {
                     self.umountKGUploadApp();

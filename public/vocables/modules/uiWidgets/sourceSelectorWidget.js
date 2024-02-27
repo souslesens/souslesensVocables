@@ -24,12 +24,27 @@ var SourceSelectorWidget = (function () {
         var jsTreeOptions = options;
         jsTreeOptions.selectTreeNodeFn = selectTreeNodeFn;
         MainController.UI.showHideRightPanel("hide");
-      //  $("#sourceSelector_searchInput").remove()
-        $("#" + targetDivId).load("snippets/sourceSelector.html", function (err) {
+        /*$("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
+            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
+            $("#mainDialogDiv")
+                .parent()
+                .find(".ui-dialog-titlebar-close")
+                .on("click", function () {
+                    $("#mainDialogDiv").parent().hide();
+                });
 
-            self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
+            if (resetAll) {
+                Lineage_sources.loadedSources = {};
+                var onSourceSelect = ResponsiveUI.onSourceSelect;
+            } else {
+                var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
+            }
+            SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
+        });*/
+        $("#" + targetDivId).load("./responsive/lineage/html/SourceDiv.html", function (err) {
+            self.loadSourcesTreeDiv("sourcesSelectorDiv", jsTreeOptions);
             $("#sourceSelector_searchInput").focus();
-          //  $("#sourceSelector_searchInput").unbind("keydown");
+            //  $("#sourceSelector_SearchSourceInput");
             $("#sourceSelector_validateButton").bind("click", function () {
                 okButtonValidateFn();
                 if (isDialog) {
@@ -167,7 +182,7 @@ var SourceSelectorWidget = (function () {
      */
     self.loadSourcesTreeDiv = function (treeDiv, jstreeOptions, callback) {
         if (!jstreeOptions) {
-           jstreeOptions = {};
+            optiojstreeOptionsns = {};
         }
 
         var treeData = self.getSourcesJstreeData();
@@ -186,10 +201,6 @@ var SourceSelectorWidget = (function () {
         if (!jstreeOptions.onOpenNodeFn) {
             jstreeOptions.onOpenNodeFn = self.defaultOpenNodeFn;
         }
-
-        $("#sourceSelector_searchInput").focus()
-
-
 
         $("#sourceSelector_searchInput").bind("keydown", null, function () {
             if (event.keyCode != 13 && event.keyCode != 9) {

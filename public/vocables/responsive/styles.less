@@ -59,7 +59,10 @@
 @resetIcon: "../icons/KGATheme/ResetIcon-KGA.png";
 @previousIcon: "../icons/KGATheme/PreviousIcon-KGA.png";
 @isDarkTheme: false;
-
+@whiteBoardIcon: "../icons/CommonIcons/WhiteboardIcon.png";
+@propertiesIcon: "../icons/CommonIcons/propertiesIcon.png";
+@containersIcon: "../icons/CommonIcons/ContainerIcon.png";
+@classesIcon: "../icons/CommonIcons/classesIcon.png";
 * {
     color: if((@isDarkTheme=true), white, black);
 }
@@ -260,4 +263,11 @@
 
 path {
     color: inherit;
+}
+
+.ui-widget-content a {
+    color: unset;
+}
+#KGcreator_infosDiv {
+    color: black;
 }

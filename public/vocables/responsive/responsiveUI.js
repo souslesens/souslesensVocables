@@ -14,7 +14,7 @@ var ResponsiveUI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator"];
+    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
     self.smartPhoneScreen = null;
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
@@ -81,13 +81,12 @@ var ResponsiveUI = (function () {
             }
             self.smartPhoneScreen = false;
 
-            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 1);
+            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth);
             $("#lateralPanelDiv").css("width", LateralPannelWidth);
         }
 
-        /*$("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 1);
-        $("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);*/
-
+        $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 7);
+        //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
     self.replaceFile = function (file1, file2) {
@@ -122,7 +121,7 @@ var ResponsiveUI = (function () {
         }
         self.currentTool = toolId;
 
-        if (toolId != "lineage") {
+        if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
             Lineage_sources.registerSource = self.registerSourceWithoutImports;
         }
 
@@ -248,8 +247,22 @@ var ResponsiveUI = (function () {
             .parent()
             .show();
         $("#sourceSelector_searchInput").focus();
-
-        $("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
+        if (resetAll) {
+            Lineage_sources.loadedSources = {};
+            var onSourceSelect = ResponsiveUI.onSourceSelect;
+        } else {
+            var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
+        }
+        SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
+            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
+            /*$("#mainDialogDiv")
+                .parent()
+                .find(".ui-dialog-titlebar-close")
+                .on("click", function () {
+                    $("#mainDialogDiv").parent().hide();
+                });*/
+        });
+        /*$("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
             $("#mainDialogDiv")
                 .parent()
@@ -265,7 +278,7 @@ var ResponsiveUI = (function () {
                 var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
             }
             SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
-        });
+        });*/
     };
     self.openDialogDiv = function (div) {
         //$("#mainDialogDiv").css('width', 'auto');
@@ -428,8 +441,19 @@ var ResponsiveUI = (function () {
         if (theme) {
             if (theme["@isDarkTheme"]) {
                 Lineage_whiteboard.defaultNodeFontColor = "white";
+
+                if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                    Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color = "white";
+                    Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
+                    Lineage_r.showHideEditButtons(self.source);
+                }
             } else {
                 Lineage_whiteboard.defaultNodeFontColor = "#343434";
+                if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                    Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color = "#343434";
+                    Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
+                    Lineage_r.showHideEditButtons(self.source);
+                }
             }
         }
     };

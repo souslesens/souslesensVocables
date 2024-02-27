@@ -149,7 +149,7 @@ var BotEngine = (function () {
         common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
         $("#bot_resourcesProposalSelect").unbind("change");
         $("#bot_resourcesProposalSelect").bind("change", function (evt) {
-          var x=evt
+            var x = evt;
             var text = $("#bot_resourcesProposalSelect option:selected").text();
             self.writeCompletedHtml(text + ":");
 

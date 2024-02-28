@@ -5,8 +5,7 @@ import common from "../shared/common.js";
 var SourceSelectorWidget = (function () {
     var self = {};
     self.currentTreeDiv = null;
-
-    self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options) {
+self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options, callback) {
         if (self.currentTreeDiv != null) {
             if ($("#" + self.currentTreeDiv).jstree() != undefined) {
                 try {
@@ -60,7 +59,9 @@ var SourceSelectorWidget = (function () {
 
             if (isDialog) {
                 $("#" + targetDivId).dialog("open");
-            } else {
+            }
+            if (callback) {
+                callback();
             }
         });
     };

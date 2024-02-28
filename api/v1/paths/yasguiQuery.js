@@ -3,52 +3,44 @@ const httpProxy = require("../../../bin/httpProxy.");
 const ConfigManager = require("../../../bin/configManager.");
 const UserRequestFiltering = require("../../../bin/userRequestFiltering.");
 
-module.exports = function () {
+module.exports = function() {
     let operations = {
-        POST,
+        POST
     };
 
     async function POST(req, res, next) {
         try {
             let query = req.body.query;
             const headers = {};
-            if (req.query.graphUri) query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");
+            if (req.query.graphUri) {
+                query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");
+            }
 
             if (req.query.method == "POST") {
                 headers["Accept"] = "application/sparql-results+json";
                 headers["Content-Type"] = "application/x-www-form-urlencoded";
 
                 var params = { query: query };
-
                 if (ConfigManager.config && req.query.url.indexOf(ConfigManager.config.sparql_server.url) == 0) {
                     params.auth = {
                         user: ConfigManager.config.sparql_server.user,
                         pass: ConfigManager.config.sparql_server.password,
-                        sendImmediately: false,
+                        sendImmediately: false
                     };
-
-                    ConfigManager.getUserSources(req, res, function (err, userSources) {
+                    ConfigManager.getUserSources(req, res, function(err, userSources) {
                         if (err) {
                             return processResponse(res, err, userSources);
                         }
-                        ConfigManager.getUser(req, res, function (err, userInfo) {
-                            if (err) {
-                                return res.status(400).json({ error: err });
+
+                        UserRequestFiltering.filterSparqlRequest(req.body.query, userSources, null, function(parsingError, filteredQuery) {
+                            if (parsingError) {
+                                return processResponse(res, parsingError, null);
                             }
-                            if (userInfo.user.groups.includes("admin")) {
-                                httpProxy.post(req.query.url, headers, params, function (err, result) {
-                                    processResponse(res, err, result);
-                                });
-                            } else {
-                                UserRequestFiltering.filterSparqlRequest(req.body.query, userSources, userInfo,function (parsingError, filteredQuery) {
-                                    if (parsingError) {
-                                        return processResponse(res, parsingError, null);
-                                    }
-                                    httpProxy.post(req.query.url, headers, params, function (err, result) {
-                                        processResponse(res, err, result);
-                                    });
-                                });
-                            }
+                            httpProxy.post(req.query.url, headers, params, function(err, result) {
+                                processResponse(res, err, result);
+                            });
+
+
                         });
                     });
                 }
@@ -59,8 +51,10 @@ module.exports = function () {
                 var query2 = encodeURIComponent(query);
                 query2 = query2.replace(/%2B/g, "+").trim();
                 var url = req.query.url + "?format=json&query=" + query2;
-                httpProxy.get(url, headers, function (err, result) {
-                    if (result && typeof result === "string") result = JSON.parse(result.trim());
+                httpProxy.get(url, headers, function(err, result) {
+                    if (result && typeof result === "string") {
+                        result = JSON.parse(result.trim());
+                    }
                     processResponse(res, err, result);
                 });
             }
@@ -68,6 +62,7 @@ module.exports = function () {
             next(err);
         }
     }
+
     POST.apiDoc = {
         summary: "Send a SPARQL query to a different domain",
         security: [{ restrictLoggedUser: [] }],
@@ -76,22 +71,22 @@ module.exports = function () {
             {
                 in: "query",
                 name: "url",
-                type: "string",
+                type: "string"
             },
             {
                 in: "query",
                 name: "graphUri",
-                type: "string",
+                type: "string"
             },
             {
                 in: "query",
                 name: "method",
-                type: "string",
+                type: "string"
             },
             {
                 in: "query",
                 name: "t",
-                type: "integer",
+                type: "integer"
             },
             {
                 in: "body",
@@ -101,12 +96,12 @@ module.exports = function () {
                     properties: {
                         query: {
                             description: "SPARQL query to send to the server",
-                            type: "string",
-                        },
-                    },
+                            type: "string"
+                        }
+                    }
                     //required: ["query"],
-                },
-            },
+                }
+            }
         ],
         responses: responseSchema("SparqlQueryResponse", "POST"),
     };

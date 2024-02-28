@@ -17,12 +17,13 @@ var async = require("async");
 var fs = require("fs");
 
 const { configPath, config } = require("../model/config");
+const { SourceModel, sourceModel } = require("../model/sources.js");
 //const { getAllowedSources, filterSources, sortObjectByKey, resourceFetched } = require("../api/v1/paths/utils");
 //const util = require("util");
 
 var ConfigManager = {
     // TODO move to model/config
-    getGeneralConfig: function (callback) {
+    getGeneralConfig: function(callback) {
         var editableConfig = config;
         var err = null;
         try {
@@ -43,36 +44,36 @@ var ConfigManager = {
         }
     },
     // TODO move to model/profiles
-    getProfiles: function (options, callback) {
+    getProfiles: function(options, callback) {
         var profilesPath = path.join(__dirname, "../" + configPath + "/profiles.json");
-        jsonFileStorage.retrieve(path.resolve(profilesPath), function (err, profiles) {
+        jsonFileStorage.retrieve(path.resolve(profilesPath), function(err, profiles) {
             callback(err, profiles);
         });
     },
     // TODO move to model/sources
-    getSources: function (options, callback) {
+    getSources: function(options, callback) {
         var sourcesPath = path.join(__dirname, "../" + configPath + "/sources.json");
-        jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
+        jsonFileStorage.retrieve(path.resolve(sourcesPath), function(err, sources) {
             callback(err, sources);
         });
     },
     // TODO move to model/blenderSources
-    createNewResource: function (sourceName, graphUri, targetSparqlServerUrl, options, callback) {
+    createNewResource: function(sourceName, graphUri, targetSparqlServerUrl, options, callback) {
         async.series(
             [
                 // create and initiate graph triples
-                function (callbackSeries) {
+                function(callbackSeries) {
                     if (options.type == "SKOS") {
-                        SourceManager.createNewSkosSourceGraph(sourceName, graphUri, targetSparqlServerUrl, options, function (err, result) {
+                        SourceManager.createNewSkosSourceGraph(sourceName, graphUri, targetSparqlServerUrl, options, function(err, result) {
                             return callbackSeries(err, result);
                         });
                     } else if (options.type == "OWL") {
                         return callbackSeries(null);
                     }
                 },
-                function (callbackSeries) {
+                function(callbackSeries) {
                     var sourcesPath = path.join(__dirname, "../" + configPath + "/blenderSources.json");
-                    jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
+                    jsonFileStorage.retrieve(path.resolve(sourcesPath), function(err, sources) {
                         if (err) {
                             return callback(err);
                         }
@@ -81,72 +82,72 @@ var ConfigManager = {
                                 editable: true,
                                 controller: "Sparql_SKOS",
                                 sparql_server: {
-                                    url: "_default",
+                                    url: "_default"
                                 },
 
                                 graphUri: graphUri,
                                 schemaType: "SKOS",
                                 predicates: { lang: options.lang },
-                                color: "#9edae3",
+                                color: "#9edae3"
                             };
                         } else if (options.type == "OWL") {
                             sources[sourceName] = {
                                 editable: true,
                                 controller: "Sparql_OWL",
                                 sparql_server: {
-                                    url: "_default",
+                                    url: "_default"
                                 },
 
                                 graphUri: graphUri,
-                                schemaType: "OWL",
+                                schemaType: "OWL"
                             };
                         }
 
                         // @ts-ignore
-                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, _sources) {
+                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function(err, _sources) {
                             callbackSeries(err);
                         });
                     });
-                },
+                }
             ],
-            function (err) {
+            function(err) {
                 callback(err, "done");
             }
         );
     },
 
     // TODO move to model/blenderSources
-    deleteResource: function (sourceName, graphUri, targetSparqlServerUrl, callback) {
+    deleteResource: function(sourceName, graphUri, targetSparqlServerUrl, callback) {
         async.series(
             [
                 // create and initiate graph triples
-                function (callbackSeries) {
-                    SourceManager.deleteSourceGraph(graphUri, targetSparqlServerUrl, function (err, result) {
+                function(callbackSeries) {
+                    SourceManager.deleteSourceGraph(graphUri, targetSparqlServerUrl, function(err, result) {
                         return callbackSeries(err, result);
                     });
                 },
-                function (callbackSeries) {
+                function(callbackSeries) {
                     var sourcesPath = path.join(__dirname, "../" + configPath + "/blenderSources.json");
-                    jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
+                    jsonFileStorage.retrieve(path.resolve(sourcesPath), function(err, sources) {
                         if (err) {
                             return callback(err);
                         }
                         delete sources[sourceName];
 
-                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, _sources) {
+                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function(err, _sources) {
                             callbackSeries(err);
                         });
                     });
-                },
+                }
             ],
-            function (err) {
+            function(err) {
                 callback(err, "done");
             }
         );
     },
     // TODO move to model/sources
-    addImportToSource: function (parentSource, importedSource, callback) {
-        ConfigManager.getSources(null, function (err, sources) {
+    addImportToSource: function(parentSource, importedSource, callback) {
+        ConfigManager.getSources(null, function(err, sources) {
             if (err) {
                 return callback(err);
             }
@@ -158,20 +159,20 @@ var ConfigManager = {
                 sources[parentSource].imports = [];
             }
             sources[parentSource].imports.push(importedSource);
-            ConfigManager.saveSources(sources, function (err, result) {
+            ConfigManager.saveSources(sources, function(err, result) {
                 callback(err, result);
             });
         });
     },
     // TODO move to model/sources
-    saveSources: function (sources, callback) {
+    saveSources: function(sources, callback) {
         var sourcesPath = path.join(__dirname, "../" + configPath + "/sources.json");
-        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, message) {
+        jsonFileStorage.store(path.resolve(sourcesPath), sources, function(err, message) {
             callback(err, message);
         });
     },
 
-    getUser: async function (req, res, next) {
+    getUser: async function(req, res, next) {
         const userManager = require(path.resolve("bin/user."));
         try {
             const userInfo = await userManager.getUser(req.user || null);
@@ -181,55 +182,67 @@ var ConfigManager = {
         }
     },
 
-    getUserSources: async function (req, res, next) {
-        const { configPath, config } = require("../model/config");
-        const sourcesJSON = path.resolve(configPath + "/sources.json");
-        const profilesJSON = path.resolve(configPath + "/profiles.json");
-        const util = require("util");
-        const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("../api/v1/paths/utils");
-        const userManager = require(path.resolve("bin/user."));
-        const read = util.promisify(fs.readFile);
-        const { getAllowedSources, filterSources, sortObjectByKey } = require("../api/v1/paths/utils.js");
+    getUserSources: async function(req, res, next) {
         try {
+            const { sourceModel, SourceModel } = require("../model/sources");
+            const userManager = require(path.resolve("bin/user."));
             const userInfo = await userManager.getUser(req.user || null);
-
-            var sourcesFile = sourcesJSON;
-            if (req.query.sourcesFile) {
-                sourcesFile = path.resolve(configPath + "/" + req.query.sourcesFile);
-                if (!sourcesFile.startsWith(path.resolve(configPath))) {
-                    return res.status(403).json({ done: false, message: "forbidden path" });
-                }
-            }
-            //  const sources = await read(sourcesJSON);
-            const sources = await read(sourcesFile);
-            const parsedSources = JSON.parse(sources);
-            // return all sources if user is admin
-            let filteredSources;
-            if (!userInfo.user.groups.includes("admin")) {
-                //   if (!userInfo.user.groups.indexOf("admin")>-1) {
-                // return filtered sources if user is not admin
-                const profiles = await read(profilesJSON);
-                const parsedProfiles = JSON.parse(profiles);
-                const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources, config.formalOntologySourceLabel);
-                filteredSources = filterSources(allowedSources, parsedSources);
-            } else {
-                // admin, return all sources with readwrite right
-                filteredSources = Object.fromEntries(
-                    Object.entries(parsedSources).map(([id, s]) => {
-                        s["accessControl"] = "readwrite";
-                        return [id, s];
-                    })
-                );
-            }
-            // sort
-            const sortedSources = sortObjectByKey(filteredSources);
-            // return
-            next(null, sortedSources);
+            const allowedSources =await sourceModel.getUserSources(userInfo.user);
+            next(null, allowedSources);
             //  resourceFetched(res, sortedSources);
         } catch (err) {
             next(err);
         }
-    },
+        if (false) {
+            const { configPath, config } = require("../model/config");
+            const sourcesJSON = path.resolve(configPath + "/sources.json");
+            const profilesJSON = path.resolve(configPath + "/profiles.json");
+            const util = require("util");
+            const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("../api/v1/paths/utils");
+            const userManager = require(path.resolve("bin/user."));
+            const read = util.promisify(fs.readFile);
+            const { getAllowedSources, filterSources, sortObjectByKey } = require("../api/v1/paths/utils.js");
+            try {
+                const userInfo = await userManager.getUser(req.user || null);
+
+                var sourcesFile = sourcesJSON;
+                if (req.query.sourcesFile) {
+                    sourcesFile = path.resolve(configPath + "/" + req.query.sourcesFile);
+                    if (!sourcesFile.startsWith(path.resolve(configPath))) {
+                        return res.status(403).json({ done: false, message: "forbidden path" });
+                    }
+                }
+                //  const sources = await read(sourcesJSON);
+                const sources = await read(sourcesFile);
+                const parsedSources = JSON.parse(sources);
+                // return all sources if user is admin
+                let filteredSources;
+                if (!userInfo.user.groups.includes("admin")) {
+                    //   if (!userInfo.user.groups.indexOf("admin")>-1) {
+                    // return filtered sources if user is not admin
+                    const profiles = await read(profilesJSON);
+                    const parsedProfiles = JSON.parse(profiles);
+                    const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources, config.formalOntologySourceLabel);
+                    filteredSources = filterSources(allowedSources, parsedSources);
+                } else {
+                    // admin, return all sources with readwrite right
+                    filteredSources = Object.fromEntries(
+                        Object.entries(parsedSources).map(([id, s]) => {
+                            s["accessControl"] = "readwrite";
+                            return [id, s];
+                        })
+                    );
+                }
+                // sort
+                const sortedSources = sortObjectByKey(filteredSources);
+                // return
+                next(null, sortedSources);
+                //  resourceFetched(res, sortedSources);
+            } catch (err) {
+                next(err);
+            }
+        }
+    }
 };
 ConfigManager.getGeneralConfig();
 module.exports = ConfigManager;

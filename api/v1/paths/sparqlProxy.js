@@ -25,41 +25,27 @@ module.exports = function () {
                             sendImmediately: false,
                         };
                     }
-                    if (true) {
                         ConfigManager.getUserSources(req, res, function (err, userSources) {
                             if (err) {
                                 return processResponse(res, err, userSources);
                             }
-
-                            ConfigManager.getUser(req, res, function (err, userInfo) {
-                                if (err) {
-                                    return res.status(400).json({ error: err });
+                            UserRequestFiltering.filterSparqlRequest(body.params.query, userSources, null, function(parsingError, filteredQuery) {
+                                if (parsingError) {
+                                    return processResponse(res, parsingError, null);
                                 }
+                                body.params.query = filteredQuery;
 
-
-                                if (userInfo.user.groups.includes("admin")) {
-                                    httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
-                                        return processResponse(res, err, result);
-                                    });
-                                } else {
-                                    UserRequestFiltering.filterSparqlRequest(body.params.query, userSources,userInfo, function (parsingError, filteredQuery) {
-                                        if (parsingError) {
-                                            return processResponse(res, parsingError, null);
-                                        }
-                                        body.params.query = filteredQuery;
-
-                                        httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
-                                            processResponse(res, err, result);
-                                        });
-                                    });
-                                }
+                                httpProxy.post(req.body.url, body.headers, body.params, function(err, result) {
+                                    processResponse(res, err, result);
+                                });
                             });
-                        });
-                    } else {
-                        httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
-                            processResponse(res, err, result);
-                        });
-                    }
+
+                            return;
+
+                        })
+
+
+
                 } else {
                     httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
                         processResponse(res, err, result);

@@ -226,7 +226,7 @@ var Lineage_similars = (function () {
             });
         });
 
-        if (output == "graph") {
+        if (true || output == "graph") {
             var visjsData = { nodes: [], edges: [] };
             commonNodes.forEach(function (item) {
                 var edgeId = item.fromNode.id + "_" + item.toNode.id;

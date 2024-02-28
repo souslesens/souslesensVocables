@@ -72,7 +72,7 @@ module.exports = function() {
                         ConfigManager.getUserSources(req, res, function(err, userSources) {
 
 
-                            UserRequestFiltering.validateElasticSearchIndices(userInfo, [req.body.indexName], userSources, "w", function(_parsingError, filteredQuery) {
+                            UserRequestFiltering.validateElasticSearchIndices(null, [req.body.indexName], userSources, "w", function(_parsingError, filteredQuery) {
                                 if (_parsingError) {
                                     parsingError = _parsingError;
                                     return callbackSeries();

@@ -20,7 +20,7 @@ const fs = require("fs");
 var UserRequestFiltering = {
   existingSources: null,
 
-  getUserGraphUrisMap: function(userSourcesMap,userInfos) {
+  getUserGraphUrisMap: function(userSourcesMap) {
 
 
     var basicVocabularies = basicVocabularies = {
@@ -172,7 +172,7 @@ var UserRequestFiltering = {
   filterSparqlRequest: function(query, userSourcesMap,userInfo, callback) {
     var error = "";
     var filteredQuery = query;
-    var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap,userInfo);
+    var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
 
     selectRegex = /(SELECT)/gim;
     var array = selectRegex.exec(query);
@@ -185,10 +185,10 @@ var UserRequestFiltering = {
       });
     }
     else {
-      for(var key in userSourcesMap){
+     /* for(var key in userSourcesMap){
         if(userInfo.user.login == userSourcesMap[key].owner)
           return callback(null,query);
-      }
+      }*/
 
       UserRequestFiltering.checkQueryByRegex(query, userGraphUrisMap, function(err, result) {
         if (err) {
@@ -200,10 +200,7 @@ var UserRequestFiltering = {
   },
 
   validateElasticSearchIndices: function(userInfo, indices, userSourcesMap, acl, callback) {
-   var userGroups= userInfo.user.groups;
-    if (userGroups && userGroups.indexOf("admin") > -1) {
-      return callback(null, indices);
-    }
+
 
     var indicesMap = {};
     for (var source in userSourcesMap) {

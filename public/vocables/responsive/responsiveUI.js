@@ -51,7 +51,7 @@ var ResponsiveUI = (function () {
         );
 
         self.themeList();
-        self.replaceFile(BotEngine, BotEngineResponsive);
+        //self.replaceFile(BotEngine, BotEngineResponsive);
         ResponsiveUI.resetWindowHeight();
     };
     self.initMenuBar = function (callback) {

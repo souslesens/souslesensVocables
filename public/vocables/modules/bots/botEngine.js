@@ -1,14 +1,15 @@
 var BotEngine = (function () {
     var self = {};
-
+    self.firstLoad = true;
+    self.OrReturnValues = [];
+    self.lastFilterListStr = "";
     self.init = function (botModule, initialWorkflow, options, callback) {
         if (!options) {
             options = {};
         }
+        self.currentBot = botModule;
         self.currentObj = initialWorkflow;
         self.initialWorkflow = initialWorkflow;
-        self.currentBot = botModule;
-        self.currentObj = botModule;
         self.history = [];
         self.history.currentIndex = 0;
         self.currentList = [];
@@ -16,22 +17,51 @@ var BotEngine = (function () {
         var divId;
         if (options.divId) {
             divId = options.divId;
-            //   $("#"+options.divId).html("  <div id='botDiv' style='width:100%;height:350px'></div>")
+            self.divId = options.divId;
         } else {
             divId = "botDiv";
-            $("#botPanel").css("display", "block");
+            $("#botPanel").dialog("open");
+            $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
+                self.firstLoad = true;
+            });
+            $("#botPanel").dialog("option", "title", self.currentBot.title);
+
+            $("#botPanel").parent().css("top", "13%");
+            $("#botPanel").parent().css("left", "30%");
         }
 
-        $("#" + divId).load("modules/bots/html/bot.html", function () {
-            $("#botTitle").html(self.currentBot.title);
-
-            if (callback) {
-                callback();
+        $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
+            if (!self.firstLoad) {
+                $("#resetButtonBot").remove();
+                $("#previousButtonBot").remove();
             }
+            $("#botFilterProposalInput").on("keyup", self.filterList);
+            self.firstLoad = false;
+            $("#resetButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+            $("#previousButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+            if (divId != "botDiv") {
+                var dialogWindow = $("#" + divId)
+                    .parents()
+                    .filter('div[role="dialog"]')[0];
+                var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
+                var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
+                $(idDialog).parent().css("top", "13%");
+                $(idDialog).parent().css("left", "10%");
+                $("#resetButtonBot").insertAfter(titleDialog);
+                $("#previousButtonBot").insertAfter(titleDialog);
+                $(dialogWindow).on("dialogclose", function (event) {
+                    $("#" + self.divId).empty();
+                    $(dialogWindow).find("#resetButtonBot").remove();
+                    $(dialogWindow).find("#previousButtonBot").remove();
+                    self.firstLoad = true;
+                });
+            }
+            if (callback) callback();
         });
     };
 
     self.nextStep = function (returnValue, varToFill) {
+        $("#botFilterProposalDiv").hide();
         self.history.push(JSON.parse(JSON.stringify(self.currentObj)));
         self.history.currentIndex += 1;
         var keys = Object.keys(self.currentObj);
@@ -46,6 +76,7 @@ var BotEngine = (function () {
             // alternative
             var alternatives = self.currentObj[key];
             if (returnValue && alternatives[returnValue]) {
+                self.OrReturnValues.push(returnValue);
                 var obj = self.currentObj["_OR"][returnValue];
                 var key0 = Object.keys(obj)[0];
                 if (!key0) {
@@ -57,6 +88,8 @@ var BotEngine = (function () {
                 }
 
                 var fn = self.currentBot.functions[key0];
+                if (!fn && self.currentBot.functions["_DEFAULT"]) fn = self.currentBot.functions["_DEFAULT"];
+
                 if (!fn || typeof fn !== "function") {
                     return alert("function not defined :" + key0);
                 }
@@ -71,9 +104,11 @@ var BotEngine = (function () {
                     choices.push({ id: key, label: key });
                 }
                 self.showList(choices, varToFill);
+                self.setStepMessage();
             }
         } else {
             var fn = self.currentBot.functions[key];
+            if (!fn && self.currentBot.functions["_DEFAULT"]) fn = self.currentBot.functions["_DEFAULT"];
             if (!fn || typeof fn !== "function") {
                 return alert("function not defined :" + key);
             }
@@ -84,13 +119,26 @@ var BotEngine = (function () {
     };
 
     self.previousStep = function (message) {
-        if (message) {
-            self.message(message);
-        }
+        if (message) self.message(message);
         if (self.history.currentIndex > 1) {
+            $("#botPromptInput").css("display", "none");
             self.history.currentIndex -= 2;
+
             self.currentObj = self.history[self.history.currentIndex];
-            self.nextStep();
+
+            //delete last 3 message sended
+            var childrens = $("#botTA").children();
+            // last is bot_input --> don't count
+            $("#botTA").children().slice(-4).filter("span").remove();
+            if (self.currentObj._OR != undefined) {
+                if (self.OrReturnValues != []) {
+                     var lastOrReturnValue = self.OrReturnValues.slice(-1);
+                    self.OrReturnValues.pop();
+                    self.nextStep(lastOrReturnValue);
+                }
+            } else {
+                self.nextStep();
+            }
         } else {
             self.reset();
         }
@@ -98,18 +146,32 @@ var BotEngine = (function () {
 
     self.end = function () {
         self.currentBot.params.queryText = self.getQueryText();
-        $("#botPanel").css("display", "none");
+        if (self.divId) {
+            var dialogWindow = $("#" + self.divId)
+                .parents()
+                .filter('div[role="dialog"]')[0];
+            var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
+            $(idDialog).dialog("close");
+        } else {
+            $("#botPanel").dialog("close");
+        }
         if (self.currentBot.callbackFn) {
             return self.currentBot.callbackFn();
         }
+        
     };
 
     self.setStepMessage = function (step) {
         if (self.currentBot.functionTitles) {
             var message = self.currentBot.functionTitles[step];
-            $("#botMessage").html(message || "select an option");
+            // In case 2 questions are asked at the same time erase the last one
+            var last_message = $("#botTA").children().filter("span").slice(-1)[0];
+            if ($(last_message).attr("class") == "chat-left") {
+                last_message.remove();
+            }
+            self.writeCompletedHtml(message || "select an option", { question: true });
         } else {
-            $("#botMessage").html("select an option");
+            self.writeCompletedHtml("select an option", { question: true });
         }
     };
 
@@ -132,7 +194,6 @@ var BotEngine = (function () {
 
     self.showList = function (values, varToFill, returnValue, sort, callback) {
         values = common.StringArrayToIdLabelObjectArray(values);
-
         if (sort) {
             values.sort(function (a, b) {
                 if (a.label > b.label) {
@@ -144,16 +205,21 @@ var BotEngine = (function () {
                 return 0;
             });
         }
-        self.currentList = values;
+
         $("#bot_resourcesProposalSelect").css("display", "block");
+        self.currentList = values;
+        if (values.length > 20) $("#botFilterProposalDiv").show();
         common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
-        $("#bot_resourcesProposalSelect").unbind("change");
-        $("#bot_resourcesProposalSelect").bind("change", function (evt) {
+        $("#bot_resourcesProposalSelect").unbind("click");
+
+        $("#bot_resourcesProposalSelect").bind("click", function (evt) {
             var x = evt;
+
             var text = $("#bot_resourcesProposalSelect option:selected").text();
             self.writeCompletedHtml(text + ":");
 
             var selectedValue = $(this).val();
+            if (evt.ctrlKey) return;
             if (callback) {
                 return callback(selectedValue);
             }
@@ -168,15 +234,36 @@ var BotEngine = (function () {
             self.nextStep(returnValue || selectedValue);
         });
     };
+    self.filterList = function (evt) {
+        //var str = $(this).val();
+        var str = $(evt.currentTarget).val();
+        if (!str && self.lastFilterListStr.length < str.length) return;
+        else {
+            common.fillSelectOptions("bot_resourcesProposalSelect", self.currentList, false, "label", "id");
+        }
+        if (str.length < 2 && self.lastFilterListStr.length < str.length) return;
+        self.lastFilterListStr = str;
+        str = str.toLowerCase();
+        var selection = [];
+        self.currentList.forEach(function (item) {
+            if (item.label.toLowerCase().indexOf(str) > -1) {
+                selection.push(item);
+            }
+        });
+        common.fillSelectOptions("bot_resourcesProposalSelect", selection, false, "label", "id");
+    };
 
     self.promptValue = function (message, varToFill, defaultValue, callback) {
+        $("#bot_resourcesProposalSelect").hide();
         $("#botPromptInput").on("keyup", function (key) {
             if (event.keyCode == 13 || event.keyCode == 9) {
+                $("#bot_resourcesProposalSelect").show();
                 $("#botPromptInput").css("display", "none");
                 var value = $(this).val();
                 var varToFill = $("#botVarToFill").val();
                 self.currentBot.params[varToFill] = value;
                 self.writeCompletedHtml(value);
+                $("#botPromptInput").off();
                 if (callback) {
                     return callback(value);
                 } else {
@@ -191,15 +278,27 @@ var BotEngine = (function () {
         $("#botPromptInput").focus();
     };
 
-    self.writeCompletedHtml = function (str) {
+    self.writeCompletedHtml = function (str, options) {
         if (!str) {
             return;
         }
+        if (!options) {
+            options = {};
+        }
+        if (options.question) {
+            var chat_class = "chat-left";
+        } else {
+            var chat_class = "chat-right";
+        }
         var tokenId = "token_" + common.getRandomHexaId(5);
-        var html = "<span class='bot-token " + "" + "' id='" + tokenId + "'>" + str + "</span>";
+        var html = "<span class='" + chat_class + "' id='" + tokenId + "'>" + str + "</span>";
         $(html).insertBefore("#bot_input");
         $("#bot_input").val("");
         $("#bot_input").focus();
+        if ($("#botDiv")[0].scrollHeight > 500) {
+            $("#botPanel").scrollTop($("#botPanel")[0].scrollHeight);
+        }
+
         return;
     };
 
@@ -210,12 +309,10 @@ var BotEngine = (function () {
         });
         return queryText;
     };
-
     self.clearProposalSelect = function () {
         $("#bot_resourcesProposalSelect").find("option").remove().end();
     };
 
-    self.analyse = function (str) {};
 
     self.exportToGraph = function () {
         var functionTitles = self.currentBot.functionTitles;

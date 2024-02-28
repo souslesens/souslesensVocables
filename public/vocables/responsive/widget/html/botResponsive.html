@@ -17,14 +17,14 @@
         <div id="botFilterProposalDiv" class="input-group mb-3" style="width: 100%; margin-top: 20px">
             <div class="input-group-prepend">
                 <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
-                    <button class="search-icon slsv-invisible-button" onclick="BotEngineResponsive.filterList(event)" style="margin-top: 4px; height: 20px; width: 20px"></button>
+                    <button class="search-icon slsv-invisible-button" onclick="BotEngine.filterList(event)" style="margin-top: 4px; height: 20px; width: 20px"></button>
                 </div>
             </div>
             <input
                 id="botFilterProposalInput"
                 style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px"
                 value=""
-                onkeyup="BotEngineResponsive.filterList(event)"
+                onkeyup="BotEngine.filterList(event)"
             />
         </div>
         <select id="bot_resourcesProposalSelect" size="10" multiple="multiple"></select>

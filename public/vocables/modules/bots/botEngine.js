@@ -132,7 +132,7 @@ var BotEngine = (function () {
             $("#botTA").children().slice(-4).filter("span").remove();
             if (self.currentObj._OR != undefined) {
                 if (self.OrReturnValues != []) {
-                     var lastOrReturnValue = self.OrReturnValues.slice(-1);
+                    var lastOrReturnValue = self.OrReturnValues.slice(-1);
                     self.OrReturnValues.pop();
                     self.nextStep(lastOrReturnValue);
                 }
@@ -158,7 +158,6 @@ var BotEngine = (function () {
         if (self.currentBot.callbackFn) {
             return self.currentBot.callbackFn();
         }
-        
     };
 
     self.setStepMessage = function (step) {
@@ -312,7 +311,6 @@ var BotEngine = (function () {
     self.clearProposalSelect = function () {
         $("#bot_resourcesProposalSelect").find("option").remove().end();
     };
-
 
     self.exportToGraph = function () {
         var functionTitles = self.currentBot.functionTitles;

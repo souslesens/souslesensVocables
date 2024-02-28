@@ -102,6 +102,14 @@ var CreateSLSVsource_bot = (function () {
         },
         uploadFromFileFn: function () {
             $("#smallDialogDiv").dialog("open");
+            $("#smallDialogDiv").parent().css("z-index",1);
+            $("#smallDialogDiv").dialog("option", "title", "Upload");
+            $("#smallDialogDiv").dialog({
+                close: function (event, ui) {
+                    BotEngine.currentObj = self.workflowUpload;
+                    BotEngine.nextStep(self.workflowUpload);
+                },
+            });
             var html =
                 '<form id="myForm" enctype="multipart/form-data" method="POST">\n' +
                 //  "  <input type=\"file\" id=\"file\" name=\"data\">\n" +

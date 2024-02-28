@@ -80,6 +80,7 @@ var Lineage_r = (function () {
                         ResponsiveUI.resetWindowHeight();
                     },
                 });
+                
             });
         }
     };

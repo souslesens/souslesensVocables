@@ -20,7 +20,7 @@ var ResponsiveUI = (function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
         //self.setSlsvCssClasses();
         //your remaining code
-
+        
         var tools = [];
 
         for (var key in Config.tools) {
@@ -81,7 +81,7 @@ var ResponsiveUI = (function () {
             }
             self.smartPhoneScreen = false;
 
-            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth);
+            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth-10);
             $("#lateralPanelDiv").css("width", LateralPannelWidth);
         }
 
@@ -437,7 +437,7 @@ var ResponsiveUI = (function () {
         });
     };
     self.darkThemeParams = function (theme) {
-        // pas suffisant mettre  a jour graph
+        
         if (theme) {
             if (theme["@isDarkTheme"]) {
                 Lineage_whiteboard.defaultNodeFontColor = "white";
@@ -455,7 +455,9 @@ var ResponsiveUI = (function () {
                     Lineage_r.showHideEditButtons(self.source);
                 }
             }
+            ResponsiveUI.resetWindowHeight();
         }
+
     };
 
     return self;

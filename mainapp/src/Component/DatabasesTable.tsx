@@ -8,13 +8,7 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle,
-    FormControl,
-    Grid,
-    IconButton,
-    InputAdornment,
     MenuItem,
-    Modal,
     Paper,
     Stack,
     Table,
@@ -27,15 +21,11 @@ import {
 } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import TableSortLabel from "@mui/material/TableSortLabel";
-import { Done, Visibility, VisibilityOff } from "@mui/icons-material";
+import { Done } from "@mui/icons-material";
 
 import * as React from "react";
 import { SRD } from "srd";
 import { ulid } from "ulid";
-import { zod } from "zod";
-import { useZorm } from "react-zorm";
-import { ZodCustomIssueWithMessage } from "react-zorm/dist/types";
-import * as z from "zod";
 
 import { useModel } from "../Admin";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -103,7 +93,7 @@ const validateForm = (form: DatabaseFormProps) => {
 };
 
 const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false }: DatabaseFormProps) => {
-    const { model, updateModel } = useModel();
+    const { updateModel } = useModel();
     const [databaseModel, update] = React.useReducer(updateDatabase, { form: database });
     const [displayPassword, setDisplayPassword] = React.useState(false);
     const [currentErrors, setErrors] = React.useState({});
@@ -115,8 +105,6 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
         setOpen(true);
     };
     const handleClose = () => setOpen(false);
-    const handleClickShowPassword = () => setDisplayPassword(!displayPassword);
-    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault();
 
     const handleValidation = (event: React.ChangeEvent<HTMLInputElement>) => {
         const errors = validateForm(databaseModel.form);
@@ -228,13 +216,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             required
                             value={databaseModel.form.user}
                         />
-                        <PasswordField
-                            error={currentErrors.password}
-                            id="password"
-                            label="Password"
-                            onChange={handleFieldUpdate("password")}
-                            value={databaseModel.form.password}
-                        />
+                        <PasswordField error={currentErrors.password} id="password" label="Password" onChange={handleFieldUpdate("password")} value={databaseModel.form.password} />
                     </Stack>
                 </DialogContent>
                 <DialogActions>

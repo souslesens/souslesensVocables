@@ -7,7 +7,7 @@ import Lineage_r from "./lineage/lineage_r.js";
 
 import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
 
-var ResponsiveUI = (function() {
+var ResponsiveUI = (function () {
     var self = {};
     self.source = null;
     self.mainDialogDiv = null;
@@ -16,22 +16,20 @@ var ResponsiveUI = (function() {
     self.currentTool = null;
     self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
     self.smartPhoneScreen = null;
-    self.init = function() {
+    self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
 
-
-
-       // Config.userTools.forEach((item, index) => {
-            for(var item in Config.userTools){
+        // Config.userTools.forEach((item, index) => {
+        for (var item in Config.userTools) {
             var logoTool = `<div style='height:35px;width:37px;' class='${item}-logo' ></div>`;
             var strTool = `<div class='Lineage_PopUpStyleDiv' style='display:flex;flex-direction:row;align-items:center;' >${logoTool}<div  value="${item}">${item}</div></div>`;
 
             $("#toolsSelect").append(strTool);
-        };
+        }
 
         window.addEventListener(
             "resize",
-            function(event) {
+            function (event) {
                 self.resetWindowHeight();
             },
             true
@@ -41,11 +39,11 @@ var ResponsiveUI = (function() {
         self.replaceFile(BotEngine, BotEngineResponsive);
         ResponsiveUI.resetWindowHeight();
     };
-    self.initMenuBar = function(callback) {
+    self.initMenuBar = function (callback) {
         $("#ChangeSourceButton").show();
         $("#index_topContolPanel").show();
         //Loading
-        $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function() {
+        $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
             if (self.currentTool != "lineage") {
                 $("#AddSourceButton").remove();
                 $("#AllSourceButton").remove();
@@ -54,7 +52,7 @@ var ResponsiveUI = (function() {
         });
     };
 
-    self.resetWindowHeight = function() {
+    self.resetWindowHeight = function () {
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPannelWidth = $("#lateralPanelDiv").width();
         // Mobile format graph div reset
@@ -76,7 +74,7 @@ var ResponsiveUI = (function() {
         //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
-    self.replaceFile = function(file1, file2) {
+    self.replaceFile = function (file1, file2) {
         Object.keys(file1).forEach((key) => {
             if (file2[key]) {
                 file1[key] = file2[key];
@@ -84,7 +82,7 @@ var ResponsiveUI = (function() {
         });
     };
 
-    self.onToolSelect = function(toolId, event) {
+    self.onToolSelect = function (toolId, event) {
         if (event) {
             var clickedElement = event.target;
             // if class
@@ -128,7 +126,7 @@ var ResponsiveUI = (function() {
         }
     };
 
-    self.onSourceSelect = function(evt, obj) {
+    self.onSourceSelect = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         var p = obj.node.parents.indexOf("PRIVATE");
         if (p > 0) {
@@ -143,21 +141,21 @@ var ResponsiveUI = (function() {
         var source = obj.node.data.id;
         self.sourceSelect(source);
     };
-    self.sourceSelect = function(source) {
+    self.sourceSelect = function (source) {
         MainController.currentSource = source;
         ResponsiveUI.source = source;
         $("#selectedSource").html(MainController.currentSource);
 
         $("#mainDialogDiv").parent().hide();
 
-        self.initTool(MainController.currentTool, function(err, result) {
+        self.initTool(MainController.currentTool, function (err, result) {
             if (err) {
                 return self.alert(err.responseText);
             }
             self.resetWindowHeight();
         });
     };
-    self.onSourceSelectForAddSource = function(evt, obj) {
+    self.onSourceSelectForAddSource = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         if (!obj.node.data || obj.node.data.type != "source") {
             return self.alert("select a tool");
@@ -169,7 +167,7 @@ var ResponsiveUI = (function() {
         Lineage_r.loadSources();
     };
 
-    self.initTool = function(toolId, callback) {
+    self.initTool = function (toolId, callback) {
         var toolObj = Config.userTools[toolId];
         MainController.initControllers();
         MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
@@ -193,14 +191,14 @@ var ResponsiveUI = (function() {
         }
     };
 
-    self.showDiv = function(modalDiv) {
+    self.showDiv = function (modalDiv) {
         $("#" + modalDiv).css("display", "block");
     };
 
-    self.hideDiv = function(modalDiv) {
+    self.hideDiv = function (modalDiv) {
         $("#" + modalDiv).css("display", "none");
     };
-    self.ApplySelectedTabCSS = function(buttonClicked, tabGroup) {
+    self.ApplySelectedTabCSS = function (buttonClicked, tabGroup) {
         var x = $("#" + tabGroup + "-buttons").children();
         if (x.length > 0) {
             x.removeClass("slsv-selectedTabDiv");
@@ -210,7 +208,7 @@ var ResponsiveUI = (function() {
         $(buttonClicked).addClass("slsv-tabButtonSelected");
         $(buttonClicked).parent().addClass("slsv-selectedTabDiv");
     };
-    self.openTab = function(tabGroup, tabId, actionFn, buttonClicked) {
+    self.openTab = function (tabGroup, tabId, actionFn, buttonClicked) {
         var i;
         var x = document.getElementsByClassName(tabGroup);
         for (i = 0; i < x.length; i++) {
@@ -225,7 +223,7 @@ var ResponsiveUI = (function() {
         self.ApplySelectedTabCSS(buttonClicked, tabGroup);
     };
 
-    self.showSourceDialog = function(resetAll) {
+    self.showSourceDialog = function (resetAll) {
         self.openDialogDiv("mainDialogDiv");
         /*
         self.showDiv("mainDialogDiv");
@@ -240,7 +238,7 @@ var ResponsiveUI = (function() {
         } else {
             var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
         }
-        SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function() {
+        SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
             /*$("#mainDialogDiv")
                 .parent()
@@ -249,7 +247,7 @@ var ResponsiveUI = (function() {
                     $("#mainDialogDiv").parent().hide();
                 });*/
         });
-        /*$("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
+        /*$("#mainDialogDiv").load("./responsive/lineage/html/sourceSlector.html", function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
             $("#mainDialogDiv")
                 .parent()
@@ -264,10 +262,10 @@ var ResponsiveUI = (function() {
             } else {
                 var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
             }
-            SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
+            SourceSelectorWidget.loadSourcesTreeDiv("sourceSelector_jstreeDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
         });*/
     };
-    self.openDialogDiv = function(div) {
+    self.openDialogDiv = function (div) {
         //$("#mainDialogDiv").css('width', 'auto');
 
         $("#" + div).empty();
@@ -283,8 +281,8 @@ var ResponsiveUI = (function() {
             .css("left", "30%");
     };
 
-    self.setSlsvCssClasses = function(callback) {
-        less.pageLoadFinished.then(function() {
+    self.setSlsvCssClasses = function (callback) {
+        less.pageLoadFinished.then(function () {
             //setTimeout(() => {}, "500");
             ResponsiveUI.changeTheme(Config.theme.defaultTheme);
 
@@ -296,13 +294,13 @@ var ResponsiveUI = (function() {
         });
     };
 
-    self.themeList = function() {
+    self.themeList = function () {
         //less.modifyVars({'@button1-color': '#000'});
         var allThemesNames = Object.keys(Config.slsvColorThemes);
         common.fillSelectOptions("themeSelect", allThemesNames, false);
     };
 
-    self.changeTheme = function(ThemeName) {
+    self.changeTheme = function (ThemeName) {
         var themeSelected = Config.slsvColorThemes[ThemeName];
         self.currentTheme = themeSelected;
         if (themeSelected["@logoInstance-icon"] == undefined || themeSelected["@logoInstance-icon"] == "") {
@@ -313,7 +311,7 @@ var ResponsiveUI = (function() {
         less.modifyVars(themeSelected);
         ResponsiveUI.darkThemeParams(themeSelected);
     };
-    self.hideShowMenuBar = function(button) {
+    self.hideShowMenuBar = function (button) {
         if (self.menuBarShowed) {
             $("#MenuBarFooter").hide();
             $("#MenuBar").css("height", "21px");
@@ -328,7 +326,7 @@ var ResponsiveUI = (function() {
             $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBar.png");
         }
     };
-    self.hideShowLateralPannel = function(button) {
+    self.hideShowLateralPannel = function (button) {
         if (self.smartPhoneScreen) {
             return;
         }
@@ -358,17 +356,16 @@ var ResponsiveUI = (function() {
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };
-    self.registerSourceWithoutImports = function(sourceLabel, callback) {
+    self.registerSourceWithoutImports = function (sourceLabel, callback) {
         if (!callback) {
-            callback = function() {
-            };
+            callback = function () {};
         }
 
         if (Lineage_sources.loadedSources[sourceLabel]) {
             return callback();
         }
 
-        OntologyModels.registerSourcesModel(sourceLabel, function(err, result) {
+        OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -394,7 +391,7 @@ var ResponsiveUI = (function() {
                     "\")'/> </button></div>";
                 $("#lineage_drawnSources").append(html);
 
-                $("#" + sourceDivId).bind("click", function(e) {
+                $("#" + sourceDivId).bind("click", function (e) {
                     var sourceDivId = $(this).attr("id");
                     var source = self.sourceDivsMap[sourceDivId];
                     Lineage_sources.setCurrentSource(source);
@@ -405,10 +402,10 @@ var ResponsiveUI = (function() {
             }
         });
     };
-    self.PopUpOnHoverButtons = function() {
+    self.PopUpOnHoverButtons = function () {
         $(".w3-button").off();
         $(".w3-bar-item").off();
-        $(".w3-button").on("mouseenter", function() {
+        $(".w3-button").on("mouseenter", function () {
             var comment = $(this).attr("popupcomment");
             if (comment) {
                 var html = "<div>" + comment + "</div>";
@@ -416,7 +413,7 @@ var ResponsiveUI = (function() {
             }
         });
 
-        $(".w3-bar-item").on("mouseenter", function() {
+        $(".w3-bar-item").on("mouseenter", function () {
             var comment = $(this).attr("popupcomment");
             if (comment) {
                 var html = "<div>" + comment + "</div>";
@@ -424,7 +421,7 @@ var ResponsiveUI = (function() {
             }
         });
     };
-    self.darkThemeParams = function(theme) {
+    self.darkThemeParams = function (theme) {
         // pas suffisant mettre  a jour graph
         if (theme) {
             if (theme["@isDarkTheme"]) {

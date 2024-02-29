@@ -85,7 +85,6 @@ var MainController = (function () {
                 }
             },
         });
-
     };
     self.loadProfiles = function (callback) {
         $.ajax({
@@ -93,8 +92,6 @@ var MainController = (function () {
             url: Config.apiUrl + "/profiles",
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-
-
                 Config.profiles = data.resources;
                 if (callback) {
                     return callback();
@@ -403,16 +400,15 @@ var MainController = (function () {
             $(".max-height").height($(window).height() - 300);
             var treeData = [];
             for (var key in Config.userTools) {
-
-                        treeData.push({
-                            id: key,
-                            text: Config.userTools[key].label,
-                            type: "tool",
-                            parent: "#",
-                            data: Config.userTools[key],
-                        });
-
-
+                if (Config.userTools[key]) {
+                    treeData.push({
+                        id: key,
+                        text: Config.userTools[key].label,
+                        type: "tool",
+                        parent: "#",
+                        data: Config.userTools[key],
+                    });
+                }
             }
             //})
             JstreeWidget.loadJsTree(treeDiv, treeData, {
@@ -421,9 +417,6 @@ var MainController = (function () {
                 },
             });
         },
-
-
-
 
         initTool: function (toolId, callback) {
             self.currentTool = toolId;

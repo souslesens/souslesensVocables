@@ -24,10 +24,10 @@ async function loadToolsAndPlugins(callback) {
         window[element.name] = plugin.default;
     }
 
-    const userTools={}
-   allowedTools.resources.forEach(function(item){
-        userTools[item.name]=allTools[item.name]
-    })
+    const userTools = {};
+    allowedTools.resources.forEach(function (item) {
+        userTools[item.name] = allTools[item.name];
+    });
 
     // We mutate Config.userTools with an object merging plugins and tools
     Config.userTools = mergeToolsAndPlugins(userTools, plugins);

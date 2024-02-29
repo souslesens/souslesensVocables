@@ -78,8 +78,8 @@ var KGcreator = (function () {
     };
 
     self.showSourcesDialog = function (callback) {
-        if (Config.tools["KGcreator"].urlParam_source) {
-            self.currentSlsvSource = Config.tools["KGcreator"].urlParam_source;
+        if (Config.userTools["KGcreator"].urlParam_source) {
+            self.currentSlsvSource = Config.userTools["KGcreator"].urlParam_source;
             self.initSource();
             return callback();
         }

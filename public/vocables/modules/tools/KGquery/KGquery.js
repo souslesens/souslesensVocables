@@ -49,8 +49,8 @@ var KGquery = (function () {
     };
 
     self.showSourcesDialog = function (forceDialog) {
-        if (!forceDialog && Config.tools["KGquery"].urlParam_source) {
-            self.currentSource = Config.tools["KGquery"].urlParam_source;
+        if (!forceDialog && Config.userTools["KGquery"].urlParam_source) {
+            self.currentSource = Config.userTools["KGquery"].urlParam_source;
             self.init();
             return;
         }

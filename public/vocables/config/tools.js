@@ -16,7 +16,6 @@ const allTools = {
 async function loadToolsAndPlugins(callback) {
     const request = await fetch("../../api/v1/tools");
     const allowedTools = await request.json();
-
     const plugins = allowedTools.resources.filter((element) => element.type === "plugin");
 
     // We import plugins and register them in the window
@@ -24,8 +23,14 @@ async function loadToolsAndPlugins(callback) {
         const plugin = await import(`../../plugins/${element.name}/js/main.js`);
         window[element.name] = plugin.default;
     }
-    // We mutate Config.tools with an object merging plugins and tools
-    Config.tools = mergeToolsAndPlugins(allTools, plugins);
+
+    const userTools={}
+   allowedTools.resources.forEach(function(item){
+        userTools[item.name]=allTools[item.name]
+    })
+
+    // We mutate Config.userTools with an object merging plugins and tools
+    Config.userTools = mergeToolsAndPlugins(userTools, plugins);
     return callback();
 }
 

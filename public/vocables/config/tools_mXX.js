@@ -110,6 +110,6 @@ Tools["IDCP"] = {
     toolDescriptionImg: null,
 };
 
-Config.tools = Tools;
+Config.userTools = Tools;
 
 export default Tools;

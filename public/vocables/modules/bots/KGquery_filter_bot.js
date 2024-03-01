@@ -5,14 +5,14 @@ import SparqlQuery_bot from "./sparqlQuery_bot.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import BotEngine from "./botEngine.js";
 
-var KGquery_filter_bot = (function () {
+var KGquery_filter_bot = (function() {
     var self = {};
     self.title = "Filter Class";
 
-    self.start = function (currentQuery, validateFn) {
-        BotEngine.init(KGquery_filter_bot, self.workflow_filterClass, null, function () {
+    self.start = function(currentQuery, validateFn) {
+        BotEngine.init(KGquery_filter_bot, self.workflow_filterClass, null, function() {
             self.validateFn = validateFn;
-            self.callbackFn = function () {
+            self.callbackFn = function() {
                 var filterLabel = BotEngine.getQueryText();
                 return self.validateFn(null, { filter: self.filter, filterLabel: filterLabel });
             };
@@ -26,39 +26,40 @@ var KGquery_filter_bot = (function () {
     self.workflow_filterClass = {
         listFilterTypes: {
             _OR: {
-                label: { promptIndividualsLabelFn: { setSparqlQueryFilter: {} } },
-                list: { listIndividualsFn: { setSparqlQueryFilter: {} } },
+                label: { promptIndividualsLabelFn: { setSparqlQueryFilter: {} } }, list: { listIndividualsFn: { setSparqlQueryFilter: {} } }
                 // advanced: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
                 // date: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
                 //  period: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
                 // }
-            },
-        },
+            }
+        }
     };
 
     self.functions = SparqlQuery_bot.functions;
 
-    (self.functions.listFilterTypes = function () {
+    self.functions.listFilterTypes = function() {
         var choices = ["label", "list"];
         BotEngine.showList(choices, "individualsFilterType");
-    }),
-        (self.functions.setSparqlQueryFilter = function (queryParams, varName) {
-            var varName = self.params.varName;
-            var individualsFilterType = self.params.individualsFilterType;
-            var individualsFilterValue = self.params.individualsFilterValue;
-            var advancedFilter = self.params.advancedFilter || "";
-            var filterLabel = self.params.queryText;
+    };
 
-            self.filter = "";
-            if (individualsFilterType == "label") {
-                self.filter = Sparql_common.setFilter(varName, null, individualsFilterValue);
-            } else if (individualsFilterType == "list") {
-                self.filter = Sparql_common.setFilter(varName, individualsFilterValue, null, { useFilterKeyWord: 1 });
-            } else if (individualsFilterType == "advanced") {
-                self.filter = advancedFilter;
-            }
-            BotEngine.nextStep();
-        });
+    self.functions.setSparqlQueryFilter = function(queryParams, varName) {
+        var varName = self.params.varName;
+        var individualsFilterType = self.params.individualsFilterType;
+        var individualsFilterValue = self.params.individualsFilterValue;
+        var advancedFilter = self.params.advancedFilter || "";
+        var filterLabel = self.params.queryText;
+
+        self.filter = "";
+        if (individualsFilterType == "label") {
+            self.filter = Sparql_common.setFilter(varName, null, individualsFilterValue);
+        } else if (individualsFilterType == "list") {
+            self.filter = Sparql_common.setFilter(varName, individualsFilterValue, null, { useFilterKeyWord: 1 });
+        } else if (individualsFilterType == "advanced") {
+            self.filter = advancedFilter;
+        }
+        self.filter=self.filter.replace("Label","_label");
+        BotEngine.nextStep();
+    };
 
     return self;
 })();

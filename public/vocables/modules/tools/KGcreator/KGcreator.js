@@ -8,7 +8,7 @@ import KGcreator_graph from "./KGcreator_graph.js";
 import KGcreator_mappings from "./KGcreator_mappings.js";
 import KGcreator_run from "./KGcreator_run.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
-import KGcreator_bot_filter from "../../bots/KGcreator_bot.js";
+import KGcreator_bot from "../../bots/KGcreator_bot.js";
 
 var KGcreator = (function () {
     var self = {};
@@ -90,7 +90,7 @@ var KGcreator = (function () {
         var selectTreeNodeFn = function () {
             self.currentSlsvSource = SourceSelectorWidget.getSelectedSource()[0];
             $("#KGcreator_slsvSource").html(self.currentSlsvSource);
-            $("#mainDialogDiv").dialog("close");
+            $("#KGcreator_dialogDiv").dialog("close");
             if (!self.currentSlsvSource) {
                 return alert("select a source");
             }
@@ -98,7 +98,7 @@ var KGcreator = (function () {
             //  self.initCentralPanel();
         };
 
-        SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
+        SourceSelectorWidget.initWidget(["OWL"], "KGcreator_dialogDiv", true, selectTreeNodeFn, null, options);
         if (callback) {
             callback();
         }
@@ -308,7 +308,7 @@ var KGcreator = (function () {
                             label: "mappingBot",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_bot_filter.start(node);
+                                KGcreator_bot.start(node);
                             },
                         };
 

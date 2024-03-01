@@ -90,6 +90,7 @@
         "passport": "^0.7.0",
         "passport-keycloak-oauth2-oidc": "^1.0.5",
         "passport-local": "^1.0.0",
+        "path-to-regexp": "^6.2.1",
         "pug": "^3.0.2",
         "rdf-parse": "^2.3.3",
         "rdfxml-streaming-parser": "^2.4.0",

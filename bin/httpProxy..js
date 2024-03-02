@@ -100,21 +100,16 @@ var httpProxy = {
                 console.log(error);
                 //  console.log("HTTP_PROXY_ERROR"+JSON.stringify(error, null, 2))
                 return callback(error);
-            }
-            else if (response.statusCode != 200){
+            } else if (response.statusCode != 200) {
                 return callback(response.statusMessage);
-            }
-
-            else if (headers && headers["Accept"] && headers["Accept"].indexOf("json") < 0) {
+            } else if (headers && headers["Accept"] && headers["Accept"].indexOf("json") < 0) {
                 return callback(null, body);
-            }
-            else if (typeof body === "string") {
-                if(body=="")
-                    return callback("undefined ERROR ")
+            } else if (typeof body === "string") {
+                if (body == "") return callback("undefined ERROR ");
                 body = body.trim();
                 var p = body.toLowerCase().indexOf("bindings");
                 var q = body.toLowerCase().indexOf("results");
-                if (p < 0 && q < 0 )
+                if (p < 0 && q < 0)
                     // error virtuoso
                     return callback(body);
                 // if ((body.toLowerCase().indexOf("error") > -1 && body.indexOf("error") < 30) || body.indexOf("{") < 0) return callback(body); //error
@@ -134,7 +129,6 @@ var httpProxy = {
                     return callback(err, body);
                 }
             } else {
-
                 return callback(null, body);
             }
         });

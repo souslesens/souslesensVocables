@@ -44,6 +44,10 @@ const apiDoc = {
             type: "object",
             additionalProperties: { $ref: "#/definitions/Source" },
         },
+        Databases: {
+            type: "object",
+            additionalProperties: { $ref: "#/definitions/Database" },
+        },
         BlenderSources: {
             type: "object",
             additionalProperties: { $ref: "#/definitions/BlenderSource" },
@@ -220,6 +224,45 @@ const apiDoc = {
                 },
                 blender: {
                     $ref: "#/definitions/Blender",
+                },
+            },
+        },
+        DatabaseNames: {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    id: { type: "string" },
+                    name: { type: "string" },
+                },
+            },
+        },
+        Database: {
+            type: "object",
+            properties: {
+                id: {
+                    type: "string",
+                },
+                name: {
+                    type: "string",
+                },
+                driver: {
+                    type: "string",
+                },
+                host: {
+                    type: "string",
+                },
+                port: {
+                    type: "number",
+                },
+                database: {
+                    type: "string",
+                },
+                user: {
+                    type: "string",
+                },
+                password: {
+                    type: "string",
                 },
             },
         },

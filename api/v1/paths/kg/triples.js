@@ -4,7 +4,7 @@ const { processResponse } = require("../utils");
 module.exports = function () {
     let operations = {
         POST,
-        DELETE
+        DELETE,
     };
 
     function POST(req, res, next) {
@@ -82,7 +82,7 @@ module.exports = function () {
     };
     async function DELETE(req, res, next) {
         try {
-            KGbuilder_main.deleteKGcreatorTriples(req.body.source, JSON.parse( req.body.tables), function (err, result) {
+            KGbuilder_main.deleteKGcreatorTriples(req.body.source, JSON.parse(req.body.tables), function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {

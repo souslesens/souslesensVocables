@@ -35,6 +35,13 @@ services:
         networks:
             - dev-backend
 
+    postgres:
+        image: postgres:16
+        ports:
+            - 5345:5432
+        environment:
+            POSTGRES_PASSWORD: mysecretpassword
+
     mariadb:
         image: mariadb:10
         ports:

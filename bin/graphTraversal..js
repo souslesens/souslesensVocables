@@ -93,7 +93,7 @@ var GraphTraversal = {
             while (tail < queue.length) {
                 var u = queue[tail++], // Pop a vertex off the queue.
                     neighbors = graph.neighbors[u];
-                
+
                 if (neighbors) {
                     for (var i = 0; i < neighbors.length; ++i) {
                         var v = neighbors[i];

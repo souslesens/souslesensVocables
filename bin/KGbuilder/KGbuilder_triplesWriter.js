@@ -4,7 +4,6 @@ const async = require("async");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket");
 
-
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
         xs: "<http://www.w3.org/2001/XMLSchema#>",
@@ -19,7 +18,6 @@ const KGbuilder_triplesWriter = {
         slsv: "<http://souslesens.org/resource/vocabulary/>",
         dcterms: "<http://purl.org/dc/terms/>",
     },
-
 
     /**
      * Write <triples> in <graphUri> at <sparqlServerUrl>
@@ -110,15 +108,13 @@ const KGbuilder_triplesWriter = {
         );
     },
 
-    deleteKGcreatorTriples: function (sparqlServerUrl,graphUri,table, callback) {
-        const KGbuilder_triplesMaker=require("./KGbuilder_triplesMaker")
+    deleteKGcreatorTriples: function (sparqlServerUrl, graphUri, table, callback) {
+        const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
         var query = "";
-        if( table) {
+        if (table) {
             query += "with  GRAPH <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGbuilder_triplesMaker.mappingFilePredicate + "> '" + table + "'}";
-        }
-        else{
+        } else {
             query += "with  <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGbuilder_triplesMaker.mappingFilePredicate + "> ?table }";
-
         }
         var params = { query: query };
         if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
@@ -137,7 +133,6 @@ const KGbuilder_triplesWriter = {
             return callback(null, result.results.bindings[0]["callret-0"].value);
         });
     },
-
 
     deleteTriples: function (triples, graphUri, sparqlServerUrl, callback) {
         var insertTriplesStr = "";

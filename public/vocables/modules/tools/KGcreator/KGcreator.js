@@ -840,8 +840,8 @@ var KGcreator = (function () {
         self.displayUploadApp("");
         $("#smallDialogDiv").dialog("close");
 
-        var datasourceName = self.uploadFormData.selectedDatabase;
-        if (!datasourceName) {
+        var datasource = self.uploadFormData.selectedDatabase;
+        if (!datasource) {
             return;
         }
         var sqlType = "sql.sqlserver";
@@ -850,13 +850,13 @@ var KGcreator = (function () {
             connection: "_default",
             tableJoins: [],
         };
-        self.currentConfig.databaseSources[datasourceName] = json;
-        self.rawConfig.databaseSources[datasourceName] = json;
+        self.currentConfig.databaseSources[datasource.name] = json;
+        self.rawConfig.databaseSources[datasource.name] = json;
         self.saveSlsvSourceConfig(function (err, result) {
             if (err) {
                 return alert(err);
             }
-            self.addDataSourceToJstree("databaseSource", datasourceName, sqlType);
+            self.addDataSourceToJstree("databaseSource", datasource, sqlType);
         });
     };
 
@@ -885,14 +885,14 @@ var KGcreator = (function () {
         });
     };
 
-    self.addDataSourceToJstree = function (type, datasourceName, sqlType) {
+    self.addDataSourceToJstree = function (type, datasource, sqlType) {
         var jstreeData = [
             {
-                id: datasourceName,
-                text: datasourceName,
+                id: datasource.id,
+                text: datasource.name,
                 type: "DataSource",
                 parent: type + "s",
-                data: { id: datasourceName, type: type, sqlType: sqlType },
+                data: { id: datasource.id,name:datasource.name, type: type, sqlType: sqlType },
             },
         ];
 

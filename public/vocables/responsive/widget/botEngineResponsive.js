@@ -267,7 +267,9 @@ var BotEngineResponsive = (function () {
                 $("#botPromptInput").css("display", "none");
                 var value = $(this).val();
                 var varToFill = $("#botVarToFill").val();
-                BotEngine.currentBot.params[varToFill] = value;
+                if(!varToFill)
+                    return self.previousStep()
+                BotEngine.currentBot.params[varToFill] = value.trim();
                 self.writeCompletedHtml(value);
                 $("#botPromptInput").off();
                 if (callback) {

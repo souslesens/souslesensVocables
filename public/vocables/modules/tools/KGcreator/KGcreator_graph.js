@@ -715,6 +715,8 @@ var KGcreator_graph = (function() {
 
 
     self.addInterTableJoinsToVisjsData = function(dataSource, visjsData) {
+        if(!KGcreator.rawConfig.databaseSources[dataSource])
+            return;
         var edges = [];
         var existingEdges = {};
         visjsData.edges.forEach(function(edge) {

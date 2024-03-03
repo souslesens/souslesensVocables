@@ -685,12 +685,14 @@ var OntologyModels = (function () {
                     var allRanges = {};
 
                     startNodeIds.forEach(function (startNodeId) {
+                        startNodeAncestorIds.push(startNodeId);
                         hierarchies[startNodeId].forEach(function (item) {
                             startNodeAncestorIds.push(item.superClass.value);
                         });
                     });
                     endNodeIds.forEach(function (endNodeId) {
                         if (endNodeId) {
+                            endNodeAncestorIds.push(endNodeId);
                             hierarchies[endNodeId].forEach(function (item, startNodeIndex) {
                                 endNodeAncestorIds.push(item.superClass.value);
                             });
@@ -703,6 +705,8 @@ var OntologyModels = (function () {
                         }
                         var sourceConstraints = Config.ontologiesVocabularyModels[_source].constraints;
                         for (var property in sourceConstraints) {
+                            if(property=="http://rds.posccaesar.org/ontology/lis14/rdl/representedIn")
+                                var x=3
                             var constraint = sourceConstraints[property];
                             constraint.source = _source;
                             var domainOK = false;

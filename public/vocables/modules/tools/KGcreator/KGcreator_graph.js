@@ -125,6 +125,8 @@ var KGcreator_graph = (function() {
     self.drawColumnToClassGraph = function(columnNodes) {
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+        if(!existingNodes || Object.keys(existingNodes).length==0)
+            return;
 
         columnNodes.forEach(function(columnNode, index) {
             var columnNodeId = columnNode.id;

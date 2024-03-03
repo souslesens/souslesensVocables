@@ -34,7 +34,7 @@ var KGcreator_mappings = (function () {
 return alert("select a field (column)");
 }*/
 
-        if (!columnNode.data.table) {
+        if (false && !columnNode.data.table) {
             alert("Select a column not a Table");
             return;
         }

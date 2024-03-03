@@ -267,6 +267,13 @@ var KGcreator = (function () {
                                 KGcreator_mappings.showTableMappings(node);
                             },
                         };
+                        items.mappingBot = {
+                            label: "add virtual column",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_bot.start(node);
+                            },
+                        };
                         items.mapColumn = {
                             label: "map Rows",
                             action: function (_e) {
@@ -284,7 +291,7 @@ var KGcreator = (function () {
                         };
 
                         items.showSampleData = {
-                            label: "showSampleData",
+                            label: "show sample data",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator.showSampleData(node, true, 200);
@@ -305,7 +312,7 @@ var KGcreator = (function () {
                         //   return (items = KGcreator.getContextMenu());
 
                         items.mappingBot = {
-                            label: "mappingBot",
+                            label: "map column",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_bot.start(node);
@@ -313,7 +320,7 @@ var KGcreator = (function () {
                         };
 
                         items.mapColumn = {
-                            label: "map Column",
+                            label: "map column advanced",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showMappingDialog();
@@ -335,6 +342,13 @@ var KGcreator = (function () {
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showTableMappings(node);
+                            },
+                        };
+                        items.mappingBot = {
+                            label: "mappingBot",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_bot.start(node);
                             },
                         };
                         items.mapColumn = {

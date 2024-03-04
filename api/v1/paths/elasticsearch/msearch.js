@@ -13,24 +13,15 @@ module.exports = function () {
 
     function POST(req, res, _next) {
         if (ConfigManager.config) {
-            console.log("getuser");
-            ConfigManager.getUser(req, res, function (err, userInfo) {
-                if (err) {
-                    console.log("userError");
-                    return res.status(400).json({ error: "error 1 " + err });
-                }
-                console.log("userOK");
-                console.log("userSources");
+
                 ConfigManager.getUserSources(req, res, function (err, userSources) {
                     if (err) {
-                        console.log("usersOurceError");
                         return res.status(400).json({ error: "error 1 " + err });
                     }
-                    console.log("usersOurcesOK");
-                    UserRequestFiltering.validateElasticSearchIndices(userInfo, req.body.indexes, userSources, "r", function (parsingError, filteredQuery) {
+
+                    UserRequestFiltering.validateElasticSearchIndices(null, req.body.indexes, userSources, "r", function (parsingError, filteredQuery) {
                         if (parsingError) {
                             console.log("validateElasticSearchIndicesError");
-
                             return processResponse(res, "error 2 " + parsingError, null);
                         }
                         console.log("validateElasticSearchIndicesOK");
@@ -42,7 +33,7 @@ module.exports = function () {
                         });
                     });
                 });
-            });
+
         } else {
             elasticRestProxy.executeMsearch(req.body.ndjson, function (err, result) {
                 if (err) {

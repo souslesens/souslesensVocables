@@ -40,7 +40,7 @@ var MainController = (function () {
                 Config.currentTopLevelOntology = serverConfig.currentTopLevelOntology;
                 Config.tools_available = serverConfig.tools_available;
                 Config.theme = serverConfig.theme;
-                //  Config.tools = serverConfig.tools_available;
+                //  Config.userTools = serverConfig.tools_available;
 
                 // display version number
                 $("#souslesensversion").html(serverConfig.version);
@@ -85,16 +85,6 @@ var MainController = (function () {
                 }
             },
         });
-        /*   $.getJSON("config/sources.json", function (json) {
-Config.sources = json;
-for(var sourceLabel in Config.sources){
-if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
-   Config.sources[sourceLabel].sparql_server.url=Config.sparql_server.url
-}
-if (callback)
-return callback()
-
-});*/
     };
     self.loadProfiles = function (callback) {
         $.ajax({
@@ -409,21 +399,15 @@ return callback()
         showToolsList: function (treeDiv) {
             $(".max-height").height($(window).height() - 300);
             var treeData = [];
-            for (var key in Config.tools) {
-                if (Config.tools_available.indexOf(key) > -1) {
-                    if ((Config.tools[key].label == "ConfigEditor" || Config.tools[key].label == "Admin") && authentication.currentUser.groupes.indexOf("admin") === -1) {
-                        continue;
-                    }
-                    if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1) {
-                    } else {
-                        treeData.push({
-                            id: key,
-                            text: Config.tools[key].label,
-                            type: "tool",
-                            parent: "#",
-                            data: Config.tools[key],
-                        });
-                    }
+            for (var key in Config.userTools) {
+                if (Config.userTools[key]) {
+                    treeData.push({
+                        id: key,
+                        text: Config.userTools[key].label,
+                        type: "tool",
+                        parent: "#",
+                        data: Config.userTools[key],
+                    });
                 }
             }
             //})
@@ -433,20 +417,10 @@ return callback()
                 },
             });
         },
+
         initTool: function (toolId, callback) {
-            /*if (ResponsiveUI.tools_available.includes(toolId)) {
-                var url = window.location.href;
-                url = url.replace("index_old.html", "");
-                var p = url.indexOf("?");
-                if (p > -1) {
-                    url = url.substring(0, p);
-                }
-                url = url + "?tool=" + toolId;
-                window.location.href = url;
-            }
-            */
             self.currentTool = toolId;
-            var toolObj = Config.tools[toolId];
+            var toolObj = Config.userTools[toolId];
             self.currentSource = null;
             // MainController.initControllers();
             MainController.writeUserLog(authentication.currentUser, self.currentTool, "");
@@ -454,7 +428,7 @@ return callback()
             $("#accordion").accordion("option", { active: 1 });
             $("#mainDialogDiv").dialog("close");
             MainController.initControllers();
-            var controller = Config.tools[self.currentTool].controller;
+            var controller = Config.userTools[self.currentTool].controller;
             $("#currentSourceTreeDiv").html("");
             $("#sourceDivControlPanelDiv").html("");
             $("#actionDivContolPanelDiv").html("");
@@ -485,15 +459,15 @@ return callback()
                 SourceSelectorWidget.initWidget(null, "sourcesTreeDiv", false, null, null, options);
 
                 // MainController.UI.showSources("sourcesTreeDiv", toolObj.multiSources);
-                if (Config.tools[self.currentTool].multiSources) {
+                if (Config.userTools[self.currentTool].multiSources) {
                     self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources");
                     if (controller.onSourceSelect) {
                         controller.onSourceSelect(self.currentSource);
                     }
                 }
             }
-            if (Config.tools[self.currentTool].toolDescriptionImg) {
-                $("#graphDiv").html("<img src='" + Config.tools[self.currentTool].toolDescriptionImg + "' width='600px' style='toolDescriptionImg'>");
+            if (Config.userTools[self.currentTool].toolDescriptionImg) {
+                $("#graphDiv").html("<img src='" + Config.userTools[self.currentTool].toolDescriptionImg + "' width='600px' style='toolDescriptionImg'>");
             } else {
                 $("#graphDiv").html(self.currentTool);
             }
@@ -508,24 +482,24 @@ return callback()
         },
 
         getJstreeConceptsContextMenu: function () {
-            if (!self.currentTool || !Config.tools[self.currentTool]) {
+            if (!self.currentTool || !Config.userTools[self.currentTool]) {
                 return;
             }
-            var controller = Config.tools[self.currentTool].controller;
+            var controller = Config.userTools[self.currentTool].controller;
             if (controller.jstreeContextMenu) {
                 return controller.jstreeContextMenu();
             }
         },
 
         onSourceSelect: function (event) {
-            if (Config.tools[self.currentTool].multiSources) {
+            if (Config.userTools[self.currentTool].multiSources) {
                 return;
             }
             //  OwlSchema.currentSourceSchema = null;
             //   Collection.currentCollectionFilter = null;
             self.UI.updateActionDivLabel();
             self.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource);
-            var controller = Config.tools[self.currentTool].controller;
+            var controller = Config.userTools[self.currentTool].controller;
             if (controller.onSourceSelect) {
                 controller.onSourceSelect(self.currentSource, event);
             }
@@ -548,9 +522,9 @@ return callback()
                 $("#toolPanelLabel").html(html);
             }
             if (self.currentSource) {
-                $("#toolPanelLabel").html(Config.tools[self.currentTool].label + " : " + self.currentSource);
+                $("#toolPanelLabel").html(Config.userTools[self.currentTool].label + " : " + self.currentSource);
             } else {
-                $("#toolPanelLabel").html(Config.tools[self.currentTool].label);
+                $("#toolPanelLabel").html(Config.userTools[self.currentTool].label);
             }
         },
 
@@ -638,7 +612,7 @@ return callback()
                     //if the old index is already launched we have just to init the tool
                     if (source) {
                         MainController.initControllers(source);
-                        Config.tools[tool].urlParam_source = source;
+                        Config.userTools[tool].urlParam_source = source;
                     }
                     self.UI.initTool(tool, function () {
                         callback();

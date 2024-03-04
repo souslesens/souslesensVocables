@@ -18,29 +18,14 @@ var ResponsiveUI = (function () {
     self.smartPhoneScreen = null;
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
-        //self.setSlsvCssClasses();
-        //your remaining code
-        
-        var tools = [];
 
-        for (var key in Config.tools) {
-            if (Config.tools_available.indexOf(key) > -1) {
-                if ((Config.tools[key].label == "ConfigEditor" || Config.tools[key].label == "Admin") && authentication.currentUser.groupes.indexOf("admin") === -1) {
-                    continue;
-                }
-                if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1) {
-                } else {
-                    tools.push(key);
-                }
-            }
-        }
-        tools.forEach((item, index) => {
+        // Config.userTools.forEach((item, index) => {
+        for (var item in Config.userTools) {
             var logoTool = `<div style='height:35px;width:37px;' class='${item}-logo' ></div>`;
-
             var strTool = `<div class='Lineage_PopUpStyleDiv' style='display:flex;flex-direction:row;align-items:center;' >${logoTool}<div  value="${item}">${item}</div></div>`;
 
             $("#toolsSelect").append(strTool);
-        });
+        }
 
         window.addEventListener(
             "resize",
@@ -115,8 +100,8 @@ var ResponsiveUI = (function () {
         }
 
         if (self.currentTool != null) {
-            if (Config.tools[self.currentTool].controller.unload) {
-                Config.tools[self.currentTool].controller.unload();
+            if (Config.userTools[self.currentTool].controller.unload) {
+                Config.userTools[self.currentTool].controller.unload();
             }
         }
         self.currentTool = toolId;
@@ -183,15 +168,15 @@ var ResponsiveUI = (function () {
     };
 
     self.initTool = function (toolId, callback) {
-        var toolObj = Config.tools[toolId];
+        var toolObj = Config.userTools[toolId];
         MainController.initControllers();
         MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
 
-        if (Config.tools[toolId].controller.onLoaded) {
+        if (Config.userTools[toolId].controller.onLoaded) {
             MainController.writeUserLog(authentication.currentUser, toolId, "");
-            Config.tools[toolId].controller.onLoaded();
+            Config.userTools[toolId].controller.onLoaded();
         } else {
             if (true) {
                 var url = window.location.href;
@@ -262,7 +247,7 @@ var ResponsiveUI = (function () {
                     $("#mainDialogDiv").parent().hide();
                 });*/
         });
-        /*$("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
+        /*$("#mainDialogDiv").load("./responsive/lineage/html/sourceSlector.html", function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
             $("#mainDialogDiv")
                 .parent()
@@ -277,7 +262,7 @@ var ResponsiveUI = (function () {
             } else {
                 var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
             }
-            SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
+            SourceSelectorWidget.loadSourcesTreeDiv("sourceSelector_jstreeDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
         });*/
     };
     self.openDialogDiv = function (div) {

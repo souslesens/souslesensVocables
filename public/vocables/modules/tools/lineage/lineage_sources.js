@@ -55,7 +55,7 @@ var Lineage_sources = (function () {
 
         Lineage_selection.selectedNodes = [];
         self.setTheme(Config.defaultGraphTheme);
-        if (!Config.tools["lineage"].noSourceDialogAtInit) {
+        if (!Config.userTools["lineage"].noSourceDialogAtInit) {
             Lineage_sources.showSourcesDialog(showDialog);
         }
     };
@@ -71,8 +71,8 @@ var Lineage_sources = (function () {
     };
 
     self.showSourcesDialog = function (forceDialog) {
-        if (!forceDialog && Config.tools["lineage"].urlParam_source) {
-            return self.loadSources(Config.tools["lineage"].urlParam_source);
+        if (!forceDialog && Config.userTools["lineage"].urlParam_source) {
+            return self.loadSources(Config.userTools["lineage"].urlParam_source);
         }
 
         var options = {

@@ -8,7 +8,7 @@ import KGcreator_graph from "./KGcreator_graph.js";
 import KGcreator_mappings from "./KGcreator_mappings.js";
 import KGcreator_run from "./KGcreator_run.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
-import KGcreator_bot_filter from "../../bots/KGcreator_bot.js";
+import KGcreator_bot from "../../bots/KGcreator_bot.js";
 
 var KGcreator = (function () {
     var self = {};
@@ -78,8 +78,8 @@ var KGcreator = (function () {
     };
 
     self.showSourcesDialog = function (callback) {
-        if (Config.tools["KGcreator"].urlParam_source) {
-            self.currentSlsvSource = Config.tools["KGcreator"].urlParam_source;
+        if (Config.userTools["KGcreator"].urlParam_source) {
+            self.currentSlsvSource = Config.userTools["KGcreator"].urlParam_source;
             self.initSource();
             return callback();
         }
@@ -90,7 +90,7 @@ var KGcreator = (function () {
         var selectTreeNodeFn = function () {
             self.currentSlsvSource = SourceSelectorWidget.getSelectedSource()[0];
             $("#KGcreator_slsvSource").html(self.currentSlsvSource);
-            $("#mainDialogDiv").dialog("close");
+            $("#KGcreator_dialogDiv").dialog("close");
             if (!self.currentSlsvSource) {
                 return alert("select a source");
             }
@@ -98,7 +98,7 @@ var KGcreator = (function () {
             //  self.initCentralPanel();
         };
 
-        SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
+        SourceSelectorWidget.initWidget(["OWL"], "KGcreator_dialogDiv", true, selectTreeNodeFn, null, options);
         if (callback) {
             callback();
         }
@@ -267,6 +267,13 @@ var KGcreator = (function () {
                                 KGcreator_mappings.showTableMappings(node);
                             },
                         };
+                        items.mappingBot = {
+                            label: "add virtual column",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_bot.start(node);
+                            },
+                        };
                         items.mapColumn = {
                             label: "map Rows",
                             action: function (_e) {
@@ -275,15 +282,16 @@ var KGcreator = (function () {
                             },
                         };
 
-                        items.tranforms = {
-                            label: "tranforms",
+                        items.transforms = {
+                            label: "transforms",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_mappings.showTranformsDialog(node);
+                                KGcreator_mappings.showTransformDialog(node);
                             },
                         };
+
                         items.showSampleData = {
-                            label: "showSampleData",
+                            label: "show sample data",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator.showSampleData(node, true, 200);
@@ -304,15 +312,15 @@ var KGcreator = (function () {
                         //   return (items = KGcreator.getContextMenu());
 
                         items.mappingBot = {
-                            label: "mappingBot",
+                            label: "map column",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_bot_filter.start(node);
+                                KGcreator_bot.start(node);
                             },
                         };
 
                         items.mapColumn = {
-                            label: "map Column",
+                            label: "map column advanced",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showMappingDialog();
@@ -336,6 +344,13 @@ var KGcreator = (function () {
                                 KGcreator_mappings.showTableMappings(node);
                             },
                         };
+                        items.mappingBot = {
+                            label: "add virtual column",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_bot.start(node);
+                            },
+                        };
                         items.mapColumn = {
                             label: "map Rows",
                             action: function (_e) {
@@ -354,7 +369,7 @@ var KGcreator = (function () {
                             label: "tranforms",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_mappings.showTranformsDialog(node);
+                                KGcreator_mappings.showTransformDialog(node);
                             },
                         };
                         // Table == Fichier pour les CSV donc on met le delete ici

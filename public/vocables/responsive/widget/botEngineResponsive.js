@@ -1,6 +1,4 @@
-
-
-var BotEngine = (function () {
+var BotEngineResponsive = (function () {
     var self = {};
     self.firstLoad = true;
     self.OrReturnValues = [];
@@ -9,12 +7,12 @@ var BotEngine = (function () {
         if (!options) {
             options = {};
         }
-        self.currentBot = botModule;
-        self.currentObj = initialWorkflow;
-        self.initialWorkflow = initialWorkflow;
-        self.history = [];
-        self.history.currentIndex = 0;
-        self.currentList = [];
+        BotEngine.currentBot = botModule;
+        BotEngine.currentObj = initialWorkflow;
+        BotEngine.initialWorkflow = initialWorkflow;
+        BotEngine.history = [];
+        BotEngine.history.currentIndex = 0;
+        BotEngine.currentList = [];
 
         var divId;
         if (options.divId) {
@@ -26,7 +24,7 @@ var BotEngine = (function () {
             $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
                 self.firstLoad = true;
             });
-            $("#botPanel").dialog("option", "title", self.currentBot.title);
+            $("#botPanel").dialog("option", "title", BotEngine.currentBot.title);
 
             $("#botPanel").parent().css("top", "13%");
             $("#botPanel").parent().css("left", "30%");
@@ -64,9 +62,9 @@ var BotEngine = (function () {
 
     self.nextStep = function (returnValue, varToFill) {
         $("#botFilterProposalDiv").hide();
-        self.history.push(JSON.parse(JSON.stringify(self.currentObj)));
-        self.history.currentIndex += 1;
-        var keys = Object.keys(self.currentObj);
+        BotEngine.history.push(JSON.parse(JSON.stringify(BotEngine.currentObj)));
+        BotEngine.history.currentIndex += 1;
+        var keys = Object.keys(BotEngine.currentObj);
 
         if (keys.length == 0) {
             return self.end();
@@ -76,27 +74,28 @@ var BotEngine = (function () {
 
         if (key == "_OR") {
             // alternative
-            var alternatives = self.currentObj[key];
+            var alternatives = BotEngine.currentObj[key];
             if (returnValue && alternatives[returnValue]) {
                 self.OrReturnValues.push(returnValue);
-                var obj = self.currentObj["_OR"][returnValue];
+                var obj = BotEngine.currentObj["_OR"][returnValue];
                 var key0 = Object.keys(obj)[0];
                 if (!key0) {
                     return self.end();
                 }
                 if (key0 == "_OR") {
-                    self.currentObj = obj;
+                    BotEngine.currentObj = obj;
                     return self.nextStep();
                 }
 
-                var fn = self.currentBot.functions[key0];
-                if (!fn && self.currentBot.functions["_DEFAULT"]) fn = self.currentBot.functions["_DEFAULT"];
+                var fn = BotEngine.currentBot.functions[key0];
+
+                if (!fn && BotEngine.currentBot.functions["_DEFAULT"]) fn = BotEngine.currentBot.functions["_DEFAULT"];
 
                 if (!fn || typeof fn !== "function") {
                     return alert("function not defined :" + key0);
                 }
                 if (obj[key0] != "_self") {
-                    self.currentObj = obj[key0];
+                    BotEngine.currentObj = obj[key0];
                 }
                 self.setStepMessage(key0);
                 fn();
@@ -109,12 +108,12 @@ var BotEngine = (function () {
                 self.setStepMessage();
             }
         } else {
-            var fn = self.currentBot.functions[key];
-            if (!fn && self.currentBot.functions["_DEFAULT"]) fn = self.currentBot.functions["_DEFAULT"];
+            var fn = BotEngine.currentBot.functions[key];
+            if (!fn && BotEngine.currentBot.functions["_DEFAULT"]) fn = BotEngine.currentBot.functions["_DEFAULT"];
             if (!fn || typeof fn !== "function") {
                 return alert("function not defined :" + key);
             }
-            self.currentObj = self.currentObj[key];
+            BotEngine.currentObj = BotEngine.currentObj[key];
             self.setStepMessage(key);
             fn();
         }
@@ -122,17 +121,17 @@ var BotEngine = (function () {
 
     self.previousStep = function (message) {
         if (message) self.message(message);
-        if (self.history.currentIndex > 1) {
+        if (BotEngine.history.currentIndex > 1) {
             $("#botPromptInput").css("display", "none");
-            self.history.currentIndex -= 2;
+            BotEngine.history.currentIndex -= 2;
 
-            self.currentObj = self.history[self.history.currentIndex];
+            BotEngine.currentObj = BotEngine.history[BotEngine.history.currentIndex];
 
             //delete last 3 message sended
             var childrens = $("#botTA").children();
             // last is bot_input --> don't count
             $("#botTA").children().slice(-4).filter("span").remove();
-            if (self.currentObj._OR != undefined) {
+            if (BotEngine.currentObj._OR != undefined) {
                 if (self.OrReturnValues != []) {
                     var lastOrReturnValue = self.OrReturnValues.slice(-1);
                     self.OrReturnValues.pop();
@@ -147,7 +146,7 @@ var BotEngine = (function () {
     };
 
     self.end = function () {
-        self.currentBot.params.queryText = self.getQueryText();
+        BotEngine.currentBot.params.queryText = self.getQueryText();
         if (self.divId) {
             var dialogWindow = $("#" + self.divId)
                 .parents()
@@ -157,20 +156,20 @@ var BotEngine = (function () {
         } else {
             $("#botPanel").dialog("close");
         }
-        if (self.currentBot.callbackFn) {
-            return self.currentBot.callbackFn();
+        if (BotEngine.currentBot.callbackFn) {
+            return BotEngine.currentBot.callbackFn();
         }
     };
 
     self.setStepMessage = function (step) {
-        if (self.currentBot.functionTitles) {
-            var message = self.currentBot.functionTitles[step];
+        if (BotEngine.currentBot.functionTitles) {
+            var message = BotEngine.currentBot.functionTitles[step];
             // In case 2 questions are asked at the same time erase the last one
             var last_message = $("#botTA").children().filter("span").slice(-1)[0];
             if ($(last_message).attr("class") == "chat-left") {
                 last_message.remove();
             }
-            self.writeCompletedHtml(message || "select an option", { question: true });
+            BotEngine.writeCompletedHtml(message || "select an option", { question: true });
         } else {
             self.writeCompletedHtml("select an option", { question: true });
         }
@@ -186,11 +185,16 @@ var BotEngine = (function () {
     };
 
     self.reset = function () {
-        self.currentBot.start();
+        /* if (!self.divId) {
+            $("#resetButtonBot").remove();
+            $("#previousButtonBot").remove();
+        }
+        */
+        BotEngine.currentBot.start();
     };
 
     self.close = function () {
-        $("#botPanel").css("display", "none");
+        $("#botPanel").dialog("close");
     };
 
     self.showList = function (values, varToFill, returnValue, sort, callback) {
@@ -218,27 +222,24 @@ var BotEngine = (function () {
 
             var text = $("#bot_resourcesProposalSelect option:selected").text();
             self.writeCompletedHtml(text + ":");
-            //voir avec Claude
-            //Donne une liste pour cet élement de façon inconnue    
+
             var selectedValue = $(this).val();
-            if(Array.isArray(selectedValue)){
-                selectedValue=selectedValue[0];
-            };
             if (evt.ctrlKey) return;
             if (callback) {
                 return callback(selectedValue);
             }
             if (varToFill) {
-                if (Array.isArray(self.currentBot.params[varToFill])) {
-                    self.currentBot.params[varToFill].push(selectedValue);
+                if (Array.isArray(BotEngine.currentBot.params[varToFill])) {
+                    BotEngine.currentBot.params[varToFill].push(selectedValue);
                 } else {
-                    self.currentBot.params[varToFill] = selectedValue;
+                    BotEngine.currentBot.params[varToFill] = selectedValue;
                 }
             }
 
             self.nextStep(returnValue || selectedValue);
         });
     };
+
     self.filterList = function (evt) {
         //var str = $(this).val();
         var str = $(evt.currentTarget).val();
@@ -320,80 +321,10 @@ var BotEngine = (function () {
         $("#bot_resourcesProposalSelect").find("option").remove().end();
     };
 
-    self.exportToGraph = function () {
-        var functionTitles = self.currentBot.functionTitles;
-        var workflow = self.initialWorkflow;
-
-        var visjsData = { nodes: [], edges: [] };
-
-        var existingNodes = {};
-        var recurse = function (obj, parentId, level) {
-            if (typeof obj == "object") {
-                for (var key in obj) {
-                    if (true || key != parentId) {
-                        var nodeId = common.getRandomHexaId(5);
-
-                        visjsData.nodes.push({
-                            id: nodeId,
-                            label: key == "_OR" ? "" : functionTitles[key] || key,
-                            shape: key == "_OR" ? "diamond" : "box",
-                            size: 10,
-                            level: level,
-                            data: {
-                                id: nodeId,
-                                label: functionTitles[key] || key,
-                            },
-                        });
-                        if (parentId) {
-                            visjsData.edges.push({
-                                id: common.getRandomHexaId(5),
-                                from: nodeId,
-                                to: parentId,
-                                color: Lineage_whiteboard.defaultEdgeColor,
-                                arrows: {
-                                    from: {
-                                        enabled: true,
-                                        type: Lineage_whiteboard.defaultEdgeArrowType,
-                                        scaleFactor: 0.5,
-                                    },
-                                },
-                            });
-                        }
-                        recurse(obj[key], nodeId, level + 1);
-                    }
-                }
-            }
-        };
-
-        var title = self.currentBot.title;
-        visjsData.nodes.push({
-            id: title,
-            label: title,
-            shape: "ellipse",
-            color: "#117de8",
-            font: { color: "white", size: 18 },
-
-            level: 0,
-            data: {
-                id: title,
-                label: title,
-            },
-        });
-
-        recurse(workflow, title, 1);
-        var x = visjsData;
-
-        $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").html("<div id='botGraphDiv' style='width:1200px;height:800px'></div>");
-
-        Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
-            layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
-            physics: { enabled: true },
-        });
-    };
+    self.analyse = function (str) {};
 
     return self;
 })();
-export default BotEngine;
+export default BotEngineResponsive;
 
-window.BotEngine = BotEngine;
+window.BotEngineResponsive = BotEngineResponsive;

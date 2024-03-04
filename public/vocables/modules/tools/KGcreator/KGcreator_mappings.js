@@ -34,7 +34,7 @@ var KGcreator_mappings = (function () {
 return alert("select a field (column)");
 }*/
 
-        if (!columnNode.data.table) {
+        if (false && !columnNode.data.table) {
             alert("Select a column not a Table");
             return;
         }
@@ -294,7 +294,7 @@ tripleObj.objectIsSpecificUri = true;
         if (!prefix) {
             return;
         }
-        var str = "if(mapping.isString && role=='o') return value; else return '" + prefix + "_'+value;";
+        var str = "if(mapping.isString && role=='o') return value; else return '" + prefix + "-'+value;";
         $("#KGcreator_fnBody").val(str);
     };
     self.testFunction = function () {
@@ -361,7 +361,7 @@ tripleObj.objectIsSpecificUri = true;
         var json = self.transformJsonEditor.get();
         KGcreator.currentConfig.currentMappings[self.currentTable].transform = json;
         KGcreator.saveDataSourceMappings();
-        $("#KGcreator_dialogDiv").dialog("close");
+        $("#smallDialogDiv").dialog("close");
     };
 
     self.saveColumnMappings = function (keepDialogOpen) {
@@ -548,7 +548,7 @@ tripleObj.objectIsSpecificUri = true;
         });
     };
 
-    self.showTranformsDialog = function (node) {
+    self.showTransformDialog = function (node) {
         PopupMenuWidget.hidePopup();
         self.currentSlsvSource = KGcreator.currentSlsvSource;
         var table = node.data.id;

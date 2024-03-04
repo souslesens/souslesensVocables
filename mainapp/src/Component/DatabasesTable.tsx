@@ -258,8 +258,8 @@ const DatabasesTable = () => {
                             onInputChange={(event, newInputValue) => setFilteringChars(newInputValue)}
                             renderInput={(params) => <TextField {...params} label="Search Databases by name" />}
                         />
-                        <TableContainer sx={{ height: "400px" }} component={Paper}>
-                            <Table>
+                        <TableContainer sx={{ maxHeight: "400px" }} component={Paper}>
+                            <Table stickyHeader>
                                 <TableHead>
                                     <TableRow>
                                         <TableCell style={{ fontWeight: "bold", width: "100%" }}>
@@ -303,7 +303,7 @@ const DatabasesTable = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        <Stack direction="row" justifyContent="center" spacing={{ sx: 1 }}>
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                             <DatabaseFormDialog create={true} />
                         </Stack>
                     </Stack>

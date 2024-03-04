@@ -1,6 +1,8 @@
 import {
+    Alert,
     Button,
     Checkbox,
+    Chip,
     FormControl,
     FormControlLabel,
     InputLabel,
@@ -58,9 +60,9 @@ const UsersTable = () => {
                 </Box>
             ),
             failure: (msg: string) => (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
-                </Box>
+                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                    {`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}
+                </Alert>
             ),
             success: (gotUsers: User[]) => {
                 const sortedUsers: User[] = gotUsers.slice().sort((a: User, b: User) => {
@@ -78,61 +80,62 @@ const UsersTable = () => {
                     return data;
                 });
                 return (
-                    <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                        <Stack spacing={2}>
-                            <CsvDownloader separator="&#9;" filename="users" extension=".tsv" datas={datas} />
-                            <Autocomplete
-                                disablePortal
-                                id="search-users"
-                                options={gotUsers.map((user) => user.login)}
-                                sx={{ width: 300 }}
-                                onInputChange={(event, newInputValue) => {
-                                    setFilteringChars(newInputValue);
-                                }}
-                                renderInput={(params) => <TextField {...params} label="Search Users by login" />}
-                            />
-                            <Box id="table-container" sx={{ justifyContent: "center", display: "flex", width: "600" }}>
-                                <TableContainer sx={{ maxHeight: "400px" }} component={Paper}>
-                                    <Table sx={{ width: "100%" }}>
-                                        <TableHead>
-                                            <TableRow style={{ fontWeight: "bold" }}>
-                                                <TableCell style={{ fontWeight: "bold" }}>Source</TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>
-                                                    <TableSortLabel active={orderBy === "login"} direction={order} onClick={() => handleRequestSort("login")}>
-                                                        Name
-                                                    </TableSortLabel>
-                                                </TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>Profiles</TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                            {sortedUsers
-                                                .filter((user) => user.login.includes(filteringChars))
-                                                .map((user) => {
-                                                    return (
-                                                        <TableRow key={user.id}>
-                                                            <TableCell>{user.source}</TableCell>
-                                                            <TableCell>{user.login}</TableCell>
-                                                            <TableCell>{user.groups.join(", ")}</TableCell>
-                                                            <TableCell>
-                                                                <Box sx={{ display: "flex" }}>
-                                                                    <UserForm id={`edit-button-${user.id}`} maybeuser={user} />
-                                                                    <ButtonWithConfirmation label="Delete" msg={() => deleteUser(user, updateModel)} />{" "}
-                                                                </Box>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    );
-                                                })}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            </Box>
-                            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                                <UserForm id={`create-button`} create={true} />
-                            </Box>
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
+                        <Autocomplete
+                            disablePortal
+                            id="search-users"
+                            options={gotUsers.map((user) => user.login)}
+                            onInputChange={(event, newInputValue) => {
+                                setFilteringChars(newInputValue);
+                            }}
+                            renderInput={(params) => <TextField {...params} label="Search Users by login" />}
+                        />
+                        <TableContainer sx={{ maxHeight: "400px" }} component={Paper}>
+                            <Table stickyHeader>
+                                <TableHead>
+                                    <TableRow style={{ fontWeight: "bold" }}>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Source</TableCell>
+                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                            <TableSortLabel active={orderBy === "login"} direction={order} onClick={() => handleRequestSort("login")}>
+                                                Name
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Profiles</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                    {sortedUsers
+                                        .filter((user) => user.login.includes(filteringChars))
+                                        .map((user) => {
+                                            return (
+                                                <TableRow key={user.id}>
+                                                    <TableCell align="center">{user.source}</TableCell>
+                                                    <TableCell>{user.login}</TableCell>
+                                                    <TableCell>
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            {user.groups.map((group) => <Chip label={group} size="small" />)}
+                                                        </Stack>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            <UserForm id={`edit-button-${user.id}`} maybeuser={user} />
+                                                            <ButtonWithConfirmation label="Delete" msg={() => deleteUser(user, updateModel)} />
+                                                        </Stack>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <CsvDownloader separator="&#9;" filename="users" extension=".tsv" datas={datas as Datas}>
+                                <Button variant="outlined">Download CSV</Button>
+                            </CsvDownloader>
+                            <UserForm id={`create-button`} create={true} />
                         </Stack>
-                    </Box>
+                    </Stack>
                 );
             },
         },

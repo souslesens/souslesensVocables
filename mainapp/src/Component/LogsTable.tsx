@@ -1,6 +1,6 @@
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 
-import { Box, TextField, CircularProgress, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack, TableSortLabel } from "@mui/material";
+import { Box, Button, TextField, CircularProgress, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack, TableSortLabel } from "@mui/material";
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
@@ -53,59 +53,58 @@ export const LogsTable = () => {
                     }, new Set());
                 const memoizedOptions = React.useMemo(() => getOptions(), [gotLogs]);
                 return (
-                    <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                        <Stack>
-                            <CsvDownloader filename="logs.csv" datas={gotLogs} />
-                            <Autocomplete
-                                disablePortal
-                                id="search-logs"
-                                options={memoizedOptions}
-                                sx={{ width: 300 }}
-                                onInputChange={(event, newInputValue) => {
-                                    setFilteringChars(newInputValue);
-                                }}
-                                getOptionLabel={(option) => option.user}
-                                renderOption={(props, option) => (
-                                    <li {...props} key={option.key}>
-                                        {option.user}
-                                    </li>
-                                )}
-                                renderInput={(params) => <TextField {...params} label="Search logs by username" />}
-                            />{" "}
-                            <Box id="table-container" sx={{ justifyContent: "center", height: "400px", display: "flex" }}>
-                                <TableContainer sx={{ height: "400px" }} component={Paper}>
-                                    <Table>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell style={{ fontWeight: "bold" }}>User</TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>Tool</TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>Source</TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>
-                                                    <TableSortLabel active={orderBy === "timestamp"} direction={order} onClick={() => handleRequestSort("timestamp")}>
-                                                        at
-                                                    </TableSortLabel>
-                                                </TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                            {memoizedLogs
-                                                .filter((log) => log.user.includes(filteringChars))
-                                                .map((log) => {
-                                                    return (
-                                                        <TableRow key={log.key}>
-                                                            <TableCell>{log.user}</TableCell>
-                                                            <TableCell>{log.tool}</TableCell>
-                                                            <TableCell>{log.source}</TableCell>
-                                                            <TableCell>{log.timestamp}</TableCell>
-                                                        </TableRow>
-                                                    );
-                                                })}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            </Box>
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
+                        <Autocomplete
+                            disablePortal
+                            id="search-logs"
+                            options={memoizedOptions}
+                            onInputChange={(event, newInputValue) => {
+                                setFilteringChars(newInputValue);
+                            }}
+                            getOptionLabel={(option) => option.user}
+                            renderOption={(props, option) => (
+                                <li {...props} key={option.key}>
+                                    {option.user}
+                                </li>
+                            )}
+                            renderInput={(params) => <TextField {...params} label="Search logs by username" />}
+                        />
+                        <TableContainer sx={{ height: "400px" }} component={Paper}>
+                            <Table stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "timestamp"} direction={order} onClick={() => handleRequestSort("timestamp")}>
+                                                at
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>User</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Tool</TableCell>
+                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>Source</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                    {memoizedLogs
+                                        .filter((log) => log.user.includes(filteringChars))
+                                        .map((log) => {
+                                            return (
+                                                <TableRow key={log.key}>
+                                                    <TableCell align="center" style={{ whiteSpace: "nowrap" }}>{log.timestamp}</TableCell>
+                                                    <TableCell align="center">{log.user}</TableCell>
+                                                    <TableCell align="center">{log.tool}</TableCell>
+                                                    <TableCell>{log.source}</TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <CsvDownloader filename="logs.csv" datas={gotLogs}>
+                                <Button variant="outlined">Download CSV</Button>
+                            </CsvDownloader>
                         </Stack>
-                    </Box>
+                     </Stack>
                 );
             },
         },

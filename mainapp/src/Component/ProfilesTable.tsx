@@ -332,6 +332,11 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
     };
 
+    const getAvailableThemes = () => {
+        return Object.keys(Config.slsvColorThemes)
+            .sort((a, b) => a.localeCompare(b));
+    };
+
     const fieldsFromSource = (source: ServerSource) => {
         let fields = [source.schemaType];
 
@@ -567,6 +572,16 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 ))}
                             </Select>
                         </FormControl>
+                        <TextField
+                            defaultValue={model.config.data.theme.defaultTheme}
+                            fullWidth
+                            id="theme"
+                            label="Theme"
+                            onChange={handleFieldUpdate("theme")}
+                            select
+                        >
+                            {getAvailableThemes().map((theme) => <MenuItem value={theme}>{theme}</MenuItem>)}
+                        </TextField>
                         <Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} type="submit" variant="contained" color="primary">
                             Save Profile
                         </Button>

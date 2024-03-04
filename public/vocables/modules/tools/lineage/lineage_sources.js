@@ -720,11 +720,13 @@ sourceDivId +
         /*  if(currentAccessControls=="readwrite")
             return true;
         return false;*/
-
-        if (groups.indexOf("admin") > -1 && Config.sources[source].editable) {
+        if(!Config.sources[source].editable){
+            return false;
+        }
+        if (groups.indexOf("admin") > -1) {
             return true;
         }
-
+        
         if (Config.sources[source].accessControl == "readwrite") {
             return true;
         }

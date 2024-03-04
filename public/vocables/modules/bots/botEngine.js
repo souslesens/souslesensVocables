@@ -1,3 +1,5 @@
+
+
 var BotEngine = (function () {
     var self = {};
     self.firstLoad = true;
@@ -216,8 +218,12 @@ var BotEngine = (function () {
 
             var text = $("#bot_resourcesProposalSelect option:selected").text();
             self.writeCompletedHtml(text + ":");
-
+            //voir avec Claude
+            //Donne une liste pour cet élement de façon inconnue    
             var selectedValue = $(this).val();
+            if(Array.isArray(selectedValue)){
+                selectedValue=selectedValue[0];
+            };
             if (evt.ctrlKey) return;
             if (callback) {
                 return callback(selectedValue);

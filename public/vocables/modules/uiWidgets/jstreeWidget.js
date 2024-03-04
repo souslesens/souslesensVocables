@@ -78,7 +78,7 @@ var JstreeWidget = (function () {
 
         // Classic items
         default: {
-            icon: "./icons/JstreeIcons/default.png",
+            icon: "./icons/JstreeIcons/Default.png",
         },
 
         Folder: {

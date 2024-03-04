@@ -209,8 +209,8 @@ var Lineage_createRelation = (function () {
 
                                             var cssClass = propStatusCssClassMap[group];
                                             var parent = property.source;
-                                            if (property.parent) {
-                                                parent = property.parent;
+                                            if (property.superProp) {
+                                                parent = property.superProp;
                                             }
 
                                             array.push({

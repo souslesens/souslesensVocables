@@ -345,7 +345,7 @@ var KGcreator = (function () {
                             },
                         };
                         items.mappingBot = {
-                            label: "mappingBot",
+                            label: "add virtual column",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_bot.start(node);

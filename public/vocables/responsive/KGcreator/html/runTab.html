@@ -1,5 +1,20 @@
-<div id="KGcreator_runmappingsTab" style="display: flex; flex-direction: row">
-    <div class="lineage_actionDiv" style="display: flex; flex-direction: column; max-height: 580px">
+<style>
+   #KGcreator_triplesDataTableDiv {
+        width: 100%;
+        height: 80%;
+        font-size: 12px;
+        font-family: system-ui;
+    }
+   #KGcreator_triplesDataTableDiv td{
+       width:30%;
+   }
+</style>
+
+
+
+
+<div id="KGcreator_runmappingsTab" style="display: flex; flex-direction: row;width:100%">
+
         <!--
         <div class="lineage_button_group" style="width: 600px">
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createTriples(true)">View Sample triples</button>
@@ -22,12 +37,16 @@
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="display: none" id="KGcreator_saveFileButton" onclick="KGcreator_run.saveFile()">Save file</button>
         </div>
         -->
-        <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
-            <textarea style="width: 700px; height: 740px; overflow: auto" id="KGcreator_infosDiv"></textarea>
-            <div>
-                <pre style="width: 600px; height: 700px" id="KGcreator_run_mappingsGraphEditor"></pre>
+      <!--  <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">-->
+
+        <div  style="width: 70%; height: 740px; overflow: auto">
+            <textarea id="KGcreator_infosDiv"  style="width: 100%; height: 20%" ></textarea>
+            <div id="KGcreator_triplesDataTableDiv"  style="width: 100%;height:80%"  ></div>
+        </div>
+            <div style="width: 30%;">
+                <pre style="width: 100%; height: 700px" id="KGcreator_run_mappingsGraphEditor"></pre>
                 <button onclick="KGcreator_run.saveDetailedMappings()">Save</button>
             </div>
-        </div>
-    </div>
+      <!--  </div>-->
+
 </div>

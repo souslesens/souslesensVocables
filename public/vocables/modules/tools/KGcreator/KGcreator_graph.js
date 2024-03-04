@@ -66,24 +66,27 @@ var KGcreator_graph = (function() {
         Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_resourceLinkGraphDiv", { nodes: [], edges: [] }, {});
 
         Lineage_sources.activeSource = source;
-        Lineage_whiteboard.drawModel(source, "KGcreator_resourceLinkGraphDiv", options, function(err) {
-            var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
-            var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.getIds();
-            var newNodes = [];
-            var newEdges = [];
-            var opacity = 0.7;
-            var fontColor = "rgb(58,119,58)";
-            nodes.forEach(function(node) {
-                newNodes.push({ id: node, opacity: opacity, font: { color: fontColor }, layer: "ontology" });
-            });
-            nodes.forEach(function(edge) {
-                newEdges.push({ id: edge, opacity: opacity, font: { color: fontColor, physics: false } });
-            });
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
-            Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
-            GraphDisplayLegend.drawLegend("KGcreator_classes", "LineageVisjsLegendCanvas", false);
+        Lineage_whiteboard.drawModel(source, "KGcreator_resourceLinkGraphDiv", options, function(err,topConcepts) {
             $("#KGcreator_resourceLinkRightPanel").load("./modules/tools/KGcreator/html/graphControlPanel.html", function() {
             });
+            if( !err && topConcepts.length>0) {
+                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.getIds();
+                var newNodes = [];
+                var newEdges = [];
+                var opacity = 0.7;
+                var fontColor = "rgb(58,119,58)";
+                nodes.forEach(function(node) {
+                    newNodes.push({ id: node, opacity: opacity, font: { color: fontColor }, layer: "ontology" });
+                });
+                nodes.forEach(function(edge) {
+                    newEdges.push({ id: edge, opacity: opacity, font: { color: fontColor, physics: false } });
+                });
+                Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
+                Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
+                GraphDisplayLegend.drawLegend("KGcreator_classes", "LineageVisjsLegendCanvas", false);
+            }
+
         });
     };
 
@@ -717,6 +720,8 @@ var KGcreator_graph = (function() {
 
 
     self.addInterTableJoinsToVisjsData = function(dataSource, visjsData) {
+        if(!  KGcreator.rawConfig.databaseSources[dataSource] ||  !KGcreator.rawConfig.databaseSources[dataSource].tableJoins)
+            return visjsData;
         var edges = [];
         var existingEdges = {};
         visjsData.edges.forEach(function(edge) {

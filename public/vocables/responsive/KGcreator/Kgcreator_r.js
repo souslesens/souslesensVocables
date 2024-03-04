@@ -56,17 +56,20 @@ var KGcreator_r = (function () {
     };
     self.showMenuButtons = function () {};
     self.initRunTab = function () {
-        $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/runTab.html", function () {
-            $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function () {
-                $("#KGcreator_topButtons").css("padding", "4px");
-                $("#MenuBar").css("height", "");
-                $("#MenuBarFooter").css("display", "flex");
-                $("#KGcreator_topButtons").css("flex-direction", "column");
-                if (KGcreator.currentTreeNode) {
-                    KGcreator_run.createTriples(true);
-                }
-                ResponsiveUI.PopUpOnHoverButtons();
-            });
+        $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/runTab.html", function (xerr, y,z) {
+
+        });
+
+        $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function () {
+            $("#KGcreator_topButtons").css("padding", "4px");
+            $("#MenuBar").css("height", "");
+            $("#MenuBarFooter").css("display", "flex");
+            $("#KGcreator_topButtons").css("flex-direction", "column");
+            if (KGcreator.currentTreeNode) {
+                KGcreator_run.createTriples(true);
+            }
+            ResponsiveUI.PopUpOnHoverButtons();
+            $("#KGcreator_centralPanelTabs").redraw();
         });
     };
     self.initLinkTab = function () {

@@ -384,7 +384,7 @@ tripleObj.objectIsSpecificUri = true;
         KGcreator.saveDataSourceMappings();
 
         JstreeWidget.setSelectedNodeStyle({ color: "#0067bb" });
-        JstreeWidget.setSelectedNodeStyle({ color: "#0067bb" });
+
 
         if (self.currentGraphNode) {
             columnNode.data.classNode = KGcreator_graph.currentGraphNode.id;
@@ -569,7 +569,9 @@ tripleObj.objectIsSpecificUri = true;
                 transforms = {};
             }
             self.transformJsonEditor = new JsonEditor("#KGcreator_transformJsonDisplay", {});
+
             self.transformJsonEditor.load(transforms);
+         //   $(".json-editor-blackbord *").css("color","#fff")
         });
     };
 

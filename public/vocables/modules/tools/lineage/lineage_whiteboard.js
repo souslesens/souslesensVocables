@@ -371,10 +371,10 @@ var Lineage_whiteboard = (function() {
             ],
             function(err) {
                 if (callback) {
-                    return callback(err);
+                    return callback(err,topConcepts);
                 }
                 if (err) {
-                    return alert(err);
+                    return alert(err),topConcepts;
                 }
             }
         );

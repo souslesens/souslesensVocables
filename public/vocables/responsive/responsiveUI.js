@@ -10,7 +10,6 @@ import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
 var ResponsiveUI = (function () {
     var self = {};
     self.source = null;
-    self.mainDialogDiv = null;
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
@@ -73,7 +72,9 @@ var ResponsiveUI = (function () {
         $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 7);
         //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
+
     };
+
     self.replaceFile = function (file1, file2) {
         Object.keys(file1).forEach((key) => {
             if (file2[key]) {
@@ -273,12 +274,12 @@ var ResponsiveUI = (function () {
         $("#" + div)
             .parent()
             .show();
-        $("#" + div)
+        /*$("#" + div)
             .parent()
             .css("top", "20%");
         $("#" + div)
             .parent()
-            .css("left", "30%");
+            .css("left", "30%");*/
     };
 
     self.setSlsvCssClasses = function (callback) {

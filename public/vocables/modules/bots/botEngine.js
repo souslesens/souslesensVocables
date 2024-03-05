@@ -28,8 +28,8 @@ var BotEngine = (function () {
             });
             $("#botPanel").dialog("option", "title", self.currentBot.title);
 
-            $("#botPanel").parent().css("top", "13%");
-            $("#botPanel").parent().css("left", "30%");
+            //$("#botPanel").parent().css("top", "13%");
+            //$("#botPanel").parent().css("left", "30%");
         }
 
         $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
@@ -384,7 +384,7 @@ var BotEngine = (function () {
         var x = visjsData;
 
         $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").html("<div id='botGraphDiv' style='width:1200px;height:800px'></div>");
+        //$("#mainDialogDiv").html("<div id='botGraphDiv' style='width:1200px;height:800px'></div>");
 
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
             layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },

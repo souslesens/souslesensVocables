@@ -18,7 +18,7 @@ const GraphManagement = (function () {
                     self.umountKGUploadApp();
                 },
             });
-            $("#mainDialogDiv").parent().css("left", "100px");
+            //$("#mainDialogDiv").parent().css("left", "100px");
 
             $("#mainDialogDiv").html("");
             $("#mainDialogDiv").html(`

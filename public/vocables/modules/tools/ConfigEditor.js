@@ -19,7 +19,7 @@ var ConfigEditor = (function () {
             $("#mainDialogDiv").dialog("open");
 
             $("#mainDialogDiv").dialog("option", "title", "Config Editor");
-            $("#mainDialogDiv").parent().css("left", "100px");
+            //$("#mainDialogDiv").parent().css("left", "100px");
             $("#mainDialogDiv").css("width", "1100px");
             $("#mainDialogDiv").dialog({
                 close: function (event, ui) {
@@ -30,7 +30,7 @@ var ConfigEditor = (function () {
 
             $("#mainDialogDiv").html(`
                     <div id="mount-app-here"></div>
-                `);
+            `);
 
             self.umountKGUploadApp = self.createApp();
         }, 2001);

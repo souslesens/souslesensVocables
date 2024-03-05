@@ -40,8 +40,8 @@ var NodeInfosWidget = (function () {
                     $("#deleteButton").remove();
                 },
             });
-            $("#mainDialogDiv").parent().css("top", "20px");
-            $("#mainDialogDiv").parent().css("left", "20px");
+            //$("#mainDialogDiv").parent().css("top", "20px");
+            //$("#mainDialogDiv").parent().css("left", "20px");
         }
         $("#" + divId).load("snippets/nodeInfosWidget.html", function () {
             $("#nodeInfosWidget_tabsDiv").tabs({
@@ -175,8 +175,10 @@ var NodeInfosWidget = (function () {
 
                 function (callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
+                        $('#nodeInfos_individualsDiv').hide();
                         return callbackSeries();
                     }
+                    $('#nodeInfos_individualsDiv').show();
                     var html = "<button id='nodesInfos_individual_button' onclick='NodeInfosWidget.showClassIndividuals()'>Individuals</button>";
                     $("#nodeInfos_individualsDiv").html(html);
                     callbackSeries();
@@ -525,9 +527,9 @@ defaultLang = 'en';*/
                 str += "</table></div>";
 
                 str +=
-                    " <br><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;'>" +
-                    "<div id='nodeInfos_restrictionsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
-                    "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
+                    " <br><div id='nodeInfos_listsDiv' >" +
+                    "<div id='nodeInfos_restrictionsDiv'  style='display:table-caption;background-color: #ddd;padding:5px'></div>" +
+                    "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;background-color: #ddd;padding:5px'></div>" +
                     "</div>";
 
                 $("#" + divId).html(str);
@@ -549,7 +551,7 @@ defaultLang = 'en';*/
                         if (err) {
                             return callbackSeries(err);
                         }
-                        str += "<b class='nodesInfos_tiltles'>Restrictions </b> <div style=''> <table>";
+                        str += "<b class='nodesInfos_tiltles'>Restrictions </b> <div style=''> <table style='display:table-caption'>";
                         result.forEach(function (item) {
                             str += "<tr class='infos_table'>";
 
@@ -561,7 +563,7 @@ defaultLang = 'en';*/
                             if (item.value) {
                                 targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
                             }
-                            str += "<td class=''>" + targetClassStr + "</td>";
+                            str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
 
                             str += "</tr>";
                         });
@@ -584,7 +586,7 @@ defaultLang = 'en';*/
                             if (err) {
                                 return callbackSeries(err);
                             }
-                            str += "<br><b class='nodesInfos_tiltles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table>";
+                            str += "<br><b class='nodesInfos_tiltles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table >";
                             result.forEach(function (item) {
                                 str += "<tr class='infos_table'>";
 
@@ -596,7 +598,7 @@ defaultLang = 'en';*/
                                 if (item.value) {
                                     targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.subject.value + "\")'>" + item.subjectLabel.value + "</span>";
                                 }
-                                str += "<td class=''>" + targetClassStr + "</td>";
+                                str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
 
                                 str += "</tr>";
                             });

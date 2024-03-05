@@ -41,7 +41,7 @@ return alert("select a field (column)");
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
         $("#smallDialogDiv").css("height", "700px");
-        $("#smallDialogDiv").parent().css("left", "10%");
+        //$("#smallDialogDiv").parent().css("left", "10%");
         /*$("#smallDialogDiv").css('left','10%');*/
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
             $("#LinkColumn_rightPanel").show();
@@ -532,7 +532,7 @@ tripleObj.objectIsSpecificUri = true;
         self.currentSlsvSource = KGcreator.currentSlsvSource;
         var table = node.data.id;
         $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").parent().css("left", "10%");
+        //$("#smallDialogDiv").parent().css("left", "10%");
         $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/lookupDialog.html", function () {
@@ -554,7 +554,7 @@ tripleObj.objectIsSpecificUri = true;
         var table = node.data.id;
         self.currentTable = table;
         $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").parent().css("left", "10%");
+        //$("#smallDialogDiv").parent().css("left", "10%");
         $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/transformDialog.html", function () {

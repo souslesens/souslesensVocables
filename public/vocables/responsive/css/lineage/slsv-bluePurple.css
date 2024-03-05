@@ -275,9 +275,14 @@
 }
 
 [role="dialog"] {
-    width: auto !important;
-    height: auto !important;
-
+    
+    width: unset !important;
+    height: unset !important;
+    max-height: 99vh;
+    max-width: 95vw;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
     .border-classic-color-theme4;
     border: @button1-color solid 5px !important;
 }

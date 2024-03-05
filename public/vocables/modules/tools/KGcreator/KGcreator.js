@@ -961,7 +961,7 @@ var KGcreator = (function () {
                 lines.push(line);
             });
             $("#smallDialogDiv").dialog("open");
-            $("#smallDialogDiv").parent().css("left", "10%");
+            //$("#smallDialogDiv").parent().css("left", "10%");
 
             Export.showDataTable("smallDialogDiv", tableCols, lines);
             return;
@@ -987,7 +987,7 @@ var KGcreator = (function () {
             html += "</table>";
 
             $("#smallDialogDiv").dialog("open");
-            $("#smallDialogDiv").parent().css("left", "10%");
+            //$("#smallDialogDiv").parent().css("left", "10%");
             // $("#smallDialogDiv").html("<div style='overflow:auto;height:90%'>"+html+"</div>")
             $("#smallDialogDiv").html(html);
         }

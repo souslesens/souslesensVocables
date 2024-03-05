@@ -678,8 +678,8 @@ var KGcreator_graph = (function() {
 
         //   var html = "<div id='KGcreator_mappingsGraphDiv' style='width:1100px;height:750px'></div>";
         $("#KGcreator_dialogDiv").dialog("open");
-        $("#KGcreator_dialogDiv").parent().css("top", "10%");
-        $("#KGcreator_dialogDiv").parent().css("left", "10%");
+        //$("#KGcreator_dialogDiv").parent().css("top", "10%");
+        //$("#KGcreator_dialogDiv").parent().css("left", "10%");
         $("#KGcreator_dialogDiv").dialog("option", "title", " Mappings");
         //  $("#KGcreator_dialogDiv").html(html);
         $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function() {

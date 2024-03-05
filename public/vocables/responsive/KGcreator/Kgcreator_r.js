@@ -41,6 +41,22 @@ var KGcreator_r = (function () {
                     KGcreator.currentSlsvSource = ResponsiveUI.source;
                     ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initLinkTab, "#MapButton");
                     ResponsiveUI.resetWindowHeight();
+                    $("#KGcreator_dialogDiv").dialog({
+                        autoOpen: false,
+                        close: function (event, ui) {
+                            window.scrollTo(0, 0);
+                            
+                        },
+                        drag:function(event,ui){
+                            $("#KGcreator_dialogDiv").parent().css('transform','unset')
+                        },
+                        open(event,ui){
+                            $("#KGcreator_dialogDiv").parent().css('transform','translate(-50%,-50%)');
+                            $("#KGcreator_dialogDiv").parent().css('top','50%');
+                            $("#KGcreator_dialogDiv").parent().css('left','50%');
+                        }
+                    });
+                    
                 });
             });
         });
@@ -67,7 +83,7 @@ var KGcreator_r = (function () {
                 }
                 ResponsiveUI.PopUpOnHoverButtons();
                 self.ResetRunMappingTabWidth();
-                
+               
                 
             });
         });

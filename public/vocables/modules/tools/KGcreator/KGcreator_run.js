@@ -128,6 +128,13 @@ var KGcreator_run = (function() {
     };
     self.showTriplesInDataTable = function(data) {
 
+
+        var escapeMarkup=function(str){
+            var str2=str.replace(/</g,"&lt;")
+            var str2=str2.replace(/>/g,"&gt;")
+            return str2
+        }
+
         var tableCols = [];
         var hearders = ["subject", "predicate", "object"];
         hearders.forEach(function(item) {
@@ -137,14 +144,10 @@ var KGcreator_run = (function() {
 
         var tableData = [];
         data.forEach(function(item, index) {
-            tableData.push([item.s, item.p, item.o]);
+            tableData.push([escapeMarkup(item.s), escapeMarkup(item.p), escapeMarkup(item.o)]);
         });
 
-        var escapeMarkup=function(str){
-            var str2=str.replace(/</g,"&lt;")
-            var str2=str2.replace(/>/g,"&gt;")
-            return str2
-        }
+
 
         var str="<table><tr><td>subject</td><td>predicate</td><td>object</td></tr>"
         data.forEach(function(item, index) {
@@ -152,8 +155,8 @@ var KGcreator_run = (function() {
         })
         str+="</table>"
 
-        $("#KGcreator_triplesDataTableDiv").html(str)
-        return;
+      /*  $("#KGcreator_triplesDataTableDiv").html(str)
+        return;*/
         Export.showDataTable("KGcreator_triplesDataTableDiv", tableCols, tableData, null, { paging: true }, function(err, datatable) {
         });
     };

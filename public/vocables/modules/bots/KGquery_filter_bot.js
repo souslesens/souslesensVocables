@@ -9,7 +9,9 @@ var KGquery_filter_bot = (function() {
     var self = {};
     self.title = "Filter Class";
 
-    self.start = function(currentQuery, validateFn) {
+
+    self.start = function(data,currentQuery, validateFn) {
+        self.data=data
         BotEngine.init(KGquery_filter_bot, self.workflow_filterClass, null, function() {
             self.validateFn = validateFn;
             self.callbackFn = function() {
@@ -24,22 +26,38 @@ var KGquery_filter_bot = (function() {
     };
 
     self.workflow_filterClass = {
-        listFilterTypes: {
+
             _OR: {
-                label: { promptIndividualsLabelFn: { setSparqlQueryFilter: {} } }, list: { listIndividualsFn: { setSparqlQueryFilter: {} } }
+                "Choose annotation":{   listAnnotationsFn:{promptAnnotationValueFn:{setSparqlQueryFilter: {} }}},
+                "enter rdfs:label": {    promptIndividualsLabelFn: { setSparqlQueryFilter: {} } },
+                "List rdfs:labels": {  listIndividualsFn: { setSparqlQueryFilter: {} } },
                 // advanced: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
                 // date: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
                 //  period: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
                 // }
             }
-        }
+
     };
 
     self.functions = SparqlQuery_bot.functions;
 
+    self.functions.listAnnotationsFn=function(){
+        if(!self.data || !self.data.annotationProperties)
+            BotEngine.abort("no annotations for this Class")
+        var choices=self.data.annotationProperties;
+        BotEngine.showList(choices, "annotationProperty");
+
+    }
+    self.functions.promptAnnotationValueFn=function(){
+        BotEngine.promptValue("enter value","annotationPropertyValue")
+    }
+
+
+
+
     self.functions.listFilterTypes = function() {
-        var choices = ["label", "list"];
-        BotEngine.showList(choices, "individualsFilterType");
+       /* var choices = ["label", "list"];
+        BotEngine.showList(choices, "individualsFilterType");*/
     };
 
     self.functions.setSparqlQueryFilter = function(queryParams, varName) {
@@ -49,8 +67,16 @@ var KGquery_filter_bot = (function() {
         var advancedFilter = self.params.advancedFilter || "";
         var filterLabel = self.params.queryText;
 
+        var annotationProperty=self.params.annotationProperty;
+        var annotationPropertyValue=self.params.annotationPropertyValue
+
         self.filter = "";
-        if (individualsFilterType == "label") {
+
+        if(annotationPropertyValue){
+            var propLabel=Sparql_common.getLabelFromURI(annotationProperty)
+            self.filter= " FILTER (regex(?"+varName+"_"+propLabel+",'"+annotationPropertyValue+"','i'))"
+        }
+        else if (individualsFilterType == "label") {
             self.filter = Sparql_common.setFilter(varName, null, individualsFilterValue);
         } else if (individualsFilterType == "list") {
             self.filter = Sparql_common.setFilter(varName, individualsFilterValue, null, { useFilterKeyWord: 1 });

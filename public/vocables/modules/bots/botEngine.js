@@ -20,10 +20,12 @@ var BotEngine = (function () {
         } else {
             divId = "botDiv";
             $("#botPanel").css("display", "block");
+
         }
 
         $("#" + divId).load("modules/bots/html/bot.html", function () {
             $("#botTitle").html(self.currentBot.title);
+
 
             if (callback) {
                 callback();
@@ -282,8 +284,8 @@ var BotEngine = (function () {
         recurse(workflow, title, 1);
         var x = visjsData;
 
-        $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").html("<div id='botGraphDiv' style='width:1200px;height:800px'></div>");
+        $("#KGcreator_dialogDiv").dialog("open");
+        $("#KGcreator_dialogDiv").html("<div id='botGraphDiv' style='width:800px;height:800px'></div>");
 
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
             layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },

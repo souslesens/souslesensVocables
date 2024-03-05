@@ -290,12 +290,12 @@ var KGbuilder_triplesMaker = {
         if (!line[mapping.o] || line[mapping.o] == "null") {
           return callback(null, null);
         }
-        else if (mapping.xsdType) {
+        else if (mapping.dataType) {
           var str = line[mapping.o];
           if (!str || str == "null") {
             return;
           }
-          if (mapping.xsdType == "dateTime") {
+          if (mapping.dataType == "dateTime") {
             var isDate = function(date) {
               return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
             };
@@ -320,7 +320,7 @@ var KGbuilder_triplesMaker = {
 
           mapping.p = "rdf:value";
 
-          objectStr = "'" + str + "'^^xsd:" + mapping.xsdType;
+          objectStr = "'" + str + "'^^" + mapping.dataType;
         }
         else if (tableMappings.transform && line[mapping.o] && tableMappings.transform[mapping.o]) {
           try {
@@ -358,7 +358,7 @@ var KGbuilder_triplesMaker = {
       if (objectStr.indexOf && objectStr.indexOf("http") == 0) {
         objectStr = "<" + objectStr + ">";
       }
-      else if (mapping.xsdType) {
+      else if (mapping.dataType) {
         //pass
       }
       else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {

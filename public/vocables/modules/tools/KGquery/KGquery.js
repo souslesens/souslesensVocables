@@ -201,7 +201,7 @@ var KGquery = (function () {
             varName: self.getVarName(aClass, true),
         };
 
-        KGquery_filter_bot.start(currentFilterQuery, function (err, result) {
+        KGquery_filter_bot.start(aClass.data,currentFilterQuery, function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -356,7 +356,7 @@ return alert("missing target node in  path");
                         optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " rdf:value " + subjectVarName + "_value}\n", optionalStr);
                     });
                 } else {
-                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " owl:hasValue " + subjectVarName + "Value}\n", optionalStr);
+                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " rdf:value " + subjectVarName + "Value}\n", optionalStr);
                     optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", optionalStr);
                 }
                 if (queryElement.toNode.data.annotationProperties) {
@@ -365,7 +365,7 @@ return alert("missing target node in  path");
                         optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " rdf:value " + objectVarName + "_value}\n", optionalStr);
                     });
                 } else {
-                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " owl:hasValue " + objectVarName + "Value}\n", optionalStr);
+                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " rdf:value " + objectVarName + "Value}\n", optionalStr);
                     optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " rdfs:label " + objectVarName + "Label}\n", optionalStr);
                 }
                 optionalStrs += " \n" + optionalStr;

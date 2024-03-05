@@ -38,6 +38,7 @@ return alert("select a field (column)");
             alert("Select a column not a Table");
             return;
         }
+        $("#smallDialogDiv").parent().css("z-index", 100)
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
         $("#smallDialogDiv").css("height", "700px");
@@ -58,9 +59,9 @@ return alert("select a field (column)");
                     $("#smallDialogDiv").find("#editPredicate_savePredicateButton").css("display", "none");
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
-                        height: 600,
-                        width: 800,
-                        modal: true,
+                      //  height: 600,
+                      //  width: 800,
+                        modal: false,
                     });
                     var html =
                         "<div>isBlankNode<input type='checkbox' id='LinkColumn_isObjectBlankNodeCBX' />" +

@@ -6,10 +6,11 @@
     <input type="hidden" id="botVarToFill" />
 
     <div>
+        <button id="displayGraphBot" onclick="BotEngine.exportToGraph()" style="display:none" >G</button>
         <button id="resetButtonBot" class="slsv-invisible-button resetIcon" style="margin-top: 30px" onclick="BotEngine.reset()"></button>
 
         <button id="previousButtonBot" class="slsv-invisible-button previousIcon" style="margin-top: 30px; margin-left: 150px" onclick="BotEngine.previousStep()"></button>
-        <button id="displayGraphBot" onclick="BotEngine.exportToGraph()" style="display: none">Graph</button>
+
     </div>
     <div style="display: flex; flex-direction: column; justify-content: center; width: 100%; margin-bottom: 20px">
         <!--<div id="botFilterProposalDiv">filter <input id="botFilterProposalInput" /></div>-->

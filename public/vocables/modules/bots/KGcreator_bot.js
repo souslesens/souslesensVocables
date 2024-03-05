@@ -8,8 +8,9 @@ var KGcreator_bot = (function() {
     var self = {};
     self.title = "Create mappings";
     self.lastObj = null;
-    self.start = function(node) {
+    self.start = function(node,callbackFn) {
         self.currentUri = null;
+     //   self.callbackFn=callbackFn
 
         var workflow = null;
         if (node) {
@@ -126,13 +127,13 @@ var KGcreator_bot = (function() {
     };
 
     self.workflowColumnMappingType = {
-        setUriTypeFn: {
+     setUriTypeFn: {
             _OR: {
                 //   columnBlankNode: { addMappingToModelFn: self.workflowRdfType },
-                "virtualColumn-bnode": { virtualColumnBlankNodeFn: { addMappingToModelFn: self.workflowRdfType } },
-                "owl:NamedIndividual": { addMappingToModelFn: self.workflowRdfType }
+                "virtualColumnBlankNode": { virtualColumnBlankNodeFn: { addMappingToModelFn: self.workflowRdfType } },
+                "namedIndividual": { addMappingToModelFn: self.workflowRdfType }
             }
-        }
+      }
     };
     self.workflowBnode = {
         virtualColumnBlankNodeFn: { addMappingToModelFn: self.workflowRdfType }
@@ -303,6 +304,7 @@ var KGcreator_bot = (function() {
                 }
             };
             $("#botPanel").dialog("close");
+
             KGcreator_bot.start(node);
         },
         addMappingToModelFn: function(callback) {

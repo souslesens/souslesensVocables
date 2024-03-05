@@ -6,6 +6,7 @@ import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
 import Lineage_r from "./lineage/lineage_r.js";
 
 import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
+import KGcreator_r from "./KGcreator/Kgcreator_r.js";
 
 var ResponsiveUI = (function () {
     var self = {};
@@ -30,6 +31,9 @@ var ResponsiveUI = (function () {
             "resize",
             function (event) {
                 self.resetWindowHeight();
+                if(self.currentTool=='KGcreator'){
+                    KGcreator_r.ResetRunMappingTabWidth();
+                }
             },
             true
         );

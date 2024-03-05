@@ -66,6 +66,9 @@ var KGcreator_r = (function () {
                     KGcreator_run.createTriples(true);
                 }
                 ResponsiveUI.PopUpOnHoverButtons();
+                self.ResetRunMappingTabWidth();
+                
+                
             });
         });
     };
@@ -82,6 +85,16 @@ var KGcreator_r = (function () {
             });
         });
     };
+    self.ResetRunMappingTabWidth=function(){
+        var LateralPannelWidth = $("#lateralPanelDiv").width();
+        var KGcreator_runmappingsTabWidth=$(window).width()-LateralPannelWidth;
+        var KGcreator_GraphEditorWidth=KGcreator_runmappingsTabWidth/2 - 5
+        $('#KGcreator_infosDiv').css('width',KGcreator_GraphEditorWidth);
+        $('#KGcreator_run_mappingsGraphEditorContainer').css('width',KGcreator_GraphEditorWidth);
+        
+        
+
+    }
     /*
     self.showMappingDialogResponsive=function(addColumnClassType, options, callback){
         if(callback){

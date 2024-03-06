@@ -574,7 +574,10 @@ var KGcreator_graph = (function() {
 
                 var mappings = sourceMappings[table];
                 var columns = KGcreator.currentConfig.currentDataSource.tables[table];
-
+                if(columns==undefined){
+                    //There is a mapping for this column but the Table is not on db anymore
+                    continue;
+                }
                 function getTripleLabelRole(id) {
 
                     if (id.indexOf("$_") == 0) {

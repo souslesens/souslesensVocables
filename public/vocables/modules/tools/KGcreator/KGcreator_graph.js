@@ -14,7 +14,7 @@ var KGcreator_graph = (function() {
     var self = {};
     self.drawOntologyModel = function(source) {
 
-        return;
+        //return;
         if (!source) {
             source = KGcreator.currentSlsvSource;
         }

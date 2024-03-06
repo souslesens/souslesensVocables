@@ -45,6 +45,21 @@ var KGquery_r = (function () {
                     KGquery_graph.drawVisjsModel("saved");
                     ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery_r.initQuery, "#QueryTabButton");
                     ResponsiveUI.resetWindowHeight();
+                    $("#KGquery_dataTableDialogDiv").dialog({
+                        autoOpen: false,
+                        close: function (event, ui) {
+                            window.scrollTo(0, 0);
+                            
+                        },
+                        drag:function(event,ui){
+                            $("#KGcreator_dialogDiv").parent().css('transform','unset')
+                        },
+                        open(event,ui){
+                            $("#KGcreator_dialogDiv").parent().css('transform','translate(-50%,-50%)');
+                            $("#KGcreator_dialogDiv").parent().css('top','50%');
+                            $("#KGcreator_dialogDiv").parent().css('left','50%');
+                        }
+                    });
                 });
             });
         });

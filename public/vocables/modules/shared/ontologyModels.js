@@ -951,6 +951,9 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 "    }\n" +
                 "  ";
 
+
+
+
             let url = Config.sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function (err, result) {
                 if (err) {
@@ -978,7 +981,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
         if (!sourceGraphUri) {
             return callback("source " + source + " not declared");
         }
-        var sourceGraphUriFrom = Sparql_common.getFromStr(source, false, true);
+        var sourceGraphUriFrom = Sparql_common.getFromStr(source, false, false);
         var genericVocabsGraphUriFrom = "";
         for (var vocab in Config.basicVocabularies) {
             genericVocabsGraphUriFrom += " " + Sparql_common.getFromStr(vocab, false, false);
@@ -1009,8 +1012,40 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
             ")\n" +
             "  }\n" +
             "}";
+
+
+        var importGraphUriFrom = Sparql_common.getFromStr(source, false, false);
+
+        var queryNew="PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT   distinct ?class ?prop  ?datatype  " +
+            sourceGraphUriFrom +
+            " " +
+            genericVocabsGraphUriFrom +
+            "  where {\n" +
+            "  { ?s rdf:type ?class. ?class rdf:type owl:Class .?class rdfs:label ?classLabel. filter (?class!=(rdfs:Class))\n" +
+            "  \n" +
+            "    \n" +
+            "    ?prop rdfs:label ?propLabel. \n" +
+            "  \n" +
+            "  }\n" +
+            " \n" +
+            " {\n" +
+            "   ?s ?prop ?o.\n" +
+            "      bind ( datatype(?o) as ?datatype )\n" +
+            "    ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#DatatypeProperty>,rdf:Property,owl:AnnotationProperty)&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>))\n" +
+            "  }\n" +
+            "} limit 100"
+
+
+
+
+
+
         let url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function (err, result) {
             if (err) {
                 return callback(err);
             }

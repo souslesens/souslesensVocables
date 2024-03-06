@@ -32,9 +32,13 @@
     .ui-widget-content a {
         color: #0d6efd;
     }
+
+    .json-dict {
+        color: white;
+    }
 </style>
 
-<div id="KGcreator_centralPanelTabs" style="width: 100%; height: 100%; display: flex">
+<div id="KGcreator_centralPanelTabs" style=" display: flex">
     <ul>
         <li><a href="#KGcreator_resourceslinkingTab">Link</a></li>
         <li><a href="#KGcreator_runmappingsTab">Run mappings</a></li>
@@ -93,8 +97,8 @@
 <script>
     $("#KGcreator_dialogDiv").dialog({
         autoOpen: false,
-        height: 800,
-        width: $(document).width() * 0.85,
+     //   height: 800,
+      //  width: $(document).width() * 0.85,
         modal: false,
         close: function (event, ui) {
             window.scrollTo(0, 0);

@@ -8,8 +8,9 @@ var KGcreator_bot = (function() {
     var self = {};
     self.title = "Create mappings";
     self.lastObj = null;
-    self.start = function(node) {
+    self.start = function(node,callbackFn) {
         self.currentUri = null;
+     //   self.callbackFn=callbackFn
 
         var workflow = null;
         if (node) {
@@ -95,7 +96,7 @@ var KGcreator_bot = (function() {
                                                 savePredicateObjectType: {
                                                     "_OR":
                                                         {
-                                                            " add mappings to predicate object  column":{addMappingsToPredicateObjectColumn: self.workflowColumnmMappingOther}
+                                                            " add mappings to predicate object  column": {addMappingsToPredicateObjectColumnFn:{}}
                                                             ,
                                                             "end": {}
                                                         }
@@ -126,13 +127,13 @@ var KGcreator_bot = (function() {
     };
 
     self.workflowColumnMappingType = {
-        setUriTypeFn: {
+     setUriTypeFn: {
             _OR: {
                 //   columnBlankNode: { addMappingToModelFn: self.workflowRdfType },
-                "virtualColumn-bnode": { virtualColumnBlankNodeFn: { addMappingToModelFn: self.workflowRdfType } },
-                "owl:NamedIndividual": { addMappingToModelFn: self.workflowRdfType }
+                "virtualColumnBlankNode": { virtualColumnBlankNodeFn: { addMappingToModelFn: self.workflowRdfType } },
+                "namedIndividual": { addMappingToModelFn: self.workflowRdfType }
             }
-        }
+      }
     };
     self.workflowBnode = {
         virtualColumnBlankNodeFn: { addMappingToModelFn: self.workflowRdfType }
@@ -157,8 +158,8 @@ var KGcreator_bot = (function() {
         virtualColumnBlankNodeFn: "Enter virtual column name",
         listAnnotationPropertiesVocabsFn: " Choose annnotation property vocabulary",
         listAnnotationPropertiesFn: " Choose annnotation property ",
-        promptTargetColumnVocabularyFn: "Choose an ontology",
-        predicateObjectColumnClassFn: " Enter Column class",
+        promptTargetColumnVocabularyFn: "Choose ontology for predicate column",
+        predicateObjectColumnClassFn: " Choose  class of  predicate column",
         listFilteredPropertiesFn: "Choose a Property"
     };
 
@@ -252,7 +253,7 @@ var KGcreator_bot = (function() {
 
         listFilteredPropertiesFn: function() {
             var columnClass = self.getColumnClasses(KGcreator.currentConfig.currentMappings[self.params.table].tripleModels, self.params.column);
-            var source=self.params.predicateObjectColumnVocabulary || self.params.source; // both cases existing or not predicate object
+            var source = self.params.predicateObjectColumnVocabulary || self.params.source; // both cases existing or not predicate object
             OntologyModels.getAllowedPropertiesBetweenNodes(source, columnClass, self.params.predicateObjectColumnClass, function(err, result) {
                 if (err) {
                     return alert(err);
@@ -295,8 +296,16 @@ var KGcreator_bot = (function() {
 
         },
 
-        addMappingsToPredicateObjectColumn:function(){
-            BotEngine.nextStep();
+        addMappingsToPredicateObjectColumnFn: function() {
+            var node = {
+                data: {
+                    table: self.params.table,
+                    id: self.currentUri
+                }
+            };
+            $("#botPanel").dialog("close");
+
+            KGcreator_bot.start(node);
         },
         addMappingToModelFn: function(callback) {
             var source = self.params.source;
@@ -337,8 +346,7 @@ var KGcreator_bot = (function() {
                 } else if (uriType == "columnBlankNode") {
                     self.currentUri = "$_" + column;
                     return callback ? callback() : BotEngine.nextStep();
-                }
-                else if (uriType == "virtualColumnBlankNode") {
+                } else if (uriType == "virtualColumnBlankNode") {
                     if (!KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns) {
                         KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns = [];
                     }
@@ -361,7 +369,7 @@ var KGcreator_bot = (function() {
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();
                 KGcreator.showTableVirtualColumnsTree(self.params.table);
-                return callback ? callback() : BotEngine.nextStep();
+             //   return callback ? callback() : BotEngine.nextStep();
             }
             if (valueType && valueColumn) {
                 self.params.valueType = null;
@@ -373,7 +381,7 @@ var KGcreator_bot = (function() {
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();
-                return callback ? callback() : BotEngine.nextStep();
+              //  return callback ? callback() : BotEngine.nextStep();
             }
 
             if (propertyId && predicateObjectColumn) {
@@ -390,7 +398,7 @@ var KGcreator_bot = (function() {
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();
-                return callback ? callback() : BotEngine.nextStep();
+              //  return callback ? callback() : BotEngine.nextStep();
             }
             if (annotationPropertyId && predicateObjectColumn) {
                 self.params.annotationPropertyId = null;
@@ -402,6 +410,7 @@ var KGcreator_bot = (function() {
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn(callback);
+              //  return callback ? callback() : BotEngine.nextStep();
                 //  return BotEngine.nextStep();
             }
         },
@@ -411,7 +420,7 @@ var KGcreator_bot = (function() {
             KGcreator.currentConfig.currentMappings[self.params.table].tripleModels = self.params.tripleModels;
             KGcreator.saveDataSourceMappings(self.params.source, self.params.datasource.name, KGcreator.currentConfig.currentMappings, function(err, result) {
                 if (err) {
-                     return callback ? callback(err) :alert(err);
+                    return callback ? callback(err) : alert(err);
                 }
                 BotEngine.message("mapping Saved");
                 return callback ? callback() : BotEngine.nextStep();

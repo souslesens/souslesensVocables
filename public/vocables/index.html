@@ -364,8 +364,9 @@
                             //width: 800,
                             modal: false,
                             close: function (event, ui) {
-                                $("#previousButtonBot").remove();
-                                $("#resetButtonBot").remove();
+                                //$("#previousButtonBot").remove();
+                                //$("#resetButtonBot").remove();
+                                $('#BotUpperButtons').remove();
                             },
                             drag:function(event,ui){
                                 $("#botPanel").parent().css('transform','unset')

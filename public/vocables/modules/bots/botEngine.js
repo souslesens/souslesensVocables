@@ -34,13 +34,14 @@ var BotEngine = (function () {
 
         $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
             if (!self.firstLoad) {
-                $("#resetButtonBot").remove();
-                $("#previousButtonBot").remove();
+                //$("#resetButtonBot").remove();
+                //$("#previousButtonBot").remove();
+                $('#BotUpperButtons').remove();
             }
             $("#botFilterProposalInput").on("keyup", self.filterList);
             self.firstLoad = false;
-            $("#resetButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
-            $("#previousButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+            $("#BotUpperButtons").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+            //$("#previousButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
             if (divId != "botDiv") {
                 var dialogWindow = $("#" + divId)
                     .parents()
@@ -49,8 +50,9 @@ var BotEngine = (function () {
                 var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
                 //$(idDialog).parent().css("top", "13%");
                 //$(idDialog).parent().css("left", "10%");
-                $("#resetButtonBot").insertAfter(titleDialog);
-                $("#previousButtonBot").insertAfter(titleDialog);
+                $('#BotUpperButtons').insertAfter(titleDialog);
+                //$("#resetButtonBot").insertAfter(titleDialog);
+                //$("#previousButtonBot").insertAfter(titleDialog);
                 $(dialogWindow).on("dialogclose", function (event) {
                     $("#" + self.divId).empty();
                     $(dialogWindow).find("#resetButtonBot").remove();
@@ -58,6 +60,7 @@ var BotEngine = (function () {
                     self.firstLoad = true;
                 });
             }
+            ResponsiveUI.PopUpOnHoverButtons();
             if (callback) callback();
         });
     };
@@ -383,12 +386,13 @@ var BotEngine = (function () {
         recurse(workflow, title, 1);
         var x = visjsData;
 
-        $("#KGcreator_dialogDiv").dialog("open");
-        $("#KGcreator_dialogDiv").html("<div id='botGraphDiv' style='width:800px;height:800px'></div>");
-
+        $("#mainDialogDiv").dialog("open");
+        $("#mainDialogDiv").html("<div id='botGraphDiv' style='width:800px;height:800px'></div>");
+        $("#mainDialogDiv").parent().css('z-index',1);
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
             layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
             physics: { enabled: true },
+            
         });
     };
 

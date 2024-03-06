@@ -119,9 +119,6 @@ const apiDoc = {
                 topClassFilter: {
                     type: "string",
                 },
-                schemaType: {
-                    type: "string",
-                },
                 dataSource: {
                     type: "null",
                 },
@@ -162,7 +159,6 @@ const apiDoc = {
                 "name",
                 "predicates",
                 "schema",
-                "schemaType",
                 "sparql_server",
                 "topClassFilter",
                 "type",

@@ -77,28 +77,25 @@ var SourceSelectorWidget = (function () {
                 if (Config.sources[sourceLabel].isDraft) {
                     //OK
                 }
-                if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) {
-                    return;
-                }
                 Config.sources[sourceLabel].name = sourceLabel;
 
-                var parent = Config.sources[sourceLabel].schemaType;
+                let parent = "";
 
-                var othersGroup = "OTHERS";
+                let othersGroup = "OTHERS";
 
                 if (!types && !distinctGroups[othersGroup]) {
                     distinctGroups[othersGroup] = 1;
                     treeData.push({
-                        id: othersGroup + "_" + parent,
+                        id: othersGroup,
                         text: "OTHERS",
                         type: "group",
                         parent: "#",
                     });
                 }
 
-                var group = Config.sources[sourceLabel].group;
+                let group = Config.sources[sourceLabel].group;
                 if (group) {
-                    var subGroups = group.split("/");
+                    let subGroups = group.split("/");
                     subGroups.forEach(function (subGroup, index) {
                         if (index > 0) {
                             parent = subGroups[index - 1];
@@ -115,12 +112,7 @@ var SourceSelectorWidget = (function () {
                         group = subGroup;
                     });
                 } else {
-                    group = othersGroup + "_" + parent;
-                    if (types) {
-                        group = Config.sources[sourceLabel].schemaType;
-                    } else {
-                        group = Config.sources[sourceLabel].schemaType;
-                    }
+                    group = othersGroup;
                 }
 
                 if (!distinctNodes[sourceLabel]) {
@@ -130,11 +122,11 @@ var SourceSelectorWidget = (function () {
                         Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
                     }
                     //  console.log(JSON.stringify(jstreeData,null,2))
-                    if (!types || types.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                    if (!types) {
                         treeData.push({
                             id: sourceLabel,
                             text: sourceLabel,
-                            type: Config.sources[sourceLabel].schemaType,
+                            type: "group",
                             parent: group,
                             data: {
                                 type: "source",

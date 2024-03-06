@@ -97,15 +97,9 @@ class SourceModel {
             const sourcesAccessControl = profile.sourcesAccessControl;
             const allowedSourceSchemas = profile.allowedSourceSchemas;
             return sourcesList
-                .filter(([sourceName, source]) => {
-                    if (allowedSourceSchemas.includes(source.schemaType)) {
-                        return [sourceName, source];
-                    }
-                })
                 .map(([sourceName, source]) => {
-                    const schemaType = source.schemaType;
                     const group = source.group;
-                    const treeStr = [schemaType, group, sourceName].join("/");
+                    const treeStr = [group, sourceName].join("/");
                     // find the closest parent accessControl
                     const closestParent = Object.entries(sourcesAccessControl)
                         .filter(([k, v]) => {

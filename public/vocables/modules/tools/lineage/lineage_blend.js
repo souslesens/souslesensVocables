@@ -145,7 +145,7 @@ var Lineage_blend = (function () {
                                 });
                             }
 
-                            if (Config.sources[source].schemaType == "OWL" && self.sourceNode.rdfType != "NamedIndividual") {
+                            if (self.sourceNode.rdfType != "NamedIndividual") {
                                 jstreeData.push({
                                     id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
                                     text: "rdfs:subClassOf",
@@ -156,17 +156,15 @@ var Lineage_blend = (function () {
                                     },
                                 });
                             }
-                            if (Config.sources[source].schemaType == "OWL") {
-                                jstreeData.push({
+                            jstreeData.push({
+                                id: "http://www.w3.org/2000/01/rdf-schema#member",
+                                text: "rdfs:member",
+                                parent: "#",
+                                data: {
                                     id: "http://www.w3.org/2000/01/rdf-schema#member",
-                                    text: "rdfs:member",
-                                    parent: "#",
-                                    data: {
-                                        id: "http://www.w3.org/2000/01/rdf-schema#member",
-                                        inSource: source,
-                                    },
-                                });
-                            }
+                                    inSource: source,
+                                },
+                            });
 
                             callbackSeries();
                         },

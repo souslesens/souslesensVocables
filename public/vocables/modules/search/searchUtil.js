@@ -27,16 +27,12 @@ var SearchUtil = (function () {
 
                 Admin.showUserSources(function (userSources) {
                     userSources.forEach(function (source) {
-                        if (options.schemaType && Config.sources[source].schemaType != options.schemaType) {
-                            // pass
-                        } else {
-                            indexes.forEach(function (indexName) {
-                                if (indexName == source.toLowerCase()) {
-                                    sources.push(source);
-                                    self.indexSourcesMap[indexName] = source;
-                                }
-                            });
-                        }
+                        indexes.forEach(function (indexName) {
+                            if (indexName == source.toLowerCase()) {
+                                sources.push(source);
+                                self.indexSourcesMap[indexName] = source;
+                            }
+                        });
                     });
                 });
 

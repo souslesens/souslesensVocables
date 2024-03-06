@@ -6,7 +6,6 @@
             "url": "_default"
         },
         "graphUri": "http://souslesens.org/resource/TOP_TAXONOMY/",
-        "schemaType": "SKOS",
         "predicates": {
             "lang": "en"
         },

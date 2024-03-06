@@ -26,8 +26,7 @@ fs.readFile(sourcesFilePath, (_err, sourcesRawData) => {
                         const source = sourcesData[sourceName];
                         if (source) {
                             const sourceGroup = source.hasOwnProperty("group") ? source.group : "NONE";
-                            const sourceSchemaType = source.hasOwnProperty("schemaType") ? source.schemaType : "NONE";
-                            const newAccessControl = sourceSchemaType + "/" + sourceGroup + "/" + sourceName;
+                            const newAccessControl = sourceGroup + "/" + sourceName;
                             return [newAccessControl, accessControl];
                         }
                         return [null, null];

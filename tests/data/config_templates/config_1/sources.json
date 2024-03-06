@@ -12,7 +12,6 @@
         "editable": true,
         "controller": "Sparql_OWL",
         "topClassFilter": "?any rdfs:subClassOf ?topConcept",
-        "schemaType": "OWL",
         "dataSource": null,
         "schema": null,
         "color": "",

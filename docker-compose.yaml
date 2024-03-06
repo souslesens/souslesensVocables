@@ -52,6 +52,8 @@ services:
             POSTGRES_PASSWORD: mysecretpassword
         volumes:
             - "${DATA_ROOT_DIR:/tmp}/souslesens/postgres:/var/lib/postgresql/data"
+        networks:
+            - backend
 
     sqlserver:
         image: mcr.microsoft.com/mssql/server:2019-latest

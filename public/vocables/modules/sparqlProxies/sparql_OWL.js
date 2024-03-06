@@ -130,9 +130,7 @@ var Sparql_OWL = (function () {
         if (options.selectGraph) {
             query += " GRAPH ?subjectGraph {";
         }
-        if (Config.sources[sourceLabel].schemaType != "KNOWLEDGE_GRAPH") {
-            query += "?topConcept rdf:type owl:Class.";
-        }
+        query += "?topConcept rdf:type owl:Class.";
         query += strFilterTopConcept + " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}" + "filter (!isBlank( ?topConcept))";
         if (options.filterCollections) {
             query +=
@@ -2361,10 +2359,8 @@ var Sparql_OWL = (function () {
                     var graphUrisStr = "";
                     for (var key in Config.sources) {
                         var source = Config.sources[key];
-                        if (source.schemaType == "OWL") {
-                            if (source.graphUri && source.graphUri.indexOf("industryportal") < 0) {
-                                graphUrisStr += "FROM <" + source.graphUri + "> ";
-                            }
+                        if (source.graphUri && source.graphUri.indexOf("industryportal") < 0) {
+                            graphUrisStr += "FROM <" + source.graphUri + "> ";
                         }
                     }
 

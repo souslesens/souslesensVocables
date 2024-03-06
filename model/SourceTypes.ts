@@ -11,7 +11,6 @@ type Source = {
     };
     controller: string;
     topClassFilter: string;
-    schemaType: string;
     dataSource: string;
     schema: string;
     isDraft: boolean;

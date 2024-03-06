@@ -6,7 +6,6 @@
             "graphUri": "http://purl.obolibrary.org/obo/",
             "group": "STANDARDS/ABSTRACT ONTOLOGIES",
             "schema": null,
-            "schemaType": "OWL",
             "sparql_server": { "url": "_default" },
             "topClassFilter": "?topConcept rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000001>"
         }

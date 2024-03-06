@@ -108,16 +108,6 @@ const decodeSource = (key: string, source: ServerSource): ServerSource => {
     return ServerSourceSchema.parse({ ...source, name: source.name ?? key });
 };
 
-function controllerDefault(schemaType: string | undefined): string {
-    if (schemaType === "OWL") {
-        return "Sparql_OWL";
-    } else if (schemaType === "SKOS") {
-        return "Sparql_SKOS";
-    } else {
-        return "default controller";
-    }
-}
-
 export type ServerSource = z.infer<typeof ServerSourceSchema>;
 export type InputSource = z.infer<typeof InputSourceSchema>;
 
@@ -169,7 +159,6 @@ export const ServerSourceSchema = z.object({
     sparql_server: SparqlServerSchema,
     controller: z.string().default("Sparql_OWL"),
     topClassFilter: z.string().default("?topConcept rdf:type owl:Class ."),
-    schemaType: z.string().default("OWL"),
     dataSource: dataSourceSchema.nullable(),
     schema: z.unknown().nullable(),
     editable: z.boolean().default(true),
@@ -189,7 +178,6 @@ export const InputSourceSchema = {
     sparql_server: SparqlServerSchema,
     controller: z.string().optional(),
     topClassFilter: z.string().optional(),
-    schemaType: z.string().optional(),
     dataSource: dataSourceSchema.nullable(),
     schema: z.unknown().nullable(),
     editable: z.boolean().optional(),
@@ -227,7 +215,6 @@ export const sourceHelp = {
     },
     controller: "OWL uses subClassOf for taxonomy queries, SKOS uses narower and broader",
     topClassFilter: "SPARQL query used to get the top concepts",
-    schemaType: "DEPRECATED, will be removed in future version",
     dataSource: "",
     schema: "",
     editable: "The source can be modified according to the user profile (read & write)",

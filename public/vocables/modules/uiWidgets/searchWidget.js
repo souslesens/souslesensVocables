@@ -100,20 +100,6 @@ var SearchWidget = (function () {
         var searchedSources = [];
         term = term.toLowerCase();
 
-        function getUserSources(schemaType) {
-            var allowedSources = [];
-            for (var sourceLabel in Config.sources) {
-                if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                    if (!schemaType || Config.sources[sourceLabel].schemaType == schemaType) {
-                        if (allowedSources.length > 0 && allowedSources.indexOf(sourceLabel) > -1) {
-                            allowedSources.push(sourceLabel);
-                        }
-                    }
-                }
-            }
-            return allowedSources;
-        }
-
         if (options.searchedSources) {
             searchedSources = options.searchedSources;
         } else {
@@ -130,14 +116,8 @@ var SearchWidget = (function () {
                 } else {
                     searchedSources = Object.keys(Lineage_sources.loadedSources);
                 }
-            } else if (sourcesScope == "all_OWLsources") {
-                searchedSources = getUserSources("OWL");
-            } else if (sourcesScope == "all_SKOSsources") {
-                searchedSources = getUserSources("SKOS");
-            } else if (sourcesScope == "all_IndividualsSources") {
-                searchedSources = getUserSources("INDIVIDUALS");
-            } else if (sourcesScope == "all_Sources") {
-                searchedSources = getUserSources(null);
+            } else { 
+                searchedSources = Config.sources;
             }
         }
 

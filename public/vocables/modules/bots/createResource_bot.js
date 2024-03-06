@@ -42,8 +42,8 @@ var CreateResource_bot = (function () {
                 // "owl:ObjectProperty": { promptResourceLabelFn: { listVocabsFn: { listObjectPropertiesfn: self.workflow_saveResource } } },
                 // "owl:AnnotationProperty": { promptResourceLabelFn: { listDatatypeProperties: self.workflow_saveResource } },
                 "owl:NamedIndividual": { promptResourceLabelFn: { listVocabsFn: { listClassTypesFn: self.workflow_saveResource } } },
-                ImportClass: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
-                ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } },
+                "ImportClass": { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
+                "ImportSource": { listImportsFn: { saveImportSource: self.workflow_end } },
             },
         },
     };
@@ -60,6 +60,7 @@ var CreateResource_bot = (function () {
     };
 
     self.functions = {
+
         listResourceTypesFn: function (queryParams, varName) {
             var choices = [
                 { id: "owl:Class", label: "Class" },

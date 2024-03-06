@@ -133,7 +133,10 @@ var KGquery_graph = (function () {
                             if (!annotationPropertiesmap[item.class.value]) {
                                 annotationPropertiesmap[item.class.value] = { label: item.classLabel.value, id: item.class.value, properties: [] };
                             }
-                            annotationPropertiesmap[item.class.value].properties.push({ label: item.propLabel.value, id: item.prop.value });
+                            annotationPropertiesmap[item.class.value].properties.push({
+                                label: item.propLabel.value,
+                                id: item.prop.value,
+                                datatype: item.datatype?item.datatype.value:"string" });
                         });
                         visjsData.nodes.forEach(function (node) {
                             if (annotationPropertiesmap[node.data.id]) {

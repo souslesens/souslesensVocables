@@ -34,7 +34,7 @@ var KGbuilder_triplesMaker = {
     var totalTriples = 0;
     var errors = "";
 
-    existingNodes = {};
+    existingTriples = {};
     var totalTriplesCount = 0;
     var totalTriples = 0;
     var missingLookups_s = 0;
@@ -74,6 +74,10 @@ var KGbuilder_triplesMaker = {
           }
         }
 
+
+
+
+
         async.eachSeries(
           tableMappings.tripleModels,
           function(mapping, callbackEachMapping) {
@@ -85,6 +89,8 @@ var KGbuilder_triplesMaker = {
             if (line[mapping.o] == "null") {
               line[mapping.o] = null;
             }
+
+
 
             if (mapping["if_column_value_not_null"]) {
               var value = line[mapping["if_column_value_not_null"]];
@@ -139,8 +145,9 @@ var KGbuilder_triplesMaker = {
                   }
                   else {
                     if (subjectStr && propertyStr && objectStr) {
-                      if (!existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr]) {
-                        existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
+
+                       if (!existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr]) {
+                        existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
                         triples.push({
                           s: subjectStr,
                           p: propertyStr,
@@ -400,8 +407,8 @@ objectStr=objectStr.replace(/[\-_]/g,"")*/
     var restrictionTriples = [];
     var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
 
-    if (!KGbuilder_triplesMaker.existingNodes[subjectStr + "_" + prop + "_" + objectStr]) {
-      KGbuilder_triplesWriter.existingNodes[subjectStr + "_" + prop + "_" + objectStr] = 1;
+    if (!KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + prop + "_" + objectStr]) {
+      KGbuilder_triplesWriter.existingTriples[subjectStr + "_" + prop + "_" + objectStr] = 1;
       restrictionTriples.push({
         s: blankNode,
         p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",

@@ -48,8 +48,14 @@ var KGquery_filter_bot = (function() {
         BotEngine.showList(choices, "annotationProperty");
 
     }
-    self.functions.promptAnnotationValueFn=function(){
-        BotEngine.promptValue("enter value","annotationPropertyValue")
+    self.functions.promptAnnotationValueFn=function() {
+        var datatype = self.data.annotationProperties[annotationProperty];
+
+        if (!datatype || datatype == "xsd:string") {
+            BotEngine.promptValue("enter value", "annotationPropertyValue")
+        } else if (!datatype || datatype == "xsd:date" || datatype == "xsd:datetime") {
+//DateWidget.
+        }
     }
 
 
@@ -68,12 +74,14 @@ var KGquery_filter_bot = (function() {
         var filterLabel = self.params.queryText;
 
         var annotationProperty=self.params.annotationProperty;
-        var annotationPropertyValue=self.params.annotationPropertyValue
+        var annotationPropertyValue=self.params.annotationPropertyValue;
+
 
         self.filter = "";
 
         if(annotationPropertyValue){
             var propLabel=Sparql_common.getLabelFromURI(annotationProperty)
+
             self.filter= " FILTER (regex(?"+varName+"_"+propLabel+",'"+annotationPropertyValue+"','i'))"
         }
         else if (individualsFilterType == "label") {

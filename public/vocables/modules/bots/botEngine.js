@@ -47,8 +47,8 @@ var BotEngine = (function () {
                     .filter('div[role="dialog"]')[0];
                 var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
                 var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
-                $(idDialog).parent().css("top", "13%");
-                $(idDialog).parent().css("left", "10%");
+                //$(idDialog).parent().css("top", "13%");
+                //$(idDialog).parent().css("left", "10%");
                 $("#resetButtonBot").insertAfter(titleDialog);
                 $("#previousButtonBot").insertAfter(titleDialog);
                 $(dialogWindow).on("dialogclose", function (event) {

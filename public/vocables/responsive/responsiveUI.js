@@ -69,7 +69,7 @@ var ResponsiveUI = (function () {
             }
             self.smartPhoneScreen = false;
 
-            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth-25);
+            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth-10);
             $("#lateralPanelDiv").css("width", LateralPannelWidth);
         }
 

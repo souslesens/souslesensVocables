@@ -89,6 +89,7 @@ type ProfileJson = {
     sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string[] | string;
     forbiddenTools: string[];
+    theme: string;
 };
 
 const decodeProfile = (key: string, profile: ProfileJson): Profile => {
@@ -100,6 +101,7 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         sourcesAccessControl: profile.sourcesAccessControl,
         allowedTools: profile.allowedTools,
         forbiddenTools: profile.forbiddenTools,
+        theme: profile.theme,
     };
 };
 
@@ -117,6 +119,7 @@ const ProfileSchema = {
     sourcesAccessControl: z.record(SourceAccessControlSchema).default({}),
     allowedTools: z.union([z.string(), z.array(z.string())]).default("ALL"),
     forbiddenTools: z.array(z.string()).default([]),
+    theme: z.string().optional(),
 };
 
 export const ProfileSchemaCreate = {
@@ -138,6 +141,7 @@ export const defaultProfile = (uuid: string): Profile => {
         sourcesAccessControl: {},
         allowedTools: "ALL",
         forbiddenTools: [],
+        theme: "Sea Breeze",
     };
 };
 export { getProfiles, deleteProfile, Profile, SourceAccessControl, ProfileSchema };

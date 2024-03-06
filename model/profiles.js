@@ -53,6 +53,7 @@ class ProfileModel {
             sourcesAccessControl: {},
             allowedTools: "ALL",
             forbiddenTools: [],
+            theme: "Sea Breeze",
         };
 
         return { ...profiles, admin: adminProfile };

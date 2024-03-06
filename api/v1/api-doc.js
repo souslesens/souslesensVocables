@@ -225,6 +225,9 @@ const apiDoc = {
                 blender: {
                     $ref: "#/definitions/Blender",
                 },
+                theme: {
+                    type: "string",
+                },
             },
         },
         DatabaseNames: {

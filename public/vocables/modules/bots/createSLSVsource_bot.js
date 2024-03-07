@@ -62,7 +62,7 @@ var CreateSLSVsource_bot = (function () {
             BotEngine.nextStep();
         },
         promptSourceNameFn: function () {
-            BotEngine.promptValue("source label", "sourceLabel", "", function (value) {
+            BotEngine.promptValue("source label", "sourceLabel", "", null,function (value) {
                 if (!value) {
                     BotEngine.previousStep();
                 }
@@ -87,7 +87,7 @@ var CreateSLSVsource_bot = (function () {
         },
 
         uploadFromUrlFn: function () {
-            BotEngine.promptValue("enter remote Url", "uploadUrl", "", function (value) {
+            BotEngine.promptValue("enter remote Url", "uploadUrl", "", null,function (value) {
                 if (!value) {
                     alert("enter a value ");
                     return BotEngine.previousStep();

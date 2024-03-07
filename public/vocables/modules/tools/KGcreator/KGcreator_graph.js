@@ -720,13 +720,11 @@ var KGcreator_graph = (function() {
 
         visjsData = self.addInterTableJoinsToVisjsData(KGcreator.currentConfig.currentDataSource.name, visjsData);
 
-        //   var html = "<div id='KGcreator_mappingsGraphDiv' style='width:1100px;height:750px'></div>";
-        $("#KGcreator_dialogDiv").dialog("open");
-        //$("#KGcreator_dialogDiv").parent().css("top", "10%");
-        //$("#KGcreator_dialogDiv").parent().css("left", "10%");
+
+      /*  $("#KGcreator_dialogDiv").dialog("open");
         $("#KGcreator_dialogDiv").dialog("option", "title", " Mappings");
-        //  $("#KGcreator_dialogDiv").html(html);
-        $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function() {
+        $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function() {*/
+            $("#KGcreator_resourceslinkingTab").load("modules/tools/KGcreator/html/detailedMappings.html", function() {
 
             var options={
                 onclickFn: KGcreator_graph.onDetailedGraphNodeClick,

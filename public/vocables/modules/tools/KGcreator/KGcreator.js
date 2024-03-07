@@ -546,6 +546,10 @@ var KGcreator = (function () {
                     self.showTablesTree(self.currentConfig.currentDataSource);
                     callbackSeries();
                 },
+                function (callbackSeries) {
+                    KGcreator_graph.drawDetailedMappings(null);
+                    callbackSeries();
+                }
             ],
             function (err) {
                 if (err) {

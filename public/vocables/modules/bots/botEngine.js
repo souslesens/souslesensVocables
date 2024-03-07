@@ -261,8 +261,17 @@ var BotEngine = (function () {
         common.fillSelectOptions("bot_resourcesProposalSelect", selection, false, "label", "id");
     };
 
-    self.promptValue = function (message, varToFill, defaultValue, callback) {
+    self.promptValue = function (message, varToFill, defaultValue,options, callback) {
         $("#bot_resourcesProposalSelect").hide();
+        DateWidget.unsetDatePickerOnInput ("botPromptInput")
+
+        if(options.datePicker){
+            DateWidget.setDatePickerOnInput("botPromptInput", null, function(date) {
+                BotEngine.currentBot.params[varToFill] = date.getTime();
+                self.nextStep();
+            })
+        }
+
         $("#botPromptInput").on("keyup", function (key) {
             if (event.keyCode == 13 || event.keyCode == 9) {
                 $("#bot_resourcesProposalSelect").show();

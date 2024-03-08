@@ -113,6 +113,19 @@ class DatabaseModel {
     };
 
     /**
+     * @param {string} driverName - the driver name
+     * @returns {string} the knex version of the database driver
+     */
+    getClientDriver = async (driverName) => {
+        switch (driverName) {
+            case "sqlserver":
+                return "mssql";
+            case "postgres":
+                return "pg";
+        }
+    }
+
+    /**
      * @param {string} identifier -  a database identifier
      */
     updateDatabase = async (updatedDatabase) => {

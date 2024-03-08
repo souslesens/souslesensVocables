@@ -4,7 +4,7 @@ const { configPath, configProfilesPath } = require("../../../model/config");
 const { sourceModel, SourceModel } = require("../../../model/sources");
 const { responseSchema } = require("./utils");
 const userManager = require(path.resolve("bin/user."));
-const { successfullyFetched, successfullyCreated ,fixBooleanInObject } = require("./utils.js");
+const { successfullyFetched, successfullyCreated, fixBooleanInObject } = require("./utils.js");
 module.exports = function () {
     let operations = {
         GET,
@@ -14,9 +14,9 @@ module.exports = function () {
     ///// GET api/v1/sources
     async function GET(req, res, next) {
         try {
+            console.log(req.user);
             const userInfo = await userManager.getUser(req.user);
             let localSourceModel = sourceModel;
-
 
             const userSources = await localSourceModel.getUserSources(userInfo.user);
             res.status(200).json(successfullyFetched(userSources));
@@ -45,10 +45,7 @@ module.exports = function () {
         try {
             var newSource = req.body;
 
-
-
-            newSource=fixBooleanInObject(newSource)
-
+            newSource = fixBooleanInObject(newSource);
 
             await Promise.all(
                 Object.entries(newSource).map(async ([_key, value]) => {

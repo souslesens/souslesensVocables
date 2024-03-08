@@ -263,12 +263,14 @@ var BotEngine = (function () {
 
     self.promptValue = function (message, varToFill, defaultValue,options, callback) {
         $("#bot_resourcesProposalSelect").hide();
-        DateWidget.unsetDatePickerOnInput ("botPromptInput")
 
-        if(options.datePicker){
+
+        if(options && options.datePicker){
             DateWidget.setDatePickerOnInput("botPromptInput", null, function(date) {
                 BotEngine.currentBot.params[varToFill] = date.getTime();
+                DateWidget.unsetDatePickerOnInput ("botPromptInput")
                 self.nextStep();
+
             })
         }
 

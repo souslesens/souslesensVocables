@@ -575,6 +575,9 @@ tripleObj.objectIsSpecificUri = true;
          //   $(".json-editor-blackbord *").css("color","#fff")
         });
     };
+    self.afterMappingsFn =function(){
+        KGcreator_mappings.showTableMappings(node);
+    };
 
     return self;
 })();

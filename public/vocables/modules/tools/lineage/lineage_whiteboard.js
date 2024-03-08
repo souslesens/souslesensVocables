@@ -550,6 +550,7 @@ var Lineage_whiteboard = (function() {
                 //   MainController.UI.message("", true)
                 //  self.drawNewGraph(visjsData);
                 if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
+                    options['legendType']='individualClasses'
                     self.drawNewGraph(visjsData, graphDiv, options);
                 } else {
                     self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
@@ -2019,7 +2020,7 @@ var Lineage_whiteboard = (function() {
                             return callbackSeries(err);
                         }
                         if (!Lineage_whiteboard.isResultAcceptable(result)) {
-                            return callbackSeries("no data found");
+                            return callback("no data found");
                         }
                         data = result;
                         callbackSeries();
@@ -2165,8 +2166,8 @@ var Lineage_whiteboard = (function() {
                         }
                     });
 
-                    if (callbackSeries && options.returnVisjsData) {
-                        return callbackSeries(null, visjsData);
+                    if (callback && options.returnVisjsData) {
+                        return callback(null, visjsData);
                     }
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
@@ -2177,8 +2178,8 @@ var Lineage_whiteboard = (function() {
                     }
 
                     $("#waitImg").css("display", "none");
-                    if (callbackSeries) {
-                        return callbackSeries(null, visjsData);
+                    if (callback) {
+                        return callback(null, visjsData);
                     }
                 }
             ],

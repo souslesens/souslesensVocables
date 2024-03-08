@@ -2020,7 +2020,12 @@ var Lineage_whiteboard = (function() {
                             return callbackSeries(err);
                         }
                         if (!Lineage_whiteboard.isResultAcceptable(result)) {
-                            return callback("no data found");
+                            if(callback){
+                                return callback("no data found");
+                            }
+                            else{
+                                return callbackSeries();
+                            }
                         }
                         data = result;
                         callbackSeries();
@@ -2172,6 +2177,7 @@ var Lineage_whiteboard = (function() {
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                        //Error on parameters for legend 
                         Lineage_decoration.drawLegend("individuals");
                     } else {
                         Lineage_whiteboard.drawNewGraph(visjsData, null, { legendType: "individualClasses" });

@@ -2,15 +2,6 @@ const knex = require("knex");
 
 const { databaseModel } = require("../../../../../../model/databases");
 
-function getClientDriver(driverName) {
-    switch (driverName) {
-        case "sqlserver":
-            return "mssql";
-        case "postgres":
-            return "pg";
-    }
-}
-
 module.exports = function () {
     let operations = { GET };
 
@@ -20,7 +11,7 @@ module.exports = function () {
 
             const connection = knex({
                 acquireConnectionTimeout: 5000, // 5s
-                client: getClientDriver(database.driver),
+                client: await databaseModel.getClientDriver(database.driver),
                 connection: {
                     host: database.host,
                     port: database.port,

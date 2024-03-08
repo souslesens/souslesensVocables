@@ -1,25 +1,37 @@
 const path = require("path");
 
-const kGSqlConnector = require(path.resolve("bin/KG/KGSqlConnector."));
-const sQLserverConnector = require(path.resolve("bin/KG/SQLserverConnector."));
+const dbConnector = require(path.resolve("bin/KG/dbConnector"));
+const { databaseModel } = require(path.resolve("model/databases"));
 
 module.exports = function () {
     let operations = {
         GET,
     };
 
-    function GET(req, res, _next) {
-        const callback = function (err, result) {
-            if (err) {
-                return res.status(400).json({ error: err });
-            }
-            return res.status(200).json(result);
-        };
+    async function GET(req, res, _next) {
+        try {
+            const database = await databaseModel.getDatabase(req.query.name);
+            const driver = await databaseModel.getClientDriver(database.driver);
 
-        if (req.query.type == "sql.sqlserver") {
-            sQLserverConnector.getData(req.query.dbName, req.query.sqlQuery, callback);
-        } else {
-            kGSqlConnector.getData(req.query.dbName, req.query.sqlQuery, callback);
+            const connection = dbConnector.getConnection(database, driver);
+            dbConnector.getData(
+                connection,
+                req.query.sqlQuery,
+                (data) => {
+                    // TODO: Adapt the result to send the same structure as the
+                    // previous connectors
+                    res.status(200).json(data);
+                },
+                (error) => {
+                    console.error(error);
+                    res.status(503).json({
+                        message: "The connection to the database was refused"
+                    });
+                }
+            );
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: error });
         }
     }
 

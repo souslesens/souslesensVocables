@@ -33,9 +33,14 @@
         color: #0d6efd;
     }
 
-    .KGcreator_columnJsonDisplay li {
+    #KGcreator_columnJsonDisplay li {
         color: white;
     }
+    #KGcreator_mappingsEditor li {
+        color: white;
+    }
+
+
 </style>
 
 <div id="KGcreator_centralPanelTabs" style=" display: flex;height: 100%;">
@@ -44,51 +49,23 @@
         <li><a href="#KGcreator_runmappingsTab">Run mappings</a></li>
     </ul>
 
-    <div id="KGcreator_runmappingsTab" style="display: flex; flex-direction: row">
-        <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
-            <!--     <div class="lineage_button_group" style="min-width: 300px">
-           <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.saveDataSourceMappings()">Save mappings</button>
-           <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_graph.drawMappings()">draw mappings</button>
-           <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_graph.drawAllMappings()">draw all mappings</button>
 
-
-
-       </div>-->
-            <div class="lineage_button_group" style="width: 600px">
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createTriples(true)">View Sample triples</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.testSelectedMappings()">test Selected Mappings</button>
-                <!--  <input type="checkbox" id="KGcreator_addAllPredefinedPart14PredicatesTriples" />addPredefinedPart14Triples-->
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createTriples()">Create triples</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.stopCreateTriples()">Abort</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createAllMappingsTriples()">Recreate graph</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.indexGraph()">Index graph</button>
-                <!--  <input type="checkbox" id="KGcreator_onlySelectionCBX"/>only selection-->
-            </div>
-            <div class="lineage_button_group" style="width: 600px">
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.deleteKGcreatorTriples()">delete current file triples</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="KGcreator_deleteKGcreatorTriplesBtn" onclick="KGcreator_run.deleteKGcreatorTriples('all')">
-                    delete ALL KGreator triples
-                </button>
-                <button onclick="KGcreator.migrateOldMappings()">migrateOldMappings</button>
-                <!--<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearGraph()" style="background-color: #fbcb09 !important">Clear entire graph</button>-->
-
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="display: none" id="KGcreator_saveFileButton" onclick="KGcreator_run.saveFile()">Save file</button>
-            </div>
-
-            <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
-                <textarea style="width: 700px; height: 740px; overflow: auto" id="KGcreator_infosDiv"></textarea>
-                <div>
-                    <pre style="width: 600px; height: 700px" id="KGcreator_run_mappingsGraphEditor"></pre>
-                    <button onclick="KGcreator_run.saveDetailedMappings()">Save</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div id="KGcreator_resourceslinkingTab" style="display: flex; flex-direction: row;height: 100%;">
-        <div id="KGcreator_resourceLinkGraphDiv" style="height: 800px"></div>
-        <div id="KGcreator_resourceLinkRightPanel" style="height: 800px; width: 200px"></div>
     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 </div>
 <div id="KGcreator_dialogDiv"></div>
 
@@ -97,8 +74,6 @@
 <script>
     $("#KGcreator_dialogDiv").dialog({
         autoOpen: false,
-     //   height: 800,
-      //  width: $(document).width() * 0.85,
         modal: false,
         close: function (event, ui) {
             window.scrollTo(0, 0);

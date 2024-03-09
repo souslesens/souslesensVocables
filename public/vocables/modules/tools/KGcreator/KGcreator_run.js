@@ -42,17 +42,22 @@ var KGcreator_run = (function() {
 
         if (KGcreator.currentTreeNode.data.type == "tableColumn") {
             table = KGcreator.currentTreeNode.data.table;
-            self.showTableMappingsEditor(KGcreator.currentTreeNode.data.table);
+            KGcreator_mappings.showMappingsInEditor(KGcreator.currentTreeNode.data.table);
         } else if (KGcreator.currentTreeNode.data.type == "table") {
             table = KGcreator.currentTreeNode.data.id;
-            self.showTableMappingsEditor(table);
+            KGcreator_mappings.showMappingsInEditor(table);
         } else if (KGcreator.currentTreeNode.data.type == "csvSource") {
             table = KGcreator.currentTreeNode.data.id;
-            self.showTableMappingsEditor(table);
+            KGcreator_mappings.showMappingsInEditor(table);
         } else if (KGcreator.currentTreeNode.data.type == "databaseSource" && allmappings) {
             table = null;
         }
         self.currentTable = table;
+        if (self.currentTable) {
+            KGcreator_mappings.showTableMappings(self.currentTable);
+        } else {
+            alert("select a table");
+        }
         return table;
     };
 
@@ -129,11 +134,11 @@ var KGcreator_run = (function() {
     self.showTriplesInDataTable = function(data) {
 
 
-        var escapeMarkup=function(str){
-            var str2=str.replace(/</g,"&lt;")
-            var str2=str2.replace(/>/g,"&gt;")
-            return str2
-        }
+        var escapeMarkup = function(str) {
+            var str2 = str.replace(/</g, "&lt;");
+            var str2 = str2.replace(/>/g, "&gt;");
+            return str2;
+        };
 
         var tableCols = [];
         var hearders = ["subject", "predicate", "object"];
@@ -148,15 +153,14 @@ var KGcreator_run = (function() {
         });
 
 
-
-        var str="<table><tr><td>subject</td><td>predicate</td><td>object</td></tr>"
+        var str = "<table><tr><td>subject</td><td>predicate</td><td>object</td></tr>";
         data.forEach(function(item, index) {
-          str+="<tr><td>"+escapeMarkup(item.s)+"</td><td>"+escapeMarkup(item.p)+"</td><td>"+escapeMarkup(item.o)+"</td></tr>"
-        })
-        str+="</table>"
+            str += "<tr><td>" + escapeMarkup(item.s) + "</td><td>" + escapeMarkup(item.p) + "</td><td>" + escapeMarkup(item.o) + "</td></tr>";
+        });
+        str += "</table>";
 
-      /*  $("#KGcreator_triplesDataTableDiv").html(str)
-        return;*/
+        /*  $("#KGcreator_triplesDataTableDiv").html(str)
+          return;*/
         Export.showDataTable("KGcreator_triplesDataTableDiv", tableCols, tableData, null, { paging: true }, function(err, datatable) {
         });
     };
@@ -316,22 +320,6 @@ var KGcreator_run = (function() {
         );
     };
 
-    self.showTableMappingsEditor = function(table) {
-        if (!KGcreator.currentConfig.currentMappings) {
-            return;
-        }
-        self.currentEditingTable = table;
-        var tableMappings = KGcreator.currentConfig.currentMappings[table];
-        self.jsonEditor = new JsonEditor("#KGcreator_run_mappingsGraphEditor", { [table]: tableMappings });
-        $("#KGcreator_run_mappingsGraphEditor").on("mouseup", function() {
-            self.currentMappingsSelection = KGcreator.getTextSelection();
-        });
-    };
-
-    self.saveDetailedMappings = function() {
-        var mappings = self.jsonEditor.get();
-        KGcreator_mappings.saveTableMappings(self.currentEditingTable, mappings);
-    };
 
     return self;
 })

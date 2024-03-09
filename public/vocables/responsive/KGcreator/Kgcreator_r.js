@@ -84,6 +84,8 @@ var KGcreator_r = (function() {
                 $("#KGcreator_topButtons").css("flex-direction", "column");*/
                 if (KGcreator.currentTreeNode) {
                     KGcreator_run.createTriples(true);
+                    KGcreator_run.getTableAndShowMappings()
+
                 }
                 ResponsiveUI.PopUpOnHoverButtons();
                 self.ResetRunMappingTabWidth();
@@ -92,16 +94,10 @@ var KGcreator_r = (function() {
         });
     };
     self.initLinkTab = function() {
-        $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/LinkTab.html", function() {
+        $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/linkTab.html", function() {
             KGcreator.initSource();
 
-            $("#KGcreator_topButtons").load("./responsive/KGcreator/html/linkButtons.html", function() {
-                /*$("#KGcreator_topButtons").css("padding", "4px");
-                $("#MenuBar").css("height", "90px");
-                $("#KGcreator_topButtons").css("flex-direction", "row");
-                $("#MenuBarFooter").css("display", "block");*/
-                ResponsiveUI.PopUpOnHoverButtons();
-            });
+
         });
     };
     self.ResetRunMappingTabWidth = function() {

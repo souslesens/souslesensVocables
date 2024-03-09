@@ -1,6 +1,6 @@
 
 
-var BotEngine = (function () {
+var _botEngine = (function () {
     var self = {};
     self.firstLoad = true;
     self.OrReturnValues = [];
@@ -267,7 +267,7 @@ var BotEngine = (function () {
 
         if(options && options.datePicker){
             DateWidget.setDatePickerOnInput("botPromptInput", null, function(date) {
-                BotEngine.currentBot.params[varToFill] = date.getTime();
+                _botEngine.currentBot.params[varToFill] = date.getTime();
                 DateWidget.unsetDatePickerOnInput ("botPromptInput")
                 self.nextStep();
 
@@ -281,8 +281,8 @@ var BotEngine = (function () {
                 var value = $(this).val();
                 var varToFill = $("#botVarToFill").val();
                 if(!varToFill)
-                    return BotEngine.previousStep()
-                BotEngine.currentBot.params[varToFill] = value.trim();
+                    return _botEngine.previousStep()
+                _botEngine.currentBot.params[varToFill] = value.trim();
                 self.writeCompletedHtml(value);
                 $("#botPromptInput").off();
                 if (callback) {
@@ -409,6 +409,6 @@ var BotEngine = (function () {
 
     return self;
 })();
-export default BotEngine;
+export default _botEngine;
 
-window.BotEngine = BotEngine;
+window.BotEngine = _botEngine;

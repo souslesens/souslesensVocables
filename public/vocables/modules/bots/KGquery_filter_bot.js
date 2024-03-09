@@ -1,9 +1,9 @@
-import botEngine from "./botEngine.js";
+import botEngine from "./_botEngine.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import KGquery from "../tools/KGquery/KGquery.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import BotEngine from "./botEngine.js";
+import _botEngine from "./_botEngine.js";
 
 var KGquery_filter_bot = (function() {
     var self = {};
@@ -12,16 +12,16 @@ var KGquery_filter_bot = (function() {
 
     self.start = function(data, currentQuery, validateFn) {
         self.data = data;
-        BotEngine.init(KGquery_filter_bot, self.workflow_filterClass, null, function() {
+        _botEngine.init(KGquery_filter_bot, self.workflow_filterClass, null, function() {
             self.validateFn = validateFn;
             self.callbackFn = function() {
-                var filterLabel = BotEngine.getQueryText();
+                var filterLabel = _botEngine.getQueryText();
                 return self.validateFn(null, { filter: self.filter, filterLabel: filterLabel });
             };
 
             self.params = currentQuery;
             SparqlQuery_bot.params = currentQuery;
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         });
     };
 
@@ -52,10 +52,10 @@ var KGquery_filter_bot = (function() {
 
     self.functions.listAnnotationsFn = function() {
         if (!self.data || !self.data.annotationProperties) {
-            BotEngine.abort("no annotations for this Class");
+            _botEngine.abort("no annotations for this Class");
         }
         var choices = self.data.annotationProperties;
-        BotEngine.showList(choices, "annotationProperty");
+        _botEngine.showList(choices, "annotationProperty");
 
     };
     self.functions.chooseAnnotationOperatorFn = function() {
@@ -75,16 +75,16 @@ var KGquery_filter_bot = (function() {
         } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#float") {
             choices = ["=", "!=", "contains", ">", "!contains"];
 
-            BotEngine.showList(choices, "annotationPropertyOperator");
+            _botEngine.showList(choices, "annotationPropertyOperator");
 
 
         }
         self.functions.promptAnnotationValueFn = function() {
 
             if (!self.params.annotationDatatype || self.params.annotationDatatype == "xsd:string") {
-                BotEngine.promptValue("enter value", "annotationPropertyValue");
+                _botEngine.promptValue("enter value", "annotationPropertyValue");
             } else if (!self.params.annotationDatatype || self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#date" || datatype == "http://www.w3.org/2001/XMLSchema#datetime") {
-                BotEngine.promptValue("enter value", "annotationPropertyValue", null, { datePicker: 1 });
+                _botEngine.promptValue("enter value", "annotationPropertyValue", null, { datePicker: 1 });
 
 
             }
@@ -134,7 +134,7 @@ var KGquery_filter_bot = (function() {
                         } else {
                             self.filter = " FILTER (regex(?" + varName + "_" + propLabel + ",'" + annotationPropertyValue + "','i'))";
                         }
-                        return BotEngine.nextStep();
+                        return _botEngine.nextStep();
                     }
                 }
             } else if (individualsFilterType == "label") {
@@ -145,7 +145,7 @@ var KGquery_filter_bot = (function() {
                 self.filter = advancedFilter;
             }
             self.filter = self.filter.replace("Label", "_label");
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         }
         ;
     };

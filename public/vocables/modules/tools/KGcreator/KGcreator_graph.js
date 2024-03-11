@@ -9,10 +9,14 @@ import KGcreator_joinTables from "./KGcreator_joinTables.js";
 import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 import KGcreator_bot from "../../bots/KGcreator_bot.js";
+import ResponsiveUI from "../../../responsive/responsiveUI.js";
 
 var KGcreator_graph = (function() {
     var self = {};
     self.drawOntologyModel = function(source) {
+        $("#KGcreator_topButtons").load("./responsive/KGcreator/html/linkButtons.html", function() {
+            ResponsiveUI.PopUpOnHoverButtons();
+        });
 
         //return;
         if (!source) {
@@ -65,10 +69,11 @@ var KGcreator_graph = (function() {
                 self.onAddEdgeOntologyModel(edgeData, callback);
             }
         };
-        Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_resourceLinkGraphDiv", { nodes: [], edges: [] }, {});
+        Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", { nodes: [], edges: [] }, {});
 
         Lineage_sources.activeSource = source;
-        Lineage_whiteboard.drawModel(source, "KGcreator_resourceLinkGraphDiv", options, function(err,topConcepts) {
+        $("#KGcreator_resourceLinkGraphDiv").html("")
+        Lineage_whiteboard.drawModel(source, "KGcreator_mappingsGraphDiv", options, function(err,topConcepts) {
             $("#KGcreator_resourceLinkRightPanel").load("./modules/tools/KGcreator/html/graphControlPanel.html", function() {
             });
             if( !err && topConcepts.length>0) {
@@ -87,6 +92,8 @@ var KGcreator_graph = (function() {
                 Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
                 Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
                 GraphDisplayLegend.drawLegend("KGcreator_classes", "LineageVisjsLegendCanvas", false);
+
+                KGcreator_graph.drawDataSourceMappings()
             }
 
         });
@@ -724,7 +731,7 @@ var KGcreator_graph = (function() {
       /*  $("#KGcreator_dialogDiv").dialog("open");
         $("#KGcreator_dialogDiv").dialog("option", "title", " Mappings");
         $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function() {*/
-            $("#KGcreator_resourceslinkingTab").load("modules/tools/KGcreator/html/detailedMappings.html", function() {
+          //  $("#KGcreator_resourceslinkingTab").load("modules/tools/KGcreator/html/detailedMappings.html", function() {
 
             var options={
                 onclickFn: KGcreator_graph.onDetailedGraphNodeClick,
@@ -754,16 +761,9 @@ var KGcreator_graph = (function() {
             var options = {
                 mode: "tree"
             };
-            self.jsonEditor = new JsonEditor("#KGcreator_mappingsGraphEditor", json);
-            $("#KGcreator_mappingsSaveEditorMappingBtn").prop("disabled", "disabled");
-            if (tablesToDraw && tablesToDraw.length == 1) {
-                $("#KGcreator_mappingsSaveEditorMappingBtn").removeProp("disabled");
-                self.currentEditingTable = tablesToDraw[0];
-            } else {
-                self.currentEditingTable = null;
-            }
+
             //  JSONEditor().setMode("tree");
-        });
+      //  });
     };
 
 
@@ -783,9 +783,7 @@ var KGcreator_graph = (function() {
         self.currentGraphNode = node;
         if (node.data.role == "column") {
             KGcreator.currentTreeNode=node;
-            KGcreator_bot.start(node, function(){
-                KGcreator_mappings.showTableMappings(node);
-            });
+            KGcreator_bot.start(node,KGcreator_mappings.afterMappingsFn )
         }
     };
 
@@ -823,11 +821,6 @@ if (sourceNode.data && sourceNode.data.role == "column") {
     };
 
 
-    self.saveDetailedMappings = function() {
-        var tableMappings = self.jsonEditor.get();
-
-        KGcreator_mappings.saveTableMappings(self.currentEditingTable, tableMappings);
-    };
 
     self.toSVG = function() {
         self.mappingVisjsGraph.toSVG();

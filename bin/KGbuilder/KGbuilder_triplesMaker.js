@@ -194,9 +194,9 @@ var KGbuilder_triplesMaker = {
       subjectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
       return callback(null, subjectStr);
     }
-    else if (typeof mapping.s === "string" && (mapping.s.indexOf("$_") == 0 ||mapping.s.indexOf("$_") == 0 ) || mapping.isSubjectBlankNode) {
-      // virtual column
-      if (typeof mapping.o === "string" && (mapping.o.indexOf("$_") != 0 && !mapping.isObjectBlankNode) && KGbuilder_triplesMaker.allColumns[mapping.o] && !line[mapping.o]) {
+    else if ((typeof mapping.s === "string" && mapping.s.endsWith("_$") ) || mapping.isSubjectBlankNode) {
+      // blankNode
+      if ((typeof mapping.o === "string" && !mapping.o.endsWith("_$") && !mapping.isObjectBlankNode) && KGbuilder_triplesMaker.allColumns[mapping.o] && !line[mapping.o]) {
         // ne pas creer des triplest sans objet
         return callback(null, null);
       }
@@ -261,9 +261,7 @@ var KGbuilder_triplesMaker = {
   getTripleObject: function(tableMappings, mapping, line, callback) {
     var objectStr = null;
 
-    if (mapping.o == "$_offshorewlmanhour") {
-      var x = 3;
-    }
+
     //get value for Object
     {
       if (mapping.o === "_rowIndex") {
@@ -288,7 +286,7 @@ var KGbuilder_triplesMaker = {
       else if (typeof mapping.o === "string" && mapping.o.match(/.+:.+/)) {
         objectStr = mapping.o;
       }
-      else if (typeof mapping.o === "string" && mapping.o.indexOf("$_") == 0 || mapping.isObjectBlankNode) {
+      else if (typeof mapping.o === "string" && mapping.o.endsWith("_$") || mapping.isObjectBlankNode) {
         objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
         return callback(null, objectStr);
       }

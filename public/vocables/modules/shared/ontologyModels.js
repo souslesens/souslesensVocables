@@ -703,11 +703,26 @@ var OntologyModels = (function () {
                         if (!Config.ontologiesVocabularyModels[_source]) {
                             return;
                         }
-                        var sourceConstraints = Config.ontologiesVocabularyModels[_source].constraints;
-                        for (var property in sourceConstraints) {
-                            if(property=="http://rds.posccaesar.org/ontology/lis14/rdl/representedIn")
+
+                        //merge constraints( range/domain) and restrictions
+                        var sourceConstraintsAndRestrictions =Config.ontologiesVocabularyModels[_source].restrictions;
+                        for (var prop in  Config.ontologiesVocabularyModels[_source].constraints) {
+
+                           var constraint=Config.ontologiesVocabularyModels[_source].constraints[prop]
+                            if (!sourceConstraintsAndRestrictions[prop]) {
+                                sourceConstraintsAndRestrictions[prop]=[constraint]
+                            }else{
+                                sourceConstraintsAndRestrictions[prop].push(constraint)
+                            }
+
+                        }
+
+                        for (var property in sourceConstraintsAndRestrictions) {
+
+                            if(property=="http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality")
                                 var x=3
-                            var constraint = sourceConstraints[property];
+
+                            sourceConstraintsAndRestrictions[property].forEach(function(constraint){
                             constraint.source = _source;
                             var domainOK = false;
                             if (!allConstraints[property]) {
@@ -736,10 +751,11 @@ var OntologyModels = (function () {
                                 if (!constraint.domain && !constraint.range) {
                                     noConstaintsArray.push(property);
                                 }
-                            } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
+                           } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
                                 duplicateProps.push(property + "_" + allConstraints[property].source + "-----" + constraint.source);
                             }
-                        }
+                        })
+                    }
                     });
 
                     callbackSeries();
@@ -772,11 +788,6 @@ var OntologyModels = (function () {
                     propertiesMatchingEndNode.forEach(function (propId) {
                         recurse(propId);
                     });
-
-                    /*   validProperties = propertiesMatchingBoth;
-validProperties = common.array.union(validProperties, propertiesMatchingStartNode);
-validProperties = common.array.union(validProperties, propertiesMatchingEndNode);
-validProperties = common.array.union(validProperties, noConstaintsArray);*/
 
                     validConstraints = { both: {}, domain: {}, range: {}, noConstraints: {} };
 
@@ -845,64 +856,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
         return restrictions;
     };
 
-    self.getInferredModelOld = function (source, options, callback) {
-        if (!options) {
-            options = {};
-        }
 
-        var filterStr = options.filter || "";
-
-        {
-            var sourceGraphUri = Config.sources[source].graphUri;
-            var sourceGraphUriFrom = Sparql_common.getFromStr(source, true, true);
-            var importGraphUriFrom = Sparql_common.getFromStr(source, true, false);
-
-            var query =
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "      SELECT   distinct ?prop ?sClass  ?oClass ?propLabel ?sClassLabel ?oClassLabel ?sparent ?oparent  ?sparentLabel ?oparentLabel \n" +
-                sourceGraphUriFrom +
-                " " +
-                importGraphUriFrom +
-                "  \n" +
-                " WHERE {";
-
-            query +=
-                "      graph ?g2{\n" +
-                "    ?sparent rdf:type ?stype filter (?stype in (owl:Class)) \n" +
-                " optional { ?sparent rdfs:label ?sparentLabel}\n" +
-                "    \n" +
-                "  }\n" +
-                "  graph ?g3{\n" +
-                "      ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
-                " optional { ?oparent rdfs:label ?oparentLabel}\n" +
-                "  }\n" +
-                "   graph <" +
-                sourceGraphUri +
-                ">  {\n" +
-                "    ?s ?prop ?o.\n" +
-                "     ?s rdf:type+ ?sparent.  \n" +
-                "       ?o rdf:type+ ?oparent.  \n" +
-                filterStr +
-                "  }\n" +
-                "    graph  ?g{\n" +
-                "     \n" +
-                "        ?prop  rdf:type  owl:ObjectProperty. optional{?prop rdfs:label ?propLabel} }\n" +
-                "  } LIMIT 10000";
-
-            let url = Config.sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
-
-                //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
-                return callback(null, result.results.bindings);
-            });
-        }
-    };
 
     self.getInferredModel = function (source, options, callback) {
         if (!options) {

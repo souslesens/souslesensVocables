@@ -520,13 +520,7 @@ tripleObj.objectIsSpecificUri = true;
         });
     };
 
-    self.showTableMappings = function (node) {
-        KGcreator_graph.drawDetailedMappings(node.data.id);
-    };
 
-    self.showSourceMappings = function (node) {
-        KGcreator_graph.drawDetailedMappings(null);
-    };
 
     self.showLookupsDialog = function (node) {
         PopupMenuWidget.hidePopup();
@@ -574,6 +568,59 @@ tripleObj.objectIsSpecificUri = true;
             self.transformJsonEditor.load(transforms);
          //   $(".json-editor-blackbord *").css("color","#fff")
         });
+    };
+
+
+
+    self.showTableMappings = function (node) {
+        KGcreator_graph.drawDetailedMappings(node.data.id);
+        self.showMappingsInEditor(node.data.id)
+    };
+
+    self.showDataSourceMappings = function (node) {
+        KGcreator_graph.drawDetailedMappings(null);
+        self.showMappingsInEditor(null)
+    };
+
+    self.showMappingsInEditor = function(table) {
+        if (!KGcreator.currentConfig.currentMappings) {
+            return alert ("no mappings selected");
+        }
+        var json={}
+        if(table){
+            var tableMappings=KGcreator.currentConfig.currentMappings[table]
+            json={ [table]: tableMappings }
+            self.currentEditingTable = table;
+        }
+        else{
+            json=KGcreator.currentConfig.currentMappings
+            self.currentEditingTable = null;
+        }
+
+        self.jsonEditor = new JsonEditor("#KGcreator_mappingsEditor",json);
+        $("#KGcreator_mappingsEditor").on("mouseup", function() {
+            self.currentMappingsSelection = KGcreator.getTextSelection();
+        });
+    };
+
+
+
+    self.saveEditorMappings = function() {
+        var mappings = self.jsonEditor.get();
+        if( self.currentEditingTable) {
+            KGcreator_mappings.saveTableMappings(self.currentEditingTable, mappings);
+        }
+        else{
+            KGcreator.saveDataSourceMappings()
+        }
+    };
+
+
+
+
+
+    self.afterMappingsFn =function(){
+        KGcreator_mappings.showTableMappings(node);
     };
 
     return self;

@@ -77,15 +77,19 @@ var KGquery_r = (function () {
         SavedQueriesComponent.showDialog("STORED_KGQUERY_QUERIES", "tabs_myQueries", KGquery.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
     };
     self.initQuery = function () {
-        $("#tabs_Query").load("./responsive/KGquery/html/KgqueryQueryTab.html", function () {
-            KGquery.addQuerySet();
-        });
+        if ($("#tabs_Query").children().length == 0) {
+            $("#tabs_Query").load("./responsive/KGquery/html/KgqueryQueryTab.html", function () {
+                KGquery.addQuerySet();
+            });
+        }
     };
     self.initGraph = function () {
+        if ($("#tabs_Graph").children().length == 0) {
         $("#tabs_Graph").load("./responsive/KGquery/html/KgqueryGraphTab.html", function () {
             KGquery_graph.init();
             KGquery_graph.drawVisjsModel("saved");
         });
+        }
     };
     self.SavedQueriesComponentShowDialogResponsive = function (CRUDsource, targetDiv, slsvSource, scope, saveQueryFn, loadQueryFn) {
         SavedQueriesComponent.init(CRUDsource);

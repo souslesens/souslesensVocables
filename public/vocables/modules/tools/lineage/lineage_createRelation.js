@@ -707,7 +707,7 @@ var Lineage_createRelation = (function () {
                         // update OntologyModel by removing restriction
                         var dataToRemove = { restrictions: [restrictionNode.data.propertyId] };
                         OntologyModels.updateModel(inSource, dataToRemove, { remove: true }, function (err, result) {
-                            callback(err);
+                            callbackSeries(err);
                         });
                     },
                 ],

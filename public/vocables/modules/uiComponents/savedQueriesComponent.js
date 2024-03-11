@@ -100,8 +100,9 @@ var SavedQueriesComponent = (function () {
 
             result.forEach(function (triple) {
                 var predicate = triple.p.value;
-                if (predicate.indexOf(self.contentPredicate) > -1) {
+                if (predicate.indexOf(self.contentPredicate) > -1) { 
                     var content = JSON.parse(atob(triple.o.value));
+
                     return self.loadQueryFn(null, content);
                 }
             });
@@ -135,7 +136,16 @@ var SavedQueriesComponent = (function () {
                 scope = authentication.currentUser.login;
             }
             var queryUri = self.currentCRUDsourceObject.graphUri + common.getRandomHexaId(10);
-            var content64 = btoa(JSON.stringify(data));
+            const getCircularReplacer = () => {
+                return (key, value) => {
+                if(key=='queryElement'){
+                    value=value['divId'];
+                }
+                return value;
+                };
+            };
+
+            var content64 = btoa(JSON.stringify(data,getCircularReplacer()));
             var triples = [];
             triples.push({
                 subject: queryUri,

@@ -16,7 +16,7 @@ var KGquery_r = (function () {
     self.onLoaded = function () {
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
         SavedQueriesComponent.showDialog = self.SavedQueriesComponentShowDialogResponsive;
-        ResponsiveUI.replaceFile(KGquery_controlPanel, KGquery_controlPanelResponsive);
+        //ResponsiveUI.replaceFile(KGquery_controlPanel, KGquery_controlPanelResponsive);
         ResponsiveUI.initMenuBar(self.loadSource);
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");

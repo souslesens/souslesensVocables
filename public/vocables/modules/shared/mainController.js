@@ -513,7 +513,9 @@ var MainController = (function () {
         },
 
         setCredits: function () {
-            var html = "<div>" + " " + " <img  src=\"images/souslesensVocables.gif\" style='background:url(images/circulargraph.png);background-repeat: no-repeat;display: block; '>" + "</div>";
+            var LateralPannelWidth = $("#lateralPanelDiv").width();
+            var gifStart=$(window).width()/2-LateralPannelWidth+100;
+            var html = "<div style='position:absolute;left:"+gifStart+"px'>" + " " + " <img  src=\"images/souslesensVocables.gif\" style='background:url(images/circulargraph.png);background-repeat: no-repeat;display: block; '>" + "</div>";
             $("#graphDiv").html(html);
         },
 

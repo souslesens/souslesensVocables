@@ -79,8 +79,7 @@ var KGquery_filter_bot = (function() {
 
 
         }
-    };
-    self.functions.promptAnnotationValueFn = function() {
+        self.functions.promptAnnotationValueFn = function() {
 
             if (!self.params.annotationDatatype || self.params.annotationDatatype == "xsd:string") {
                 _botEngine.promptValue("enter value", "annotationPropertyValue");
@@ -88,42 +87,42 @@ var KGquery_filter_bot = (function() {
                 _botEngine.promptValue("enter value", "annotationPropertyValue", null, { datePicker: 1 });
 
 
-        }
-    };
+            }
+        };
 
 
-    self.functions.listFilterTypes = function() {
-        /* var choices = ["label", "list"];
-            BotEngine.showList(choices, "individualsFilterType");*/
-    };
+        self.functions.listFilterTypes = function() {
+            /* var choices = ["label", "list"];
+             BotEngine.showList(choices, "individualsFilterType");*/
+        };
 
-    self.functions.setSparqlQueryFilter = function(queryParams, varName) {
-        var varName = self.params.varName;
-        var individualsFilterType = self.params.individualsFilterType;
-        var individualsFilterValue = self.params.individualsFilterValue;
-        var advancedFilter = self.params.advancedFilter || "";
-        var filterLabel = self.params.queryText;
+        self.functions.setSparqlQueryFilter = function(queryParams, varName) {
+            var varName = self.params.varName;
+            var individualsFilterType = self.params.individualsFilterType;
+            var individualsFilterValue = self.params.individualsFilterValue;
+            var advancedFilter = self.params.advancedFilter || "";
+            var filterLabel = self.params.queryText;
 
-        var annotationProperty = self.params.annotationProperty;
-        var annotationPropertyOperator = self.params.annotationPropertyOperator;
-        var annotationPropertyValue = self.params.annotationPropertyValue;
+            var annotationProperty = self.params.annotationProperty;
+            var annotationPropertyOperator = self.params.annotationPropertyOperator;
+            var annotationPropertyValue = self.params.annotationPropertyValue;
 
 
-        self.filter = "";
+            self.filter = "";
 
-        if (annotationPropertyValue) {
-            var propLabel = Sparql_common.getLabelFromURI(annotationProperty);
+            if (annotationPropertyValue) {
+                var propLabel = Sparql_common.getLabelFromURI(annotationProperty);
 
-            if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
-                // annotationPropertyOperator = ">";
-                var dateStr = new Date(annotationPropertyValue).toISOString();
-                self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + dateStr + "'^^xsd:datetime )";
+                if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
+                    // annotationPropertyOperator = ">";
+                    var dateStr = new Date(annotationPropertyValue).toISOString();
+                    self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + dateStr + "'^^xsd:datetime )";
 
-            } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#int") {
-                self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + annotationPropertyValue + "'^^xsd:int )";
+                } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#int") {
+                    self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + annotationPropertyValue + "'^^xsd:int )";
 
-            } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#float") {
-                self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + annotationPropertyValue + "'^^xsd:float )";
+                } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#float") {
+                    self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + annotationPropertyValue + "'^^xsd:float )";
 
 
                 } else {
@@ -145,12 +144,11 @@ var KGquery_filter_bot = (function() {
             } else if (individualsFilterType == "advanced") {
                 self.filter = advancedFilter;
             }
-            self.filter = self.filter.replace("Label", "_label");
+            //self.filter = self.filter.replace("Label", "_label");
             _botEngine.nextStep();
         }
         ;
     };
-
 
 
     return self;

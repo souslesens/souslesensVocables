@@ -8,7 +8,7 @@ RUN apk add --update --no-cache openjdk11
 WORKDIR /app
 COPY package.json package-lock.json /app/
 WORKDIR /app/mainapp
-COPY mainapp/package.json mainapp/package-lock.json /app/mainapp/
+COPY mainapp/package.json /app/mainapp/
 WORKDIR /app
 RUN npm ci
 

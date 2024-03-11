@@ -5,8 +5,7 @@ import common from "../shared/common.js";
 var SourceSelectorWidget = (function () {
     var self = {};
     self.currentTreeDiv = null;
-
-    self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options,callback) {
+    self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options, callback) {
         if (self.currentTreeDiv != null) {
             if ($("#" + self.currentTreeDiv).jstree() != undefined) {
                 try {
@@ -44,14 +43,12 @@ var SourceSelectorWidget = (function () {
 
             if (isDialog) {
                 $("#" + targetDivId).dialog("open");
-            } else {
             }
-            if(callback){
+            if (callback) {
                 callback();
             }
         });
     };
-
     self.getSourcesJstreeData = function (types, sourcesSelection) {
         var distinctNodes = {};
 

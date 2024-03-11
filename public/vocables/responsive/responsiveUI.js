@@ -270,9 +270,12 @@ var ResponsiveUI = (function () {
     };
     //keep
     self.setSlsvCssClasses = function (callback) {
-        less.pageLoadFinished.then(function () {
+        less.pageLoadFinished.then(async function () {
             //setTimeout(() => {}, "500");
-            ResponsiveUI.changeTheme(Config.theme.defaultTheme);
+            // fetch theme from api
+            const response = await fetch("/api/v1/users/theme");
+            const data = await response.json();
+            ResponsiveUI.changeTheme(data.theme);
 
             if (Config.theme.selector) {
                 $("#theme-selector-btn").show();

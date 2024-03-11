@@ -208,6 +208,23 @@ class ProfileModel {
             lock.release("ProfilesThread");
         }
     };
+
+    /**
+     * @param {string} profileName - the profile name
+     * @returns {string} the theme currently defined for this profile
+     */
+    getThemeFromProfile = async (profileName) => {
+        const profiles = await this._read();
+
+        const firstProfile = Object.values(profiles).find((profile) => {
+            if (profile.name === profileName) {
+                return profile.theme;
+            }
+        });
+        const findTheme = firstProfile.theme;
+
+        return findTheme !== undefined ? findTheme : config.theme.defaultTheme;
+    };
 }
 
 const profileModel = new ProfileModel(configProfilesPath);

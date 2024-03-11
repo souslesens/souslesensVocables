@@ -697,18 +697,7 @@ var Lineage_whiteboard = (function() {
                         });
                     }
                 }
-                /*
-                addNode: function (nodeData, callback) {
-                     CreateResource_bot.start()
-                    return;
-                    Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
-                        if (err) {
-                            return callback(err.responseText);
-                        }
-                        return null;
-                    });
-                },
-                */
+
             };
             if (false) {
                 options.visjsOptions.interaction = {

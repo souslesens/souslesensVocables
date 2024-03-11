@@ -224,7 +224,7 @@ var KGcreator = (function () {
                         var table = obj.node.data.id;
                         self.currentConfig.currentDataSource.currentTable = table;
                         self.showTablesColumnTree(table, columns);
-                       // self.showTableVirtualColumnsTree(table);
+                        self.showTableVirtualColumnsTree(table);
                         KGcreator_mappings.showTableMappings(obj.node)
                     } else if (obj.node.data.type == "tableColumn") {
                     } else if (obj.node.data.type == "csvFileColumn") {
@@ -616,7 +616,7 @@ var KGcreator = (function () {
 
                         var columnMappings = self.getColumnsMappings(fileName, null, "s");
 
-                        if (columnMappings[column] || columnMappings["$_" + column]) {
+                        if (columnMappings[column] || columnMappings[ column+"_$"]) {
                             label = "<span class='KGcreator_fileWithMappings'>" + column + "</span>";
                         }
 
@@ -738,7 +738,7 @@ var KGcreator = (function () {
         var tableTriples = self.currentConfig.currentMappings[node.data.table].tripleModels;
         var tableTriplesCopy = JSON.parse(JSON.stringify(tableTriples));
         tableTriples.forEach(function (triple, index) {
-            if (triple.s.replace("$_", "") == node.data.id) {
+            if (triple.s.replace("_$", "") == node.data.id) {
                 tableTriplesCopy = tableTriplesCopy.filter((element) => JSON.stringify(element) != JSON.stringify(triple));
                 JstreeWidget.setSelectedNodeStyle({ color: "black" });
                 KGcreator_graph.deleteColumnNode(node);
@@ -854,7 +854,7 @@ var KGcreator = (function () {
         }
 
         self.currentConfig.currentMappings[table].tripleModels.forEach(function (triple) {
-            if ((column && triple[role].replace("$_", "") == column.replace("$_", "")) || !column) {
+            if ((column && triple[role].replace("_$", "") == column.replace("_$", "")) || !column) {
                 if (!columnTriples[triple[role]]) {
                     columnTriples[triple[role]] = [];
                 }

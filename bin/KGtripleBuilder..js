@@ -371,9 +371,9 @@ var KGtripleBuilder = {
                                                                         blankNodesMap["_rowIndex"] = blankNode;
                                                                     }
                                                                     subjectStr = blankNode;
-                                                                } else if (item.s.indexOf("$_") == 0) {
+                                                                } else if (item.s.endsWith("_$") ) {
                                                                     // virtual column
-                                                                    if (typeof item.o === "string" && item.o.indexOf("$_") != 0 && allColumns[item.o] && !line[item.o]) {
+                                                                    if (typeof item.o === "string" && item.o.endsWith("_$") && allColumns[item.o] && !line[item.o]) {
                                                                         // ne pas creer des triplest sans objet
 
                                                                         return;
@@ -434,8 +434,7 @@ var KGtripleBuilder = {
                                                                     } catch (e) {
                                                                         return (lineError = e);
                                                                     }
-                                                                } else if (item.o.indexOf("$_") == 0) {
-                                                                    // virtual column
+                                                                } else if (item.o.endsWith("_$")) {
                                                                     var blankNode = blankNodesMap[item.o];
                                                                     if (!blankNode) {
                                                                         blankNode = getNewBlankNodeId();

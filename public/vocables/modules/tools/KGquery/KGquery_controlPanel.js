@@ -69,13 +69,13 @@ var KGquery_controlPanel = (function () {
             "<div  class='KGquery_pathNodeDiv' id='" +
             nodeDivId +
             "'>" +
-            "<span style='font:bold 14px'>" +
+            "<div style='display:inline-flex'><span style='font:bold 14px'>" +
             label +
             "</span>" +
             "&nbsp;&nbsp;" +
             "<button  class='slsv-invisible-button filterIcon' about='add filter' onclick='KGquery.addNodeFilter(\"" +
             nodeDivId +
-            "\");'</button>";
+            "\");'></button></div>";
 
         html += "<div style='font-size: 10px;' id='" + nodeDivId + "_filter'></div> " + "</div>" + "</div>";
 

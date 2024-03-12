@@ -59,26 +59,27 @@ var KGquery_filter_bot = (function() {
 
     };
     self.functions.chooseAnnotationOperatorFn = function() {
-        var datatype = null;
-        self.data.annotationProperties.forEach(function(item) {
-            if (item.id == self.params.annotationProperty) {
-                datatype = item.datatype;
+            var datatype = null;
+            self.data.annotationProperties.forEach(function(item) {
+                if (item.id == self.params.annotationProperty) {
+                    datatype = item.datatype;
+                }
+            });
+            self.params.annotationDatatype = datatype;
+            var choices = [];
+            if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
+                // annotationPropertyOperator = ">";
+                choices = ["=", "<", "<=", ">", ">="];
+            } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#int") {
+                choices = ["=", "<", "<=", ">", ">="];
+            } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#float") {
+                choices = ["=", "!=", "contains", ">", "!contains"];
+
+                _botEngine.showList(choices, "annotationPropertyOperator");
+
+
             }
-        });
-        self.params.annotationDatatype = datatype;
-        var choices = [];
-        if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
-            // annotationPropertyOperator = ">";
-            choices = ["=", "<", "<=", ">", ">="];
-        } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#int") {
-            choices = ["=", "<", "<=", ">", ">="];
-        } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#float") {
-            choices = ["=", "!=", "contains", ">", "!contains"];
-
-            _botEngine.showList(choices, "annotationPropertyOperator");
-
-
-        }
+        };
         self.functions.promptAnnotationValueFn = function() {
 
             if (!self.params.annotationDatatype || self.params.annotationDatatype == "xsd:string") {
@@ -109,7 +110,7 @@ var KGquery_filter_bot = (function() {
 
 
             self.filter = "";
-
+            //individualsFilterType='list';
             if (annotationPropertyValue) {
                 var propLabel = Sparql_common.getLabelFromURI(annotationProperty);
 
@@ -146,9 +147,8 @@ var KGquery_filter_bot = (function() {
             }
             //self.filter = self.filter.replace("Label", "_label");
             _botEngine.nextStep();
-        }
-        ;
-    };
+        };
+    
 
 
     return self;

@@ -4,7 +4,6 @@ import SavedQueriesComponent from "../../modules/uiComponents/savedQueriesCompon
 import Lineage_r from "../lineage/lineage_r.js";
 import ResponsiveUI from "../responsiveUI.js";
 import KGquery_controlPanel from "../../modules/tools/KGquery/KGquery_controlPanel.js";
-import KGquery_controlPanelResponsive from "./KGquery_controlPanelResponsive.js";
 import VisjsGraphClass from "../../modules/graph/VisjsGraphClass.js";
 
 var KGquery_r = (function () {

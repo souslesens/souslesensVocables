@@ -703,6 +703,7 @@ var OntologyModels = (function () {
                         if (!Config.ontologiesVocabularyModels[_source]) {
                             return;
                         }
+                        allConstraints={};
 
                         //merge constraints( range/domain) and restrictions
                         var sourceConstraintsAndRestrictions =Config.ontologiesVocabularyModels[_source].restrictions;

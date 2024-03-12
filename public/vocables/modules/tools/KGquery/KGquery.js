@@ -206,7 +206,7 @@ var KGquery = (function () {
                 return alert(err.responseText);
             }
             self.querySets.sets[classSetIndex].classFiltersMap[classDivId] = { class: aClass, filter: result.filter };
-            $("#" + classDivId + "_filter").append(result.filterLabel || result.filter);
+            $("#" + classDivId + "_filter").text(result.filterLabel || result.filter);
         });
     };
 

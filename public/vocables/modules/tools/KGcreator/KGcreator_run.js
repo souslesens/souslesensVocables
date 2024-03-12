@@ -53,11 +53,7 @@ var KGcreator_run = (function() {
             table = null;
         }
         self.currentTable = table;
-        if (self.currentTable) {
-            KGcreator_mappings.showTableMappings(self.currentTable);
-        } else {
-            alert("select a table");
-        }
+
         return table;
     };
 

@@ -23,6 +23,7 @@ var KGcreator_bot = (function() {
             if (node.data.table) {
                 self.params.table = node.data.table;
                 self.params.column = node.data.id;
+
             } else {//map virtual on table node
                 self.params.table = node.data.id;
                 self.params.column = null;
@@ -30,12 +31,8 @@ var KGcreator_bot = (function() {
             }
 
 
-            if (KGcreator.currentConfig.currentMappings && KGcreator.currentConfig.currentMappings[self.params.table]) {
-                self.params.tripleModels = KGcreator.currentConfig.currentMappings[self.params.table].tripleModels || [];
-            } else {
-                KGcreator.currentConfig.currentMappings[self.params.table] = { tripleModels: [] };
-                self.params.tripleModels = [];
-            }
+            self.params.tripleModels = self.getTableTripleModels(self.params.table);
+
 
             if (!self.params.column) {//map virtual on table node
                 self.params.columnType = "virtualColumn";
@@ -43,6 +40,11 @@ var KGcreator_bot = (function() {
             } else if (self.params.tripleModels.length == 0) {
                 workflow = self.workflowColumnMappingType;
 
+            } else if (node.data.predicateObjectColumn && node.data.predicateObjectTable) {
+
+                self.params.predicateTargetColumn = node.data.predicateObjectColumn;
+                self.params.predicateObjectTable = node.data.predicateObjectTable;
+                workflow = self.workflowObjectPredicateInOtherTable;
             } else {
                 self.params.tripleModels.predicateObjectColumnClass = self.getColumnClasses(self.params.tripleModels, self.params.column);
                 if (self.params.tripleModels.predicateObjectColumnClass) {
@@ -79,37 +81,47 @@ var KGcreator_bot = (function() {
     };
 
     self.callbackFn = function() {
-        self.start(self.currentColumn);
+        ;//  self.start(self.currentColumn);
     };
 
     self.workflowColumnmMappingOther = {
         _OR: {
             "set value": { listValueTypeFn: { setValueColumnFn: { addMappingToModelFn: {} } } },
             "set object predicate": {
-                listTableColumnsFn: {
-                    checkColumnTypeFn: {
-                        _OR: {
-                            KO: {
-                                promptTargetColumnVocabularyFn: {
-                                    predicateObjectColumnClassFn: {
-                                        listFilteredPropertiesFn: {
-                                            addMappingToModelFn: {
-                                                savePredicateObjectType: {
-                                                    "_OR":
-                                                        {
-                                                            " add mappings to predicate object  column": { addMappingsToPredicateObjectColumnFn: {} }
-                                                            ,
-                                                            "end": {}
-                                                        }
+                listTablesFn: {
+                    listTableColumnsFn: {
+                        checkColumnTypeFn: {
+                            _OR: {
+                                KO: {
+                                    promptTargetColumnVocabularyFn: {
+                                            predicateObjectColumnClassFn: {
+                                                listFilteredPropertiesFn: {
+                                                    setpredicateObjectColumnUriTypeFn : {
+                                                    addMappingToModelFn: {
+                                                        "_OR":
+                                                            {
+                                                                "save ObjectPredicate Class": {
+                                                                    savePredicateObjectType: {
+                                                                        "_OR":
+                                                                            {
+                                                                                " add mappings to predicate object  column": { addMappingsToPredicateObjectColumnFn: {} }
+                                                                                ,
+                                                                                "end": {}
+                                                                            }
 
+                                                                    }
+                                                                },
+                                                                "end": {}
+                                                            }
+                                                    }
                                                 }
                                             }
                                         }
                                     }
-                                }
-                            },
-                            //  "OK": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "addMappingToModel": {} } } }
-                            OK: { listFilteredPropertiesFn: { addMappingToModelFn: {} } }
+                                },
+                                //  "OK": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "addMappingToModel": {} } } }
+                                OK: { listFilteredPropertiesFn: { addMappingToModelFn: {} } }
+                            }
                         }
                     }
                 }
@@ -149,6 +161,12 @@ var KGcreator_bot = (function() {
         }
     };
 
+    self.workflowObjectPredicateInOtherTable = {
+        ObjectPredicateInOtherTableFn: { listTableColumnsFn: { listFilteredPropertiesFn: { writeObjectPredicateJoinKeyFn: { writeObjectPredicateTableJoinFn: {} } } } }
+
+    };
+
+
     self.functionTitles = {
         setUriTypeFn: "Choose column URI type",
         listValueTypeFn: "Choose a xsd type",
@@ -167,6 +185,8 @@ var KGcreator_bot = (function() {
     };
 
     self.functions = {
+
+
         chooseSourceFn: function() {
         },
         chooseTableFn: function() {
@@ -181,6 +201,11 @@ var KGcreator_bot = (function() {
             var choices = ["namedIndividual", "blankNode"];
 
             _botEngine.showList(choices, "uriType");
+        },
+        setpredicateObjectColumnUriTypeFn: function() {
+            var choices = ["namedIndividual", "blankNode"];
+
+            _botEngine.showList(choices, "predicateObjectColumnUriType");
         },
 
         listClassVocabsFn: function() {
@@ -203,10 +228,20 @@ var KGcreator_bot = (function() {
             var columns = KGcreator.currentConfig.currentDataSource.tables[self.params.table];
             _botEngine.showList(columns, "valueColumn");
         },
+        listTablesFn: function() {
+            if (false) {
+                var tables = Object.keys(KGcreator.currentConfig.currentDataSource.tables);
+                _botEngine.showList(tables, "predicateObjectTable");
+            }
 
+            self.params.predicateObjectTable = self.params.table;
+            BotEngine.nextStep();
+
+
+        },
         listTableColumnsFn: function() {
-            var columns = KGcreator.currentConfig.currentDataSource.tables[self.params.table];
-            var virtualColumns = KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns;
+            var columns = KGcreator.currentConfig.currentDataSource.tables[self.params.predicateObjectTable];
+            var virtualColumns = KGcreator.currentConfig.currentMappings[self.params.predicateObjectTable].virtualColumns;
             if (virtualColumns) {
                 columns = columns.concat(virtualColumns);
             }
@@ -216,10 +251,9 @@ var KGcreator_bot = (function() {
 
         checkColumnTypeFn: function() {
             //check if source  target column is mapped and has a rdf:type that are classes in source and imports
-            var predicateObjectColumnName = self.params.predicateObjectColumn;
-            var predicateObjectColumnClass = null;
-            self.params.predicateObjectColumnClass = self.getColumnClasses(self.params.tripleModels, self.params.column);
-            self.params.predicateObjectColumnClass = self.getColumnClasses(self.params.tripleModels, self.params.predicateObjectColumn);
+            var predicateObjectTripleModels = self.getTableTripleModels(self.params.predicateObjectTable);
+            //   self.params.predicateObjectColumnClass = self.getColumnClasses(predicateObjectTripleModels, self.params.column);
+            self.params.predicateObjectColumnClass = self.getColumnClasses(predicateObjectTripleModels, self.params.predicateObjectColumn);
 
             var OK = false;
             if (self.params.predicateObjectColumnClass && self.params.predicateObjectColumnClass) {
@@ -300,13 +334,14 @@ var KGcreator_bot = (function() {
             var node = {
                 data: {
                     table: self.params.table,
-                    id: self.currentUri
+                    id: self.params.predicateObjectColumn
                 }
             };
             $("#botPanel").dialog("close");
 
             KGcreator_bot.start(node);
         },
+
         addMappingToModelFn: function(callback) {
             var source = self.params.source;
             var datasource = self.params.datasource;
@@ -319,6 +354,7 @@ var KGcreator_bot = (function() {
             var predicateObjectId = self.params.predicateObjectId;
             var predicateObjectColumn = self.params.predicateObjectColumn;
             var annotationPropertyId = self.params.annotationPropertyId;
+            var predicateObjectColumnUriType=self.params.predicateObjectColumnUriType
 
             var valueType = self.params.valueType;
             var valueColumn = self.params.valueColumn;
@@ -344,7 +380,7 @@ var KGcreator_bot = (function() {
                 }
                 column = "@" + self.params.column + "";
                 if (uriType == "blankNode") {
-                    column+="_$";
+                    column += "_$";
                 }
                 self.params.columnType = null;
                 self.params.column = column;
@@ -370,10 +406,25 @@ var KGcreator_bot = (function() {
                     self.params.tripleModels.push(triple);
                     return _botEngine.nextStep();
 
-                }
-                else if (uriType == "blankNode" && column.indexOf("$")<0) {
-                    self.currentUri+="_$"
+                } else if (uriType == "blankNode" && !column.endsWith("_$")) {
+                    self.currentUri += "_$";
                     return callback ? callback() : _botEngine.nextStep();
+                }
+            }
+            if(predicateObjectColumnUriType) {
+                if (predicateObjectColumnUriType == "namedIndividual") {
+                    triple = {
+                        s: column,
+                        p: "rdf:type",
+                        o: "owl:NamedIndividual"
+                    };
+                    self.currentUri = predicateObjectColumn;
+                    self.params.tripleModels.push(triple);
+
+
+                } else if (predicateObjectColumnUriType == "blankNode" && !predicateObjectColumn.endsWith("_$")) {
+                    self.currentUri  += "_$";
+
                 }
             }
 
@@ -406,7 +457,7 @@ var KGcreator_bot = (function() {
                 self.params.propertyId = null;
                 var object = predicateObjectColumn;
                 if (self.isColumnBlankNode(predicateObjectColumn)) {
-                    object = predicateObjectColumn+"_$";
+                    object = predicateObjectColumn + "_$";
                 }
 
                 triple = {
@@ -432,6 +483,64 @@ var KGcreator_bot = (function() {
                 //  return BotEngine.nextStep();
             }
         },
+        ObjectPredicateInOtherTableFn: function() {
+            if (!self.params.predicateObjectTable) {
+
+                return BotEngine.abort("no targetColumnTable");
+            }
+
+            if (self.params.predicateObjectTable == self.params.table) {
+                return BotEngine.abort(" targetColumnTable==table");
+            }
+
+            var sourcecolumnType = self.getColumnClasses(self.params.tripleModels, self.params.column);
+            var targetTripleModels = self.getTableTripleModels(self.params.predicateObjectTable);
+            self.params.targetTripleModels=targetTripleModels
+            var targetcolumnType = self.getColumnClasses(targetTripleModels, self.params.predicateTargetColumn);
+
+            var ok = sourcecolumnType && targetcolumnType;
+
+            if (!ok) {
+                return BotEngine.abort(" cannot proceed :no class defined for both subject and object");
+            }
+            self.params.predicateObjectColumnClass = targetcolumnType;
+            BotEngine.nextStep();
+
+        },
+        writeObjectPredicateJoinKeyFn: function() {
+            var triple = {
+                s: self.params.predicateObjectColumn,
+                p: self.params.propertyId,
+                o: self.params.predicateTargetColumn,
+            };
+
+            self.params.targetTripleModels.push(triple);
+            KGcreator.currentConfig.currentMappings[self.params.predicateObjectTable].tripleModels = self.params.targetTripleModels;
+            KGcreator.saveDataSourceMappings(self.params.source, self.params.datasource.name, KGcreator.currentConfig.currentMappings, function(err, result) {
+                if (err) {
+                    return BotEngine.abort(err);
+                }
+                _botEngine.message("mapping Saved");
+                return  _botEngine.nextStep();
+            });
+
+        },
+        writeObjectPredicateTableJoinFn: function() {
+            var join = {
+                "fromTable": self.params.table,
+                "toTable": self.params.predicateObjectTable,
+                "fromColumn": self.params.column,
+                "toColumn": self.params.predicateObjectColumn
+            };
+            KGcreator.rawConfig.databaseSources[KGcreator.currentConfig.currentDataSource.name].tableJoins.push(join);
+            KGcreator.saveSlsvSourceConfig(function(err, result) {
+                if (err) {
+                    BotEngine.abort(err);
+                }
+                BotEngine.nextStep();
+                KGcreator_graph.drawDataSourceMappings()
+            });
+        },
 
         saveFn: function(callback) {
             KGcreator_mappings.columnJsonEditor.load(self.params.tripleModels);
@@ -451,7 +560,7 @@ var KGcreator_bot = (function() {
             role = "s";
         }
         KGcreator.currentConfig.currentMappings[self.params.table].tripleModels.forEach(function(item) {
-            if (item[role] == columnName+"_$") {
+            if (item[role] == columnName + "_$") {
                 isBlankNode = true;
             }
         });
@@ -460,7 +569,7 @@ var KGcreator_bot = (function() {
     self.getColumnClasses = function(tripleModels, columnName) {
         var columnClasses = null;
         tripleModels.forEach(function(item) {
-            if ((item.s == columnName || item.s == columnName+"_$") && item.p == "rdf:type") {
+            if ((item.s == columnName || item.s == columnName + "_$") && item.p == "rdf:type") {
                 if (item.o.indexOf("owl:") < 0) {
                     if (!columnClasses) {
                         columnClasses = [];
@@ -470,6 +579,17 @@ var KGcreator_bot = (function() {
             }
         });
         return columnClasses;
+    };
+
+    self.getTableTripleModels = function(table) {
+        var tripleModels = [];
+        if (KGcreator.currentConfig.currentMappings && KGcreator.currentConfig.currentMappings[table]) {
+            tripleModels = KGcreator.currentConfig.currentMappings[table].tripleModels || [];
+        } else {
+            KGcreator.currentConfig.currentMappings[table] = { tripleModels: [] };
+            tripleModels = [];
+        }
+        return tripleModels;
     };
 
     return self;

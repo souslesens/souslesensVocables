@@ -96,8 +96,8 @@ return alert("select a field (column)");
                 if (existingTriples[columnNode.data.id]) {
                     self.updateColumnTriplesEditor(existingTriples[columnNode.data.id]);
                 }
-                if (existingTriples["$_" + columnNode.data.id]) {
-                    self.updateColumnTriplesEditor(existingTriples["$_" + columnNode.data.id]);
+                if (existingTriples[ columnNode.data.id+"_$"]) {
+                    self.updateColumnTriplesEditor(existingTriples[ columnNode.data.id+"_$"]);
                 }
 
                 if (addColumnClassType && KGcreator_graph.currentGraphNode.data.id) {
@@ -130,7 +130,7 @@ return alert("select a field (column)");
             if (value == "_selectedColumn") {
                 $("#LinkColumn_subjectInput").val(columnNode.data.id);
             } else if (value == "_virtualColumn") {
-                $("#LinkColumn_subjectInput").val("$_" + columnNode.data.id);
+                $("#LinkColumn_subjectInput").val( columnNode.data.id+"_$");
             } else {
                 $("#LinkColumn_subjectInput").val(value);
             }
@@ -237,10 +237,10 @@ return alert("select a field (column)");
             tripleObj.lookup_o = objectLookupName;
         }
         if (isSubjectBlankNode) {
-            tripleObj.s = "$_" + subject;
+            tripleObj.s = subject+"_$";
         }
         if (isObjectBlankNode) {
-            tripleObj.o = "$_" + object;
+            tripleObj.o = object+"_$";
         }
         if (isRestrictionCBX) {
             tripleObj.isRestriction = true;
@@ -374,8 +374,7 @@ tripleObj.objectIsSpecificUri = true;
 
         //concat new triples from editor with other mappings in table
         KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels.forEach(function (triple) {
-            if (triple.s.replace("$_", "") == columnNode.data.id) {
-                //include "$_ blanknode
+            if (triple.s.replace("_$", "") == columnNode.data.id) {
                 return;
             }
             newColumnMappings.push(triple);

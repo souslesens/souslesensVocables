@@ -27,6 +27,10 @@ var SimpleListSelectorWidget = (function () {
 
         $("#" + divId).html(html);
 
+        if(options.title){
+            $("#" + divId).dialog("option","title",options.title);
+        }
+
         loadFn(function (data) {
             if (typeof data[0] === "object") {
                 common.fillSelectOptions("SimpleListSelectorWidget_select", data, !options.multiple, "label", "id");

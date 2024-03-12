@@ -205,7 +205,7 @@ var SQLquery_filters = (function () {
                     matches.push({
                         dataSource: datasource,
                         table: table,
-                        column: triple.s.replace("$_", ""),
+                        column: triple.s.replace("_$", ""),
                     });
                 }
             });

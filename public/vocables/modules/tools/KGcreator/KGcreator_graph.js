@@ -72,11 +72,11 @@ var KGcreator_graph = (function() {
         Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", { nodes: [], edges: [] }, {});
 
         Lineage_sources.activeSource = source;
-        $("#KGcreator_resourceLinkGraphDiv").html("")
-        Lineage_whiteboard.drawModel(source, "KGcreator_mappingsGraphDiv", options, function(err,topConcepts) {
+        $("#KGcreator_resourceLinkGraphDiv").html("");
+        Lineage_whiteboard.drawModel(source, "KGcreator_mappingsGraphDiv", options, function(err, topConcepts) {
             $("#KGcreator_resourceLinkRightPanel").load("./modules/tools/KGcreator/html/graphControlPanel.html", function() {
             });
-            if( !err && topConcepts.length>0) {
+            if (!err && topConcepts.length > 0) {
                 var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
                 var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.getIds();
                 var newNodes = [];
@@ -93,7 +93,7 @@ var KGcreator_graph = (function() {
                 Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
                 GraphDisplayLegend.drawLegend("KGcreator_classes", "LineageVisjsLegendCanvas", false);
 
-                KGcreator_graph.drawDataSourceMappings()
+                KGcreator_graph.drawDataSourceMappings();
             }
 
         });
@@ -107,7 +107,7 @@ var KGcreator_graph = (function() {
         }
         self.currentGraphNode = node;
         if (node.data.type == "table" || node.data.type == "column") {
-            Lineage_whiteboard.lineageVisjsGraph.network.addEdgeMode();
+            //  Lineage_whiteboard.lineageVisjsGraph.network.addEdgeMode();
         } else {
             Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
         }
@@ -137,8 +137,9 @@ var KGcreator_graph = (function() {
     self.drawColumnToClassGraph = function(columnNodes) {
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-        if(!existingNodes || Object.keys(existingNodes).length==0)
+        if (!existingNodes || Object.keys(existingNodes).length == 0) {
             return;
+        }
 
         columnNodes.forEach(function(columnNode, index) {
             var columnNodeId = columnNode.id;
@@ -515,8 +516,9 @@ var KGcreator_graph = (function() {
 
 
     self.addInterTableJoinsToVisjsData = function(dataSource, visjsData) {
-        if(!  KGcreator.rawConfig.databaseSources[dataSource] ||  !KGcreator.rawConfig.databaseSources[dataSource].tableJoins)
+        if (!KGcreator.rawConfig.databaseSources[dataSource] || !KGcreator.rawConfig.databaseSources[dataSource].tableJoins) {
             return visjsData;
+        }
         var edges = [];
         var existingEdges = {};
         visjsData.edges.forEach(function(edge) {
@@ -541,12 +543,7 @@ var KGcreator_graph = (function() {
     };
 
 
-
-
-
-
     /////////////////////////////////////////Detailed Mappings//////////////////////////////////////////////////////
-
 
 
     self.drawDetailedMappings = function(tablesToDraw) {
@@ -581,13 +578,14 @@ var KGcreator_graph = (function() {
 
                 var mappings = sourceMappings[table];
                 var columns = KGcreator.currentConfig.currentDataSource.tables[table];
-                if(columns==undefined){
+                if (columns == undefined) {
                     //There is a mapping for this column but the Table is not on db anymore
                     continue;
                 }
+
                 function getTripleLabelRole(id) {
 
-                    if (id.indexOf("$_") == 0) {
+                    if (id.endsWith("_$")) {
                         return "column";
                     }
                     var role = null;
@@ -601,25 +599,25 @@ var KGcreator_graph = (function() {
 
                 json[table] = mappings;
                 mappings.tripleModels.forEach(function(item, index) {
+
+
+                    if (!item.s || !item.p || !item.o) {
+                        return alert("tripleModel is malformed " + JSON.stringify(item));
+                    }
+
                     function getNodeAttrs(str) {
                         if (str.indexOf("http") > -1) {
-                            return { type: "Class", color: "#70ac47", shape: "dot", size: 20 };
+                            return { type: "Class", color: "#70ac47", shape: "box", size: 30 };
                         } else if (str.indexOf(":") > -1) {
-                            // return "#0067bb";
                             return { type: "OwlType", color: "#aaa", shape: "ellipse" };
-                        } else if (str.indexOf("$_") > -1) {
-                            // return "#0067bb";
-                            return { type: "blankNode", color: "#b0f5f5", shape: "square" };
+                        } else if (str.endsWith("_$")) {
+                            return { type: "blankNode", color: "#00afef", shape: "square" };
                         } else if (str.indexOf("_rowIndex") > -1) {
-                            // return "#0067bb";
                             return { type: "rowIndex", color: "#f90edd", shape: "star" };
                         } else {
-                            if (table) {
-                                var color = common.getResourceColor("mappingFileName", table);
-                                return { type: "OwlType", color: "#00afef", shape: "box" };
-                                //   return { type: "FileColumn", color: color, shape: "box" };
-                            }
-                            return {};
+                            drawRelation = false;
+                            return { type: "OwlType", color: "#00afef", shape: "hexagon" };
+
                         }
                     }
 
@@ -628,8 +626,12 @@ var KGcreator_graph = (function() {
                     var oId = table + "_" + item.o;
 
                     if (!existingNodes[sId]) {
+                        if (!sId) {
+                            return;
+                        }
                         existingNodes[sId] = 1;
                         var label = Sparql_common.getLabelFromURI(item.s);
+
                         var attrs = getNodeAttrs(item.s);
                         var drawRelation = true;
                         if (item.o == "owl:NamedIndividual") {
@@ -643,6 +645,8 @@ var KGcreator_graph = (function() {
                         if (item.o == "rdf:Bag") {
                             attrs.shape = "box";
                             drawRelation = false;
+                        } else if (item.s.startsWith("@")) {
+                            attrs.color = "#8200fd";
                         }
                         /*  if (item.isString) {
                 attrs.shape = "text";
@@ -654,6 +658,7 @@ var KGcreator_graph = (function() {
                             label: label,
                             shape: attrs.shape,
                             color: attrs.color,
+                            font: { color: attrs.color },
                             size: Lineage_whiteboard.defaultShapeSize,
                             data: {
                                 id: item.s,
@@ -661,7 +666,7 @@ var KGcreator_graph = (function() {
                                 fileName: table,
                                 type: attrs.type,
                                 role: getTripleLabelRole(item.s),
-                                table:table
+                                table: table
                             }
                         });
                     }
@@ -676,14 +681,15 @@ var KGcreator_graph = (function() {
                                 label: label,
                                 shape: attrs.shape,
                                 color: attrs.color,
+                                font: (attrs.shape == "box" ? { color: "white" } : { color: attrs.color }),
                                 size: Lineage_whiteboard.defaultShapeSize,
                                 data: {
-                                    id: item.s,
+                                    id: item.o,
                                     label: label,
                                     fileName: table,
                                     type: attrs.type,
                                     role: getTripleLabelRole(item.o),
-                                    table:table
+                                    table: table
                                 }
                             });
                         }
@@ -697,6 +703,7 @@ var KGcreator_graph = (function() {
                                 from: sId,
                                 to: oId,
                                 label: label,
+                                font: { size: 12, ital: true, color: "brown" },
                                 // color: getNodeAttrs(item.o),
                                 arrows: {
                                     to: {
@@ -716,8 +723,8 @@ var KGcreator_graph = (function() {
                             visjsData.edges.push({
                                 id: edgeId,
                                 from: table,
-                                to: sId,
-                                label: label
+                                to: sId
+                                //  label: label
                             });
                         }
                     }
@@ -728,42 +735,35 @@ var KGcreator_graph = (function() {
         visjsData = self.addInterTableJoinsToVisjsData(KGcreator.currentConfig.currentDataSource.name, visjsData);
 
 
-      /*  $("#KGcreator_dialogDiv").dialog("open");
-        $("#KGcreator_dialogDiv").dialog("option", "title", " Mappings");
-        $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function() {*/
-          //  $("#KGcreator_resourceslinkingTab").load("modules/tools/KGcreator/html/detailedMappings.html", function() {
+        /*  $("#KGcreator_dialogDiv").dialog("open");
+          $("#KGcreator_dialogDiv").dialog("option", "title", " Mappings");
+          $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function() {*/
+        //  $("#KGcreator_resourceslinkingTab").load("modules/tools/KGcreator/html/detailedMappings.html", function() {
 
-            var options={
-                onclickFn: KGcreator_graph.onDetailedGraphNodeClick,
-            }
-
-                options.manipulation = {
-                    enabled: false,
+        var options = {
+            onclickFn: KGcreator_graph.onDetailedGraphNodeClick,
+            visjsOptions: {
+                manipulation: {
+                    enabled: true,
                     initiallyActive: true,
                     deleteNode: false,
                     deleteEdge: false,
-                    // editNode: false,
-                    // editEdge: false,
+                    editNode: false,
+                    editEdge: false,
 
                     addEdge: function(edgeData, callback) {
-                        self.onAddEdgeDetailledMappings(edgeData, callback);
+                        self.onAddEdgeDetailedMappings(edgeData, callback);
                     }
-                };
+                }
+            }
+        };
 
 
+        self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, options);
+        self.mappingVisjsGraph.draw();
+        GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas", false);
 
 
-
-
-            self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData,options);
-            self.mappingVisjsGraph.draw();
-            GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas", false);
-            var options = {
-                mode: "tree"
-            };
-
-            //  JSONEditor().setMode("tree");
-      //  });
     };
 
 
@@ -773,33 +773,53 @@ var KGcreator_graph = (function() {
         if (!node || !node.data) {
             return (self.currentGraphNode = null);
         }
-
-        if (node.data.role == "column") {
+        self.currentGraphNode = node;
+        if (event.ctrlKey && node.data.role == "column") {
             self.mappingVisjsGraph.network.addEdgeMode();
         } else {
             self.mappingVisjsGraph.network.disableEditMode();
+            if (node.data.role == "column") {
+                KGcreator.currentTreeNode = node;
+                KGcreator_bot.start(node, KGcreator_mappings.afterMappingsFn);
+            }
         }
 
-        self.currentGraphNode = node;
-        if (node.data.role == "column") {
-            KGcreator.currentTreeNode=node;
-            KGcreator_bot.start(node,KGcreator_mappings.afterMappingsFn )
-        }
+
     };
 
 
+    self.onAddEdgeDetailedMappings = function(edgeData, callback) {
 
-    self.onAddEdgeDetailledMappings = function(edgeData, callback) {
-        return;
-        var sourceNode =self.mappingVisjsGraph.data.nodes.get(edgeData.from);
+
+        var sourceNode = self.mappingVisjsGraph.data.nodes.get(edgeData.from);
         var targetNode = self.mappingVisjsGraph.data.nodes.get(edgeData.to);
-if (sourceNode.data && sourceNode.data.role == "column") {
+
+        var node = {
+            data: {
+                id: sourceNode.data.id,
+                table: sourceNode.data.table,
+                predicateObjectColumn: targetNode.data.id,
+                predicateObjectTable: targetNode.data.table
+            }
+        };
+
+
+        return KGcreator_bot.start(node);
+
+
+        if (sourceNode.data && sourceNode.data.role == "column") {
             if (sourceNode.data.table != targetNode.data.table) {
                 self.mappingVisjsGraph.network.disableEditMode();
 
+
                 var columns = KGcreator.currentConfig.currentDataSource.tables[sourceNode.data.table];
+                var virtualColumns = KGcreator.currentConfig.currentMappings[sourceNode.data.table].virtualColumns;
+                if (virtualColumns) {
+                    columns = columns.concat(virtualColumns);
+                }
+
                 SimpleListSelectorWidget.showDialog(
-                    null,
+                    { title: "Choose correponding column as join key in source table" },
                     function(callbackLoad) {
                         return callbackLoad(columns);
                     },
@@ -819,7 +839,6 @@ if (sourceNode.data && sourceNode.data.role == "column") {
             return null;
         }
     };
-
 
 
     self.toSVG = function() {

@@ -5,6 +5,24 @@ import antlr4 from 'antlr4';
 // This class defines a complete listener for a parse tree produced by OWL2ManchesterParser.
 export default class OWL2ManchesterListener extends antlr4.tree.ParseTreeListener {
 
+	// Enter a parse tree produced by OWL2ManchesterParser#comparisonOperator.
+	enterComparisonOperator(ctx) {
+	}
+
+	// Exit a parse tree produced by OWL2ManchesterParser#comparisonOperator.
+	exitComparisonOperator(ctx) {
+	}
+
+
+	// Enter a parse tree produced by OWL2ManchesterParser#prefixAxiom.
+	enterPrefixAxiom(ctx) {
+	}
+
+	// Exit a parse tree produced by OWL2ManchesterParser#prefixAxiom.
+	exitPrefixAxiom(ctx) {
+	}
+
+
 	// Enter a parse tree produced by OWL2ManchesterParser#classAxiom.
 	enterClassAxiom(ctx) {
 	}
@@ -23,12 +41,12 @@ export default class OWL2ManchesterListener extends antlr4.tree.ParseTreeListene
 	}
 
 
-	// Enter a parse tree produced by OWL2ManchesterParser#equivalentAxiom.
-	enterEquivalentAxiom(ctx) {
+	// Enter a parse tree produced by OWL2ManchesterParser#equivalentClassAxiom.
+	enterEquivalentClassAxiom(ctx) {
 	}
 
-	// Exit a parse tree produced by OWL2ManchesterParser#equivalentAxiom.
-	exitEquivalentAxiom(ctx) {
+	// Exit a parse tree produced by OWL2ManchesterParser#equivalentClassAxiom.
+	exitEquivalentClassAxiom(ctx) {
 	}
 
 
@@ -65,6 +83,78 @@ export default class OWL2ManchesterListener extends antlr4.tree.ParseTreeListene
 
 	// Exit a parse tree produced by OWL2ManchesterParser#negationAxiom.
 	exitNegationAxiom(ctx) {
+	}
+
+
+	// Enter a parse tree produced by OWL2ManchesterParser#propertyAxiom.
+	enterPropertyAxiom(ctx) {
+	}
+
+	// Exit a parse tree produced by OWL2ManchesterParser#propertyAxiom.
+	exitPropertyAxiom(ctx) {
+	}
+
+
+	// Enter a parse tree produced by OWL2ManchesterParser#objectpropertyaxiom.
+	enterObjectpropertyaxiom(ctx) {
+	}
+
+	// Exit a parse tree produced by OWL2ManchesterParser#objectpropertyaxiom.
+	exitObjectpropertyaxiom(ctx) {
+	}
+
+
+	// Enter a parse tree produced by OWL2ManchesterParser#classExpression.
+	enterClassExpression(ctx) {
+	}
+
+	// Exit a parse tree produced by OWL2ManchesterParser#classExpression.
+	exitClassExpression(ctx) {
+	}
+
+
+	// Enter a parse tree produced by OWL2ManchesterParser#individualAxiom.
+	enterIndividualAxiom(ctx) {
+	}
+
+	// Exit a parse tree produced by OWL2ManchesterParser#individualAxiom.
+	exitIndividualAxiom(ctx) {
+	}
+
+
+	// Enter a parse tree produced by OWL2ManchesterParser#typeSection.
+	enterTypeSection(ctx) {
+	}
+
+	// Exit a parse tree produced by OWL2ManchesterParser#typeSection.
+	exitTypeSection(ctx) {
+	}
+
+
+	// Enter a parse tree produced by OWL2ManchesterParser#factsSection.
+	enterFactsSection(ctx) {
+	}
+
+	// Exit a parse tree produced by OWL2ManchesterParser#factsSection.
+	exitFactsSection(ctx) {
+	}
+
+
+	// Enter a parse tree produced by OWL2ManchesterParser#propertySection.
+	enterPropertySection(ctx) {
+	}
+
+	// Exit a parse tree produced by OWL2ManchesterParser#propertySection.
+	exitPropertySection(ctx) {
+	}
+
+
+	// Enter a parse tree produced by OWL2ManchesterParser#v.
+	enterV(ctx) {
+	}
+
+	// Exit a parse tree produced by OWL2ManchesterParser#v.
+	exitV(ctx) {
 	}
 
 

@@ -52,6 +52,7 @@
     "dependencies": {
         "@elastic/elasticsearch": "^8.7.0",
         "@sentry/node": "^7.49.0",
+        "antlr4": "^4.13.1-patch-1",
         "async": "^3.2.4",
         "async-await-mutex-lock": "^1.0.10",
         "bcrypt": "^5.1.1",

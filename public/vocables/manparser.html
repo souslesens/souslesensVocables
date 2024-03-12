@@ -7,7 +7,7 @@
 </head>
 <body>
   <h1>OWL 2 Manchester Syntax Parser</h1>
-  <form action="/parse" method="post">
+  <form id="parserForm">
     <label for="owlInput">Enter OWL 2 Manchester Syntax:</label>
     <textarea id="owlInput" name="owlInput" rows="4" cols="50" required></textarea>
     <br>
@@ -15,3 +15,18 @@
   </form>
 </body>
 </html>
+
+<script type="module" src="js/external/antlr4/antlr4.web.mjs"></script>
+<script type="module" src="modules/bots/parsers/OWL2ManchesterParser.js"></script>
+<script src="modules/bots/parsers/OWL2ManchesterLexer.js"></script>
+
+<script>
+
+document.getElementById("parserForm").addEventListener("submit", function(event) {
+      event.preventDefault(); // Prevents the default form submission
+
+      console.log("Parsing OWL 2 Manchester Syntax...");
+
+});
+
+</script>

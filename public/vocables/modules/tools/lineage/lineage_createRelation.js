@@ -570,7 +570,22 @@ var Lineage_createRelation = (function () {
         ];
 
         Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
-            callback(err, { uri: subPropId });
+           var modelData={
+              properties:{[subPropId]: {
+                      id: subPropId,
+                      label: subPropertyLabel,
+                      inverseProp: null,
+                      superProp: superPropId
+                  }
+               }
+
+           }
+            OntologyModels.updateModel(source, modelData, {}, function (err, result) {
+                console.log(err || "ontologyModelCache updated");
+                callback(err, { uri: subPropId });
+            });
+
+
         });
     };
 

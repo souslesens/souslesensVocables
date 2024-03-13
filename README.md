@@ -256,6 +256,20 @@ SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
 
 Certain version need migration of data. See `CHANGELOG.md` before upgrading.
 
+To run migration scripts you need to use the command 
+
+
+```bash
+npm run migrate
+```
+at project root
+
+Under Windows need to use git bash to run this script
+```git bash
+cd project-root
+npm run migrate
+```
+
 ## Contribute to souslesensVocable
 
 To contribute to souslesensVocable, fork the repo and submit Pull Requests.

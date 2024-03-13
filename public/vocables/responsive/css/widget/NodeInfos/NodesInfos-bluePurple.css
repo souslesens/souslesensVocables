@@ -27,6 +27,7 @@ th, td{
     padding: 24px;
     background-color: @dark-background-color !important;
     border-radius: 14px;
+    max-height: 90vh;
     overflow: auto;
 }
 .detailsCellValue {
@@ -60,7 +61,6 @@ th, td{
     border-top-left-radius: 0px;
     overflow: unset;
     display: flex;
-    max-height: 550px;
 }
 .nodesInfosAdditionalInfos {
     background-color: @background-color !important;
@@ -69,11 +69,15 @@ th, td{
 }
 #nodeInfos_restrictionsDiv {
     .nodesInfosAdditionalInfos;
+    max-height: 55vh;
+    overflow: auto;
 }
 
 #nodeInfos_individualsDiv {
     .nodesInfosAdditionalInfos;
-    height: fit-content;
+    max-height: 20vh;
+    overflow: auto;
+    margin-top: 10px;
 }
 #nodesInfos_individual_button {
     .font-table;
@@ -94,6 +98,7 @@ th, td{
 }
 #nodeInfosWidget_tabsDiv {
     .nodesInfos-border;
+    max-height: 100%;
 }
 
 #sourceBrowser_addPropertyDiv {
@@ -199,20 +204,8 @@ a:visited.ui-button,
 .nodesInfos-iconsButtons:hover {
     background-color: inherit !important;
 }
-#nodeInfos_individualsDiv {
-    margin: 10px;
-}
-
-#nodeInfos_restrictionsDiv {
-    margin: 10px;
-    height: fit-content;
-}
 
 #nodeInfos_listsDiv {
     margin: 10px;
-    overflow: auto;
-}
-
-#mainDialogDiv {
-    max-height: 620px !important;
+    max-height: 90dvh;
 }

@@ -34,14 +34,15 @@ var KGcreator_mappings = (function () {
 return alert("select a field (column)");
 }*/
 
-        if (!columnNode.data.table) {
+        if (false && !columnNode.data.table) {
             alert("Select a column not a Table");
             return;
         }
+        $("#smallDialogDiv").parent().css("z-index", 100);
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
         $("#smallDialogDiv").css("height", "700px");
-        $("#smallDialogDiv").parent().css("left", "10%");
+        //$("#smallDialogDiv").parent().css("left", "10%");
         /*$("#smallDialogDiv").css('left','10%');*/
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
             $("#LinkColumn_rightPanel").show();
@@ -58,9 +59,9 @@ return alert("select a field (column)");
                     $("#smallDialogDiv").find("#editPredicate_savePredicateButton").css("display", "none");
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
-                        height: 600,
-                        width: 800,
-                        modal: true,
+                        //  height: 600,
+                        //  width: 800,
+                        modal: false,
                     });
                     var html =
                         "<div>isBlankNode<input type='checkbox' id='LinkColumn_isObjectBlankNodeCBX' />" +
@@ -95,8 +96,8 @@ return alert("select a field (column)");
                 if (existingTriples[columnNode.data.id]) {
                     self.updateColumnTriplesEditor(existingTriples[columnNode.data.id]);
                 }
-                if (existingTriples["$_" + columnNode.data.id]) {
-                    self.updateColumnTriplesEditor(existingTriples["$_" + columnNode.data.id]);
+                if (existingTriples[columnNode.data.id + "_$"]) {
+                    self.updateColumnTriplesEditor(existingTriples[columnNode.data.id + "_$"]);
                 }
 
                 if (addColumnClassType && KGcreator_graph.currentGraphNode.data.id) {
@@ -129,7 +130,7 @@ return alert("select a field (column)");
             if (value == "_selectedColumn") {
                 $("#LinkColumn_subjectInput").val(columnNode.data.id);
             } else if (value == "_virtualColumn") {
-                $("#LinkColumn_subjectInput").val("$_" + columnNode.data.id);
+                $("#LinkColumn_subjectInput").val(columnNode.data.id + "_$");
             } else {
                 $("#LinkColumn_subjectInput").val(value);
             }
@@ -236,10 +237,10 @@ return alert("select a field (column)");
             tripleObj.lookup_o = objectLookupName;
         }
         if (isSubjectBlankNode) {
-            tripleObj.s = "$_" + subject;
+            tripleObj.s = subject + "_$";
         }
         if (isObjectBlankNode) {
-            tripleObj.o = "$_" + object;
+            tripleObj.o = object + "_$";
         }
         if (isRestrictionCBX) {
             tripleObj.isRestriction = true;
@@ -373,8 +374,7 @@ tripleObj.objectIsSpecificUri = true;
 
         //concat new triples from editor with other mappings in table
         KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels.forEach(function (triple) {
-            if (triple.s.replace("$_", "") == columnNode.data.id) {
-                //include "$_ blanknode
+            if (triple.s.replace("_$", "") == columnNode.data.id) {
                 return;
             }
             newColumnMappings.push(triple);
@@ -383,7 +383,6 @@ tripleObj.objectIsSpecificUri = true;
         KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels = newColumnMappings;
         KGcreator.saveDataSourceMappings();
 
-        JstreeWidget.setSelectedNodeStyle({ color: "#0067bb" });
         JstreeWidget.setSelectedNodeStyle({ color: "#0067bb" });
 
         if (self.currentGraphNode) {
@@ -446,7 +445,9 @@ tripleObj.objectIsSpecificUri = true;
             var inverseRestrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, toClass, fromClass);
 
             var targetColumnInTable = columnToData.columnName;
-            if (foreignKey) targetColumnInTable = foreignKey;
+            if (foreignKey) {
+                targetColumnInTable = foreignKey;
+            }
 
             var allConstraints = {};
             for (var key in constraints) {
@@ -473,12 +474,16 @@ tripleObj.objectIsSpecificUri = true;
                     },
 
                     function (selectedProperty) {
-                        if (!selectedProperty) return;
+                        if (!selectedProperty) {
+                            return;
+                        }
 
                         //write the join between tables if foreignKey
                         if (foreignKey) {
                             self.joinColumns(columnFromData, columnToData, foreignKey, function (err, result) {
-                                if (err) return callback(err);
+                                if (err) {
+                                    return callback(err);
+                                }
                             });
                         }
 
@@ -519,20 +524,12 @@ tripleObj.objectIsSpecificUri = true;
         });
     };
 
-    self.showTableMappings = function (node) {
-        KGcreator_graph.drawDetailedMappings(node.data.id);
-    };
-
-    self.showSourceMappings = function (node) {
-        KGcreator_graph.drawDetailedMappings(null);
-    };
-
     self.showLookupsDialog = function (node) {
         PopupMenuWidget.hidePopup();
         self.currentSlsvSource = KGcreator.currentSlsvSource;
         var table = node.data.id;
         $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").parent().css("left", "10%");
+        //$("#smallDialogDiv").parent().css("left", "10%");
         $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/lookupDialog.html", function () {
@@ -554,7 +551,7 @@ tripleObj.objectIsSpecificUri = true;
         var table = node.data.id;
         self.currentTable = table;
         $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").parent().css("left", "10%");
+        //$("#smallDialogDiv").parent().css("left", "10%");
         $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/transformDialog.html", function () {
@@ -562,6 +559,12 @@ tripleObj.objectIsSpecificUri = true;
             KGcreator.currentConfig.currentDataSource.tables[table].forEach(function (column) {
                 columns.push(column);
             });
+
+            var virtualColumns = KGcreator.currentConfig.currentMappings[table].virtualColumns;
+            if (virtualColumns) {
+                columns = virtualColumns.concat(columns);
+            }
+
             common.fillSelectOptions("KGcreator_transformColumnSelect", columns, true);
 
             var transforms = KGcreator.currentConfig.currentMappings[table].transform;
@@ -569,8 +572,56 @@ tripleObj.objectIsSpecificUri = true;
                 transforms = {};
             }
             self.transformJsonEditor = new JsonEditor("#KGcreator_transformJsonDisplay", {});
+
             self.transformJsonEditor.load(transforms);
+            //   $(".json-editor-blackbord *").css("color","#fff")
         });
+    };
+
+    self.showTableMappings = function (table) {
+        KGcreator_graph.drawDetailedMappings(table);
+        self.showMappingsInEditor(table);
+    };
+
+    self.showDataSourceMappings = function (node) {
+        KGcreator_graph.drawDetailedMappings(null);
+        self.showMappingsInEditor(null);
+    };
+
+    self.showMappingsInEditor = function (table) {
+        if (!KGcreator.currentConfig.currentMappings) {
+            return alert("no mappings selected");
+        }
+        var json = {};
+        if (table) {
+            var tableMappings = KGcreator.currentConfig.currentMappings[table];
+            json = { [table]: tableMappings };
+            self.currentEditingTable = table;
+        } else {
+            json = KGcreator.currentConfig.currentMappings;
+            self.currentEditingTable = null;
+        }
+
+        self.jsonEditor = new JsonEditor("#KGcreator_mappingsEditor", json);
+        $("#KGcreator_mappingsEditor").on("mouseup", function () {
+            var selection = KGcreator.getTextSelection();
+            if (selection) {
+                self.currentMappingsSelection = selection;
+            }
+        });
+    };
+
+    self.saveEditorMappings = function () {
+        var mappings = self.jsonEditor.get();
+        if (self.currentEditingTable) {
+            KGcreator_mappings.saveTableMappings(self.currentEditingTable, mappings);
+        } else {
+            KGcreator.saveDataSourceMappings();
+        }
+    };
+
+    self.afterMappingsFn = function () {
+        KGcreator_mappings.showTableMappings(node.id);
     };
 
     return self;

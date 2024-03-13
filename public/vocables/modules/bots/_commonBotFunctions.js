@@ -1,4 +1,4 @@
-import BotEngine from "./botEngine.js";
+import _botEngine from "./_botEngine.js";
 import KGcreator from "../tools/KGcreator/KGcreator.js";
 import OntologyModels from "../shared/ontologyModels.js";
 
@@ -21,7 +21,7 @@ var CommonBotFunctions = (function () {
         var sources = [sourceLabel];
         if (!Config.sources[sourceLabel]) {
             alert("Source not recognized");
-            return BotEngine.end();
+            return _botEngine.end();
         }
         if (Config.sources[sourceLabel].imports) {
             sources = sources.concat(Config.sources[sourceLabel].imports);
@@ -53,10 +53,10 @@ var CommonBotFunctions = (function () {
             }
         }
         if (vocabs.length == 0) {
-            return BotEngine.previousStep("no values found, try another option");
+            return _botEngine.previousStep("no values found, try another option");
         }
 
-        BotEngine.showList(vocabs, varToFill);
+        _botEngine.showList(vocabs, varToFill);
     };
 
     self.listVocabClasses = function (vocab, varToFill, includeOwlThing, classes) {
@@ -78,7 +78,7 @@ var CommonBotFunctions = (function () {
                 classes.splice(0, 0, { id: "owl:Thing", label: "owl:Thing" });
             }
 
-            BotEngine.showList(classes, varToFill);
+            _botEngine.showList(classes, varToFill);
         });
     };
 
@@ -92,10 +92,10 @@ var CommonBotFunctions = (function () {
                 props.push({ id: prop.id, label: prop.label });
             }
             if (props.length == 0) {
-                return BotEngine.previousStep("no values found, try another option");
+                return _botEngine.previousStep("no values found, try another option");
             }
             self.sortList(props);
-            BotEngine.showList(props, varToFill);
+            _botEngine.showList(props, varToFill);
         });
     };
 
@@ -120,10 +120,10 @@ var CommonBotFunctions = (function () {
             },
             function (err) {
                 if (props.length == 0) {
-                    return BotEngine.previousStep("no values found, try another option");
+                    return _botEngine.previousStep("no values found, try another option");
                 }
                 self.sortList(props);
-                BotEngine.showList(props, varToFill);
+                _botEngine.showList(props, varToFill);
             }
         );
     };

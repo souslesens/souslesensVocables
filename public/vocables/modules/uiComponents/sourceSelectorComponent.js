@@ -30,6 +30,7 @@ import "./js/basicComponents.js";
  */
 
 class sourceSelector extends LitElement {
+    /*
     render() {
         return html`
             <div id="sourceSelector" style="margin-bottom: 10px; width: auto; min-height: 0px; max-height: none; height: 680px">
@@ -48,7 +49,7 @@ class sourceSelector extends LitElement {
             </div>
         `;
     }
-
+    */
     _validateButtonFn(e) {
         SourceSelectorWidget.okButtonValidateFn();
     }

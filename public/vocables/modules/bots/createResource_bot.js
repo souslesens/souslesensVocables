@@ -1,11 +1,11 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import KGquery from "../tools/KGquery/KGquery.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
-import BotEngine from "./botEngine.js";
+import _botEngine from "./_botEngine.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import AxiomsEditor from "../tools/lineage/axiomsEditor.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
-import CommonBotFunctions from "./commonBotFunctions.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 
 var CreateResource_bot = (function () {
@@ -13,10 +13,10 @@ var CreateResource_bot = (function () {
     self.title = "Create Resource";
 
     self.start = function () {
-        BotEngine.init(CreateResource_bot, self.workflow, null, function () {
+        _botEngine.init(CreateResource_bot, self.workflow, null, function () {
             self.source = Lineage_sources.activeSource;
             self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         });
     };
 
@@ -69,7 +69,7 @@ var CreateResource_bot = (function () {
                 { id: "ImportClass", label: "Import Class" },
                 { id: "ImportSource", label: "Add import source " },
             ];
-            BotEngine.showList(choices, "resourceType");
+            _botEngine.showList(choices, "resourceType");
         },
 
         listVocabsFn: function () {
@@ -77,7 +77,7 @@ var CreateResource_bot = (function () {
         },
 
         promptResourceLabelFn: function () {
-            BotEngine.promptValue("resource label ", "resourceLabel");
+            _botEngine.promptValue("resource label ", "resourceLabel");
             /*  self.params.resourceLabel = prompt("resource label ");
             BotEngine.writeCompletedHtml(self.params.resourceLabel);
             BotEngine.nextStep();*/
@@ -92,23 +92,23 @@ var CreateResource_bot = (function () {
         axiomaticDefinitionFn: function () {
             AxiomsEditor.init(self.params.resourceId, function (err, manchesterText) {
                 self.params.manchesterText = manchesterText;
-                BotEngine.nextStep();
+                _botEngine.nextStep();
             });
         },
 
         listImportsFn: function () {
             var choices = Object.keys(Config.sources);
             choices.sort();
-            BotEngine.showList(choices, "importSource");
+            _botEngine.showList(choices, "importSource");
         },
         saveImportSource: function () {
             var importSource = self.params.importSource;
             if (!importSource) {
                 alert("no source selected for import");
-                return BotEngine.reset();
+                return _botEngine.reset();
             }
             Lineage_createRelation.setNewImport(self.params.source, importSource, function (err, result) {
-                BotEngine.nextStep();
+                _botEngine.nextStep();
             });
         },
 
@@ -119,17 +119,17 @@ var CreateResource_bot = (function () {
                 var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
                 Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
                     if (err) {
-                        BotEngine.abort(err.responseText);
+                        _botEngine.abort(err.responseText);
                     }
                     self.params.resourceId = resourceId;
-                    BotEngine.nextStep();
+                    _botEngine.nextStep();
                 });
             }
         },
 
         editResourceFn: function () {
             NodeInfosWidget.showNodeInfos(self.params.source, self.params.resourceId, "mainDialogDiv");
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         },
         drawResourceFn: function () {
             var nodeData = {
@@ -140,7 +140,7 @@ var CreateResource_bot = (function () {
                 },
             };
             Lineage_whiteboard.drawNodesAndParents(nodeData, 1, { legendType: "individualClasses" });
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         },
         newResourceFn: function () {
             self.start();

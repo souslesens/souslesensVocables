@@ -17,21 +17,26 @@ var Lineage_r = (function () {
     self.oldExportTable = null;
     self.MoreActionsShow = false;
     self.MoreOptionsShow = true;
-
+    self.firstLoad = true;
     self.onLoaded = function () {
-        self.controller = Lineage_whiteboard;
-        PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
-        SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
-        //To Table
-        self.oldExportTable = Export.exportTreeToDataTable;
-        Export.exportTreeToDataTable = self.ExportTableDialog;
-        //Nodes Infos overcharge
-        //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
-        //SHowHideButtons overcharge
-        Lineage_sources.showHideEditButtons = self.showHideEditButtons;
-        //AddEdge overcharge
-        self.oldAddEdgeDialog = Lineage_createRelation.showAddEdgeFromGraphDialog;
-        Lineage_createRelation.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
+        if (self.firstLoad) {
+            self.firstLoad = false;
+            // Overcharge only one time at first lineage load
+            self.controller = Lineage_whiteboard;
+            PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
+            SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
+            //To Table
+            self.oldExportTable = Export.exportTreeToDataTable;
+            Export.exportTreeToDataTable = self.ExportTableDialog;
+            //Nodes Infos overcharge
+            //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
+            //SHowHideButtons overcharge
+            Lineage_sources.showHideEditButtons = self.showHideEditButtons;
+            //AddEdge overcharge
+            self.oldAddEdgeDialog = Lineage_createRelation.showAddEdgeFromGraphDialog;
+            Lineage_createRelation.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
+        }
+
         ResponsiveUI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").load("./responsive/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
@@ -49,7 +54,9 @@ var Lineage_r = (function () {
             }
             $("#lateralPanelDiv").load("./responsive/lineage/html/index.html", function () {
                 self.initWhiteboardTab();
-                Lineage_whiteboard.initUI();
+                if (Object.keys(Lineage_sources.loadedSources).length == 0) {
+                    Lineage_whiteboard.initUI();
+                }
             });
         });
     };
@@ -166,7 +173,7 @@ var Lineage_r = (function () {
     };
     self.showQueryDialog = function () {
         //ResponsiveUI.openMainDialogDivForDialogs();
-        $("#mainDialogDiv").parent().css("top", "10%");
+        //$("#mainDialogDiv").parent().css("top", "10%");
         //  $("#mainDialogDiv").parent().css("left", "20%");
         $("#mainDialogDiv")
             .parent()
@@ -186,7 +193,7 @@ var Lineage_r = (function () {
 
     self.NodesInfosResponsiveDialog = function (sourceLabel, divId, options, callback) {
         ResponsiveUI.openDialogDiv(divId);
-        $("#mainDialogDiv").parent().css("top", "5%");
+        //$("#mainDialogDiv").parent().css("top", "5%");
         //  $("#mainDialogDiv").parent().css("left", "35%");
         $("#" + divId)
             .parent()
@@ -195,7 +202,7 @@ var Lineage_r = (function () {
             });
     };
     self.responsiveAddEdgeDialog = function (edgeData, callback) {
-        ResponsiveUI.openDialogDiv("smallDialogDiv");
+        //ResponsiveUI.openDialogDiv("smallDialogDiv");
         $("#smallDialogDiv")
             .parent()
             .show("fast", function () {

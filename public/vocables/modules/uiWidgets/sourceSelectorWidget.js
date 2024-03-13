@@ -23,25 +23,9 @@ var SourceSelectorWidget = (function () {
         var jsTreeOptions = options;
         jsTreeOptions.selectTreeNodeFn = selectTreeNodeFn;
         MainController.UI.showHideRightPanel("hide");
-        /*$("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
-            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
-            $("#mainDialogDiv")
-                .parent()
-                .find(".ui-dialog-titlebar-close")
-                .on("click", function () {
-                    $("#mainDialogDiv").parent().hide();
-                });
 
-            if (resetAll) {
-                Lineage_sources.loadedSources = {};
-                var onSourceSelect = ResponsiveUI.onSourceSelect;
-            } else {
-                var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
-            }
-            SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
-        });*/
-        $("#" + targetDivId).load("./responsive/lineage/html/SourceDiv.html", function (err) {
-            self.loadSourcesTreeDiv("sourcesSelectorDiv", jsTreeOptions);
+        $("#" + targetDivId).load("./responsive/widget/html/sourceSelector.html", function (err) {
+            self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
             $("#sourceSelector_searchInput").focus();
             //  $("#sourceSelector_SearchSourceInput");
             $("#sourceSelector_validateButton").bind("click", function () {
@@ -276,6 +260,7 @@ var SourceSelectorWidget = (function () {
     };
 
     self.getCheckedSources = function () {
+        var vv = $("#sourceSelector_jstreeDiv").jstree();
         var checkedNodes = $("#sourceSelector_jstreeDiv").jstree().get_checked();
         var sources = [];
         checkedNodes.forEach(function (item) {

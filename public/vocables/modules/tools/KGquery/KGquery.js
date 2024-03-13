@@ -49,8 +49,8 @@ var KGquery = (function () {
     };
 
     self.showSourcesDialog = function (forceDialog) {
-        if (!forceDialog && Config.tools["KGquery"].urlParam_source) {
-            self.currentSource = Config.tools["KGquery"].urlParam_source;
+        if (!forceDialog && Config.userTools["KGquery"].urlParam_source) {
+            self.currentSource = Config.userTools["KGquery"].urlParam_source;
             self.init();
             return;
         }
@@ -201,12 +201,12 @@ var KGquery = (function () {
             varName: self.getVarName(aClass, true),
         };
 
-        KGquery_filter_bot.start(currentFilterQuery, function (err, result) {
+        KGquery_filter_bot.start(aClass.data, currentFilterQuery, function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
             self.querySets.sets[classSetIndex].classFiltersMap[classDivId] = { class: aClass, filter: result.filter };
-            $("#" + classDivId + "_filter").append(result.filterLabel || result.filter);
+            $("#" + classDivId + "_filter").text(result.filterLabel || result.filter);
         });
     };
 
@@ -291,7 +291,7 @@ return alert("missing target node in  path");
 
             var predicateStr = "";
             var filterStr = "";
-            var optionalStrs = "";
+            var annotationPredicatesStrs = "";
 
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
                 if (!queryElement.fromNode || !queryElement.toNode) {
@@ -315,7 +315,7 @@ return alert("missing target node in  path");
                     filterStr += " " + objectVarName + "  rdf:type <" + objectUri + ">.";
                 }
 
-                var transitionPredicate = "";
+                var filterClassLabels = {};
 
                 queryElement.paths.forEach(function (pathItem, pathIndex) {
                     var startVarName;
@@ -339,6 +339,7 @@ return alert("missing target node in  path");
 
                 for (var key in querySet.classFiltersMap) {
                     filterStr += querySet.classFiltersMap[key].filter + " \n";
+                    filterClassLabels["?" + querySet.classFiltersMap[key].class.label] = 1;
                 }
 
                 function addToStringIfNotExists(str, text) {
@@ -349,33 +350,62 @@ return alert("missing target node in  path");
                     }
                 }
 
-                var optionalStr = "";
+                var annotationPredicatesStr = "";
                 if (queryElement.fromNode.data.annotationProperties) {
                     queryElement.fromNode.data.annotationProperties.forEach(function (property) {
-                        optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " <" + property.id + "> " + subjectVarName + "_" + property.label + "}\n", optionalStr);
-                        optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " rdf:value " + subjectVarName + "_value}\n", optionalStr);
+                        var optionalStr = " OPTIONAL ";
+                        if (filterClassLabels[subjectVarName]) {
+                            // if( filterStr.indexOf(subjectVarName)>-1){
+                            optionalStr = "";
+                        }
+
+                        annotationPredicatesStr = addToStringIfNotExists(
+                            optionalStr + " {" + subjectVarName + " <" + property.id + "> " + subjectVarName + "_" + property.label + "}\n",
+                            annotationPredicatesStr
+                        );
+                        annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdf:value " + subjectVarName + "_value}\n", annotationPredicatesStr);
                     });
                 } else {
-                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " owl:hasValue " + subjectVarName + "Value}\n", optionalStr);
-                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", optionalStr);
+                    var optionalStr = " OPTIONAL ";
+                    if (filterClassLabels[subjectVarName]) {
+                        optionalStr = "";
+                    }
+                    annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdf:value " + subjectVarName + "Value}\n", annotationPredicatesStr);
+                    annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", annotationPredicatesStr);
                 }
+
                 if (queryElement.toNode.data.annotationProperties) {
                     queryElement.toNode.data.annotationProperties.forEach(function (property) {
-                        optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " <" + property.id + "> " + objectVarName + "_" + property.label + "}\n", optionalStr);
-                        optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " rdf:value " + objectVarName + "_value}\n", optionalStr);
+                        var optionalStr = " OPTIONAL ";
+                        if (filterClassLabels[objectVarName]) {
+                            optionalStr = "";
+                        }
+                        annotationPredicatesStr = addToStringIfNotExists(
+                            optionalStr + "  {" + objectVarName + " <" + property.id + "> " + objectVarName + "_" + property.label + "}\n",
+                            annotationPredicatesStr
+                        );
+                        annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdf:value " + objectVarName + "_value}\n", annotationPredicatesStr);
                     });
                 } else {
-                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " owl:hasValue " + objectVarName + "Value}\n", optionalStr);
-                    optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " rdfs:label " + objectVarName + "Label}\n", optionalStr);
+                    var optionalStr = " OPTIONAL ";
+                    if (filterClassLabels[objectVarName]) {
+                        optionalStr = "";
+                    }
+                    annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdf:value " + objectVarName + "Value}\n", annotationPredicatesStr);
+                    annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdfs:label " + objectVarName + "Label}\n", annotationPredicatesStr);
                 }
-                optionalStrs += " \n" + optionalStr;
+                annotationPredicatesStrs += " \n" + annotationPredicatesStr;
             });
 
-            whereStr += "{" + predicateStr + "\n" + "" + "\n" + filterStr + "\n" + optionalStrs + "}";
+            whereStr += "{" + predicateStr + "\n" + "" + "\n" + filterStr + "\n" + annotationPredicatesStrs + "}";
         });
 
         var fromStr = Sparql_common.getFromStr(self.currentSource);
-        var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
 
         query += " Select " + selectStr + "  " + fromStr + " where {" + whereStr + "}";
 
@@ -527,6 +557,7 @@ self.querySets.sets.forEach(function (querySet) {
             //   KGquery_graph.drawVisjsModel("saved")
             $("#KGquery_pathsDiv").html("");
             self.addQuerySet();
+            //Hide Union and minus showToClaude
             $("#KGquery_SetsControlsDiv").hide();
         }
     };

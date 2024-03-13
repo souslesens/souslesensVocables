@@ -685,12 +685,14 @@ var OntologyModels = (function () {
                     var allRanges = {};
 
                     startNodeIds.forEach(function (startNodeId) {
+                        startNodeAncestorIds.push(startNodeId);
                         hierarchies[startNodeId].forEach(function (item) {
                             startNodeAncestorIds.push(item.superClass.value);
                         });
                     });
                     endNodeIds.forEach(function (endNodeId) {
                         if (endNodeId) {
+                            endNodeAncestorIds.push(endNodeId);
                             hierarchies[endNodeId].forEach(function (item, startNodeIndex) {
                                 endNodeAncestorIds.push(item.superClass.value);
                             });
@@ -701,40 +703,54 @@ var OntologyModels = (function () {
                         if (!Config.ontologiesVocabularyModels[_source]) {
                             return;
                         }
-                        var sourceConstraints = Config.ontologiesVocabularyModels[_source].constraints;
-                        for (var property in sourceConstraints) {
-                            var constraint = sourceConstraints[property];
-                            constraint.source = _source;
-                            var domainOK = false;
-                            if (!allConstraints[property]) {
-                                allConstraints[property] = constraint;
 
-                                if (constraint.domain) {
-                                    if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
-                                        if (!constraint.range || constraint.range.indexOf("http") < 0 || endNodeIds.length == 0) {
-                                            propertiesMatchingStartNode.push(property);
-                                        } else {
-                                            domainOK = true;
-                                        }
-                                    }
-                                }
-                                if (constraint.range) {
-                                    if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
-                                        if (domainOK) {
-                                            propertiesMatchingBoth.push(property);
-                                        } else {
-                                            if (!constraint.domain || constraint.domain.indexOf("http") < 0) {
-                                                propertiesMatchingEndNode.push(property);
+                        //merge constraints( range/domain) and restrictions
+                        var sourceConstraintsAndRestrictions = Config.ontologiesVocabularyModels[_source].restrictions;
+                        for (var prop in Config.ontologiesVocabularyModels[_source].constraints) {
+                            var constraint = Config.ontologiesVocabularyModels[_source].constraints[prop];
+                            if (!sourceConstraintsAndRestrictions[prop]) {
+                                sourceConstraintsAndRestrictions[prop] = [constraint];
+                            } else {
+                                sourceConstraintsAndRestrictions[prop].push(constraint);
+                            }
+                        }
+
+                        for (var property in sourceConstraintsAndRestrictions) {
+                            if (property == "http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality") var x = 3;
+
+                            sourceConstraintsAndRestrictions[property].forEach(function (constraint) {
+                                constraint.source = _source;
+                                var domainOK = false;
+                                if (!allConstraints[property]) {
+                                    allConstraints[property] = constraint;
+
+                                    if (constraint.domain) {
+                                        if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
+                                            if (!constraint.range || constraint.range.indexOf("http") < 0 || endNodeIds.length == 0) {
+                                                propertiesMatchingStartNode.push(property);
+                                            } else {
+                                                domainOK = true;
                                             }
                                         }
                                     }
+                                    if (constraint.range) {
+                                        if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
+                                            if (domainOK) {
+                                                propertiesMatchingBoth.push(property);
+                                            } else {
+                                                if (!constraint.domain || constraint.domain.indexOf("http") < 0) {
+                                                    propertiesMatchingEndNode.push(property);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (!constraint.domain && !constraint.range) {
+                                        noConstaintsArray.push(property);
+                                    }
+                                } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
+                                    duplicateProps.push(property + "_" + allConstraints[property].source + "-----" + constraint.source);
                                 }
-                                if (!constraint.domain && !constraint.range) {
-                                    noConstaintsArray.push(property);
-                                }
-                            } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
-                                duplicateProps.push(property + "_" + allConstraints[property].source + "-----" + constraint.source);
-                            }
+                            });
                         }
                     });
 
@@ -768,11 +784,6 @@ var OntologyModels = (function () {
                     propertiesMatchingEndNode.forEach(function (propId) {
                         recurse(propId);
                     });
-
-                    /*   validProperties = propertiesMatchingBoth;
-validProperties = common.array.union(validProperties, propertiesMatchingStartNode);
-validProperties = common.array.union(validProperties, propertiesMatchingEndNode);
-validProperties = common.array.union(validProperties, noConstaintsArray);*/
 
                     validConstraints = { both: {}, domain: {}, range: {}, noConstraints: {} };
 
@@ -839,65 +850,6 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
             });
         }
         return restrictions;
-    };
-
-    self.getInferredModelOld = function (source, options, callback) {
-        if (!options) {
-            options = {};
-        }
-
-        var filterStr = options.filter || "";
-
-        {
-            var sourceGraphUri = Config.sources[source].graphUri;
-            var sourceGraphUriFrom = Sparql_common.getFromStr(source, true, true);
-            var importGraphUriFrom = Sparql_common.getFromStr(source, true, false);
-
-            var query =
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "      SELECT   distinct ?prop ?sClass  ?oClass ?propLabel ?sClassLabel ?oClassLabel ?sparent ?oparent  ?sparentLabel ?oparentLabel \n" +
-                sourceGraphUriFrom +
-                " " +
-                importGraphUriFrom +
-                "  \n" +
-                " WHERE {";
-
-            query +=
-                "      graph ?g2{\n" +
-                "    ?sparent rdf:type ?stype filter (?stype in (owl:Class)) \n" +
-                " optional { ?sparent rdfs:label ?sparentLabel}\n" +
-                "    \n" +
-                "  }\n" +
-                "  graph ?g3{\n" +
-                "      ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
-                " optional { ?oparent rdfs:label ?oparentLabel}\n" +
-                "  }\n" +
-                "   graph <" +
-                sourceGraphUri +
-                ">  {\n" +
-                "    ?s ?prop ?o.\n" +
-                "     ?s rdf:type+ ?sparent.  \n" +
-                "       ?o rdf:type+ ?oparent.  \n" +
-                filterStr +
-                "  }\n" +
-                "    graph  ?g{\n" +
-                "     \n" +
-                "        ?prop  rdf:type  owl:ObjectProperty. optional{?prop rdfs:label ?propLabel} }\n" +
-                "  } LIMIT 10000";
-
-            let url = Config.sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
-
-                //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
-                return callback(null, result.results.bindings);
-            });
-        }
     };
 
     self.getInferredModel = function (source, options, callback) {
@@ -974,7 +926,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
         if (!sourceGraphUri) {
             return callback("source " + source + " not declared");
         }
-        var sourceGraphUriFrom = Sparql_common.getFromStr(source, false, true);
+        var sourceGraphUriFrom = Sparql_common.getFromStr(source, false, false);
         var genericVocabsGraphUriFrom = "";
         for (var vocab in Config.basicVocabularies) {
             genericVocabsGraphUriFrom += " " + Sparql_common.getFromStr(vocab, false, false);
@@ -1005,8 +957,35 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
             ")\n" +
             "  }\n" +
             "}";
+
+        var importGraphUriFrom = Sparql_common.getFromStr(source, false, false);
+
+        var queryNew =
+            "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT   distinct ?class ?prop  ?datatype  " +
+            sourceGraphUriFrom +
+            " " +
+            genericVocabsGraphUriFrom +
+            "  where {\n" +
+            "  { ?s rdf:type ?class. ?class rdf:type owl:Class .?class rdfs:label ?classLabel. filter (?class!=(rdfs:Class))\n" +
+            "  \n" +
+            "    \n" +
+            "    ?prop rdfs:label ?propLabel. \n" +
+            "  \n" +
+            "  }\n" +
+            " \n" +
+            " {\n" +
+            "   ?s ?prop ?o.\n" +
+            "      bind ( datatype(?o) as ?datatype )\n" +
+            "    ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#DatatypeProperty>,rdf:Property,owl:AnnotationProperty)&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>))\n" +
+            "  }\n" +
+            "} limit 100";
+
         let url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function (err, result) {
             if (err) {
                 return callback(err);
             }

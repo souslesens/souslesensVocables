@@ -11,7 +11,7 @@ var Lineage_similars = (function () {
 
     self.showDialog = function () {
         $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").parent().css("left", "30%");
+        //$("#smallDialogDiv").parent().css("left", "30%");
         $("#smallDialogDiv").dialog("option", "title", "Similars");
         $("#smallDialogDiv").load("snippets/lineage/lineageSimilarsDialog.html", function () {
             self.mode = "whiteboard";
@@ -226,7 +226,7 @@ var Lineage_similars = (function () {
             });
         });
 
-        if (output == "graph") {
+        if (true || output == "graph") {
             var visjsData = { nodes: [], edges: [] };
             commonNodes.forEach(function (item) {
                 var edgeId = item.fromNode.id + "_" + item.toNode.id;

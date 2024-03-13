@@ -6,54 +6,45 @@ import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
 import Lineage_r from "./lineage/lineage_r.js";
 
 import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
+import KGcreator_r from "./KGcreator/Kgcreator_r.js";
+import MainController from "../modules/shared/mainController.js";
 
 var ResponsiveUI = (function () {
     var self = {};
     self.source = null;
-    self.mainDialogDiv = null;
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
     self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
     self.smartPhoneScreen = null;
+    //Etablish the resizing, load select bar tools --> Keep here
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
-        //self.setSlsvCssClasses();
-        //your remaining code
 
-        var tools = [];
-
-        for (var key in Config.tools) {
-            if (Config.tools_available.indexOf(key) > -1) {
-                if ((Config.tools[key].label == "ConfigEditor" || Config.tools[key].label == "Admin") && authentication.currentUser.groupes.indexOf("admin") === -1) {
-                    continue;
-                }
-                if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1) {
-                } else {
-                    tools.push(key);
-                }
-            }
-        }
-        tools.forEach((item, index) => {
+        // Config.userTools.forEach((item, index) => {
+        for (var item in Config.userTools) {
             var logoTool = `<div style='height:35px;width:37px;' class='${item}-logo' ></div>`;
-
             var strTool = `<div class='Lineage_PopUpStyleDiv' style='display:flex;flex-direction:row;align-items:center;' >${logoTool}<div  value="${item}">${item}</div></div>`;
 
             $("#toolsSelect").append(strTool);
-        });
+        }
 
         window.addEventListener(
             "resize",
             function (event) {
                 self.resetWindowHeight();
+                if (self.currentTool == "KGcreator") {
+                    KGcreator_r.ResetRunMappingTabWidth();
+                }
             },
             true
         );
 
         self.themeList();
-        self.replaceFile(BotEngine, BotEngineResponsive);
+        //self.replaceFile(BotEngine, BotEngineResponsive);
         ResponsiveUI.resetWindowHeight();
     };
+    // keep here
     self.initMenuBar = function (callback) {
         $("#ChangeSourceButton").show();
         $("#index_topContolPanel").show();
@@ -66,7 +57,7 @@ var ResponsiveUI = (function () {
             callback();
         });
     };
-
+    // Keep Here
     self.resetWindowHeight = function () {
         var MenuBarHeight = $("#MenuBar").height();
         var LateralPannelWidth = $("#lateralPanelDiv").width();
@@ -81,7 +72,7 @@ var ResponsiveUI = (function () {
             }
             self.smartPhoneScreen = false;
 
-            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth);
+            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 10);
             $("#lateralPanelDiv").css("width", LateralPannelWidth);
         }
 
@@ -89,6 +80,7 @@ var ResponsiveUI = (function () {
         //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
+    // To suppress
     self.replaceFile = function (file1, file2) {
         Object.keys(file1).forEach((key) => {
             if (file2[key]) {
@@ -96,7 +88,7 @@ var ResponsiveUI = (function () {
             }
         });
     };
-
+    //  MainController --> onToolSelect.initTool   when click on a button of a tool
     self.onToolSelect = function (toolId, event) {
         if (event) {
             var clickedElement = event.target;
@@ -115,8 +107,8 @@ var ResponsiveUI = (function () {
         }
 
         if (self.currentTool != null) {
-            if (Config.tools[self.currentTool].controller.unload) {
-                Config.tools[self.currentTool].controller.unload();
+            if (Config.userTools[self.currentTool].controller.unload) {
+                Config.userTools[self.currentTool].controller.unload();
             }
         }
         self.currentTool = toolId;
@@ -140,7 +132,7 @@ var ResponsiveUI = (function () {
             self.initTool(toolId);
         }
     };
-
+    //MainController.onSourceSelect
     self.onSourceSelect = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         var p = obj.node.parents.indexOf("PRIVATE");
@@ -156,13 +148,13 @@ var ResponsiveUI = (function () {
         var source = obj.node.data.id;
         self.sourceSelect(source);
     };
+    //To MainController too
     self.sourceSelect = function (source) {
         MainController.currentSource = source;
         ResponsiveUI.source = source;
         $("#selectedSource").html(MainController.currentSource);
 
         $("#mainDialogDiv").parent().hide();
-
         self.initTool(MainController.currentTool, function (err, result) {
             if (err) {
                 return self.alert(err.responseText);
@@ -170,6 +162,7 @@ var ResponsiveUI = (function () {
             self.resetWindowHeight();
         });
     };
+    // MainController or in Lineage_r ?
     self.onSourceSelectForAddSource = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         if (!obj.node.data || obj.node.data.type != "source") {
@@ -181,17 +174,17 @@ var ResponsiveUI = (function () {
         $("#mainDialogDiv").parent().hide();
         Lineage_r.loadSources();
     };
-
+    // What is the goal of this function? --> MainController?
     self.initTool = function (toolId, callback) {
-        var toolObj = Config.tools[toolId];
+        var toolObj = Config.userTools[toolId];
         MainController.initControllers();
         MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
 
-        if (Config.tools[toolId].controller.onLoaded) {
+        if (Config.userTools[toolId].controller.onLoaded) {
             MainController.writeUserLog(authentication.currentUser, toolId, "");
-            Config.tools[toolId].controller.onLoaded();
+            Config.userTools[toolId].controller.onLoaded();
         } else {
             if (true) {
                 var url = window.location.href;
@@ -205,14 +198,15 @@ var ResponsiveUI = (function () {
             }
         }
     };
-
+    // To remove? --> unused
     self.showDiv = function (modalDiv) {
         $("#" + modalDiv).css("display", "block");
     };
-
+    // To remove? unused
     self.hideDiv = function (modalDiv) {
         $("#" + modalDiv).css("display", "none");
     };
+    //Keep
     self.ApplySelectedTabCSS = function (buttonClicked, tabGroup) {
         var x = $("#" + tabGroup + "-buttons").children();
         if (x.length > 0) {
@@ -223,6 +217,7 @@ var ResponsiveUI = (function () {
         $(buttonClicked).addClass("slsv-tabButtonSelected");
         $(buttonClicked).parent().addClass("slsv-selectedTabDiv");
     };
+    //Keep
     self.openTab = function (tabGroup, tabId, actionFn, buttonClicked) {
         var i;
         var x = document.getElementsByClassName(tabGroup);
@@ -237,12 +232,9 @@ var ResponsiveUI = (function () {
         }
         self.ApplySelectedTabCSS(buttonClicked, tabGroup);
     };
-
+    // Load Souirce selector with the rights options
     self.showSourceDialog = function (resetAll) {
         self.openDialogDiv("mainDialogDiv");
-        /*
-        self.showDiv("mainDialogDiv");
-        $("#mainDialogDiv").css("display", "block");*/
         $("#" + "mainDialogDiv")
             .parent()
             .show();
@@ -255,52 +247,33 @@ var ResponsiveUI = (function () {
         }
         SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
-            /*$("#mainDialogDiv")
-                .parent()
-                .find(".ui-dialog-titlebar-close")
-                .on("click", function () {
-                    $("#mainDialogDiv").parent().hide();
-                });*/
         });
-        /*$("#mainDialogDiv").load("./responsive/lineage/html/SourceDiv.html", function () {
-            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
-            $("#mainDialogDiv")
-                .parent()
-                .find(".ui-dialog-titlebar-close")
-                .on("click", function () {
-                    $("#mainDialogDiv").parent().hide();
-                });
-
-            if (resetAll) {
-                Lineage_sources.loadedSources = {};
-                var onSourceSelect = ResponsiveUI.onSourceSelect;
-            } else {
-                var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
-            }
-            SourceSelectorWidget.loadSourcesTreeDiv("sourcesSelectorDiv", { selectTreeNodeFn: onSourceSelect }, function (err, result) {});
-        });*/
     };
+    //keep
     self.openDialogDiv = function (div) {
         //$("#mainDialogDiv").css('width', 'auto');
 
         $("#" + div).empty();
         $("#" + div).dialog();
-        $("#" + div)
-            .parent()
-            .show();
-        $("#" + div)
+        //$("#" + div).parent().show();
+        /*$("#" + div)
             .parent()
             .css("top", "20%");
         $("#" + div)
             .parent()
-            .css("left", "30%");
+            .css("left", "30%");*/
     };
-
+    //keep
     self.setSlsvCssClasses = function (callback) {
         less.pageLoadFinished.then(async function () {
             //setTimeout(() => {}, "500");
             // fetch theme from api
             const response = await fetch("/api/v1/users/theme");
+            if (response.status == 400) {
+                ResponsiveUI.changeTheme(Config.theme.defaultTheme);
+                callback();
+            }
+
             const data = await response.json();
             ResponsiveUI.changeTheme(data.theme);
 
@@ -311,15 +284,16 @@ var ResponsiveUI = (function () {
             callback();
         });
     };
-
+    //Keep
     self.themeList = function () {
         //less.modifyVars({'@button1-color': '#000'});
         var allThemesNames = Object.keys(Config.slsvColorThemes);
         common.fillSelectOptions("themeSelect", allThemesNames, false);
     };
-
-    self.changeTheme = function (ThemeName) {
-        var themeSelected = Config.slsvColorThemes[ThemeName];
+    //Keep
+    self.changeTheme = function (themeName) {
+        if (!themeName) return;
+        var themeSelected = Config.slsvColorThemes[themeName];
         self.currentTheme = themeSelected;
         if (themeSelected["@logoInstance-icon"] == undefined || themeSelected["@logoInstance-icon"] == "") {
             $("#externalLogoDiv").hide();
@@ -329,6 +303,7 @@ var ResponsiveUI = (function () {
         less.modifyVars(themeSelected);
         ResponsiveUI.darkThemeParams(themeSelected);
     };
+    //Keep
     self.hideShowMenuBar = function (button) {
         if (self.menuBarShowed) {
             $("#MenuBarFooter").hide();
@@ -344,6 +319,7 @@ var ResponsiveUI = (function () {
             $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBar.png");
         }
     };
+    //Keep
     self.hideShowLateralPannel = function (button) {
         if (self.smartPhoneScreen) {
             return;
@@ -374,6 +350,7 @@ var ResponsiveUI = (function () {
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };
+    //Lineage.sources?
     self.registerSourceWithoutImports = function (sourceLabel, callback) {
         if (!callback) {
             callback = function () {};
@@ -420,6 +397,7 @@ var ResponsiveUI = (function () {
             }
         });
     };
+    //keep
     self.PopUpOnHoverButtons = function () {
         $(".w3-button").off();
         $(".w3-bar-item").off();
@@ -439,8 +417,8 @@ var ResponsiveUI = (function () {
             }
         });
     };
+    //keep
     self.darkThemeParams = function (theme) {
-        // pas suffisant mettre  a jour graph
         if (theme) {
             if (theme["@isDarkTheme"]) {
                 Lineage_whiteboard.defaultNodeFontColor = "white";
@@ -458,6 +436,7 @@ var ResponsiveUI = (function () {
                     Lineage_r.showHideEditButtons(self.source);
                 }
             }
+            ResponsiveUI.resetWindowHeight();
         }
     };
 

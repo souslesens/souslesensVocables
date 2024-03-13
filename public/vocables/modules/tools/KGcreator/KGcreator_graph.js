@@ -8,17 +8,24 @@ import KGcreator_mappings from "./KGcreator_mappings.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
 import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
+import KGcreator_bot from "../../bots/KGcreator_bot.js";
+import ResponsiveUI from "../../../responsive/responsiveUI.js";
 
 var KGcreator_graph = (function () {
     var self = {};
     self.drawOntologyModel = function (source) {
+        $("#KGcreator_topButtons").load("./responsive/KGcreator/html/linkButtons.html", function () {
+            ResponsiveUI.PopUpOnHoverButtons();
+        });
+
+        //return;
         if (!source) {
             source = KGcreator.currentSlsvSource;
         }
         var options = {
             visjsOptions: {
                 keepNodePositionOnDrag: true,
-                onclickFn: KGcreator_graph.onNodeClick,
+                onclickFn: KGcreator_graph.onOntologyModelNodeClick,
                 onRightClickFn: KGcreator_graph.showGraphPopupMenu,
                 visjsOptions: {
                     physics: {
@@ -59,33 +66,38 @@ var KGcreator_graph = (function () {
             // editEdge: false,
 
             addEdge: function (edgeData, callback) {
-                self.onAddEdge(edgeData, callback);
+                self.onAddEdgeOntologyModel(edgeData, callback);
             },
         };
-        Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_resourceLinkGraphDiv", { nodes: [], edges: [] }, {});
+        Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", { nodes: [], edges: [] }, {});
 
         Lineage_sources.activeSource = source;
-        Lineage_whiteboard.drawModel(source, "KGcreator_resourceLinkGraphDiv", options, function (err) {
-            var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
-            var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.getIds();
-            var newNodes = [];
-            var newEdges = [];
-            var opacity = 0.7;
-            var fontColor = "rgb(58,119,58)";
-            nodes.forEach(function (node) {
-                newNodes.push({ id: node, opacity: opacity, font: { color: fontColor }, layer: "ontology" });
-            });
-            nodes.forEach(function (edge) {
-                newEdges.push({ id: edge, opacity: opacity, font: { color: fontColor, physics: false } });
-            });
-            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
-            Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
-            GraphDisplayLegend.drawLegend("KGcreator_classes", "LineageVisjsLegendCanvas", false);
+        $("#KGcreator_resourceLinkGraphDiv").html("");
+        Lineage_whiteboard.drawModel(source, "KGcreator_mappingsGraphDiv", options, function (err, topConcepts) {
             $("#KGcreator_resourceLinkRightPanel").load("./modules/tools/KGcreator/html/graphControlPanel.html", function () {});
+            if (!err && topConcepts.length > 0) {
+                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.getIds();
+                var newNodes = [];
+                var newEdges = [];
+                var opacity = 0.7;
+                var fontColor = "rgb(58,119,58)";
+                nodes.forEach(function (node) {
+                    newNodes.push({ id: node, opacity: opacity, font: { color: fontColor }, layer: "ontology" });
+                });
+                nodes.forEach(function (edge) {
+                    newEdges.push({ id: edge, opacity: opacity, font: { color: fontColor, physics: false } });
+                });
+                Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
+                Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
+                GraphDisplayLegend.drawLegend("KGcreator_classes", "LineageVisjsLegendCanvas", false);
+
+                KGcreator_graph.drawDataSourceMappings();
+            }
         });
     };
 
-    self.onNodeClick = function (node, point, event, caller) {
+    self.onOntologyModelNodeClick = function (node, point, event, caller) {
         // console.log(JSON.stringify(node));
         PopupMenuWidget.hidePopup();
         if (!node || !node.data) {
@@ -93,14 +105,14 @@ var KGcreator_graph = (function () {
         }
         self.currentGraphNode = node;
         if (node.data.type == "table" || node.data.type == "column") {
-            Lineage_whiteboard.lineageVisjsGraph.network.addEdgeMode();
+            //  Lineage_whiteboard.lineageVisjsGraph.network.addEdgeMode();
         } else {
             Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
         }
     };
 
     self.showNodeNodeInfos = function () {
-        NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
+        NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "KGcreator_dialogDiv");
     };
     self.showGraphPopupMenu = function (node, point, event) {
         if (!node) {
@@ -123,6 +135,9 @@ var KGcreator_graph = (function () {
     self.drawColumnToClassGraph = function (columnNodes) {
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+        if (!existingNodes || Object.keys(existingNodes).length == 0) {
+            return;
+        }
 
         columnNodes.forEach(function (columnNode, index) {
             var columnNodeId = columnNode.id;
@@ -337,7 +352,7 @@ var KGcreator_graph = (function () {
         });
         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(edges);
     };
-    self.onAddEdge = function (edgeData, callbabck) {
+    self.onAddEdgeOntologyModel = function (edgeData, callback) {
         var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from);
         var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
 
@@ -496,6 +511,35 @@ var KGcreator_graph = (function () {
         Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
     };
 
+    self.addInterTableJoinsToVisjsData = function (dataSource, visjsData) {
+        if (!KGcreator.rawConfig.databaseSources[dataSource] || !KGcreator.rawConfig.databaseSources[dataSource].tableJoins) {
+            return visjsData;
+        }
+        var edges = [];
+        var existingEdges = {};
+        visjsData.edges.forEach(function (edge) {
+            existingEdges[edge.id] = 1;
+        });
+        KGcreator.rawConfig.databaseSources[dataSource].tableJoins.forEach(function (item) {
+            var sId = item.fromTable + "_" + item.fromColumn;
+            var oId = item.toTable + "_" + item.toColumn;
+            var edgeId = sId + "_" + oId;
+            if (!existingEdges[edgeId]) {
+                existingEdges[edgeId] = 1;
+                visjsData.edges.push({
+                    id: edgeId,
+                    from: sId,
+                    to: oId,
+                    color: "#f90edd",
+                    dashes: true,
+                });
+            }
+        });
+        return visjsData;
+    };
+
+    /////////////////////////////////////////Detailed Mappings//////////////////////////////////////////////////////
+
     self.drawDetailedMappings = function (tablesToDraw) {
         if (tablesToDraw && !Array.isArray(tablesToDraw)) {
             tablesToDraw = [tablesToDraw];
@@ -527,35 +571,56 @@ var KGcreator_graph = (function () {
                 }
 
                 var mappings = sourceMappings[table];
+                var columns = KGcreator.currentConfig.currentDataSource.tables[table];
+                if (columns == undefined) {
+                    //There is a mapping for this column but the Table is not on db anymore
+                    continue;
+                }
+
+                function getTripleLabelRole(id) {
+                    if (id.endsWith("_$")) {
+                        return "column";
+                    }
+                    var role = null;
+                    columns.forEach(function (column) {
+                        if (column == id) {
+                            role = "column";
+                        }
+                    });
+                    return role;
+                }
+
                 json[table] = mappings;
                 mappings.tripleModels.forEach(function (item, index) {
+                    if (!item.s || !item.p || !item.o) {
+                        return alert("tripleModel is malformed " + JSON.stringify(item));
+                    }
+
                     function getNodeAttrs(str) {
                         if (str.indexOf("http") > -1) {
-                            return { type: "Class", color: "#70ac47", shape: "dot", size: 20 };
+                            return { type: "Class", color: "#70ac47", shape: "box", size: 30 };
                         } else if (str.indexOf(":") > -1) {
-                            // return "#0067bb";
                             return { type: "OwlType", color: "#aaa", shape: "ellipse" };
-                        } else if (str.indexOf("$_") > -1) {
-                            // return "#0067bb";
-                            return { type: "blankNode", color: "#b0f5f5", shape: "square" };
+                        } else if (str.endsWith("_$")) {
+                            return { type: "blankNode", color: "#00afef", shape: "square" };
                         } else if (str.indexOf("_rowIndex") > -1) {
-                            // return "#0067bb";
                             return { type: "rowIndex", color: "#f90edd", shape: "star" };
                         } else {
-                            if (table) {
-                                var color = common.getResourceColor("mappingFileName", table);
-                                return { type: "OwlType", color: "#00afef", shape: "box" };
-                                //   return { type: "FileColumn", color: color, shape: "box" };
-                            }
-                            return {};
+                            drawRelation = false;
+                            return { type: "OwlType", color: "#00afef", shape: "hexagon" };
                         }
                     }
 
                     var sId = table + "_" + item.s;
                     var oId = table + "_" + item.o;
+
                     if (!existingNodes[sId]) {
+                        if (!sId) {
+                            return;
+                        }
                         existingNodes[sId] = 1;
                         var label = Sparql_common.getLabelFromURI(item.s);
+
                         var attrs = getNodeAttrs(item.s);
                         var drawRelation = true;
                         if (item.o == "owl:NamedIndividual") {
@@ -569,6 +634,8 @@ var KGcreator_graph = (function () {
                         if (item.o == "rdf:Bag") {
                             attrs.shape = "box";
                             drawRelation = false;
+                        } else if (item.s.startsWith("@")) {
+                            attrs.color = "#8200fd";
                         }
                         /*  if (item.isString) {
                 attrs.shape = "text";
@@ -580,12 +647,15 @@ var KGcreator_graph = (function () {
                             label: label,
                             shape: attrs.shape,
                             color: attrs.color,
+                            font: { color: attrs.color },
                             size: Lineage_whiteboard.defaultShapeSize,
                             data: {
                                 id: item.s,
                                 label: label,
                                 fileName: table,
                                 type: attrs.type,
+                                role: getTripleLabelRole(item.s),
+                                table: table,
                             },
                         });
                     }
@@ -600,12 +670,15 @@ var KGcreator_graph = (function () {
                                 label: label,
                                 shape: attrs.shape,
                                 color: attrs.color,
+                                font: attrs.shape == "box" ? { color: "white" } : { color: attrs.color },
                                 size: Lineage_whiteboard.defaultShapeSize,
                                 data: {
-                                    id: item.s,
+                                    id: item.o,
                                     label: label,
                                     fileName: table,
                                     type: attrs.type,
+                                    role: getTripleLabelRole(item.o),
+                                    table: table,
                                 },
                             });
                         }
@@ -619,6 +692,7 @@ var KGcreator_graph = (function () {
                                 from: sId,
                                 to: oId,
                                 label: label,
+                                font: { size: 12, ital: true, color: "brown" },
                                 // color: getNodeAttrs(item.o),
                                 arrows: {
                                     to: {
@@ -639,7 +713,7 @@ var KGcreator_graph = (function () {
                                 id: edgeId,
                                 from: table,
                                 to: sId,
-                                label: label,
+                                //  label: label
                             });
                         }
                     }
@@ -649,59 +723,97 @@ var KGcreator_graph = (function () {
 
         visjsData = self.addInterTableJoinsToVisjsData(KGcreator.currentConfig.currentDataSource.name, visjsData);
 
-        //   var html = "<div id='KGcreator_mappingsGraphDiv' style='width:1100px;height:750px'></div>";
-        $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").parent().css("top", "10%");
-        $("#mainDialogDiv").parent().css("left", "10%");
-        $("#mainDialogDiv").dialog("option", "title", " Mappings");
-        //  $("#mainDialogDiv").html(html);
-        $("#mainDialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function () {
-            self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, { onclickFn: KGcreator_graph.onNodeClick });
-            self.mappingVisjsGraph.draw();
-            GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas", false);
-            var options = {
-                mode: "tree",
-            };
-            self.jsonEditor = new JsonEditor("#KGcreator_mappingsGraphEditor", json);
-            $("#KGcreator_mappingsSaveEditorMappingBtn").prop("disabled", "disabled");
-            if (tablesToDraw && tablesToDraw.length == 1) {
-                $("#KGcreator_mappingsSaveEditorMappingBtn").removeProp("disabled");
-                self.currentEditingTable = tablesToDraw[0];
+        /*  $("#KGcreator_dialogDiv").dialog("open");
+          $("#KGcreator_dialogDiv").dialog("option", "title", " Mappings");
+          $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function() {*/
+        //  $("#KGcreator_resourceslinkingTab").load("modules/tools/KGcreator/html/detailedMappings.html", function() {
+
+        var options = {
+            onclickFn: KGcreator_graph.onDetailedGraphNodeClick,
+            visjsOptions: {
+                manipulation: {
+                    enabled: true,
+                    initiallyActive: true,
+                    deleteNode: false,
+                    deleteEdge: false,
+                    editNode: false,
+                    editEdge: false,
+
+                    addEdge: function (edgeData, callback) {
+                        self.onAddEdgeDetailedMappings(edgeData, callback);
+                    },
+                },
+            },
+        };
+
+        self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, options);
+        self.mappingVisjsGraph.draw();
+        GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas", false);
+    };
+
+    self.onDetailedGraphNodeClick = function (node, point, event, caller) {
+        // console.log(JSON.stringify(node));
+        PopupMenuWidget.hidePopup();
+        if (!node || !node.data) {
+            return (self.currentGraphNode = null);
+        }
+        self.currentGraphNode = node;
+        if (event.ctrlKey && node.data.role == "column") {
+            self.mappingVisjsGraph.network.addEdgeMode();
+        } else {
+            self.mappingVisjsGraph.network.disableEditMode();
+            if (node.data.role == "column") {
+                KGcreator.currentTreeNode = node;
+                KGcreator_bot.start(node, KGcreator_mappings.afterMappingsFn);
+            }
+        }
+    };
+
+    self.onAddEdgeDetailedMappings = function (edgeData, callback) {
+        var sourceNode = self.mappingVisjsGraph.data.nodes.get(edgeData.from);
+        var targetNode = self.mappingVisjsGraph.data.nodes.get(edgeData.to);
+
+        var node = {
+            data: {
+                id: sourceNode.data.id,
+                table: sourceNode.data.table,
+                predicateObjectColumn: targetNode.data.id,
+                predicateObjectTable: targetNode.data.table,
+            },
+        };
+
+        return KGcreator_bot.start(node);
+
+        if (sourceNode.data && sourceNode.data.role == "column") {
+            if (sourceNode.data.table != targetNode.data.table) {
+                self.mappingVisjsGraph.network.disableEditMode();
+
+                var columns = KGcreator.currentConfig.currentDataSource.tables[sourceNode.data.table];
+                var virtualColumns = KGcreator.currentConfig.currentMappings[sourceNode.data.table].virtualColumns;
+                if (virtualColumns) {
+                    columns = columns.concat(virtualColumns);
+                }
+
+                SimpleListSelectorWidget.showDialog(
+                    { title: "Choose correponding column as join key in source table" },
+                    function (callbackLoad) {
+                        return callbackLoad(columns);
+                    },
+
+                    function (selectedColumn) {
+                        if (!selectedColumn) {
+                            return;
+                        }
+
+                        KGcreator_mappings.setPredicatesBetweenColumnsInTable(sourceNode.data, targetNode.data, selectedColumn);
+                    }
+                );
             } else {
-                self.currentEditingTable = null;
+                KGcreator_mappings.setPredicatesBetweenColumnsInTable(sourceNode.data, targetNode.data, null);
             }
-            //  JSONEditor().setMode("tree");
-        });
-    };
-
-    self.addInterTableJoinsToVisjsData = function (dataSource, visjsData) {
-        var edges = [];
-        var existingEdges = {};
-        visjsData.edges.forEach(function (edge) {
-            existingEdges[edge.id] = 1;
-        });
-        KGcreator.rawConfig.databaseSources[dataSource].tableJoins.forEach(function (item) {
-            var sId = item.fromTable + "_" + item.fromColumn;
-            var oId = item.toTable + "_" + item.toColumn;
-            var edgeId = sId + "_" + oId;
-            if (!existingEdges[edgeId]) {
-                existingEdges[edgeId] = 1;
-                visjsData.edges.push({
-                    id: edgeId,
-                    from: sId,
-                    to: oId,
-                    color: "#f90edd",
-                    dashes: true,
-                });
-            }
-        });
-        return visjsData;
-    };
-
-    self.saveDetailedMappings = function () {
-        var tableMappings = self.jsonEditor.get();
-
-        KGcreator_mappings.saveTableMappings(self.currentEditingTable, tableMappings);
+        } else {
+            return null;
+        }
     };
 
     self.toSVG = function () {

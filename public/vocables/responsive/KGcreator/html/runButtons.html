@@ -1,17 +1,39 @@
 <div>
-    <button class="w3-button slsv-button-1" onclick="KGcreator_run.createTriples(true)" popUpComment="View Sample triples">View Sample triples</button>
-    <button class="w3-button slsv-button-1" onclick="KGcreator_run.testSelectedMappings()">test Selected Mappings</button>
+    <button class="w3-button slsv-button-1 KGcreator_Runbuttons" onclick="KGcreator_run.createTriples(true)" popUpComment="View Sample triples">
+        View Sample triples
+        <!--<img src="./icons/CommonIcons/ViewSampleTripleIcon.png" >-->
+    </button>
+    <button class="w3-button slsv-button-1 KGcreator_Runbuttons" onclick="KGcreator_run.testSelectedMappings()" popUpComment="Test Selected Mappings">
+        Test Selected Mappings<!--<img src="./icons/CommonIcons/TestSelectedMappingIcon.png" >-->
+    </button>
     <!--  <input type="checkbox" id="KGcreator_addAllPredefinedPart14PredicatesTriples" />addPredefinedPart14Triples-->
-    <button class="w3-button slsv-button-1" onclick="KGcreator_run.createTriples()">Create triples</button>
-    <button class="w3-button slsv-button-1" onclick="KGcreator_run.stopCreateTriples()">Abort</button>
-    <button class="w3-button slsv-button-1" onclick="KGcreator_run.createAllMappingsTriples()">Recreate graph</button>
-    <button class="w3-button slsv-button-1" onclick="KGcreator_run.indexGraph()">Index graph</button>
+    <button class="w3-button slsv-button-1 KGcreator_Runbuttons" onclick="KGcreator_run.createTriples()" popUpComment="Create triples">
+        Create triples<!--<img src="./icons/CommonIcons/CreateTriplesIcon.png" >-->
+    </button>
+    <button class="w3-button slsv-button-1 KGcreator_Runbuttons" onclick="KGcreator_run.stopCreateTriples()" popUpComment="Abort">Abort<!--<img src="./icons/CommonIcons/AbortIcon.png" >--></button>
+    <button class="w3-button slsv-button-1 KGcreator_Runbuttons" onclick="KGcreator_run.createAllMappingsTriples()" popUpComment="Recreate graph">
+        Recreate graph<!--<img src="./icons/CommonIcons/RecreateGraphIcon.png">-->
+    </button>
+    <button class="w3-button slsv-button-1 KGcreator_Runbuttons" onclick="KGcreator_run.indexGraph()" popUpComment="Index graph">
+        Index graph<!--<img src="./icons/CommonIcons/IndexGraphIcon.png" >-->
+    </button>
     <!--  <input type="checkbox" id="KGcreator_onlySelectionCBX"/>only selection-->
 
-    <button class="w3-button slsv-button-2" onclick="KGcreator_run.deleteKGcreatorTriples()">delete current file triples</button>
-    <button class="w3-button slsv-button-2" id="KGcreator_deleteKGcreatorTriplesBtn" onclick="KGcreator_run.deleteKGcreatorTriples('all')">delete ALL KGreator triples</button>
-    <button class="w3-button slsv-button-2" onclick="KGcreator.migrateOldMappings()">migrateOldMappings</button>
+    <button class="w3-button slsv-button-2 KGcreator_Runbuttons" onclick="KGcreator_run.deleteKGcreatorTriples()" popUpComment="delete current file triples">
+        delete current file triples<!--<img src="./icons/CommonIcons/DeleteCurrentFileTriplesIcon.png" >-->
+    </button>
+    <button
+        class="w3-button slsv-button-2 KGcreator_Runbuttons"
+        id="KGcreator_deleteKGcreatorTriplesBtn"
+        onclick="KGcreator_run.deleteKGcreatorTriples('all')"
+        popUpComment="delete ALL KGreator triples"
+    >
+        delete ALL KGreator triples<!--<img src="./icons/CommonIcons/DeleteALLKGcreatorTriplesIcon.png">-->
+    </button>
+    <!--<button class="w3-button slsv-button-2" onclick="KGcreator.migrateOldMappings()" popUpComment="migrateOldMappings">migrateOldMappings<img src="./icons/CommonIcons/MigrateOldMappingsIcon.png"></button>-->
     <!--<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearGraph()" style="background-color: #fbcb09 !important">Clear entire graph</button>-->
 
-    <button class="w3-button slsv-button-2" style="display: none" id="KGcreator_saveFileButton" onclick="KGcreator_run.saveFile()">Save file</button>
+    <button class="w3-button slsv-button-2 KGcreator_Runbuttons" style="display: none" id="KGcreator_saveFileButton" onclick="KGcreator_run.saveFile()" popUpComment="Save file">
+        Save file<!--<img src="./icons/CommonIcons/SaveFileIcon.png">-->
+    </button>
 </div>

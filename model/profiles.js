@@ -102,7 +102,13 @@ class ProfileModel {
             } catch {
                 console.warn("No plugins directory");
             }
+
+
             const toolsFromNames = (tools) => [...tools].map((tool) => ({ name: tool, type: plugins.includes(tool) ? "plugin" : "tool" }));
+
+
+
+
 
             if (user.login === "admin" || user?.groups.includes("admin")) {
                 return toolsFromNames(allTools);

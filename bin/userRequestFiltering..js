@@ -20,7 +20,7 @@ const fs = require("fs");
 var UserRequestFiltering = {
   existingSources: null,
 
-  getUserGraphUrisMap: function(userSourcesMap,userInfos) {
+  getUserGraphUrisMap: function(userSourcesMap) {
 
 
     var basicVocabularies = basicVocabularies = {
@@ -132,7 +132,7 @@ var UserRequestFiltering = {
       var query2 = query;
       try {
         query2 = query.replace(regex, ""); // bug in  parser remove property path cardinality for parsing
-        query3 = query2.replace(/<_:.[^>]*>,*/gm, ""); // cited blank nodes on queries don't pass the parser
+        query3 = query2.replace(/<_:.[^>]*>/gm, "?replacementCitedBlankNodeToParse"); // cited blank nodes on queries don't pass the parser
         query4 = query3.replace(/<1>,/gm, ""); // ones for pathes
         var json = parser.parse(query4);
       } catch (e) {
@@ -172,7 +172,7 @@ var UserRequestFiltering = {
   filterSparqlRequest: function(query, userSourcesMap,userInfo, callback) {
     var error = "";
     var filteredQuery = query;
-    var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap,userInfo);
+    var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
 
     selectRegex = /(SELECT)/gim;
     var array = selectRegex.exec(query);
@@ -185,11 +185,6 @@ var UserRequestFiltering = {
       });
     }
     else {
-      for(var key in userSourcesMap){
-        if(userInfo.user.login == userSourcesMap[key].owner)
-          return callback(null,query);
-      }
-
       UserRequestFiltering.checkQueryByRegex(query, userGraphUrisMap, function(err, result) {
         if (err) {
           return callback(err);
@@ -200,10 +195,7 @@ var UserRequestFiltering = {
   },
 
   validateElasticSearchIndices: function(userInfo, indices, userSourcesMap, acl, callback) {
-   var userGroups= userInfo.user.groups;
-    if (userGroups && userGroups.indexOf("admin") > -1) {
-      return callback(null, indices);
-    }
+
 
     var indicesMap = {};
     for (var source in userSourcesMap) {

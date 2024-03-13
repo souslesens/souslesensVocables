@@ -78,7 +78,7 @@ var JstreeWidget = (function () {
 
         // Classic items
         default: {
-            icon: "./icons/JstreeIcons/default.png",
+            icon: "./icons/JstreeIcons/Default.png",
         },
 
         Folder: {
@@ -391,7 +391,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
 
-    self.setSelectedNodeStyle = function (style) {
+    self.setSelectedNodeStyle = function (style, id) {
         var node = $(".jstree-clicked");
         for (var key in style) {
             node.css(key, style[key]);

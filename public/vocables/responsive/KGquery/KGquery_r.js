@@ -4,7 +4,6 @@ import SavedQueriesComponent from "../../modules/uiComponents/savedQueriesCompon
 import Lineage_r from "../lineage/lineage_r.js";
 import ResponsiveUI from "../responsiveUI.js";
 import KGquery_controlPanel from "../../modules/tools/KGquery/KGquery_controlPanel.js";
-import KGquery_controlPanelResponsive from "./KGquery_controlPanelResponsive.js";
 import VisjsGraphClass from "../../modules/graph/VisjsGraphClass.js";
 
 var KGquery_r = (function () {
@@ -16,7 +15,7 @@ var KGquery_r = (function () {
     self.onLoaded = function () {
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
         SavedQueriesComponent.showDialog = self.SavedQueriesComponentShowDialogResponsive;
-        ResponsiveUI.replaceFile(KGquery_controlPanel, KGquery_controlPanelResponsive);
+        //ResponsiveUI.replaceFile(KGquery_controlPanel, KGquery_controlPanelResponsive);
         ResponsiveUI.initMenuBar(self.loadSource);
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
@@ -45,6 +44,20 @@ var KGquery_r = (function () {
                     KGquery_graph.drawVisjsModel("saved");
                     ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery_r.initQuery, "#QueryTabButton");
                     ResponsiveUI.resetWindowHeight();
+                    $("#KGquery_dataTableDialogDiv").dialog({
+                        autoOpen: false,
+                        close: function (event, ui) {
+                            window.scrollTo(0, 0);
+                        },
+                        drag: function (event, ui) {
+                            $("#KGcreator_dialogDiv").parent().css("transform", "unset");
+                        },
+                        open(event, ui) {
+                            $("#KGcreator_dialogDiv").parent().css("transform", "translate(-50%,-50%)");
+                            $("#KGcreator_dialogDiv").parent().css("top", "50%");
+                            $("#KGcreator_dialogDiv").parent().css("left", "50%");
+                        },
+                    });
                 });
             });
         });
@@ -62,15 +75,19 @@ var KGquery_r = (function () {
         SavedQueriesComponent.showDialog("STORED_KGQUERY_QUERIES", "tabs_myQueries", KGquery.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
     };
     self.initQuery = function () {
-        $("#tabs_Query").load("./responsive/KGquery/html/KgqueryQueryTab.html", function () {
-            KGquery.addQuerySet();
-        });
+        if ($("#tabs_Query").children().length == 0) {
+            $("#tabs_Query").load("./responsive/KGquery/html/KgqueryQueryTab.html", function () {
+                KGquery.addQuerySet();
+            });
+        }
     };
     self.initGraph = function () {
-        $("#tabs_Graph").load("./responsive/KGquery/html/KgqueryGraphTab.html", function () {
-            KGquery_graph.init();
-            KGquery_graph.drawVisjsModel("saved");
-        });
+        if ($("#tabs_Graph").children().length == 0) {
+            $("#tabs_Graph").load("./responsive/KGquery/html/KgqueryGraphTab.html", function () {
+                KGquery_graph.init();
+                KGquery_graph.drawVisjsModel("saved");
+            });
+        }
     };
     self.SavedQueriesComponentShowDialogResponsive = function (CRUDsource, targetDiv, slsvSource, scope, saveQueryFn, loadQueryFn) {
         SavedQueriesComponent.init(CRUDsource);

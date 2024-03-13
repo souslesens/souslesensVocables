@@ -15,15 +15,16 @@
                 right: 100px;
                 padding: 5px;
             }
+
+            .json-dict li {
+                color: white;
+            }
         </style>
     </head>
     <body>
         <div style="display: flex; flex-direction: row">
-            <div id="KGcreator_mappingsGraphDiv" style="width: 1000px; height: 750px"></div>
-            <div>
-                <pre style="width: 600px; height: 700px" id="KGcreator_mappingsGraphEditor"></pre>
-                <button id="KGcreator_mappingsSaveEditorMappingBtn" onclick="KGcreator_graph.saveDetailedMappings()">Save</button>
-            </div>
+            <div id="KGcreator_mappingsGraphDiv" style="width: 100%; height: 85vh"></div>
+
             <canvas id="KGcreatorVisjsLegendCanvas" height="150"></canvas>
         </div>
     </body>

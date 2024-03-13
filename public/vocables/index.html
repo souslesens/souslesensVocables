@@ -128,7 +128,7 @@
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_SKOS.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_OWL.js"></script>
-        <script type="module" src="modules/bots/addPredicate_bot.js"></script>
+
         <script type="module" src="modules/bots/nodeRelations_bot.js"></script>
         <!--   <script type="module" src="modules/sparqlProxies/sparql_INDIVIDUALS.js"></script>-->
 
@@ -211,7 +211,7 @@
         <script type="module" src="./responsive/responsiveUI.js"></script>
         <script type="module" src="./responsive/lineage/lineage_r.js"></script>
 
-        <script type="module" src="./responsive/widget/botEngineResponsive.js"></script>
+        <!--<script type="module" src="./responsive/widget/botEngineResponsive.js"></script>-->
         <script type="module" src="./responsive/KGquery/KGquery_r.js"></script>
         <script type="module" src="./responsive/KGcreator/Kgcreator_r.js"></script>
         <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
@@ -235,6 +235,12 @@
                     location.href = `/login?redirect=${uri}`;
                 }
             });
+
+            $.fn.redraw = function () {
+                $(this).each(function () {
+                    var redraw = this.offsetHeight;
+                });
+            };
 
             $(function () {
                 async.series(
@@ -290,43 +296,83 @@
                     MainController.UI.initialGraphDivWitdh = w;
                     $("#graphDiv").height(h - 50);
                     */
-
+                        /*
                         $("#accordion").accordion({
                             heightStyle: "fill",
                         });
                         $("#accordion").accordion("option", { active: 0 });
                         $("#accordion").on("accordionbeforeactivate", function (event, ui) {});
                         $("#accordion").on("accordionactivate", function (event, ui) {});
+                        */
                         $("#mainDialogDiv").dialog({
                             autoOpen: false,
-                            height: 800,
-                            width: $(document).width() * 0.85,
+                            //height: 800,
+                            //width: $(document).width() * 0.85,
                             modal: false,
                             close: function (event, ui) {
                                 window.scrollTo(0, 0);
                             },
+                            drag: function (event, ui) {
+                                $("#mainDialogDiv").parent().css("transform", "unset");
+                            },
+                            open(event, ui) {
+                                $("#mainDialogDiv").parent().css("transform", "translate(-50%,-50%)");
+                                $("#mainDialogDiv").parent().css("top", "50%");
+                                $("#mainDialogDiv").parent().css("left", "50%");
+                            },
                         });
                         $("#mainDialogDiv2").dialog({
                             autoOpen: false,
-                            height: 800,
-                            width: $(document).width() * 0.85,
+                            //height: 800,
+                            //width: $(document).width() * 0.85,
                             modal: false,
+                            close: function (event, ui) {
+                                window.scrollTo(0, 0);
+                            },
+                            drag: function (event, ui) {
+                                $("#mainDialogDiv2").parent().css("transform", "unset");
+                            },
+                            open(event, ui) {
+                                $("#mainDialogDiv2").parent().css("transform", "translate(-50%,-50%)");
+                                $("#mainDialogDiv2").parent().css("top", "50%");
+                                $("#mainDialogDiv2").parent().css("left", "50%");
+                            },
                         });
 
                         $("#smallDialogDiv").dialog({
                             autoOpen: false,
-                            height: 600,
-                            width: 800,
+                            //height: 600,
+                            //width: 800,
                             modal: false,
+                            close: function (event, ui) {
+                                window.scrollTo(0, 0);
+                            },
+                            drag: function (event, ui) {
+                                $("#smallDialogDiv").parent().css("transform", "unset");
+                            },
+                            open(event, ui) {
+                                $("#smallDialogDiv").parent().css("transform", "translate(-50%,-50%)");
+                                $("#smallDialogDiv").parent().css("top", "50%");
+                                $("#smallDialogDiv").parent().css("left", "50%");
+                            },
                         });
                         $("#botPanel").dialog({
                             autoOpen: false,
-                            height: 600,
-                            width: 800,
+                            //height: 600,
+                            //width: 800,
                             modal: false,
                             close: function (event, ui) {
-                                $("#previousButtonBot").remove();
-                                $("#resetButtonBot").remove();
+                                //$("#previousButtonBot").remove();
+                                //$("#resetButtonBot").remove();
+                                $("#BotUpperButtons").remove();
+                            },
+                            drag: function (event, ui) {
+                                $("#botPanel").parent().css("transform", "unset");
+                            },
+                            open(event, ui) {
+                                $("#botPanel").parent().css("transform", "translate(-50%,-50%)");
+                                $("#botPanel").parent().css("top", "50%");
+                                $("#botPanel").parent().css("left", "50%");
                             },
                         });
 
@@ -462,7 +508,8 @@
         <!-- style="height: 92.5dvh"-->
         <div id="graphAndCommandScreen" class="w3-container" style="height: 92.5dvh">
             <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="width: 435px; height: 99%" id="lateralPanelDiv"></div>
-            <div class="w3-container w3-col l9" style="height: 100%; width: auto">
+
+            <div id="graphDivContainer" class="w3-container w3-col l9" style="height: 100%; width: 0px">
                 <div id="graphDiv" class="w3-container" style="height: 100%"></div>
             </div>
         </div>

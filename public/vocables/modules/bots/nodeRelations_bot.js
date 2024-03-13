@@ -6,20 +6,20 @@ import Lineage_relationIndividualsFilter from "../tools/lineage/lineage_relation
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import IndividualValueFilterWidget from "../uiWidgets/individualValuefilterWidget.js";
-import BotEngine from "./botEngine.js";
-import CommonBotFunctions from "./commonBotFunctions.js";
+import _botEngine from "./_botEngine.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 
 var NodeRelations_bot = (function () {
     var self = {};
 
     self.start = function () {
         self.title = "Query graph";
-        BotEngine.init(NodeRelations_bot, self.workflow, null, function () {
+        _botEngine.init(NodeRelations_bot, self.workflow, null, function () {
             self.params = {
                 source: Lineage_sources.activeSource,
                 currentClass: Lineage_whiteboard.currentGraphNode.data.id,
             };
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         });
     };
 
@@ -76,7 +76,7 @@ var NodeRelations_bot = (function () {
             Sparql_OWL.getFilteredTriples2(self.params.source, self.params.currentClass, null, null, { distinct: "?prop ?propLabel" }, function (err, result) {
                 if (err) {
                     console.log(err.responseText);
-                    return BotEngine.reset();
+                    return _botEngine.reset();
                 }
                 var properties = [];
                 result.forEach(function (item) {
@@ -85,7 +85,7 @@ var NodeRelations_bot = (function () {
                     }
                 });
                 properties.splice(0, 0, { id: "AnyProperty", label: "Any Property" });
-                BotEngine.showList(properties, "currentProperty", null, true);
+                _botEngine.showList(properties, "currentProperty", null, true);
             });
         },
 
@@ -99,14 +99,14 @@ var NodeRelations_bot = (function () {
         },
 
         promptAnnotationPropertyValue: function () {
-            BotEngine.promptValue("value contains ", "annotationValue");
+            _botEngine.promptValue("value contains ", "annotationValue");
         },
 
         listRestrictions: function () {
             //    Lineage_whiteboard.drawRestrictions( self.params.source,  self.params.currentClass, null, null, {  }, function (err, result) {
             Sparql_OWL.getObjectRestrictions(self.params.source, self.params.currentClass, { listPropertiesOnly: true }, function (err, result) {
                 if (result.length == 0) {
-                    return BotEngine.abort("no data found");
+                    return _botEngine.abort("no data found");
                 }
                 var properties = [];
                 result.forEach(function (item) {
@@ -115,7 +115,7 @@ var NodeRelations_bot = (function () {
                     }
                 });
                 properties.splice(0, 0, { id: "AnyProperty", label: "Any Property" });
-                BotEngine.showList(properties, "currentProperty", null, true);
+                _botEngine.showList(properties, "currentProperty", null, true);
             });
         },
         listInverseRestrictions: function () {
@@ -128,7 +128,7 @@ var NodeRelations_bot = (function () {
                     }
                 });
                 properties.splice(0, 0, { id: "AnyProperty", label: "Any Property" });
-                BotEngine.showList(properties, "currentProperty", null, true);
+                _botEngine.showList(properties, "currentProperty", null, true);
             });
         },
 
@@ -265,7 +265,7 @@ var NodeRelations_bot = (function () {
                     limit = parseInt(sampleSize);
                 } catch (e) {
                     alert("wrong number for sampleSize");
-                    return BotEngine.reset();
+                    return _botEngine.reset();
                 }
             } else {
                 filter = setAnnotationPropertyFilter() || getPathFilter() + " " + getIndividualsFilter();
@@ -280,7 +280,7 @@ var NodeRelations_bot = (function () {
 
             Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);
 
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         },
     };
 

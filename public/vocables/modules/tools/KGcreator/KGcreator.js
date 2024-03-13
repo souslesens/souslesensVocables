@@ -8,7 +8,7 @@ import KGcreator_graph from "./KGcreator_graph.js";
 import KGcreator_mappings from "./KGcreator_mappings.js";
 import KGcreator_run from "./KGcreator_run.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
-import KGcreator_bot_filter from "../../bots/KGcreator_bot.js";
+import KGcreator_bot from "../../bots/KGcreator_bot.js";
 
 var KGcreator = (function () {
     var self = {};
@@ -62,7 +62,7 @@ var KGcreator = (function () {
                         activate: function (e, ui) {
                             var divId = ui.newPanel.selector;
                             if (divId == "#KGcreator_resourceslinkingTab") {
-                                KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
+                                //  KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
                             }
                         },
                     });
@@ -78,8 +78,8 @@ var KGcreator = (function () {
     };
 
     self.showSourcesDialog = function (callback) {
-        if (Config.tools["KGcreator"].urlParam_source) {
-            self.currentSlsvSource = Config.tools["KGcreator"].urlParam_source;
+        if (Config.userTools["KGcreator"].urlParam_source) {
+            self.currentSlsvSource = Config.userTools["KGcreator"].urlParam_source;
             self.initSource();
             return callback();
         }
@@ -90,7 +90,7 @@ var KGcreator = (function () {
         var selectTreeNodeFn = function () {
             self.currentSlsvSource = SourceSelectorWidget.getSelectedSource()[0];
             $("#KGcreator_slsvSource").html(self.currentSlsvSource);
-            $("#mainDialogDiv").dialog("close");
+            $("#KGcreator_dialogDiv").dialog("close");
             if (!self.currentSlsvSource) {
                 return alert("select a source");
             }
@@ -98,7 +98,7 @@ var KGcreator = (function () {
             //  self.initCentralPanel();
         };
 
-        SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
+        SourceSelectorWidget.initWidget(["OWL"], "KGcreator_dialogDiv", true, selectTreeNodeFn, null, options);
         if (callback) {
             callback();
         }
@@ -118,7 +118,7 @@ var KGcreator = (function () {
             if (err) {
                 return alert(err);
             }
-            KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
+            //  KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
         });
     };
 
@@ -193,7 +193,7 @@ var KGcreator = (function () {
                 selectTreeNodeFn: function (event, obj) {
                     self.currentTreeNode = obj.node;
                     KGcreator.currentTreeNode = obj.node;
-                    KGcreator_run.getTableAndShowMappings();
+                    //  KGcreator_run.getTableAndShowMappings();
 
                     if (obj.node.data.type == "databaseSource") {
                         self.currentConfig.currentDataSource = {
@@ -214,7 +214,12 @@ var KGcreator = (function () {
                             currentTable: "",
                         };
 
-                        KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id);
+                        KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, function (err, result) {
+                            if (err) {
+                                alert(err.responseText);
+                            }
+                            KGcreator_mappings.showTableMappings(obj.node.id);
+                        });
                     } else if (obj.node.data.type == "table") {
                         var mappingObj = self.currentConfig.currentMappings[obj.node.data.id];
 
@@ -223,6 +228,7 @@ var KGcreator = (function () {
                         self.currentConfig.currentDataSource.currentTable = table;
                         self.showTablesColumnTree(table, columns);
                         self.showTableVirtualColumnsTree(table);
+                        KGcreator_mappings.showTableMappings(obj.node.id);
                     } else if (obj.node.data.type == "tableColumn") {
                     } else if (obj.node.data.type == "csvFileColumn") {
                     }
@@ -241,7 +247,7 @@ var KGcreator = (function () {
                         return items;
                     } else if (node.id == "csvSources") {
                         items.csvSources = {
-                            label: "addCsvSources",
+                            label: "add Csv Sources",
                             action: function (_e) {
                                 // pb avec source
                                 self.displayUploadApp("file");
@@ -250,33 +256,47 @@ var KGcreator = (function () {
                         };
                         return items;
                     } else if (node.data.type == "databaseSource") {
-                        items.showSourceMappings = {
-                            label: "showSourceMappings",
+                        items.showDataSourceMappings = {
+                            label: "show data source Mappings",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_mappings.showSourceMappings(node);
+                                KGcreator_mappings.showDataSourceMappings(node);
+                            },
+                        };
+                        items.drawOntolologyModel = {
+                            label: "draw Ontolology and mappings",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
                             },
                         };
 
                         return items;
                     } else if (node.data.type == "table") {
-                        items.showTableMappings = {
-                            label: "showTableMappings",
+                        /*  items.showTableMappings = {
+                              label: "showTableMappings",
+                              action: function (_e) {
+                                  // pb avec source
+                                  KGcreator_mappings.showTableMappings(node);
+                              },
+                          };*/
+                        items.mappingBot = {
+                            label: "add virtual column",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_mappings.showTableMappings(node);
+                                KGcreator_bot.start(node);
                             },
                         };
-                        items.mapColumn = {
-                            label: "map Rows",
-                            action: function (_e) {
-                                // pb avec source
-                                KGcreator_mappings.showMappingDialog(null, { rowIndex: 1 });
-                            },
-                        };
+                        /*   items.mapColumn = {
+                               label: "map Rows",
+                               action: function (_e) {
+                                   // pb avec source
+                                   KGcreator_mappings.showMappingDialog(null, { rowIndex: 1 });
+                               },
+                           };*/
 
                         items.transforms = {
-                            label: "transforms",
+                            label: "edit transforms",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showTransformDialog(node);
@@ -284,14 +304,14 @@ var KGcreator = (function () {
                         };
 
                         items.showSampleData = {
-                            label: "showSampleData",
+                            label: "show sample data",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator.showSampleData(node, true, 200);
                             },
                         };
                         items.removeTableMappings = {
-                            label: "removeTableMappings",
+                            label: "remove table Mappings",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator.removeTableMappings(node);
@@ -305,15 +325,15 @@ var KGcreator = (function () {
                         //   return (items = KGcreator.getContextMenu());
 
                         items.mappingBot = {
-                            label: "mappingBot",
+                            label: "map column",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_bot_filter.start(node);
+                                KGcreator_bot.start(node);
                             },
                         };
 
                         items.mapColumn = {
-                            label: "map Column",
+                            label: "map column advanced",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showMappingDialog();
@@ -330,20 +350,27 @@ var KGcreator = (function () {
 
                         return items;
                     } else if (node.data.type == "csvSource") {
-                        items.showTableMappings = {
-                            label: "showTableMappings",
+                        /*  items.showTableMappings = {
+                              label: "show table mappings",
+                              action: function (_e) {
+                                  // pb avec source
+                                  KGcreator_mappings.showTableMappings(node);
+                              },
+                          };*/
+                        items.mappingBot = {
+                            label: "add virtual column",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator_mappings.showTableMappings(node);
+                                KGcreator_bot.start(node);
                             },
                         };
-                        items.mapColumn = {
-                            label: "map Rows",
-                            action: function (_e) {
-                                // pb avec source
-                                KGcreator_mappings.showMappingDialog(null, { rowIndex: 1 });
-                            },
-                        };
+                        /*  items.mapColumn = {
+                              label: "map Rows",
+                              action: function (_e) {
+                                  // pb avec source
+                                  KGcreator_mappings.showMappingDialog(null, { rowIndex: 1 });
+                              },
+                          };*/
                         items.lookups = {
                             label: "lookups",
                             action: function (_e) {
@@ -352,7 +379,7 @@ var KGcreator = (function () {
                             },
                         };
                         items.tranforms = {
-                            label: "tranforms",
+                            label: "edit tranforms",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showTransformDialog(node);
@@ -360,7 +387,7 @@ var KGcreator = (function () {
                         };
                         // Table == Fichier pour les CSV donc on met le delete ici
                         items.deleteCsvFile = {
-                            label: "deleteFile",
+                            label: "delete file",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator.deleteCsvFile(node);
@@ -368,14 +395,14 @@ var KGcreator = (function () {
                         };
 
                         items.showSampleData = {
-                            label: "showSampleData",
+                            label: "show sample Data",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator.showSampleData(node, true, 200);
                             },
                         };
                         items.removeTableMappings = {
-                            label: "removeTableMappings",
+                            label: "remove table mappings",
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator.removeTableMappings(node);
@@ -532,6 +559,10 @@ var KGcreator = (function () {
                     self.showTablesTree(self.currentConfig.currentDataSource);
                     callbackSeries();
                 },
+                function (callbackSeries) {
+                    KGcreator_mappings.showDataSourceMappings(null);
+                    callbackSeries();
+                },
             ],
             function (err) {
                 if (err) {
@@ -586,7 +617,7 @@ var KGcreator = (function () {
 
                         var columnMappings = self.getColumnsMappings(fileName, null, "s");
 
-                        if (columnMappings[column] || columnMappings["$_" + column]) {
+                        if (columnMappings[column] || columnMappings[column + "_$"]) {
                             label = "<span class='KGcreator_fileWithMappings'>" + column + "</span>";
                         }
 
@@ -627,7 +658,13 @@ var KGcreator = (function () {
             ],
             function (err) {
                 if (err) {
+                    if (callback) {
+                        return callback(err);
+                    }
                     return alert(err);
+                }
+                if (callback) {
+                    return callback(null);
                 }
             }
         );
@@ -681,7 +718,9 @@ var KGcreator = (function () {
     };
 
     self.showTableVirtualColumnsTree = function (table) {
-        if (!table) return alert("no table selected");
+        if (!table) {
+            return alert("no table selected");
+        }
         if (!self.currentConfig.currentMappings || !self.currentConfig.currentMappings[table] || !self.currentConfig.currentMappings[table].virtualColumns) {
             return;
         }
@@ -708,7 +747,7 @@ var KGcreator = (function () {
         var tableTriples = self.currentConfig.currentMappings[node.data.table].tripleModels;
         var tableTriplesCopy = JSON.parse(JSON.stringify(tableTriples));
         tableTriples.forEach(function (triple, index) {
-            if (triple.s.replace("$_", "") == node.data.id) {
+            if (triple.s.replace("_$", "") == node.data.id) {
                 tableTriplesCopy = tableTriplesCopy.filter((element) => JSON.stringify(element) != JSON.stringify(triple));
                 JstreeWidget.setSelectedNodeStyle({ color: "black" });
                 KGcreator_graph.deleteColumnNode(node);
@@ -719,7 +758,9 @@ var KGcreator = (function () {
         var virtualColumns = self.currentConfig.currentMappings[node.data.table].virtualColumns;
 
         var index = virtualColumns.indexOf(node.data.id);
-        if (index > -1) virtualColumns.splice(index, 1);
+        if (index > -1) {
+            virtualColumns.splice(index, 1);
+        }
 
         self.saveDataSourceMappings();
     };
@@ -824,7 +865,7 @@ var KGcreator = (function () {
         }
 
         self.currentConfig.currentMappings[table].tripleModels.forEach(function (triple) {
-            if ((column && triple[role].replace("$_", "") == column.replace("$_", "")) || !column) {
+            if ((column && triple[role].replace("_$", "") == column.replace("_$", "")) || !column) {
                 if (!columnTriples[triple[role]]) {
                     columnTriples[triple[role]] = [];
                 }
@@ -947,7 +988,7 @@ var KGcreator = (function () {
                 lines.push(line);
             });
             $("#smallDialogDiv").dialog("open");
-            $("#smallDialogDiv").parent().css("left", "10%");
+            //$("#smallDialogDiv").parent().css("left", "10%");
 
             Export.showDataTable("smallDialogDiv", tableCols, lines);
             return;
@@ -973,7 +1014,7 @@ var KGcreator = (function () {
             html += "</table>";
 
             $("#smallDialogDiv").dialog("open");
-            $("#smallDialogDiv").parent().css("left", "10%");
+            //$("#smallDialogDiv").parent().css("left", "10%");
             // $("#smallDialogDiv").html("<div style='overflow:auto;height:90%'>"+html+"</div>")
             $("#smallDialogDiv").html(html);
         }

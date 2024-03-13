@@ -31,3 +31,7 @@
 input[type="checkbox"] {
     width: 30px !important;
 }
+.KGcreator_Runbuttons {
+    font-size: 9px !important;
+    padding: 9px 3px;
+}

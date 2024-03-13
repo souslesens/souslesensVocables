@@ -338,8 +338,11 @@ var Lineage_whiteboard = (function () {
                             return alert(err.response);
                         }
                         var options = { output: "graph" };
-
-                        var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+                        if (!Lineage_whiteboard.lineageVisjsGraph.data.nodes.get) {
+                            nodes = [];
+                        } else {
+                            var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+                        }
                         var data = [];
                         nodes.forEach(function (node) {
                             if (node.data && (!node.data.type || node.data.type != "literal")) {
@@ -367,10 +370,10 @@ var Lineage_whiteboard = (function () {
             ],
             function (err) {
                 if (callback) {
-                    return callback(err);
+                    return callback(err, topConcepts);
                 }
                 if (err) {
-                    return alert(err);
+                    return alert(err), topConcepts;
                 }
             }
         );
@@ -546,6 +549,7 @@ var Lineage_whiteboard = (function () {
                 //   MainController.UI.message("", true)
                 //  self.drawNewGraph(visjsData);
                 if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
+                    options["legendType"] = "individualClasses";
                     self.drawNewGraph(visjsData, graphDiv, options);
                 } else {
                     self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
@@ -693,18 +697,6 @@ var Lineage_whiteboard = (function () {
                         });
                     }
                 },
-                /*
-                addNode: function (nodeData, callback) {
-                     CreateResource_bot.start()
-                    return;
-                    Lineage_createResource.showAddNodeGraphDialog(function (err, result) {
-                        if (err) {
-                            return callback(err.responseText);
-                        }
-                        return null;
-                    });
-                },
-                */
             };
             if (false) {
                 options.visjsOptions.interaction = {
@@ -1990,7 +1982,9 @@ var Lineage_whiteboard = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    if (!options.getFilteredTriples2) return callbackSeries();
+                    if (!options.getFilteredTriples2) {
+                        return callbackSeries();
+                    }
                     Sparql_OWL.getFilteredTriples2(source, subjectIds, properties, objectIds, options, function (err, result) {
                         //Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function(err, result) {
                         if (err) {
@@ -2004,14 +1998,20 @@ var Lineage_whiteboard = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    if (options.getFilteredTriples2) return callbackSeries();
+                    if (options.getFilteredTriples2) {
+                        return callbackSeries();
+                    }
                     Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function (err, result) {
                         //Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function(err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
                         if (!Lineage_whiteboard.isResultAcceptable(result)) {
-                            return callbackSeries("no data found");
+                            if (callback) {
+                                return callback("no data found");
+                            } else {
+                                return callbackSeries();
+                            }
                         }
                         data = result;
                         callbackSeries();
@@ -2157,20 +2157,21 @@ var Lineage_whiteboard = (function () {
                         }
                     });
 
-                    if (callbackSeries && options.returnVisjsData) {
-                        return callbackSeries(null, visjsData);
+                    if (callback && options.returnVisjsData) {
+                        return callback(null, visjsData);
                     }
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                        //Error on parameters for legend
                         Lineage_decoration.drawLegend("individuals");
                     } else {
                         Lineage_whiteboard.drawNewGraph(visjsData, null, { legendType: "individualClasses" });
                     }
 
                     $("#waitImg").css("display", "none");
-                    if (callbackSeries) {
-                        return callbackSeries(null, visjsData);
+                    if (callback) {
+                        return callback(null, visjsData);
                     }
                 },
             ],

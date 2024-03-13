@@ -979,6 +979,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             modal: false,
             title: "Graph parameters",
             position: { my: "left top", at: "right top" },
+            close: function (event, ui) {
+                window.scrollTo(0, 0);
+            },
+            drag: function (event, ui) {
+                $("#visjsConfigureDiv").parent().css("transform", "unset");
+            },
+            open(event, ui) {
+                $("#visjsConfigureDiv").parent().css("transform", "translate(-50%,-50%)");
+                $("#visjsConfigureDiv").parent().css("top", "50%");
+                $("#visjsConfigureDiv").parent().css("left", "50%");
+            },
         });
 
         //    $('#graphConfigDiv').dialog("open")
@@ -999,7 +1010,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
             setTimeout(function () {
                 $("#graphDisplay_theme").remove();
-                $("#visjsConfigureDiv").parent().css("left", "20%");
+                //$("#visjsConfigureDiv").parent().css("left", "20%");
                 $("#visjsConfigureDiv").prepend(
                     "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
                         "<select onchange='Lineage_sources.setTheme($(this).val())' >" +

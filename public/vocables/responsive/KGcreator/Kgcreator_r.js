@@ -6,11 +6,13 @@ import NodesInfosWidget from "../../modules/uiWidgets/nodeInfosWidget.js";
 
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
 import Lineage_r from "../lineage/lineage_r.js";
+
 var KGcreator_r = (function () {
     var self = {};
     //changed files and functions
     self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
     self.oldshowDialog = SavedQueriesComponent.showDialog;
+    self.currentTab = "";
 
     //self.oldshowMappingDialog=KGcreator_mappings.showMappingDialog;
     self.onLoaded = function () {
@@ -40,7 +42,22 @@ var KGcreator_r = (function () {
                 $("#lateralPanelDiv").load("./responsive/KGcreator/html/leftPanel.html", function () {
                     KGcreator.currentSlsvSource = ResponsiveUI.source;
                     ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initLinkTab, "#MapButton");
+                    KGcreator.initSource();
                     ResponsiveUI.resetWindowHeight();
+                    $("#KGcreator_dialogDiv").dialog({
+                        autoOpen: false,
+                        close: function (event, ui) {
+                            window.scrollTo(0, 0);
+                        },
+                        drag: function (event, ui) {
+                            $("#KGcreator_dialogDiv").parent().css("transform", "unset");
+                        },
+                        open(event, ui) {
+                            $("#KGcreator_dialogDiv").parent().css("transform", "translate(-50%,-50%)");
+                            $("#KGcreator_dialogDiv").parent().css("top", "50%");
+                            $("#KGcreator_dialogDiv").parent().css("left", "50%");
+                        },
+                    });
                 });
             });
         });
@@ -56,31 +73,43 @@ var KGcreator_r = (function () {
     };
     self.showMenuButtons = function () {};
     self.initRunTab = function () {
-        $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/runTab.html", function () {
-            $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function () {
-                $("#KGcreator_topButtons").css("padding", "4px");
-                $("#MenuBar").css("height", "");
-                $("#MenuBarFooter").css("display", "flex");
-                $("#KGcreator_topButtons").css("flex-direction", "column");
-                if (KGcreator.currentTreeNode) {
-                    KGcreator_run.createTriples(true);
-                }
-                ResponsiveUI.PopUpOnHoverButtons();
+        if (self.currentTab != "Run") {
+            self.currentTab = "Run";
+            $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/runTab.html", function () {
+                $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function () {
+                    /*$("#KGcreator_topButtons").css("padding", "4px");
+                    $("#MenuBar").css("height", "");
+                    $("#MenuBarFooter").css("display", "flex");
+                    $("#KGcreator_topButtons").css("flex-direction", "column");*/
+                    if (KGcreator.currentTreeNode) {
+                        KGcreator_run.createTriples(true);
+                        KGcreator_run.getTableAndShowMappings();
+                    }
+                    ResponsiveUI.PopUpOnHoverButtons();
+                    self.ResetRunMappingTabWidth();
+                    $("#KGcreator_centralPanelTabs").redraw();
+                });
             });
-        });
+        }
     };
     self.initLinkTab = function () {
-        $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/LinkTab.html", function () {
-            KGcreator.initSource();
-
-            $("#KGcreator_topButtons").load("./responsive/KGcreator/html/linkButtons.html", function () {
-                $("#KGcreator_topButtons").css("padding", "4px");
-                $("#MenuBar").css("height", "90px");
-                $("#KGcreator_topButtons").css("flex-direction", "row");
-                $("#MenuBarFooter").css("display", "block");
-                ResponsiveUI.PopUpOnHoverButtons();
+        if (self.currentTab != "Map") {
+            self.currentTab = "Map";
+            $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/linkTab.html", function () {
+                $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function () {
+                    if (KGcreator.currentTreeNode != undefined) {
+                        $(document.getElementById(KGcreator.currentTreeNode.id + "_anchor")).click();
+                    }
+                });
             });
-        });
+        }
+    };
+    self.ResetRunMappingTabWidth = function () {
+        var LateralPannelWidth = $("#lateralPanelDiv").width();
+        var KGcreator_runmappingsTabWidth = $(window).width() - LateralPannelWidth;
+        var KGcreator_GraphEditorWidth = KGcreator_runmappingsTabWidth / 2 - 5;
+
+        $("#KGcreator_run_mappingsGraphEditorContainer").css("width", KGcreator_GraphEditorWidth);
     };
     /*
     self.showMappingDialogResponsive=function(addColumnClassType, options, callback){

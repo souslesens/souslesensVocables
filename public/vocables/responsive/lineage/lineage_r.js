@@ -198,7 +198,7 @@ var Lineage_r = (function () {
             });
     };
     self.responsiveAddEdgeDialog = function (edgeData, callback) {
-        ResponsiveUI.openDialogDiv("smallDialogDiv");
+        //ResponsiveUI.openDialogDiv("smallDialogDiv");
         $("#smallDialogDiv")
             .parent()
             .show("fast", function () {

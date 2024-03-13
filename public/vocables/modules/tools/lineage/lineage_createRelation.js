@@ -321,7 +321,9 @@ var Lineage_createRelation = (function () {
                                 label: "Node infos",
                                 action: function (_e) {
                                     // pb avec source
-                                    NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv");
+                                    NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv",null,function(){
+                                        $('#mainDialogDiv').parent().css('z-index',1);
+                                    });
                                 },
                             },
                         };

@@ -12,6 +12,7 @@ var KGcreator_r = (function() {
     //changed files and functions
     self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
     self.oldshowDialog = SavedQueriesComponent.showDialog;
+    self.currentTab='';
 
     //self.oldshowMappingDialog=KGcreator_mappings.showMappingDialog;
     self.onLoaded = function() {
@@ -41,6 +42,7 @@ var KGcreator_r = (function() {
                 $("#lateralPanelDiv").load("./responsive/KGcreator/html/leftPanel.html", function() {
                     KGcreator.currentSlsvSource = ResponsiveUI.source;
                     ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initLinkTab, "#MapButton");
+                    KGcreator.initSource();
                     ResponsiveUI.resetWindowHeight();
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
@@ -74,31 +76,39 @@ var KGcreator_r = (function() {
     self.showMenuButtons = function() {
     };
     self.initRunTab = function() {
-        $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/runTab.html", function(xerr, y, z) {
+        if(self.currentTab!='Run'){
+            self.currentTab='Run';
+            $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/runTab.html", function() {
 
 
-            $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function() {
-                /*$("#KGcreator_topButtons").css("padding", "4px");
-                $("#MenuBar").css("height", "");
-                $("#MenuBarFooter").css("display", "flex");
-                $("#KGcreator_topButtons").css("flex-direction", "column");*/
-                if (KGcreator.currentTreeNode) {
-                    KGcreator_run.createTriples(true);
-                    KGcreator_run.getTableAndShowMappings()
+                $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function() {
+                    /*$("#KGcreator_topButtons").css("padding", "4px");
+                    $("#MenuBar").css("height", "");
+                    $("#MenuBarFooter").css("display", "flex");
+                    $("#KGcreator_topButtons").css("flex-direction", "column");*/
+                    if (KGcreator.currentTreeNode) {
+                        KGcreator_run.createTriples(true);
+                        KGcreator_run.getTableAndShowMappings()
 
-                }
-                ResponsiveUI.PopUpOnHoverButtons();
-                self.ResetRunMappingTabWidth();
-                $("#KGcreator_centralPanelTabs").redraw();
+                    }
+                    ResponsiveUI.PopUpOnHoverButtons();
+                    self.ResetRunMappingTabWidth();
+                    $("#KGcreator_centralPanelTabs").redraw();
+                    
+
+                });
             });
-        });
+        }
     };
     self.initLinkTab = function() {
-        $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/linkTab.html", function() {
-            KGcreator.initSource();
+        if(self.currentTab!='Map'){
+            self.currentTab='Map';
+            $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/linkTab.html", function() {
+                
 
-
-        });
+            });
+        }
+       
     };
     self.ResetRunMappingTabWidth = function() {
         var LateralPannelWidth = $("#lateralPanelDiv").width();

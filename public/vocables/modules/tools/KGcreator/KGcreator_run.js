@@ -61,7 +61,7 @@ var KGcreator_run = (function() {
         if (!options) {
             options = {};
         }
-
+        ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initRunTab, "#RunButton");
         var table = self.getTableAndShowMappings(allmappings);
         if (!table) {
             return alert("select a node");
@@ -76,6 +76,7 @@ var KGcreator_run = (function() {
         if (sampleData) {
             options.deleteOldGraph = false;
             options.sampleSize = 500;
+            
         } else {
             options.deleteOldGraph = false;
         }
@@ -169,8 +170,10 @@ var KGcreator_run = (function() {
         if (!Config.sources[graphSource].graphUri) {
             return alert("no graphUri for source" + KGcreator.currentSlsvSource);
         }
+        
 
         if (callback || confirm("index source " + graphSource)) {
+            ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initRunTab, "#RunButton");
             SearchUtil.generateElasticIndex(graphSource, null, function(err, _result) {
                 if (err) {
                     if (callback) {
@@ -284,6 +287,7 @@ var KGcreator_run = (function() {
         if (!confirm("generate KGcreator triples of datasource " + KGcreator.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
             return;
         }
+        ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initRunTab, "#RunButton");
         $("#KGcreator_infosDiv").val("generating KGcreator triples form all mappings ");
         async.series(
             [

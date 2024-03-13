@@ -18,13 +18,11 @@ var NodeInfosWidget = (function () {
 
     self.initDialog = function (sourceLabel, divId, options, callback) {
         ResponsiveUI.openDialogDiv(divId);
-        $("#" + divId)
-            .parent()
-            .show("fast", function () {
+        $("#" + divId).parent().show("fast", function () {
                 self.oldNodeInfosInit(sourceLabel, divId, options, callback);
                 $("#addPredicateButton").remove();
                 $("#deleteButton").remove();
-            });
+        });
 
         //$(".ui-dialog-title")
     };

@@ -4,7 +4,7 @@ import KGquery from "../tools/KGquery/KGquery.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
 import _botEngine from "./_botEngine.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import _commonBotFunctions from "./_commonBotFunctions.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 
 var CreateSLSVsource_bot = (function () {
     var self = {};

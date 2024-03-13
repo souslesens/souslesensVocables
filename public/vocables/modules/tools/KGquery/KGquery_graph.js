@@ -85,7 +85,7 @@ var KGquery_graph = (function () {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
-
+MainController.UI.message("generating tbox graph from abox graph")
                     self.getInferredModelVisjsData(KGquery.currentSource, function (err, result2) {
                         if (err) {
                             return alert(err);
@@ -148,6 +148,7 @@ var KGquery_graph = (function () {
                 },
             ],
             function (err) {
+                MainController.UI.message("",true)
                 if (err) {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");

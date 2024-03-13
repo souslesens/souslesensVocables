@@ -28,13 +28,10 @@ var KGquery_filter_bot = (function() {
     self.workflow_filterClass = {
 
         _OR: {
-            "Choose annotation": { listAnnotationsFn: { chooseAnnotationOperatorFn: { promptAnnotationValueFn: { setSparqlQueryFilter: {} } } } },
-            "enter rdfs:label": { promptIndividualsLabelFn: { setSparqlQueryFilter: {} } },
-            "List rdfs:labels": { listIndividualsFn: { setSparqlQueryFilter: {} } }
-            // advanced: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
-            // date: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
-            //  period: { promptIndividualsAdvandedFilterFn: { setSparqlQueryFilter: {} } },
-            // }
+            "Choose annotation": { listAnnotationsFn: { chooseAnnotationOperatorFn: { promptAnnotationValueFn: { setSparqlQueryFilterFn: {} } } } },
+            "rdfs:label contains": { promptIndividualsLabelFn: { setSparqlQueryFilterFn: {} } },
+            "Choose rdfs:label": { listIndividualsFn: { setSparqlQueryFilterFn: {} } }
+
         }
 
     };
@@ -79,6 +76,7 @@ var KGquery_filter_bot = (function() {
 
 
         }
+    }
         self.functions.promptAnnotationValueFn = function() {
 
             if (!self.params.annotationDatatype || self.params.annotationDatatype == "xsd:string") {
@@ -91,12 +89,9 @@ var KGquery_filter_bot = (function() {
         };
 
 
-        self.functions.listFilterTypes = function() {
-            /* var choices = ["label", "list"];
-             BotEngine.showList(choices, "individualsFilterType");*/
-        };
 
-        self.functions.setSparqlQueryFilter = function(queryParams, varName) {
+
+        self.functions.setSparqlQueryFilterFn = function(queryParams, varName) {
             var varName = self.params.varName;
             var individualsFilterType = self.params.individualsFilterType;
             var individualsFilterValue = self.params.individualsFilterValue;
@@ -148,7 +143,7 @@ var KGquery_filter_bot = (function() {
             _botEngine.nextStep();
         }
         ;
-    };
+
 
 
     return self;

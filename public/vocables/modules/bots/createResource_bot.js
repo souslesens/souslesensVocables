@@ -5,7 +5,7 @@ import _botEngine from "./_botEngine.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import AxiomsEditor from "../tools/lineage/axiomsEditor.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
-import _commonBotFunctions from "./_commonBotFunctions.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 
 var CreateResource_bot = (function () {
@@ -73,7 +73,7 @@ var CreateResource_bot = (function () {
         },
 
         listVocabsFn: function () {
-            _commonBotFunctions.listVocabsFn(self.source, "currentVocab");
+            CommonBotFunctions.listVocabsFn(self.source, "currentVocab");
         },
 
         promptResourceLabelFn: function () {
@@ -84,7 +84,7 @@ var CreateResource_bot = (function () {
         },
 
         listSuperClassesFn: function () {
-            _commonBotFunctions.listVocabClasses(self.params.currentVocab, "resourceId", true);
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "resourceId", true);
         },
         listClassTypesFn: function () {
             self.functions.listSuperClassesFn();

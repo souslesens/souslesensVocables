@@ -2,7 +2,7 @@ import _botEngine from "./_botEngine.js";
 import KGcreator from "../tools/KGcreator/KGcreator.js";
 import OntologyModels from "../shared/ontologyModels.js";
 
-var _commonBotFunctions = (function () {
+var CommonBotFunctions = (function () {
     var self = {};
 
     self.sortList = function (list) {
@@ -130,4 +130,4 @@ var _commonBotFunctions = (function () {
 
     return self;
 })();
-export default _commonBotFunctions;
+export default CommonBotFunctions;

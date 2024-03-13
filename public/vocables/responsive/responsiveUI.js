@@ -272,6 +272,11 @@ var ResponsiveUI = (function () {
             //setTimeout(() => {}, "500");
             // fetch theme from api
             const response = await fetch("/api/v1/users/theme");
+            if(response.status==400){
+                ResponsiveUI.changeTheme(Config.theme.defaultTheme)
+                callback();
+            }
+
             const data = await response.json();
             ResponsiveUI.changeTheme(data.theme);
 
@@ -289,8 +294,10 @@ var ResponsiveUI = (function () {
         common.fillSelectOptions("themeSelect", allThemesNames, false);
     };
     //Keep
-    self.changeTheme = function (ThemeName) {
-        var themeSelected = Config.slsvColorThemes[ThemeName];
+    self.changeTheme = function (themeName) {
+        if(!themeName)
+            return;
+        var themeSelected = Config.slsvColorThemes[themeName];
         self.currentTheme = themeSelected;
         if (themeSelected["@logoInstance-icon"] == undefined || themeSelected["@logoInstance-icon"] == "") {
             $("#externalLogoDiv").hide();

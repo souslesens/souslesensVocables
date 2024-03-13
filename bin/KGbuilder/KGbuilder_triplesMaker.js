@@ -203,9 +203,14 @@ var KGbuilder_triplesMaker = {
       subjectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.s);
       return callback(null, subjectStr);
     }
-    else if (tableMappings.transform && line[mapping.s] && tableMappings.transform[mapping.s]) {
+    else if (tableMappings.transform  && tableMappings.transform[mapping.s]) {
       try {
-        subjectStr = tableMappings.transform[mapping.s](line[mapping.s], "s", mapping.p, line, mapping);
+        if(line[mapping.s]) {
+          subjectStr = tableMappings.transform[mapping.s](line[mapping.s], "s", mapping.p, line, mapping);
+        }else{
+          subjectStr = tableMappings.transform[mapping.s](mapping.s, "s", mapping.p, line, mapping);
+        }
+
       } catch (e) {
         return callback((lineError = e + " " + mapping.s));
       }
@@ -327,9 +332,14 @@ var KGbuilder_triplesMaker = {
 
           objectStr = "'" + str + "'^^" + mapping.dataType;
         }
-        else if (tableMappings.transform && line[mapping.o] && tableMappings.transform[mapping.o]) {
+        else if (tableMappings.transform  && tableMappings.transform[mapping.o]) {
           try {
-            objectStr = tableMappings.transform[mapping.o](line[mapping.o], "o", mapping.p, line, mapping);
+            if(line[mapping.o]) {
+              objectStr = tableMappings.transform[mapping.o](line[mapping.o], "o", mapping.p, line, mapping);
+            }
+            else{
+              objectStr = tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
+            }
           } catch (e) {
             return (lineError = e + " " + mapping.o);
           }

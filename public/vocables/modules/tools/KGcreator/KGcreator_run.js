@@ -15,7 +15,7 @@ var KGcreator_run = (function() {
             return alert("select a node");
         }
 
-        var selectedText = self.currentMappingsSelection;
+        var selectedText = KGcreator_mappings.currentMappingsSelection;
         if (!selectedText) {
             return;
         }

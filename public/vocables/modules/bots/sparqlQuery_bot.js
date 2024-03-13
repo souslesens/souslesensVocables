@@ -7,7 +7,7 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import IndividualValueFilterWidget from "../uiWidgets/individualValuefilterWidget.js";
 import _botEngine from "./_botEngine.js";
-import _commonBotFunctions from "./_commonBotFunctions.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 
 var SparqlQuery_bot = (function () {
     var self = {};
@@ -121,7 +121,7 @@ var SparqlQuery_bot = (function () {
 
     self.functions = {
         listVocabsFn: function () {
-            _commonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
+            CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
         },
         listQueryTypeFn: function () {
             var choices = ["By Class", "By Object Property", "By Annotation/Datatype property", "Sample of Classes", "Sample of Individuals", "Sample of Predicates"];
@@ -130,11 +130,11 @@ var SparqlQuery_bot = (function () {
         },
 
         listClassesFn: function () {
-            _commonBotFunctions.listVocabClasses(self.params.currentVocab, "currentClass", true, [{ label: ".Any Class", id: "AnyClass" }]);
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "currentClass", true, [{ label: ".Any Class", id: "AnyClass" }]);
         },
 
         listPropertiesFn: function () {
-            _commonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "currentProperty", [{ label: ".Any property", id: "AnyProperty" }]);
+            CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "currentProperty", [{ label: ".Any property", id: "AnyProperty" }]);
         },
 
         listPredicatePathsFn: function () {
@@ -190,12 +190,12 @@ var SparqlQuery_bot = (function () {
         },
 
         listAnnotationPropertiesVocabsFn: function () {
-            _commonBotFunctions.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
+            CommonBotFunctions.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
         },
 
         listAnnotationPropertiesFn: function () {
             // filter properties compatible with
-            _commonBotFunctions.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
+            CommonBotFunctions.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
         },
 
         promptAnnotationPropertyValue: function () {

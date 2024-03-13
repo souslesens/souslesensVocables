@@ -7,7 +7,7 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import IndividualValueFilterWidget from "../uiWidgets/individualValuefilterWidget.js";
 import _botEngine from "./_botEngine.js";
-import _commonBotFunctions from "./_commonBotFunctions.js";
+import CommonBotFunctions from "./_commonBotFunctions.js";
 
 var NodeRelations_bot = (function () {
     var self = {};
@@ -61,11 +61,11 @@ var NodeRelations_bot = (function () {
 
     self.functions = {
         listVocabsFn: function () {
-            _commonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
+            CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
         },
 
         listClassesFn: function () {
-            _commonBotFunctions.listVocabClasses(self.params.currentVocab, "currentClass", true, [{ label: "_Any Class", id: "AnyClass" }]);
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "currentClass", true, [{ label: "_Any Class", id: "AnyClass" }]);
         },
 
         listPredicatePathsFn: function () {
@@ -90,12 +90,12 @@ var NodeRelations_bot = (function () {
         },
 
         listAnnotationPropertiesVocabsFn: function () {
-            _commonBotFunctions.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
+            CommonBotFunctions.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
         },
 
         listAnnotationPropertiesFn: function () {
             // filter properties compatible with
-            _commonBotFunctions.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
+            CommonBotFunctions.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
         },
 
         promptAnnotationPropertyValue: function () {

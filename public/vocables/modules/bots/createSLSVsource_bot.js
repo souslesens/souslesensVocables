@@ -62,7 +62,7 @@ var CreateSLSVsource_bot = (function () {
             _botEngine.nextStep();
         },
         promptSourceNameFn: function () {
-            _botEngine.promptValue("source label", "sourceLabel", "", null,function (value) {
+            _botEngine.promptValue("source label", "sourceLabel", "", null, function (value) {
                 if (!value) {
                     _botEngine.previousStep();
                 }
@@ -87,7 +87,7 @@ var CreateSLSVsource_bot = (function () {
         },
 
         uploadFromUrlFn: function () {
-            _botEngine.promptValue("enter remote Url", "uploadUrl", "", null,function (value) {
+            _botEngine.promptValue("enter remote Url", "uploadUrl", "", null, function (value) {
                 if (!value) {
                     alert("enter a value ");
                     return _botEngine.previousStep();
@@ -102,7 +102,7 @@ var CreateSLSVsource_bot = (function () {
         },
         uploadFromFileFn: function () {
             $("#smallDialogDiv").dialog("open");
-            $("#smallDialogDiv").parent().css("z-index",1);
+            $("#smallDialogDiv").parent().css("z-index", 1);
             $("#smallDialogDiv").dialog("option", "title", "Upload");
             $("#smallDialogDiv").dialog({
                 close: function (event, ui) {

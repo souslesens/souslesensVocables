@@ -981,16 +981,15 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             position: { my: "left top", at: "right top" },
             close: function (event, ui) {
                 window.scrollTo(0, 0);
-                
             },
-            drag:function(event,ui){
-                $("#visjsConfigureDiv").parent().css('transform','unset')
+            drag: function (event, ui) {
+                $("#visjsConfigureDiv").parent().css("transform", "unset");
             },
-            open(event,ui){
-                $("#visjsConfigureDiv").parent().css('transform','translate(-50%,-50%)');
-                $("#visjsConfigureDiv").parent().css('top','50%');
-                $("#visjsConfigureDiv").parent().css('left','50%');
-            }
+            open(event, ui) {
+                $("#visjsConfigureDiv").parent().css("transform", "translate(-50%,-50%)");
+                $("#visjsConfigureDiv").parent().css("top", "50%");
+                $("#visjsConfigureDiv").parent().css("left", "50%");
+            },
         });
 
         //    $('#graphConfigDiv').dialog("open")

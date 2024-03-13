@@ -236,8 +236,8 @@
                 }
             });
 
-            $.fn.redraw = function(){
-                $(this).each(function(){
+            $.fn.redraw = function () {
+                $(this).each(function () {
                     var redraw = this.offsetHeight;
                 });
             };
@@ -311,16 +311,15 @@
                             modal: false,
                             close: function (event, ui) {
                                 window.scrollTo(0, 0);
-                                
                             },
-                            drag:function(event,ui){
-                                $("#mainDialogDiv").parent().css('transform','unset')
+                            drag: function (event, ui) {
+                                $("#mainDialogDiv").parent().css("transform", "unset");
                             },
-                            open(event,ui){
-                                $("#mainDialogDiv").parent().css('transform','translate(-50%,-50%)');
-                                $("#mainDialogDiv").parent().css('top','50%');
-                                $("#mainDialogDiv").parent().css('left','50%');
-                            }
+                            open(event, ui) {
+                                $("#mainDialogDiv").parent().css("transform", "translate(-50%,-50%)");
+                                $("#mainDialogDiv").parent().css("top", "50%");
+                                $("#mainDialogDiv").parent().css("left", "50%");
+                            },
                         });
                         $("#mainDialogDiv2").dialog({
                             autoOpen: false,
@@ -329,16 +328,15 @@
                             modal: false,
                             close: function (event, ui) {
                                 window.scrollTo(0, 0);
-                                
                             },
-                            drag:function(event,ui){
-                                $("#mainDialogDiv2").parent().css('transform','unset')
+                            drag: function (event, ui) {
+                                $("#mainDialogDiv2").parent().css("transform", "unset");
                             },
-                            open(event,ui){
-                                $("#mainDialogDiv2").parent().css('transform','translate(-50%,-50%)');
-                                $("#mainDialogDiv2").parent().css('top','50%');
-                                $("#mainDialogDiv2").parent().css('left','50%');
-                            }
+                            open(event, ui) {
+                                $("#mainDialogDiv2").parent().css("transform", "translate(-50%,-50%)");
+                                $("#mainDialogDiv2").parent().css("top", "50%");
+                                $("#mainDialogDiv2").parent().css("left", "50%");
+                            },
                         });
 
                         $("#smallDialogDiv").dialog({
@@ -348,16 +346,15 @@
                             modal: false,
                             close: function (event, ui) {
                                 window.scrollTo(0, 0);
-                                
                             },
-                            drag:function(event,ui){
-                                $("#smallDialogDiv").parent().css('transform','unset')
+                            drag: function (event, ui) {
+                                $("#smallDialogDiv").parent().css("transform", "unset");
                             },
-                            open(event,ui){
-                                $("#smallDialogDiv").parent().css('transform','translate(-50%,-50%)');
-                                $("#smallDialogDiv").parent().css('top','50%');
-                                $("#smallDialogDiv").parent().css('left','50%');
-                            }
+                            open(event, ui) {
+                                $("#smallDialogDiv").parent().css("transform", "translate(-50%,-50%)");
+                                $("#smallDialogDiv").parent().css("top", "50%");
+                                $("#smallDialogDiv").parent().css("left", "50%");
+                            },
                         });
                         $("#botPanel").dialog({
                             autoOpen: false,
@@ -367,18 +364,18 @@
                             close: function (event, ui) {
                                 //$("#previousButtonBot").remove();
                                 //$("#resetButtonBot").remove();
-                                $('#BotUpperButtons').remove();
+                                $("#BotUpperButtons").remove();
                             },
-                            drag:function(event,ui){
-                                $("#botPanel").parent().css('transform','unset')
+                            drag: function (event, ui) {
+                                $("#botPanel").parent().css("transform", "unset");
                             },
-                            open(event,ui){
-                                $("#botPanel").parent().css('transform','translate(-50%,-50%)');
-                                $("#botPanel").parent().css('top','50%');
-                                $("#botPanel").parent().css('left','50%');
-                            }
+                            open(event, ui) {
+                                $("#botPanel").parent().css("transform", "translate(-50%,-50%)");
+                                $("#botPanel").parent().css("top", "50%");
+                                $("#botPanel").parent().css("left", "50%");
+                            },
                         });
-                       
+
                         $(document).on("click", "a", function () {
                             var target = $(this).attr("target");
                             if (target == "_slsvCallback") {
@@ -510,8 +507,8 @@
         </header>
         <!-- style="height: 92.5dvh"-->
         <div id="graphAndCommandScreen" class="w3-container" style="height: 92.5dvh">
-            <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="width: 435px; height:99%" id="lateralPanelDiv"></div>
-           
+            <div class="w3-container w3-col l3 slsv-bg-pale w3-display-container" style="width: 435px; height: 99%" id="lateralPanelDiv"></div>
+
             <div id="graphDivContainer" class="w3-container w3-col l9" style="height: 100%; width: 0px">
                 <div id="graphDiv" class="w3-container" style="height: 100%"></div>
             </div>

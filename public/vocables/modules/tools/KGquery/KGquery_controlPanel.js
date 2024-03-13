@@ -59,7 +59,6 @@ var KGquery_controlPanel = (function () {
         return queryElementDivId;
     };
 
-
     self.addNodeToQueryElementDiv = function (queryElementDivId, role, label) {
         $("#" + queryElementDivId).css("display", "block");
         var nodeDivId = "nodeDiv_" + common.getRandomHexaId(5);

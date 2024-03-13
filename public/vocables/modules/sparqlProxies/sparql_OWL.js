@@ -765,7 +765,6 @@ var Sparql_OWL = (function () {
                 hierarchies[id] = [];
 
                 result.results.bindings.forEach(function (item) {
-
                     if (item.subject.value == id) {
                         hierarchies[id].push(item);
                     }
@@ -1429,8 +1428,8 @@ var Sparql_OWL = (function () {
     self.getInverseRestriction = function (sourceLabel, restrictionId, callback) {
         var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
         query += "SELECT distinct *";
-        query +=Sparql_common.getFromStr(sourceLabel)
-        query +="where"
+        query += Sparql_common.getFromStr(sourceLabel);
+        query += "where";
         query += "{ graph ?g {?subject owl:inverseOf <" + restrictionId + ">." + "?subject ?predicate ?object.}}";
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var url = self.sparql_url + "?format=json&query=";

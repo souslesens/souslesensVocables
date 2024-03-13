@@ -3,10 +3,10 @@ import KGcreator_graph from "./KGcreator_graph.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 import kgcreator_r from "../../../responsive/KGcreator/Kgcreator_r.js";
 
-var KGcreator_mappings = (function() {
+var KGcreator_mappings = (function () {
     var self = {};
 
-    self.showMappingDialog = function(addColumnClassType, options, callback) {
+    self.showMappingDialog = function (addColumnClassType, options, callback) {
         PopupMenuWidget.hidePopup();
 
         if (!options) {
@@ -16,7 +16,7 @@ var KGcreator_mappings = (function() {
         self.currentSlsvSource = KGcreator.currentSlsvSource;
         self.currentColumn = {
             node: KGcreator.currentTreeNode,
-            triples: []
+            triples: [],
         };
         var columnNode = self.currentColumn.node;
 
@@ -44,26 +44,24 @@ return alert("select a field (column)");
         $("#smallDialogDiv").css("height", "700px");
         //$("#smallDialogDiv").parent().css("left", "10%");
         /*$("#smallDialogDiv").css('left','10%');*/
-        $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function() {
+        $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
             $("#LinkColumn_rightPanel").show();
             $("#LinkColumn_basicTypeSelect").show();
             $("#LinkColumn_basicTypeSelect").parent().find("span").show();
 
-            PredicatesSelectorWidget.load("LinkColumn_predicateSelectorDiv", self.currentSlsvSource, { "flex-direction": "column" }, function() {
+            PredicatesSelectorWidget.load("LinkColumn_predicateSelectorDiv", self.currentSlsvSource, { "flex-direction": "column" }, function () {
                 $("#editPredicate_vocabularySelect2").css("display", "inline");
                 $("#editPredicate_vocabularySelect2").val("usual");
                 $("#smallDialogDiv").find("#editPredicate_mainDiv").css("flex-direction", "column");
-                PredicatesSelectorWidget.init(self.currentSlsvSource, function() {
-                    PredicatesSelectorWidget.onSelectObjectFn = function(value) {
-                    };
-                    PredicatesSelectorWidget.onSelectPropertyFn = function(value) {
-                    };
+                PredicatesSelectorWidget.init(self.currentSlsvSource, function () {
+                    PredicatesSelectorWidget.onSelectObjectFn = function (value) {};
+                    PredicatesSelectorWidget.onSelectPropertyFn = function (value) {};
                     $("#smallDialogDiv").find("#editPredicate_savePredicateButton").css("display", "none");
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
                         //  height: 600,
                         //  width: 800,
-                        modal: false
+                        modal: false,
                     });
                     var html =
                         "<div>isBlankNode<input type='checkbox' id='LinkColumn_isObjectBlankNodeCBX' />" +
@@ -72,20 +70,20 @@ return alert("select a field (column)");
                     $("#editPredicate_customContentDiv").html(html);
                     //
 
-                    $("#editPredicate_objectSelect").bind("change", function() {
+                    $("#editPredicate_objectSelect").bind("change", function () {
                         KGcreator_mappings.onTripleModelSelect("o", $(this).val());
                     });
 
-                    $("#editPredicate_vocabularySelect2").bind("change", function() {
+                    $("#editPredicate_vocabularySelect2").bind("change", function () {
                         KGcreator_mappings.onTripleModelSelect("o", $(this).val());
                     });
 
-                    $("#editPredicate_currentVocabPredicateSelect").bind("change", function() {
+                    $("#editPredicate_currentVocabPredicateSelect").bind("change", function () {
                         KGcreator_mappings.onTripleModelSelect("p", $(this).val());
                     });
 
                     $("#LinkColumn_subjectInput").val(columnNode.data.id);
-                    $("#editPredicate_vocabularySelect2").append("<option value=\"table_Column\">table Column</option>");
+                    $("#editPredicate_vocabularySelect2").append('<option value="table_Column">table Column</option>');
                 });
 
                 self.columnJsonEditor = new JsonEditor("#KGcreator_columnJsonDisplay", {});
@@ -106,7 +104,7 @@ return alert("select a field (column)");
                     var classTypeTriple = {
                         s: columnNode.data.id,
                         p: "rdf:type",
-                        o: KGcreator_graph.currentGraphNode.data.id
+                        o: KGcreator_graph.currentGraphNode.data.id,
                     };
                     self.updateColumnTriplesEditor(classTypeTriple);
                 }
@@ -117,7 +115,7 @@ return alert("select a field (column)");
         });
     };
 
-    self.onTripleModelSelect = function(role, value) {
+    self.onTripleModelSelect = function (role, value) {
         if (!value) {
             return;
         }
@@ -155,12 +153,12 @@ return alert("select a field (column)");
         }
     };
 
-    self.updateColumnTriplesEditor = function(triples, column) {
+    self.updateColumnTriplesEditor = function (triples, column) {
         if (!Array.isArray(triples)) {
             triples = [triples];
         }
 
-        triples.forEach(function(triple) {
+        triples.forEach(function (triple) {
             if (Object.keys(triple).length >= 3) {
                 self.currentColumn.triples.push(triple);
             }
@@ -168,25 +166,25 @@ return alert("select a field (column)");
         self.columnJsonEditor.load(self.currentColumn.triples);
     };
 
-    self.addBasicMapping = function(basicType) {
+    self.addBasicMapping = function (basicType) {
         if (basicType) {
             var column = self.currentColumn.node.data.id;
             var triples = [];
             triples.push({
                 s: column,
                 p: "rdf:type",
-                o: basicType
+                o: basicType,
             });
             triples.push({
                 s: column,
                 p: "rdfs:label",
                 o: column,
-                isString: true
+                isString: true,
             });
             self.updateColumnTriplesEditor(triples);
         }
     };
-    self.addTripleFromPredicateSelectorWidget = function(basicType) {
+    self.addTripleFromPredicateSelectorWidget = function (basicType) {
         // var subject = self.currentColumn.node.data.id;
         /*  var subjectType=$("#LinkColumn_subjectSelect").val();
   if(subjectType!="_selectedColumn")*/
@@ -256,13 +254,13 @@ tripleObj.objectIsSpecificUri = true;
         self.updateColumnTriplesEditor(tripleObj);
         self.saveColumnMappings(true);
     };
-    self.addLookup = function() {
+    self.addLookup = function () {
         var lookup = {
             name: $("#KGCreator_lookupName").val(),
             fileName: $("#KGCreator_lookupTable").val(),
             sourceColumn: $("#KGCreator_lookupSourceColumnSelect").val(),
             targetColumn: $("#KGCreator_lookupTargetColumnSelect").val(),
-            transformFn: $("#KGCreator_lookupTransformFn").val().replace(/"/g, "'")
+            transformFn: $("#KGCreator_lookupTransformFn").val().replace(/"/g, "'"),
         };
 
         if (!lookup.name) {
@@ -282,12 +280,12 @@ tripleObj.objectIsSpecificUri = true;
         KGcreator.saveDataSourceMappings();
         $("#smallDialogDiv").dialog("close");
     };
-    self.showFunctionDialog = function(_role) {
+    self.showFunctionDialog = function (_role) {
         $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/functionDialog.html");
         $("#KGcreator_dialogDiv").dialog("open");
     };
 
-    self.createPrefixTransformFn = function() {
+    self.createPrefixTransformFn = function () {
         if (!self.currentTreeNode) {
             var column_selected = $("#KGcreator_transformColumnSelect").val();
         } else {
@@ -300,7 +298,7 @@ tripleObj.objectIsSpecificUri = true;
         var str = "if(mapping.isString && role=='o') return value; else return '" + prefix + "-'+value;";
         $("#KGcreator_fnBody").val(str);
     };
-    self.testFunction = function() {
+    self.testFunction = function () {
         var fnBody = $("#KGcreator_fnBody").val();
         fnBody = fnBody.replace(/"/g, "'");
         try {
@@ -311,7 +309,7 @@ tripleObj.objectIsSpecificUri = true;
         }
     };
 
-    self.addFunction = function(role) {
+    self.addFunction = function (role) {
         if (!role) {
             role = self.currentMappingRole;
         }
@@ -336,7 +334,7 @@ tripleObj.objectIsSpecificUri = true;
         $("#KGcreator_dialogDiv").dialog("close");
     };
 
-    self.addTransformFunction = function() {
+    self.addTransformFunction = function () {
         var table = self.currentTable;
         if (!table) {
             return alert("no table selected");
@@ -360,14 +358,14 @@ tripleObj.objectIsSpecificUri = true;
         self.transformJsonEditor.load(KGcreator.currentConfig.currentMappings[self.currentTable].transform);
     };
 
-    self.saveTransform = function() {
+    self.saveTransform = function () {
         var json = self.transformJsonEditor.get();
         KGcreator.currentConfig.currentMappings[self.currentTable].transform = json;
         KGcreator.saveDataSourceMappings();
         $("#smallDialogDiv").dialog("close");
     };
 
-    self.saveColumnMappings = function(keepDialogOpen) {
+    self.saveColumnMappings = function (keepDialogOpen) {
         var columnNode = self.currentColumn.node;
         if (!KGcreator.currentConfig.currentMappings[columnNode.data.table]) {
             KGcreator.currentConfig.currentMappings[columnNode.data.table] = { tripleModels: [], transforms: [] };
@@ -375,7 +373,7 @@ tripleObj.objectIsSpecificUri = true;
         var newColumnMappings = self.columnJsonEditor.get();
 
         //concat new triples from editor with other mappings in table
-        KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels.forEach(function(triple) {
+        KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels.forEach(function (triple) {
             if (triple.s.replace("_$", "") == columnNode.data.id) {
                 return;
             }
@@ -387,7 +385,6 @@ tripleObj.objectIsSpecificUri = true;
 
         JstreeWidget.setSelectedNodeStyle({ color: "#0067bb" });
 
-
         if (self.currentGraphNode) {
             columnNode.data.classNode = KGcreator_graph.currentGraphNode.id;
             KGcreator_graph.drawColumnToClassGraph([columnNode]);
@@ -397,7 +394,7 @@ tripleObj.objectIsSpecificUri = true;
         }
     };
 
-    self.saveTableMappings = function(tableId, tableMappings) {
+    self.saveTableMappings = function (tableId, tableMappings) {
         if (!tableMappings) {
             return alert("incorrect data");
         }
@@ -423,20 +420,20 @@ tripleObj.objectIsSpecificUri = true;
         KGcreator.saveDataSourceMappings();
     };
 
-    self.joinColumns = function(columnFromData, columnToData, foreignKey, callback) {
+    self.joinColumns = function (columnFromData, columnToData, foreignKey, callback) {
         var joins = {
             fromTable: columnFromData.table,
             toTable: columnToData.table,
             fromColumn: foreignKey,
-            toColumn: columnToData.columnName
+            toColumn: columnToData.columnName,
         };
         KGcreator.rawConfig.databaseSources[KGcreator.currentConfig.currentDataSource.name].tableJoins.push(joins);
         KGcreator.saveSlsvSourceConfig();
         return callback();
     };
 
-    self.setPredicatesBetweenColumnsInTable = function(columnFromData, columnToData, foreignKey, callback) {
-        OntologyModels.registerSourcesModel(KGcreator.currentSlsvSource, function(err, result) {
+    self.setPredicatesBetweenColumnsInTable = function (columnFromData, columnToData, foreignKey, callback) {
+        OntologyModels.registerSourcesModel(KGcreator.currentSlsvSource, function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -472,18 +469,18 @@ tripleObj.objectIsSpecificUri = true;
             } else {
                 return SimpleListSelectorWidget.showDialog(
                     null,
-                    function(callbackLoad) {
+                    function (callbackLoad) {
                         return callbackLoad(Object.keys(allConstraints));
                     },
 
-                    function(selectedProperty) {
+                    function (selectedProperty) {
                         if (!selectedProperty) {
                             return;
                         }
 
                         //write the join between tables if foreignKey
                         if (foreignKey) {
-                            self.joinColumns(columnFromData, columnToData, foreignKey, function(err, result) {
+                            self.joinColumns(columnFromData, columnToData, foreignKey, function (err, result) {
                                 if (err) {
                                     return callback(err);
                                 }
@@ -495,15 +492,14 @@ tripleObj.objectIsSpecificUri = true;
                                 var triple = {
                                     s: targetColumnInTable,
                                     p: selectedProperty,
-                                    o: columnFromData.columnName
+                                    o: columnFromData.columnName,
                                 };
                                 KGcreator.currentConfig.currentMappings[columnFromData.table].tripleModels.push(triple);
                                 KGcreator.saveDataSourceMappings(
                                     KGcreator.currentSlsvSource,
                                     KGcreator.currentConfig.currentDataSource.name,
                                     KGcreator.currentConfig.currentMappings,
-                                    function(err, result) {
-                                    }
+                                    function (err, result) {}
                                 );
                             }
                         } else {
@@ -511,15 +507,14 @@ tripleObj.objectIsSpecificUri = true;
                                 var triple = {
                                     s: columnFromData.columnName,
                                     p: selectedProperty,
-                                    o: targetColumnInTable
+                                    o: targetColumnInTable,
                                 };
                                 KGcreator.currentConfig.currentMappings[columnFromData.table].tripleModels.push(triple);
                                 KGcreator.saveDataSourceMappings(
                                     KGcreator.currentSlsvSource,
                                     KGcreator.currentConfig.currentDataSource.name,
                                     KGcreator.currentConfig.currentMappings,
-                                    function(err, result) {
-                                    }
+                                    function (err, result) {}
                                 );
                             }
                         }
@@ -529,8 +524,7 @@ tripleObj.objectIsSpecificUri = true;
         });
     };
 
-
-    self.showLookupsDialog = function(node) {
+    self.showLookupsDialog = function (node) {
         PopupMenuWidget.hidePopup();
         self.currentSlsvSource = KGcreator.currentSlsvSource;
         var table = node.data.id;
@@ -538,12 +532,12 @@ tripleObj.objectIsSpecificUri = true;
         //$("#smallDialogDiv").parent().css("left", "10%");
         $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
 
-        $("#smallDialogDiv").load("./modules/tools/KGcreator/html/lookupDialog.html", function() {
+        $("#smallDialogDiv").load("./modules/tools/KGcreator/html/lookupDialog.html", function () {
             $("#KGCreator_lookupName").val(table);
             $("#KGCreator_lookupTable").val(table);
 
             var columns = [];
-            KGcreator.currentConfig.currentDataSource.tables[table].forEach(function(column) {
+            KGcreator.currentConfig.currentDataSource.tables[table].forEach(function (column) {
                 columns.push(column);
             });
             common.fillSelectOptions("KGCreator_lookupSourceColumnSelect", columns, true);
@@ -551,7 +545,7 @@ tripleObj.objectIsSpecificUri = true;
         });
     };
 
-    self.showTransformDialog = function(node) {
+    self.showTransformDialog = function (node) {
         PopupMenuWidget.hidePopup();
         self.currentSlsvSource = KGcreator.currentSlsvSource;
         var table = node.data.id;
@@ -560,9 +554,9 @@ tripleObj.objectIsSpecificUri = true;
         //$("#smallDialogDiv").parent().css("left", "10%");
         $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
 
-        $("#smallDialogDiv").load("./modules/tools/KGcreator/html/transformDialog.html", function() {
+        $("#smallDialogDiv").load("./modules/tools/KGcreator/html/transformDialog.html", function () {
             var columns = [];
-            KGcreator.currentConfig.currentDataSource.tables[table].forEach(function(column) {
+            KGcreator.currentConfig.currentDataSource.tables[table].forEach(function (column) {
                 columns.push(column);
             });
 
@@ -584,18 +578,17 @@ tripleObj.objectIsSpecificUri = true;
         });
     };
 
-
-    self.showTableMappings = function(table) {
+    self.showTableMappings = function (table) {
         KGcreator_graph.drawDetailedMappings(table);
         self.showMappingsInEditor(table);
     };
 
-    self.showDataSourceMappings = function(node) {
+    self.showDataSourceMappings = function (node) {
         KGcreator_graph.drawDetailedMappings(null);
         self.showMappingsInEditor(null);
     };
 
-    self.showMappingsInEditor = function(table) {
+    self.showMappingsInEditor = function (table) {
         if (!KGcreator.currentConfig.currentMappings) {
             return alert("no mappings selected");
         }
@@ -610,7 +603,7 @@ tripleObj.objectIsSpecificUri = true;
         }
 
         self.jsonEditor = new JsonEditor("#KGcreator_mappingsEditor", json);
-        $("#KGcreator_mappingsEditor").on("mouseup", function() {
+        $("#KGcreator_mappingsEditor").on("mouseup", function () {
             var selection = KGcreator.getTextSelection();
             if (selection) {
                 self.currentMappingsSelection = selection;
@@ -618,8 +611,7 @@ tripleObj.objectIsSpecificUri = true;
         });
     };
 
-
-    self.saveEditorMappings = function() {
+    self.saveEditorMappings = function () {
         var mappings = self.jsonEditor.get();
         if (self.currentEditingTable) {
             KGcreator_mappings.saveTableMappings(self.currentEditingTable, mappings);
@@ -628,8 +620,7 @@ tripleObj.objectIsSpecificUri = true;
         }
     };
 
-
-    self.afterMappingsFn = function() {
+    self.afterMappingsFn = function () {
         KGcreator_mappings.showTableMappings(node.id);
     };
 

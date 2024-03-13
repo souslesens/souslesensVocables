@@ -1,9 +1,9 @@
-var _botEngine = (function() {
+var _botEngine = (function () {
     var self = {};
     self.firstLoad = true;
     self.OrReturnValues = [];
     self.lastFilterListStr = "";
-    self.init = function(botModule, initialWorkflow, options, callback) {
+    self.init = function (botModule, initialWorkflow, options, callback) {
         if (!options) {
             options = {};
         }
@@ -21,7 +21,7 @@ var _botEngine = (function() {
         } else {
             divId = "botDiv";
             $("#botPanel").dialog("open");
-            $($("#botPanel").parent()[0]).on("dialogclose", function(event) {
+            $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
                 self.firstLoad = true;
             });
             $("#botPanel").dialog("option", "title", self.currentBot.title);
@@ -30,7 +30,7 @@ var _botEngine = (function() {
             //$("#botPanel").parent().css("left", "30%");
         }
 
-        $("#" + divId).load("responsive/widget/html/botResponsive.html", function() {
+        $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
             if (!self.firstLoad) {
                 //$("#resetButtonBot").remove();
                 //$("#previousButtonBot").remove();
@@ -43,7 +43,7 @@ var _botEngine = (function() {
             if (divId != "botDiv") {
                 var dialogWindow = $("#" + divId)
                     .parents()
-                    .filter("div[role=\"dialog\"]")[0];
+                    .filter('div[role="dialog"]')[0];
                 var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
                 var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
                 //$(idDialog).parent().css("top", "13%");
@@ -51,7 +51,7 @@ var _botEngine = (function() {
                 $("#BotUpperButtons").insertAfter(titleDialog);
                 //$("#resetButtonBot").insertAfter(titleDialog);
                 //$("#previousButtonBot").insertAfter(titleDialog);
-                $(dialogWindow).on("dialogclose", function(event) {
+                $(dialogWindow).on("dialogclose", function (event) {
                     $("#" + self.divId).empty();
                     $(dialogWindow).find("#resetButtonBot").remove();
                     $(dialogWindow).find("#previousButtonBot").remove();
@@ -65,7 +65,7 @@ var _botEngine = (function() {
         });
     };
 
-    self.nextStep = function(returnValue, varToFill) {
+    self.nextStep = function (returnValue, varToFill) {
         $("#botFilterProposalDiv").hide();
         self.history.push(JSON.parse(JSON.stringify(self.currentObj)));
         self.history.currentIndex += 1;
@@ -130,7 +130,7 @@ var _botEngine = (function() {
         }
     };
 
-    self.previousStep = function(message) {
+    self.previousStep = function (message) {
         if (message) {
             self.message(message);
         }
@@ -158,12 +158,12 @@ var _botEngine = (function() {
         }
     };
 
-    self.end = function() {
+    self.end = function () {
         self.currentBot.params.queryText = self.getQueryText();
         if (self.divId) {
             var dialogWindow = $("#" + self.divId)
                 .parents()
-                .filter("div[role=\"dialog\"]")[0];
+                .filter('div[role="dialog"]')[0];
             var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
             $(idDialog).dialog("close");
         } else {
@@ -174,7 +174,7 @@ var _botEngine = (function() {
         }
     };
 
-    self.setStepMessage = function(step) {
+    self.setStepMessage = function (step) {
         if (self.currentBot.functionTitles) {
             var message = self.currentBot.functionTitles[step];
             // In case 2 questions are asked at the same time erase the last one
@@ -188,27 +188,27 @@ var _botEngine = (function() {
         }
     };
 
-    self.message = function(message) {
+    self.message = function (message) {
         $("#botMessage").html(message);
     };
 
-    self.abort = function(message) {
+    self.abort = function (message) {
         alert(message);
         self.close();
     };
 
-    self.reset = function() {
+    self.reset = function () {
         self.currentBot.start();
     };
 
-    self.close = function() {
+    self.close = function () {
         $("#botPanel").css("display", "none");
     };
 
-    self.showList = function(values, varToFill, returnValue, sort, callback) {
+    self.showList = function (values, varToFill, returnValue, sort, callback) {
         values = common.StringArrayToIdLabelObjectArray(values);
         if (sort) {
-            values.sort(function(a, b) {
+            values.sort(function (a, b) {
                 if (a.label > b.label) {
                     return 1;
                 }
@@ -227,18 +227,17 @@ var _botEngine = (function() {
         common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
         $("#bot_resourcesProposalSelect").unbind("click");
 
-        $("#bot_resourcesProposalSelect").bind("click", function(evt) {
+        $("#bot_resourcesProposalSelect").bind("click", function (evt) {
             var x = evt;
 
             var text = $("#bot_resourcesProposalSelect option:selected").text();
             self.writeCompletedHtml(text + ":");
             //voir avec Claude
-            //Donne une liste pour cet élement de façon inconnue    
+            //Donne une liste pour cet élement de façon inconnue
             var selectedValue = $(this).val();
             if (Array.isArray(selectedValue)) {
                 selectedValue = selectedValue[0];
             }
-            ;
             if (evt.ctrlKey) {
                 return;
             }
@@ -256,7 +255,7 @@ var _botEngine = (function() {
             self.nextStep(returnValue || selectedValue);
         });
     };
-    self.filterList = function(evt) {
+    self.filterList = function (evt) {
         //var str = $(this).val();
         var str = $(evt.currentTarget).val();
         if (!str && self.lastFilterListStr.length < str.length) {
@@ -270,7 +269,7 @@ var _botEngine = (function() {
         self.lastFilterListStr = str;
         str = str.toLowerCase();
         var selection = [];
-        self.currentList.forEach(function(item) {
+        self.currentList.forEach(function (item) {
             if (item.label.toLowerCase().indexOf(str) > -1) {
                 selection.push(item);
             }
@@ -278,20 +277,18 @@ var _botEngine = (function() {
         common.fillSelectOptions("bot_resourcesProposalSelect", selection, false, "label", "id");
     };
 
-    self.promptValue = function(message, varToFill, defaultValue, options, callback) {
+    self.promptValue = function (message, varToFill, defaultValue, options, callback) {
         $("#bot_resourcesProposalSelect").hide();
 
-
         if (options && options.datePicker) {
-            DateWidget.setDatePickerOnInput("botPromptInput", null, function(date) {
+            DateWidget.setDatePickerOnInput("botPromptInput", null, function (date) {
                 _botEngine.currentBot.params[varToFill] = date.getTime();
                 DateWidget.unsetDatePickerOnInput("botPromptInput");
                 self.nextStep();
-
             });
         }
 
-        $("#botPromptInput").on("keyup", function(key) {
+        $("#botPromptInput").on("keyup", function (key) {
             if (event.keyCode == 13 || event.keyCode == 9) {
                 $("#bot_resourcesProposalSelect").show();
                 $("#botPromptInput").css("display", "none");
@@ -317,7 +314,7 @@ var _botEngine = (function() {
         $("#botPromptInput").focus();
     };
 
-    self.writeCompletedHtml = function(str, options) {
+    self.writeCompletedHtml = function (str, options) {
         if (!str) {
             return;
         }
@@ -341,25 +338,25 @@ var _botEngine = (function() {
         return;
     };
 
-    self.getQueryText = function() {
+    self.getQueryText = function () {
         var queryText = "";
-        $(".bot-token").each(function() {
+        $(".bot-token").each(function () {
             queryText += $(this).html();
         });
         return queryText;
     };
-    self.clearProposalSelect = function() {
+    self.clearProposalSelect = function () {
         $("#bot_resourcesProposalSelect").find("option").remove().end();
     };
 
-    self.exportToGraph = function() {
+    self.exportToGraph = function () {
         var functionTitles = self.currentBot.functionTitles;
         var workflow = self.initialWorkflow;
 
         var visjsData = { nodes: [], edges: [] };
 
         var existingNodes = {};
-        var recurse = function(obj, parentId, level) {
+        var recurse = function (obj, parentId, level) {
             if (typeof obj == "object") {
                 for (var key in obj) {
                     if (true || key != parentId) {
@@ -373,8 +370,8 @@ var _botEngine = (function() {
                             level: level,
                             data: {
                                 id: nodeId,
-                                label: functionTitles[key] || key
-                            }
+                                label: functionTitles[key] || key,
+                            },
                         });
                         if (parentId) {
                             visjsData.edges.push({
@@ -386,9 +383,9 @@ var _botEngine = (function() {
                                     from: {
                                         enabled: true,
                                         type: Lineage_whiteboard.defaultEdgeArrowType,
-                                        scaleFactor: 0.5
-                                    }
-                                }
+                                        scaleFactor: 0.5,
+                                    },
+                                },
                             });
                         }
                         recurse(obj[key], nodeId, level + 1);
@@ -408,8 +405,8 @@ var _botEngine = (function() {
             level: 0,
             data: {
                 id: title,
-                label: title
-            }
+                label: title,
+            },
         });
 
         recurse(workflow, title, 1);
@@ -421,7 +418,6 @@ var _botEngine = (function() {
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
             layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
             physics: { enabled: true },
-
         });
     };
 

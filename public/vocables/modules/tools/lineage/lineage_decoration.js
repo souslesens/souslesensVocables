@@ -27,7 +27,7 @@ var Lineage_decoration = (function () {
         } else if (legendType == "queryInfos") {
             self.decorateByQueryInfos(visjsNodes, Lineage_relations.currentQueryInfos);
             Lineage_relations.currentQueryInfos = null;
-        } else if(legendType) {
+        } else if (legendType) {
             self.decorateByUpperOntologyByClass(visjsNodes);
         }
     };

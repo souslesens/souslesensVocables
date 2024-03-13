@@ -33,7 +33,7 @@ var ResponsiveUI = (function () {
             "resize",
             function (event) {
                 self.resetWindowHeight();
-                if(self.currentTool=='KGcreator'){
+                if (self.currentTool == "KGcreator") {
                     KGcreator_r.ResetRunMappingTabWidth();
                 }
             },
@@ -72,14 +72,13 @@ var ResponsiveUI = (function () {
             }
             self.smartPhoneScreen = false;
 
-            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth-10);
+            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 10);
             $("#lateralPanelDiv").css("width", LateralPannelWidth);
         }
 
         $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 7);
         //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
-
     };
     // To suppress
     self.replaceFile = function (file1, file2) {
@@ -133,7 +132,7 @@ var ResponsiveUI = (function () {
             self.initTool(toolId);
         }
     };
-    //MainController.onSourceSelect 
+    //MainController.onSourceSelect
     self.onSourceSelect = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         var p = obj.node.parents.indexOf("PRIVATE");
@@ -174,7 +173,7 @@ var ResponsiveUI = (function () {
         $("#selectedSource").html(MainController.currentSource);
         $("#mainDialogDiv").parent().hide();
         Lineage_r.loadSources();
-    }; 
+    };
     // What is the goal of this function? --> MainController?
     self.initTool = function (toolId, callback) {
         var toolObj = Config.userTools[toolId];
@@ -248,9 +247,7 @@ var ResponsiveUI = (function () {
         }
         SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
-
         });
-       
     };
     //keep
     self.openDialogDiv = function (div) {
@@ -272,8 +269,8 @@ var ResponsiveUI = (function () {
             //setTimeout(() => {}, "500");
             // fetch theme from api
             const response = await fetch("/api/v1/users/theme");
-            if(response.status==400){
-                ResponsiveUI.changeTheme(Config.theme.defaultTheme)
+            if (response.status == 400) {
+                ResponsiveUI.changeTheme(Config.theme.defaultTheme);
                 callback();
             }
 
@@ -295,8 +292,7 @@ var ResponsiveUI = (function () {
     };
     //Keep
     self.changeTheme = function (themeName) {
-        if(!themeName)
-            return;
+        if (!themeName) return;
         var themeSelected = Config.slsvColorThemes[themeName];
         self.currentTheme = themeSelected;
         if (themeSelected["@logoInstance-icon"] == undefined || themeSelected["@logoInstance-icon"] == "") {
@@ -423,7 +419,6 @@ var ResponsiveUI = (function () {
     };
     //keep
     self.darkThemeParams = function (theme) {
-        
         if (theme) {
             if (theme["@isDarkTheme"]) {
                 Lineage_whiteboard.defaultNodeFontColor = "white";
@@ -443,7 +438,6 @@ var ResponsiveUI = (function () {
             }
             ResponsiveUI.resetWindowHeight();
         }
-
     };
 
     return self;

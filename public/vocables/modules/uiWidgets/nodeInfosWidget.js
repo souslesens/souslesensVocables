@@ -18,11 +18,13 @@ var NodeInfosWidget = (function () {
 
     self.initDialog = function (sourceLabel, divId, options, callback) {
         ResponsiveUI.openDialogDiv(divId);
-        $("#" + divId).parent().show("fast", function () {
+        $("#" + divId)
+            .parent()
+            .show("fast", function () {
                 self.oldNodeInfosInit(sourceLabel, divId, options, callback);
                 $("#addPredicateButton").remove();
                 $("#deleteButton").remove();
-        });
+            });
 
         //$(".ui-dialog-title")
     };
@@ -173,10 +175,10 @@ var NodeInfosWidget = (function () {
 
                 function (callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
-                        $('#nodeInfos_individualsDiv').hide();
+                        $("#nodeInfos_individualsDiv").hide();
                         return callbackSeries();
                     }
-                    $('#nodeInfos_individualsDiv').show();
+                    $("#nodeInfos_individualsDiv").show();
                     var html = "<button  class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showClassIndividuals()'>Individuals</button>";
                     $("#nodeInfos_individualsDiv").html(html);
                     callbackSeries();

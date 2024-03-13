@@ -7,6 +7,7 @@ import Lineage_r from "./lineage/lineage_r.js";
 
 import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
 import KGcreator_r from "./KGcreator/Kgcreator_r.js";
+import MainController from "../modules/shared/mainController.js";
 
 var ResponsiveUI = (function () {
     var self = {};
@@ -155,7 +156,6 @@ var ResponsiveUI = (function () {
         $("#selectedSource").html(MainController.currentSource);
 
         $("#mainDialogDiv").parent().hide();
-
         self.initTool(MainController.currentTool, function (err, result) {
             if (err) {
                 return self.alert(err.responseText);

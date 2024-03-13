@@ -17,21 +17,26 @@ var Lineage_r = (function () {
     self.oldExportTable = null;
     self.MoreActionsShow = false;
     self.MoreOptionsShow = true;
-
+    self.firstLoad=true;
     self.onLoaded = function () {
-        self.controller = Lineage_whiteboard;
-        PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
-        SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
-        //To Table
-        self.oldExportTable = Export.exportTreeToDataTable;
-        Export.exportTreeToDataTable = self.ExportTableDialog;
-        //Nodes Infos overcharge
-        //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
-        //SHowHideButtons overcharge
-        Lineage_sources.showHideEditButtons = self.showHideEditButtons;
-        //AddEdge overcharge
-        self.oldAddEdgeDialog = Lineage_createRelation.showAddEdgeFromGraphDialog;
-        Lineage_createRelation.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
+        if(self.firstLoad){
+            self.firstLoad=false;
+            // Overcharge only one time at first lineage load
+            self.controller = Lineage_whiteboard;
+            PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
+            SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
+            //To Table
+            self.oldExportTable = Export.exportTreeToDataTable;
+            Export.exportTreeToDataTable = self.ExportTableDialog;
+            //Nodes Infos overcharge
+            //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
+            //SHowHideButtons overcharge
+            Lineage_sources.showHideEditButtons = self.showHideEditButtons;
+            //AddEdge overcharge
+            self.oldAddEdgeDialog = Lineage_createRelation.showAddEdgeFromGraphDialog;
+            Lineage_createRelation.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
+        }
+  
         ResponsiveUI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").load("./responsive/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
@@ -41,6 +46,7 @@ var Lineage_r = (function () {
         $("#graphDiv").empty();
         $("#lateralPanelDiv").off();
         $("#lateralPanelDiv").css("width", "435px");
+       
     };
     self.loadSources = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
@@ -199,9 +205,7 @@ var Lineage_r = (function () {
     };
     self.responsiveAddEdgeDialog = function (edgeData, callback) {
         //ResponsiveUI.openDialogDiv("smallDialogDiv");
-        $("#smallDialogDiv")
-            .parent()
-            .show("fast", function () {
+        $("#smallDialogDiv").parent().show("fast", function () {
                 self.oldAddEdgeDialog(edgeData, function () {
                     callback();
                     self.showHideEditButtons(Lineage_sources.activeSource);

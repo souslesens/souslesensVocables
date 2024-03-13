@@ -555,6 +555,7 @@ self.querySets.sets.forEach(function (querySet) {
             //   KGquery_graph.drawVisjsModel("saved")
             $("#KGquery_pathsDiv").html("");
             self.addQuerySet();
+            //Hide Union and minus showToClaude
             $("#KGquery_SetsControlsDiv").hide();
         }
     };

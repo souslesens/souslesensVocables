@@ -89,7 +89,7 @@ var KGcreator_r = (function() {
                     if (KGcreator.currentTreeNode) {
                         KGcreator_run.createTriples(true);
                         KGcreator_run.getTableAndShowMappings()
-
+                        
                     }
                     ResponsiveUI.PopUpOnHoverButtons();
                     self.ResetRunMappingTabWidth();
@@ -104,7 +104,12 @@ var KGcreator_r = (function() {
         if(self.currentTab!='Map'){
             self.currentTab='Map';
             $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/linkTab.html", function() {
-                $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function() {});
+                $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function() {
+                    if(KGcreator.currentTreeNode!=undefined){
+                        $(document.getElementById(KGcreator.currentTreeNode.id+'_anchor')).click();
+                    }
+                    
+                });
 
             });
         }

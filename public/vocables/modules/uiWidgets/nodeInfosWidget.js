@@ -177,7 +177,7 @@ var NodeInfosWidget = (function () {
                         return callbackSeries();
                     }
                     $('#nodeInfos_individualsDiv').show();
-                    var html = "<button id='nodesInfos_individual_button' onclick='NodeInfosWidget.showClassIndividuals()'>Individuals</button>";
+                    var html = "<button  class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showClassIndividuals()'>Individuals</button>";
                     $("#nodeInfos_individualsDiv").html(html);
                     callbackSeries();
                 },

@@ -275,6 +275,7 @@ var ResponsiveUI = (function () {
 
         $("#" + div).empty();
         $("#" + div).dialog();
+        return;
         $("#" + div)
             .parent()
             .show();

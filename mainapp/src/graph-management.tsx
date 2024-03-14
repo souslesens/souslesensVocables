@@ -3,21 +3,21 @@ import { createRoot } from "react-dom/client";
 import { useState, useEffect, useRef } from "react";
 
 import Alert from "react-bootstrap/Alert";
-import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import ProgressBar from "react-bootstrap/ProgressBar";
-import Stack from "react-bootstrap/Stack";
-import Table from "react-bootstrap/Table";
+
+import { TableSortLabel, Chip, TableBody, Link, Stack, Button, Table, TableHead, TableRow, TableCell } from "@mui/material";
+
+import { ServerSource } from "../Source";
 
 import { fetchMe } from "./Utils";
-
 
 declare global {
     interface Window {
         GraphManagement: {
             createApp: () => void;
-        } 
+        };
     }
 }
 export default function GraphManagement() {
@@ -47,6 +47,16 @@ export default function GraphManagement() {
 
     // modal
     const [displayModal, setDisplayModal] = useState<string | null>(null);
+
+    // sorting
+    type Order = "asc" | "desc";
+    const [orderBy, setOrderBy] = React.useState<keyof ServerSource>("name");
+    const [order, setOrder] = React.useState<Order>("asc");
+    function handleRequestSort(property: keyof ServerSource) {
+        const isAsc = orderBy === property && order === "asc";
+        setOrder(isAsc ? "desc" : "asc");
+        setOrderBy(property);
+    }
 
     useEffect(() => {
         void fetchSources();
@@ -133,7 +143,7 @@ export default function GraphManagement() {
         }
     };
 
-const handleUploadGraph = async () => {
+    const handleUploadGraph = async () => {
         // init progress bar
         setCurrentOperation("upload");
         setTransferPercent(0);
@@ -352,7 +362,7 @@ const handleUploadGraph = async () => {
 
                 <Stack direction="horizontal" gap={1}>
                     {!currentOperation ? (
-                        <Button disabled={currentDownloadFormat === null} type="submit" onClick={downloadSource} style={{ flex: 1 }}>
+                        <Button variant="contained" color="primary" disabled={currentDownloadFormat === null} type="submit" onClick={downloadSource} style={{ flex: 1 }}>
                             Download
                         </Button>
                     ) : null}
@@ -366,7 +376,7 @@ const handleUploadGraph = async () => {
                         />
                     ) : null}
                     {currentOperation == "download" ? (
-                        <Button variant="danger" onClick={handleCancelOperation} disabled={transferPercent == 100}>
+                        <Button variant="contained" color="error" onClick={handleCancelOperation} disabled={transferPercent == 100}>
                             Cancel
                         </Button>
                     ) : null}
@@ -385,7 +395,7 @@ const handleUploadGraph = async () => {
                 <Form.Check checked={replaceGraph} value={replaceGraph} onClick={handleReplaceGraphCheckbox} className="mb-3" type="switch" id="toto" label="Delete before upload" />
                 <Stack direction="horizontal" gap={1}>
                     {!currentOperation ? (
-                        <Button disabled={uploadfile.length < 1 ? true : false} type="submit" onClick={handleUploadGraph} style={{ flex: 1 }}>
+                        <Button variant="contained" color="primary" disabled={uploadfile.length < 1 ? true : false} type="submit" onClick={handleUploadGraph} style={{ flex: 1 }}>
                             Upload
                         </Button>
                     ) : null}
@@ -399,7 +409,7 @@ const handleUploadGraph = async () => {
                         />
                     ) : null}
                     {currentOperation == "upload" ? (
-                        <Button variant="danger" onClick={handleCancelOperation} disabled={transferPercent == 100}>
+                        <Button variant="contained" color="error" onClick={handleCancelOperation} disabled={transferPercent == 100}>
                             Cancel
                         </Button>
                     ) : null}
@@ -430,26 +440,31 @@ const handleUploadGraph = async () => {
         </Modal>
     );
 
-    const tableBody = Object.entries(sources)
-        .sort(([aName, _a], [bName, _b]) => {
-            return aName.toLowerCase() > bName.toLowerCase();
+    const tableBody = Object.values(sources)
+        .sort((a, b) => {
+            const left: string = a[orderBy] || ("" as string);
+            const right: string = b[orderBy] || ("" as string);
+            return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
         })
-        .map(([sourceName, source]) => {
+        .map((source) => {
             return (
-                <tr>
-                    <td>{sourceName}</td>
-                    <td>{source.graphUri}</td>
-                    <td>
-                        <Stack direction="horizontal" gap={1}>
-                            <Button disabled={source.accessControl != "readwrite"} variant="secondary" value={sourceName} onClick={handleUploadSource}>
+                <TableRow key={source.name}>
+                    <TableCell>{source.name}</TableCell>
+                    <TableCell>
+                        <Link href={source.graphUri}>{source.graphUri}</Link>
+                    </TableCell>
+                    <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>
+                    <TableCell>
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <Button variant="contained" disabled={source.accessControl != "readwrite"} color="secondary" value={source.name} onClick={handleUploadSource}>
                                 Upload
                             </Button>
-                            <Button variant="primary" value={sourceName} onClick={handleDownloadSource}>
+                            <Button variant="contained" color="primary" value={source.name} onClick={handleDownloadSource}>
                                 Download
                             </Button>
                         </Stack>
-                    </td>
-                </tr>
+                    </TableCell>
+                </TableRow>
             );
         });
 
@@ -457,23 +472,35 @@ const handleUploadGraph = async () => {
         <>
             {uploadModal}
             <Stack style={{ overflow: "auto", height: "90vh" }}>
-                <Table>
-                    <thead style={{ position: "sticky", top: 0, "z-index": 10, "background-color": "white" }}>
-                        <tr>
-                            <th>Sources</th>
-                            <th>Graph URI</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>{tableBody}</tbody>
+                <Table stickyHeader>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell style={{ fontWeight: "bold" }}>
+                                <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                                    Sources
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell style={{ fontWeight: "bold" }}>
+                                <TableSortLabel active={orderBy === "graphUri"} direction={order} onClick={() => handleRequestSort("graphUri")}>
+                                    Graph URI
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                <TableSortLabel active={orderBy === "group"} direction={order} onClick={() => handleRequestSort("group")}>
+                                    Group
+                                </TableSortLabel>
+                            </TableCell>
+                            <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                Actions
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody sx={{ width: "100%", overflow: "visible" }}>{tableBody}</TableBody>
                 </Table>
             </Stack>
         </>
     );
 }
-
-
-
 
 window.GraphManagement.createApp = function createApp() {
     const container = document.getElementById("mount-graph-management-here");

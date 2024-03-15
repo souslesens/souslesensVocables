@@ -13,6 +13,7 @@ import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_cr
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
 import ResponsiveUI from "../../responsive/responsiveUI.js";
+
 var NodeInfosWidget = (function () {
     var self = {};
 
@@ -196,8 +197,17 @@ var NodeInfosWidget = (function () {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
                         return callbackSeries();
                     }
+
                     self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfos_restrictionsDiv", function (_err, _result) {
                         callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
+                        return callbackSeries();
+                    }
+                    self.showInferredRangeAndDomain(self.currentNodeRealSource, [nodeId], "nodeInfos_RangeAndDomainDiv", function (err) {
+                        callbackSeries(err);
                     });
                 },
             ],
@@ -529,8 +539,8 @@ defaultLang = 'en';*/
                 str +=
                     " <br><div id='nodeInfos_listsDiv' >" +
                     "<div id='nodeInfos_restrictionsDiv'  style='display:table-caption;background-color: #ddd;padding:5px'></div>" +
-                    "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;background-color: #ddd;padding:5px'></div>" +
-                    "</div>";
+                    "<div id='nodeInfos_RangeAndDomainDiv'  style='display:none;background-color: #ddd;padding:5px'></div>";
+                "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;background-color: #ddd;padding:5px'></div>" + "</div>";
 
                 $("#" + divId).html(str);
                 if (callback) {
@@ -643,7 +653,11 @@ defaultLang = 'en';*/
             var data = result.results.bindings;
 
             if (data.length == 0) {
-                return callback();
+                $("#nodeInfos_individualsDiv").text("No result");
+                if (callback) {
+                    callback();
+                }
+                return;
             } else {
                 var str = "<b>TypeOf </b><br><table>";
 
@@ -685,6 +699,36 @@ defaultLang = 'en';*/
 
             return _callback();
         });
+    };
+
+    self.showInferredRangeAndDomain = function (sourceLabel, nodeId, divId, callback) {
+        var ontologySourceModel = Config.ontologiesVocabularyModels[sourceLabel];
+        if (ontologySourceModel != undefined) {
+            var property = ontologySourceModel.constraints[nodeId];
+            if (property == undefined) {
+                if (callback) {
+                    callback();
+                }
+                return;
+            }
+            var domainLabel = property.domainLabel != "" ? property.domainLabel : "anything";
+            var rangeLabel = property.rangeLabel != "" ? property.domainLabel : "anything";
+            var domain = property.domain != "" ? `onclick='NodeInfosWidget.onClickLink("${property.domain}")'` : "";
+            var range = property.range != "" ? `onclick='NodeInfosWidget.onClickLink("${property.range}")'` : "";
+            var cells = `
+            <tr class='infos_table'><td class='detailsCellValue'>Domain</td><td class='detailsCellValue'  ${domain}>${domainLabel}</td></tr>
+            <tr class='infos_table'><td class='detailsCellValue'>Range</td><td class='detailsCellValue' ${range}>${rangeLabel}</td></tr>
+            `;
+            var html = `<b>Inferred Range and Domains</b>
+            <table>
+            ${cells}
+           `;
+            $("#" + divId).append(html);
+            $("#" + divId).css("display", "table-caption");
+        }
+        if (callback) {
+            callback();
+        }
     };
 
     self.onClickLink = function (nodeId) {

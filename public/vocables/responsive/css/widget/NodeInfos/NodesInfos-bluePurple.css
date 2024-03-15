@@ -72,6 +72,12 @@ th, td{
     max-height: 55vh;
     overflow: auto;
 }
+#nodeInfos_RangeAndDomainDiv {
+    .nodesInfosAdditionalInfos;
+    max-height: 55vh;
+    overflow: auto;
+    margin-top: 10px;
+}
 
 #nodeInfos_individualsDiv {
     .nodesInfosAdditionalInfos;

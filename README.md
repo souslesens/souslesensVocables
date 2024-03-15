@@ -262,7 +262,7 @@ To run migration scripts you need to use the command
 ```bash
 npm run migrate
 ```
-at project root
+At project root
 
 Under Windows need to use git bash to run this script
 ```git bash

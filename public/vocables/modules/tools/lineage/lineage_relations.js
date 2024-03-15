@@ -474,10 +474,13 @@ var Lineage_relations = (function () {
 
                         Lineage_whiteboard.drawPredicatesGraph(source, data, null, options, function (err, result) {
                             if (err) {
+                                if (err == "no data found") {
+                                    callbackSeries();
+                                }
                                 return callbackSeries(err);
                             }
                             concatVisjsdata(result);
-                            return callbackSeries(err);
+                            return callbackSeries();
                         });
                     } else {
                         return callbackSeries();

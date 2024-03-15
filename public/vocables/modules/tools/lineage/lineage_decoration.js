@@ -21,6 +21,8 @@ var Lineage_decoration = (function () {
     self.currentVisjGraphNodesMap = {};
 
     self.decorateNodeAndDrawLegend = function (visjsNodes, legendType) {
+        self.decorateByUpperOntologyByClass(visjsNodes);
+        return;
         if (!visjsNodes) visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
         if (legendType == "individualClasses") {
             self.drawIndividualTypesLegend(visjsNodes, function () {});

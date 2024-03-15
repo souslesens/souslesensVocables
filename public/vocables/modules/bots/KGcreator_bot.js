@@ -220,11 +220,12 @@ var KGcreator_bot = (function () {
             BotEngine.nextStep();
         },
         listTableColumnsFn: function () {
-            var virtualColumns = KGcreator.currentConfig.currentMappings[self.params.predicateObjectTable].virtualColumns;
-            var columns = KGcreator.currentConfig.currentDataSource.tables[self.params.predicateObjectTable];
+            var table = self.params.predicateObjectTable || self.params.table;
+            var virtualColumns = KGcreator.currentConfig.currentMappings[table].virtualColumns;
+            var columns = KGcreator.currentConfig.currentDataSource.tables[table];
 
             if (virtualColumns) {
-                columns = virtualColumns.concat(columns);
+                columns = columns.concat(virtualColumns);
             }
 
             _botEngine.showList(columns, "predicateObjectColumn", true);
@@ -267,9 +268,13 @@ var KGcreator_bot = (function () {
         },
 
         listFilteredPropertiesFn: function () {
-            var columnClass = self.getColumnClasses(KGcreator.currentConfig.currentMappings[self.params.table].tripleModels, self.params.column);
+            var columnClasses = self.getColumnClasses(KGcreator.currentConfig.currentMappings[self.params.table].tripleModels, self.params.column);
+            /*  if (self.params.predicateObjectColumnClass.startsWith("@")) {
+                BotEngine.abort("cannot find predicates for a dynamic class object");
+            }*/
+
             var source = self.params.predicateObjectColumnVocabulary || self.params.source; // both cases existing or not predicate object
-            OntologyModels.getAllowedPropertiesBetweenNodes(source, columnClass, self.params.predicateObjectColumnClass, function (err, result) {
+            OntologyModels.getAllowedPropertiesBetweenNodes(source, columnClasses, self.params.predicateObjectColumnClass, function (err, result) {
                 self.params.predicateObjectColumnClass = null; // not used after properties are found
 
                 if (err) {

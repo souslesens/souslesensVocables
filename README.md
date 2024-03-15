@@ -264,13 +264,10 @@ npm run migrate
 ```
 at the root of the project
 
-For Windows users this don't work, you need in place to launch the git bash client
+For Windows users this don't work, you need in place to launch the git bash client, type on windows search bar git bash or install it if you haven't. 
 In the command prompt use
 ```bash
-cd path
-```
-to go at the root of the project, Then use the same command
-```bash
+cd /c/Users/SousleSensRoot
 npm run migrate
 ```
 

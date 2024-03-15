@@ -37,8 +37,13 @@ var DateWidget = (function () {
         },
     };
 
+
     self.setDatePickerOnInput = function (inputId, options, callback) {
         $("#" + inputId).datepicker({
+            showOn: "button",
+          //  buttonImage: "images/calendar.gif",
+            buttonImageOnly: true,//
+            buttonText: "Select date",
             dateFormat: "yy-mm-dd",
             onClose: function (selectedDate) {
                 if (callback) {

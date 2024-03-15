@@ -867,7 +867,7 @@ var OntologyModels = (function () {
             }
             var importGraphUriFrom = Sparql_common.getFromStr(source, false, false);
 
-            var queryNew =
+            var queryNewWithLabels =
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
@@ -899,12 +899,41 @@ var OntologyModels = (function () {
                 "    }\n" +
                 "  ";
 
+            var queryNew =
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT   distinct ?prop ?sClass ?oClass ?sClassLabel ?oClassLabel ?propLabel ?g\n" +
+                importGraphUriFrom +
+                " where " +
+                " { select ?prop  ?sClass ?oClass where {\n" +
+                "  graph <" +
+                sourceGraphUri +
+                "> {\n" +
+                "   ?s ?prop ?o.\n" +
+                "   {?s rdf:type ?sClass.}\n" +
+                "   {?o rdf:type ?oClass.} \n" +
+                "filter(?sClass not in (owl:Class,owl:NamedIndividual,owl:Restriction)) \n" +
+                " filter(?oClass not in (owl:Class,owl:NamedIndividual,owl:Restriction)) " +
+                " filter (!regex(str(?prop),\"rdf\",\"i\")) filter (?prop not in (<http://purl.org/dc/terms/created>, <http://souslesens.org/KGcreator#mappingFile>))"+
+                "  filter (?s != ?o)\n" +
+                "    }\n" +
+                "    }\n" +
+                "  }\n" +
+                "\n" +
+
+                "  ";
+
             let url = Config.sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
+
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
+
+
+
 
                 //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
                 return callback(null, result.results.bindings);

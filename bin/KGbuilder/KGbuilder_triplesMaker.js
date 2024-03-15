@@ -210,10 +210,11 @@ var KGbuilder_triplesMaker = {
         }else{
           subjectStr = tableMappings.transform[mapping.s](mapping.s, "s", mapping.p, line, mapping);
         }
-
+     //   return callback(null,subjectStr);
       } catch (e) {
         return callback((lineError = e + " " + mapping.s));
       }
+
     }
     else if (typeof mapping.s === "string" && mapping.s.indexOf("http") == 0) {
       subjectStr = "<" + mapping.s + ">";
@@ -295,6 +296,19 @@ var KGbuilder_triplesMaker = {
         objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
         return callback(null, objectStr);
       }
+      else if (tableMappings.transform  && tableMappings.transform[mapping.o]) {
+        try {
+          if(line[mapping.o]) {
+            objectStr = tableMappings.transform[mapping.o](line[mapping.o], "o", mapping.p, line, mapping);
+          }
+          else{
+            objectStr = tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
+          }
+         // return callback(null,objectStr);
+        } catch (e) {
+          return (lineError = e + " " + mapping.o);
+        }
+      }
 
       else {
         if (!line[mapping.o] || line[mapping.o] == "null") {
@@ -332,18 +346,7 @@ var KGbuilder_triplesMaker = {
 
           objectStr = "'" + str + "'^^" + mapping.dataType;
         }
-        else if (tableMappings.transform  && tableMappings.transform[mapping.o]) {
-          try {
-            if(line[mapping.o]) {
-              objectStr = tableMappings.transform[mapping.o](line[mapping.o], "o", mapping.p, line, mapping);
-            }
-            else{
-              objectStr = tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
-            }
-          } catch (e) {
-            return (lineError = e + " " + mapping.o);
-          }
-        }
+
         else {
           objectStr = line[mapping.o];
         }

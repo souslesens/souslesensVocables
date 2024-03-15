@@ -34,6 +34,7 @@ describe("ProfileModel", () => {
                 sourcesAccessControl: {},
                 allowedTools: "ALL",
                 forbiddenTools: [],
+                theme: "Sea Breeze",
             },
         };
         expect(profiles).toStrictEqual(expectedResult);

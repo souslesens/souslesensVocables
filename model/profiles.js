@@ -53,6 +53,7 @@ class ProfileModel {
             sourcesAccessControl: {},
             allowedTools: "ALL",
             forbiddenTools: [],
+            theme: config.theme.defaultTheme,
         };
 
         return { ...profiles, admin: adminProfile };
@@ -214,16 +215,20 @@ class ProfileModel {
      * @returns {string} the theme currently defined for this profile
      */
     getThemeFromProfile = async (profileName) => {
-        const profiles = await this._read();
+        try {
+            const profiles = await this._read();
 
-        const firstProfile = Object.values(profiles).find((profile) => {
-            if (profile.name === profileName) {
-                return profile.theme;
-            }
-        });
-        const findTheme = firstProfile.theme;
+            const firstProfile = Object.values(profiles).find((profile) => {
+                if (profile.name === profileName) {
+                    return profile.theme;
+                }
+            });
 
-        return findTheme !== undefined ? findTheme : config.theme.defaultTheme;
+            const findTheme = firstProfile.theme;
+            return findTheme !== undefined ? findTheme : config.theme.defaultTheme;
+        } catch {
+            return config.theme.defaultTheme;
+        }
     };
 }
 

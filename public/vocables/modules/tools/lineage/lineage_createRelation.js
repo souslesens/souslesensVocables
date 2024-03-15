@@ -321,8 +321,8 @@ var Lineage_createRelation = (function () {
                                 label: "Node infos",
                                 action: function (_e) {
                                     // pb avec source
-                                    NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv",null,function(){
-                                        $('#mainDialogDiv').parent().css('z-index',1);
+                                    NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
+                                        $("#mainDialogDiv").parent().css("z-index", 1);
                                     });
                                 },
                             },
@@ -572,22 +572,20 @@ var Lineage_createRelation = (function () {
         ];
 
         Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
-           var modelData={
-              properties:{[subPropId]: {
-                      id: subPropId,
-                      label: subPropertyLabel,
-                      inverseProp: null,
-                      superProp: superPropId
-                  }
-               }
-
-           }
+            var modelData = {
+                properties: {
+                    [subPropId]: {
+                        id: subPropId,
+                        label: subPropertyLabel,
+                        inverseProp: null,
+                        superProp: superPropId,
+                    },
+                },
+            };
             OntologyModels.updateModel(source, modelData, {}, function (err, result) {
                 console.log(err || "ontologyModelCache updated");
                 callback(err, { uri: subPropId });
             });
-
-
         });
     };
 

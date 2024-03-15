@@ -380,8 +380,7 @@ var Sparql_common = (function () {
     };
 
     self.getLabelFromURI = function (id) {
-        if(!id || !id.indexOf)
-            return;
+        if (!id || !id.indexOf) return;
 
         const p = id.lastIndexOf("#");
         if (p > -1) {

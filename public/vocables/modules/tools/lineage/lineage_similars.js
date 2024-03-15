@@ -58,7 +58,6 @@ var Lineage_similars = (function () {
         if (self.mode == "whiteboard") {
             self.drawWhiteBoardSimilars();
             $("#smallDialogDiv").dialog("close");
-
         }
     };
 

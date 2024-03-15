@@ -116,7 +116,6 @@ var CreateResource_bot = (function () {
             if (self.params.resourceType == "ImportClass") {
                 Sparql_OWL.copyUriTriplesFromSourceToSource(self.params.currentVocab, self.params.source, self.params.resourceId, function (err, result) {});
             } else {
-                
                 var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
                 Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
                     if (err) {

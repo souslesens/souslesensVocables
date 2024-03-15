@@ -400,7 +400,7 @@ var Export = (function () {
                 data: dataSet,
                 columns: cols,
                 fixedColumns: true,
-                pageLength: 15,
+                pageLength: 200,
                 dom: buttons,
                 buttons: [
                     {

@@ -262,12 +262,11 @@ To run migration scripts you need to use the command
 ```bash
 npm run migrate
 ```
-at the root of the project
+At project root
 
-For Windows users this don't work, you need in place to launch the git bash client, type on windows search bar git bash or install it if you haven't. 
-In the command prompt use
-```bash
-cd /c/Users/SousleSensRoot
+Under Windows need to use git bash to run this script
+```git bash
+cd project-root
 npm run migrate
 ```
 

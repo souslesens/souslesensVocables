@@ -27,8 +27,8 @@ var SimpleListSelectorWidget = (function () {
 
         $("#" + divId).html(html);
 
-        if(options.title){
-            $("#" + divId).dialog("option","title",options.title);
+        if (options.title) {
+            $("#" + divId).dialog("option", "title", options.title);
         }
 
         loadFn(function (data) {

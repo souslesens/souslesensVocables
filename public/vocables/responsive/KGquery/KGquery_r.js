@@ -48,16 +48,15 @@ var KGquery_r = (function () {
                         autoOpen: false,
                         close: function (event, ui) {
                             window.scrollTo(0, 0);
-                            
                         },
-                        drag:function(event,ui){
-                            $("#KGcreator_dialogDiv").parent().css('transform','unset')
+                        drag: function (event, ui) {
+                            $("#KGcreator_dialogDiv").parent().css("transform", "unset");
                         },
-                        open(event,ui){
-                            $("#KGcreator_dialogDiv").parent().css('transform','translate(-50%,-50%)');
-                            $("#KGcreator_dialogDiv").parent().css('top','50%');
-                            $("#KGcreator_dialogDiv").parent().css('left','50%');
-                        }
+                        open(event, ui) {
+                            $("#KGcreator_dialogDiv").parent().css("transform", "translate(-50%,-50%)");
+                            $("#KGcreator_dialogDiv").parent().css("top", "50%");
+                            $("#KGcreator_dialogDiv").parent().css("left", "50%");
+                        },
                     });
                 });
             });
@@ -84,10 +83,10 @@ var KGquery_r = (function () {
     };
     self.initGraph = function () {
         if ($("#tabs_Graph").children().length == 0) {
-        $("#tabs_Graph").load("./responsive/KGquery/html/KgqueryGraphTab.html", function () {
-            KGquery_graph.init();
-            KGquery_graph.drawVisjsModel("saved");
-        });
+            $("#tabs_Graph").load("./responsive/KGquery/html/KgqueryGraphTab.html", function () {
+                KGquery_graph.init();
+                KGquery_graph.drawVisjsModel("saved");
+            });
         }
     };
     self.SavedQueriesComponentShowDialogResponsive = function (CRUDsource, targetDiv, slsvSource, scope, saveQueryFn, loadQueryFn) {

@@ -10,7 +10,7 @@ import KGcreator_run from "./KGcreator_run.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
 import KGcreator_bot from "../../bots/KGcreator_bot.js";
 
-var KGcreator = (function() {
+var KGcreator = (function () {
     var self = {};
     self.currentConfig = {};
     self.currentSlsvSource = {};
@@ -24,47 +24,47 @@ var KGcreator = (function() {
         displayForm: "", // can be database, file or ""
         currentSource: "",
         selectedDatabase: "",
-        selectedFiles: []
+        selectedFiles: [],
     };
 
-    self.displayUploadApp = function(displayForm) {
+    self.displayUploadApp = function (displayForm) {
         self.uploadFormData.displayForm = displayForm;
         //   return   $.getScript("/kg_upload_app.js");
         if (!displayForm) {
             return;
         }
-        var html = " <div id=\"mount-kg-upload-app-here\"></div>";
+        var html = ' <div id="mount-kg-upload-app-here"></div>';
         $("#smallDialogDiv").html(html);
         $("#smallDialogDiv").dialog({
-            open: function(event, ui) {
+            open: function (event, ui) {
                 if (self.createApp === null) {
                     throw new Error("React app is not ready");
                 }
                 self.uploadFormData.currentSource = self.currentSlsvSource;
                 self.umountKGUploadApp = self.createApp(self.uploadFormData);
             },
-            beforeClose: function() {
+            beforeClose: function () {
                 self.umountKGUploadApp();
-            }
+            },
         });
         $("#smallDialogDiv").dialog("open");
     };
 
-    self.onLoaded = function() {
-        $("#actionDivContolPanelDiv").load("./modules/tools/KGcreator/html/leftPanel.html", function() {
+    self.onLoaded = function () {
+        $("#actionDivContolPanelDiv").load("./modules/tools/KGcreator/html/leftPanel.html", function () {
             //   self.loadCsvDirs();
-            self.showSourcesDialog(function(err, result) {
+            self.showSourcesDialog(function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
-                $("#graphDiv").load("./modules/tools/KGcreator/html/centralPanel.html", function() {
+                $("#graphDiv").load("./modules/tools/KGcreator/html/centralPanel.html", function () {
                     $("#KGcreator_centralPanelTabs").tabs({
-                        activate: function(e, ui) {
+                        activate: function (e, ui) {
                             var divId = ui.newPanel.selector;
                             if (divId == "#KGcreator_resourceslinkingTab") {
                                 //  KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
                             }
-                        }
+                        },
                     });
 
                     if (!authentication.currentUser.groupes.indexOf("admin") < 0) {
@@ -77,7 +77,7 @@ var KGcreator = (function() {
         $("#accordion").accordion("option", { active: 2 });
     };
 
-    self.showSourcesDialog = function(callback) {
+    self.showSourcesDialog = function (callback) {
         if (Config.userTools["KGcreator"].urlParam_source) {
             self.currentSlsvSource = Config.userTools["KGcreator"].urlParam_source;
             self.initSource();
@@ -85,9 +85,9 @@ var KGcreator = (function() {
         }
 
         var options = {
-            withCheckboxes: false
+            withCheckboxes: false,
         };
-        var selectTreeNodeFn = function() {
+        var selectTreeNodeFn = function () {
             self.currentSlsvSource = SourceSelectorWidget.getSelectedSource()[0];
             $("#KGcreator_slsvSource").html(self.currentSlsvSource);
             $("#KGcreator_dialogDiv").dialog("close");
@@ -104,17 +104,17 @@ var KGcreator = (function() {
         }
     };
 
-    self.initSource = function() {
+    self.initSource = function () {
         $("#KGcreator_centralPanelTabs").tabs({
-            activate: function(e, ui) {
+            activate: function (e, ui) {
                 var divId = ui.newPanel.selector;
                 if (divId == "#KGcreator_resourceslinkingTab") {
                     //  KGcreator.drawOntologyModel(self.currentSlsvSource);
                 }
-            }
+            },
         });
 
-        self.initSlsvSourceConfig(self.currentSlsvSource, function(err, result) {
+        self.initSlsvSourceConfig(self.currentSlsvSource, function (err, result) {
             if (err) {
                 return alert(err);
             }
@@ -122,17 +122,17 @@ var KGcreator = (function() {
         });
     };
 
-    self.getSlsvSourceConfig = function(source, callback) {
+    self.getSlsvSourceConfig = function (source, callback) {
         var payload = {
             dir: mappingsDir + "/" + source,
-            fileName: "main.json"
+            fileName: "main.json",
         };
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/file",
             data: payload,
             dataType: "json",
-            success: function(result, _textStatus, _jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 var json;
                 try {
                     json = JSON.parse(result);
@@ -141,46 +141,46 @@ var KGcreator = (function() {
                 }
                 return callback(null, json);
             },
-            error: function(err) {
-                self.initNewSlsvSource(source, function(err, json) {
+            error: function (err) {
+                self.initNewSlsvSource(source, function (err, json) {
                     return callback(null, json);
                 });
-            }
+            },
         });
     };
 
     // create dir and main.json
-    self.initNewSlsvSource = function(source, callback) {
+    self.initNewSlsvSource = function (source, callback) {
         var newJson = {
             sparqlServerUrl: Config.sources[self.currentSlsvSource].sparql_server.url,
             graphUri: Config.sources[self.currentSlsvSource].graphUri,
             prefixes: {},
             lookups: {},
             databaseSources: {},
-            csvSources: {}
+            csvSources: {},
         };
 
         var payload = {
             dir: mappingsDir,
-            newDirName: source
+            newDirName: source,
         };
         $.ajax({
             type: "POST",
             url: Config.apiUrl + "/data/dir",
             data: payload,
             dataType: "json",
-            success: function(result, _textStatus, _jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 KGcreator.rawConfig = newJson;
                 return callback(null, newJson);
             },
-            error: function(err) {
+            error: function (err) {
                 return callback(null, newJson);
-            }
+            },
         });
     };
 
-    self.initSlsvSourceConfig = function(source, callback) {
-        self.getSlsvSourceConfig(source, function(err, result) {
+    self.initSlsvSourceConfig = function (source, callback) {
+        self.getSlsvSourceConfig(source, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -190,7 +190,7 @@ var KGcreator = (function() {
             var jstreeData = [];
             var options = {
                 openAll: true,
-                selectTreeNodeFn: function(event, obj) {
+                selectTreeNodeFn: function (event, obj) {
                     self.currentTreeNode = obj.node;
                     KGcreator.currentTreeNode = obj.node;
                     //  KGcreator_run.getTableAndShowMappings();
@@ -201,27 +201,25 @@ var KGcreator = (function() {
                             tables: [],
                             type: "databaseSource",
                             sqlType: obj.node.data.sqlType,
-                            currentTable: ""
+                            currentTable: "",
                         };
 
                         KGcreator.loadDataBaseSource(self.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
-
                     } else if (obj.node.data.type == "csvSource") {
                         self.currentConfig.currentDataSource = {
                             name: obj.node.id,
                             tables: [],
                             type: "csvSource",
                             sqlType: obj.node.data.sqlType,
-                            currentTable: ""
+                            currentTable: "",
                         };
 
-                        KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, function(err, result) {
+                        KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, function (err, result) {
                             if (err) {
                                 alert(err.responseText);
                             }
                             KGcreator_mappings.showTableMappings(obj.node.id);
                         });
-
                     } else if (obj.node.data.type == "table") {
                         var mappingObj = self.currentConfig.currentMappings[obj.node.data.id];
 
@@ -236,43 +234,42 @@ var KGcreator = (function() {
                     }
                 },
 
-                contextMenu: function(node, x) {
+                contextMenu: function (node, x) {
                     var items = {};
                     if (node.id == "databaseSources") {
                         items.addDatabaseSource = {
                             label: "addDatabaseSources",
-                            action: function(_e) {
+                            action: function (_e) {
                                 self.displayUploadApp("database");
                                 // KGcreator.createDataBaseSourceMappings();
-                            }
+                            },
                         };
                         return items;
                     } else if (node.id == "csvSources") {
                         items.csvSources = {
                             label: "add Csv Sources",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 self.displayUploadApp("file");
                                 // KGcreator.createCsvSourceMappings();
-                            }
+                            },
                         };
                         return items;
                     } else if (node.data.type == "databaseSource") {
                         items.showDataSourceMappings = {
                             label: "show data source Mappings",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showDataSourceMappings(node);
-                            }
+                            },
                         };
                         items.drawOntolologyModel = {
                             label: "draw Ontolology and mappings",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
-                            }
+                            },
                         };
-
 
                         return items;
                     } else if (node.data.type == "table") {
@@ -285,10 +282,10 @@ var KGcreator = (function() {
                           };*/
                         items.mappingBot = {
                             label: "add virtual column",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator_bot.start(node);
-                            }
+                            },
                         };
                         /*   items.mapColumn = {
                                label: "map Rows",
@@ -300,25 +297,25 @@ var KGcreator = (function() {
 
                         items.transforms = {
                             label: "edit transforms",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showTransformDialog(node);
-                            }
+                            },
                         };
 
                         items.showSampleData = {
                             label: "show sample data",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator.showSampleData(node, true, 200);
-                            }
+                            },
                         };
                         items.removeTableMappings = {
                             label: "remove table Mappings",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator.removeTableMappings(node);
-                            }
+                            },
                         };
 
                         return items;
@@ -329,26 +326,26 @@ var KGcreator = (function() {
 
                         items.mappingBot = {
                             label: "map column",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator_bot.start(node);
-                            }
+                            },
                         };
 
                         items.mapColumn = {
                             label: "map column advanced",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showMappingDialog();
-                            }
+                            },
                         };
 
                         items.removeColumnMappings = {
                             label: "removeColumnMappings",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator.removeColumnMappings(node);
-                            }
+                            },
                         };
 
                         return items;
@@ -362,10 +359,10 @@ var KGcreator = (function() {
                           };*/
                         items.mappingBot = {
                             label: "add virtual column",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator_bot.start(node);
-                            }
+                            },
                         };
                         /*  items.mapColumn = {
                               label: "map Rows",
@@ -376,46 +373,46 @@ var KGcreator = (function() {
                           };*/
                         items.lookups = {
                             label: "lookups",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showLookupsDialog(node);
-                            }
+                            },
                         };
                         items.tranforms = {
                             label: "edit tranforms",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showTransformDialog(node);
-                            }
+                            },
                         };
                         // Table == Fichier pour les CSV donc on met le delete ici
                         items.deleteCsvFile = {
                             label: "delete file",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator.deleteCsvFile(node);
-                            }
+                            },
                         };
 
                         items.showSampleData = {
                             label: "show sample Data",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator.showSampleData(node, true, 200);
-                            }
+                            },
                         };
                         items.removeTableMappings = {
                             label: "remove table mappings",
-                            action: function(_e) {
+                            action: function (_e) {
                                 // pb avec source
                                 KGcreator.removeTableMappings(node);
-                            }
+                            },
                         };
                         return items;
                     }
 
                     return items;
-                }
+                },
 
                 // show_contextmenu: KGcreator.getContextMenu()
                 //  withCheckboxes: true,
@@ -427,8 +424,8 @@ var KGcreator = (function() {
                 parent: "#",
                 type: "databaseSources",
                 data: {
-                    type: "sourceType"
-                }
+                    type: "sourceType",
+                },
             });
             jstreeData.push({
                 id: "csvSources",
@@ -436,8 +433,8 @@ var KGcreator = (function() {
                 parent: "#",
                 type: "CSVS",
                 data: {
-                    type: "sourceType"
-                }
+                    type: "sourceType",
+                },
             });
 
             for (var datasource in self.currentConfig.databaseSources) {
@@ -448,7 +445,7 @@ var KGcreator = (function() {
                     text: datasource,
                     parent: "databaseSources",
                     type: "DataSource",
-                    data: { id: datasource, type: "databaseSource", sqlType: sqlType }
+                    data: { id: datasource, type: "databaseSource", sqlType: sqlType },
                 });
             }
             for (var datasource in self.currentConfig.csvSources) {
@@ -457,7 +454,7 @@ var KGcreator = (function() {
                     text: datasource,
                     parent: "csvSources",
                     type: "CSV",
-                    data: { id: datasource, type: "csvSource" }
+                    data: { id: datasource, type: "csvSource" },
                 });
             }
             JstreeWidget.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
@@ -467,31 +464,31 @@ var KGcreator = (function() {
         });
     };
 
-    self.saveSlsvSourceConfig = function(callback) {
+    self.saveSlsvSourceConfig = function (callback) {
         var data = KGcreator.rawConfig;
         var source = self.currentSlsvSource;
 
         var payload = {
             dir: mappingsDir + "/" + source,
             fileName: "main.json",
-            data: JSON.stringify(data, null, 2)
+            data: JSON.stringify(data, null, 2),
         };
         $.ajax({
             type: "POST",
             url: Config.apiUrl + "/data/file",
             data: payload,
             dataType: "json",
-            success: function(result, _textStatus, _jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 MainController.UI.message(mappingsDir + "/" + source + "config saved");
                 callback();
             },
-            error: function(err) {
+            error: function (err) {
                 callback(err);
-            }
+            },
         });
     };
 
-    self.updateDataSourceTripleModels = function(table, triples, save) {
+    self.updateDataSourceTripleModels = function (table, triples, save) {
         if (!table) {
             table = self.currentTreeNode.data.table;
         }
@@ -501,7 +498,7 @@ var KGcreator = (function() {
         }
     };
 
-    self.saveDataSourceMappings = function(source, datasource, data, callback) {
+    self.saveDataSourceMappings = function (source, datasource, data, callback) {
         if (!source) {
             source = self.currentSlsvSource;
         }
@@ -515,33 +512,33 @@ var KGcreator = (function() {
         var payload = {
             dir: mappingsDir + "/" + source,
             fileName: datasource + ".json",
-            data: JSON.stringify(data, null, 2)
+            data: JSON.stringify(data, null, 2),
         };
         $.ajax({
             type: "POST",
             url: Config.apiUrl + "/data/file",
             data: payload,
             dataType: "json",
-            success: function(result, _textStatus, _jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 MainController.UI.message(mappingsDir + "/" + source + "config saved");
                 if (callback) {
                     return callback();
                 }
             },
-            error: function(err) {
+            error: function (err) {
                 if (callback) {
                     return callback(err);
                 }
                 alert(err);
-            }
+            },
         });
     };
 
-    self.loadDataBaseSource = function(slsvSource, dataSource, sqlType) {
+    self.loadDataBaseSource = function (slsvSource, dataSource, sqlType) {
         async.series(
             [
-                function(callbackSeries) {
-                    KGcreator.listDatabaseTables(dataSource, sqlType, function(err, tables) {
+                function (callbackSeries) {
+                    KGcreator.listDatabaseTables(dataSource, sqlType, function (err, tables) {
                         if (err) {
                             return callbackSeries();
                         }
@@ -549,8 +546,8 @@ var KGcreator = (function() {
                         callbackSeries();
                     });
                 },
-                function(callbackSeries) {
-                    self.loadDataSourceMappings(slsvSource, dataSource, function(err, mappings) {
+                function (callbackSeries) {
+                    self.loadDataSourceMappings(slsvSource, dataSource, function (err, mappings) {
                         if (err) {
                             return callbackSeries();
                         }
@@ -558,16 +555,16 @@ var KGcreator = (function() {
                         callbackSeries();
                     });
                 },
-                function(callbackSeries) {
+                function (callbackSeries) {
                     self.showTablesTree(self.currentConfig.currentDataSource);
                     callbackSeries();
                 },
-                function(callbackSeries) {
+                function (callbackSeries) {
                     KGcreator_mappings.showDataSourceMappings(null);
                     callbackSeries();
-                }
+                },
             ],
-            function(err) {
+            function (err) {
                 if (err) {
                     return alert(err);
                 }
@@ -575,34 +572,34 @@ var KGcreator = (function() {
         );
     };
 
-    self.loadCsvSource = function(slsvSource, fileName, callback) {
+    self.loadCsvSource = function (slsvSource, fileName, callback) {
         var columns = [];
         async.series(
             [
-                function(callbackSeries) {
+                function (callbackSeries) {
                     var payload = {
                         fileName: fileName,
                         dir: "CSV/" + slsvSource,
-                        lines: 200
+                        lines: 200,
                     };
                     $.ajax({
                         type: "GET",
                         url: Config.apiUrl + "/data/csv",
                         data: payload,
                         dataType: "json",
-                        success: function(result, _textStatus, _jqXHR) {
+                        success: function (result, _textStatus, _jqXHR) {
                             columns = result.headers;
                             var tableObj = { [fileName]: columns };
                             self.currentConfig.currentDataSource.tables = tableObj;
                             callbackSeries();
                         },
-                        error: function(err) {
+                        error: function (err) {
                             callbackSeries(err);
-                        }
+                        },
                     });
                 },
-                function(callbackSeries) {
-                    self.loadDataSourceMappings(slsvSource, fileName, function(err, mappings) {
+                function (callbackSeries) {
+                    self.loadDataSourceMappings(slsvSource, fileName, function (err, mappings) {
                         if (err) {
                             return callbackSeries();
                         }
@@ -612,10 +609,10 @@ var KGcreator = (function() {
                         callbackSeries();
                     });
                 },
-                function(callbackSeries) {
+                function (callbackSeries) {
                     var jstreeData = [];
 
-                    columns.forEach(function(column) {
+                    columns.forEach(function (column) {
                         var label = column;
 
                         var columnMappings = self.getColumnsMappings(fileName, null, "s");
@@ -629,19 +626,19 @@ var KGcreator = (function() {
                             text: label,
                             type: "Column",
                             parent: fileName,
-                            data: { id: column, table: fileName, label: column, type: "tableColumn" }
+                            data: { id: column, table: fileName, label: column, type: "tableColumn" },
                         });
                     });
 
                     if (self.currentConfig.currentMappings && self.currentConfig.currentMappings[fileName] && self.currentConfig.currentMappings[fileName].virtualColumns) {
-                        self.currentConfig.currentMappings[fileName].virtualColumns.forEach(function(virtualColumn) {
+                        self.currentConfig.currentMappings[fileName].virtualColumns.forEach(function (virtualColumn) {
                             var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
                             jstreeData.push({
                                 id: fileName + "_" + virtualColumn,
                                 text: label,
                                 type: "Column",
                                 parent: fileName,
-                                data: { id: virtualColumn, table: fileName, label: virtualColumn, type: "tableColumn" }
+                                data: { id: virtualColumn, table: fileName, label: virtualColumn, type: "tableColumn" },
                             });
                         });
                     }
@@ -651,29 +648,29 @@ var KGcreator = (function() {
                     callbackSeries();
                 },
 
-                function(callbackSeries) {
+                function (callbackSeries) {
                     self.showTableVirtualColumnsTree(fileName);
                     callbackSeries();
                 },
-                function(callbackSeries) {
+                function (callbackSeries) {
                     callbackSeries();
-                }
+                },
             ],
-            function(err) {
+            function (err) {
                 if (err) {
-                    if(callback){
-                        return callback(err)
+                    if (callback) {
+                        return callback(err);
                     }
                     return alert(err);
                 }
-                if(callback){
-                    return callback(null)
+                if (callback) {
+                    return callback(null);
                 }
             }
         );
     };
 
-    self.showTablesTree = function(datasourceConfig) {
+    self.showTablesTree = function (datasourceConfig) {
         var jstreeData = [];
 
         for (var table in datasourceConfig.tables) {
@@ -689,19 +686,19 @@ var KGcreator = (function() {
                 data: {
                     id: table,
                     label: table,
-                    type: "table"
-                }
+                    type: "table",
+                },
             });
         }
         JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", datasourceConfig.name, jstreeData);
     };
 
-    self.showTablesColumnTree = function(table, tableColumns) {
+    self.showTablesColumnTree = function (table, tableColumns) {
         var jstreeData = [];
 
         var columnMappings = self.getColumnsMappings(table, null, "s");
         tableColumns.sort();
-        tableColumns.forEach(function(column) {
+        tableColumns.forEach(function (column) {
             var label = column;
 
             if (columnMappings[column]) {
@@ -712,7 +709,7 @@ var KGcreator = (function() {
                 text: label,
                 parent: table,
                 type: "Column",
-                data: { id: column, table: table, label: column, type: "tableColumn" }
+                data: { id: column, table: table, label: column, type: "tableColumn" },
             });
         });
 
@@ -720,7 +717,7 @@ var KGcreator = (function() {
         KGcreator_graph.graphColumnToClassPredicates([table]);
     };
 
-    self.showTableVirtualColumnsTree = function(table) {
+    self.showTableVirtualColumnsTree = function (table) {
         if (!table) {
             return alert("no table selected");
         }
@@ -728,28 +725,28 @@ var KGcreator = (function() {
             return;
         }
         var jstreeData = [];
-        self.currentConfig.currentMappings[table].virtualColumns.forEach(function(virtualColumn) {
+        self.currentConfig.currentMappings[table].virtualColumns.forEach(function (virtualColumn) {
             var label = "<span class='KGcreator_virtualColumn'>" + virtualColumn + "</span>";
             jstreeData.push({
                 id: table + "_" + virtualColumn,
                 type: "Column",
                 text: label,
                 parent: table,
-                data: { id: virtualColumn, table: table, label: virtualColumn, type: "tableColumn" }
+                data: { id: virtualColumn, table: table, label: virtualColumn, type: "tableColumn" },
             });
         });
         JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", table, jstreeData);
         KGcreator_graph.graphColumnToClassPredicates([table]);
     };
 
-    self.removeColumnMappings = function(node) {
+    self.removeColumnMappings = function (node) {
         if (!confirm(" remove mappings for column " + node.text)) {
             return;
         }
 
         var tableTriples = self.currentConfig.currentMappings[node.data.table].tripleModels;
         var tableTriplesCopy = JSON.parse(JSON.stringify(tableTriples));
-        tableTriples.forEach(function(triple, index) {
+        tableTriples.forEach(function (triple, index) {
             if (triple.s.replace("_$", "") == node.data.id) {
                 tableTriplesCopy = tableTriplesCopy.filter((element) => JSON.stringify(element) != JSON.stringify(triple));
                 JstreeWidget.setSelectedNodeStyle({ color: "black" });
@@ -768,7 +765,7 @@ var KGcreator = (function() {
         self.saveDataSourceMappings();
     };
 
-    self.removeTableMappings = function(node) {
+    self.removeTableMappings = function (node) {
         if (!confirm(" remove mappings for table " + node.text)) {
             return;
         }
@@ -778,9 +775,9 @@ var KGcreator = (function() {
         self.saveDataSourceMappings();
     };
 
-    self.getMappingsList = function(source, callback) {
+    self.getMappingsList = function (source, callback) {
         var payload = {
-            dir: mappingsDir + "/" + source
+            dir: mappingsDir + "/" + source,
         };
 
         $.ajax({
@@ -788,27 +785,27 @@ var KGcreator = (function() {
             url: Config.apiUrl + "/data/files",
             data: payload,
             dataType: "json",
-            success: function(result, _textStatus, _jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 self.mappingFiles = {};
                 if (result == null) {
                     return callback();
                 }
                 var mappingFiles = [];
-                result.forEach(function(file) {
+                result.forEach(function (file) {
                     if (file != "main.json" && file.indexOf(".json" > -1)) {
                         mappingFiles.push(file);
                     }
                 });
                 callback(null, mappingFiles);
             },
-            error: function(err) {
+            error: function (err) {
                 callback(err);
-            }
+            },
         });
     };
 
-    self.getIndividualMapping = function(source, className) {
-        self.loadDataSourceMappings(source, self.currentConfig.currentDataSource, function(err, allTripleMappings) {
+    self.getIndividualMapping = function (source, className) {
+        self.loadDataSourceMappings(source, self.currentConfig.currentDataSource, function (err, allTripleMappings) {
             if (err) {
                 return callback(err);
             }
@@ -819,7 +816,7 @@ var KGcreator = (function() {
                 var tripleModels = allTripleMappings[fileName].tripleModels;
                 var databaseSource = allTripleMappings[fileName].databaseSource;
 
-                tripleModels.forEach(function(triple) {
+                tripleModels.forEach(function (triple) {
                     if (triple.p == "rdf:type" && triple.o == className) {
                         table = fileName;
                         column = triple.s;
@@ -829,16 +826,16 @@ var KGcreator = (function() {
             }
         });
     };
-    self.getIndividualRecord = function(source, className, uri, callback) {
+    self.getIndividualRecord = function (source, className, uri, callback) {
         var mapping = self.getIndividualMapping(source, className);
 
         var sql = "select * from " + mapping.table + "where " + mapping.column + " = '" + uri + "'";
     };
 
-    self.loadDataSourceMappings = function(slsvSource, dataSource, callback) {
+    self.loadDataSourceMappings = function (slsvSource, dataSource, callback) {
         var payload = {
             dir: mappingsDir + "/" + slsvSource,
-            fileName: dataSource + ".json"
+            fileName: dataSource + ".json",
         };
 
         $.ajax({
@@ -846,7 +843,7 @@ var KGcreator = (function() {
             url: `${Config.apiUrl}/data/file`,
             data: payload,
             dataType: "json",
-            success: function(result, _textStatus, _jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 var json;
                 try {
                     json = JSON.parse(result);
@@ -857,17 +854,17 @@ var KGcreator = (function() {
             },
             error(err) {
                 return callback(null, {});
-            }
+            },
         });
     };
 
-    self.getColumnsMappings = function(table, column, role) {
+    self.getColumnsMappings = function (table, column, role) {
         var columnTriples = {};
         if (!self.currentConfig.currentMappings[table]) {
             return columnTriples;
         }
 
-        self.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
+        self.currentConfig.currentMappings[table].tripleModels.forEach(function (triple) {
             if ((column && triple[role].replace("_$", "") == column.replace("_$", "")) || !column) {
                 if (!columnTriples[triple[role]]) {
                     columnTriples[triple[role]] = [];
@@ -879,7 +876,7 @@ var KGcreator = (function() {
         return columnTriples;
     };
 
-    self.createDataBaseSourceMappings = function() {
+    self.createDataBaseSourceMappings = function () {
         // hide uploadApp
         self.displayUploadApp("");
         $("#smallDialogDiv").dialog("close");
@@ -892,11 +889,11 @@ var KGcreator = (function() {
         var json = {
             type: sqlType,
             connection: "_default",
-            tableJoins: []
+            tableJoins: [],
         };
         self.currentConfig.databaseSources[datasourceName] = json;
         self.rawConfig.databaseSources[datasourceName] = json;
-        self.saveSlsvSourceConfig(function(err, result) {
+        self.saveSlsvSourceConfig(function (err, result) {
             if (err) {
                 return alert(err);
             }
@@ -904,7 +901,7 @@ var KGcreator = (function() {
         });
     };
 
-    self.createCsvSourceMappings = function() {
+    self.createCsvSourceMappings = function () {
         // hide uploadApp
         self.displayUploadApp("");
         $("#smallDialogDiv").dialog("close");
@@ -916,12 +913,12 @@ var KGcreator = (function() {
         self.currentConfig.csvSources[datasourceName] = {};
         self.rawConfig.csvSources[datasourceName] = {};
 
-        self.saveSlsvSourceConfig(function(err, result) {
+        self.saveSlsvSourceConfig(function (err, result) {
             if (err) {
                 return alert(err);
             }
             self.addDataSourceToJstree("csvSource", datasourceName);
-            self.loadCsvSource(self.currentSlsvSource, datasourceName, function(err, result) {
+            self.loadCsvSource(self.currentSlsvSource, datasourceName, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
@@ -929,31 +926,31 @@ var KGcreator = (function() {
         });
     };
 
-    self.addDataSourceToJstree = function(type, datasourceName, sqlType) {
+    self.addDataSourceToJstree = function (type, datasourceName, sqlType) {
         var jstreeData = [
             {
                 id: datasourceName,
                 text: datasourceName,
                 type: "DataSource",
                 parent: type + "s",
-                data: { id: datasourceName, type: type, sqlType: sqlType }
-            }
+                data: { id: datasourceName, type: type, sqlType: sqlType },
+            },
         ];
 
         JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", type + "s", jstreeData);
     };
 
-    self.listDatabaseTables = function(databaseSource, type, callback) {
+    self.listDatabaseTables = function (databaseSource, type, callback) {
         const params = new URLSearchParams({
             name: databaseSource,
-            type: type
+            type: type,
         });
 
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/kg/model?" + params.toString(),
             dataType: "json",
-            success: function(data, _textStatus, _jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 self.currentDataSourceModel = data;
                 var tables = [];
                 self.currentSource = self.currentDbName;
@@ -963,19 +960,19 @@ var KGcreator = (function() {
                 }
                 return callback(null, data);
             },
-            error: function(_err) {
+            error: function (_err) {
                 return callback(err);
-            }
+            },
         });
     };
 
-    self.showSampleData = function(node, column, callback) {
+    self.showSampleData = function (node, column, callback) {
         // alert("coming soon");
 
         function showTable(data) {
             var headers = [];
             var tableCols = [];
-            data.forEach(function(item) {
+            data.forEach(function (item) {
                 for (var key in item)
                     if (headers.indexOf(key) < 0) {
                         headers.push(key);
@@ -983,9 +980,9 @@ var KGcreator = (function() {
                     }
             });
             var lines = [];
-            data.forEach(function(item) {
+            data.forEach(function (item) {
                 var line = [];
-                headers.forEach(function(column) {
+                headers.forEach(function (column) {
                     line.push(item[column] || "");
                 });
                 lines.push(line);
@@ -999,7 +996,7 @@ var KGcreator = (function() {
 
             var html = "<table border='1'><tr>";
             var headers = [];
-            data.forEach(function(item) {
+            data.forEach(function (item) {
                 for (var key in item)
                     if (headers.indexOf(key) < 0) {
                         headers.push(key);
@@ -1007,9 +1004,9 @@ var KGcreator = (function() {
                     }
             });
             html += "</tr>";
-            data.forEach(function(item) {
+            data.forEach(function (item) {
                 html += "<tr>";
-                headers.forEach(function(column) {
+                headers.forEach(function (column) {
                     html += "<td>" + (item[column] || "") + "</td>";
                 });
                 html += "</tr>";
@@ -1030,7 +1027,7 @@ var KGcreator = (function() {
             const params = new URLSearchParams({
                 type: self.currentConfig.currentDataSource.sqlType,
                 dbName: self.currentConfig.currentDataSource.name,
-                sqlQuery: sqlQuery
+                sqlQuery: sqlQuery,
             });
 
             $.ajax({
@@ -1038,24 +1035,24 @@ var KGcreator = (function() {
                 url: Config.apiUrl + "/kg/data?" + params.toString(),
                 dataType: "json",
 
-                success: function(data, _textStatus, _jqXHR) {
+                success: function (data, _textStatus, _jqXHR) {
                     showTable(data);
                 },
                 error(err) {
                     return alert(err.responseText);
-                }
+                },
             });
         } else if (self.currentConfig.currentDataSource.type == "csvSource") {
             alert("Comming Soon...");
         }
     };
 
-    self.migrateOldMappings = function(slsvSource) {
+    self.migrateOldMappings = function (slsvSource) {
         if (!slsvSource) {
             slsvSource = self.currentSlsvSource;
         }
         var json = {};
-        KGcreator.getAllTriplesMappingsOld(slsvSource, function(err, mappingObjects) {
+        KGcreator.getAllTriplesMappingsOld(slsvSource, function (err, mappingObjects) {
             if (err) {
                 return alert(err);
             }
@@ -1066,7 +1063,7 @@ var KGcreator = (function() {
                     tripleModels: item.tripleModels,
                     lookups: item.lookups,
                     transform: item.transform,
-                    prefixes: item.prefixes
+                    prefixes: item.prefixes,
                 };
                 json[item.fileName] = obj;
             }
@@ -1074,10 +1071,10 @@ var KGcreator = (function() {
         });
     };
 
-    self.deleteCsvFile = function(node) {
+    self.deleteCsvFile = function (node) {
         return alert("coming soon");
     };
-    self.deleteMappings = function(node) {
+    self.deleteMappings = function (node) {
         var table = node.data.id;
         if (confirm("delete mappings of table " + table)) {
             delete self.currentConfig.currentMappings[table];
@@ -1085,7 +1082,7 @@ var KGcreator = (function() {
         }
     };
 
-    self.getTextSelection = function() {
+    self.getTextSelection = function () {
         var t;
         if (window.getSelection) {
             t = window.getSelection().toString();
@@ -1096,7 +1093,6 @@ var KGcreator = (function() {
         }
         return t;
     };
-
 
     return self;
 })();

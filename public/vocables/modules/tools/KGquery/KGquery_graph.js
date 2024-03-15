@@ -85,7 +85,7 @@ var KGquery_graph = (function () {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
-MainController.UI.message("generating tbox graph from abox graph")
+                    MainController.UI.message("generating tbox graph from abox graph");
                     self.getInferredModelVisjsData(KGquery.currentSource, function (err, result2) {
                         if (err) {
                             return alert(err);
@@ -136,7 +136,8 @@ MainController.UI.message("generating tbox graph from abox graph")
                             annotationPropertiesmap[item.class.value].properties.push({
                                 label: item.propLabel.value,
                                 id: item.prop.value,
-                                datatype: item.datatype?item.datatype.value:"string" });
+                                datatype: item.datatype ? item.datatype.value : "string",
+                            });
                         });
                         visjsData.nodes.forEach(function (node) {
                             if (annotationPropertiesmap[node.data.id]) {
@@ -148,7 +149,7 @@ MainController.UI.message("generating tbox graph from abox graph")
                 },
             ],
             function (err) {
-                MainController.UI.message("",true)
+                MainController.UI.message("", true);
                 if (err) {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");

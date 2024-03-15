@@ -705,57 +705,53 @@ var OntologyModels = (function () {
                         }
 
                         //merge constraints( range/domain) and restrictions
-                        var sourceConstraintsAndRestrictions =Config.ontologiesVocabularyModels[_source].restrictions;
-                        for (var prop in  Config.ontologiesVocabularyModels[_source].constraints) {
-
-                           var constraint=Config.ontologiesVocabularyModels[_source].constraints[prop]
+                        var sourceConstraintsAndRestrictions = Config.ontologiesVocabularyModels[_source].restrictions;
+                        for (var prop in Config.ontologiesVocabularyModels[_source].constraints) {
+                            var constraint = Config.ontologiesVocabularyModels[_source].constraints[prop];
                             if (!sourceConstraintsAndRestrictions[prop]) {
-                                sourceConstraintsAndRestrictions[prop]=[constraint]
-                            }else{
-                                sourceConstraintsAndRestrictions[prop].push(constraint)
+                                sourceConstraintsAndRestrictions[prop] = [constraint];
+                            } else {
+                                sourceConstraintsAndRestrictions[prop].push(constraint);
                             }
-
                         }
 
                         for (var property in sourceConstraintsAndRestrictions) {
+                            if (property == "http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality") var x = 3;
 
-                            if(property=="http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality")
-                                var x=3
+                            sourceConstraintsAndRestrictions[property].forEach(function (constraint) {
+                                constraint.source = _source;
+                                var domainOK = false;
+                                if (!allConstraints[property]) {
+                                    allConstraints[property] = constraint;
 
-                            sourceConstraintsAndRestrictions[property].forEach(function(constraint){
-                            constraint.source = _source;
-                            var domainOK = false;
-                            if (!allConstraints[property]) {
-                                allConstraints[property] = constraint;
-
-                                if (constraint.domain) {
-                                    if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
-                                        if (!constraint.range || constraint.range.indexOf("http") < 0 || endNodeIds.length == 0) {
-                                            propertiesMatchingStartNode.push(property);
-                                        } else {
-                                            domainOK = true;
-                                        }
-                                    }
-                                }
-                                if (constraint.range) {
-                                    if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
-                                        if (domainOK) {
-                                            propertiesMatchingBoth.push(property);
-                                        } else {
-                                            if (!constraint.domain || constraint.domain.indexOf("http") < 0) {
-                                                propertiesMatchingEndNode.push(property);
+                                    if (constraint.domain) {
+                                        if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
+                                            if (!constraint.range || constraint.range.indexOf("http") < 0 || endNodeIds.length == 0) {
+                                                propertiesMatchingStartNode.push(property);
+                                            } else {
+                                                domainOK = true;
                                             }
                                         }
                                     }
+                                    if (constraint.range) {
+                                        if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
+                                            if (domainOK) {
+                                                propertiesMatchingBoth.push(property);
+                                            } else {
+                                                if (!constraint.domain || constraint.domain.indexOf("http") < 0) {
+                                                    propertiesMatchingEndNode.push(property);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (!constraint.domain && !constraint.range) {
+                                        noConstaintsArray.push(property);
+                                    }
+                                } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
+                                    duplicateProps.push(property + "_" + allConstraints[property].source + "-----" + constraint.source);
                                 }
-                                if (!constraint.domain && !constraint.range) {
-                                    noConstaintsArray.push(property);
-                                }
-                           } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
-                                duplicateProps.push(property + "_" + allConstraints[property].source + "-----" + constraint.source);
-                            }
-                        })
-                    }
+                            });
+                        }
                     });
 
                     callbackSeries();
@@ -856,8 +852,6 @@ var OntologyModels = (function () {
         return restrictions;
     };
 
-
-
     self.getInferredModel = function (source, options, callback) {
         if (!options) {
             options = {};
@@ -873,7 +867,7 @@ var OntologyModels = (function () {
             }
             var importGraphUriFrom = Sparql_common.getFromStr(source, false, false);
 
-            var queryNew =
+            var queryNewWithLabels =
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
@@ -905,14 +899,36 @@ var OntologyModels = (function () {
                 "    }\n" +
                 "  ";
 
-
-
+            var queryNew =
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT   distinct ?prop ?sClass ?oClass ?sClassLabel ?oClassLabel ?propLabel ?g\n" +
+                importGraphUriFrom +
+                " where " +
+                " { select ?prop  ?sClass ?oClass where {\n" +
+                "  graph <" +
+                sourceGraphUri +
+                "> {\n" +
+                "   ?s ?prop ?o.\n" +
+                "   {?s rdf:type ?sClass.}\n" +
+                "   {?o rdf:type ?oClass.} \n" +
+                "filter(?sClass not in (owl:Class,owl:NamedIndividual,owl:Restriction)) \n" +
+                " filter(?oClass not in (owl:Class,owl:NamedIndividual,owl:Restriction)) " +
+                ' filter (!regex(str(?prop),"rdf","i")) filter (?prop not in (<http://purl.org/dc/terms/created>, <http://souslesens.org/KGcreator#mappingFile>))' +
+                "  filter (?s != ?o)\n" +
+                "    }\n" +
+                "    }\n" +
+                "  }\n" +
+                "\n" +
+                "  ";
 
             let url = Config.sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
+
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
 
                 //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
@@ -967,10 +983,10 @@ var OntologyModels = (function () {
             "  }\n" +
             "}";
 
-
         var importGraphUriFrom = Sparql_common.getFromStr(source, false, false);
 
-        var queryNew="PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+        var queryNew =
+            "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
@@ -991,12 +1007,7 @@ var OntologyModels = (function () {
             "      bind ( datatype(?o) as ?datatype )\n" +
             "    ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#DatatypeProperty>,rdf:Property,owl:AnnotationProperty)&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>))\n" +
             "  }\n" +
-            "} limit 100"
-
-
-
-
-
+            "} limit 100";
 
         let url = Config.sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function (err, result) {

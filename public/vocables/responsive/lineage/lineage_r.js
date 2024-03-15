@@ -17,10 +17,10 @@ var Lineage_r = (function () {
     self.oldExportTable = null;
     self.MoreActionsShow = false;
     self.MoreOptionsShow = true;
-    self.firstLoad=true;
+    self.firstLoad = true;
     self.onLoaded = function () {
-        if(self.firstLoad){
-            self.firstLoad=false;
+        if (self.firstLoad) {
+            self.firstLoad = false;
             // Overcharge only one time at first lineage load
             self.controller = Lineage_whiteboard;
             PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
@@ -36,7 +36,7 @@ var Lineage_r = (function () {
             self.oldAddEdgeDialog = Lineage_createRelation.showAddEdgeFromGraphDialog;
             Lineage_createRelation.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
         }
-  
+
         ResponsiveUI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").load("./responsive/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
@@ -46,7 +46,6 @@ var Lineage_r = (function () {
         $("#graphDiv").empty();
         $("#lateralPanelDiv").off();
         $("#lateralPanelDiv").css("width", "435px");
-       
     };
     self.loadSources = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
@@ -88,7 +87,6 @@ var Lineage_r = (function () {
                         ResponsiveUI.resetWindowHeight();
                     },
                 });
-                
             });
         }
     };
@@ -205,7 +203,9 @@ var Lineage_r = (function () {
     };
     self.responsiveAddEdgeDialog = function (edgeData, callback) {
         //ResponsiveUI.openDialogDiv("smallDialogDiv");
-        $("#smallDialogDiv").parent().show("fast", function () {
+        $("#smallDialogDiv")
+            .parent()
+            .show("fast", function () {
                 self.oldAddEdgeDialog(edgeData, function () {
                     callback();
                     self.showHideEditButtons(Lineage_sources.activeSource);

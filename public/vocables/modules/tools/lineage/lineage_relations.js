@@ -532,7 +532,7 @@ var Lineage_relations = (function () {
                         Lineage_whiteboard.drawNewGraph(allVisjsData, graphDiv);
                     }
                     if (err) {
-                        return (err);
+                        return err;
                     }
                 } else if (options.output == "table") {
                     Export.exportGraphToDataTable(self.lineageVisjsGraph, null, allVisjsData.nodes, allVisjsData.edges);

@@ -27,9 +27,8 @@ th, td{
     padding: 24px;
     background-color: @dark-background-color !important;
     border-radius: 14px;
-    max-height:90vh;
+    max-height: 90vh;
     overflow: auto;
-    
 }
 .detailsCellValue {
     .font-table;
@@ -62,8 +61,6 @@ th, td{
     border-top-left-radius: 0px;
     overflow: unset;
     display: flex;
-   
-
 }
 .nodesInfosAdditionalInfos {
     background-color: @background-color !important;
@@ -74,7 +71,6 @@ th, td{
     .nodesInfosAdditionalInfos;
     max-height: 55vh;
     overflow: auto;
-
 }
 #nodeInfos_RangeAndDomainDiv {
     .nodesInfosAdditionalInfos;
@@ -216,10 +212,7 @@ a:visited.ui-button,
     background-color: inherit !important;
 }
 
-
-
 #nodeInfos_listsDiv {
     margin: 10px;
     max-height: 90dvh;
-  
 }

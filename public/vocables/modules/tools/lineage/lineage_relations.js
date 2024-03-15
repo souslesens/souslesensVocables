@@ -474,7 +474,7 @@ var Lineage_relations = (function () {
 
                         Lineage_whiteboard.drawPredicatesGraph(source, data, null, options, function (err, result) {
                             if (err) {
-                                if(err=="no data found"){
+                                if (err == "no data found") {
                                     callbackSeries();
                                 }
                                 return callbackSeries(err);

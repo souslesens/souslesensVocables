@@ -539,9 +539,8 @@ defaultLang = 'en';*/
                 str +=
                     " <br><div id='nodeInfos_listsDiv' >" +
                     "<div id='nodeInfos_restrictionsDiv'  style='display:table-caption;background-color: #ddd;padding:5px'></div>" +
-                    "<div id='nodeInfos_RangeAndDomainDiv'  style='display:none;background-color: #ddd;padding:5px'></div>"
-                    "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;background-color: #ddd;padding:5px'></div>" +
-                    "</div>";
+                    "<div id='nodeInfos_RangeAndDomainDiv'  style='display:none;background-color: #ddd;padding:5px'></div>";
+                "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;background-color: #ddd;padding:5px'></div>" + "</div>";
 
                 $("#" + divId).html(str);
                 if (callback) {
@@ -654,11 +653,11 @@ defaultLang = 'en';*/
             var data = result.results.bindings;
 
             if (data.length == 0) {
-                $('#nodeInfos_individualsDiv').text('No result');
-                if(callback){
+                $("#nodeInfos_individualsDiv").text("No result");
+                if (callback) {
                     callback();
                 }
-                return 
+                return;
             } else {
                 var str = "<b>TypeOf </b><br><table>";
 
@@ -701,38 +700,37 @@ defaultLang = 'en';*/
             return _callback();
         });
     };
-    
-    self.showInferredRangeAndDomain=function(sourceLabel, nodeId, divId, callback){
-        var ontologySourceModel=Config.ontologiesVocabularyModels[sourceLabel];
-        if(ontologySourceModel!=undefined){
-            var property=ontologySourceModel.constraints[nodeId];
-            if(property==undefined){
-                if(callback){
+
+    self.showInferredRangeAndDomain = function (sourceLabel, nodeId, divId, callback) {
+        var ontologySourceModel = Config.ontologiesVocabularyModels[sourceLabel];
+        if (ontologySourceModel != undefined) {
+            var property = ontologySourceModel.constraints[nodeId];
+            if (property == undefined) {
+                if (callback) {
                     callback();
                 }
                 return;
             }
-            var domainLabel= property.domainLabel!="" ? property.domainLabel:'anything';
-            var rangeLabel= property.rangeLabel!="" ? property.domainLabel:'anything';
-            var domain=property.domain!='' ? `onclick='NodeInfosWidget.onClickLink("${property.domain}")'`:'';
-            var range=property.range!='' ? `onclick='NodeInfosWidget.onClickLink("${ property.range}")'`:'';
-            var cells=`
+            var domainLabel = property.domainLabel != "" ? property.domainLabel : "anything";
+            var rangeLabel = property.rangeLabel != "" ? property.domainLabel : "anything";
+            var domain = property.domain != "" ? `onclick='NodeInfosWidget.onClickLink("${property.domain}")'` : "";
+            var range = property.range != "" ? `onclick='NodeInfosWidget.onClickLink("${property.range}")'` : "";
+            var cells = `
             <tr class='infos_table'><td class='detailsCellValue'>Domain</td><td class='detailsCellValue'  ${domain}>${domainLabel}</td></tr>
             <tr class='infos_table'><td class='detailsCellValue'>Range</td><td class='detailsCellValue' ${range}>${rangeLabel}</td></tr>
-            `
-            var html=`<b>Inferred Range and Domains</b>
+            `;
+            var html = `<b>Inferred Range and Domains</b>
             <table>
             ${cells}
            `;
-           $('#'+divId).append(html);
-           $('#'+divId).css('display','table-caption');
-           
+            $("#" + divId).append(html);
+            $("#" + divId).css("display", "table-caption");
         }
-        if(callback){
+        if (callback) {
             callback();
         }
     };
-    
+
     self.onClickLink = function (nodeId) {
         /*  var filter=Sparql_common.setFilter("subject",[nodeId])
 Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(err, result){

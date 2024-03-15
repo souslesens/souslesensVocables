@@ -195,6 +195,23 @@ class SourceModel {
     };
 
     /**
+     * @param {UserAccount} user - a user account
+     * @returns {Promise<Record<string, sourcesAccessControl>>} a collection of sources owned by
+     * user
+     */
+    getOwnedSources = async (user) => {
+        const allSources = await this._read();
+        const ownedSources = Object.fromEntries(
+            Object.entries(allSources).filter(([name, source]) => {
+                if (source.owner == user.login) {
+                    return [name, source];
+                }
+            })
+        );
+        return ownedSources;
+    };
+
+    /**
      * @param {Source} newSource -  a source
      */
     addSource = async (newSource) => {

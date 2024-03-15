@@ -2,6 +2,7 @@
 import {
     Button,
     Checkbox,
+    Chip,
     FormControl,
     FormControlLabel,
     FormGroup,
@@ -64,7 +65,7 @@ const ProfilesTable = () => {
     const renderProfiles = SRD.match(
         {
             // eslint-disable-next-line react/no-unescaped-entities
-            notAsked: () => <p>Let's fetch some data!</p>,
+            notAsked: () => <p>Let’s fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />
@@ -101,57 +102,60 @@ const ProfilesTable = () => {
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
                 return (
-                    <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                        <Stack>
-                            <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas} />
-                            <Autocomplete
-                                disablePortal
-                                id="filter profiles"
-                                options={gotProfiles.map((profile) => profile.name)}
-                                sx={{ width: 300 }}
-                                onInputChange={(event, newInputValue) => {
-                                    setFilteringChars(newInputValue);
-                                }}
-                                renderInput={(params) => <TextField {...params} label="Search Profiles by name" />}
-                            />
-                            <Box sx={{ justifyContent: "center", display: "flex" }}>
-                                <TableContainer sx={{ height: "400px" }} component={Paper}>
-                                    <Table>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell style={{ fontWeight: "bold" }}>
-                                                    <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
-                                                        Name
-                                                    </TableSortLabel>
-                                                </TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>Allowed Sources</TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                            {sortedProfiles
-                                                .filter((profile) => profile.name.includes(filteringChars))
-                                                .map((profile) => {
-                                                    return (
-                                                        <TableRow key={profile.id}>
-                                                            <TableCell>{profile.name}</TableCell>
-                                                            <TableCell>{profile.allowedSourceSchemas.join(", ")}</TableCell>
-                                                            <TableCell>
-                                                                <ProfileForm profile={profile} />
-                                                                <ButtonWithConfirmation label="Delete" msg={() => deleteProfile(profile, updateModel)} />
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    );
-                                                })}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            </Box>
-                            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                                <ProfileForm create={true} />
-                            </Box>
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
+                        <Autocomplete
+                            disablePortal
+                            id="filter profiles"
+                            options={gotProfiles.map((profile) => profile.name)}
+                            onInputChange={(event, newInputValue) => {
+                                setFilteringChars(newInputValue);
+                            }}
+                            renderInput={(params) => <TextField {...params} label="Search Profiles by name" />}
+                        />
+                        <TableContainer sx={{ height: "400px" }} component={Paper}>
+                            <Table stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                            <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                                                    Name
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>Allowed Sources</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                    {sortedProfiles
+                                        .filter((profile) => profile.name.includes(filteringChars))
+                                        .map((profile) => {
+                                            return (
+                                                <TableRow key={profile.id}>
+                                                    <TableCell>{profile.name}</TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            {profile.allowedSourceSchemas.map((source) => <Chip label={source} size="small" />)}
+                                                        </Stack>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            <ProfileForm profile={profile} />
+                                                            <ButtonWithConfirmation label="Delete" msg={() => deleteProfile(profile, updateModel)} />
+                                                        </Stack>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas as Datas}>
+                                <Button variant="outlined">Download CSV</Button>
+                            </CsvDownloader>
+                            <ProfileForm create={true} />
                         </Stack>
-                    </Box>
+                    </Stack>
                 );
             },
         },

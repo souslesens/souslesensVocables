@@ -1,10 +1,12 @@
 import {
     Button,
     Checkbox,
+    Chip,
     FormControl,
     FormControlLabel,
     Grid,
     InputLabel,
+    Link,
     MenuItem,
     Modal,
     Select,
@@ -102,71 +104,76 @@ const SourcesTable = () => {
                 });
 
                 return (
-                    <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                        <Stack>
-                            <CsvDownloader separator="&#9;" filename="sources" extension=".tsv" datas={datas as Datas} />
-                            <Autocomplete
-                                disablePortal
-                                id="search-sources"
-                                options={gotSources.map((source) => source.name)}
-                                sx={{ width: 300 }}
-                                onInputChange={(event, newInputValue) => {
-                                    setFilteringChars(newInputValue);
-                                }}
-                                renderInput={(params) => <TextField {...params} label="Search Sources by name" />}
-                            />{" "}
-                            <Box id="table-container" sx={{ justifyContent: "center", height: "400px", display: "flex" }}>
-                                <TableContainer sx={{ height: "400px" }} component={Paper}>
-                                    <Table>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell style={{ fontWeight: "bold" }}>
-                                                    <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
-                                                        Name
-                                                    </TableSortLabel>
-                                                </TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>graphUri</TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>Data</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                            {sortedSources
-                                                .filter((source) => source.name.includes(filteringChars))
-                                                .map((source) => {
-                                                    const haveIndices = indices ? indices.includes(source.name.toLowerCase()) : false;
-                                                    const haveGraphs = graphs ? graphs.includes(source.graphUri || "") : false;
-                                                    console.log();
-                                                    return (
-                                                        <TableRow key={source.name}>
-                                                            <TableCell>{source.name}</TableCell>
-                                                            <TableCell>{source.graphUri}</TableCell>
-                                                            <TableCell>
-                                                                <Box sx={{ display: "flex" }}>
-                                                                    <SourceForm source={source} />
-                                                                    <ButtonWithConfirmation label="Delete" msg={() => deleteSource(source, updateModel)} />
-                                                                </Box>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Tooltip title="RDF Graph">
-                                                                    <CircleIcon sx={{ color: graphs !== null ? (haveGraphs ? green[500] : pink[500]) : grey[500] }} />
-                                                                </Tooltip>
-                                                                <Tooltip title="ElasticSearch indices">
-                                                                    <CircleIcon sx={{ color: indices !== null ? (haveIndices ? green[500] : pink[500]) : grey[500] }} />
-                                                                </Tooltip>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    );
-                                                })}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            </Box>
-                            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                                <SourceForm create={true} />
-                            </Box>
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
+                        <Autocomplete
+                            disablePortal
+                            id="search-sources"
+                            options={gotSources.map((source) => source.name)}
+                            onInputChange={(event, newInputValue) => {
+                                setFilteringChars(newInputValue);
+                            }}
+                            renderInput={(params) => <TextField {...params} label="Search Sources by name" />}
+                        />
+                        <TableContainer sx={{ maxHeight: "400px" }} component={Paper}>
+                            <Table stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                                                Name
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>Graph URI</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Group</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Data</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                    {sortedSources
+                                        .filter((source) => source.name.includes(filteringChars))
+                                        .map((source) => {
+                                            const haveIndices = indices ? indices.includes(source.name.toLowerCase()) : false;
+                                            const haveGraphs = graphs ? graphs.includes(source.graphUri || "") : false;
+                                            console.log();
+                                            return (
+                                                <TableRow key={source.name}>
+                                                    <TableCell>{source.name}</TableCell>
+                                                    <TableCell>
+                                                        <Link href={source.graphUri}>{source.graphUri}</Link>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        { source.group ? <Chip label={source.group} size="small" /> : "" }
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" useFlexGap>
+                                                            <Tooltip title="RDF Graph">
+                                                                <CircleIcon sx={{ color: graphs !== null ? (haveGraphs ? green[500] : pink[500]) : grey[500] }} />
+                                                            </Tooltip>
+                                                            <Tooltip title="ElasticSearch indices">
+                                                                <CircleIcon sx={{ color: indices !== null ? (haveIndices ? green[500] : pink[500]) : grey[500] }} />
+                                                            </Tooltip>
+                                                        </Stack>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            <SourceForm source={source} />
+                                                            <ButtonWithConfirmation label="Delete" msg={() => deleteSource(source, updateModel)} />
+                                                        </Stack>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <CsvDownloader separator="&#9;" filename="sources" extension=".tsv" datas={datas as Datas}>
+                                <Button variant="outlined">Download CSV</Button>
+                            </CsvDownloader>
+                            <SourceForm create={true} />
                         </Stack>
-                    </Box>
+                    </Stack>
                 );
             },
         },

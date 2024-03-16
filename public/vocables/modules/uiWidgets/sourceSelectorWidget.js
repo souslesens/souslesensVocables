@@ -1,9 +1,9 @@
 import MainController from "../shared/mainController.js";
 import common from "../shared/common.js";
 import { LitElement, html, css } from "https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js";
-import { JstreeController } from "./jstreeController.js";
+//import { JstreeController } from "./jstreeController.js";
 import JstreeWidget from "./jstreeWidget.js";
-import "./js/basicComponents.js";
+//import "./js/basicComponents.js";
 
 /**
  * ***********************************************************************
@@ -30,26 +30,7 @@ import "./js/basicComponents.js";
  */
 
 class sourceSelector extends LitElement {
-    /*
-    render() {
-        return html`
-            <div id="sourceSelector" style="margin-bottom: 10px; width: auto; min-height: 0px; max-height: none; height: 680px">
-                <div className="sourceSelector_buttons">
-                    <slsv-button id="zzzz" value="Cancel" action="close"></slsv-button>
-                    <slsv-button id="sourceSelector_validateButton" value="OK" @click="${this._validateButtonFn}"></slsv-button>
-                </div>
-                <div>
-                    Search :
-                    <slsv-input id="sourceSelector_searchInput" value="" onkeydown="SourceSelectorWidget.searchInJstree(event);" autocomplete="off"></slsv-input>
 
-                    <div className="jstreeContainer" id="sourceSelectorJstreeContainer" style="width: 360px; height: 600px; overflow: auto; margin-top: 5px">
-                        <div id="sourceSelector_jstreeDiv"></div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-    */
     _validateButtonFn(e) {
         SourceSelectorWidget.okButtonValidateFn();
     }

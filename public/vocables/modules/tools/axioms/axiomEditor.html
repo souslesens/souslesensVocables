@@ -1,0 +1,26 @@
+<style>
+    #axiomsEditor_input {
+        width: 200px;
+        border: 1px solid;
+        background-color: #ddd;
+
+    }
+
+    #axiomsEditor_suggestionsSelect {
+        height: 200px;
+        width: 300px;
+    }
+
+
+</style>
+<div style="display: flex;flex-direction: column;width: 500px;height: 300px">
+    <div id="axiomsEditor_textDiv">
+        <input id="axiomsEditor_input"  onkeyup="AxiomEditor.onInputChar($(this).val())"></input>
+    </div>
+    <div>
+        <select id="axiomsEditor_suggestionsSelect"></select>
+    </div>
+
+    <divid id="axiomsEditor_messageDiv"></divid>
+
+</div>

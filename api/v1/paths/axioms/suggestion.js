@@ -1,6 +1,6 @@
 const path = require("path");
 
-const ManchesterSyntaxEngine = require(path.resolve("../bin/axioms/manchesterSyntaxEngine."));
+//const ManchesterSyntaxEngine = require("../../../../bin/axioms/manchesterSyntaxEngine.js");
 
 
 module.exports = function() {
@@ -19,7 +19,7 @@ module.exports = function() {
         if (req.query.options) {
             options = JSON.parse(req.query.options);
         }
-        ManchesterSyntaxEngine.getSuggestion(req.query.source, req.query.lastToken, options, callback);
+     //   ManchesterSyntaxEngine.getSuggestion(req.query.source, req.query.lastToken, options, callback);
 
     }
 

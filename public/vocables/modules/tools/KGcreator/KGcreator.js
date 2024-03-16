@@ -440,7 +440,7 @@ var KGcreator = (function () {
             Object.entries(self.currentConfig.databaseSources).forEach(([key, datasource]) => {
                 jstreeData.push({
                     id: key,
-                    text: datasource.name,
+                    text: datasource.name || key,
                     parent: "databaseSources",
                     data: { id: datasource.name, type: "databaseSource" },
                 });
@@ -933,7 +933,7 @@ var KGcreator = (function () {
     self.listDatabaseTables = function (databaseSource, type, callback) {
         const params = new URLSearchParams({
             name: databaseSource,
-            type: type,
+            type: type || "sql.sqlserver",
         });
 
         $.ajax({
@@ -950,7 +950,7 @@ var KGcreator = (function () {
                 }
                 return callback(null, data);
             },
-            error: function (_err) {
+            error: function (err) {
                 return callback(err);
             },
         });

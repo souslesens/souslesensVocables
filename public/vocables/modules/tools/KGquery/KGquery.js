@@ -13,7 +13,7 @@ import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.j
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
 import KGquery_graph from "./KGquery_graph.js";
-import SavedQueriesComponent from "../../uiComponents/savedQueriesComponent.js";
+import SavedQueriesWidget from "../../uiWidgets/savedQueriesWidget.js";
 import KGquery_myQueries from "./KGquery_myQueries.js";
 import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
@@ -43,7 +43,7 @@ var KGquery = (function () {
 
     self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
-        SavedQueriesComponent.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
+        SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
 
         //  self.addQuerySet();
     };

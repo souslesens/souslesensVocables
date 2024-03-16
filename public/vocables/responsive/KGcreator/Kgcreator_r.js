@@ -11,7 +11,7 @@ var KGcreator_r = (function () {
     var self = {};
     //changed files and functions
     self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
-    self.oldshowDialog = SavedQueriesComponent.showDialog;
+    self.oldshowDialog = SavedQueriesWidget.showDialog;
     self.currentTab = "";
 
     //self.oldshowMappingDialog=KGcreator_mappings.showMappingDialog;

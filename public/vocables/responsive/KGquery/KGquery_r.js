@@ -1,6 +1,6 @@
 import KGquery from "../../modules/tools/KGquery/KGquery.js";
 import KGquery_graph from "../../modules/tools/KGquery/KGquery_graph.js";
-import SavedQueriesComponent from "../../modules/uiComponents/savedQueriesComponent.js";
+import SavedQueriesWidget from "../../modules/uiWidgets/savedQueriesWidget.js";
 import Lineage_r from "../lineage/lineage_r.js";
 import ResponsiveUI from "../responsiveUI.js";
 import KGquery_controlPanel from "../../modules/tools/KGquery/KGquery_controlPanel.js";
@@ -10,11 +10,11 @@ var KGquery_r = (function () {
     var self = {};
     //changed files and functions
     self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
-    self.oldshowDialog = SavedQueriesComponent.showDialog;
+    self.oldshowDialog = SavedQueriesWidget.showDialog;
     self.oldKGquery_controlPanel = window.KGquery_controlPanel;
     self.onLoaded = function () {
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
-        SavedQueriesComponent.showDialog = self.SavedQueriesComponentShowDialogResponsive;
+        SavedQueriesWidget.showDialog = self.SavedQueriesComponentShowDialogResponsive;
         //ResponsiveUI.replaceFile(KGquery_controlPanel, KGquery_controlPanelResponsive);
         ResponsiveUI.initMenuBar(self.loadSource);
         $("#messageDiv").attr("id", "KGquery_messageDiv");
@@ -23,7 +23,7 @@ var KGquery_r = (function () {
     self.unload = function () {
         //retribute old file and functions
         Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
-        SavedQueriesComponent.showDialog = self.oldshowDialog;
+        SavedQueriesWidget.showDialog = self.oldshowDialog;
         window.KGquery_controlPanel = self.oldKGquery_controlPanel;
         Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
         //reapply changed DOM
@@ -72,7 +72,7 @@ var KGquery_r = (function () {
         $(".vis-edit-mode").css("display", "none");
     };
     self.initMyQuery = function () {
-        SavedQueriesComponent.showDialog("STORED_KGQUERY_QUERIES", "tabs_myQueries", KGquery.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
+        SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "tabs_myQueries", KGquery.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
     };
     self.initQuery = function () {
         if ($("#tabs_Query").children().length == 0) {
@@ -90,16 +90,16 @@ var KGquery_r = (function () {
         }
     };
     self.SavedQueriesComponentShowDialogResponsive = function (CRUDsource, targetDiv, slsvSource, scope, saveQueryFn, loadQueryFn) {
-        SavedQueriesComponent.init(CRUDsource);
-        SavedQueriesComponent.saveQueryFn = saveQueryFn;
-        SavedQueriesComponent.loadQueryFn = loadQueryFn;
-        SavedQueriesComponent.slsvSource = slsvSource;
+        SavedQueriesWidget.init(CRUDsource);
+        SavedQueriesWidget.saveQueryFn = saveQueryFn;
+        SavedQueriesWidget.loadQueryFn = loadQueryFn;
+        SavedQueriesWidget.slsvSource = slsvSource;
         if (targetDiv.indexOf("Dialog") > -1) {
             $("#" + targetDiv).dialog("open");
         }
         $("#" + targetDiv).load("./responsive/widget/html/savedQueriesWidgetResponsive.html", function () {
             if (slsvSource) {
-                SavedQueriesComponent.list(CRUDsource, slsvSource, scope);
+                SavedQueriesWidget.list(CRUDsource, slsvSource, scope);
             }
         });
     };

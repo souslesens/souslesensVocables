@@ -271,7 +271,7 @@ var ResponsiveUI = (function () {
             const response = await fetch("/api/v1/users/theme");
             if (response.status == 400) {
                 ResponsiveUI.changeTheme(Config.theme.defaultTheme);
-                callback();
+               return callback();
             }
 
             const data = await response.json();

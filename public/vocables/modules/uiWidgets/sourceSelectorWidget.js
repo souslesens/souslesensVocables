@@ -1,18 +1,117 @@
 import MainController from "../shared/mainController.js";
-import SearchUtil from "../search/searchUtil.js";
 import common from "../shared/common.js";
+import { LitElement, html, css } from "https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js";
+import { JstreeController } from "./jstreeController.js";
+import JstreeWidget from "./jstreeWidget.js";
+import "./js/basicComponents.js";
+
+/**
+ * ***********************************************************************
+ *  Widget >Description
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * @type {{}}
+ */
+
+/**
+ * ***************************************************************************************
+ * WebComponent
+ *
+ *
+ *
+ * @type {{}}
+ */
+
+class sourceSelector extends LitElement {
+    /*
+    render() {
+        return html`
+            <div id="sourceSelector" style="margin-bottom: 10px; width: auto; min-height: 0px; max-height: none; height: 680px">
+                <div className="sourceSelector_buttons">
+                    <slsv-button id="zzzz" value="Cancel" action="close"></slsv-button>
+                    <slsv-button id="sourceSelector_validateButton" value="OK" @click="${this._validateButtonFn}"></slsv-button>
+                </div>
+                <div>
+                    Search :
+                    <slsv-input id="sourceSelector_searchInput" value="" onkeydown="SourceSelectorWidget.searchInJstree(event);" autocomplete="off"></slsv-input>
+
+                    <div className="jstreeContainer" id="sourceSelectorJstreeContainer" style="width: 360px; height: 600px; overflow: auto; margin-top: 5px">
+                        <div id="sourceSelector_jstreeDiv"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    */
+    _validateButtonFn(e) {
+        SourceSelectorWidget.okButtonValidateFn();
+    }
+
+    firstUpdated() {
+        super.firstUpdated();
+        var shadowDom = null;
+        shadowDom = this.renderRoot.querySelector("#sourceSelector");
+
+        $("#mainDialogDiv").html(shadowDom);
+        //   setTimeout(function () {
+        SourceSelectorWidget.initJsTree(SourceSelectorWidget.jsTreeOptions);
+        //   },1000)
+    }
+}
+
+customElements.define("slsv-source-selector", sourceSelector);
+/**
+ * **********************************************************************************************
+ * Business logic
+ *
+ *
+ *
+ * @type {{}}
+ */
 
 var SourceSelectorWidget = (function () {
     var self = {};
+
+    self.searchInJstree = function (event) {
+        if (event.keyCode != 13 && event.keyCode != 9) {
+            return;
+        }
+        var value = event.currentTarget.shadowRoot.querySelector("input").value;
+        $("#sourceSelector_jstreeDiv").jstree(true).search(value);
+    };
+
+    self.getComponentSearchedValue = function () {
+        document.querySelector("#sourceSelector_searchInput").shadowRoot.querySelector("input").value;
+    };
+
     self.currentTreeDiv = null;
-    self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options, callback) {
+
+    self.initJsTree = function (options) {
+        SourceSelectorWidget.loadSourcesTreeDiv("sourceSelector_jstreeDiv", options);
+        $("#sourceSelector_searchInput").focus();
+        if (options.withCheckboxes) {
+            $(".sourceSelector_buttons").css("display", "block");
+        } else {
+            $(".sourceSelector_buttons").css("display", "none");
+        }
+    };
+
+    self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeCallbackFn, okButtonValidateFn, options) {
+        self.okButtonValidateFn = okButtonValidateFn;
+        options.selectTreeNodeFn = selectTreeNodeCallbackFn;
+        self.jsTreeOptions = options;
         if (self.currentTreeDiv != null) {
             if ($("#" + self.currentTreeDiv).jstree() != undefined) {
-                try {
-                    $("#" + self.currentTreeDiv)
-                        .jstree()
-                        .destroy();
-                } catch (e) {}
+                $("#" + self.currentTreeDiv)
+                    .jstree()
+                    .destroy();
             }
         }
 
@@ -21,34 +120,18 @@ var SourceSelectorWidget = (function () {
             options = {};
         }
         var jsTreeOptions = options;
-        jsTreeOptions.selectTreeNodeFn = selectTreeNodeFn;
+        jsTreeOptions.selectTreeNodeFn = selectTreeNodeCallbackFn;
         MainController.UI.showHideRightPanel("hide");
 
-        $("#" + targetDivId).load("./responsive/widget/html/sourceSelector.html", function (err) {
-            self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
-            $("#sourceSelector_searchInput").focus();
-            //  $("#sourceSelector_SearchSourceInput");
-            $("#sourceSelector_validateButton").bind("click", function () {
-                okButtonValidateFn();
-                if (isDialog) {
-                    $("#" + targetDivId).dialog("close");
-                }
-            });
-
-            if (options.withCheckboxes) {
-                $(".sourceSelector_buttons").css("display", "block");
-            } else {
-                $(".sourceSelector_buttons").css("display", "none");
-            }
-
-            if (isDialog) {
-                $("#" + targetDivId).dialog("open");
-            }
-            if (callback) {
-                callback();
-            }
+        $("#mainDialogDiv").dialog({
+            open: function (event, ui) {
+                $("#mainDialogDiv").html(" <slsv-source-selector></slsv-source-selector>");
+            },
         });
+
+        $("#mainDialogDiv").dialog("open");
     };
+
     self.getSourcesJstreeData = function (types, sourcesSelection) {
         var distinctNodes = {};
 
@@ -64,7 +147,7 @@ var SourceSelectorWidget = (function () {
                     id: item,
                     text: item,
                     parent: "#",
-                    type: "Folder",
+                    type: item,
                 });
             }
         });
@@ -76,7 +159,7 @@ var SourceSelectorWidget = (function () {
                     return;
                 }
                 if (Config.sources[sourceLabel].isDraft) {
-                    //OK
+                    return;
                 }
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) {
                     return;
@@ -86,6 +169,16 @@ var SourceSelectorWidget = (function () {
                 var parent = Config.sources[sourceLabel].schemaType;
 
                 var othersGroup = "OTHERS";
+
+                if (!types && !distinctGroups[othersGroup]) {
+                    distinctGroups[othersGroup] = 1;
+                    treeData.push({
+                        id: othersGroup + "_" + parent,
+                        text: "OTHERS",
+                        type: "group",
+                        parent: "#",
+                    });
+                }
 
                 var group = Config.sources[sourceLabel].group;
                 if (group) {
@@ -99,7 +192,7 @@ var SourceSelectorWidget = (function () {
                             treeData.push({
                                 id: subGroup,
                                 text: subGroup,
-                                type: "Folder",
+                                type: "group",
                                 parent: parent,
                             });
                         }
@@ -113,15 +206,7 @@ var SourceSelectorWidget = (function () {
                         group = Config.sources[sourceLabel].schemaType;
                     }
                 }
-                if (!types && !distinctGroups[othersGroup]) {
-                    distinctGroups[othersGroup] = 1;
-                    treeData.push({
-                        id: othersGroup + "_" + parent,
-                        text: "OTHERS",
-                        type: "Folder",
-                        parent: "#",
-                    });
-                }
+
                 if (!distinctNodes[sourceLabel]) {
                     distinctNodes[sourceLabel] = 1;
 
@@ -130,23 +215,11 @@ var SourceSelectorWidget = (function () {
                     }
                     //  console.log(JSON.stringify(jstreeData,null,2))
                     if (!types || types.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                        var type = Config.sources[sourceLabel].schemaType;
-                        if (type == "OWL") {
-                            type = "Source";
-                        }
-                        if (type == "SKOS") {
-                            type = "Thesaurus";
-                        }
                         treeData.push({
                             id: sourceLabel,
                             text: sourceLabel,
-                            type: type,
+                            type: Config.sources[sourceLabel].schemaType,
                             parent: group,
-                            data: {
-                                type: "source",
-                                label: sourceLabel,
-                                id: sourceLabel,
-                            },
                         });
                     }
                 }
@@ -186,15 +259,15 @@ var SourceSelectorWidget = (function () {
             jstreeOptions.onOpenNodeFn = self.defaultOpenNodeFn;
         }
 
-        $("#sourceSelector_searchInput").bind("keydown", null, function () {
-            if (event.keyCode != 13 && event.keyCode != 9) {
-                return;
-            }
-            var value = $(this).val();
-            $("#" + treeDiv)
-                .jstree(true)
-                .search(value);
-        });
+        /*   $("#sourceSelector_searchInput").bind("keydown", null, function () {
+           if (event.keyCode != 13 && event.keyCode != 9) {
+               return;
+           }
+           var value = $(this).val();
+           $("#" + treeDiv)
+               .jstree(true)
+               .search(value);
+       });*/
 
         jstreeOptions.searchPlugin = {
             case_insensitive: true,
@@ -202,7 +275,9 @@ var SourceSelectorWidget = (function () {
             show_only_matches: true,
         };
 
-        JstreeWidget.loadJsTree(treeDiv, treeData, jstreeOptions, function () {
+        /*  var treeDivShadow=document.querySelector("slsv-source-selector")
+     treeDivShadow=document.querySelector("slsv-source-selector").shadowRoot.querySelector("#sourceSelector_jstreeDiv")*/
+        JstreeWidget.loadJsTree("sourceSelector_jstreeDiv", treeData, jstreeOptions, function () {
             var openedTypes = Config.preferredSchemaType;
             $("#" + treeDiv)
                 .jstree(true)
@@ -260,11 +335,12 @@ var SourceSelectorWidget = (function () {
     };
 
     self.getCheckedSources = function () {
-        var vv = $("#sourceSelector_jstreeDiv").jstree();
         var checkedNodes = $("#sourceSelector_jstreeDiv").jstree().get_checked();
         var sources = [];
         checkedNodes.forEach(function (item) {
-            if (Config.sources[item]) sources.push(item);
+            if (Config.sources[item]) {
+                sources.push(item);
+            }
         });
         return sources;
     };

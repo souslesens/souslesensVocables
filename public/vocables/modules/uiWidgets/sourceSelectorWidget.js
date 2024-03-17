@@ -1,98 +1,18 @@
 import MainController from "../shared/mainController.js";
+import SearchUtil from "../search/searchUtil.js";
 import common from "../shared/common.js";
-import { LitElement, html, css } from "https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js";
-//import { JstreeController } from "./jstreeController.js";
-import JstreeWidget from "./jstreeWidget.js";
-//import "./js/basicComponents.js";
-
-/**
- * ***********************************************************************
- *  Widget >Description
- *
- *
- *
- *
- *
- *
- *
- *
- *
- * @type {{}}
- */
-
-/**
- * ***************************************************************************************
- * WebComponent
- *
- *
- *
- * @type {{}}
- */
-
-class sourceSelector extends LitElement {
-
-    _validateButtonFn(e) {
-        SourceSelectorWidget.okButtonValidateFn();
-    }
-
-    firstUpdated() {
-        super.firstUpdated();
-        var shadowDom = null;
-        shadowDom = this.renderRoot.querySelector("#sourceSelector");
-
-        $("#mainDialogDiv").html(shadowDom);
-        //   setTimeout(function () {
-        SourceSelectorWidget.initJsTree(SourceSelectorWidget.jsTreeOptions);
-        //   },1000)
-    }
-}
-
-customElements.define("slsv-source-selector", sourceSelector);
-/**
- * **********************************************************************************************
- * Business logic
- *
- *
- *
- * @type {{}}
- */
 
 var SourceSelectorWidget = (function () {
     var self = {};
-
-    self.searchInJstree = function (event) {
-        if (event.keyCode != 13 && event.keyCode != 9) {
-            return;
-        }
-        var value = event.currentTarget.shadowRoot.querySelector("input").value;
-        $("#sourceSelector_jstreeDiv").jstree(true).search(value);
-    };
-
-    self.getComponentSearchedValue = function () {
-        document.querySelector("#sourceSelector_searchInput").shadowRoot.querySelector("input").value;
-    };
-
     self.currentTreeDiv = null;
-
-    self.initJsTree = function (options) {
-        SourceSelectorWidget.loadSourcesTreeDiv("sourceSelector_jstreeDiv", options);
-        $("#sourceSelector_searchInput").focus();
-        if (options.withCheckboxes) {
-            $(".sourceSelector_buttons").css("display", "block");
-        } else {
-            $(".sourceSelector_buttons").css("display", "none");
-        }
-    };
-
-    self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeCallbackFn, okButtonValidateFn, options) {
-        self.okButtonValidateFn = okButtonValidateFn;
-        options.selectTreeNodeFn = selectTreeNodeCallbackFn;
-        self.jsTreeOptions = options;
+    self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options, callback) {
         if (self.currentTreeDiv != null) {
             if ($("#" + self.currentTreeDiv).jstree() != undefined) {
-                $("#" + self.currentTreeDiv)
-                    .jstree()
-                    .destroy();
+                try {
+                    $("#" + self.currentTreeDiv)
+                        .jstree()
+                        .destroy();
+                } catch (e) {}
             }
         }
 
@@ -101,18 +21,34 @@ var SourceSelectorWidget = (function () {
             options = {};
         }
         var jsTreeOptions = options;
-        jsTreeOptions.selectTreeNodeFn = selectTreeNodeCallbackFn;
+        jsTreeOptions.selectTreeNodeFn = selectTreeNodeFn;
         MainController.UI.showHideRightPanel("hide");
 
-        $("#mainDialogDiv").dialog({
-            open: function (event, ui) {
-                $("#mainDialogDiv").html(" <slsv-source-selector></slsv-source-selector>");
-            },
+        $("#" + targetDivId).load("./responsive/widget/html/sourceSelector.html", function (err) {
+            self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
+            $("#sourceSelector_searchInput").focus();
+            //  $("#sourceSelector_SearchSourceInput");
+            $("#sourceSelector_validateButton").bind("click", function () {
+                okButtonValidateFn();
+                if (isDialog) {
+                    $("#" + targetDivId).dialog("close");
+                }
+            });
+
+            if (options.withCheckboxes) {
+                $(".sourceSelector_buttons").css("display", "block");
+            } else {
+                $(".sourceSelector_buttons").css("display", "none");
+            }
+
+            if (isDialog) {
+                $("#" + targetDivId).dialog("open");
+            }
+            if (callback) {
+                callback();
+            }
         });
-
-        $("#mainDialogDiv").dialog("open");
     };
-
     self.getSourcesJstreeData = function (types, sourcesSelection) {
         var distinctNodes = {};
 
@@ -128,7 +64,7 @@ var SourceSelectorWidget = (function () {
                     id: item,
                     text: item,
                     parent: "#",
-                    type: item,
+                    type: "Folder",
                 });
             }
         });
@@ -140,7 +76,7 @@ var SourceSelectorWidget = (function () {
                     return;
                 }
                 if (Config.sources[sourceLabel].isDraft) {
-                    return;
+                    //OK
                 }
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) {
                     return;
@@ -150,16 +86,6 @@ var SourceSelectorWidget = (function () {
                 var parent = Config.sources[sourceLabel].schemaType;
 
                 var othersGroup = "OTHERS";
-
-                if (!types && !distinctGroups[othersGroup]) {
-                    distinctGroups[othersGroup] = 1;
-                    treeData.push({
-                        id: othersGroup + "_" + parent,
-                        text: "OTHERS",
-                        type: "group",
-                        parent: "#",
-                    });
-                }
 
                 var group = Config.sources[sourceLabel].group;
                 if (group) {
@@ -173,7 +99,7 @@ var SourceSelectorWidget = (function () {
                             treeData.push({
                                 id: subGroup,
                                 text: subGroup,
-                                type: "group",
+                                type: "Folder",
                                 parent: parent,
                             });
                         }
@@ -187,7 +113,15 @@ var SourceSelectorWidget = (function () {
                         group = Config.sources[sourceLabel].schemaType;
                     }
                 }
-
+                if (!types && !distinctGroups[othersGroup]) {
+                    distinctGroups[othersGroup] = 1;
+                    treeData.push({
+                        id: othersGroup + "_" + parent,
+                        text: "OTHERS",
+                        type: "Folder",
+                        parent: "#",
+                    });
+                }
                 if (!distinctNodes[sourceLabel]) {
                     distinctNodes[sourceLabel] = 1;
 
@@ -196,11 +130,23 @@ var SourceSelectorWidget = (function () {
                     }
                     //  console.log(JSON.stringify(jstreeData,null,2))
                     if (!types || types.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                        var type = Config.sources[sourceLabel].schemaType;
+                        if (type == "OWL") {
+                            type = "Source";
+                        }
+                        if (type == "SKOS") {
+                            type = "Thesaurus";
+                        }
                         treeData.push({
                             id: sourceLabel,
                             text: sourceLabel,
-                            type: Config.sources[sourceLabel].schemaType,
+                            type: type,
                             parent: group,
+                            data: {
+                                type: "source",
+                                label: sourceLabel,
+                                id: sourceLabel,
+                            },
                         });
                     }
                 }
@@ -240,15 +186,15 @@ var SourceSelectorWidget = (function () {
             jstreeOptions.onOpenNodeFn = self.defaultOpenNodeFn;
         }
 
-        /*   $("#sourceSelector_searchInput").bind("keydown", null, function () {
-           if (event.keyCode != 13 && event.keyCode != 9) {
-               return;
-           }
-           var value = $(this).val();
-           $("#" + treeDiv)
-               .jstree(true)
-               .search(value);
-       });*/
+        $("#sourceSelector_searchInput").bind("keydown", null, function () {
+            if (event.keyCode != 13 && event.keyCode != 9) {
+                return;
+            }
+            var value = $(this).val();
+            $("#" + treeDiv)
+                .jstree(true)
+                .search(value);
+        });
 
         jstreeOptions.searchPlugin = {
             case_insensitive: true,
@@ -256,9 +202,7 @@ var SourceSelectorWidget = (function () {
             show_only_matches: true,
         };
 
-        /*  var treeDivShadow=document.querySelector("slsv-source-selector")
-     treeDivShadow=document.querySelector("slsv-source-selector").shadowRoot.querySelector("#sourceSelector_jstreeDiv")*/
-        JstreeWidget.loadJsTree("sourceSelector_jstreeDiv", treeData, jstreeOptions, function () {
+        JstreeWidget.loadJsTree(treeDiv, treeData, jstreeOptions, function () {
             var openedTypes = Config.preferredSchemaType;
             $("#" + treeDiv)
                 .jstree(true)
@@ -316,12 +260,11 @@ var SourceSelectorWidget = (function () {
     };
 
     self.getCheckedSources = function () {
+        var vv = $("#sourceSelector_jstreeDiv").jstree();
         var checkedNodes = $("#sourceSelector_jstreeDiv").jstree().get_checked();
         var sources = [];
         checkedNodes.forEach(function (item) {
-            if (Config.sources[item]) {
-                sources.push(item);
-            }
+            if (Config.sources[item]) sources.push(item);
         });
         return sources;
     };

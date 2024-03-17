@@ -1,14 +1,27 @@
 <style>
     #axiomsEditor_input {
-        width: 200px;
-        border: 1px solid;
-        background-color: #ddd;
+        width: 50px;
+       // border: 1px solid;
+      //  background-color: #ddd;
+
 
     }
 
+    #axiomsEditor_textDiv{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: baseline;
+        width:100%
+    }
+
     #axiomsEditor_suggestionsSelect {
-        height: 200px;
         width: 300px;
+    }
+
+    .axiom_keyWord{
+        color:blue;
     }
 
 
@@ -18,7 +31,7 @@
         <input id="axiomsEditor_input"  onkeyup="AxiomEditor.onInputChar($(this).val())"></input>
     </div>
     <div>
-        <select id="axiomsEditor_suggestionsSelect"></select>
+        <select id="axiomsEditor_suggestionsSelect" onchange="AxiomEditor.onSelectSuggestion($(this).val())"size="5"></select>
     </div>
 
     <divid id="axiomsEditor_messageDiv"></divid>

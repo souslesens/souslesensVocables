@@ -1,5 +1,4 @@
 
-
 const AxiomEditor=(function(){
     var self={}
 
@@ -15,19 +14,33 @@ const AxiomEditor=(function(){
 
     }
 
-    self.onInputChar=function(text){
-       if(text.length>2){
-          self.showSuggestions(text,function(err,result){
-              if(err)
-                  alert(err)
-          })
-       }
+    self.onInputChar=function(text) {
+        if (text.length > 0) {
+            self.showSuggestions(text, function(err, result) {
+                var suggestions = result.suggestions
+                common.fillSelectOptions("axiomsEditor_suggestionsSelect", suggestions)
+                if (err)
+                    alert(err)
+            })
+        }
+    }
 
 
+
+    self.onSelectSuggestion=function(suggestion){
+        var cssClass="axiom_keyWord"
+        $("#axiomsEditor_input").before("<span class='"+cssClass+"'>"+suggestion+"</span>")
+
+        self.onInputChar(suggestion)
+        $("#axiomsEditor_input").val(suggestion);
     }
 
 
     self.showSuggestions=function(text,callback){
+
+
+
+
         var options={}
         const params = new URLSearchParams({
             source: Lineage_sources.activeSource,
@@ -56,9 +69,8 @@ const AxiomEditor=(function(){
 
 
     return self;
-
-
-})()
+    }
+    )()
 
 export default AxiomEditor;
 window.AxiomEditor=AxiomEditor

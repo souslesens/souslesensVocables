@@ -1,7 +1,13 @@
-// Generated from parser/OWL2Manchester.g4 by ANTLR 4.13.1
+// Generated =require( parser/OWL2Manchester.g4 by ANTLR 4.13.1
 // jshint ignore: start
 const antlr4 =require( 'antlr4');
 const OWL2ManchesterListener =require( './OWL2ManchesterListener.js');
+
+//import antlr4 from 'antlr4';
+//import OWL2ManchesterListener from './OWL2ManchesterListener.js';
+
+
+
 const serializedATN = [4,1,22,86,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,1,0,1,0,
 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,3,0,25,8,0,1,0,1,
 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,
@@ -30,13 +36,14 @@ const serializedATN = [4,1,22,86,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,1,0,1,0,
 69,71,81];
 
 
-const atn = new antlr4.atn.ATNDeserializer().deserialize(serializedATN);
+const atn = new antlr4.ATNDeserializer().deserialize(serializedATN);
 
 const decisionsToDFA = atn.decisionToState.map( (ds, index) => new antlr4.dfa.DFA(ds, index) );
 
 const sharedContextCache = new antlr4.atn.PredictionContextCache();
 
-export default class OWL2ManchesterParser extends antlr4.Parser {
+//export default class OWL2ManchesterParser extends antlr4.Parser {
+	module.exports= class OWL2ManchesterParser extends antlr4.Parser {
 
     static grammarFileName = "OWL2Manchester.g4";
     static literalNames = [ null, "'ObjectProperty:'", "':'", null, "'SubClassOf'", 

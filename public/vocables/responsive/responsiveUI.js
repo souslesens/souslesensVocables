@@ -239,10 +239,10 @@ var ResponsiveUI = (function () {
             .parent()
             .show();
         $("#sourceSelector_searchInput").focus();
-        var onSourceSelect
+        var onSourceSelect;
         if (resetAll) {
             Lineage_sources.loadedSources = {};
-             onSourceSelect = ResponsiveUI.onSourceSelect;
+           onSourceSelect = ResponsiveUI.onSourceSelect;
         } else {
              onSourceSelect = ResponsiveUI.onSourceSelect_AddSource;
         }
@@ -252,17 +252,10 @@ var ResponsiveUI = (function () {
     };
     //keep
     self.openDialogDiv = function (div) {
-        //$("#mainDialogDiv").css('width', 'auto');
 
         $("#" + div).empty();
         $("#" + div).dialog();
-        //$("#" + div).parent().show();
-        /*$("#" + div)
-            .parent()
-            .css("top", "20%");
-        $("#" + div)
-            .parent()
-            .css("left", "30%");*/
+
     };
     //keep
     self.setSlsvCssClasses = function (callback) {

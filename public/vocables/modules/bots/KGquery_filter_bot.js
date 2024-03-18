@@ -73,6 +73,7 @@ var KGquery_filter_bot = (function () {
             }
             var choices = self.data.annotationProperties;
             BotEngine.showList(choices, "annotationProperty");
+            BotEngine.showList(choices, "annotationProperty");
         });
     self.functions.chooseAnnotationOperatorFn = function () {
         var datatype = null;

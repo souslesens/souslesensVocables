@@ -725,16 +725,17 @@ var OntologyModels = (function () {
                                     allConstraints[property] = constraint;
 
                                     if (constraint.domain) {
-                                        if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
+                                        if (startNodeAncestorIds.indexOf(constraint.domain) > -1 || startNodeAncestorIds[0]=="http://www.w3.org/2002/07/owl#Class") {
                                             if (!constraint.range || constraint.range.indexOf("http") < 0 || endNodeIds.length == 0) {
                                                 propertiesMatchingStartNode.push(property);
                                             } else {
                                                 domainOK = true;
                                             }
                                         }
+
                                     }
                                     if (constraint.range) {
-                                        if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
+                                        if (endNodeAncestorIds.indexOf(constraint.range) > -1  || endNodeAncestorIds[0]=="http://www.w3.org/2002/07/owl#Class") {
                                             if (domainOK) {
                                                 propertiesMatchingBoth.push(property);
                                             } else {

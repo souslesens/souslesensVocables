@@ -1,8 +1,11 @@
 <style>
     #axiomsEditor_input {
         width: 50px;
-       // border: 1px solid;
-      //  background-color: #ddd;
+        border-radius:3px;
+       background-color: #ccc;
+        border: none;
+
+        margin-left: 5px;
 
 
     }
@@ -13,25 +16,35 @@
         flex-wrap: nowrap;
         justify-content: flex-start;
         align-items: baseline;
-        width:100%
+        width:600px
     }
 
     #axiomsEditor_suggestionsSelect {
         width: 300px;
     }
 
+    .axiom_element{
+        margin:3px
+    }
+
     .axiom_keyWord{
+        color:gray;
+    }
+    .axiom_Class{
+        color:green;
+    }
+    .axiom_Property{
         color:blue;
     }
 
 
 </style>
-<div style="display: flex;flex-direction: column;width: 500px;height: 300px">
+<div style="display: flex;flex-direction: column;width: 800px;height: 300px">
     <div id="axiomsEditor_textDiv">
         <input id="axiomsEditor_input"  onkeyup="AxiomEditor.onInputChar($(this).val())"></input>
     </div>
     <div>
-        <select id="axiomsEditor_suggestionsSelect" onchange="AxiomEditor.onSelectSuggestion($(this).val())"size="5"></select>
+        <select id="axiomsEditor_suggestionsSelect" onchange="AxiomEditor.onSelectSuggestion($(this))"size="5"></select>
     </div>
 
     <divid id="axiomsEditor_messageDiv"></divid>

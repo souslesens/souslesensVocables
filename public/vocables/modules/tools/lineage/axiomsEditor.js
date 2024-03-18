@@ -1,7 +1,7 @@
 import common from "../../shared/common.js";
 import ManchesterSyntaxWidget from "../../bots/manchesterSyntaxWidget.js";
 
-var AxiomsEditor = (function () {
+var AxiomsEditorXX = (function () {
     var self = {};
     self.keywordsMap = null;
 
@@ -15,7 +15,7 @@ var AxiomsEditor = (function () {
         var sourceLabel = Lineage_sources.activeSource;
 
         $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").load("modules/tools/lineage/html/axiomEditor.html", function () {
+        $("#smallDialogDiv").load("modules/tools/axioms/axiomEditor.html", function () {
             var keyWords = {
                 and: { css: "bot-syntax", id: "and", label: "and" },
                 or: { css: "bot-syntax", id: "or", label: "or" },
@@ -35,5 +35,5 @@ var AxiomsEditor = (function () {
     return self;
 })();
 
-export default AxiomsEditor;
-window.AxiomEditor = AxiomsEditor;
+export default AxiomsEditorXX;
+window.AxiomEditor = AxiomsEditorXX;

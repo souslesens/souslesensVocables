@@ -3,7 +3,7 @@ import common from "../shared/common.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
-var SavedQueriesComponent = (function () {
+var SavedQueriesWidget = (function () {
     var self = {};
 
     self.contentPredicate = "hasContent";
@@ -212,5 +212,5 @@ var SavedQueriesComponent = (function () {
     return self;
 })();
 
-export default SavedQueriesComponent;
-window.SavedQueriesComponent = SavedQueriesComponent;
+export default SavedQueriesWidget;
+window.SavedQueriesWidget = SavedQueriesWidget;

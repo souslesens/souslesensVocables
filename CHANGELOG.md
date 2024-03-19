@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.57.0...master)
 
+## [1.57.1](https://github.com/souslesens/souslesensVocables/compare/1.56.0...1.57.1)
+
+### Fixed
+
+-   /api/v1/users/theme return defaultTheme if no theme is found
+
 ## [1.57.0](https://github.com/souslesens/souslesensVocables/compare/1.56.0...1.57.0)
 
 > [!IMPORTANT]

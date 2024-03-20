@@ -531,11 +531,14 @@ self.querySets.sets.forEach(function (querySet) {
                 var dataItem = self.currentData[datasetIndex];
                 var varName = self.tableCols[index.column].title;
                 if (true || !dataItem[varName]) {
-                    varName = varName.replace("_label", "").replace("_hasValue", "").replace("_comment", "").replace("_prefLabel", "");
+                    varName = varName.split('_')[0];
                 }
                 var uri = dataItem[varName].value;
                 var node = { data: { id: uri } };
-                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv",null,function(err){
+                    $('#smallDialogDiv').parent().css('z-index',1);
+                });
+                
             });
         });
     };

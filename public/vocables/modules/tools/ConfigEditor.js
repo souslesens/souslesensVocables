@@ -16,11 +16,12 @@ var ConfigEditor = (function () {
         import("/assets/index.js");
 
         setTimeout(function () {
-            $("#mainDialogDiv").dialog("open");
 
+            $("#mainDialogDiv").dialog("open");
+            $("#mainDialogDiv").parent().show();
             $("#mainDialogDiv").dialog("option", "title", "Config Editor");
             //$("#mainDialogDiv").parent().css("left", "100px");
-            $("#mainDialogDiv").css("width", "1100px");
+            $("#mainDialogDiv").css("width", "1700px");
             $("#mainDialogDiv").dialog({
                 close: function (event, ui) {
                     self.umountKGUploadApp();
@@ -33,7 +34,7 @@ var ConfigEditor = (function () {
             `);
 
             self.umountKGUploadApp = self.createApp();
-        }, 2001);
+        }, 1500);
     };
 
     return self;

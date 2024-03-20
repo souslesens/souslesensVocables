@@ -4,6 +4,7 @@ import Lineage_whiteboard from "./lineage_whiteboard.js";
 import common from "../../shared/common.js";
 import Export from "../../shared/export.js";
 import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
+import Lineage_decoration from "./lineage_decoration.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -413,6 +414,31 @@ var Lineage_properties = (function () {
             if (err) {
                 return alert(err.responseText);
             }
+
+         //set invers properties
+            var inversePropsItems=[]
+            result.forEach(function (item) {
+                if(item.inverseProperty && item.inverseProperty.value ){
+                    var prop={
+                        property:item.inverseProperty,
+                        propertyLabel:item.inversePropertyLabel,
+                        domain: item.range,
+                        domainLabel: item.rangeLabel,
+                        range: item.domain,
+                        rangeLabel: item.domainLabel,
+
+                    }
+
+
+                    inversePropsItems.push(prop)
+                }
+
+            })
+
+            result=result.concat(inversePropsItems)
+
+
+
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = {};
             if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes) {
@@ -423,6 +449,7 @@ var Lineage_properties = (function () {
             var classShape = "dot";
             var propColor = "#ddd";
             var propShape = "box";
+            var allNodeIds=[]
 
             result.forEach(function (item) {
                 var ok = 0;
@@ -544,7 +571,9 @@ var Lineage_properties = (function () {
                 }
 
                 if (item.range) {
+
                     if (!existingNodes[item.range.value]) {
+                        allNodeIds.push({id:item.range.value})
                         if (item.rangeType) {
                             if (item.rangeType.value.indexOf("Class") > -1) {
                                 shape = Lineage_whiteboard.defaultShape;
@@ -575,6 +604,8 @@ var Lineage_properties = (function () {
                             id: edgeId,
                             from: item.property.value,
                             to: item.range.value,
+                            label:"R",
+                            font:{size:12,color:"#cb6601"},
                             data: { id: edgeId, source: Lineage_sources.activeSource },
                             color: "#cb6601",
                             arrows: {
@@ -589,6 +620,7 @@ var Lineage_properties = (function () {
                 }
                 if (item.domain) {
                     if (!existingNodes[item.domain.value]) {
+                        allNodeIds.push({id:item.domain.value})
                         existingNodes[item.domain.value] = 1;
                         var shape = "text";
                         if (item.domainType) {
@@ -621,9 +653,11 @@ var Lineage_properties = (function () {
                             from: item.property.value,
                             to: item.domain.value,
                             color: "#008000",
+                            label:"D",
+                            font:{size:12,color:"#008000"},
                             data: { id: edgeId, source: Lineage_sources.activeSource },
                             arrows: {
-                                from: {
+                                to: {
                                     enabled: true,
                                     type: Lineage_whiteboard.defaultEdgeArrowType,
                                     scaleFactor: 0.5,
@@ -634,6 +668,7 @@ var Lineage_properties = (function () {
                 }
                 if (item.range) {
                     if (!existingNodes[item.range.value]) {
+                        allNodeIds.push({id:item.range.value})
                         shape = "text";
                         if (item.rangeType) {
                             if (item.rangeType.value.indexOf("Class") > -1) {
@@ -666,6 +701,8 @@ var Lineage_properties = (function () {
                             from: item.property.value,
                             to: item.range.value,
                             color: "#cb6601",
+                            label:"R",
+                            font:{size:12,color:"#cb6601"},
                             data: { id: edgeId, source: Lineage_sources.activeSource },
                             arrows: {
                                 to: {
@@ -696,7 +733,8 @@ var Lineage_properties = (function () {
                         });
                     }
                     edgeId = item.inverseProperty.value + "_" + item.property.value;
-                    if (!existingNodes[edgeId]) {
+                    var inverseEdge= item.property.value + "_" + item.inverseProperty.value;
+                    if (!existingNodes[edgeId] && !existingNodes[inverseEdge]) {
                         existingNodes[edgeId] = 1;
                         visjsData.edges.push({
                             id: edgeId,
@@ -705,6 +743,7 @@ var Lineage_properties = (function () {
                             color: "#0067bb",
                             data: { id: edgeId, source: Lineage_sources.activeSource },
                             dashes: true,
+
                         });
                     }
                 }
@@ -716,6 +755,7 @@ var Lineage_properties = (function () {
                 Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                 Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
             }
+            Lineage_decoration.decorateNodeAndDrawLegend(allNodeIds,null)
             GraphDisplayLegend.drawLegend("RangesAndDomains", "LineageVisjsLegendCanvas", false);
             /*  Lineage_whiteboard.lineageVisjsGraph.network.fit();
 

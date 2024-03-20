@@ -293,12 +293,22 @@ var Lineage_decoration = (function () {
         var nodeOwlTypesMap = {};
         var legendOwlTypeColorsMap = {};
         var legendTreeNode = {};
+        var okNodeIds=[]
         async.series(
             [
+
+                function (callbackSeries) {
+                    nodeIds.forEach(function(item){
+                        if(item.startsWith("http")){
+                            okNodeIds.push(item)
+                        }
+                    })
+                    callbackSeries();
+                },
                 // get nodes super Classes
                 function (callbackSeries) {
                     var uniqueTypes = {};
-                    var slices = common.array.slice(nodeIds, Config.slicedArrayLength);
+                    var slices = common.array.slice(okNodeIds, Config.slicedArrayLength);
                     async.eachSeries(
                         slices,
                         function (slice, callbackEach) {

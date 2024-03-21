@@ -17,7 +17,7 @@ module.exports = function () {
     GET.apiDoc = {
         operationId: "getDatabasesName",
         responses: responseSchema("DatabaseNames", "GET"),
-        security: [{ restrictAdmin: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Returns all databases name",
     };
 

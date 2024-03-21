@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.57.0...master)
 
+## [1.57.2](https://github.com/souslesens/souslesensVocables/compare/1.56.0...1.57.2)
+
+### Fixed
+
+-   /api/v1/databases is restrictLoggedUser
+
 ## [1.57.1](https://github.com/souslesens/souslesensVocables/compare/1.56.0...1.57.1)
 
 ### Fixed

@@ -47,7 +47,7 @@ services:
             - backend
 
     postgres:
-        image: postgres:16
+        image: postgis/postgis:16-3.4
         ports:
             - ${POSTGRES_LISTEN_PORT:-5432}:5432
         environment:

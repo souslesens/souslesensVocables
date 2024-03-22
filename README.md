@@ -335,7 +335,7 @@ plugins
 
 The plugin's directory must contain a public directory with the source code within it.  
 
-MyPluginName.js must export a single IIFE function.  
+main.js must export a single IIFE function.  
 
 ```
 const Toto = (function () {

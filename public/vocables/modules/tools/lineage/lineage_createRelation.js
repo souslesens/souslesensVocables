@@ -184,11 +184,11 @@ var Lineage_createRelation = (function () {
                             //  domain: "lineageAddEdgeDialog_domainOntologyProp"
                         };
                         
-                        var allPropertyAuthorized=[];
+                        var allProperties=[];
                         var uniqueProps = {};
                         for (var group in authorizedProps) {
                             for (var propId in authorizedProps[group]) {
-                                allPropertyAuthorized.push(propId);
+                                allProperties.push(propId);
                         }}
                         sources.forEach(function (_source) {
                             jstreeData.push({
@@ -214,7 +214,7 @@ var Lineage_createRelation = (function () {
 
                                             var cssClass = propStatusCssClassMap[group];
                                             var parent = property.source;
-                                            if (property.superProp && allPropertyAuthorized.indexOf(property.superProp)>0) {
+                                            if (property.superProp && allProperties.indexOf(property.superProp)>0) {
                                                 parent = property.superProp;
                                             }
 

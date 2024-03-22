@@ -721,7 +721,7 @@ var OntologyModels = (function () {
                             sourceConstraintsAndRestrictions[property].forEach(function (constraint) {
                                 constraint.source = _source;
                                 var domainOK = false;
-                                if (!allConstraints[property]) {
+                                if (true||!allConstraints[property]) {
                                     allConstraints[property] = constraint;
 
                                     if (constraint.domain) {

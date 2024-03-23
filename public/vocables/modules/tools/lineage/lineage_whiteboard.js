@@ -332,7 +332,7 @@ var Lineage_whiteboard = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    options.skipTopClassFilter = 1;
+                  //  options.skipTopClassFilter = 1;
                     self.drawTopConcepts(source, options, graphDiv, function (err, result) {
                         if (err) {
                             return alert(err.response);

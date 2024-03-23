@@ -710,7 +710,15 @@ sourceDivId +
         if (!Config.sources[source]) {
             return false; // console.log("no source " + source);
         }
+        if (!Config.sources[source].editable) {
+            return false;
+        }
+
+
         const groups = authentication.currentUser.groupes;
+        if (groups.indexOf("admin") > -1) {
+            return true;
+        }
         const currentAccessControls = groups.map((group) => {
             const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
             const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
@@ -720,9 +728,7 @@ sourceDivId +
         /*  if(currentAccessControls=="readwrite")
             return true;
         return false;*/
-        if (!Config.sources[source].editable) {
-            return false;
-        }
+    /*
         if (groups.indexOf("admin") > -1) {
             return true;
         }
@@ -737,7 +743,7 @@ sourceDivId +
             return true;
         } else {
             return false;
-        }
+        }*/
     };
 
     self.clearSource = function (source) {

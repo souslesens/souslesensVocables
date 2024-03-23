@@ -381,7 +381,11 @@
                             if (target == "_slsvCallback") {
                                 var id = $(this).attr("href");
                                 event.preventDefault();
-                                NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
+                                NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv", null, function (err, result) {
+                                    if (err) {
+                                        window.open(target, "_blank");
+                                    }
+                                });
                             }
                         });
 

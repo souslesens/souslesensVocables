@@ -25,11 +25,12 @@ module.exports = function () {
                             sendImmediately: false,
                         };
                     }
+                    ConfigManager.getUser(req, res, function (err, user) {
                         ConfigManager.getUserSources(req, res, function (err, userSources) {
                             if (err) {
                                 return processResponse(res, err, userSources);
                             }
-                            UserRequestFiltering.filterSparqlRequest(body.params.query, userSources, null, function(parsingError, filteredQuery) {
+                            UserRequestFiltering.filterSparqlRequest(body.params.query, userSources, user, function(parsingError, filteredQuery) {
                                 if (parsingError) {
                                     return processResponse(res, parsingError, null);
                                 }
@@ -43,7 +44,7 @@ module.exports = function () {
                             return;
 
                         })
-
+                    })
 
 
                 } else {

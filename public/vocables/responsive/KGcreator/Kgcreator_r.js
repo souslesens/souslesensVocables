@@ -25,6 +25,7 @@ var KGcreator_r = (function () {
         //KGcreator_mappings.showMappingDialog=self.showMappingDialogResponsive;
     };
     self.unload = function () {
+        self.currentTab = "";
         Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
         $("#KGcreator_topButtons").css("flex-direction", "row");
         $("#KGcreator_topButtons").attr("id", "Lineage_graphEditionButtons");

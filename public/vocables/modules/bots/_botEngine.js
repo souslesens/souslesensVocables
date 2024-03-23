@@ -284,7 +284,7 @@ var _botEngine = (function () {
             DateWidget.setDatePickerOnInput("botPromptInput", null, function (date) {
                 _botEngine.currentBot.params[varToFill] = date.getTime();
                 DateWidget.unsetDatePickerOnInput("botPromptInput");
-               // self.nextStep();
+                // self.nextStep();
             });
         }
 

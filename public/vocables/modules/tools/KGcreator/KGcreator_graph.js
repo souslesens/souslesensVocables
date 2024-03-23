@@ -624,15 +624,15 @@ var KGcreator_graph = (function () {
                         var attrs = getNodeAttrs(item.s);
                         var drawRelation = true;
                         if (item.o == "owl:NamedIndividual") {
-                            attrs.shape = "triangle";
+                            // attrs.shape = "triangle";
                             drawRelation = false;
                         }
                         if (item.o == "owl:Class") {
-                            attrs.shape = "triangle";
+                            // attrs.shape = "triangle";
                             drawRelation = false;
                         }
                         if (item.o == "rdf:Bag") {
-                            attrs.shape = "box";
+                            //   attrs.shape = "box";
                             drawRelation = false;
                         } else if (item.s.startsWith("@")) {
                             attrs.color = "#8200fd";

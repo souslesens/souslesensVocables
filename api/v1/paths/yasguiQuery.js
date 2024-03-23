@@ -27,22 +27,24 @@ module.exports = function() {
                         pass: ConfigManager.config.sparql_server.password,
                         sendImmediately: false
                     };
-                    ConfigManager.getUserSources(req, res, function(err, userSources) {
-                        if (err) {
-                            return processResponse(res, err, userSources);
-                        }
-
-                        UserRequestFiltering.filterSparqlRequest(req.body.query, userSources, null, function(parsingError, filteredQuery) {
-                            if (parsingError) {
-                                return processResponse(res, parsingError, null);
+                    ConfigManager.getUser(req, res, function (err, user) {
+                        ConfigManager.getUserSources(req, res, function(err, userSources) {
+                            if (err) {
+                                return processResponse(res, err, userSources);
                             }
-                            httpProxy.post(req.query.url, headers, params, function(err, result) {
-                                processResponse(res, err, result);
+
+                            UserRequestFiltering.filterSparqlRequest(req.body.query, userSources, user, function(parsingError, filteredQuery) {
+                                if (parsingError) {
+                                    return processResponse(res, parsingError, null);
+                                }
+                                httpProxy.post(req.query.url, headers, params, function(err, result) {
+                                    processResponse(res, err, result);
+                                });
+
+
                             });
-
-
                         });
-                    });
+                    })
                 }
             } else if (req.query.method == "GET") {
                 headers["Accept"] = "application/sparql-results+json";

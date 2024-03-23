@@ -184,6 +184,16 @@ var KGquery = (function () {
         }
     };
 
+    self.addEdge = function (edge, evt) {
+        var fromNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.from);
+        var toNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.to);
+
+        var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
+        self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
+        self.addNodeToQueryElement(queryElement, toNode, "toNode");
+        queryElement.paths = [[edge.from, edge.id, edge.to]];
+    };
+
     self.addNodeFilter = function (classDivId) {
         var aClass = self.divsMap[classDivId];
         var classSetIndex = aClass.data.queryElement.setIndex;
@@ -339,7 +349,8 @@ return alert("missing target node in  path");
 
                 for (var key in querySet.classFiltersMap) {
                     filterStr += querySet.classFiltersMap[key].filter + " \n";
-                    filterClassLabels["?" + querySet.classFiltersMap[key].class.label] = 1;
+                    var filterType = filterStr.match(/<.*>/) ? "uri" : literal;
+                    filterClassLabels["?" + querySet.classFiltersMap[key].class.label] = filterType;
                 }
 
                 function addToStringIfNotExists(str, text) {
@@ -350,14 +361,20 @@ return alert("missing target node in  path");
                     }
                 }
 
+                function getOptionalClause(varName) {
+                    var optionalStr = " OPTIONAL ";
+                    var filterType = filterClassLabels[varName];
+                    if (filterType && filterType != "uri") {
+                        optionalStr = "";
+                    }
+
+                    return optionalStr;
+                }
+
                 var annotationPredicatesStr = "";
                 if (queryElement.fromNode.data.annotationProperties) {
                     queryElement.fromNode.data.annotationProperties.forEach(function (property) {
-                        var optionalStr = " OPTIONAL ";
-                        if (filterClassLabels[subjectVarName]) {
-                            // if( filterStr.indexOf(subjectVarName)>-1){
-                            optionalStr = "";
-                        }
+                        var optionalStr = getOptionalClause(subjectVarName);
 
                         annotationPredicatesStr = addToStringIfNotExists(
                             optionalStr + " {" + subjectVarName + " <" + property.id + "> " + subjectVarName + "_" + property.label + "}\n",
@@ -366,20 +383,14 @@ return alert("missing target node in  path");
                         annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdf:value " + subjectVarName + "_value}\n", annotationPredicatesStr);
                     });
                 } else {
-                    var optionalStr = " OPTIONAL ";
-                    if (filterClassLabels[subjectVarName]) {
-                        optionalStr = "";
-                    }
+                    var optionalStr = getOptionalClause(subjectVarName);
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdf:value " + subjectVarName + "Value}\n", annotationPredicatesStr);
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", annotationPredicatesStr);
                 }
 
                 if (queryElement.toNode.data.annotationProperties) {
                     queryElement.toNode.data.annotationProperties.forEach(function (property) {
-                        var optionalStr = " OPTIONAL ";
-                        if (filterClassLabels[objectVarName]) {
-                            optionalStr = "";
-                        }
+                        var optionalStr = getOptionalClause(objectVarName);
                         annotationPredicatesStr = addToStringIfNotExists(
                             optionalStr + "  {" + objectVarName + " <" + property.id + "> " + objectVarName + "_" + property.label + "}\n",
                             annotationPredicatesStr
@@ -387,10 +398,7 @@ return alert("missing target node in  path");
                         annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdf:value " + objectVarName + "_value}\n", annotationPredicatesStr);
                     });
                 } else {
-                    var optionalStr = " OPTIONAL ";
-                    if (filterClassLabels[objectVarName]) {
-                        optionalStr = "";
-                    }
+                    var optionalStr = getOptionalClause(objectVarName);
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdf:value " + objectVarName + "Value}\n", annotationPredicatesStr);
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdfs:label " + objectVarName + "Label}\n", annotationPredicatesStr);
                 }

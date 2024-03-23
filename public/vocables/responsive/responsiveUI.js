@@ -242,9 +242,9 @@ var ResponsiveUI = (function () {
         var onSourceSelect;
         if (resetAll) {
             Lineage_sources.loadedSources = {};
-           onSourceSelect = ResponsiveUI.onSourceSelect;
+            onSourceSelect = ResponsiveUI.onSourceSelect;
         } else {
-             onSourceSelect = ResponsiveUI.onSourceSelect_AddSource;
+            onSourceSelect = ResponsiveUI.onSourceSelect_AddSource;
         }
         SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
@@ -252,10 +252,8 @@ var ResponsiveUI = (function () {
     };
     //keep
     self.openDialogDiv = function (div) {
-
         $("#" + div).empty();
         $("#" + div).dialog();
-
     };
     //keep
     self.setSlsvCssClasses = function (callback) {
@@ -265,7 +263,7 @@ var ResponsiveUI = (function () {
             const response = await fetch("/api/v1/users/theme");
             if (response.status == 400) {
                 ResponsiveUI.changeTheme(Config.theme.defaultTheme);
-               return callback();
+                return callback();
             }
 
             const data = await response.json();

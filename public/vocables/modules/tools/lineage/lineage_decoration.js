@@ -293,16 +293,15 @@ var Lineage_decoration = (function () {
         var nodeOwlTypesMap = {};
         var legendOwlTypeColorsMap = {};
         var legendTreeNode = {};
-        var okNodeIds=[]
+        var okNodeIds = [];
         async.series(
             [
-
                 function (callbackSeries) {
-                    nodeIds.forEach(function(item){
-                        if(item.startsWith("http")){
-                            okNodeIds.push(item)
+                    nodeIds.forEach(function (item) {
+                        if (item.startsWith("http")) {
+                            okNodeIds.push(item);
                         }
-                    })
+                    });
                     callbackSeries();
                 },
                 // get nodes super Classes

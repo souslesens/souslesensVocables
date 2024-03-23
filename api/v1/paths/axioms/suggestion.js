@@ -29,7 +29,14 @@ module.exports = function() {
      //  ManchesterSyntaxEngine.getSuggestion(req.query.source, req.query.lastToken, options, callback);
         var url="http://localhost:3000/getSuggestions"
         httpProxy.post(url, null, { owlInput:req.query.lastToken }, function(result) {
-            processResponse(res, null, JSON.parse(result));
+
+            try {
+                var json=JSON.parse(result)
+                processResponse(res, null, json);
+            }
+            catch(err){
+                processResponse(res, err+" "+result, null);
+            }
         });
     }
 

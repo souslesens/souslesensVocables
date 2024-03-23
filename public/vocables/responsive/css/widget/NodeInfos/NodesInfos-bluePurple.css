@@ -72,7 +72,7 @@ th, td{
     max-height: 55vh;
     overflow: auto;
 }
-#nodeInfos_RangeAndDomainDiv {
+#nodeInfos_associatedPropertiesDiv {
     .nodesInfosAdditionalInfos;
     max-height: 55vh;
     overflow: auto;
@@ -93,7 +93,7 @@ th, td{
     border: 0px !important;
     font-weight: bold;
 }
-.nodesInfos_tiltles {
+.nodesInfos_titles {
     color: @source-color;
     font-size: 15px;
 }

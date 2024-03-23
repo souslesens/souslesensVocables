@@ -116,7 +116,7 @@ var KGquery = (function () {
         var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId, role, node.data.label);
 
         KGquery_graph.outlineNode(node.id);
-        node.data.queryElement = queryElement;
+      //  node.data.queryElement = queryElement;
         self.divsMap[nodeDivId] = node;
     };
 
@@ -187,11 +187,19 @@ var KGquery = (function () {
     self.addEdge = function (edge, evt) {
         var fromNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.from);
         var toNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.to);
-
+        if (edge.from == edge.to) {
+            toNode=JSON.parse(JSON.stringify(fromNode))
+            toNode.label += "_" + (self.currentQueryElement.paths.length + 1);
+            toNode.data.label=toNode.label
+        }
         var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
         self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
         self.addNodeToQueryElement(queryElement, toNode, "toNode");
-        queryElement.paths = [[edge.from, edge.id, edge.to]];
+        var path=[[edge.from, edge.to, edge.data.propertyId]]
+        var pathWithVarNames = KGquery_paths.substituteClassIdToVarNameInPath(queryElement, path);
+        queryElement.paths = pathWithVarNames;
+        self.addQueryElementToQuerySet(self.currentQuerySet)
+
     };
 
     self.addNodeFilter = function (classDivId) {
@@ -242,9 +250,7 @@ var KGquery = (function () {
         if (!options) {
             options = {};
         }
-        /* if (!self.querySets.toNode) {
-return alert("missing target node in  path");
-}*/
+
 
         $("#KGquery_dataTableDiv").html("");
         self.message("searching...");

@@ -19,6 +19,9 @@ var KGquery_graph = (function () {
 
     self.visjsOptions = {
         onclickFn: function (node, point, nodeEvent) {
+            if(!node){
+                return;
+            }
             if (node.from) {
                 self.currentGraphNode = null;
                 KGquery.addEdge(node, nodeEvent);

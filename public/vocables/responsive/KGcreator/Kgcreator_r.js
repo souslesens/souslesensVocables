@@ -16,6 +16,7 @@ var KGcreator_r = (function () {
 
     //self.oldshowMappingDialog=KGcreator_mappings.showMappingDialog;
     self.onLoaded = function () {
+        self.currentTab = "";
         PredicatesSelectorWidget.load = Lineage_r.loadPredicateSelectorWidgetResponsive;
         ResponsiveUI.initMenuBar(self.loadSource);
         //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
@@ -27,6 +28,7 @@ var KGcreator_r = (function () {
     self.unload = function () {
         self.currentTab = "";
         Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
+        self.currentTab = "";
         $("#KGcreator_topButtons").css("flex-direction", "row");
         $("#KGcreator_topButtons").attr("id", "Lineage_graphEditionButtons");
         $("#MenuBar").css("height", "90px");
@@ -83,7 +85,7 @@ var KGcreator_r = (function () {
                     $("#MenuBarFooter").css("display", "flex");
                     $("#KGcreator_topButtons").css("flex-direction", "column");*/
                     if (KGcreator.currentTreeNode) {
-                        KGcreator_run.createTriples(true);
+                        //KGcreator_run.createTriples(true);
                         KGcreator_run.getTableAndShowMappings();
                     }
                     ResponsiveUI.PopUpOnHoverButtons();

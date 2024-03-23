@@ -749,6 +749,9 @@ var KGcreator_graph = (function () {
         self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, options);
         self.mappingVisjsGraph.draw();
         GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas", false);
+        $('#KGcreatorVisjsLegendCanvas').css('left','55%');
+        var menuBarPosition=-($(window).height()-$('#MenuBar').height()+30);
+        $('#KGcreatorVisjsLegendCanvas').css('top',menuBarPosition);
     };
 
     self.onDetailedGraphNodeClick = function (node, point, event, caller) {

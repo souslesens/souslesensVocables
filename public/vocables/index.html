@@ -383,7 +383,8 @@
                                 event.preventDefault();
                                 NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv", null, function (err, result) {
                                     if (err) {
-                                        window.open(target, "_blank");
+                                        $("#mainDialogDiv").dialog("close")
+                                        window.open(id, "_blank");
                                     }
                                 });
                             }

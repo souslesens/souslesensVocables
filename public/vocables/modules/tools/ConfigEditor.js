@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var ConfigEditor = (function () {
     var self = {};
+    import("/assets/index.js");
     self.createApp = null;
     self.umountKGUploadApp = null;
     self.unload = function () {
@@ -13,9 +14,7 @@ var ConfigEditor = (function () {
 
     self.onLoaded = function () {
         $("#accordion").accordion("option", { active: 2 });
-        import("/assets/index.js");
 
-        setTimeout(function () {
 
             $("#mainDialogDiv").dialog("open");
             $("#mainDialogDiv").parent().show();
@@ -34,7 +33,6 @@ var ConfigEditor = (function () {
             `);
 
             self.umountKGUploadApp = self.createApp();
-        }, 1500);
     };
 
     return self;

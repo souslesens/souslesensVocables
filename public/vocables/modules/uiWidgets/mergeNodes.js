@@ -1,10 +1,9 @@
-var MergeNodes = (function() {
-
+var MergeNodes = (function () {
     var self = {};
 
     self.mergeNodes = {
-        showDialog: function() {
-            $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_mergeNodesDialog.html", function() {
+        showDialog: function () {
+            $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_mergeNodesDialog.html", function () {
                 var sources = [];
                 for (var key in Config.sources) {
                     if (Config.sources[key].editable) {
@@ -15,7 +14,7 @@ var MergeNodes = (function() {
                 common.fillSelectOptions("LineageMerge_targetSourceSelect", sources, null);
             });
         },
-        mergeNodesUI: function() {
+        mergeNodesUI: function () {
             var targetNode = null;
             var targetSource = $("#LineageMerge_targetSourceSelect").val();
             var mergeMode = $("#LineageMerge_aggregateModeSelect").val();
@@ -34,7 +33,7 @@ var MergeNodes = (function() {
             self.mergeNodes.mergeNodes(jstreeNodes, mergeMode, mergeDepth, mergeRestrictions, mergedNodesType, targetSource, targetNode);
         },
 
-        mergeNodes: function(jstreeNodes, mergeMode, mergeDepth, mergeRestrictions, mergedNodesType, targetSource, targetNode, callback) {
+        mergeNodes: function (jstreeNodes, mergeMode, mergeDepth, mergeRestrictions, mergedNodesType, targetSource, targetNode, callback) {
             var maxDepth = 10;
 
             var newUriPrefix = Config.sources[targetSource].graphUri;
@@ -48,7 +47,7 @@ var MergeNodes = (function() {
             var descendantsMap = {};
             var newTriples = [];
             var message = "";
-            jstreeNodes.forEach(function(node) {
+            jstreeNodes.forEach(function (node) {
                 if (node.parent == "#") {
                     return;
                 }
@@ -60,7 +59,7 @@ var MergeNodes = (function() {
 
             var sources = Object.keys(nodesToMerge);
 
-            async.eachSeries(sources, function(source, callbackEachSource) {
+            async.eachSeries(sources, function (source, callbackEachSource) {
                 var nodesToCopyMap = {};
                 var selectedNodeIds = Object.keys(nodesToMerge[source]);
                 var sourceGraphUri = Config.sources[source].graphUri;
@@ -75,12 +74,12 @@ var MergeNodes = (function() {
 
                 async.eachSeries(
                     selectedNodeIds,
-                    function(selectedNodeId, callbackEachNodeToMerge) {
+                    function (selectedNodeId, callbackEachNodeToMerge) {
                         var nodesToCopy = [selectedNodeId];
                         async.series(
                             [
                                 //getNodes descendants by depth and add them to ids
-                                function(callbackSeries) {
+                                function (callbackSeries) {
                                     if (mergeDepth == "nodeOnly") {
                                         return callbackSeries();
                                     } else {
@@ -90,12 +89,12 @@ var MergeNodes = (function() {
                                         } else {
                                             depth = maxDepth;
                                         }
-                                        Sparql_generic.getNodeChildren(source, null, selectedNodeId, depth, { selectGraph: false }, function(err, result) {
+                                        Sparql_generic.getNodeChildren(source, null, selectedNodeId, depth, { selectGraph: false }, function (err, result) {
                                             if (err) {
                                                 return callbackSeries(err);
                                             }
 
-                                            result.forEach(function(item, index) {
+                                            result.forEach(function (item, index) {
                                                 for (var i = 1; i <= maxDepth; i++) {
                                                     if (item["child" + i]) {
                                                         var parent;
@@ -122,8 +121,8 @@ var MergeNodes = (function() {
                                 },
 
                                 //set nodesMap for change URI later
-                                function(callbackSeries) {
-                                    nodesToCopy.forEach(function(nodeId) {
+                                function (callbackSeries) {
+                                    nodesToCopy.forEach(function (nodeId) {
                                         nodesToCopyMap[nodeId] = {};
                                     });
 
@@ -131,7 +130,7 @@ var MergeNodes = (function() {
                                 },
 
                                 //create hierarchy if needed (when targetNode  and mergedNodesType)
-                                function(callbackSeries) {
+                                function (callbackSeries) {
                                     if (!targetNode) {
                                         return callbackSeries();
                                     }
@@ -149,27 +148,27 @@ var MergeNodes = (function() {
                                         newTriples.push({
                                             subject: selectedNodeId,
                                             predicate: "rdf:type",
-                                            object: mergedNodesType
+                                            object: mergedNodesType,
                                         });
 
                                         newTriples.push({
                                             subject: selectedNodeId,
                                             predicate: mergedNodesParentProperty,
-                                            object: targetNode
+                                            object: targetNode,
                                         });
                                     }
 
                                     var descendantIds = Object.keys(descendantsMap);
-                                    descendantIds.forEach(function(item) {
+                                    descendantIds.forEach(function (item) {
                                         newTriples.push({
                                             subject: item,
                                             predicate: "rdf:type",
-                                            object: mergedNodesType
+                                            object: mergedNodesType,
                                         });
                                         newTriples.push({
                                             subject: item,
                                             predicate: mergedNodesParentProperty,
-                                            object: descendantsMap[item].parent
+                                            object: descendantsMap[item].parent,
                                         });
                                     });
 
@@ -177,32 +176,32 @@ var MergeNodes = (function() {
                                 },
 
                                 //get all node ids subject triple including descendants
-                                function(callbackSeries) {
-                                    Sparql_OWL.getAllTriples(source, "subject", nodesToCopy, { removeBlankNodesObjects: true }, function(err, result) {
+                                function (callbackSeries) {
+                                    Sparql_OWL.getAllTriples(source, "subject", nodesToCopy, { removeBlankNodesObjects: true }, function (err, result) {
                                         if (err) {
                                             return callbackSeries(err);
                                         }
-                                        result.forEach(function(item) {
+                                        result.forEach(function (item) {
                                             if (nodesToMerge[source][selectedNodeId]) {
                                                 nodesToMerge[source][selectedNodeId].push(item);
                                             }
                                         });
                                         callbackSeries();
                                     });
-                                }
+                                },
                             ],
-                            function(err) {
+                            function (err) {
                                 callbackEachNodeToMerge();
                             }
                         );
                     },
                     // end for each node to merge
 
-                    function(err) {
+                    function (err) {
                         async.series(
                             [
                                 //get restrictions triple including descendants
-                                function(callbackSeries) {
+                                function (callbackSeries) {
                                     if (!mergeRestrictions) {
                                         return callbackSeries();
                                     }
@@ -225,12 +224,12 @@ var MergeNodes = (function() {
                                         sparql_url = Config.sparql_server.url;
                                     }
                                     var url = sparql_url + "?format=json&query=";
-                                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
+                                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
                                         if (err) {
                                             return callbackSeries(err);
                                         }
 
-                                        result.results.bindings.forEach(function(item) {
+                                        result.results.bindings.forEach(function (item) {
                                             var value = item.o.value;
                                             if (item.o.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") {
                                                 value += "^^xsd:dateTime";
@@ -242,7 +241,7 @@ var MergeNodes = (function() {
                                             newTriples.push({
                                                 subject: item.s.value,
                                                 predicate: item.p.value,
-                                                object: value
+                                                object: value,
                                             });
                                         });
                                         return callbackSeries();
@@ -250,7 +249,7 @@ var MergeNodes = (function() {
                                 },
 
                                 //create newTriples
-                                function(callbackSeries) {
+                                function (callbackSeries) {
                                     if (true) {
                                         function getTripleNewUris(triple) {
                                             if (mergeMode == "keepUri") {
@@ -280,7 +279,7 @@ var MergeNodes = (function() {
                                         }
 
                                         for (var selectedNodeId in nodesToMerge[source]) {
-                                            nodesToMerge[source][selectedNodeId].forEach(function(item) {
+                                            nodesToMerge[source][selectedNodeId].forEach(function (item) {
                                                 var value = item.object.value;
                                                 if (item.object.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") {
                                                     value += "^^xsd:dateTime";
@@ -301,7 +300,7 @@ var MergeNodes = (function() {
                                                 });
                                             });
                                         }
-                                        Sparql_generic.insertTriples(targetSource, newTriples, {}, function(err, result) {
+                                        Sparql_generic.insertTriples(targetSource, newTriples, {}, function (err, result) {
                                             if (err) {
                                                 return callbackSeries(err);
                                             }
@@ -314,28 +313,28 @@ var MergeNodes = (function() {
                                 },
 
                                 //create newTriples
-                                function(callbackSeries) {
+                                function (callbackSeries) {
                                     MainController.UI.message(sourceMessage + " indexing data ...  ");
-                                    SearchUtil.generateElasticIndex(targetSource, { ids: nodesToCopy }, function(err, _result) {
+                                    SearchUtil.generateElasticIndex(targetSource, { ids: nodesToCopy }, function (err, _result) {
                                         return callbackSeries(err);
                                     });
                                 },
                             ],
-                            function(err) {
+                            function (err) {
                                 if (err) {
                                     return callbackEachNodeToMerge(err);
                                 }
 
                                 callbackEachNodeToMerge();
                             },
-                            function(err) {
+                            function (err) {
                                 callbackEachSource(err);
                             }
                         );
                     },
 
                     //end eachSource
-                    function(err) {
+                    function (err) {
                         if (callback) {
                             return callback(err, sourceMessage);
                         }
@@ -349,7 +348,6 @@ var MergeNodes = (function() {
             });
         },
     };
-
-})()
+})();
 export default MergeNodes;
-window.MergeNodes = MergeNodes
+window.MergeNodes = MergeNodes;

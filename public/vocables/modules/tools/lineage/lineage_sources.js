@@ -208,7 +208,7 @@ var Lineage_sources = (function () {
 
         $("#LineageNodesJsTreeDiv").empty();
         $("#Lineage_propertiesTree").empty();
-        Lineage_selection.selectedNodes=[]
+        Lineage_selection.selectedNodes = [];
         self.showHideEditButtons(source);
         setTimeout(function () {
             SearchWidget.init();
@@ -715,7 +715,6 @@ sourceDivId +
             return false;
         }
 
-
         const groups = authentication.currentUser.groupes;
         if (groups.indexOf("admin") > -1) {
             return true;
@@ -729,7 +728,7 @@ sourceDivId +
         /*  if(currentAccessControls=="readwrite")
             return true;
         return false;*/
-    /*
+        /*
         if (groups.indexOf("admin") > -1) {
             return true;
         }

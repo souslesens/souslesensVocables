@@ -116,7 +116,7 @@ var KGquery = (function () {
         var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId, role, node.data.label);
 
         KGquery_graph.outlineNode(node.id);
-      //  node.data.queryElement = queryElement;
+        //  node.data.queryElement = queryElement;
         self.divsMap[nodeDivId] = node;
     };
 
@@ -188,18 +188,17 @@ var KGquery = (function () {
         var fromNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.from);
         var toNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.to);
         if (edge.from == edge.to) {
-            toNode=JSON.parse(JSON.stringify(fromNode))
+            toNode = JSON.parse(JSON.stringify(fromNode));
             toNode.label += "_" + (self.currentQueryElement.paths.length + 1);
-            toNode.data.label=toNode.label
+            toNode.data.label = toNode.label;
         }
         var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
         self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
         self.addNodeToQueryElement(queryElement, toNode, "toNode");
-        var path=[[edge.from, edge.to, edge.data.propertyId]]
+        var path = [[edge.from, edge.to, edge.data.propertyId]];
         var pathWithVarNames = KGquery_paths.substituteClassIdToVarNameInPath(queryElement, path);
         queryElement.paths = pathWithVarNames;
-        self.addQueryElementToQuerySet(self.currentQuerySet)
-
+        self.addQueryElementToQuerySet(self.currentQuerySet);
     };
 
     self.addNodeFilter = function (classDivId) {
@@ -250,7 +249,6 @@ var KGquery = (function () {
         if (!options) {
             options = {};
         }
-
 
         $("#KGquery_dataTableDiv").html("");
         self.message("searching...");
@@ -545,14 +543,13 @@ self.querySets.sets.forEach(function (querySet) {
                 var dataItem = self.currentData[datasetIndex];
                 var varName = self.tableCols[index.column].title;
                 if (true || !dataItem[varName]) {
-                    varName = varName.split('_')[0];
+                    varName = varName.split("_")[0];
                 }
                 var uri = dataItem[varName].value;
                 var node = { data: { id: uri } };
-                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv",null,function(err){
-                    $('#smallDialogDiv').parent().css('z-index',1);
+                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv", null, function (err) {
+                    $("#smallDialogDiv").parent().css("z-index", 1);
                 });
-                
             });
         });
     };

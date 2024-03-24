@@ -749,11 +749,11 @@ var KGcreator_graph = (function () {
         self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, options);
         self.mappingVisjsGraph.draw();
         GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas", false);
-     /*   $('#KGcreatorVisjsLegendCanvas').css('right','55%');
+        /*   $('#KGcreatorVisjsLegendCanvas').css('right','55%');
         var menuBarPosition=-($(window).height()-$('#MenuBar').height()+30);
         $('#KGcreatorVisjsLegendCanvas').css('top',0);*/
-        $('#KGcreatorVisjsLegendCanvas').css('top',0);
-        $('#KGcreatorVisjsLegendCanvas').css('right',200);
+        $("#KGcreatorVisjsLegendCanvas").css("top", 0);
+        $("#KGcreatorVisjsLegendCanvas").css("right", 200);
     };
 
     self.onDetailedGraphNodeClick = function (node, point, event, caller) {

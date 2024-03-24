@@ -332,7 +332,7 @@ var Lineage_whiteboard = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                  //  options.skipTopClassFilter = 1;
+                    //  options.skipTopClassFilter = 1;
                     self.drawTopConcepts(source, options, graphDiv, function (err, result) {
                         if (err) {
                             return alert(err.response);
@@ -1355,9 +1355,8 @@ var Lineage_whiteboard = (function () {
                                                 type: Lineage_whiteboard.defaultEdgeArrowType,
                                                 scaleFactor: 0.5,
                                             },
-
                                         },
-                                        data:{type:"parent",source:source}
+                                        data: { type: "parent", source: source },
                                     };
                                     visjsData.edges.push(edge);
                                 }
@@ -1515,7 +1514,7 @@ var Lineage_whiteboard = (function () {
                                     scaleFactor: 0.5,
                                 },
                             },
-                            data: { source: source ,type:"parent"},
+                            data: { source: source, type: "parent" },
                         });
                     }
                 }
@@ -1599,7 +1598,7 @@ var Lineage_whiteboard = (function () {
                                                 scaleFactor: 0.5,
                                             },
                                         },
-                                        data: { source: childNodeSource,type:"parent" },
+                                        data: { source: childNodeSource, type: "parent" },
                                     });
                                 }
                             }

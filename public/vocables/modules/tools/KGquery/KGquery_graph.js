@@ -19,7 +19,7 @@ var KGquery_graph = (function () {
 
     self.visjsOptions = {
         onclickFn: function (node, point, nodeEvent) {
-            if(!node){
+            if (!node) {
                 return;
             }
             if (node.from) {

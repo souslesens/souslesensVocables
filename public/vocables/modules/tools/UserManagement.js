@@ -10,7 +10,6 @@ const UserManagement = (function () {
             $("#graphDiv").html(`
                     <div id="mount-user-management-here"></div>
                 `);
-
         }, 200);
     };
 

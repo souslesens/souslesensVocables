@@ -1093,4 +1093,3 @@ var KGcreator = (function () {
 
 export default KGcreator;
 window.KGcreator = KGcreator;
-

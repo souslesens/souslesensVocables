@@ -10,6 +10,9 @@ import KGcreator_run from "./KGcreator_run.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
 import KGcreator_bot from "../../bots/KGcreator_bot.js";
 
+// imports React app
+import("/assets/kg_upload_app.js");
+
 var KGcreator = (function () {
     var self = {};
     self.currentConfig = {};
@@ -45,6 +48,7 @@ var KGcreator = (function () {
             },
             beforeClose: function () {
                 self.umountKGUploadApp();
+                self.initSource();
             },
         });
         $("#smallDialogDiv").dialog("open");
@@ -440,7 +444,7 @@ var KGcreator = (function () {
             Object.entries(self.currentConfig.databaseSources).forEach(([key, datasource]) => {
                 jstreeData.push({
                     id: key,
-                    text: datasource.name,
+                    text: datasource.name || key,
                     parent: "databaseSources",
                     data: { id: datasource.name, type: "databaseSource" },
                 });
@@ -933,7 +937,7 @@ var KGcreator = (function () {
     self.listDatabaseTables = function (databaseSource, type, callback) {
         const params = new URLSearchParams({
             name: databaseSource,
-            type: type,
+            type: type || "sql.sqlserver",
         });
 
         $.ajax({
@@ -950,7 +954,7 @@ var KGcreator = (function () {
                 }
                 return callback(null, data);
             },
-            error: function (_err) {
+            error: function (err) {
                 return callback(err);
             },
         });
@@ -1089,5 +1093,3 @@ var KGcreator = (function () {
 
 export default KGcreator;
 window.KGcreator = KGcreator;
-// imports React app
-import("/assets/kg_upload_app.js");

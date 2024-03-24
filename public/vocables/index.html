@@ -122,7 +122,7 @@
         <script type="module" src="modules/shared/authentification.js"></script>
         <script type="module" src="modules/tools/myDashboard.js"></script>
 
-        <script type="module"></script>
+        <script type="module" src="modules/tools/axioms/axiomEditor.js"></script>
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
@@ -135,7 +135,7 @@
         <script type="module" src="modules/sparqlProxies/sparql_common.js"></script>
         <!-- <script type="module" src="modules/sparqlProxies/sparql_schema.js"></script>-->
 
-        <script type="module" src="modules/uiComponents/savedQueriesComponent.js"></script>
+        <script type="module" src="modules/uiWidgets/savedQueriesWidget.js"></script>
         <script type="module" src="modules/search/searchUtil.js"></script>
         <!--  <script type="module" src="modules/tools/ontologyUtil.js"></script>-->
 
@@ -149,7 +149,6 @@
         <script type="module" src="modules/tools/lineage/lineage_similars.js"></script>
         <script type="module" src="modules/shared/graphLoader.js"></script>
 
-        <script type="module" src="modules/tools/fabricjs/tagsGeometry.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
         <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
@@ -381,7 +380,12 @@
                             if (target == "_slsvCallback") {
                                 var id = $(this).attr("href");
                                 event.preventDefault();
-                                NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
+                                NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv", null, function (err, result) {
+                                    if (err) {
+                                        $("#mainDialogDiv").dialog("close");
+                                        window.open(id, "_blank");
+                                    }
+                                });
                             }
                         });
 

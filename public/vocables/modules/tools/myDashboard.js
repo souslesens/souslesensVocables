@@ -1,4 +1,4 @@
-import SavedQueriesComponent from "../uiComponents/savedQueriesComponent.js";
+import SavedQueriesWidget from "../uiWidgets/savedQueriesWidget.js";
 
 var MyDashboard = (function () {
     var self = {};
@@ -15,13 +15,13 @@ var MyDashboard = (function () {
                     callbackSeries();
                 },
                 function (callbackSeries) {
-                    SavedQueriesComponent.list("STORED_KGQUERY_QUERIES", null, null, "myDashboard_KGquery_myQueriesSelect", function (err, result) {
+                    SavedQueriesWidget.list("STORED_KGQUERY_QUERIES", null, null, "myDashboard_KGquery_myQueriesSelect", function (err, result) {
                         if (err) callbackSeries(err);
                         callbackSeries();
                     });
                 },
                 function (callbackSeries) {
-                    SavedQueriesComponent.list("STORED_TIMELINE_QUERIES", null, null, "myDashboard_TimeLine_myQueriesSelect", function (err, result) {
+                    SavedQueriesWidget.list("STORED_TIMELINE_QUERIES", null, null, "myDashboard_TimeLine_myQueriesSelect", function (err, result) {
                         if (err) callbackSeries(err);
                         callbackSeries();
                     });

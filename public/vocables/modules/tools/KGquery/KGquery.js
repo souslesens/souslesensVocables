@@ -13,7 +13,7 @@ import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.j
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
 import KGquery_graph from "./KGquery_graph.js";
-import SavedQueriesComponent from "../../uiComponents/savedQueriesComponent.js";
+import SavedQueriesWidget from "../../uiWidgets/savedQueriesWidget.js";
 import KGquery_myQueries from "./KGquery_myQueries.js";
 import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
@@ -43,7 +43,7 @@ var KGquery = (function () {
 
     self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
-        SavedQueriesComponent.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
+        SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
 
         //  self.addQuerySet();
     };
@@ -116,7 +116,7 @@ var KGquery = (function () {
         var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId, role, node.data.label);
 
         KGquery_graph.outlineNode(node.id);
-        node.data.queryElement = queryElement;
+        //  node.data.queryElement = queryElement;
         self.divsMap[nodeDivId] = node;
     };
 
@@ -184,6 +184,23 @@ var KGquery = (function () {
         }
     };
 
+    self.addEdge = function (edge, evt) {
+        var fromNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.from);
+        var toNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.to);
+        if (edge.from == edge.to) {
+            toNode = JSON.parse(JSON.stringify(fromNode));
+            toNode.label += "_" + (self.currentQueryElement.paths.length + 1);
+            toNode.data.label = toNode.label;
+        }
+        var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
+        self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
+        self.addNodeToQueryElement(queryElement, toNode, "toNode");
+        var path = [[edge.from, edge.to, edge.data.propertyId]];
+        var pathWithVarNames = KGquery_paths.substituteClassIdToVarNameInPath(queryElement, path);
+        queryElement.paths = pathWithVarNames;
+        self.addQueryElementToQuerySet(self.currentQuerySet);
+    };
+
     self.addNodeFilter = function (classDivId) {
         var aClass = self.divsMap[classDivId];
         var classSetIndex = aClass.data.queryElement.setIndex;
@@ -232,9 +249,6 @@ var KGquery = (function () {
         if (!options) {
             options = {};
         }
-        /* if (!self.querySets.toNode) {
-return alert("missing target node in  path");
-}*/
 
         $("#KGquery_dataTableDiv").html("");
         self.message("searching...");
@@ -339,7 +353,8 @@ return alert("missing target node in  path");
 
                 for (var key in querySet.classFiltersMap) {
                     filterStr += querySet.classFiltersMap[key].filter + " \n";
-                    filterClassLabels["?" + querySet.classFiltersMap[key].class.label] = 1;
+                    var filterType = filterStr.match(/<.*>/) ? "uri" : literal;
+                    filterClassLabels["?" + querySet.classFiltersMap[key].class.label] = filterType;
                 }
 
                 function addToStringIfNotExists(str, text) {
@@ -350,14 +365,20 @@ return alert("missing target node in  path");
                     }
                 }
 
+                function getOptionalClause(varName) {
+                    var optionalStr = " OPTIONAL ";
+                    var filterType = filterClassLabels[varName];
+                    if (filterType && filterType != "uri") {
+                        optionalStr = "";
+                    }
+
+                    return optionalStr;
+                }
+
                 var annotationPredicatesStr = "";
                 if (queryElement.fromNode.data.annotationProperties) {
                     queryElement.fromNode.data.annotationProperties.forEach(function (property) {
-                        var optionalStr = " OPTIONAL ";
-                        if (filterClassLabels[subjectVarName]) {
-                            // if( filterStr.indexOf(subjectVarName)>-1){
-                            optionalStr = "";
-                        }
+                        var optionalStr = getOptionalClause(subjectVarName);
 
                         annotationPredicatesStr = addToStringIfNotExists(
                             optionalStr + " {" + subjectVarName + " <" + property.id + "> " + subjectVarName + "_" + property.label + "}\n",
@@ -366,20 +387,14 @@ return alert("missing target node in  path");
                         annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdf:value " + subjectVarName + "_value}\n", annotationPredicatesStr);
                     });
                 } else {
-                    var optionalStr = " OPTIONAL ";
-                    if (filterClassLabels[subjectVarName]) {
-                        optionalStr = "";
-                    }
+                    var optionalStr = getOptionalClause(subjectVarName);
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdf:value " + subjectVarName + "Value}\n", annotationPredicatesStr);
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", annotationPredicatesStr);
                 }
 
                 if (queryElement.toNode.data.annotationProperties) {
                     queryElement.toNode.data.annotationProperties.forEach(function (property) {
-                        var optionalStr = " OPTIONAL ";
-                        if (filterClassLabels[objectVarName]) {
-                            optionalStr = "";
-                        }
+                        var optionalStr = getOptionalClause(objectVarName);
                         annotationPredicatesStr = addToStringIfNotExists(
                             optionalStr + "  {" + objectVarName + " <" + property.id + "> " + objectVarName + "_" + property.label + "}\n",
                             annotationPredicatesStr
@@ -387,10 +402,7 @@ return alert("missing target node in  path");
                         annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdf:value " + objectVarName + "_value}\n", annotationPredicatesStr);
                     });
                 } else {
-                    var optionalStr = " OPTIONAL ";
-                    if (filterClassLabels[objectVarName]) {
-                        optionalStr = "";
-                    }
+                    var optionalStr = getOptionalClause(objectVarName);
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdf:value " + objectVarName + "Value}\n", annotationPredicatesStr);
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdfs:label " + objectVarName + "Label}\n", annotationPredicatesStr);
                 }
@@ -531,11 +543,13 @@ self.querySets.sets.forEach(function (querySet) {
                 var dataItem = self.currentData[datasetIndex];
                 var varName = self.tableCols[index.column].title;
                 if (true || !dataItem[varName]) {
-                    varName = varName.replace("_label", "").replace("_hasValue", "").replace("_comment", "").replace("_prefLabel", "");
+                    varName = varName.split("_")[0];
                 }
                 var uri = dataItem[varName].value;
                 var node = { data: { id: uri } };
-                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv", null, function (err) {
+                    $("#smallDialogDiv").parent().css("z-index", 1);
+                });
             });
         });
     };

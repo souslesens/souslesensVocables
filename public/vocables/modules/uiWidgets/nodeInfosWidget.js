@@ -151,7 +151,7 @@ var NodeInfosWidget = (function () {
                         callback(err);
                     }
                     if (err) {
-                        return alert(err);
+                        MainController.UI.message(err, true);
                     }
                     self.showNodeInfosToolbar(options);
 
@@ -168,7 +168,10 @@ var NodeInfosWidget = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (_err, result) {
+                    self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (err, result) {
+                        if (err) {
+                            callbackSeries(err);
+                        }
                         types = result.types;
                         callbackSeries();
                     });
@@ -199,14 +202,14 @@ var NodeInfosWidget = (function () {
                     }
 
                     self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfos_restrictionsDiv", function (_err, _result) {
-                        callbackSeries();
+                        callbackSeries(_err);
                     });
                 },
                 function (callbackSeries) {
-                    if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
                         return callbackSeries();
                     }
-                    self.showInferredRangeAndDomain(self.currentNodeRealSource, [nodeId], "nodeInfos_RangeAndDomainDiv", function (err) {
+                    self.showAssociatedProperties(self.currentNodeRealSource, nodeId, "nodeInfos_associatedPropertiesDiv", function (err) {
                         callbackSeries(err);
                     });
                 },
@@ -216,7 +219,7 @@ var NodeInfosWidget = (function () {
                     callback(err);
                 }
                 if (err) {
-                    return alert(err);
+                    return MainController.UI.message(err.responseText || err, true);
                 }
             }
         );
@@ -285,7 +288,15 @@ var NodeInfosWidget = (function () {
             },
             function (err, data) {
                 if (err) {
-                    return MainController.UI.message(err);
+                    MainController.UI.message(err.responseText);
+                    if (callback) {
+                        return callback(err);
+                    }
+                }
+                if (data.length == 0) {
+                    if (callback) {
+                        return callback("no data found");
+                    }
                 }
                 if (divId.indexOf("Dialog") > -1) {
                     $("#" + divId).on("dialogbeforeclose", function (_event, _ui) {
@@ -516,7 +527,7 @@ defaultLang = 'en';*/
 
                         str +=
                             "<td class='detailsCellName'>" +
-                            "<a target='" +
+                            "<a target ='" +
                             self.getUriTarget(self.propertiesMap.properties[key].propUri) +
                             "' href='" +
                             self.propertiesMap.properties[key].propUri +
@@ -537,10 +548,10 @@ defaultLang = 'en';*/
                 str += "</table></div>";
 
                 str +=
-                    " <br><div id='nodeInfos_listsDiv' >" +
-                    "<div id='nodeInfos_restrictionsDiv'  style='display:table-caption;background-color: #ddd;padding:5px'></div>" +
-                    "<div id='nodeInfos_RangeAndDomainDiv'  style='display:none;background-color: #ddd;padding:5px'></div>";
-                "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;background-color: #ddd;padding:5px'></div>" + "</div>";
+                    " <div id='nodeInfos_listsDiv' >" +
+                    "<div id='nodeInfos_associatedPropertiesDiv' class='nodeInfos_rigthDiv' ></div><br>" +
+                    "<div id='nodeInfos_restrictionsDiv' class='nodeInfos_rigthDiv'  style='display:table-caption;'></div>" +
+                    "<div id='nodeInfos_individualsDiv' class='nodeInfos_rigthDiv' style=' display:flex;flex-direction: ></div></div>";
 
                 $("#" + divId).html(str);
                 if (callback) {
@@ -561,7 +572,7 @@ defaultLang = 'en';*/
                         if (err) {
                             return callbackSeries(err);
                         }
-                        str += "<b class='nodesInfos_tiltles'>Restrictions </b> <div style=''> <table style='display:table-caption'>";
+                        str += "<b class='nodesInfos_titles'>Restrictions </b> <div style=''> <table style='display:table-caption'>";
                         result.forEach(function (item) {
                             str += "<tr class='infos_table'>";
 
@@ -596,7 +607,7 @@ defaultLang = 'en';*/
                             if (err) {
                                 return callbackSeries(err);
                             }
-                            str += "<br><b class='nodesInfos_tiltles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table >";
+                            str += "<br><b class='nodesInfos_titles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table >";
                             result.forEach(function (item) {
                                 str += "<tr class='infos_table'>";
 
@@ -669,15 +680,17 @@ defaultLang = 'en';*/
                 str += "</table>";
                 $("#nodeInfos_individualsDiv").html(str);
             }
-            if (callback) callback();
+            if (callback) {
+                callback();
+            }
         });
     };
 
     self.showPropertyRestrictions = function (sourceLabel, nodeId, divId, _callback) {
         Sparql_OWL.getPropertiesRestrictionsDescription(sourceLabel, nodeId, {}, function (err, result) {
             if (err) {
-                alert(err.responseText);
-                return MainController.UI.message(err.responseText, true);
+                //  alert(err.responseText);
+                return MainController.UI.message(err.responseText || err, true);
             }
 
             var str = "<b>Property restrictions</b><table>";
@@ -701,30 +714,38 @@ defaultLang = 'en';*/
         });
     };
 
-    self.showInferredRangeAndDomain = function (sourceLabel, nodeId, divId, callback) {
+    self.showAssociatedProperties = function (sourceLabel, nodeId, divId, callback) {
         var ontologySourceModel = Config.ontologiesVocabularyModels[sourceLabel];
-        if (ontologySourceModel != undefined) {
-            var property = ontologySourceModel.constraints[nodeId];
-            if (property == undefined) {
-                if (callback) {
-                    callback();
+        if (ontologySourceModel) {
+            var domainOfProperties = [];
+            var rangeOfProperties = [];
+            for (var prop in ontologySourceModel.constraints) {
+                var constraint = ontologySourceModel.constraints[prop];
+                if (constraint.domain == nodeId) {
+                    domainOfProperties.push({ id: prop, label: constraint.label });
                 }
-                return;
+                if (constraint.range == nodeId) {
+                    rangeOfProperties.push({ id: prop, label: constraint.label });
+                }
             }
-            var domainLabel = property.domainLabel != "" ? property.domainLabel : "anything";
-            var rangeLabel = property.rangeLabel != "" ? property.domainLabel : "anything";
-            var domain = property.domain != "" ? `onclick='NodeInfosWidget.onClickLink("${property.domain}")'` : "";
-            var range = property.range != "" ? `onclick='NodeInfosWidget.onClickLink("${property.range}")'` : "";
-            var cells = `
-            <tr class='infos_table'><td class='detailsCellValue'>Domain</td><td class='detailsCellValue'  ${domain}>${domainLabel}</td></tr>
-            <tr class='infos_table'><td class='detailsCellValue'>Range</td><td class='detailsCellValue' ${range}>${rangeLabel}</td></tr>
-            `;
-            var html = `<b>Inferred Range and Domains</b>
-            <table>
-            ${cells}
-           `;
-            $("#" + divId).append(html);
-            $("#" + divId).css("display", "table-caption");
+
+            var html = "";
+            if (domainOfProperties.length > 0) {
+                html += "<b><div class='nodesInfos_titles'>Domain of</div></b>";
+                domainOfProperties.forEach(function (property) {
+                    html += "  <div class='XdetailsCellValue'> <a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a> </div>";
+                });
+            }
+            if (rangeOfProperties.length > 0) {
+                html += "<b><div  class='nodesInfos_titles'>Range of</div></b>";
+                rangeOfProperties.forEach(function (property) {
+                    html += "  <div class='XdetailsCellValue'> <a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a> </div>";
+                });
+            }
+            if (html) {
+                $("#" + divId).append(html);
+                $("#" + divId).css("display", "table-caption");
+            }
         }
         if (callback) {
             callback();
@@ -988,24 +1009,12 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
     };
 
-    self.isSLSVvisibleUri = function (uri) {
-        if (!uri || !uri.indexOf) {
-            return false;
-        }
-        for (var source in Config.sources) {
-            var graphUri = Config.sources[source].graphUri;
-            if (graphUri && uri.indexOf(graphUri) == 0) {
-                return true;
-            }
-        }
-        return false;
-    };
     self.getUriTarget = function (nodeId) {
-        var target = "_blank";
+        /* var target = "_blank";
         if (self.isSLSVvisibleUri(nodeId)) {
             target = "_slsvCallback";
-        }
-        return target;
+        }*/
+        return "_slsvCallback";
     };
 
     self.updatePredicateValue = function () {

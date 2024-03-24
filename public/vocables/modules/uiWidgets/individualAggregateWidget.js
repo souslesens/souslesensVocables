@@ -41,7 +41,7 @@ var IndividualAggregateWidget = (function () {
         } else if (fn == "COUNT") {
             common.fillSelectOptions("individualAggregate_functionVariableSelect", self.groupByClasses.concat(self.functionVarClasses), null, "label", "label");
         } else {
-            common.fillSelectOptions("individualAggregate_functionVariableSelect", self.functionVarClasses, null, "label", "label");
+            common.fillSelectOptions("individualAggregate_functionVariableSelect", self.groupByClasses.concat(self.functionVarClasses), null, "label", "label");
         }
     };
 
@@ -61,7 +61,7 @@ var IndividualAggregateWidget = (function () {
             var fnVar = Sparql_common.formatStringForTriple(fnVars[0], true);
             if (fn == "concat") selectStr += "(GROUP_CONCAT(distinct ?" + fnVar + ';SEPARATOR=",") AS ?concat_' + fnVar + ")";
             else if (fn == "COUNT") selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
-            else selectStr += " (" + fn + "(distinct ?" + fnVar + "Value) as ?" + fn + "_" + fnVar + ")";
+            else selectStr += " (" + fn + "(distinct ?" + fnVar + "_value) as ?" + fn + "_" + fnVar + ")";
         });
 
         var aggregateClauses = { select: selectStr, groupBy: groupByStr };

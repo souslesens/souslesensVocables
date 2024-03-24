@@ -1,5 +1,6 @@
 const UserManagement = (function () {
     const self = {};
+    import("/assets/user_management.js");
     self.onSourceSelect = function () {};
 
     self.onLoaded = function () {
@@ -9,7 +10,6 @@ const UserManagement = (function () {
             $("#graphDiv").html(`
                     <div id="mount-user-management-here"></div>
                 `);
-            import("/assets/user_management.js");
         }, 200);
     };
 

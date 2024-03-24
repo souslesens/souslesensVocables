@@ -54,9 +54,7 @@ var Lineage_r = (function () {
             }
             $("#lateralPanelDiv").load("./responsive/lineage/html/index.html", function () {
                 self.initWhiteboardTab();
-                if (Object.keys(Lineage_sources.loadedSources).length == 0) {
-                    Lineage_whiteboard.initUI();
-                }
+                Lineage_whiteboard.initUI();
             });
         });
     };

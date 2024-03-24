@@ -332,7 +332,7 @@ var Lineage_whiteboard = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    options.skipTopClassFilter = 1;
+                    //  options.skipTopClassFilter = 1;
                     self.drawTopConcepts(source, options, graphDiv, function (err, result) {
                         if (err) {
                             return alert(err.response);
@@ -1339,7 +1339,6 @@ var Lineage_whiteboard = (function () {
                                 visjsData.nodes.push(node);
                             } else {
                             }
-                            //link node to source
 
                             if (item.broader1.value != source) {
                                 var edgeId = item.subject.value + "_" + item.broader1.value;
@@ -1357,6 +1356,7 @@ var Lineage_whiteboard = (function () {
                                                 scaleFactor: 0.5,
                                             },
                                         },
+                                        data: { type: "parent", source: source },
                                     };
                                     visjsData.edges.push(edge);
                                 }
@@ -1514,7 +1514,7 @@ var Lineage_whiteboard = (function () {
                                     scaleFactor: 0.5,
                                 },
                             },
-                            data: { source: source },
+                            data: { source: source, type: "parent" },
                         });
                     }
                 }
@@ -1598,7 +1598,7 @@ var Lineage_whiteboard = (function () {
                                                 scaleFactor: 0.5,
                                             },
                                         },
-                                        data: { source: childNodeSource },
+                                        data: { source: childNodeSource, type: "parent" },
                                     });
                                 }
                             }

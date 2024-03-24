@@ -172,7 +172,15 @@ var UserRequestFiltering = {
   filterSparqlRequest: function(query, userSourcesMap,userInfo, callback) {
     var error = "";
     var filteredQuery = query;
+
+
+    // no filtering for admin
+    if(userInfo.user.groups.indexOf("admin")>-1){
+      return  callback(null,query);
+    }
+
     var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
+
 
     selectRegex = /(SELECT)/gim;
     var array = selectRegex.exec(query);

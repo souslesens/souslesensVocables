@@ -14,7 +14,7 @@ var KGquery_filter_bot = (function () {
         if (!self.data.annotationProperties) {
             workflow = self.workflow_RdfLabel;
         } else {
-            workflow = self.workflow_Annotation;
+            workflow = self.workflow_filterClass;
         }
 
         BotEngine.init(KGquery_filter_bot, workflow, null, function () {
@@ -62,6 +62,7 @@ var KGquery_filter_bot = (function () {
 
     (self.functions.listFilterTypes = function () {
         var choices = [
+            { id: "annotation", label: "annotation" },
             { id: "label", label: "rdfs:label contains" },
             { id: "labelsList", label: "Choose rdfs:label" },
         ];
@@ -72,6 +73,7 @@ var KGquery_filter_bot = (function () {
                 BotEngine.abort("no annotations for this Class");
             }
             var choices = self.data.annotationProperties;
+            BotEngine.showList(choices, "annotationProperty");
             BotEngine.showList(choices, "annotationProperty");
         });
     self.functions.chooseAnnotationOperatorFn = function () {

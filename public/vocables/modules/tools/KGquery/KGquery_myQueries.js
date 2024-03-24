@@ -1,5 +1,5 @@
 import KGquery from "./KGquery.js";
-import SavedQueriesComponent from "../../uiComponents/savedQueriesComponent.js";
+import SavedQueriesWidget from "../../uiWidgets/savedQueriesWidget.js";
 
 var KGquery_myQueries = (function () {
     var self = {};

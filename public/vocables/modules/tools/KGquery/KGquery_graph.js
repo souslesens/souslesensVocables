@@ -19,14 +19,19 @@ var KGquery_graph = (function () {
 
     self.visjsOptions = {
         onclickFn: function (node, point, nodeEvent) {
-            if (!node || node.from) {
+            if (!node) {
                 return;
             }
-            self.currentGraphNode = node;
-            if (nodeEvent.ctrlKey) {
-                NodeInfosWidget.showNodeInfos(KGquery.currentSource, node, "smallDialogDiv", {});
+            if (node.from) {
+                self.currentGraphNode = null;
+                KGquery.addEdge(node, nodeEvent);
             } else {
-                KGquery.addNode(node, nodeEvent);
+                self.currentGraphNode = node;
+                if (nodeEvent.ctrlKey) {
+                    NodeInfosWidget.showNodeInfos(KGquery.currentSource, node, "smallDialogDiv", {});
+                } else {
+                    KGquery.addNode(node, nodeEvent);
+                }
             }
         },
         visjsOptions: {

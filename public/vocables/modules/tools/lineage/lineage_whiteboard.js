@@ -1339,7 +1339,6 @@ var Lineage_whiteboard = (function () {
                                 visjsData.nodes.push(node);
                             } else {
                             }
-                            //link node to source
 
                             if (item.broader1.value != source) {
                                 var edgeId = item.subject.value + "_" + item.broader1.value;
@@ -1356,7 +1355,9 @@ var Lineage_whiteboard = (function () {
                                                 type: Lineage_whiteboard.defaultEdgeArrowType,
                                                 scaleFactor: 0.5,
                                             },
+
                                         },
+                                        data:{type:"parent",source:source}
                                     };
                                     visjsData.edges.push(edge);
                                 }
@@ -1514,7 +1515,7 @@ var Lineage_whiteboard = (function () {
                                     scaleFactor: 0.5,
                                 },
                             },
-                            data: { source: source },
+                            data: { source: source ,type:"parent"},
                         });
                     }
                 }
@@ -1598,7 +1599,7 @@ var Lineage_whiteboard = (function () {
                                                 scaleFactor: 0.5,
                                             },
                                         },
-                                        data: { source: childNodeSource },
+                                        data: { source: childNodeSource,type:"parent" },
                                     });
                                 }
                             }

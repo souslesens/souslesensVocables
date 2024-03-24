@@ -152,7 +152,7 @@ var NodeInfosWidget = (function() {
                         callback(err);
                     }
                     if (err) {
-                        return alert(err);
+                       MainController.UI.message(err,true)
                     }
                     self.showNodeInfosToolbar(options);
 

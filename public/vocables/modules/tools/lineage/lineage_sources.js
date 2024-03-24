@@ -208,6 +208,7 @@ var Lineage_sources = (function () {
 
         $("#LineageNodesJsTreeDiv").empty();
         $("#Lineage_propertiesTree").empty();
+        Lineage_selection.selectedNodes=[]
         self.showHideEditButtons(source);
         setTimeout(function () {
             SearchWidget.init();

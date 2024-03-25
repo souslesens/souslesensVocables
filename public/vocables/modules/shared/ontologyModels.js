@@ -652,7 +652,7 @@ var OntologyModels = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    Sparql_OWL.getNodesAncestors(source, startNodeIds, { excludeItself: 0, filter: filter }, function (err, result) {
+                    Sparql_OWL.getNodesAncestorsOrDescendants(source, startNodeIds, { excludeItself: 0, filter: filter }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -664,7 +664,7 @@ var OntologyModels = (function () {
                     if (!endNodeIds) {
                         return callbackSeries();
                     }
-                    Sparql_OWL.getNodesAncestors(source, endNodeIds, { excludeItself: 0, filter: filter }, function (err, result) {
+                    Sparql_OWL.getNodesAncestorsOrDescendants(source, endNodeIds, { excludeItself: 0, filter: filter }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }

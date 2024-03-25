@@ -213,6 +213,12 @@ var NodeInfosWidget = (function() {
                     self.showAssociatedProperties(self.currentNodeRealSource, nodeId, "nodeInfos_associatedPropertiesDiv", function(err) {
                         callbackSeries(err);
                     });
+                },
+                function(callbackSeries) {
+                    self.showClassesBreakDown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function(err) {
+                        callbackSeries(err);
+                    });
+
                 }
             ],
             function(err) {
@@ -550,6 +556,7 @@ defaultLang = 'en';*/
 
                 str +=
                     " <div id='nodeInfos_listsDiv' >" +
+                    "<div id='nodeInfos_classHierarchyDiv' class='nodeInfos_rigthDiv' ></div><br>" +
                     "<div id='nodeInfos_associatedPropertiesDiv' class='nodeInfos_rigthDiv' ></div><br>" +
                     "<div id='nodeInfos_restrictionsDiv' class='nodeInfos_rigthDiv'  style='display:table-caption;'></div>" +
                     "<div id='nodeInfos_individualsDiv' class='nodeInfos_rigthDiv' style=' display:flex;flex-direction: ></div></div>";
@@ -663,7 +670,7 @@ defaultLang = 'en';*/
                                callbackSeries();
                            }*/
                             callbackSeries();
-                        } );
+                        });
                 }
 
             ],
@@ -796,6 +803,86 @@ defaultLang = 'en';*/
         if (callback) {
             callback();
         }
+    };
+
+    self.showClassesBreakDown = function(sourceLabel, nodeId, divId, callback) {
+        Sparql_OWL.getNodesAncestorsOrDescendants(sourceLabel, nodeId, {}, function(err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var jstreeData = [];
+            var lastItem;
+            if(result.hierarchies[nodeId].length>0) {
+                result.hierarchies[nodeId].forEach(function(item) {
+                    var parent;
+                    if (!item.superClass) {
+                        parent = "#";
+                    } else {
+                        parent = item.superClass.value;
+                    }
+                    jstreeData.push(
+                        {
+                            id: item.class.value,
+                            text: item.classLabel.value,
+                            parent: parent,
+                            type: "Class",
+                            data: {
+                                id: item.class.value,
+                                source: sourceLabel
+                            }
+                        });
+                    lastItem = item;
+                });
+                jstreeData.push({
+                    id: lastItem.superClass.value,
+                    text: lastItem.superClassLabel.value,
+                    parent: "#",
+                    type: "Class",
+                    data: {
+                        id: lastItem.superClass.value,
+                        source: sourceLabel
+                    }
+                });
+            }
+
+            Sparql_OWL.getNodesAncestorsOrDescendants(sourceLabel, nodeId, { descendants: 1 }, function(err, result) {
+                if (err) {
+                    return callback(err);
+                }
+
+
+                result.hierarchies[nodeId].forEach(function(item) {
+
+                    jstreeData.push({ id: item.class.value,
+                        text: item.classLabel.value,
+                        parent: item.superClass.value,
+                        type: "Class" ,
+                        data: {
+                            id: item.class.value,
+                            source: sourceLabel
+                        }});
+                });
+
+                var html = "<b><div  class='nodesInfos_titles'>Class hierarchy</div></b>" +
+                    "<div id='classHierarchyTreeDiv' style='width:300px;height: 300px;overflow: auto'></div>";
+
+                $("#" + divId).html(html);
+
+                var options = {
+                    openAll: true,
+                    selectTreeNodeFn: function(event, obj) {
+
+                        NodeInfosWidget.showNodeInfos(sourceLabel, obj.node,"mainDialogDiv");
+                    }
+                };
+
+                JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
+
+            });
+
+        });
+
+
     };
 
     self.onClickLink = function(nodeId) {

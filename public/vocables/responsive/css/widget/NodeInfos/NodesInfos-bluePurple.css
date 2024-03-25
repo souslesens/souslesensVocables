@@ -74,7 +74,13 @@ th, td{
 }
 #nodeInfos_associatedPropertiesDiv {
     .nodesInfosAdditionalInfos;
-    max-height: 55vh;
+    max-height: 300px;
+    overflow: auto;
+    margin-top: 10px;
+}
+#nodeInfos_classHierarchyDiv {
+    .nodesInfosAdditionalInfos;
+    max-height: 100px;
     overflow: auto;
     margin-top: 10px;
 }

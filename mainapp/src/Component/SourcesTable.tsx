@@ -320,6 +320,9 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
     };
+    const handleGroupUpdate = (value: string) => {
+        update({ type: Type.UserUpdatedField, payload: { fieldname: "group", newValue: value } });
+    };
 
     const handleTaxonomyPredicatesUpdate = (value: string[]) => {
         update({ type: Type.UserUpdatedField, payload: { fieldname: "taxonomyPredicates", newValue: value } });
@@ -370,13 +373,9 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
 
-    const knownTaxonomyPredicates = [
-        ...new Set(
-            sources.flatMap((source) => {
-                return source.taxonomyPredicates;
-            })
-        ),
-    ];
+    const knownGroup = [...new Set(sources.flatMap((source) => source.group))].filter((group) => group.length > 0);
+    const knownTaxonomyPredicates = [...new Set(sources.flatMap((source) => source.taxonomyPredicates))];
+
     function validateSourceName(sourceName: string) {
         const issues = createCustomIssues(InputSourceSchema);
 
@@ -632,23 +631,27 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                             </FormControl>
                         </Grid>
                         <Grid item xs={6}>
-                            <TextField
-                                fullWidth
-                                helperText={errorMessage(zo.errors.group)}
-                                onBlur={validateAfterSubmission}
-                                onChange={handleFieldUpdate("group")}
-                                value={sourceModel.sourceForm.group}
-                                id={`group`}
-                                name={zo.fields.group()}
+                            <Autocomplete
+                                freeSolo
+                                disableClearable
+                                options={knownGroup}
                                 label={"Group"}
-                                variant="standard"
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <HelpButton title="Group" message={sourceHelp.group} />
-                                        </InputAdornment>
-                                    ),
-                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        helperText={errorMessage(zo.errors.group)}
+                                        id="group"
+                                        label="Group"
+                                        name={zo.fields.group()}
+                                        onBlur={validateAfterSubmission}
+                                        onChange={handleFieldUpdate("group")}
+                                        value={sourceModel.sourceForm.group}
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            type: "search",
+                                        }}
+                                    />
+                                )}
                             />
                         </Grid>
 

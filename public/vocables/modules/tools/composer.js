@@ -148,7 +148,7 @@ var Composer = (function () {
         var source = self.currentTreeNode.data.source;
         if (obj.event.button != 2) {
             Lineage_containers.getContainerResources(source, self.currentTreeNode.id, { descendants: true }, function (err, result) {
-                var children = $("#Composer_Application_ITdomaintreeDiv").jstree().get_json(self.currentTreeNode.id);
+                //   var children = $("#Composer_Application_ITdomaintreeDiv").jstree().get_json(self.currentTreeNode.id);
                 if (err) {
                     return alert(err.responseText);
                 }

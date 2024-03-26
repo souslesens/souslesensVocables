@@ -13,7 +13,7 @@ var Lineage_createRelation = (function () {
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-        $("#smallDialogDiv").load("snippets/lineage/lineageAddEdgeDialog.html", function () {
+        $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
             self.sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
             self.targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
@@ -149,15 +149,26 @@ var Lineage_createRelation = (function () {
                             var html = "Ancestors<br>";
                             var str = "<b>" + self.sourceNode.label + "</b>";
                             result.nodes.startNode.forEach(function (item, index) {
-                                str += "->";
+                                if (index == 0) {
+                                    str += "<b>";
+                                } else {
+                                    str += "->";
+                                }
                                 str += Sparql_common.getLabelFromURI(item);
+                                if (index == 0) str += "</b>";
                             });
                             html += str;
                             html += "<br>";
+
                             var str = "<b>" + self.targetNode.label + "</b>";
                             result.nodes.endNode.forEach(function (item, index) {
-                                str += "->";
+                                if (index == 0) {
+                                    str += "<b>";
+                                } else {
+                                    str += "->";
+                                }
                                 str += Sparql_common.getLabelFromURI(item);
+                                if (index == 0) str += "</b>";
                             });
                             html += str;
                             $("#lineageAddEdgeDialog_nodesAncestorsDiv").html(html);

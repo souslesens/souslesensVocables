@@ -187,8 +187,6 @@ export default function GraphManagement() {
             }).forEach(([key, value]) => {
                 formData.append(key, value);
             });
-            console.log(slsApiBaseUrl);
-            console.log(currentUserToken);
             // if cancel button is pressed, remove uploaded file and return
             if (cancelCurrentOperation.current) {
                 formData.set("clean", true);

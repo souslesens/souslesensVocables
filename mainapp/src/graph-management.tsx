@@ -7,7 +7,7 @@ import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import ProgressBar from "react-bootstrap/ProgressBar";
 
-import { TableSortLabel, Chip, TableBody, Link, Stack, Button, Table, TableHead, TableRow, TableCell } from "@mui/material";
+import { Autocomplete, TableSortLabel, Chip, TableBody, Link, Stack, Button, Table, TableHead, TableRow, TableCell, TextField } from "@mui/material";
 
 import { ServerSource } from "../Source";
 
@@ -57,6 +57,9 @@ export default function GraphManagement() {
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
     }
+
+    // search
+    const [filteringChars, setFilteringChars] = React.useState("");
 
     useEffect(() => {
         void fetchSources();
@@ -444,6 +447,7 @@ export default function GraphManagement() {
             const right: string = b[orderBy] || ("" as string);
             return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
         })
+        .filter((source) => source.name.includes(filteringChars))
         .map((source) => {
             return (
                 <TableRow key={source.name}>
@@ -470,6 +474,15 @@ export default function GraphManagement() {
         <>
             {uploadModal}
             <Stack style={{ overflow: "auto", height: "90vh" }}>
+                <Autocomplete
+                    disablePortal
+                    id="search-graph"
+                    options={Object.entries(sources).map(([sourceName, _source]) => sourceName)}
+                    onInputChange={(_event, newInputValue) => {
+                        setFilteringChars(newInputValue);
+                    }}
+                    renderInput={(params) => <TextField {...params} label="Search Sources by name" />}
+                />
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>

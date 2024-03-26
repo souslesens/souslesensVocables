@@ -25,7 +25,7 @@ var SourceSelectorWidget = (function () {
         jsTreeOptions.selectTreeNodeFn = selectTreeNodeFn;
         MainController.UI.showHideRightPanel("hide");
 
-        $("#" + targetDivId).load("./responsive/widget/html/sourceSelector.html", function (err) {
+        $("#" + targetDivId).load("./snippets/sourceSelector.html", function (err) {
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
             $("#sourceSelector_searchInput").focus();
             //  $("#sourceSelector_SearchSourceInput");

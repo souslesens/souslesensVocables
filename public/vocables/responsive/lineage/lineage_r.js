@@ -61,7 +61,7 @@ var Lineage_r = (function () {
     self.loadPredicateSelectorWidgetResponsive = function (divId, source, options, configureFn, callback) {
         PredicatesSelectorWidget.options = options || {};
         $("#" + divId).html("");
-        $("#" + divId).load("./responsive/widget/html/predicatesSelectorWidgetDialogResponsive.html", function (a, b, c) {
+        $("#" + divId).load("./snippets/predicatesSelectorWidgetDialog.html", function (a, b, c) {
             var x = a + b + c;
             PredicatesSelectorWidget.init(source, configureFn, function (err, result) {
                 if (callback) {

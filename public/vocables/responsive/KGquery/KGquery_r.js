@@ -40,9 +40,9 @@ var KGquery_r = (function () {
                 return alert(err.responseText);
             }
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
-                $("#lateralPanelDiv").load("./responsive/KGquery/html/index.html", function () {
+                $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPannel.html", function () {
                     KGquery_graph.drawVisjsModel("saved");
-                    ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery_r.initQuery, "#QueryTabButton");
+                    ResponsiveUI.openTab("KGquery-tab", "tabs_Query", KGquery_r.initQuery, "#QueryTabButton");
                     ResponsiveUI.resetWindowHeight();
                     $("#KGquery_dataTableDialogDiv").dialog({
                         autoOpen: false,
@@ -76,14 +76,14 @@ var KGquery_r = (function () {
     };
     self.initQuery = function () {
         if ($("#tabs_Query").children().length == 0) {
-            $("#tabs_Query").load("./responsive/KGquery/html/KGqueryQueryTab.html", function () {
+            $("#tabs_Query").load("./modules/tools/KGquery/html/KGqueryQueryTab.html", function () {
                 KGquery.addQuerySet();
             });
         }
     };
     self.initGraph = function () {
         if ($("#tabs_Graph").children().length == 0) {
-            $("#tabs_Graph").load("./responsive/KGquery/html/KGqueryGraphTab.html", function () {
+            $("#tabs_Graph").load("./modules/tools/KGquery/html/KGqueryGraphTab.html", function () {
                 KGquery_graph.init();
                 KGquery_graph.drawVisjsModel("saved");
             });
@@ -97,7 +97,7 @@ var KGquery_r = (function () {
         if (targetDiv.indexOf("Dialog") > -1) {
             $("#" + targetDiv).dialog("open");
         }
-        $("#" + targetDiv).load("./responsive/widget/html/savedQueriesWidgetResponsive.html", function () {
+        $("#" + targetDiv).load("./snippets/savedQueriesWidget.html", function () {
             if (slsvSource) {
                 SavedQueriesWidget.list(CRUDsource, slsvSource, scope);
             }

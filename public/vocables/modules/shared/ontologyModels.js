@@ -164,10 +164,12 @@ var OntologyModels = (function () {
                                 } else {
                                     var query =
                                         queryP +
-                                        " select distinct ?sub ?subLabel FROM <" +
+                                        " select distinct ?sub ?subLabel ?superClass ?superClassLabel FROM <" +
                                         graphUri +
                                         "> where{" +
                                         " ?sub rdf:type ?class. " +
+                                        "OPTIONAL {?sub rdfs:subClassOf ?superClass. " +
+                                        " OPTIONAL {?superClass rdfs:label ?superClassLabel}}" +
                                         Sparql_common.getVariableLangLabel("sub", true, true) +
                                         " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
                                     Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
@@ -179,6 +181,12 @@ var OntologyModels = (function () {
                                                 Config.ontologiesVocabularyModels[source].classes[item.sub.value] = {
                                                     id: item.sub.value,
                                                     label: item.subLabel ? item.subLabel.value : Sparql_common.getLabelFromURI(item.sub.value),
+                                                    superClass: item.superClass ? item.superClass.value : null,
+                                                    superClassLabel: item.superClass
+                                                        ? item.superClassLabel
+                                                            ? item.superClassLabel.value
+                                                            : Sparql_common.getLabelFromURI(item.superClass.value)
+                                                        : null,
                                                 };
                                             }
                                         });
@@ -1054,6 +1062,82 @@ var OntologyModels = (function () {
             //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
             return callback(null, result.results.bindings);
         });
+    };
+
+    self.getClassHierarchyTreeData = function (sourcelabel, baseClassId, direction, options) {
+        if (!options) {
+            options = {};
+        }
+
+        var sources = [sourcelabel];
+        if (Config.sources[sourcelabel].imports) {
+            sources = sources.concat(Config.sources[sourcelabel].imports);
+        }
+
+        var classes = {};
+
+        sources.forEach(function (source) {
+            if (!Config.ontologiesVocabularyModels[source]) return;
+            for (var key in Config.ontologiesVocabularyModels[source].classes) {
+                var item = Config.ontologiesVocabularyModels[source].classes[key];
+                if (classes[key]) {
+                    classes[key].superClass = item.superClass;
+                } else {
+                    classes[key] = item;
+                }
+            }
+        });
+        var hierarchyArray = [];
+        var uniqueIds = {};
+        if (direction == "ancestors") {
+            function recurse(classId) {
+                if (classes[classId] && !uniqueIds[classId]) {
+                    uniqueIds[classId] = 1;
+                    hierarchyArray.push(classes[classId]);
+                    if (classes[classId].superClass) {
+                        recurse(classes[classId].superClass);
+                    }
+                }
+            }
+
+            recurse(baseClassId);
+        } else if (direction == "descendants") {
+            if (!options.depth) {
+                var nClasses = Object.keys(classes).length;
+                if (nClasses < 50) {
+                    options.depth = 4;
+                } else if (nClasses < 200) options.depth = 2;
+                else {
+                    options.depth = 1;
+                }
+            }
+
+            var childrenMap = {};
+            var uniqueIds = {};
+            hierarchyArray.push(classes[baseClassId]);
+            for (var key in classes) {
+                if (key == baseClassId) var x = 3;
+                if (!childrenMap[classes[key].superClass]) childrenMap[classes[key].superClass] = [];
+                childrenMap[classes[key].superClass].push(classes[key]);
+            }
+
+            function recurse(classId, depth) {
+                if (depth >= options.depth) return;
+                if (childrenMap[classId]) {
+                    childrenMap[classId].forEach(function (item) {
+                        if (!uniqueIds[item.id]) {
+                            uniqueIds[item.id] = 1;
+                            hierarchyArray.push(item);
+                            recurse(item.id, depth + 1);
+                        }
+                    });
+                }
+            }
+
+            recurse(baseClassId, 0);
+        }
+
+        return hierarchyArray;
     };
 
     return self;

@@ -719,31 +719,16 @@ sourceDivId +
         if (groups.indexOf("admin") > -1) {
             return true;
         }
+        if (Config.sources[source].accessControl == "readwrite") {
+            return true;
+        }
+
+        // used ???
         const currentAccessControls = groups.map((group) => {
             const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
             const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
             return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
         });
-
-        /*  if(currentAccessControls=="readwrite")
-            return true;
-        return false;*/
-        /*
-        if (groups.indexOf("admin") > -1) {
-            return true;
-        }
-
-        if (Config.sources[source].accessControl == "readwrite") {
-            return true;
-        }
-
-        self.realAccessControl = currentAccessControls.includes("readwrite") ? "readwrite" : currentAccessControls.includes("read") ? "read" : "forbidden";
-
-        if (self.realAccessControl === "readwrite" && Config.sources[source].editable) {
-            return true;
-        } else {
-            return false;
-        }*/
     };
 
     self.clearSource = function (source) {

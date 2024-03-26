@@ -80,7 +80,6 @@ th, td{
 }
 #nodeInfos_classHierarchyDiv {
     .nodesInfosAdditionalInfos;
-    max-height: 100px;
     overflow: auto;
     margin-top: 10px;
 }

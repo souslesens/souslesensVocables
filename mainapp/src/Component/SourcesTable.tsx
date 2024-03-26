@@ -98,8 +98,8 @@ const SourcesTable = () => {
                     return { ...dataWithoutCarriageReturns };
                 });
                 const sortedSources: ServerSource[] = gotSources.slice().sort((a: ServerSource, b: ServerSource) => {
-                    const left: string = a[orderBy] as string;
-                    const right: string = b[orderBy] as string;
+                    const left: string = a[orderBy] || ("" as string);
+                    const right: string = b[orderBy] || ("" as string);
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
 
@@ -123,10 +123,22 @@ const SourcesTable = () => {
                                                 Name
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>Graph URI</TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Group</TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Data</TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                            <TableSortLabel active={orderBy === "graphUri"} direction={order} onClick={() => handleRequestSort("graphUri")}>
+                                                Graph URI
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "group"} direction={order} onClick={() => handleRequestSort("group")}>
+                                                Group
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Data
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Actions
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody sx={{ width: "100%", overflow: "visible" }}>
@@ -142,9 +154,7 @@ const SourcesTable = () => {
                                                     <TableCell>
                                                         <Link href={source.graphUri}>{source.graphUri}</Link>
                                                     </TableCell>
-                                                    <TableCell align="center">
-                                                        { source.group ? <Chip label={source.group} size="small" /> : "" }
-                                                    </TableCell>
+                                                    <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" useFlexGap>
                                                             <Tooltip title="RDF Graph">
@@ -164,7 +174,7 @@ const SourcesTable = () => {
                                                 </TableRow>
                                             );
                                         })}
-                                    </TableBody>
+                                </TableBody>
                             </Table>
                         </TableContainer>
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>

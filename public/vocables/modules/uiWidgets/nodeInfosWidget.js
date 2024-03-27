@@ -829,87 +829,11 @@ defaultLang = 'en';*/
                     });
                 }
 
-                /* if (item.superClass) {
-                    if (!uniqueIds[item.superClass]) {
-                        var parent=item.superClass || "#"
-                        uniqueIds[item.superClass] = 1;
-                        jstreeData.push(
-                            {
-                                id: item.superClass,
-                                text: item.superClassLabel,
-                                parent: "#",
-                                type: "Class",
-                                data: {
-                                    id: item.superClass,
-                                    source: sourceLabel
-                                }
-                            });
-                    }
-                }*/
+
             });
         }
 
-        /*  Sparql_OWL.getNodesAncestorsOrDescendants(sourceLabel, nodeId, {}, function(err, result) {
-              if (err) {
-                  return callback(err);
-              }
-              var jstreeData = [];
-              var lastItem;
-              if(result.hierarchies[nodeId].length>0) {
-                  result.hierarchies[nodeId].forEach(function(item) {
-                      var parent;
-                      if (!item.superClass) {
-                          parent = "#";
-                      } else {
-                          parent = item.superClass.value;
-                      }
-                      jstreeData.push(
-                          {
-                              id: item.class.value,
-                              text: item.classLabel.value,
-                              parent: parent,
-                              type: "Class",
-                              data: {
-                                  id: item.class.value,
-                                  source: sourceLabel
-                              }
-                          });
-                      lastItem = item;
-                  });
 
-
-              }
-
-              Sparql_OWL.getNodesAncestorsOrDescendants(sourceLabel, nodeId, { descendants: 1 }, function(err, result) {
-                  if (err) {
-                      return callback(err);
-                  }
-
-
-                  result.hierarchies[nodeId].forEach(function(item,index) {
-                      if(!lastItem)
-                          lastItem=item;
-
-                      jstreeData.push({ id: item.superClassSubClass.value,
-                          text: item.superClassSubClassLabel.value,
-                          parent: item.class.value,
-                          type: "Class" ,
-                          data: {
-                              id: item.superClassSubClass.value,
-                              source: sourceLabel
-                          }});
-                  });
-
-                  jstreeData.push({
-                      id: lastItem.superClass.value,
-                      text: lastItem.superClassLabel.value,
-                      parent: "#",
-                      type: "Class",
-                      data: {
-                          id: lastItem.superClass.value,
-                          source: sourceLabel
-                      }
-                  });*/
 
         var html = "<b><div  class='nodesInfos_titles'>Class hierarchy</div></b>" + "<div id='classHierarchyTreeDiv' style='width:300px;height: 330px;overflow: auto;font-size: 12px'></div>";
 
@@ -948,6 +872,8 @@ defaultLang = 'en';*/
         };
 
         JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
+
+        callback();
     };
 
     self.onClickLink = function (nodeId) {

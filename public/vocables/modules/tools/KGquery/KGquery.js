@@ -116,7 +116,7 @@ var KGquery = (function () {
         var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId, role, node.data.label);
 
         KGquery_graph.outlineNode(node.id);
-        node.data.setIndex=self.currentQuerySet.index
+        node.data.setIndex = self.currentQuerySet.index;
         //  node.data.queryElement = queryElement;
         self.divsMap[nodeDivId] = node;
     };

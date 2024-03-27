@@ -828,12 +828,8 @@ defaultLang = 'en';*/
                         },
                     });
                 }
-
-
             });
         }
-
-
 
         var html = "<b><div  class='nodesInfos_titles'>Class hierarchy</div></b>" + "<div id='classHierarchyTreeDiv' style='width:300px;height: 330px;overflow: auto;font-size: 12px'></div>";
 

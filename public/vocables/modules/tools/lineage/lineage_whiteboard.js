@@ -250,7 +250,7 @@ var Lineage_whiteboard = (function () {
         Lineage_decoration.initLegend();
 
         if (clearTree) {
-            $("#lineage_drawnSources").html("");
+            $("#Lineage_sourcesDiv").html("");
             $("#LineageNodesJsTreeDiv").empty();
 
             if (Lineage_sources.activeSource) {

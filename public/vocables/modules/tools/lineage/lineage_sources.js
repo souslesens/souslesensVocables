@@ -415,7 +415,7 @@ sourceDivId +
                 "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
                 sourceDivId +
                 "\")'/> </button></div>";
-            $("#lineage_drawnSources").append(html);
+            $("#Lineage_sourcesDiv").append(html);
 
             $("#" + sourceDivId).bind("click", function (e) {
                 var sourceDivId = $(this).attr("id");

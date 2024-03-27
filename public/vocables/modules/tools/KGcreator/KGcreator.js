@@ -65,7 +65,7 @@ var KGcreator = (function () {
                     $("#KGcreator_centralPanelTabs").tabs({
                         activate: function (e, ui) {
                             var divId = ui.newPanel.selector;
-                            if (divId == "#KGcreator_resourceslinkingTab") {
+                            if (divId == "#KGcreator_MapTabDiv") {
                                 //  KGcreator_graph.drawOntologyModel(self.currentSlsvSource);
                             }
                         },
@@ -112,7 +112,7 @@ var KGcreator = (function () {
         $("#KGcreator_centralPanelTabs").tabs({
             activate: function (e, ui) {
                 var divId = ui.newPanel.selector;
-                if (divId == "#KGcreator_resourceslinkingTab") {
+                if (divId == "#KGcreator_MapTabDiv") {
                     //  KGcreator.drawOntologyModel(self.currentSlsvSource);
                 }
             },

@@ -46,13 +46,13 @@ var ResponsiveUI = (function () {
     };
     // keep here
     self.initMenuBar = function (callback) {
-        $("#ChangeSourceButton").show();
+        $("#Lineage_changeSourceButton").show();
         $("#index_topContolPanel").show();
         //Loading
-        $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
+        $("#index_topContolPanel").load("./modules/tools/lineage/html/Lineage_sourcesDiv.html", function () {
             if (self.currentTool != "lineage") {
-                $("#AddSourceButton").remove();
-                $("#AllSourceButton").remove();
+                $("#Lineage_addSourceButton").remove();
+                $("#Lineage_allSourceButton").remove();
             }
             callback();
         });
@@ -376,7 +376,7 @@ var ResponsiveUI = (function () {
                     "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
                     sourceDivId +
                     "\")'/> </button></div>";
-                $("#lineage_drawnSources").append(html);
+                $("#Lineage_sourcesDiv").append(html);
 
                 $("#" + sourceDivId).bind("click", function (e) {
                     var sourceDivId = $(this).attr("id");

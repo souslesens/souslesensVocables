@@ -38,7 +38,7 @@ var Lineage_r = (function () {
         }
 
         ResponsiveUI.initMenuBar(self.loadSources);
-        $("#Lineage_graphEditionButtons").load("./responsive/lineage/html/AddNodeEdgeButtons.html");
+        $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/Lineage_topButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
     };
@@ -52,7 +52,7 @@ var Lineage_r = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            $("#lateralPanelDiv").load("./responsive/lineage/html/index.html", function () {
+            $("#lateralPanelDiv").load("./modules/tools/lineage/html/Lineage_leftPannel.html", function () {
                 self.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
             });
@@ -72,7 +72,7 @@ var Lineage_r = (function () {
     };
     self.initWhiteboardTab = function () {
         if ($("#tabs_whiteboard").children().length == 0) {
-            $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {
+            $("#tabs_whiteboard").load("./modules/tools/lineage/html/Lineage_whiteboardPannel.html", function (s) {
                 $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
                 $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
                 Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
@@ -91,9 +91,9 @@ var Lineage_r = (function () {
 
     self.initClassesTab = function () {
         if ($("#tabs_classes").children().length == 0) {
-            $("#tabs_classes").load("./responsive/lineage/html/classesPanel.html", function (s) {
+            $("#tabs_classes").load("./modules/tools/lineage/html/Lineage_classesPannel.html", function (s) {
                 SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
-                $("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
+                $("#Lineage_searchBarWrapper").load("./snippets/searchAllResponsive.html", function () {
                     SearchWidget.init();
                     $("#GenericTools_searchInAllSources").prop("checked", false);
                     $("#Lineage_MoreClassesOptions").hide();
@@ -142,7 +142,7 @@ var Lineage_r = (function () {
             $("#Lineage_graphEditionButtons").css("display", "none");
             $("#lineage_createResourceBtn").hide();
         }
-        $("#Title1").text($(".Lineage_selectedSourceDiv").text());
+        $("#Lineage_sourceButtonsTitle").text($(".Lineage_selectedSourceDiv").text());
         self.resetCurrentTab();
     };
     self.resetCurrentTab = function () {

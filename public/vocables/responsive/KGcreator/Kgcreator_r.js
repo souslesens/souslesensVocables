@@ -42,9 +42,9 @@ var KGcreator_r = (function () {
                 return alert(err.responseText);
             }
             $("#graphDiv").load("./modules/tools/KGcreator/html/centralPanel.html", function () {
-                $("#lateralPanelDiv").load("./responsive/KGcreator/html/leftPanel.html", function () {
+                $("#lateralPanelDiv").load("./modules/tools/KGcreator/html/KGcreator_leftPannel.html", function () {
                     KGcreator.currentSlsvSource = ResponsiveUI.source;
-                    ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initLinkTab, "#MapButton");
+                    ResponsiveUI.openTab("KGcreator-tab", "KGcreator_treeWrapper", KGcreator_r.initMapTab, "#KGcreator_MapTabButton");
                     KGcreator.initSource();
                     ResponsiveUI.resetWindowHeight();
                     $("#KGcreator_dialogDiv").dialog({
@@ -78,8 +78,8 @@ var KGcreator_r = (function () {
     self.initRunTab = function () {
         if (self.currentTab != "Run") {
             self.currentTab = "Run";
-            $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/runTab.html", function () {
-                $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function () {
+            $("#KGcreator_centralPanelTabs").load("./modules/tools/KGcreator/html/KGcreator_runTab.html", function () {
+                $("#KGcreator_topButtons").load("./modules/tools/KGcreator/html/KGcreator_topButtons.html", function () {
                     /*$("#KGcreator_topButtons").css("padding", "4px");
                     $("#MenuBar").css("height", "");
                     $("#MenuBarFooter").css("display", "flex");
@@ -95,11 +95,11 @@ var KGcreator_r = (function () {
             });
         }
     };
-    self.initLinkTab = function () {
+    self.initMapTab = function () {
         if (self.currentTab != "Map") {
             self.currentTab = "Map";
-            $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/linkTab.html", function () {
-                $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function () {
+            $("#KGcreator_centralPanelTabs").load("./modules/tools/KGcreator/html/KGcreator_mapTab.html", function () {
+                $("#KGcreator_topButtons").load("./modules/tools/KGcreator/html/KGcreator_topButtons.html", function () {
                     if (KGcreator.currentTreeNode != undefined) {
                         $(document.getElementById(KGcreator.currentTreeNode.id + "_anchor")).click();
                     }
@@ -109,8 +109,8 @@ var KGcreator_r = (function () {
     };
     self.ResetRunMappingTabWidth = function () {
         var LateralPannelWidth = $("#lateralPanelDiv").width();
-        var KGcreator_runmappingsTabWidth = $(window).width() - LateralPannelWidth;
-        var KGcreator_GraphEditorWidth = KGcreator_runmappingsTabWidth / 2 - 5;
+        var KGcreator_runTabDivWidth = $(window).width() - LateralPannelWidth;
+        var KGcreator_GraphEditorWidth = KGcreator_runTabDivWidth / 2 - 5;
 
         $("#KGcreator_run_mappingsGraphEditorContainer").css("width", KGcreator_GraphEditorWidth);
     };

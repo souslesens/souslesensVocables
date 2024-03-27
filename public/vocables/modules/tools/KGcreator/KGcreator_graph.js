@@ -726,7 +726,7 @@ var KGcreator_graph = (function () {
         /*  $("#KGcreator_dialogDiv").dialog("open");
           $("#KGcreator_dialogDiv").dialog("option", "title", " Mappings");
           $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function() {*/
-        //  $("#KGcreator_resourceslinkingTab").load("modules/tools/KGcreator/html/detailedMappings.html", function() {
+        //  $("#KGcreator_MapTabDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function() {
 
         var options = {
             onclickFn: KGcreator_graph.onDetailedGraphNodeClick,

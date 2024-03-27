@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.58.0...master)
+## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.59.0...master)
+
+## [1.59.0](https://github.com/souslesens/souslesensVocables/compare/1.58.0...1.59.0)
 
 ## [1.58.0](https://github.com/souslesens/souslesensVocables/compare/1.57.0...1.58.1)
 

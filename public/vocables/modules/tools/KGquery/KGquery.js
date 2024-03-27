@@ -116,6 +116,7 @@ var KGquery = (function () {
         var nodeDivId = KGquery_controlPanel.addNodeToQueryElementDiv(queryElement.divId, role, node.data.label);
 
         KGquery_graph.outlineNode(node.id);
+        node.data.setIndex = self.currentQuerySet.index;
         //  node.data.queryElement = queryElement;
         self.divsMap[nodeDivId] = node;
     };
@@ -203,7 +204,7 @@ var KGquery = (function () {
 
     self.addNodeFilter = function (classDivId) {
         var aClass = self.divsMap[classDivId];
-        var classSetIndex = aClass.data.queryElement.setIndex;
+        var classSetIndex = aClass.data.setIndex;
         if (self.querySets.sets[classSetIndex].classFiltersMap[classDivId]) {
             delete self.querySets.sets[classSetIndex].classFiltersMap[classDivId];
             $("#" + classDivId + "_filter").html("");

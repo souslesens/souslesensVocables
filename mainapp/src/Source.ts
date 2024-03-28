@@ -172,7 +172,7 @@ export const ServerSourceSchema = z.object({
     schemaType: z.string().default("OWL"),
     dataSource: dataSourceSchema.nullable(),
     schema: z.unknown().nullable(),
-    editable: z.boolean().default(true),
+    editable: z.boolean().default(false),
     color: z.string().default(""),
     isDraft: z.boolean().default(false),
     allowIndividuals: z.boolean().default(false),

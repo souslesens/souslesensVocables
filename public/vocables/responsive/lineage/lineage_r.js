@@ -111,7 +111,7 @@ var Lineage_r = (function () {
     };
     self.initPropertiesTab = function () {
         if ($("#tabs_properties").children().length == 0) {
-            $("#tabs_properties").load("./responsive/lineage/html/propertiesPanel.html", function (s) {
+            $("#tabs_properties").load("./modules/tools/lineage/html/Lineage_propertiesPannel.html", function (s) {
                 Lineage_r.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
                 Lineage_properties.searchTermInSources();
             });
@@ -119,7 +119,7 @@ var Lineage_r = (function () {
     };
     self.initContainersTab = function () {
         if ($("#tabs_containers").children().length == 0) {
-            $("#tabs_containers").load("./responsive/lineage/html/containersPanel.html", function (s) {
+            $("#tabs_containers").load("./modules/tools/lineage/html/Lineage_containersPannel.html", function (s) {
                 Lineage_containers.search();
             });
         }

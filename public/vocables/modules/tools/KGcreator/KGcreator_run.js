@@ -63,7 +63,7 @@ var KGcreator_run = (function () {
         }
         ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initRunTab, "#RunButton");
         var table = self.getTableAndShowMappings(allmappings);
-        if (!table) {
+        if (!allmappings && !table) {
             return alert("select a node");
         }
 
@@ -82,6 +82,10 @@ var KGcreator_run = (function () {
 
         if (Config.clientSocketId) {
             options.clientSocketId = Config.clientSocketId;
+        }
+        if (allmappings) {
+            options = {};
+            table = null;
         }
 
         var payload = {

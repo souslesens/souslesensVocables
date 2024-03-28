@@ -426,6 +426,15 @@ var KGquery = (function () {
 
         var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
 
+        var currentSparqlQuery = {
+            url: url,
+            query: query,
+            source: self.currentSource,
+        };
+
+        if (options.dontExecute) {
+            return callback(null, currentSparqlQuery);
+        }
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource, caller: "getObjectRestrictions" }, function (err, result) {
             if (err) {
                 return callback(err);

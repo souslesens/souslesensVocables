@@ -96,6 +96,17 @@ var Lineage_createRelation = (function () {
                                 },
                             });
                         }
+                        if (true) {
+                            jstreeData.push({
+                                id: "_datatypeProperty",
+                                text: "datatypeProperty",
+                                parent: "#",
+                                type: "_datatypeProperty",
+                                data: {
+                                    id: "_datatypeProperty",
+                                },
+                            });
+                        }
 
                         if (true || self.sourceNode.rdfType == "NamedIndividual") {
                             jstreeData.push({
@@ -147,7 +158,7 @@ var Lineage_createRelation = (function () {
                             authorizedProps = result.constraints;
 
                             var html = "Ancestors<br>";
-                            var str = "<b>" + self.sourceNode.label + "</b>";
+                            var str = ""; //"<b>" + self.sourceNode.label + "</b>";
                             result.nodes.startNode.forEach(function (item, index) {
                                 if (index == 0) {
                                     str += "<b>";
@@ -160,7 +171,7 @@ var Lineage_createRelation = (function () {
                             html += str;
                             html += "<br>";
 
-                            var str = "<b>" + self.targetNode.label + "</b>";
+                            var str = ""; //"<b>" + self.targetNode.label + "</b>";
                             result.nodes.endNode.forEach(function (item, index) {
                                 if (index == 0) {
                                     str += "<b>";
@@ -411,6 +422,7 @@ var Lineage_createRelation = (function () {
         if (obj.event.which == 3) {
             return;
         }
+
         //dispatch of sources to write in depending on relation type and editable
         var inSource;
         var options = {};
@@ -418,6 +430,17 @@ var Lineage_createRelation = (function () {
         if (propId == "http://www.w3.org/2002/07/owl#sameAs" || propId == "http://www.w3.org/2002/07/owl#equivalentClass") {
             // le sameAs sont tous dans le dictionaire
             inSource = Config.dictionarySource;
+        } else if (propId == "_datatypeProperty") {
+            var propLabel = prompt("DatatypeProperty Label");
+            if (!propLabel) return;
+            var xsdType = prompt("DatatypeProperty range xsd:type");
+
+            self.createDataTypeProperty(Lineage_sources.activeSource, propLabel, null, xsdType, function (err, result) {
+                if (err) return alert(err.responseText);
+                $("#smallDialogDiv").dialog("close");
+                return MainController.UI.message("annotation property created", true);
+            });
+            return;
         } else {
             var mainSource = Config.sources[Lineage_sources.activeSource];
             if (Config.sources[self.sourceNode.source].editable) {

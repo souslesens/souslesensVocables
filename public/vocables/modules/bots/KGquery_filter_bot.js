@@ -130,7 +130,7 @@ var KGquery_filter_bot = (function () {
 
             if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
                 // annotationPropertyOperator = ">";
-                var date = new Date(annotationPropertyValue).toISOString();
+                var dateStr = new Date(annotationPropertyValue).toISOString();
                 //   var dateStr=date.getMonth()+"/"+date.getDate()+"/"+date.getFullYear()
 
                 self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + dateStr + "'^^xsd:datetime )";

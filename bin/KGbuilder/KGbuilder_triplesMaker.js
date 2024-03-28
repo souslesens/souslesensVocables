@@ -342,7 +342,7 @@ var KGbuilder_triplesMaker = {
             }
           }
 
-          mapping.p = "rdf:value";
+        //  mapping.p = "rdf:value";
 
           objectStr = "'" + str + "'^^" + mapping.dataType;
         }

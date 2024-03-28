@@ -66,7 +66,7 @@ var KGquery_graph = (function () {
         var visjsData = { nodes: [], edges: [] };
 
         //  KGquery.clearAll();
-
+        $("#waitImg").css("display", "block");
         async.series(
             [
                 //saved visjgraphData
@@ -77,6 +77,8 @@ var KGquery_graph = (function () {
 
                     self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
+
+                    MainController.UI.message("loading graph display");
                     self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                         if (err) {
                             return callbackSeries("notFound");
@@ -129,6 +131,7 @@ var KGquery_graph = (function () {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
+                    MainController.UI.message("loading datatypeProperties");
                     OntologyModels.getInferredAnnotationProperties(source, {}, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -154,18 +157,21 @@ var KGquery_graph = (function () {
                 },
             ],
             function (err) {
-                MainController.UI.message("", true);
                 if (err) {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");
                     }
+                    MainController.UI.message("", true);
                     return alert(err);
                 }
-
+                MainController.UI.message("drawing graph");
                 visjsData.nodes.forEach(function (item) {
                     // item.color="#ddd"
-                    if (item.label.indexOf("Date") > -1) item.color = "#96f696";
-                    else item.color = "#f3ebbe";
+                    if (item.label.indexOf("Date") > -1) {
+                        item.color = "#96f696";
+                    } else {
+                        item.color = "#f3ebbe";
+                    }
                     item.initialColor = item.color;
                     item.initialShape = item.shape;
                 });
@@ -180,6 +186,7 @@ var KGquery_graph = (function () {
                     });
                     self.KGqueryGraph.data.nodes.update(newNodes);
                 });
+                MainController.UI.message("", true);
 
                 //  KGquery.clearAll();
             }
@@ -454,8 +461,11 @@ var KGquery_graph = (function () {
 
         if (!nodes) {
             nodes = [];
-            if (KGquery_graph.KGqueryGraph.data.nodes.get) nodes = KGquery_graph.KGqueryGraph.data.nodes.get();
-            else return;
+            if (KGquery_graph.KGqueryGraph.data.nodes.get) {
+                nodes = KGquery_graph.KGqueryGraph.data.nodes.get();
+            } else {
+                return;
+            }
         }
         if (!Array.isArray(nodes)) {
             nodes = [nodes];
@@ -476,8 +486,11 @@ var KGquery_graph = (function () {
         }
         var newVisjsEdges = [];
         var edges = [];
-        if (KGquery_graph.KGqueryGraph.data.edges.getIds) edges = KGquery_graph.KGqueryGraph.data.edges.getIds();
-        else return;
+        if (KGquery_graph.KGqueryGraph.data.edges.getIds) {
+            edges = KGquery_graph.KGqueryGraph.data.edges.getIds();
+        } else {
+            return;
+        }
 
         edges.forEach(function (edgeId, index) {
             newVisjsEdges.push({ id: edgeId, color: Lineage_whiteboard.restrictionColor, width: 1 });

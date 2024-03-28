@@ -7,6 +7,9 @@ import AxiomsEditor from "../tools/lineage/axiomsEditor.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
+import common from "../shared/common.js";
+import Sparql_generic from "../sparqlProxies/sparql_generic.js";
+import OntologyModels from "../shared/ontologyModels.js";
 
 var CreateResource_bot = (function () {
     var self = {};
@@ -40,8 +43,9 @@ var CreateResource_bot = (function () {
             _OR: {
                 "owl:Class": { promptResourceLabelFn: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } },
                 // "owl:ObjectProperty": { promptResourceLabelFn: { listVocabsFn: { listObjectPropertiesfn: self.workflow_saveResource } } },
-                // "owl:AnnotationProperty": { promptResourceLabelFn: { listDatatypeProperties: self.workflow_saveResource } },
+
                 "owl:NamedIndividual": { promptResourceLabelFn: { listVocabsFn: { listClassTypesFn: self.workflow_saveResource } } },
+                DatatypeProperty: { promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } } },
                 ImportClass: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
                 ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } },
             },
@@ -57,6 +61,9 @@ var CreateResource_bot = (function () {
         listClassTypesFn: "Choose a  a class type ",
         saveResourceFn: " Save resource",
         listImportsFn: "Add import to source",
+        promptDatatypePropertyLabelFn: "enter datatypeProperty label",
+        listDatatypePropertyDomainFn: "enter datatypeProperty domain",
+        listDatatypePropertyRangeFn: "enter datatypeProperty domain",
     };
 
     self.functions = {
@@ -65,7 +72,7 @@ var CreateResource_bot = (function () {
                 { id: "owl:Class", label: "Class" },
                 { id: "owl:NamedIndividual", label: "Individual" },
                 // { id: "owl:ObjectProperty", label: "ObjectProperty" },
-                // { id: "owl:AnnotationProperty", label: "AnnotationProperty" },
+                { id: "DatatypeProperty", label: "DatatypeProperty" },
                 { id: "ImportClass", label: "Import Class" },
                 { id: "ImportSource", label: "Add import source " },
             ];
@@ -144,6 +151,64 @@ var CreateResource_bot = (function () {
         },
         newResourceFn: function () {
             self.start();
+        },
+
+        promptDatatypePropertyLabelFn: function () {
+            _botEngine.promptValue("DatatypePropertyLabel", "datatypePropertyLabel");
+        },
+
+        listDatatypePropertyDomainFn: function () {
+            CommonBotFunctions.listVocabClasses(self.params.source, "datatypePropertyDomain", false, [{ id: "", label: "none" }]);
+        },
+        listDatatypePropertyRangeFn: function () {
+            var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:datetime"];
+            _botEngine.showList(choices, "datatypePropertyRange");
+        },
+
+        createDataTypePropertyFn: function (source, propLabel, domain, range, callback) {
+            var source = self.params.source;
+            var propLabel = self.params.datatypePropertyLabel;
+            var domain = self.params.datatypePropertyDomain;
+            var range = self.params.datatypePropertyRange;
+
+            propLabel = Sparql_common.formatString(propLabel);
+            var propId = common.getURI(propLabel, source, "fromLabel");
+            //  var subPropId = Config.sources[source].graphUri + common.getRandomHexaId(10);
+            var triples = [
+                {
+                    subject: propId,
+                    predicate: "rdf:type",
+                    object: "owl:DatatypeProperty",
+                },
+                {
+                    subject: propId,
+                    predicate: "rdfs:label",
+                    object: propLabel,
+                },
+            ];
+            if (range) {
+                triples.push({
+                    subject: propId,
+                    predicate: "rdfs:range",
+                    object: range,
+                });
+            }
+
+            Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
+                var modelData = {
+                    annotationProperties: {
+                        [propId]: {
+                            id: propId,
+                            label: propLabel,
+                            range: range,
+                        },
+                    },
+                };
+                OntologyModels.updateModel(source, modelData, {}, function (err, result) {
+                    console.log(err || "ontologyModelCache updated");
+                    BotEngine.nextStep();
+                });
+            });
         },
     };
 

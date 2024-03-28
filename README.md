@@ -21,6 +21,14 @@ A key feature of SLSV is graph visualization and interaction performed using exc
 Annotate tool allows annotate textual corpus with several registered lexical resources
 and identify missing terms
 
+## Documentation
+
+Please visit [Technical Design Documents](http://souslesens.org/index.php/documentation) for details on the technical details of souslesensVocable.
+
+Please watch the videos at [videos sections](http://souslesens.org/index.php/videos/) for getting started with souslesensVocable.
+
+[SLSV Glossary](http://souslesens.org/index.php/slsv-glossary/) provides definitions of several terms used in souslesensVocable.
+
 ## Deploy a production instance
 
 ### Prerequisites

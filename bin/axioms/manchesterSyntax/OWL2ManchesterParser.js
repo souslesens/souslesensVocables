@@ -1,13 +1,8 @@
-// Generated =require( parser/OWL2Manchester.g4 by ANTLR 4.13.1
+// Generated from parser/OWL2Manchester.g4 by ANTLR 4.13.1
 // jshint ignore: start
-const antlr4 =require( 'antlr4');
-const OWL2ManchesterListener =require( './OWL2ManchesterListener.js');
-
+const antlr4 = require('antlr4')
 //import antlr4 from 'antlr4';
-//import OWL2ManchesterListener from './OWL2ManchesterListener.js';
-
-
-
+const OWL2ManchesterListener = require('./OWL2ManchesterListener.js');
 const serializedATN = [4,1,22,86,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,1,0,1,0,
 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,3,0,25,8,0,1,0,1,
 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,
@@ -38,12 +33,11 @@ const serializedATN = [4,1,22,86,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,1,0,1,0,
 
 const atn = new antlr4.ATNDeserializer().deserialize(serializedATN);
 
-const decisionsToDFA = atn.decisionToState.map( (ds, index) => new antlr4.dfa.DFA(ds, index) );
+const decisionsToDFA = atn.decisionToState.map( (ds, index) => new antlr4.DFA(ds, index) );
 
-const sharedContextCache = new antlr4.atn.PredictionContextCache();
+const sharedContextCache = new antlr4.PredictionContextCache();
 
-//export default class OWL2ManchesterParser extends antlr4.Parser {
-	module.exports= class OWL2ManchesterParser extends antlr4.Parser {
+class OWL2ManchesterParser extends antlr4.Parser {
 
     static grammarFileName = "OWL2Manchester.g4";
     static literalNames = [ null, "'ObjectProperty:'", "':'", null, "'SubClassOf'", 
@@ -62,7 +56,7 @@ const sharedContextCache = new antlr4.atn.PredictionContextCache();
 
     constructor(input) {
         super(input);
-        this._interp = new antlr4.atn.ParserATNSimulator(this, atn, decisionsToDFA, sharedContextCache);
+        this._interp = new antlr4.ParserATNSimulator(this, atn, decisionsToDFA, sharedContextCache);
         this.ruleNames = OWL2ManchesterParser.ruleNames;
         this.literalNames = OWL2ManchesterParser.literalNames;
         this.symbolicNames = OWL2ManchesterParser.symbolicNames;
@@ -164,7 +158,7 @@ const sharedContextCache = new antlr4.atn.PredictionContextCache();
 	        this.state = 71;
 	        this._errHandler.sync(this);
 	        var _alt = this._interp.adaptivePredict(this._input,3,this._ctx)
-	        while(_alt!=2 && _alt!=antlr4.atn.ATN.INVALID_ALT_NUMBER) {
+	        while(_alt!=2 && _alt!=antlr4.ATN.INVALID_ALT_NUMBER) {
 	            if(_alt===1) {
 	                if(this._parseListeners!==null) {
 	                    this.triggerExitRuleEvent();
@@ -712,3 +706,6 @@ OWL2ManchesterParser.ClassExpressionContext = ClassExpressionContext;
 OWL2ManchesterParser.LexerErrorContext = LexerErrorContext; 
 OWL2ManchesterParser.ParserErrorContext = ParserErrorContext; 
 OWL2ManchesterParser.AxiomContext = AxiomContext; 
+
+
+module.exports = OWL2ManchesterParser;

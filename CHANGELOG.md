@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.59.0](https://github.com/souslesens/souslesensVocables/compare/1.58.0...1.59.0)
 
-## [1.58.0](https://github.com/souslesens/souslesensVocables/compare/1.57.0...1.58.1)
+## [1.58.1](https://github.com/souslesens/souslesensVocables/compare/1.57.0...1.58.1)
 
 ### Fixed
 

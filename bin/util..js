@@ -446,6 +446,126 @@ var util = {
         }
         return str;
     },
+    getDateFromSLSformat: function(formatCode, dateStr) {
+        var formats = {
+            "FR": "27/05/2024",
+            "ISO": "2024-05-27",
+            "USA": "05/27/2024",
+            "EUR": "27. 05. 2024",
+            "JIS": "2024-05-27",
+            "ISO-time": "2022-09-27 18:00:00.000"
+        };
+
+        if(!dateStr)
+            dateStr=formats[formatCode]
+
+        function getMonth(str) {
+            try {
+                var number = parseInt(str);
+                number -= 1;
+
+                return  number;
+            } catch (err) {
+                return null;
+            }
+        }
+
+        function getDay(str) {
+            try {
+                var number = parseInt(str);
+
+                return  number
+            } catch (err) {
+                return null
+            }
+        }
+
+        function getYear(str) {
+            try {
+                var number = parseInt(str)
+                if (number < 1900) {
+                    return  (2000 + number);
+                }
+                return  number
+            } catch (err) {
+                return null
+            }
+        }
+
+        var day, mont, year
+        if (formatCode == "FR") {
+            var array = dateStr.split("/")
+            if (array.length != 3) {
+                return null;
+            }
+            day = getDay(array[0])
+            month = getMonth(array[1])
+            year = getYear(array[2])
+
+        }
+
+       else if (formatCode == "ISO") {
+            var array = dateStr.split("-")
+            if (array.length != 3) {
+                return null;
+            }
+            day = getDay(array[2])
+            month = getMonth(array[1])
+            year = getYear(array[0])
+
+        }
+        else if (formatCode == "USA") {
+            var array = dateStr.split("/")
+            if (array.length != 3) {
+                return null;
+            }
+            day = getDay(array[1])
+            month = getMonth(array[0])
+            year = getYear(array[2])
+
+        }
+        else  if (formatCode == "EUR") {
+            var array = dateStr.split(".")
+            if (array.length != 3) {
+                return null;
+            }
+            day = getDay(array[0].trim())
+            month = getMonth(array[1].trim())
+            year = getYear(array[2].trim())
+
+        }
+        else if (formatCode == "JIS") {
+            var array = dateStr.split("-")
+            if (array.length != 3) {
+                return null;
+            }
+            day = getDay(array[2])
+            month = getMonth(array[1])
+            year = getYear(array[0])
+
+        }
+        else if (formatCode == "ISO-time") {
+         try{
+             var date = new Date(dateStr)
+             return date.toISOString()
+         }catch(e){
+             return null
+         }
+
+        }
+
+
+
+
+        if (!year || !month || !day) {
+            return null;
+        }
+
+        var date = new Date(Date.UTC(year, month,day))
+        return date.toISOString()
+
+
+    },
 
     /** Retrieve the authorization scheme and token from the HTTP header
      *
@@ -465,3 +585,5 @@ var util = {
 };
 
 module.exports = util;
+
+

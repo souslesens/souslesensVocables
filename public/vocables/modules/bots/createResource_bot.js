@@ -193,14 +193,22 @@ var CreateResource_bot = (function () {
                     object: range,
                 });
             }
+            if (domain) {
+                triples.push({
+                    subject: propId,
+                    predicate: "rdfs:domain",
+                    object: domain,
+                });
+            }
 
             Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
                 var modelData = {
-                    annotationProperties: {
+                    nonObjectProperties: {
                         [propId]: {
                             id: propId,
                             label: propLabel,
                             range: range,
+                            domain: domain,
                         },
                     },
                 };

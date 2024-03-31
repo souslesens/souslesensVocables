@@ -44,7 +44,7 @@ var OntologyModels = (function () {
                 Config.ontologiesVocabularyModels[source].restrictions = {};
                 Config.ontologiesVocabularyModels[source].classes = {};
                 Config.ontologiesVocabularyModels[source].properties = {};
-                Config.ontologiesVocabularyModels[source].annotationProperties = {};
+                Config.ontologiesVocabularyModels[source].nonObjectProperties = {};
 
                 var uniqueProperties = {};
                 var propsWithoutDomain = [];
@@ -70,8 +70,8 @@ var OntologyModels = (function () {
                                     if (!Config.ontologiesVocabularyModels[source].properties) {
                                         Config.ontologiesVocabularyModels[source].properties = {};
                                     }
-                                    if (!Config.ontologiesVocabularyModels[source].annotationProperties) {
-                                        Config.ontologiesVocabularyModels[source].annotationProperties = {};
+                                    if (!Config.ontologiesVocabularyModels[source].nonObjectProperties) {
+                                        Config.ontologiesVocabularyModels[source].nonObjectProperties = {};
                                     }
 
                                     return callbackEach();
@@ -121,11 +121,11 @@ var OntologyModels = (function () {
                                 callbackSeries();
                             });
                         },
-                        //set AnnotationProperties
+                        //set AnnotationProperties and datatypeProperties
                         function (callbackSeries) {
                             var query =
                                 queryP +
-                                " SELECT distinct ?prop ?propLabel from <" +
+                                " SELECT distinct ?prop ?propLabel ?propDomain ?propRange  from <" +
                                 graphUri +
                                 ">  WHERE {\n" +
                                 " ?prop rdf:type ?type. filter (?type in (rdf:Property,<http://www.w3.org/2002/07/owl#AnnotationProperty>,owl:DatatypeProperty))  " +
@@ -140,9 +140,11 @@ var OntologyModels = (function () {
                                 result.results.bindings.forEach(function (item) {
                                     if (true || !uniqueProperties[item.prop.value]) {
                                         uniqueProperties[item.prop.value] = 1;
-                                        Config.ontologiesVocabularyModels[source].annotationProperties[item.prop.value] = {
+                                        Config.ontologiesVocabularyModels[source].nonObjectProperties[item.prop.value] = {
                                             id: item.prop.value,
                                             label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                                            domain:item.propDomain ?item.propDomain.value : null,
+                                            range:item.propRange ?item.propRange.value : null,
                                         };
                                     }
                                 });
@@ -150,6 +152,7 @@ var OntologyModels = (function () {
                                 callbackSeries();
                             });
                         },
+
                         // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)
                         function (callbackSeries) {
                             var query = queryP + " select (count (distinct ?sub) as ?numberOfClasses)  FROM <" + graphUri + "> where{" + " ?sub rdf:type owl:Class.} ";
@@ -487,8 +490,8 @@ var OntologyModels = (function () {
 
     self.getAnnotationProperties = function (source) {
         var array = [];
-        for (var prop in Config.ontologiesVocabularyModels[source].annotationProperties) {
-            array.push(Config.ontologiesVocabularyModels[source].annotationProperties[prop]);
+        for (var prop in Config.ontologiesVocabularyModels[source].nonObjectProperties) {
+            array.push(Config.ontologiesVocabularyModels[source].nonObjectProperties[prop]);
         }
         return array;
     };

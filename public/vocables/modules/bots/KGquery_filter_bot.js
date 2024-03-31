@@ -11,7 +11,7 @@ var KGquery_filter_bot = (function () {
     self.start = function (data, currentQuery, validateFn) {
         self.data = data;
         var workflow = null;
-        if (!self.data.annotationProperties) {
+        if (!self.data.nonObjectProperties) {
             workflow = self.workflow_RdfLabel;
         } else {
             workflow = self.workflow_filterClass;
@@ -69,16 +69,16 @@ var KGquery_filter_bot = (function () {
         BotEngine.showList(choices, "individualsFilterType");
     }),
         (self.functions.listAnnotationsFn = function () {
-            if (!self.data || !self.data.annotationProperties) {
+            if (!self.data || !self.data.nonObjectProperties) {
                 BotEngine.abort("no annotations for this Class");
             }
-            var choices = self.data.annotationProperties;
+            var choices = self.data.nonObjectProperties;
             BotEngine.showList(choices, "annotationProperty");
             BotEngine.showList(choices, "annotationProperty");
         });
     self.functions.chooseAnnotationOperatorFn = function () {
         var datatype = null;
-        self.data.annotationProperties.forEach(function (item) {
+        self.data.nonObjectProperties.forEach(function (item) {
             if (item.id == self.params.annotationProperty) {
                 datatype = item.datatype;
             }

@@ -149,7 +149,7 @@ var KGquery_graph = (function () {
                         });
                         visjsData.nodes.forEach(function (node) {
                             if (annotationPropertiesmap[node.data.id]) {
-                                node.data.annotationProperties = annotationPropertiesmap[node.data.id].properties;
+                                node.data.nonObjectProperties = annotationPropertiesmap[node.data.id].properties;
                             }
                         });
                         callbackSeries();

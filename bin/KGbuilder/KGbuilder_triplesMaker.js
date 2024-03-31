@@ -320,6 +320,13 @@ var KGbuilder_triplesMaker = {
             return;
           }
           if (mapping.dataType == "dateTime") {
+
+            if(mapping.dateFormat){
+              str=util.getDateFromSLSformat(mapping.dateFormat,str);
+              return str;
+            }
+
+
             var isDate = function(date) {
               return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
             };

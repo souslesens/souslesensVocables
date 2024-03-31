@@ -377,8 +377,8 @@ var KGquery = (function () {
                 }
 
                 var annotationPredicatesStr = "";
-                if (queryElement.fromNode.data.annotationProperties) {
-                    queryElement.fromNode.data.annotationProperties.forEach(function (property) {
+                if (queryElement.fromNode.data.nonObjectProperties) {
+                    queryElement.fromNode.data.nonObjectProperties.forEach(function (property) {
                         var optionalStr = getOptionalClause(subjectVarName);
 
                         annotationPredicatesStr = addToStringIfNotExists(
@@ -393,8 +393,8 @@ var KGquery = (function () {
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", annotationPredicatesStr);
                 }
 
-                if (queryElement.toNode.data.annotationProperties) {
-                    queryElement.toNode.data.annotationProperties.forEach(function (property) {
+                if (queryElement.toNode.data.nonObjectProperties) {
+                    queryElement.toNode.data.nonObjectProperties.forEach(function (property) {
                         var optionalStr = getOptionalClause(objectVarName);
                         annotationPredicatesStr = addToStringIfNotExists(
                             optionalStr + "  {" + objectVarName + " <" + property.id + "> " + objectVarName + "_" + property.label + "}\n",

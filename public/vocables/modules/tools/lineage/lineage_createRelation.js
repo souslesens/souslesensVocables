@@ -96,7 +96,7 @@ var Lineage_createRelation = (function () {
                                 },
                             });
                         }
-                       /* if (true) {
+                        /* if (true) {
                             jstreeData.push({
                                 id: "_datatypeProperty",
                                 text: "datatypeProperty",
@@ -430,7 +430,7 @@ var Lineage_createRelation = (function () {
         if (propId == "http://www.w3.org/2002/07/owl#sameAs" || propId == "http://www.w3.org/2002/07/owl#equivalentClass") {
             // le sameAs sont tous dans le dictionaire
             inSource = Config.dictionarySource;
-        }
+        } else {
         /*else if (propId == "_datatypeProperty") {
             var propLabel = prompt("DatatypeProperty Label");
             if (!propLabel) return;
@@ -442,7 +442,7 @@ var Lineage_createRelation = (function () {
                 return MainController.UI.message("annotation property created", true);
             });
             return;
-        } */else {
+        } */
             var mainSource = Config.sources[Lineage_sources.activeSource];
             if (Config.sources[self.sourceNode.source].editable) {
                 inSource = self.sourceNode.source;

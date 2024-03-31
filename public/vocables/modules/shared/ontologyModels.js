@@ -143,8 +143,8 @@ var OntologyModels = (function () {
                                         Config.ontologiesVocabularyModels[source].nonObjectProperties[item.prop.value] = {
                                             id: item.prop.value,
                                             label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
-                                            domain:item.propDomain ?item.propDomain.value : null,
-                                            range:item.propRange ?item.propRange.value : null,
+                                            domain: item.propDomain ? item.propDomain.value : null,
+                                            range: item.propRange ? item.propRange.value : null,
                                         };
                                     }
                                 });

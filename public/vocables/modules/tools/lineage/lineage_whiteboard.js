@@ -2058,14 +2058,13 @@ var Lineage_whiteboard = (function () {
                                 color = "#EEE";
                                 size = 2;
                             }
-                            if (type.indexOf("Property")>-1) {
+                            if (type.indexOf("Property") > -1) {
                                 shape = "text";
                                 color = "#c3c3c3";
-
                             }
 
                             var predicateUri = options.inversePredicate ? null : item.prop.value;
-                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, label, predicateUri, { shape: shape ,color:color}));
+                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, label, predicateUri, { shape: shape, color: color }));
                         }
                         if (options.skipLiterals && item.object.type && item.object.type.indexOf("literal") > -1) {
                             return;
@@ -2093,12 +2092,10 @@ var Lineage_whiteboard = (function () {
                                 color = "#EEE";
                                 size = 2;
                             }
-                            if (type.indexOf("Property")>-1) {
+                            if (type.indexOf("Property") > -1) {
                                 shape = "text";
                                 color = "#c3c3c3";
-
                             }
-
 
                             var font = null;
                             if (item.object.type == "literal") {
@@ -2112,7 +2109,7 @@ var Lineage_whiteboard = (function () {
 
                             var predicateUri = options.inversePredicate ? item.prop.value : null;
 
-                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.object.value, label, predicateUri, { shape: shape,color:color }));
+                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.object.value, label, predicateUri, { shape: shape, color: color }));
                         }
                         if (!options.OnlySubjects) {
                             var edgeId = item.subject.value + "_" + item.prop.value + "_" + item.object.value;

@@ -10,18 +10,14 @@ const AxiomEditor = (function () {
         });
     };
 
-
-
     self.onInputChar = function (text) {
-       var text2= text.toLowerCase();
-       if(text2=="c")
-           return;
-        if(text2.toLowerCase().startsWith("cl")){
-            self.currentObject = "listClass"
+        var text2 = text.toLowerCase();
+        if (text2 == "c") return;
+        if (text2.toLowerCase().startsWith("cl")) {
+            self.currentObject = "listClass";
             self.onSelectSuggestion("listClass");
-          $("#axiomsEditor_textDiv").append("Class")
+            $("#axiomsEditor_textDiv").append("Class");
             return;
-
         }
 
         self.getSuggestions(text, function (err, suggestions) {
@@ -33,9 +29,6 @@ const AxiomEditor = (function () {
                 alert(err);
             }
         });
-
-
-
 
         return;
         if (text.length > 0) {
@@ -84,7 +77,7 @@ const AxiomEditor = (function () {
         }
 
         $("#axiomsEditor_input").val("");
-     $("#axiomsEditor_input").focus();
+        $("#axiomsEditor_input").focus();
         self.onInputChar(suggestion.label);
         $("#axiomsEditor_input").before("<span class='axiom_element " + cssClass + "' id='" + suggestion.id + "'>" + suggestion.label + "</span>");
         $("#axiomsEditor_input").val("");
@@ -95,42 +88,28 @@ const AxiomEditor = (function () {
         var suggestionId = $("#axiomsEditor_suggestionsSelect").val();
         var suggestionObj = { id: suggestionId, label: suggestionText };
 
-
-    if (self.currentObject == "listClass") {
-            CommonBotFunctions.listVocabClasses(Lineage_sources.activeSource, null, false, [],function (err, choices) {
+        if (self.currentObject == "listClass") {
+            CommonBotFunctions.listVocabClasses(Lineage_sources.activeSource, null, false, [], function (err, choices) {
                 self.currentObject = "Class";
                 common.fillSelectOptions("axiomsEditor_suggestionsSelect", choices, false, "label", "id");
                 return;
             });
+        } else if (self.currentObject == "Class") {
+            self.currentObject = null;
+            self.addSuggestion(suggestionObj, "axiom_Class");
+            return;
+            self.getSuggestions(suggestionId.id, function (err, result) {
+                result.forEach(function (suggestion) {});
+            });
+            return;
+        } else {
+            self.addSuggestion(suggestionObj, "axiom_Class");
+            self.getSuggestions(suggestionId.id, function (err, result) {
+                common.fillSelectOptions("axiomsEditor_suggestionsSelect", result, false);
+            });
         }
 
-    else if (self.currentObject == "Class") {
-        self.currentObject = null;
-        self.addSuggestion(suggestionObj, "axiom_Class");
         return;
-        self.getSuggestions(suggestionId.id, function(err, result) {
-            result.forEach(function(suggestion) {
-
-
-            })
-
-        })
-        return;
-    }else{
-        self.addSuggestion(suggestionObj, "axiom_Class");
-        self.getSuggestions(suggestionId.id, function(err, result) {
-            common.fillSelectOptions("axiomsEditor_suggestionsSelect", result, false,);
-
-        })
-
-    }
-
-
-return;
-
-
-
-
 
         if (suggestionId == "ObjectProperty:") {
             self.addSuggestion(suggestionObj, "axiom_keyWord");
@@ -151,7 +130,7 @@ return;
                 self.currentObject = "ClassVocab";
                 common.fillSelectOptions("axiomsEditor_suggestionsSelect", choices, false, "label", "id");
             });
-        }else {
+        } else {
             return self.addSuggestion(suggestionObj, "axiom_keyWord");
         }
     };

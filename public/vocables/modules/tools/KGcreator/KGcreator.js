@@ -199,6 +199,8 @@ var KGcreator = (function () {
                     KGcreator.currentTreeNode = obj.node;
                     //  KGcreator_run.getTableAndShowMappings();
 
+
+
                     if (obj.node.data.type == "databaseSource") {
                         self.currentConfig.currentDataSource = {
                             name: obj.node.id,
@@ -234,6 +236,7 @@ var KGcreator = (function () {
                         self.showTableVirtualColumnsTree(table);
                         KGcreator_mappings.showTableMappings(obj.node.id);
                     } else if (obj.node.data.type == "tableColumn") {
+                        KGcreator_bot.start(obj.node);
                     } else if (obj.node.data.type == "csvFileColumn") {
                     }
                 },
@@ -581,7 +584,7 @@ var KGcreator = (function () {
                     var payload = {
                         fileName: fileName,
                         dir: "CSV/" + slsvSource,
-                        lines: 200,
+                        lines: 100,
                     };
                     $.ajax({
                         type: "GET",
@@ -592,6 +595,7 @@ var KGcreator = (function () {
                             columns = result.headers;
                             var tableObj = { [fileName]: columns };
                             self.currentConfig.currentDataSource.tables = tableObj;
+                            self.currentConfig.currentDataSource.sampleData=result.data[0]
                             callbackSeries();
                         },
                         error: function (err) {
@@ -1013,8 +1017,8 @@ var KGcreator = (function () {
             $("#smallDialogDiv").html(html);
         }
 
-        if (node.data.sample) {
-            showTable(node.data.sample);
+        if (self.currentConfig.currentDataSource.sampleData) {
+            showTable(self.currentConfig.currentDataSource.sampleData);
         } else if (self.currentConfig.currentDataSource.type == "databaseSource") {
             var size = 200;
             var sqlQuery = "select top  " + size + "* from " + node.data.id;

@@ -319,36 +319,36 @@ var KGbuilder_triplesMaker = {
           if (!str || str == "null") {
             return;
           }
-          if (mapping.dataType == "dateTime") {
+          if (mapping.dataType == "dateTime" || mapping.dataType == "xsd:datetime") {
 
-            if(mapping.dateFormat){
-              str=util.getDateFromSLSformat(mapping.dateFormat,str);
-              return str;
-            }
+            if (mapping.dateFormat) {
+              str = util.getDateFromSLSformat(mapping.dateFormat, str);
+
+            } else {
 
 
-            var isDate = function(date) {
-              return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
-            };
+              var isDate = function(date) {
+                return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
+              };
 
-            var formatDate = function(date) {
-              return new Date(date).toISOString(); //.slice(0, 10);
-            };
+              var formatDate = function(date) {
+                return new Date(date).toISOString(); //.slice(0, 10);
+              };
 
-            if (!isDate(str)) {
-              var date = util.convertFrDateStr2Date(str);
-              if (!date) {
-                return;
+              if (!isDate(str)) {
+                var date = util.convertFrDateStr2Date(str);
+                if (!date) {
+                  return;
+                } else {
+                  str = date.toISOString();
+                }
+              } else {
+                str = formatDate(str);
               }
-              else {
-                str = date.toISOString();
-              }
-            }
-            else {
-              str = formatDate(str);
             }
           }
-
+          if(!str)
+            objectStr=""
         //  mapping.p = "rdf:value";
 
           objectStr = "'" + str + "'^^" + mapping.dataType;

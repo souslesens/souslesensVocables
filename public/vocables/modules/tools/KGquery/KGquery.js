@@ -233,6 +233,13 @@ var KGquery = (function () {
         if (self.querySets.sets.length > 0) {
             message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
         }
+
+
+
+
+
+
+
         IndividualAggregateWidget.showDialog(
             null,
             function (callback) {

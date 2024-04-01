@@ -21,6 +21,26 @@ var IndividualAggregateWidget = (function () {
                 var functionVarClasses = [];
                 for (var key in data) {
                     var item = data[key];
+
+                    var otherproperties=item.data.nonObjectProperties;
+                    if(otherproperties){
+
+                        otherproperties.forEach(function(prop){
+                            var obj={id:item.id+"|"+prop.id,label:item.label+":"+prop.label}
+                            if(  prop.datatype== "http://www.w3.org/2001/XMLSchema#string"){
+                                self.groupByClasses.push(obj)
+
+                            }else{
+                                self.functionVarClasses.push(obj);
+                            }
+
+                        })
+
+
+                    }
+
+
+
                     if (item.data.datatype) {
                         self.functionVarClasses.push(item);
                     } else {

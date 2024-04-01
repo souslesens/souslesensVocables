@@ -119,10 +119,11 @@ var CommonBotFunctions = (function () {
             vocabs,
             function (vocab, callbackEach) {
                 OntologyModels.registerSourcesModel(vocab, function (err, result) {
-                    for (var key in Config.ontologiesVocabularyModels[vocab].nonObjectProperties) {
-                        var prop = Config.ontologiesVocabularyModels[vocab].nonObjectProperties[key];
-                        if (!domain || domain == prop.domain) {
-                            props.push({ id: prop.id, label: vocab + ":" + prop.label, domain: propDomain, range: propRange });
+                    var props2=Config.ontologiesVocabularyModels[vocab].nonObjectProperties
+                    for (var key in props2) {
+                        var prop = props2[key];
+                        if (!domain ||  ! prop.domain  || domain == prop.domain || prop.domain=="http://www.w3.org/2000/01/rdf-schema#Resource") {
+                            props.push({ id: prop.id, label: vocab + ":" + prop.label, domain: prop.domain, range: prop.range });
                         }
                     }
                     callbackEach();

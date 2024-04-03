@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.62.0](https://github.com/souslesens/souslesensVocables/compare/1.61.0...1.62.0) (2024-04-03)
+
+
+### Bug Fixes
+
+* **CHANGELOG:** fix duplicated release ([63cf72f](https://github.com/souslesens/souslesensVocables/commit/63cf72f78c2095fb5bd5a933ecd7692e4bfcfc1c))
+
 ## [1.61.0](https://github.com/souslesens/souslesensVocables/compare/1.60.0...1.61.0) (2024-03-29)
 
 ### Features

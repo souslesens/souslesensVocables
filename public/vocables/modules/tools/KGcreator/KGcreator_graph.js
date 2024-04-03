@@ -624,15 +624,15 @@ var KGcreator_graph = (function () {
                         var attrs = getNodeAttrs(item.s);
                         var drawRelation = true;
                         if (item.o == "owl:NamedIndividual") {
-                            attrs.shape = "triangle";
+                            // attrs.shape = "triangle";
                             drawRelation = false;
                         }
                         if (item.o == "owl:Class") {
-                            attrs.shape = "triangle";
+                            // attrs.shape = "triangle";
                             drawRelation = false;
                         }
                         if (item.o == "rdf:Bag") {
-                            attrs.shape = "box";
+                            //   attrs.shape = "box";
                             drawRelation = false;
                         } else if (item.s.startsWith("@")) {
                             attrs.color = "#8200fd";
@@ -749,6 +749,11 @@ var KGcreator_graph = (function () {
         self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, options);
         self.mappingVisjsGraph.draw();
         GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas", false);
+        /*   $('#KGcreatorVisjsLegendCanvas').css('right','55%');
+        var menuBarPosition=-($(window).height()-$('#MenuBar').height()+30);
+        $('#KGcreatorVisjsLegendCanvas').css('top',0);*/
+        $("#KGcreatorVisjsLegendCanvas").css("top", 0);
+        $("#KGcreatorVisjsLegendCanvas").css("right", 200);
     };
 
     self.onDetailedGraphNodeClick = function (node, point, event, caller) {

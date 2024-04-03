@@ -98,8 +98,8 @@ const SourcesTable = () => {
                     return { ...dataWithoutCarriageReturns };
                 });
                 const sortedSources: ServerSource[] = gotSources.slice().sort((a: ServerSource, b: ServerSource) => {
-                    const left: string = a[orderBy] as string;
-                    const right: string = b[orderBy] as string;
+                    const left: string = a[orderBy] || ("" as string);
+                    const right: string = b[orderBy] || ("" as string);
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
 
@@ -123,10 +123,22 @@ const SourcesTable = () => {
                                                 Name
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>Graph URI</TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Group</TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Data</TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                            <TableSortLabel active={orderBy === "graphUri"} direction={order} onClick={() => handleRequestSort("graphUri")}>
+                                                Graph URI
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "group"} direction={order} onClick={() => handleRequestSort("group")}>
+                                                Group
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Data
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Actions
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody sx={{ width: "100%", overflow: "visible" }}>
@@ -142,9 +154,7 @@ const SourcesTable = () => {
                                                     <TableCell>
                                                         <Link href={source.graphUri}>{source.graphUri}</Link>
                                                     </TableCell>
-                                                    <TableCell align="center">
-                                                        { source.group ? <Chip label={source.group} size="small" /> : "" }
-                                                    </TableCell>
+                                                    <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" useFlexGap>
                                                             <Tooltip title="RDF Graph">
@@ -164,7 +174,7 @@ const SourcesTable = () => {
                                                 </TableRow>
                                             );
                                         })}
-                                    </TableBody>
+                                </TableBody>
                             </Table>
                         </TableContainer>
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
@@ -310,6 +320,9 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
     };
+    const handleGroupUpdate = (value: string) => {
+        update({ type: Type.UserUpdatedField, payload: { fieldname: "group", newValue: value } });
+    };
 
     const handleTaxonomyPredicatesUpdate = (value: string[]) => {
         update({ type: Type.UserUpdatedField, payload: { fieldname: "taxonomyPredicates", newValue: value } });
@@ -360,13 +373,9 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
 
-    const knownTaxonomyPredicates = [
-        ...new Set(
-            sources.flatMap((source) => {
-                return source.taxonomyPredicates;
-            })
-        ),
-    ];
+    const knownGroup = [...new Set(sources.flatMap((source) => source.group))].filter((group) => group.length > 0);
+    const knownTaxonomyPredicates = [...new Set(sources.flatMap((source) => source.taxonomyPredicates))];
+
     function validateSourceName(sourceName: string) {
         const issues = createCustomIssues(InputSourceSchema);
 
@@ -622,23 +631,27 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                             </FormControl>
                         </Grid>
                         <Grid item xs={6}>
-                            <TextField
-                                fullWidth
-                                helperText={errorMessage(zo.errors.group)}
-                                onBlur={validateAfterSubmission}
-                                onChange={handleFieldUpdate("group")}
-                                value={sourceModel.sourceForm.group}
-                                id={`group`}
-                                name={zo.fields.group()}
+                            <Autocomplete
+                                freeSolo
+                                disableClearable
+                                options={knownGroup}
                                 label={"Group"}
-                                variant="standard"
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <HelpButton title="Group" message={sourceHelp.group} />
-                                        </InputAdornment>
-                                    ),
-                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        helperText={errorMessage(zo.errors.group)}
+                                        id="group"
+                                        label="Group"
+                                        name={zo.fields.group()}
+                                        onBlur={validateAfterSubmission}
+                                        onChange={handleFieldUpdate("group")}
+                                        value={sourceModel.sourceForm.group}
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            type: "search",
+                                        }}
+                                    />
+                                )}
                             />
                         </Grid>
 

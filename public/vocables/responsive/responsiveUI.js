@@ -163,7 +163,7 @@ var ResponsiveUI = (function () {
         });
     };
     // MainController or in Lineage_r ?
-    self.onSourceSelectForAddSource = function (evt, obj) {
+    self.onSourceSelect_AddSource = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         if (!obj.node.data || obj.node.data.type != "source") {
             return self.alert("select a tool");
@@ -239,11 +239,12 @@ var ResponsiveUI = (function () {
             .parent()
             .show();
         $("#sourceSelector_searchInput").focus();
+        var onSourceSelect;
         if (resetAll) {
             Lineage_sources.loadedSources = {};
-            var onSourceSelect = ResponsiveUI.onSourceSelect;
+            onSourceSelect = ResponsiveUI.onSourceSelect;
         } else {
-            var onSourceSelect = ResponsiveUI.onSourceSelectForAddSource;
+            onSourceSelect = ResponsiveUI.onSourceSelect_AddSource;
         }
         SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
@@ -251,17 +252,8 @@ var ResponsiveUI = (function () {
     };
     //keep
     self.openDialogDiv = function (div) {
-        //$("#mainDialogDiv").css('width', 'auto');
-
         $("#" + div).empty();
         $("#" + div).dialog();
-        //$("#" + div).parent().show();
-        /*$("#" + div)
-            .parent()
-            .css("top", "20%");
-        $("#" + div)
-            .parent()
-            .css("left", "30%");*/
     };
     //keep
     self.setSlsvCssClasses = function (callback) {
@@ -271,7 +263,7 @@ var ResponsiveUI = (function () {
             const response = await fetch("/api/v1/users/theme");
             if (response.status == 400) {
                 ResponsiveUI.changeTheme(Config.theme.defaultTheme);
-                callback();
+                return callback();
             }
 
             const data = await response.json();

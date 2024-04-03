@@ -3,12 +3,13 @@ const GraphManagement = (function () {
     self.onSourceSelect = function () {};
     self.createApp = null;
     self.umountKGUploadApp = null;
+    import("/assets/graph_management.js");
     self.unload = function () {
         self.umountKGUploadApp();
     };
     self.onLoaded = function () {
         $("#accordion").accordion("option", { active: 2 });
-        import("/assets/graph_management.js");
+
         setTimeout(function () {
             $("#mainDialogDiv").dialog("open");
 

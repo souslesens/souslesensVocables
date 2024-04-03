@@ -21,6 +21,14 @@ A key feature of SLSV is graph visualization and interaction performed using exc
 Annotate tool allows annotate textual corpus with several registered lexical resources
 and identify missing terms
 
+## Documentation
+
+Please visit [Technical Design Documents](http://souslesens.org/index.php/documentation) for details on the technical details of souslesensVocable.
+
+Please watch the videos at [videos sections](http://souslesens.org/index.php/videos/) for getting started with souslesensVocable.
+
+[SLSV Glossary](http://souslesens.org/index.php/slsv-glossary/) provides definitions of several terms used in souslesensVocable.
+
 ## Deploy a production instance
 
 ### Prerequisites
@@ -262,7 +270,7 @@ To run migration scripts you need to use the command
 ```bash
 npm run migrate
 ```
-at project root
+At project root
 
 Under Windows need to use git bash to run this script
 ```git bash
@@ -319,25 +327,38 @@ In root create a plugins folder
 
 `mkdir plugins`
 
-Each directory is named after the plugin we want to add.
+Each directory is named after the plugin we want to add.  
 
 ```
-plugins/
-└── MyPlugin
-    └── public
-        └── MyPlugin.js
+plugins  
+└── MyPluginName  
+    └── public  
+        └── js  
+            └── main.js  
+        └──html  
+            
 ```
 
-The plugin's directory must contain a public directory with the source code within it.
 
-MyPlugin.js must export a single IIFE function.
+
+The plugin's directory must contain a public directory with the source code within it.  
+
+main.js must export a single IIFE function.  
 
 ```
 const Toto = (function () {
+    var self={};
+    self.onLoaded=function(){
+
+    }
     return { name: "toto" };
 })();
 export default Toto;
 ```
 
-Once it done, don't forget to add the plugin's name to `mainConfig.tools_available`.
-If you still don't see the plugin in the jsTree, check that your user's profile allows to see this plugin.
+Once it done, don't forget to add the plugin's name to `mainConfig.tools_available`.  
+If you still don't see the plugin in the jsTree, check that your user's profile allows to see this plugin.  
+The function onLoaded is loaded when you select the tool.  
+
+The following Github Repository contains all the plugins of SLS and give more informations about them :  
+https://github.com/souslesens/slsv-plugins/

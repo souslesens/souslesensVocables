@@ -602,7 +602,11 @@ enabled:true},*/
         };
 
         var graphDivContainer = "axiomsGraphDivContainer";
-        $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:100%;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>");
+        $("#" + graphDivContainer).html(
+            "<span style='font-size: 16px;color: blue; font-weight: bold'> WORK IN PROGRESS</span>" +
+                '  <button onclick="AxiomEditor.init()">Edit Axiom</button>' +
+                "<div id='axiomsGraphDiv' style='width:100%;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
+        );
         self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv", visjsData, options);
         self.axiomsVisjsGraph.draw(function () {});
     };

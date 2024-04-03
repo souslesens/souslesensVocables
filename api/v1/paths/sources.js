@@ -2,6 +2,7 @@ const path = require("path");
 
 const { configPath, configProfilesPath } = require("../../../model/config");
 const { sourceModel, SourceModel } = require("../../../model/sources");
+const { userModel } = require("../../../model/users");
 const { responseSchema } = require("./utils");
 const userManager = require(path.resolve("bin/user."));
 const { successfullyFetched, successfullyCreated, fixBooleanInObject } = require("./utils.js");
@@ -14,7 +15,6 @@ module.exports = function () {
     ///// GET api/v1/sources
     async function GET(req, res, next) {
         try {
-            console.log(req.user);
             const userInfo = await userManager.getUser(req.user);
             let localSourceModel = sourceModel;
 
@@ -43,6 +43,20 @@ module.exports = function () {
     ///// POST api/v1/sources
     async function POST(req, res, next) {
         try {
+            const userInfo = await userManager.getUser(req.user);
+            const userLogin = userInfo.user.login;
+            const isAdmin = await userModel.isAdmin(userLogin);
+            if (!isAdmin && !userInfo.allowSourceCreation) {
+                res.status(401).json({ message: "Not allowed to create source" });
+                return;
+            }
+
+            const userOwnedSources = await sourceModel.getOwnedSources(userInfo.user);
+            if (!isAdmin && Object.keys(userOwnedSources).length >= userInfo.maxNumberCreatedSource) {
+                res.status(401).json({ message: "Cannot create another source, the maximal limit was reached." });
+                return;
+            }
+
             var newSource = req.body;
 
             newSource = fixBooleanInObject(newSource);
@@ -60,7 +74,7 @@ module.exports = function () {
     }
     POST.apiDoc = {
         summary: "Update Sources",
-        security: [{ restrictAdmin: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "updateSources",
         parameters: [],
         responses: responseSchema("Sources", "POST"),

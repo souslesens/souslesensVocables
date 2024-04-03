@@ -1,4 +1,5 @@
-plugins
+plugins/*
+!plugins
 
 # Cypress
 core
@@ -139,7 +140,7 @@ mainapp/static/assets
 
 
 /bin/test.js
-/public/vocables/customPlugins/
+
 /jena/data/temp.rdf
 /jena/lib/
 /data/CSV/CFIHOS_V1.5_RDL/
@@ -150,3 +151,4 @@ mainapp/static/assets
 /mainapp/static/kg_upload_app.js.LICENSE.txt
 /mainapp/static/mainapp.js.LICENSE.txt
 /data/uploaded_rdf_data/
+/bin/other/

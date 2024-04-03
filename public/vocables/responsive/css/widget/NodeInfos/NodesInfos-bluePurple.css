@@ -72,6 +72,17 @@ th, td{
     max-height: 55vh;
     overflow: auto;
 }
+#nodeInfos_associatedPropertiesDiv {
+    .nodesInfosAdditionalInfos;
+    max-height: 300px;
+    overflow: auto;
+    margin-top: 10px;
+}
+#nodeInfos_classHierarchyDiv {
+    .nodesInfosAdditionalInfos;
+    overflow: auto;
+    margin-top: 10px;
+}
 
 #nodeInfos_individualsDiv {
     .nodesInfosAdditionalInfos;
@@ -87,7 +98,7 @@ th, td{
     border: 0px !important;
     font-weight: bold;
 }
-.nodesInfos_tiltles {
+.nodesInfos_titles {
     color: @source-color;
     font-size: 15px;
 }

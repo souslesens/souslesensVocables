@@ -13,6 +13,7 @@ import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_cr
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
 import ResponsiveUI from "../../responsive/responsiveUI.js";
+
 var NodeInfosWidget = (function () {
     var self = {};
 
@@ -150,7 +151,7 @@ var NodeInfosWidget = (function () {
                         callback(err);
                     }
                     if (err) {
-                        return alert(err);
+                        MainController.UI.message(err, true);
                     }
                     self.showNodeInfosToolbar(options);
 
@@ -167,7 +168,10 @@ var NodeInfosWidget = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (_err, result) {
+                    self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
                         types = result.types;
                         callbackSeries();
                     });
@@ -196,8 +200,22 @@ var NodeInfosWidget = (function () {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
                         return callbackSeries();
                     }
+
                     self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfos_restrictionsDiv", function (_err, _result) {
-                        callbackSeries();
+                        callbackSeries(_err);
+                    });
+                },
+                function (callbackSeries) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
+                        return callbackSeries();
+                    }
+                    self.showAssociatedProperties(self.currentNodeRealSource, nodeId, "nodeInfos_associatedPropertiesDiv", function (err) {
+                        callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    self.showClassesBreakDown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function (err) {
+                        callbackSeries(err);
                     });
                 },
             ],
@@ -206,7 +224,7 @@ var NodeInfosWidget = (function () {
                     callback(err);
                 }
                 if (err) {
-                    return alert(err);
+                    return MainController.UI.message(err.responseText || err, true);
                 }
             }
         );
@@ -275,7 +293,15 @@ var NodeInfosWidget = (function () {
             },
             function (err, data) {
                 if (err) {
-                    return MainController.UI.message(err);
+                    MainController.UI.message(err.responseText);
+                    if (callback) {
+                        return callback(err);
+                    }
+                }
+                if (data.length == 0) {
+                    if (callback) {
+                        return callback("no data found");
+                    }
                 }
                 if (divId.indexOf("Dialog") > -1) {
                     $("#" + divId).on("dialogbeforeclose", function (_event, _ui) {
@@ -506,7 +532,7 @@ defaultLang = 'en';*/
 
                         str +=
                             "<td class='detailsCellName'>" +
-                            "<a target='" +
+                            "<a target ='" +
                             self.getUriTarget(self.propertiesMap.properties[key].propUri) +
                             "' href='" +
                             self.propertiesMap.properties[key].propUri +
@@ -527,10 +553,11 @@ defaultLang = 'en';*/
                 str += "</table></div>";
 
                 str +=
-                    " <br><div id='nodeInfos_listsDiv' >" +
-                    "<div id='nodeInfos_restrictionsDiv'  style='display:table-caption;background-color: #ddd;padding:5px'></div>" +
-                    "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;background-color: #ddd;padding:5px'></div>" +
-                    "</div>";
+                    " <div id='nodeInfos_listsDiv' >" +
+                    "<div id='nodeInfos_classHierarchyDiv' class='nodeInfos_rigthDiv' ></div><br>" +
+                    "<div id='nodeInfos_associatedPropertiesDiv' class='nodeInfos_rigthDiv' ></div><br>" +
+                    "<div id='nodeInfos_restrictionsDiv' class='nodeInfos_rigthDiv'  style='display:table-caption;'></div>" +
+                    "<div id='nodeInfos_individualsDiv' class='nodeInfos_rigthDiv' style=' display:flex;flex-direction: ></div></div>";
 
                 $("#" + divId).html(str);
                 if (callback) {
@@ -551,24 +578,43 @@ defaultLang = 'en';*/
                         if (err) {
                             return callbackSeries(err);
                         }
-                        str += "<b class='nodesInfos_tiltles'>Restrictions </b> <div style=''> <table style='display:table-caption'>";
+                        str = "<b class='nodesInfos_titles'>Restrictions </b> <div style=''> <table style='display:table-caption'>";
+
                         result.forEach(function (item) {
-                            str += "<tr class='infos_table'>";
-
                             var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
-
-                            str += "<td class=''>" + propStr + "</td>";
+                            str += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(item.prop.value) + "' href='" + item.prop.value + "'>" + propStr + "</a>";
 
                             var targetClassStr = "any";
                             if (item.value) {
-                                targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
+                                str +=
+                                    "&nbsp; <i><a style='color: #aaa' target='" +
+                                    NodeInfosWidget.getUriTarget(item.value.value) +
+                                    "' href='" +
+                                    item.value.value +
+                                    "'>" +
+                                    item.valueLabel.value +
+                                    "</a></i>";
                             }
-                            str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
-
-                            str += "</tr>";
+                            str += "</div>";
                         });
 
-                        str += "</table> </div>" + "</div>";
+                        /*   result.forEach(function(item) {
+                               str += "<tr class='infos_table'>";
+
+                               var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
+
+                               str += "<td class=''>" + propStr + "</td>";
+
+                               var targetClassStr = "any";
+                               if (item.value) {
+                                   targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
+                               }
+                               str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
+
+                               str += "</tr>";
+                           });
+
+                           str += "</table> </div>" + "</div>";*/
 
                         callbackSeries();
                     });
@@ -586,25 +632,46 @@ defaultLang = 'en';*/
                             if (err) {
                                 return callbackSeries(err);
                             }
-                            str += "<br><b class='nodesInfos_tiltles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table >";
+
+                            str += "<br><b class='nodesInfos_titles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table >";
                             result.forEach(function (item) {
-                                str += "<tr class='infos_table'>";
-
                                 var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
-
-                                str += "<td class=''>" + propStr + "</td>";
+                                str += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(item.prop.value) + "' href='" + item.prop.value + "'>" + propStr + "</a>";
 
                                 var targetClassStr = "any";
                                 if (item.value) {
-                                    targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.subject.value + "\")'>" + item.subjectLabel.value + "</span>";
+                                    str +=
+                                        "&nbsp; <i><a style='color: #aaa' target='" +
+                                        NodeInfosWidget.getUriTarget(item.subject.value) +
+                                        "' href='" +
+                                        item.subject.value +
+                                        "'>" +
+                                        item.subjectLabel.value +
+                                        "</a></i>";
                                 }
-                                str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
-
-                                str += "</tr>";
+                                str += "</div>";
                             });
 
-                            str += "</table> </div>" + "</div>";
+                            /*   result.forEach(function(item) {
+                                   str += "<tr class='infos_table'>";
 
+                                   var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
+
+                                   str += "<td class=''>" + propStr + "</td>";
+
+                                   var targetClassStr = "any";
+                                   if (item.value) {
+                                       targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.subject.value + "\")'>" + item.subjectLabel.value + "</span>";
+                                   }
+                                   str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
+
+                                   str += "</tr>";
+                               });
+
+                               str += "</table> </div>" + "</div>";
+
+                               callbackSeries();
+                           }*/
                             callbackSeries();
                         }
                     );
@@ -643,7 +710,11 @@ defaultLang = 'en';*/
             var data = result.results.bindings;
 
             if (data.length == 0) {
-                return callback();
+                $("#nodeInfos_individualsDiv").text("No result");
+                if (callback) {
+                    callback();
+                }
+                return;
             } else {
                 var str = "<b>TypeOf </b><br><table>";
 
@@ -655,15 +726,17 @@ defaultLang = 'en';*/
                 str += "</table>";
                 $("#nodeInfos_individualsDiv").html(str);
             }
-            if (callback) callback();
+            if (callback) {
+                callback();
+            }
         });
     };
 
     self.showPropertyRestrictions = function (sourceLabel, nodeId, divId, _callback) {
         Sparql_OWL.getPropertiesRestrictionsDescription(sourceLabel, nodeId, {}, function (err, result) {
             if (err) {
-                alert(err.responseText);
-                return MainController.UI.message(err.responseText, true);
+                //  alert(err.responseText);
+                return MainController.UI.message(err.responseText || err, true);
             }
 
             var str = "<b>Property restrictions</b><table>";
@@ -685,6 +758,118 @@ defaultLang = 'en';*/
 
             return _callback();
         });
+    };
+
+    self.showAssociatedProperties = function (sourceLabel, nodeId, divId, callback) {
+        var ontologySourceModel = Config.ontologiesVocabularyModels[sourceLabel];
+        if (ontologySourceModel) {
+            var domainOfProperties = [];
+            var rangeOfProperties = [];
+            for (var prop in ontologySourceModel.constraints) {
+                var constraint = ontologySourceModel.constraints[prop];
+                if (constraint.domain == nodeId) {
+                    domainOfProperties.push({ id: prop, label: constraint.label, rangeId: constraint.range, rangeLabel: constraint.rangeLabel });
+                }
+                if (constraint.range == nodeId) {
+                    rangeOfProperties.push({ id: prop, label: constraint.label, domainId: constraint.domain, domainLabel: constraint.domainLabel });
+                }
+            }
+
+            var html = "";
+            if (domainOfProperties.length > 0) {
+                html += "<b><div class='nodesInfos_titles'>Domain of</div></b>";
+                domainOfProperties.forEach(function (property) {
+                    html += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a>";
+                    if (property.rangeId) {
+                        html += "&nbsp; <i><a style='color: #aaa' target='" + NodeInfosWidget.getUriTarget(property.rangeId) + "' href='" + property.rangeId + "'>" + property.rangeLabel + "</a></i>";
+                    }
+                    html += "</div>";
+                });
+            }
+            if (rangeOfProperties.length > 0) {
+                html += "<b><div  class='nodesInfos_titles'>Range of</div></b>";
+                rangeOfProperties.forEach(function (property) {
+                    html += "  <div class='XdetailsCellValue'>";
+                    if (property.domainId) {
+                        html +=
+                            "&nbsp; <i><a style='color: #aaa' target='" + NodeInfosWidget.getUriTarget(property.domainId) + "' href='" + property.domainId + "'>" + property.domainLabel + "</a></i>";
+                    }
+                    html += " <a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a> </div>";
+                });
+            }
+            if (html) {
+                $("#" + divId).append(html);
+                $("#" + divId).css("display", "table-caption");
+            }
+        }
+        if (callback) {
+            callback();
+        }
+    };
+
+    self.showClassesBreakDown = function (sourceLabel, nodeId, divId, callback) {
+        var jstreeData = [];
+        var ancestors = OntologyModels.getClassHierarchyTreeData(sourceLabel, nodeId, "ancestors");
+
+        var uniqueIds = {};
+        if (ancestors.length > 0) {
+            ancestors.forEach(function (item) {
+                if (!uniqueIds[item.id]) {
+                    var parent = item.superClass || "#";
+                    uniqueIds[item.id] = 1;
+                    jstreeData.push({
+                        id: item.id,
+                        text: item.label,
+                        parent: parent,
+                        type: "Class",
+                        data: {
+                            id: item.id,
+                            source: sourceLabel,
+                        },
+                    });
+                }
+            });
+        }
+
+        var html = "<b><div  class='nodesInfos_titles'>Class hierarchy</div></b>" + "<div id='classHierarchyTreeDiv' style='width:300px;height: 330px;overflow: auto;font-size: 12px'></div>";
+
+        $("#" + divId).html(html);
+
+        var options = {
+            openAll: true,
+            selectTreeNodeFn: function (event, obj) {
+                if (!obj.event.ctrlKey) {
+                    var descendants = OntologyModels.getClassHierarchyTreeData(sourceLabel, obj.node.id, "descendants");
+                    var jstreeData = [];
+                    var uniqueIds = JstreeWidget.getNodeDescendants("classHierarchyTreeDiv", "#", null, true);
+                    if (descendants.length > 0) {
+                        descendants.forEach(function (item) {
+                            if (!uniqueIds[item.id]) {
+                                uniqueIds[item.id] = 1;
+                                jstreeData.push({
+                                    id: item.id,
+                                    text: item.label,
+                                    parent: item.superClass,
+                                    type: "Class",
+                                    data: {
+                                        id: item.id,
+                                        source: sourceLabel,
+                                    },
+                                });
+                            }
+                        });
+
+                        JstreeWidget.addNodesToJstree("classHierarchyTreeDiv", null, jstreeData);
+                    }
+                } else {
+                    NodeInfosWidget.showNodeInfos(sourceLabel, obj.node, "mainDialogDiv");
+                }
+            },
+        };
+
+        JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
+
+        callback();
     };
 
     self.onClickLink = function (nodeId) {
@@ -944,24 +1129,12 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
     };
 
-    self.isSLSVvisibleUri = function (uri) {
-        if (!uri || !uri.indexOf) {
-            return false;
-        }
-        for (var source in Config.sources) {
-            var graphUri = Config.sources[source].graphUri;
-            if (graphUri && uri.indexOf(graphUri) == 0) {
-                return true;
-            }
-        }
-        return false;
-    };
     self.getUriTarget = function (nodeId) {
-        var target = "_blank";
+        /* var target = "_blank";
         if (self.isSLSVvisibleUri(nodeId)) {
             target = "_slsvCallback";
-        }
-        return target;
+        }*/
+        return "_slsvCallback";
     };
 
     self.updatePredicateValue = function () {

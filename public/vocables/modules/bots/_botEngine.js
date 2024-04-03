@@ -90,6 +90,10 @@ var _botEngine = (function () {
                 if (!key0) {
                     return self.end();
                 }
+
+                if (!obj[key0]) {
+                    console.log("WARNING : in bot workflow has to be declared before it is called in another workflow");
+                }
                 if (key0 == "_OR") {
                     self.currentObj = obj;
                     return self.nextStep();
@@ -284,7 +288,7 @@ var _botEngine = (function () {
             DateWidget.setDatePickerOnInput("botPromptInput", null, function (date) {
                 _botEngine.currentBot.params[varToFill] = date.getTime();
                 DateWidget.unsetDatePickerOnInput("botPromptInput");
-                self.nextStep();
+                // self.nextStep();
             });
         }
 

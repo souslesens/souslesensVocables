@@ -48,6 +48,10 @@
     "wiki": {
         "url": ""
     },
+    "theme": {
+        "selector": false,
+        "defaultTheme": "Sea Breeze"
+    },
     "authenticationDatabase": {
         "host": "localhost",
         "port": 3306,

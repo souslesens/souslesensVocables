@@ -590,7 +590,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getNodesAncestorsOld = function (sourceLabel, classIds, options, callback) {
+    self.getNodesAncestorsOrDescendantsOld = function (sourceLabel, classIds, options, callback) {
         if (!options) {
             options = {};
         }
@@ -679,14 +679,14 @@ var Sparql_OWL = (function () {
     };
 
     /**
-     * in this version (see getNodesAncestorsOld ) hierarchy is not ordered , manages multiple hierarchy
+     * in this version (see getNodesAncestorsOrDescendantsOld ) hierarchy is not ordered , manages multiple hierarchy
      *
      * @param sourceLabel
      * @param classIds
      * @param options
      * @param callback
      */
-    self.getNodesAncestors = function (sourceLabel, classIds, options, callback) {
+    self.getNodesAncestorsOrDescendants = function (sourceLabel, classIds, options, callback) {
         if (!options) {
             options = {};
         }
@@ -700,50 +700,49 @@ var Sparql_OWL = (function () {
         if (options.excludeItself) {
             modifier = "+";
         }
-        var queryOld =
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-            "SELECT distinct ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel " +
-            // "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
-            fromStr +
-            " WHERE {" +
-            " ?class rdf:type ?type." +
-            " ?class rdfs:subClassOf" +
-            modifier +
-            "|rdf:type" +
-            modifier +
-            " ?superClass." +
-            " ?superClass ^rdfs:subClassOf ?subClass." +
-            "optional{?superClass rdfs:label|skos:prefLabel ?superClassLabel}" +
-            " ?subClass rdf:type ?subClassType. ?superClass rdf:type ?superClassType" +
-            filterStr +
-            " filter (?superClassType !=owl:Restriction)";
-
-        var filterStr = Sparql_common.setFilter("subject", classIds);
 
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-            'SELECT distinct ?subject ?class ?type ?classLabel  ?superClass ?superClassType  ?superClassLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) ' +
-            fromStr +
-            "WHERE { \n" +
-            "  ?class rdf:type ?type. ?class rdfs:subClassOf*|rdf:type* ?superClass.\n" +
-            "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
-            "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
+            'SELECT distinct ?subject ?class ?type ?classLabel  ?superClass ?superClassType ?superClassSubClass ?superClassLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) ' +
+            fromStr;
+        var filterStr;
+        if (!options.descendants) {
+            filterStr = Sparql_common.setFilter("subject", classIds);
+            query +=
+                "  WHERE {" +
+                "  ?superClass ^rdfs:subClassOf ?superClassSubClass\n" +
+                "  \n" +
+                " { SELECT * where {" +
+                "  ?class rdf:type ?type. ?class rdfs:subClassOf*|rdf:type* ?superClass.\n" +
+                "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
+                "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
+        } else {
+            filterStr = Sparql_common.setFilter("superClass", classIds);
+            query +=
+                "  WHERE {" +
+                "   ?superClassSubClass  rdfs:subClassOf ?class" +
+                "  \n" +
+                " { SELECT * where {" +
+                "  ?class rdf:type ?type. ?class rdfs:subClassOf*|rdf:type* ?superClass.\n" +
+                "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
+                "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
+        }
 
         if (options.filter) {
             query += options.filter;
         }
         if (options.withLabels) {
-            query += "OPTIONAL {?class rdfs:label|skos:prefLabel ?classLabel } OPTIONAL {?superClass rdfs:label|skos:prefLabel ?superClassLabel }";
+            query +=
+                "OPTIONAL {?class rdfs:label|skos:prefLabel ?classLabel }" +
+                "OPTIONAL {?superClassSubClass rdfs:label|skos:prefLabel ?superClassSubClassLabel }" +
+                " OPTIONAL {?superClass rdfs:label|skos:prefLabel ?superClassLabel }";
         }
         query += filterStr;
 
-        query += "} LIMIT 1000";
+        query += "}}} LIMIT 1000";
 
         var url = self.sparql_url + "?format=json&query=";
         self.no_params = true;
@@ -758,18 +757,75 @@ var Sparql_OWL = (function () {
                 return callback(err);
             }
 
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass"], { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "superClassSubClass"], { source: sourceLabel });
 
             var hierarchies = {};
-            classIds.forEach(function (id) {
-                hierarchies[id] = [];
 
-                result.results.bindings.forEach(function (item) {
-                    if (item.subject.value == id) {
-                        hierarchies[id].push(item);
+            if (!options.descendants) {
+                classIds.forEach(function (id) {
+                    hierarchies[id] = [];
+
+                    result.results.bindings.forEach(function (item) {
+                        if (!options.descendants && item.subject.value == id) {
+                            hierarchies[id].push(item);
+                        }
+                        if (options.descendants && item.class.value == id) {
+                            hierarchies[id].push(item);
+                        }
+                    });
+
+                    for (var baseClassId in hierarchies) {
+                        var hierarchy = hierarchies[baseClassId];
+                        var parentsMap = {};
+                        hierarchy.forEach(function (item) {
+                            if (item.superClassSubClass) {
+                                parentsMap[item.superClassSubClass.value] = item;
+                            }
+                        });
+                        var uniqueClass = {};
+                        var orderedHierarchy = [];
+
+                        function recurse(classId) {
+                            if (parentsMap[classId] && !uniqueClass[classId]) {
+                                uniqueClass[classId] = 1;
+                                orderedHierarchy.push(parentsMap[classId]);
+                                if (parentsMap[classId].superClass.value) {
+                                    recurse(parentsMap[classId].superClass.value);
+                                }
+                            }
+                        }
+
+                        recurse(baseClassId);
+                        hierarchies[baseClassId] = orderedHierarchy;
                     }
+                    // tions.descendants
                 });
-            });
+            } else {
+                //options.descendants
+
+                classIds.forEach(function (baseClassId) {
+                    var childrenMap = {};
+                    result.results.bindings.forEach(function (item) {
+                        if (item.superClass.value == baseClassId) {
+                            childrenMap[item.superClassSubClass.value] = item;
+                        }
+                    });
+
+                    var orderedHierarchy = [];
+
+                    function recurse(classId) {
+                        for (var key in childrenMap) {
+                            if (childrenMap[key].class.value == classId) {
+                                orderedHierarchy.push(childrenMap[key]);
+                                recurse(childrenMap[key].superClassSubClass.value);
+                            }
+                        }
+                    }
+
+                    recurse(baseClassId);
+                    hierarchies[baseClassId] = orderedHierarchy;
+                });
+            }
 
             return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
         });

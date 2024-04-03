@@ -1,21 +1,25 @@
 import KGquery from "./KGquery.js";
-import SavedQueriesComponent from "../../uiComponents/savedQueriesComponent.js";
+import SavedQueriesWidget from "../../uiWidgets/savedQueriesWidget.js";
 
 var KGquery_myQueries = (function () {
     var self = {};
 
     self.save = function (callback) {
-        var data = {
-            querySets: KGquery.querySets,
-        };
-        return callback(null, data);
+        KGquery.execPathQuery({ dontExecute: true }, function (err, query) {
+            var data = {
+                querySets: KGquery.querySets,
+                sparqlQuery: query,
+            };
+            return callback(null, data);
+        });
     };
 
     self.load = function (err, result) {
         if (err) {
             return alert(err.responseText);
         }
-        $("#KGquery_leftPanelTabs").tabs("option", "active", 1);
+        ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery_r.initQuery, this);
+        //  $("#KGquery_leftPanelTabs").tabs("option", "active", 1);
         KGquery.clearAll();
         KGquery.switchRightPanel(true);
         var querySets = result.querySets.sets;

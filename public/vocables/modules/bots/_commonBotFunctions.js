@@ -39,7 +39,7 @@ var CommonBotFunctions = (function () {
         );
     };
 
-    self.listVocabsFn = function (sourceLabel, varToFill, includeBasicVocabs) {
+    self.listVocabsFn = function (sourceLabel, varToFill, includeBasicVocabs, callback) {
         var vocabs = [{ id: sourceLabel, label: sourceLabel }];
         var imports = Config.sources[sourceLabel].imports;
         if (imports) {
@@ -55,11 +55,13 @@ var CommonBotFunctions = (function () {
         if (vocabs.length == 0) {
             return _botEngine.previousStep("no values found, try another option");
         }
-
+        if (callback) {
+            return callback(null, vocabs);
+        }
         _botEngine.showList(vocabs, varToFill);
     };
 
-    self.listVocabClasses = function (vocab, varToFill, includeOwlThing, classes) {
+    self.listVocabClasses = function (vocab, varToFill, includeOwlThing, classes, callback) {
         OntologyModels.registerSourcesModel(vocab, function (err, result) {
             if (err) {
                 return alert(err.responseText);
@@ -77,12 +79,14 @@ var CommonBotFunctions = (function () {
             if (includeOwlThing || classes.length == 0) {
                 classes.splice(0, 0, { id: "owl:Thing", label: "owl:Thing" });
             }
-
+            if (callback) {
+                return callback(null, classes);
+            }
             _botEngine.showList(classes, varToFill);
         });
     };
 
-    self.listVocabPropertiesFn = function (vocab, varToFill, props) {
+    self.listVocabPropertiesFn = function (vocab, varToFill, props, callback) {
         OntologyModels.registerSourcesModel(vocab, function (err, result) {
             if (!props) {
                 props = [];
@@ -94,12 +98,16 @@ var CommonBotFunctions = (function () {
             if (props.length == 0) {
                 return _botEngine.previousStep("no values found, try another option");
             }
+
             self.sortList(props);
+            if (callback) {
+                return callback(null, props);
+            }
             _botEngine.showList(props, varToFill);
         });
     };
 
-    self.listAnnotationPropertiesFn = function (vocabs, varToFill) {
+    self.listNonObjectPropertiesFn = function (vocabs, varToFill, domain, callback) {
         if (!vocabs) {
             vocabs = Object.keys(Config.ontologiesVocabularyModels);
         }
@@ -111,9 +119,12 @@ var CommonBotFunctions = (function () {
             vocabs,
             function (vocab, callbackEach) {
                 OntologyModels.registerSourcesModel(vocab, function (err, result) {
-                    for (var key in Config.ontologiesVocabularyModels[vocab].annotationProperties) {
-                        var prop = Config.ontologiesVocabularyModels[vocab].annotationProperties[key];
-                        props.push({ id: prop.id, label: vocab + ":" + prop.label });
+                    var props2 = Config.ontologiesVocabularyModels[vocab].nonObjectProperties;
+                    for (var key in props2) {
+                        var prop = props2[key];
+                        if (!domain || !prop.domain || domain == prop.domain || prop.domain == "http://www.w3.org/2000/01/rdf-schema#Resource") {
+                            props.push({ id: prop.id, label: vocab + ":" + prop.label, domain: prop.domain, range: prop.range });
+                        }
                     }
                     callbackEach();
                 });
@@ -123,6 +134,9 @@ var CommonBotFunctions = (function () {
                     return _botEngine.previousStep("no values found, try another option");
                 }
                 self.sortList(props);
+                if (callback) {
+                    return callback(null, props);
+                }
                 _botEngine.showList(props, varToFill);
             }
         );

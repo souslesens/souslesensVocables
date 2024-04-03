@@ -72,7 +72,7 @@ var Lineage_axioms_create = (function () {
                 if (!Array.isArray(types)) {
                     types = [types];
                 }
-                Sparql_OWL.getNodesAncestors("owl", types, {}, function (err, result) {
+                Sparql_OWL.getNodesAncestorsOrDescendants("owl", types, {}, function (err, result) {
                     //  var options = { specificPredicates: ["rdfs:subClassOf", "rdf:type"], includeSources: ["rdf", "rdfs"] };
                     //  Sparql_OWL.getNodesDescendants("owl", types, options, function(err, result) {
                     if (err) {

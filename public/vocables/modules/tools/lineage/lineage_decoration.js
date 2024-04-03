@@ -21,6 +21,8 @@ var Lineage_decoration = (function () {
     self.currentVisjGraphNodesMap = {};
 
     self.decorateNodeAndDrawLegend = function (visjsNodes, legendType) {
+        self.decorateByUpperOntologyByClass(visjsNodes);
+        return;
         if (!visjsNodes) visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
         if (legendType == "individualClasses") {
             self.drawIndividualTypesLegend(visjsNodes, function () {});
@@ -291,12 +293,21 @@ var Lineage_decoration = (function () {
         var nodeOwlTypesMap = {};
         var legendOwlTypeColorsMap = {};
         var legendTreeNode = {};
+        var okNodeIds = [];
         async.series(
             [
+                function (callbackSeries) {
+                    nodeIds.forEach(function (item) {
+                        if (item.startsWith("http")) {
+                            okNodeIds.push(item);
+                        }
+                    });
+                    callbackSeries();
+                },
                 // get nodes super Classes
                 function (callbackSeries) {
                     var uniqueTypes = {};
-                    var slices = common.array.slice(nodeIds, Config.slicedArrayLength);
+                    var slices = common.array.slice(okNodeIds, Config.slicedArrayLength);
                     async.eachSeries(
                         slices,
                         function (slice, callbackEach) {
@@ -325,7 +336,7 @@ var Lineage_decoration = (function () {
                                     });
                                 }
 
-                                Sparql_OWL.getNodesAncestors(Lineage_sources.activeSource, slice, { excludeItself: 0, withLabels: true }, function (err, result) {
+                                Sparql_OWL.getNodesAncestorsOrDescendants(Lineage_sources.activeSource, slice, { excludeItself: 0, withLabels: true }, function (err, result) {
                                     if (err) {
                                         return callbackEach(err);
                                     }

@@ -176,6 +176,19 @@ class UserModel {
             lock.release("UsersThread");
         }
     };
+
+    /**
+     * @param {string} login - the user login
+     * @returns {boolean} the administrator status of the user
+     */
+    isAdmin = async (login) => {
+        const user = await this.findUserAccount(login);
+        if (!user) {
+            throw Error("UserAccount does not exist");
+        }
+
+        return user.id === "admin" || user.groups.includes("admin");
+    };
 }
 
 class UserModelJson extends UserModel {

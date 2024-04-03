@@ -11,10 +11,10 @@ var KGquery_filter_bot = (function () {
     self.start = function (data, currentQuery, validateFn) {
         self.data = data;
         var workflow = null;
-        if (!self.data.annotationProperties) {
+        if (!self.data.nonObjectProperties) {
             workflow = self.workflow_RdfLabel;
         } else {
-            workflow = self.workflow_Annotation;
+            workflow = self.workflow_filterClass;
         }
 
         BotEngine.init(KGquery_filter_bot, workflow, null, function () {
@@ -62,21 +62,23 @@ var KGquery_filter_bot = (function () {
 
     (self.functions.listFilterTypes = function () {
         var choices = [
+            { id: "annotation", label: "annotation" },
             { id: "label", label: "rdfs:label contains" },
             { id: "labelsList", label: "Choose rdfs:label" },
         ];
         BotEngine.showList(choices, "individualsFilterType");
     }),
         (self.functions.listAnnotationsFn = function () {
-            if (!self.data || !self.data.annotationProperties) {
+            if (!self.data || !self.data.nonObjectProperties) {
                 BotEngine.abort("no annotations for this Class");
             }
-            var choices = self.data.annotationProperties;
+            var choices = self.data.nonObjectProperties;
+            BotEngine.showList(choices, "annotationProperty");
             BotEngine.showList(choices, "annotationProperty");
         });
     self.functions.chooseAnnotationOperatorFn = function () {
         var datatype = null;
-        self.data.annotationProperties.forEach(function (item) {
+        self.data.nonObjectProperties.forEach(function (item) {
             if (item.id == self.params.annotationProperty) {
                 datatype = item.datatype;
             }
@@ -129,6 +131,8 @@ var KGquery_filter_bot = (function () {
             if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
                 // annotationPropertyOperator = ">";
                 var dateStr = new Date(annotationPropertyValue).toISOString();
+                //   var dateStr=date.getMonth()+"/"+date.getDate()+"/"+date.getFullYear()
+
                 self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + dateStr + "'^^xsd:datetime )";
             } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#int") {
                 self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + annotationPropertyValue + "'^^xsd:int )";

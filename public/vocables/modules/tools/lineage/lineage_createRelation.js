@@ -13,7 +13,7 @@ var Lineage_createRelation = (function () {
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-        $("#smallDialogDiv").load("snippets/lineage/lineageAddEdgeDialog.html", function () {
+        $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
             self.sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
             self.targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
@@ -96,6 +96,17 @@ var Lineage_createRelation = (function () {
                                 },
                             });
                         }
+                        /* if (true) {
+                            jstreeData.push({
+                                id: "_datatypeProperty",
+                                text: "datatypeProperty",
+                                parent: "#",
+                                type: "_datatypeProperty",
+                                data: {
+                                    id: "_datatypeProperty",
+                                },
+                            });
+                        }*/
 
                         if (true || self.sourceNode.rdfType == "NamedIndividual") {
                             jstreeData.push({
@@ -147,17 +158,28 @@ var Lineage_createRelation = (function () {
                             authorizedProps = result.constraints;
 
                             var html = "Ancestors<br>";
-                            var str = "<b>" + self.sourceNode.label + "</b>";
+                            var str = ""; //"<b>" + self.sourceNode.label + "</b>";
                             result.nodes.startNode.forEach(function (item, index) {
-                                str += "->";
+                                if (index == 0) {
+                                    str += "<b>";
+                                } else {
+                                    str += "->";
+                                }
                                 str += Sparql_common.getLabelFromURI(item);
+                                if (index == 0) str += "</b>";
                             });
                             html += str;
                             html += "<br>";
-                            var str = "<b>" + self.targetNode.label + "</b>";
+
+                            var str = ""; //"<b>" + self.targetNode.label + "</b>";
                             result.nodes.endNode.forEach(function (item, index) {
-                                str += "->";
+                                if (index == 0) {
+                                    str += "<b>";
+                                } else {
+                                    str += "->";
+                                }
                                 str += Sparql_common.getLabelFromURI(item);
+                                if (index == 0) str += "</b>";
                             });
                             html += str;
                             $("#lineageAddEdgeDialog_nodesAncestorsDiv").html(html);
@@ -184,7 +206,13 @@ var Lineage_createRelation = (function () {
                             //  domain: "lineageAddEdgeDialog_domainOntologyProp"
                         };
 
+                        var allProperties = [];
                         var uniqueProps = {};
+                        for (var group in authorizedProps) {
+                            for (var propId in authorizedProps[group]) {
+                                allProperties.push(propId);
+                            }
+                        }
                         sources.forEach(function (_source) {
                             jstreeData.push({
                                 id: _source,
@@ -209,7 +237,7 @@ var Lineage_createRelation = (function () {
 
                                             var cssClass = propStatusCssClassMap[group];
                                             var parent = property.source;
-                                            if (property.superProp) {
+                                            if (property.superProp && allProperties.indexOf(property.superProp) > 0) {
                                                 parent = property.superProp;
                                             }
 
@@ -394,6 +422,7 @@ var Lineage_createRelation = (function () {
         if (obj.event.which == 3) {
             return;
         }
+
         //dispatch of sources to write in depending on relation type and editable
         var inSource;
         var options = {};
@@ -402,6 +431,18 @@ var Lineage_createRelation = (function () {
             // le sameAs sont tous dans le dictionaire
             inSource = Config.dictionarySource;
         } else {
+            /*else if (propId == "_datatypeProperty") {
+            var propLabel = prompt("DatatypeProperty Label");
+            if (!propLabel) return;
+            var xsdType = prompt("DatatypeProperty range xsd:type");
+
+            self.createDataTypeProperty(Lineage_sources.activeSource, propLabel, null, xsdType, function (err, result) {
+                if (err) return alert(err.responseText);
+                $("#smallDialogDiv").dialog("close");
+                return MainController.UI.message("annotation property created", true);
+            });
+            return;
+        } */
             var mainSource = Config.sources[Lineage_sources.activeSource];
             if (Config.sources[self.sourceNode.source].editable) {
                 inSource = self.sourceNode.source;

@@ -618,6 +618,7 @@ tripleObj.objectIsSpecificUri = true;
         } else {
             KGcreator.saveDataSourceMappings();
         }
+        KGcreator_mappings.showTableMappings(self.currentEditingTable);
     };
 
     self.afterMappingsFn = function () {

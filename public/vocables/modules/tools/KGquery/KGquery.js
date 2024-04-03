@@ -133,13 +133,13 @@ var KGquery = (function () {
 
         if (self.currentQuerySet.elements.length > 1) {
             var excludeSelf = false;
-            self.currentQuerySet.elements.forEach(function (queryElement) {
+            /*   self.currentQuerySet.elements.forEach(function (queryElement) {
                 if (queryElement.fromNode.id == node.id || queryElement.toNode.id == node.id) {
                     excludeSelf = true;
                     node.label += "_" + (self.currentQueryElement.paths.length + 1);
                     node.data.label = node.label;
                 }
-            });
+            });*/
 
             $("#KGquery_SetsControlsDiv").show();
             KGquery_paths.getNearestNodeId(node.id, self.currentQuerySet, excludeSelf, function (err, nearestNodeId) {
@@ -233,6 +233,7 @@ var KGquery = (function () {
         if (self.querySets.sets.length > 0) {
             message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
         }
+
         IndividualAggregateWidget.showDialog(
             null,
             function (callback) {
@@ -377,8 +378,8 @@ var KGquery = (function () {
                 }
 
                 var annotationPredicatesStr = "";
-                if (queryElement.fromNode.data.annotationProperties) {
-                    queryElement.fromNode.data.annotationProperties.forEach(function (property) {
+                if (queryElement.fromNode.data.nonObjectProperties) {
+                    queryElement.fromNode.data.nonObjectProperties.forEach(function (property) {
                         var optionalStr = getOptionalClause(subjectVarName);
 
                         annotationPredicatesStr = addToStringIfNotExists(
@@ -393,8 +394,8 @@ var KGquery = (function () {
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", annotationPredicatesStr);
                 }
 
-                if (queryElement.toNode.data.annotationProperties) {
-                    queryElement.toNode.data.annotationProperties.forEach(function (property) {
+                if (queryElement.toNode.data.nonObjectProperties) {
+                    queryElement.toNode.data.nonObjectProperties.forEach(function (property) {
                         var optionalStr = getOptionalClause(objectVarName);
                         annotationPredicatesStr = addToStringIfNotExists(
                             optionalStr + "  {" + objectVarName + " <" + property.id + "> " + objectVarName + "_" + property.label + "}\n",
@@ -409,6 +410,9 @@ var KGquery = (function () {
                 }
                 annotationPredicatesStrs += " \n" + annotationPredicatesStr;
             });
+            if (options.aggregate) {
+                whereStr += options.aggregate.where;
+            }
 
             whereStr += "{" + predicateStr + "\n" + "" + "\n" + filterStr + "\n" + annotationPredicatesStrs + "}";
         });

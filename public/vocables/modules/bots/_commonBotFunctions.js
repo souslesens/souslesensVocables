@@ -107,7 +107,7 @@ var CommonBotFunctions = (function () {
         });
     };
 
-    self.listAnnotationPropertiesFn = function (vocabs, varToFill, callback) {
+    self.listNonObjectPropertiesFn = function (vocabs, varToFill, domain, callback) {
         if (!vocabs) {
             vocabs = Object.keys(Config.ontologiesVocabularyModels);
         }
@@ -119,9 +119,12 @@ var CommonBotFunctions = (function () {
             vocabs,
             function (vocab, callbackEach) {
                 OntologyModels.registerSourcesModel(vocab, function (err, result) {
-                    for (var key in Config.ontologiesVocabularyModels[vocab].annotationProperties) {
-                        var prop = Config.ontologiesVocabularyModels[vocab].annotationProperties[key];
-                        props.push({ id: prop.id, label: vocab + ":" + prop.label });
+                    var props2 = Config.ontologiesVocabularyModels[vocab].nonObjectProperties;
+                    for (var key in props2) {
+                        var prop = props2[key];
+                        if (!domain || !prop.domain || domain == prop.domain || prop.domain == "http://www.w3.org/2000/01/rdf-schema#Resource") {
+                            props.push({ id: prop.id, label: vocab + ":" + prop.label, domain: prop.domain, range: prop.range });
+                        }
                     }
                     callbackEach();
                 });

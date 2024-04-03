@@ -22,10 +22,12 @@ const ManchesterSyntaxEngine = {
 
         const autosuggester = autosuggest.autosuggester(OWL2ManchesterLexer, OWL2ManchesterParser);
         try {
-            let suggestions = autosuggester.autosuggest(owlInput);
+            let suggestions = autosuggester.autosuggest(lastToken);
+            console.log("lastToken: ", lastToken);
             console.log("suggestions: ", suggestions);
             callback(null, suggestions);
         } catch (err) {
+            console.log(err)
             callback(err);
         }
 

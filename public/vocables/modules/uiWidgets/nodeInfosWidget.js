@@ -170,7 +170,7 @@ var NodeInfosWidget = (function () {
                 function (callbackSeries) {
                     self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (err, result) {
                         if (err) {
-                            callbackSeries(err);
+                            return callbackSeries(err);
                         }
                         types = result.types;
                         callbackSeries();

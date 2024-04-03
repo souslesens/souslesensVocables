@@ -15,10 +15,16 @@ var CreateResource_bot = (function () {
     var self = {};
     self.title = "Create Resource";
 
-    self.start = function () {
-        _botEngine.init(CreateResource_bot, self.workflow, null, function () {
+    self.start = function (workflow, _params, callback) {
+        self.callback = callback;
+        if (!workflow) workflow = self.workflow;
+        _botEngine.init(CreateResource_bot, workflow, null, function () {
             self.source = Lineage_sources.activeSource;
             self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
+            if (_params)
+                for (var key in _params) {
+                    self.params[key] = _params[key];
+                }
             _botEngine.nextStep();
         });
     };
@@ -45,11 +51,15 @@ var CreateResource_bot = (function () {
                 // "owl:ObjectProperty": { promptResourceLabelFn: { listVocabsFn: { listObjectPropertiesfn: self.workflow_saveResource } } },
 
                 "owl:NamedIndividual": { promptResourceLabelFn: { listVocabsFn: { listClassTypesFn: self.workflow_saveResource } } },
-                DatatypeProperty: { promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } } },
+                DatatypeProperty: self.workFlowDatatypeProperty,
                 ImportClass: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
                 ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } },
             },
         },
+    };
+
+    self.workFlowDatatypeProperty = {
+        promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } },
     };
 
     self.functionTitles = {
@@ -158,6 +168,7 @@ var CreateResource_bot = (function () {
         },
 
         listDatatypePropertyDomainFn: function () {
+            if (self.params.datatypePropertyDomain) return _botEngine.nextStep();
             CommonBotFunctions.listVocabClasses(self.params.source, "datatypePropertyDomain", false, [{ id: "", label: "none" }]);
         },
         listDatatypePropertyRangeFn: function () {
@@ -193,19 +204,31 @@ var CreateResource_bot = (function () {
                     object: range,
                 });
             }
+            if (domain) {
+                triples.push({
+                    subject: propId,
+                    predicate: "rdfs:domain",
+                    object: domain,
+                });
+            }
 
             Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
                 var modelData = {
-                    annotationProperties: {
+                    nonObjectProperties: {
                         [propId]: {
                             id: propId,
                             label: propLabel,
                             range: range,
+                            domain: domain,
                         },
                     },
                 };
                 OntologyModels.updateModel(source, modelData, {}, function (err, result) {
                     console.log(err || "ontologyModelCache updated");
+
+                    if (self.callback) {
+                        return self.callback();
+                    }
                     BotEngine.nextStep();
                 });
             });

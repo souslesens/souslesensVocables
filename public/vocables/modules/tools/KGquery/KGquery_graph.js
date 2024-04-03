@@ -41,10 +41,10 @@ var KGquery_graph = (function () {
                 deleteNode: false,
                 deleteEdge: false,
 
-                addEdge: function (edgeData, callback) {
-                    KGquery_graph.addInterGraphLink(edgeData, callback);
-                    return false;
-                },
+                /*     addEdge: function (edgeData, callback) {
+                         KGquery_graph.addInterGraphLink(edgeData, callback);
+                         return false;
+                     },*/
             },
         },
     };
@@ -84,6 +84,7 @@ var KGquery_graph = (function () {
                             return callbackSeries("notFound");
                         }
                         visjsData = result;
+
                         return callbackSeries();
                     });
                 },
@@ -149,7 +150,7 @@ var KGquery_graph = (function () {
                         });
                         visjsData.nodes.forEach(function (node) {
                             if (annotationPropertiesmap[node.data.id]) {
-                                node.data.annotationProperties = annotationPropertiesmap[node.data.id].properties;
+                                node.data.nonObjectProperties = annotationPropertiesmap[node.data.id].properties;
                             }
                         });
                         callbackSeries();
@@ -165,6 +166,20 @@ var KGquery_graph = (function () {
                     return alert(err);
                 }
                 MainController.UI.message("drawing graph");
+
+                //   https://fonts.google.com/icons
+
+                var colors = ["#fdac00", "#aa1151", "#ED008C", "#00B5EC", "#af7ede", "#AFD46B"];
+
+                var icons = {
+                    "http://data.total/resource/tsf/dalia-lifex1/manning": { icon: "persons.png", color: colors[4] },
+                    "http://data.total/resource/tsf/dalia-lifex1/tag": { icon: "bookmark.png", color: colors[2] },
+                    "http://data.total/resource/tsf/dalia-lifex1/Task": { icon: "task.png", color: colors[0] },
+                    "http://data.total/resource/tsf/dalia-lifex1/JobCardExecution": { icon: "jobCard.png", color: colors[1] },
+                    "http://data.total/resource/tsf/dalia-lifex1/EquipmentItem": { icon: "machine.png", color: colors[3] },
+                };
+
+                var dir = "/vocables/KGqueryIcons/";
                 visjsData.nodes.forEach(function (item) {
                     // item.color="#ddd"
                     if (item.label.indexOf("Date") > -1) {
@@ -174,6 +189,21 @@ var KGquery_graph = (function () {
                     }
                     item.initialColor = item.color;
                     item.initialShape = item.shape;
+                    if (icons[item.id]) {
+                        item.shape = "circularImage";
+                        item.size = 15;
+                        delete item.icon;
+                        item.image = dir + icons[item.id].icon;
+                        item.color = icons[item.id].color;
+                        item.borderWidth = 3;
+                        item.font = "18px arial " + icons[item.id].color;
+                        /* item.icon = {
+                             face: "'Ionicons'",
+                             code: "\uf276",
+                             size: 50,
+                             color: "#f0a30a"
+                         };*/
+                    }
                 });
 
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
@@ -184,7 +214,7 @@ var KGquery_graph = (function () {
                     visjsData.nodes.forEach(function (node) {
                         newNodes.push({ id: node.id, color: node.color, shape: node.shape });
                     });
-                    self.KGqueryGraph.data.nodes.update(newNodes);
+                    self.KGqueryGraph.data.nodes.update(visjsData.nodes);
                 });
                 MainController.UI.message("", true);
 

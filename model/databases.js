@@ -1,4 +1,5 @@
 const fs = require("fs");
+const knex = require("knex");
 const { Lock } = require("async-await-mutex-lock");
 
 const { configDatabasesPath } = require("./config");
@@ -116,14 +117,14 @@ class DatabaseModel {
      * @param {string} driverName - the driver name
      * @returns {string} the knex version of the database driver
      */
-    getClientDriver = async (driverName) => {
+    getClientDriver = (driverName) => {
         switch (driverName) {
             case "sqlserver":
                 return "mssql";
             case "postgres":
                 return "pg";
         }
-    }
+    };
 
     /**
      * @param {string} identifier -  a database identifier
@@ -132,7 +133,7 @@ class DatabaseModel {
         const databases = await this._read();
 
         const updatedDatabases = databases.map((database) => {
-            return (database.id == updatedDatabase.id) ? updatedDatabase : database;
+            return database.id == updatedDatabase.id ? updatedDatabase : database;
         });
 
         await lock.acquire("DatabasesThread");
@@ -141,6 +142,29 @@ class DatabaseModel {
         } finally {
             lock.release("DatabasesThread");
         }
+    };
+    /**
+     * @param {string} databaseId - the database id
+     * @param {string} query - a sql query
+     * @returns {Promise<any>} query result
+     */
+    query = async (databaseId, query) => {
+        const database = await this.getDatabase(databaseId);
+        const dbClient = this.getClientDriver(database.driver);
+        const conn = knex({
+            acquireConnectionTimeout: 5000,
+            client: dbClient,
+            connection: {
+                host: database.host,
+                port: database.port,
+                user: database.user,
+                password: database.password,
+                database: database.database,
+            },
+        });
+
+        const result = await conn.raw(query);
+        return { rowCount: result.rowCount, rows: result.rows };
     };
 }
 

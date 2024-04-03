@@ -1,37 +1,15 @@
-const knex = require("knex");
-
 const { databaseModel } = require("../../../../../../model/databases");
 
 module.exports = function () {
     let operations = { GET };
 
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
         try {
-            const database = await databaseModel.getDatabase(req.params.id);
-
-            const connection = knex({
-                acquireConnectionTimeout: 5000, // 5s
-                client: await databaseModel.getClientDriver(database.driver),
-                connection: {
-                    host: database.host,
-                    port: database.port,
-                    user: database.user,
-                    password: database.password,
-                    database: database.database,
-                },
-            });
-
-            connection
-                .raw("SELECT 1")
-                .then(() => {
-                    res.status(200).json({ message: "The remote database server is running" });
-                })
-                .catch((err) => {
-                    res.status(403).json({ message: "The connection to the database was refused" });
-                });
+            await databaseModel.query(req.params.id, "SELECT 1");
+            res.status(200).json({ message: "The remote database server is running" });
         } catch (err) {
-            if (typeof err.cause === "number") {
-                res.status(err.cause).json({ message: err.message });
+            if (err.code === "EHOSTUNREACH") {
+                res.status(403).json({ message: err.message });
             } else {
                 res.status(500).json({ message: err.message });
             }

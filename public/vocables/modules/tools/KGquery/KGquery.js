@@ -133,13 +133,13 @@ var KGquery = (function () {
 
         if (self.currentQuerySet.elements.length > 1) {
             var excludeSelf = false;
-            self.currentQuerySet.elements.forEach(function (queryElement) {
+            /*   self.currentQuerySet.elements.forEach(function (queryElement) {
                 if (queryElement.fromNode.id == node.id || queryElement.toNode.id == node.id) {
                     excludeSelf = true;
                     node.label += "_" + (self.currentQueryElement.paths.length + 1);
                     node.data.label = node.label;
                 }
-            });
+            });*/
 
             $("#KGquery_SetsControlsDiv").show();
             KGquery_paths.getNearestNodeId(node.id, self.currentQuerySet, excludeSelf, function (err, nearestNodeId) {
@@ -233,12 +233,6 @@ var KGquery = (function () {
         if (self.querySets.sets.length > 0) {
             message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
         }
-
-
-
-
-
-
 
         IndividualAggregateWidget.showDialog(
             null,
@@ -416,6 +410,9 @@ var KGquery = (function () {
                 }
                 annotationPredicatesStrs += " \n" + annotationPredicatesStr;
             });
+            if (options.aggregate) {
+                whereStr += options.aggregate.where;
+            }
 
             whereStr += "{" + predicateStr + "\n" + "" + "\n" + filterStr + "\n" + annotationPredicatesStrs + "}";
         });

@@ -91,8 +91,8 @@ var _botEngine = (function () {
                     return self.end();
                 }
 
-                if(!obj[key0]){
-                    console.log("WARNING : in bot workflow has to be declared before it is called in another workflow")
+                if (!obj[key0]) {
+                    console.log("WARNING : in bot workflow has to be declared before it is called in another workflow");
                 }
                 if (key0 == "_OR") {
                     self.currentObj = obj;

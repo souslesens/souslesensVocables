@@ -11,40 +11,37 @@ import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../shared/ontologyModels.js";
 
-var CreateResource_bot = (function() {
+var CreateResource_bot = (function () {
     var self = {};
     self.title = "Create Resource";
 
-    self.start = function(workflow,_params,callback) {
-
-        self.callback=callback;
-        if(!workflow)
-            workflow=self.workflow
-        _botEngine.init(CreateResource_bot, workflow, null, function() {
+    self.start = function (workflow, _params, callback) {
+        self.callback = callback;
+        if (!workflow) workflow = self.workflow;
+        _botEngine.init(CreateResource_bot, workflow, null, function () {
             self.source = Lineage_sources.activeSource;
             self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
-            if(_params)
-                for(var key in _params){
-                    self.params[key]=_params[key]
-            }
+            if (_params)
+                for (var key in _params) {
+                    self.params[key] = _params[key];
+                }
             _botEngine.nextStep();
         });
     };
 
     self.workflow_end = {
-
         _OR: {
             "New Resource": { newResourceFn: {} },
-            End: {}
-        }
+            End: {},
+        },
     };
     self.workflow_saveResource = {
         saveResourceFn: {
             _OR: {
                 Edit: { editResourceFn: self.workflow_end },
-                Draw: { drawResourceFn: self.workflow_end }
-            }
-        }
+                Draw: { drawResourceFn: self.workflow_end },
+            },
+        },
     };
 
     self.workflow = {
@@ -56,14 +53,13 @@ var CreateResource_bot = (function() {
                 "owl:NamedIndividual": { promptResourceLabelFn: { listVocabsFn: { listClassTypesFn: self.workflow_saveResource } } },
                 DatatypeProperty: self.workFlowDatatypeProperty,
                 ImportClass: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
-                ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } }
-            }
-        }
+                ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } },
+            },
+        },
     };
 
     self.workFlowDatatypeProperty = {
-        promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } }
-
+        promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } },
     };
 
     self.functionTitles = {
@@ -77,69 +73,68 @@ var CreateResource_bot = (function() {
         listImportsFn: "Add import to source",
         promptDatatypePropertyLabelFn: "enter datatypeProperty label",
         listDatatypePropertyDomainFn: "enter datatypeProperty domain",
-        listDatatypePropertyRangeFn: "enter datatypeProperty domain"
+        listDatatypePropertyRangeFn: "enter datatypeProperty domain",
     };
 
     self.functions = {
-        listResourceTypesFn: function(queryParams, varName) {
+        listResourceTypesFn: function (queryParams, varName) {
             var choices = [
                 { id: "owl:Class", label: "Class" },
                 { id: "owl:NamedIndividual", label: "Individual" },
                 // { id: "owl:ObjectProperty", label: "ObjectProperty" },
                 { id: "DatatypeProperty", label: "DatatypeProperty" },
                 { id: "ImportClass", label: "Import Class" },
-                { id: "ImportSource", label: "Add import source " }
+                { id: "ImportSource", label: "Add import source " },
             ];
             _botEngine.showList(choices, "resourceType");
         },
 
-        listVocabsFn: function() {
+        listVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(self.source, "currentVocab");
         },
 
-        promptResourceLabelFn: function() {
+        promptResourceLabelFn: function () {
             _botEngine.promptValue("resource label ", "resourceLabel");
             /*  self.params.resourceLabel = prompt("resource label ");
             BotEngine.writeCompletedHtml(self.params.resourceLabel);
             BotEngine.nextStep();*/
         },
 
-        listSuperClassesFn: function() {
+        listSuperClassesFn: function () {
             CommonBotFunctions.listVocabClasses(self.params.currentVocab, "resourceId", true);
         },
-        listClassTypesFn: function() {
+        listClassTypesFn: function () {
             self.functions.listSuperClassesFn();
         },
-        axiomaticDefinitionFn: function() {
-            AxiomsEditor.init(self.params.resourceId, function(err, manchesterText) {
+        axiomaticDefinitionFn: function () {
+            AxiomsEditor.init(self.params.resourceId, function (err, manchesterText) {
                 self.params.manchesterText = manchesterText;
                 _botEngine.nextStep();
             });
         },
 
-        listImportsFn: function() {
+        listImportsFn: function () {
             var choices = Object.keys(Config.sources);
             choices.sort();
             _botEngine.showList(choices, "importSource");
         },
-        saveImportSource: function() {
+        saveImportSource: function () {
             var importSource = self.params.importSource;
             if (!importSource) {
                 alert("no source selected for import");
                 return _botEngine.reset();
             }
-            Lineage_createRelation.setNewImport(self.params.source, importSource, function(err, result) {
+            Lineage_createRelation.setNewImport(self.params.source, importSource, function (err, result) {
                 _botEngine.nextStep();
             });
         },
 
-        saveResourceFn: function() {
+        saveResourceFn: function () {
             if (self.params.resourceType == "ImportClass") {
-                Sparql_OWL.copyUriTriplesFromSourceToSource(self.params.currentVocab, self.params.source, self.params.resourceId, function(err, result) {
-                });
+                Sparql_OWL.copyUriTriplesFromSourceToSource(self.params.currentVocab, self.params.source, self.params.resourceId, function (err, result) {});
             } else {
                 var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, self.params.resourceId);
-                Lineage_createResource.writeResource(self.params.source, triples, function(err, resourceId) {
+                Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
                     if (err) {
                         _botEngine.abort(err.responseText);
                     }
@@ -149,40 +144,39 @@ var CreateResource_bot = (function() {
             }
         },
 
-        editResourceFn: function() {
+        editResourceFn: function () {
             NodeInfosWidget.showNodeInfos(self.params.source, self.params.resourceId, "mainDialogDiv");
             _botEngine.nextStep();
         },
-        drawResourceFn: function() {
+        drawResourceFn: function () {
             var nodeData = {
                 id: self.params.resourceId,
                 data: {
                     id: self.params.resourceId,
-                    source: self.params.source
-                }
+                    source: self.params.source,
+                },
             };
             Lineage_whiteboard.drawNodesAndParents(nodeData, 1, { legendType: "individualClasses" });
             _botEngine.nextStep();
         },
-        newResourceFn: function() {
+        newResourceFn: function () {
             self.start();
         },
 
-        promptDatatypePropertyLabelFn: function() {
+        promptDatatypePropertyLabelFn: function () {
             _botEngine.promptValue("DatatypePropertyLabel", "datatypePropertyLabel");
         },
 
-        listDatatypePropertyDomainFn: function() {
-            if(self.params.datatypePropertyDomain)
-                return _botEngine.nextStep()
+        listDatatypePropertyDomainFn: function () {
+            if (self.params.datatypePropertyDomain) return _botEngine.nextStep();
             CommonBotFunctions.listVocabClasses(self.params.source, "datatypePropertyDomain", false, [{ id: "", label: "none" }]);
         },
-        listDatatypePropertyRangeFn: function() {
+        listDatatypePropertyRangeFn: function () {
             var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:datetime"];
             _botEngine.showList(choices, "datatypePropertyRange");
         },
 
-        createDataTypePropertyFn: function(source, propLabel, domain, range, callback) {
+        createDataTypePropertyFn: function (source, propLabel, domain, range, callback) {
             var source = self.params.source;
             var propLabel = self.params.datatypePropertyLabel;
             var domain = self.params.datatypePropertyDomain;
@@ -195,50 +189,50 @@ var CreateResource_bot = (function() {
                 {
                     subject: propId,
                     predicate: "rdf:type",
-                    object: "owl:DatatypeProperty"
+                    object: "owl:DatatypeProperty",
                 },
                 {
                     subject: propId,
                     predicate: "rdfs:label",
-                    object: propLabel
-                }
+                    object: propLabel,
+                },
             ];
             if (range) {
                 triples.push({
                     subject: propId,
                     predicate: "rdfs:range",
-                    object: range
+                    object: range,
                 });
             }
             if (domain) {
                 triples.push({
                     subject: propId,
                     predicate: "rdfs:domain",
-                    object: domain
+                    object: domain,
                 });
             }
 
-            Sparql_generic.insertTriples(source, triples, null, function(err, _result) {
+            Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
                 var modelData = {
                     nonObjectProperties: {
                         [propId]: {
                             id: propId,
                             label: propLabel,
                             range: range,
-                            domain: domain
-                        }
-                    }
+                            domain: domain,
+                        },
+                    },
                 };
-                OntologyModels.updateModel(source, modelData, {}, function(err, result) {
+                OntologyModels.updateModel(source, modelData, {}, function (err, result) {
                     console.log(err || "ontologyModelCache updated");
 
-                    if(self.callback){
-                        return self.callback()
+                    if (self.callback) {
+                        return self.callback();
                     }
                     BotEngine.nextStep();
                 });
             });
-        }
+        },
     };
 
     return self;

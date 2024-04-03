@@ -431,7 +431,7 @@ var Lineage_createRelation = (function () {
             // le sameAs sont tous dans le dictionaire
             inSource = Config.dictionarySource;
         } else {
-        /*else if (propId == "_datatypeProperty") {
+            /*else if (propId == "_datatypeProperty") {
             var propLabel = prompt("DatatypeProperty Label");
             if (!propLabel) return;
             var xsdType = prompt("DatatypeProperty range xsd:type");

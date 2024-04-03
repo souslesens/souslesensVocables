@@ -199,8 +199,6 @@ var KGcreator = (function () {
                     KGcreator.currentTreeNode = obj.node;
                     //  KGcreator_run.getTableAndShowMappings();
 
-
-
                     if (obj.node.data.type == "databaseSource") {
                         self.currentConfig.currentDataSource = {
                             name: obj.node.id,
@@ -595,7 +593,7 @@ var KGcreator = (function () {
                             columns = result.headers;
                             var tableObj = { [fileName]: columns };
                             self.currentConfig.currentDataSource.tables = tableObj;
-                            self.currentConfig.currentDataSource.sampleData=result.data[0]
+                            self.currentConfig.currentDataSource.sampleData = result.data[0];
                             callbackSeries();
                         },
                         error: function (err) {

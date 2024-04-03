@@ -1,11 +1,30 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.61.0](https://github.com/souslesens/souslesensVocables/compare/1.60.0...1.61.0) (2024-03-29)
 
-## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.57.0...master)
+### Features
+
+-   **ConfigEditor:** autocomplete group in the edit source form ([dc610d7](https://github.com/souslesens/souslesensVocables/commit/dc610d7d813c0782a420c4d0ac031225b05a8a55))
+-   **configEditor:** sort sources by graphURI and Groups ([7e01253](https://github.com/souslesens/souslesensVocables/commit/7e012539972a0692e74f9474ee7dadaecb22e055))
+-   **configEditor:** source is readOnly by default ([af79e14](https://github.com/souslesens/souslesensVocables/commit/af79e14ea4231bc426d1b485b5d0a116cc645612))
+-   **graphManagement:** filter sources ([4cd1d51](https://github.com/souslesens/souslesensVocables/commit/4cd1d51c816f56485711b8c653587a238376b6da))
+-   **graphManagement:** use mui table with sorting ([1027a84](https://github.com/souslesens/souslesensVocables/commit/1027a84959cc8f8e68e21fbd6179f380f406e85f))
+
+### Bug Fixes
+
+-   remove console.log ([54aee8e](https://github.com/souslesens/souslesensVocables/commit/54aee8e14bf7543da801a6ae488963aa9bf6cb64))
+
+## [1.59.0](https://github.com/souslesens/souslesensVocables/compare/1.58.0...1.59.0)
+
+## [1.58.1](https://github.com/souslesens/souslesensVocables/compare/1.57.0...1.58.1)
+
+### Fixed
+
+-   Rename KgqueryQueryTab.html to KGqueryQueryTab.html
+
+## [1.58.0](https://github.com/souslesens/souslesensVocables/compare/1.57.0...1.58.0)
 
 ## [1.57.2](https://github.com/souslesens/souslesensVocables/compare/1.56.0...1.57.2)
 

@@ -1,5 +1,7 @@
 # Changelog
 
+
+
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 ## [1.62.0](https://github.com/souslesens/souslesensVocables/compare/1.61.0...1.62.0) (2024-04-03)
@@ -22,6 +24,14 @@ All notable changes to this project will be documented in this file. See [standa
 ### Bug Fixes
 
 -   remove console.log ([54aee8e](https://github.com/souslesens/souslesensVocables/commit/54aee8e14bf7543da801a6ae488963aa9bf6cb64))
+
+## [1.60.1](https://github.com/souslesens/souslesensVocables/compare/1.59.0...1.60.1)
+
+## Fixed
+
+-   **user/model**: fix idAdmin method
+
+## [1.60.0](https://github.com/souslesens/souslesensVocables/compare/1.59.0...1.60.0)
 
 ## [1.59.0](https://github.com/souslesens/souslesensVocables/compare/1.58.0...1.59.0)
 

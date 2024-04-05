@@ -251,7 +251,8 @@ var KGbuilder_triplesMaker = {
     getTripleObject: function(tableMappings, mapping, line, callback) {
         var objectStr = null;
 
-
+if(mapping.p.indexOf("member")>-1)
+    var x=3
         //get value for Object
         {
             if (mapping.o === "_rowIndex") {
@@ -326,7 +327,7 @@ var KGbuilder_triplesMaker = {
                     }
                     //  mapping.p = "rdf:value";
                     if (!mapping.dataType.startsWith("xsd:")) {
-                        mapping.dataType = "xsd:string";
+                        mapping.dataType = "" //"xsd:string";
                     }
                     objectStr = "'" + str + "'^^" + mapping.dataType;
                 } else {

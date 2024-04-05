@@ -225,10 +225,10 @@ var KGcreator_bot = (function () {
         },
 
         listClassVocabsFn: function () {
-            CommonBotFunctions.listVocabsFn(self.params.source, "classVocab");
+            CommonBotFunctions.listVocabsFn(self.params.source, "classVocab",true);
         },
         listPredicateVocabsFn: function () {
-            CommonBotFunctions.listVocabsFn(self.params.source, "predicateVocab");
+            CommonBotFunctions.listVocabsFn(self.params.source, "predicateVocab",true);
         },
         listNonObjectPropertiesVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(self.params.source, "nonObjectPropertyVocab", true);
@@ -582,6 +582,8 @@ var KGcreator_bot = (function () {
                     o: predicateObjectColumn,
                 };
                 var range = Config.ontologiesVocabularyModels[nonObjectPropertyVocab].nonObjectProperties[nonObjectPropertyId].range;
+                if( range.indexOf("Resource")>-1)
+                    range=""
                 if (range) {
                     triple.dataType = range;
                 } else {

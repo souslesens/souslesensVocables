@@ -279,7 +279,7 @@ var KGbuilder_triplesMaker = {
                     if (line[mapping.o]) {
                         objectStr = tableMappings.transform[mapping.o](line[mapping.o], "o", mapping.p, line, mapping);
                     } else {
-                        objectStr = tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
+                        objectStr = ""//tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
                     }
                     // return callback(null,objectStr);
                 } catch (e) {

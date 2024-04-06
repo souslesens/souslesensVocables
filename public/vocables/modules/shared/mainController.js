@@ -616,33 +616,18 @@ var MainController = (function () {
 
                 var url = window.location.href;
 
-                if (url.includes("index_old.html")) {
-                    //if the old index is already launched we have just to init the tool
-                    if (source) {
-                        MainController.initControllers(source);
-                        Config.userTools[tool].urlParam_source = source;
-                    }
-                    self.UI.initTool(tool, function () {
-                        callback();
-                    });
-                } else {
                     // if tool available load it in responsive
                     if (source) {
                         ResponsiveUI.source = source;
                     }
-
                     ResponsiveUI.onToolSelect(tool);
-                    /*
-                    var p = url.indexOf("?");
-                    if (p > -1) {
-                        var params = url.substring(p);
-                        url = url.substring(0, p);
-                    }
 
-                    url = url + "index_old.html" + params;
-                    window.location.assign(url);
-                    */
+                if (window.history.pushState && url.indexOf("localhost")<0) {
+                    var url=url.substring(0,url.indexOf("?"))
+                    window.history.pushState({  }, "SLS",url);
                 }
+
+
             }
         } else {
             callback();

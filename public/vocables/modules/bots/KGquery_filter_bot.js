@@ -3,6 +3,7 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
 
 import BotEngine from "./_botEngine.js";
+import _botEngine from "./_botEngine.js";
 
 var KGquery_filter_bot = (function () {
     var self = {};
@@ -30,16 +31,20 @@ var KGquery_filter_bot = (function () {
         });
     };
 
-    self.workflow_filterClass = {
-        listFilterTypes: {
-            _OR: {
-                annotation: { listAnnotationsFn: { chooseAnnotationOperatorFn: { promptAnnotationValueFn: { setSparqlQueryFilterFn: {} } } } },
-                label: { promptIndividualsLabelFn: { setSparqlQueryFilterFn: {} } },
-                labelsList: { listIndividualsFn: { setSparqlQueryFilterFn: {} } },
-            },
-        },
-    };
-    self.workflow_Annotation = { listAnnotationsFn: { chooseAnnotationOperatorFn: { promptAnnotationValueFn: { setSparqlQueryFilterFn: {} } } } };
+   
+
+    self.workflow_filterClass = { listPropertiesFn: {
+            choosePropertyOperatorFn: {
+                promptPropertyValueFn: {listLogicalOperatorFn:{setSparqlQueryFilterFn: {}}
+
+                }
+            }
+        }
+    }
+
+
+
+    self.workflow_Property = { listPropertiesFn: { choosePropertyOperatorFn: { promptPropertyValueFn: { setSparqlQueryFilterFn: {} } } } };
 
     self.workflow_RdfLabel = {
         listFilterTypes: {
@@ -51,9 +56,9 @@ var KGquery_filter_bot = (function () {
     };
 
     self.functionTitles = {
-        listAnnotationsFn: "Choose an annotation",
-        chooseAnnotationOperatorFn: "Choose an operator",
-        promptAnnotationValueFn: "Enter a value ",
+        listPropertiesFn: "Choose an property",
+        choosePropertyOperatorFn: "Choose an operator",
+        promptPropertyValueFn: "Enter a value ",
         promptIndividualsLabelFn: "Enter a label ",
         listIndividualsFn: "Choose a label ",
     };
@@ -62,55 +67,64 @@ var KGquery_filter_bot = (function () {
 
     (self.functions.listFilterTypes = function () {
         var choices = [
-            { id: "annotation", label: "annotation" },
+            { id: "property", label: "property" },
             { id: "label", label: "rdfs:label contains" },
             { id: "labelsList", label: "Choose rdfs:label" },
         ];
         BotEngine.showList(choices, "individualsFilterType");
     }),
-        (self.functions.listAnnotationsFn = function () {
+        (self.functions.listPropertiesFn = function () {
             if (!self.data || !self.data.nonObjectProperties) {
-                BotEngine.abort("no annotations for this Class");
+                BotEngine.abort("no property for this Class");
             }
             var choices = self.data.nonObjectProperties;
-            BotEngine.showList(choices, "annotationProperty");
-            BotEngine.showList(choices, "annotationProperty");
+            BotEngine.showList(choices, "property");
+         
         });
-    self.functions.chooseAnnotationOperatorFn = function () {
+    self.functions.choosePropertyOperatorFn = function () {
         var datatype = null;
         self.data.nonObjectProperties.forEach(function (item) {
-            if (item.id == self.params.annotationProperty) {
+            if (item.id == self.params.property) {
                 datatype = item.datatype;
             }
         });
-        self.params.annotationDatatype = datatype;
+        self.params.propertyDatatype = datatype;
         var choices = [];
-        if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
-            // annotationPropertyOperator = ">";
+        if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
+            // propertyOperator = ">";
             choices = ["=", "<", "<=", ">", ">="];
-        } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#int") {
+        } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
             choices = ["=", "<", "<=", ">", ">="];
-        } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#float") {
+        } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#float") {
             choices = ["=", "<", "<=", ">", ">="];
         } else {
             choices = ["=", "!=", "contains", ">", "!contains"];
         }
 
-        BotEngine.showList(choices, "annotationPropertyOperator");
+        BotEngine.showList(choices, "propertyOperator");
     };
-    self.functions.promptAnnotationValueFn = function () {
-        if (!self.params.annotationDatatype || self.params.annotationDatatype == "xsd:string") {
-            BotEngine.promptValue("enter value", "annotationPropertyValue");
+    self.functions.promptPropertyValueFn = function () {
+        if (!self.params.propertyDatatype || self.params.propertyDatatype == "xsd:string") {
+            BotEngine.promptValue("enter value", "propertyValue");
         } else if (
-            !self.params.annotationDatatype ||
-            self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#date" ||
-            self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#datetime"
+            !self.params.propertyDatatype ||
+            self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" ||
+            self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#datetime"
         ) {
-            BotEngine.promptValue("enter value", "annotationPropertyValue", null, { datePicker: 1 });
+            BotEngine.promptValue("enter value", "propertyValue", null, { datePicker: 1 });
         } else {
-            BotEngine.promptValue("enter value", "annotationPropertyValue");
+            BotEngine.promptValue("enter value", "propertyValue");
         }
     };
+
+    self.functions.listLogicalOperatorFn=function(){
+       var choices=["end","AND","OR"]
+        BotEngine.showList(choices, "propertyOperator",null,false,function(value){
+            if(value=="end")
+                _botEngine.nextStep()
+        });
+    }
+
 
     self.functions.setSparqlQueryFilterFn = function (queryParams, varName) {
         var varName = self.params.varName;
@@ -119,34 +133,38 @@ var KGquery_filter_bot = (function () {
         var advancedFilter = self.params.advancedFilter || "";
         var filterLabel = self.params.queryText;
 
-        var annotationProperty = self.params.annotationProperty;
-        var annotationPropertyOperator = self.params.annotationPropertyOperator;
-        var annotationPropertyValue = self.params.annotationPropertyValue;
+        var property = self.params.property;
+        var propertyOperator = self.params.propertyOperator;
+        var propertyValue = self.params.propertyValue;
 
         self.filter = "";
         //individualsFilterType='list';
-        if (annotationPropertyValue) {
-            var propLabel = Sparql_common.getLabelFromURI(annotationProperty);
+        if (propertyValue) {
+            var propLabel = Sparql_common.getLabelFromURI(property);
 
-            if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
-                // annotationPropertyOperator = ">";
-                var dateStr = new Date(annotationPropertyValue).toISOString();
+            if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
+                // propertyOperator = ">";
+                var dateStr = new Date(propertyValue).toISOString();
                 //   var dateStr=date.getMonth()+"/"+date.getDate()+"/"+date.getFullYear()
 
-                self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + dateStr + "'^^xsd:datetime )";
-            } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#int") {
-                self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + annotationPropertyValue + "'^^xsd:int )";
-            } else if (self.params.annotationDatatype == "http://www.w3.org/2001/XMLSchema#float") {
-                self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + annotationPropertyValue + "'^^xsd:float )";
+                self.filter = "FILTER (?" + varName + "_" + propLabel + " " + propertyOperator + " '" + dateStr + "'^^xsd:datetime )";
+            } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
+                self.filter = "FILTER (?" + varName + "_" + propLabel + " " + propertyOperator + " '" + propertyValue + "'^^xsd:int )";
+            } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#float") {
+                self.filter = "FILTER (?" + varName + "_" + propLabel + " " + propertyOperator + " '" + propertyValue + "'^^xsd:float )";
             } else {
-                if (common.isNumber(annotationPropertyValue)) {
-                    self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " " + annotationPropertyValue + " )";
+                if (common.isNumber(propertyValue)) {
+                    self.filter = "FILTER (?" + varName + "_" + propLabel + " " + propertyOperator + " " + propertyValue + " )";
                 } else {
                     //string
-                    if (annotationPropertyOperator == "=" || annotationPropertyOperator == "!=") {
-                        self.filter = "FILTER (?" + varName + "_" + propLabel + " " + annotationPropertyOperator + " '" + annotationPropertyValue + "')";
+                    if (propertyOperator == "=" || propertyOperator == "!=") {
+                        self.filter = "FILTER (?" + varName + "_" + propLabel + " " + propertyOperator + " '" + propertyValue + "')";
                     } else {
-                        self.filter = " FILTER (regex(?" + varName + "_" + propLabel + ",'" + annotationPropertyValue + "','i'))";
+                        var negation=""
+                        if(propertyOperator.indexOf("!")==0)
+                            negation="!"
+                        self.filter = " FILTER ("+negation+"regex(?" + varName + "_" + propLabel + ",'" + propertyValue + "','i'))";
+
                     }
                     return BotEngine.nextStep();
                 }

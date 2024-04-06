@@ -533,7 +533,20 @@ self.querySets.sets.forEach(function (querySet) {
         data.forEach(function (item, index) {
             var line = [index];
             colNames.forEach(function (col) {
-                line.push(item[col] ? item[col].value : null);
+                var value=null;
+                if(item[col]) {
+                    value = item[col].value;
+
+                    //format date
+                    if(item[col].datatype=="http://www.w3.org/2001/XMLSchema#datetime"){
+                      var p=value.indexOf("T00:00:00.000Z")
+                        if(p>-1)
+                        value=value.substring(0,p)
+                    }
+
+                }
+
+                line.push(value);
             });
 
             tableData.push(line);

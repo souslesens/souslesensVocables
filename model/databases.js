@@ -99,6 +99,20 @@ class DatabaseModel {
     /**
      * @returns {Promise<Record<string, string>[]>} - a list of database name
      */
+    getDatabaseMinimal = async (identifier) => {
+        const database = await this.getDatabase(identifier);
+
+        return {
+            id: database.id,
+            name: database.name,
+            driver: database.driver,
+            database: database.database,
+        };
+    };
+
+    /**
+     * @returns {Promise<Record<string, string>[]>} - a list of database name
+     */
     getDatabasesName = async () => {
         const databases = await this._read();
         return databases.map((db) => {

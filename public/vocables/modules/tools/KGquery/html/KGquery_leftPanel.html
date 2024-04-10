@@ -83,6 +83,10 @@
                 <button onclick="KGquery.queryKG('table')">Table</button>
                 <!-- <button onclick="KGquery.queryKG('vijsGraph')">Graph</button>-->
                 <button onclick="KGquery.aggregateQuery()">Aggregate</button>
+                <select id="KGquery_outputTypeSelect" onchange="KGquery.onOutputTypeSelect($(this).val());">
+                    <option></option>
+                    <option>Graph</option>
+                </select>
                 <!-- <button onclick="KGquery.queryKG('table',null,true)">Query database</button>-->
 
                 <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->

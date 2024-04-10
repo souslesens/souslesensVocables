@@ -12,13 +12,23 @@ const AxiomEditor = (function () {
 
     self.onInputChar = function (text) {
         var text2 = text.toLowerCase();
-        if (text2 == "c") return;
-        if (text2.toLowerCase().startsWith("cl")) {
+
+
+        //class
+        if (text2.toLowerCase().startsWith("_")) {
             self.currentObject = "listClass";
             self.onSelectSuggestion("listClass");
-            $("#axiomsEditor_textDiv").append("Class");
+
             return;
         }
+        //Objectproperty
+        if (text2.toLowerCase().startsWith("-")) {
+            self.currentObject = "listObjectProperty";
+            self.onSelectSuggestion("listObjectProperty");
+
+            return;
+        }
+
 
         self.getSuggestions(text, function (err, suggestions) {
             if (err) {
@@ -89,7 +99,7 @@ const AxiomEditor = (function () {
         var suggestionObj = { id: suggestionId, label: suggestionText };
 
         if (self.currentObject == "listClass") {
-            CommonBotFunctions.listVocabClasses(Lineage_sources.activeSource, null, false, [], function (err, choices) {
+            CommonBotFunctions.listSourceAllClasses(Lineage_sources.activeSource, null, false, [], function (err, choices) {
                 self.currentObject = "Class";
                 common.fillSelectOptions("axiomsEditor_suggestionsSelect", choices, false, "label", "id");
                 return;
@@ -97,42 +107,42 @@ const AxiomEditor = (function () {
         } else if (self.currentObject == "Class") {
             self.currentObject = null;
             self.addSuggestion(suggestionObj, "axiom_Class");
-            return;
-            self.getSuggestions(suggestionId.id, function (err, result) {
-                result.forEach(function (suggestion) {});
+            self.getSuggestions("_"+suggestionText, function (err, result) {
+                common.fillSelectOptions("axiomsEditor_suggestionsSelect", result.suggestions, false);
             });
             return;
-        } else {
-            self.addSuggestion(suggestionObj, "axiom_Class");
-            self.getSuggestions(suggestionId.id, function (err, result) {
-                common.fillSelectOptions("axiomsEditor_suggestionsSelect", result, false);
-            });
         }
-
-        return;
-
-        if (suggestionId == "ObjectProperty:") {
-            self.addSuggestion(suggestionObj, "axiom_keyWord");
-            CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, null, false, function (err, choices) {
-                self.currentObject = "ObjectPropertyVocab";
-                common.fillSelectOptions("axiomsEditor_suggestionsSelect", choices, false, "label", "id");
-            });
-        } else if (self.currentObject == "ObjectPropertyVocab") {
-            CommonBotFunctions.listVocabPropertiesFn(Lineage_sources.activeSource, null, false, function (err, choices) {
+        if (self.currentObject == "listObjectProperty") {
+            CommonBotFunctions.listSourceAllObjectProperties (Lineage_sources.activeSource, null, null,  function (err, choices) {
                 self.currentObject = "ObjectProperty";
                 common.fillSelectOptions("axiomsEditor_suggestionsSelect", choices, false, "label", "id");
+                return;
             });
         } else if (self.currentObject == "ObjectProperty") {
             self.currentObject = null;
-            return self.addSuggestion(suggestionObj, "axiom_Property");
-        } else if (suggestionId == "Class:" || suggestion == "Class") {
-            CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, null, false, function (err, choices) {
-                self.currentObject = "ClassVocab";
-                common.fillSelectOptions("axiomsEditor_suggestionsSelect", choices, false, "label", "id");
+            self.addSuggestion(suggestionObj, "axiom_Property");
+            self.getSuggestions(suggestionText+" ", function (err, result) {
+                common.fillSelectOptions("axiomsEditor_suggestionsSelect", result.suggestions, false);
             });
-        } else {
-            return self.addSuggestion(suggestionObj, "axiom_keyWord");
+            return;
         }
+
+
+
+
+
+   else {
+         //   self.addSuggestion(suggestionObj, "axiom_Class");
+          self.getSuggestions(suggestionId.id, function (err, result) {
+                common.fillSelectOptions("axiomsEditor_suggestionsSelect", result.suggestions, false);
+            });
+        }
+
+
+
+    /*   else {
+            return self.addSuggestion(suggestionObj, "axiom_keyWord");
+        }*/
     };
 
     self.getSuggestions = function (text, callback) {

@@ -180,7 +180,7 @@ var KGquery_filter_bot = (function () {
 
 
                     var dateStr = new Date(propertyValue).toISOString();
-                    self.filterItems.push(filterBooleanOperator+ "?" + varName + "_" + propLabel + " " + propertyOperator + " \"" + dateStr + "^^xsd:dateTime"  );
+                    self.filterItems.push(filterBooleanOperator+ "?" + varName + "_" + propLabel + " " + propertyOperator + " \"" + dateStr + "\"^^xsd:dateTime"  );
 
                 } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
                 self.filterItems.push(filterBooleanOperator+ "?" + varName + "_" + propLabel + " " + propertyOperator + " \"" + propertyValue + "\"^^xsd:int " );

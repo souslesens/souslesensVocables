@@ -847,7 +847,8 @@ var Sparql_OWL = (function () {
             'select ?id (GROUP_CONCAT( distinct ?type;separator=";;")as ?types)   ' +
             fromStr +
             " where" +
-            " { ?id rdf:type  ?type " +
+            " { ?id rdf:type|rdfs:subClassOf  ?type." +
+            "  filter (?type !=owl:Class && !isblank(?type)) " +
             filterStr +
             " }" +
             "GROUP  BY ?id " +

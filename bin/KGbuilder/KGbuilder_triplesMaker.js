@@ -253,7 +253,7 @@ var KGbuilder_triplesMaker = {
 
 
         //get value for Object
-        {
+
             if (mapping.o === "_rowIndex") {
                 objectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
                 return objectStr;
@@ -279,7 +279,7 @@ var KGbuilder_triplesMaker = {
                     if (line[mapping.o]) {
                         objectStr = tableMappings.transform[mapping.o](line[mapping.o], "o", mapping.p, line, mapping);
                     } else {
-                        objectStr = ""//tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
+                        objectStr = "";//tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
                     }
                     // return callback(null,objectStr);
                 } catch (e) {
@@ -291,12 +291,15 @@ var KGbuilder_triplesMaker = {
                 } else if (mapping.dataType) {
                     var str = line[mapping.o];
                     if (!str || str == "null") {
-                        return;
+                        return callback(null, null);
                     }
-                    if (mapping.dataType == "dateTime" || mapping.dataType == "xsd:datetime") {
+                    if (mapping.dataType .startsWith("xsd:date")) {
 
                         if (mapping.dateFormat) {
                             str = util.getDateFromSLSformat(mapping.dateFormat, str);
+                            if (!str) {
+                                return callback(null, null);
+                            }
 
                         } else {
 
@@ -306,7 +309,7 @@ var KGbuilder_triplesMaker = {
                             };
 
                             var formatDate = function(date) {
-                                return new Date(date).toISOString(); //.slice(0, 10);
+                                str = new Date(date).toISOString(); //.slice(0, 10);
                             };
 
                             if (!isDate(str)) {
@@ -324,11 +327,14 @@ var KGbuilder_triplesMaker = {
                     if (!str) {
                         objectStr = "";
                     }
-                    //  mapping.p = "rdf:value";
+
                     if (!mapping.dataType.startsWith("xsd:")) {
                         mapping.dataType = "xsd:string";
                     }
-                    objectStr = "'" + str + "'^^" + mapping.dataType;
+                    if (!str || str == "null") {
+                        return callback(null, null);
+                    }
+                    objectStr = "\"" + str + "\"^^" + mapping.dataType;
                 } else {
                     objectStr = line[mapping.o];
                 }
@@ -346,7 +352,7 @@ var KGbuilder_triplesMaker = {
                     }
                 }
             }
-        }
+
         if (!objectStr || objectStr == "null") {
             return callback(null, null);
         }
@@ -572,7 +578,8 @@ var KGbuilder_triplesMaker = {
                     return callback(err);
                 }
                 KGbuilder_socket.message(options.clientSocketId, " data loaded from " + tableMappings.table, false);
-                tableData = result.data[0];
+                tableData = [].concat.apply([], result.data);
+               // tableData = result.data[0];
                 callback(null, tableData);
             });
         } else if (tableMappings.datasourceConfig) {

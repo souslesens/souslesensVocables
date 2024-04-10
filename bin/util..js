@@ -446,6 +446,7 @@ var util = {
         }
         return str;
     },
+
     getDateFromSLSformat: function(formatCode, dateStr) {
         var formats = {
             "FR": "27/05/2024",
@@ -562,7 +563,8 @@ var util = {
         }
 
         var date = new Date(Date.UTC(year, month,day))
-        return date.toISOString()
+        return util.dateToRDFString(date)
+       // return date.toISOString()
 
 
     },

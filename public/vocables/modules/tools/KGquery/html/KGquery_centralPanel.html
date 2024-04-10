@@ -2,11 +2,17 @@
 <div id="KGquery_dataTableDialogDiv" style="display: none">
     <div id="KGquery_dataTableDiv" style="width: 100%; height: 100%"></div>
 </div>
+
+<div id="KGquery_rangeSliderDialogDiv" ></div>
 <script>
     $("#KGquery_dataTableDialogDiv").dialog({
         autoOpen: false,
         height: $(document).height() * 0.9,
         width: "100vW",
+        modal: false,
+    });
+    $("#KGquery_rangeSliderDialogDiv").dialog({
+        autoOpen: false,
         modal: false,
     });
 </script>

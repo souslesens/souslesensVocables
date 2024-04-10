@@ -172,7 +172,7 @@ var CreateResource_bot = (function () {
             CommonBotFunctions.listVocabClasses(self.params.source, "datatypePropertyDomain", false, [{ id: "", label: "none" }]);
         },
         listDatatypePropertyRangeFn: function () {
-            var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:datetime"];
+            var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
             _botEngine.showList(choices, "datatypePropertyRange");
         },
 

@@ -54,6 +54,7 @@ var KGcreator_bot = (function () {
                     workflow = self.workflowColumnmMappingOther;
                 } else {
                     workflow = self.workflowColumnMappingType;
+
                 }
             }
         } else {
@@ -96,32 +97,34 @@ var KGcreator_bot = (function () {
     };
 
     self.workflowColumnmMappingOther = {
-        _OR: {
-            //Obsolete replaced by other predicate
-            // "set value": { listValueTypeFn: { setValueColumnFn: { addMappingToModelFn: {} } } },
-            "set object predicate": {
-                listTablesFn: {
-                    listTableColumnsFn: {
-                        checkColumnTypeFn: {
-                            _OR: {
-                                KO: {
-                                    promptTargetColumnVocabularyFn: {
-                                        predicateObjectColumnClassFn: {
-                                            listFilteredPropertiesFn: {
-                                                _OR: {
-                                                    "Apply property": self.workflowCreateObjectPredicate,
-                                                    "Create subProperty": { createSubPropertyFn: self.workflowCreateObjectPredicate },
+        setColumnClassFn: {
+            _OR: {
+                //Obsolete replaced by other predicate
+                // "set value": { listValueTypeFn: { setValueColumnFn: { addMappingToModelFn: {} } } },
+                "set object predicate": {
+                    listTablesFn: {
+                        listTableColumnsFn: {
+                            checkColumnTypeFn: {
+                                _OR: {
+                                    KO: {
+                                        promptTargetColumnVocabularyFn: {
+                                            predicateObjectColumnClassFn: {
+                                                listFilteredPropertiesFn: {
+                                                    _OR: {
+                                                        "Apply property": self.workflowCreateObjectPredicate,
+                                                        "Create subProperty": { createSubPropertyFn: self.workflowCreateObjectPredicate },
+                                                    },
                                                 },
                                             },
                                         },
                                     },
-                                },
-                                //  "OK": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "addMappingToModel": {} } } }
-                                OK: {
-                                    listFilteredPropertiesFn: {
-                                        _OR: {
-                                            "Apply property": self.workflowCreateObjectPredicate,
-                                            "Create subProperty": { createSubPropertyFn: self.workflowCreateObjectPredicate },
+                                    //  "OK": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "addMappingToModel": {} } } }
+                                    OK: {
+                                        listFilteredPropertiesFn: {
+                                            _OR: {
+                                                "Apply property": self.workflowCreateObjectPredicate,
+                                                "Create subProperty": { createSubPropertyFn: self.workflowCreateObjectPredicate },
+                                            },
                                         },
                                     },
                                 },
@@ -129,27 +132,27 @@ var KGcreator_bot = (function () {
                         },
                     },
                 },
-            },
 
-            "set other predicate": {
-                listNonObjectPropertiesVocabsFn: {
-                    listNonObjectPropertiesFn: {
-                        listLitteralFormatFn: {
-                            listTableColumnsFn: {
-                                addMappingToModelFn: {},
+                "set other predicate": {
+                    listNonObjectPropertiesVocabsFn: {
+                        listNonObjectPropertiesFn: {
+                            listLitteralFormatFn: {
+                                listTableColumnsFn: {
+                                    addMappingToModelFn: {},
+                                },
                             },
                         },
                     },
                 },
-            },
-            "create  datatypeProperty": {
-                createDatatypePropertyFn: {},
-            },
+                "create  datatypeProperty": {
+                    createDatatypePropertyFn: {},
+                },
 
-            end: {},
-        },
-        "save mapping": { saveFn: {} },
-        "new Mapping": {},
+                end: {},
+            },
+            "save mapping": { saveFn: {} },
+            "new Mapping": {},
+        }
     };
     self.workflowRdfType = {
         _OR: {
@@ -165,6 +168,7 @@ var KGcreator_bot = (function () {
                 blankNode: { addMappingToModelFn: self.workflowRdfType },
                 namedIndividual: { addMappingToModelFn: self.workflowRdfType },
                 class: { listSuperClassVocabFn: { listSuperClassFn: { listClassLabelColumnFn: { addMappingToModelFn: {} } } } },
+                other:self.workflowColumnmMappingOther
             },
         },
     };
@@ -218,10 +222,22 @@ var KGcreator_bot = (function () {
             });
         },
 
+
         setUriTypeFn: function () {
-            var choices = ["namedIndividual", "blankNode", "class"];
+            var choices = ["namedIndividual", "blankNode", "class","other"];
 
             _botEngine.showList(choices, "uriType");
+        },
+
+
+        setColumnClassFn:function(){
+            var predicateSubColumnClass = self.getColumnClass(self.params.tripleModels, self.params.column);
+            if(predicateSubColumnClass){
+               _botEngine.nextStep()
+            }else{
+                _botEngine.nextStep()
+            }
+
         },
 
         listClassVocabsFn: function () {
@@ -237,7 +253,7 @@ var KGcreator_bot = (function () {
             CommonBotFunctions.listVocabClasses(self.params.classVocab, "resourceType");
         },
         listValueTypeFn: function () {
-            var choices = ["xsd:string", "xsd:int", "xsd:float", "xsd:datetime"];
+            var choices = ["xsd:string", "xsd:int", "xsd:float", "xsd:date", "xsd:dateTime"];
             _botEngine.showList(choices, "valueType");
         },
         setValueColumnFn: function () {
@@ -361,7 +377,7 @@ var KGcreator_bot = (function () {
             if (!range) {
                 return _botEngine.nextStep();
             }
-            if (range != "xsd:datetime") {
+            if (range != "xsd:dateTime") {
                 return _botEngine.nextStep();
             } else {
                 var choices = [

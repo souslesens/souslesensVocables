@@ -599,10 +599,7 @@ var MainController = (function () {
         //   bc.postMessage("bc")
     };
 
-    self.showPart14AxiomsImage = function () {
-        $("#mainDialogDiv").html("ISO-15926 part14 axioms<br><img  src=\"images/part14Axioms.png\" style='display: block; margin-left: auto; margin-right: auto width:400px;margin: auto;'>");
-        $("#mainDialogDiv").dialog("open");
-    };
+
 
     self.parseUrlParam = function (callback) {
         var paramsMap = common.getUrlParamsMap();

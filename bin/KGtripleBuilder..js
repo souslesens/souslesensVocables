@@ -428,7 +428,7 @@ var KGtripleBuilder = {
                                                                 } else if (item.objectIsSpecificUri) {
                                                                     objectStr = item.o;
                                                                 } else if (typeof item.o === "function") {
-                                                                    try {
+                                                                    try {ate
                                                                         objectStr = item.o(line, item);
                                                                         objectStr = util.formatStringForTriple(objectStr, false);
                                                                     } catch (e) {
@@ -994,11 +994,7 @@ callbackEach();
             options = {};
         }
         var metaDataTriples = [];
-        /*   metaDataTriples.push({
-   s: subjectUri,
-   p: "<http://purl.org/dc/terms/creator>",
-   o: "'" + creator + "'",
-});*/
+
 
         metaDataTriples.push({
             s: subjectUri,

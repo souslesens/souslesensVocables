@@ -60,7 +60,7 @@ var Config = (function () {
     };
 
     self.sousLeSensVocablesGraphUri = "http://data.souslesens.org/";
-    self.formalOntologySourceLabel = "ISO_15926-part-14_PCA";
+    self.formalOntologySourceLabel = "IDO-3";
 
     self.CRUDsources = {
         STORED_LINEAGE_QUERIES: {

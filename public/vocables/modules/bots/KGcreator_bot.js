@@ -582,13 +582,17 @@ var KGcreator_bot = (function () {
                     o: predicateObjectColumn,
                 };
                 var range = Config.ontologiesVocabularyModels[nonObjectPropertyVocab].nonObjectProperties[nonObjectPropertyId].range;
-                if( range.indexOf("Resource")>-1)
-                    range=""
                 if (range) {
                     triple.dataType = range;
+                    if( range.indexOf("Resource")>-1){
+                        range=""
+                    }
                 } else {
                     triple.isString = true;
                 }
+                
+                    
+               
                 if (nonObjectPropertyDateFormat) {
                     triple.dateFormat = nonObjectPropertyDateFormat;
                 }

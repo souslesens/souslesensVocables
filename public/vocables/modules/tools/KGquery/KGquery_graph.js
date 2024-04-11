@@ -155,6 +155,7 @@ var KGquery_graph = (function () {
                         });
                         callbackSeries();
                     });
+                    callbackSeries();
                 },
             ],
             function (err) {

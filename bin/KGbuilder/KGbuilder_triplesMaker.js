@@ -573,7 +573,8 @@ if(mapping.p.indexOf("member")>-1)
                     return callback(err);
                 }
                 KGbuilder_socket.message(options.clientSocketId, " data loaded from " + tableMappings.table, false);
-                tableData = result.data[0];
+                //tableData = result.data[0];
+                tableData = [].concat.apply([], result.data);
                 callback(null, tableData);
             });
         } else if (tableMappings.datasourceConfig) {

@@ -28,7 +28,6 @@ var KGcreator_r = (function () {
     self.unload = function () {
         self.currentTab = "";
         Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
-        self.currentTab = "";
         $("#KGcreator_topButtons").css("flex-direction", "row");
         $("#KGcreator_topButtons").attr("id", "Lineage_graphEditionButtons");
         $("#MenuBar").css("height", "90px");
@@ -74,7 +73,6 @@ var KGcreator_r = (function () {
         Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
         $(".vis-edit-mode").css("display", "none");
     };
-    self.showMenuButtons = function () {};
     self.initRunTab = function () {
         if (self.currentTab != "Run") {
             self.currentTab = "Run";
@@ -114,20 +112,7 @@ var KGcreator_r = (function () {
 
         $("#KGcreator_run_mappingsGraphEditorContainer").css("width", KGcreator_GraphEditorWidth);
     };
-    /*
-    self.showMappingDialogResponsive=function(addColumnClassType, options, callback){
-        if(callback){
-            var oldCallback=callback;
-            callback=function(){
-                $('#LinkColumn_botPanel').hide();
-                oldCallback();
-            }
-        }
-        
-        
-        self.oldshowMappingDialog(addColumnClassType, options, callback)
-    }
-    */
+ 
 
     return self;
 })();

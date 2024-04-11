@@ -19,22 +19,18 @@ var Lineage_r = (function () {
     self.MoreOptionsShow = true;
     self.firstLoad = true;
     self.onLoaded = function () {
+        // Overcharge only one time at first lineage load
         if (self.firstLoad) {
             self.firstLoad = false;
-            // Overcharge only one time at first lineage load
+            
             self.controller = Lineage_whiteboard;
-            PredicatesSelectorWidget.load = self.loadPredicateSelectorWidgetResponsive;
+
             SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
-            //To Table
-            self.oldExportTable = Export.exportTreeToDataTable;
-            Export.exportTreeToDataTable = self.ExportTableDialog;
-            //Nodes Infos overcharge
-            //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
-            //SHowHideButtons overcharge
+
             Lineage_sources.showHideEditButtons = self.showHideEditButtons;
             //AddEdge overcharge
-            self.oldAddEdgeDialog = Lineage_createRelation.showAddEdgeFromGraphDialog;
-            Lineage_createRelation.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;
+            /*self.oldAddEdgeDialog = Lineage_createRelation.showAddEdgeFromGraphDialog;
+            Lineage_createRelation.showAddEdgeFromGraphDialog = self.responsiveAddEdgeDialog;*/
         }
 
         ResponsiveUI.initMenuBar(self.loadSources);
@@ -58,18 +54,8 @@ var Lineage_r = (function () {
             });
         });
     };
-    self.loadPredicateSelectorWidgetResponsive = function (divId, source, options, configureFn, callback) {
-        PredicatesSelectorWidget.options = options || {};
-        $("#" + divId).html("");
-        $("#" + divId).load("./snippets/predicatesSelectorWidgetDialog.html", function (a, b, c) {
-            var x = a + b + c;
-            PredicatesSelectorWidget.init(source, configureFn, function (err, result) {
-                if (callback) {
-                    return callback();
-                }
-            });
-        });
-    };
+   
+
     self.initWhiteboardTab = function () {
         if ($("#tabs_whiteboard").children().length == 0) {
             $("#tabs_whiteboard").load("./modules/tools/lineage/html/Lineage_whiteboardPannel.html", function (s) {
@@ -199,7 +185,7 @@ var Lineage_r = (function () {
                 self.oldNodeInfosInit(sourceLabel, divId, options, callback);
             });
     };
-    self.responsiveAddEdgeDialog = function (edgeData, callback) {
+    /*self.responsiveAddEdgeDialog = function (edgeData, callback) {
         //ResponsiveUI.openDialogDiv("smallDialogDiv");
         $("#smallDialogDiv")
             .parent()
@@ -209,14 +195,8 @@ var Lineage_r = (function () {
                     self.showHideEditButtons(Lineage_sources.activeSource);
                 });
             });
-    };
-    self.ExportTableDialog = function (jstreeDiv, nodeId) {
-        $("#mainDialogDiv")
-            .parent()
-            .show("fast", function () {
-                self.oldExportTable(jstreeDiv, nodeId);
-            });
-    };
+    };*/
+    
     self.hideShowMoreActions = function (hideShowParameter) {
         if (hideShowParameter == "hide") {
             self.MoreActionsShow = true;

@@ -18,7 +18,7 @@ var KGquery_myQueries = (function () {
         if (err) {
             return alert(err.responseText);
         }
-        ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery_r.initQuery, this);
+        ResponsiveUI.openTab("KGquery-tab", "tabs_Query", KGquery.initQuery, "#QueryTabButton");
         //  $("#KGquery_leftPanelTabs").tabs("option", "active", 1);
         KGquery.clearAll();
         KGquery.switchRightPanel(true);

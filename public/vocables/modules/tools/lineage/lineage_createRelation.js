@@ -860,7 +860,7 @@ var Lineage_createRelation = (function () {
         if (!options) {
             options = {};
         }
-        var login = authentication.currentUser.login;
+        var login = Sparql_common.formatString(authentication.currentUser.login);
         //  var authorUri = Config.defaultNewUriRoot + "users/" + login;
         var dateTime = common.dateToRDFString(new Date(), true) + "^^xsd:dateTime";
 

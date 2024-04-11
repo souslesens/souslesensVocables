@@ -1,4 +1,3 @@
-
 const autosuggest =require( "antlr4-autosuggest");
 const OWL2ManchesterParser =require( "./manchesterSyntax/OWL2ManchesterParser.js");
 const OWL2ManchesterLexer =require( "./manchesterSyntax/OWL2ManchesterLexer.js");

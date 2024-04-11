@@ -86,6 +86,7 @@ if (config.auth !== "disabled") {
     app.use(passport.authenticate("session"));
 }
 
+
 /**
  * Routes
  */

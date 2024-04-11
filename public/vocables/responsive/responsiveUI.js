@@ -9,6 +9,7 @@ import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
 import KGcreator_r from "./KGcreator/Kgcreator_r.js";
 import MainController from "../modules/shared/mainController.js";
 
+
 var ResponsiveUI = (function () {
     var self = {};
     self.source = null;
@@ -89,7 +90,7 @@ var ResponsiveUI = (function () {
         });
     };
     //  MainController --> onToolSelect.initTool   when click on a button of a tool
-    self.onToolSelect = function (toolId, event) {
+    self.onToolSelect = function (toolId, event,callback) {
         if (event) {
             var clickedElement = event.target;
             // if class
@@ -130,6 +131,9 @@ var ResponsiveUI = (function () {
             }
         } else {
             self.initTool(toolId);
+        }
+        if(callback){
+            callback()
         }
     };
     //MainController.onSourceSelect

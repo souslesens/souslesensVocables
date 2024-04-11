@@ -26,7 +26,7 @@ module.exports = function() {
         if (req.query.options) {
             options = JSON.parse(req.query.options);
         }
-        if(true) {
+        if(false) {
             ManchesterSyntaxEngine.getSuggestion(req.query.source, req.query.lastToken, options, callback);
             return;
         }

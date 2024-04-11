@@ -1,7 +1,7 @@
 import KGcreator from "./KGcreator.js";
 import KGcreator_graph from "./KGcreator_graph.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
-import kgcreator_r from "../../../responsive/KGcreator/Kgcreator_r.js";
+
 
 var KGcreator_mappings = (function () {
     var self = {};

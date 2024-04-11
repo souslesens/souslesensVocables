@@ -4,7 +4,6 @@ import Clipboard from "../modules/shared/clipboard.js";
 import Lineage_sources from "../modules/tools/lineage/lineage_sources.js";
 import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
 import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
-import KGcreator_r from "./KGcreator/Kgcreator_r.js";
 import MainController from "../modules/shared/mainController.js";
 
 
@@ -33,7 +32,7 @@ var ResponsiveUI = (function () {
             function (event) {
                 self.resetWindowHeight();
                 if (self.currentTool == "KGcreator") {
-                    KGcreator_r.ResetRunMappingTabWidth();
+                    KGcreator.ResetRunMappingTabWidth();
                 }
             },
             true

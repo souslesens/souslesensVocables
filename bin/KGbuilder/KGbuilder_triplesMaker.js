@@ -438,6 +438,7 @@ var KGbuilder_triplesMaker = {
                         .query(tableMappings.dataSourceConfig.dbName, sqlQuery)
                         .then((result) => {
                             var lookupLines = result.rows;
+                            console.log("lookupLines", lookupLines);
                             lookUpsMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
                             lookupLines.forEach(function (line, index) {
                                 if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
@@ -565,22 +566,22 @@ var KGbuilder_triplesMaker = {
                 callback(null, tableData);
             });
         } else if (tableMappings.datasourceConfig) {
-            var limitStr = "";
-            if (options.sampleSize) {
-                limitStr = " TOP (" + options.sampleSize + ") ";
-            }
-            var sqlQuery = "select" + limitStr + " * from " + tableMappings.table;
-            KGbuilder_socket.message(options.clientSocketId, "loading data from sql server, table " + tableMappings.table, false);
-            databaseModel
-                .query(tableMappings.datasourceConfig.dbName, sqlQuery)
-                .then((result) => {
-                    tableData = result.rows;
-                    KGbuilder_socket.message(options.clientSocketId, " data loaded ,table " + tableMappings.table, false);
-                    return callback(null, tableData);
-                })
-                .catch((err) => {
-                    return callback(err);
-                });
+            databaseModel.getConnection(tableMappings.datasourceConfig.dbName).then((connection) => {
+                const request = connection.select("*").from(tableMappings.table);
+                if (options.sampleSize) {
+                    request.limit(options.sampleSize);
+                }
+
+                request
+                    .then((result) => {
+                        tableData = result;
+                        KGbuilder_socket.message(options.clientSocketId, " data loaded ,table " + tableMappings.table, false);
+                        return callback(null, tableData);
+                    })
+                    .catch((err) => {
+                        return callback(err);
+                    });
+            });
         }
     },
 };

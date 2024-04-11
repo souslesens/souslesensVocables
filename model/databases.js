@@ -157,15 +157,15 @@ class DatabaseModel {
             lock.release("DatabasesThread");
         }
     };
+
     /**
      * @param {string} databaseId - the database id
-     * @param {string} query - a sql query
-     * @returns {Promise<any>} query result
+     * @returns {Promise<any>} database connection
      */
-    query = async (databaseId, query) => {
+    getConnection = async (databaseId) => {
         const database = await this.getDatabase(databaseId);
         const dbClient = this.getClientDriver(database.driver);
-        const conn = knex({
+        return knex({
             acquireConnectionTimeout: 5000,
             client: dbClient,
             connection: {
@@ -176,7 +176,15 @@ class DatabaseModel {
                 database: database.database,
             },
         });
+    };
 
+    /**
+     * @param {string} databaseId - the database id
+     * @param {string} query - a sql query
+     * @returns {Promise<any>} query result
+     */
+    query = async (databaseId, query) => {
+        const conn = await this.getConnection(databaseId);
         const result = await conn.raw(query);
         return { rowCount: result.rowCount, rows: result.rows };
     };

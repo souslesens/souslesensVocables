@@ -31,6 +31,8 @@ services:
         environment:
             ACCEPT_EULA: "Y"
             SA_PASSWORD: "superSecretP4ssword"
+        volumes:
+            - ./docker-data/sqlserver:/var/opt/mssql
         networks:
             - dev-backend
 

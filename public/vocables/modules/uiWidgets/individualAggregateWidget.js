@@ -17,54 +17,88 @@ var IndividualAggregateWidget = (function () {
         }
         $("#" + divId).load("snippets/individualAggregateWidget.html", function () {
             loadClassesFn(function (data) {
-                var groupByClasses = [];
-                var functionVarClasses = [];
+                self.groupByClassesMap = {};
+                self.functionVarClassesMap = {};
                 for (var key in data) {
                     var item = data[key];
-                    if (item.data.datatype) {
-                        self.functionVarClasses.push(item);
-                    } else {
-                        self.groupByClasses.push(item);
+
+                    var otherproperties = item.data.nonObjectProperties;
+                    if (otherproperties) {
+                        var groupByTypes = [
+                            "http://www.w3.org/2001/XMLSchema#string",
+                            "http://www.w3.org/2001/XMLSchema#date",
+                            "http://www.w3.org/2001/XMLSchema#datetime",
+                            "http://www.w3.org/2000/01/rdf-schema#Literal",
+                        ];
+                        otherproperties.forEach(function (prop) {
+                            var label = item.label + "_" + prop.label;
+                            var obj = { label: label, item: item, prop: prop };
+                            if (groupByTypes.indexOf(prop.datatype) > -1) {
+                                self.groupByClassesMap[label] = obj;
+                            } else {
+                                self.functionVarClassesMap[label] = obj;
+                            }
+                        });
                     }
+
+                    /*  if (item.data.datatype) {
+                          self.functionVarClasses.push(item);
+                      } else {
+                          self.groupByClasses.push(item);
+                      }*/
                 }
-                common.fillSelectOptions("individualAggregate_groupBySelect", self.groupByClasses, null, "label", "label");
+                common.fillSelectOptions("individualAggregate_groupBySelect", Object.keys(self.groupByClassesMap), null);
 
                 common.fillSelectOptions("individualAggregate_groupFunctionSelect", self.groupFunctions, null);
-                if (message) $("#individualAggregate_messageDiv").html(message);
+                if (message) {
+                    $("#individualAggregate_messageDiv").html(message);
+                }
             });
         });
     };
 
     self.onGroupFunctionSelect = function (fn) {
+        var allVars = Object.keys(self.groupByClassesMap).concat(Object.keys(self.functionVarClassesMap));
         if (fn == "concat") {
-            common.fillSelectOptions("individualAggregate_functionVariableSelect", self.groupByClasses, null, "label", "label");
+            common.fillSelectOptions("individualAggregate_functionVariableSelect", allVars, null);
         } else if (fn == "COUNT") {
-            common.fillSelectOptions("individualAggregate_functionVariableSelect", self.groupByClasses.concat(self.functionVarClasses), null, "label", "label");
+            common.fillSelectOptions("individualAggregate_functionVariableSelect", allVars, null);
         } else {
-            common.fillSelectOptions("individualAggregate_functionVariableSelect", self.groupByClasses.concat(self.functionVarClasses), null, "label", "label");
+            common.fillSelectOptions("individualAggregate_functionVariableSelect", Object.keys(self.functionVarClassesMap), null);
         }
     };
 
     self.onOKbutton = function () {
-        var groupByClasses = $("#individualAggregate_groupBySelect").val();
+        var groupByObj = self.groupByClassesMap[$("#individualAggregate_groupBySelect").val()];
         var groupFunctions = $("#individualAggregate_groupFunctionSelect").val();
-        var fnVars = $("#individualAggregate_functionVariableSelect").val();
+        var value = $("#individualAggregate_functionVariableSelect").val();
+        var fnVarObj = self.functionVarClassesMap[value] || self.groupByClassesMap[value];
 
         var selectStr = "";
         var groupByStr = "";
-        groupByClasses.forEach(function (item) {
-            item = Sparql_common.formatStringForTriple(item, true);
-            selectStr += "?" + item + " ?" + item + "_label  ";
-            groupByStr += "?" + item + " ?" + item + "_label";
-        });
+        var whereStr = "";
+
+        function getWhereClause(obj) {
+            return "?" + obj.item.label + " <" + obj.prop.id + "> " + "?" + Sparql_common.formatStringForTriple(obj.label);
+        }
+
+        whereStr += getWhereClause(groupByObj);
+        selectStr += " ?" + groupByObj.label + "   ";
+        groupByStr += " ?" + groupByObj.label + "   ";
+
         groupFunctions.forEach(function (fn) {
-            var fnVar = Sparql_common.formatStringForTriple(fnVars[0], true);
-            if (fn == "concat") selectStr += "(GROUP_CONCAT(distinct ?" + fnVar + ';SEPARATOR=",") AS ?concat_' + fnVar + ")";
-            else if (fn == "COUNT") selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
-            else selectStr += " (" + fn + "(distinct ?" + fnVar + "_value) as ?" + fn + "_" + fnVar + ")";
+            var fnVar = Sparql_common.formatStringForTriple(fnVarObj.label, true);
+
+            if (fn == "concat") {
+                selectStr += "(GROUP_CONCAT(distinct ?" + fnVar + ';SEPARATOR=",") AS ?concat_' + fnVar + ")";
+            } else if (fn == "COUNT") {
+                selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
+            } else {
+                selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
+            }
         });
 
-        var aggregateClauses = { select: selectStr, groupBy: groupByStr };
+        var aggregateClauses = { select: selectStr, groupBy: groupByStr, where: whereStr };
 
         $("#" + self.divId).dialog("close");
         if (self.validateFn) {

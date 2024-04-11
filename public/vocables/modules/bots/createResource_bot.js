@@ -7,15 +7,24 @@ import AxiomsEditor from "../tools/lineage/axiomsEditor.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
+import common from "../shared/common.js";
+import Sparql_generic from "../sparqlProxies/sparql_generic.js";
+import OntologyModels from "../shared/ontologyModels.js";
 
 var CreateResource_bot = (function () {
     var self = {};
     self.title = "Create Resource";
 
-    self.start = function () {
-        _botEngine.init(CreateResource_bot, self.workflow, null, function () {
+    self.start = function (workflow, _params, callback) {
+        self.callback = callback;
+        if (!workflow) workflow = self.workflow;
+        _botEngine.init(CreateResource_bot, workflow, null, function () {
             self.source = Lineage_sources.activeSource;
             self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
+            if (_params)
+                for (var key in _params) {
+                    self.params[key] = _params[key];
+                }
             _botEngine.nextStep();
         });
     };
@@ -40,12 +49,17 @@ var CreateResource_bot = (function () {
             _OR: {
                 "owl:Class": { promptResourceLabelFn: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } } },
                 // "owl:ObjectProperty": { promptResourceLabelFn: { listVocabsFn: { listObjectPropertiesfn: self.workflow_saveResource } } },
-                // "owl:AnnotationProperty": { promptResourceLabelFn: { listDatatypeProperties: self.workflow_saveResource } },
+
                 "owl:NamedIndividual": { promptResourceLabelFn: { listVocabsFn: { listClassTypesFn: self.workflow_saveResource } } },
+                DatatypeProperty: self.workFlowDatatypeProperty,
                 ImportClass: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
                 ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } },
             },
         },
+    };
+
+    self.workFlowDatatypeProperty = {
+        promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } },
     };
 
     self.functionTitles = {
@@ -57,6 +71,9 @@ var CreateResource_bot = (function () {
         listClassTypesFn: "Choose a  a class type ",
         saveResourceFn: " Save resource",
         listImportsFn: "Add import to source",
+        promptDatatypePropertyLabelFn: "enter datatypeProperty label",
+        listDatatypePropertyDomainFn: "enter datatypeProperty domain",
+        listDatatypePropertyRangeFn: "enter datatypeProperty domain",
     };
 
     self.functions = {
@@ -65,7 +82,7 @@ var CreateResource_bot = (function () {
                 { id: "owl:Class", label: "Class" },
                 { id: "owl:NamedIndividual", label: "Individual" },
                 // { id: "owl:ObjectProperty", label: "ObjectProperty" },
-                // { id: "owl:AnnotationProperty", label: "AnnotationProperty" },
+                { id: "DatatypeProperty", label: "DatatypeProperty" },
                 { id: "ImportClass", label: "Import Class" },
                 { id: "ImportSource", label: "Add import source " },
             ];
@@ -144,6 +161,77 @@ var CreateResource_bot = (function () {
         },
         newResourceFn: function () {
             self.start();
+        },
+
+        promptDatatypePropertyLabelFn: function () {
+            _botEngine.promptValue("DatatypePropertyLabel", "datatypePropertyLabel");
+        },
+
+        listDatatypePropertyDomainFn: function () {
+            if (self.params.datatypePropertyDomain) return _botEngine.nextStep();
+            CommonBotFunctions.listVocabClasses(self.params.source, "datatypePropertyDomain", false, [{ id: "", label: "none" }]);
+        },
+        listDatatypePropertyRangeFn: function () {
+            var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
+            _botEngine.showList(choices, "datatypePropertyRange");
+        },
+
+        createDataTypePropertyFn: function (source, propLabel, domain, range, callback) {
+            var source = self.params.source;
+            var propLabel = self.params.datatypePropertyLabel;
+            var domain = self.params.datatypePropertyDomain;
+            var range = self.params.datatypePropertyRange;
+
+            propLabel = Sparql_common.formatString(propLabel);
+            var propId = common.getURI(propLabel, source, "fromLabel");
+            //  var subPropId = Config.sources[source].graphUri + common.getRandomHexaId(10);
+            var triples = [
+                {
+                    subject: propId,
+                    predicate: "rdf:type",
+                    object: "owl:DatatypeProperty",
+                },
+                {
+                    subject: propId,
+                    predicate: "rdfs:label",
+                    object: propLabel,
+                },
+            ];
+            if (range) {
+                triples.push({
+                    subject: propId,
+                    predicate: "rdfs:range",
+                    object: range,
+                });
+            }
+            if (domain) {
+                triples.push({
+                    subject: propId,
+                    predicate: "rdfs:domain",
+                    object: domain,
+                });
+            }
+
+            Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
+                var modelData = {
+                    nonObjectProperties: {
+                        [propId]: {
+                            id: propId,
+                            label: propLabel,
+                            range: range,
+                            domain: domain,
+                        },
+                    },
+                };
+                OntologyModels.updateModel(source, modelData, {}, function (err, result) {
+                    console.log(err || "ontologyModelCache updated");
+
+                    if (self.callback) {
+                        return self.callback();
+                    }
+                    BotEngine.nextStep();
+                });
+            });
         },
     };
 

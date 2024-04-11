@@ -336,7 +336,7 @@ var Lineage_decoration = (function () {
                                     });
                                 }
 
-                                Sparql_OWL.getNodesAncestors(Lineage_sources.activeSource, slice, { excludeItself: 0, withLabels: true }, function (err, result) {
+                                Sparql_OWL.getNodesAncestorsOrDescendants(Lineage_sources.activeSource, slice, { excludeItself: 0, withLabels: true }, function (err, result) {
                                     if (err) {
                                         return callbackEach(err);
                                     }

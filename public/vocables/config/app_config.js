@@ -147,7 +147,7 @@ var Config = (function () {
         elasticIndexesSourcesMap: {
             readi: "CFIHOS_READI",
             pca: "ISO_15926-PCA",
-            cfihos: "CFIHOS-ISO",
+            CFIHOS: "CFIHOS-ISO",
         },
     };
 
@@ -160,7 +160,7 @@ var Config = (function () {
             "lineage_actionDiv_linkedData",
             "lineage_actionDiv_reasoner",
             "lineage_actionDiv_rules",
-            "lineage_actionDiv_newAxiom",
+          //  "lineage_actionDiv_newAxiom",
 
             //"lineage_actionDiv_clearLast",
             // "lineage_actionDiv_last"
@@ -605,7 +605,7 @@ var Config = (function () {
             "@containersIcon": "../icons/IOGP/ContainerIcon-IOGP.png",
             "@classesIcon": "../icons/IOGP/ClassesIcon-IOGP.png",
         },
-        cfihos: {
+        CFIHOS: {
             "@source-color": "#DD8736",
             "@button1-color": "#3A609E",
             "@button2-color": "#F79D1F",
@@ -623,20 +623,20 @@ var Config = (function () {
             "@OntoCreator-logo": "../icons/CFIHOS/Ontocreator-CFIHOS.png",
             "@TimeLine-logo": "../icons/CFIHOS/Timeline-CFIHOS.png",
             "@logoInstance-icon": "../icons/CFIHOS/Logo-CFIHOS.png",
-            "@arrow-icon": "../icons/CFIHOS/caret-right-cfihos.png",
-            "@moreOptions-icon": "../icons/CFIHOS/MoreOptionsIcon-cfihos.png",
-            "@search-icon": "../icons/CFIHOS/SearchIcon-cfihos.png",
-            "@saveIcon": "../icons/CFIHOS/SaveIcon-cfihos.png",
-            "@deleteIcon": "../icons/CFIHOS/DeleteIcon-cfihos.png",
-            "@jqueryClose": "../icons/CFIHOS/CrossIcon-cfihos.png",
-            "@resetIcon": "../icons/CFIHOS/ResetIcon-cfihos.png",
-            "@previousIcon": "../icons/CFIHOS/PreviousIcon-cfihos.png",
-            "@allPropertyIcon": "../icons/CFIHOS/SelectionAllIcon-cfihos.png",
-            "@currentPropertyIcon": "../icons/CFIHOS/SelectionIcon-cfihos.png",
-            "@whiteBoardIcon": "../icons/CFIHOS/WhiteboardIcon-cfihos.png",
-            "@propertiesIcon": "../icons/CFIHOS/PropertiesIcon-cfihos.png",
-            "@containersIcon": "../icons/CFIHOS/ContainerIcon-cfihos.png",
-            "@classesIcon": "../icons/CFIHOS/ClassesIcon-cfihos.png",
+            "@arrow-icon": "../icons/CFIHOS/caret-right-CFIHOS.png",
+            "@moreOptions-icon": "../icons/CFIHOS/MoreOptionsIcon-CFIHOS.png",
+            "@search-icon": "../icons/CFIHOS/SearchIcon-CFIHOS.png",
+            "@saveIcon": "../icons/CFIHOS/SaveIcon-CFIHOS.png",
+            "@deleteIcon": "../icons/CFIHOS/DeleteIcon-CFIHOS.png",
+            "@jqueryClose": "../icons/CFIHOS/CrossIcon-CFIHOS.png",
+            "@resetIcon": "../icons/CFIHOS/ResetIcon-CFIHOS.png",
+            "@previousIcon": "../icons/CFIHOS/PreviousIcon-CFIHOS.png",
+            "@allPropertyIcon": "../icons/CFIHOS/SelectionAllIcon-CFIHOS.png",
+            "@currentPropertyIcon": "../icons/CFIHOS/SelectionIcon-CFIHOS.png",
+            "@whiteBoardIcon": "../icons/CFIHOS/WhiteboardIcon-CFIHOS.png",
+            "@propertiesIcon": "../icons/CFIHOS/PropertiesIcon-CFIHOS.png",
+            "@containersIcon": "../icons/CFIHOS/ContainerIcon-CFIHOS.png",
+            "@classesIcon": "../icons/CFIHOS/ClassesIcon-CFIHOS.png",
         },
         DeepOffShore: {
             "@source-color": "#1D82FF",

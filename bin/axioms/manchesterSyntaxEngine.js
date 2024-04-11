@@ -1,4 +1,3 @@
-
 const autosuggest =require( "antlr4-autosuggest");
 const OWL2ManchesterParser =require( "./manchesterSyntax/OWL2ManchesterParser.js");
 const OWL2ManchesterLexer =require( "./manchesterSyntax/OWL2ManchesterLexer.js");
@@ -22,10 +21,12 @@ const ManchesterSyntaxEngine = {
 
         const autosuggester = autosuggest.autosuggester(OWL2ManchesterLexer, OWL2ManchesterParser);
         try {
-            let suggestions = autosuggester.autosuggest(owlInput);
+            let suggestions = autosuggester.autosuggest(lastToken);
+            console.log("lastToken: ", lastToken);
             console.log("suggestions: ", suggestions);
             callback(null, suggestions);
         } catch (err) {
+            console.log(err)
             callback(err);
         }
 

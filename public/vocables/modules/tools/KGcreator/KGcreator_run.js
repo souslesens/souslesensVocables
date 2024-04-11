@@ -63,7 +63,7 @@ var KGcreator_run = (function () {
         }
         ResponsiveUI.openTab("KGcreator-tab", "KGcreator_treeWrapper", KGcreator_r.initRunTab, "#KGcreator_RunTabButton");
         var table = self.getTableAndShowMappings(allmappings);
-        if (!table) {
+        if (!allmappings && !table) {
             return alert("select a node");
         }
 
@@ -82,6 +82,10 @@ var KGcreator_run = (function () {
 
         if (Config.clientSocketId) {
             options.clientSocketId = Config.clientSocketId;
+        }
+        if (allmappings) {
+            options = {};
+            table = null;
         }
 
         var payload = {

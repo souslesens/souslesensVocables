@@ -170,7 +170,7 @@ var NodeInfosWidget = (function () {
                 function (callbackSeries) {
                     self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (err, result) {
                         if (err) {
-                            callbackSeries(err);
+                            return callbackSeries(err);
                         }
                         types = result.types;
                         callbackSeries();
@@ -210,6 +210,11 @@ var NodeInfosWidget = (function () {
                         return callbackSeries();
                     }
                     self.showAssociatedProperties(self.currentNodeRealSource, nodeId, "nodeInfos_associatedPropertiesDiv", function (err) {
+                        callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    self.showClassesBreakDown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function (err) {
                         callbackSeries(err);
                     });
                 },
@@ -549,6 +554,7 @@ defaultLang = 'en';*/
 
                 str +=
                     " <div id='nodeInfos_listsDiv' >" +
+                    "<div id='nodeInfos_classHierarchyDiv' class='nodeInfos_rigthDiv' ></div><br>" +
                     "<div id='nodeInfos_associatedPropertiesDiv' class='nodeInfos_rigthDiv' ></div><br>" +
                     "<div id='nodeInfos_restrictionsDiv' class='nodeInfos_rigthDiv'  style='display:table-caption;'></div>" +
                     "<div id='nodeInfos_individualsDiv' class='nodeInfos_rigthDiv' style=' display:flex;flex-direction: ></div></div>";
@@ -572,24 +578,43 @@ defaultLang = 'en';*/
                         if (err) {
                             return callbackSeries(err);
                         }
-                        str += "<b class='nodesInfos_titles'>Restrictions </b> <div style=''> <table style='display:table-caption'>";
+                        str = "<b class='nodesInfos_titles'>Restrictions </b> <div style=''> <table style='display:table-caption'>";
+
                         result.forEach(function (item) {
-                            str += "<tr class='infos_table'>";
-
                             var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
-
-                            str += "<td class=''>" + propStr + "</td>";
+                            str += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(item.prop.value) + "' href='" + item.prop.value + "'>" + propStr + "</a>";
 
                             var targetClassStr = "any";
                             if (item.value) {
-                                targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
+                                str +=
+                                    "&nbsp; <i><a style='color: #aaa' target='" +
+                                    NodeInfosWidget.getUriTarget(item.value.value) +
+                                    "' href='" +
+                                    item.value.value +
+                                    "'>" +
+                                    item.valueLabel.value +
+                                    "</a></i>";
                             }
-                            str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
-
-                            str += "</tr>";
+                            str += "</div>";
                         });
 
-                        str += "</table> </div>" + "</div>";
+                        /*   result.forEach(function(item) {
+                               str += "<tr class='infos_table'>";
+
+                               var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
+
+                               str += "<td class=''>" + propStr + "</td>";
+
+                               var targetClassStr = "any";
+                               if (item.value) {
+                                   targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
+                               }
+                               str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
+
+                               str += "</tr>";
+                           });
+
+                           str += "</table> </div>" + "</div>";*/
 
                         callbackSeries();
                     });
@@ -607,25 +632,46 @@ defaultLang = 'en';*/
                             if (err) {
                                 return callbackSeries(err);
                             }
+
                             str += "<br><b class='nodesInfos_titles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table >";
                             result.forEach(function (item) {
-                                str += "<tr class='infos_table'>";
-
                                 var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
-
-                                str += "<td class=''>" + propStr + "</td>";
+                                str += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(item.prop.value) + "' href='" + item.prop.value + "'>" + propStr + "</a>";
 
                                 var targetClassStr = "any";
                                 if (item.value) {
-                                    targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.subject.value + "\")'>" + item.subjectLabel.value + "</span>";
+                                    str +=
+                                        "&nbsp; <i><a style='color: #aaa' target='" +
+                                        NodeInfosWidget.getUriTarget(item.subject.value) +
+                                        "' href='" +
+                                        item.subject.value +
+                                        "'>" +
+                                        item.subjectLabel.value +
+                                        "</a></i>";
                                 }
-                                str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
-
-                                str += "</tr>";
+                                str += "</div>";
                             });
 
-                            str += "</table> </div>" + "</div>";
+                            /*   result.forEach(function(item) {
+                                   str += "<tr class='infos_table'>";
 
+                                   var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
+
+                                   str += "<td class=''>" + propStr + "</td>";
+
+                                   var targetClassStr = "any";
+                                   if (item.value) {
+                                       targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.subject.value + "\")'>" + item.subjectLabel.value + "</span>";
+                                   }
+                                   str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
+
+                                   str += "</tr>";
+                               });
+
+                               str += "</table> </div>" + "</div>";
+
+                               callbackSeries();
+                           }*/
                             callbackSeries();
                         }
                     );
@@ -722,10 +768,10 @@ defaultLang = 'en';*/
             for (var prop in ontologySourceModel.constraints) {
                 var constraint = ontologySourceModel.constraints[prop];
                 if (constraint.domain == nodeId) {
-                    domainOfProperties.push({ id: prop, label: constraint.label });
+                    domainOfProperties.push({ id: prop, label: constraint.label, rangeId: constraint.range, rangeLabel: constraint.rangeLabel });
                 }
                 if (constraint.range == nodeId) {
-                    rangeOfProperties.push({ id: prop, label: constraint.label });
+                    rangeOfProperties.push({ id: prop, label: constraint.label, domainId: constraint.domain, domainLabel: constraint.domainLabel });
                 }
             }
 
@@ -733,13 +779,22 @@ defaultLang = 'en';*/
             if (domainOfProperties.length > 0) {
                 html += "<b><div class='nodesInfos_titles'>Domain of</div></b>";
                 domainOfProperties.forEach(function (property) {
-                    html += "  <div class='XdetailsCellValue'> <a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a> </div>";
+                    html += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a>";
+                    if (property.rangeId) {
+                        html += "&nbsp; <i><a style='color: #aaa' target='" + NodeInfosWidget.getUriTarget(property.rangeId) + "' href='" + property.rangeId + "'>" + property.rangeLabel + "</a></i>";
+                    }
+                    html += "</div>";
                 });
             }
             if (rangeOfProperties.length > 0) {
                 html += "<b><div  class='nodesInfos_titles'>Range of</div></b>";
                 rangeOfProperties.forEach(function (property) {
-                    html += "  <div class='XdetailsCellValue'> <a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a> </div>";
+                    html += "  <div class='XdetailsCellValue'>";
+                    if (property.domainId) {
+                        html +=
+                            "&nbsp; <i><a style='color: #aaa' target='" + NodeInfosWidget.getUriTarget(property.domainId) + "' href='" + property.domainId + "'>" + property.domainLabel + "</a></i>";
+                    }
+                    html += " <a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a> </div>";
                 });
             }
             if (html) {
@@ -750,6 +805,71 @@ defaultLang = 'en';*/
         if (callback) {
             callback();
         }
+    };
+
+    self.showClassesBreakDown = function (sourceLabel, nodeId, divId, callback) {
+        var jstreeData = [];
+        var ancestors = OntologyModels.getClassHierarchyTreeData(sourceLabel, nodeId, "ancestors");
+
+        var uniqueIds = {};
+        if (ancestors.length > 0) {
+            ancestors.forEach(function (item) {
+                if (!uniqueIds[item.id]) {
+                    var parent = item.superClass || "#";
+                    uniqueIds[item.id] = 1;
+                    jstreeData.push({
+                        id: item.id,
+                        text: item.label,
+                        parent: parent,
+                        type: "Class",
+                        data: {
+                            id: item.id,
+                            source: sourceLabel,
+                        },
+                    });
+                }
+            });
+        }
+
+        var html = "<b><div  class='nodesInfos_titles'>Class hierarchy</div></b>" + "<div id='classHierarchyTreeDiv' style='width:300px;height: 330px;overflow: auto;font-size: 12px'></div>";
+
+        $("#" + divId).html(html);
+
+        var options = {
+            openAll: true,
+            selectTreeNodeFn: function (event, obj) {
+                if (!obj.event.ctrlKey) {
+                    var descendants = OntologyModels.getClassHierarchyTreeData(sourceLabel, obj.node.id, "descendants");
+                    var jstreeData = [];
+                    var uniqueIds = JstreeWidget.getNodeDescendants("classHierarchyTreeDiv", "#", null, true);
+                    if (descendants.length > 0) {
+                        descendants.forEach(function (item) {
+                            if (!uniqueIds[item.id]) {
+                                uniqueIds[item.id] = 1;
+                                jstreeData.push({
+                                    id: item.id,
+                                    text: item.label,
+                                    parent: item.superClass,
+                                    type: "Class",
+                                    data: {
+                                        id: item.id,
+                                        source: sourceLabel,
+                                    },
+                                });
+                            }
+                        });
+
+                        JstreeWidget.addNodesToJstree("classHierarchyTreeDiv", null, jstreeData);
+                    }
+                } else {
+                    NodeInfosWidget.showNodeInfos(sourceLabel, obj.node, "mainDialogDiv");
+                }
+            },
+        };
+
+        JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
+
+        callback();
     };
 
     self.onClickLink = function (nodeId) {

@@ -1,6 +1,6 @@
 
 
-//const ManchesterSyntaxEngine = require("../../../../bin/axioms/manchesterSyntaxEngine.js");
+const ManchesterSyntaxEngine = require("../../../../bin/axioms/manchesterSyntaxEngine.js");
 
 //import    ManchesterSyntaxEngine from  "../../../../bin/axioms/manchesterSyntaxEngine.js";
 
@@ -26,7 +26,10 @@ module.exports = function() {
         if (req.query.options) {
             options = JSON.parse(req.query.options);
         }
-     //  ManchesterSyntaxEngine.getSuggestion(req.query.source, req.query.lastToken, options, callback);
+        if(false) {
+            ManchesterSyntaxEngine.getSuggestion(req.query.source, req.query.lastToken, options, callback);
+            return;
+        }
         var url="http://localhost:3000/getSuggestions"
         httpProxy.post(url, null, { owlInput:req.query.lastToken }, function(result) {
 

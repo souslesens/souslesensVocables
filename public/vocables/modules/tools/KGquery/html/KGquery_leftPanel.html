@@ -1,0 +1,127 @@
+<style>
+    .KGquery_pathDiv {
+        border: 1px saddlebrown solid;
+        margin: 3px;
+        padding-top: 3px;
+        border-radius: 3px;
+    }
+
+    .KGquery_pathNodeDiv {
+        display: flex;
+        flex-direction: row;
+        margin-left: 10px;
+        width: 200px;
+    }
+
+    .KGquery_classDiv {
+        margin: 3px;
+        padding-top: 3px;
+    }
+
+    /* #KGquery_dataTableDiv {
+         width: 800px;
+         height: 800px;
+         overflow: auto;
+
+     }*/
+
+    #dataTableDivExport_wrapper {
+        width: 100%;
+        height: 90dvh;
+        overflow: auto;
+    }
+
+    .KGquery_divActions {
+        font-size: 12px;
+        height: 25px;
+        width: 25px;
+
+        margin: 3px;
+        padding: 3px;
+        margin-right: 8px;
+    }
+
+    .KGquery_setDiv {
+        margin: 3px;
+        padding: 3px;
+        border-radius: 3px;
+        border: solid 2px brown;
+    }
+
+    .KGquery_smallButton {
+        font-size: 4px;
+        float: right;
+        margin: 2px;
+    }
+</style>
+
+<script>
+    $(function () {
+        $("button").addClass(" btn btn-sm my-1 py-0 btn-outline-primary");
+        $("KGquery_smallButton").addClass(" btn btn-sm my-1 py-0 btn-outline-primary");
+    });
+</script>
+<div style="display: flex; flex-direction: column" id="KGquery_leftPanelTabs">
+    <ul>
+        <li><a href="#KGquery_queryTab">Query</a></li>
+        <li><a href="#KGquery_myQueriesTab">My Queries</a></li>
+        <!-- <li><a href="#KGquery_SQLqueryTab">SQL query</a></li>-->
+        <li><a href="#KGquery_graphTab">Graph</a></li>
+    </ul>
+
+    <div id="KGquery_myQueriesTab" style="display: flex; flex-direction: column">
+        <div id="KGquery_myQueriesDiv"></div>
+    </div>
+
+    <div id="KGquery_queryTab" style="display: flex; flex-direction: column">
+        <div style="display: flex; flex-direction: column">
+            <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center">
+                <!--  <button onclick="KGquery.switchRightPanel(true)">Graph</button>-->
+                <button onclick="KGquery.clearAll();KGquery.switchRightPanel(true)">Clear</button>
+
+                &nbsp; &nbsp;
+                <button onclick="KGquery.queryKG('table')">Table</button>
+                <!-- <button onclick="KGquery.queryKG('vijsGraph')">Graph</button>-->
+                <button onclick="KGquery.aggregateQuery()">Aggregate</button>
+                <select id="KGquery_outputTypeSelect" onchange="KGquery.onOutputTypeSelect($(this).val());">
+                    <option></option>
+                    <option>Graph</option>
+                </select>
+                <!-- <button onclick="KGquery.queryKG('table',null,true)">Query database</button>-->
+
+                <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
+                &nbsp;
+            </div>
+            <div>
+                <img src="./images/waitAnimated.gif" id="KGquery_waitImg" style="display: none; width: 15px; height: 15px; text-align: justify" />
+                &nbsp; <span class="messageDiv" id="KGquery_messageDiv"></span>
+            </div>
+        </div>
+        <div style="width: 300px; align-items: baseline" id="KGquery_SetsControlsDiv">
+            <button onclick="KGquery.addQuerySet('Minus');KGquery.switchRightPanel(true)"><img src="icons/CommonIcons/MinusIcon.png" height="15px" />Minus</button>
+            <button onclick="KGquery.addQuerySet('Union');KGquery.switchRightPanel(true)"><img src="icons/CommonIcons/UnionIcon.png" height="15px" />Union</button>
+        </div>
+
+        <div style="display: flex; flex-direction: column" id="KGquery_pathsDiv"></div>
+    </div>
+    <div id="KGquery_graphTab">
+        <div>
+            GRAPH
+            <button onclick="KGquery_graph.drawVisjsModel('saved')">loadSaved</button>
+            <button onclick="KGquery_graph.drawVisjsModel('inferred')">regenerate</button>
+            <button onclick="KGquery_graph.saveVisjsModelGraph()">saveGraph</button>
+            <button onclick="KGquery_graph.setEdgeMode()">setEdgeMode</button>
+        </div>
+
+        <div>
+            Node Color
+            <select id="KGquery_graph_nodeColorSelect" onclick="KGquery_graph.setNodeAttr('color',$(this).val())"></select>
+            <div>
+                Node Shape
+                <select id="KGquery_graph_nodeShapeSelect" onclick="KGquery_graph.setNodeAttr('shape',$(this).val())"></select>
+
+                <button onclick="KGquery_graph.setAllNodesFontSize()">AllNodesFontSize</button>
+            </div>
+        </div>
+    </div>
+</div>

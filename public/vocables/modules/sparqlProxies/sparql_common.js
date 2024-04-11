@@ -185,6 +185,8 @@ var Sparql_common = (function () {
             }
         });
 
+
+
         return filters[0];
 
         var filter = "";
@@ -318,6 +320,7 @@ var Sparql_common = (function () {
         //   str = str.replace(/\)/gm, "\\\)")
 
         str = str.replace(/\\xa0/gm, " ");
+        str = str.replace(/@/gm, "_");
         str = str.replace(/'/gm, "\\'");
         if (forUri) {
             str = str.replace(/ /gm, "_");
@@ -640,6 +643,11 @@ var Sparql_common = (function () {
     return self;
 })();
 
+
+
+
 export default Sparql_common;
+
+
 
 window.Sparql_common = Sparql_common;

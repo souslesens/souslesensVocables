@@ -42,6 +42,26 @@ var SearchWidget = (function () {
      *  -contextMenufn
      *
      */
+    self.initClassesTab = function () {
+        if ($("#tabs_classes").children().length == 0) {
+            $("#tabs_classes").load("./modules/tools/lineage/html/Lineage_classesPannel.html", function (s) {
+                SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
+                $("#Lineage_searchBarWrapper").load("./snippets/searchAllResponsive.html", function () {
+                    SearchWidget.init();
+                    $("#GenericTools_searchInAllSources").prop("checked", false);
+                    $("#Lineage_MoreClassesOptions").hide();
+                    SearchWidget.showTopConcepts();
+                    $("#lateralPanelDiv").resizable({
+                        maxWidth: 435,
+                        minWidth: 150,
+                        stop: function (event, ui) {
+                            ResponsiveUI.resetWindowHeight();
+                        },
+                    });
+                });
+            });
+        }
+    };
     self.searchTermInSources = function (options) {
         if (!options) {
             options = {};

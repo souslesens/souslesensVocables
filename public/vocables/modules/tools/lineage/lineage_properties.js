@@ -28,6 +28,24 @@ var Lineage_properties = (function () {
     self.init = function () {
         self.graphInited = false;
     };
+    self.initPropertiesTab = function () {
+        if ($("#tabs_properties").children().length == 0) {
+            $("#tabs_properties").load("./modules/tools/lineage/html/Lineage_propertiesPannel.html", function (s) {
+                Lineage_whiteboard.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
+                Lineage_properties.searchTermInSources();
+            });
+        }
+    };
+    self.changeIconForPropertiesGraphAction = function (div) {
+        var icon = $(div).children().attr("class");
+        if (icon == "allPropertyIcon slsv-invisible-button" || icon == "slsv-invisible-button allPropertyIcon") {
+            $(div).children().removeClass("allPropertyIcon");
+            $(div).children().addClass("currentPropertyIcon");
+        } else {
+            $(div).children().removeClass("currentPropertyIcon");
+            $(div).children().addClass("allPropertyIcon");
+        }
+    };
     self.showPropInfos = function (_event, obj) {
         var id = obj.node.id;
         var html = JSON.stringify(self.properties[id]);

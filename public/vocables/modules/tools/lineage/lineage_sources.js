@@ -21,43 +21,16 @@ var Lineage_sources = (function () {
     self.loadedSources = {};
     self.sourceDivsMap = {};
 
-    self.init = function (showDialog) {
-        if (true) {
-            Config.Lineage.disabledButtons.forEach(function (buttonId) {
-                $("#" + buttonId).prop("disabled", true);
-            });
-        }
-
-        if (self.loadedSources) {
-            for (var source in self.loadedSources) {
-                self.menuActions.closeSource(source);
+    self.init = function () {
+        self.loadSources(MainController.currentSource, function (err) {
+            if (err) {
+                return alert(err.responseText);
             }
-        }
-        $("#LineagePopup").dialog({
-            autoOpen: false,
-            height: 800,
-            width: 1000,
-            modal: false,
-            //  position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
+            $("#lateralPanelDiv").load("./modules/tools/lineage/html/Lineage_leftPannel.html", function () {
+                Lineage_whiteboard.initWhiteboardTab();
+                Lineage_whiteboard.initUI();
+            });
         });
-        $("#QueryDialog").dialog({
-            autoOpen: false,
-            height: 800,
-            width: 700,
-            modal: false,
-            // position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
-        });
-        self.activeSource = null;
-        self.loadedSources = {};
-        self.sourceDivsMap = {};
-
-        // self.clearSource()
-
-        Lineage_selection.selectedNodes = [];
-        self.setTheme(Config.defaultGraphTheme);
-        if (!Config.userTools["lineage"].noSourceDialogAtInit) {
-            Lineage_sources.showSourcesDialog(showDialog);
-        }
     };
 
     self.resetAll = function (showDialog) {
@@ -254,18 +227,23 @@ var Lineage_sources = (function () {
         if (!Lineage_whiteboard.lineageVisjsGraph.network) {
             return;
         }
-        if (hide) {
-            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
-            $(".vis-edit-mode").css("display", "none");
+        if(MainController.currentTool!='lineage'){
+            hide=true;
         }
+        Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
+        $(".vis-edit-mode").css("display", "none");
+
         var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
-        if (isNodeEditable) {
-            Lineage_whiteboard.lineageVisjsGraph.network.enableEditMode();
-            $(".vis-edit-mode").css("display", "block");
+        if (isNodeEditable && !hide) {
+            $("#Lineage_graphEditionButtons").css("display", "block");
+
+            $("#lineage_createResourceBtn").show();
         } else {
-            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
-            $(".vis-edit-mode").css("display", "none");
+            $("#Lineage_graphEditionButtons").css("display", "none");
+            $("#lineage_createResourceBtn").hide();
         }
+        $("#Lineage_sourceButtonsTitle").text($(".Lineage_selectedSourceDiv").text());
+        Lineage_whiteboard.resetCurrentTab();
     };
 
     self.whiteboard_setGraphOpacity = function (source) {
@@ -455,7 +433,7 @@ sourceDivId +
     };
 
     self.setAllWhiteBoardSources = function (remove) {
-        self.showHideEditButtons(null, true);
+        
         if (remove) {
             Lineage_sources.fromAllWhiteboardSources = true;
         }

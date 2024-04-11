@@ -18,6 +18,7 @@ import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Lineage_createResource from "./lineage_createResource.js";
+import ResponsiveUI from "../../../responsive/responsiveUI.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -82,83 +83,88 @@ var Lineage_whiteboard = (function () {
     self.currentExpandLevel = 1;
 
     self.queriesStack = [];
-
-    /**
-     *
-     *
-     * @param callback
-     */
-    self.onLoaded = function (callback) {
-        if (self.isLoaded) {
-        } // return;
-        self.isLoaded = true;
-
-        $("#sourceDivControlPanelDiv").html("");
-
-        $("#graphDiv").bind("click", function () {
-            // MainController.UI.showHideRightPanel()
-        });
-        $("#sourcesTreeDivContainer").html("");
-        var x = $("#actionDivContolPanelDiv").html();
-
-        $("#actionDivContolPanelDiv").load("snippets/lineage/lineageLeftPanel.html", function (err, x) {
-            Lineage_sources.init();
-
-            $("#rightPanelDivInner").html("");
-            $("#rightPanelDivInner").load("snippets/lineage/lineageRightPanel.html", function () {
-                $("#GenericTools_searchSchemaType").val("OWL");
-
-                if (Object.keys(Lineage_sources.loadedSources).length == 0) {
-                    $("#lineage_allActions").css("visibility", "hidden");
-                }
-
-                SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
-                $("#Lineage_containers_searchInput").bind("keydown", null, function () {
-                    if (event.keyCode == 13) {
-                        Lineage_containers.search();
-                    }
-                });
-
-                $("#LineagePopup").dialog({
-                    autoOpen: false,
-                    height: 700,
-                    width: 700,
-                    modal: false,
-                });
-                $("#Lineage_Tabs").tabs({
-                    activate: function (/** @type {any} */ e, /** @type {{ newPanel: { selector: any; }; }} */ ui) {
-                        self.currentOwlType = "Class";
-                        var divId = ui.newPanel.selector;
-                        if (divId == "#LineageTypesTab") {
-                            self.currentOwlType = "Type";
-                            Lineage_types.init();
-                        } else if (divId == "#LineagePropertiesTab") {
-                            self.currentOwlType = "ObjectProperty";
-                            Lineage_properties.init();
-                        } else if (divId == "#LineageRelationsTab") {
-                            self.currentOwlType = "Relations";
-                        }
+    self.MoreActionsShow = false;
+    self.MoreOptionsShow = true;
+   
+    self.onLoaded = function () {
+        
+        
+           
+          
+        SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
+        ResponsiveUI.initMenuBar(Lineage_sources.init);
+        $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/Lineage_topButtons.html");
+        $("KGquery_messageDiv").attr("id", "messageDiv");
+        $("KGquery_waitImg").attr("id", "waitImg");
+    };
+    self.unload = function () {
+        $("#graphDiv").empty();
+        $("#lateralPanelDiv").off();
+        $("#lateralPanelDiv").css("width", "435px");
+    };
+    self.initWhiteboardTab = function () {
+        if ($("#tabs_whiteboard").children().length == 0) {
+            $("#tabs_whiteboard").load("./modules/tools/lineage/html/Lineage_whiteboardPannel.html", function (s) {
+                $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
+                $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
+                Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
+                Lineage_whiteboard.hideShowMoreActions("hide");
+                ResponsiveUI.PopUpOnHoverButtons();
+                $("#lateralPanelDiv").resizable({
+                    maxWidth: 435,
+                    minWidth: 150,
+                    stop: function (event, ui) {
+                        ResponsiveUI.resetWindowHeight();
                     },
                 });
-
-                for (var sourceLabel in Config.sources) {
-                    var graphUri = Config.sources[sourceLabel].graphUri;
-                    if (graphUri && graphUri != "") {
-                        self.sourcesGraphUriMap[graphUri] = Config.sources[sourceLabel];
-                    }
-                }
-                $("#GenericTools_searchSchemaType").val("OWL");
-                MainController.UI.showHideRightPanel("hide");
-
-                if (callback) {
-                    callback();
-                }
             });
-        });
+        }
     };
-
-    self.onSourceSelect = function (sourceLabel, /** @type {{ button: number; }} */ event) {};
-
+    self.resetCurrentTab = function () {
+        var currentTab = $(".slsv-tabButtonSelected").parent().attr('popUpComment');
+        if (currentTab == "Classes") {
+            SearchWidget.showTopConcepts();
+        }
+        if (currentTab == "Properties") {
+            Lineage_properties.searchTermInSources();
+        }
+        if (currentTab == "Containers") {
+            Lineage_containers.search();
+        }
+    };
+    self.hideShowMoreActions = function (hideShowParameter) {
+        if (hideShowParameter == "hide") {
+            self.MoreActionsShow = true;
+        }
+        if (hideShowParameter == "show") {
+            self.MoreActionsShow = false;
+        }
+        if (!self.MoreActionsShow) {
+            $("#Lineage_MoreActionsButtons").show();
+            self.MoreActionsShow = true;
+            $("#Lineage_MoreActionsDiv").removeClass("TitleBoxLine");
+        } else {
+            $("#Lineage_MoreActionsButtons").hide();
+            self.MoreActionsShow = false;
+            $("#Lineage_MoreActionsDiv").addClass("TitleBoxLine");
+        }
+    };
+    self.hideShowMoreOptions = function (hideShowParameter, divId) {
+        if (hideShowParameter == "hide") {
+            self.MoreOptionsShow = false;
+        }
+        if (hideShowParameter == "show") {
+            self.MoreOptionsShow = true;
+        }
+        if (self.MoreOptionsShow) {
+            $("#" + divId).show();
+            self.MoreOptionsShow = false;
+        } else {
+            $("#" + divId).hide();
+            self.MoreOptionsShow = true;
+        }
+    };
+    
     self.onGraphOrTreeNodeClick = function (node, nodeEvent, options) {
         //  console.trace("onGraphOrTreeNodeClick");
 

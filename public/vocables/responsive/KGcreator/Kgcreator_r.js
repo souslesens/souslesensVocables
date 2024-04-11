@@ -3,9 +3,8 @@ import KGcreator_mappings from "../../modules/tools/KGcreator/KGcreator_mappings
 import KGcreator_run from "../../modules/tools/KGcreator/KGcreator_run.js";
 import ResponsiveUI from "../../responsive/responsiveUI.js";
 import NodesInfosWidget from "../../modules/uiWidgets/nodeInfosWidget.js";
-
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
-import Lineage_r from "../lineage/lineage_r.js";
+import SavedQueriesWidget from "../../modules/uiWidgets/savedQueriesWidget.js";
 
 var KGcreator_r = (function () {
     var self = {};
@@ -17,7 +16,7 @@ var KGcreator_r = (function () {
     //self.oldshowMappingDialog=KGcreator_mappings.showMappingDialog;
     self.onLoaded = function () {
         self.currentTab = "";
-        PredicatesSelectorWidget.load = Lineage_r.loadPredicateSelectorWidgetResponsive;
+        
         ResponsiveUI.initMenuBar(self.loadSource);
         //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
         $("#Lineage_graphEditionButtons").show();

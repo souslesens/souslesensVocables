@@ -35,8 +35,10 @@ var KGquery = (function() {
         ResponsiveUI.initMenuBar(KGquery.loadSource);
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
+        
     };
     self.unload = function () {
+        Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
         $("#KGquery_messageDiv").attr("id", "messageDiv");
         $("#KGquery_waitImg").attr("id", "waitImg");
         $("#graphDiv").empty();

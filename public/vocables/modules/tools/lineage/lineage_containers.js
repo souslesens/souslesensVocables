@@ -16,6 +16,13 @@ var Lineage_containers = (function() {
     self.ancestors_tree_search_areRunning = [false, false, false];
     self.flag_search = false;
     self.flag_search_launch_search = false;
+    self.initContainersTab = function () {
+        if ($("#tabs_containers").children().length == 0) {
+            $("#tabs_containers").load("./modules/tools/lineage/html/Lineage_containersPannel.html", function (s) {
+                Lineage_containers.search();
+            });
+        }
+    };
     self.flag_function = function() {
         self.flag_search = false;
         if (self.flag_search_launch_search == true) {

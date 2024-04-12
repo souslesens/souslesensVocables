@@ -43,7 +43,7 @@ var ResponsiveUI = (function () {
         ResponsiveUI.resetWindowHeight();
     };
     // keep here
-    self.initMenuBar = function (callback) {
+    self.initMenuBar = function (fn) {
         $("#Lineage_changeSourceButton").show();
         $("#index_topContolPanel").show();
         //Loading
@@ -52,7 +52,7 @@ var ResponsiveUI = (function () {
                 $("#Lineage_addSourceButton").remove();
                 $("#Lineage_allSourceButton").remove();
             }
-            callback();
+            fn();
         });
     };
     // Keep Here
@@ -80,6 +80,8 @@ var ResponsiveUI = (function () {
     };
 
     //  MainController --> onToolSelect.initTool   when click on a button of a tool
+    // Manage when we click on a tool with parameter event
+    // Or when we choose a tool with the url with toolId parameter
     self.onToolSelect = function (toolId, event,callback) {
         if (event) {
             var clickedElement = event.target;
@@ -105,7 +107,7 @@ var ResponsiveUI = (function () {
         self.currentTool = toolId;
 
         if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
-            Lineage_sources.registerSource = self.registerSourceWithoutImports;
+            Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
         }
 
         $("#currentToolTitle").html(toolId);
@@ -127,6 +129,8 @@ var ResponsiveUI = (function () {
         }
     };
     //MainController.onSourceSelect
+    // onSourceSelect is an event click functions when we choose a source she attribute the correct source corresponding to the click then execute source select which is the 
+    // the real execution of what we do when we choosed a source 
     self.onSourceSelect = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         var p = obj.node.parents.indexOf("PRIVATE");
@@ -156,7 +160,7 @@ var ResponsiveUI = (function () {
             self.resetWindowHeight();
         });
     };
-    // MainController or in Lineage_r ?
+    // MainController 
     self.onSourceSelect_AddSource = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         if (!obj.node.data || obj.node.data.type != "source") {
@@ -168,7 +172,8 @@ var ResponsiveUI = (function () {
         $("#mainDialogDiv").parent().hide();
         Lineage_whiteboard.init();
     };
-    // What is the goal of this function? --> MainController?
+    // MainController
+    //Giving a tool in parameter and the function launch it
     self.initTool = function (toolId, callback) {
         var toolObj = Config.userTools[toolId];
         MainController.initControllers();
@@ -192,14 +197,7 @@ var ResponsiveUI = (function () {
             }
         }
     };
-    // To remove? --> unused
-    self.showDiv = function (modalDiv) {
-        $("#" + modalDiv).css("display", "block");
-    };
-    // To remove? unused
-    self.hideDiv = function (modalDiv) {
-        $("#" + modalDiv).css("display", "none");
-    };
+   
     //Keep
     self.ApplySelectedTabCSS = function (buttonClicked, tabGroup) {
         var x = $("#" + tabGroup + "-buttons").children();
@@ -226,9 +224,9 @@ var ResponsiveUI = (function () {
         }
         self.ApplySelectedTabCSS(buttonClicked, tabGroup);
     };
-    // Load Souirce selector with the rights options
+    // Keep
     self.showSourceDialog = function (resetAll) {
-        self.openDialogDiv("mainDialogDiv");
+        //self.openDialogDiv("mainDialogDiv");
         $("#" + "mainDialogDiv")
             .parent()
             .show();
@@ -245,10 +243,12 @@ var ResponsiveUI = (function () {
         });
     };
     //keep
+    /*
     self.openDialogDiv = function (div) {
+        
         $("#" + div).empty();
         $("#" + div).dialog();
-    };
+    };*/
     //keep
     self.setSlsvCssClasses = function (callback) {
         less.pageLoadFinished.then(async function () {
@@ -336,8 +336,8 @@ var ResponsiveUI = (function () {
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };
-    //Lineage.sources?
-    self.registerSourceWithoutImports = function (sourceLabel, callback) {
+    //Lineage.sources
+    self.registerSourceWithoutDisplayingImports = function (sourceLabel, callback) {
         if (!callback) {
             callback = function () {};
         }

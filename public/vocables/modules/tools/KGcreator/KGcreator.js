@@ -48,6 +48,7 @@ var KGcreator = (function () {
         $("#KGcreator_topButtons").css("flex-direction", "row");
         $("#Lineage_graphEditionButtons").empty();
         $("#MenuBarFooter").css("display", "block");
+        $('#KGcreator_centralPanelTabs').remove();
     };
     self.displayUploadApp = function (displayForm) {
         self.uploadFormData.displayForm = displayForm;

@@ -113,6 +113,7 @@ var Lineage_whiteboard = (function () {
                 $("#lateralPanelDiv").resizable({
                     maxWidth: 435,
                     minWidth: 150,
+                    handles:'e',
                     stop: function (event, ui) {
                         ResponsiveUI.resetWindowHeight();
                     },

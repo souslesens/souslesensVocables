@@ -14,6 +14,7 @@ import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 import Authentification from "../../shared/authentification.js";
+import ResponsiveUI from "../../../responsive/responsiveUI.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -403,6 +404,53 @@ sourceDivId +
             return callback();
         });
     };
+    self.registerSourceWithoutDisplayingImports = function (sourceLabel, callback) {
+        if (!callback) {
+            callback = function () {};
+        }
+
+        if (Lineage_sources.loadedSources[sourceLabel]) {
+            return callback();
+        }
+
+        OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            if (sourceLabel == ResponsiveUI.source) {
+                var sourceDivId = "source_" + common.getRandomHexaId(5);
+                self.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
+                self.sourceDivsMap[sourceDivId] = sourceLabel;
+                var html =
+                    "<div  id='" +
+                    sourceDivId +
+                    "' style='color: " +
+                    Lineage_whiteboard.getSourceColor(sourceLabel) +
+                    ";display:inline-flex;align-items:end;'" +
+                    " class='Lineage_sourceLabelDiv'  " +
+                    ">" +
+                    sourceLabel +
+                    "&nbsp;" +
+                    /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+    sourceDivId +
+    "\")'>[-]</i>";*/
+                    "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+                    sourceDivId +
+                    "\")'/> </button></div>";
+                $("#Lineage_sourcesDiv").append(html);
+
+                $("#" + sourceDivId).bind("click", function (e) {
+                    var sourceDivId = $(this).attr("id");
+                    var source = self.sourceDivsMap[sourceDivId];
+                    self.setCurrentSource(source);
+                });
+                return callback();
+            } else {
+                return callback();
+            }
+        });
+    };
+
     self.showSourceDivPopupMenu = function (sourceDivId) {
         event.stopPropagation();
         var source = Lineage_sources.sourceDivsMap[sourceDivId];

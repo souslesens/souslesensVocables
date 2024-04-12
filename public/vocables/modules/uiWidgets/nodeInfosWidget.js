@@ -18,7 +18,7 @@ var NodeInfosWidget = (function () {
     var self = {};
 
     self.initDialog = function (sourceLabel, divId, options, callback) {
-        ResponsiveUI.openDialogDiv(divId);
+        //ResponsiveUI.openDialogDiv(divId);
         $("#" + divId)
             .parent()
             .show("fast", function () {

@@ -974,7 +974,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.showGraphConfig = function () {
         $("#visjsConfigureDiv").dialog({
             //   autoOpen: false,
-            height: 700,
+            
             width: 550,
             modal: false,
             title: "Graph parameters",

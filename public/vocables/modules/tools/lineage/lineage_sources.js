@@ -64,14 +64,14 @@ var Lineage_sources = (function () {
             self.setCurrentSource(source);
             $("#sourcesSelectionDialogdiv").dialog("close");
             $("#lineage_allActions").css("visibility", "visible");
-            MainController.UI.showHideRightPanel("show");
+            //MainController.UI.showHideRightPanel("show");
         };
 
         var validateButtonFn = function () {
             var sources = SourceSelectorWidget.getCheckedSources();
             self.loadSources(sources);
         };
-        MainController.UI.showHideRightPanel("hide");
+        //MainController.UI.showHideRightPanel("hide");
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, validateButtonFn, options);
 
         return;
@@ -112,7 +112,7 @@ var Lineage_sources = (function () {
                 }
                 self.setCurrentSource(firstSource);
                 $("#sourcesSelectionDialogdiv").dialog("close");
-                MainController.UI.showHideRightPanel();
+                //MainController.UI.showHideRightPanel();
                 $("#lineage_allActions").css("visibility", "visible");
 
                 if (callback) {

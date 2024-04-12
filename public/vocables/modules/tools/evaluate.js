@@ -39,7 +39,7 @@ var Evaluate = (function () {
                         activate: self.onTabActivate,
                     });
                     $("#Evaluate_rightPanelTabs").tabs({});
-                    MainController.UI.showHideRightPanel();
+                    //MainController.UI.showHideRightPanel();
 
                     common.fillSelectOptions("evaluate_sourceSelect", self.selectedSources, true);
                     self.initCorpusList();

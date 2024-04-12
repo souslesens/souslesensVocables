@@ -18,7 +18,7 @@ var Lineage_relations = (function () {
     self.whiteboardSourcesFromStatus = false;
 
     self.showDrawRelationsDialog = function (caller) {
-        MainController.UI.showHideRightPanel("hide");
+        //MainController.UI.showHideRightPanel("hide");
         self.drawRelationCurrentCaller = caller;
         self.currentQueryInfos = { predicate: "", filter: {} };
 

@@ -92,7 +92,7 @@ var KGpropertyFilter = (function () {
             self.onChangeSourceSelect("IDCP");
         });
 
-        //  MainController.UI.showHideRightPanel(true);
+        ////MainController.UI.showHideRightPanel(true);
         $("#graphDiv").width(1000);
 
         /*  $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function() {

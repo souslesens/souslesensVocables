@@ -174,10 +174,7 @@ var MainController = (function () {
                             callbackSeries(err);
                         });
                     },
-                    function (callbackSeries) {
-                        MainController.UI.showToolsList("toolsTreeDiv");
-                        callbackSeries();
-                    },
+                    
                     function (callbackSeries) {
                         MainController.parseUrlParam(function () {
                             callbackSeries();
@@ -185,7 +182,7 @@ var MainController = (function () {
                     },
                 ],
                 function (_err) {
-                    MainController.UI.configureUI();
+                    //MainController.UI.configureUI();
                 }
             );
             callback(_err);
@@ -203,10 +200,10 @@ var MainController = (function () {
                 }
             });
     };
-
+    
     self.UI = {
         initialGraphDivWitdh: 0,
-
+        /*
         configureUI: function () {
             if (Config.currentProfile.forbiddenTools.indexOf("BLENDER") > -1) {
                 $("#showBlenderButton").css("display", "none");
@@ -480,7 +477,7 @@ var MainController = (function () {
                 });
             }
         },
-
+        */
         getJstreeConceptsContextMenu: function () {
             if (!self.currentTool || !Config.userTools[self.currentTool]) {
                 return;
@@ -490,7 +487,7 @@ var MainController = (function () {
                 return controller.jstreeContextMenu();
             }
         },
-
+        /*
         onSourceSelect: function (event) {
             if (Config.userTools[self.currentTool].multiSources) {
                 return;
@@ -504,14 +501,14 @@ var MainController = (function () {
                 controller.onSourceSelect(self.currentSource, event);
             }
         },
-
+        */
         message: function (message, stopWaitImg) {
             $("#messageDiv").html(message);
             if (stopWaitImg) {
                 $("#waitImg").css("display", "none");
             }
         },
-
+        /*
         setCredits: function () {
             var LateralPannelWidth = $("#lateralPanelDiv").width();
             var gifStart = $(window).width() / 2 - LateralPannelWidth + 100;
@@ -524,7 +521,7 @@ var MainController = (function () {
                 "</div>";
             $("#graphDiv").html(html);
         },
-
+P
         updateActionDivLabel: function (html) {
             if (html) {
                 $("#toolPanelLabel").html(html);
@@ -592,12 +589,10 @@ var MainController = (function () {
         logout: function () {
             // eslint-disable-next-line no-console
             console.log("logout");
-        },
+        },*/
     };
 
-    self.test = function () {
-        //   bc.postMessage("bc")
-    };
+
 
 
 

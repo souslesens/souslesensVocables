@@ -389,7 +389,7 @@ var Lineage_whiteboard = (function () {
         if (!options) {
             options = {};
         }
-        MainController.UI.showHideRightPanel("hide");
+        //MainController.UI.showHideRightPanel("hide");
         self.currentExpandLevel = 1;
 
         if (!source) {

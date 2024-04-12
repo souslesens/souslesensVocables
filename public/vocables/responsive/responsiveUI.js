@@ -78,14 +78,7 @@ var ResponsiveUI = (function () {
         //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
-    // To suppress
-    self.replaceFile = function (file1, file2) {
-        Object.keys(file1).forEach((key) => {
-            if (file2[key]) {
-                file1[key] = file2[key];
-            }
-        });
-    };
+
     //  MainController --> onToolSelect.initTool   when click on a button of a tool
     self.onToolSelect = function (toolId, event,callback) {
         if (event) {

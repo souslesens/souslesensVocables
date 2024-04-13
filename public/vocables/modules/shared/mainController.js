@@ -136,6 +136,7 @@ var MainController = (function () {
         if (!authentication.currentUser) {
             return alert(" no user identified");
         }
+        Config.clientCache={}
         var groups = authentication.currentUser.groupes;
 
         MainController.loadProfiles(function (_err, _result) {
@@ -205,197 +206,15 @@ var MainController = (function () {
     };
 
     self.UI = {
-        initialGraphDivWitdh: 0,
+
 
         configureUI: function () {
-            if (Config.currentProfile.forbiddenTools.indexOf("BLENDER") > -1) {
-                $("#showBlenderButton").css("display", "none");
-            } else {
-                $("#showBlenderButton").css("display", "block");
-            }
+
+
         },
 
-        showSources: function (treeDiv, withCBX, sources, types, options, callback) {
-            if (!options) {
-                options = {};
-            }
-            var treeData = [];
 
-            if (self.currentSourcesTree) {
-                treeData = self.currentSourcesTree;
-            } else {
-                var distinctNodes = {};
 
-                var distinctGroups = {};
-
-                if (Config.currentProfile.allowedSourceSchemas.length == 0) {
-                    return alert(Config.currentProfile.name + " has no schema type allowed. Contact administrator");
-                }
-                Config.currentProfile.allowedSourceSchemas.sort().forEach(function (item) {
-                    if (!types || (types && types.indexOf(item) > -1)) {
-                        treeData.push({
-                            id: item,
-                            text: item,
-                            parent: "#",
-                            type: item,
-                        });
-                    }
-                });
-                Object.keys(Config.sources)
-                    .sort()
-                    .forEach(function (sourceLabel, index) {
-                        // self.initControllers();
-                        if (sources && sources.indexOf(sourceLabel) < 0) {
-                            return;
-                        }
-                        if (Config.sources[sourceLabel].isDraft) {
-                            return;
-                        }
-                        if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) {
-                            return;
-                        }
-                        Config.sources[sourceLabel].name = sourceLabel;
-
-                        var parent = Config.sources[sourceLabel].schemaType;
-
-                        var othersGroup = "OTHERS";
-
-                        if (!types && !distinctGroups[othersGroup]) {
-                            distinctGroups[othersGroup] = 1;
-                            treeData.push({
-                                id: othersGroup + "_" + parent,
-                                text: "OTHERS",
-                                type: "group",
-                                parent: "#",
-                            });
-                        }
-
-                        var group = Config.sources[sourceLabel].group;
-                        if (group) {
-                            var subGroups = group.split("/");
-                            subGroups.forEach(function (subGroup, index) {
-                                if (index > 0) {
-                                    parent = subGroups[index - 1];
-                                }
-                                if (!distinctGroups[subGroup]) {
-                                    distinctGroups[subGroup] = 1;
-                                    treeData.push({
-                                        id: subGroup,
-                                        text: subGroup,
-                                        type: "group",
-                                        parent: parent,
-                                    });
-                                }
-                                group = subGroup;
-                            });
-                        } else {
-                            group = othersGroup + "_" + parent;
-                            if (types) {
-                                group = Config.sources[sourceLabel].schemaType;
-                            } else {
-                                group = Config.sources[sourceLabel].schemaType;
-                            }
-                        }
-
-                        if (!distinctNodes[sourceLabel]) {
-                            distinctNodes[sourceLabel] = 1;
-
-                            if (!Config.sources[sourceLabel].color) {
-                                Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
-                            }
-                            //  console.log(JSON.stringify(jstreeData,null,2))
-                            if (!types || types.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                                treeData.push({
-                                    id: sourceLabel,
-                                    text: sourceLabel,
-                                    type: Config.sources[sourceLabel].schemaType,
-                                    parent: group,
-                                });
-                            }
-                        }
-                    });
-                self.currentSourcesTree = treeData;
-            }
-            var jstreeOptions = options;
-            if (!jstreeOptions.contextMenu) {
-                jstreeOptions.contextMenu = MainController.UI.getJstreeConceptsContextMenu();
-            }
-            if (withCBX) {
-                jstreeOptions.withCheckboxes = withCBX;
-            }
-
-            if (!withCBX && !jstreeOptions.selectTreeNodeFn) {
-                jstreeOptions.selectTreeNodeFn = function (evt, obj) {
-                    if (!Config.sources[obj.node.id]) {
-                        return;
-                    }
-                    $("#mainDialogDiv").dialog("close");
-                    if (obj.node.parent == "#") {
-                        //first level group by schema type
-                        if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {
-                            //schemaTypeNode
-                            if (obj.node.id == "KNOWLEDGE_GRAPH") {
-                                MainController.currentSchemaType = "OWL";
-                            } else {
-                                MainController.currentSchemaType = obj.node.id;
-                            }
-
-                            if ($("#sourcesTreeDiv").children().length > 0) {
-                                $("#sourcesTreeDiv").jstree(true).open_node(obj.node.id);
-                            }
-                            return;
-                        }
-                    } else {
-                        self.currentSource = obj.node.id;
-                        MainController.UI.onSourceSelect(obj.event);
-                    }
-                };
-            }
-
-            if (!jstreeOptions.onOpenNodeFn) {
-                jstreeOptions.onOpenNodeFn = function (evt, obj) {
-                    if (obj.node.parent == "#") {
-                        //first level group by schema type
-                        if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {
-                            //schemaTypeNode
-                            if (obj.node.id == "KNOWLEDGE_GRAPH") {
-                                MainController.currentSchemaType = "OWL";
-                            } else {
-                                MainController.currentSchemaType = obj.node.id;
-                            }
-                        }
-                    }
-                };
-            }
-
-            $("#Lineage_SearchSourceInput").bind("keydown", null, MainController.UI.searchInSourcesTree);
-            options.searchPlugin = {
-                case_insensitive: true,
-                fuzzy: false,
-                show_only_matches: true,
-            };
-
-            JstreeWidget.loadJsTree(treeDiv, treeData, options, function () {
-                var openedTypes = Config.preferredSchemaType;
-                //    if (types) openedTypes = types;
-                //  $("#" + treeDiv).jstree(true).open_all(openedTypes);
-                $("#" + treeDiv)
-                    .jstree(true)
-                    .open_node(openedTypes);
-                if (callback) {
-                    return callback();
-                }
-            });
-        },
-
-        searchInSourcesTree: function () {
-            if (event.keyCode != 13 && event.keyCode != 9) {
-                return;
-            }
-            var value = $("#Lineage_SearchSourceInput").val();
-            $("#sourcesTreeDiv").jstree(true).search(value);
-            //$("#Lineage_SearchSourceInput").val("");
-        },
         showToolsList: function (treeDiv) {
             $(".max-height").height($(window).height() - 300);
             var treeData = [];
@@ -458,7 +277,6 @@ var MainController = (function () {
                 };
                 SourceSelectorWidget.initWidget(null, "sourcesTreeDiv", false, null, null, options);
 
-                // MainController.UI.showSources("sourcesTreeDiv", toolObj.multiSources);
                 if (Config.userTools[self.currentTool].multiSources) {
                     self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources");
                     if (controller.onSourceSelect) {

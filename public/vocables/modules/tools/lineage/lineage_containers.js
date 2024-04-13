@@ -134,8 +134,12 @@ var Lineage_containers = (function() {
         if ($("#lineage_containers_containersJstree").jstree) {
             $("#lineage_containers_containersJstree").empty();
         }
+        var options={}
         if (self.flag_search == false) {
-            self.drawContainerJstree(source, filter, "lineage_containers_containersJstree", search_on_container, memberType, {}, function(err, result) {
+            if (term != "") {
+            options.depth=5
+            }
+            self.drawContainerJstree(source, filter, "lineage_containers_containersJstree", search_on_container, memberType, options, function(err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
@@ -150,7 +154,9 @@ var Lineage_containers = (function() {
         if (!options) {
             options = {};
         }
-        options.depth = 5;
+        if (!options.depth) {
+            options.depth = 1;
+        }
         if (!options.filter) {
             options.filter = "";
         }
@@ -771,15 +777,15 @@ var Lineage_containers = (function() {
                             var shape = Lineage_containers.containerStyle.shape;
                             var type = "container";
                             if (item.memberTypes.value.indexOf("Bag") < 0) {
-                                color=Lineage_whiteboard.getSourceColor(Lineage_sources.activeSource)
+                                color = Lineage_whiteboard.getSourceColor(Lineage_sources.activeSource);
                                 if (item.memberTypes.value.indexOf("Individual") > -1) {
                                     type = "individual";
-                                    shape="triangle"
+                                    shape = "triangle";
 
-                                }else{
+                                } else {
                                     type = "class";
-                                    shape= Lineage_whiteboard.defaultShape
-                                    shape="dot"
+                                    shape = Lineage_whiteboard.defaultShape;
+                                    shape = "dot";
                                 }
                             }
 
@@ -788,7 +794,7 @@ var Lineage_containers = (function() {
                                 id: item.member.value,
                                 label: item.memberLabel.value,
                                 shadow: self.nodeShadow,
-                                shape:shape,
+                                shape: shape,
                                 size: size,
                                 font: type == "container" ? { color: color2, size: 10 } : null,
                                 color: color,

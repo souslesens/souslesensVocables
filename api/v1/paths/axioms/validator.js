@@ -26,16 +26,16 @@ module.exports = function() {
         if (req.query.options) {
             options = JSON.parse(req.query.options);
         }
-        if(true) {
-            ManchesterSyntaxEngine.getSuggestion(req.query.source, req.query.lastToken, options, callback);
+        if(false) {
+            ManchesterSyntaxEngine.getSuggestion(req.query.source, req.query.axiom, options, callback);
             return;
         }
-        var url="http://localhost:3000/getSuggestions"
-        httpProxy.post(url, null, { owlInput:req.query.lastToken }, function(result) {
+        var url="http://localhost:3000/parse"
+        httpProxy.post(url, null, { owlInput:req.query.axiom }, function(result) {
 
             try {
-                var json=JSON.parse(result)
-                processResponse(res, null, json);
+
+                processResponse(res, null, result);
             }
             catch(err){
                 processResponse(res, err+" "+result, null);
@@ -45,9 +45,9 @@ module.exports = function() {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Return a suggestion to build an axiom",
-        description: "Return a suggestion to build an axiom",
-        operationId: "Return a suggestion to build an axiom",
+        summary: "Return axiom validation",
+        description: "Return axiom validation",
+        operationId: "Return axiom validation",
         parameters: [
             {
                 name: "source",
@@ -57,15 +57,15 @@ module.exports = function() {
                 required: true
             },
             {
-                name: "lastToken",
-                description: "lastToken",
+                name: "axiom",
+                description: "axiom",
                 in: "query",
                 type: "string",
                 required: true
             },
             {
                 name: "options",
-                description: "options",
+                description: "option",
                 in: "query",
                 type: "string",
                 required: false

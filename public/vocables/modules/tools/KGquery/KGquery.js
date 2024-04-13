@@ -46,7 +46,6 @@ var KGquery = (function() {
         KGquery_graph.drawVisjsModel("saved");
         SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
 
-        //  self.addQuerySet();
     };
 
     self.showSourcesDialog = function(forceDialog) {
@@ -66,6 +65,7 @@ var KGquery = (function() {
             self.init();
         };
         MainController.UI.showHideRightPanel("hide");
+        $("#KGquery_SetsControlsDiv").hide();
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
     };
 
@@ -90,6 +90,7 @@ var KGquery = (function() {
     };
 
     self.addQueryElementToQuerySet = function(querySet) {
+        $("#KGquery_SetsControlsDiv").show();
         var queryElementDivId = KGquery_controlPanel.addQueryElementToCurrentSet(querySet.divId);
         var queryElement = {
             divId: queryElementDivId,
@@ -161,10 +162,12 @@ var KGquery = (function() {
                     KGquery_controlPanel.addPredicateToQueryElementDiv(self.currentQueryElement.divId, predicateLabel);
 
                     self.currentQueryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
+
                 });
             });
         } else if (!self.currentQueryElement.fromNode) {
             self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode");
+            self.currentFromNode=node;
         } else if (!self.currentQueryElement.toNode) {
             //give new varName to the classId
             if (self.currentQueryElement.fromNode.id == node.id) {
@@ -311,8 +314,13 @@ var KGquery = (function() {
             var annotationPredicatesStrs = "";
 
             querySet.elements.forEach(function(queryElement, queryElementIndex) {
-                if (!queryElement.fromNode || !queryElement.toNode) {
-                    return;
+                if (!queryElement.toNode){
+
+               if( queryElement.fromNode) {
+
+                }else{
+                   return;
+               }
                 }
 
                 var subjectVarName = self.getVarName(queryElement.fromNode);
@@ -321,15 +329,16 @@ var KGquery = (function() {
                     distinctTypesMap[subjectVarName] = 1;
                     filterStr += " " + subjectVarName + "  rdf:type <" + subjectUri + ">. ";
                 }
-
-                var objectVarName = self.getVarName(queryElement.toNode);
-
-                var objectUri = queryElement.toNode.id;
                 var subjectUri = queryElement.fromNode.id;
-                if (!distinctTypesMap[objectVarName]) {
-                    distinctTypesMap[objectVarName] = 1;
 
-                    filterStr += " " + objectVarName + "  rdf:type <" + objectUri + ">.";
+
+                if (queryElement.toNode) {
+                    var objectVarName = self.getVarName(queryElement.toNode);
+                    var objectUri = queryElement.toNode.id;
+                    if (!distinctTypesMap[objectVarName]) {
+                        distinctTypesMap[objectVarName] = 1;
+                        filterStr += " " + objectVarName + "  rdf:type <" + objectUri + ">.";
+                    }
                 }
 
                 var filterClassLabels = {};
@@ -356,7 +365,7 @@ var KGquery = (function() {
 
                 for (var key in querySet.classFiltersMap) {
                     filterStr += querySet.classFiltersMap[key].filter + " \n";
-                    var filterType = filterStr.match(/<.*>/) ? "uri" : literal;
+                    var filterType = filterStr.match(/<.*>/) ? "uri" : "literal";
                     filterClassLabels["?" + querySet.classFiltersMap[key].class.label] = filterType;
                 }
 
@@ -394,20 +403,21 @@ var KGquery = (function() {
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdf:value " + subjectVarName + "Value}\n", annotationPredicatesStr);
                     annotationPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", annotationPredicatesStr);
                 }
-
-                if (queryElement.toNode.data.nonObjectProperties) {
-                    queryElement.toNode.data.nonObjectProperties.forEach(function(property) {
+                if (queryElement.toNode) {
+                    if (queryElement.toNode.data.nonObjectProperties) {
+                        queryElement.toNode.data.nonObjectProperties.forEach(function(property) {
+                            var optionalStr = getOptionalClause(objectVarName);
+                            annotationPredicatesStr = addToStringIfNotExists(
+                                optionalStr + "  {" + objectVarName + " <" + property.id + "> " + objectVarName + "_" + property.label + "}\n",
+                                annotationPredicatesStr
+                            );
+                            annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdf:value " + objectVarName + "_value}\n", annotationPredicatesStr);
+                        });
+                    } else {
                         var optionalStr = getOptionalClause(objectVarName);
-                        annotationPredicatesStr = addToStringIfNotExists(
-                            optionalStr + "  {" + objectVarName + " <" + property.id + "> " + objectVarName + "_" + property.label + "}\n",
-                            annotationPredicatesStr
-                        );
-                        annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdf:value " + objectVarName + "_value}\n", annotationPredicatesStr);
-                    });
-                } else {
-                    var optionalStr = getOptionalClause(objectVarName);
-                    annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdf:value " + objectVarName + "Value}\n", annotationPredicatesStr);
-                    annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdfs:label " + objectVarName + "Label}\n", annotationPredicatesStr);
+                        annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdf:value " + objectVarName + "Value}\n", annotationPredicatesStr);
+                        annotationPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdfs:label " + objectVarName + "Label}\n", annotationPredicatesStr);
+                    }
                 }
                 annotationPredicatesStrs += " \n" + annotationPredicatesStr;
             });
@@ -495,6 +505,9 @@ var KGquery = (function() {
         });
 
         ResponsiveUI.onToolSelect("lineage",null,function() {
+           KGquery_myQueries.save(function(err,query) {
+                Config.clientCache.KGquery = query
+            })
             setTimeout(function(){
             Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
             },2000)

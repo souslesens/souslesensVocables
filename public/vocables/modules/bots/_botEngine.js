@@ -83,26 +83,34 @@ var _botEngine = (function () {
         if (key == "_OR") {
             // alternative
             var alternatives = self.currentObj[key];
-            if (returnValue && alternatives[returnValue]) {
-                self.OrReturnValues.push(returnValue);
-                var obj = self.currentObj["_OR"][returnValue];
-                var key0 = Object.keys(obj)[0];
-                if (!key0) {
-                    return self.end();
-                }
+           // if  return value execute function linked to return value in alternative
+            if (returnValue  ) {
+                if(alternatives[returnValue]) {
+                    self.OrReturnValues.push(returnValue);
+                    var obj = self.currentObj["_OR"][returnValue];
+                    var key0 = Object.keys(obj)[0];
+                    if (!key0) {
+                        return self.end();
+                    }
 
-                if (!obj[key0]) {
-                    console.log("WARNING : in bot workflow has to be declared before it is called in another workflow");
+                    if (!obj[key0]) {
+                        console.log("WARNING : in bot workflow has to be declared before it is called in another workflow");
+                    }
+                    if (key0 == "_OR") {
+                        self.currentObj = obj;
+                        return self.nextStep();
+                    }
                 }
-                if (key0 == "_OR") {
-                    self.currentObj = obj;
-                    return self.nextStep();
+                else if(alternatives["_DEFAULT"]){
+                    //  try to find _DEFAULT alternative and functuntion associated
+                    var obj = self.currentObj["_OR"]["_DEFAULT"];
+                    var key0 = Object.keys(obj)[0];
+
+
                 }
 
                 var fn = self.currentBot.functions[key0];
-                if (!fn && self.currentBot.functions["_DEFAULT"]) {
-                    fn = self.currentBot.functions["_DEFAULT"];
-                }
+
 
                 if (!fn || typeof fn !== "function") {
                     return alert("function not defined :" + key0);

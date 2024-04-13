@@ -15,13 +15,14 @@ var ContainerSearchWidget = (function () {
                 return alert(err.responseText);
             }
 
-            var html = "<div>types <select id='containerSearchWidget_typesSelect' onchange='ContainerSearchWidget.execSearch()' </div>";
+       /*     var html = "<div>types <select id='containerSearchWidget_typesSelect' onchange='ContainerSearchWidget.execSearch()' </div>";
 
             $("#smallDialogDiv").html(html);
             $("#smallDialogDiv").dialog("open");
-            //$("#smallDialogDiv").parent().css("left", "30%");
-            types.splice(0, 0, { id: "all", label: "all" });
 
+            //$("#smallDialogDiv").parent().css("left", "30%");*/
+            types.splice(0, 0, { id: "all", label: "all" });
+$("#containerSearchWidget_typesSelect").css("display","block")
             common.fillSelectOptions("containerSearchWidget_typesSelect", types, true, "label", "id");
             //  PopupMenuWidget.initAndShow(html)
         });

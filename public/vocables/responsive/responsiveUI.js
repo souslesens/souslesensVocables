@@ -46,7 +46,7 @@ var ResponsiveUI = (function () {
         ResponsiveUI.resetWindowHeight();
     };
     // keep here
-    self.initMenuBar = function (callback) {
+    self.initMenuBar = function (fn) {
         $("#ChangeSourceButton").show();
         $("#index_topContolPanel").show();
         //Loading
@@ -55,7 +55,7 @@ var ResponsiveUI = (function () {
                 $("#AddSourceButton").remove();
                 $("#AllSourceButton").remove();
             }
-            callback();
+            fn();
         });
     };
     // Keep Here

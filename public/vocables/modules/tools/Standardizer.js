@@ -64,7 +64,6 @@ var Standardizer = (function () {
 
             SourceSelectorWidget.initWidget(["OWL", "KNOWLEDGE_GRAPH", "SKOS"], "Standardizer_sourcesTree", false, Standardizer.onselectSourcesTreeNodeFn, null, options);
 
-            // MainController.UI.showSources("Standardizer_sourcesTree", true, sources, ["OWL", "KNOWLEDGE_GRAPH", "SKOS"], options);
 
             var candidateEntities = sources;
             candidateEntities.splice(0, 0, "all");

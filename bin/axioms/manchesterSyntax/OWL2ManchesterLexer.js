@@ -1,7 +1,8 @@
 // Generated from parser/OWL2Manchester.g4 by ANTLR 4.13.1
 // jshint ignore: start
-const antlr4 = require('antlr4')
+// import antlr4 from 'antlr4';
 
+const antlr4 = require('antlr4');
 
 
 const serializedATN = [4,0,17,115,6,-1,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,
@@ -64,7 +65,7 @@ class OWL2ManchesterLexer extends antlr4.Lexer {
 
     constructor(input) {
         super(input)
-        this._interp = new antlr4.atn.LexerATNSimulator(this, atn, decisionsToDFA, new antlr4.atn.PredictionContextCache());
+        this._interp = new antlr4.LexerATNSimulator(this, atn, decisionsToDFA, new antlr4.PredictionContextCache());
     }
 }
 
@@ -89,3 +90,4 @@ OWL2ManchesterLexer.RPAREN = 17;
 
 
 
+module.exports = OWL2ManchesterLexer;

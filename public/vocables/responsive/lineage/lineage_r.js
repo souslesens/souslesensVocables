@@ -7,6 +7,7 @@ import SearchWidget from "../../modules/uiWidgets/searchWidget.js";
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
 import Lineage_createResource from "../../modules/tools/lineage/lineage_createResource.js";
 import PopupMenuWidget from "../../modules/uiWidgets/popupMenuWidget.js";
+import Lineage_containers from "../../modules/tools/lineage/lineage_containers.js";
 
 var Lineage_r = (function () {
     var self = {};

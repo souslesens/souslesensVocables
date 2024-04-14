@@ -1,5 +1,5 @@
 import common from "../shared/common.js";
-import Lineage_containers from "./lineage/lineage_containers.js";
+import Containers_UI from "./containers/Containers_UI.js";
 
 import Lineage_whiteboard from "./lineage/lineage_whiteboard.js";
 import Export from "../shared/export.js";
@@ -77,7 +77,7 @@ var Composer = (function () {
             $("#Composer_treePanelTabs").tabs({});
         }
 
-        Lineage_containers.getContainerResources(source, [topContainerId], options, function (err, result) {
+        Containers_UI.getContainerResources(source, [topContainerId], options, function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -99,7 +99,7 @@ var Composer = (function () {
                 var jstreeDiv = self.getjstreeDiv(tabId);
                 var options = { jstreeOptions: jstreeOptions, tabId: tabId };
 
-                Lineage_containers.drawContainerJstree(source, filter, jstreeDiv, memberType, options, function (err, result) {
+                Containers_UI.drawContainerJstree(source, filter, jstreeDiv, memberType, options, function (err, result) {
                     callbackEach();
                 });
             });
@@ -147,7 +147,7 @@ var Composer = (function () {
         var existingChildren = obj.node.children;
         var source = self.currentTreeNode.data.source;
         if (obj.event.button != 2) {
-            Lineage_containers.getContainerResources(source, self.currentTreeNode.id, { descendants: true }, function (err, result) {
+            Containers_UI.getContainerResources(source, self.currentTreeNode.id, { descendants: true }, function (err, result) {
                 //   var children = $("#Composer_Application_ITdomaintreeDiv").jstree().get_json(self.currentTreeNode.id);
                 if (err) {
                     return alert(err.responseText);
@@ -233,7 +233,7 @@ var Composer = (function () {
 
                 //draw  descendants container
                 function (callbackSeries) {
-                    Lineage_containers.graphResources(source, self.currentTreeNode.data, { descendants: true }, function (err, result) {
+                    Containers_UI.graphResources(source, self.currentTreeNode.data, { descendants: true }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -261,7 +261,7 @@ var Composer = (function () {
                 //draw  parent containers
                 function (callbackSeries) {
                     return callbackSeries();
-                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], null, function (err, result) {
+                    Containers_UI.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], null, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -1044,7 +1044,7 @@ var Composer = (function () {
                     return callbackSeries();
                 },
                 function (callbackSeries) {
-                    Lineage_containers.graphResources(source, self.currentTreeNode.data, { descendants: true }, function (err, result) {
+                    Containers_UI.graphResources(source, self.currentTreeNode.data, { descendants: true }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -1073,7 +1073,7 @@ var Composer = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], null, function (err, result) {
+                    Containers_UI.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], null, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }

@@ -5,7 +5,7 @@ import Lineage_selection from "./lineage_selection.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
-import Lineage_containers from "./lineage_containers.js";
+import Containers_UI from "../containers/Containers_UI.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
@@ -115,7 +115,7 @@ var Lineage_whiteboard = (function () {
                 SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
                 $("#Lineage_containers_searchInput").bind("keydown", null, function () {
                     if (event.keyCode == 13) {
-                        Lineage_containers.search();
+                        Containers_UI.search();
                     }
                 });
 
@@ -673,7 +673,7 @@ var Lineage_whiteboard = (function () {
                     var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
 
                     if (false && sourceNode.data && sourceNode.data.type != "container" && targetNode.data && targetNode.data.type == "container") {
-                        return Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);
+                        return Containers_UI.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);
                     }
 
                     if (Lineage_graphTraversal.inPathMode) {

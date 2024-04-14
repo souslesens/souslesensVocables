@@ -109,23 +109,23 @@ var KGcreator_bot = (function() {
                                     KO: {
                                         promptTargetColumnVocabularyFn: {
                                             predicateObjectColumnClassFn: {
-                                                listFilteredPropertiesFn: {
-                                                    _OR: {
+                                                listFilteredPropertiesFn: { addMappingToModelFn: {}}
+                                                 /* {  _OR: {
                                                         "Apply property": self.workflowCreateObjectPredicate,
                                                         "Create subProperty": { createSubPropertyFn: self.workflowCreateObjectPredicate }
                                                     }
-                                                }
+                                                }*/
                                             }
                                         }
                                     },
                                     //  "OK": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "addMappingToModel": {} } } }
                                     OK: {
-                                        listFilteredPropertiesFn: {
-                                            _OR: {
+                                        listFilteredPropertiesFn: { addMappingToModelFn: {}}
+                                         /*   _OR:self.workflowCreateObjectPredicate/* {
                                                 "Apply property": self.workflowCreateObjectPredicate,
                                                 "Create subProperty": { createSubPropertyFn: self.workflowCreateObjectPredicate }
                                             }
-                                        }
+                                        }*/
                                     }
                                 }
                             }
@@ -350,6 +350,8 @@ var KGcreator_bot = (function() {
             /*  if (self.params.predicateObjectColumnClass.startsWith("@")) {
                 BotEngine.abort("cannot find predicates for a dynamic class object");
             }*/
+            if(!columnClasses || columnClasses.lengh==0)
+                return _botEngine.abort("cannot find column type" )
 
             var source = self.params.predicateObjectColumnVocabulary || self.params.source; // both cases existing or not predicate object
             OntologyModels.getAllowedPropertiesBetweenNodes(source, columnClasses, self.params.predicateObjectColumnClass, function(err, result) {

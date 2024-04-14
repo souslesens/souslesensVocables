@@ -649,9 +649,9 @@ var OntologyModels = (function () {
         var propertiesMatchingStartNode = [];
         var propertiesMatchingEndNode = [];
         var filter = ""; // "filter (?superClass not in (<http://purl.obolibrary.org/obo/BFO_0000001>,<http://purl.obolibrary.org/obo/BFO_0000002>,<http://purl.obolibrary.org/obo/BFO_0000003>))";
-        var duplicateProps = [];
 
-        var validConstraints = {};
+
+
         var startNodeAncestorIds = [];
         var endNodeAncestorIds = [];
         var allSources = [source];
@@ -761,8 +761,6 @@ var OntologyModels = (function () {
                                     if (!constraint.domain && !constraint.range) {
                                         noConstaintsArray.push(property);
                                     }
-                                } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
-                                    duplicateProps.push(property + "_" + allConstraints[property].source + "-----" + constraint.source);
                                 }
                             });
                         }
@@ -854,13 +852,7 @@ var OntologyModels = (function () {
                 },
             ],
             function (err) {
-                if (duplicateProps.length > 0) {
-                    MainController.UI.message(duplicateProps.length + " DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN");
-                }
-                console.warn("DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN\r");
-                duplicateProps.forEach(function (item) {
-                    console.warn(item);
-                });
+
                 return callback(err, { constraints: validConstraints, nodes: { startNode: startNodeAncestorIds, endNode: endNodeAncestorIds } });
             }
         );

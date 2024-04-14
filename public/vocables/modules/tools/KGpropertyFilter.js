@@ -5,7 +5,7 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import Export from "../shared/export.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import Lineage_whiteboard from "./lineage/lineage_whiteboard.js";
-import Lineage_containers from "./lineage/lineage_containers.js";
+import Containers_UI from "./containers/Containers_UI.js";
 
 var KGpropertyFilter = (function () {
     var self = {};
@@ -695,7 +695,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     return callbackSeries();
                 },
                 function (callbackSeries) {
-                    Lineage_containers.graphResources(source, self.currentTreeNode.id, { descendants: true }, function (err, result) {
+                    Containers_UI.graphResources(source, self.currentTreeNode.id, { descendants: true }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -724,7 +724,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     });
                 },
                 function (callbackSeries) {
-                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], null, function (err, result) {
+                    Containers_UI.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], null, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }

@@ -30,6 +30,7 @@ var KGquery = (function() {
     self.classeMap = {};
     self.allPathEdges = {};
     self.isLoaded = false;
+    self.maxResultSizeforLineageViz=500;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
     self.onLoaded = function() {
@@ -466,14 +467,17 @@ var KGquery = (function() {
     };
 
     self.queryResultToVisjsGraph = function(result) {
+
+
         var classNodes = self.getAllQueryPathClasses();
 
 
         var data = result.results.bindings;
-        data=common.array.slice(data,200)[0]
+        if(data.length>self.maxResultSizeforLineageViz)
+            return alert("result size to large "+data.length +" to display graph .Add filters to reduce result size less than "+self.maxResultSizeforLineageViz)
 
-        var visjsData = { nodes: [], edges: [] };
         var existingNodes = {};
+        var visjsData={nodes:[],edges:[]}
         data.forEach(function(item, index) {
             var lineNodeId = common.getRandomHexaId(5);
             visjsData.nodes.push(VisjsUtil.getVisjsNode(self.currentSource, lineNodeId, "", null, { shape: "text", size: 2, color: "#ddd" }));
@@ -570,6 +574,7 @@ var KGquery = (function() {
         });
 
         $("#KGquery_dataTableDialogDiv").dialog("open");
+        $("#KGquery_dataTableDialogDiv").dialog("option","title","Query result size: "+tableData.length);
 
         $("#KGquery_dataTableDialogDiv").css("left", "10px");
         $("#KGquery_dataTableDiv").width("90vW");

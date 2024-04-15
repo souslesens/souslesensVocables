@@ -18,17 +18,18 @@ module.exports = {
     getData: function (connection, query, successCallback, errorCallback) {
         connection
             .raw(query)
-            .then(result => successCallback(result))
-            .catch(error => errorCallback(error));
+            .then((result) => successCallback(result))
+            .catch((error) => errorCallback(error));
     },
 
-    getKGModel: function (connection, dbName, successCallback, errorCallback) {
+    getKGModel: function (connection, dbName, driver, successCallback, errorCallback) {
+        const where = driver == "postgres" ? { table_schema: "public" } : {};
         connection
-            .select("table_name", "column_name")
+            .distinct("table_name", "column_name")
             .from("information_schema.columns")
-            .where("table_schema", dbName)
-            .orderBy("table_schema", "table_name")
-            .then(result => successCallback(result))
-            .catch(error => errorCallback(error));
-    }
+            .where(where)
+            .orderBy("table_name")
+            .then((result) => successCallback(result))
+            .catch((error) => errorCallback(error));
+    },
 };

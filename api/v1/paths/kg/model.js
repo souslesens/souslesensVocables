@@ -17,15 +17,21 @@ module.exports = function () {
             dbConnector.getKGModel(
                 connection,
                 database.database,
+                database.driver,
                 (data) => {
-                    // TODO: Adapt the result to send the same structure as the
-                    // previous connectors
-                    res.status(200).json(data);
+                    let tables = {};
+                    data.forEach((d) => {
+                        if (!Object.keys(tables).includes(d.table_name)) {
+                            tables[d.table_name] = [];
+                        }
+                        tables[d.table_name].push(d.column_name);
+                    });
+                    res.status(200).json(tables);
                 },
                 (error) => {
                     console.error(error);
                     res.status(503).json({
-                        message: "The connection to the database was refused"
+                        message: "The connection to the database was refused",
                     });
                 }
             );

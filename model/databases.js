@@ -99,6 +99,20 @@ class DatabaseModel {
     /**
      * @returns {Promise<Record<string, string>[]>} - a list of database name
      */
+    getDatabaseMinimal = async (identifier) => {
+        const database = await this.getDatabase(identifier);
+
+        return {
+            id: database.id,
+            name: database.name,
+            driver: database.driver,
+            database: database.database,
+        };
+    };
+
+    /**
+     * @returns {Promise<Record<string, string>[]>} - a list of database name
+     */
     getDatabasesName = async () => {
         const databases = await this._read();
         return databases.map((db) => {
@@ -143,15 +157,15 @@ class DatabaseModel {
             lock.release("DatabasesThread");
         }
     };
+
     /**
      * @param {string} databaseId - the database id
-     * @param {string} query - a sql query
-     * @returns {Promise<any>} query result
+     * @returns {Promise<any>} database connection
      */
-    query = async (databaseId, query) => {
+    getConnection = async (databaseId) => {
         const database = await this.getDatabase(databaseId);
         const dbClient = this.getClientDriver(database.driver);
-        const conn = knex({
+        return knex({
             acquireConnectionTimeout: 5000,
             client: dbClient,
             connection: {
@@ -162,7 +176,15 @@ class DatabaseModel {
                 database: database.database,
             },
         });
+    };
 
+    /**
+     * @param {string} databaseId - the database id
+     * @param {string} query - a sql query
+     * @returns {Promise<any>} query result
+     */
+    query = async (databaseId, query) => {
+        const conn = await this.getConnection(databaseId);
         const result = await conn.raw(query);
         return { rowCount: result.rowCount, rows: result.rows };
     };

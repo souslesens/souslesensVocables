@@ -15,6 +15,7 @@ var httpProxy = require("../httpProxy.");
 var sqlConnector = require("./KGSqlConnector.");
 var SQLserverConnector = require("./SQLserverConnector.");
 var socket = require("../socketManager.");
+const { databaseModel } = require("../../model/databases");
 
 var KGcontroller = require("./KGcontroller.");
 
@@ -229,13 +230,18 @@ var KGbuilder = {
 
                         var sqlQuery =
                             "select " + options.dataSource.local_dictionary.idColumn + "," + options.dataSource.local_dictionary.labelColumn + " from " + options.dataSource.local_dictionary.table;
-                        SQLserverConnector.getData(options.dataSource.dbName, sqlQuery, function (err, result) {
-                            if (err) return callbackSeries(err);
-                            result.forEach(function (item) {
-                                ARDLdictionary[item[options.dataSource.local_dictionary.idColumn]] = item[options.dataSource.local_dictionary.labelColumn];
+
+                        databaseModel
+                            .query(options.dataSource.dbName, sqlQuery)
+                            .then((result) => {
+                                result.rows.forEach(function (item) {
+                                    ARDLdictionary[item[options.dataSource.local_dictionary.idColumn]] = item[options.dataSource.local_dictionary.labelColumn];
+                                });
+                                return callbackSeries();
+                            })
+                            .catch((err) => {
+                                return callbackSeries(err);
                             });
-                            return callbackSeries();
-                        });
                     } else {
                         return callbackSeries();
                     }
@@ -401,23 +407,26 @@ var KGbuilder = {
 
                     if (dbConnection.type == "sql.sqlserver") {
                         var sqlQuery = "select count(*) as count from  " + dbConnection.dbName + "." + sqlTable + " ";
-                        SQLserverConnector.getData(dbConnection.dbName, sqlQuery, function (err, result) {
-                            if (err) {
+
+                        databaseModel
+                            .query(dbConnection.dbName, sqlQuery)
+                            .then((result) => {
+                                socket.message("KGbuild", "tableSize_" + result.rows[0].count);
+
+                                var sqlQuery = "select distinct " + selectStr + " from  " + dbConnection.dbName + "." + sqlTable + " ";
+
+                                //sqlQuery += " ORDER BY " + selectStr + " "
+                                SQLserverConnector.getFetchedData(dbConnection.dbName, sqlQuery, processor, sqlParams.fetchSize, uniqueTriples, function (err, _result) {
+                                    //  SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, uniqueTriples, function (err, result.rows) {
+                                    if (err) return callbackSeries(err);
+
+                                    callbackSeries();
+                                });
+                            })
+                            .catch((err) => {
                                 console.log(err);
                                 return callback(err);
-                            }
-                            socket.message("KGbuild", "tableSize_" + result[0].count);
-
-                            var sqlQuery = "select distinct " + selectStr + " from  " + dbConnection.dbName + "." + sqlTable + " ";
-
-                            //sqlQuery += " ORDER BY " + selectStr + " "
-                            SQLserverConnector.getFetchedData(dbConnection.dbName, sqlQuery, processor, sqlParams.fetchSize, uniqueTriples, function (err, _result) {
-                                //  SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, uniqueTriples, function (err, result) {
-                                if (err) return callbackSeries(err);
-
-                                callbackSeries();
                             });
-                        });
                     } else {
                         sqlConnector.processFetchedData(
                             sqlParams.database,

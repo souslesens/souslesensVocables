@@ -39,13 +39,6 @@
         "virtuoso",
         "elasticsearch"
     ],
-    "SQLserver": {
-        "user": "",
-        "password": "",
-        "server": "",
-        "database": "",
-        "trustServerCertificate": true
-    },
     "sparql_server": {
         "url": "http://xxx:8890/sparql",
         "user": "",
@@ -79,3 +72,4 @@
         "groupsColumn": ""
     }
 }
+

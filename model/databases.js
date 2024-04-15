@@ -1,4 +1,5 @@
 const fs = require("fs");
+const knex = require("knex");
 const { Lock } = require("async-await-mutex-lock");
 
 const { configDatabasesPath } = require("./config");
@@ -98,6 +99,20 @@ class DatabaseModel {
     /**
      * @returns {Promise<Record<string, string>[]>} - a list of database name
      */
+    getDatabaseMinimal = async (identifier) => {
+        const database = await this.getDatabase(identifier);
+
+        return {
+            id: database.id,
+            name: database.name,
+            driver: database.driver,
+            database: database.database,
+        };
+    };
+
+    /**
+     * @returns {Promise<Record<string, string>[]>} - a list of database name
+     */
     getDatabasesName = async () => {
         const databases = await this._read();
         return databases.map((db) => {
@@ -113,13 +128,26 @@ class DatabaseModel {
     };
 
     /**
+     * @param {string} driverName - the driver name
+     * @returns {string} the knex version of the database driver
+     */
+    getClientDriver = (driverName) => {
+        switch (driverName) {
+            case "sqlserver":
+                return "mssql";
+            case "postgres":
+                return "pg";
+        }
+    };
+
+    /**
      * @param {string} identifier -  a database identifier
      */
     updateDatabase = async (updatedDatabase) => {
         const databases = await this._read();
 
         const updatedDatabases = databases.map((database) => {
-            return (database.id == updatedDatabase.id) ? updatedDatabase : database;
+            return database.id == updatedDatabase.id ? updatedDatabase : database;
         });
 
         await lock.acquire("DatabasesThread");
@@ -128,6 +156,37 @@ class DatabaseModel {
         } finally {
             lock.release("DatabasesThread");
         }
+    };
+
+    /**
+     * @param {string} databaseId - the database id
+     * @returns {Promise<any>} database connection
+     */
+    getConnection = async (databaseId) => {
+        const database = await this.getDatabase(databaseId);
+        const dbClient = this.getClientDriver(database.driver);
+        return knex({
+            acquireConnectionTimeout: 5000,
+            client: dbClient,
+            connection: {
+                host: database.host,
+                port: database.port,
+                user: database.user,
+                password: database.password,
+                database: database.database,
+            },
+        });
+    };
+
+    /**
+     * @param {string} databaseId - the database id
+     * @param {string} query - a sql query
+     * @returns {Promise<any>} query result
+     */
+    query = async (databaseId, query) => {
+        const conn = await this.getConnection(databaseId);
+        const result = await conn.raw(query);
+        return { rowCount: result.rowCount, rows: result.rows };
     };
 }
 

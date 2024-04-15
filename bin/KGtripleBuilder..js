@@ -5,6 +5,7 @@ var async = require("async");
 var util = require("./util.");
 var httpProxy = require("./httpProxy.");
 var sqlServerProxy = require("./KG/SQLserverConnector.");
+const { databaseModel } = require("../model/databases");
 
 var ConfigManager = require("./configManager.");
 const SocketManager = require("./socketManager.");
@@ -187,24 +188,32 @@ var KGtripleBuilder = {
                                             callbackEachLookup();
                                         });
                                     } else if (mapping.databaseSource) {
-                                        var sqlQuery = "select distinct " + lookup.sourceColumn + "," + lookup.targetColumn + " from " + lookup.fileName;
+                                        databaseModel
+                                            .getConnection(mapping.databaseSource.dbName)
+                                            .then((connection) => {
+                                                connection
+                                                    .distinct(lookup.sourceColumn, lookup.targetColumn)
+                                                    .from(lookup.fileName)
+                                                    .then((result) => {
+                                                        var lookupLines = result.rows;
+                                                        lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
+                                                        lookupLines.forEach(function (line, index) {
+                                                            if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
+                                                                return KGtripleBuilder.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
+                                                            }
 
-                                        sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
-                                            if (err) {
+                                                            lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
+                                                        });
+
+                                                        callbackEachLookup();
+                                                    })
+                                                    .catch((err) => {
+                                                        return callbackEachLookup(err);
+                                                    });
+                                            })
+                                            .catch((err) => {
                                                 return callbackEachLookup(err);
-                                            }
-                                            var lookupLines = result;
-                                            lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
-                                            lookupLines.forEach(function (line, index) {
-                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
-                                                    return KGtripleBuilder.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
-                                                }
-
-                                                lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
                                             });
-
-                                            callbackEachLookup();
-                                        });
                                     }
                                 },
                                 function (err) {
@@ -236,19 +245,22 @@ var KGtripleBuilder = {
                             if (!mapping.databaseSource) {
                                 return callbackSeries();
                             }
-                            var limitStr = "";
-                            if (options.sampleSize) {
-                                limitStr = " TOP (" + options.sampleSize + ") ";
-                            }
-                            var sqlQuery = "select" + limitStr + " * from " + mapping.fileName;
-                            KGtripleBuilder.message(options.clientSocketId, "loading data from sql server", false);
-                            sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
-                                if (err) {
-                                    return callbackSeries(err);
+
+                            databaseModel.getConnection(mapping.databaseSource.dbName).then((connection) => {
+                                const request = connection.select("*").from(mapping.fileName);
+                                if (options.sampleSize) {
+                                    request.limit(options.sampleSize);
                                 }
-                                csvData = [result];
-                                KGtripleBuilder.message(options.clientSocketId, " data loaded", false);
-                                callbackSeries();
+
+                                request
+                                    .then((result) => {
+                                        csvData = [result];
+                                        KGtripleBuilder.message(options.clientSocketId, " data loaded", false);
+                                        callbackSeries();
+                                    })
+                                    .catch((err) => {
+                                        return callbackSeries(err);
+                                    })
                             });
                         },
                         //fileProcessing
@@ -371,7 +383,7 @@ var KGtripleBuilder = {
                                                                         blankNodesMap["_rowIndex"] = blankNode;
                                                                     }
                                                                     subjectStr = blankNode;
-                                                                } else if (item.s.endsWith("_$") ) {
+                                                                } else if (item.s.endsWith("_$")) {
                                                                     // virtual column
                                                                     if (typeof item.o === "string" && item.o.endsWith("_$") && allColumns[item.o] && !line[item.o]) {
                                                                         // ne pas creer des triplest sans objet

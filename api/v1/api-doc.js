@@ -269,6 +269,23 @@ const apiDoc = {
                 },
             },
         },
+        DatabaseMinimal: {
+            type: "object",
+            properties: {
+                id: {
+                    type: "string",
+                },
+                name: {
+                    type: "string",
+                },
+                driver: {
+                    type: "string",
+                },
+                database: {
+                    type: "string",
+                },
+            },
+        },
         GetSources: {
             type: "object",
             properties: {},

@@ -31,6 +31,8 @@ services:
         environment:
             ACCEPT_EULA: "Y"
             SA_PASSWORD: "superSecretP4ssword"
+        volumes:
+            - ./docker-data/sqlserver:/var/opt/mssql
         networks:
             - dev-backend
 
@@ -40,6 +42,8 @@ services:
             - 5432:5432
         environment:
             POSTGRES_PASSWORD: "mysecretpassword"
+        volumes:
+            - ./docker-data/postgres:/var/lib/postgresql/data
         networks:
             - dev-backend
 

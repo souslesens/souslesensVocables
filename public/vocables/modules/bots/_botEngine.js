@@ -107,6 +107,9 @@ var _botEngine = (function () {
                     var key0 = Object.keys(obj)[0];
 
 
+                }else{
+                    self.showAlternatives(alternatives,varToFill);
+                    return;
                 }
 
                 var fn = self.currentBot.functions[key0];
@@ -121,12 +124,7 @@ var _botEngine = (function () {
                 self.setStepMessage(key0);
                 fn();
             } else {
-                var choices = [];
-                for (var key in alternatives) {
-                    choices.push({ id: key, label: key });
-                }
-                self.showList(choices, varToFill);
-                self.setStepMessage();
+                self.showAlternatives(alternatives,varToFill);
             }
         } else {
             var fn = self.currentBot.functions[key];
@@ -350,6 +348,16 @@ var _botEngine = (function () {
 
         return;
     };
+
+    self.showAlternatives=function(alternatives,varToFill){
+        var choices = [];
+        for (var key in alternatives) {
+            choices.push({ id: key, label: key });
+        }
+        self.showList(choices, varToFill);
+        self.setStepMessage();
+    }
+
 
     self.getQueryText = function () {
         var queryText = "";

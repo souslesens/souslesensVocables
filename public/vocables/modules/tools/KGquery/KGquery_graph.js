@@ -133,24 +133,14 @@ var KGquery_graph = (function () {
                         return callbackSeries();
                     }
                     MainController.UI.message("loading datatypeProperties");
-                    OntologyModels.getInferredAnnotationProperties(source, {}, function (err, result) {
+                    OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        var annotationPropertiesmap = {};
-                        result.forEach(function (item) {
-                            if (!annotationPropertiesmap[item.class.value]) {
-                                annotationPropertiesmap[item.class.value] = { label: item.classLabel.value, id: item.class.value, properties: [] };
-                            }
-                            annotationPropertiesmap[item.class.value].properties.push({
-                                label: item.propLabel.value,
-                                id: item.prop.value,
-                                datatype: item.datatype ? item.datatype.value : "string",
-                            });
-                        });
+
                         visjsData.nodes.forEach(function (node) {
-                            if (annotationPropertiesmap[node.data.id]) {
-                                node.data.nonObjectProperties = annotationPropertiesmap[node.data.id].properties;
+                            if (nonObjectPropertiesmap[node.data.id]) {
+                                node.data.nonObjectProperties = nonObjectPropertiesmap[node.data.id].properties;
                             }
                         });
                         callbackSeries();

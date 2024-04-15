@@ -26,7 +26,7 @@ var KGquery_filter_bot = (function () {
             self.validateFn = validateFn;
             self.callbackFn = function () {
                 var filterLabel = BotEngine.getQueryText();
-                return self.validateFn(null, { filter: self.filter, filterLabel: filterLabel });
+                return self.validateFn(null, { filter: self.filter, filterLabel: filterLabel, filterParams:self.filterParams});
             };
 
             self.params = currentQuery;
@@ -35,7 +35,7 @@ var KGquery_filter_bot = (function () {
         });
     };
 
-   
+
 
 
 
@@ -43,16 +43,16 @@ var KGquery_filter_bot = (function () {
 
     self.workflow_filterClass = {
         listPropertiesFn: {
-                choosePropertyOperatorFn: {
-                    "_OR":{
+            choosePropertyOperatorFn: {
+                "_OR":{
                     "ChooseInList"  : { listIndividualsFn:{listLogicalOperatorFn: { setSparqlQueryFilterFn: {}} } },
-                 "_DEFAULT":
-                     {promptPropertyValueFn: {listLogicalOperatorFn:{setSparqlQueryFilterFn: {}}}
-                    }
-
+                    "_DEFAULT":
+                        {promptPropertyValueFn: {listLogicalOperatorFn:{setSparqlQueryFilterFn: {}}}
                         }
-                    }
+
                 }
+            }
+        }
 
     }
 
@@ -94,21 +94,21 @@ var KGquery_filter_bot = (function () {
             _botEngine.showList(individuals, "individualsFilterValue");
         });
     },
-    self.functions.listFilterTypes = function () {
-        var choices = [
-            { id: "label", label: "rdfs:label contains" },
-            { id: "labelsList", label: "Choose rdfs:label" },
-        ];
-        BotEngine.showList(choices, "individualsFilterType");
-    }
-        self.functions.listPropertiesFn = function () {
-            if (!self.data || !self.data.nonObjectProperties) {
-                BotEngine.abort("no property for this Class");
-            }
-            var choices = self.data.nonObjectProperties;
-            BotEngine.showList(choices, "property");
-         
-        };
+        self.functions.listFilterTypes = function () {
+            var choices = [
+                { id: "label", label: "rdfs:label contains" },
+                { id: "labelsList", label: "Choose rdfs:label" },
+            ];
+            BotEngine.showList(choices, "individualsFilterType");
+        }
+    self.functions.listPropertiesFn = function () {
+        if (!self.data || !self.data.nonObjectProperties) {
+            BotEngine.abort("no property for this Class");
+        }
+        var choices = self.data.nonObjectProperties;
+        BotEngine.showList(choices, "property");
+
+    };
     self.functions.choosePropertyOperatorFn = function () {
         var datatype = null;
         self.data.nonObjectProperties.forEach(function (item) {
@@ -141,9 +141,9 @@ var KGquery_filter_bot = (function () {
             self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#datetime"
         ) {
             if(self.params.propertyOperator=="range"){
-                DateWidget.showDateRangePicker ( "KGquery_rangeSliderDialogDiv",null,null, function (minDate,maxDate) {
+                DateWidget.showDateRangePicker ( "widgetGenericDialogDiv",null,null, function (minDate,maxDate) {
                     self.params.dateValueRange= { minDate:minDate,maxDate:maxDate };
-                 //   self.functions.setSparqlQueryFilterFn()
+                    //   self.functions.setSparqlQueryFilterFn()
                     _botEngine.nextStep()
                 })
                 return;
@@ -156,7 +156,7 @@ var KGquery_filter_bot = (function () {
     };
 
     self.functions.listLogicalOperatorFn=function(){
-       var choices=["end","AND","OR"]
+        var choices=["end","AND","OR"]
         BotEngine.showList(choices, "filterBooleanOperator");
     }
 
@@ -172,7 +172,7 @@ var KGquery_filter_bot = (function () {
         var propertyOperator = self.params.propertyOperator;
         var propertyValue = self.params.propertyValue;
         var dateValueRange=self.params.dateValueRange
-        
+
         var filterBooleanOperator = self.params.filterBooleanOperator;
         if(!filterBooleanOperator || filterBooleanOperator=="end")
             filterBooleanOperator= ""
@@ -202,10 +202,10 @@ var KGquery_filter_bot = (function () {
             if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
 
 
-                    var dateStr = new Date(propertyValue).toISOString();
-                    self.filterItems.push(filterBooleanOperator+ "?" + varName + "_" + propLabel + " " + propertyOperator + " \"" + dateStr + "\"^^xsd:dateTime"  );
+                var dateStr = new Date(propertyValue).toISOString();
+                self.filterItems.push(filterBooleanOperator+ "?" + varName + "_" + propLabel + " " + propertyOperator + " \"" + dateStr + "\"^^xsd:dateTime"  );
 
-                } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
+            } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
                 self.filterItems.push(filterBooleanOperator+ "?" + varName + "_" + propLabel + " " + propertyOperator + " \"" + propertyValue + "\"^^xsd:int " );
             } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#float") {
                 self.filterItems.push(filterBooleanOperator+ "?" + varName + "_" + propLabel + " " + propertyOperator + " \"" + propertyValue + "\"^^xsd:float " );
@@ -234,28 +234,30 @@ var KGquery_filter_bot = (function () {
         else{
             _botEngine.abort(("filter type not implemented"))
         }
-        
-      if(self.params.filterBooleanOperator=="end") {
-          self.functions.writeFilterFn()
 
-          BotEngine.nextStep();
-      }else{
-          _botEngine.currentObj= self.workflow_filterClass;
-          _botEngine.nextStep()
-      }
+        if(self.params.filterBooleanOperator=="end") {
+            self.functions.writeFilterFn()
+
+            BotEngine.nextStep();
+        }else{
+            _botEngine.currentObj= self.workflow_filterClass;
+            _botEngine.nextStep()
+        }
     };
-    
+
 
 
 
 
     self.functions.writeFilterFn=function(){
-       var str=""
+        var str=""
         self.filterItems.forEach(function(item){
             str=item+str
         })
+        var propLabel = Sparql_common.getLabelFromURI(self.params.property);
         self.filter+= "FILTER ("+str+")"
         self.filter = self.filter.replace("Label", "_label");
+        self.filterParams={varName:self.params.varName,property:self.params.property,propertyLabel:propLabel}
     }
 
     return self;

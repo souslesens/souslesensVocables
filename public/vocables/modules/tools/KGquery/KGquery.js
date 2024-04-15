@@ -224,7 +224,7 @@ var KGquery = (function() {
             varName: self.getVarName(aClass, true)
         };
 
-        KGquery_filter_bot.start(aClass.data, currentFilterQuery, function(err, result) {
+        KGquery_filter_bot.start(aClass.data, currentFilterQuery,function(err, result) {
             if (err) {
                 return alert(err.responseText);
             }

@@ -366,6 +366,10 @@
                                 $("#botPanel").parent().css("left", "50%");
                             },
                         });
+                        $("#widgetGenericDialogDiv").dialog({
+                            autoOpen: false,
+                            modal: false,
+                        });
 
                         $(document).on("click", "a", function () {
                             var target = $(this).attr("target");
@@ -514,6 +518,8 @@
 
         <div id="mainDialogDiv"></div>
         <div id="smallDialogDiv"></div>
+        <div id="widgetGenericDialogDiv"></div>
+
         <div id="LineagePopup"></div>
         <div id="popupMenuWidgetDiv" onclick="PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
         <div id="botPanel">

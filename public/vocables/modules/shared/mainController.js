@@ -323,10 +323,13 @@ var MainController = (function () {
             }
         },
 
-        message: function (message, stopWaitImg) {
+        message: function (message, stopWaitImg,startWaitImg) {
             $("#messageDiv").html(message);
             if (stopWaitImg) {
                 $("#waitImg").css("display", "none");
+            }
+            if (startWaitImg) {
+                $("#waitImg").css("display", "block");
             }
         },
 

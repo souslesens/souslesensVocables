@@ -8,7 +8,7 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_SKOS from "../sparqlProxies/sparql_SKOS.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import GraphLoader from "./graphLoader.js";
-import ResponsiveUI from "../../responsive/responsiveUI.js";
+import UI from "./UI.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -610,9 +610,9 @@ P
 
                     // if tool available load it in responsive
                     if (source) {
-                        ResponsiveUI.source = source;
+                        UI.source = source;
                     }
-                    ResponsiveUI.onToolSelect(tool);
+                    UI.onToolSelect(tool);
 
                 if (window.history.pushState && url.indexOf("localhost")<0) {
                     var url=url.substring(0,url.indexOf("?"))

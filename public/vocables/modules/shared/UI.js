@@ -1,13 +1,13 @@
-import common from "../modules/shared/common.js";
-import authentication from "../modules/shared/authentification.js";
-import Clipboard from "../modules/shared/clipboard.js";
-import Lineage_sources from "../modules/tools/lineage/lineage_sources.js";
-import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
-import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
-import MainController from "../modules/shared/mainController.js";
+/*import Lineage_sources from "../../tools/lineage/lineage_sources.js";
+import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
+import Lineage_whiteboard from "../../tools/lineage/lineage_whiteboard.js";*/
+import common from "./common.js";
+import authentication from "./authentification.js";
+import Clipboard from "./clipboard.js";
+import MainController from "./mainController.js";
 
 
-var ResponsiveUI = (function () {
+var UI = (function () {
     var self = {};
     self.source = null;
     self.menuBarShowed = true;
@@ -40,7 +40,7 @@ var ResponsiveUI = (function () {
 
         self.themeList();
         //self.replaceFile(BotEngine, BotEngineResponsive);
-        ResponsiveUI.resetWindowHeight();
+        UI.resetWindowHeight();
     };
     // keep here
     self.initMenuBar = function (fn) {
@@ -117,7 +117,7 @@ var ResponsiveUI = (function () {
         MainController.currentTool = toolId;
         if (self.toolsNeedSource.includes(toolId)) {
             if (self.source == null) {
-                ResponsiveUI.showSourceDialog(true);
+                UI.showSourceDialog(true);
             } else {
                 self.sourceSelect(self.source);
             }
@@ -149,7 +149,7 @@ var ResponsiveUI = (function () {
     //To MainController too
     self.sourceSelect = function (source) {
         MainController.currentSource = source;
-        ResponsiveUI.source = source;
+        UI.source = source;
         $("#selectedSource").html(MainController.currentSource);
 
         $("#mainDialogDiv").parent().hide();
@@ -170,7 +170,7 @@ var ResponsiveUI = (function () {
         MainController.currentSource = obj.node.data.id;
         $("#selectedSource").html(MainController.currentSource);
         $("#mainDialogDiv").parent().hide();
-        Lineage_whiteboard.init();
+        Lineage_sources.init();
     };
     // MainController
     //Giving a tool in parameter and the function launch it
@@ -234,9 +234,9 @@ var ResponsiveUI = (function () {
         var onSourceSelect;
         if (resetAll) {
             Lineage_sources.loadedSources = {};
-            onSourceSelect = ResponsiveUI.onSourceSelect;
+            onSourceSelect = UI.onSourceSelect;
         } else {
-            onSourceSelect = ResponsiveUI.onSourceSelect_AddSource;
+            onSourceSelect = UI.onSourceSelect_AddSource;
         }
         SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
@@ -256,12 +256,12 @@ var ResponsiveUI = (function () {
             // fetch theme from api
             const response = await fetch("/api/v1/users/theme");
             if (response.status == 400) {
-                ResponsiveUI.changeTheme(Config.theme.defaultTheme);
+                UI.changeTheme(Config.theme.defaultTheme);
                 return callback();
             }
 
             const data = await response.json();
-            ResponsiveUI.changeTheme(data.theme);
+            UI.changeTheme(data.theme);
 
             if (Config.theme.selector) {
                 $("#theme-selector-btn").show();
@@ -287,20 +287,20 @@ var ResponsiveUI = (function () {
             $("#externalLogoDiv").show();
         }
         less.modifyVars(themeSelected);
-        ResponsiveUI.darkThemeParams(themeSelected);
+        UI.darkThemeParams(themeSelected);
     };
     //Keep
     self.hideShowMenuBar = function (button) {
         if (self.menuBarShowed) {
             $("#MenuBarFooter").hide();
             $("#MenuBar").css("height", "21px");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.menuBarShowed = false;
             $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBarShow.png");
         } else {
             $("#MenuBarFooter").show();
             $("#MenuBar").css("height", "90px");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.menuBarShowed = true;
             $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBar.png");
         }
@@ -315,7 +315,7 @@ var ResponsiveUI = (function () {
             $(button).parent().hide();
             $("#lateralPanelDiv").css("width", "21px");
             $("#lateralPanelDiv").removeClass("ui-resizable");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.LateralPannelShowed = false;
             var buttonclone = button.cloneNode(true);
             $("#lateralPanelDiv").append(buttonclone);
@@ -326,7 +326,7 @@ var ResponsiveUI = (function () {
             $("#lineage-tab-buttons").show();
             $("#WhiteboardContent").show();
             $("#lateralPanelDiv").css("width", "435px");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.LateralPannelShowed = true;
             var currentTabId = "#tabs_" + $(".slsv-selectedTabDiv").attr("popupcomment").toLowerCase();
             $(currentTabId).children().show();
@@ -422,11 +422,11 @@ var ResponsiveUI = (function () {
                     Lineage_sources.showHideEditButtons(self.source);
                 }
             }
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
         }
     };
 
     return self;
 })();
-export default ResponsiveUI;
-window.ResponsiveUI = ResponsiveUI;
+export default UI;
+window.UI = UI;

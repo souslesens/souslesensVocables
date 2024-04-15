@@ -55,7 +55,7 @@ var SearchWidget = (function () {
                         maxWidth: 435,
                         minWidth: 150,
                         stop: function (event, ui) {
-                            ResponsiveUI.resetWindowHeight();
+                            UI.resetWindowHeight();
                         },
                     });
                 });
@@ -384,7 +384,7 @@ var SearchWidget = (function () {
                 jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
             }
             if (!options.selectTreeNodeFn) {
-                jsTreeOptions.selectTreeNodeFn = Config.userTools[MainController.currentTool].controller.controller.selectTreeNodeFn;
+                jsTreeOptions.selectTreeNodeFn = Config.userTools[MainController.currentTool].controller.selectTreeNodeFn;
             }
 
             jsTreeOptions.source = sourceLabel;

@@ -9,13 +9,13 @@ import KGcreator_joinTables from "./KGcreator_joinTables.js";
 import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 import KGcreator_bot from "../../bots/KGcreator_bot.js";
-import ResponsiveUI from "../../../responsive/responsiveUI.js";
+import UI from "../../shared/UI.js";
 
 var KGcreator_graph = (function () {
     var self = {};
     self.drawOntologyModel = function (source) {
         $("#KGcreator_topButtons").load("./responsive/KGcreator/html/linkButtons.html", function () {
-            ResponsiveUI.PopUpOnHoverButtons();
+            UI.PopUpOnHoverButtons();
         });
 
         //return;

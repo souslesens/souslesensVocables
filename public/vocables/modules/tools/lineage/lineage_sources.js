@@ -14,7 +14,7 @@ import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 import Authentification from "../../shared/authentification.js";
-import ResponsiveUI from "../../../responsive/responsiveUI.js";
+import UI from "../../shared/UI.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -417,7 +417,7 @@ sourceDivId +
             if (err) {
                 return callback(err);
             }
-            if (sourceLabel == ResponsiveUI.source) {
+            if (sourceLabel == UI.source) {
                 var sourceDivId = "source_" + common.getRandomHexaId(5);
                 self.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
                 self.sourceDivsMap[sourceDivId] = sourceLabel;

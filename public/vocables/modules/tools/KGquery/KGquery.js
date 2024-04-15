@@ -21,7 +21,7 @@ import KGquery_paths from "./KGquery_paths.js";
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 //import KGquery_annotations_bot from "../../bots/KGquery_annotations_bot.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
-import ResponsiveUI from "../../../responsive/responsiveUI.js";
+import UI from "../../shared/UI.js";
 
 var KGquery = (function() {
     var self = {};
@@ -32,20 +32,20 @@ var KGquery = (function() {
     self.isLoaded = false;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
     self.onLoaded = function () {
-        ResponsiveUI.initMenuBar(KGquery.loadSource);
+        UI.initMenuBar(KGquery.loadSource);
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
         
     };
     self.unload = function () {
-        Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
+        Lineage_sources.registerSource = UI.oldRegisterSource;
         $("#KGquery_messageDiv").attr("id", "messageDiv");
         $("#KGquery_waitImg").attr("id", "waitImg");
         $("#graphDiv").empty();
         $("#lateralPanelDiv").empty();
     };
     self.loadSource = function () {
-        KGquery.currentSource = ResponsiveUI.source;
+        KGquery.currentSource = UI.source;
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
                 return alert(err.responseText);
@@ -53,8 +53,8 @@ var KGquery = (function() {
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPannel.html", function () {
                     KGquery_graph.drawVisjsModel("saved");
-                    ResponsiveUI.openTab("KGquery-tab", "tabs_Query", self.initQuery, "#QueryTabButton");
-                    ResponsiveUI.resetWindowHeight();
+                    UI.openTab("KGquery-tab", "tabs_Query", self.initQuery, "#QueryTabButton");
+                    UI.resetWindowHeight();
                     $("#KGquery_dataTableDialogDiv").dialog({
                         autoOpen: false,
                         close: function (event, ui) {
@@ -518,7 +518,7 @@ var KGquery = (function() {
 
         });
 
-        ResponsiveUI.onToolSelect("lineage",null,function() {
+        UI.onToolSelect("lineage",null,function() {
             setTimeout(function(){
             Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
             },2000)

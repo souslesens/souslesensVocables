@@ -61,7 +61,7 @@ var KGcreator_run = (function () {
         if (!options) {
             options = {};
         }
-        ResponsiveUI.openTab("KGcreator-tab", "KGcreator_treeWrapper", KGcreator.initRunTab, "#KGcreator_RunTabButton");
+        UI.openTab("KGcreator-tab", "KGcreator_treeWrapper", KGcreator.initRunTab, "#KGcreator_RunTabButton");
         var table = self.getTableAndShowMappings(allmappings);
         if (!allmappings && !table) {
             return alert("select a node");
@@ -169,7 +169,7 @@ var KGcreator_run = (function () {
         }
 
         if (callback || confirm("index source " + graphSource)) {
-            ResponsiveUI.openTab("KGcreator-tab", "KGcreator_treeWrapper", KGcreator.initRunTab, "#KGcreator_RunTabButton");
+            UI.openTab("KGcreator-tab", "KGcreator_treeWrapper", KGcreator.initRunTab, "#KGcreator_RunTabButton");
             SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
                 if (err) {
                     if (callback) {
@@ -283,7 +283,7 @@ var KGcreator_run = (function () {
         if (!confirm("generate KGcreator triples of datasource " + KGcreator.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
             return;
         }
-        ResponsiveUI.openTab("KGcreator-tab", "KGcreator_treeWrapper", KGcreator.initRunTab, "#KGcreator_RunTabButton");
+        UI.openTab("KGcreator-tab", "KGcreator_treeWrapper", KGcreator.initRunTab, "#KGcreator_RunTabButton");
         $("#KGcreator_infosDiv").val("generating KGcreator triples form all mappings ");
         async.series(
             [

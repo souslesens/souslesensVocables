@@ -12,13 +12,13 @@ import Lineage_axioms_draw from "../../modules/tools/lineage/lineage_axioms_draw
 import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_create.js";
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
-import ResponsiveUI from "../../responsive/responsiveUI.js";
+import UI from "../shared/UI.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
 
     self.initDialog = function (sourceLabel, divId, options, callback) {
-        //ResponsiveUI.openDialogDiv(divId);
+        //UI.openDialogDiv(divId);
         $("#" + divId)
             .parent()
             .show("fast", function () {

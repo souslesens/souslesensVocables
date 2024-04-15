@@ -32,8 +32,8 @@ var KGcreator = (function () {
     self.onLoaded = function () {
         self.currentTab = "";
         
-        ResponsiveUI.initMenuBar(KGcreator.loadSource);
-        //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
+        UI.initMenuBar(KGcreator.loadSource);
+        //UI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
         $("#Lineage_graphEditionButtons").show();
         $("#Lineage_graphEditionButtons").empty();
         $("#Lineage_graphEditionButtons").attr("id", "KGcreator_topButtons");
@@ -41,7 +41,7 @@ var KGcreator = (function () {
     };
     self.unload = function () {
         self.currentTab = "";
-        Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
+        Lineage_sources.registerSource = UI.oldRegisterSource;
         $("#KGcreator_topButtons").css("flex-direction", "row");
         $("#KGcreator_topButtons").attr("id", "Lineage_graphEditionButtons");
         $("#MenuBar").css("height", "90px");
@@ -81,10 +81,10 @@ var KGcreator = (function () {
             }
             $("#graphDiv").load("./modules/tools/KGcreator/html/centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./modules/tools/KGcreator/html/KGcreator_leftPannel.html", function () {
-                    self.currentSlsvSource = ResponsiveUI.source;
-                    ResponsiveUI.openTab("KGcreator-tab", "KGcreator_treeWrapper", KGcreator.initMapTab, "#KGcreator_MapTabButton");
+                    self.currentSlsvSource = UI.source;
+                    UI.openTab("KGcreator-tab", "KGcreator_treeWrapper", KGcreator.initMapTab, "#KGcreator_MapTabButton");
                     self.initSource();
-                    ResponsiveUI.resetWindowHeight();
+                    UI.resetWindowHeight();
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
                         close: function (event, ui) {
@@ -114,7 +114,7 @@ var KGcreator = (function () {
                         //KGcreator_run.createTriples(true);
                         KGcreator_run.getTableAndShowMappings();
                     }
-                    ResponsiveUI.PopUpOnHoverButtons();
+                    UI.PopUpOnHoverButtons();
                     self.ResetRunMappingTabWidth();
                     $("#KGcreator_centralPanelTabs").redraw();
                 });

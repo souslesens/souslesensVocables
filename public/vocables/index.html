@@ -201,15 +201,11 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
-
-        <!--<link rel="stylesheet" href="./responsive/index.css" />-->
-
         <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
         <script src="./responsive/less.min.js"></script>
-        <script type="module" src="./responsive/responsiveUI.js"></script>
+        <script type="module" src="modules/shared//UI.js"></script>
         
 
-        <!--<script type="module" src="./responsive/widget/botEngineResponsive.js"></script>-->
         
       
         <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css" />
@@ -258,7 +254,7 @@
                         },
 
                         function (callBackSeries) {
-                            ResponsiveUI.setSlsvCssClasses(function () {
+                            UI.setSlsvCssClasses(function () {
                                 callBackSeries();
                             });
                         },
@@ -393,7 +389,7 @@
                         $("#Lineage_changeSourceButton").hide();
                         $("#index_topContolPanel").hide();
                         $("#Lineage_graphEditionButtons").hide();
-                        ResponsiveUI.init();
+                        UI.init();
                     }
                 );
             });
@@ -412,7 +408,7 @@
                             </tr>
                         </table>
                     </div>
-                    <button class="w3-display-bottommiddle slsv-invisible-button" onclick="ResponsiveUI.hideShowMenuBar(this)">
+                    <button class="w3-display-bottommiddle slsv-invisible-button" onclick="UI.hideShowMenuBar(this)">
                         <img src="./icons/CommonIcons/ArrowMenuBar.png" />
                     </button>
 
@@ -432,13 +428,13 @@
                                 <button id="selectedTool" class="slsv-invisible-button" style="padding: 0px; margin-left: 10px">Tool</button>
                                 <button class="arrow-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-left: 3px; margin-right: 10px"></button>
                                 <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                                    <!-- <select id="toolsSelect" style="min-width:150px" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto"></select>-->
+                                    <!-- <select id="toolsSelect" style="min-width:150px" class="Lineage_PopUpStyle" size="8" onclick="UI.onToolSelect($(this).val())" style="overflow: auto"></select>-->
                                     <div
                                         id="toolsSelect"
                                         style="min-width: 150px; display: flex; flex-direction: column; overflow: auto; max-height: 300px"
                                         class="Lineage_PopUpStyle"
                                         size="8"
-                                        onclick="ResponsiveUI.onToolSelect(null,event)"
+                                        onclick="UI.onToolSelect(null,event)"
                                     ></div>
                                 </div>
                             </div>
@@ -495,7 +491,7 @@
                     <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button w3-right">
                         <button style="display: none" id="theme-selector-btn" class="w3-button slsv-right-top-bar-button">Themes</button>
                         <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                            <select id="themeSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.changeTheme($(this).val())" style="overflow: auto"></select>
+                            <select id="themeSelect" class="Lineage_PopUpStyle" size="8" onclick="UI.changeTheme($(this).val())" style="overflow: auto"></select>
                         </div>
                     </div>
                 </div>

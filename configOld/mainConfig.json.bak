@@ -1,0 +1,86 @@
+{
+  "serverUrl": "../slsv",
+  "data_dir": null,
+  "auth": "local",
+  "logDir": "logs",
+  "default_lang": "en",
+  "theme": {
+    "selector": true,
+    "defaultTheme": "KGA"
+  },
+  "tools_available": [
+    "lineage",
+    "KGcreator",
+    "KGquery",
+    "Standardizer",
+    "admin",
+    "ConfigEditor",
+    "SPARQL",
+    "TimeLine",
+    "OntoCreator",
+    "GraphManagement",
+    "UserManagement",
+    "TagsGeometry"
+
+  ],
+  "cookieSameSite": "",
+  "cookieSecure": false,
+  "cookieSecureTrustProxy": false,
+  "cookieMaxAge": 2629800000,
+
+  "sparql_server": {
+    "url": "http://51.178.139.80:8890/sparql",
+    "user": "dba",
+    "password": "SlSv@51"
+  },
+  "jowlServer": {
+    "urlx": "http://51.178.39.209:9170/",
+    "url": "http://137.74.198.126:8080/"
+  },
+  "slsApi_x": {
+    "url": "http://137.74.198.126:8008"
+  },
+  "ElasticSearch": {
+    "user": "elastic",
+    "password": "SlSv@51",
+    "skipSslVerify": true,
+    "url": "https://51.178.139.80:9200/",
+    "other_servers": [
+      "http://164.132.194.227:2009/",
+      "http://51.178.39.209:2009/",
+      "https://51.178.139.80:9200/",
+      "http://opeppa-updtlb03:9200/",
+      "http://51.178.39.209:2009/"
+    ]
+  },
+  "SQLserver": {
+    "user": "sa",
+    "password": "Fa1#majeur",
+    "server": "51.178.39.209",
+    "database": "master",
+    "trustServerCertificate": true
+  },
+  "logger": {
+    "errorsLogPath": "logs/error.log",
+    "usersLogPath": "logs/vocables.log"
+  },
+  "annotator": {
+    "tikaServerUrl": "127.0.0.1:41000",
+    "spacyServerUrl": "http://51.178.39.209:8000/pos",
+    "parsedDocumentsHomeDir": null,
+    "uploadDirPath": null
+  },
+  "wiki": {
+    "url": "http://51.178.39.209:8080/index.php/"
+  },
+  "authenticationDatabase": {
+    "user": "root",
+    "password": "xxx",
+    "host": "127.0.0.1",
+    "database": "slsv",
+    "table": "users",
+    "loginColumn": "login",
+    "passwordColumn": "password",
+    "groupsColumn": "groups"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "private": {
+    "name": "private",
+    "_type": "profile",
+    "id": "private",
+    "allowedSourceSchemas": [
+      "OWL"
+    ],
+    "sourcesAccessControl": {
+      "OWL": "readwrite"
+    },
+    "allowedTools": "ALL",
+    "forbiddenTools": []
+  }
+}

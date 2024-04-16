@@ -1,0 +1,60 @@
+{
+    "serverUrl": "../slsv",
+    "default_sparql_url": "http://51.178.139.80:8890/sparql",
+    "default_sparql_url_old": "http://137.74.198.126:8890/sparql",
+    "data_dir": null,
+    "auth": "disabled",
+    "logDir": "logs",
+    "default_lang": "en",
+    "tools_available": ["lineage", "KGcreator", "Standardizer", "admin", "ConfigEditor", "SPARQL"],
+    "cookieSameSite": "none",
+    "cookieSecure": false,
+    "cookieSecureTrustProxy": false,
+
+    "sparql_server": {
+        "user": "dba",
+        "password": "SlSv@51"
+    },
+
+    "jowlServer": {
+        "urlx": "http://51.178.39.209:9170/",
+        "url": "http://137.74.198.126:9170/"
+    },
+
+    "SQLserver": {
+        "user": "sa",
+        "password": "Fa1#majeur",
+        "server": "51.178.39.209",
+        "database": "master",
+        "trustServerCertificate": true
+    },
+    "ElasticSearch": {
+        "user": "elastic",
+        "password": "SlSv@51",
+        "url": "https://51.178.139.80:9200/",
+        "other_servers": ["http://164.132.194.227:2009/", "http://51.178.39.209:2009/", "https://51.178.139.80:9200/", "http://opeppa-updtlb03:9200/", "http://51.178.39.209:2009/"]
+    },
+    "logger": {
+        "errorsLogPath": "logs/error.log",
+        "usersLogPath": "logs/vocables.log"
+    },
+    "annotator": {
+        "tikaServerUrl": "127.0.0.1:41000",
+        "spacyServerUrl": "http://51.178.39.209:8000/pos",
+        "parsedDocumentsHomeDir": null,
+        "uploadDirPath": null
+    },
+    "wiki": {
+        "url": "http://51.178.39.209:8080/index.php/"
+    },
+    "authenticationDatabase": {
+        "user": "root",
+        "password": "xxx",
+        "host": "127.0.0.1",
+        "database": "slsv",
+        "table": "users",
+        "loginColumn": "login",
+        "passwordColumn": "password",
+        "groupsColumn": "groups"
+    }
+}

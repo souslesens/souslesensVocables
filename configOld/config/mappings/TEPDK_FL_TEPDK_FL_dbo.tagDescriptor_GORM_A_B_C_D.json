@@ -1,0 +1,179 @@
+{
+    "mappings": [
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.tagnumber",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://w3id.org/readi/rdl/D101001495"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.functionlabel",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://w3id.org/readi/rdl/D101001053"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.parent_loc1",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://data.total.com/resource/ARDL/Asset"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.modulelabel",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://data.total.com/resource/ARDL/ModuleUnit"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.parent_tagname",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://w3id.org/readi/rdl/D101001495"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.manufacturer",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Organization"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.manufacturer_model_number",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://w3id.org/readi/rdl/CFIHOS-00000008"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.class",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Location"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.tagnumber",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/concretizedBy",
+            "object": "dbo.tagdescriptor_gorm_a_b_c_d.functionlabel"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.parent_loc1",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasSubLocation",
+            "object": "dbo.tagdescriptor_gorm_a_b_c_d.modulelabel"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.functionlabel",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/locatedRelativeTo",
+            "object": "dbo.tagdescriptor_gorm_a_b_c_d.modulelabel"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.parent_tagname",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasFunctionalPart",
+            "object": "dbo.tagdescriptor_gorm_a_b_c_d.tagnumber"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.functionlabel",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasInstalled",
+            "object": "dbo.tagdescriptor_gorm_a_b_c_d.manufacturer_model_number"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.manufacturer",
+            "predicate": "http://w3id.org/readi/rdl/D101001101",
+            "object": "dbo.tagdescriptor_gorm_a_b_c_d.manufacturer_model_number"
+        },
+        {
+            "subject": "dbo.tagdescriptor_gorm_a_b_c_d.functionlabel",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasFunction",
+            "object": "dbo.tagdescriptor_gorm_a_b_c_d.class"
+        }
+    ],
+    "model": {
+        "http://w3id.org/readi/rdl/D101001495": {
+            "parents": ["NO-SUBCLASSES", "#"],
+            "label": "CFIHOS Tag Type"
+        },
+        "http://w3id.org/readi/rdl/D101001053": {
+            "parents": ["REFERENCE", "#"],
+            "label": "Artefact"
+        },
+        "http://data.total.com/resource/ARDL/Asset": {
+            "parents": ["ARDL-SPECIFIC", "#"],
+            "label": "Asset"
+        },
+        "http://data.total.com/resource/ARDL/ModuleUnit": {
+            "parents": ["ARDL-SPECIFIC", "#"],
+            "label": "ModuleUnit"
+        },
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Organization": {
+            "parents": ["NO-SUBCLASSES", "#"],
+            "label": "organization"
+        },
+        "http://w3id.org/readi/rdl/CFIHOS-00000008": {
+            "parents": ["NO-SUBCLASSES", "#"],
+            "label": "CFIHOS Model Part"
+        },
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Location": {
+            "parents": ["NO-SUBCLASSES", "#"],
+            "label": "Location"
+        },
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/concretizedBy": {
+            "label": "concretizedBy"
+        },
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasSubLocation": {
+            "label": "hasSubLocation"
+        },
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/locatedRelativeTo": {
+            "label": "locatedRelativeTo"
+        },
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasFunctionalPart": {
+            "label": "hasFunctionalPart"
+        },
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasInstalled": {
+            "label": "hasInstalled"
+        },
+        "http://w3id.org/readi/rdl/D101001101": {
+            "label": "Manufacturer"
+        },
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasFunction": {
+            "parents": ["http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasDisposition", "ONE-MODEL", "#"],
+            "label": "hasFunction"
+        }
+    },
+    "graph": {
+        "dbo.tagdescriptor_gorm_a_b_c_d.tagnumber": {
+            "x": -25,
+            "y": 7
+        },
+        "dbo.tagdescriptor_gorm_a_b_c_d.functionlabel": {
+            "x": 65,
+            "y": 185
+        },
+        "dbo.tagdescriptor_gorm_a_b_c_d.parent_loc1": {
+            "x": -397,
+            "y": 26
+        },
+        "dbo.tagdescriptor_gorm_a_b_c_d.modulelabel": {
+            "x": -319,
+            "y": 271
+        },
+        "dbo.tagdescriptor_gorm_a_b_c_d.parent_tagname": {
+            "x": -428,
+            "y": -145
+        },
+        "dbo.tagdescriptor_gorm_a_b_c_d.manufacturer": {
+            "x": 395,
+            "y": -101
+        },
+        "dbo.tagdescriptor_gorm_a_b_c_d.manufacturer_model_number": {
+            "x": 408,
+            "y": 60
+        },
+        "dbo.tagdescriptor_gorm_a_b_c_d.class": {
+            "x": 482,
+            "y": 238
+        }
+    },
+    "data": {
+        "adlSource": {
+            "type": "sql.sqlserver",
+            "connection": "_default",
+            "dbName": "TEPDK",
+            "table_schema": "dbo",
+            "local_dictionary": {
+                "table": "tblAttributePickListValue",
+                "idColumn": "ID",
+                "labelColumn": "Name"
+            }
+        },
+        "adlTable": "dbo.tagDescriptor_GORM_A_B_C_D"
+    }
+}

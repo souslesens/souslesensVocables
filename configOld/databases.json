@@ -1,0 +1,22 @@
+[
+  {
+    "id": "01HQZT7RSVSP4B2D91GBHGH1Y4",
+    "name": "testPG1",
+    "driver": "postgres",
+    "host": "51.178.39.209",
+    "port": 5432,
+    "database": "postgres",
+    "user": "postgres",
+    "password": "mysecretpassword"
+  },
+  {
+    "id": "01HSEJD99914P19Z6ANK18CGPC",
+    "name": "Lifex_tags_loc",
+    "driver": "sqlserver",
+    "host": "51.178.39.209",
+    "port": 5432,
+    "database": "master",
+    "user": "sa",
+    "password": "Fa1#majeur"
+  }
+]

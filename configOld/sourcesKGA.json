@@ -1,0 +1,1713 @@
+{
+  "GEMET": {
+    "name": "GEMET",
+    "_type": "source",
+    "id": "01GKHD23Y6REP3MTPE9CYAWNFK",
+    "graphUri": "http://www.eionet.europa.eu/gemet/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_SKOS",
+    "topClassFilter": "?topConcept rdf:type <http://www.eionet.europa.eu/gemet/2004/06/gemet-schema.rdf#SuperGroup>.",
+    "schemaType": "SKOS",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": true,
+    "allowIndividuals": true,
+    "color": "#c7c7c7",
+    "predicates": {
+      "lang": "en",
+      "prefLabel": "rdfs:label|skos:prefLabel",
+      "broaderPredicate": "^skos:member|skos:broader",
+      "topConceptFilter": "?topConcept rdf:type <http://www.eionet.europa.eu/gemet/2004/06/gemet-schema.rdf#SuperGroup>.",
+      "optionalDepth": 3
+    },
+    "group": "",
+    "imports": [
+      "GEMET"
+    ],
+    "taxonomyPredicates": [],
+    "owner": "admin",
+    "published": true
+  },
+  "GEOSCMIL": {
+    "name": "GEOSCMIL",
+    "_type": "source",
+    "id": "01H7ASHS2AACT6NWWJ0T2CVKHZ",
+    "graphUri": "http://resource.geosciml.org/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_SKOS",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "SKOS",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#c5b0d5",
+    "predicates": {
+      "broaderPredicate": "^skos:hasTopConcept|skos:broader",
+      "lang": "en"
+    },
+    "group": "",
+    "imports": [],
+    "taxonomyPredicates": [],
+    "owner": "admin",
+    "published": true
+  },
+  "INT_CHRONOSTRATIGRAPHIC_CHART": {
+    "controller": "Sparql_SKOS",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "graphUri": "http://resource.geosciml.org/vocabulary/timescale/isc2017/",
+    "taxonomyPredicates": [
+      "http://www.w3.org/2004/02/skos/core#broader"
+    ],
+    "schemaType": "SKOS",
+    "predicates": {
+      "topConceptFilter": "?topConcept skos:prefLabel ?topConceptLabel.filter(not exists  {?topConcept <http://www.w3.org/2004/02/skos/core#broader> ?x})",
+      "lang": "en"
+    },
+    "color": "#c5b0d5",
+    "imports": [],
+    "topClassFilter": "?topConcept rdf:type <http://www.w3.org/2002/07/owl#Class>",
+    "name": "INT_CHRONOSTRATIGRAPHIC_CHART",
+    "owner": "admin",
+    "published": true
+  },
+  "LOTERRE": {
+    "name": "LOTERRE",
+    "_type": "source",
+    "id": "01H7ASHS2B7GM0FCG6RBAYTZN0",
+    "graphUri": "",
+    "sparql_server": {
+      "url": "https://sparql.loterre.fr/LoterreVocabularies/sparql",
+      "method": "GET"
+    },
+    "controller": "Sparql_SKOS",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "SKOS",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#ffbb78",
+    "predicates": {
+      "topConceptFilterWW": "  ?topConcept skos:prefLabel ?topConceptLabel.filter (exists {?x <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSCollection> ?topConcept}",
+      "topConceptFilter": "  ?topConcept skos:prefLabel ?topConceptLabel.?topConcept <http:xxx> ?x.",
+      "lang": "en"
+    },
+    "group": "",
+    "imports": [],
+    "taxonomyPredicates": [],
+    "owner": "admin",
+    "published": true
+  },
+  "BFO": {
+    "name": "BFO",
+    "_type": "source",
+    "id": "01H7AS9Q6BN6QHV23K4BCJXHCC",
+    "graphUri": "http://purl.obolibrary.org/obo/bfo.owl",
+    "sparql_server": {
+      "url": "_default",
+      "method": "Post"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "STANDARDS/TOP_ONTOLOGIES",
+    "imports": [],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf",
+      "rdf:type"
+    ],
+    "owner": "admin",
+    "published": true
+  },
+  "DOLCE": {
+    "graphUri": "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept ?p ?o filter (?topConcept= <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Entity>)",
+    "schemaType": "OWL",
+    "schema": null,
+    "pref_lang": "en",
+    "color": "#bcbd22",
+    "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+    "imports": [],
+    "name": "DOLCE",
+    "owner": "admin",
+    "published": true
+  },
+  "GUFO": {
+    "graphUri": "http://purl.org/nemo/gufo#",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf ?superClass filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22",
+    "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+    "imports": [],
+    "name": "GUFO",
+    "owner": "admin",
+    "published": true
+  },
+  "SUMO": {
+    "graphUri": "http://www.ontologyportal.org/SUMO.owl",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf ?superClass filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22",
+    "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+    "imports": [],
+    "name": "SUMO",
+    "owner": "admin",
+    "published": true
+  },
+  "SEMANTIC-SCIENCE": {
+    "graphUri": "http://semanticscience.org/ontology/sio.owl",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://semanticscience.org/resource/SIO_000000>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22",
+    "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+    "imports": [],
+    "name": "SEMANTIC-SCIENCE",
+    "owner": "admin",
+    "published": true
+  },
+  "DATA_KNOWLEDGE": {
+    "name": "DATA_KNOWLEDGE",
+    "_type": "source",
+    "id": "01H7ASHS297KZHB4QWQG7PKS23",
+    "graphUri": "http://http://www.data-knowledge.org/dk/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+    "imports": [],
+    "taxonomyPredicates": [],
+    "owner": "admin",
+    "published": true
+  },
+  "ISO_15926-part-14_PCA": {
+    "name": "ISO_15926-part-14_PCA",
+    "_type": "source",
+    "id": "01GMDMQXHQKTMYGFSFHW65HV3K",
+    "graphUri": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept rdf:type <http://www.w3.org/2002/07/owl#Class>  filter (NOT exists {?topConcept rdfs:subClassOf ?y} &&  (!isBlank(?topConcept))  )",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+    "imports": [],
+    "taxonomyPredicates": [],
+    "owner": "admin",
+    "published": true
+  },
+  "IOF_core": {
+    "id": "01HMETF63X447ZRBJCTTZ2NJMS",
+    "name": "IOF_core",
+    "graphUri": "https://www.industrialontologies.org/core/",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST",
+      "headers": {}
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') )",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "schema": null,
+    "editable": false,
+    "color": "#bcbd22",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+    "imports": [
+      "BFO"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "owner": "admin",
+    "published": true
+  },
+  "IOF_maintenance": {
+    "id": "01HMETF63X447ZRBJCTTZ2NJMS",
+    "name": "IOF_maintenance",
+    "graphUri": "https://www.industrialontologies.org/maintenance/",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST",
+      "headers": {}
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') )",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "schema": null,
+    "editable": false,
+    "color": "#bcbd22",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "STANDARDS/MAINTENANCE",
+    "imports": [
+      "IOF_core",
+      "BFO"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "owner": "admin",
+    "published": true
+  },
+  "ROMAIN": {
+    "id": "01HMETF63X447ZRBJCTTZ2NJMS",
+    "name": "ROMAIN",
+    "graphUri": "http://www.semanticweb.org/hedi/ontologies/2018/11/ROMAIN/",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST",
+      "headers": {}
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf ?r. ?r rdf:type owl:Restriction",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "schema": null,
+    "editable": false,
+    "color": "#bcbd22",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "STANDARDS/MAINTENANCE",
+    "imports": [
+      "IOF_core",
+      "IOF_maintenance"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "owner": "admin",
+    "published": true
+  },
+  "QUDT": {
+    "name": "QUDT",
+    "_type": "source",
+    "id": "01GNYJ6AM3W62H2DY48SSBZNSR",
+    "graphUri": "",
+    "sparql_server": {
+      "url": "http://www.qudt.org/fuseki/qudt/sparql",
+      "method": "GET"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://qudt.org/schema/qudt/Datatype>",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "TSF/DRAFTS/OTHERS_OWL",
+    "imports": [],
+    "taxonomyPredicates": [],
+    "owner": "admin",
+    "published": true
+  },
+  "plant_ontology": {
+    "name": "plant_ontology",
+    "_type": "source",
+    "id": "01GNYJ9BH858QQD6JXSRWCEZZ6",
+    "graphUri": "http://purl.obolibrary.org/obo/po/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') )",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "TSF/DRAFTS/OTHERS_OWL",
+    "imports": [],
+    "taxonomyPredicates": [],
+    "owner": "admin",
+    "published": true
+  },
+  "cido_coronavirus": {
+    "name": "cido_coronavirus",
+    "_type": "source",
+    "id": "01GNYJ7NSK6KK351JEJY9TKNK8",
+    "graphUri": "http://purl.obolibrary.org/obo/cido.owl#",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000001>",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": false,
+    "allowIndividuals": false,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "TSF/DRAFTS/OTHERS_OWL",
+    "imports": [],
+    "taxonomyPredicates": [],
+    "owner": "admin",
+    "published": true
+  },
+  "TSF_GAIA_TEST": {
+    "name": "TSF_GAIA_TEST",
+    "_type": "source",
+    "id": "01GH9BYD174FK5Z85D3EX4CMVV",
+    "graphUri": "http://data.total.com/resource/tsf/ontology/gaia-test/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": true,
+    "allowIndividuals": true,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "TSF/DRAFTS",
+    "imports": [
+      "ISO_15926-part-14_PCA"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf",
+      "rdf:type"
+    ],
+    "owner": "admin",
+    "published": true
+  },
+  "TSF_STANDARDS_LANDSCAPE": {
+    "name": "TSF_STANDARDS_LANDSCAPE",
+    "_type": "source",
+    "id": "01GW2ECMJ446HAB9CGSMHEZK1A",
+    "graphUri": "http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type  owl:Class.\n",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "isDraft": false,
+    "editable": true,
+    "allowIndividuals": true,
+    "color": "#bcbd22",
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "TSF/DRAFTS",
+    "imports": [
+      "ISO_15926-part-14_PCA"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf",
+      "rdf:type"
+    ],
+    "owner": "admin",
+    "published": true
+  },
+  "IOF-SUPPLY-CHAIN": {
+    "id": "IOF-SUPPLY-CHAIN",
+    "name": "IOF-SUPPLY-CHAIN",
+    "_type": "source",
+    "graphUri": "https://spec.industrialontologies.org/ontology/supplychain/SupplyChainReferenceOntology/",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST",
+      "headers": {}
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "IOF",
+    "imports": [
+      "IOF_core"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "owner": "admin",
+    "published": true
+  },
+  "IOF-CORE-202401": {
+    "id": "IOF-CORE-202401",
+    "name": "IOF-CORE-202401",
+    "_type": "source",
+    "graphUri": "https://spec.industrialontologies.org/ontology/202401/core/Core/",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST",
+      "headers": {}
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "IOF",
+    "imports": [
+      "BFO",
+      "AnnotationVocabulary"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "owner": "admin",
+    "published": true
+  },
+  "AnnotationVocabulary": {
+    "id": "AnnotationVocabulary",
+    "name": "AnnotationVocabulary",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/admin",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/",
+    "owner": "admin",
+    "imports": [],
+    "published": true
+  },
+  "abox-gor-lor": {
+    "id": "abox-gor-lor",
+    "name": "abox-gor-lor",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/admin",
+    "imports": [
+      "IOF-CORE-202401"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://www.example.com/base#",
+    "owner": "admin",
+    "published": true
+  },
+  "IDO": {
+    "id": "IDO",
+    "name": "IDO",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/admin",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://rds.posccaesar.org/ontology/lis14/ont/core",
+    "owner": "admin",
+    "imports": [],
+    "published": true
+  },
+  "testCF28": {
+    "id": "testCF28",
+    "name": "testCF28",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/Arko",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testCF28",
+    "owner": "Arko",
+    "imports": [],
+    "published": true
+  },
+  "testCF30": {
+    "id": "testCF30",
+    "name": "testCF30",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/admin",
+    "imports": [
+      "BFO"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testCF30",
+    "owner": "admin",
+    "published": true
+  },
+  "EMMO": {
+    "id": "EMMO",
+    "name": "EMMO",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/nasro",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://emmo.info/emmo",
+    "owner": "nasro",
+    "imports": [],
+    "published": true
+  },
+  "TRIBONT": {
+    "id": "TRIBONT",
+    "name": "TRIBONT",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/nasro",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "https://w3id.org/tribont",
+    "owner": "nasro",
+    "imports": [],
+    "published": true
+  },
+  "test41": {
+    "id": "test41",
+    "name": "test41",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/admin",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://test41",
+    "owner": "admin",
+    "imports": [],
+    "published": true
+  },
+  "test46": {
+    "id": "test46",
+    "name": "test46",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/admin",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://test46",
+    "owner": "admin",
+    "imports": [],
+    "published": true
+  },
+  "test49": {
+    "id": "test49",
+    "name": "test49",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/admin",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://test49",
+    "owner": "admin",
+    "imports": [],
+    "published": true
+  },
+  "testH1": {
+    "id": "testH1",
+    "name": "testH1",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/Hedi",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testH1",
+    "owner": "Hedi",
+    "imports": [],
+    "published": true
+  },
+  "testH2": {
+    "id": "testH2",
+    "name": "testH2",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/Hedi",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testH2",
+    "owner": "Hedi",
+    "imports": [],
+    "published": true
+  },
+  "testH4": {
+    "id": "testH4",
+    "name": "testH4",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/Hedi",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testH4",
+    "owner": "Hedi",
+    "imports": [],
+    "published": true
+  },
+  "testCF50": {
+    "id": "testCF50",
+    "name": "testCF50",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/admin",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testCF50",
+    "owner": "admin",
+    "imports": [],
+    "published": true
+  },
+  "testH6": {
+    "id": "testH6",
+    "name": "testH6",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/Hedi",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testH6",
+    "owner": "Hedi",
+    "imports": [],
+    "published": true
+  },
+  "testH7": {
+    "id": "testH7",
+    "name": "testH7",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/Hedi",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testH6",
+    "owner": "Hedi",
+    "imports": [],
+    "published": true
+  },
+  "testH8": {
+    "id": "testH8",
+    "name": "testH8",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/Hedi",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testH8",
+    "owner": "Hedi",
+    "imports": [],
+    "published": true
+  },
+  "testH18": {
+    "id": "testH18",
+    "name": "testH18",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/Hedi",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testH18",
+    "owner": "Hedi",
+    "imports": [],
+    "published": true
+  },
+  "testHx1": {
+    "id": "testHx1",
+    "name": "testHx1",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/Hedi",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testHx1",
+    "owner": "Hedi",
+    "imports": [],
+    "published": true
+  },
+  "testhx3": {
+    "id": "testhx3",
+    "name": "testhx3",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/Hedi",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testhx3",
+    "owner": "Hedi",
+    "imports": [],
+    "published": true
+  },
+  "test": {
+    "id": "test",
+    "name": "test",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/nasro",
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://uukllk",
+    "owner": "nasro",
+    "imports": [],
+    "published": true
+  },
+  "machine-data": {
+    "id": "machine-data",
+    "name": "machine-data",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/admin",
+    "imports": [
+      "IOF-CORE-202401"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://machine-data.example#",
+    "owner": "admin",
+    "published": true
+  },
+  "testCF321": {
+    "id": "testCF321",
+    "name": "testCF321",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/admin",
+    "imports": [
+      "BFO"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://testCF321",
+    "owner": "admin",
+    "published": true
+  },
+  "test321": {
+    "id": "test321",
+    "name": "test321",
+    "_type": "source",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/admin",
+    "imports": [
+      "BFO"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf"
+    ],
+    "graphUri": "http://test321",
+    "owner": "admin",
+    "published": true
+  },
+  "demo-gor-lor": {
+    "id": "demo-gor-lor",
+    "name": "demo-gor-lor",
+    "_type": "source",
+    "graphUri": "http://example.com/ontologies/demo-gor-lor#",
+    "sparql_server": {
+      "url": "_default",
+      "method": "POST",
+      "headers": {}
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdf:type owl:Class .",
+    "schemaType": "OWL",
+    "dataSource": {
+      "type": "",
+      "connection": "_default",
+      "dbName": "",
+      "table_schema": "",
+      "local_dictionary": {
+        "table": "",
+        "idColumn": "",
+        "labelColumn": ""
+      }
+    },
+    "editable": true,
+    "color": "",
+    "isDraft": false,
+    "allowIndividuals": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "PRIVATE/Arko",
+    "imports": [
+      "IOF-CORE-202401",
+      "BFO"
+    ],
+    "taxonomyPredicates": [
+      "rdfs:subClassOf",
+      "rdf:type"
+    ],
+    "owner": "admin",
+    "published": true
+  },
+  "iof-av": {
+    "id": "iof-av",
+  "name": "iof-av",
+  "_type": "source",
+  "sparql_server": {
+    "url": "_default",
+    "method": "POST"
+  },
+  "controller": "Sparql_OWL",
+  "topClassFilter": "?topConcept rdf:type owl:Class .",
+  "schemaType": "OWL",
+  "dataSource": {
+    "type": "",
+    "connection": "_default",
+    "dbName": "",
+    "table_schema": "",
+    "local_dictionary": {
+      "table": "",
+      "idColumn": "",
+      "labelColumn": ""
+    }
+  },
+  "editable": true,
+  "color": "",
+  "isDraft": false,
+  "allowIndividuals": false,
+  "predicates": {
+    "broaderPredicate": "",
+    "lang": ""
+  },
+  "group": "PRIVATE/admin",
+  "taxonomyPredicates": [
+    "rdfs:subClassOf"
+  ],
+  "graphUri": "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/",
+  "owner": "admin"
+},
+"skos": {"id": "skos", "name": "skos", "_type": "source", "sparql_server": {"url": "_default", "method": "POST"
+},
+"controller": "Sparql_OWL", "topClassFilter": "?topConcept rdf:type owl:Class .", "schemaType": "OWL", "dataSource": {"type": "", "connection": "_default", "dbName": "",
+"table_schema": "", "local_dictionary": {
+"table": "", "idColumn": "", "labelColumn": ""
+}
+},
+"editable": true, "color": "", "isDraft": false, "allowIndividuals": false, "predicates": {"broaderPredicate": "", "lang": ""
+},
+"group": "PRIVATE/admin", "taxonomyPredicates": ["rdfs:subClassOf"], "graphUri": "http://www.w3.org/2004/02/skos/core/", "owner": "admin"
+},
+"dcterms": {"id": "dcterms", "name": "dcterms", "_type": "source", "sparql_server": {"url": "_default", "method": "POST"
+},
+"controller": "Sparql_OWL", "topClassFilter": "?topConcept rdf:type owl:Class .", "schemaType": "OWL", "dataSource": {"type": "", "connection": "_default", "dbName": "",
+"table_schema": "", "local_dictionary": {
+"table": "", "idColumn": "", "labelColumn": ""
+}
+},
+"editable": true, "color": "", "isDraft": false, "allowIndividuals": false, "predicates": {"broaderPredicate": "", "lang": ""
+},
+"group": "PRIVATE/admin", "taxonomyPredicates": ["rdfs:subClassOf"], "graphUri": "http://purl.org/dc/terms/", "owner": "admin"
+},
+"dc": {"id": "dc", "name": "dc", "_type": "source", "sparql_server": {"url": "_default", "method": "POST"
+},
+"controller": "Sparql_OWL", "topClassFilter": "?topConcept rdf:type owl:Class .", "schemaType": "OWL", "dataSource": {"type": "", "connection": "_default", "dbName": "",
+"table_schema": "", "local_dictionary": {
+"table": "", "idColumn": "", "labelColumn": ""
+}
+},
+"editable": true, "color": "", "isDraft": false, "allowIndividuals": false, "predicates": {"broaderPredicate": "", "lang": ""
+},
+"group": "PRIVATE/admin", "taxonomyPredicates": ["rdfs:subClassOf"], "graphUri": "http://purl.org/dc/elements/1.1/", "owner": "admin"
+},
+"owl": {"id": "owl", "name": "owl", "_type": "source", "sparql_server": {"url": "_default", "method": "POST"
+},
+"controller": "Sparql_OWL", "topClassFilter": "?topConcept rdf:type owl:Class .", "schemaType": "OWL", "dataSource": {"type": "", "connection": "_default", "dbName": "",
+"table_schema": "", "local_dictionary": {
+"table": "", "idColumn": "", "labelColumn": ""
+}
+},
+"editable": true, "color": "", "isDraft": false, "allowIndividuals": false, "predicates": {"broaderPredicate": "", "lang": ""
+},
+"group": "PRIVATE/admin", "taxonomyPredicates": ["rdfs:subClassOf"], "graphUri": "https://www.w3.org/2002/07/owl", "owner": "admin"
+},
+"rdfs": {"id": "rdfs", "name": "rdfs", "_type": "source", "graphUri": "https://www.w3.org/2000/01/rdf-schema", "sparql_server": {"url": "_default", "method": "POST", "headers": {}
+},
+"controller": "Sparql_OWL", "topClassFilter": "?topConcept rdf:type owl:Class .", "schemaType": "OWL", "dataSource": {"type": "", "connection": "_default", "dbName": "",
+"table_schema": "", "local_dictionary": {
+"table": "", "idColumn": "", "labelColumn": ""
+}
+},
+"editable": true, "color": "", "isDraft": false, "allowIndividuals": false, "predicates": {"broaderPredicate": "", "lang": ""
+},
+"group": "BASIC", "imports": [], "taxonomyPredicates": ["rdfs:subClassOf"]
+},
+"rdf": {"id": "rdf", "name": "rdf", "_type": "source", "graphUri": "https://www.w3.org/1999/02/22-rdf-syntax-ns", "sparql_server": {"url": "_default", "method": "POST", "headers": {}
+},
+"controller": "Sparql_OWL", "topClassFilter": "?topConcept rdf:type owl:Class .", "schemaType": "OWL", "dataSource": {"type": "", "connection": "_default", "dbName": "",
+"table_schema": "", "local_dictionary": {
+"table": "", "idColumn": "", "labelColumn": ""
+}
+},
+"editable": true, "color": "", "isDraft": false, "allowIndividuals": false, "predicates": {"broaderPredicate": "", "lang": ""
+},
+"group": "BASIC", "imports": [], "taxonomyPredicates": ["rdfs:subClassOf"]
+}
+}

@@ -1,0 +1,153 @@
+{
+    "admin": {
+        "login": "admin",
+        "password": "admin",
+        "groups": ["admin"]
+    },
+    "Fauconnet": {
+        "login": "Fauconnet",
+        "password": "&",
+        "groups": ["admin"]
+    },
+    "JCL": {
+        "login": "JCL",
+        "password": "&",
+        "groups": ["admin"]
+    },
+    "BETA": {
+        "login": "BETA",
+        "password": "thes_X32!",
+        "groups": ["admin"]
+    },
+    "P.Jallais": {
+        "login": "P.Jallais",
+        "password": "thes_X32!",
+        "groups": ["admin"]
+    },
+    "S.Dorleans": {
+        "login": "S.Dorleans",
+        "password": "thes_X32!",
+        "groups": ["admin_skos"]
+    },
+    "skosReader": {
+        "login": "skosReader",
+        "password": "thes_X32!",
+        "groups": ["reader_skos"]
+    },
+    "skosBlender": {
+        "login": "skosBlender",
+        "password": "thes_X32!",
+        "groups": ["blender_skos"]
+    },
+    "ECCENCA": {
+        "login": "ECCENCA",
+        "password": "ONE-sense!rDf",
+        "groups": ["reader_owl"]
+    },
+
+    "LOGILAB": {
+        "login": "LOGILAB",
+        "password": "ONE-sense!rDf",
+        "groups": ["admin"]
+    },
+    "R.DAIAN": {
+        "login": "R.DAIAN",
+        "password": "ONE-sense!rDf",
+        "groups": ["reader_owl"]
+    },
+    "D.SIMON": {
+        "login": "D.SIMON",
+        "password": "ONE-sense!rDf",
+        "groups": ["reader_owl"]
+    },
+    "V.LAMBERT": {
+        "login": "V.LAMBERT",
+        "password": "ONE-sense!rDf",
+        "groups": ["admin"]
+    },
+    "F.VERLHEST": {
+        "login": "F.VERLHEST",
+        "password": "ONE-sense!rDf",
+        "groups": ["reader_owl"]
+    },
+    "G.TETARD": {
+        "login": "G.TETARD",
+        "password": "ONE-sense!rDf",
+        "groups": ["reader_owl"]
+    },
+    "JEMS": {
+        "login": "JEMS",
+        "password": "ONE-sense!rDf",
+        "groups": ["reader_skos_blend"]
+    },
+    "JFD": {
+        "login": "JFD",
+        "password": "ONE-sense!JFD",
+        "groups": ["reader_owl_iso15926"]
+    },
+    "MAJOREL": {
+        "login": "MAJOREL",
+        "password": "ONE-sense!PM",
+        "groups": ["reader_owl"]
+    },
+
+    "MAURIN": {
+        "login": "MAURIN",
+        "password": "ONE-sense!SM",
+        "groups": ["reader_owl"]
+    },
+    "CYROT": {
+        "login": "CYROT",
+        "password": "ONE-sense!MC",
+        "groups": ["reader_owl"]
+    },
+
+    "HARRATI ": {
+        "login": "HARRATI",
+        "password": "ONE-sense!AH",
+        "groups": ["reader_owl"]
+    },
+
+    "GUILLARME": {
+        "login": "GUILLARME",
+        "password": "ONE-sense!SG",
+        "groups": ["reader_owl"]
+    },
+
+    "TEIXUGUEIRA": {
+        "login": "TEIXUGUEIRA",
+        "password": "ONE-sense!DT",
+        "groups": ["reader_owl"]
+    },
+    "STABLO": {
+        "login": "STABLO",
+        "password": "ONE-sense!GS",
+        "groups": ["reader_owl"]
+    },
+    "MERCERON": {
+        "login": "MERCERON",
+        "password": "ONE-sense!GM",
+        "groups": ["reader_owl"]
+    },
+
+    "BORNON": {
+        "login": "BORNON",
+        "password": "ONE-sense!OB",
+        "groups": ["reader_owl"]
+    },
+    "BITTAR": {
+        "login": "BITTAR",
+        "password": "ONE-sense!SB",
+        "groups": ["reader_owl"]
+    },
+    "RANCHET": {
+        "login": "RANCHET",
+        "password": "ONE-sense!NR",
+        "groups": ["reader_owl"]
+    },
+    "MOURAILLE": {
+        "login": "MOURAILLE",
+        "password": "ONE-sense!OM",
+        "groups": ["reader_owl"]
+    }
+}

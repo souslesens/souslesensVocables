@@ -1,0 +1,1054 @@
+{
+    "ROMAIN": {
+        "name": "ROMAIN",
+        "_type": "source",
+        "id": "42dd6bb5f2",
+        "type": "",
+        "graphUri": "http://www.semanticweb.org/hedi/ontologies/2018/11/ROMAIN",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "IOF-CORE": {
+        "name": "IOF-CORE",
+        "_type": "source",
+        "id": "555331c526",
+        "type": "",
+        "graphUri": "https://purl.industrialontologies.org/ontology/core/Core",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": true,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": ["bfo.owl"],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BFO-2020": {
+        "name": "BFO-2020",
+        "_type": "source",
+        "id": "604d09d4fa",
+        "type": "",
+        "graphUri": "http://purl.obolibrary.org/obo/bfo/2020/bfo.owl",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .",
+        "schemaType": "OWL",
+        "allowIndividuals": true,
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "IOF-MAINTENANCE": {
+        "name": "IOF-MAINTENANCE",
+        "_type": "source",
+        "id": "bc81f55e1f",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/IOF-MAINTENANCE#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": ["bfo.owl"],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BIMERRMP": {
+        "name": "BIMERRMP",
+        "_type": "source",
+        "id": "f1e7be1a94",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BIMERRMP#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BEO": {
+        "name": "BEO",
+        "_type": "source",
+        "id": "4765c65495",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BEO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BAO": {
+        "name": "BAO",
+        "_type": "source",
+        "id": "a89e8c89e5",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BAO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BIMERRB": {
+        "name": "BIMERRB",
+        "_type": "source",
+        "id": "73f4179da1",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BIMERRB#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BIMERRAO": {
+        "name": "BIMERRAO",
+        "_type": "source",
+        "id": "71c14d6205",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BIMERRAO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BIMERRIO": {
+        "name": "BIMERRIO",
+        "_type": "source",
+        "id": "2677d79d5c",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BIMERRIO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BRICK": {
+        "name": "BRICK",
+        "_type": "source",
+        "id": "118dc984f5",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BRICK#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BIMERRW": {
+        "name": "BIMERRW",
+        "_type": "source",
+        "id": "2db465bbfa",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BIMERRW#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "FALCON": {
+        "name": "FALCON",
+        "_type": "source",
+        "id": "9fbaa1c3c8",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/FALCON#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .filter (!isBlank(?topConcept))",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BOT": {
+        "name": "BOT",
+        "_type": "source",
+        "id": "e5b188e69e",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BOT#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "EXTRUONT": {
+        "name": "EXTRUONT",
+        "_type": "source",
+        "id": "e898e559bd",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/EXTRUONT#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .filter (!isBlank(?topConcept))",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "GeospatialOntology": {
+        "name": "GeospatialOntology",
+        "_type": "source",
+        "id": "4cf5b21daf",
+        "type": "",
+        "graphUri": "http://www.ontologyrepository.com/CommonCoreOntologies/Mid/GeospatialOntology",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "bfo.owl": {
+        "name": "bfo.owl",
+        "_type": "source",
+        "id": "0e26b6efb9",
+        "type": "",
+        "graphUri": "http://purl.obolibrary.org/obo/bfo/2.0/bfo.owl",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "TimeOntology": {
+        "name": "TimeOntology",
+        "_type": "source",
+        "id": "1151f0a705",
+        "type": "",
+        "graphUri": "http://www.ontologyrepository.com/CommonCoreOntologies/Mid/TimeOntology",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "ArtifactOntology": {
+        "name": "ArtifactOntology",
+        "_type": "source",
+        "id": "999a010dda",
+        "type": "",
+        "graphUri": "http://www.ontologyrepository.com/CommonCoreOntologies/Mid/ArtifactOntology",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "UnitsOfMeasureOntology": {
+        "name": "UnitsOfMeasureOntology",
+        "_type": "source",
+        "id": "a201125595",
+        "type": "",
+        "graphUri": "http://www.ontologyrepository.com/CommonCoreOntologies/Mid/UnitsOfMeasureOntology",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "iao.owl": {
+        "name": "iao.owl",
+        "_type": "source",
+        "id": "4a4eece3ab",
+        "type": "",
+        "graphUri": "http://purl.obolibrary.org/obo/iao/2017-03-24/iao.owl",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "ExtendedRelationOntology": {
+        "name": "ExtendedRelationOntology",
+        "_type": "source",
+        "id": "fbc5b22714",
+        "type": "",
+        "graphUri": "http://www.ontologyrepository.com/CommonCoreOntologies/Mid/ExtendedRelationOntology",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BCAO": {
+        "name": "BCAO",
+        "_type": "source",
+        "id": "30ba83a5db",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BCAO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BIMERRKPI": {
+        "name": "BIMERRKPI",
+        "_type": "source",
+        "id": "272c880ecf",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BIMERRKPI#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BIMERRM": {
+        "name": "BIMERRM",
+        "_type": "source",
+        "id": "1f3b39f67b",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BIMERRM#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BIMERROP": {
+        "name": "BIMERROP",
+        "_type": "source",
+        "id": "3341e41e44",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BIMERROP#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BIMERRRP": {
+        "name": "BIMERRRP",
+        "_type": "source",
+        "id": "cc226f2d50",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BIMERRRP#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BIMERRSD": {
+        "name": "BIMERRSD",
+        "_type": "source",
+        "id": "c8857458df",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BIMERRSD#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BONSAI": {
+        "name": "BONSAI",
+        "_type": "source",
+        "id": "4ac99f792a",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BONSAI#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BPO": {
+        "name": "BPO",
+        "_type": "source",
+        "id": "b39409a425",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BPO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "CHAMEO": {
+        "name": "CHAMEO",
+        "_type": "source",
+        "id": "b3556cd1af",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/CHAMEO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "COINS": {
+        "name": "COINS",
+        "_type": "source",
+        "id": "702dd2831b",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/COINS#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "FUNSTEP": {
+        "name": "FUNSTEP",
+        "_type": "source",
+        "id": "d251cc3e40",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/FUNSTEP#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "IAO": {
+        "name": "IAO",
+        "_type": "source",
+        "id": "d7e9794b1d",
+        "type": "",
+        "graphUri": "http://purl.obolibrary.org/obo/iao.owl",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "IOF-AV": {
+        "name": "IOF-AV",
+        "_type": "source",
+        "id": "1d9e9e1fb7",
+        "type": "",
+        "graphUri": "https://purl.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "ITSMO": {
+        "name": "ITSMO",
+        "_type": "source",
+        "id": "306deb3ed5",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/ITSMO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "IMAMO": {
+        "name": "IMAMO",
+        "_type": "source",
+        "id": "c6ea80940d",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/IMAMO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "SCOR": {
+        "name": "SCOR",
+        "_type": "source",
+        "id": "067ec7e1f3",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/SCOR#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "UNSPSC": {
+        "name": "UNSPSC",
+        "_type": "source",
+        "id": "3400ffe929",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/UNSPSC#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "DEMO": {
+        "name": "DEMO",
+        "_type": "source",
+        "id": "3238234aa6",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/DEMO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "DBO": {
+        "name": "DBO",
+        "_type": "source",
+        "id": "68529cbc07",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/DBO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "GRACE": {
+        "name": "GRACE",
+        "_type": "source",
+        "id": "bab50b4d27",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/GRACE#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "OPENADR": {
+        "name": "OPENADR",
+        "_type": "source",
+        "id": "2b97f9cded",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/OPENADR#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "EMMO": {
+        "name": "EMMO",
+        "_type": "source",
+        "id": "a08a461a40",
+        "type": "",
+        "graphUri": "http://emmo.info/emmo",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "I40KG": {
+        "name": "I40KG",
+        "_type": "source",
+        "id": "71e3e3c9af",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/I40KG#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": false,
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "BFO": {
+        "name": "BFO",
+        "_type": "source",
+        "id": "158cea8a29",
+        "type": "",
+        "graphUri": "http://industryportal.enit.fr/ontologies/BFO#",
+        "sparql_server": {
+            "url": "http://51.178.139.80:8890/sparql",
+            "method": "Post",
+            "headers": {}
+        },
+        "editable": "false",
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+        "schemaType": "OWL",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "ONTOCOMMONS",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    }
+}

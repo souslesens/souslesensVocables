@@ -1,0 +1,31 @@
+{
+  "ONTOCOMMONS": {
+    "name": "ONTOCOMMONS",
+    "_type": "profile",
+    "id": "TEST19",
+    "allowedSourceSchemas": [
+      "OWL"
+    ],
+    "sourcesAccessControl": {
+      "OWL/TEST": "readwrite",
+      "OWL/ONTOCOMMONS": "readwrite",
+      "OWL/STANDARDS/TOP_ONTOLOGIES": "read"
+    },
+    "allowedTools": "lineage",
+    "forbiddenTools": []
+  },
+  "undefined": {
+    "admin": {
+      "name": "admin",
+      "_type": "profile",
+      "id": "0d5fdacb8232",
+      "allowedSourceSchemas": [
+        "OWL"
+      ],
+      "sourcesAccessControl": {
+        "PRIVATE/admin": "readwrite"
+      },
+      "allowedTools": "ALL"
+    }
+  }
+}

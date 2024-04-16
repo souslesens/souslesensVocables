@@ -1,0 +1,56 @@
+{
+  "private": {
+    "name": "private",
+    "_type": "profile",
+    "id": "private",
+    "allowedSourceSchemas": [
+      "OWL"
+    ],
+    "sourcesAccessControl": {
+      "OWL": "forbidden",
+      "OWL/STANDARDS": "read"
+    },
+    "allowedTools": [
+      "lineage",
+      "KGcreator",
+      "KGquery",
+      "OntoCreator"
+    ],
+    "forbiddenTools": [],
+    "theme": "KGA"
+  },
+  "iof": {
+    "name": "iof",
+    "_type": "profile",
+    "id": "iof",
+    "allowedSourceSchemas": [
+      "OWL"
+    ],
+    "sourcesAccessControl": {
+      "OWL": "read"
+    },
+    "allowedTools": "ALL",
+    "forbiddenTools": [
+      "TimeLine",
+      "admin",
+      "Standardizer"
+    ],
+    "theme": "KGA"
+  },
+  "lifex": {
+    "name": "lifex",
+    "_type": "profile",
+    "id": "lifex",
+    "allowedSourceSchemas": [
+      "OWL"
+    ],
+    "sourcesAccessControl": {
+      "OWL": "readwrite"
+    },
+    "allowedTools": [
+      "Lifex_dalia_2d"
+    ],
+    "forbiddenTools": [],
+    "theme": "KGA"
+  }
+}

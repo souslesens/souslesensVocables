@@ -16,7 +16,6 @@ var Admin = (function () {
 
     self.onLoaded = function () {
         $("#lateralPanelDiv").load("snippets/admin.html", function () {
-
             var options = {
                 withCheckboxes: true,
             };

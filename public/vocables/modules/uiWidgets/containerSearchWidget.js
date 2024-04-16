@@ -3,19 +3,18 @@ import common from "../shared/common.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import Lineage_containers from "../tools/lineage/lineage_containers.js";
 
-var ContainerSearchWidget = (function() {
+var ContainerSearchWidget = (function () {
     var self = {};
 
-    self.showDialog = function(source) {
+    self.showDialog = function (source) {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
         self.currentSource = source;
-        Containers_UI.getContainerTypes(source, null, function(err, types) {
+        Containers_UI.getContainerTypes(source, null, function (err, types) {
             if (err) {
                 return alert(err.responseText);
             }
-
 
             types.splice(0, 0, { id: "all", label: "all" });
             $("#containerSearchWidget_typesSelect").css("display", "block");
@@ -24,7 +23,7 @@ var ContainerSearchWidget = (function() {
         });
     };
 
-    self.execSearch = function() {
+    self.execSearch = function () {
         var type = $("#containerSearchWidget_typesSelect").val();
         $("#containerSearchWidget_typesSelect").val("");
         var filter = "";

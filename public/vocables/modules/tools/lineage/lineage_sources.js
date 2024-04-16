@@ -183,7 +183,7 @@ var Lineage_sources = (function () {
         JstreeWidget.clear("lineage_containers_containersJstree");
         var editable = Lineage_sources.isSourceEditableForUser(source);
         var display = editable ? "block" : "none";
-       $("#lineage_actionDiv_newAxiom").css("display", display);
+        $("#lineage_actionDiv_newAxiom").css("display", display);
 
         //new source to load
         if (!self.loadedSources[source]) {

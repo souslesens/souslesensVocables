@@ -83,9 +83,9 @@ var _botEngine = (function () {
         if (key == "_OR") {
             // alternative
             var alternatives = self.currentObj[key];
-           // if  return value execute function linked to return value in alternative
-            if (returnValue  ) {
-                if(alternatives[returnValue]) {
+            // if  return value execute function linked to return value in alternative
+            if (returnValue) {
+                if (alternatives[returnValue]) {
                     self.OrReturnValues.push(returnValue);
                     var obj = self.currentObj["_OR"][returnValue];
                     var key0 = Object.keys(obj)[0];
@@ -100,20 +100,16 @@ var _botEngine = (function () {
                         self.currentObj = obj;
                         return self.nextStep();
                     }
-                }
-                else if(alternatives["_DEFAULT"]){
+                } else if (alternatives["_DEFAULT"]) {
                     //  try to find _DEFAULT alternative and functuntion associated
                     var obj = self.currentObj["_OR"]["_DEFAULT"];
                     var key0 = Object.keys(obj)[0];
-
-
-                }else{
-                    self.showAlternatives(alternatives,varToFill);
+                } else {
+                    self.showAlternatives(alternatives, varToFill);
                     return;
                 }
 
                 var fn = self.currentBot.functions[key0];
-
 
                 if (!fn || typeof fn !== "function") {
                     return alert("function not defined :" + key0);
@@ -124,7 +120,7 @@ var _botEngine = (function () {
                 self.setStepMessage(key0);
                 fn();
             } else {
-                self.showAlternatives(alternatives,varToFill);
+                self.showAlternatives(alternatives, varToFill);
             }
         } else {
             var fn = self.currentBot.functions[key];
@@ -291,7 +287,6 @@ var _botEngine = (function () {
         $("#bot_resourcesProposalSelect").hide();
 
         if (options && options.datePicker) {
-
             DateWidget.setDatePickerOnInput("botPromptInput", null, function (date) {
                 _botEngine.currentBot.params[varToFill] = date.getTime();
                 DateWidget.unsetDatePickerOnInput("botPromptInput");
@@ -349,15 +344,14 @@ var _botEngine = (function () {
         return;
     };
 
-    self.showAlternatives=function(alternatives,varToFill){
+    self.showAlternatives = function (alternatives, varToFill) {
         var choices = [];
         for (var key in alternatives) {
             choices.push({ id: key, label: key });
         }
         self.showList(choices, varToFill);
         self.setStepMessage();
-    }
-
+    };
 
     self.getQueryText = function () {
         var queryText = "";

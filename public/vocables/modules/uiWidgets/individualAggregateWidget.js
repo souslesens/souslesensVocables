@@ -23,7 +23,10 @@ var IndividualAggregateWidget = (function () {
                     var item = data[key];
 
                     var otherproperties = item.data.nonObjectProperties;
+                    var labelObj = { id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label", datatype: "http://www.w3.org/2001/XMLSchema#string" };
+
                     if (otherproperties) {
+                        otherproperties.splice(0, 0, labelObj);
                         var groupByTypes = [
                             "http://www.w3.org/2001/XMLSchema#string",
                             "http://www.w3.org/2001/XMLSchema#date",

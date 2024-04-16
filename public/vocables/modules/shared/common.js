@@ -904,6 +904,11 @@ if (callback) return callback(err);
         return uri;
     };
 
+    self.countStringsInString = (string, char) => {
+        const chars = string.match(new RegExp(char, "g")).length;
+        return chars;
+    };
+
     return self;
 })();
 

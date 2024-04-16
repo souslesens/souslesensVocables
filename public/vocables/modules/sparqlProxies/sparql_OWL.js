@@ -2519,7 +2519,8 @@ var Sparql_OWL = (function () {
             fromStr +
             "" +
             " WHERE {{ ?id rdf:type ?type.?id rdf:type ?type2. " +
-            filterStr +"  FILTER (?type2=owl:NamedIndividual) "+
+            filterStr +
+            "  FILTER (?type2=owl:NamedIndividual) " +
             "?id rdfs:label ?label  }} limit 10000";
         var url = Config.sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
@@ -2529,9 +2530,6 @@ var Sparql_OWL = (function () {
             return callback(null, _result.results.bindings);
         });
     };
-
-
-
 
     self.getLabelsMapFromLabelsGraph = function (ids, callback) {
         var filter = Sparql_common.setFilter("sub", ids);

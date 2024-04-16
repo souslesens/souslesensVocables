@@ -185,8 +185,6 @@ var Sparql_common = (function () {
             }
         });
 
-
-
         return filters[0];
 
         var filter = "";
@@ -643,11 +641,6 @@ var Sparql_common = (function () {
     return self;
 })();
 
-
-
-
 export default Sparql_common;
-
-
 
 window.Sparql_common = Sparql_common;

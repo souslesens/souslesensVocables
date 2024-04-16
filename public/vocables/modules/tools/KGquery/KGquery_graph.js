@@ -159,7 +159,7 @@ var KGquery_graph = (function () {
 
                 //   https://fonts.google.com/icons
 
-                var colors = ["#fdac00", "#aa1151", "#ED008C", "#00B5EC", "#af7ede", "#AFD46B"];
+                var colors = ["#fdac00", "#aa1151", "#ED008C", "#00B5EC", "#af7ede", "#72914BFF", "#72914b", "#000efd"];
 
                 var icons = {
                     "http://data.total/resource/tsf/dalia-lifex1/manning": { icon: "persons.png", color: colors[4] },
@@ -167,6 +167,9 @@ var KGquery_graph = (function () {
                     "http://data.total/resource/tsf/dalia-lifex1/Task": { icon: "task.png", color: colors[0] },
                     "http://data.total/resource/tsf/dalia-lifex1/JobCardExecution": { icon: "jobCard.png", color: colors[1] },
                     "http://data.total/resource/tsf/dalia-lifex1/EquipmentItem": { icon: "machine.png", color: colors[3] },
+                    "http://data.total/resource/tsf/dalia-lifex1/Discipline": { icon: "school.png", color: colors[7] },
+                    "http://data.total/resource/tsf/dalia-lifex1/WBS": { icon: "contract.png", color: colors[6] },
+                    "http://data.total/resource/tsf/dalia-lifex1/WBSactivity": { icon: "engineering.png", color: colors[6] },
                 };
 
                 var dir = "/vocables/KGqueryIcons/";

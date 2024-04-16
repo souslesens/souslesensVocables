@@ -70,7 +70,6 @@ var Evaluate = (function () {
             openAll: true,
         };
         SourceSelectorWidget.initWidget(null, "annotate_resourcesTreeDiv", false, null, null, options);
-
     };
 
     self.execAnnotate = function () {

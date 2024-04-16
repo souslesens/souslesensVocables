@@ -37,23 +37,22 @@
     }
 </style>
 <div style="display: flex; flex-direction: column; width: 800px; height: 500px">
-
     <div id="axiomsEditor_textDiv">
         <input id="axiomsEditor_input" autocomplete="off" onkeyup="AxiomEditor.onInputChar($(this).val())" />
     </div>
     <div>
-        <select id="axiomsEditor_suggestionsSelect" onchange="AxiomEditor.onSelectSuggestion($(this))"
-                size="15"></select>
+        <select id="axiomsEditor_suggestionsSelect" onchange="AxiomEditor.onSelectSuggestion($(this))" size="15"></select>
     </div>
 
     <divid id="axiomsEditor_messageDiv"></divid>
     <div>
-        Frame  <select id="axiomEditor_frameSelect" >
-        <option>subClassOf</option>
-        <option>equivalentClass</option>
-        <option>disjointWith</option>
-        <option>disjointUnionWith</option>
-    </select>
+        Frame
+        <select id="axiomEditor_frameSelect">
+            <option>subClassOf</option>
+            <option>equivalentClass</option>
+            <option>disjointWith</option>
+            <option>disjointUnionWith</option>
+        </select>
         <button onclick="AxiomEditor.clear()">clear</button>
         <button onclick="AxiomEditor.checkSyntax()">checkSyntax</button>
         <button onclick="AxiomEditor.saveAxiom()">saveAxiom</button>
@@ -62,4 +61,3 @@
         <div id="axiomEditor_messageDiv>"></div>
     </div>
 </div>
-

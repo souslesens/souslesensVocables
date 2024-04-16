@@ -136,7 +136,7 @@ var MainController = (function () {
         if (!authentication.currentUser) {
             return alert(" no user identified");
         }
-        Config.clientCache={}
+        Config.clientCache = {};
         var groups = authentication.currentUser.groupes;
 
         MainController.loadProfiles(function (_err, _result) {
@@ -206,14 +206,7 @@ var MainController = (function () {
     };
 
     self.UI = {
-
-
-        configureUI: function () {
-
-
-        },
-
-
+        configureUI: function () {},
 
         showToolsList: function (treeDiv) {
             $(".max-height").height($(window).height() - 300);
@@ -323,7 +316,7 @@ var MainController = (function () {
             }
         },
 
-        message: function (message, stopWaitImg,startWaitImg) {
+        message: function (message, stopWaitImg, startWaitImg) {
             $("#messageDiv").html(message);
             if (stopWaitImg) {
                 $("#waitImg").css("display", "none");
@@ -420,8 +413,6 @@ var MainController = (function () {
         //   bc.postMessage("bc")
     };
 
-
-
     self.parseUrlParam = function (callback) {
         var paramsMap = common.getUrlParamsMap();
 
@@ -434,18 +425,16 @@ var MainController = (function () {
 
                 var url = window.location.href;
 
-                    // if tool available load it in responsive
-                    if (source) {
-                        ResponsiveUI.source = source;
-                    }
-                    ResponsiveUI.onToolSelect(tool);
-
-                if (window.history.pushState && url.indexOf("localhost")<0) {
-                    var url=url.substring(0,url.indexOf("?"))
-                    window.history.pushState({  }, "SLS",url);
+                // if tool available load it in responsive
+                if (source) {
+                    ResponsiveUI.source = source;
                 }
+                ResponsiveUI.onToolSelect(tool);
 
-
+                if (window.history.pushState && url.indexOf("localhost") < 0) {
+                    var url = url.substring(0, url.indexOf("?"));
+                    window.history.pushState({}, "SLS", url);
+                }
             }
         } else {
             callback();

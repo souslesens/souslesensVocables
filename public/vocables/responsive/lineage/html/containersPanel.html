@@ -2,10 +2,8 @@
     <div class="w3-container">
         <div class="input-group mb-3" style="width: 100%">
             <div class="input-group-prepend">
-                <div class="SearchButtonIconLeft border-without-raduis-theme1"
-                     style="height: 33.5px; padding-left: 7px; padding-right: 5px">
-                    <button class="search-icon slsv-invisible-button" onclick="Lineage_containers.search()"
-                            style="margin-top: 4px; height: 20px; width: 20px"></button>
+                <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+                    <button class="search-icon slsv-invisible-button" onclick="Lineage_containers.search()" style="margin-top: 4px; height: 20px; width: 20px"></button>
                 </div>
             </div>
             <input
@@ -21,26 +19,16 @@
                     <span class="button-font-color-button1"> Current</span>-->
                 </button>
             </div>
-            <div class="w3-button classesPannelButton size-of-button-small"
-                 onclick="ContainerSearchWidget.showDialog()">Parent Containers
-            </div>
-            <div>type<select id='containerSearchWidget_typesSelect' style='display:none'
-                             onchange='ContainerSearchWidget.execSearch()'></select></div>
+            <div class="w3-button classesPannelButton size-of-button-small" onclick="ContainerSearchWidget.showDialog()">Parent Containers</div>
+            <div>type<select id="containerSearchWidget_typesSelect" style="display: none" onchange="ContainerSearchWidget.execSearch()"></select></div>
             <div>
-
-                <div id="Lineage_addContainer_button" class="w3-button classesPannelButton size-of-button-small"
-                     style="padding: 3px 5px !important" onclick="Lineage_containers.addContainer()">
+                <div id="Lineage_addContainer_button" class="w3-button classesPannelButton size-of-button-small" style="padding: 3px 5px !important" onclick="Lineage_containers.addContainer()">
                     <button class="slsv-invisible-button add-icon" style="height: 25px; width: 29px"></button>
                 </div>
-                <button class="w3-button classesPannelButton size-of-button-small" style="font-weight: bold"
-                        onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all">
+                <button class="w3-button classesPannelButton size-of-button-small" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all">
                     <img src="./icons/CommonIcons/ClearAllIcon.png" />
                 </button>
-                <button class="w3-button classesPannelButton size-of-button-small"
-                        onclick="Export.exportTreeToDataTable('lineage_containers_containersJstree','#')">Export
-                </button>
-                <img src="./icons/CommonIcons/ClearAllIcon.png" />
-                </button>
+                <button class="w3-button classesPannelButton size-of-button-small" onclick="Export.exportTreeToDataTable('lineage_containers_containersJstree','#')">Export</button>
             </div>
         </div>
     </div>
@@ -48,8 +36,7 @@
     <div style="width: 375px; max-height: 60dvh; overflow: auto">
         <div id="lineage_containers_containersJstree" style="margin-top: 20px"></div>
     </div>
-    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px"
-            onclick="ResponsiveUI.hideShowLateralPannel(this)">
+    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="ResponsiveUI.hideShowLateralPannel(this)">
         <img id="ArrowLateralPannel" src="./icons/CommonIcons/ArrowLateralPannel.png" />
     </button>
 </div>

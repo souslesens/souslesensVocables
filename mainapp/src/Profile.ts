@@ -89,6 +89,7 @@ type ProfileJson = {
     sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string[] | string;
     forbiddenTools: string[];
+    theme?: string;
 };
 
 const decodeProfile = (key: string, profile: ProfileJson): Profile => {
@@ -100,6 +101,7 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         sourcesAccessControl: profile.sourcesAccessControl,
         allowedTools: profile.allowedTools,
         forbiddenTools: profile.forbiddenTools,
+        theme: profile.theme,
     };
 };
 

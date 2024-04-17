@@ -146,6 +146,7 @@ var KGquery_graph = (function () {
                         callbackSeries();
                     });
                 },
+
             ],
             function (err) {
                 if (err) {
@@ -260,6 +261,28 @@ var KGquery_graph = (function () {
                                 callbackSeries();
                             });
                         },
+                        function(callbackSeries){
+                        OntologyModels.getContainerBreakdownClasses(source,function(err, result){
+                            if(err){
+                                return callbackSeries(err);
+                            }
+                            result.forEach(function(item){
+                                var edegId=common.getRandomHexaId(5)
+                                visjsData.edges.push({
+                                    id:edegId,
+                                    from :item.sClass.value,
+                                    to:item.oClass.value,
+                                    arrows:"to",
+                                    label: "contains",
+                                    font:{ital:true},
+                                    dashes:[5, 5],
+                                    data: {propertyId:"rdfs:member"}
+
+                                })
+                            })
+                            return callbackSeries();
+                        })
+                    }
                     ],
                     function (err) {
                         if (err) {

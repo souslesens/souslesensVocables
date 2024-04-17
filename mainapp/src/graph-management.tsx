@@ -2,16 +2,34 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { useState, useEffect, useRef } from "react";
 
-import Alert from "react-bootstrap/Alert";
-import Form from "react-bootstrap/Form";
-import Modal from "react-bootstrap/Modal";
-import ProgressBar from "react-bootstrap/ProgressBar";
+import {
+    Alert,
+    Button,
+    Checkbox,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    FormControlLabel,
+    InputLabel,
+    LinearProgress,
+    Link,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography,
+} from "@mui/material";
+import { Cancel, Close, Done, Folder } from "@mui/icons-material";
 
-import { Autocomplete, TableSortLabel, Chip, TableBody, Link, Stack, Button, Table, TableHead, TableRow, TableCell, TextField } from "@mui/material";
-
-import { ServerSource } from "../Source";
-
-import { fetchMe } from "./Utils";
+import { fetchMe, VisuallyHiddenInput } from "./Utils";
 
 declare global {
     interface Window {
@@ -34,7 +52,7 @@ export default function GraphManagement() {
     const [currentOperation, setCurrentOperation] = useState<string | null>(null);
     const cancelCurrentOperation = useRef(false);
     const [animatedProgressBar, setAnimatedProgressBar] = useState(false);
-    const [currentDownloadFormat, setCurrentDownloadFormat] = useState<string | null>(null);
+    const [currentDownloadFormat, setCurrentDownloadFormat] = useState<string>("nt");
     const [skipNamedIndividuals, setSkipNamedIndividuals] = useState<boolean>(false);
 
     // error management
@@ -115,15 +133,15 @@ export default function GraphManagement() {
     };
 
     const handleSetFormat = async (event: React.MouseEvent<HTMLElement>) => {
-        setCurrentDownloadFormat(event.currentTarget.value);
+        setCurrentDownloadFormat(event.target.value);
     };
 
-    const handleSetSkipNamedIndividuals = async (event: React.MouseEvent<HTMLElement>) => {
-        setSkipNamedIndividuals(event.currentTarget.value == "false");
+    const handleSetSkipNamedIndividuals = async (event: React.ChangeEvent<HTMLElement>) => {
+        setSkipNamedIndividuals(event.currentTarget.checked);
     };
 
-    const handleReplaceGraphCheckbox = async (event: React.MouseEvent<HTMLInputElement>) => {
-        setReplaceGraph(event.currentTarget.value == "false");
+    const handleReplaceGraphCheckbox = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        setReplaceGraph(event.currentTarget.checked);
     };
 
     const handleDownloadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -144,9 +162,12 @@ export default function GraphManagement() {
         if (currentOperation) {
             cancelCurrentOperation.current = true;
         }
+        setSkipNamedIndividuals(false);
+        setReplaceGraph(true);
+        setCurrentDownloadFormat("nt");
     };
 
-    const handleUploadGraph = async () => {
+    const uploadSource = async () => {
         // init progress bar
         setCurrentOperation("upload");
         setTransferPercent(0);
@@ -297,6 +318,8 @@ export default function GraphManagement() {
             }
 
             if (blobParts.length == 0) {
+                setErrorMessage("Receive empty data from the API");
+                setError(true);
                 return;
             }
 
@@ -309,205 +332,156 @@ export default function GraphManagement() {
             URL.revokeObjectURL(link.href);
         } catch (error) {
             console.error(error);
+            setErrorMessage(error);
             setError(true);
         }
     };
 
     const downloadModalContent = (
-        <Stack>
-            <Form>
-                <Stack direction="horizontal">
-                    <Form.Check
-                        disabled={currentOperation !== null}
-                        onClick={handleSetFormat}
-                        name="radio-format"
-                        inline
-                        type="radio"
-                        id={`radio-format-nt-${currentSource}`}
-                        label="N-triples"
-                        value="nt"
-                    ></Form.Check>
-                    <Form.Check
-                        disabled={currentOperation !== null || slsApiBaseUrl === "/"}
-                        onClick={handleSetFormat}
-                        name="radio-format"
-                        inline
-                        type="radio"
-                        id={`radio-format-xml-${currentSource}`}
-                        label="RDF/XML"
-                        value="xml"
-                    ></Form.Check>
-                    <Form.Check
-                        disabled={currentOperation !== null || slsApiBaseUrl === "/"}
-                        onClick={handleSetFormat}
-                        name="radio-format"
-                        inline
-                        type="radio"
-                        id={`radio-format-ttl-${currentSource}`}
-                        label="Turtle"
-                        value="ttl"
-                    ></Form.Check>
-                </Stack>
-
-                <Stack className="my-2">
-                    <Form.Check
-                        disabled={currentOperation !== null || slsApiBaseUrl === "/"}
-                        id={`check-ignore-namedIndividuals-${currentSource}`}
-                        label="Ignore the namedIndividuals in this download"
-                        name="check-ignore-namedIndividuals"
-                        onClick={handleSetSkipNamedIndividuals}
-                        type="switch"
-                        value={skipNamedIndividuals}
-                    ></Form.Check>
-                </Stack>
-
-                <Stack direction="horizontal" gap={1}>
-                    {!currentOperation ? (
-                        <Button variant="contained" color="primary" disabled={currentDownloadFormat === null} type="submit" onClick={downloadSource} style={{ flex: 1 }}>
-                            Download
-                        </Button>
-                    ) : null}
-                    {currentOperation == "download" ? (
-                        <ProgressBar
-                            animated={animatedProgressBar}
-                            label={transferPercent == 100 ? (animatedProgressBar ? "Preparing data…" : "Completed") : ""}
-                            style={{ flex: 1, display: "flex", height: "3.1em" }}
-                            id={`progress-bar`}
-                            now={transferPercent}
-                        />
-                    ) : null}
-                    {currentOperation == "download" ? (
-                        <Button variant="contained" color="error" onClick={handleCancelOperation} disabled={transferPercent == 100}>
-                            Cancel
-                        </Button>
-                    ) : null}
-                </Stack>
-            </Form>
+        <Stack spacing={2} sx={{ pt: 1 }}>
+            <FormControl fullWidth>
+                <InputLabel id="select-format-label">File format</InputLabel>
+                <Select
+                    disabled={currentOperation !== null}
+                    id={`select-format-${currentSource}`}
+                    label="File format"
+                    labelId="select-format-label"
+                    onChange={handleSetFormat}
+                    value={currentDownloadFormat}
+                >
+                    <MenuItem disabled={currentOperation !== null} value={"nt"}>
+                        N-triples
+                    </MenuItem>
+                    <MenuItem disabled={currentOperation !== null || slsApiBaseUrl === "/"} value={"xml"}>
+                        RDF/XML
+                    </MenuItem>
+                    <MenuItem disabled={currentOperation !== null || slsApiBaseUrl === "/"} value={"ttl"}>
+                        Turtle
+                    </MenuItem>
+                </Select>
+            </FormControl>
+            <FormControl fullWidth>
+                <FormControlLabel
+                    id={`download-switch-${currentSource}`}
+                    control={<Checkbox checked={skipNamedIndividuals} disabled={currentOperation !== null || slsApiBaseUrl === "/"} onChange={handleSetSkipNamedIndividuals} />}
+                    label="Ignore the namedIndividuals in this download"
+                />
+            </FormControl>
         </Stack>
     );
 
     const uploadModalContent = (
-        <Form>
-            <Stack>
-                <Form.Group controlId="formUploadGraph" className="mb-2">
-                    <Form.Label>Choose RDF graph to upload</Form.Label>
-                    <Form.Control onChange={handleFileChange} required={true} type="file" disabled={currentOperation == "upload"} />
-                </Form.Group>
-                <Form.Check checked={replaceGraph} value={replaceGraph} onClick={handleReplaceGraphCheckbox} className="mb-3" type="switch" id="toto" label="Delete before upload" />
-                <Stack direction="horizontal" gap={1}>
-                    {!currentOperation ? (
-                        <Button variant="contained" color="primary" disabled={uploadfile.length < 1 ? true : false} type="submit" onClick={handleUploadGraph} style={{ flex: 1 }}>
-                            Upload
-                        </Button>
-                    ) : null}
-                    {currentOperation == "upload" ? (
-                        <ProgressBar
-                            animated={animatedProgressBar}
-                            label={transferPercent == 100 ? (!error ? "Completed" : "") : animatedProgressBar ? "Uploading to triplestore" : ""}
-                            style={{ flex: 1, display: "flex", height: "3.1em", transition: "none" }}
-                            id={`progress-toto`}
-                            now={transferPercent}
-                        />
-                    ) : null}
-                    {currentOperation == "upload" ? (
-                        <Button variant="contained" color="error" onClick={handleCancelOperation} disabled={transferPercent == 100}>
-                            Cancel
-                        </Button>
-                    ) : null}
-                </Stack>
+        <Stack spacing={2} sx={{ pt: 1 }}>
+            <Stack spacing={1} direction="row" useFlexGap>
+                <Button color="info" component="label" disabled={currentOperation === "upload"} fullWidth role={undefined} startIcon={<Folder />} tabIndex={-1} variant="outlined">
+                    {uploadfile.length === 1 ? uploadfile[0].name : "Select a file to upload…"}
+                    <VisuallyHiddenInput id="formUploadGraph" onChange={handleFileChange} type="file" />
+                </Button>
             </Stack>
-        </Form>
+            <FormControl fullWidth>
+                <FormControlLabel
+                    id={`upload-switch-${currentSource}`}
+                    control={<Checkbox checked={replaceGraph} disabled={currentOperation !== null} onChange={handleReplaceGraphCheckbox} />}
+                    label="Delete before upload"
+                />
+            </FormControl>
+        </Stack>
     );
 
-    const uploadModal = (
-        <Modal show={displayModal} onHide={handleHideModal} backdrop={"static"} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
-            <Modal.Header closeButton>
-                <Modal.Title id="contained-modal-title-vcenter">
-                    {displayModal == "upload" ? "Uploading" : null}
-                    {displayModal == "download" ? "Downloading" : null} {currentSource}
-                </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Stack gap={3}>
-                    {displayModal == "upload" ? uploadModalContent : null}
-                    {displayModal == "download" ? downloadModalContent : null}
+    const dialogModal = (
+        <Dialog fullWidth={true} maxWidth="md" onClose={handleHideModal} open={displayModal} PaperProps={{ component: "form" }}>
+            <DialogTitle id="contained-modal-title-vcenter">
+                {displayModal == "upload" ? "Uploading" : "Downloading"} {currentSource}
+            </DialogTitle>
+            <DialogContent sx={{ mt: 1 }}>
+                <Stack spacing={2} useFlexGap>
                     {error ? (
-                        <Alert style={{ mt: "1em" }} variant="danger">
+                        <Alert variant="filled" severity="error">
                             {errorMessage}
                         </Alert>
                     ) : null}
-                </Stack>
-            </Modal.Body>
-        </Modal>
-    );
-
-    const tableBody = Object.values(sources)
-        .sort((a, b) => {
-            const left: string = a[orderBy] || ("" as string);
-            const right: string = b[orderBy] || ("" as string);
-            return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
-        })
-        .filter((source) => source.name.includes(filteringChars))
-        .map((source) => {
-            return (
-                <TableRow key={source.name}>
-                    <TableCell>{source.name}</TableCell>
-                    <TableCell>
-                        <Link href={source.graphUri}>{source.graphUri}</Link>
-                    </TableCell>
-                    <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>
-                    <TableCell>
-                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <Button variant="contained" disabled={source.accessControl != "readwrite"} color="secondary" value={source.name} onClick={handleUploadSource}>
-                                Upload
-                            </Button>
-                            <Button variant="contained" color="primary" value={source.name} onClick={handleDownloadSource}>
-                                Download
-                            </Button>
+                    {displayModal == "upload" ? uploadModalContent : downloadModalContent}
+                    {currentOperation !== null && !error ? (
+                        <Stack alignItems="center" direction="row" spacing={2} useFlexGap>
+                            <LinearProgress id={`progress-${currentSource}`} sx={{ flex: 1 }} value={transferPercent} variant="determinate" />
+                            <Typography variant="body2">{transferPercent === 100 ? (!error ? "Completed" : "") : `${transferPercent}%`}</Typography>
                         </Stack>
-                    </TableCell>
-                </TableRow>
-            );
-        });
+                    ) : null}
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <Stack direction="horizontal" gap={1}>
+                    {!currentOperation ? (
+                        <Button
+                            color="primary"
+                            component="label"
+                            disabled={displayModal === "upload" ? uploadfile.length < 1 : currentDownloadFormat === null}
+                            onClick={displayModal === "upload" ? uploadSource : downloadSource}
+                            startIcon={<Done />}
+                            type="submit"
+                            variant="contained"
+                        >
+                            Submit
+                        </Button>
+                    ) : null}
+                    {currentOperation === "upload" || currentOperation === "download" ? (
+                        <Button
+                            color={error || transferPercent === 100 ? "primary" : "error"}
+                            onClick={handleCancelOperation}
+                            startIcon={error || transferPercent === 100 ? <Close /> : <Cancel />}
+                            variant="outlined"
+                        >
+                            {error || transferPercent === 100 ? "Close" : "Cancel"}
+                        </Button>
+                    ) : null}
+                </Stack>
+            </DialogActions>
+        </Dialog>
+    );
 
     return (
         <>
-            {uploadModal}
-            <Stack style={{ overflow: "auto", height: "90vh" }}>
-                <Autocomplete
-                    disablePortal
-                    id="search-graph"
-                    options={Object.entries(sources).map(([sourceName, _source]) => sourceName)}
-                    onInputChange={(_event, newInputValue) => {
-                        setFilteringChars(newInputValue);
-                    }}
-                    renderInput={(params) => <TextField {...params} label="Search Sources by name" />}
-                />
-                <Table stickyHeader>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell style={{ fontWeight: "bold" }}>
-                                <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
-                                    Sources
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell style={{ fontWeight: "bold" }}>
-                                <TableSortLabel active={orderBy === "graphUri"} direction={order} onClick={() => handleRequestSort("graphUri")}>
-                                    Graph URI
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                <TableSortLabel active={orderBy === "group"} direction={order} onClick={() => handleRequestSort("group")}>
-                                    Group
-                                </TableSortLabel>
-                            </TableCell>
-                            <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                Actions
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody sx={{ width: "100%", overflow: "visible" }}>{tableBody}</TableBody>
-                </Table>
+            {dialogModal}
+            <Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
+                <TableContainer sx={{ height: "80vh" }} component={Paper}>
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell style={{ fontWeight: "bold" }}>Sources</TableCell>
+                                <TableCell style={{ fontWeight: "bold", width: "100%" }}>Graph URI</TableCell>
+                                <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                    Actions
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                            {Object.entries(sources)
+                                .sort(([aName, _a], [bName, _b]) => {
+                                    return aName.toLowerCase() > bName.toLowerCase();
+                                })
+                                .map(([sourceName, source]) => {
+                                    return (
+                                        <TableRow>
+                                            <TableCell>{sourceName}</TableCell>
+                                            <TableCell>
+                                                <Link href={source.graphUri}>{source.graphUri}</Link>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                    <Button variant="contained" disabled={source.accessControl != "readwrite"} color="secondary" value={source.name} onClick={handleUploadSource}>
+                                                        Upload
+                                                    </Button>
+                                                    <Button variant="contained" color="primary" value={source.name} onClick={handleDownloadSource}>
+                                                        Download
+                                                    </Button>
+                                                </Stack>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             </Stack>
         </>
     );

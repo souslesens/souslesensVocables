@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.63.1](https://github.com/souslesens/souslesensVocables/compare/1.63.0...1.63.1) (2024-04-17)
+
+
+### Bug Fixes
+
+* add missing databases.json.default to config_templates ([bab4c66](https://github.com/souslesens/souslesensVocables/commit/bab4c66f61eecfa2c30811fc96e07bb9f6670d27))
+* **ConfigEditor:** fix default theme being selected instead of current theme in profile form ([a95c939](https://github.com/souslesens/souslesensVocables/commit/a95c9392bbea108b06d100109bfaf744fe55f0ff))
+* **migration:** use fast-glob instead of glob ([10b25d6](https://github.com/souslesens/souslesensVocables/commit/10b25d643f0ac2765107c83033dbb63a41fe5e4a))
+
 ## [1.63.0](https://github.com/souslesens/souslesensVocables/compare/1.62.1...1.63.0) (2024-04-16)
 
 ### Features

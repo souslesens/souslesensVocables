@@ -90,7 +90,7 @@ const UsersTable = () => {
                             }}
                             renderInput={(params) => <TextField {...params} label="Search Users by login" />}
                         />
-                        <TableContainer sx={{ maxHeight: "400px" }} component={Paper}>
+                        <TableContainer sx={{ height: "400px" }} component={Paper}>
                             <Table stickyHeader>
                                 <TableHead>
                                     <TableRow style={{ fontWeight: "bold" }}>

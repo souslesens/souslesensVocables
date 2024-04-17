@@ -278,7 +278,7 @@ const DatabasesTable = () => {
                             onInputChange={(event, newInputValue) => setFilteringChars(newInputValue)}
                             renderInput={(params) => <TextField {...params} label="Search Databases by name" />}
                         />
-                        <TableContainer sx={{ maxHeight: "400px" }} component={Paper}>
+                        <TableContainer sx={{ height: "400px" }} component={Paper}>
                             <Table stickyHeader>
                                 <TableHead>
                                     <TableRow>

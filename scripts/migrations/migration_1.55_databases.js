@@ -2,7 +2,7 @@ const fs = require("fs");
 const yargs = require("yargs");
 const path = require("path");
 const ULID = require("ulid");
-const { globSync } = require("glob");
+const { globSync } = require("fast-glob");
 const argv = yargs.alias("c", "config").describe("c", "Path to config directory").demandOption(["c"]).alias("w", "write").describe("w", "Write to the file").boolean("w").help().argv;
 
 const mainconfigFilePath = path.resolve(argv.config, "mainConfig.json");

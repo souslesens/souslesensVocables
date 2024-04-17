@@ -2,11 +2,15 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { useState, useEffect, useRef } from "react";
 
-import Stack from "react-bootstrap/Stack";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import InputGroup from "react-bootstrap/InputGroup";
-
+import {
+    Button,
+    IconButton,
+    InputAdornment,
+    OutlinedInput,
+    FormControl,
+    Stack,
+    Typography,
+} from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
 
@@ -41,17 +45,27 @@ export default function UserManagenent() {
     };
 
     return (
-        <Stack className="p-3">
-            <h4>Manage API key</h4>
-            <InputGroup className="w-50">
-                <Form.Control value={currentUserToken} placeholder="" aria-label="API key" aria-describedby="basic-addon" />
-                <Button onClick={handleCopyToken} variant={copied ? "outline-success" : "outline-primary"} id="button-addon">
-                    {copied ? <CheckIcon /> : <ContentCopyIcon />}
-                </Button>
-                <Button onClick={handleUpdateToken} variant="primary" id="button-addon">
+        <Stack spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }}>
+            <Typography variant="h4">Manage API key</Typography>
+            <Stack direction="row" spacing={{ xs: 1 }} sx={{ m: 4 }} useFlexGap>
+                <FormControl variant="outlined">
+                    <OutlinedInput
+                        id="outlined-adornment-token"
+                        endAdornment={
+                            <InputAdornment position="end">
+                                <IconButton aria-label="Copy token in the clipboard" edge="end" onClick={handleCopyToken} sx={{ p: 2 }}>
+                                    {copied ? <CheckIcon /> : <ContentCopyIcon />}
+                                </IconButton>
+                            </InputAdornment>
+                        }
+                        sx={{ width: 600 }}
+                        value={currentUserToken}
+                    />
+                </FormControl>
+                <Button aria-label="Renew" onClick={handleUpdateToken} sx={{ p: 2 }} variant="contained">
                     Renew
                 </Button>
-            </InputGroup>
+            </Stack>
         </Stack>
     );
 }

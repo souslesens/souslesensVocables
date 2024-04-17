@@ -1,3 +1,5 @@
+import { styled } from '@mui/material/styles';
+
 const identity = <Type>(a: Type): Type => a;
 
 function joinWhenArray(stringOrArray: string | string[]): string {
@@ -25,10 +27,22 @@ const style = {
     p: 4,
 };
 
+const VisuallyHiddenInput = styled("input")({
+    clip: "rect(0 0 0 0)",
+    clipPath: "inset(50%)",
+    height: 1,
+    overflow: "hidden",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    whiteSpace: "nowrap",
+    width: 1,
+});
+
 async function fetchMe() {
     const response = await fetch("/api/v1/auth/whoami");
     const json = await response.json();
     return json;
 }
 
-export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style };
+export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput };

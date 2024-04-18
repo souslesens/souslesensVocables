@@ -167,7 +167,7 @@ var KGbuilder_triplesMaker = {
         );
     },
 
-    getTripleSubject: function (tableMappings, mapping, line, callback) {
+    getTripleSubject: function(tableMappings, mapping, line, callback) {
         //get value for Subject
         var subjectStr = null;
         if (mapping.subjectIsSpecificUri) {
@@ -183,7 +183,7 @@ var KGbuilder_triplesMaker = {
             return callback(null, subjectStr);
         } else if ((typeof mapping.s === "string" && mapping.s.endsWith("_$")) || mapping.isSubjectBlankNode) {
             // blankNode
-            if (typeof mapping.o === "string" && !mapping.o.endsWith("_$") && !mapping.isObjectBlankNode && KGbuilder_triplesMaker.allColumns[mapping.o] && !line[mapping.o]) {
+            if ((typeof mapping.o === "string" && !mapping.o.endsWith("_$") && !mapping.isObjectBlankNode) && KGbuilder_triplesMaker.allColumns[mapping.o] && !line[mapping.o]) {
                 // ne pas creer des triplest sans objet
                 return callback(null, null);
             }
@@ -200,6 +200,7 @@ var KGbuilder_triplesMaker = {
             } catch (e) {
                 return callback((lineError = e + " " + mapping.s));
             }
+
         } else if (typeof mapping.s === "string" && mapping.s.indexOf("http") == 0) {
             subjectStr = "<" + mapping.s + ">";
         } else if (typeof mapping.s === "string" && mapping.s.match(/.+:.+/)) {
@@ -241,99 +242,112 @@ var KGbuilder_triplesMaker = {
         return callback(null, subjectStr);
     },
 
-    getTripleObject: function (tableMappings, mapping, line, callback) {
+
+    getTripleObject: function(tableMappings, mapping, line, callback) {
         var objectStr = null;
 
+
         //get value for Object
-        {
-            if (mapping.o === "_rowIndex") {
-                objectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
-                return objectStr;
-            } else if (mapping.objectIsSpecificUri) {
-                objectStr = mapping.o;
-            } else if (typeof mapping.o === "function") {
-                try {
-                    objectStr = mapping.o(line, mapping);
-                    objectStr = util.formatStringForTriple(objectStr, false);
-                } catch (e) {
-                    return callback(e);
+
+        if (mapping.o === "_rowIndex") {
+            objectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
+            return objectStr;
+        } else if (mapping.objectIsSpecificUri) {
+            objectStr = mapping.o;
+
+        } else if (typeof mapping.o === "function") {
+            try {
+                objectStr = mapping.o(line, mapping);
+                objectStr = util.formatStringForTriple(objectStr, false);
+            } catch (e) {
+                return callback(e);
+            }
+        } else if (typeof mapping.o === "string" && mapping.o.indexOf("http") == 0) {
+            objectStr = "<" + mapping.o + ">";
+        } else if (typeof mapping.o === "string" && mapping.o.match(/.+:.+/)) {
+            objectStr = mapping.o;
+        } else if (typeof mapping.o === "string" && mapping.o.endsWith("_$") || mapping.isObjectBlankNode) {
+            objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
+            return callback(null, objectStr);
+        } else if (tableMappings.transform && tableMappings.transform[mapping.o]) {
+            try {
+                if (line[mapping.o]) {
+                    objectStr = tableMappings.transform[mapping.o](line[mapping.o], "o", mapping.p, line, mapping);
+                } else {
+                    objectStr = "";//tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
                 }
-            } else if (typeof mapping.o === "string" && mapping.o.indexOf("http") == 0) {
-                objectStr = "<" + mapping.o + ">";
-            } else if (typeof mapping.o === "string" && mapping.o.match(/.+:.+/)) {
-                objectStr = mapping.o;
-            } else if ((typeof mapping.o === "string" && mapping.o.endsWith("_$")) || mapping.isObjectBlankNode) {
-                objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
-                return callback(null, objectStr);
-            } else if (tableMappings.transform && tableMappings.transform[mapping.o]) {
-                try {
-                    if (line[mapping.o]) {
-                        objectStr = tableMappings.transform[mapping.o](line[mapping.o], "o", mapping.p, line, mapping);
-                    } else {
-                        objectStr = tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
-                    }
-                    // return callback(null,objectStr);
-                } catch (e) {
-                    return (lineError = e + " " + mapping.o);
-                }
-            } else {
-                if (!line[mapping.o] || line[mapping.o] == "null") {
+                // return callback(null,objectStr);
+            } catch (e) {
+                return (lineError = e + " " + mapping.o);
+            }
+        } else {
+            if (!line[mapping.o] || line[mapping.o] == "null") {
+                return callback(null, null);
+            } else if (mapping.dataType) {
+                var str = line[mapping.o];
+                if (!str || str == "null") {
                     return callback(null, null);
-                } else if (mapping.dataType) {
-                    var str = line[mapping.o];
-                    if (!str || str == "null") {
-                        return;
-                    }
-                    if (mapping.dataType == "dateTime" || mapping.dataType == "xsd:datetime") {
-                        if (mapping.dateFormat) {
-                            str = util.getDateFromSLSformat(mapping.dateFormat, str);
-                        } else {
-                            var isDate = function (date) {
-                                return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
-                            };
+                }
+                if (mapping.dataType .startsWith("xsd:date")) {
 
-                            var formatDate = function (date) {
-                                return new Date(date).toISOString(); //.slice(0, 10);
-                            };
+                    if (mapping.dateFormat) {
+                        str = util.getDateFromSLSformat(mapping.dateFormat, str);
+                        if (!str) {
+                            return callback(null, null);
+                        }
 
-                            if (!isDate(str)) {
-                                var date = util.convertFrDateStr2Date(str);
-                                if (!date) {
-                                    return;
-                                } else {
-                                    str = date.toISOString();
-                                }
+                    } else {
+
+
+                        var isDate = function(date) {
+                            return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
+                        };
+
+                        var formatDate = function(date) {
+                            str = new Date(date).toISOString(); //.slice(0, 10);
+                        };
+
+                        if (!isDate(str)) {
+                            var date = util.convertFrDateStr2Date(str);
+                            if (!date) {
+                                return;
                             } else {
-                                str = formatDate(str);
+                                str = date.toISOString();
                             }
+                        } else {
+                            str = formatDate(str);
                         }
                     }
-                    if (!str) {
-                        objectStr = "";
-                    }
-                    //  mapping.p = "rdf:value";
-                    if (!mapping.dataType.startsWith("xsd:")) {
-                        mapping.dataType = "xsd:string";
-                    }
-                    objectStr = "'" + str + "'^^" + mapping.dataType;
-                } else {
-                    objectStr = line[mapping.o];
+                }
+                if (!str) {
+                    objectStr = "";
                 }
 
-                if (mapping.lookup_o) {
-                    if (!lookUpsMap[mapping.lookup_o]) {
-                        return (lineError = "no lookup named " + mapping.lookup_o);
-                    }
-                    var lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, objectStr);
-                    if (!lookupValue) {
-                        missingLookups_o += 1;
-                    } else {
-                        okLookups_o += 1;
-                        objectStr = lookupValue;
-                    }
+                if (!mapping.dataType.startsWith("xsd:")) {
+                    mapping.dataType = "xsd:string";
+                }
+                if (!str || str == "null") {
+                    return callback(null, null);
+                }
+                objectStr = "\"" + str + "\"^^" + mapping.dataType;
+            } else {
+                objectStr = line[mapping.o];
+            }
+
+            if (mapping.lookup_o) {
+                if (!lookUpsMap[mapping.lookup_o]) {
+                    return (lineError = "no lookup named " + mapping.lookup_o);
+                }
+                var lookupValue = KGbuilder_triplesMaker.getLookupValue(mapping.lookup_o, objectStr);
+                if (!lookupValue) {
+                    missingLookups_o += 1;
+                } else {
+                    okLookups_o += 1;
+                    objectStr = lookupValue;
                 }
             }
         }
+
         if (!objectStr || objectStr == "null") {
             return callback(null, null);
         }

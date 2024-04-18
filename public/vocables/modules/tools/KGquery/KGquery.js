@@ -676,10 +676,14 @@ var KGquery = (function () {
     };
 
     self.clearAll = function (exceptSetQueries) {
-        self.querySets.elements.forEach(function (element) {
-            if (element.fromNode) element.fromNode.alias = null;
-            if (element.toNode) element.toNode.alias = null;
-        });
+        self.querySets.sets.foreach(function(set){
+            set.elements.forEach(function (element) {
+                if (element.fromNode) element.fromNode.alias = null;
+                if (element.toNode) element.toNode.alias = null;
+            })
+    })
+
+
 
         self.querySets = { sets: [], groups: [], currentIndex: -1 };
         self.divsMap = {};

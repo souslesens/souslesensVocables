@@ -905,10 +905,8 @@ if (callback) return callback(err);
     };
 
     self.countStringsInString = (string, char) => {
-
         const array = string.match(new RegExp(char, "g"));
-        if(!array)
-            return 0;
+        if (!array) return 0;
         return array.length;
     };
 

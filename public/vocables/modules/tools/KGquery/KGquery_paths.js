@@ -222,10 +222,6 @@ var KGquery_paths = (function () {
             ambiguousEdges,
             function (ambiguousEdge, callbackEach) {
                 if (ambiguousEdge && ambiguousEdge.properties.length > 0) {
-
-
-
-
                     return SimpleListSelectorWidget.showDialog(
                         null,
                         function (callbackLoad) {

@@ -1,11 +1,11 @@
 import common from "../shared/common.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 
-var IndividualAggregateWidget = (function() {
+var IndividualAggregateWidget = (function () {
     var self = {};
     self.groupFunctions = ["COUNT", "SUM", "MAX", "MIN", "AVG", "concat"];
 
-    self.showDialog = function(divId, loadClassesFn, validateFn, message) {
+    self.showDialog = function (divId, loadClassesFn, validateFn, message) {
         self.validateFn = validateFn;
         self.functionVarClasses = [];
         self.groupByClasses = [];
@@ -15,11 +15,11 @@ var IndividualAggregateWidget = (function() {
             self.divId = divId;
             $("#smallDialogDiv").dialog("open");
         }
-        $("#" + divId).load("snippets/individualAggregateWidget.html", function() {
-            loadClassesFn(function(data) {
+        $("#" + divId).load("snippets/individualAggregateWidget.html", function () {
+            loadClassesFn(function (data) {
                 self.groupByClassesMap = {};
                 self.functionVarClassesMap = {};
-                self.allProperties={}
+                self.allProperties = {};
                 for (var key in data) {
                     var item = data[key];
 
@@ -36,14 +36,14 @@ var IndividualAggregateWidget = (function() {
                         "http://www.w3.org/2001/XMLSchema#string",
                         "http://www.w3.org/2001/XMLSchema#date",
                         "http://www.w3.org/2001/XMLSchema#datetime",
-                        "http://www.w3.org/2000/01/rdf-schema#Literal"
+                        "http://www.w3.org/2000/01/rdf-schema#Literal",
                     ];
 
-                    otherproperties.forEach(function(prop) {
-                        var label = item.label + "_" + prop.label;
+                    otherproperties.forEach(function (prop) {
+                        var label = (item.alias || item.label) + "_" + prop.label;
 
-                        var obj = { label: label, item: item, prop: prop,classLabel:item.data.label };
-                        self.allProperties[label]=obj
+                        var obj = { label: label, item: item, prop: prop, classLabel: item.data.label };
+                        self.allProperties[label] = obj;
                         if (groupByTypes.indexOf(prop.datatype) > -1) {
                             self.groupByClassesMap[label] = obj;
                         } else {
@@ -67,7 +67,7 @@ var IndividualAggregateWidget = (function() {
         });
     };
 
-    self.onGroupFunctionSelect = function(fn) {
+    self.onGroupFunctionSelect = function (fn) {
         var allVars = Object.keys(self.groupByClassesMap).concat(Object.keys(self.functionVarClassesMap));
         if (fn == "concat") {
             common.fillSelectOptions("individualAggregate_functionVariableSelect", allVars, null);
@@ -78,7 +78,7 @@ var IndividualAggregateWidget = (function() {
         }
     };
 
-    self.onOKbutton = function() {
+    self.onOKbutton = function () {
         var groupByObj = self.groupByClassesMap[$("#individualAggregate_groupBySelect").val()];
         var groupFunctions = $("#individualAggregate_groupFunctionSelect").val();
         var value = $("#individualAggregate_functionVariableSelect").val();
@@ -95,19 +95,19 @@ var IndividualAggregateWidget = (function() {
         whereStr += getWhereClause(groupByObj);
         selectStr += " ?" + groupByObj.label + "   ";
         groupByStr += " ?" + groupByObj.label + "   ";
-        var groupByPredicates = {}
-        groupByPredicates[groupByObj.label] =self.allProperties[groupByObj.label]
-        groupFunctions.forEach(function(fn) {
+        var groupByPredicates = {};
+        groupByPredicates[groupByObj.label] = self.allProperties[groupByObj.label];
+        groupFunctions.forEach(function (fn) {
             var fnVar = Sparql_common.formatStringForTriple(fnVarObj.label, true);
 
             if (fn == "concat") {
-                selectStr += "(GROUP_CONCAT(distinct ?" + fnVar + ";SEPARATOR=\",\") AS ?concat_" + fnVar + ")";
+                selectStr += "(GROUP_CONCAT(distinct ?" + fnVar + ';SEPARATOR=",") AS ?concat_' + fnVar + ")";
             } else if (fn == "COUNT") {
                 selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
             } else {
                 selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
             }
-            groupByPredicates[fnVar] =self.allProperties[fnVar]
+            groupByPredicates[fnVar] = self.allProperties[fnVar];
         });
 
         var aggregateClauses = { select: selectStr, groupBy: groupByStr, where: whereStr, groupByPredicates: groupByPredicates };

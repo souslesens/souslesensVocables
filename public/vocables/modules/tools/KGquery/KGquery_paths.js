@@ -15,11 +15,6 @@ var KGquery_paths = (function () {
 
             path = JSON.parse(JSON.stringify(path));
             self.managePathAmbiguousEdges(path, function (unAmbiguousPath) {
-                //register queryPath in pathDivsMap
-
-                //  var cleanedPath = self.processPathDuplicateClassIds(unAmbiguousPath, queryElement);
-
-                // self.pathDivsMap[queryElement.divId] = queryElement;
                 self.drawPathOnGraph(unAmbiguousPath);
 
                 var pathWithVarNames = self.substituteClassIdToVarNameInPath(queryElement, unAmbiguousPath);

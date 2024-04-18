@@ -1000,17 +1000,16 @@ var OntologyModels = (function () {
                     "SELECT   distinct ?class ?prop  ?datatype  " +
                     sourceGraphUriFrom +
                     "  where {\n" +
-                    "  { ?s rdf:type ?class. ?class rdf:type owl:Class .?class rdfs:label ?classLabel. filter (?class!=(rdfs:Class))\n" +
-                    "  \n" +
-                    "    \n" +
-                    "    ?prop rdfs:label ?propLabel. \n" +
-                    "  \n" +
-                    "  }\n" +
-                    " \n" +
+                    " { ?s rdf:type ?class. ?class rdf:type owl:Class .?class rdfs:label ?classLabel. filter (?class!=(rdfs:Class))}\n" +
                     " {\n" +
                     "   ?s ?prop ?o.\n" +
                     "      bind ( datatype(?o) as ?datatype )\n" +
                     "    ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#DatatypeProperty>,rdf:Property,owl:AnnotationProperty)&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>))\n" +
+                    "}\n" +
+                    "  UNION\n" +
+                    "  {\n" +
+                    "    ?s ?prop ?o. values ?prop{rdf:value}" +
+                    "    bind ( datatype(?o) as ?datatype )\n" +
                     "  }\n" +
                     "} limit 100";
 
@@ -1042,6 +1041,33 @@ var OntologyModels = (function () {
                 return callback(null, nonObjectPropertiesmap);
             }
         );
+    };
+
+    self.getContainerBreakdownClasses = function (source, callback) {
+        var fromStr = Sparql_common.getFromStr(source, false, true);
+
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT   distinct ?prop ?sClass ?oClass ?sClassLabel ?oClassLabel ?propLabel ?g\n" +
+            fromStr +
+            "  where  { " +
+            "   ?s ?prop ?o.\n" +
+            "   ?s rdf:type ?sClass.\n" +
+            "   ?o rdf:type ?oClass. \n" +
+            "filter(?prop= rdfs:member)\n" +
+            "      filter (?sClass  not in(rdf:Bag,owl:NamedIndividual) && ?oClass not in(rdf:Bag,owl:NamedIndividual) )\n" +
+            "  }";
+
+        let url = Config.sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "class"]);
+            return callback(null, result.results.bindings);
+        });
     };
 
     self.getInferredClassValueDataTypes = function (source, options, callback) {

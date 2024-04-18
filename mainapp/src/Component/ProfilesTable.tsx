@@ -577,7 +577,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                             </Select>
                         </FormControl>
                         <TextField
-                            defaultValue={model.config.data.theme.defaultTheme}
+                            defaultValue={profileModel.profileForm.theme ?? model.config.data.theme.defaultTheme}
                             fullWidth
                             id="theme"
                             label="Theme"

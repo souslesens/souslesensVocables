@@ -6,6 +6,8 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
+import Containers_tree from "../containers/containers_tree.js";
+
 self.lineageVisjsGraph;
 
 var Lineage_containers = (function () {
@@ -97,6 +99,8 @@ var Lineage_containers = (function () {
     };
 
     self.search = function (memberType, callback) {
+        //  return  Containers_tree.search();
+
         if (!callback) {
             callback = function () {};
         }

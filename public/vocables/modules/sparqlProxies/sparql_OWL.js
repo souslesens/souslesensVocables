@@ -693,7 +693,7 @@ var Sparql_OWL = (function () {
         if (!Array.isArray(classIds)) {
             classIds = [classIds];
         }
-        var filterStr = Sparql_common.setFilter("class", classIds);
+        var filterStr = Sparql_common.setFilter("class", classIds, null, { values: 1 });
 
         var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
         var modifier = "*";
@@ -706,21 +706,23 @@ var Sparql_OWL = (function () {
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-            'SELECT distinct ?subject ?class ?type ?classLabel  ?superClass ?superClassType ?superClassSubClass ?superClassLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) ' +
+            "SELECT distinct ?subject ?class ?type ?classLabel " +
+            ' ?superClass ?superClassType ?superClassSubClass ?superClassLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes) ' +
             fromStr;
         var filterStr;
         if (!options.descendants) {
-            filterStr = Sparql_common.setFilter("subject", classIds);
+            filterStr = Sparql_common.setFilter("subject", classIds, null, { values: 1 });
             query +=
                 "  WHERE {" +
                 "  ?superClass ^rdfs:subClassOf ?superClassSubClass\n" +
-                "  \n" +
+                "  OPTIONAL {?superClassSubClass rdfs:label|skos:prefLabel ?superClassSubClassLabel }" +
+                "  OPTIONAL {?superClass rdfs:label|skos:prefLabel ?superClassLabel }" +
                 " { SELECT * where {" +
                 "  ?class rdf:type ?type. ?class rdfs:subClassOf*|rdf:type* ?superClass.\n" +
                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
         } else {
-            filterStr = Sparql_common.setFilter("superClass", classIds);
+            filterStr = Sparql_common.setFilter("superClass", classIds, null, { values: 1 });
             query +=
                 "  WHERE {" +
                 "   ?superClassSubClass  rdfs:subClassOf ?class" +
@@ -728,18 +730,18 @@ var Sparql_OWL = (function () {
                 " { SELECT * where {" +
                 "  ?class rdf:type ?type. ?class rdfs:subClassOf*|rdf:type* ?superClass.\n" +
                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
+                "   OPTIONAL {?class rdfs:label|skos:prefLabel ?classLabel }" +
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
         }
 
         if (options.filter) {
             query += options.filter;
         }
-        if (options.withLabels) {
+        /*    if (options.withLabels) {
             query +=
                 "OPTIONAL {?class rdfs:label|skos:prefLabel ?classLabel }" +
-                "OPTIONAL {?superClassSubClass rdfs:label|skos:prefLabel ?superClassSubClassLabel }" +
-                " OPTIONAL {?superClass rdfs:label|skos:prefLabel ?superClassLabel }";
-        }
+
+        }*/
         query += filterStr;
 
         query += "}}} LIMIT 1000";
@@ -844,6 +846,7 @@ var Sparql_OWL = (function () {
 
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             'select ?id (GROUP_CONCAT( distinct ?type;separator=";;")as ?types)   ' +
             fromStr +
             " where" +

@@ -414,9 +414,7 @@ var Lineage_decoration = (function () {
                     callbackSeries();
                 },
 
-                //change vijsNodes Color
                 function (callbackSeries) {
-                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     callbackSeries();
                 },
 
@@ -426,7 +424,12 @@ var Lineage_decoration = (function () {
                     callbackSeries();
                 },
             ],
-            function (err) {}
+            function (err) {
+                //change vijsNodes Color
+                setTimeout(function () {
+                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
+                }, 500);
+            }
         );
     };
 

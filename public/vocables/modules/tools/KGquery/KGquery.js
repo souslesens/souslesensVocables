@@ -183,7 +183,10 @@ var KGquery = (function () {
 
     self.addEdge = function (edge, evt) {
         var fromNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.from);
+        fromNode = JSON.parse(JSON.stringify(fromNode));
+
         var toNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.to);
+        toNode = JSON.parse(JSON.stringify(toNode));
         if (edge.from == edge.to) {
             toNode = JSON.parse(JSON.stringify(fromNode));
             if (edge.data.propertyId == "rdfs:member") {
@@ -366,6 +369,7 @@ var KGquery = (function () {
                                 var str = "";
                                 var number = parseInt(depth);
                                 propertyStr = " rdfs:member{0," + number + "} ";
+                                otherPredicatesStrs += " FILTER (" + pathItem[0] + " !=" + pathItem[1] + ") ";
                             } else {
                             }
                         }
@@ -676,15 +680,6 @@ var KGquery = (function () {
     };
 
     self.clearAll = function (exceptSetQueries) {
-        self.querySets.sets.foreach(function(set){
-            set.elements.forEach(function (element) {
-                if (element.fromNode) element.fromNode.alias = null;
-                if (element.toNode) element.toNode.alias = null;
-            })
-    })
-
-
-
         self.querySets = { sets: [], groups: [], currentIndex: -1 };
         self.divsMap = {};
         self.currentQuerySet = self.addQuerySet();

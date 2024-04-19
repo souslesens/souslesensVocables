@@ -238,11 +238,8 @@ var util = {
         }
         str = str.trim();
         str = str.replace(/\\/gm, "_");
-        str = str.replace(/"/gm, '\\"');
-        // str = str.replace(/;/gm, "\\\;")
-        //  str = str.replace(/\n/gm, "\\\\n")
         str = str.replace(/\n/gm, "\\\\n");
-        //  str = str.replace(/\r/gm, "\\\\r")
+
         str = str.replace(/\r/gm, "");
         str = str.replace(/\t/gm, "\\\\t");
         str = str.replace(/\\xa0/gm, " ");
@@ -251,17 +248,17 @@ var util = {
         str = str.replace(/—/gm, " ");
         str = str.replace(/:/gm, "");
         str = str.replace(/\:/gm, "");
-
+        str = str.replace(/"/gm, '\\"');
         if (forUri) {
             str = str.replace(/ /gm, "_");
-            //  str = str.replace(/\-/gm, "_");
+
             str = str.replace(/:/gm, "_");
             str = str.replace(/\(/gm, "_");
             str = str.replace(/\)/gm, "_");
 
             str = str.replace(/[^a-zA-Z0-9-_]/g, "");
-            /*  str = encodeURIComponent(str);
-       str = str.replace(/%2F/gm, "/");*/
+
+
         }
 
         return str;

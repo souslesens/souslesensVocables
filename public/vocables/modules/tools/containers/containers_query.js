@@ -28,17 +28,53 @@ var Containers_query = (function () {
 
     self.getContainerDescendants = function (source, containerId, options, callback) {
         var fromStr = Sparql_common.getFromStr(source, false, false);
-        var filterContainer0Str = "";
+        var filter = options.filter || "";
         if (containerId) {
             // needs options.useFilterKeyWord because VALUES dont work
-            filterContainer0Str = Sparql_common.setFilter("parent0", containerId, null, { useFilterKeyWord: 1 });
+            filter = Sparql_common.setFilter("parent", containerId, null, { useFilterKeyWord: 1 });
         }
 
-        var filter = options.filter || "";
-
-        var filterLeaves = "";
         if (!options.leaves) {
-            filterLeaves = " FILTER (?memberType in(rdf:Bag,rdf:List))";
+            filter = " FILTER (?memberType in(rdf:Bag,rdf:List))";
+        }
+
+        var pathOperator = "+";
+        if (options.onlyOneLevel) {
+            pathOperator = "";
+        } else if (options.depth) {
+            pathOperator = "{1," + options.depth + "}";
+        }
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+            "SELECT distinct ?descendant ?descendantParent ?parent " +
+            fromStr +
+            " WHERE {\n" +
+            "?descendant ^rdfs:member ?descendantParent.\n" +
+            "?parent  rdfs:member" +
+            pathOperator +
+            "?descendant.\n" +
+            "            \n" +
+            filter +
+            "} " +
+            "      ";
+
+        var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, result);
+        });
+    };
+
+    self.getContainerAscendants = function (source, containerId, options, callback) {
+        var fromStr = Sparql_common.getFromStr(source, false, false);
+        var filter = options.filter || "";
+        if (containerId) {
+            // needs options.useFilterKeyWord because VALUES dont work
+            filter = Sparql_common.setFilter("child", containerId, null, { useFilterKeyWord: 1 });
         }
 
         //  var pathOperator = "+";
@@ -48,36 +84,20 @@ var Containers_query = (function () {
         } else if (options.depth) {
             pathOperator = "{1," + options.depth + "}";
         }
-        var query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
-                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
-                 SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes)  ${fromStr}
-                 WHERE {?searchValue ^rdfs:member{0,5} ?member.
-                    ?member ^rdfs:member ?parent.
-                    ?member rdf:type ?memberType.
-                    ?member rdfs:label ?memberLabel.
-                    ?parent rdfs:label ?parentLabel.
-                    
-                    {select ?searchValue where{
-                        ?parent0  rdfs:member${pathOperator} ?searchValue.
-                        ?searchValue rdfs:label ?searchValueLabel.
-                        ${filterContainer0Str}
-                        ${filter}
-                        }
-                    }
-                }  group by   ?member ?memberLabel ?parent ?parentLabel ?searchValue   
-                `;
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+            "SELECT distinct ?ancestor ?ancestorChild ?child  FROM   <http://data.total/resource/tsf/dalia-lifex1/> " +
+            from +
+            "WHERE {\n" +
+            "?ancestor rdfs:member ?ancestorChild.\n" +
+            "?ancestor  rdfs:member" +
+            pathOperator +
+            " ?child.\n" +
+            "\n" +
+            filter +
+            " } limit 10000 ";
 
-        /*
-                filter +
-                "  {select ?member where{\n" +
-                "?parent0  rdfs:member" +
-                pathOperator +
-                " ?member." +
-                filterContainer0Str +
-                "}\n" +
-                "  }\n" +
-                "}  group by ?member ?memberLabel ?parent ?parentLabel";
-                    */
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {

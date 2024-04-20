@@ -11,7 +11,7 @@ var Containers_query = (function () {
             fromStr +
             " where {" +
             "    ?member rdf:type ?memberType. " +
-            " ?member rdfs:label ?memberLabel. " +
+            " OPTIONAL { ?member rdfs:label ?memberLabel}  " +
             " FILTER (?memberType in(rdf:Bag,rdf:List))\n" +
             "  filter (not exists{?parent rdfs:member ?member})\n" +
             "    }";
@@ -35,26 +35,28 @@ var Containers_query = (function () {
         }
 
         if (!options.leaves) {
-            filter = " FILTER (?memberType in(rdf:Bag,rdf:List))";
+            filter+= " FILTER (?descendantType in(rdf:Bag,rdf:List))";
         }
 
-        var pathOperator = "+";
-        if (options.onlyOneLevel) {
-            pathOperator = "";
-        } else if (options.depth) {
+        var pathOperator = "";
+
+      if (options.depth) {
             pathOperator = "{1," + options.depth + "}";
         }
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-            "SELECT distinct ?descendant ?descendantParent ?parent " +
+            "SELECT distinct ?descendant ?descendantParent ?descendantLabel ?descendantParentLabel " +
             fromStr +
             " WHERE {\n" +
             "?descendant ^rdfs:member ?descendantParent.\n" +
+            "  OPTIONAL{?descendant rdfs:label ?descendantLabel}  " +
+            "  OPTIONAL{?descendantParent rdfs:label ?descendantParentLabel}  " +
             "?parent  rdfs:member" +
             pathOperator +
             "?descendant.\n" +
             "            \n" +
+            "  ?descendant rdf:type ?descendantType."+
             filter +
             "} " +
             "      ";
@@ -69,7 +71,7 @@ var Containers_query = (function () {
         });
     };
 
-    self.getContainerAscendants = function (source, containerId, options, callback) {
+    self.getContainerLabelAscendants = function (source, containerId, options, callback) {
         var fromStr = Sparql_common.getFromStr(source, false, false);
         var filter = options.filter || "";
         if (containerId) {
@@ -79,24 +81,24 @@ var Containers_query = (function () {
 
         //  var pathOperator = "+";
         var pathOperator = "+";
-        if (options.onlyOneLevel) {
-            pathOperator = "";
-        } else if (options.depth) {
+     if (options.depth) {
             pathOperator = "{1," + options.depth + "}";
         }
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-            "SELECT distinct ?ancestor ?ancestorChild ?child  FROM   <http://data.total/resource/tsf/dalia-lifex1/> " +
-            from +
+            "SELECT distinct ?ancestor ?ancestorChild " +
+            fromStr +
             "WHERE {\n" +
-            "?ancestor rdfs:member ?ancestorChild.\n" +
-            "?ancestor  rdfs:member" +
-            pathOperator +
-            " ?child.\n" +
-            "\n" +
+              " optional{?ancestor rdfs:member ?ancestorChild.}\n" +
+            "  ?ancestorChild  rdfs:member"+pathOperator+" ?child.\n" +
+            "  OPTIONAL{?ancestorChild rdfs:label ?ancestorChildLabel}  \n" +
+            "  {select ?child where  {\n" +
+            "   ?child rdfs:label ?childLabel."+
             filter +
-            " } limit 10000 ";
+            "}\n" +
+            "  }\n" +
+            "} limit 10000 "
 
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 

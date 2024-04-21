@@ -23,6 +23,7 @@ import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
 import ResponsiveUI from "../../../responsive/responsiveUI.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
+import jstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
 var KGquery = (function() {
     var self = {};
@@ -212,12 +213,15 @@ var KGquery = (function() {
         self.addQueryElementToQuerySet(self.currentQuerySet);
     };
 
-    self.addNodeFilter = function(classDivId) {
+    self.addNodeFilter = function(classDivId,addTojsTreeNode) {
         var aClass = self.divsMap[classDivId];
         var classSetIndex = aClass.data.setIndex;
         if (self.querySets.sets[classSetIndex].classFiltersMap[classDivId]) {
             delete self.querySets.sets[classSetIndex].classFiltersMap[classDivId];
             $("#" + classDivId + "_filter").html("");
+            if(addTojsTreeNode){
+                jstreeWidget.deleteNode(null,classDivId + "_filter")
+            }
             return;
         }
         var varName = [self.getVarName(aClass, true)];
@@ -235,6 +239,17 @@ var KGquery = (function() {
             }
             self.querySets.sets[classSetIndex].classFiltersMap[classDivId] = { class: aClass, filter: result.filter };
             $("#" + classDivId + "_filter").text(result.filterLabel || result.filter);
+
+
+            if(addTojsTreeNode){
+                var jstreeData=[{
+                    id: classDivId + "_filter",
+                    text:result.filterLabel || result.filter,
+                    parent:addTojsTreeNode
+                }]
+                jstreeWidget.addNodesToJstree(null,addTojsTreeNode,jstreeData)
+            }
+
         });
     };
 
@@ -291,6 +306,7 @@ var KGquery = (function() {
         self.execPathQuery(options, function(err, result) {
             self.message("", true);
             if (err) {
+                if(err.responseText)
                 return alert(err.responseText);
             }
 
@@ -326,9 +342,12 @@ var labelProperty={
                         var addLabel = true;
 
                         queryElement.fromNode.data.nonObjectProperties.forEach(function(property) {
+                            if (property.label.indexOf("label") > -1) {
+                                addLabel = false;
+                            }
 
-                            if(!uniqueProps[subjectVarName+"_"+property]) {
-                                uniqueProps[subjectVarName+"_"+property]=1
+                            if(!uniqueProps[subjectVarName+"_"+property.label]) {
+                                uniqueProps[subjectVarName+"_"+property.label]=1
                                 queryNonObjectProperties.push({ varName: subjectVarName, property: property,nodeDivId: queryElement.fromNode.data.nodeDivId });
                             }
                         });
@@ -346,10 +365,10 @@ var labelProperty={
                         var addLabel = true;
                         queryElement.toNode.data.nonObjectProperties.forEach(function(property) {
                             if (property.label.indexOf("label") > -1) {
-                                addLabel = true;
+                                addLabel = false;
                             }
-                            if(!uniqueProps[subjectVarName+"_"+property]) {
-                                uniqueProps[subjectVarName + "_" + property] = 1
+                            if(!uniqueProps[objectVarName+"_"+property.label]) {
+                                uniqueProps[objectVarName + "_" + property.label] = 1
                                 queryNonObjectProperties.push({ varName: objectVarName, property: property ,nodeDivId: queryElement.toNode.data.nodeDivId});
                             }
                         });
@@ -365,16 +384,14 @@ var labelProperty={
              });
             });
         });
-        if (false && queryNonObjectProperties.length < self.maxOptionalPredicatesInQuery) {
-            return callback(null, queryNonObjectProperties);
-        } else {
+
             var jstreeData = [];
             queryNonObjectProperties.forEach(function(item) {
                 var label = item.varName + "_" +item.property.label;
                 var nodeDivId=item.nodeDivId
                 jstreeData.push({
                     id: label,
-                    text: label+"<button style='vertical-align:middle' class=\"slsv-invisible-button filterIcon\" about=\"add filter\" onclick=\"KGquery.addNodeFilter('"+nodeDivId+"')\"></button>",
+                    text: label+"<button style='vertical-align:middle' class=\"slsv-invisible-button filterIcon\" about=\"add filter\" onclick=\"KGquery.addNodeFilter('"+nodeDivId+"','"+label+"')\"></button>",
                     parent: "#",
                     data:{property:item.property},
                     type:"Property"
@@ -384,8 +401,27 @@ var labelProperty={
                 var options = {
                     withCheckboxes: true,
 
-                    validateFn: function(checkedOptions) {
-                        queryNonObjectProperties = checkedOptions;
+                    validateFn: function(checkedNodes) {
+
+                        queryNonObjectProperties = []
+                        if(!checkedNodes || checkedNodes.length==0)
+                            return callback("no properties selected")
+                        checkedNodes.forEach(function(node){
+                            if(node.parents.length==1)
+                                queryNonObjectProperties.push(node)
+                        })
+
+
+
+                       if(queryNonObjectProperties.length > self.maxOptionalPredicatesInQuery){
+                           if(confirm("many properties have been selected. Query may take time or abort, Continue anyway?")){
+                               return callback(null, queryNonObjectProperties);
+                           }
+                           else{
+                               return callback("query aborted");
+                           }
+                       }
+
                         return callback(null, queryNonObjectProperties);
                     }
                 };
@@ -398,7 +434,7 @@ var labelProperty={
 
 
 
-        }
+
 
 
     };
@@ -414,6 +450,7 @@ var labelProperty={
                 function(callbackSeries) {
                     self.filterQueryNonObjectProperties(function(err, result) {
                         if (err) {
+                            MainController.UI.message(err, true)
                             callbackSeries(err);
                         }
                         queryNonObjectProperties = result;

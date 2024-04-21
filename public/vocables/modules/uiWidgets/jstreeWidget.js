@@ -106,6 +106,25 @@ var JstreeWidget = (function () {
     };
 
     self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
+
+        if(!jstreeDiv){
+            self.jstreeDiv="jstreeWidget_treeDiv"
+            self.dialogDiv ="#smallDialogDiv"
+
+            $("#smallDialogDiv").dialog("option","title","Select items")
+            $("#smallDialogDiv").dialog("open")
+            $("#smallDialogDiv").load("modules/uiWidgets/jstreeWidget.html",function(){
+                self.loadJsTree ("jstreeWidget_treeDiv", jstreeData, options, callback)
+            })
+                return;
+        }else{
+            self.jstreeDiv=  jstreeDiv
+        }
+
+
+
+
+
         var jstreeData2 = [];
         jstreeData.forEach(function (item) {
             if (item.parent != item.id) {
@@ -117,7 +136,7 @@ var JstreeWidget = (function () {
         if (!options) {
             options = {};
         }
-
+self.options=options;
         var plugins = [];
         if (!options.cascade) {
             options.cascade = "xxx";
@@ -511,6 +530,8 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
     self.checkAll = function (jstreeDiv) {
+        if(!jstreeDiv)
+            jstreeDiv=self.jstreeDiv
         $("#" + jstreeDiv)
             .jstree()
             .check_all();
@@ -627,6 +648,20 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
 
         return index_finded;
     };
+
+
+    self.validateSelfDialog=function(){
+        var selected=$("#jstreeWidget_treeDiv").jstree().get_checked(true)
+        if(selected.length==0){
+            var selected=$("#jstreeWidget_treeDiv").jstree().get_selected(true)
+        }
+        $("#"+self.dialogDiv).dialog.close()
+        if(self.options.validateFn){
+            self.options.validateFn(selected)
+        }
+
+    }
+
 
     return self;
 })();

@@ -30,6 +30,7 @@ var KGquery_filter_bot = (function () {
 
             self.params = currentQuery;
             SparqlQuery_bot.params = currentQuery;
+
             BotEngine.nextStep();
         });
     };
@@ -100,12 +101,21 @@ var KGquery_filter_bot = (function () {
         BotEngine.showList(choices, "individualsFilterType");
     };
     self.functions.listPropertiesFn = function () {
+
+        if(self.params.property){
+            return _botEngine.nextStep()
+        }
+
+
+
         var choices = [{ id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label" }];
         if (self.data && self.data.nonObjectProperties) {
             choices = choices.concat(self.data.nonObjectProperties);
         }
         BotEngine.showList(choices, "property");
     };
+
+
     self.functions.choosePropertyOperatorFn = function () {
         var datatype = null;
         self.data.nonObjectProperties.forEach(function (item) {

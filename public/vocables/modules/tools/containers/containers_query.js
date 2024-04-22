@@ -2,7 +2,14 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 var Containers_query = (function () {
     var self = {};
-    self.getTopContainer = function (source, callback) {
+    self.getTopContainer = function (source, options,callback) {
+        if(!options){
+            options={}
+        }
+        var filterStr="";
+        if(options.memberClass)
+            filterStr=  "?member rdf:type ?memberClass filter (?memberClass=<"+options.memberClass+">)"
+
         var fromStr = Sparql_common.getFromStr(source, false, false);
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
@@ -14,6 +21,7 @@ var Containers_query = (function () {
             " OPTIONAL { ?member rdfs:label ?memberLabel}  " +
             " FILTER (?memberType in(rdf:Bag,rdf:List))\n" +
             "  filter (not exists{?parent rdfs:member ?member})\n" +
+             filterStr+
             "    }";
 
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";

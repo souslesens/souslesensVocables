@@ -7,7 +7,16 @@ import Containers_query from "./containers_query.js";
 var Containers_tree = (function() {
     var self = {};
     self.jstreeDivId = "lineage_containers_containersJstree";
-    self.search = function(memberType, callback) {
+
+
+
+
+    self.search = function(jstreeDivId,options, callback) {
+        if(jstreeDivId)
+            self.jstreeDivId=jstreeDivId
+        if(!options){
+            options={}
+        }
         if (!callback) {
             callback = function() {
             };
@@ -25,8 +34,8 @@ var Containers_tree = (function() {
 
             });
         } else {
-            Containers_query.getTopContainer(source, function(err, result) {
-                var options = {};
+            Containers_query.getTopContainer(source, options,function(err, result) {
+
                 self.drawTree(self.jstreeDivId, source, "#", result.results.bindings, options);
             });
         }

@@ -13,7 +13,6 @@ var UI = (function () {
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
     self.smartPhoneScreen = null;
     //Etablish the resizing, load select bar tools --> Keep here
     self.init = function () {
@@ -39,7 +38,6 @@ var UI = (function () {
         );
 
         self.themeList();
-        //self.replaceFile(BotEngine, BotEngineResponsive);
         UI.resetWindowHeight();
     };
     // keep here
@@ -79,124 +77,10 @@ var UI = (function () {
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
 
-    //  MainController --> onToolSelect.initTool   when click on a button of a tool
-    // Manage when we click on a tool with parameter event
-    // Or when we choose a tool with the url with toolId parameter
-    self.onToolSelect = function (toolId, event,callback) {
-        if (event) {
-            var clickedElement = event.target;
-            // if class
-            if (clickedElement.className == "Lineage_PopUpStyleDiv") {
-                var toolId = $(clickedElement).children()[1].innerHTML;
-            } else {
-                if (clickedElement.id == "toolsSelect") {
-                    return;
-                } else if (clickedElement.innerHTML) {
-                    var toolId = clickedElement.innerHTML;
-                } else {
-                    var toolId = clickedElement.nextSibling.innerHTML;
-                }
-            }
-        }
-
-        if (self.currentTool != null) {
-            if (Config.userTools[self.currentTool].controller.unload) {
-                Config.userTools[self.currentTool].controller.unload();
-            }
-        }
-        self.currentTool = toolId;
-
-        if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
-            Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
-        }
-
-        $("#currentToolTitle").html(toolId);
-        if (self.currentTheme["@" + toolId + "-logo"]) {
-            $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
-        }
-        MainController.currentTool = toolId;
-        if (self.toolsNeedSource.includes(toolId)) {
-            if (self.source == null) {
-                UI.showSourceDialog(true);
-            } else {
-                self.sourceSelect(self.source);
-            }
-        } else {
-            self.initTool(toolId);
-        }
-        if(callback){
-            callback()
-        }
-    };
-    //MainController.onSourceSelect
-    // onSourceSelect is an event click functions when we choose a source she attribute the correct source corresponding to the click then execute source select which is the 
-    // the real execution of what we do when we choosed a source 
-    self.onSourceSelect = function (evt, obj) {
-        //  if (!MainController.currentTool) return self.alert("select a tool first");
-        var p = obj.node.parents.indexOf("PRIVATE");
-        if (p > 0) {
-            Config.sourceOwner = obj.node.parents[p - 1];
-        }
-
-        if (!obj.node.data || obj.node.data.type != "source") {
-            $(obj.event.currentTarget).siblings().click();
-            return;
-        }
-
-        var source = obj.node.data.id;
-        self.sourceSelect(source);
-    };
-    //To MainController too
-    self.sourceSelect = function (source) {
-        MainController.currentSource = source;
-        UI.source = source;
-        $("#selectedSource").html(MainController.currentSource);
-
-        $("#mainDialogDiv").parent().hide();
-        self.initTool(MainController.currentTool, function (err, result) {
-            if (err) {
-                return self.alert(err.responseText);
-            }
-            self.resetWindowHeight();
-        });
-    };
-    // MainController 
-    self.onSourceSelect_AddSource = function (evt, obj) {
-        //  if (!MainController.currentTool) return self.alert("select a tool first");
-        if (!obj.node.data || obj.node.data.type != "source") {
-            return self.alert("select a tool");
-        }
-
-        MainController.currentSource = obj.node.data.id;
-        $("#selectedSource").html(MainController.currentSource);
-        $("#mainDialogDiv").parent().hide();
-        Lineage_sources.init();
-    };
-    // MainController
-    //Giving a tool in parameter and the function launch it
-    self.initTool = function (toolId, callback) {
-        var toolObj = Config.userTools[toolId];
-        MainController.initControllers();
-        MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
-        Clipboard.clear();
-        Lineage_sources.loadedSources = {};
-
-        if (Config.userTools[toolId].controller.onLoaded) {
-            MainController.writeUserLog(authentication.currentUser, toolId, "");
-            Config.userTools[toolId].controller.onLoaded();
-        } else {
-            if (true) {
-                var url = window.location.href;
-                var p = url.indexOf("?");
-                if (p > -1) {
-                    url = url.substring(0, p);
-                }
-                url = url.replace("index_r.html", "");
-                url += "?tool=" + toolId;
-                window.location.href = url;
-            }
-        }
-    };
+    
+    
+    
+    
    
     //Keep
     self.ApplySelectedTabCSS = function (buttonClicked, tabGroup) {
@@ -234,9 +118,9 @@ var UI = (function () {
         var onSourceSelect;
         if (resetAll) {
             Lineage_sources.loadedSources = {};
-            onSourceSelect = UI.onSourceSelect;
+            onSourceSelect = MainController.onSourceSelect;
         } else {
-            onSourceSelect = UI.onSourceSelect_AddSource;
+            onSourceSelect = MainController.onSourceSelect_AddSource;
         }
         SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
@@ -336,53 +220,7 @@ var UI = (function () {
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };
-    //Lineage.sources
-    self.registerSourceWithoutDisplayingImports = function (sourceLabel, callback) {
-        if (!callback) {
-            callback = function () {};
-        }
 
-        if (Lineage_sources.loadedSources[sourceLabel]) {
-            return callback();
-        }
-
-        OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (sourceLabel == self.source) {
-                var sourceDivId = "source_" + common.getRandomHexaId(5);
-                Lineage_sources.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
-                Lineage_sources.sourceDivsMap[sourceDivId] = sourceLabel;
-                var html =
-                    "<div  id='" +
-                    sourceDivId +
-                    "' style='color: " +
-                    Lineage_whiteboard.getSourceColor(sourceLabel) +
-                    ";display:inline-flex;align-items:end;'" +
-                    " class='Lineage_sourceLabelDiv'  " +
-                    ">" +
-                    sourceLabel +
-                    "&nbsp;" +
-                    /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-    sourceDivId +
-    "\")'>[-]</i>";*/
-                    "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-                    sourceDivId +
-                    "\")'/> </button></div>";
-                $("#Lineage_sourcesDiv").append(html);
-
-                $("#" + sourceDivId).bind("click", function (e) {
-                    var sourceDivId = $(this).attr("id");
-                    var source = self.sourceDivsMap[sourceDivId];
-                    Lineage_sources.setCurrentSource(source);
-                });
-                return callback();
-            } else {
-                return callback();
-            }
-        });
-    };
     //keep
     self.PopUpOnHoverButtons = function () {
         $(".w3-button").off();

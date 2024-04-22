@@ -1,13 +1,6 @@
-import Sparql_common from "../sparqlProxies/sparql_common.js";
 import common from "./common.js";
 import OntologyModels from "./ontologyModels.js";
 import authentication from "./authentification.js";
-import Clipboard from "./clipboard.js";
-import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import Sparql_SKOS from "../sparqlProxies/sparql_SKOS.js";
-import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
-import GraphLoader from "./graphLoader.js";
 import UI from "./UI.js";
 
 /** The MIT License
@@ -22,7 +15,7 @@ import UI from "./UI.js";
 
 var MainController = (function () {
     var self = {};
-
+    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
     self.currentTool = null;
     self.currentSchemaType = null;
     self.currentSource = null;
@@ -201,7 +194,123 @@ var MainController = (function () {
                 }
             });
     };
+    //  MainController --> onToolSelect.initTool   when click on a button of a tool
+    // Manage when we click on a tool with parameter event
+    // Or when we choose a tool with the url with toolId parameter
+    self.onToolSelect = function (toolId, event,callback) {
+        if (event) {
+            var clickedElement = event.target;
+            // if class
+            if (clickedElement.className == "Lineage_PopUpStyleDiv") {
+                var toolId = $(clickedElement).children()[1].innerHTML;
+            } else {
+                if (clickedElement.id == "toolsSelect") {
+                    return;
+                } else if (clickedElement.innerHTML) {
+                    var toolId = clickedElement.innerHTML;
+                } else {
+                    var toolId = clickedElement.nextSibling.innerHTML;
+                }
+            }
+        }
+
+        if (self.currentTool != null) {
+            if (Config.userTools[self.currentTool].controller.unload) {
+                Config.userTools[self.currentTool].controller.unload();
+            }
+        }
+        self.currentTool = toolId;
+
+        if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
+            Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
+        }
+
+        $("#currentToolTitle").html(toolId);
+        if (UI.currentTheme["@" + toolId + "-logo"]) {
+            $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
+        }
+        MainController.currentTool = toolId;
+        if (self.toolsNeedSource.includes(toolId)) {
+            if (self.currentSource == null) {
+                UI.showSourceDialog(true);
+            } else {
+                self.sourceSelect(self.currentSource);
+            }
+        } else {
+            self.initTool(toolId);
+        }
+        if(callback){
+            callback()
+        }
+    };
     
+    // onSourceSelect is an event click functions when we choose a source she attribute the correct source corresponding to the click then execute source select which is the 
+    // the real execution of what we do when we choosed a source 
+    self.onSourceSelect = function (evt, obj) {
+        //  if (!MainController.currentTool) return self.alert("select a tool first");
+        var p = obj.node.parents.indexOf("PRIVATE");
+        if (p > 0) {
+            Config.sourceOwner = obj.node.parents[p - 1];
+        }
+
+        if (!obj.node.data || obj.node.data.type != "source") {
+            $(obj.event.currentTarget).siblings().click();
+            return;
+        }
+
+        var source = obj.node.data.id;
+        self.sourceSelect(source);
+    };
+   
+    self.sourceSelect = function (source) {
+        MainController.currentSource = source;
+        UI.source = source;
+        $("#selectedSource").html(MainController.currentSource);
+
+        $("#mainDialogDiv").parent().hide();
+        self.initTool(MainController.currentTool, function (err, result) {
+            if (err) {
+                return self.alert(err.responseText);
+            }
+            self.resetWindowHeight();
+        });
+    };
+    
+    self.onSourceSelect_AddSource = function (evt, obj) {
+        //  if (!MainController.currentTool) return self.alert("select a tool first");
+        if (!obj.node.data || obj.node.data.type != "source") {
+            return self.alert("select a tool");
+        }
+
+        MainController.currentSource = obj.node.data.id;
+        $("#selectedSource").html(MainController.currentSource);
+        $("#mainDialogDiv").parent().hide();
+        Lineage_sources.init();
+    };
+    //Giving a tool in parameter and the function launch it
+    self.initTool = function (toolId, callback) {
+        var toolObj = Config.userTools[toolId];
+        MainController.initControllers();
+        MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
+        Clipboard.clear();
+        Lineage_sources.loadedSources = {};
+
+        if (Config.userTools[toolId].controller.onLoaded) {
+            MainController.writeUserLog(authentication.currentUser, toolId, "");
+            Config.userTools[toolId].controller.onLoaded();
+        } else {
+            if (true) {
+                var url = window.location.href;
+                var p = url.indexOf("?");
+                if (p > -1) {
+                    url = url.substring(0, p);
+                }
+                url = url.replace("index_r.html", "");
+                url += "?tool=" + toolId;
+                window.location.href = url;
+            }
+        }
+    };
     self.UI = {
         initialGraphDivWitdh: 0,
         /*
@@ -502,7 +611,7 @@ var MainController = (function () {
             }
         },
         */
-        message: function (message, stopWaitImg) {
+        message: function (message, stopWaitImg,startWaitImg) {
             $("#messageDiv").html(message);
             if (stopWaitImg) {
                 $("#waitImg").css("display", "none");
@@ -615,7 +724,7 @@ P
                     if (source) {
                         UI.source = source;
                     }
-                    UI.onToolSelect(tool);
+                    self.onToolSelect(tool);
 
                 if (window.history.pushState && url.indexOf("localhost") < 0) {
                     var url = url.substring(0, url.indexOf("?"));

@@ -657,7 +657,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         if(selected.length==0){
             var selected=$("#jstreeWidget_treeDiv").jstree().get_selected(true)
         }
-        $("#"+self.dialogDiv).dialog.close()
+        $("#"+self.dialogDiv).dialog('close');
         if(self.options.validateFn){
             self.options.validateFn(selected)
         }

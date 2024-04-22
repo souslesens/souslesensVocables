@@ -66,7 +66,7 @@
         <script type="module" src="modules/tools/lineage/lineage_upperOntologies.js"></script>
 
         <script type="module" src="modules/tools/containers/Containers_UI.js"></script>
-        <script type="module" src="modules/tools/containers/lineage_containers_treeWidget.js"></script>
+        <script type="module" src="modules/tools/containers/containers_tree.js"></script>
         <script type="module" src="modules/tools/containers/containers_query.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_containers.js"></script>
 
@@ -423,13 +423,13 @@
                                 <button id="selectedTool" class="slsv-invisible-button" style="padding: 0px; margin-left: 10px">Tool</button>
                                 <button class="arrow-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-left: 3px; margin-right: 10px"></button>
                                 <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                                    <!-- <select id="toolsSelect" style="min-width:150px" class="Lineage_PopUpStyle" size="8" onclick="UI.onToolSelect($(this).val())" style="overflow: auto"></select>-->
+                                
                                     <div
                                         id="toolsSelect"
                                         style="min-width: 150px; display: flex; flex-direction: column; overflow: auto; max-height: 300px"
                                         class="Lineage_PopUpStyle"
                                         size="8"
-                                        onclick="UI.onToolSelect(null,event)"
+                                        onclick="MainController.onToolSelect(null,event)"
                                     ></div>
                                 </div>
                             </div>

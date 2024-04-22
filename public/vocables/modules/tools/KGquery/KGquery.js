@@ -760,7 +760,7 @@ var labelProperty={
             });
         });
 
-        UI.onToolSelect("lineage",null,function() {
+        MainController.onToolSelect("lineage",null,function() {
             setTimeout(function(){
             Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
             },2000)
@@ -775,7 +775,7 @@ var labelProperty={
                 }
             }
         });
-        ResponsiveUI.onToolSelect("TagsGeometry", null, function() {
+        MainController.onToolSelect("TagsGeometry", null, function() {
             setTimeout(function() {
                 //   import TagsGeometry from "../../../../plugins/TagsGeometry/public/js/main.js";
                 TagsGeometry.draw(tagsMap);

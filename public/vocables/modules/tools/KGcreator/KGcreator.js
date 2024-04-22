@@ -245,7 +245,7 @@ var KGcreator = (function () {
                             tables: [],
                             type: "databaseSource",
                             sqlType: obj.node.data.sqlType,
-                            currentTable: "",
+                            currentTable: obj.node.data.table,
                         };
 
                         KGcreator.loadDataBaseSource(self.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
@@ -577,41 +577,48 @@ var KGcreator = (function () {
     };
 
     self.loadDataBaseSource = function (slsvSource, dataSource, sqlType) {
-        async.series(
-            [
-                function (callbackSeries) {
-                    KGcreator.listDatabaseTables(dataSource, sqlType, function (err, tables) {
+        fetch(`${Config.apiUrl}/databases/${dataSource}`).then((response) => {
+            response.json().then((data) => {
+                async.series(
+                    [
+                        function (callbackSeries) {
+                            KGcreator.listDatabaseTables(data.id, data.driver, function (err, tables) {
+                                if (err) {
+                                    return callbackSeries();
+                                }
+                                self.currentConfig.currentDataSource.tables = tables;
+                                callbackSeries();
+                            });
+                        },
+
+                        function (callbackSeries) {
+                            self.loadDataSourceMappings(slsvSource, dataSource, function (err, mappings) {
+                                if (err) {
+                                    return callbackSeries();
+                                }
+                                self.currentConfig.currentMappings = mappings;
+                                callbackSeries();
+                            });
+                        },
+
+                        function (callbackSeries) {
+                            self.showTablesTree(self.currentConfig.currentDataSource);
+                            callbackSeries();
+                        },
+
+                        function (callbackSeries) {
+                            KGcreator_mappings.showDataSourceMappings(null);
+                            callbackSeries();
+                        },
+                    ],
+                    function (err) {
                         if (err) {
-                            return callbackSeries();
+                            return alert(err);
                         }
-                        self.currentConfig.currentDataSource.tables = tables;
-                        callbackSeries();
-                    });
-                },
-                function (callbackSeries) {
-                    self.loadDataSourceMappings(slsvSource, dataSource, function (err, mappings) {
-                        if (err) {
-                            return callbackSeries();
-                        }
-                        self.currentConfig.currentMappings = mappings;
-                        callbackSeries();
-                    });
-                },
-                function (callbackSeries) {
-                    self.showTablesTree(self.currentConfig.currentDataSource);
-                    callbackSeries();
-                },
-                function (callbackSeries) {
-                    KGcreator_mappings.showDataSourceMappings(null);
-                    callbackSeries();
-                },
-            ],
-            function (err) {
-                if (err) {
-                    return alert(err);
-                }
-            }
-        );
+                    }
+                );
+            });
+        });
     };
 
     self.loadCsvSource = function (slsvSource, fileName, callback) {
@@ -979,21 +986,16 @@ var KGcreator = (function () {
     self.listDatabaseTables = function (databaseSource, type, callback) {
         const params = new URLSearchParams({
             name: databaseSource,
-            type: type || "sql.sqlserver",
+            type: type,
         });
-
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/kg/model?" + params.toString(),
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
                 self.currentDataSourceModel = data;
-                var tables = [];
                 self.currentSource = self.currentDbName;
                 self.currentdabase = { type: type, dbName: self.currentDbName };
-                for (var key in data) {
-                    tables.push(key);
-                }
                 return callback(null, data);
             },
             error: function (err) {

@@ -8,6 +8,8 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import IndividualValueFilterWidget from "../uiWidgets/individualValuefilterWidget.js";
 import _botEngine from "./_botEngine.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
+import OntologyModels from "../shared/ontologyModels.js";
+import BotEngine from "./_botEngine.js";
 
 var SparqlQuery_bot = (function () {
     var self = {};
@@ -20,30 +22,48 @@ var SparqlQuery_bot = (function () {
         });
     };
 
-    self.workflow_individualsFilter = {
-        listFilterTypes: {
-            _OR: {
-                label: { promptIndividualsLabelFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
-                list: { listIndividualsFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
-                advanced: { promptIndividualsAdvandedFilterFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
-                // }
-            },
-        },
-    };
+    /* self.workflow_individualsFilter = {
 
-    self.workflow_individualsRole = {
-        listIndividualFilterRole: {
-            _OR: {
-                all: {
-                    listWhiteBoardFilterType: {
-                        executeQuery: {},
-                    },
-                },
-                subject: self.workflow_individualsFilter,
-                object: self.workflow_individualsFilter,
-            },
-        },
-    };
+             _OR: {
+                 "property":{
+                     chooseIndividualsPredicate:
+                         { choosePropertyOperatorFn: {promptPropertyValueFn:{}}
+
+
+         }
+     },
+                 "label contains": { promptIndividualsLabelFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
+                 "list labels": { listIndividualsFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
+
+                 // }
+             },
+
+     };
+     self.workflow_individualsFilterXX = {
+         listFilterTypes: {
+             _OR: {
+                 label: { promptIndividualsLabelFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
+                 list: { listIndividualsFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
+                 advanced: { promptIndividualsAdvandedFilterFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
+                 // }
+             },
+         },
+     };
+
+
+     self.workflow_individualsRole = {
+         listIndividualFilterRole: {
+             _OR: {
+                 all: {
+                     listWhiteBoardFilterType: {
+                         executeQuery: {},
+                     },
+                 },
+                 subject: self.workflow_individualsFilter,
+                 object: self.workflow_individualsFilter,
+             },
+         },
+     };*/
 
     self.workflow = {
         _OR: {
@@ -56,7 +76,7 @@ var SparqlQuery_bot = (function () {
                                 listPredicatePathsFn: {
                                     _OR: {
                                         empty: { listWhiteBoardFilterType: { executeQuery: {} } },
-                                        ok: self.workflow_individualsRole,
+                                        ok: { listWhiteBoardFilterType: { executeQuery: {} } }, //self.workflow_individualsRole,
                                     },
                                 },
                             },
@@ -65,6 +85,11 @@ var SparqlQuery_bot = (function () {
                             Individuals: { setIndividualsTypeFilter: { executeQuery: {} } },
                         },
                     },
+                },
+            },
+            Individual: {
+                listActiveSourceVocabsFn: {
+                    listClassesFn: { switchToIndividualsBotFn: {} },
                 },
             },
             "Object Property": {
@@ -102,8 +127,8 @@ var SparqlQuery_bot = (function () {
                     },
                 },
             },
-            "Sample of Classes": { promptClassesSampleSizeFn: { executeQuery: {} } },
-            "Sample of Individuals": { promptIndividualsSampleSizeFn: { executeQuery: {} } },
+            /*  "Sample of Classes": { promptClassesSampleSizeFn: { executeQuery: {} } },
+              "Sample of Individuals": { promptIndividualsSampleSizeFn: { executeQuery: {} } },*/
             "Sample of Predicates": { promptPredicatesSampleSizeFn: { executeQuery: {} } },
         },
     };
@@ -123,10 +148,11 @@ var SparqlQuery_bot = (function () {
         listVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
         },
-        listQueryTypeFn: function () {
-            var choices = ["By Class", "By Object Property", "By Annotation/Datatype property", "Sample of Classes", "Sample of Individuals", "Sample of Predicates"];
-
-            _botEngine.showList(choices, null);
+        listActiveSourceVocabsFn: function () {
+            self.params.currentVocab = self.params.source;
+            self.params.allindividuals = true;
+            self.params.individualsFilterRole = "subject";
+            _botEngine.nextStep();
         },
 
         listClassesFn: function () {
@@ -141,14 +167,6 @@ var SparqlQuery_bot = (function () {
             var property = self.params.currentProperty;
             var fromClass = self.params.currentClass;
             var toClass = self.params.currentClass;
-            /*   if(fromClass=="AnyClass"){
-                   self.params.currentClass=null;
-                   return self.functions.executeQuery();
-               }
-               if(property=="AnyProperty"){
-                   self.params.currentProperty=null;
-                   return self.functions.executeQuery();
-               }*/
 
             self.getSourceInferredModelVisjsData(self.params.source + "_KGmodelGraph.json", function (err, visjsData) {
                 if (err) {
@@ -202,59 +220,35 @@ var SparqlQuery_bot = (function () {
             _botEngine.promptValue("value contains ", "annotationValue");
         },
 
-        listIndividualFilterRole: function () {
-            var subject = "subject";
-            var object = "object";
-            if (self.params.path) {
-                var array = self.params.path.split("|");
-                if (array.length == 3) {
-                    subject = Sparql_common.getLabelFromURI(array[0]);
-                    object = Sparql_common.getLabelFromURI(array[2]);
-                }
-            }
-            var choices = [
-                { id: "all", label: "all individuals" },
-                { id: "subject", label: "filter " + subject },
-                { id: "object", label: "filter " + object },
-            ];
-            _botEngine.showList(choices, "individualsFilterRole");
-            return;
-        },
-        listFilterTypes: function (target) {
-            var choices = [
-                { id: "label", label: "label contains" },
-                { id: "list", label: "choose in list" },
-                { id: "advanced", label: "advanced search" },
-            ];
-            _botEngine.showList(choices, "individualsFilterType");
-        },
+        switchToIndividualsBotFn: function () {
+            OntologyModels.getKGnonObjectProperties(self.params.source, null, function (err, allProps) {
+                var obj = {
+                    label: Sparql_common.getLabelFromURI(self.params.currentClass),
+                    id: self.params.currentClass,
 
-        listIndividualsFn: function () {
-            Sparql_OWL.getDistinctClassLabels(self.params.source, [self.params.currentClass], {}, function (err, result) {
-                if (err) {
-                    return alert(err);
-                }
-                var individuals = [];
-                result.forEach(function (item) {
-                    individuals.push({
-                        id: item.id.value,
-                        label: item.label.value,
-                    });
+                    source: self.params.source,
+                    nonObjectProperties: allProps[self.params.currentClass].properties,
+                };
+                var currentFilterQuery = {
+                    source: self.currentSource,
+                    currentClass: self.params.currentClass,
+                    varName: "x",
+                };
+
+                KGquery_filter_bot.start(obj, currentFilterQuery, function (err, result) {
+                    var individualBotFilter = "?object <" + result.filterParams.property + "> ?x_" + result.filterParams.propertyLabel + ". " + result.filter;
+                    var typeFilter = " ?subject rdf:type <" + self.params.currentClass + ">.";
+
+                    var options = {
+                        filter: individualBotFilter + typeFilter,
+                        limit: self.searchLimit,
+                        getFilteredTriples2: null,
+                        OnlySubjects: false,
+                        withImports: false,
+                    };
+
+                    Lineage_whiteboard.drawPredicatesGraph(Lineage_sources.activeSource, [], null, options);
                 });
-                _botEngine.showList(individuals, "individualsFilterValue");
-            });
-        },
-        promptIndividualsLabelFn: function () {
-            _botEngine.promptValue("label contains ", "individualsFilterValue");
-            /* self.params.individualsFilterValue = prompt("label contains ");
-      BotEngine.writeCompletedHtml(self.params.individualsFilterValue);
-      BotEngine.nextStep();*/
-        },
-        promptIndividualsAdvandedFilterFn: function () {
-            IndividualValueFilterWidget.showDialog(null, self.params.source, self.params.individualsFilterRole, self.params.currentClass, null, function (err, filter) {
-                self.params.advancedFilter = filter;
-                _botEngine.writeCompletedHtml(self.params.advancedFilter);
-                _botEngine.nextStep("advanced");
             });
         },
 
@@ -315,7 +309,9 @@ var SparqlQuery_bot = (function () {
             if (self.params.currentClass && self.params.currentClass != "AnyClass") {
                 options.filter = Sparql_common.setFilter(inverse ? "value" : "subject", self.params.currentClass);
             }
-            if (inverse) options.inverseRestriction = true;
+            if (inverse) {
+                options.inverseRestriction = true;
+            }
             Lineage_whiteboard.drawRestrictions(self.params.source, nodeIds, null, null, options, function (err, result) {
                 if (err) {
                 }
@@ -389,6 +385,10 @@ var SparqlQuery_bot = (function () {
 
             function getIndividualsFilter() {
                 var filter = "";
+
+                if (self.params.individualBotFilter) {
+                    return self.params.individualBotFilter;
+                }
 
                 if (!individualsFilterRole) {
                     return "";

@@ -19,27 +19,37 @@ var IndividualAggregateWidget = (function () {
             loadClassesFn(function (data) {
                 self.groupByClassesMap = {};
                 self.functionVarClassesMap = {};
+                self.allProperties = {};
                 for (var key in data) {
                     var item = data[key];
 
                     var otherproperties = item.data.nonObjectProperties;
+                    var labelObj = { id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label", datatype: "http://www.w3.org/2001/XMLSchema#string" };
+
                     if (otherproperties) {
-                        var groupByTypes = [
-                            "http://www.w3.org/2001/XMLSchema#string",
-                            "http://www.w3.org/2001/XMLSchema#date",
-                            "http://www.w3.org/2001/XMLSchema#datetime",
-                            "http://www.w3.org/2000/01/rdf-schema#Literal",
-                        ];
-                        otherproperties.forEach(function (prop) {
-                            var label = item.label + "_" + prop.label;
-                            var obj = { label: label, item: item, prop: prop };
-                            if (groupByTypes.indexOf(prop.datatype) > -1) {
-                                self.groupByClassesMap[label] = obj;
-                            } else {
-                                self.functionVarClassesMap[label] = obj;
-                            }
-                        });
+                        otherproperties.splice(0, 0, labelObj);
+                    } else {
+                        otherproperties = [labelObj];
                     }
+
+                    var groupByTypes = [
+                        "http://www.w3.org/2001/XMLSchema#string",
+                        "http://www.w3.org/2001/XMLSchema#date",
+                        "http://www.w3.org/2001/XMLSchema#datetime",
+                        "http://www.w3.org/2000/01/rdf-schema#Literal",
+                    ];
+
+                    otherproperties.forEach(function (prop) {
+                        var label = (item.alias || item.label) + "_" + prop.label;
+
+                        var obj = { label: label, item: item, prop: prop, classLabel: item.data.label };
+                        self.allProperties[label] = obj;
+                        if (groupByTypes.indexOf(prop.datatype) > -1) {
+                            self.groupByClassesMap[label] = obj;
+                        } else {
+                            self.functionVarClassesMap[label] = obj;
+                        }
+                    });
 
                     /*  if (item.data.datatype) {
                           self.functionVarClasses.push(item);
@@ -85,7 +95,8 @@ var IndividualAggregateWidget = (function () {
         whereStr += getWhereClause(groupByObj);
         selectStr += " ?" + groupByObj.label + "   ";
         groupByStr += " ?" + groupByObj.label + "   ";
-
+        var groupByPredicates = {};
+        groupByPredicates[groupByObj.label] = self.allProperties[groupByObj.label];
         groupFunctions.forEach(function (fn) {
             var fnVar = Sparql_common.formatStringForTriple(fnVarObj.label, true);
 
@@ -96,9 +107,10 @@ var IndividualAggregateWidget = (function () {
             } else {
                 selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
             }
+            groupByPredicates[fnVar] = self.allProperties[fnVar];
         });
 
-        var aggregateClauses = { select: selectStr, groupBy: groupByStr, where: whereStr };
+        var aggregateClauses = { select: selectStr, groupBy: groupByStr, where: whereStr, groupByPredicates: groupByPredicates };
 
         $("#" + self.divId).dialog("close");
         if (self.validateFn) {

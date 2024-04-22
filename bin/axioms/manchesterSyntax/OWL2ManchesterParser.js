@@ -1,6 +1,11 @@
-const antlr4 = require('antlr4')
-//import antlr4 from 'antlr4';
+// Generated from parser/OWL2Manchester.g4 by ANTLR 4.13.1
+// jshint ignore: start
+// import antlr4 from 'antlr4';
+// import OWL2ManchesterListener from './OWL2ManchesterListener.js';
+
+const antlr4 = require('antlr4');
 const OWL2ManchesterListener = require('./OWL2ManchesterListener.js');
+
 const serializedATN = [4,1,17,62,2,0,7,0,2,1,7,1,1,0,1,0,1,0,1,0,1,0,1,0,
 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,3,0,
 28,8,0,1,0,1,0,1,0,1,0,3,0,34,8,0,1,0,1,0,1,0,1,0,3,0,40,8,0,3,0,42,8,0,
@@ -29,7 +34,7 @@ const decisionsToDFA = atn.decisionToState.map( (ds, index) => new antlr4.DFA(ds
 
 const sharedContextCache = new antlr4.PredictionContextCache();
 
- class OWL2ManchesterParser extends antlr4.Parser {
+class OWL2ManchesterParser extends antlr4.Parser {
 
     static grammarFileName = "OWL2Manchester.g4";
     static literalNames = [ null, null, null, "'and'", "'or'", "'not'", 
@@ -199,7 +204,7 @@ const sharedContextCache = new antlr4.PredictionContextCache();
 	        this.state = 51;
 	        this._errHandler.sync(this);
 	        var _alt = this._interp.adaptivePredict(this._input,5,this._ctx)
-	        while(_alt!=2 && _alt!=antlr4.atn.ATN.INVALID_ALT_NUMBER) {
+	        while(_alt!=2 && _alt!=antlr4.ATN.INVALID_ALT_NUMBER) {
 	            if(_alt===1) {
 	                if(this._parseListeners!==null) {
 	                    this.triggerExitRuleEvent();
@@ -466,3 +471,6 @@ class AxiomContext extends antlr4.ParserRuleContext {
 
 OWL2ManchesterParser.ClassExpressionContext = ClassExpressionContext; 
 OWL2ManchesterParser.AxiomContext = AxiomContext; 
+
+
+module.exports = OWL2ManchesterParser;

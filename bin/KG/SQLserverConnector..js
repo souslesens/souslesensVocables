@@ -185,6 +185,7 @@ var SQLserverConnector = {
         //   query +=" where  TABLE_SCHEMA not in ('dbo') order by TABLE_SCHEMA,TABLE_NAME "
         query += "  order by TABLE_SCHEMA,TABLE_NAME ";
 
+
         sql.connect(connection, (err) => {
             if (err) return console.log(err); // ... error checks
 

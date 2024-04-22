@@ -96,9 +96,17 @@ const ProfilesTable = () => {
                     );
                     return { ...dataWithoutCarriageReturns };
                 });
-                const sortedProfiles: Profile[] = gotProfiles.slice().sort((a: Profile, b: Profile) => {
-                    const left: string = a[orderBy] as string;
-                    const right: string = b[orderBy] as string;
+                const sortedProfiles: Profile[] = gotProfiles.slice().sort((a: Profile, b: Profile) => {let left: string = "";
+                    let right: string = "";
+
+                    if (a[orderBy] instanceof Array) {
+                        left = a[orderBy].toString();
+                        right = b[orderBy].toString();
+                    } else {
+                        left = a[orderBy] as string;
+                        right = b[orderBy] as string;
+                    }
+
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
                 return (
@@ -118,10 +126,14 @@ const ProfilesTable = () => {
                                     <TableRow>
                                         <TableCell style={{ fontWeight: "bold", width: "100%" }}>
                                             <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
-                                                    Name
+                                                Name
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>Allowed Sources</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                            <TableSortLabel active={orderBy === "allowedSourceSchemas"} direction={order} onClick={() => handleRequestSort("allowedSourceSchemas")}>
+                                                Allowed Sources
+                                            </TableSortLabel>
+                                        </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold" }}>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -577,7 +589,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                             </Select>
                         </FormControl>
                         <TextField
-                            defaultValue={model.config.data.theme.defaultTheme}
+                            defaultValue={profileModel.profileForm.theme ?? model.config.data.theme.defaultTheme}
                             fullWidth
                             id="theme"
                             label="Theme"

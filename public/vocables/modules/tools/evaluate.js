@@ -70,11 +70,6 @@ var Evaluate = (function () {
             openAll: true,
         };
         SourceSelectorWidget.initWidget(null, "annotate_resourcesTreeDiv", false, null, null, options);
-
-        /* MainController.UI.showSources("annotate_resourcesTreeDiv", true, null, null, options, function () {
-                $("#annotate_resourcesTreeDiv").jstree(true).open_all();
-            });
-        }, 200);*/
     };
 
     self.execAnnotate = function () {

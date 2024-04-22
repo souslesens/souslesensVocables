@@ -26,7 +26,7 @@ module.exports = function() {
         if (req.query.options) {
             options = JSON.parse(req.query.options);
         }
-        if(false) {
+        if(true) {
             ManchesterSyntaxEngine.getSuggestion(req.query.source, req.query.lastToken, options, callback);
             return;
         }
@@ -45,7 +45,7 @@ module.exports = function() {
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Return a suggestion to builde an axiom",
+        summary: "Return a suggestion to build an axiom",
         description: "Return a suggestion to build an axiom",
         operationId: "Return a suggestion to build an axiom",
         parameters: [
@@ -65,7 +65,7 @@ module.exports = function() {
             },
             {
                 name: "options",
-                description: "database name",
+                description: "options",
                 in: "query",
                 type: "string",
                 required: false

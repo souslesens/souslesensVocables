@@ -369,6 +369,14 @@ var Export = (function () {
     };
 
     self.showDataTable = function (div, cols, dataSet, buttons, options, callback) {
+        if (dataSet.length == 0) {
+            alert("No data");
+            return;
+        }
+        if (cols.length == 0) {
+            alert("No Columns");
+            return;
+        }
         if (!options) {
             options = {};
         }
@@ -377,64 +385,62 @@ var Export = (function () {
             $("#dataTableDiv").html("");
         }
         if (!div) {
-            $("#mainDialogDiv").dialog("open");
-            $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
-            //$("#mainDialogDiv").parent().css("left", "10%");
-            div = "dataTableDiv";
-        } else {
-            try {
-                $("#" + div).dialog("open");
-            } catch (e) {}
-
-            $("#" + div).html("<table id='dataTableDivExport'></table>");
+            div = "mainDialogDiv";
         }
+        try {
+            $("#" + div).dialog("open");
+        } catch (e) {}
 
-        if (!buttons) {
-            buttons = "Bfrtip";
-        }
-        setTimeout(function () {
-            if (!buttons) {
-                buttons = "Bfrtip";
-            }
-            var params = {
-                data: dataSet,
-                columns: cols,
-                fixedColumns: true,
-                pageLength: 200,
-                dom: buttons,
-                buttons: [
-                    {
-                        extend: "csvHtml5",
-                        text: "Export CSV",
-                        fieldBoundary: "",
-                        fieldSeparator: ";",
-                    },
-                    "copy",
-                ],
+        $("#" + div)
+            .parent()
+            .show("fast", function () {
+                $("#" + div).html("<table id='dataTableDivExport'></table>");
+                if (!buttons) {
+                    buttons = "Bfrtip";
+                }
 
-                paging: false,
-                /*  columnDefs: [
+                if (!buttons) {
+                    buttons = "Bfrtip";
+                }
+                var params = {
+                    data: dataSet,
+                    columns: cols,
+                    fixedColumns: true,
+                    pageLength: 200,
+                    dom: buttons,
+                    buttons: [
+                        {
+                            extend: "csvHtml5",
+                            text: "Export CSV",
+                            fieldBoundary: "",
+                            fieldSeparator: ";",
+                        },
+                        "copy",
+                    ],
+
+                    paging: false,
+                    /*  columnDefs: [
             { width: 400, targets: 0 }
         ],
         fixedColumns: true*/
 
-                //  order: []
-            };
+                    //  order: []
+                };
 
-            if (false && options && options.fixedColumns) {
-                params.fixedColumns = true;
-            }
-            if (false && options && options.columnDefs) {
-                params.columnDefs = options.columnDefs;
-            }
-            if (options && options.paging) {
-                params.paging = true;
-            }
-            self.dataTable = $("#dataTableDivExport").DataTable(params);
-            if (callback) {
-                return callback(null, self.dataTable);
-            }
-        }, 200);
+                if (false && options && options.fixedColumns) {
+                    params.fixedColumns = true;
+                }
+                if (false && options && options.columnDefs) {
+                    params.columnDefs = options.columnDefs;
+                }
+                if (options && options.paging) {
+                    params.paging = true;
+                }
+                self.dataTable = $("#dataTableDivExport").DataTable(params);
+                if (callback) {
+                    return callback(null, self.dataTable);
+                }
+            });
     };
 
     return self;

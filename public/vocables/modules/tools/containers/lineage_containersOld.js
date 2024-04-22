@@ -1,5 +1,5 @@
-import Lineage_whiteboard from "./lineage_whiteboard.js";
-import Lineage_styles from "./lineage_styles.js";
+import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
+import Lineage_styles from "../lineage/lineage_styles.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import common from "../../shared/common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
@@ -815,7 +815,7 @@ var query =
                             font: { multi: true, size: 10 },
 
                             //  dashes: true,
-                            color: "#8528c9",
+                            color: self.containerEdgeColor,
                         });
                     }
                 });
@@ -1063,7 +1063,7 @@ var query =
 
                     var shape = "dot";
                     var color2 = common.colorToRgba(color, opacity * 0.7);
-                    var memberEdgeColor = common.colorToRgba("#8528c9", opacity * 0.7);
+                    var memberEdgeColor = common.colorToRgba(self.containerEdgeColor, opacity * 0.7);
                     var size = Lineage_whiteboard.defaultShapeSize;
 
                     if (!existingNodes[containerData.id]) {
@@ -1421,7 +1421,7 @@ var query =
                         font: { multi: true, size: 10 },
 
                         //  dashes: true,
-                        color: "#8528c9",
+                        color: self.containerEdgeColor,
                     });
                 }
             });

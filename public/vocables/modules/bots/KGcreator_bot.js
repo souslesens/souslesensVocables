@@ -54,7 +54,6 @@ var KGcreator_bot = (function () {
                     workflow = self.workflowColumnmMappingOther;
                 } else {
                     workflow = self.workflowColumnMappingType;
-
                 }
             }
         } else {
@@ -109,23 +108,23 @@ var KGcreator_bot = (function () {
                                     KO: {
                                         promptTargetColumnVocabularyFn: {
                                             predicateObjectColumnClassFn: {
-                                                listFilteredPropertiesFn: {
-                                                    _OR: {
+                                                listFilteredPropertiesFn: { addMappingToModelFn: {} },
+                                                /* {  _OR: {
                                                         "Apply property": self.workflowCreateObjectPredicate,
-                                                        "Create subProperty": { createSubPropertyFn: self.workflowCreateObjectPredicate },
-                                                    },
-                                                },
+                                                        "Create subProperty": { createSubPropertyFn: self.workflowCreateObjectPredicate }
+                                                    }
+                                                }*/
                                             },
                                         },
                                     },
                                     //  "OK": { "listPredicateVocabsFn": { "listVocabPropertiesFn": { "addMappingToModel": {} } } }
                                     OK: {
-                                        listFilteredPropertiesFn: {
-                                            _OR: {
+                                        listFilteredPropertiesFn: { addMappingToModelFn: {} },
+                                        /*   _OR:self.workflowCreateObjectPredicate/* {
                                                 "Apply property": self.workflowCreateObjectPredicate,
-                                                "Create subProperty": { createSubPropertyFn: self.workflowCreateObjectPredicate },
-                                            },
-                                        },
+                                                "Create subProperty": { createSubPropertyFn: self.workflowCreateObjectPredicate }
+                                            }
+                                        }*/
                                     },
                                 },
                             },
@@ -152,7 +151,7 @@ var KGcreator_bot = (function () {
             },
             "save mapping": { saveFn: {} },
             "new Mapping": {},
-        }
+        },
     };
     self.workflowRdfType = {
         _OR: {
@@ -168,7 +167,7 @@ var KGcreator_bot = (function () {
                 blankNode: { addMappingToModelFn: self.workflowRdfType },
                 namedIndividual: { addMappingToModelFn: self.workflowRdfType },
                 class: { listSuperClassVocabFn: { listSuperClassFn: { listClassLabelColumnFn: { addMappingToModelFn: {} } } } },
-                other:self.workflowColumnmMappingOther
+                other: self.workflowColumnmMappingOther,
             },
         },
     };
@@ -222,22 +221,19 @@ var KGcreator_bot = (function () {
             });
         },
 
-
         setUriTypeFn: function () {
-            var choices = ["namedIndividual", "blankNode", "class","other"];
+            var choices = ["namedIndividual", "blankNode", "class", "other"];
 
             _botEngine.showList(choices, "uriType");
         },
 
-
-        setColumnClassFn:function(){
+        setColumnClassFn: function () {
             var predicateSubColumnClass = self.getColumnClass(self.params.tripleModels, self.params.column);
-            if(predicateSubColumnClass){
-               _botEngine.nextStep()
-            }else{
-                _botEngine.nextStep()
+            if (predicateSubColumnClass) {
+                _botEngine.nextStep();
+            } else {
+                _botEngine.nextStep();
             }
-
         },
 
         listClassVocabsFn: function () {
@@ -332,7 +328,9 @@ var KGcreator_bot = (function () {
         createSubPropertyFn: function () {
             _botEngine.promptValue("enter subProperty label", "subPropLabel", null, {}, function (subPropLabel) {
                 Lineage_createRelation.createSubProperty(self.params.source, self.params.propertyId, subPropLabel, function (err, subPropertyObj) {
-                    if (err) return _botEngine.abort(err.responseText);
+                    if (err) {
+                        return _botEngine.abort(err.responseText);
+                    }
 
                     self.params.propertyId = subPropertyObj.uri;
                     _botEngine.nextStep();
@@ -345,6 +343,7 @@ var KGcreator_bot = (function () {
             /*  if (self.params.predicateObjectColumnClass.startsWith("@")) {
                 BotEngine.abort("cannot find predicates for a dynamic class object");
             }*/
+            if (!columnClasses || columnClasses.lengh == 0) return _botEngine.abort("cannot find column type");
 
             var source = self.params.predicateObjectColumnVocabulary || self.params.source; // both cases existing or not predicate object
             OntologyModels.getAllowedPropertiesBetweenNodes(source, columnClasses, self.params.predicateObjectColumnClass, function (err, result) {
@@ -599,7 +598,11 @@ var KGcreator_bot = (function () {
                 };
                 var range = Config.ontologiesVocabularyModels[nonObjectPropertyVocab].nonObjectProperties[nonObjectPropertyId].range;
                 if (range) {
-                    triple.dataType = range;
+                    if (range.indexOf("Resource") > -1) {
+                        triple.isString = true;
+                    } else {
+                        triple.dataType = range;
+                    }
                 } else {
                     triple.isString = true;
                 }

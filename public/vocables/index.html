@@ -65,6 +65,9 @@
 
         <script type="module" src="modules/tools/lineage/lineage_upperOntologies.js"></script>
 
+        <script type="module" src="modules/tools/containers/Containers_UI.js"></script>
+        <script type="module" src="modules/tools/containers/lineage_containers_treeWidget.js"></script>
+        <script type="module" src="modules/tools/containers/containers_query.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_containers.js"></script>
 
         <script type="module" src="modules/tools/lineage/lineage_selection.js"></script>
@@ -285,19 +288,7 @@
                         h = $(document).height() - 30;
 
                         h = Math.min(h, 1000);
-                        /*
-                    $("#graphDiv").width(w);
-                    MainController.UI.initialGraphDivWitdh = w;
-                    $("#graphDiv").height(h - 50);
-                    */
-                        /*
-                        $("#accordion").accordion({
-                            heightStyle: "fill",
-                        });
-                        $("#accordion").accordion("option", { active: 0 });
-                        $("#accordion").on("accordionbeforeactivate", function (event, ui) {});
-                        $("#accordion").on("accordionactivate", function (event, ui) {});
-                        */
+
                         $("#mainDialogDiv").dialog({
                             autoOpen: false,
                             //height: 800,
@@ -368,6 +359,10 @@
                                 $("#botPanel").parent().css("top", "50%");
                                 $("#botPanel").parent().css("left", "50%");
                             },
+                        });
+                        $("#widgetGenericDialogDiv").dialog({
+                            autoOpen: false,
+                            modal: false,
                         });
 
                         $(document).on("click", "a", function () {
@@ -510,6 +505,8 @@
 
         <div id="mainDialogDiv"></div>
         <div id="smallDialogDiv"></div>
+        <div id="widgetGenericDialogDiv"></div>
+
         <div id="LineagePopup"></div>
         <div id="popupMenuWidgetDiv" onclick="PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
         <div id="botPanel">

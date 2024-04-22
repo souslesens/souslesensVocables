@@ -274,7 +274,7 @@
     align-items: center;
 }
 
-[role="dialog"] {
+[role="dialog"]:not(.MuiPaper-root) {
     width: unset !important;
     height: unset !important;
     max-height: 99vh;

@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.64.0](https://github.com/souslesens/souslesensVocables/compare/1.63.1...1.64.0) (2024-04-18)
+
+### [1.63.1](https://github.com/souslesens/souslesensVocables/compare/1.63.0...1.63.1) (2024-04-17)
+
+
+### Bug Fixes
+
+* add missing databases.json.default to config_templates ([bab4c66](https://github.com/souslesens/souslesensVocables/commit/bab4c66f61eecfa2c30811fc96e07bb9f6670d27))
+* **ConfigEditor:** fix default theme being selected instead of current theme in profile form ([a95c939](https://github.com/souslesens/souslesensVocables/commit/a95c9392bbea108b06d100109bfaf744fe55f0ff))
+* **migration:** use fast-glob instead of glob ([10b25d6](https://github.com/souslesens/souslesensVocables/commit/10b25d643f0ac2765107c83033dbb63a41fe5e4a))
+
+## [1.63.0](https://github.com/souslesens/souslesensVocables/compare/1.62.1...1.63.0) (2024-04-16)
+
+### Features
+
+-   add the api routes and models for databases configuration ([acc24aa](https://github.com/souslesens/souslesensVocables/commit/acc24aa41db27ac70cc7acd32859ca81a6f1b3e9))
+-   add the databases.json file to the config module ([412ade9](https://github.com/souslesens/souslesensVocables/commit/412ade9eec52c856fbce013f8eb2289cda3a4fd1))
+-   **api:** add user databases route ([aee6943](https://github.com/souslesens/souslesensVocables/commit/aee694366089a268b337a9d6f99f9d28e62c012c))
+-   **api:** implements database management with kgcreator ([6d1965d](https://github.com/souslesens/souslesensVocables/commit/6d1965d08dea6623d51fe57a8d94743d8c3309d7))
+-   **api:** move database api to admin section and resrict usage to admin ([4a483a5](https://github.com/souslesens/souslesensVocables/commit/4a483a5d80d13324807cdca2e31c769d2b17131a))
+-   **configEditor:** cleanup the sourcesTable component and show the source group ([e0d4104](https://github.com/souslesens/souslesensVocables/commit/e0d41047f3bef25ade894a0fbef4acb3ef7a1790))
+-   **configEditor:** use the same interface for all the tabs ([2eba224](https://github.com/souslesens/souslesensVocables/commit/2eba2248a8457aaae709a5ef174fe6ed255cf5ad))
+-   **database:** allow to try database connection from the configEditor ([06a9e5c](https://github.com/souslesens/souslesensVocables/commit/06a9e5cc1dc607c01a94fb6c756a53381ce79f40))
+-   implements add and update database actions ([09ad09d](https://github.com/souslesens/souslesensVocables/commit/09ad09d4269f7785f7e39d66fc2476de9a86c314))
+-   implements the databases tab in the configEditor ([09660e1](https://github.com/souslesens/souslesensVocables/commit/09660e1cf2c143e10e9bf238e538c924cf2a7814))
+-   **kgcreator:** implement the new database system ([b2310bc](https://github.com/souslesens/souslesensVocables/commit/b2310bcb651cd529818352be6555f14a2aa1ac23))
+-   **kg:** implements database management for KGBuilder ([cd2f329](https://github.com/souslesens/souslesensVocables/commit/cd2f3299d2bf7005f61a44134edc73561415f3a8))
+-   **KG:** start to works on knex integration for the KGCreator tool ([196a0a5](https://github.com/souslesens/souslesensVocables/commit/196a0a50de551205041e84ada31cb916405fb2a4))
+-   **mainapp:** add the PasswordField component to the configEditor ([c2fc82a](https://github.com/souslesens/souslesensVocables/commit/c2fc82a8e30d8d4a062f2b7cc50d885638140c24))
+-   **migration:** migrate all config files ([e55eae8](https://github.com/souslesens/souslesensVocables/commit/e55eae895b24316a612ad5488bd1b77331e44b3f))
+-   **migrations:** migrate databases ([038f780](https://github.com/souslesens/souslesensVocables/commit/038f78086682db41423e6449d6cb85525ba8395b))
+-   **migrations:** migrate mappings files ([742f05d](https://github.com/souslesens/souslesensVocables/commit/742f05de42ae9f68a8d2192fb9bc419cf6031ec8))
+-   **migrations:** migrate SQLServer from mainConfig.json to databases.json ([e291c95](https://github.com/souslesens/souslesensVocables/commit/e291c956e0300845a52e2dac595b5a12298a7b98))
+-   **model/databases:** add query method and use it in api/v1/admin/databases/test ([fd93769](https://github.com/souslesens/souslesensVocables/commit/fd93769cf32cfc36d30ce016333c58c58d5ec8f9))
+-   **model:** add an API route to retrieve a specific database ([63628f8](https://github.com/souslesens/souslesensVocables/commit/63628f882ce31ca7a3c0e0192e7090bd61705671))
+
+### Bug Fixes
+
+-   **api:** remove the useless \_type attribute from Database schema ([f44cfcf](https://github.com/souslesens/souslesensVocables/commit/f44cfcff245db936658793f28bf9e6b52105093c))
+-   **UserManagement:** import after timeout ([00b0261](https://github.com/souslesens/souslesensVocables/commit/00b02610b59859247dd87c65f321c5ea5b4e5d4e))
+
 ### [1.62.1](https://github.com/souslesens/souslesensVocables/compare/1.60.1...1.62.1) (2024-04-03)
 
 ## Fixed

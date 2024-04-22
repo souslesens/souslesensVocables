@@ -133,24 +133,14 @@ var KGquery_graph = (function () {
                         return callbackSeries();
                     }
                     MainController.UI.message("loading datatypeProperties");
-                    OntologyModels.getInferredAnnotationProperties(source, {}, function (err, result) {
+                    OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        var annotationPropertiesmap = {};
-                        result.forEach(function (item) {
-                            if (!annotationPropertiesmap[item.class.value]) {
-                                annotationPropertiesmap[item.class.value] = { label: item.classLabel.value, id: item.class.value, properties: [] };
-                            }
-                            annotationPropertiesmap[item.class.value].properties.push({
-                                label: item.propLabel.value,
-                                id: item.prop.value,
-                                datatype: item.datatype ? item.datatype.value : "string",
-                            });
-                        });
+
                         visjsData.nodes.forEach(function (node) {
-                            if (annotationPropertiesmap[node.data.id]) {
-                                node.data.nonObjectProperties = annotationPropertiesmap[node.data.id].properties;
+                            if (nonObjectPropertiesmap[node.data.id]) {
+                                node.data.nonObjectProperties = nonObjectPropertiesmap[node.data.id].properties;
                             }
                         });
                         callbackSeries();
@@ -169,7 +159,7 @@ var KGquery_graph = (function () {
 
                 //   https://fonts.google.com/icons
 
-                var colors = ["#fdac00", "#aa1151", "#ED008C", "#00B5EC", "#af7ede", "#AFD46B"];
+                var colors = ["#fdac00", "#aa1151", "#ED008C", "#00B5EC", "#af7ede", "#72914BFF", "#72914b", "#000efd"];
 
                 var icons = {
                     "http://data.total/resource/tsf/dalia-lifex1/manning": { icon: "persons.png", color: colors[4] },
@@ -177,6 +167,9 @@ var KGquery_graph = (function () {
                     "http://data.total/resource/tsf/dalia-lifex1/Task": { icon: "task.png", color: colors[0] },
                     "http://data.total/resource/tsf/dalia-lifex1/JobCardExecution": { icon: "jobCard.png", color: colors[1] },
                     "http://data.total/resource/tsf/dalia-lifex1/EquipmentItem": { icon: "machine.png", color: colors[3] },
+                    "http://data.total/resource/tsf/dalia-lifex1/Discipline": { icon: "school.png", color: colors[7] },
+                    "http://data.total/resource/tsf/dalia-lifex1/WBS": { icon: "contract.png", color: colors[6] },
+                    "http://data.total/resource/tsf/dalia-lifex1/WBSactivity": { icon: "engineering.png", color: colors[6] },
                 };
 
                 var dir = "/vocables/KGqueryIcons/";
@@ -267,6 +260,28 @@ var KGquery_graph = (function () {
                                 callbackSeries();
                             });
                         },
+                        function (callbackSeries) {
+                            OntologyModels.getContainerBreakdownClasses(source, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+                                result.forEach(function (item) {
+                                    var edegId = common.getRandomHexaId(5);
+                                    visjsData.edges.push({
+                                        id: edegId,
+                                        from: item.sClass.value,
+                                        to: item.oClass.value,
+                                        arrows: "to",
+                                        label: "->",
+                                        font: { ital: true },
+                                        dashes: [5, 5],
+                                        selfReference: { renderBehindTheNode: true, size: 50 },
+                                        data: { propertyId: "rdfs:member" },
+                                    });
+                                });
+                                return callbackSeries();
+                            });
+                        },
                     ],
                     function (err) {
                         if (err) {
@@ -313,7 +328,7 @@ var KGquery_graph = (function () {
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
 
-                        visjsData.edges.push({
+                        var edge = {
                             id: edgeId,
                             from: item.sClass.value,
                             to: item.oClass.value,
@@ -334,16 +349,15 @@ var KGquery_graph = (function () {
                             },
                             // dashes: true,
                             color: Lineage_whiteboard.defaultPredicateEdgeColor,
-                        });
+                        };
+                        if (item.sClass.value == item.oClass.value) {
+                            (edge.dashes = [5, 5]), (edge.selfReference = { renderBehindTheNode: true, size: 50 });
+                        }
+                        visjsData.edges.push(edge);
                     }
                 });
                 MainController.UI.message("", true);
                 return callback(null, visjsData);
-
-                /*   self.getInterGraphModel(source, visjsData, function(err, result) {
-
- return callback(null, result);
-});*/
             }
         );
     };

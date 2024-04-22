@@ -102,7 +102,7 @@ var httpProxy = {
                 return callback(error);
             }
             else if (response.statusCode != 200){
-                return callback(response.statusMessage);
+                return callback(body || ""+" "+response.statusMessage);
             }
 
             else if (headers && headers["Accept"] && headers["Accept"].indexOf("json") < 0) {

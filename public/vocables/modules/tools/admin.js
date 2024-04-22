@@ -16,7 +16,6 @@ var Admin = (function () {
 
     self.onLoaded = function () {
         $("#lateralPanelDiv").load("snippets/admin.html", function () {
-            // MainController.UI.showSources("sourcesTreeDiv", true, null, null, {});
             var options = {
                 withCheckboxes: true,
             };

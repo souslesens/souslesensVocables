@@ -78,9 +78,21 @@ export const LogsTable = () => {
                                                 at
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>User</TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Tool</TableCell>
-                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>Source</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "user"} direction={order} onClick={() => handleRequestSort("user")}>
+                                                User
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "tool"} direction={order} onClick={() => handleRequestSort("tool")}>
+                                                Tool
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                            <TableSortLabel active={orderBy === "source"} direction={order} onClick={() => handleRequestSort("source")}>
+                                                Source
+                                            </TableSortLabel>
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody sx={{ width: "100%", overflow: "visible" }}>

@@ -5,7 +5,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_relations from "./lineage_relations.js";
 import LegendWidget from "../../uiWidgets/legendWidget.js";
-import Lineage_containers from "./lineage_containers.js";
+import Containers_UI from "../containers/Containers_UI.js";
 
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
@@ -141,9 +141,9 @@ var Lineage_decoration = (function () {
                                             if (type.indexOf("Individual") > -1) {
                                                 newNode.shape = "triangle";
                                             } else if (type.indexOf("Bag") > -1) {
-                                                newNode.shape = Lineage_containers.containerStyle.shape;
+                                                newNode.shape = Containers_UI.containerStyle.shape;
 
-                                                newNode.font = { color: Lineage_containers.containerStyle.color };
+                                                newNode.font = { color: Containers_UI.containerStyle.color };
                                             } else {
                                             }
                                         }
@@ -377,8 +377,8 @@ var Lineage_decoration = (function () {
                             obj.shape = "triangle";
                         }
                         if (nodeOwlTypesMap[nodeId] && nodeOwlTypesMap[nodeId].indexOf("Bag") > -1) {
-                            obj.shape = Lineage_containers.containerStyle.shape;
-                            obj.color = Lineage_containers.containerStyle.color;
+                            obj.shape = Containers_UI.containerStyle.shape;
+                            obj.color = Containers_UI.containerStyle.color;
                             obj.font = { color: color };
                         }
                         if (nodeIds.indexOf(nodeId) > -1) {
@@ -414,9 +414,7 @@ var Lineage_decoration = (function () {
                     callbackSeries();
                 },
 
-                //change vijsNodes Color
                 function (callbackSeries) {
-                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     callbackSeries();
                 },
 
@@ -426,7 +424,12 @@ var Lineage_decoration = (function () {
                     callbackSeries();
                 },
             ],
-            function (err) {}
+            function (err) {
+                //change vijsNodes Color
+                setTimeout(function () {
+                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
+                }, 500);
+            }
         );
     };
 

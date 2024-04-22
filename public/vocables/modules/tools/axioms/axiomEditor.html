@@ -27,14 +27,16 @@
     .axiom_keyWord {
         color: gray;
     }
+
     .axiom_Class {
         color: green;
     }
+
     .axiom_Property {
         color: blue;
     }
 </style>
-<div style="display: flex; flex-direction: column; width: 800px; height: 300px">
+<div style="display: flex; flex-direction: column; width: 800px; height: 500px">
     <div id="axiomsEditor_textDiv">
         <input id="axiomsEditor_input" autocomplete="off" onkeyup="AxiomEditor.onInputChar($(this).val())" />
     </div>
@@ -43,4 +45,19 @@
     </div>
 
     <divid id="axiomsEditor_messageDiv"></divid>
+    <div>
+        Frame
+        <select id="axiomEditor_frameSelect">
+            <option>subClassOf</option>
+            <option>equivalentClass</option>
+            <option>disjointWith</option>
+            <option>disjointUnionWith</option>
+        </select>
+        <button onclick="AxiomEditor.clear()">clear</button>
+        <button onclick="AxiomEditor.checkSyntax()">checkSyntax</button>
+        <button onclick="AxiomEditor.saveAxiom()">saveAxiom</button>
+        <button onclick="AxiomEditor.generateTriples()">generateTriples</button>
+
+        <div id="axiomEditor_messageDiv>"></div>
+    </div>
 </div>

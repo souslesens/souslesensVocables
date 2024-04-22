@@ -136,6 +136,7 @@ var MainController = (function () {
         if (!authentication.currentUser) {
             return alert(" no user identified");
         }
+        Config.clientCache = {};
         var groups = authentication.currentUser.groupes;
 
         MainController.loadProfiles(function (_err, _result) {
@@ -455,7 +456,6 @@ var MainController = (function () {
                 };
                 SourceSelectorWidget.initWidget(null, "sourcesTreeDiv", false, null, null, options);
 
-                // MainController.UI.showSources("sourcesTreeDiv", toolObj.multiSources);
                 if (Config.userTools[self.currentTool].multiSources) {
                     self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources");
                     if (controller.onSourceSelect) {
@@ -506,6 +506,9 @@ var MainController = (function () {
             $("#messageDiv").html(message);
             if (stopWaitImg) {
                 $("#waitImg").css("display", "none");
+            }
+            if (startWaitImg) {
+                $("#waitImg").css("display", "block");
             }
         },
         /*
@@ -614,12 +617,10 @@ P
                     }
                     UI.onToolSelect(tool);
 
-                if (window.history.pushState && url.indexOf("localhost")<0) {
-                    var url=url.substring(0,url.indexOf("?"))
-                    window.history.pushState({  }, "SLS",url);
+                if (window.history.pushState && url.indexOf("localhost") < 0) {
+                    var url = url.substring(0, url.indexOf("?"));
+                    window.history.pushState({}, "SLS", url);
                 }
-
-
             }
         } else {
             callback();

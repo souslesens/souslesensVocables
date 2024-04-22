@@ -5,6 +5,7 @@ const AxiomEditor = (function () {
 
     self.init = function (divId) {
         $("#smallDialogDiv").dialog("open");
+        $("#smallDialogDiv").dialog("option", "title", "Axiom Editor");
         $("#smallDialogDiv").load("modules/tools/axioms/axiomEditor.html", function (x, y) {
             $("#axiomsEditor_input").focus();
         });
@@ -12,7 +13,6 @@ const AxiomEditor = (function () {
 
     self.onInputChar = function (text) {
         var text2 = text.toLowerCase();
-
 
         //class
         if (text2.toLowerCase().startsWith("_")) {
@@ -29,7 +29,6 @@ const AxiomEditor = (function () {
             return;
         }
 
-
         self.getSuggestions(text, function (err, suggestions) {
             if (err) {
                 return alert(err.responseText);
@@ -39,38 +38,6 @@ const AxiomEditor = (function () {
                 alert(err);
             }
         });
-
-        return;
-        if (text.length > 0) {
-            var tokens = self.autoComplete(text);
-            var token = null;
-            if (tokens.length == 1) {
-                token = tokens[0];
-            } else {
-                return;
-            }
-
-            self.addSuggestion(token);
-            if (token.id == "Class") {
-                self.onSelectSuggestion("ClassVocab");
-                return;
-            }
-            if (token.id == "ObjectProperty") {
-                self.onSelectSuggestion("ObjectPropertyVocab");
-                return;
-            }
-
-            self.getSuggestions(token.id, function (err, result) {
-                if (err) {
-                    return alert(err.responseText);
-                }
-                var suggestions = result.suggestions;
-                common.fillSelectOptions("axiomsEditor_suggestionsSelect", suggestions);
-                if (err) {
-                    alert(err);
-                }
-            });
-        }
     };
 
     self.addSuggestion = function (suggestion, cssClass) {
@@ -95,6 +62,7 @@ const AxiomEditor = (function () {
 
     self.onSelectSuggestion = function () {
         var suggestionText = $("#axiomsEditor_suggestionsSelect option:selected").text();
+        suggestionText = suggestionText.replace(/ /g, "_");
         var suggestionId = $("#axiomsEditor_suggestionsSelect").val();
         var suggestionObj = { id: suggestionId, label: suggestionText };
 
@@ -102,47 +70,35 @@ const AxiomEditor = (function () {
             CommonBotFunctions.listSourceAllClasses(Lineage_sources.activeSource, null, false, [], function (err, choices) {
                 self.currentObject = "Class";
                 common.fillSelectOptions("axiomsEditor_suggestionsSelect", choices, false, "label", "id");
-                return;
             });
+            return;
         } else if (self.currentObject == "Class") {
             self.currentObject = null;
             self.addSuggestion(suggestionObj, "axiom_Class");
-            self.getSuggestions("_"+suggestionText, function (err, result) {
+            self.getSuggestions("_" + suggestionText, function (err, result) {
                 common.fillSelectOptions("axiomsEditor_suggestionsSelect", result.suggestions, false);
             });
             return;
-        }
-        if (self.currentObject == "listObjectProperty") {
-            CommonBotFunctions.listSourceAllObjectProperties (Lineage_sources.activeSource, null, null,  function (err, choices) {
+        } else if (self.currentObject == "listObjectProperty") {
+            CommonBotFunctions.listSourceAllObjectProperties(Lineage_sources.activeSource, null, null, function (err, choices) {
                 self.currentObject = "ObjectProperty";
                 common.fillSelectOptions("axiomsEditor_suggestionsSelect", choices, false, "label", "id");
-                return;
             });
+            return;
         } else if (self.currentObject == "ObjectProperty") {
             self.currentObject = null;
             self.addSuggestion(suggestionObj, "axiom_Property");
-            self.getSuggestions(suggestionText+" ", function (err, result) {
+            self.getSuggestions(suggestionText + " ", function (err, result) {
                 common.fillSelectOptions("axiomsEditor_suggestionsSelect", result.suggestions, false);
             });
             return;
-        }
-
-
-
-
-
-   else {
-         //   self.addSuggestion(suggestionObj, "axiom_Class");
-          self.getSuggestions(suggestionId.id, function (err, result) {
+        } else {
+            self.addSuggestion(suggestionObj, "axiom_keyWord");
+            var text = self.getAxiomText();
+            self.getSuggestions(text, function (err, result) {
                 common.fillSelectOptions("axiomsEditor_suggestionsSelect", result.suggestions, false);
             });
         }
-
-
-
-    /*   else {
-            return self.addSuggestion(suggestionObj, "axiom_keyWord");
-        }*/
     };
 
     self.getSuggestions = function (text, callback) {
@@ -166,96 +122,71 @@ const AxiomEditor = (function () {
             },
         });
     };
-    self.autoComplete = function (text) {
-        var tokens = [];
-        text = text.toLowerCase();
-        for (var key in self.terms) {
-            if (key.startsWith(text)) {
-                tokens.push({ id: self.terms[key], label: key });
-            }
-        }
-        tokens.forEach(function (token) {
-            if (token.label == text) {
-                tokens = [token];
-            }
+
+    self.checkSyntax = function () {
+        var axiomText = self.getAxiomText();
+        var options = {};
+
+        const params = new URLSearchParams({
+            source: Lineage_sources.activeSource,
+            axiom: axiomText,
+            options: JSON.stringify(options),
         });
-        return tokens;
+
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/axioms/validator?" + params.toString(),
+            dataType: "json",
+
+            success: function (data, _textStatus, _jqXHR) {
+                var message = "";
+                if (true) {
+                    message = " syntax OK";
+                } else {
+                    message = " syntax error";
+                }
+                $("#axiomEditor_messageDiv").html(message);
+            },
+            error(err) {},
+        });
+    };
+    self.saveAxiom = function () {};
+    self.generateTriples = function () {
+        var options = {};
+        const params = new URLSearchParams({
+            source: Lineage_sources.activeSource,
+            lastToken: text,
+            options: JSON.stringify(options),
+        });
+
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/jowl/manchesterAxiom2triples?" + params.toString(),
+            dataType: "json",
+
+            success: function (data, _textStatus, _jqXHR) {
+                callback(null, data);
+            },
+            error(err) {
+                callback(err.responseText);
+            },
+        });
     };
 
-    self.terms = {
-        ">": ">",
-        "<": "<",
-        ">=": ">=",
-        "<=": "<=",
-        "(": "(",
-        ")": ")",
-        prefix: "Prefix",
-        class: "KW_CLASS",
-        individual: "Individual",
-        property: "Property",
-        objectproperty: "ObjectProperty",
-        types: "Types",
-        facts: "Facts",
-        subclassof: "SubClassOf",
-        equivalentto: "EquivalentTo",
-        disjointwith: "DisjointWith",
-        and: "and",
-        or: "or",
-        not: "not",
-        some: "some",
-        only: "only",
-        min: "min",
-        max: "max",
-        exactly: "exactly",
-        value: "value",
-        domain: "Domain",
-        range: "Range",
-        /*  "ws": "WS",
-                "prefix": "KW_PREFIX",
-                "class": "KW_CLASS",
-                "individual": "KW_INDIVIDUAL",
-                "property": "KW_PROPERTY",
-                "objectproperty": "KW_OBJECTPROPERTY",
-                "types": "KW_TYPES",
-                "facts": "KW_FACTS",
-                "subclassof": "KW_SUBCLASSOF",
-                "equivalentto": "KW_EQUIVALENTTO",
-                "disjointwith": "KW_DISJOINTWITH",
-                "and": "KW_AND",
-                "or": "KW_OR",
-                "not": "KW_NOT",
-                "some": "KW_SOME",
-                "only": "KW_ONLY",
-                "min": "KW_MIN",
-                "max": "KW_MAX",
-                "exactly": "KW_EXACTLY",
-                "value": "KW_VALUE",
-                "domain": "KW_DOMAIN",
-                "range": "KW_RANGE",
-                "string": "STRING",
-                "id": "ID",
-                "boolean": "BOOLEAN",
-                "int": "INT",
-                "comparisonoperator": "comparisonOperator",
-                "prefixaxiom": "prefixAxiom",
-                "classaxiom": "classAxiom",
-                "subclassaxiom": "subclassAxiom",
-                "equivalentclassaxiom": "equivalentClassAxiom",
-                "disjointaxiom": "disjointAxiom",
-                "conjunctionaxiom": "conjunctionAxiom",
-                "disjunctionaxiom": "disjunctionAxiom",
-                "negationaxiom": "negationAxiom",
-                "propertyaxiom": "propertyAxiom",
-                "objectpropertyaxiom": "objectpropertyaxiom",
-                "classexpression": "classExpression",
-                "individualaxiom": "individualAxiom",
-                "typesection": "typeSection",
-                "factssection": "factsSection",
-                "propertysection": "propertySection",
-                "v": "v",
-                "lexererror": "lexerError",
-                "parsererror": "parserError",
-                "axiom": "axiom"*/
+    self.getAxiomText = function () {
+        var text = "";
+        $(".axiom_element").each(function () {
+            if (text !== "") text += " ";
+            text += $(this).html();
+        });
+        return text;
+    };
+
+    self.clear = function () {
+        $(".axiom_element").each(function () {
+            $(this).remove();
+        });
+        $("#axiomsEditor_suggestionsSelect").find("option").remove();
     };
 
     return self;

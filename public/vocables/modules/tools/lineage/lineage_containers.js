@@ -20,7 +20,7 @@ var Lineage_containers = (function () {
     self.flag_search_launch_search = false;
     self.initContainersTab = function () {
         if ($("#tabs_containers").children().length == 0) {
-            $("#tabs_containers").load("./modules/tools/lineage/html/Lineage_containersPannel.html", function (s) {
+            $("#tabs_containers").load("./modules/tools/lineage/html/Lineage_containersPanel.html", function (s) {
                 Lineage_containers.search();
             });
         }

@@ -104,7 +104,7 @@ var Lineage_whiteboard = (function () {
     };
     self.initWhiteboardTab = function () {
         if ($("#tabs_whiteboard").children().length == 0) {
-            $("#tabs_whiteboard").load("./modules/tools/lineage/html/Lineage_whiteboardPannel.html", function (s) {
+            $("#tabs_whiteboard").load("./modules/tools/lineage/html/Lineage_whiteboardPanel.html", function (s) {
                 $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
                 $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
                 Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);

@@ -80,7 +80,7 @@ var KGcreator = (function () {
                 return alert(err.responseText);
             }
             $("#graphDiv").load("./modules/tools/KGcreator/html/centralPanel.html", function () {
-                $("#lateralPanelDiv").load("./modules/tools/KGcreator/html/KGcreator_leftPannel.html", function () {
+                $("#lateralPanelDiv").load("./modules/tools/KGcreator/html/KGcreator_leftPanel.html", function () {
                     self.currentSlsvSource = UI.source;
                     UI.openTab("KGcreator-tab", "KGcreator_treeWrapper", KGcreator.initMapTab, "#KGcreator_MapTabButton");
                     self.initSource();

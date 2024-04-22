@@ -30,7 +30,7 @@ var Lineage_properties = (function () {
     };
     self.initPropertiesTab = function () {
         if ($("#tabs_properties").children().length == 0) {
-            $("#tabs_properties").load("./modules/tools/lineage/html/Lineage_propertiesPannel.html", function (s) {
+            $("#tabs_properties").load("./modules/tools/lineage/html/Lineage_propertiesPanel.html", function (s) {
                 Lineage_whiteboard.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
                 Lineage_properties.searchTermInSources();
             });

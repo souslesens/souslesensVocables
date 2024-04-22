@@ -55,7 +55,7 @@ var KGquery = (function() {
                 return alert(err.responseText);
             }
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
-                $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPannel.html", function () {
+                $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
                     KGquery_graph.drawVisjsModel("saved");
                     UI.openTab("KGquery-tab", "tabs_Query", self.initQuery, "#QueryTabButton");
                     UI.resetWindowHeight();

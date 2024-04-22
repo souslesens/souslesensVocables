@@ -27,7 +27,7 @@ var Lineage_sources = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            $("#lateralPanelDiv").load("./modules/tools/lineage/html/Lineage_leftPannel.html", function () {
+            $("#lateralPanelDiv").load("./modules/tools/lineage/html/Lineage_leftPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
             });

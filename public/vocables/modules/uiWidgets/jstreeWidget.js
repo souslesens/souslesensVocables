@@ -106,6 +106,25 @@ var JstreeWidget = (function () {
     };
 
     self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
+
+        if(!jstreeDiv){
+            self.jstreeDiv="jstreeWidget_treeDiv"
+            self.dialogDiv ="smallDialogDiv"
+
+            $("#smallDialogDiv").dialog("option","title","Select items")
+            $("#smallDialogDiv").dialog("open")
+            $("#smallDialogDiv").load("modules/uiWidgets/jstreeWidget.html",function(){
+                self.loadJsTree ("jstreeWidget_treeDiv", jstreeData, options, callback)
+            })
+                return;
+        }else{
+            self.jstreeDiv=  jstreeDiv
+        }
+
+
+
+
+
         var jstreeData2 = [];
         jstreeData.forEach(function (item) {
             if (item.parent != item.id) {
@@ -117,7 +136,7 @@ var JstreeWidget = (function () {
         if (!options) {
             options = {};
         }
-
+self.options=options;
         var plugins = [];
         if (!options.cascade) {
             options.cascade = "xxx";
@@ -156,9 +175,9 @@ var JstreeWidget = (function () {
         };
 
         if ($("#" + jstreeDiv).jstree) {
-            $("#" + jstreeDiv).jstree("destroy");
+            $("#" +( jstreeDiv || self.jstreeDiv)).jstree("destroy");
         }
-        $("#" + jstreeDiv)
+        $("#" +( jstreeDiv || self.jstreeDiv))
             .jstree({
                 /* "checkbox": {
 "keep_selected_style": false
@@ -184,7 +203,7 @@ var JstreeWidget = (function () {
             .on("loaded.jstree", function () {
                 //  setTimeout(function () {
                 if (options.openAll) {
-                    $("#" + jstreeDiv)
+                    $("#" +( jstreeDiv || self.jstreeDiv))
                         .jstree(true)
                         .open_all();
                 }
@@ -278,19 +297,21 @@ var JstreeWidget = (function () {
         }
 
         if (options.onHoverNode) {
-            $("#" + jstreeDiv).on("hover_node.jstree", function (node) {
+            $("#" +( jstreeDiv || self.jstreeDiv)).on("hover_node.jstree", function (node) {
                 options.onHoverNode(node);
             });
         }
     };
 
     self.clear = function (jstreeDiv) {
-        $("#" + jstreeDiv)
+        $("#" +( jstreeDiv || self.jstreeDiv))
             .jstree("destroy")
             .empty();
     };
 
     self.addNodesToJstree = function (jstreeDiv, parentNodeId_, jstreeData, options, callback) {
+        if(! jstreeDiv)
+            jstreeDiv= self.jstreeDiv;
         if (!options) {
             options = {};
         }
@@ -328,11 +349,11 @@ var JstreeWidget = (function () {
                 // parent exists and have children
 
                 //Create node
-                $("#" + jstreeDiv)
+                $("#" +( jstreeDiv || self.jstreeDiv))
                     .jstree(true)
                     .create_node(parentNodeId, node, position, function () {
                         self.setTreeAppearance();
-                        $("#" + jstreeDiv)
+                        $("#" +( jstreeDiv || self.jstreeDiv))
                             .jstree(true)
                             .open_node(parentNodeId, null, 500);
                     });
@@ -344,7 +365,7 @@ var JstreeWidget = (function () {
     };
 
     self.deleteNode = function (jstreeDiv, nodeId) {
-        $("#" + jstreeDiv)
+        $("#" +( jstreeDiv || self.jstreeDiv))
             .jstree(true)
             .delete_node(nodeId);
         self.setTreeAppearance();
@@ -365,7 +386,7 @@ var JstreeWidget = (function () {
 $("#" + jstreeDiv).jstree(true).delete_node(item)
 })*/
         try {
-            $("#" + jstreeDiv)
+            $("#" +( jstreeDiv || self.jstreeDiv))
                 .jstree(true)
                 .delete_node(descendants);
         } catch (e) {
@@ -454,7 +475,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     };
     self.openNodeDescendants = function (jstreeDiv, nodeId, depth) {
         var descendants = JstreeWidget.getNodeDescendants(jstreeDiv, nodeId, depth);
-        $("#" + jstreeDiv)
+        $("#" +( jstreeDiv || self.jstreeDiv))
             .jstree()
             .open_node(descendants);
     };
@@ -501,22 +522,24 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     self.onAllTreeCbxChange = function (allCBX, jstreeDiv) {
         var checked = $(allCBX).prop("checked");
         if (checked) {
-            $("#" + jstreeDiv)
+            $("#" +( jstreeDiv || self.jstreeDiv))
                 .jstree(true)
                 .check_all();
         } else {
-            $("#" + jstreeDiv)
+            $("#" +( jstreeDiv || self.jstreeDiv))
                 .jstree(true)
                 .uncheck_all();
         }
     };
     self.checkAll = function (jstreeDiv) {
-        $("#" + jstreeDiv)
+        if(!jstreeDiv)
+            jstreeDiv=self.jstreeDiv
+        $("#" +( jstreeDiv || self.jstreeDiv))
             .jstree()
             .check_all();
     };
     self.openNode = function (jstreeDiv, nodeId) {
-        $("#" + jstreeDiv)
+        $("#" +( jstreeDiv || self.jstreeDiv))
             .jstree()
             .open_node(nodeId);
     };
@@ -627,6 +650,20 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
 
         return index_finded;
     };
+
+
+    self.validateSelfDialog=function(){
+        var selected=$("#jstreeWidget_treeDiv").jstree().get_checked(true)
+        if(selected.length==0){
+            var selected=$("#jstreeWidget_treeDiv").jstree().get_selected(true)
+        }
+        $("#"+self.dialogDiv).dialog.close()
+        if(self.options.validateFn){
+            self.options.validateFn(selected)
+        }
+
+    }
+
 
     return self;
 })();

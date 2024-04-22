@@ -4,11 +4,11 @@ const socket = io();
 // client-side
 socket.on("connect", () => {
     Config.clientSocketId = socket.id;
-    console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+   // console.log(socket.id); // x8WIv7-mJelg7on_ALbx
 });
 
 socket.on("disconnect", () => {
-    console.log(socket.id); // undefined
+  //  console.log(socket.id); // undefined
 });
 
 socket.on("KGcreator", function (message) {

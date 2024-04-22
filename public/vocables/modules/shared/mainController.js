@@ -707,7 +707,7 @@ P
 
                     // if tool available load it in responsive
                     if (source) {
-                        UI.source = source;
+                        MainController.currentSource = source;
                     }
                     self.onToolSelect(tool);
 

@@ -549,6 +549,16 @@ var KGquery_graph = (function () {
         },500)*/
     };
 
+    self.setIcon=function(){
+        if (!self.currentGraphNode) {
+            alert('no node selected');
+            return;
+        }
+        else{
+
+        }
+    }
+
     return self;
 })();
 

@@ -241,6 +241,24 @@ var UI = (function () {
             }
         });
     };
+    self.message= function (message, stopWaitImg,startWaitImg) {
+        $("#messageDiv").html(message);
+        if (stopWaitImg) {
+            $("#waitImg").css("display", "none");
+        }
+        if (startWaitImg) {
+            $("#waitImg").css("display", "block");
+        }
+    },
+    self.getJstreeConceptsContextMenu= function () {
+        if (!self.currentTool || !Config.userTools[self.currentTool]) {
+            return;
+        }
+        var controller = Config.userTools[self.currentTool].controller;
+        if (controller.jstreeContextMenu) {
+            return controller.jstreeContextMenu();
+        }
+    },
     //keep
     self.darkThemeParams = function (theme) {
         if (theme) {
@@ -263,6 +281,7 @@ var UI = (function () {
             UI.resetWindowHeight();
         }
     };
+    
 
     return self;
 })();

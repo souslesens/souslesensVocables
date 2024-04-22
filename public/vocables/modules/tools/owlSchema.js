@@ -93,7 +93,7 @@ var OwlSchema = (function () {
                     if (self.currentSourceSchema) return callbackSeries();
                     self.initSourceSchema(sourceLabel, function (err, result) {
                         self.currentSourceSchema = result;
-                        if (err) return MainController.UI.message(err);
+                        if (err) return UI.message(err);
 
                         callbackSeries(err);
                     });

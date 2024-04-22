@@ -475,7 +475,7 @@ var labelProperty={
                 function(callbackSeries) {
                     self.filterQueryNonObjectProperties(function(err, result) {
                         if (err) {
-                            MainController.UI.message(err, true)
+                            UI.message(err, true)
                             callbackSeries(err);
                         }
                         queryNonObjectProperties = result;

@@ -163,7 +163,7 @@ var Lineage_sources = (function () {
         if (!self.loadedSources[source]) {
             self.initSource(source, function (err, sourceDivId) {
                 if (err) {
-                    return MainController.UI.message(err);
+                    return UI.message(err);
                 }
 
                 highlightSourceDiv(source);
@@ -334,7 +334,7 @@ var Lineage_sources = (function () {
                 if (drawTopConcepts) {
                     Lineage_whiteboard.drawTopConcepts(source, {}, null, function (err) {
                         if (err) {
-                            return MainController.UI.message(err);
+                            return UI.message(err);
                         }
                     });
                 }
@@ -350,13 +350,13 @@ var Lineage_sources = (function () {
                 return alert(err.responseText);
             }
             if (indexedSources.indexOf(source) < 0) {
-                MainController.UI.message("indexing source " + source);
+                UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");
                 SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
                     if (err) {
-                        return MainController.UI.message(err, true);
+                        return UI.message(err, true);
                     }
-                    MainController.UI.message("ALL DONE", true);
+                    UI.message("ALL DONE", true);
                 });
             }
         });

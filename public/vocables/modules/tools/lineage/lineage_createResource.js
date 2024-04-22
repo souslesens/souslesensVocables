@@ -201,7 +201,7 @@ var Lineage_createResource = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            MainController.UI.message("resource Created");
+            UI.message("resource Created");
             var nodeData = {
                 id: self.currentResourceUri,
                 data: {
@@ -240,7 +240,7 @@ var Lineage_createResource = (function () {
                     if (err) {
                         return callback(err);
                     }
-                    MainController.UI.message("node Created and Indexed");
+                    UI.message("node Created and Indexed");
                 });
 
                 var modelData = {};

@@ -311,9 +311,10 @@ var MainController = (function () {
             }
         }
     };
+    /*
     self.UI = {
         initialGraphDivWitdh: 0,
-        /*
+        
         configureUI: function () {
             if (Config.currentProfile.forbiddenTools.indexOf("BLENDER") > -1) {
                 $("#showBlenderButton").css("display", "none");
@@ -425,7 +426,7 @@ var MainController = (function () {
             }
             var jstreeOptions = options;
             if (!jstreeOptions.contextMenu) {
-                jstreeOptions.contextMenu = MainController.UI.getJstreeConceptsContextMenu();
+                jstreeOptions.contextMenu = UI.getJstreeConceptsContextMenu();
             }
             if (withCBX) {
                 jstreeOptions.withCheckboxes = withCBX;
@@ -587,15 +588,7 @@ var MainController = (function () {
             }
         },
         */
-        getJstreeConceptsContextMenu: function () {
-            if (!self.currentTool || !Config.userTools[self.currentTool]) {
-                return;
-            }
-            var controller = Config.userTools[self.currentTool].controller;
-            if (controller.jstreeContextMenu) {
-                return controller.jstreeContextMenu();
-            }
-        },
+        
         /*
         onSourceSelect: function (event) {
             if (Config.userTools[self.currentTool].multiSources) {
@@ -611,15 +604,7 @@ var MainController = (function () {
             }
         },
         */
-        message: function (message, stopWaitImg,startWaitImg) {
-            $("#messageDiv").html(message);
-            if (stopWaitImg) {
-                $("#waitImg").css("display", "none");
-            }
-            if (startWaitImg) {
-                $("#waitImg").css("display", "block");
-            }
-        },
+       
         /*
         setCredits: function () {
             var LateralPannelWidth = $("#lateralPanelDiv").width();
@@ -701,8 +686,8 @@ P
         logout: function () {
             // eslint-disable-next-line no-console
             console.log("logout");
-        },*/
-    };
+        },
+    };*/
 
 
 

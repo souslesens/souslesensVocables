@@ -378,7 +378,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     return alert(err.responseText);
                 }
 
-                MainController.UI.message("child Created");
+                UI.message("child Created");
                 var newNode = {
                     id: newUri,
                     text: label,
@@ -421,7 +421,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 $("#" + self.currentTreeNode.treeDiv)
                     .jstree()
                     .delete_node(self.currentTreeNode.data.id);
-                return MainController.UI.message("node deleted");
+                return UI.message("node deleted");
             });
         },
 

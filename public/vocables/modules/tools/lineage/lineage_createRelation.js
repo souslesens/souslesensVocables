@@ -439,7 +439,7 @@ var Lineage_createRelation = (function () {
             self.createDataTypeProperty(Lineage_sources.activeSource, propLabel, null, xsdType, function (err, result) {
                 if (err) return alert(err.responseText);
                 $("#smallDialogDiv").dialog("close");
-                return MainController.UI.message("annotation property created", true);
+                return UI.message("annotation property created", true);
             });
             return;
         } */
@@ -495,7 +495,7 @@ var Lineage_createRelation = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        MainController.UI.message("relation added", true);
+                        UI.message("relation added", true);
 
                         if (oldRelations.length > 0) {
                             if (confirm("delete previous relation " + oldRelations[0].data.propertyLabel)) {
@@ -770,7 +770,7 @@ var Lineage_createRelation = (function () {
                 function (_err) {
                     Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(restrictionNode.id);
                     Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(inverseRestriction);
-                    MainController.UI.message("restriction removed", true);
+                    UI.message("restriction removed", true);
                     if (callback) {
                         return callback(_err);
                     }

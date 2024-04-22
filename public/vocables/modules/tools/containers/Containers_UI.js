@@ -105,7 +105,7 @@ var Containers_UI = (function () {
                 }
                 return alert(err.responseText);
             }
-            MainController.UI.message("nodes added to container " + container.label);
+            UI.message("nodes added to container " + container.label);
             var jstreeData = [];
             nodesData.forEach(function (nodeData) {
                 jstreeData.push({
@@ -172,7 +172,7 @@ var Containers_UI = (function () {
         common.pasteTextFromClipboard(function (text) {
             // debugger
             if (!text) {
-                return MainController.UI.message("no node copied");
+                return UI.message("no node copied");
             }
             try {
                 var nodes = JSON.parse(text);
@@ -329,7 +329,7 @@ var Containers_UI = (function () {
                 function (callbackSeries) {
                     //  options.descendants = true;
                     // options.leaves = true;
-                    MainController.UI.message("searching...");
+                    UI.message("searching...");
                     self.sparql_queries.getContainerDescendants(source, containerData.id, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -340,7 +340,7 @@ var Containers_UI = (function () {
                         }
                         return callbackSeries();
                     });
-                    MainController.UI.message("drawing graph...");
+                    UI.message("drawing graph...");
                 },
 
                 //get containersStyles
@@ -556,7 +556,7 @@ var Containers_UI = (function () {
                 },
             ],
             function (err) {
-                MainController.UI.message("", true);
+                UI.message("", true);
                 if (err) {
                     return alert(err.responseText);
                     if (callback) {

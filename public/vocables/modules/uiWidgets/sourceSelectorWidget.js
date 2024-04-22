@@ -173,7 +173,7 @@ var SourceSelectorWidget = (function () {
         var treeData = self.getSourcesJstreeData();
 
         if (!jstreeOptions.contextMenu) {
-            jstreeOptions.contextMenu = MainController.UI.getJstreeConceptsContextMenu();
+            jstreeOptions.contextMenu = UI.getJstreeConceptsContextMenu();
         }
 
         if (!jstreeOptions.withCheckboxes && !jstreeOptions.selectTreeNodeFn) {

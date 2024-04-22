@@ -2039,7 +2039,7 @@ var Sparql_OWL = (function () {
                         if (err) {
                             return callbackEach(err);
                         }
-                        MainController.UI.message((totalItems += slice.length) + " done ");
+                        UI.message((totalItems += slice.length) + " done ");
                         callbackEach();
                     });
                 },
@@ -2578,7 +2578,7 @@ var Sparql_OWL = (function () {
                         data: payload,
                         dataType: "json",
                         success: function (_result, _textStatus, _jqXHR) {
-                            MainController.UI.message("graph deleted " + Config.labelsGraphUri);
+                            UI.message("graph deleted " + Config.labelsGraphUri);
                             callbackSeries();
                         },
                         error(err) {

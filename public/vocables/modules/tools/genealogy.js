@@ -72,7 +72,7 @@ var Genealogy = (function () {
             function (sourceId, callbackEach) {
                 if (!Config.sources[sourceId].controller) return callbackEach();
                 //  setTimeout(function () {
-                MainController.UI.message("searching in " + sourceId);
+                UI.message("searching in " + sourceId);
                 //    callbackEach()
                 Sparql_generic.getNodeParents(sourceId, word, null, 1, { exactMatch: exactMatch }, function (err, result) {
                     // sparql_abstract.list(source.name, word, {exactMatch: exactMatch}, function (err, result) {
@@ -112,7 +112,7 @@ var Genealogy = (function () {
             function (err) {
                 if (err) return $("#messageDiv").html(err);
                 $("#conceptsJstreeDiv").jstree(true).select_node(selectedIds);
-                MainController.UI.message("done");
+                UI.message("done");
                 $("#waitImg").css("display", "none");
                 return;
             }
@@ -271,7 +271,7 @@ var Genealogy = (function () {
             NodeInfosWidget.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode, "Genealogy_nodeInfosDialogDiv");
             /*   Sparql_generic.getNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, null, function (err, result) {
                    if (err) {
-                       return MainController.UI.message(err);
+                       return UI.message(err);
                    } $("#Genealogy_nodeInfosDialogDiv").dialog("open");
                    SourceEditor.showNodeInfos("Genealogy_nodeInfosDialogDiv", "en", self.graphActions.currentNode.id, result)
 

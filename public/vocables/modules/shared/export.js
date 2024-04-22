@@ -71,7 +71,7 @@ var Export = (function () {
                 dataset.push(line);
             });
 
-            MainController.UI.message("", true);
+            UI.message("", true);
             var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
             Export.showDataTable(divId, cols, dataset, null, { fixedColumns: 1, columnDefs: columnDefs });
         } else {
@@ -271,11 +271,11 @@ var Export = (function () {
             options = {};
         }
 
-        MainController.UI.message("exporting node descendants...");
+        UI.message("exporting node descendants...");
         $("#waitImg").css("display", "block");
         SearchUtil.getParentAllDescendants(parentId, indexes, null, function (err, result) {
             if (err) {
-                MainController.UI.message(err, true);
+                UI.message(err, true);
             }
             var matrixLabels = [];
             var matrixIds = [];
@@ -330,7 +330,7 @@ var Export = (function () {
             }
             cols.push({ title: "-----", defaultContent: "" });
 
-            MainController.UI.message("", true);
+            UI.message("", true);
             Export.showDataTable(null, cols, matrixLabels);
         });
     };

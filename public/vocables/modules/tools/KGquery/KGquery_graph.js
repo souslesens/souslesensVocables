@@ -78,7 +78,7 @@ var KGquery_graph = (function () {
                     self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
 
-                    MainController.UI.message("loading graph display");
+                    UI.message("loading graph display");
                     self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                         if (err) {
                             return callbackSeries("notFound");
@@ -93,7 +93,7 @@ var KGquery_graph = (function () {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
-                    MainController.UI.message("generating tbox graph from abox graph");
+                    UI.message("generating tbox graph from abox graph");
                     self.getInferredModelVisjsData(KGquery.currentSource, function (err, result2) {
                         if (err) {
                             return alert(err);
@@ -132,7 +132,7 @@ var KGquery_graph = (function () {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
-                    MainController.UI.message("loading datatypeProperties");
+                    UI.message("loading datatypeProperties");
                     OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
                         if (err) {
                             return callbackSeries(err);
@@ -152,10 +152,10 @@ var KGquery_graph = (function () {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");
                     }
-                    MainController.UI.message("", true);
+                    UI.message("", true);
                     return alert(err);
                 }
-                MainController.UI.message("drawing graph");
+                UI.message("drawing graph");
 
                 //   https://fonts.google.com/icons
 
@@ -209,7 +209,7 @@ var KGquery_graph = (function () {
                     });
                     self.KGqueryGraph.data.nodes.update(visjsData.nodes);
                 });
-                MainController.UI.message("", true);
+                UI.message("", true);
 
                 //  KGquery.clearAll();
             }
@@ -217,7 +217,7 @@ var KGquery_graph = (function () {
     };
 
     self.getInferredModelVisjsData = function (source, callback) {
-        MainController.UI.message("creating graph");
+        UI.message("creating graph");
         if (!source) {
             source = self.source;
         }
@@ -356,7 +356,7 @@ var KGquery_graph = (function () {
                         visjsData.edges.push(edge);
                     }
                 });
-                MainController.UI.message("", true);
+                UI.message("", true);
                 return callback(null, visjsData);
             }
         );

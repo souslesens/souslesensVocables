@@ -95,7 +95,7 @@ var KGcreator_run = (function () {
             options: JSON.stringify(options),
         };
 
-        MainController.UI.message("creating triples...");
+        UI.message("creating triples...");
         $.ajax({
             type: "POST",
             url: `${Config.apiUrl}/kg/triples`,
@@ -108,14 +108,14 @@ var KGcreator_run = (function () {
                     //   $("#KGcreator_infosDiv").val(str);
                     self.showTriplesInDataTable(result);
 
-                    MainController.UI.message("", true);
+                    UI.message("", true);
                 } else {
                     if (options.deleteTriples) {
                         $("#KGcreator_infosDiv").val(result.result);
-                        MainController.UI.message(result.result, true);
+                        UI.message(result.result, true);
                     } else {
                         $("#KGcreator_infosDiv").val(result.result + " triples created in graph " + KGcreator.currentConfig.graphUri);
-                        MainController.UI.message("triples created", true);
+                        UI.message("triples created", true);
                     }
                 }
                 if (callback) {
@@ -212,13 +212,13 @@ var KGcreator_run = (function () {
                 if (callback) {
                     return callback();
                 }
-                return MainController.UI.message("graph deleted " + mappings.graphUri);
+                return UI.message("graph deleted " + mappings.graphUri);
             },
             error(err) {
                 if (callback) {
                     return callback(err);
                 }
-                return MainController.UI.message(err);
+                return UI.message(err);
             },
         });
     };
@@ -242,7 +242,7 @@ var KGcreator_run = (function () {
             source: KGcreator.currentSlsvSource,
             tables: JSON.stringify(tables),
         };
-        MainController.UI.message("deleting KGcreator  triples...");
+        UI.message("deleting KGcreator  triples...");
         $.ajax({
             type: "DELETE",
             url: `${Config.apiUrl}/kg/triples`,
@@ -252,26 +252,26 @@ var KGcreator_run = (function () {
                 if (callback) {
                     return callback();
                 }
-                MainController.UI.message(result.result);
+                UI.message(result.result);
             },
             error: function (err) {
                 if (callback) {
                     return callback(err);
                 }
-                MainController.UI.message(err.responseText);
+                UI.message(err.responseText);
             },
         });
     };
 
     self.socketMessage = function (message) {
         //  console.log(message)
-        MainController.UI.message(message);
+        UI.message(message);
         //  $("#KGcreator_infosDiv").append(message+"\n")
     };
 
     self.stopCreateTriples = function () {
         socket.emit("KGCreator", "stopCreateTriples");
-        MainController.UI.message("import interrupted by user", true);
+        UI.message("import interrupted by user", true);
     };
 
     self.createAllMappingsTriples = function () {

@@ -206,7 +206,7 @@ var OntologyBrowser = (function () {
                 ],
                 function (err) {
                     if (callback) callback(err);
-                    if (err) return MainController.UI.message(err);
+                    if (err) return UI.message(err);
                 }
             );
         }
@@ -244,7 +244,7 @@ var OntologyBrowser = (function () {
         OwlSchema.getClassDescription(MainController.currentSource, node.id, function (err, _result) {
             if (err) {
                 self.currentNode = null;
-                return MainController.UI.message(err);
+                return UI.message(err);
             }
             self.currentNode = node;
             self.currentNode.dataProperties = {};
@@ -296,7 +296,7 @@ var OntologyBrowser = (function () {
         expandSubclasses: function () {
             Config.sources[MainController.currentSource].controller.getNodeChildren(MainController.currentSource, null, OntologyBrowser.currentNode.id, 1, {}, function (err, children) {
                 OwlSchema.setLabelsFromQueryResult(children);
-                if (err) return MainController.UI.message(err);
+                if (err) return UI.message(err);
                 var existingVisjsIds = visjsGraph.getExistingIdsMap();
                 var visjsData = { nodes: [], edges: [] };
                 children.forEach(function (item) {
@@ -527,8 +527,8 @@ var OntologyBrowser = (function () {
             //  return;
             var url = Config.sources[MainController.currentSource].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {}, function (err, result) {
-                if (err) return MainController.UI.message(err);
-                if (result.length >= self.queryLimit) return MainController.UI.message("result too long >" + self.queryLimit + " lines ");
+                if (err) return UI.message(err);
+                if (result.length >= self.queryLimit) return UI.message("result too long >" + self.queryLimit + " lines ");
                 self.query.showQueryResultInDataTable(result);
             });
         },

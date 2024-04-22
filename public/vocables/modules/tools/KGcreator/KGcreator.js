@@ -521,7 +521,7 @@ var KGcreator = (function () {
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-                MainController.UI.message(mappingsDir + "/" + source + "config saved");
+                UI.message(mappingsDir + "/" + source + "config saved");
                 callback();
             },
             error: function (err) {
@@ -562,7 +562,7 @@ var KGcreator = (function () {
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-                MainController.UI.message(mappingsDir + "/" + source + "config saved");
+                UI.message(mappingsDir + "/" + source + "config saved");
                 if (callback) {
                     return callback();
                 }

@@ -366,7 +366,7 @@ var KGcreator_graph = (function () {
                         return alert(err);
                     }
 
-                    MainController.UI.message("join saved");
+                    UI.message("join saved");
                 });
             });
         } else if (sourceNode.data && sourceNode.data.type == "column" && targetNode.data && targetNode.data.type == "column") {

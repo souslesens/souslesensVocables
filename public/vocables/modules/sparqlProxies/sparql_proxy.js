@@ -206,7 +206,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                     console.log(data.results.bindings.length);
                 }
                 if (data.results.bindings.length == 0) {
-                } // MainController.UI.message("No data found", true);
+                } // UI.message("No data found", true);
 
                 callback(null, data);
             },
@@ -222,7 +222,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                     alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data");
                 } else {
                     console.log(err.responseText);
-                    MainController.UI.message("error in sparql query");
+                    UI.message("error in sparql query");
                 }
 
                 $("#waitImg").css("display", "none");
@@ -230,7 +230,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 console.log(JSON.stringify(err));
                 // eslint-disable-next-line no-console
                 console.log(JSON.stringify(query));
-                MainController.UI.message(err.responseText);
+                UI.message(err.responseText);
                 if (callback) {
                     return callback(err);
                 }

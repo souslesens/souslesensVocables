@@ -240,7 +240,7 @@ var Lineage_selection = (function () {
                 if (err) {
                     return alert(err.responseText);
                 }
-                MainController.UI.message("predicate added to container " + containerName);
+                UI.message("predicate added to container " + containerName);
             });
         },
         deletePredicate: function () {
@@ -259,7 +259,7 @@ var Lineage_selection = (function () {
 
             Sparql_generic.deleteTriples(Lineage_sources.activeSource, nodeIds, property, object, function (err, result) {
                 return alert(err.responseText);
-                MainController.UI.message(nodeIds.length + " nodes deleted  ");
+                UI.message(nodeIds.length + " nodes deleted  ");
             });
         },
 
@@ -279,7 +279,7 @@ var Lineage_selection = (function () {
                     if (err) {
                         return alert(err.responseText);
                     }
-                    MainController.UI.message(nodeIds.length + " nodes deleted  ");
+                    UI.message(nodeIds.length + " nodes deleted  ");
                 });
             });
         },

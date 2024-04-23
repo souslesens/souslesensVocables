@@ -154,7 +154,6 @@ const SourcesTable = () => {
                                         .map((source) => {
                                             const haveIndices = indices ? indices.includes(source.name.toLowerCase()) : false;
                                             const haveGraphs = graphs ? graphs.includes(source.graphUri || "") : false;
-                                            console.log();
                                             return (
                                                 <TableRow key={source.name}>
                                                     <TableCell>{source.name}</TableCell>

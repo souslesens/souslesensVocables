@@ -178,6 +178,8 @@ export const ServerSourceSchema = z.object({
     allowIndividuals: z.boolean().default(false),
     predicates: SourcePredicatesSchema,
     group: z.string().default(""),
+    owner: z.string().default(""),
+    published: z.boolean().default(false),
     imports: z.array(z.string()).default([]),
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 });
@@ -202,6 +204,8 @@ export const InputSourceSchema = {
         .nonempty({ message: "Required" })
         .min(3, { message: "3 chars min" })
         .refine((val) => val.match(/^[^\/]/), { message: "Cannot start with /" }),
+    owner: z.string().default(""),
+    published: z.boolean().default(false),
     imports: z.array(z.string()).default([]),
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 };
@@ -238,6 +242,8 @@ export const sourceHelp = {
     group: "Group and subgroups (AAA/BBB) used to order the sources",
     imports: "List of imported sources",
     taxonomyPredicates: "List of properties used to draw the taxonomies of classes and named individuals",
+    published: "The source will be visible by all user (with right permission to see it)",
+    owner: "User that own the source. The user will have all right on the source.",
 };
 
 export const defaultSource = (id: string): ServerSource => {

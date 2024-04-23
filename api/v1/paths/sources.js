@@ -57,12 +57,17 @@ module.exports = function () {
                 return;
             }
 
-            var newSource = req.body;
+            let newSource = req.body;
 
             newSource = fixBooleanInObject(newSource);
 
             await Promise.all(
                 Object.entries(newSource).map(async ([_key, value]) => {
+                    // if user is not admin, set owner=me and published=false
+                    if (!isAdmin) {
+                        value.owner = userLogin;
+                        value.published = false;
+                    }
                     await sourceModel.addSource(value);
                 })
             );

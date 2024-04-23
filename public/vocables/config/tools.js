@@ -19,8 +19,11 @@ async function loadToolsAndPlugins(callback) {
 
     // We import plugins and register them in the window
     for (const element of plugins) {
-        const plugin = await import(`../../plugins/${element.name}/js/main.js`);
-        window[element.name] = plugin.default;
+        const { default: plugin } = await import(`../../plugins/${element.name}/js/main.js`);
+        if (typeof plugin.setConfig === "function") {
+            plugin.setConfig(element.config);
+        }
+        window[element.name] = plugin;
     }
 
     const userTools = {};

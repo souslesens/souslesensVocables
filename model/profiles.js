@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { Lock } = require("async-await-mutex-lock");
-const { configProfilesPath, config } = require("./config");
+const { configProfilesPath, config, configPlugins } = require("./config");
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -12,10 +12,17 @@ const lock = new Lock();
 
 class ProfileModel {
     /**
-     * @param {string} path - path of the profiles.json file
+     * @param {string} configProfilesPath - path of the profiles.json file
      */
-    constructor(path) {
-        this.configProfilesPath = path;
+    constructor(configProfilesPath) {
+        this.configProfilesPath = configProfilesPath;
+        this.plugins = new Array();
+        try {
+            this.plugins = fs.readdirSync(path.join(process.cwd(), "/plugins"));
+        } catch {
+            console.warn("No plugins directory");
+        }
+        this.pluginsConfig = JSON.parse(fs.readFileSync(configPlugins).toString());
     }
 
     /**
@@ -86,8 +93,26 @@ class ProfileModel {
     };
 
     /**
+     * @param {string} toolName - the name of a tool or a plugin
+     */
+    _toolToJSON = (toolName) => {
+        if (this.plugins.includes(toolName)) {
+            return {
+                name: toolName,
+                type: "plugin",
+                config: this.pluginsConfig[toolName],
+            };
+        } else {
+            return {
+                name: toolName,
+                type: "tool",
+            };
+        }
+    };
+
+    /**
      * @param {UserAccount} user -  a user account
-     * @returns {Promise<Array<{name: string, type: string}>>} a list of tools' name
+     * @returns {Promise<Array<{name: string, type: string}> | undefined>} a list of tools' name
      */
     getUserTools = async (user) => {
         try {
@@ -97,24 +122,11 @@ class ProfileModel {
             const forbiddenTools = new Set(Object.entries(userProfiles).reduce((acc, [k, v]) => acc.concat(v.forbiddenTools), []));
             const allowedTools = allowedToolsOrAll.has("ALL") ? allTools : allowedToolsOrAll;
             const userTools = new Set([...allowedTools].filter((x) => !forbiddenTools.has(x)));
-            let plugins = new Array();
-            try {
-                plugins = fs.readdirSync(path.join(process.cwd(), "/plugins"));
-            } catch {
-                console.warn("No plugins directory");
-            }
-
-
-            const toolsFromNames = (tools) => [...tools].map((tool) => ({ name: tool, type: plugins.includes(tool) ? "plugin" : "tool" }));
-
-
-
-
 
             if (user.login === "admin" || user?.groups.includes("admin")) {
-                return toolsFromNames(allTools);
+                return [...allTools].map(this._toolToJSON);
             }
-            return toolsFromNames(userTools);
+            return [...userTools].map(this._toolToJSON);
         } catch (error) {
             console.log(error);
         }

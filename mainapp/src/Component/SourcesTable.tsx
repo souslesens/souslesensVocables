@@ -682,19 +682,19 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                 disableClearable
                                 options={knownGroup}
                                 label={"Group"}
+                                onInputChange={(_e, newValue) => handleGroupUpdate(newValue)}
+                                onBlur={validateAfterSubmission}
+                                inputValue={sourceModel.sourceForm.group}
+                                id="group"
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
                                         helperText={errorMessage(zo.errors.group)}
-                                        id="group"
                                         label="Group"
-                                        name={zo.fields.group()}
-                                        onBlur={validateAfterSubmission}
-                                        onChange={handleFieldUpdate("group")}
-                                        value={sourceModel.sourceForm.group}
                                         InputProps={{
                                             ...params.InputProps,
                                             type: "search",
+                                            name: zo.fields.group(),
                                         }}
                                     />
                                 )}

@@ -24,7 +24,7 @@ var Lineage_sources = (function () {
     self.init = function (showDialog) {
         if (true) {
             Config.Lineage.disabledButtons.forEach(function (buttonId) {
-                $("#" + buttonId).prop("disabled", true);
+                $("#" + buttonId).prop("disabled", "disabled");
             });
         }
 
@@ -159,7 +159,7 @@ var Lineage_sources = (function () {
         }
 
         Config.Lineage.disabledButtons.forEach(function (buttonId) {
-            $("#" + buttonId).prop("disabled", true);
+            $("#" + buttonId).prop("disabled", "disabled");
         });
 
         function highlightSourceDiv(source) {

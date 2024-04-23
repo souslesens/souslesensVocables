@@ -106,6 +106,21 @@ var JstreeWidget = (function () {
     };
 
     self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
+        if (!jstreeDiv) {
+            self.jstreeDiv = "jstreeWidget_treeDiv";
+            jstreeDiv = self.jstreeDiv;
+            self.dialogDiv = "smallDialogDiv";
+
+            $("#smallDialogDiv").dialog("option", "title", "Select items");
+            $("#smallDialogDiv").dialog("open");
+            $("#smallDialogDiv").load("modules/uiWidgets/jstreeWidget.html", function () {
+                self.loadJsTree("jstreeWidget_treeDiv", jstreeData, options, callback);
+            });
+            return;
+        } else {
+            self.jstreeDiv = jstreeDiv;
+        }
+
         var jstreeData2 = [];
         jstreeData.forEach(function (item) {
             if (item.parent != item.id) {
@@ -117,7 +132,7 @@ var JstreeWidget = (function () {
         if (!options) {
             options = {};
         }
-
+        self.options = options;
         var plugins = [];
         if (!options.cascade) {
             options.cascade = "xxx";
@@ -184,7 +199,7 @@ var JstreeWidget = (function () {
             .on("loaded.jstree", function () {
                 //  setTimeout(function () {
                 if (options.openAll) {
-                    $("#" + jstreeDiv)
+                    $("#" + (jstreeDiv || self.jstreeDiv))
                         .jstree(true)
                         .open_all();
                 }
@@ -278,19 +293,20 @@ var JstreeWidget = (function () {
         }
 
         if (options.onHoverNode) {
-            $("#" + jstreeDiv).on("hover_node.jstree", function (node) {
+            $("#" + (jstreeDiv || self.jstreeDiv)).on("hover_node.jstree", function (node) {
                 options.onHoverNode(node);
             });
         }
     };
 
     self.clear = function (jstreeDiv) {
-        $("#" + jstreeDiv)
+        $("#" + (jstreeDiv || self.jstreeDiv))
             .jstree("destroy")
             .empty();
     };
 
     self.addNodesToJstree = function (jstreeDiv, parentNodeId_, jstreeData, options, callback) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         if (!options) {
             options = {};
         }
@@ -328,11 +344,11 @@ var JstreeWidget = (function () {
                 // parent exists and have children
 
                 //Create node
-                $("#" + jstreeDiv)
+                $("#" + (jstreeDiv || self.jstreeDiv))
                     .jstree(true)
                     .create_node(parentNodeId, node, position, function () {
                         self.setTreeAppearance();
-                        $("#" + jstreeDiv)
+                        $("#" + (jstreeDiv || self.jstreeDiv))
                             .jstree(true)
                             .open_node(parentNodeId, null, 500);
                     });
@@ -344,12 +360,13 @@ var JstreeWidget = (function () {
     };
 
     self.deleteNode = function (jstreeDiv, nodeId) {
-        $("#" + jstreeDiv)
+        $("#" + (jstreeDiv || self.jstreeDiv))
             .jstree(true)
             .delete_node(nodeId);
         self.setTreeAppearance();
     };
     self.deleteBranch = function (jstreeDiv, nodeId, deleteNodeItself) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         var descendants = self.getNodeDescendants(jstreeDiv, nodeId, null, true);
         if (deleteNodeItself) {
             if (descendants.indexOf(nodeId) < 0) {
@@ -365,7 +382,7 @@ var JstreeWidget = (function () {
 $("#" + jstreeDiv).jstree(true).delete_node(item)
 })*/
         try {
-            $("#" + jstreeDiv)
+            $("#" + (jstreeDiv || self.jstreeDiv))
                 .jstree(true)
                 .delete_node(descendants);
         } catch (e) {
@@ -373,6 +390,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
     self.getjsTreeNodes = function (jstreeDiv, IdsOnly, parentNodeId) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         if (!parentNodeId) {
             parentNodeId = "#";
         }
@@ -399,12 +417,14 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     };
 
     self.getjsTreeNodeObj = function (jstreeDiv, id) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         return $("#" + jstreeDiv)
             .jstree(true)
             .get_node(id);
     };
     // get node from node.data field
     self.getNodeByDataField = function (jstreeDiv, property, value) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         if (!$("#" + jstreeDiv).jstree(true)) {
             return null;
         }
@@ -421,6 +441,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     };
 
     self.getNodeDescendants = function (jstreeDiv, nodeId, depth, onlyIds) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         var nodes = [];
         var nodeIdsMap = {};
         var currentLevel = 0;
@@ -453,13 +474,15 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         return nodes;
     };
     self.openNodeDescendants = function (jstreeDiv, nodeId, depth) {
-        var descendants = JstreeWidget.getNodeDescendants(jstreeDiv, nodeId, depth);
-        $("#" + jstreeDiv)
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        var descendants = JstreeWidget.getNodeDescendants(jstreeDiv || self.jstreeDiv, nodeId, depth);
+        $("#" + (jstreeDiv || self.jstreeDiv))
             .jstree()
             .open_node(descendants);
     };
 
     self.setTreeParentDivDimensions = function (jstreeDiv) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         var parentDiv = $("#" + jstreeDiv).parent();
         if (!parentDiv) {
             // || parentDiv.width)
@@ -499,6 +522,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         return;
     };
     self.onAllTreeCbxChange = function (allCBX, jstreeDiv) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         var checked = $(allCBX).prop("checked");
         if (checked) {
             $("#" + jstreeDiv)
@@ -511,11 +535,13 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
     self.checkAll = function (jstreeDiv) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         $("#" + jstreeDiv)
             .jstree()
             .check_all();
     };
     self.openNode = function (jstreeDiv, nodeId) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         $("#" + jstreeDiv)
             .jstree()
             .open_node(nodeId);
@@ -588,6 +614,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     };
 
     self.orderJstreeDataForCreation = function (jstreeDiv, JstreeData) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         var length = JstreeData.length;
         var n = 0;
         while (n < length) {
@@ -626,6 +653,17 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         });
 
         return index_finded;
+    };
+
+    self.validateSelfDialog = function () {
+        var selected = $("#jstreeWidget_treeDiv").jstree().get_checked(true);
+        if (selected.length == 0) {
+            var selected = $("#jstreeWidget_treeDiv").jstree().get_selected(true);
+        }
+        $("#" + self.dialogDiv).dialog("close");
+        if (self.options.validateFn) {
+            self.options.validateFn(selected);
+        }
     };
 
     return self;

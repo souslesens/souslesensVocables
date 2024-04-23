@@ -1,5 +1,6 @@
 import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import KGquery_filter from "./KGquery_filter.js";
 
 var KGquery_controlPanel = (function () {
     var self = {};
@@ -72,7 +73,7 @@ var KGquery_controlPanel = (function () {
             label +
             "</span>" +
             "&nbsp;&nbsp;" +
-            "<button  class='slsv-invisible-button filterIcon' about='add filter' onclick='KGquery.addNodeFilter(\"" +
+            "<button  class='slsv-invisible-button filterIcon' about='add filter' onclick='KGquery_filter.addNodeFilter(\"" +
             nodeDivId +
             "\");'></button></div>";
 

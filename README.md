@@ -264,15 +264,16 @@ SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
 
 Certain version need migration of data. See `CHANGELOG.md` before upgrading.
 
-To run migration scripts you need to use the command 
-
+To run migration scripts you need to use the command
 
 ```bash
 npm run migrate
 ```
+
 At project root
 
 Under Windows need to use git bash to run this script
+
 ```git bash
 cd project-root
 npm run migrate
@@ -327,38 +328,50 @@ In root create a plugins folder
 
 `mkdir plugins`
 
-Each directory is named after the plugin we want to add.  
+Each directory is named after the plugin we want to add.
 
 ```
-plugins  
-└── MyPluginName  
-    └── public  
-        └── js  
-            └── main.js  
-        └──html  
-            
-```
-
-
-
-The plugin's directory must contain a public directory with the source code within it.  
-
-main.js must export a single IIFE function.  
+plugins
+└── MyPluginName
+    └── public
+        └── js
+            └── main.js
+        └──html
 
 ```
-const Toto = (function () {
-    var self={};
-    self.onLoaded=function(){
 
+The plugin's directory must contain a public directory with the source code within it.
+
+main.js must export a single IIFE function or class instance.
+
+```
+class MyPlugin {
+    onLoaded(){
+        alert(`Welcome ${this.user}`)
     }
-    return { name: "toto" };
-})();
-export default Toto;
+
+    setConfig(config) {
+        this.user = config.user
+    }
+};
+export default new MyPlugin();
 ```
 
-Once it done, don't forget to add the plugin's name to `mainConfig.tools_available`.  
-If you still don't see the plugin in the jsTree, check that your user's profile allows to see this plugin.  
-The function onLoaded is loaded when you select the tool.  
+Once it done, don't forget to add the plugin's name to `mainConfig.tools_available`.
+If you still don't see the plugin in the jsTree, check that your user's profile allows to see this plugin.
+The function onLoaded is loaded when you select the tool.
 
-The following Github Repository contains all the plugins of SLS and give more informations about them :  
+If a plugin requires configuration, it can be added to the `config/pluginsConfig.json` file:
+
+```
+{
+    "MyPlugin": {
+        "user": "John Doe"
+    }
+}
+```
+
+This configuration will be provided to the plugin by calling the `setConfig` method.
+
+The following Github Repository contains all the plugins of SLS and give more informations about them :
 https://github.com/souslesens/slsv-plugins/

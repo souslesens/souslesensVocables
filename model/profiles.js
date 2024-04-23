@@ -118,8 +118,8 @@ class ProfileModel {
         try {
             const userProfiles = await this.getUserProfiles(user);
             const allTools = new Set(config.tools_available);
-            const allowedToolsOrAll = new Set(Object.entries(userProfiles).reduce((acc, [k, v]) => acc.concat(v.allowedTools), []));
-            const forbiddenTools = new Set(Object.entries(userProfiles).reduce((acc, [k, v]) => acc.concat(v.forbiddenTools), []));
+            const allowedToolsOrAll = new Set(Object.values(userProfiles).flatMap((v) => v.allowedTools));
+            const forbiddenTools = new Set(Object.values(userProfiles).flatMap((v) => v.forbiddenTools));
             const allowedTools = allowedToolsOrAll.has("ALL") ? allTools : allowedToolsOrAll;
             const userTools = new Set([...allowedTools].filter((x) => !forbiddenTools.has(x)));
 

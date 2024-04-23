@@ -14,7 +14,7 @@ var KGquery_filter = (function() {
         var uniqueProps = {};
         var labelProperty = {
             datatype: "http://www.w3.org/2001/XMLSchema#string",
-            id: "rdf:label",
+            id: "rdfs:label",
             label: "label"
         };
         querySets.sets.forEach(function(querySet) {
@@ -180,7 +180,8 @@ var KGquery_filter = (function() {
             }else{
                 propertyStr=data.property.id
             }
-            optionalPredicatesSparql = addToStringIfNotExists(optionalStr + " {?" + data.varName +" "+ propertyStr+ " ?" + data.varName + "_" + data.property.label + "}\n", optionalPredicatesSparql);
+            var str=optionalStr + " {?" + data.varName +" "+ propertyStr+ " ?" + data.varName + "_" + data.property.label + ".}\n"
+            optionalPredicatesSparql = addToStringIfNotExists(str, optionalPredicatesSparql);
 
         })
         
@@ -193,72 +194,12 @@ var KGquery_filter = (function() {
         for (var key in groupByPredicates) {
             var obj = groupByPredicates[key];
             str += " ?" + obj.classLabel + " <" + obj.prop.id + "> ?" + obj.label + ". ";
+            console.log("++++"+str)
         }
 
         return str;
     };
-    self.getOtherPredicates = function(queryElement, filterClassLabels) {
-        function getOptionalClause(varName) {
-            var optionalStr = " OPTIONAL ";
-            var filterType = filterClassLabels[varName];
-            if (filterType && filterType != "uri") {
-                optionalStr = "";
-            }
 
-            return optionalStr;
-        }
-
-        function addToStringIfNotExists(str, text) {
-            if (text.indexOf(str) > -1) {
-                return text;
-            } else {
-                return text + str;
-            }
-        }
-
-        var otherPredicatesStr = "";
-        var subjectVarName = KGquery.getVarName(queryElement.fromNode);
-        var objectVarName = KGquery.getVarName(queryElement.toNode);
-        if (queryElement.fromNode.data.nonObjectProperties) {
-            var addLabelPredicate = true;
-            queryElement.fromNode.data.nonObjectProperties.forEach(function(property) {
-                if (property.label.indexOf("label") > -1) {
-                    addLabelPredicate = false;
-                }
-                var optionalStr = getOptionalClause(subjectVarName);
-
-                otherPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " <" + property.id + "> " + subjectVarName + "_" + property.label + "}\n", otherPredicatesStr);
-            });
-
-            if (addLabelPredicate) {
-                var optionalStr = getOptionalClause(subjectVarName);
-                otherPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + subjectVarName + " rdfs:label " + subjectVarName + "_label}\n", otherPredicatesStr);
-            }
-        } else {
-            var optionalStr = getOptionalClause(subjectVarName);
-            otherPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdfs:label " + subjectVarName + "_label}\n", otherPredicatesStr);
-        }
-        if (queryElement.toNode) {
-            if (queryElement.toNode.data.nonObjectProperties) {
-                var addLabelPredicate = true;
-                queryElement.toNode.data.nonObjectProperties.forEach(function(property) {
-                    if (property.label.indexOf("label") > -1) {
-                        addLabelPredicate = false;
-                    }
-                    var optionalStr = getOptionalClause(objectVarName);
-                    otherPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " <" + property.id + "> " + objectVarName + "_" + property.label + "}\n", otherPredicatesStr);
-                });
-                if (addLabelPredicate) {
-                    var optionalStr = getOptionalClause(objectVarName);
-                    otherPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdfs:label " + objectVarName + "_label}\n", otherPredicatesStr);
-                }
-            } else {
-                var optionalStr = getOptionalClause(objectVarName);
-                otherPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdfs:label " + objectVarName + "_label}\n", otherPredicatesStr);
-            }
-        }
-        return otherPredicatesStr;
-    };
 
 
     self.addNodeFilter = function(classDivId, addTojsTreeNode,propertyId) {
@@ -273,14 +214,7 @@ var KGquery_filter = (function() {
             return;
         }
 
-        var varName = KGquery.getVarName(aClass, true);
-        if(false && varName.endsWith("_parent") && !self.setMemberFilter(classDivId)){
-
-          return  self.setMemberFilter(classDivId)
-
-        }else {
-          //  var varName = [KGquery.getVarName(aClass, true)];
-          //  var datatype = aClass.data.datatype;
+        
             var currentFilterQuery = {
                 source: KGquery.currentSource,
                 currentClass: aClass.id,
@@ -306,31 +240,11 @@ var KGquery_filter = (function() {
                 }
 
             });
-        }
+        
     };
 
 
-    self.setMemberFilter=function(classDivId){
-        var aClass = KGquery.divsMap[classDivId];
-         var options={memberClass:aClass.data.id};
-         self.currentContainerVarName=KGquery.getVarName(aClass)
-        $("#smallDialogDiv").dialog("close")
 
-               Containers_widget.showDialog(self.currentSource,options,function(err, result){
-                   $("#smallDialogDiv").dialog("open")
-                    if(err)
-                        return alert(err)
-
-                   self.containersFilterMap[self.currentContainerVarName]={
-                       classId:aClass.id,
-                       depth:result.depth
-                   }
-
-
-
-
-                })
-    }
 
 
     return self;

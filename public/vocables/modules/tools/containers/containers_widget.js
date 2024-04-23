@@ -22,7 +22,7 @@ self.showDialog=function(source,options, validateFn){
 self.validateDialog=function(){
         var selectedMembers=$("#containerWidget_treeDiv").jstree().get_selected(true)
     var depth=$("#containerWidget_depthInput").val()
-    $("#smaDialogDiv").dialog("close")
+    $("#mainDialogDiv").dialog("close")
     if(!selectedMembers || selectedMembers.length==0) {
         alert("no node selected")
         return self.validateFn("no top node selected")

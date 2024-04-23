@@ -28,25 +28,10 @@ var KGbuilder_triplesMaker = {
             return callback();
         }
 
-        //  var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/test/"
-        var totalTriples = 0;
-        var errors = "";
 
-        existingTriples = {};
-        var totalTriplesCount = 0;
-        var totalTriples = 0;
-        var missingLookups_s = 0;
-        var missingLookups_o = 0;
-        var okLookups_o = 0;
-        var okLookups_s = 0;
-        var lookUpsMap = {};
+
         var triples = [];
-        var tableData = [];
-        var dataSource = tableMappings.table;
 
-        var graphUri = tableMappings.graphUri;
-
-        KGbuilder_triplesMaker.allColumns = {};
 
         async.eachSeries(
             data,
@@ -136,8 +121,8 @@ var KGbuilder_triplesMaker = {
                                         });
                                     } else {
                                         if (subjectStr && propertyStr && objectStr) {
-                                            if (!existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr]) {
-                                                existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
+                                            if (!KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr]) {
+                                                KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
                                                 triples.push({
                                                     s: subjectStr,
                                                     p: propertyStr,
@@ -400,7 +385,7 @@ var KGbuilder_triplesMaker = {
         var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
 
         if (!KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + prop + "_" + objectStr]) {
-            KGbuilder_triplesWriter.existingTriples[subjectStr + "_" + prop + "_" + objectStr] = 1;
+            KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + prop + "_" + objectStr] = 1;
             restrictionTriples.push({
                 s: blankNode,
                 p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
@@ -585,7 +570,7 @@ var KGbuilder_triplesMaker = {
             });
         } else if (tableMappings.datasourceConfig) {
             databaseModel.getConnection(tableMappings.datasourceConfig.dbName).then((connection) => {
-                const request = connection.select("*").from(tableMappings.table);
+                const request = connection.select ("*").from(tableMappings.table);
                 if (options.sampleSize) {
                     request.limit(options.sampleSize);
                 }

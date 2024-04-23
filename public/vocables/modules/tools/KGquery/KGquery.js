@@ -182,19 +182,24 @@ var KGquery = (function() {
         }
     };
 
+
+   self.addEdgeNodes = function(fromNode,toNode,edge) {
+        var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
+        self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
+        self.addNodeToQueryElement(queryElement, toNode, "toNode");
+        var subPath = [edge.from, edge.to, edge.data.propertyId];
+
+        var path = [subPath];
+        var pathWithVarNames = KGquery_paths.substituteClassIdToVarNameInPath(queryElement, path);
+        queryElement.paths = pathWithVarNames;
+        self.addQueryElementToQuerySet(self.currentQuerySet);
+    };
+
+
+
     self.addEdge = function(edge, evt) {
 
-        var addEdgeNodes = function() {
-            var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
-            self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
-            self.addNodeToQueryElement(queryElement, toNode, "toNode");
-            var subPath = [edge.from, edge.to, edge.data.propertyId];
 
-            var path = [subPath];
-            var pathWithVarNames = KGquery_paths.substituteClassIdToVarNameInPath(queryElement, path);
-            queryElement.paths = pathWithVarNames;
-            self.addQueryElementToQuerySet(self.currentQuerySet);
-        };
 
 
         var fromNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.from);
@@ -207,12 +212,21 @@ var KGquery = (function() {
 
             if (edge.data.propertyId == "rdfs:member") {
                 fromNode.alias = fromNode.label + "_parent";
-                addEdgeNodes();
+                var options = { memberClass: fromNode.data.id };
+
+                Containers_widget.showDialog(self.currentSource, options, function(err, result) {
+              //  KGquery_filter.selectContainerFilters(fromNode,function(err, result){
+                    fromNode.containerFilter = {
+                        classId: result.topMember.id,
+                        depth: result.depth
+                    }
+                    KGquery.addEdgeNodes(fromNode,toNode,edge);
+                })
 
 
             } else {
                 toNode.alias = toNode.label + (self.currentQueryElement.paths.length + 1);
-                return addEdgeNodes();
+                return KGquery.addEdgeNodes(fromNode,toNode,edge);
             }
         }
 
@@ -296,6 +310,7 @@ var KGquery = (function() {
 
     self.execPathQuery = function(options, callback) {
         var optionalPredicatesSparql = "";
+        var containerFiltersSparql=""
         var query = "";
         var data;
         async.series([
@@ -357,10 +372,6 @@ var KGquery = (function() {
 
                             var subjectVarName = self.getVarName(queryElement.fromNode);
 
-                            var containerFilter = KGquery_filter.containersFilterMap[subjectVarName];
-                            if (containerFilter) {
-                                filterStr += " FILTER(" + subjectVarName + "=<" + containerFilter.classId + ">) ";
-                            }
 
                             var subjectUri = queryElement.fromNode.id;
                             if (!distinctTypesMap[subjectVarName]) {
@@ -382,7 +393,8 @@ var KGquery = (function() {
                                 var propertyStr = pathItem[2];
 
                                 if (propertyStr == "rdfs:member") {
-                                    var depth = containerFilter.depth || 1;
+                                    filterStr += "\n FILTER(" + subjectVarName + "=<" + queryElement.fromNode.containerFilter.classId + ">)\n ";
+                                    var depth = queryElement.fromNode.containerFilter.depth || 1;
                                     {
                                         if (depth) {
                                             var str = "";
@@ -416,14 +428,7 @@ var KGquery = (function() {
                             });
 
 
-                            for (var key in querySet.classFiltersMap) {
 
-                                var filterType = filterStr.match(/<.*>/) ? "uri" : "literal";
-                                filterClassLabels["?" + querySet.classFiltersMap[key].class.label] = filterType;
-                            }
-                            if (!options.aggregate) {
-                                otherPredicatesStrs += " \n" + KGquery_filter.getOtherPredicates(queryElement, filterClassLabels);
-                            }
                         });
 
 
@@ -439,10 +444,10 @@ var KGquery = (function() {
                         } else {
                         }
 
-                        whereStr += "{" + predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs + "}";
+                        whereStr +=  predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
                     });
 
-                    whereStr+=optionalPredicatesSparql
+                    whereStr += optionalPredicatesSparql ;
 
                     var fromStr = Sparql_common.getFromStr(self.currentSource);
                     query =
@@ -646,6 +651,9 @@ var KGquery = (function() {
     };
 
     self.clearAll = function(exceptSetQueries) {
+        self.querySets.sets.forEach(function(querySet) {
+            querySet.classFiltersMap={}
+        })
         self.querySets = { sets: [], groups: [], currentIndex: -1 };
         self.divsMap = {};
         self.currentQuerySet = self.addQuerySet();
@@ -657,6 +665,8 @@ var KGquery = (function() {
             self.classeMap = {};
             self.SetQueries = [];
             self.queryPathesMap = {};
+
+
             self.divsMap = {};
             KGquery_graph.resetVisjNodes();
             KGquery_graph.resetVisjEdges();

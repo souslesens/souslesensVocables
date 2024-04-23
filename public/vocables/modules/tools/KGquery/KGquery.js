@@ -23,7 +23,7 @@ import KGquery_filter from "./KGquery_filter.js";
 
 import Containers_widget from "../containers/containers_widget.js";
 
-var KGquery = (function() {
+var KGquery = (function () {
     var self = {};
     self.querySets = { sets: [], groups: [], currentIndex: -1 };
     self.divsMap = {};
@@ -34,22 +34,22 @@ var KGquery = (function() {
     self.maxOptionalPredicatesInQuery = 8;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
-    self.onLoaded = function() {
-        $("#actionDivContolPanelDiv").load("modules/tools/KGquery/html/KGquery_leftPanel.html", function() {
+    self.onLoaded = function () {
+        $("#actionDivContolPanelDiv").load("modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
             KGquery_graph.init();
         });
-        $("#graphDiv").load("modules/tools/KGquery/html/KGquery_centralPanel.html", function() {
+        $("#graphDiv").load("modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
             self.currentSource = Lineage_sources.activeSource;
             self.showSourcesDialog();
         });
     };
 
-    self.init = function() {
+    self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
         SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
     };
 
-    self.showSourcesDialog = function(forceDialog) {
+    self.showSourcesDialog = function (forceDialog) {
         if (!forceDialog && Config.userTools["KGquery"].urlParam_source) {
             self.currentSource = Config.userTools["KGquery"].urlParam_source;
             self.init();
@@ -58,9 +58,9 @@ var KGquery = (function() {
 
         var options = {
             includeSourcesWithoutSearchIndex: true,
-            withCheckboxes: false
+            withCheckboxes: false,
         };
-        var selectTreeNodeFn = function(event, obj) {
+        var selectTreeNodeFn = function (event, obj) {
             $("#mainDialogDiv").dialog("close");
             self.currentSource = obj.node.id;
             self.init();
@@ -70,7 +70,7 @@ var KGquery = (function() {
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
     };
 
-    self.addQuerySet = function(booleanOperator) {
+    self.addQuerySet = function (booleanOperator) {
         var label = "";
         var color = self.pathEdgesColors[self.querySets.sets.length];
         var querySetDivId = KGquery_controlPanel.addQuerySet("KGquery_pathsDiv", booleanOperator, label, color);
@@ -81,7 +81,7 @@ var KGquery = (function() {
             color: color,
             booleanOperator: booleanOperator,
             classFiltersMap: {},
-            index: self.querySets.sets.length
+            index: self.querySets.sets.length,
         }; // array of queryElements with a color and a currentIndex
 
         self.addQueryElementToQuerySet(querySet);
@@ -90,7 +90,7 @@ var KGquery = (function() {
         self.divsMap[querySetDivId] = querySet;
     };
 
-    self.addQueryElementToQuerySet = function(querySet) {
+    self.addQueryElementToQuerySet = function (querySet) {
         $("#KGquery_SetsControlsDiv").show();
         var queryElementDivId = KGquery_controlPanel.addQueryElementToCurrentSet(querySet.divId);
         var queryElement = {
@@ -102,7 +102,7 @@ var KGquery = (function() {
             fromNodeDivId: "",
             toNodeDivId: "",
             index: querySet.elements.length,
-            setIndex: querySet.index
+            setIndex: querySet.index,
         };
         querySet.elements.push(queryElement);
         self.currentQueryElement = queryElement;
@@ -110,7 +110,7 @@ var KGquery = (function() {
         return queryElement;
     };
 
-    self.addNodeToQueryElement = function(queryElement, node, role) {
+    self.addNodeToQueryElement = function (queryElement, node, role) {
         self.classeMap[node.id] = node;
         queryElement[role] = node;
         if (role == "toNode") {
@@ -125,7 +125,7 @@ var KGquery = (function() {
         self.divsMap[nodeDivId] = node;
     };
 
-    self.addNode = function(selectedNode, nodeEvent) {
+    self.addNode = function (selectedNode, nodeEvent) {
         if (!selectedNode) {
             return;
         }
@@ -138,7 +138,7 @@ var KGquery = (function() {
         if (self.currentQuerySet.elements.length > 1) {
             var excludeSelf = false;
             $("#KGquery_SetsControlsDiv").show();
-            KGquery_paths.getNearestNodeId(node.id, self.currentQuerySet, excludeSelf, function(err, nearestNodeId) {
+            KGquery_paths.getNearestNodeId(node.id, self.currentQuerySet, excludeSelf, function (err, nearestNodeId) {
                 if (err) {
                     return acllback(err.responseText);
                 }
@@ -147,7 +147,7 @@ var KGquery = (function() {
                 var nearestNode = self.classeMap[nearestNodeId];
                 self.addNodeToQueryElement(self.currentQueryElement, nearestNode, "toNode");
 
-                KGquery_paths.setQueryElementPath(self.currentQueryElement, function(err, result) {
+                KGquery_paths.setQueryElementPath(self.currentQueryElement, function (err, result) {
                     if (err) {
                         return alert(err.responseText);
                     }
@@ -169,7 +169,7 @@ var KGquery = (function() {
             }
 
             self.currentQueryElement.toNode = node;
-            KGquery_paths.setQueryElementPath(self.currentQueryElement, function(err, result) {
+            KGquery_paths.setQueryElementPath(self.currentQueryElement, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
@@ -182,8 +182,7 @@ var KGquery = (function() {
         }
     };
 
-
-   self.addEdgeNodes = function(fromNode,toNode,edge) {
+    self.addEdgeNodes = function (fromNode, toNode, edge) {
         var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
         self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
         self.addNodeToQueryElement(queryElement, toNode, "toNode");
@@ -195,13 +194,7 @@ var KGquery = (function() {
         self.addQueryElementToQuerySet(self.currentQuerySet);
     };
 
-
-
-    self.addEdge = function(edge, evt) {
-
-
-
-
+    self.addEdge = function (edge, evt) {
         var fromNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.from);
         fromNode = JSON.parse(JSON.stringify(fromNode));
 
@@ -214,27 +207,22 @@ var KGquery = (function() {
                 fromNode.alias = fromNode.label + "_parent";
                 var options = { memberClass: fromNode.data.id };
 
-                Containers_widget.showDialog(self.currentSource, options, function(err, result) {
-              //  KGquery_filter.selectContainerFilters(fromNode,function(err, result){
+                Containers_widget.showDialog(self.currentSource, options, function (err, result) {
+                    //  KGquery_filter.selectContainerFilters(fromNode,function(err, result){
                     fromNode.containerFilter = {
                         classId: result.topMember.id,
-                        depth: result.depth
-                    }
-                    KGquery.addEdgeNodes(fromNode,toNode,edge);
-                })
-
-
+                        depth: result.depth,
+                    };
+                    KGquery.addEdgeNodes(fromNode, toNode, edge);
+                });
             } else {
                 toNode.alias = toNode.label + (self.currentQueryElement.paths.length + 1);
-                return KGquery.addEdgeNodes(fromNode,toNode,edge);
+                return KGquery.addEdgeNodes(fromNode, toNode, edge);
             }
         }
-
-
     };
 
-
-    self.aggregateQuery = function() {
+    self.aggregateQuery = function () {
         var message = "";
         if (self.querySets.sets.length > 0) {
             message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
@@ -242,8 +230,8 @@ var KGquery = (function() {
 
         var varsMap = {};
 
-        self.querySets.sets.forEach(function(querySet) {
-            querySet.elements.forEach(function(queryElement, queryElementIndex) {
+        self.querySets.sets.forEach(function (querySet) {
+            querySet.elements.forEach(function (queryElement, queryElementIndex) {
                 if (queryElement.fromNode) {
                     var key = queryElement.fromNode.alias || queryElement.fromNode.label;
                     varsMap[key] = queryElement.fromNode;
@@ -257,18 +245,18 @@ var KGquery = (function() {
 
         IndividualAggregateWidget.showDialog(
             null,
-            function(callback) {
+            function (callback) {
                 callback(varsMap);
             },
 
-            function(err, aggregateClauses) {
+            function (err, aggregateClauses) {
                 self.queryKG("table", { aggregate: aggregateClauses });
             },
             message
         );
     };
 
-    self.queryKG = function(output, options, isVirtualSQLquery) {
+    self.queryKG = function (output, options, isVirtualSQLquery) {
         if (!options) {
             options = {};
         }
@@ -284,7 +272,7 @@ var KGquery = (function() {
             return SQLquery_filters.showFiltersDialog(self.querySets, self.currentSource);
         }
 
-        self.execPathQuery(options, function(err, result) {
+        self.execPathQuery(options, function (err, result) {
             self.message("", true);
             if (err) {
                 if (err.responseText) {
@@ -307,22 +295,20 @@ var KGquery = (function() {
         });
     };
 
-
-    self.execPathQuery = function(options, callback) {
+    self.execPathQuery = function (options, callback) {
         var optionalPredicatesSparql = "";
-        var containerFiltersSparql=""
+        var containerFiltersSparql = "";
         var query = "";
         var data;
-        async.series([
-
-
+        async.series(
+            [
                 //selectOptionalPredicates
-                function(callbackSeries) {
+                function (callbackSeries) {
                     if (options.aggregate) {
                         return callbackSeries();
                     }
 
-                    KGquery_filter.selectOptionalPredicates(self.querySets, function(err, result) {
+                    KGquery_filter.selectOptionalPredicates(self.querySets, function (err, result) {
                         if (err) {
                             MainController.UI.message(err, true);
                             callbackSeries(err);
@@ -332,9 +318,8 @@ var KGquery = (function() {
                     });
                 },
 
-
                 //build query
-                function(callbackSeries) {
+                function (callbackSeries) {
                     if (!options) {
                         options = {};
                     }
@@ -352,7 +337,7 @@ var KGquery = (function() {
                     var whereStr = "";
                     var uniqueQueries = {};
 
-                    self.querySets.sets.forEach(function(querySet) {
+                    self.querySets.sets.forEach(function (querySet) {
                         if (querySet.booleanOperator) {
                             whereStr += "\n " + querySet.booleanOperator + "\n ";
                         }
@@ -361,7 +346,7 @@ var KGquery = (function() {
                         var filterStr = "";
                         var otherPredicatesStrs = "";
 
-                        querySet.elements.forEach(function(queryElement, queryElementIndex) {
+                        querySet.elements.forEach(function (queryElement, queryElementIndex) {
                             if (!queryElement.toNode) {
                                 if (queryElement.fromNode) {
                                 } else {
@@ -369,9 +354,7 @@ var KGquery = (function() {
                                 }
                             }
 
-
                             var subjectVarName = self.getVarName(queryElement.fromNode);
-
 
                             var subjectUri = queryElement.fromNode.id;
                             if (!distinctTypesMap[subjectVarName]) {
@@ -389,7 +372,7 @@ var KGquery = (function() {
                                 }
                             }
                             var filterClassLabels = {};
-                            queryElement.paths.forEach(function(pathItem, pathIndex) {
+                            queryElement.paths.forEach(function (pathItem, pathIndex) {
                                 var propertyStr = pathItem[2];
 
                                 if (propertyStr == "rdfs:member") {
@@ -426,16 +409,11 @@ var KGquery = (function() {
                                     predicateStr += basicPredicate;
                                 }
                             });
-
-
-
                         });
-
 
                         for (var key in querySet.classFiltersMap) {
                             filterStr += querySet.classFiltersMap[key].filter + " \n";
                         }
-
 
                         if (options.aggregate) {
                             whereStr += options.aggregate.where;
@@ -444,10 +422,10 @@ var KGquery = (function() {
                         } else {
                         }
 
-                        whereStr +=  predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
+                        whereStr += predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
                     });
 
-                    whereStr += optionalPredicatesSparql ;
+                    whereStr += optionalPredicatesSparql;
 
                     var fromStr = Sparql_common.getFromStr(self.currentSource);
                     query =
@@ -461,47 +439,41 @@ var KGquery = (function() {
                     query += " " + groupByStr + " limit 10000";
 
                     callbackSeries();
-
-
                 },
 
-
                 //execute query
-                function(callbackSeries) {
-
+                function (callbackSeries) {
                     var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
 
                     var currentSparqlQuery = {
                         url: url,
                         query: query,
-                        source: self.currentSource
+                        source: self.currentSource,
                     };
 
                     if (options.dontExecute) {
                         return callback(null, currentSparqlQuery);
                     }
 
-
-                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource, caller: "getObjectRestrictions" }, function(err, result) {
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource, caller: "getObjectRestrictions" }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
                         data = result;
                         callbackSeries(null, result);
                     });
-
                 },
-                function(callbackSeries) {
+                function (callbackSeries) {
                     callbackSeries();
-                }
-            ]
-            , function(err) {
+                },
+            ],
+            function (err) {
                 callback(err, data);
-            });
+            }
+        );
     };
 
-
-    self.queryResultToVisjsGraph = function(result) {
+    self.queryResultToVisjsGraph = function (result) {
         var classNodes = self.getAllQueryPathClasses();
 
         var data = result.results.bindings;
@@ -511,11 +483,11 @@ var KGquery = (function() {
 
         var existingNodes = {};
         var visjsData = { nodes: [], edges: [] };
-        data.forEach(function(item, index) {
+        data.forEach(function (item, index) {
             var lineNodeId = common.getRandomHexaId(5);
             visjsData.nodes.push(VisjsUtil.getVisjsNode(self.currentSource, lineNodeId, "", null, { shape: "text", size: 2, color: "#ddd" }));
 
-            classNodes.forEach(function(classNode) {
+            classNodes.forEach(function (classNode) {
                 var varNameKey = self.getVarName(classNode, true);
                 var labelKey = varNameKey + "Label";
                 if (!item[varNameKey]) {
@@ -527,51 +499,51 @@ var KGquery = (function() {
                     var options = {
                         shape: "triangle",
                         size: Lineage_whiteboard.defaultShapeSize,
-                        color: common.getResourceColor("class", varNameKey)
+                        color: common.getResourceColor("class", varNameKey),
                     };
                     var label = item[labelKey] ? item[labelKey].value : Sparql_common.getLabelFromURI(item[varNameKey].value);
                     visjsData.nodes.push(VisjsUtil.getVisjsNode(self.currentSource, item[varNameKey].value, label, null, options));
                     visjsData.edges.push({
                         id: lineNodeId + item[varNameKey].value,
                         from: item[varNameKey].value,
-                        to: lineNodeId
+                        to: lineNodeId,
                     });
                 }
             });
         });
 
-        ResponsiveUI.onToolSelect("lineage", null, function() {
-            KGquery_myQueries.save(function(err, query) {
+        ResponsiveUI.onToolSelect("lineage", null, function () {
+            KGquery_myQueries.save(function (err, query) {
                 // Config.clientCache.KGquery = query;
             });
-            setTimeout(function() {
+            setTimeout(function () {
                 Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
             }, 2000);
         });
     };
-    self.queryToTagsGeometry = function(data) {
+    self.queryToTagsGeometry = function (data) {
         var tagsMap = {};
-        data.forEach(function(item) {
+        data.forEach(function (item) {
             for (var key in item) {
                 if (key.indexOf("tag") > -1) {
                     tagsMap[item[key].value] = 1;
                 }
             }
         });
-        ResponsiveUI.onToolSelect("TagsGeometry", null, function() {
-            setTimeout(function() {
+        ResponsiveUI.onToolSelect("TagsGeometry", null, function () {
+            setTimeout(function () {
                 //   import TagsGeometry from "../../../../plugins/TagsGeometry/public/js/main.js";
                 TagsGeometry.draw(tagsMap);
             }, 2000);
         });
     };
 
-    self.queryResultToTable = function(result) {
+    self.queryResultToTable = function (result) {
         var data = result.results.bindings;
         //prepare columns
         var nonNullCols = {};
-        data.forEach(function(item) {
-            result.head.vars.forEach(function(varName) {
+        data.forEach(function (item) {
+            result.head.vars.forEach(function (varName) {
                 if (varName.length < 3) {
                     return;
                 }
@@ -598,9 +570,9 @@ var KGquery = (function() {
         var tableData = [];
         self.currentData = data;
         self.tableCols = tableCols;
-        data.forEach(function(item, index) {
+        data.forEach(function (item, index) {
             var line = [index];
-            colNames.forEach(function(col) {
+            colNames.forEach(function (col) {
                 var value = null;
                 if (item[col]) {
                     value = item[col].value;
@@ -626,8 +598,8 @@ var KGquery = (function() {
         $("#KGquery_dataTableDialogDiv").css("left", "10px");
         $("#KGquery_dataTableDiv").width("90vW");
         //  $("#mainDialogDiv").html("<div id='KGquery_dataTableDiv' style='width:100vW;heigth:100vH'></div>")
-        Export.showDataTable("KGquery_dataTableDiv", tableCols, tableData, null, { paging: true }, function(err, datatable) {
-            $("#dataTableDivExport").on("click", "td", function() {
+        Export.showDataTable("KGquery_dataTableDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
+            $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();
 
                 var index = table.cell(this).index();
@@ -643,17 +615,17 @@ var KGquery = (function() {
                 }
                 var uri = dataItem[varName].value;
                 var node = { data: { id: uri } };
-                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv", null, function(err) {
+                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv", null, function (err) {
                     $("#smallDialogDiv").parent().css("z-index", 1);
                 });
             });
         });
     };
 
-    self.clearAll = function(exceptSetQueries) {
-        self.querySets.sets.forEach(function(querySet) {
-            querySet.classFiltersMap={}
-        })
+    self.clearAll = function (exceptSetQueries) {
+        self.querySets.sets.forEach(function (querySet) {
+            querySet.classFiltersMap = {};
+        });
         self.querySets = { sets: [], groups: [], currentIndex: -1 };
         self.divsMap = {};
         self.currentQuerySet = self.addQuerySet();
@@ -666,7 +638,6 @@ var KGquery = (function() {
             self.SetQueries = [];
             self.queryPathesMap = {};
 
-
             self.divsMap = {};
             KGquery_graph.resetVisjNodes();
             KGquery_graph.resetVisjEdges();
@@ -678,16 +649,16 @@ var KGquery = (function() {
         }
     };
 
-    self.getVarName = function(node, withoutQuestionMark) {
+    self.getVarName = function (node, withoutQuestionMark) {
         var varName = (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.alias || node.label || Sparql_common.getLabelFromURI(node.id), true);
 
         return varName;
     };
 
-    self.getAllQueryPathClasses = function() {
+    self.getAllQueryPathClasses = function () {
         var classes = [];
-        self.querySets.sets.forEach(function(querySet) {
-            querySet.elements.forEach(function(queryPath) {
+        self.querySets.sets.forEach(function (querySet) {
+            querySet.elements.forEach(function (queryPath) {
                 classes.push(queryPath.fromNode);
                 classes.push(queryPath.toNode);
             });
@@ -695,7 +666,7 @@ var KGquery = (function() {
         return classes;
     };
 
-    self.message = function(message, stopWaitImg) {
+    self.message = function (message, stopWaitImg) {
         $("#KGquery_messageDiv").html(message);
         if (stopWaitImg) {
             $("#KGquery_waitImg").css("display", "none");
@@ -704,7 +675,7 @@ var KGquery = (function() {
         }
     };
 
-    self.switchRightPanel = function(forceGraph) {
+    self.switchRightPanel = function (forceGraph) {
         return;
         var isGraphDisplayed = $("#KGquery_graphDiv").css("display");
         if (!forceGraph && isGraphDisplayed == "block") {
@@ -716,23 +687,23 @@ var KGquery = (function() {
         }
     };
 
-    self.onBooleanOperatorChange = function(querySetDivId, value) {
+    self.onBooleanOperatorChange = function (querySetDivId, value) {
         self.divsMap[querySetDivId].booleanOperator = value;
     };
 
-    self.removeQueryElement = function(queryElementDivId) {
+    self.removeQueryElement = function (queryElementDivId) {
         $("#" + queryElementDivId).remove();
         var queryElement = self.divsMap[queryElementDivId];
         self.querySets.sets[queryElement.setIndex].elements.splice(queryElement.index, 1);
     };
 
-    self.removeSet = function(querySetDivId) {
+    self.removeSet = function (querySetDivId) {
         $("#" + querySetDivId).remove();
         var set = self.divsMap[querySetDivId];
         self.querySets.sets.splice(set.index, 1);
     };
 
-    self.onOutputTypeSelect = function(output) {
+    self.onOutputTypeSelect = function (output) {
         if (output == "") {
             return;
         }
@@ -740,7 +711,7 @@ var KGquery = (function() {
         $("#KGquery_outputTypeSelect").val("");
     };
 
-    self.addOutputType = function() {
+    self.addOutputType = function () {
         $("KGquery_outputTypeSelect");
     };
 

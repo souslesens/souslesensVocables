@@ -101,12 +101,9 @@ var KGquery_filter_bot = (function () {
         BotEngine.showList(choices, "individualsFilterType");
     };
     self.functions.listPropertiesFn = function () {
-
-        if(self.params.property){
-            return _botEngine.nextStep()
+        if (self.params.property) {
+            return _botEngine.nextStep();
         }
-
-
 
         var choices = [{ id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label" }];
         if (self.data && self.data.nonObjectProperties) {
@@ -114,7 +111,6 @@ var KGquery_filter_bot = (function () {
         }
         BotEngine.showList(choices, "property");
     };
-
 
     self.functions.choosePropertyOperatorFn = function () {
         var datatype = null;

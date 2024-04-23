@@ -1,11 +1,7 @@
-
-
 <div>
     <div class="input-group-prepend">
-        <div class="SearchButtonIconLeft border-without-raduis-theme1"
-             style="height: 33.5px; padding-left: 7px; padding-right: 5px">
-            <button class="search-icon slsv-invisible-button" onclick="Containers_widget.search()"
-                    style="margin-top: 4px; height: 20px; width: 20px"></button>
+        <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+            <button class="search-icon slsv-invisible-button" onclick="Containers_widget.search()" style="margin-top: 4px; height: 20px; width: 20px"></button>
         </div>
     </div>
     <input
@@ -15,8 +11,7 @@
         onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Containers_widget.search()}"
     />
 </div>
-<div style="width:350px;height: 500px;overflow: auto;">
+<div style="width: 350px; height: 500px; overflow: auto">
     <div id="containerWidget_treeDiv"></div>
 </div>
-recursive depth <input id="containerWidget_depthInput" value="10" style="width: 50px">
-<button onclick="Containers_widget.validateDialog()">OK</button>
+recursive depth <input id="containerWidget_depthInput" value="10" style="width: 50px" /> <button onclick="Containers_widget.validateDialog()">OK</button>

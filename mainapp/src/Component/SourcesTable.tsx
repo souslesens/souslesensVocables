@@ -47,7 +47,6 @@ import * as z from "zod";
 
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
-
     const [filteringChars, setFilteringChars] = React.useState("");
     const [orderBy, setOrderBy] = React.useState<keyof ServerSource>("name");
     const [order, setOrder] = React.useState<Order>("asc");
@@ -57,6 +56,14 @@ const SourcesTable = () => {
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
     }
+    const [me, setMe] = React.useState("");
+    React.useEffect(() => {
+        (async () => {
+            const response = await fetch("/api/v1/auth/whoami");
+            const json = (await response.json()) as Response;
+            setMe(json.user.login);
+        })();
+    }, []);
 
     const indices = SRD.withDefault(null, model.indices);
     const graphs = SRD.withDefault(null, model.graphs);
@@ -167,7 +174,7 @@ const SourcesTable = () => {
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <SourceForm source={source} />
+                                                            <SourceForm source={source} me={me} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => deleteSource(source, updateModel)} />
                                                         </Stack>
                                                     </TableCell>
@@ -181,7 +188,7 @@ const SourcesTable = () => {
                             <CsvDownloader separator="&#9;" filename="sources" extension=".tsv" datas={datas as Datas}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
-                            <SourceForm create={true} />
+                            <SourceForm create={true} me={me} />
                         </Stack>
                     </Stack>
                 );
@@ -302,7 +309,7 @@ type SourceFormProps = {
     create?: boolean;
 };
 
-const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFormProps) => {
+const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }: SourceFormProps) => {
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
     const sources = React.useMemo(() => unwrappedSources, [unwrappedSources]);
@@ -329,6 +336,10 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     };
 
     const _handleFieldUpdate = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value });
+
+    if (sourceModel.sourceForm.owner.length == 0) {
+        update({ type: Type.UserUpdatedField, payload: { fieldname: "owner", newValue: me } });
+    }
 
     const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         update({
@@ -423,7 +434,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         <Grid item>
                             <Grid alignItems="center" container wrap="nowrap">
                                 <Grid item flex={1}>
-                                    <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Is this source editable?" />
+                                    <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Editable?" />
                                 </Grid>
                                 <Grid item>
                                     <HelpButton title="Editable" message={sourceHelp.editable} />
@@ -433,7 +444,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         <Grid item>
                             <Grid alignItems="center" container wrap="nowrap">
                                 <Grid item flex={1}>
-                                    <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Is it a draft?" />
+                                    <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Draft?" />
                                 </Grid>
                                 <Grid item>
                                     <HelpButton title="isDraft" message={sourceHelp.isDraft} />
@@ -450,6 +461,16 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 </Grid>
                                 <Grid item>
                                     <HelpButton title="allowIndividuals" message={sourceHelp.allowIndividuals} />
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item>
+                            <Grid alignItems="center" container wrap="nowrap">
+                                <Grid item flex={1}>
+                                    <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.published} onChange={handleCheckbox("published")} />} label="Published?" />
+                                </Grid>
+                                <Grid item>
+                                    <HelpButton title="published" message={sourceHelp.published} />
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -625,6 +646,32 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                     {["Sparql_OWL", "Sparql_SKOS", "Sparql_INDIVIDUALS"].map((schemaType) => (
                                         <MenuItem key={schemaType} value={schemaType}>
                                             {schemaType}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <FormControl>
+                                <InputLabel id="owner">owner</InputLabel>
+                                <Select
+                                    labelId="owner"
+                                    id="owner-select"
+                                    value={sourceModel.sourceForm.owner}
+                                    label="select-owner"
+                                    fullWidth
+                                    style={{ width: "400px" }}
+                                    renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
+                                    onChange={handleFieldUpdate("owner")}
+                                    endAdornment={
+                                        <InputAdornment position="end">
+                                            <HelpButton title="owner" message={sourceHelp.owner} />
+                                        </InputAdornment>
+                                    }
+                                >
+                                    {model.users.data.map((user) => (
+                                        <MenuItem key={user.id} value={user.login}>
+                                            {user.login}
                                         </MenuItem>
                                     ))}
                                 </Select>

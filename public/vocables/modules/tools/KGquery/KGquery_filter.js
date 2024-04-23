@@ -9,7 +9,7 @@ var KGquery_filter = (function() {
 
     self.containersFilterMap={}
 
-    self.filterQueryNonObjectProperties = function(querySets, callback) {
+    self.selectOptionalPredicates = function(querySets, callback) {
         var queryNonObjectProperties = [];
         var uniqueProps = {};
         var labelProperty = {
@@ -19,7 +19,7 @@ var KGquery_filter = (function() {
         };
         querySets.sets.forEach(function(querySet) {
             querySet.elements.forEach(function(queryElement, queryElementIndex) {
-                queryElement.paths.forEach(function(pathItem, pathIndex) {
+               // queryElement.paths.forEach(function(pathItem, pathIndex) {
                     if (queryElement.fromNode) {
 
 
@@ -40,14 +40,14 @@ var KGquery_filter = (function() {
 
                             if (!uniqueProps[subjectVarName + "_" + property.label]) {
                                 uniqueProps[subjectVarName + "_" + property.label] = 1;
-                                queryNonObjectProperties.push({ varName: subjectVarName, property: property, nodeDivId: queryElement.fromNode.data.nodeDivId });
+                                queryNonObjectProperties.push({ varName: subjectVarName, property: property, queryElementData:queryElement.fromNode.data});
                             }
                         });
                         if (addLabel) {
                             if (!uniqueProps[subjectVarName + "_" + "rdfs:label"]) {
                                 uniqueProps[subjectVarName + "_" + "rdfs:label"] = 1;
                             }
-                            queryNonObjectProperties.push({ varName: subjectVarName, property: labelProperty, nodeDivId: queryElement.fromNode.data.nodeDivId });
+                            queryNonObjectProperties.push({ varName: subjectVarName, property: labelProperty, queryElementData:queryElement.fromNode.data});
                         }
 
 
@@ -69,19 +69,19 @@ var KGquery_filter = (function() {
                             }
                             if (!uniqueProps[objectVarName + "_" + property.label]) {
                                 uniqueProps[objectVarName + "_" + property.label] = 1;
-                                queryNonObjectProperties.push({ varName: objectVarName, property: property, nodeDivId: queryElement.toNode.data.nodeDivId });
+                                queryNonObjectProperties.push({ varName: objectVarName, property: property,queryElementData:queryElement.toNode.data });
                             }
                         });
                         if (addLabel) {
                             if (!uniqueProps[objectVarName + "_" + "rdfs:label"]) {
                                 uniqueProps[objectVarName + "_" + "rdfs:label"] = 1;
-                                queryNonObjectProperties.push({ varName: objectVarName, property: labelProperty, nodeDivId: queryElement.toNode.data.nodeDivId });
+                                queryNonObjectProperties.push({ varName: objectVarName, property: labelProperty, queryElementData:queryElement.toNode.data });
                             }
                         }
 
                     }
 
-                });
+               // });
             });
         });
 
@@ -92,54 +92,40 @@ var KGquery_filter = (function() {
             parent: "#",
         })
         queryNonObjectProperties.forEach(function(item) {
-            var label = item.varName + "_" + item.property.label;
+            var id = item.varName + "_" + item.property.label;
             var nodeDivId = item.nodeDivId;
 
 
             jstreeData.push({
-                id: label,
-                text: label + "<button style='vertical-align:middle' class=\"slsv-invisible-button filterIcon\" " +
+                id: id,
+                text: id + "<button style='vertical-align:middle' class=\"slsv-invisible-button filterIcon\" " +
                     "about=\"add filter\" " +
-                    "onclick=\"KGquery_filter.addNodeFilter('" + nodeDivId + "','" + label + "','" + item.property.id + "')\"></button>",
+                   ">"+// "onclick=\"KGquery_filter.addNodeFilter('" + nodeDivId + "','" + label + "','" + item.property.id + "')\">" +
+                    "</button>",
                 parent: "root",
-                data: { property: item.property },
+                data: item,
                 type: "Property"
             });
         });
 
         var options = {
             withCheckboxes: true,
-
+            selectTreeNodeFn: function(event, obj){
+                var node=obj.node
+                KGquery_filter.addNodeFilter(node.data.queryElementData.nodeDivId ,node.data.queryElementData.label ,node.data.property.id )
+            },
 
             validateFn: function(checkedNodes) {
+                KGquery_filter.getOptionalPredicates(checkedNodes,function(err,result){
+                    return callback(err, result)
 
-                queryNonObjectProperties = [];
-                if (!checkedNodes || checkedNodes.length == 0) {
-                    alert("no properties selected");
-                    return callback("no properties selected");
-                }
-                checkedNodes.forEach(function(node) {
-                    if (node.parents.length == 2) {
-                        queryNonObjectProperties.push(node);
-                    }
                 });
 
-
-                if (queryNonObjectProperties.length > self.maxOptionalPredicatesInQuery) {
-                    if (confirm("many properties have been selected. Query may take time or abort, Continue anyway?")) {
-                        return callback(null, queryNonObjectProperties);
-                    } else {
-                        $("#smallDialogDiv").dialog("open")
-                        return callback("query aborted");
-                    }
-                }
-
-                return callback(null, queryNonObjectProperties);
             }
         };
         JstreeWidget.loadJsTree(null, jstreeData, options, function() {
             JstreeWidget.openNodeDescendants(null,"root")
-            if ( queryNonObjectProperties.length < self.maxOptionalPredicatesInQuery) {
+            if (true ||  queryNonObjectProperties.length < self.maxOptionalPredicatesInQuery) {
                 JstreeWidget.checkAll();
 
 
@@ -149,6 +135,57 @@ var KGquery_filter = (function() {
 
 
     };
+    self.getOptionalPredicates=function(propertyNodes, callback){
+        var selectedPropertyNodes = [];
+        if (!propertyNodes || propertyNodes.length == 0) {
+            alert("no properties selected");
+            return callback("no properties selected");
+        }
+        propertyNodes.forEach(function(node) {
+            if (node.parents.length == 2) {
+                selectedPropertyNodes.push(node);
+            }
+        });
+
+
+        if (selectedPropertyNodes.length > self.maxOptionalPredicatesInQuery) {
+            if (confirm("many properties have been selected. Query may take time or abort, Continue anyway?")) {
+              ;//  return callback(null, queryNonObjectProperties);
+            } else {
+                $("#smallDialogDiv").dialog("open")
+                return callback("query aborted");
+            }
+        }
+
+
+        function addToStringIfNotExists(str, text) {
+            if (text.indexOf(str) > -1) {
+                return text;
+            } else {
+                return text + str;
+            }
+        }
+
+
+
+      var optionalPredicatesSparql = "";
+
+        selectedPropertyNodes.forEach(function(propertyNode) {
+            var optionalStr = " OPTIONAL "
+            var data = propertyNode.data
+
+            var propertyStr=""
+            if(data.property.id.startsWith("http")){
+                propertyStr="<" + data.property.id+">"
+            }else{
+                propertyStr=data.property.id
+            }
+            optionalPredicatesSparql = addToStringIfNotExists(optionalStr + " {?" + data.varName +" "+ propertyStr+ " ?" + data.varName + "_" + data.property.label + "}\n", optionalPredicatesSparql);
+
+        })
+        
+        return callback(null,optionalPredicatesSparql )
+    }
 
 
     self.getAggregatePredicates = function(groupByPredicates) {

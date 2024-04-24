@@ -20,19 +20,19 @@ import ResponsiveUI from "../../responsive/responsiveUI.js";
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var MainController = (function () {
+var MainController = (function() {
     var self = {};
 
     self.currentTool = null;
     self.currentSchemaType = null;
     self.currentSource = null;
 
-    self.initConfig = function (callback) {
+    self.initConfig = function(callback) {
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/config",
             dataType: "json",
-            success: function (serverConfig, _textStatus, _jqXHR) {
+            success: function(serverConfig, _textStatus, _jqXHR) {
                 Config.default_lang = serverConfig.default_lang || "en";
                 Config.sparql_server = serverConfig.sparql_server;
                 Config.wiki = serverConfig.wiki;
@@ -47,22 +47,22 @@ var MainController = (function () {
 
                 return callback();
             },
-            error: function (err) {
+            error: function(err) {
                 return callback(err);
-            },
+            }
         });
     };
 
-    self.loadSources = function (sourcesFile, callback) {
+    self.loadSources = function(sourcesFile, callback) {
         var _payload = {
-            getSources: 1,
+            getSources: 1
         };
 
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/sources",
             dataType: "json",
-            success: function (data_, _textStatus, _jqXHR) {
+            success: function(data_, _textStatus, _jqXHR) {
                 const data = data_.resources;
                 for (var source in data) {
                     if (data[source].sparql_server && data[source].sparql_server.url == "_default") {
@@ -76,41 +76,41 @@ var MainController = (function () {
                     return callback();
                 }
             },
-            error: function (err) {
+            error: function(err) {
                 alert("cannot load sources");
                 // eslint-disable-next-line no-console
                 console.log(err);
                 if (callback) {
                     return callback();
                 }
-            },
+            }
         });
     };
-    self.loadProfiles = function (callback) {
+    self.loadProfiles = function(callback) {
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/profiles",
             dataType: "json",
-            success: function (data, _textStatus, _jqXHR) {
+            success: function(data, _textStatus, _jqXHR) {
                 Config.profiles = data.resources;
                 if (callback) {
                     return callback();
                 }
             },
-            error: function (err) {
+            error: function(err) {
                 alert("cannot load profiles");
                 // eslint-disable-next-line no-console
                 console.log(err);
                 if (callback) {
                     return callback();
                 }
-            },
+            }
         });
     };
 
-    self.writeUserLog = function (user, tool, source) {
+    self.writeUserLog = function(user, tool, source) {
         var payload = {
-            infos: user.identifiant + "," + tool + "," + source,
+            infos: user.identifiant + "," + tool + "," + source
         };
         $.ajax({
             type: "POST",
@@ -118,13 +118,13 @@ var MainController = (function () {
             data: payload,
             dataType: "json",
 
-            success: function (_data, _textStatus, _jqXHR) {
+            success: function(_data, _textStatus, _jqXHR) {
                 // Pass
             },
-            error: function (err) {
+            error: function(err) {
                 // eslint-disable-next-line no-console
                 console.log(err);
-            },
+            }
         });
     };
 
@@ -132,16 +132,16 @@ var MainController = (function () {
         return Object.entries(Config.profiles).filter(([_key, val]) => val.name === valueCheckedAgainst);
     }
 
-    self.onAfterLogin = function (callback) {
+    self.onAfterLogin = function(callback) {
         if (!authentication.currentUser) {
             return alert(" no user identified");
         }
         Config.clientCache = {};
         var groups = authentication.currentUser.groupes;
 
-        MainController.loadProfiles(function (_err, _result) {
+        MainController.loadProfiles(function(_err, _result) {
             //  Config.currentProfile=Config.profiles["reader_all"]
-            groups.forEach(function (group) {
+            groups.forEach(function(group) {
                 if (groupWithinCurrentProfile(group).length) {
                     return (Config.currentProfile = groupWithinCurrentProfile(group)[0][1]);
                 }
@@ -149,7 +149,7 @@ var MainController = (function () {
 
             async.series(
                 [
-                    function (callbackSeries) {
+                    function(callbackSeries) {
                         var paramsMap = common.getUrlParamsMap();
                         if (paramsMap.sourcesFile) {
                             Config.currentProfile.sourcesFile = paramsMap.sourcesFile;
@@ -157,35 +157,35 @@ var MainController = (function () {
                         callbackSeries();
                     },
 
-                    function (callbackSeries) {
-                        MainController.loadSources(null, function (_err, _result) {
+                    function(callbackSeries) {
+                        MainController.loadSources(null, function(_err, _result) {
                             callbackSeries(_err);
                         });
                     },
-                    function (callbackSeries) {
+                    function(callbackSeries) {
                         MainController.initControllers();
                         callbackSeries(_err);
                     },
 
-                    function (callbackSeries) {
+                    function(callbackSeries) {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
                         // return callbackSeries();
 
-                        OntologyModels.registerSourcesModel(sources, function (err) {
+                        OntologyModels.registerSourcesModel(sources, function(err) {
                             callbackSeries(err);
                         });
                     },
-                    function (callbackSeries) {
+                    function(callbackSeries) {
                         MainController.UI.showToolsList("toolsTreeDiv");
                         callbackSeries();
                     },
-                    function (callbackSeries) {
-                        MainController.parseUrlParam(function () {
+                    function(callbackSeries) {
+                        MainController.parseUrlParam(function() {
                             callbackSeries();
                         });
-                    },
+                    }
                 ],
-                function (_err) {
+                function(_err) {
                     MainController.UI.configureUI();
                 }
             );
@@ -193,10 +193,10 @@ var MainController = (function () {
         });
     };
 
-    self.initControllers = function () {
+    self.initControllers = function() {
         Object.keys(Config.sources)
             .sort()
-            .forEach(function (sourceLabel) {
+            .forEach(function(sourceLabel) {
                 if (!Config.sources[sourceLabel].controllerName) {
                     var controllerName = Config.sources[sourceLabel].controller;
                     Config.sources[sourceLabel].controllerName = controllerName;
@@ -206,9 +206,10 @@ var MainController = (function () {
     };
 
     self.UI = {
-        configureUI: function () {},
+        configureUI: function() {
+        },
 
-        showToolsList: function (treeDiv) {
+        showToolsList: function(treeDiv) {
             $(".max-height").height($(window).height() - 300);
             var treeData = [];
             for (var key in Config.userTools) {
@@ -218,19 +219,19 @@ var MainController = (function () {
                         text: Config.userTools[key].label,
                         type: "tool",
                         parent: "#",
-                        data: Config.userTools[key],
+                        data: Config.userTools[key]
                     });
                 }
             }
             //})
             JstreeWidget.loadJsTree(treeDiv, treeData, {
-                selectTreeNodeFn: function (evt, obj) {
+                selectTreeNodeFn: function(evt, obj) {
                     self.UI.initTool(obj.node.id);
-                },
+                }
             });
         },
 
-        initTool: function (toolId, callback) {
+        initTool: function(toolId, callback) {
             self.currentTool = toolId;
             var toolObj = Config.userTools[toolId];
             self.currentSource = null;
@@ -251,7 +252,7 @@ var MainController = (function () {
                 $("#accordion").accordion("option", { active: 2 });
                 MainController.currentSource = null;
 
-                controller.onLoaded(function (err, result) {
+                controller.onLoaded(function(err, result) {
                     if (callback) {
                         callback(err, result);
                     }
@@ -266,7 +267,7 @@ var MainController = (function () {
                 MainController.UI.onSourceSelect();
             } else {
                 var options = {
-                    withCheckboxes: toolObj.multiSources,
+                    withCheckboxes: toolObj.multiSources
                 };
                 SourceSelectorWidget.initWidget(null, "sourcesTreeDiv", false, null, null, options);
 
@@ -284,7 +285,7 @@ var MainController = (function () {
             }
 
             if (controller.onLoaded) {
-                controller.onLoaded(function (err, result) {
+                controller.onLoaded(function(err, result) {
                     if (callback) {
                         callback(err, result);
                     }
@@ -292,7 +293,7 @@ var MainController = (function () {
             }
         },
 
-        getJstreeConceptsContextMenu: function () {
+        getJstreeConceptsContextMenu: function() {
             if (!self.currentTool || !Config.userTools[self.currentTool]) {
                 return;
             }
@@ -302,7 +303,7 @@ var MainController = (function () {
             }
         },
 
-        onSourceSelect: function (event) {
+        onSourceSelect: function(event) {
             if (Config.userTools[self.currentTool].multiSources) {
                 return;
             }
@@ -316,17 +317,22 @@ var MainController = (function () {
             }
         },
 
-        message: function (message, stopWaitImg, startWaitImg) {
-            $("#messageDiv").html(message);
+        message: function(message, stopWaitImg, startWaitImg) {
+            if (message.length > 200) {
+                alert(message);
+            } else {
+                $("#messageDiv").html(message);
+            }
             if (stopWaitImg) {
                 $("#waitImg").css("display", "none");
             }
             if (startWaitImg) {
                 $("#waitImg").css("display", "block");
             }
+
         },
 
-        setCredits: function () {
+        setCredits: function() {
             var LateralPannelWidth = $("#lateralPanelDiv").width();
             var gifStart = $(window).width() / 2 - LateralPannelWidth + 100;
             var html =
@@ -339,7 +345,7 @@ var MainController = (function () {
             $("#graphDiv").html(html);
         },
 
-        updateActionDivLabel: function (html) {
+        updateActionDivLabel: function(html) {
             if (html) {
                 $("#toolPanelLabel").html(html);
             }
@@ -350,7 +356,7 @@ var MainController = (function () {
             }
         },
 
-        onAccordionChangePanel: function (panelLabel) {
+        onAccordionChangePanel: function(panelLabel) {
             if (self.previousPanelLabel && self.previousPanelLabel == "toolPanelDiv") {
                 // Pass
             } else {
@@ -359,7 +365,7 @@ var MainController = (function () {
             self.previousPanelLabel = panelLabel;
         },
 
-        showHideRightPanel: function (showOrHide) {
+        showHideRightPanel: function(showOrHide) {
             var w = $(window).width();
             var show = false;
             if (!showOrHide) {
@@ -396,24 +402,24 @@ var MainController = (function () {
                 $("#rightPanelDiv_searchIconInput").attr("src", "./icons/oldIcons/search.png");
             }
         },
-        showCurrentQuery: function () {
+        showCurrentQuery: function() {
             $("#mainDialogDiv").html("<textarea style='width: 100%;height: 400px'>" + Sparql_proxy.currentQuery + "</textarea>");
             $("#mainDialogDiv").dialog("open");
         },
-        copyCurrentQuery: function () {
+        copyCurrentQuery: function() {
             common.copyTextToClipboard(Sparql_proxy.currentQuery);
         },
-        logout: function () {
+        logout: function() {
             // eslint-disable-next-line no-console
             console.log("logout");
-        },
+        }
     };
 
-    self.test = function () {
+    self.test = function() {
         //   bc.postMessage("bc")
     };
 
-    self.parseUrlParam = function (callback) {
+    self.parseUrlParam = function(callback) {
         var paramsMap = common.getUrlParamsMap();
 
         // old or new url

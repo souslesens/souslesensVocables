@@ -22,7 +22,6 @@ describe("UserModelJson", () => {
                 groups: ["admin"],
                 source: "json",
                 _type: "user",
-                token: "admin-token",
                 allowSourceCreation: false,
                 maxNumberCreatedSource: 5,
             },
@@ -32,7 +31,6 @@ describe("UserModelJson", () => {
                 groups: ["owl_only"],
                 source: "json",
                 _type: "user",
-                token: "owl-token",
                 allowSourceCreation: false,
                 maxNumberCreatedSource: 5,
             },
@@ -42,7 +40,6 @@ describe("UserModelJson", () => {
                 groups: ["skos_only"],
                 source: "json",
                 _type: "user",
-                token: "skos-token",
                 allowSourceCreation: false,
                 maxNumberCreatedSource: 5,
             },
@@ -55,8 +52,8 @@ describe("UserModelJson", () => {
             login: "admin",
             groups: ["admin"],
             source: "json",
-            _type: "user",
             token: "admin-token",
+            _type: "user",
             allowSourceCreation: false,
             maxNumberCreatedSource: 5,
         });
@@ -104,7 +101,6 @@ describe("UserModelJson", () => {
         };
         await tmpUserModelJson.addUserAccount(newUser);
         const users = await tmpUserModelJson.getUserAccounts();
-        expected.token = users.LOGIN.token;
         expect(users).toStrictEqual({ LOGIN: expected });
         tmpDir.removeCallback();
     });
@@ -117,7 +113,6 @@ describe("UserModelJson", () => {
                 groups: [],
                 source: "",
                 _type: "user",
-                token: "login1-token",
                 allowSourceCreation: false,
                 maxNumberCreatedSource: 5,
             },
@@ -128,7 +123,6 @@ describe("UserModelJson", () => {
                 groups: [],
                 source: "",
                 _type: "user",
-                token: "login2-token",
                 allowSourceCreation: false,
                 maxNumberCreatedSource: 5,
             },
@@ -153,7 +147,6 @@ describe("UserModelJson", () => {
             groups: ["test"],
             source: "",
             _type: "user",
-            token: "login1-token",
             allowSourceCreation: false,
             maxNumberCreatedSource: 5,
         };
@@ -163,7 +156,6 @@ describe("UserModelJson", () => {
             groups: [],
             source: "",
             _type: "user",
-            token: "login2-token",
             allowSourceCreation: false,
             maxNumberCreatedSource: 5,
         };

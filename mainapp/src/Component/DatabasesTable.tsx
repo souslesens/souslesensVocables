@@ -10,6 +10,7 @@ import {
     DialogContent,
     MenuItem,
     Paper,
+    Snackbar,
     Stack,
     Table,
     TableBody,
@@ -240,12 +241,29 @@ const DatabasesTable = () => {
     const [orderBy, setOrderBy] = React.useState<keyof Database>("id");
     const [order, setOrder] = React.useState<Order>("asc");
 
+    const [snackOpen, setSnackOpen] = React.useState<bool>(false);
+    const [snackMessage, setSnackMessage] = React.useState<string>("");
+
     type Order = "asc" | "desc";
+
+    const handleCopyIdentifier = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSnackOpen(false);
+        navigator.clipboard.writeText(event.target.innerText);
+        setSnackOpen(true);
+        setSnackMessage("The identifier has been copied in the clipboard.");
+    };
 
     function handleRequestSort(property: keyof Database) {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
+    }
+
+    const handleSnackbarClose = async (event: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === "clickaway") {
+            return;
+        }
+        setSnackOpen(false);
     }
 
     const renderDatabases = SRD.match(
@@ -271,6 +289,11 @@ const DatabasesTable = () => {
 
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
+                        <Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
+                            <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+                                {snackMessage}
+                            </Alert>
+                        </Snackbar>
                         <Autocomplete
                             disablePortal
                             id="filter databases"
@@ -278,7 +301,7 @@ const DatabasesTable = () => {
                             onInputChange={(event, newInputValue) => setFilteringChars(newInputValue)}
                             renderInput={(params) => <TextField {...params} label="Search Databases by name" />}
                         />
-                        <TableContainer sx={{ maxHeight: "400px" }} component={Paper}>
+                        <TableContainer sx={{ height: "400px" }} component={Paper}>
                             <Table stickyHeader>
                                 <TableHead>
                                     <TableRow>
@@ -288,7 +311,9 @@ const DatabasesTable = () => {
                                             </TableSortLabel>
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            Driver
+                                            <TableSortLabel active={orderBy === "driver"} direction={order} onClick={() => handleRequestSort("driver")}>
+                                                Driver
+                                            </TableSortLabel>
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold" }}>
                                             Test
@@ -304,7 +329,12 @@ const DatabasesTable = () => {
                                         .map((database: Database) => {
                                             return (
                                                 <TableRow key={database.name}>
-                                                    <TableCell>{database.name}</TableCell>
+                                                    <TableCell>
+                                                        {database.name}
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Chip label={database.id} onClick={handleCopyIdentifier} size="small" />
+                                                    </TableCell>
                                                     <TableCell align="center">
                                                         <Chip label={database.driver} size="small" />
                                                     </TableCell>

@@ -66,8 +66,17 @@ const UsersTable = () => {
             ),
             success: (gotUsers: User[]) => {
                 const sortedUsers: User[] = gotUsers.slice().sort((a: User, b: User) => {
-                    const left: string = a[orderBy] as string;
-                    const right: string = b[orderBy] as string;
+                    let left: string = "";
+                    let right: string = "";
+
+                    if (a[orderBy] instanceof Array) {
+                        left = a[orderBy].toString();
+                        right = b[orderBy].toString();
+                    } else {
+                        left = a[orderBy] as string;
+                        right = b[orderBy] as string;
+                    }
+
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
                 const datas = gotUsers.map((user) => {
@@ -90,17 +99,25 @@ const UsersTable = () => {
                             }}
                             renderInput={(params) => <TextField {...params} label="Search Users by login" />}
                         />
-                        <TableContainer sx={{ maxHeight: "400px" }} component={Paper}>
+                        <TableContainer sx={{ height: "400px" }} component={Paper}>
                             <Table stickyHeader>
                                 <TableHead>
                                     <TableRow style={{ fontWeight: "bold" }}>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Source</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "source"} direction={order} onClick={() => handleRequestSort("source")}>
+                                                Source
+                                            </TableSortLabel>
+                                        </TableCell>
                                         <TableCell style={{ fontWeight: "bold", width: "100%" }}>
                                             <TableSortLabel active={orderBy === "login"} direction={order} onClick={() => handleRequestSort("login")}>
                                                 Name
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Profiles</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "groups"} direction={order} onClick={() => handleRequestSort("groups")}>
+                                                Profiles
+                                            </TableSortLabel>
+                                        </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold" }}>Actions</TableCell>
                                     </TableRow>
                                 </TableHead>

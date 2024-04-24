@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.65.0](https://github.com/souslesens/souslesensVocables/compare/1.64.0...1.65.0) (2024-04-24)
+
+
+### Features
+
+* **ConfigEditor:** add missing sort column in database, profiles and users tables ([e60ee4b](https://github.com/souslesens/souslesensVocables/commit/e60ee4beddcc360d207eafd6703f425cf98554d9))
+* **configEditor:** set owner and published in source form ([ef1d820](https://github.com/souslesens/souslesensVocables/commit/ef1d820dca511cf46e041153f995461beeee2887))
+* **ConfigEditor:** show the database identifier in the table ([024165c](https://github.com/souslesens/souslesensVocables/commit/024165ca9d09b93fdb2d38766be71ffbbbb42588))
+* **mainapp:** migrate the GraphManagement component to MaterialUI ([6c59daa](https://github.com/souslesens/souslesensVocables/commit/6c59daa93e933141a1cb5dbbcf18326c541e3c6f))
+* **mainapp:** migrate the kg-upload-app component to MaterialUI ([50b0127](https://github.com/souslesens/souslesensVocables/commit/50b0127306c4f022dd0772170c02bac634c9cc07))
+* **mainapp:** migrate the UserManagement component to MaterialUI ([32c2ec0](https://github.com/souslesens/souslesensVocables/commit/32c2ec07fde91c1222919a801f413bab85082c0c))
+
+
+### Bug Fixes
+
+* **configEditor:** fix group form ([f18840a](https://github.com/souslesens/souslesensVocables/commit/f18840aed68a6d5ffde744fe86673e88952017ae))
+* **model/users:** getUserAccounts: don't return tokens ([c886f72](https://github.com/souslesens/souslesensVocables/commit/c886f72a48c244f93ba938b18577b802611190b6))
+* remove a console.log ([33a6a29](https://github.com/souslesens/souslesensVocables/commit/33a6a29e38f41e214f1e17748f12eeb520f97047))
+* set owner=me and published=false if user is not admin ([c83f0cc](https://github.com/souslesens/souslesensVocables/commit/c83f0cc8a39de1b43900e12bd966decde2cfe784))
+
+## [1.64.0](https://github.com/souslesens/souslesensVocables/compare/1.63.1...1.64.0) (2024-04-18)
+
 ### [1.63.1](https://github.com/souslesens/souslesensVocables/compare/1.63.0...1.63.1) (2024-04-17)
 
 

@@ -247,8 +247,8 @@ var Lineage_selection = (function () {
                   
                         },
                         error(err) {
-                                
-                            return callbackSeries(err);
+                            decoration_data=newIds;
+                            return callbackSeries();
                         },
                     });
 

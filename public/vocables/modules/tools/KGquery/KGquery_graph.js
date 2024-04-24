@@ -148,6 +148,9 @@ var KGquery_graph = (function () {
                 },
                 //Add decoration data from decorate file
                 function(callbackSeries){
+                    if (mode.indexOf("saved") < 0) {
+                        return callbackSeries();
+                    }
                     var fileName=MainController.currentSource+'_decoration.json';
                     //Get current decoration file 
                     var payload = {
@@ -184,14 +187,14 @@ var KGquery_graph = (function () {
                         },
                         error(err) {
                                 
-                            return callbackSeries(err);
+                            return callbackSeries('no decoration');
                         },
                     });
                 }
             ],
             //draw graph
             function (err) {
-                if (err) {
+                if (err && err!='no decoration') {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");
                     }

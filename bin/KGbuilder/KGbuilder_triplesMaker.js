@@ -9,6 +9,7 @@ const path = require("path");
 const { databaseModel } = require("../../model/databases");
 var KGbuilder_triplesMaker = {
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
+    existingTriples:{},
     /**
      * Generate triples
      *

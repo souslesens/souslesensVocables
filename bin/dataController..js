@@ -30,7 +30,18 @@ var DataController = {
      */
     saveDataToFile: function (dir, fileName, data, callback) {
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
+        if(fileName.indexOf('.png')>-1){
+            const jsonData = JSON.parse(data);
+
+            // Décoder les données Base64
+            const base64Data = jsonData.data;
+
+            // Convertir les données Base64 en buffer
+            const bufferData = Buffer.from(base64Data, 'base64');
+            data=bufferData;
+        }
         fs.writeFile(filePath, data, {}, function (err) {
+
             return callback(err, "file saved");
         });
     },

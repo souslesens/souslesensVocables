@@ -64,7 +64,7 @@ var KGquery_graph = (function () {
     self.drawVisjsModel = function (mode) {
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
-
+        var icones_used=[];
         //  KGquery.clearAll();
         $("#waitImg").css("display", "block");
         async.series(
@@ -146,7 +146,50 @@ var KGquery_graph = (function () {
                         callbackSeries();
                     });
                 },
+                //Add decoration data from decorate file
+                function(callbackSeries){
+                    var fileName=MainController.currentSource+'_decoration.json';
+                    //Get current decoration file 
+                    var payload = {
+                        dir: "graphs/",
+                        fileName: fileName,
+                    };
+                    //get decoration file
+                    $.ajax({
+                        type: "GET",
+                        url: `${Config.apiUrl}/data/file`,
+                        data: payload, 
+                        dataType: "json",
+                        success: function (result, _textStatus, _jqXHR) {
+                            var data = JSON.parse(result);
+                            
+                            for(var node in data){
+                                if(data[node].image){
+                                    icones_used.push(data[node].image);
+                                }
+                                var visjsCorrespondingNode=visjsData.nodes.filter(attr => attr.id === node)[0];
+                                for(var decoration in data[node]){
+                                    //decoration = clé de décoration
+                                    
+                                    if(visjsCorrespondingNode[decoration]){
+                                        visjsCorrespondingNode[decoration]=data[node][decoration];
+                                    }
+                                }
+                            }
+                            // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
+                            // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
+                            callbackSeries();
+
+                  
+                        },
+                        error(err) {
+                                
+                            return callbackSeries(err);
+                        },
+                    });
+                }
             ],
+            //draw graph
             function (err) {
                 if (err) {
                     if (err == "notFound") {
@@ -158,9 +201,15 @@ var KGquery_graph = (function () {
                 UI.message("drawing graph");
 
                 //   https://fonts.google.com/icons
+                
 
+                
+
+                
+                /*
+                var dir = "/vocables/KGqueryIcons/";
+                
                 var colors = ["#fdac00", "#aa1151", "#ED008C", "#00B5EC", "#af7ede", "#72914BFF", "#72914b", "#000efd"];
-
                 var icons = {
                     "http://data.total/resource/tsf/dalia-lifex1/manning": { icon: "persons.png", color: colors[4] },
                     "http://data.total/resource/tsf/dalia-lifex1/tag": { icon: "bookmark.png", color: colors[2] },
@@ -171,8 +220,6 @@ var KGquery_graph = (function () {
                     "http://data.total/resource/tsf/dalia-lifex1/WBS": { icon: "contract.png", color: colors[6] },
                     "http://data.total/resource/tsf/dalia-lifex1/WBSactivity": { icon: "engineering.png", color: colors[6] },
                 };
-
-                var dir = "/vocables/KGqueryIcons/";
                 visjsData.nodes.forEach(function (item) {
                     // item.color="#ddd"
                     if (item.label.indexOf("Date") > -1) {
@@ -195,9 +242,10 @@ var KGquery_graph = (function () {
                              code: "\uf276",
                              size: 50,
                              color: "#f0a30a"
-                         };*/
+                         };
                     }
-                });
+                });*/
+                
 
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
 

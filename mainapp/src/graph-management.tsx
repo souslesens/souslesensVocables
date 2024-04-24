@@ -203,7 +203,7 @@ export default function GraphManagement() {
             const file = uploadfile[0];
 
             // get file size and chunk size
-            const chunkSize = 1000000;
+            const chunkSize = 10_000_000; // 10Mb
             const fileSize = file.size;
 
             // init values

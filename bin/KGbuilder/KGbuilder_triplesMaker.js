@@ -9,7 +9,7 @@ const path = require("path");
 const { databaseModel } = require("../../model/databases");
 var KGbuilder_triplesMaker = {
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
-    existingTriples:{},
+    existingTriples: {},
     /**
      * Generate triples
      *
@@ -28,7 +28,6 @@ var KGbuilder_triplesMaker = {
             KGbuilder_socket.message(options.clientSocketId, "No data  in table " + tableMappings.table);
             return callback();
         }
-
 
 
         var triples = [];
@@ -275,33 +274,52 @@ var KGbuilder_triplesMaker = {
                     return callback(null, null);
                 }
                 if (mapping.dataType.startsWith("xsd:date")) {
-
-                    if (mapping.dateFormat) {
-                        str = util.getDateFromSLSformat(mapping.dateFormat, str);
-                        if (!str) {
-                            return callback(null, null);
+                    var isDateOk;
+                    try {
+                        var date= new Date(str);
+                        if(date=="Invalid Date" )
+                            isDateOk = false;
+                        else{
+                            str=date.toISOString()
+                            mapping.dateFormat="ISO"
                         }
 
-                    } else {
+
+                        isDateOk = true;
+                    } catch (e) {
+                        isDateOk = false;
+                    }
+
+                    if (true || isDateOk) {
+                        if (mapping.dateFormat) {
 
 
-                        var isDate = function(date) {
-                            return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
-                        };
-
-                        var formatDate = function(date) {
-                            str = new Date(date).toISOString(); //.slice(0, 10);
-                        };
-
-                        if (!isDate(str)) {
-                            var date = util.convertFrDateStr2Date(str);
-                            if (!date) {
-                                return;
-                            } else {
-                                str = date.toISOString();
+                            str = util.getDateFromSLSformat(mapping.dateFormat, str);
+                            if (!str) {
+                                return callback(null, null);
                             }
+
                         } else {
-                            str = formatDate(str);
+
+
+                            var isDate = function(date) {
+                                return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
+                            };
+
+                            var formatDate = function(date) {
+                                str = new Date(date).toISOString(); //.slice(0, 10);
+                            };
+
+                            if (!isDate(str)) {
+                                var date = util.convertFrDateStr2Date(str);
+                                if (!date) {
+                                    return;
+                                } else {
+                                    str = date.toISOString();
+                                }
+                            } else {
+                                str = formatDate(str);
+                            }
                         }
                     }
                 }
@@ -571,7 +589,7 @@ var KGbuilder_triplesMaker = {
             });
         } else if (tableMappings.datasourceConfig) {
             databaseModel.getConnection(tableMappings.datasourceConfig.dbName).then((connection) => {
-                const request = connection.select ("*").from(tableMappings.table);
+                const request = connection.select("*").from(tableMappings.table);
                 if (options.sampleSize) {
                     request.limit(options.sampleSize);
                 }

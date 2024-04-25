@@ -3,13 +3,16 @@ import Lineage_styles from "../lineage/lineage_styles.js";
 import common from "../../shared/common.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import Containers_query from "./containers_query.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 
 var Containers_tree = (function () {
     var self = {};
     self.jstreeDivId = "lineage_containers_containersJstree";
 
     self.search = function (jstreeDivId, options, callback) {
-        if (jstreeDivId) self.jstreeDivId = jstreeDivId;
+        if (jstreeDivId) {
+            self.jstreeDivId = jstreeDivId;
+        }
         if (!options) {
             options = {};
         }
@@ -76,6 +79,16 @@ var Containers_tree = (function () {
             jstreeData.push(node);
         });
 
+        jstreeData.sort(function (a, b) {
+            if (a.text > b.text) {
+                return 1;
+            }
+            if (a.text < b.text) {
+                return -1;
+            }
+            return 0;
+        });
+
         var jstreeOptions;
         if (options.jstreeOptions) {
             jstreeOptions = options.jstreeOptions;
@@ -84,13 +97,22 @@ var Containers_tree = (function () {
                 openAll: false,
                 contextMenu: Containers_tree.getContextJstreeMenu(),
                 selectTreeNodeFn: Containers_tree.onSelectedNodeTreeclick,
+                dnd: {
+                    drag_stop: function (data, element, helper, event) {
+                        //  self.onMoveContainer(data, element, helper, event);
+                    },
+                    drag_start: function (data, element, helper, event) {
+                        var sourceNodeId = element.data.nodes[0];
+                        self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
+                    },
+                },
             };
         }
         JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
             $("#" + jstreeDiv)
                 .jstree()
                 .open_node("#");
-            //  self.bindMoveNode(jstreeDiv);
+            self.bindMoveNode(jstreeDiv);
         });
     };
 
@@ -157,7 +179,7 @@ var Containers_tree = (function () {
             });
             var rootNode = null;
             result.results.bindings.forEach(function (item) {
-                if (!childrenMap[item.ancestor.value])
+                if (!childrenMap[item.ancestor.value]) {
                     rootNode = {
                         ancestor: {
                             type: "uri",
@@ -168,6 +190,7 @@ var Containers_tree = (function () {
                             value: item.ancestor.value,
                         },
                     };
+                }
             });
             result.results.bindings.push(rootNode);
 
@@ -219,13 +242,22 @@ var Containers_tree = (function () {
                         openAll: false,
                         contextMenu: Containers_tree.getContextJstreeMenu(),
                         selectTreeNodeFn: Containers_tree.onSelectedNodeTreeclick,
+                        dnd: {
+                            drag_stop: function (data, element, helper, event) {
+                                //  self.onMoveContainer(data, element, helper, event);
+                            },
+                            drag_start: function (data, element, helper, event) {
+                                var sourceNodeId = element.data.nodes[0];
+                                self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
+                            },
+                        },
                     };
                 }
                 JstreeWidget.loadJsTree(self.jstreeDivId, jstreeData, jstreeOptions, function () {
                     $("#" + self.jstreeDivId)
                         .jstree()
                         .open_all();
-                    //  self.bindMoveNode(jstreeDiv);
+                    self.bindMoveNode(jstreeDiv);
                 });
             });
         });
@@ -308,6 +340,25 @@ var Containers_tree = (function () {
         };
 
         return items;
+    };
+
+    self.bindMoveNode = function (jstreeDiv) {
+        $("#" + jstreeDiv).bind("move_node.jstree", function (e, data) {
+            function getjstreeIdUri(id) {
+                var node = $("#lineage_containers_containersJstree").jstree().get_node(id);
+                var uri = node && node.data ? node.data.id : "x";
+                return uri;
+            }
+
+            var movingInfos = {
+                nodeId: getjstreeIdUri(data.node.id),
+                newParent: getjstreeIdUri(data.parent),
+                oldParent: getjstreeIdUri(data.old_parent),
+                position: getjstreeIdUri(data.position),
+            };
+            Containers_query.writeMovedNodeNewParent(movingInfos);
+            // console.log(movingInfos)
+        });
     };
 
     return self;

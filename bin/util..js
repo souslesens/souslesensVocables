@@ -504,7 +504,7 @@ var util = {
 
        else if (formatCode == "ISO") {
             var array = dateStr.split("-")
-            if (array.length != 3) {
+            if (array.length < 3) {
                 return null;
             }
             day = getDay(array[2])
@@ -514,7 +514,7 @@ var util = {
         }
         else if (formatCode == "USA") {
             var array = dateStr.split("/")
-            if (array.length != 3) {
+            if (array.length < 3) {
                 return null;
             }
             day = getDay(array[1])
@@ -524,7 +524,7 @@ var util = {
         }
         else  if (formatCode == "EUR") {
             var array = dateStr.split(".")
-            if (array.length != 3) {
+            if (array.length < 3) {
                 return null;
             }
             day = getDay(array[0].trim())
@@ -534,7 +534,7 @@ var util = {
         }
         else if (formatCode == "JIS") {
             var array = dateStr.split("-")
-            if (array.length != 3) {
+            if (array.length < 3) {
                 return null;
             }
             day = getDay(array[2])

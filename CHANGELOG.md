@@ -2,36 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [1.65.0](https://github.com/souslesens/souslesensVocables/compare/1.64.0...1.65.0) (2024-04-24)
+## [1.66.0](https://github.com/souslesens/souslesensVocables/compare/1.65.0...1.66.0) (2024-04-25)
 
+## [1.65.0](https://github.com/souslesens/souslesensVocables/compare/1.64.0...1.65.0) (2024-04-24)
 
 ### Features
 
-* **ConfigEditor:** add missing sort column in database, profiles and users tables ([e60ee4b](https://github.com/souslesens/souslesensVocables/commit/e60ee4beddcc360d207eafd6703f425cf98554d9))
-* **configEditor:** set owner and published in source form ([ef1d820](https://github.com/souslesens/souslesensVocables/commit/ef1d820dca511cf46e041153f995461beeee2887))
-* **ConfigEditor:** show the database identifier in the table ([024165c](https://github.com/souslesens/souslesensVocables/commit/024165ca9d09b93fdb2d38766be71ffbbbb42588))
-* **mainapp:** migrate the GraphManagement component to MaterialUI ([6c59daa](https://github.com/souslesens/souslesensVocables/commit/6c59daa93e933141a1cb5dbbcf18326c541e3c6f))
-* **mainapp:** migrate the kg-upload-app component to MaterialUI ([50b0127](https://github.com/souslesens/souslesensVocables/commit/50b0127306c4f022dd0772170c02bac634c9cc07))
-* **mainapp:** migrate the UserManagement component to MaterialUI ([32c2ec0](https://github.com/souslesens/souslesensVocables/commit/32c2ec07fde91c1222919a801f413bab85082c0c))
-
+-   **ConfigEditor:** add missing sort column in database, profiles and users tables ([e60ee4b](https://github.com/souslesens/souslesensVocables/commit/e60ee4beddcc360d207eafd6703f425cf98554d9))
+-   **configEditor:** set owner and published in source form ([ef1d820](https://github.com/souslesens/souslesensVocables/commit/ef1d820dca511cf46e041153f995461beeee2887))
+-   **ConfigEditor:** show the database identifier in the table ([024165c](https://github.com/souslesens/souslesensVocables/commit/024165ca9d09b93fdb2d38766be71ffbbbb42588))
+-   **mainapp:** migrate the GraphManagement component to MaterialUI ([6c59daa](https://github.com/souslesens/souslesensVocables/commit/6c59daa93e933141a1cb5dbbcf18326c541e3c6f))
+-   **mainapp:** migrate the kg-upload-app component to MaterialUI ([50b0127](https://github.com/souslesens/souslesensVocables/commit/50b0127306c4f022dd0772170c02bac634c9cc07))
+-   **mainapp:** migrate the UserManagement component to MaterialUI ([32c2ec0](https://github.com/souslesens/souslesensVocables/commit/32c2ec07fde91c1222919a801f413bab85082c0c))
 
 ### Bug Fixes
 
-* **configEditor:** fix group form ([f18840a](https://github.com/souslesens/souslesensVocables/commit/f18840aed68a6d5ffde744fe86673e88952017ae))
-* **model/users:** getUserAccounts: don't return tokens ([c886f72](https://github.com/souslesens/souslesensVocables/commit/c886f72a48c244f93ba938b18577b802611190b6))
-* remove a console.log ([33a6a29](https://github.com/souslesens/souslesensVocables/commit/33a6a29e38f41e214f1e17748f12eeb520f97047))
-* set owner=me and published=false if user is not admin ([c83f0cc](https://github.com/souslesens/souslesensVocables/commit/c83f0cc8a39de1b43900e12bd966decde2cfe784))
+-   **configEditor:** fix group form ([f18840a](https://github.com/souslesens/souslesensVocables/commit/f18840aed68a6d5ffde744fe86673e88952017ae))
+-   **model/users:** getUserAccounts: don't return tokens ([c886f72](https://github.com/souslesens/souslesensVocables/commit/c886f72a48c244f93ba938b18577b802611190b6))
+-   remove a console.log ([33a6a29](https://github.com/souslesens/souslesensVocables/commit/33a6a29e38f41e214f1e17748f12eeb520f97047))
+-   set owner=me and published=false if user is not admin ([c83f0cc](https://github.com/souslesens/souslesensVocables/commit/c83f0cc8a39de1b43900e12bd966decde2cfe784))
 
 ## [1.64.0](https://github.com/souslesens/souslesensVocables/compare/1.63.1...1.64.0) (2024-04-18)
 
 ### [1.63.1](https://github.com/souslesens/souslesensVocables/compare/1.63.0...1.63.1) (2024-04-17)
 
-
 ### Bug Fixes
 
-* add missing databases.json.default to config_templates ([bab4c66](https://github.com/souslesens/souslesensVocables/commit/bab4c66f61eecfa2c30811fc96e07bb9f6670d27))
-* **ConfigEditor:** fix default theme being selected instead of current theme in profile form ([a95c939](https://github.com/souslesens/souslesensVocables/commit/a95c9392bbea108b06d100109bfaf744fe55f0ff))
-* **migration:** use fast-glob instead of glob ([10b25d6](https://github.com/souslesens/souslesensVocables/commit/10b25d643f0ac2765107c83033dbb63a41fe5e4a))
+-   add missing databases.json.default to config_templates ([bab4c66](https://github.com/souslesens/souslesensVocables/commit/bab4c66f61eecfa2c30811fc96e07bb9f6670d27))
+-   **ConfigEditor:** fix default theme being selected instead of current theme in profile form ([a95c939](https://github.com/souslesens/souslesensVocables/commit/a95c9392bbea108b06d100109bfaf744fe55f0ff))
+-   **migration:** use fast-glob instead of glob ([10b25d6](https://github.com/souslesens/souslesensVocables/commit/10b25d643f0ac2765107c83033dbb63a41fe5e4a))
 
 ## [1.63.0](https://github.com/souslesens/souslesensVocables/compare/1.62.1...1.63.0) (2024-04-16)
 
@@ -88,28 +87,6 @@ All notable changes to this project will be documented in this file. See [standa
 ### Bug Fixes
 
 -   remove console.log ([54aee8e](https://github.com/souslesens/souslesensVocables/commit/54aee8e14bf7543da801a6ae488963aa9bf6cb64))
-
-## [1.62.0](https://github.com/souslesens/souslesensVocables/compare/1.61.0...1.62.0) (2024-04-03)
-
-### Bug Fixes
-
--   **CHANGELOG:** fix duplicated release ([63cf72f](https://github.com/souslesens/souslesensVocables/commit/63cf72f78c2095fb5bd5a933ecd7692e4bfcfc1c))
-
-## [1.61.0](https://github.com/souslesens/souslesensVocables/compare/1.60.0...1.61.0) (2024-03-29)
-
-### Features
-
--   **ConfigEditor:** autocomplete group in the edit source form ([dc610d7](https://github.com/souslesens/souslesensVocables/commit/dc610d7d813c0782a420c4d0ac031225b05a8a55))
--   **configEditor:** sort sources by graphURI and Groups ([7e01253](https://github.com/souslesens/souslesensVocables/commit/7e012539972a0692e74f9474ee7dadaecb22e055))
--   **configEditor:** source is readOnly by default ([af79e14](https://github.com/souslesens/souslesensVocables/commit/af79e14ea4231bc426d1b485b5d0a116cc645612))
--   **graphManagement:** filter sources ([4cd1d51](https://github.com/souslesens/souslesensVocables/commit/4cd1d51c816f56485711b8c653587a238376b6da))
--   **graphManagement:** use mui table with sorting ([1027a84](https://github.com/souslesens/souslesensVocables/commit/1027a84959cc8f8e68e21fbd6179f380f406e85f))
-
-### Bug Fixes
-
--   remove console.log ([54aee8e](https://github.com/souslesens/souslesensVocables/commit/54aee8e14bf7543da801a6ae488963aa9bf6cb64))
-
-## [1.60.1](https://github.com/souslesens/souslesensVocables/compare/1.59.0...1.60.1)
 
 ## Fixed
 

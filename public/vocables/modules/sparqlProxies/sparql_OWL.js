@@ -718,7 +718,7 @@ var Sparql_OWL = (function () {
                 "  OPTIONAL {?superClassSubClass rdfs:label|skos:prefLabel ?superClassSubClassLabel }" +
                 "  OPTIONAL {?superClass rdfs:label|skos:prefLabel ?superClassLabel }" +
                 " { SELECT * where {" +
-                "  ?class rdf:type ?type. ?class rdfs:subClassOf*|rdf:type* ?superClass.\n" +
+                "  ?class rdf:type ?type. ?class rdfs:subClassOf* ?superClass.\n" +
                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
         } else {
@@ -728,7 +728,7 @@ var Sparql_OWL = (function () {
                 "   ?superClassSubClass  rdfs:subClassOf ?class" +
                 "  \n" +
                 " { SELECT * where {" +
-                "  ?class rdf:type ?type. ?class rdfs:subClassOf*|rdf:type* ?superClass.\n" +
+                "  ?class rdf:type ?type. ?class rdfs:subClassOf* ?superClass.\n" +
                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
                 "   OPTIONAL {?class rdfs:label|skos:prefLabel ?classLabel }" +
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";

@@ -136,6 +136,7 @@ var KGbuilder_main = {
 
                             //load data
                             function(callbackSeries) {
+                                KGbuilder_socket.message(options.clientSocketId, "creating triples for mappings " + mappings.table);
                                 KGbuilder_triplesMaker.loadData(mappings, options, function(err, result) {
                                     if (err) {
                                         if (tableMappingsToProcess.length > 1) {
@@ -154,10 +155,14 @@ var KGbuilder_main = {
 
                             //build triples
                             function(callbackSeries) {
+
+
+                                KGbuilder_triplesMaker.existingTriples = {};
+
                                 //sample only
                                 if (options.sampleSize) {
                                     options.customMetaData = { [KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table };
-                                    KGbuilder_socket.message(options.clientSocketId, "creating triples for mappings " + mappings.table);
+
                                     KGbuilder_triplesMaker.createTriples(mappings, data, options, function(err, result) {
 
                                         if (err) {
@@ -173,7 +178,7 @@ var KGbuilder_main = {
                                         if (err) {
                                             return callbackSeries(err);
                                         }
-                                        triples = result;
+                                        totalTriples = result;
                                         callbackSeries();
                                     });
 
@@ -183,16 +188,16 @@ var KGbuilder_main = {
 
                         ], function(err) {
                             if (err) {
-                                return callbackSeries(err);
+                                return callbackEach(err);
                             }
                             output = "(created  triples for table " + mappings.table + " :" + totalTriples;
-                            return callbackSeries();
+                            return callbackEach();
 
                         });
                 },
 
                 function(err) {
-                    return callbackEach(err);
+                    return callback(err);
                 }
             );
         });
@@ -207,7 +212,7 @@ var KGbuilder_main = {
         var triples = [];
         var slices = util.sliceArray(data, 200);
         var uniqueSubjects = {};
-        KGbuilder_triplesMaker.existingTriples = {};
+
         async.eachSeries(slices, function(dataSlice, callbackEach) {
 
 
@@ -224,7 +229,6 @@ var KGbuilder_main = {
                 //set triples
                 function(callbackSeries) {
                     options.customMetaData = { [KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table };
-                    KGbuilder_socket.message(options.clientSocketId, "creating triples for mappings " + mappings.table);
                     KGbuilder_triplesMaker.createTriples(mappings, dataSlice, options, function(err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -255,7 +259,7 @@ var KGbuilder_main = {
 
                 //writeTriples
                 function(callbackSeries) {
-                    KGbuilder_socket.message(options.clientSocketId, "table " + mappings.table + " : writing triples:" + triples.length);
+                   // KGbuilder_socket.message(options.clientSocketId, "table " + mappings.table + " : writing triples:" + triples.length);
 
 //return callbackSeries();
                     KGbuilder_triplesWriter.writeTriples(triples, mappings.graphUri, mappings.sparqlServerUrl, function(err, result) {
@@ -273,9 +277,9 @@ var KGbuilder_main = {
                 }],
                 function(err) {
                 callbackEach(err)
-            }), function(err) {
-                return callback(err, totalTriples);
-            };
+            })
+        }, function(err) {
+            return callback(err, totalTriples);
         });
 
     }

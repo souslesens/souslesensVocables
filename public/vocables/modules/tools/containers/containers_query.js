@@ -1,5 +1,6 @@
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+
 var Containers_query = (function () {
     var self = {};
     self.getTopContainer = function (source, options, callback) {
@@ -7,7 +8,9 @@ var Containers_query = (function () {
             options = {};
         }
         var filterStr = "";
-        if (options.memberClass) filterStr = "?member rdf:type ?memberClass filter (?memberClass=<" + options.memberClass + ">)";
+        if (false && options.memberClass) {
+            filterStr = "?member rdf:type ?memberClass filter (?memberClass=<" + options.memberClass + ">)";
+        }
 
         var fromStr = Sparql_common.getFromStr(source, false, false);
         var query =
@@ -116,6 +119,32 @@ var Containers_query = (function () {
                 return callback(err);
             }
             return callback(null, result);
+        });
+    };
+
+    self.writeMovedNodeNewParent = function (movedNodeInfos) {
+        var graphUri = Config.sources[Lineage_sources.activeSource].graphUri;
+        var query =
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "with <" +
+            graphUri +
+            "> delete {<" +
+            movedNodeInfos.oldParent +
+            "> rdfs:member <" +
+            movedNodeInfos.nodeId +
+            ">}" +
+            "insert {<" +
+            movedNodeInfos.newParent +
+            "> rdfs:member <" +
+            movedNodeInfos.nodeId +
+            ">}";
+
+        var url = Config.sources[Lineage_sources.activeSource].sparql_server.url + "?format=json&query=";
+
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Lineage_sources.activeSource }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
         });
     };
 

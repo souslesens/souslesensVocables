@@ -241,8 +241,13 @@ var UI = (function () {
             }
         });
     };
+  
     self.message= function (message, stopWaitImg,startWaitImg) {
-        $("#messageDiv").html(message);
+        if (message.length > 200) {
+            alert(message);
+        } else {
+            $("#messageDiv").html(message);
+        }
         if (stopWaitImg) {
             $("#waitImg").css("display", "none");
         }

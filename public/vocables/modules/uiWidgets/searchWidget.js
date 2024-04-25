@@ -46,7 +46,7 @@ var SearchWidget = (function () {
         if ($("#tabs_classes").children().length == 0) {
             $("#tabs_classes").load("./modules/tools/lineage/html/Lineage_classesPanel.html", function (s) {
                 SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
-                $("#Lineage_searchBarWrapper").load("./snippets/searchAllResponsive.html", function () {
+                $("#Lineage_searchBarWrapper").load("./snippets/searchAll.html", function () {
                     SearchWidget.init();
                     $("#GenericTools_searchInAllSources").prop("checked", false);
                     $("#Lineage_MoreClassesOptions").hide();

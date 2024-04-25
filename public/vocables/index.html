@@ -46,6 +46,7 @@
 
         <script type="module" src="modules/tools/KGquery/KGquery.js"></script>
         <script type="module" src="modules/tools/KGquery/KGquery_graph.js"></script>
+        <script type="module" src="modules/tools/KGquery/KGquery_filter.js"></script>
         <script type="module" src="modules/tools/KGquery/KGquery_myQueries.js"></script>
 
         <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
@@ -68,6 +69,7 @@
         <script type="module" src="modules/tools/containers/Containers_UI.js"></script>
         <script type="module" src="modules/tools/containers/containers_tree.js"></script>
         <script type="module" src="modules/tools/containers/containers_query.js"></script>
+        <script type="module" src="modules/tools/containers/containers_widget.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_containers.js"></script>
 
         <script type="module" src="modules/tools/lineage/lineage_selection.js"></script>
@@ -89,7 +91,7 @@
         <script type="module" src="modules/uiWidgets/searchWidget.js"></script>
         <script type="module" src="modules/uiWidgets/graphDecorationWidget.js"></script>
         <script type="module" src="modules/uiWidgets/legendWidget.js"></script>
-        <script type="module" src="modules/uiWidgets/containerSearchWidget.js"></script>
+
         <script type="module" src="modules/uiWidgets/dateWidget.js"></script>
         <script type="module" src="modules/uiWidgets/popupMenuWidget.js"></script>
 
@@ -438,24 +440,12 @@
                         </div>
                     </div>
 
-                    <!--<div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button">
-
-        </div>-->
-
-                    <!--
-        <div class="w3-bar-item slsv-bg-intense">
-            <div class="w3-button w3-light-blue" id="lineage_sourcesPanel">Lineage sources</div>
-        </div>
-        -->
-
                     <div class="w3-bar-item">
                         <div
                             class="w3-sand w3-round-xlarge"
                             style="display: flex; flex-direction: row; align-items: center; margin-left: 0px !important; margin-right: 0px !important; padding: 1px"
                             id="index_topContolPanel"
-                        >
-                            <!--  <span class="w3-left-align w3-text-blue" id="selectedTool">select tool and source...</span>-->
-                        </div>
+                        ></div>
                     </div>
 
                     <div class="w3-bar-item">
@@ -463,9 +453,7 @@
                             class="w3-sand w3-round-xlarge"
                             style="display: flex; flex-direction: row; align-items: center; margin-left: 0px !important; margin-right: 0px !important; padding: 6.5px"
                             id="Lineage_graphEditionButtons"
-                        >
-                         
-                        </div>
+                        ></div>
                     </div>
 
                     <div id="externalLogoDiv" class="w3-bar-item slsv-invisible-button w3-right">

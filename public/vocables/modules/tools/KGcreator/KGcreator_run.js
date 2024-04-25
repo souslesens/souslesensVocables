@@ -10,7 +10,7 @@ var KGcreator_run = (function () {
     self.currentTable = null;
 
     self.testSelectedMappings = function () {
-        var table = self.currentTable;
+        var table = KGcreator.currentConfig.currentDataSource.currentTable;
         if (!table) {
             return alert("select a node");
         }

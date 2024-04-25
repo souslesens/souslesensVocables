@@ -1,8 +1,17 @@
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+
 var Containers_query = (function () {
     var self = {};
-    self.getTopContainer = function (source, callback) {
+    self.getTopContainer = function (source, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        var filterStr = "";
+        if (false && options.memberClass) {
+            filterStr = "?member rdf:type ?memberClass filter (?memberClass=<" + options.memberClass + ">)";
+        }
+
         var fromStr = Sparql_common.getFromStr(source, false, false);
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
@@ -14,6 +23,7 @@ var Containers_query = (function () {
             " OPTIONAL { ?member rdfs:label ?memberLabel}  " +
             " FILTER (?memberType in(rdf:Bag,rdf:List))\n" +
             "  filter (not exists{?parent rdfs:member ?member})\n" +
+            filterStr +
             "    }";
 
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
@@ -35,12 +45,12 @@ var Containers_query = (function () {
         }
 
         if (!options.leaves) {
-            filter+= " FILTER (?descendantType in(rdf:Bag,rdf:List))";
+            filter += " FILTER (?descendantType in(rdf:Bag,rdf:List))";
         }
 
         var pathOperator = "";
 
-      if (options.depth) {
+        if (options.depth) {
             pathOperator = "{1," + options.depth + "}";
         }
         var query =
@@ -56,7 +66,7 @@ var Containers_query = (function () {
             pathOperator +
             "?descendant.\n" +
             "            \n" +
-            "  ?descendant rdf:type ?descendantType."+
+            "  ?descendant rdf:type ?descendantType." +
             filter +
             "} " +
             "      ";
@@ -81,7 +91,7 @@ var Containers_query = (function () {
 
         //  var pathOperator = "+";
         var pathOperator = "+";
-     if (options.depth) {
+        if (options.depth) {
             pathOperator = "{1," + options.depth + "}";
         }
         var query =
@@ -90,15 +100,17 @@ var Containers_query = (function () {
             "SELECT distinct ?ancestor ?ancestorChild " +
             fromStr +
             "WHERE {\n" +
-              " optional{?ancestor rdfs:member ?ancestorChild.}\n" +
-            "  ?ancestorChild  rdfs:member"+pathOperator+" ?child.\n" +
+            " optional{?ancestor rdfs:member ?ancestorChild.}\n" +
+            "  ?ancestorChild  rdfs:member" +
+            pathOperator +
+            " ?child.\n" +
             "  OPTIONAL{?ancestorChild rdfs:label ?ancestorChildLabel}  \n" +
             "  {select ?child where  {\n" +
-            "   ?child rdfs:label ?childLabel."+
+            "   ?child rdfs:label ?childLabel." +
             filter +
             "}\n" +
             "  }\n" +
-            "} limit 10000 "
+            "} limit 10000 ";
 
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
@@ -107,6 +119,32 @@ var Containers_query = (function () {
                 return callback(err);
             }
             return callback(null, result);
+        });
+    };
+
+    self.writeMovedNodeNewParent = function (movedNodeInfos) {
+        var graphUri = Config.sources[Lineage_sources.activeSource].graphUri;
+        var query =
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "with <" +
+            graphUri +
+            "> delete {<" +
+            movedNodeInfos.oldParent +
+            "> rdfs:member <" +
+            movedNodeInfos.nodeId +
+            ">}" +
+            "insert {<" +
+            movedNodeInfos.newParent +
+            "> rdfs:member <" +
+            movedNodeInfos.nodeId +
+            ">}";
+
+        var url = Config.sources[Lineage_sources.activeSource].sparql_server.url + "?format=json&query=";
+
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Lineage_sources.activeSource }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
         });
     };
 

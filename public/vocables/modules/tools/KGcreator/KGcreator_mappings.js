@@ -359,7 +359,12 @@ tripleObj.objectIsSpecificUri = true;
     };
 
     self.saveTransform = function () {
-        var json = self.transformJsonEditor.get();
+        var json;
+        try {
+            json = self.transformJsonEditor.get();
+        } catch (e) {
+            return alert(e);
+        }
         KGcreator.currentConfig.currentMappings[self.currentTable].transform = json;
         KGcreator.saveDataSourceMappings();
         $("#smallDialogDiv").dialog("close");
@@ -370,7 +375,12 @@ tripleObj.objectIsSpecificUri = true;
         if (!KGcreator.currentConfig.currentMappings[columnNode.data.table]) {
             KGcreator.currentConfig.currentMappings[columnNode.data.table] = { tripleModels: [], transforms: [] };
         }
-        var newColumnMappings = self.columnJsonEditor.get();
+        var newColumnMappings;
+        try {
+            newColumnMappings = self.columnJsonEditor.get();
+        } catch (e) {
+            return alert(e);
+        }
 
         //concat new triples from editor with other mappings in table
         KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels.forEach(function (triple) {
@@ -612,7 +622,12 @@ tripleObj.objectIsSpecificUri = true;
     };
 
     self.saveEditorMappings = function () {
-        var mappings = self.jsonEditor.get();
+        var mappings;
+        try {
+            mappings = self.jsonEditor.get();
+        } catch (e) {
+            return alert(e);
+        }
         if (self.currentEditingTable) {
             KGcreator_mappings.saveTableMappings(self.currentEditingTable, mappings);
         } else {

@@ -89,7 +89,7 @@ var IndividualAggregateWidget = (function () {
         var whereStr = "";
 
         function getWhereClause(obj) {
-            return "?" + obj.item.label + " <" + obj.prop.id + "> " + "?" + Sparql_common.formatStringForTriple(obj.label);
+            return "?" + obj.item.label + " <" + obj.prop.id + "> " + "?" + Sparql_common.formatStringForTriple(obj.label) + ". ";
         }
 
         whereStr += getWhereClause(groupByObj);

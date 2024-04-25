@@ -255,7 +255,7 @@ var KGcreator = (function () {
                             tables: [],
                             type: "csvSource",
                             sqlType: obj.node.data.sqlType,
-                            currentTable: "",
+                            currentTable: obj.node.id,
                         };
 
                         KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, function (err, result) {

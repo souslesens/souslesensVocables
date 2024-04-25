@@ -9,7 +9,7 @@ module.exports = function () {
             const database = await databaseModel.getDatabaseMinimal(req.params.id);
             res.status(200).json(database);
         } catch (error) {
-            res.status(500).json({ message: err.message, status: err.cause });
+            res.status(500).json({ message: error.message, status: error.cause });
         }
     }
 

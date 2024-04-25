@@ -3,6 +3,7 @@ const httpProxy = require("../httpProxy.");
 const async = require("async");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket");
+const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker.js");
 
 
 const KGbuilder_triplesWriter = {
@@ -29,36 +30,46 @@ const KGbuilder_triplesWriter = {
      * @param {string} sparqlServerUrl - URL of the sparql endpoint where to write the graph
      * @param {Function} callback - Node-style async Function called to proccess result or handle error
      */
-    writeTriples: function (triples, graphUri, sparqlServerUrl, callback) {
-        var insertTriplesStr = "";
+    writeTriples: function (allTriples, graphUri, sparqlServerUrl, callback) {
+
         var totalTriples = 0;
-        triples.forEach(function (triple) {
-            var str = triple.s + " " + triple.p + " " + triple.o + ". ";
-            insertTriplesStr += str;
-        });
 
-        var queryGraph = KGbuilder_triplesWriter.getSparqlPrefixesStr();
 
-        queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
+        var slices = util.sliceArray(allTriples, 200);
 
-        var params = { query: queryGraph };
+        KGbuilder_triplesMaker.existingTriples = {};
+        async.eachSeries(slices, function(triples, callbackEach) {
+            var insertTriplesStr = "";
+            triples.forEach(function(triple) {
+                var str = triple.s + " " + triple.p + " " + triple.o + ". ";
+                insertTriplesStr += str;
+            });
 
-        if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
-            params.auth = {
-                user: ConfigManager.config.sparql_server.user,
-                pass: ConfigManager.config.sparql_server.password,
-                sendImmediately: false,
-            };
-        }
+            var queryGraph = KGbuilder_triplesWriter.getSparqlPrefixesStr();
 
-        httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
-            if (err) {
-                var x = queryGraph;
-                return callback(err);
+            queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
+
+            var params = { query: queryGraph };
+
+            if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
+                params.auth = {
+                    user: ConfigManager.config.sparql_server.user,
+                    pass: ConfigManager.config.sparql_server.password,
+                    sendImmediately: false,
+                };
             }
-            totalTriples += triples.length;
+
+            httpProxy.post(sparqlServerUrl, null, params, function(err, _result) {
+                if (err) {
+                    var x = queryGraph;
+                    return callback(err);
+                }
+                totalTriples += triples.length;
+                return callbackEach(null, totalTriples);
+            });
+        },function(err){
             return callback(null, totalTriples);
-        });
+        })
     },
 
     /**

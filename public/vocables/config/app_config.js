@@ -162,7 +162,6 @@ var Config = (function () {
             "lineage_actionDiv_rules",
             "lineage_actionDiv_newAxiom",
 
-
             //"lineage_actionDiv_clearLast",
             // "lineage_actionDiv_last"
         ],

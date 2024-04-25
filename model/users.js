@@ -41,7 +41,6 @@ class UserModel {
                 groups: value.groups,
                 _type: value._type,
                 source: value.source,
-                token: value.token,
                 allowSourceCreation: value.allowSourceCreation,
                 maxNumberCreatedSource: value.maxNumberCreatedSource,
             };

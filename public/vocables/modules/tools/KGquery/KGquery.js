@@ -1,15 +1,13 @@
-import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Lineage_sources from "../lineage/lineage_sources.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import Lineage_relationIndividualsFilter from "../lineage/lineage_relationIndividualsFilter.js";
+
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
-import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
+
 import Export from "../../shared/export.js";
 import common from "../../shared/common.js";
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 import IndividualAggregateWidget from "../../uiWidgets/individualAggregateWidget.js";
-import IndividualValueFilterWidget from "../../uiWidgets/individualValuefilterWidget.js";
-import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
+
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
 import KGquery_graph from "./KGquery_graph.js";
@@ -25,7 +23,7 @@ import UI from "../../shared/UI.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import jstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
-var KGquery = (function() {
+var KGquery = (function () {
     var self = {};
     self.querySets = { sets: [], groups: [], currentIndex: -1 };
     self.divsMap = {};
@@ -97,7 +95,7 @@ var KGquery = (function() {
         }
     };
 
-    self.addQuerySet = function(booleanOperator) {
+    self.addQuerySet = function (booleanOperator) {
         var label = "";
         var color = self.pathEdgesColors[self.querySets.sets.length];
         var querySetDivId = KGquery_controlPanel.addQuerySet("KGquery_pathsDiv", booleanOperator, label, color);
@@ -108,7 +106,7 @@ var KGquery = (function() {
             color: color,
             booleanOperator: booleanOperator,
             classFiltersMap: {},
-            index: self.querySets.sets.length
+            index: self.querySets.sets.length,
         }; // array of queryElements with a color and a currentIndex
 
         self.addQueryElementToQuerySet(querySet);
@@ -117,7 +115,7 @@ var KGquery = (function() {
         self.divsMap[querySetDivId] = querySet;
     };
 
-    self.addQueryElementToQuerySet = function(querySet) {
+    self.addQueryElementToQuerySet = function (querySet) {
         $("#KGquery_SetsControlsDiv").show();
         var queryElementDivId = KGquery_controlPanel.addQueryElementToCurrentSet(querySet.divId);
         var queryElement = {
@@ -129,7 +127,7 @@ var KGquery = (function() {
             fromNodeDivId: "",
             toNodeDivId: "",
             index: querySet.elements.length,
-            setIndex: querySet.index
+            setIndex: querySet.index,
         };
         querySet.elements.push(queryElement);
         self.currentQueryElement = queryElement;
@@ -137,7 +135,7 @@ var KGquery = (function() {
         return queryElement;
     };
 
-    self.addNodeToQueryElement = function(queryElement, node, role) {
+    self.addNodeToQueryElement = function (queryElement, node, role) {
         self.classeMap[node.id] = node;
         queryElement[role] = node;
         if (role == "toNode") {
@@ -147,12 +145,12 @@ var KGquery = (function() {
 
         KGquery_graph.outlineNode(node.id);
         node.data.setIndex = self.currentQuerySet.index;
-        node.data.nodeDivId=nodeDivId
+        node.data.nodeDivId = nodeDivId;
         //  node.data.queryElement = queryElement;
         self.divsMap[nodeDivId] = node;
     };
 
-    self.addNode = function(selectedNode, nodeEvent) {
+    self.addNode = function (selectedNode, nodeEvent) {
         if (!selectedNode) {
             return;
         }
@@ -165,7 +163,7 @@ var KGquery = (function() {
         if (self.currentQuerySet.elements.length > 1) {
             var excludeSelf = false;
             $("#KGquery_SetsControlsDiv").show();
-            KGquery_paths.getNearestNodeId(node.id, self.currentQuerySet, excludeSelf, function(err, nearestNodeId) {
+            KGquery_paths.getNearestNodeId(node.id, self.currentQuerySet, excludeSelf, function (err, nearestNodeId) {
                 if (err) {
                     return acllback(err.responseText);
                 }
@@ -174,7 +172,7 @@ var KGquery = (function() {
                 var nearestNode = self.classeMap[nearestNodeId];
                 self.addNodeToQueryElement(self.currentQueryElement, nearestNode, "toNode");
 
-                KGquery_paths.setQueryElementPath(self.currentQueryElement, function(err, result) {
+                KGquery_paths.setQueryElementPath(self.currentQueryElement, function (err, result) {
                     if (err) {
                         return alert(err.responseText);
                     }
@@ -196,7 +194,7 @@ var KGquery = (function() {
             }
 
             self.currentQueryElement.toNode = node;
-            KGquery_paths.setQueryElementPath(self.currentQueryElement, function(err, result) {
+            KGquery_paths.setQueryElementPath(self.currentQueryElement, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
@@ -209,7 +207,19 @@ var KGquery = (function() {
         }
     };
 
-    self.addEdge = function(edge, evt) {
+    self.addEdgeNodes = function (fromNode, toNode, edge) {
+        var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
+        self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
+        self.addNodeToQueryElement(queryElement, toNode, "toNode");
+        var subPath = [edge.from, edge.to, edge.data.propertyId];
+
+        var path = [subPath];
+        var pathWithVarNames = KGquery_paths.substituteClassIdToVarNameInPath(queryElement, path);
+        queryElement.paths = pathWithVarNames;
+        self.addQueryElementToQuerySet(self.currentQuerySet);
+    };
+
+    self.addEdge = function (edge, evt) {
         var fromNode = KGquery_graph.KGqueryGraph.data.nodes.get(edge.from);
         fromNode = JSON.parse(JSON.stringify(fromNode));
 
@@ -217,68 +227,27 @@ var KGquery = (function() {
         toNode = JSON.parse(JSON.stringify(toNode));
         if (edge.from == edge.to) {
             toNode = JSON.parse(JSON.stringify(fromNode));
+
             if (edge.data.propertyId == "rdfs:member") {
-                fromNode.breakdownDepth = prompt("specify  number of breakdown levels :(default 1)") || 1;
                 fromNode.alias = fromNode.label + "_parent";
+                var options = { memberClass: fromNode.data.id };
+
+                Containers_widget.showDialog(self.currentSource, options, function (err, result) {
+                    //  KGquery_filter.selectContainerFilters(fromNode,function(err, result){
+                    fromNode.containerFilter = {
+                        classId: result.topMember.id,
+                        depth: result.depth,
+                    };
+                    KGquery.addEdgeNodes(fromNode, toNode, edge);
+                });
             } else {
                 toNode.alias = toNode.label + (self.currentQueryElement.paths.length + 1);
+                return KGquery.addEdgeNodes(fromNode, toNode, edge);
             }
         }
-
-        var queryElement = self.addQueryElementToQuerySet(self.currentQuerySet);
-        self.addNodeToQueryElement(queryElement, fromNode, "fromNode");
-        self.addNodeToQueryElement(queryElement, toNode, "toNode");
-        var subPath = [edge.from, edge.to, edge.data.propertyId];
-        if (fromNode.breakdownDepth) {
-            subPath.breakdownDepth = fromNode.breakdownDepth;
-        }
-        var path = [subPath];
-        var pathWithVarNames = KGquery_paths.substituteClassIdToVarNameInPath(queryElement, path);
-        queryElement.paths = pathWithVarNames;
-        self.addQueryElementToQuerySet(self.currentQuerySet);
     };
 
-    self.addNodeFilter = function(classDivId,addTojsTreeNode) {
-        var aClass = self.divsMap[classDivId];
-        var classSetIndex = aClass.data.setIndex;
-        if (self.querySets.sets[classSetIndex].classFiltersMap[classDivId]) {
-            delete self.querySets.sets[classSetIndex].classFiltersMap[classDivId];
-            $("#" + classDivId + "_filter").html("");
-            if(addTojsTreeNode){
-                jstreeWidget.deleteNode(null,classDivId + "_filter")
-            }
-            return;
-        }
-        var varName = [self.getVarName(aClass, true)];
-        var datatype = aClass.data.datatype;
-
-        var currentFilterQuery = {
-            source: self.currentSource,
-            currentClass: aClass.id,
-            varName: self.getVarName(aClass, true)
-        };
-
-        KGquery_filter_bot.start(aClass.data, currentFilterQuery, function(err, result) {
-            if (err) {
-                return alert(err.responseText);
-            }
-            self.querySets.sets[classSetIndex].classFiltersMap[classDivId] = { class: aClass, filter: result.filter };
-            $("#" + classDivId + "_filter").text(result.filterLabel || result.filter);
-
-
-            if(addTojsTreeNode){
-                var jstreeData=[{
-                    id: classDivId + "_filter",
-                    text:result.filterLabel || result.filter,
-                    parent:addTojsTreeNode
-                }]
-                jstreeWidget.addNodesToJstree(null,addTojsTreeNode,jstreeData)
-            }
-
-        });
-    };
-
-    self.aggregateQuery = function() {
+    self.aggregateQuery = function () {
         var message = "";
         if (self.querySets.sets.length > 0) {
             message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
@@ -286,8 +255,8 @@ var KGquery = (function() {
 
         var varsMap = {};
 
-        self.querySets.sets.forEach(function(querySet) {
-            querySet.elements.forEach(function(queryElement, queryElementIndex) {
+        self.querySets.sets.forEach(function (querySet) {
+            querySet.elements.forEach(function (queryElement, queryElementIndex) {
                 if (queryElement.fromNode) {
                     var key = queryElement.fromNode.alias || queryElement.fromNode.label;
                     varsMap[key] = queryElement.fromNode;
@@ -301,18 +270,18 @@ var KGquery = (function() {
 
         IndividualAggregateWidget.showDialog(
             null,
-            function(callback) {
+            function (callback) {
                 callback(varsMap);
             },
 
-            function(err, aggregateClauses) {
+            function (err, aggregateClauses) {
                 self.queryKG("table", { aggregate: aggregateClauses });
             },
             message
         );
     };
 
-    self.queryKG = function(output, options, isVirtualSQLquery) {
+    self.queryKG = function (output, options, isVirtualSQLquery) {
         if (!options) {
             options = {};
         }
@@ -328,11 +297,12 @@ var KGquery = (function() {
             return SQLquery_filters.showFiltersDialog(self.querySets, self.currentSource);
         }
 
-        self.execPathQuery(options, function(err, result) {
+        self.execPathQuery(options, function (err, result) {
             self.message("", true);
             if (err) {
-                if(err.responseText)
-                return alert(err.responseText);
+                if (err.responseText) {
+                    return alert(err.responseText);
+                }
             }
 
             if (result.results.bindings.length == 0) {
@@ -350,142 +320,31 @@ var KGquery = (function() {
         });
     };
 
-
-    self.filterQueryNonObjectProperties = function(callback) {
-        var queryNonObjectProperties = [];
-        var uniqueProps={}
-var labelProperty={
-    datatype :"http://www.w3.org/2001/XMLSchema#string",
-    id:"rdf:label",
-    label :"label"
-}
-        self.querySets.sets.forEach(function(querySet) {
-            querySet.elements.forEach(function(queryElement, queryElementIndex) {
-               queryElement.paths.forEach(function(pathItem, pathIndex) {
-                    if (queryElement.fromNode && queryElement.fromNode.data.nonObjectProperties) {
-                        var subjectVarName = self.getVarName(queryElement.fromNode,true);
-                        var addLabel = true;
-
-                        queryElement.fromNode.data.nonObjectProperties.forEach(function(property) {
-                            if (property.label.indexOf("label") > -1) {
-                                addLabel = false;
-                            }
-
-                            if(!uniqueProps[subjectVarName+"_"+property.label]) {
-                                uniqueProps[subjectVarName+"_"+property.label]=1
-                                queryNonObjectProperties.push({ varName: subjectVarName, property: property,nodeDivId: queryElement.fromNode.data.nodeDivId });
-                            }
-                        });
-                        if (addLabel) {
-                            if(!uniqueProps[subjectVarName+"_"+"rdfs:label"]) {
-                                uniqueProps[subjectVarName + "_" + "rdfs:label"] = 1
-                            }
-                            queryNonObjectProperties.push({ varName: subjectVarName, property: labelProperty,nodeDivId: queryElement.fromNode.data.nodeDivId });
-                        }
-
-
-                    }
-                    if (queryElement.toNode && queryElement.toNode.data.nonObjectProperties) {
-                        var objectVarName = self.getVarName(queryElement.toNode,true);
-                        var addLabel = true;
-                        queryElement.toNode.data.nonObjectProperties.forEach(function(property) {
-                            if (property.label.indexOf("label") > -1) {
-                                addLabel = false;
-                            }
-                            if(!uniqueProps[objectVarName+"_"+property.label]) {
-                                uniqueProps[objectVarName + "_" + property.label] = 1
-                                queryNonObjectProperties.push({ varName: objectVarName, property: property ,nodeDivId: queryElement.toNode.data.nodeDivId});
-                            }
-                        });
-                        if (addLabel) {
-                            if(!uniqueProps[objectVarName+"_"+"rdfs:label"]) {
-                                uniqueProps[objectVarName + "_" + "rdfs:label"] = 1
-                                queryNonObjectProperties.push({ varName: objectVarName, property: labelProperty ,nodeDivId: queryElement.toNode.data.nodeDivId });
-                            }
-                        }
-
-                    }
-
-             });
-            });
-        });
-
-            var jstreeData = [];
-            queryNonObjectProperties.forEach(function(item) {
-                var label = item.varName + "_" +item.property.label;
-                var nodeDivId=item.nodeDivId
-                jstreeData.push({
-                    id: label,
-                    text: label+"<button style='vertical-align:middle' class=\"slsv-invisible-button filterIcon\" about=\"add filter\" onclick=\"KGquery.addNodeFilter('"+nodeDivId+"','"+label+"')\"></button>",
-                    parent: "#",
-                    data:{property:item.property},
-                    type:"Property"
-                });
-            });
-
-                var options = {
-                    withCheckboxes: true,
-
-                    validateFn: function(checkedNodes) {
-
-                        queryNonObjectProperties = []
-                        if(!checkedNodes || checkedNodes.length==0)
-                            return callback("no properties selected")
-                        checkedNodes.forEach(function(node){
-                            if(node.parents.length==1)
-                                queryNonObjectProperties.push(node)
-                        })
-
-
-
-                       if(queryNonObjectProperties.length > self.maxOptionalPredicatesInQuery){
-                           if(confirm("many properties have been selected. Query may take time or abort, Continue anyway?")){
-                               return callback(null, queryNonObjectProperties);
-                           }
-                           else{
-                               return callback("query aborted");
-                           }
-                       }
-
-                        return callback(null, queryNonObjectProperties);
-                    }
-                };
-                JstreeWidget.loadJsTree(null, jstreeData, options,function(){
-                    if(queryNonObjectProperties.length < self.maxOptionalPredicatesInQuery){
-                        JstreeWidget.checkAll()
-                    }
-
-        });
-
-
-
-
-
-
-    };
-
-    self.execPathQuery = function(options, callback) {
-        var queryNonObjectProperties = [];
+    self.execPathQuery = function (options, callback) {
+        var optionalPredicatesSparql = "";
+        var containerFiltersSparql = "";
         var query = "";
         var data;
-        async.series([
+        async.series(
+            [
+                //selectOptionalPredicates
+                function (callbackSeries) {
+                    if (options.aggregate) {
+                        return callbackSeries();
+                    }
 
-
-                //filterQueryNonObjectProperties
-                function(callbackSeries) {
-                    self.filterQueryNonObjectProperties(function(err, result) {
+                    KGquery_filter.selectOptionalPredicates(self.querySets, function (err, result) {
                         if (err) {
                             UI.message(err, true)
                             callbackSeries(err);
                         }
-                        queryNonObjectProperties = result;
+                        optionalPredicatesSparql = result;
                         callbackSeries();
                     });
                 },
 
-
                 //build query
-                function(callbackSeries) {
+                function (callbackSeries) {
                     if (!options) {
                         options = {};
                     }
@@ -503,7 +362,7 @@ var labelProperty={
                     var whereStr = "";
                     var uniqueQueries = {};
 
-                    self.querySets.sets.forEach(function(querySet) {
+                    self.querySets.sets.forEach(function (querySet) {
                         if (querySet.booleanOperator) {
                             whereStr += "\n " + querySet.booleanOperator + "\n ";
                         }
@@ -512,7 +371,7 @@ var labelProperty={
                         var filterStr = "";
                         var otherPredicatesStrs = "";
 
-                        querySet.elements.forEach(function(queryElement, queryElementIndex) {
+                        querySet.elements.forEach(function (queryElement, queryElementIndex) {
                             if (!queryElement.toNode) {
                                 if (queryElement.fromNode) {
                                 } else {
@@ -521,6 +380,7 @@ var labelProperty={
                             }
 
                             var subjectVarName = self.getVarName(queryElement.fromNode);
+
                             var subjectUri = queryElement.fromNode.id;
                             if (!distinctTypesMap[subjectVarName]) {
                                 distinctTypesMap[subjectVarName] = 1;
@@ -537,11 +397,12 @@ var labelProperty={
                                 }
                             }
                             var filterClassLabels = {};
-                            queryElement.paths.forEach(function(pathItem, pathIndex) {
+                            queryElement.paths.forEach(function (pathItem, pathIndex) {
                                 var propertyStr = pathItem[2];
 
                                 if (propertyStr == "rdfs:member") {
-                                    var depth = pathItem.breakdownDepth || 1;
+                                    filterStr += "\n FILTER(" + subjectVarName + "=<" + queryElement.fromNode.containerFilter.classId + ">)\n ";
+                                    var depth = queryElement.fromNode.containerFilter.depth || 1;
                                     {
                                         if (depth) {
                                             var str = "";
@@ -573,26 +434,23 @@ var labelProperty={
                                     predicateStr += basicPredicate;
                                 }
                             });
-
-                            for (var key in querySet.classFiltersMap) {
-                                filterStr += querySet.classFiltersMap[key].filter + " \n";
-                                var filterType = filterStr.match(/<.*>/) ? "uri" : "literal";
-                                filterClassLabels["?" + querySet.classFiltersMap[key].class.label] = filterType;
-                            }
-
-                            if (!options.aggregate) {
-                                otherPredicatesStrs += " \n" + self.getOtherPredicates(queryElement, filterClassLabels);
-                            }
                         });
+
+                        for (var key in querySet.classFiltersMap) {
+                            filterStr += querySet.classFiltersMap[key].filter + " \n";
+                        }
+
                         if (options.aggregate) {
                             whereStr += options.aggregate.where;
                             var groupByPredicates = options.aggregate.groupByPredicates;
-                            otherPredicatesStrs += " \n" + self.getAggregatePredicates(groupByPredicates);
+                            otherPredicatesStrs += " \n" + KGquery_filter.getAggregatePredicates(groupByPredicates);
                         } else {
                         }
 
-                        whereStr += "{" + predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs + "}";
+                        whereStr += predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
                     });
+
+                    whereStr += optionalPredicatesSparql;
 
                     var fromStr = Sparql_common.getFromStr(self.currentSource);
                     query =
@@ -606,122 +464,41 @@ var labelProperty={
                     query += " " + groupByStr + " limit 10000";
 
                     callbackSeries();
-
-
                 },
 
-
                 //execute query
-                function(callbackSeries) {
-
+                function (callbackSeries) {
                     var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
 
                     var currentSparqlQuery = {
                         url: url,
                         query: query,
-                        source: self.currentSource
+                        source: self.currentSource,
                     };
 
                     if (options.dontExecute) {
                         return callback(null, currentSparqlQuery);
                     }
 
-                    var countOptional = common.countStringsInString(query, "OPTIONAL");
-                    if (countOptional > self.maxOptionalPredicatesInQuery) {
-                        return alert("query too long , remove  nodes");
-                    }
-                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource, caller: "getObjectRestrictions" }, function(err, result) {
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource, caller: "getObjectRestrictions" }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
                         data = result;
                         callbackSeries(null, result);
                     });
-
                 },
-                function(callbackSeries) {
+                function (callbackSeries) {
                     callbackSeries();
-                }
-            ]
-            , function(err) {
+                },
+            ],
+            function (err) {
                 callback(err, data);
-            });
+            }
+        );
     };
 
-
-    self.getAggregatePredicates = function(groupByPredicates) {
-        var str = "";
-        for (var key in groupByPredicates) {
-            var obj = groupByPredicates[key];
-            str += " ?" + obj.classLabel + " <" + obj.prop.id + "> ?" + obj.label + ". ";
-        }
-
-        return str;
-    };
-    self.getOtherPredicates = function(queryElement, filterClassLabels) {
-        function getOptionalClause(varName) {
-            var optionalStr = " OPTIONAL ";
-            var filterType = filterClassLabels[varName];
-            if (filterType && filterType != "uri") {
-                optionalStr = "";
-            }
-
-            return optionalStr;
-        }
-
-        function addToStringIfNotExists(str, text) {
-            if (text.indexOf(str) > -1) {
-                return text;
-            } else {
-                return text + str;
-            }
-        }
-
-        var otherPredicatesStr = "";
-        var subjectVarName = self.getVarName(queryElement.fromNode);
-        var objectVarName = self.getVarName(queryElement.toNode);
-        if (queryElement.fromNode.data.nonObjectProperties) {
-            var addLabelPredicate = true;
-            queryElement.fromNode.data.nonObjectProperties.forEach(function(property) {
-                if (property.label.indexOf("label") > -1) {
-                    addLabelPredicate = false;
-                }
-                var optionalStr = getOptionalClause(subjectVarName);
-
-                otherPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " <" + property.id + "> " + subjectVarName + "_" + property.label + "}\n", otherPredicatesStr);
-            });
-
-            if (addLabelPredicate) {
-                var optionalStr = getOptionalClause(subjectVarName);
-                otherPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + subjectVarName + " rdfs:label " + subjectVarName + "_label}\n", otherPredicatesStr);
-            }
-        } else {
-            var optionalStr = getOptionalClause(subjectVarName);
-            otherPredicatesStr = addToStringIfNotExists(optionalStr + " {" + subjectVarName + " rdfs:label " + subjectVarName + "_label}\n", otherPredicatesStr);
-        }
-        if (queryElement.toNode) {
-            if (queryElement.toNode.data.nonObjectProperties) {
-                var addLabelPredicate = true;
-                queryElement.toNode.data.nonObjectProperties.forEach(function(property) {
-                    if (property.label.indexOf("label") > -1) {
-                        addLabelPredicate = false;
-                    }
-                    var optionalStr = getOptionalClause(objectVarName);
-                    otherPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " <" + property.id + "> " + objectVarName + "_" + property.label + "}\n", otherPredicatesStr);
-                });
-                if (addLabelPredicate) {
-                    var optionalStr = getOptionalClause(objectVarName);
-                    otherPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdfs:label " + objectVarName + "_label}\n", otherPredicatesStr);
-                }
-            } else {
-                var optionalStr = getOptionalClause(objectVarName);
-                otherPredicatesStr = addToStringIfNotExists(optionalStr + "  {" + objectVarName + " rdfs:label " + objectVarName + "_label}\n", otherPredicatesStr);
-            }
-        }
-        return otherPredicatesStr;
-    };
-
-    self.queryResultToVisjsGraph = function(result) {
+    self.queryResultToVisjsGraph = function (result) {
         var classNodes = self.getAllQueryPathClasses();
 
         var data = result.results.bindings;
@@ -731,11 +508,11 @@ var labelProperty={
 
         var existingNodes = {};
         var visjsData = { nodes: [], edges: [] };
-        data.forEach(function(item, index) {
+        data.forEach(function (item, index) {
             var lineNodeId = common.getRandomHexaId(5);
             visjsData.nodes.push(VisjsUtil.getVisjsNode(self.currentSource, lineNodeId, "", null, { shape: "text", size: 2, color: "#ddd" }));
 
-            classNodes.forEach(function(classNode) {
+            classNodes.forEach(function (classNode) {
                 var varNameKey = self.getVarName(classNode, true);
                 var labelKey = varNameKey + "Label";
                 if (!item[varNameKey]) {
@@ -747,14 +524,14 @@ var labelProperty={
                     var options = {
                         shape: "triangle",
                         size: Lineage_whiteboard.defaultShapeSize,
-                        color: common.getResourceColor("class", varNameKey)
+                        color: common.getResourceColor("class", varNameKey),
                     };
                     var label = item[labelKey] ? item[labelKey].value : Sparql_common.getLabelFromURI(item[varNameKey].value);
                     visjsData.nodes.push(VisjsUtil.getVisjsNode(self.currentSource, item[varNameKey].value, label, null, options));
                     visjsData.edges.push({
                         id: lineNodeId + item[varNameKey].value,
                         from: item[varNameKey].value,
-                        to: lineNodeId
+                        to: lineNodeId,
                     });
                 }
             });
@@ -766,9 +543,9 @@ var labelProperty={
             },2000)
         })
     };
-    self.queryToTagsGeometry = function(data) {
+    self.queryToTagsGeometry = function (data) {
         var tagsMap = {};
-        data.forEach(function(item) {
+        data.forEach(function (item) {
             for (var key in item) {
                 if (key.indexOf("tag") > -1) {
                     tagsMap[item[key].value] = 1;
@@ -783,12 +560,12 @@ var labelProperty={
         });
     };
 
-    self.queryResultToTable = function(result) {
+    self.queryResultToTable = function (result) {
         var data = result.results.bindings;
         //prepare columns
         var nonNullCols = {};
-        data.forEach(function(item) {
-            result.head.vars.forEach(function(varName) {
+        data.forEach(function (item) {
+            result.head.vars.forEach(function (varName) {
                 if (varName.length < 3) {
                     return;
                 }
@@ -815,9 +592,9 @@ var labelProperty={
         var tableData = [];
         self.currentData = data;
         self.tableCols = tableCols;
-        data.forEach(function(item, index) {
+        data.forEach(function (item, index) {
             var line = [index];
-            colNames.forEach(function(col) {
+            colNames.forEach(function (col) {
                 var value = null;
                 if (item[col]) {
                     value = item[col].value;
@@ -843,8 +620,8 @@ var labelProperty={
         $("#KGquery_dataTableDialogDiv").css("left", "10px");
         $("#KGquery_dataTableDiv").width("90vW");
         //  $("#mainDialogDiv").html("<div id='KGquery_dataTableDiv' style='width:100vW;heigth:100vH'></div>")
-        Export.showDataTable("KGquery_dataTableDiv", tableCols, tableData, null, { paging: true }, function(err, datatable) {
-            $("#dataTableDivExport").on("click", "td", function() {
+        Export.showDataTable("KGquery_dataTableDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
+            $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();
 
                 var index = table.cell(this).index();
@@ -860,24 +637,29 @@ var labelProperty={
                 }
                 var uri = dataItem[varName].value;
                 var node = { data: { id: uri } };
-                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv", null, function(err) {
+                NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv", null, function (err) {
                     $("#smallDialogDiv").parent().css("z-index", 1);
                 });
             });
         });
     };
 
-    self.clearAll = function(exceptSetQueries) {
+    self.clearAll = function (exceptSetQueries) {
+        self.querySets.sets.forEach(function (querySet) {
+            querySet.classFiltersMap = {};
+        });
         self.querySets = { sets: [], groups: [], currentIndex: -1 };
         self.divsMap = {};
         self.currentQuerySet = self.addQuerySet();
         self.allPathEdges = {};
+        KGquery_filter.containersFilterMap = {};
         /* $("#KGquery_graphDiv").css("display", "flex");
         $("#KGquery_dataTableDiv").css("display", "none");*/
         if (!exceptSetQueries) {
             self.classeMap = {};
             self.SetQueries = [];
             self.queryPathesMap = {};
+
             self.divsMap = {};
             KGquery_graph.resetVisjNodes();
             KGquery_graph.resetVisjEdges();
@@ -889,16 +671,16 @@ var labelProperty={
         }
     };
 
-    self.getVarName = function(node, withoutQuestionMark) {
+    self.getVarName = function (node, withoutQuestionMark) {
         var varName = (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.alias || node.label || Sparql_common.getLabelFromURI(node.id), true);
 
         return varName;
     };
 
-    self.getAllQueryPathClasses = function() {
+    self.getAllQueryPathClasses = function () {
         var classes = [];
-        self.querySets.sets.forEach(function(querySet) {
-            querySet.elements.forEach(function(queryPath) {
+        self.querySets.sets.forEach(function (querySet) {
+            querySet.elements.forEach(function (queryPath) {
                 classes.push(queryPath.fromNode);
                 classes.push(queryPath.toNode);
             });
@@ -906,7 +688,7 @@ var labelProperty={
         return classes;
     };
 
-    self.message = function(message, stopWaitImg) {
+    self.message = function (message, stopWaitImg) {
         $("#KGquery_messageDiv").html(message);
         if (stopWaitImg) {
             $("#KGquery_waitImg").css("display", "none");
@@ -915,7 +697,7 @@ var labelProperty={
         }
     };
 
-    self.switchRightPanel = function(forceGraph) {
+    self.switchRightPanel = function (forceGraph) {
         return;
         var isGraphDisplayed = $("#KGquery_graphDiv").css("display");
         if (!forceGraph && isGraphDisplayed == "block") {
@@ -927,23 +709,23 @@ var labelProperty={
         }
     };
 
-    self.onBooleanOperatorChange = function(querySetDivId, value) {
+    self.onBooleanOperatorChange = function (querySetDivId, value) {
         self.divsMap[querySetDivId].booleanOperator = value;
     };
 
-    self.removeQueryElement = function(queryElementDivId) {
+    self.removeQueryElement = function (queryElementDivId) {
         $("#" + queryElementDivId).remove();
         var queryElement = self.divsMap[queryElementDivId];
         self.querySets.sets[queryElement.setIndex].elements.splice(queryElement.index, 1);
     };
 
-    self.removeSet = function(querySetDivId) {
+    self.removeSet = function (querySetDivId) {
         $("#" + querySetDivId).remove();
         var set = self.divsMap[querySetDivId];
         self.querySets.sets.splice(set.index, 1);
     };
 
-    self.onOutputTypeSelect = function(output) {
+    self.onOutputTypeSelect = function (output) {
         if (output == "") {
             return;
         }
@@ -951,7 +733,7 @@ var labelProperty={
         $("#KGquery_outputTypeSelect").val("");
     };
 
-    self.addOutputType = function() {
+    self.addOutputType = function () {
         $("KGquery_outputTypeSelect");
     };
 

@@ -64,7 +64,7 @@ var KGquery_graph = (function () {
     self.drawVisjsModel = function (mode) {
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
-
+        var icones_used=[];
         //  KGquery.clearAll();
         $("#waitImg").css("display", "block");
         async.series(
@@ -146,9 +146,54 @@ var KGquery_graph = (function () {
                         callbackSeries();
                     });
                 },
+                //Add decoration data from decorate file
+                function(callbackSeries){
+                    if (mode.indexOf("saved") < 0) {
+                        return callbackSeries();
+                    }
+                    var fileName=MainController.currentSource+'_decoration.json';
+                    //Get current decoration file 
+                    var payload = {
+                        dir: "graphs/",
+                        fileName: fileName,
+                    };
+                    //get decoration file
+                    $.ajax({
+                        type: "GET",
+                        url: `${Config.apiUrl}/data/file`,
+                        data: payload, 
+                        dataType: "json",
+                        success: function (result, _textStatus, _jqXHR) {
+                            var data = JSON.parse(result);
+
+                            for(var node in data){
+                                if(data[node].image){
+                                    icones_used.push(data[node].image);
+                                }
+                                var visjsCorrespondingNode=visjsData.nodes.filter(attr => attr.id === node)[0];
+                                for(var decoration in data[node]){
+                                    //decoration = clé de décoration
+
+                                    
+                                        visjsCorrespondingNode[decoration]=data[node][decoration];
+                                    
+                                }
+                            }
+                            // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
+                            // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
+                            callbackSeries();
+
+
+                        },
+                        error(err) {
+
+                            return callbackSeries('no decoration');
+                        },
+                    });
+                }
             ],
             function (err) {
-                if (err) {
+                if (err && err!='no decoration') {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");
                     }
@@ -159,46 +204,7 @@ var KGquery_graph = (function () {
 
                 //   https://fonts.google.com/icons
 
-                var colors = ["#fdac00", "#aa1151", "#ED008C", "#00B5EC", "#af7ede", "#72914BFF", "#72914b", "#000efd"];
-
-                var icons = {
-                    "http://data.total/resource/tsf/dalia-lifex1/manning": { icon: "persons.png", color: colors[4] },
-                    "http://data.total/resource/tsf/dalia-lifex1/tag": { icon: "bookmark.png", color: colors[2] },
-                    "http://data.total/resource/tsf/dalia-lifex1/Task": { icon: "task.png", color: colors[0] },
-                    "http://data.total/resource/tsf/dalia-lifex1/JobCardExecution": { icon: "jobCard.png", color: colors[1] },
-                    "http://data.total/resource/tsf/dalia-lifex1/EquipmentItem": { icon: "machine.png", color: colors[3] },
-                    "http://data.total/resource/tsf/dalia-lifex1/Discipline": { icon: "school.png", color: colors[7] },
-                    "http://data.total/resource/tsf/dalia-lifex1/WBS": { icon: "contract.png", color: colors[6] },
-                    "http://data.total/resource/tsf/dalia-lifex1/WBSactivity": { icon: "engineering.png", color: colors[6] },
-                };
-
-                var dir = "/vocables/KGqueryIcons/";
-                visjsData.nodes.forEach(function (item) {
-                    // item.color="#ddd"
-                    if (item.label.indexOf("Date") > -1) {
-                        item.color = "#96f696";
-                    } else {
-                        item.color = "#f3ebbe";
-                    }
-                    item.initialColor = item.color;
-                    item.initialShape = item.shape;
-                    if (icons[item.id]) {
-                        item.shape = "circularImage";
-                        item.size = 15;
-                        delete item.icon;
-                        item.image = dir + icons[item.id].icon;
-                        item.color = icons[item.id].color;
-                        item.borderWidth = 3;
-                        item.font = "18px arial " + icons[item.id].color;
-                        /* item.icon = {
-                             face: "'Ionicons'",
-                             code: "\uf276",
-                             size: 50,
-                             color: "#f0a30a"
-                         };*/
-                    }
-                });
-
+             
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
 
                 // cannot get colors from loadGraph ???!!

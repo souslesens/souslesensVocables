@@ -151,6 +151,11 @@ export default function GraphManagement() {
     };
 
     const handleHideModal = () => {
+        const idle = error || transferPercent === 100 || currentOperation === null;
+        if (!idle) {
+            return;
+        }
+
         setCurrentOperation(null);
         setDisplayModal(null);
         setCurrentSource(null);

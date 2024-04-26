@@ -7,7 +7,7 @@ import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import Export from "../../shared/export.js";
 import common from "../../shared/common.js";
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
-import IndividualAggregateWidget from "../../uiWidgets/individualAggregateWidget.js";
+import IndividualAggregateWidget from "./individualAggregateWidget.js";
 import IndividualValueFilterWidget from "../../uiWidgets/individualValuefilterWidget.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";

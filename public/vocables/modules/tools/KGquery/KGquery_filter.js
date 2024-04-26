@@ -174,12 +174,23 @@ var KGquery_filter = (function () {
         return callback(null, optionalPredicatesSparql);
     };
 
+    self.getAggregateFilterOptionalPredicates = function (querySet, filter) {
+        var filterStr = "";
+        for (var key in querySet.classFiltersMap) {
+            var classObj = querySet.classFiltersMap[key].class;
+            classObj.data.nonObjectProperties.forEach(function (property) {
+                var varName = KGquery.getVarName(classObj);
+                if (filter.indexOf(varName) > -1) filterStr += " OPTIONAL {" + varName + " <" + property.id + "> " + varName + "_" + property.label + ".}\n";
+            });
+        }
+        return filterStr;
+    };
+
     self.getAggregatePredicates = function (groupByPredicates) {
         var str = "";
         for (var key in groupByPredicates) {
             var obj = groupByPredicates[key];
             str += " ?" + obj.classLabel + " <" + obj.prop.id + "> ?" + obj.label + ". ";
-            console.log("++++" + str);
         }
 
         return str;

@@ -1,5 +1,5 @@
-import common from "../shared/common.js";
-import Sparql_common from "../sparqlProxies/sparql_common.js";
+import common from "../../shared/common.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
 var IndividualAggregateWidget = (function () {
     var self = {};
@@ -15,7 +15,7 @@ var IndividualAggregateWidget = (function () {
             self.divId = divId;
             $("#smallDialogDiv").dialog("open");
         }
-        $("#" + divId).load("snippets/individualAggregateWidget.html", function () {
+        $("#" + divId).load("modules/tools/KGquery/html/individualAggregateWidget.html", function () {
             loadClassesFn(function (data) {
                 self.groupByClassesMap = {};
                 self.functionVarClassesMap = {};
@@ -105,7 +105,7 @@ var IndividualAggregateWidget = (function () {
             } else if (fn == "COUNT") {
                 selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
             } else {
-                selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
+                selectStr += " (" + fn + " (?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
             }
             groupByPredicates[fnVar] = self.allProperties[fnVar];
         });

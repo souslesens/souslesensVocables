@@ -1,5 +1,6 @@
 
 
+
 var Lineage_selection = (function () {
     var self = {};
     self.selectedNodes = [];
@@ -362,7 +363,7 @@ var Lineage_selection = (function () {
                         dataType: "json",
                         success: function (_result, _textStatus, _jqXHR) {
 
-                            UI.message("graph saved");
+                            MainController.UI.message("Decoration deleted");
                         },
                         error(err) {
                             return alert(err);

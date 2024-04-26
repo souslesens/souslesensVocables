@@ -48,7 +48,7 @@ var DataController = {
     /**
      * Reads a file in a sub-directory of `data`
      * @param {string} dir - directory path under data
-     * @param {string} fileName - name of the file to read
+        * @param {string} fileName - name of the file to read
      * @param {(err: Error | string | null, data: string | null) => void} callback -
      *   function to be called with the file content as second argument
      */

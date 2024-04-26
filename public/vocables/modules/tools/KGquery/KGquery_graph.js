@@ -41,10 +41,11 @@ var KGquery_graph = (function () {
                 deleteNode: false,
                 deleteEdge: false,
 
-                /*     addEdge: function (edgeData, callback) {
-                         KGquery_graph.addInterGraphLink(edgeData, callback);
-                         return false;
-                     },*/
+                addEdge: function (edgeData, callback) {
+                    // KGquery_graph.addInterGraphLink(edgeData, callback);
+                    KGquery_graph.addInterGraphProperty(edgeData, callback);
+                    return false;
+                },
             },
         },
     };
@@ -59,6 +60,31 @@ var KGquery_graph = (function () {
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
         self.KGqueryGraph.saveGraph(fileName, true);
         return;
+    };
+    self.addInterGraphProperty = function (edgeData) {
+        var propertyId = prompt("enter property URI");
+        if (!propertyId) {
+            return;
+        }
+
+        var propertyLabel = prompt("enter property label");
+        if (!propertyLabel) {
+            return;
+        }
+
+        var edge = {
+            from: edgeData.from,
+            to: edgeData.to,
+            id: common.getRandomHexaId(10),
+            label: propertyLabel,
+            data: {
+                propertyId: propertyId,
+                source: KGquery.currentSource,
+                propertyLabel: propertyLabel,
+            },
+        };
+
+        self.KGqueryGraph.data.edges.add(edge);
     };
 
     self.drawVisjsModel = function (mode) {
@@ -81,7 +107,10 @@ var KGquery_graph = (function () {
                     MainController.UI.message("loading graph display");
                     self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                         if (err) {
-                            return callbackSeries("notFound");
+                            // return callbackSeries("notFound");
+
+                            self.DrawImportsCommonGraph(source);
+                            return callbackSeries("generate commonGraph");
                         }
                         visjsData = result;
 
@@ -212,6 +241,60 @@ var KGquery_graph = (function () {
                 MainController.UI.message("", true);
 
                 //  KGquery.clearAll();
+            }
+        );
+    };
+
+    self.DrawImportsCommonGraph = function () {
+        var source = KGquery.currentSource;
+        var sources = [];
+        var imports = Config.sources[source].imports;
+        if (imports) {
+            sources = sources.concat(imports);
+        }
+        var visjsData = { nodes: [], edges: [] };
+        var uniqueNodes = {};
+        self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
+        async.eachSeries(
+            sources,
+            function (source, callbackEach) {
+                var visjsGraphFileName = source + "_KGmodelGraph.json";
+
+                MainController.UI.message("loading graph display");
+                self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
+                    if (!err && result.nodes) {
+                        result.nodes.forEach(function (node) {
+                            if (!uniqueNodes[node.id]) {
+                                uniqueNodes[node.id] = 1;
+                                visjsData.nodes.push(node);
+                            }
+                        });
+                        result.edges.forEach(function (edge) {
+                            if (!uniqueNodes[edge.id]) {
+                                uniqueNodes[edge.id] = 1;
+                                visjsData.edges.push(edge);
+                            }
+                        });
+                    }
+
+                    callbackEach();
+                });
+            },
+            function (err) {
+                if (err) {
+                    return alert(err);
+                }
+                self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
+
+                // cannot get colors from loadGraph ???!!
+                self.KGqueryGraph.draw(function () {
+                    var newNodes = [];
+                    visjsData.nodes.forEach(function (node) {
+                        newNodes.push({ id: node.id, color: node.color, shape: node.shape });
+                    });
+                    self.KGqueryGraph.data.nodes.update(visjsData.nodes);
+                });
+                MainController.UI.message("", true);
             }
         );
     };

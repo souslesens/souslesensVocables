@@ -91,7 +91,7 @@ var KGquery_r = (function () {
         if ($("#tabs_Graph").children().length == 0) {
             $("#tabs_Graph").load("./responsive/KGquery/html/KGqueryGraphTab.html", function () {
                 KGquery_graph.init();
-                KGquery_graph.drawVisjsModel("saved");
+                //  KGquery_graph.drawVisjsModel("saved");
             });
         }
     };

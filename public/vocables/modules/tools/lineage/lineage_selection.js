@@ -117,6 +117,8 @@ var Lineage_selection = (function () {
             return alert("check nodes to process");
         } else if (action == "decorate") {
             self.decorate.showDialog();
+        } else if (action == "classDecorate") {
+            self.classDecorate.showDialog();
         } else if (action == "modifyPredicates") {
             self.modifyPredicates.showDialog();
         } else if (action == "deleteSelection") {
@@ -183,6 +185,180 @@ var Lineage_selection = (function () {
 
             $("#smallDialogDiv").dialog("close");
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newIds);
+        },
+    };
+    self.classDecorate = {
+        showDialog: function () {
+            $("#lineage_selection_rightPanel").load("modules/tools/lineage/html/selection/lineage_selection_decorateClassDialog.html", function () {
+                $("#lineage_selection_decorate_applyButton").bind("click", Lineage_selection.classDecorate.execDecorate);
+                $("#lineage_selection_decorate_deleteButton").bind("click", Lineage_selection.classDecorate.deleteDecorate);
+                common.fillSelectWithColorPalette("lineage_selection_decorate_colorSelect");
+                var shapes = ["ellipse", " circle", " database", " box", " text", "diamond", " dot", " star", " triangle", " triangleDown", " hexagon", " square"];
+                common.fillSelectOptions("lineage_selection_decorate_shapeSelect", shapes, true);
+            });
+        },
+        execDecorate: function () {
+            var jstreeNodes = self.getSelectedNodes();
+
+            var newIds = {};
+            var decoration_data = {};
+            var color = $("#lineage_selection_decorate_colorSelect").val();
+            var shape = $("#lineage_selection_decorate_shapeSelect").val();
+            var size = $("#lineage_selection_decorate_sizeInput").val();
+            var file_icon = $("#lineage_selection_decorate_iconInput")[0].files[0];
+
+            async.series(
+                [
+                    //File icon uploading
+                    function (callbackSeries) {
+                        if (file_icon) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                var fileContent = e.target.result; // Stockage du contenu du fichier dans la variable
+                                var base64Data = btoa(fileContent);
+                                var payload = {
+                                    dir: "classIcons/",
+                                    fileName: $("#lineage_selection_decorate_iconInput")[0].files[0].name,
+                                    data: JSON.stringify({ data: base64Data }),
+                                };
+                                $.ajax({
+                                    type: "POST",
+                                    url: `${Config.apiUrl}/data/file`,
+                                    data: payload,
+                                    dataType: "json",
+                                    success: function (_result, _textStatus, _jqXHR) {
+                                        MainController.UI.message("icon uploaded");
+                                        callbackSeries();
+                                    },
+                                    error(err) {
+                                        return callbackSeries(err);
+                                    },
+                                });
+                            };
+                            reader.readAsBinaryString(file_icon);
+                        } else {
+                            callbackSeries();
+                        }
+                    },
+
+                    function (callbackSeries) {
+                        jstreeNodes.forEach(function (node) {
+                            if (!node.data) {
+                                return;
+                            }
+                            var obj = { id: node.id };
+                            if (color) {
+                                obj.color = color;
+                            }
+                            if (shape) {
+                                obj.shape = shape;
+                            }
+                            if (size) {
+                                obj.size = size;
+                            }
+                            if (file_icon) {
+                                obj.image = "classIcons/" + $("#lineage_selection_decorate_iconInput")[0].files[0].name;
+                                obj.shape = "circularImage";
+                            }
+                            newIds[node.id] = obj;
+                        });
+                        var fileName = MainController.currentSource + "_decoration.json";
+                        //Get current decoration file
+                        var payload = {
+                            dir: "graphs/",
+                            fileName: fileName,
+                        };
+
+                        $.ajax({
+                            type: "GET",
+                            url: `${Config.apiUrl}/data/file`,
+                            data: payload,
+                            dataType: "json",
+                            success: function (result, _textStatus, _jqXHR) {
+                                var data = JSON.parse(result);
+                                for (var key in newIds) {
+                                    data[key] = newIds[key];
+                                }
+                                decoration_data = JSON.parse(JSON.stringify(data));
+                                callbackSeries();
+                            },
+                            error(err) {
+                                decoration_data = newIds;
+                                return callbackSeries();
+                            },
+                        });
+                    },
+                    function (callbackSeries) {
+                        var fileName = MainController.currentSource + "_decoration.json";
+                        var payload = {
+                            dir: "graphs/",
+                            fileName: fileName,
+                            data: JSON.stringify(decoration_data),
+                        };
+                        $.ajax({
+                            type: "POST",
+                            url: `${Config.apiUrl}/data/file`,
+                            data: payload,
+                            dataType: "json",
+                            success: function (_result, _textStatus, _jqXHR) {
+                                MainController.UI.message("Decoration saved");
+                                callbackSeries();
+                            },
+                            error(err) {
+                                return callbackSeries(err);
+                            },
+                        });
+                    },
+                ],
+                function (err) {
+                    if (err) {
+                        return err;
+                    }
+                }
+            );
+        },
+        deleteDecorate: function () {
+            var jstreeNodes = self.getSelectedNodes();
+            var fileName = MainController.currentSource + "_decoration.json";
+            //Get decoration data
+            var payload = {
+                dir: "graphs/",
+                fileName: fileName,
+            };
+
+            $.ajax({
+                type: "GET",
+                url: `${Config.apiUrl}/data/file`,
+                data: payload,
+                dataType: "json",
+                success: function (result, _textStatus, _jqXHR) {
+                    var data = JSON.parse(result);
+                    for (var node in jstreeNodes) {
+                        delete data[jstreeNodes[node].id];
+                    }
+                    var fileName = MainController.currentSource + "_decoration.json";
+                    var payload = {
+                        dir: "graphs/",
+                        fileName: fileName,
+                        data: JSON.stringify(data),
+                    };
+                    $.ajax({
+                        type: "POST",
+                        url: `${Config.apiUrl}/data/file`,
+                        data: payload,
+                        dataType: "json",
+                        success: function (_result, _textStatus, _jqXHR) {
+                            MainController.UI.message("Decoration deleted");
+                        },
+                        error(err) {
+                            return alert(err);
+                        },
+                    });
+                },
+                error(err) {
+                    return alert(err);
+                },
+            });
         },
     };
 

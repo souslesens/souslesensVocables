@@ -122,6 +122,7 @@ data/**/*.pdf
 data/**/*.zip
 data/**/*.txt
 data/**/*.csv
+data/**/*.png
 
 docker-data/
 

@@ -1,6 +1,6 @@
 {
     "name": "souslesensvocables",
-    "version": "1.65.0",
+    "version": "1.66.1",
     "private": true,
     "workspaces": [
         "mainapp"

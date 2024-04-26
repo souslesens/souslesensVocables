@@ -28,6 +28,24 @@ var Lineage_properties = (function () {
     self.init = function () {
         self.graphInited = false;
     };
+    self.initPropertiesTab = function () {
+        if ($("#tabs_properties").children().length == 0) {
+            $("#tabs_properties").load("./modules/tools/lineage/html/Lineage_propertiesPanel.html", function (s) {
+                Lineage_whiteboard.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
+                Lineage_properties.searchTermInSources();
+            });
+        }
+    };
+    self.changeIconForPropertiesGraphAction = function (div) {
+        var icon = $(div).children().attr("class");
+        if (icon == "allPropertyIcon slsv-invisible-button" || icon == "slsv-invisible-button allPropertyIcon") {
+            $(div).children().removeClass("allPropertyIcon");
+            $(div).children().addClass("currentPropertyIcon");
+        } else {
+            $(div).children().removeClass("currentPropertyIcon");
+            $(div).children().addClass("allPropertyIcon");
+        }
+    };
     self.showPropInfos = function (_event, obj) {
         var id = obj.node.id;
         var html = JSON.stringify(self.properties[id]);
@@ -92,11 +110,11 @@ var Lineage_properties = (function () {
 
     self.openNode = function (node) {
         var options = { subPropIds: node.data.id };
-        MainController.UI.message("searching in " + node.data.source);
+        UI.message("searching in " + node.data.source);
         // @ts-ignore
         Sparql_OWL.getObjectPropertiesDomainAndRange(node.data.source, null, options, function (err, result) {
             if (err) {
-                return MainController.UI.message(err);
+                return UI.message(err);
             }
             var data = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
             var distinctIds = {};
@@ -124,7 +142,7 @@ var Lineage_properties = (function () {
                 }
             });
             JstreeWidget.addNodesToJstree("Lineage_propertiesTree", node.id, jstreeData);
-            MainController.UI.message("", true);
+            UI.message("", true);
         });
     };
 
@@ -245,7 +263,7 @@ var Lineage_properties = (function () {
         Sparql_OWL.getPropertiesRestrictionsDescription(source, properties, options, function (err, result) {
             if (err) {
                 alert(err.responseText);
-                return MainController.UI.message(err.responseText, true);
+                return UI.message(err.responseText, true);
             }
             var visjsData = { nodes: [], edges: [] };
 
@@ -787,7 +805,7 @@ var Lineage_properties = (function () {
                 }
             }
             if (properties && properties.length > 0) options.filter = Sparql_common.setFilter("prop", properties);
-            MainController.UI.message("searching...");
+            UI.message("searching...");
             Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, options, function (err, result) {
                 if (err) {
                     return callback(err);
@@ -795,9 +813,9 @@ var Lineage_properties = (function () {
                 var allProps = [];
                 if (Object.keys(allProps).length == 0) {
                 }
-                //  MainController.UI.message("No data found",true)
+                //  UI.message("No data found",true)
 
-                MainController.UI.message("drawing...");
+                UI.message("drawing...");
                 for (var propId in result) {
                     var item = result[propId];
 
@@ -898,7 +916,7 @@ var Lineage_properties = (function () {
             searchedSources,
             function (sourceLabel, callbackEach) {
                 $("waitImg").css("display", "block");
-                MainController.UI.message("searching in " + sourceLabel);
+                UI.message("searching in " + sourceLabel);
 
                 self.getPropertiesjsTreeData(
                     sourceLabel,
@@ -934,14 +952,14 @@ var Lineage_properties = (function () {
             },
             function (err) {
                 if (err) {
-                    MainController.UI.message(err, true);
+                    UI.message(err, true);
                 }
 
                 if (jstreeData.length == 0) {
                     $("#Lineage_propertiesTree").html("no properties found");
                 }
 
-                MainController.UI.message(jstreeData.length + " nodes found", true);
+                UI.message(jstreeData.length + " nodes found", true);
                 var options = {
                     selectTreeNodeFn: Lineage_properties.onTreeNodeClick,
                     openAll: true,

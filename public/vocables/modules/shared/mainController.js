@@ -1,14 +1,7 @@
-import Sparql_common from "../sparqlProxies/sparql_common.js";
 import common from "./common.js";
 import OntologyModels from "./ontologyModels.js";
 import authentication from "./authentification.js";
-import Clipboard from "./clipboard.js";
-import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import Sparql_SKOS from "../sparqlProxies/sparql_SKOS.js";
-import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
-import GraphLoader from "./graphLoader.js";
-import ResponsiveUI from "../../responsive/responsiveUI.js";
+import UI from "./UI.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -22,7 +15,7 @@ import ResponsiveUI from "../../responsive/responsiveUI.js";
 
 var MainController = (function () {
     var self = {};
-
+    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
     self.currentTool = null;
     self.currentSchemaType = null;
     self.currentSource = null;
@@ -175,10 +168,7 @@ var MainController = (function () {
                             callbackSeries(err);
                         });
                     },
-                    function (callbackSeries) {
-                        MainController.UI.showToolsList("toolsTreeDiv");
-                        callbackSeries();
-                    },
+                    
                     function (callbackSeries) {
                         MainController.parseUrlParam(function () {
                             callbackSeries();
@@ -186,7 +176,7 @@ var MainController = (function () {
                     },
                 ],
                 function (_err) {
-                    MainController.UI.configureUI();
+                    //MainController.UI.configureUI();
                 }
             );
             callback(_err);
@@ -204,10 +194,316 @@ var MainController = (function () {
                 }
             });
     };
+    //  MainController --> onToolSelect.initTool   when click on a button of a tool
+    // Manage when we click on a tool with parameter event
+    // Or when we choose a tool with the url with toolId parameter
+    self.onToolSelect = function (toolId, event,callback) {
+        if (event) {
+            var clickedElement = event.target;
+            // if class
+            if (clickedElement.className == "Lineage_PopUpStyleDiv") {
+                var toolId = $(clickedElement).children()[1].innerHTML;
+            } else {
+                if (clickedElement.id == "toolsSelect") {
+                    return;
+                } else if (clickedElement.innerHTML) {
+                    var toolId = clickedElement.innerHTML;
+                } else {
+                    var toolId = clickedElement.nextSibling.innerHTML;
+                }
+            }
+        }
 
+        if (self.currentTool != null) {
+            if (Config.userTools[self.currentTool].controller.unload) {
+                Config.userTools[self.currentTool].controller.unload();
+            }
+        }
+        self.currentTool = toolId;
+
+        if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
+            Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
+        }
+
+        $("#currentToolTitle").html(toolId);
+        if (UI.currentTheme["@" + toolId + "-logo"]) {
+            $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
+        }
+        MainController.currentTool = toolId;
+        if (self.toolsNeedSource.includes(toolId)) {
+            if (self.currentSource == null) {
+                UI.showSourceDialog(true);
+            } else {
+                self.sourceSelect(self.currentSource);
+            }
+        } else {
+            self.initTool(toolId);
+        }
+        if(callback){
+            callback()
+        }
+    };
+    
+    // onSourceSelect is an event click functions when we choose a source she attribute the correct source corresponding to the click then execute source select which is the 
+    // the real execution of what we do when we choosed a source 
+    self.onSourceSelect = function (evt, obj) {
+        //  if (!MainController.currentTool) return self.alert("select a tool first");
+        var p = obj.node.parents.indexOf("PRIVATE");
+        if (p > 0) {
+            Config.sourceOwner = obj.node.parents[p - 1];
+        }
+
+        if (!obj.node.data || obj.node.data.type != "source") {
+            $(obj.event.currentTarget).siblings().click();
+            return;
+        }
+
+        var source = obj.node.data.id;
+        self.sourceSelect(source);
+    };
+   
+    self.sourceSelect = function (source) {
+        MainController.currentSource = source;
+        UI.source = source;
+        $("#selectedSource").html(MainController.currentSource);
+
+        $("#mainDialogDiv").parent().hide();
+        self.initTool(MainController.currentTool, function (err, result) {
+            if (err) {
+                return self.alert(err.responseText);
+            }
+            self.resetWindowHeight();
+        });
+    };
+    
+    self.onSourceSelect_AddSource = function (evt, obj) {
+        //  if (!MainController.currentTool) return self.alert("select a tool first");
+        if (!obj.node.data || obj.node.data.type != "source") {
+            return self.alert("select a tool");
+        }
+
+        MainController.currentSource = obj.node.data.id;
+        $("#selectedSource").html(MainController.currentSource);
+        $("#mainDialogDiv").parent().hide();
+        Lineage_sources.init();
+    };
+    //Giving a tool in parameter and the function launch it
+    self.initTool = function (toolId, callback) {
+        var toolObj = Config.userTools[toolId];
+        MainController.initControllers();
+        MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
+        Clipboard.clear();
+        Lineage_sources.loadedSources = {};
+
+        if (Config.userTools[toolId].controller.onLoaded) {
+            MainController.writeUserLog(authentication.currentUser, toolId, "");
+            Config.userTools[toolId].controller.onLoaded();
+        } else {
+            if (true) {
+                var url = window.location.href;
+                var p = url.indexOf("?");
+                if (p > -1) {
+                    url = url.substring(0, p);
+                }
+                url = url.replace("index_r.html", "");
+                url += "?tool=" + toolId;
+                window.location.href = url;
+            }
+        }
+    };
+    /*
     self.UI = {
-        configureUI: function () {},
+        initialGraphDivWitdh: 0,
+        
+        configureUI: function () {
+            if (Config.currentProfile.forbiddenTools.indexOf("BLENDER") > -1) {
+                $("#showBlenderButton").css("display", "none");
+            } else {
+                $("#showBlenderButton").css("display", "block");
+            }
+        },
 
+        showSources: function (treeDiv, withCBX, sources, types, options, callback) {
+            if (!options) {
+                options = {};
+            }
+            var treeData = [];
+
+            if (self.currentSourcesTree) {
+                treeData = self.currentSourcesTree;
+            } else {
+                var distinctNodes = {};
+
+                var distinctGroups = {};
+
+                if (Config.currentProfile.allowedSourceSchemas.length == 0) {
+                    return alert(Config.currentProfile.name + " has no schema type allowed. Contact administrator");
+                }
+                Config.currentProfile.allowedSourceSchemas.sort().forEach(function (item) {
+                    if (!types || (types && types.indexOf(item) > -1)) {
+                        treeData.push({
+                            id: item,
+                            text: item,
+                            parent: "#",
+                            type: item,
+                        });
+                    }
+                });
+                Object.keys(Config.sources)
+                    .sort()
+                    .forEach(function (sourceLabel, index) {
+                        // self.initControllers();
+                        if (sources && sources.indexOf(sourceLabel) < 0) {
+                            return;
+                        }
+                        if (Config.sources[sourceLabel].isDraft) {
+                            return;
+                        }
+                        if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) {
+                            return;
+                        }
+                        Config.sources[sourceLabel].name = sourceLabel;
+
+                        var parent = Config.sources[sourceLabel].schemaType;
+
+                        var othersGroup = "OTHERS";
+
+                        if (!types && !distinctGroups[othersGroup]) {
+                            distinctGroups[othersGroup] = 1;
+                            treeData.push({
+                                id: othersGroup + "_" + parent,
+                                text: "OTHERS",
+                                type: "group",
+                                parent: "#",
+                            });
+                        }
+
+                        var group = Config.sources[sourceLabel].group;
+                        if (group) {
+                            var subGroups = group.split("/");
+                            subGroups.forEach(function (subGroup, index) {
+                                if (index > 0) {
+                                    parent = subGroups[index - 1];
+                                }
+                                if (!distinctGroups[subGroup]) {
+                                    distinctGroups[subGroup] = 1;
+                                    treeData.push({
+                                        id: subGroup,
+                                        text: subGroup,
+                                        type: "group",
+                                        parent: parent,
+                                    });
+                                }
+                                group = subGroup;
+                            });
+                        } else {
+                            group = othersGroup + "_" + parent;
+                            if (types) {
+                                group = Config.sources[sourceLabel].schemaType;
+                            } else {
+                                group = Config.sources[sourceLabel].schemaType;
+                            }
+                        }
+
+                        if (!distinctNodes[sourceLabel]) {
+                            distinctNodes[sourceLabel] = 1;
+
+                            if (!Config.sources[sourceLabel].color) {
+                                Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
+                            }
+                            //  console.log(JSON.stringify(jstreeData,null,2))
+                            if (!types || types.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                                treeData.push({
+                                    id: sourceLabel,
+                                    text: sourceLabel,
+                                    type: Config.sources[sourceLabel].schemaType,
+                                    parent: group,
+                                });
+                            }
+                        }
+                    });
+                self.currentSourcesTree = treeData;
+            }
+            var jstreeOptions = options;
+            if (!jstreeOptions.contextMenu) {
+                jstreeOptions.contextMenu = UI.getJstreeConceptsContextMenu();
+            }
+            if (withCBX) {
+                jstreeOptions.withCheckboxes = withCBX;
+            }
+
+            if (!withCBX && !jstreeOptions.selectTreeNodeFn) {
+                jstreeOptions.selectTreeNodeFn = function (evt, obj) {
+                    if (!Config.sources[obj.node.id]) {
+                        return;
+                    }
+                    $("#mainDialogDiv").dialog("close");
+                    if (obj.node.parent == "#") {
+                        //first level group by schema type
+                        if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {
+                            //schemaTypeNode
+                            if (obj.node.id == "KNOWLEDGE_GRAPH") {
+                                MainController.currentSchemaType = "OWL";
+                            } else {
+                                MainController.currentSchemaType = obj.node.id;
+                            }
+
+                            if ($("#sourcesTreeDiv").children().length > 0) {
+                                $("#sourcesTreeDiv").jstree(true).open_node(obj.node.id);
+                            }
+                            return;
+                        }
+                    } else {
+                        self.currentSource = obj.node.id;
+                        MainController.UI.onSourceSelect(obj.event);
+                    }
+                };
+            }
+
+            if (!jstreeOptions.onOpenNodeFn) {
+                jstreeOptions.onOpenNodeFn = function (evt, obj) {
+                    if (obj.node.parent == "#") {
+                        //first level group by schema type
+                        if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {
+                            //schemaTypeNode
+                            if (obj.node.id == "KNOWLEDGE_GRAPH") {
+                                MainController.currentSchemaType = "OWL";
+                            } else {
+                                MainController.currentSchemaType = obj.node.id;
+                            }
+                        }
+                    }
+                };
+            }
+
+            $("#Lineage_SearchSourceInput").bind("keydown", null, MainController.UI.searchInSourcesTree);
+            options.searchPlugin = {
+                case_insensitive: true,
+                fuzzy: false,
+                show_only_matches: true,
+            };
+
+            JstreeWidget.loadJsTree(treeDiv, treeData, options, function () {
+                var openedTypes = Config.preferredSchemaType;
+                //    if (types) openedTypes = types;
+                //  $("#" + treeDiv).jstree(true).open_all(openedTypes);
+                $("#" + treeDiv)
+                    .jstree(true)
+                    .open_node(openedTypes);
+                if (callback) {
+                    return callback();
+                }
+            });
+        },
+
+        searchInSourcesTree: function () {
+            if (event.keyCode != 13 && event.keyCode != 9) {
+                return;
+            }
+            var value = $("#Lineage_SearchSourceInput").val();
+            $("#sourcesTreeDiv").jstree(true).search(value);
+            //$("#Lineage_SearchSourceInput").val("");
+        },
         showToolsList: function (treeDiv) {
             $(".max-height").height($(window).height() - 300);
             var treeData = [];
@@ -291,17 +587,9 @@ var MainController = (function () {
                 });
             }
         },
-
-        getJstreeConceptsContextMenu: function () {
-            if (!self.currentTool || !Config.userTools[self.currentTool]) {
-                return;
-            }
-            var controller = Config.userTools[self.currentTool].controller;
-            if (controller.jstreeContextMenu) {
-                return controller.jstreeContextMenu();
-            }
-        },
-
+        */
+        
+        /*
         onSourceSelect: function (event) {
             if (Config.userTools[self.currentTool].multiSources) {
                 return;
@@ -315,21 +603,9 @@ var MainController = (function () {
                 controller.onSourceSelect(self.currentSource, event);
             }
         },
-
-        message: function (message, stopWaitImg, startWaitImg) {
-            if (message.length > 200) {
-                alert(message);
-            } else {
-                $("#messageDiv").html(message);
-            }
-            if (stopWaitImg) {
-                $("#waitImg").css("display", "none");
-            }
-            if (startWaitImg) {
-                $("#waitImg").css("display", "block");
-            }
-        },
-
+        */
+       
+        /*
         setCredits: function () {
             var LateralPannelWidth = $("#lateralPanelDiv").width();
             var gifStart = $(window).width() / 2 - LateralPannelWidth + 100;
@@ -342,7 +618,7 @@ var MainController = (function () {
                 "</div>";
             $("#graphDiv").html(html);
         },
-
+P
         updateActionDivLabel: function (html) {
             if (html) {
                 $("#toolPanelLabel").html(html);
@@ -411,11 +687,11 @@ var MainController = (function () {
             // eslint-disable-next-line no-console
             console.log("logout");
         },
-    };
+    };*/
 
-    self.test = function () {
-        //   bc.postMessage("bc")
-    };
+
+
+
 
     self.parseUrlParam = function (callback) {
         var paramsMap = common.getUrlParamsMap();
@@ -429,11 +705,11 @@ var MainController = (function () {
 
                 var url = window.location.href;
 
-                // if tool available load it in responsive
-                if (source) {
-                    ResponsiveUI.source = source;
-                }
-                ResponsiveUI.onToolSelect(tool);
+                    // if tool available load it in responsive
+                    if (source) {
+                        MainController.currentSource = source;
+                    }
+                    self.onToolSelect(tool);
 
                 if (window.history.pushState && url.indexOf("localhost") < 0) {
                     var url = url.substring(0, url.indexOf("?"));

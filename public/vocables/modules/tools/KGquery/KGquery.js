@@ -16,12 +16,12 @@ import KGquery_myQueries from "./KGquery_myQueries.js";
 import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
-
-import ResponsiveUI from "../../../responsive/responsiveUI.js";
-
-import KGquery_filter from "./KGquery_filter.js";
-
-import Containers_widget from "../containers/containers_widget.js";
+import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
+//import KGquery_annotations_bot from "../../bots/KGquery_annotations_bot.js";
+import sparql_common from "../../sparqlProxies/sparql_common.js";
+import UI from "../../shared/UI.js";
+import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
+import jstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
 var KGquery = (function () {
     var self = {};
@@ -33,41 +33,66 @@ var KGquery = (function () {
     self.maxResultSizeforLineageViz = 1000;
     self.maxOptionalPredicatesInQuery = 8;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
-
     self.onLoaded = function () {
-        $("#actionDivContolPanelDiv").load("modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
-            KGquery_graph.init();
-        });
-        $("#graphDiv").load("modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
-            self.currentSource = Lineage_sources.activeSource;
-            self.showSourcesDialog();
+        UI.initMenuBar(KGquery.loadSource);
+        $("#messageDiv").attr("id", "KGquery_messageDiv");
+        $("#waitImg").attr("id", "KGquery_waitImg");
+        
+    };
+    self.unload = function () {
+        Lineage_sources.registerSource = UI.oldRegisterSource;
+        $("#KGquery_messageDiv").attr("id", "messageDiv");
+        $("#KGquery_waitImg").attr("id", "waitImg");
+        $("#graphDiv").empty();
+        $("#lateralPanelDiv").empty();
+    };
+    self.loadSource = function () {
+        KGquery.currentSource = UI.source;
+        Lineage_sources.loadSources(MainController.currentSource, function (err) {
+            if (err) {
+                return alert(err.responseText);
+            }
+            $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
+                $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
+                    KGquery_graph.drawVisjsModel("saved");
+                    UI.openTab("KGquery-tab", "tabs_Query", self.initQuery, "#QueryTabButton");
+                    UI.resetWindowHeight();
+                    $("#KGquery_dataTableDialogDiv").dialog({
+                        autoOpen: false,
+                        close: function (event, ui) {
+                            window.scrollTo(0, 0);
+                        },
+                        drag: function (event, ui) {
+                            $("#KGquery_dataTableDialogDiv").parent().css("transform", "unset");
+                        },
+                        open(event, ui) {
+                            $("#KGquery_dataTableDialogDiv").parent().css("transform", "translate(-50%,-50%)");
+                            $("#KGquery_dataTableDialogDiv").parent().css("top", "50%");
+                            $("#KGquery_dataTableDialogDiv").parent().css("left", "50%");
+                        },
+                    });
+                });
+            });
         });
     };
 
-    self.init = function () {
-        KGquery_graph.drawVisjsModel("saved");
-        SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
+    self.initMyQuery = function () {
+        SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "tabs_myQueries", KGquery.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
     };
-
-    self.showSourcesDialog = function (forceDialog) {
-        if (!forceDialog && Config.userTools["KGquery"].urlParam_source) {
-            self.currentSource = Config.userTools["KGquery"].urlParam_source;
-            self.init();
-            return;
+    self.initQuery = function () {
+        if ($("#tabs_Query").children().length == 0) {
+            $("#tabs_Query").load("./modules/tools/KGquery/html/KGqueryQueryTab.html", function () {
+                KGquery.addQuerySet();
+            });
         }
-
-        var options = {
-            includeSourcesWithoutSearchIndex: true,
-            withCheckboxes: false,
-        };
-        var selectTreeNodeFn = function (event, obj) {
-            $("#mainDialogDiv").dialog("close");
-            self.currentSource = obj.node.id;
-            self.init();
-        };
-        MainController.UI.showHideRightPanel("hide");
-        $("#KGquery_SetsControlsDiv").hide();
-        SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
+    };
+    self.initGraph = function () {
+        if ($("#tabs_Graph").children().length == 0) {
+            $("#tabs_Graph").load("./modules/tools/KGquery/html/KGqueryGraphTab.html", function () {
+                KGquery_graph.init();
+                KGquery_graph.drawVisjsModel("saved");
+            });
+        }
     };
 
     self.addQuerySet = function (booleanOperator) {
@@ -310,7 +335,7 @@ var KGquery = (function () {
 
                     KGquery_filter.selectOptionalPredicates(self.querySets, function (err, result) {
                         if (err) {
-                            MainController.UI.message(err, true);
+                            UI.message(err, true)
                             callbackSeries(err);
                         }
                         optionalPredicatesSparql = result;
@@ -512,14 +537,11 @@ var KGquery = (function () {
             });
         });
 
-        ResponsiveUI.onToolSelect("lineage", null, function () {
-            KGquery_myQueries.save(function (err, query) {
-                // Config.clientCache.KGquery = query;
-            });
-            setTimeout(function () {
-                Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
-            }, 2000);
-        });
+        MainController.onToolSelect("lineage",null,function() {
+            setTimeout(function(){
+            Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
+            },2000)
+        })
     };
     self.queryToTagsGeometry = function (data) {
         var tagsMap = {};
@@ -530,8 +552,8 @@ var KGquery = (function () {
                 }
             }
         });
-        ResponsiveUI.onToolSelect("TagsGeometry", null, function () {
-            setTimeout(function () {
+        MainController.onToolSelect("TagsGeometry", null, function() {
+            setTimeout(function() {
                 //   import TagsGeometry from "../../../../plugins/TagsGeometry/public/js/main.js";
                 TagsGeometry.draw(tagsMap);
             }, 2000);

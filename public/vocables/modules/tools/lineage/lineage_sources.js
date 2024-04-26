@@ -14,6 +14,7 @@ import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 import Authentification from "../../shared/authentification.js";
+import UI from "../../shared/UI.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -21,43 +22,16 @@ var Lineage_sources = (function () {
     self.loadedSources = {};
     self.sourceDivsMap = {};
 
-    self.init = function (showDialog) {
-        if (true) {
-            Config.Lineage.disabledButtons.forEach(function (buttonId) {
-                $("#" + buttonId).prop("disabled", "disabled");
-            });
-        }
-
-        if (self.loadedSources) {
-            for (var source in self.loadedSources) {
-                self.menuActions.closeSource(source);
+    self.init = function () {
+        self.loadSources(MainController.currentSource, function (err) {
+            if (err) {
+                return alert(err.responseText);
             }
-        }
-        $("#LineagePopup").dialog({
-            autoOpen: false,
-            height: 800,
-            width: 1000,
-            modal: false,
-            //  position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
+            $("#lateralPanelDiv").load("./modules/tools/lineage/html/Lineage_leftPanel.html", function () {
+                Lineage_whiteboard.initWhiteboardTab();
+                Lineage_whiteboard.initUI();
+            });
         });
-        $("#QueryDialog").dialog({
-            autoOpen: false,
-            height: 800,
-            width: 700,
-            modal: false,
-            // position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
-        });
-        self.activeSource = null;
-        self.loadedSources = {};
-        self.sourceDivsMap = {};
-
-        // self.clearSource()
-
-        Lineage_selection.selectedNodes = [];
-        self.setTheme(Config.defaultGraphTheme);
-        if (!Config.userTools["lineage"].noSourceDialogAtInit) {
-            Lineage_sources.showSourcesDialog(showDialog);
-        }
     };
 
     self.resetAll = function (showDialog) {
@@ -91,14 +65,14 @@ var Lineage_sources = (function () {
             self.setCurrentSource(source);
             $("#sourcesSelectionDialogdiv").dialog("close");
             $("#lineage_allActions").css("visibility", "visible");
-            MainController.UI.showHideRightPanel("show");
+            //MainController.UI.showHideRightPanel("show");
         };
 
         var validateButtonFn = function () {
             var sources = SourceSelectorWidget.getCheckedSources();
             self.loadSources(sources);
         };
-        MainController.UI.showHideRightPanel("hide");
+        //MainController.UI.showHideRightPanel("hide");
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, validateButtonFn, options);
 
         return;
@@ -139,7 +113,7 @@ var Lineage_sources = (function () {
                 }
                 self.setCurrentSource(firstSource);
                 $("#sourcesSelectionDialogdiv").dialog("close");
-                MainController.UI.showHideRightPanel();
+                //MainController.UI.showHideRightPanel();
                 $("#lineage_allActions").css("visibility", "visible");
 
                 if (callback) {
@@ -189,7 +163,7 @@ var Lineage_sources = (function () {
         if (!self.loadedSources[source]) {
             self.initSource(source, function (err, sourceDivId) {
                 if (err) {
-                    return MainController.UI.message(err);
+                    return UI.message(err);
                 }
 
                 highlightSourceDiv(source);
@@ -254,18 +228,23 @@ var Lineage_sources = (function () {
         if (!Lineage_whiteboard.lineageVisjsGraph.network) {
             return;
         }
-        if (hide) {
-            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
-            $(".vis-edit-mode").css("display", "none");
+        if(MainController.currentTool!='lineage'){
+            hide=true;
         }
+        Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
+        $(".vis-edit-mode").css("display", "none");
+
         var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
-        if (isNodeEditable) {
-            Lineage_whiteboard.lineageVisjsGraph.network.enableEditMode();
-            $(".vis-edit-mode").css("display", "block");
+        if (isNodeEditable && !hide) {
+            $("#Lineage_graphEditionButtons").css("display", "block");
+
+            $("#lineage_createResourceBtn").show();
         } else {
-            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
-            $(".vis-edit-mode").css("display", "none");
+            $("#Lineage_graphEditionButtons").css("display", "none");
+            $("#lineage_createResourceBtn").hide();
         }
+        $("#Lineage_sourceButtonsTitle").text($(".Lineage_selectedSourceDiv").text());
+        Lineage_whiteboard.resetCurrentTab();
     };
 
     self.whiteboard_setGraphOpacity = function (source) {
@@ -355,7 +334,7 @@ var Lineage_sources = (function () {
                 if (drawTopConcepts) {
                     Lineage_whiteboard.drawTopConcepts(source, {}, null, function (err) {
                         if (err) {
-                            return MainController.UI.message(err);
+                            return UI.message(err);
                         }
                     });
                 }
@@ -371,13 +350,13 @@ var Lineage_sources = (function () {
                 return alert(err.responseText);
             }
             if (indexedSources.indexOf(source) < 0) {
-                MainController.UI.message("indexing source " + source);
+                UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");
                 SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
                     if (err) {
-                        return MainController.UI.message(err, true);
+                        return UI.message(err, true);
                     }
-                    MainController.UI.message("ALL DONE", true);
+                    UI.message("ALL DONE", true);
                 });
             }
         });
@@ -415,7 +394,7 @@ sourceDivId +
                 "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
                 sourceDivId +
                 "\")'/> </button></div>";
-            $("#lineage_drawnSources").append(html);
+            $("#Lineage_sourcesDiv").append(html);
 
             $("#" + sourceDivId).bind("click", function (e) {
                 var sourceDivId = $(this).attr("id");
@@ -425,6 +404,53 @@ sourceDivId +
             return callback();
         });
     };
+    self.registerSourceWithoutDisplayingImports = function (sourceLabel, callback) {
+        if (!callback) {
+            callback = function () {};
+        }
+
+        if (Lineage_sources.loadedSources[sourceLabel]) {
+            return callback();
+        }
+
+        OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            if (sourceLabel == UI.source) {
+                var sourceDivId = "source_" + common.getRandomHexaId(5);
+                self.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
+                self.sourceDivsMap[sourceDivId] = sourceLabel;
+                var html =
+                    "<div  id='" +
+                    sourceDivId +
+                    "' style='color: " +
+                    Lineage_whiteboard.getSourceColor(sourceLabel) +
+                    ";display:inline-flex;align-items:end;'" +
+                    " class='Lineage_sourceLabelDiv'  " +
+                    ">" +
+                    sourceLabel +
+                    "&nbsp;" +
+                    /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+    sourceDivId +
+    "\")'>[-]</i>";*/
+                    "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+                    sourceDivId +
+                    "\")'/> </button></div>";
+                $("#Lineage_sourcesDiv").append(html);
+
+                $("#" + sourceDivId).bind("click", function (e) {
+                    var sourceDivId = $(this).attr("id");
+                    var source = self.sourceDivsMap[sourceDivId];
+                    self.setCurrentSource(source);
+                });
+                return callback();
+            } else {
+                return callback();
+            }
+        });
+    };
+
     self.showSourceDivPopupMenu = function (sourceDivId) {
         event.stopPropagation();
         var source = Lineage_sources.sourceDivsMap[sourceDivId];
@@ -455,7 +481,7 @@ sourceDivId +
     };
 
     self.setAllWhiteBoardSources = function (remove) {
-        self.showHideEditButtons(null, true);
+        
         if (remove) {
             Lineage_sources.fromAllWhiteboardSources = true;
         }

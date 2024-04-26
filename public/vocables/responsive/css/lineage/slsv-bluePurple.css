@@ -53,7 +53,7 @@
 .w3-bar-item {
     padding: 8px 5px !important;
 }
-.w3-barslsv-bg-pale {
+.w3-bar_slsv-bg-pale {
     background-color: @background-color;
 }
 .w3-container {

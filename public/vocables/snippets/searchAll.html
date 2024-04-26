@@ -1,38 +1,24 @@
 <div style="display: flex; flex-direction: column; height: 50px">
-    <div>
-        <input type="checkbox" id="GenericTools_allExactMatchSearchCBX" />Exact Match
-
-        <b>Scope </b>
-        <select id="GenericTools_searchScope" class="GenericTools_searchAllOptional" onchange="Lineage_sources.initSourcesSearchSelect()">
-            <option value="currentSource">Current Source</option>
-            <option value="whiteboardSources">Current whiteboard sources</option>
-            <!--   <option value="all_OWLsources">All OWL sources</option>
-            <option value="all_SKOSsources">All SKOS sources</option>
-            <option value="all_IndividualsSources">All Individuals sources</option>-->
-            <option value="all_Sources">All Sources</option>
-        </select>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional" onclick="SourceSelectorWidget.showDialog(['OWL'],null,SearchWidget.searchTermInSources)">+</button>
-        <input type="checkbox" checked="checked" id="GenericTools_searchAllLabelsCBX" />All labels
-    </div>
-    <div>
-        Class
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="GenericTools_searchAllClassSelectPromptBtn" onclick="SearchWidget.onSearchClass()">?</button>
-        <select id="GenericTools_searchAllClassSelect" style="min-width: 100px"></select>
-    </div>
-    <div>
-        <input id="searchWidget_searchTermInput" autocomplete="off" style="width: 150px" value="" />
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="GenericTools_onSearchAllInput" onclick="SearchWidget.searchTermInSources()">Search</button>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="SearchWidget.showTopConcepts();">reset</button>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional" onclick="Export.exportTreeToDataTable(null,'#')">toTable</button>
-    </div>
-</div>
-<div id="sourcesSelectionDialogdiv" style="margin-bottom: 10px">
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#sourcesSelectionDialogdiv').dialog('close')">Cancel</button>
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="searchAllValidateButton">OK</button>
-    <div>Search : <input id="Lineage_classes_SearchSourceInput" value="" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>
-    <div id="sourcesTreeDivContainer" style="overflow: auto" class="jstreeContainerXX XXXmax-height">
-        <div class="jstreeContainer" style="width: 360px; height: 600px; overflow: auto; margin-top: 5px">
-            <div id="searchAll_sourcesTree"></div>
+    <div class="w3-container">
+        <div class="input-group mb-3" style="width: 100%">
+            <div class="input-group-prepend">
+                <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+                    <button class="search-icon slsv-invisible-button" onclick="SearchWidget.searchTermInSources()" style="margin-top: 4px; height: 20px; width: 20px"></button>
+                </div>
+            </div>
+            <input id="searchWidget_searchTermInput" class="border-without-raduis-theme1" autocomplete="off" style="width: 35%; height: 33.5px" value="" />
+            <div id="Lineage_classes_moreOptionsButton" class="input-group-append">
+                <div class="SearchButtonIconRight border-without-raduis-theme1" onclick="Lineage_whiteboard.hideShowMoreOptions(null,'Lineage_MoreClassesOptions')" style="height: 33.5px">
+                    <button class="moreOptions-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-top: 5px; margin-right: 5px"></button>
+                </div>
+            </div>
+            <div>
+                <button class="w3-button classesPannelButton size-of-button-small" style="margin-left: 10px" onclick="SearchWidget.showTopConcepts();">Reset</button>
+                <button class="w3-button classesPannelButton size-of-button-small" style="margin-left: 1px" onclick="Export.exportTreeToDataTable(null,'#')">Export</button>
+                <button class="w3-button classesPannelButton size-of-button-small" onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all">
+                    <img src="./icons/CommonIcons/ClearAllIcon.png" />
+                </button>
+            </div>
         </div>
     </div>
 </div>

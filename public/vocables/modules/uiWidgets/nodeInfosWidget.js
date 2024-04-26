@@ -12,13 +12,13 @@ import Lineage_axioms_draw from "../../modules/tools/lineage/lineage_axioms_draw
 import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_create.js";
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
-import ResponsiveUI from "../../responsive/responsiveUI.js";
+import UI from "../shared/UI.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
 
     self.initDialog = function (sourceLabel, divId, options, callback) {
-        ResponsiveUI.openDialogDiv(divId);
+        //UI.openDialogDiv(divId);
         $("#" + divId)
             .parent()
             .show("fast", function () {
@@ -151,7 +151,7 @@ var NodeInfosWidget = (function () {
                         callback(err);
                     }
                     if (err) {
-                        MainController.UI.message(err, true);
+                        UI.message(err, true);
                     }
                     self.showNodeInfosToolbar(options);
 
@@ -224,7 +224,7 @@ var NodeInfosWidget = (function () {
                     callback(err);
                 }
                 if (err) {
-                    return MainController.UI.message(err.responseText || err, true);
+                    return UI.message(err.responseText || err, true);
                 }
             }
         );
@@ -293,7 +293,7 @@ var NodeInfosWidget = (function () {
             },
             function (err, data) {
                 if (err) {
-                    MainController.UI.message(err.responseText);
+                    UI.message(err.responseText);
                     if (callback) {
                         return callback(err);
                     }
@@ -736,7 +736,7 @@ defaultLang = 'en';*/
         Sparql_OWL.getPropertiesRestrictionsDescription(sourceLabel, nodeId, {}, function (err, result) {
             if (err) {
                 //  alert(err.responseText);
-                return MainController.UI.message(err.responseText || err, true);
+                return UI.message(err.responseText || err, true);
             }
 
             var str = "<b>Property restrictions</b><table>";
@@ -1100,7 +1100,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         return alert(err);
                     }
                     $("#" + self.divId).dialog("close");
-                    MainController.UI.message("node deleted");
+                    UI.message("node deleted");
                 }
             );
         }
@@ -1303,7 +1303,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 if (err) {
                     return alert(err.responseText);
                 }
-                MainController.UI.message("node Created and Indexed");
+                UI.message("node Created and Indexed");
             });
         });
     };

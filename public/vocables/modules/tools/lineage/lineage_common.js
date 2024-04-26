@@ -16,8 +16,8 @@ var Lineage_common = (function () {
     self.currentSource = null;
     self.copyNodeToClipboard = function (nodeData) {
         common.copyTextToClipboard(JSON.stringify(nodeData), function (err, result) {
-            if (err) return MainController.UI.message(err);
-            MainController.UI.message(result);
+            if (err) return UI.message(err);
+            UI.message(result);
         });
     };
 
@@ -25,8 +25,8 @@ var Lineage_common = (function () {
         if (node.children && node.children.length > 0) return alert("cannot delete node with children");
         if (confirm("delete node " + node.data.label)) {
             Sparql_generic.deleteTriples(Lineage_sources.activeSource, node.data.id, null, null, function (err, _result) {
-                if (err) MainController.UI.message(err);
-                MainController.UI.message("node " + node.data.label + " deleted");
+                if (err) UI.message(err);
+                UI.message("node " + node.data.label + " deleted");
                 $("#" + jstreeId)
                     .jstree(true)
                     .delete_node(node.id);
@@ -89,7 +89,7 @@ var Lineage_common = (function () {
 
                 if (confirm("insert inside " + parentNode.data.label + "  triples " + JSON.stringify(triples, null, 2))) {
                     Sparql_generic.insertTriples(parentNode.data.source, triples, null, function (err, _result) {
-                        if (err) return MainController.UI.message(err);
+                        if (err) return UI.message(err);
                         nodeData.source = parentNode.data.source;
                         var jstreeData = [
                             {
@@ -103,7 +103,7 @@ var Lineage_common = (function () {
                     });
                 }
             } catch (e) {
-                MainController.UI.message(e);
+                UI.message(e);
             }
         });
     };

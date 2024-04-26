@@ -100,7 +100,7 @@ var ChildHood = (function () {
                 );
             },
             function (err) {
-                if (err) return MainController.UI.message(err);
+                if (err) return UI.message(err);
                 self.drawGraph(allNodes);
             }
         );

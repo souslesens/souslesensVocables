@@ -61,7 +61,7 @@ var KGquery = (function () {
             self.currentSource = obj.node.id;
             self.init();
         };
-        MainController.UI.showHideRightPanel("hide");
+        //MainController.UI.showHideRightPanel("hide");
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
     };
 

@@ -43,7 +43,7 @@
 <li class="Lineage_ClassTabLi"><a href="#LineageSetsTab">Sets</a></li>-->
         </ul>
         <div class="" id="Lineage_ClassesTab">
-            <div id="GenericTools_searchAllDiv" style="height: 50px; margin-bottom: 10px"></div>
+            <div id="Lineage_searchBarWrapper" style="height: 50px; margin-bottom: 10px"></div>
 
             <div id="Lineage_sourceLabelDiv" style="font-size: 14px; color: #372806; font-weight: bold; background-color: #bdbdbd"></div>
 
@@ -147,7 +147,7 @@
 
     <script>
         SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
-        $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html", function () {
+        $("#Lineage_searchBarWrapper").load("./snippets/searchAll.html", function () {
             $("#GenericTools_searchInAllSources").prop("checked", false);
         });
     </script>

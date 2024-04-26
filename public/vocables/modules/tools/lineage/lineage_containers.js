@@ -18,7 +18,14 @@ var Lineage_containers = (function () {
     self.ancestors_tree_search_areRunning = [false, false, false];
     self.flag_search = false;
     self.flag_search_launch_search = false;
-    self.flag_function = function () {
+    self.initContainersTab = function () {
+        if ($("#tabs_containers").children().length == 0) {
+            $("#tabs_containers").load("./modules/tools/lineage/html/Lineage_containersPanel.html", function (s) {
+                Lineage_containers.search();
+            });
+        }
+    };
+    self.flag_function = function() {
         self.flag_search = false;
         if (self.flag_search_launch_search == true) {
             Lineage_containers.search();
@@ -497,7 +504,7 @@ var Lineage_containers = (function () {
                 }
                 return alert(err.responseText);
             }
-            MainController.UI.message("nodes added to container " + container.label);
+            UI.message("nodes added to container " + container.label);
             var jstreeData = [];
             nodesData.forEach(function (nodeData) {
                 jstreeData.push({
@@ -558,7 +565,7 @@ var Lineage_containers = (function () {
         common.pasteTextFromClipboard(function (text) {
             // debugger
             if (!text) {
-                return MainController.UI.message("no node copied");
+                return UI.message("no node copied");
             }
             try {
                 var nodes = JSON.parse(text);
@@ -700,7 +707,7 @@ var Lineage_containers = (function () {
                 function (callbackSeries) {
                     //  options.descendants = true;
                     // options.leaves = true;
-                    MainController.UI.message("searching...");
+                    UI.message("searching...");
                     self.sparql_queries.getContainerDescendants(source, containerData.id, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -711,7 +718,7 @@ var Lineage_containers = (function () {
                         }
                         return callbackSeries();
                     });
-                    MainController.UI.message("drawing graph...");
+                    UI.message("drawing graph...");
                 },
 
                 //get containersStyles
@@ -927,7 +934,7 @@ var Lineage_containers = (function () {
                 },
             ],
             function (err) {
-                MainController.UI.message("", true);
+                UI.message("", true);
                 if (err) {
                     return alert(err.responseText);
                     if (callback) {

@@ -224,7 +224,7 @@ var CreateSLSVsource_bot = (function () {
     };
 
     self.upload = function (body, callback) {
-        MainController.UI.message("Importing graph...");
+        UI.message("Importing graph...");
         $("#waitImg").css("display", "block");
 
         fetch(`${Config.apiUrl}/jowl/uploadGraph`, {
@@ -236,11 +236,11 @@ var CreateSLSVsource_bot = (function () {
                 $("#smallDialogDiv").dialog("close");
 
                 if (data.result == -1) {
-                    MainController.UI.message("", true);
+                    UI.message("", true);
                     alert("graph already exist ");
                     return _botEngine.reset();
                 } else {
-                    MainController.UI.message("imported triples :" + data.result, true);
+                    UI.message("imported triples :" + data.result, true);
                     botEngine.nextStep();
                 }
                 callback();
@@ -252,7 +252,7 @@ var CreateSLSVsource_bot = (function () {
 
     // using api/rdf from Logilab
     self.uploadXXX = function (formData) {
-        MainController.UI.message("Importing graph...");
+        UI.message("Importing graph...");
         $("#waitImg").css("display", "block");
         var currentUserToken = authentication.currentUser.currentUserToken;
         fetch("/api/v1/rdf/graph", {
@@ -264,11 +264,11 @@ var CreateSLSVsource_bot = (function () {
             .then((data) => {
                 $("#smallDialogDiv").dialog("close");
                 if (data.result == -1) {
-                    MainController.UI.message("", true);
+                    UI.message("", true);
                     alert("graph already exist ");
                     return _botEngine.reset();
                 } else {
-                    MainController.UI.message("imported triples :" + data.result, true);
+                    UI.message("imported triples :" + data.result, true);
                     botEngine.nextStep();
                 }
             })

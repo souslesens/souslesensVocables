@@ -37,7 +37,7 @@ var OntologiesStats = (function () {
                             function (toSourceId, callbackEnd) {
                                 if (fromArray.indexOf(toSourceId) < 0) {
                                     $("#graphDiv").append("running " + rdfType + " from " + fromSourceId + " to " + toSourceId);
-                                    MainController.UI.message("running " + rdfType + " from " + fromSourceId + " to " + toSourceId);
+                                    UI.message("running " + rdfType + " from " + fromSourceId + " to " + toSourceId);
                                     self.compareConcepts(true, "stats", rdfType, fromSourceId, toSourceId, function (err, result) {
                                         if (result) {
                                             resultArray = resultArray.concat(result);
@@ -58,11 +58,11 @@ var OntologiesStats = (function () {
                 );
             },
             function (err) {
-                if (err) MainController.UI.message(err);
+                if (err) UI.message(err);
                 // eslint-disable-next-line no-console
                 console.log(JSON.stringify(resultArray, null, 2));
                 $("#graphDiv").html(JSON.stringify(resultArray, null, 2));
-                MainController.UI.message("Done");
+                UI.message("Done");
             }
         );
     };

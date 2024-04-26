@@ -64,7 +64,7 @@ var KGquery_graph = (function () {
     self.drawVisjsModel = function (mode) {
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
-
+        var icones_used=[];
         //  KGquery.clearAll();
         $("#waitImg").css("display", "block");
         async.series(
@@ -78,7 +78,7 @@ var KGquery_graph = (function () {
                     self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
 
-                    MainController.UI.message("loading graph display");
+                    UI.message("loading graph display");
                     self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                         if (err) {
                             return callbackSeries("notFound");
@@ -93,7 +93,7 @@ var KGquery_graph = (function () {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
-                    MainController.UI.message("generating tbox graph from abox graph");
+                    UI.message("generating tbox graph from abox graph");
                     self.getInferredModelVisjsData(KGquery.currentSource, function (err, result2) {
                         if (err) {
                             return alert(err);
@@ -132,7 +132,7 @@ var KGquery_graph = (function () {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
-                    MainController.UI.message("loading datatypeProperties");
+                    UI.message("loading datatypeProperties");
                     OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
                         if (err) {
                             return callbackSeries(err);
@@ -146,21 +146,73 @@ var KGquery_graph = (function () {
                         callbackSeries();
                     });
                 },
+                //Add decoration data from decorate file
+                function(callbackSeries){
+                    if (mode.indexOf("saved") < 0) {
+                        return callbackSeries();
+                    }
+                    var fileName=MainController.currentSource+'_decoration.json';
+                    //Get current decoration file 
+                    var payload = {
+                        dir: "graphs/",
+                        fileName: fileName,
+                    };
+                    //get decoration file
+                    $.ajax({
+                        type: "GET",
+                        url: `${Config.apiUrl}/data/file`,
+                        data: payload, 
+                        dataType: "json",
+                        success: function (result, _textStatus, _jqXHR) {
+                            var data = JSON.parse(result);
+                            
+                            for(var node in data){
+                                if(data[node].image){
+                                    icones_used.push(data[node].image);
+                                }
+                                var visjsCorrespondingNode=visjsData.nodes.filter(attr => attr.id === node)[0];
+                                for(var decoration in data[node]){
+                                    //decoration = clé de décoration
+                                    
+                                    if(visjsCorrespondingNode[decoration]){
+                                        visjsCorrespondingNode[decoration]=data[node][decoration];
+                                    }
+                                }
+                            }
+                            // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
+                            // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
+                            callbackSeries();
+
+                  
+                        },
+                        error(err) {
+                                
+                            return callbackSeries('no decoration');
+                        },
+                    });
+                }
             ],
+            //draw graph
             function (err) {
-                if (err) {
+                if (err && err!='no decoration') {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");
                     }
-                    MainController.UI.message("", true);
+                    UI.message("", true);
                     return alert(err);
                 }
-                MainController.UI.message("drawing graph");
+                UI.message("drawing graph");
 
                 //   https://fonts.google.com/icons
+                
 
+                
+
+                
+                /*
+                var dir = "/vocables/KGqueryIcons/";
+                
                 var colors = ["#fdac00", "#aa1151", "#ED008C", "#00B5EC", "#af7ede", "#72914BFF", "#72914b", "#000efd"];
-
                 var icons = {
                     "http://data.total/resource/tsf/dalia-lifex1/manning": { icon: "persons.png", color: colors[4] },
                     "http://data.total/resource/tsf/dalia-lifex1/tag": { icon: "bookmark.png", color: colors[2] },
@@ -171,8 +223,6 @@ var KGquery_graph = (function () {
                     "http://data.total/resource/tsf/dalia-lifex1/WBS": { icon: "contract.png", color: colors[6] },
                     "http://data.total/resource/tsf/dalia-lifex1/WBSactivity": { icon: "engineering.png", color: colors[6] },
                 };
-
-                var dir = "/vocables/KGqueryIcons/";
                 visjsData.nodes.forEach(function (item) {
                     // item.color="#ddd"
                     if (item.label.indexOf("Date") > -1) {
@@ -195,9 +245,10 @@ var KGquery_graph = (function () {
                              code: "\uf276",
                              size: 50,
                              color: "#f0a30a"
-                         };*/
+                         };
                     }
-                });
+                });*/
+                
 
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
 
@@ -209,7 +260,7 @@ var KGquery_graph = (function () {
                     });
                     self.KGqueryGraph.data.nodes.update(visjsData.nodes);
                 });
-                MainController.UI.message("", true);
+                UI.message("", true);
 
                 //  KGquery.clearAll();
             }
@@ -217,7 +268,7 @@ var KGquery_graph = (function () {
     };
 
     self.getInferredModelVisjsData = function (source, callback) {
-        MainController.UI.message("creating graph");
+        UI.message("creating graph");
         if (!source) {
             source = self.source;
         }
@@ -356,7 +407,7 @@ var KGquery_graph = (function () {
                         visjsData.edges.push(edge);
                     }
                 });
-                MainController.UI.message("", true);
+                UI.message("", true);
                 return callback(null, visjsData);
             }
         );
@@ -548,6 +599,16 @@ var KGquery_graph = (function () {
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
         },500)*/
     };
+
+    self.setIcon=function(){
+        if (!self.currentGraphNode) {
+            alert('no node selected');
+            return;
+        }
+        else{
+
+        }
+    }
 
     return self;
 })();

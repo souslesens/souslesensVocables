@@ -12,8 +12,8 @@
                 style="width: 35%; height: 33.5px"
                 onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_properties.searchTermInSources()}"
             />
-            <div id="Lineage_classes_moreOptionsButtonOnSearchbar" class="input-group-append">
-                <div class="SearchButtonIconRight border-without-raduis-theme1" onclick="Lineage_r.hideShowMoreOptions(null,'Lineage_MorePropertiesOptions')" style="height: 33.5px">
+            <div id="Lineage_classes_moreOptionsButton" class="input-group-append">
+                <div class="SearchButtonIconRight border-without-raduis-theme1" onclick="Lineage_whiteboard.hideShowMoreOptions(null,'Lineage_MorePropertiesOptions')" style="height: 33.5px">
                     <button class="moreOptions-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-top: 5px; margin-right: 5px"></button>
                 </div>
             </div>
@@ -44,7 +44,7 @@
             <div class="slsv-invisible-button">
                 <button
                     class="moreOptions-icon slsv-invisible-button"
-                    onclick="Lineage_r.hideShowMoreOptions('hide','Lineage_MorePropertiesOptions')"
+                    onclick="Lineage_whiteboard.hideShowMoreOptions('hide','Lineage_MorePropertiesOptions')"
                     style="width: 20px; height: 20px; margin-left: 5px"
                 ></button>
             </div>
@@ -66,7 +66,7 @@
 
         <div id="lineage_actionsWrapper" class="lineage_actionDiv">
             <div style="display: flex">
-                <div class="slsv-invisible-button" style="margin-top: 10px" id="lineageProperties_nodesSelectionSelect" onclick="Lineage_r.changeIconForPropertiesGraphAction(this)">
+                <div class="slsv-invisible-button" style="margin-top: 10px" id="lineageProperties_nodesSelectionSelect" onclick="Lineage_properties.changeIconForPropertiesGraphAction(this)">
                     <button class="allPropertyIcon slsv-invisible-button" style="margin-bottom: -10px"></button>
                 </div>
 
@@ -84,7 +84,7 @@
     <div class="jstreeContainer" style="width: 95%; height: 450px; max-height: 45dvh; margin: 3px; padding: 3px">
         <div class="jstree" id="Lineage_propertiesTree"></div>
     </div>
-    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="ResponsiveUI.hideShowLateralPannel(this)">
+    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="UI.hideShowLateralPannel(this)">
         <img id="ArrowLateralPannel" src="./icons/CommonIcons/ArrowLateralPannel.png" />
     </button>
 </div>

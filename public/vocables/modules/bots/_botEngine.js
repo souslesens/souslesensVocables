@@ -30,7 +30,7 @@ var _botEngine = (function () {
             //$("#botPanel").parent().css("left", "30%");
         }
 
-        $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
+        $("#" + divId).load("modules/bots/html/bot.html", function () {
             if (!self.firstLoad) {
                 //$("#resetButtonBot").remove();
                 //$("#previousButtonBot").remove();
@@ -58,7 +58,7 @@ var _botEngine = (function () {
                     self.firstLoad = true;
                 });
             }
-            ResponsiveUI.PopUpOnHoverButtons();
+            UI.PopUpOnHoverButtons();
             if (callback) {
                 callback();
             }

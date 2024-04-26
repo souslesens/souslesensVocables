@@ -1,21 +1,18 @@
-import common from "../modules/shared/common.js";
-import authentication from "../modules/shared/authentification.js";
-import Clipboard from "../modules/shared/clipboard.js";
-import Lineage_sources from "../modules/tools/lineage/lineage_sources.js";
-import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
-import Lineage_r from "./lineage/lineage_r.js";
+/*import Lineage_sources from "../../tools/lineage/lineage_sources.js";
+import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
+import Lineage_whiteboard from "../../tools/lineage/lineage_whiteboard.js";*/
+import common from "./common.js";
+import authentication from "./authentification.js";
+import Clipboard from "./clipboard.js";
+import MainController from "./mainController.js";
 
-import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
-import KGcreator_r from "./KGcreator/Kgcreator_r.js";
-import MainController from "../modules/shared/mainController.js";
 
-var ResponsiveUI = (function () {
+var UI = (function () {
     var self = {};
     self.source = null;
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.currentTool = null;
-    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
     self.smartPhoneScreen = null;
     //Etablish the resizing, load select bar tools --> Keep here
     self.init = function () {
@@ -34,25 +31,24 @@ var ResponsiveUI = (function () {
             function (event) {
                 self.resetWindowHeight();
                 if (self.currentTool == "KGcreator") {
-                    KGcreator_r.ResetRunMappingTabWidth();
+                    KGcreator.ResetRunMappingTabWidth();
                 }
             },
             true
         );
 
         self.themeList();
-        //self.replaceFile(BotEngine, BotEngineResponsive);
-        ResponsiveUI.resetWindowHeight();
+        UI.resetWindowHeight();
     };
     // keep here
     self.initMenuBar = function (fn) {
-        $("#ChangeSourceButton").show();
+        $("#Lineage_changeSourceButton").show();
         $("#index_topContolPanel").show();
         //Loading
-        $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
+        $("#index_topContolPanel").load("./modules/tools/lineage/html/Lineage_sourcesDiv.html", function () {
             if (self.currentTool != "lineage") {
-                $("#AddSourceButton").remove();
-                $("#AllSourceButton").remove();
+                $("#Lineage_addSourceButton").remove();
+                $("#Lineage_allSourceButton").remove();
             }
             fn();
         });
@@ -80,135 +76,12 @@ var ResponsiveUI = (function () {
         //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
-    // To suppress
-    self.replaceFile = function (file1, file2) {
-        Object.keys(file1).forEach((key) => {
-            if (file2[key]) {
-                file1[key] = file2[key];
-            }
-        });
-    };
-    //  MainController --> onToolSelect.initTool   when click on a button of a tool
-    self.onToolSelect = function (toolId, event, callback) {
-        if (event) {
-            var clickedElement = event.target;
-            // if class
-            if (clickedElement.className == "Lineage_PopUpStyleDiv") {
-                var toolId = $(clickedElement).children()[1].innerHTML;
-            } else {
-                if (clickedElement.id == "toolsSelect") {
-                    return;
-                } else if (clickedElement.innerHTML) {
-                    var toolId = clickedElement.innerHTML;
-                } else {
-                    var toolId = clickedElement.nextSibling.innerHTML;
-                }
-            }
-        }
 
-        if (self.currentTool != null) {
-            if (Config.userTools[self.currentTool].controller.unload) {
-                Config.userTools[self.currentTool].controller.unload();
-            }
-        }
-        self.currentTool = toolId;
-
-        if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
-            Lineage_sources.registerSource = self.registerSourceWithoutImports;
-        }
-
-        $("#currentToolTitle").html(toolId);
-        if (self.currentTheme["@" + toolId + "-logo"]) {
-            $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
-        }
-        MainController.currentTool = toolId;
-        if (self.toolsNeedSource.includes(toolId)) {
-            if (self.source == null) {
-                ResponsiveUI.showSourceDialog(true);
-            } else {
-                self.sourceSelect(self.source);
-            }
-        } else {
-            self.initTool(toolId);
-        }
-        if (callback) {
-            callback();
-        }
-    };
-    //MainController.onSourceSelect
-    self.onSourceSelect = function (evt, obj) {
-        //  if (!MainController.currentTool) return self.alert("select a tool first");
-        var p = obj.node.parents.indexOf("PRIVATE");
-        if (p > 0) {
-            Config.sourceOwner = obj.node.parents[p - 1];
-        }
-
-        if (!obj.node.data || obj.node.data.type != "source") {
-            $(obj.event.currentTarget).siblings().click();
-            return;
-        }
-
-        var source = obj.node.data.id;
-        self.sourceSelect(source);
-    };
-    //To MainController too
-    self.sourceSelect = function (source) {
-        MainController.currentSource = source;
-        ResponsiveUI.source = source;
-        $("#selectedSource").html(MainController.currentSource);
-
-        $("#mainDialogDiv").parent().hide();
-        self.initTool(MainController.currentTool, function (err, result) {
-            if (err) {
-                return self.alert(err.responseText);
-            }
-            self.resetWindowHeight();
-        });
-    };
-    // MainController or in Lineage_r ?
-    self.onSourceSelect_AddSource = function (evt, obj) {
-        //  if (!MainController.currentTool) return self.alert("select a tool first");
-        if (!obj.node.data || obj.node.data.type != "source") {
-            return self.alert("select a tool");
-        }
-
-        MainController.currentSource = obj.node.data.id;
-        $("#selectedSource").html(MainController.currentSource);
-        $("#mainDialogDiv").parent().hide();
-        Lineage_r.loadSources();
-    };
-    // What is the goal of this function? --> MainController?
-    self.initTool = function (toolId, callback) {
-        var toolObj = Config.userTools[toolId];
-        MainController.initControllers();
-        MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
-        Clipboard.clear();
-        Lineage_sources.loadedSources = {};
-
-        if (Config.userTools[toolId].controller.onLoaded) {
-            MainController.writeUserLog(authentication.currentUser, toolId, "");
-            Config.userTools[toolId].controller.onLoaded();
-        } else {
-            if (true) {
-                var url = window.location.href;
-                var p = url.indexOf("?");
-                if (p > -1) {
-                    url = url.substring(0, p);
-                }
-                url = url.replace("index_r.html", "");
-                url += "?tool=" + toolId;
-                window.location.href = url;
-            }
-        }
-    };
-    // To remove? --> unused
-    self.showDiv = function (modalDiv) {
-        $("#" + modalDiv).css("display", "block");
-    };
-    // To remove? unused
-    self.hideDiv = function (modalDiv) {
-        $("#" + modalDiv).css("display", "none");
-    };
+    
+    
+    
+    
+   
     //Keep
     self.ApplySelectedTabCSS = function (buttonClicked, tabGroup) {
         var x = $("#" + tabGroup + "-buttons").children();
@@ -235,9 +108,9 @@ var ResponsiveUI = (function () {
         }
         self.ApplySelectedTabCSS(buttonClicked, tabGroup);
     };
-    // Load Souirce selector with the rights options
+    // Keep
     self.showSourceDialog = function (resetAll) {
-        self.openDialogDiv("mainDialogDiv");
+        //self.openDialogDiv("mainDialogDiv");
         $("#" + "mainDialogDiv")
             .parent()
             .show();
@@ -245,19 +118,21 @@ var ResponsiveUI = (function () {
         var onSourceSelect;
         if (resetAll) {
             Lineage_sources.loadedSources = {};
-            onSourceSelect = ResponsiveUI.onSourceSelect;
+            onSourceSelect = MainController.onSourceSelect;
         } else {
-            onSourceSelect = ResponsiveUI.onSourceSelect_AddSource;
+            onSourceSelect = MainController.onSourceSelect_AddSource;
         }
         SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
             $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
         });
     };
     //keep
+    /*
     self.openDialogDiv = function (div) {
+        
         $("#" + div).empty();
         $("#" + div).dialog();
-    };
+    };*/
     //keep
     self.setSlsvCssClasses = function (callback) {
         less.pageLoadFinished.then(async function () {
@@ -265,12 +140,12 @@ var ResponsiveUI = (function () {
             // fetch theme from api
             const response = await fetch("/api/v1/users/theme");
             if (response.status == 400) {
-                ResponsiveUI.changeTheme(Config.theme.defaultTheme);
+                UI.changeTheme(Config.theme.defaultTheme);
                 return callback();
             }
 
             const data = await response.json();
-            ResponsiveUI.changeTheme(data.theme);
+            UI.changeTheme(data.theme);
 
             if (Config.theme.selector) {
                 $("#theme-selector-btn").show();
@@ -296,20 +171,20 @@ var ResponsiveUI = (function () {
             $("#externalLogoDiv").show();
         }
         less.modifyVars(themeSelected);
-        ResponsiveUI.darkThemeParams(themeSelected);
+        UI.darkThemeParams(themeSelected);
     };
     //Keep
     self.hideShowMenuBar = function (button) {
         if (self.menuBarShowed) {
             $("#MenuBarFooter").hide();
             $("#MenuBar").css("height", "21px");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.menuBarShowed = false;
             $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBarShow.png");
         } else {
             $("#MenuBarFooter").show();
             $("#MenuBar").css("height", "90px");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.menuBarShowed = true;
             $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBar.png");
         }
@@ -324,7 +199,7 @@ var ResponsiveUI = (function () {
             $(button).parent().hide();
             $("#lateralPanelDiv").css("width", "21px");
             $("#lateralPanelDiv").removeClass("ui-resizable");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.LateralPannelShowed = false;
             var buttonclone = button.cloneNode(true);
             $("#lateralPanelDiv").append(buttonclone);
@@ -335,7 +210,7 @@ var ResponsiveUI = (function () {
             $("#lineage-tab-buttons").show();
             $("#WhiteboardContent").show();
             $("#lateralPanelDiv").css("width", "435px");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.LateralPannelShowed = true;
             var currentTabId = "#tabs_" + $(".slsv-selectedTabDiv").attr("popupcomment").toLowerCase();
             $(currentTabId).children().show();
@@ -345,53 +220,7 @@ var ResponsiveUI = (function () {
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };
-    //Lineage.sources?
-    self.registerSourceWithoutImports = function (sourceLabel, callback) {
-        if (!callback) {
-            callback = function () {};
-        }
 
-        if (Lineage_sources.loadedSources[sourceLabel]) {
-            return callback();
-        }
-
-        OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (sourceLabel == self.source) {
-                var sourceDivId = "source_" + common.getRandomHexaId(5);
-                Lineage_sources.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
-                Lineage_sources.sourceDivsMap[sourceDivId] = sourceLabel;
-                var html =
-                    "<div  id='" +
-                    sourceDivId +
-                    "' style='color: " +
-                    Lineage_whiteboard.getSourceColor(sourceLabel) +
-                    ";display:inline-flex;align-items:end;'" +
-                    " class='Lineage_sourceLabelDiv'  " +
-                    ">" +
-                    sourceLabel +
-                    "&nbsp;" +
-                    /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-    sourceDivId +
-    "\")'>[-]</i>";*/
-                    "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-                    sourceDivId +
-                    "\")'/> </button></div>";
-                $("#lineage_drawnSources").append(html);
-
-                $("#" + sourceDivId).bind("click", function (e) {
-                    var sourceDivId = $(this).attr("id");
-                    var source = self.sourceDivsMap[sourceDivId];
-                    Lineage_sources.setCurrentSource(source);
-                });
-                return callback();
-            } else {
-                return callback();
-            }
-        });
-    };
     //keep
     self.PopUpOnHoverButtons = function () {
         $(".w3-button").off();
@@ -412,6 +241,29 @@ var ResponsiveUI = (function () {
             }
         });
     };
+  
+    self.message= function (message, stopWaitImg,startWaitImg) {
+        if (message.length > 200) {
+            alert(message);
+        } else {
+            $("#messageDiv").html(message);
+        }
+        if (stopWaitImg) {
+            $("#waitImg").css("display", "none");
+        }
+        if (startWaitImg) {
+            $("#waitImg").css("display", "block");
+        }
+    },
+    self.getJstreeConceptsContextMenu= function () {
+        if (!self.currentTool || !Config.userTools[self.currentTool]) {
+            return;
+        }
+        var controller = Config.userTools[self.currentTool].controller;
+        if (controller.jstreeContextMenu) {
+            return controller.jstreeContextMenu();
+        }
+    },
     //keep
     self.darkThemeParams = function (theme) {
         if (theme) {
@@ -421,21 +273,22 @@ var ResponsiveUI = (function () {
                 if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                     Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color = "white";
                     Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
-                    Lineage_r.showHideEditButtons(self.source);
+                    Lineage_sources.showHideEditButtons(self.source);
                 }
             } else {
                 Lineage_whiteboard.defaultNodeFontColor = "#343434";
                 if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                     Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color = "#343434";
                     Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
-                    Lineage_r.showHideEditButtons(self.source);
+                    Lineage_sources.showHideEditButtons(self.source);
                 }
             }
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
         }
     };
+    
 
     return self;
 })();
-export default ResponsiveUI;
-window.ResponsiveUI = ResponsiveUI;
+export default UI;
+window.UI = UI;

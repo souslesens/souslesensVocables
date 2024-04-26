@@ -1,11 +1,11 @@
-<div id="sourceSelector" style="margin-bottom: 10px; width: auto; height: 680px">
-    <div class="sourceSelector_buttons">
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#sourceSelector').dialog('close')">Cancel</button>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="sourceSelector_validateButton">OK</button>
+<div class="w3-modal-content">
+    <div>
+        <div class="w3-row">
+            <span> Search </span>
+            <input id="sourceSelector_searchInput" class="w3-input w3-border w3-padding" type="text" value="" autocomplete="off" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" />
+        </div>
     </div>
-    <div>Search : <input id="sourceSelector_searchInput" value="" autocomplete="off" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>
-
-    <div class="jstreeContainer" style="width: 360px; height: 600px; overflow: auto; margin-top: 5px">
+    <div id="sourcesSelectorWrapper" style="height: 50vh; overflow: auto">
         <div id="sourceSelector_jstreeDiv"></div>
     </div>
 </div>

@@ -64,7 +64,7 @@ var OwlEditor = (function () {
             "owl:Restriction": [],
         };
 
-        MainController.UI.message("loading ontology : " + source);
+        UI.message("loading ontology : " + source);
         async.series(
             [
                 //load Classes

@@ -285,7 +285,7 @@ indexes.push(source.toLowerCase());
                         };
                         str += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
                     });
-                    MainController.UI.message("getting labels " + allHits.length + " ...");
+                    UI.message("getting labels " + allHits.length + " ...");
                     ElasticSearchProxy.executeMsearch(str, [indexes], function (err, result) {
                         if (err) {
                             return callbackEach(err);
@@ -421,7 +421,7 @@ indexes.push(source.toLowerCase());
 
     self.getElasticSearchMatches = function (words, indexes, mode, from, size, options, callback) {
         $("#waitImg").css("display", "block");
-        //   MainController.UI.message("Searching exact matches ")
+        //   UI.message("Searching exact matches ")
 
         self.entitiesMap = {};
         var bulQueryStr = "";
@@ -545,13 +545,13 @@ indexes.push(source.toLowerCase());
                                             }
                                             totalLines += result.length;
                                             totalLinesAllsources += totalLines;
-                                            MainController.UI.message("indexed " + totalLines + "/" + classesArray.length + " in index " + sourceLabel.toLowerCase());
+                                            UI.message("indexed " + totalLines + "/" + classesArray.length + " in index " + sourceLabel.toLowerCase());
 
                                             callbackEach();
                                         });
                                     },
                                     function (err) {
-                                        // MainController.UI.message("DONE " + sourceLabel + " total indexed : " + totalLinesAllsources, true);
+                                        // UI.message("DONE " + sourceLabel + " total indexed : " + totalLinesAllsources, true);
                                         return callbackSeries(err);
                                     }
                                 );
@@ -570,7 +570,7 @@ indexes.push(source.toLowerCase());
                             });
 
                             var totalLines = 0;
-                            MainController.UI.message("indexing namedIndividuals");
+                            UI.message("indexing namedIndividuals");
 
                             var processor = function (data, callbackProcessor) {
                                 var individualsToIndex = [];
@@ -608,7 +608,7 @@ indexes.push(source.toLowerCase());
                                     totalLines += result.length;
                                     totalLinesAllsources += totalLines;
 
-                                    MainController.UI.message("indexed " + totalLines + " namedIndividuals in index " + sourceLabel.toLowerCase());
+                                    UI.message("indexed " + totalLines + " namedIndividuals in index " + sourceLabel.toLowerCase());
 
                                     callbackProcessor(err);
                                 });
@@ -626,7 +626,7 @@ indexes.push(source.toLowerCase());
                             if (!options.indexProperties) {
                                 return callbackSeries();
                             }
-                            MainController.UI.message("indexing properties");
+                            UI.message("indexing properties");
                             totalLines = 0;
                             Sparql_OWL.getObjectProperties(sourceLabel, {}, function (err, result) {
                                 if (err) {
@@ -655,7 +655,7 @@ indexes.push(source.toLowerCase());
                                             }
                                             totalLines += result.length;
                                             totalLinesAllsources += totalLines;
-                                            MainController.UI.message("indexed " + totalLines + " objectProperties in index " + sourceLabel.toLowerCase());
+                                            UI.message("indexed " + totalLines + " objectProperties in index " + sourceLabel.toLowerCase());
                                             callbackEach();
                                         });
                                     },
@@ -667,7 +667,7 @@ indexes.push(source.toLowerCase());
                         },
                     ],
                     function (err) {
-                        // MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
+                        // UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
 
                         return callbackEachSource(err);
                     }
@@ -679,7 +679,7 @@ indexes.push(source.toLowerCase());
                 if (err) {
                     alert(err.responseText);
                 } else {
-                    MainController.UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
+                    UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
                 }
                 if (callback) {
                     return callback(err);

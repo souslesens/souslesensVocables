@@ -42,6 +42,26 @@ var SearchWidget = (function () {
      *  -contextMenufn
      *
      */
+    self.initClassesTab = function () {
+        if ($("#tabs_classes").children().length == 0) {
+            $("#tabs_classes").load("./modules/tools/lineage/html/Lineage_classesPanel.html", function (s) {
+                SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
+                $("#Lineage_searchBarWrapper").load("./snippets/searchAll.html", function () {
+                    SearchWidget.init();
+                    $("#GenericTools_searchInAllSources").prop("checked", false);
+                    $("#Lineage_MoreClassesOptions").hide();
+                    SearchWidget.showTopConcepts();
+                    $("#lateralPanelDiv").resizable({
+                        maxWidth: 435,
+                        minWidth: 150,
+                        stop: function (event, ui) {
+                            UI.resetWindowHeight();
+                        },
+                    });
+                });
+            });
+        }
+    };
     self.searchTermInSources = function (options) {
         if (!options) {
             options = {};
@@ -293,7 +313,7 @@ var SearchWidget = (function () {
             JstreeWidget.loadJsTree(targetDiv, jstreeData, jstreeOptions);
             setTimeout(function () {
                 //  MainController.UI.updateActionDivLabel("Multi source search :" + term)
-                MainController.UI.message("");
+                UI.message("");
                 $("#waitImg").css("display", "none");
                 $("#" + targetDiv)
                     .jstree(true)
@@ -339,7 +359,7 @@ var SearchWidget = (function () {
 
         Sparql_generic.getTopConcepts(sourceLabel, options, function (err, result) {
             if (err) {
-                return MainController.UI.message(err);
+                return UI.message(err);
             }
 
             if (result.length == 0) {
@@ -349,14 +369,14 @@ var SearchWidget = (function () {
                 var html = "<div id='" + self.currentTargetDiv + "'>no data found</div>";
                 $("#" + self.currentTargetDiv).html(html);
 
-                return MainController.UI.message("");
+                return UI.message("");
             }
 
             if (!options) {
                 options = {};
             }
             if (err) {
-                return MainController.UI.message(err);
+                return UI.message(err);
             }
 
             var jsTreeOptions = options;
@@ -364,7 +384,7 @@ var SearchWidget = (function () {
                 jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
             }
             if (!options.selectTreeNodeFn) {
-                jsTreeOptions.selectTreeNodeFn = Config.userTools[MainController.currentTool].controller.controller.selectTreeNodeFn;
+                jsTreeOptions.selectTreeNodeFn = Config.userTools[MainController.currentTool].controller.selectTreeNodeFn;
             }
 
             jsTreeOptions.source = sourceLabel;
@@ -449,7 +469,7 @@ var SearchWidget = (function () {
 
                         common.pasteTextFromClipboard(function (text) {
                             if (!text) {
-                                return MainController.UI.message("no node copied");
+                                return UI.message("no node copied");
                             }
                             try {
                                 var node = JSON.parse(text);
@@ -499,7 +519,7 @@ var SearchWidget = (function () {
         // options.filterCollections = Collection.currentCollectionFilter;
         Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, descendantsDepth, options, function (err, result) {
             if (err) {
-                return MainController.UI.message(err);
+                return UI.message(err);
             }
             if (options.beforeDrawingFn) {
                 options.beforeDrawingFn(result);

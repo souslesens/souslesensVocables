@@ -6,10 +6,10 @@ import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 
-var KGquery_graph = (function () {
+var KGquery_graph = (function() {
     var self = {};
 
-    self.init = function () {
+    self.init = function() {
         $("#KGquery_leftPanelTabs").tabs();
 
         common.fillSelectWithColorPalette("KGquery_graph_nodeColorSelect");
@@ -18,7 +18,7 @@ var KGquery_graph = (function () {
     };
 
     self.visjsOptions = {
-        onclickFn: function (node, point, nodeEvent) {
+        onclickFn: function(node, point, nodeEvent) {
             if (!node) {
                 return;
             }
@@ -41,27 +41,56 @@ var KGquery_graph = (function () {
                 deleteNode: false,
                 deleteEdge: false,
 
-                /*     addEdge: function (edgeData, callback) {
-                         KGquery_graph.addInterGraphLink(edgeData, callback);
-                         return false;
-                     },*/
-            },
-        },
+                addEdge: function(edgeData, callback) {
+                    // KGquery_graph.addInterGraphLink(edgeData, callback);
+                    KGquery_graph.addInterGraphProperty(edgeData, callback);
+                    return false;
+                }
+            }
+        }
     };
 
     self.visjsNodeOptions = {
         shape: "box", //Lineage_whiteboard.defaultShape,
         //   size: Lineage_whiteboard.defaultShapeSize,
-        color: "#ddd", //Lineage_whiteboard.getSourceColor(source)
+        color: "#ddd" //Lineage_whiteboard.getSourceColor(source)
     };
 
-    self.saveVisjsModelGraph = function () {
+    self.saveVisjsModelGraph = function() {
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
         self.KGqueryGraph.saveGraph(fileName, true);
         return;
     };
+    self.addInterGraphProperty = function(edgeData) {
+        var propertyId = prompt("enter property URI");
+        if (!propertyId) {
+            return;
+        }
 
-    self.drawVisjsModel = function (mode) {
+        var propertyLabel = prompt("enter property label");
+        if (!propertyLabel) {
+            return;
+        }
+
+        var edge = {
+            "from": edgeData.from,
+            "to": edgeData.to,
+            "id": common.getRandomHexaId(10),
+            "label": propertyLabel,
+            "data": {
+                "propertyId": propertyId,
+                "source": KGquery.currentSource,
+                "propertyLabel": propertyLabel
+            }
+
+        };
+
+        self.KGqueryGraph.data.edges.add(edge)
+
+    };
+
+
+    self.drawVisjsModel = function(mode) {
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
 
@@ -70,7 +99,7 @@ var KGquery_graph = (function () {
         async.series(
             [
                 //saved visjgraphData
-                function (callbackSeries) {
+                function(callbackSeries) {
                     if (mode.indexOf("saved") < 0) {
                         return callbackSeries();
                     }
@@ -79,9 +108,13 @@ var KGquery_graph = (function () {
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
 
                     MainController.UI.message("loading graph display");
-                    self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
+                    self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function(err, result) {
                         if (err) {
-                            return callbackSeries("notFound");
+                            // return callbackSeries("notFound");
+
+                            self.DrawImportsCommonGraph(source);
+                            return callbackSeries("generate commonGraph");
+
                         }
                         visjsData = result;
 
@@ -89,12 +122,12 @@ var KGquery_graph = (function () {
                     });
                 },
                 //inferred
-                function (callbackSeries) {
+                function(callbackSeries) {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
                     MainController.UI.message("generating tbox graph from abox graph");
-                    self.getInferredModelVisjsData(KGquery.currentSource, function (err, result2) {
+                    self.getInferredModelVisjsData(KGquery.currentSource, function(err, result2) {
                         if (err) {
                             return alert(err);
                         }
@@ -102,20 +135,20 @@ var KGquery_graph = (function () {
                         var oldEdgesMap = {};
                         var newNodes = [];
                         var newEdges = [];
-                        visjsData.nodes.forEach(function (item) {
+                        visjsData.nodes.forEach(function(item) {
                             oldNodesMap[item.id] = item;
                         });
 
-                        visjsData.edges.forEach(function (item) {
+                        visjsData.edges.forEach(function(item) {
                             oldEdgesMap[item.id] = item;
                         });
 
-                        result2.nodes.forEach(function (item) {
+                        result2.nodes.forEach(function(item) {
                             if (!oldNodesMap[item.id]) {
                                 newNodes.push(item);
                             }
                         });
-                        result2.edges.forEach(function (item) {
+                        result2.edges.forEach(function(item) {
                             if (!oldEdgesMap[item.id]) {
                                 newEdges.push(item);
                             }
@@ -128,26 +161,26 @@ var KGquery_graph = (function () {
                     });
                 },
                 // load annotationProperties
-                function (callbackSeries) {
+                function(callbackSeries) {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
                     MainController.UI.message("loading datatypeProperties");
-                    OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
+                    OntologyModels.getKGnonObjectProperties(source, {}, function(err, nonObjectPropertiesmap) {
                         if (err) {
                             return callbackSeries(err);
                         }
 
-                        visjsData.nodes.forEach(function (node) {
+                        visjsData.nodes.forEach(function(node) {
                             if (nonObjectPropertiesmap[node.data.id]) {
                                 node.data.nonObjectProperties = nonObjectPropertiesmap[node.data.id].properties;
                             }
                         });
                         callbackSeries();
                     });
-                },
+                }
             ],
-            function (err) {
+            function(err) {
                 if (err) {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");
@@ -169,11 +202,11 @@ var KGquery_graph = (function () {
                     "http://data.total/resource/tsf/dalia-lifex1/EquipmentItem": { icon: "machine.png", color: colors[3] },
                     "http://data.total/resource/tsf/dalia-lifex1/Discipline": { icon: "school.png", color: colors[7] },
                     "http://data.total/resource/tsf/dalia-lifex1/WBS": { icon: "contract.png", color: colors[6] },
-                    "http://data.total/resource/tsf/dalia-lifex1/WBSactivity": { icon: "engineering.png", color: colors[6] },
+                    "http://data.total/resource/tsf/dalia-lifex1/WBSactivity": { icon: "engineering.png", color: colors[6] }
                 };
 
                 var dir = "/vocables/KGqueryIcons/";
-                visjsData.nodes.forEach(function (item) {
+                visjsData.nodes.forEach(function(item) {
                     // item.color="#ddd"
                     if (item.label.indexOf("Date") > -1) {
                         item.color = "#96f696";
@@ -202,9 +235,9 @@ var KGquery_graph = (function () {
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
 
                 // cannot get colors from loadGraph ???!!
-                self.KGqueryGraph.draw(function () {
+                self.KGqueryGraph.draw(function() {
                     var newNodes = [];
-                    visjsData.nodes.forEach(function (node) {
+                    visjsData.nodes.forEach(function(node) {
                         newNodes.push({ id: node.id, color: node.color, shape: node.shape });
                     });
                     self.KGqueryGraph.data.nodes.update(visjsData.nodes);
@@ -216,7 +249,64 @@ var KGquery_graph = (function () {
         );
     };
 
-    self.getInferredModelVisjsData = function (source, callback) {
+
+    self.DrawImportsCommonGraph = function() {
+        var source = KGquery.currentSource;
+        var sources = [];
+        var imports = Config.sources[source].imports;
+        if (imports) {
+            sources = sources.concat(imports);
+        }
+        var visjsData = { nodes: [], edges: [] };
+        var uniqueNodes = {};
+        self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
+        async.eachSeries(sources, function(source, callbackEach) {
+
+            var visjsGraphFileName = source + "_KGmodelGraph.json";
+
+            MainController.UI.message("loading graph display");
+            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function(err, result) {
+                if (!err && result.nodes) {
+                    result.nodes.forEach(function(node) {
+                        if (!uniqueNodes[node.id]) {
+                            uniqueNodes[node.id] = 1;
+                            visjsData.nodes.push(node);
+                        }
+                    });
+                    result.edges.forEach(function(edge) {
+                        if (!uniqueNodes[edge.id]) {
+                            uniqueNodes[edge.id] = 1;
+                            visjsData.edges.push(edge);
+                        }
+                    });
+
+                }
+
+                callbackEach();
+            });
+
+        }, function(err) {
+            if (err) {
+                return alert(err);
+            }
+            self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
+
+            // cannot get colors from loadGraph ???!!
+            self.KGqueryGraph.draw(function() {
+                var newNodes = [];
+                visjsData.nodes.forEach(function(node) {
+                    newNodes.push({ id: node.id, color: node.color, shape: node.shape });
+                });
+                self.KGqueryGraph.data.nodes.update(visjsData.nodes);
+            });
+            MainController.UI.message("", true);
+        });
+
+
+    };
+
+
+    self.getInferredModelVisjsData = function(source, callback) {
         MainController.UI.message("creating graph");
         if (!source) {
             source = self.source;
@@ -233,12 +323,12 @@ var KGquery_graph = (function () {
 
         async.eachSeries(
             sources,
-            function (source, callbackEach) {
+            function(source, callbackEach) {
                 async.series(
                     [
                         //get effective distinct ObjectProperties
-                        function (callbackSeries) {
-                            OntologyModels.getInferredModel(source, {}, function (err, result) {
+                        function(callbackSeries) {
+                            OntologyModels.getInferredModel(source, {}, function(err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
@@ -248,24 +338,24 @@ var KGquery_graph = (function () {
                             });
                         },
 
-                        function (callbackSeries) {
-                            OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
+                        function(callbackSeries) {
+                            OntologyModels.getInferredClassValueDataTypes(source, {}, function(err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
 
-                                result.forEach(function (item) {
+                                result.forEach(function(item) {
                                     dataTypes[item.class.value] = item.datatype.value;
                                 });
                                 callbackSeries();
                             });
                         },
-                        function (callbackSeries) {
-                            OntologyModels.getContainerBreakdownClasses(source, function (err, result) {
+                        function(callbackSeries) {
+                            OntologyModels.getContainerBreakdownClasses(source, function(err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                result.forEach(function (item) {
+                                result.forEach(function(item) {
                                     var edegId = common.getRandomHexaId(5);
                                     visjsData.edges.push({
                                         id: edegId,
@@ -276,14 +366,14 @@ var KGquery_graph = (function () {
                                         font: { ital: true },
                                         dashes: [5, 5],
                                         selfReference: { renderBehindTheNode: true, size: 50 },
-                                        data: { propertyId: "rdfs:member" },
+                                        data: { propertyId: "rdfs:member" }
                                     });
                                 });
                                 return callbackSeries();
                             });
-                        },
+                        }
                     ],
-                    function (err) {
+                    function(err) {
                         if (err) {
                             return callbackEach(err);
                         }
@@ -292,7 +382,7 @@ var KGquery_graph = (function () {
                     }
                 );
             },
-            function (err) {
+            function(err) {
                 if (err) {
                     return callback();
                 }
@@ -300,7 +390,7 @@ var KGquery_graph = (function () {
                     callback("no inferred model for source " + source);
                 }
 
-                inferredModel.forEach(function (item) {
+                inferredModel.forEach(function(item) {
                     item.sClass = item.sClass || item.sparent;
                     item.oClass = item.oClass || item.oparent;
 
@@ -337,18 +427,18 @@ var KGquery_graph = (function () {
                             data: {
                                 propertyId: item.prop.value,
                                 source: source,
-                                propertyLabel: item.propLabel.value,
+                                propertyLabel: item.propLabel.value
                             },
 
                             arrows: {
                                 to: {
                                     enabled: true,
                                     type: "solid",
-                                    scaleFactor: 0.5,
-                                },
+                                    scaleFactor: 0.5
+                                }
                             },
                             // dashes: true,
-                            color: Lineage_whiteboard.defaultPredicateEdgeColor,
+                            color: Lineage_whiteboard.defaultPredicateEdgeColor
                         };
                         if (item.sClass.value == item.oClass.value) {
                             (edge.dashes = [5, 5]), (edge.selfReference = { renderBehindTheNode: true, size: 50 });
@@ -362,7 +452,7 @@ var KGquery_graph = (function () {
         );
     };
 
-    self.getInterGraphModel = function (source, visjsData, callback) {
+    self.getInterGraphModel = function(source, visjsData, callback) {
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
@@ -376,11 +466,11 @@ var KGquery_graph = (function () {
 
         var url = Config.sources[source].sparql_server.url;
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function(err, result) {
             if (err) {
                 return callbackSeries(err);
             }
-            result.results.bindings.forEach(function (item) {
+            result.results.bindings.forEach(function(item) {
                 var label = Sparql_common.getLabelFromURI(item.prop.value);
                 var x = visjsData.edges.push({
                     id: item.prop.value,
@@ -392,25 +482,25 @@ var KGquery_graph = (function () {
                     data: {
                         propertyId: item.prop.value,
                         source: source,
-                        propertyLabel: label,
+                        propertyLabel: label
                     },
 
                     arrows: {
                         to: {
                             enabled: true,
                             type: "solid",
-                            scaleFactor: 0.5,
-                        },
+                            scaleFactor: 0.5
+                        }
                     },
 
-                    color: Lineage_whiteboard.defaultPredicateEdgeColor,
+                    color: Lineage_whiteboard.defaultPredicateEdgeColor
                 });
             });
             return callback(null, visjsData);
         });
     };
 
-    self.addInterGraphLink = function (edgeData, callback) {
+    self.addInterGraphLink = function(edgeData, callback) {
         var source = KGquery.currentSource;
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
@@ -422,7 +512,7 @@ var KGquery_graph = (function () {
             ">.} limit 100";
 
         var url = Config.sources[source].sparql_server.url;
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function(err, result) {
             if (err) {
                 return callbackSeries(err);
             }
@@ -432,7 +522,7 @@ var KGquery_graph = (function () {
             }
 
             var visjsData = { edges: [] };
-            result.results.bindings.forEach(function (item) {
+            result.results.bindings.forEach(function(item) {
                 var label = Sparql_common.getLabelFromURI(item.prop.value);
                 var x = visjsData.edges.push({
                     id: edgeData.from + "_" + item.prop.value + "_" + edgeData.to,
@@ -444,16 +534,16 @@ var KGquery_graph = (function () {
                     data: {
                         propertyId: item.prop.value,
                         source: source,
-                        propertyLabel: label,
+                        propertyLabel: label
                     },
 
                     arrows: {
                         to: {
                             enabled: true,
                             type: "solid",
-                            scaleFactor: 0.5,
-                        },
-                    },
+                            scaleFactor: 0.5
+                        }
+                    }
                 });
             });
 
@@ -461,23 +551,23 @@ var KGquery_graph = (function () {
         });
     };
 
-    self.setEdgeMode = function () {
+    self.setEdgeMode = function() {
         self.KGqueryGraph.network.addEdgeMode();
     };
 
-    self.setNodeAttr = function (attr, value) {
+    self.setNodeAttr = function(attr, value) {
         if (!self.currentGraphNode) {
             return;
         }
 
         var newNode = {
             id: self.currentGraphNode.id,
-            [attr]: value,
+            [attr]: value
         };
         self.KGqueryGraph.data.nodes.update(newNode);
     };
 
-    self.setAllNodesFontSize = function () {
+    self.setAllNodesFontSize = function() {
         var fontSize = prompt("font size");
         if (!fontSize) {
             return;
@@ -485,19 +575,19 @@ var KGquery_graph = (function () {
         self.setAllNodesAttr("font", { size: parseInt(fontSize) });
     };
 
-    self.setAllNodesAttr = function (attr, value) {
+    self.setAllNodesAttr = function(attr, value) {
         var nodesId = self.KGqueryGraph.data.nodes.getIds();
         var newNodes = [];
-        nodesId.forEach(function (id) {
+        nodesId.forEach(function(id) {
             newNodes.push({
                 id: id,
-                [attr]: value,
+                [attr]: value
             });
         });
         self.KGqueryGraph.data.nodes.update(newNodes);
     };
 
-    self.resetVisjNodes = function (nodes) {
+    self.resetVisjNodes = function(nodes) {
         if (!KGquery_graph.KGqueryGraph) {
             return;
         }
@@ -514,17 +604,17 @@ var KGquery_graph = (function () {
         if (!Array.isArray(nodes)) {
             nodes = [nodes];
         }
-        nodes.forEach(function (item) {
+        nodes.forEach(function(item) {
             newNodes.push({
                 id: item.id,
                 shape: item.initialShape,
-                color: item.initialColor,
+                color: item.initialColor
             });
         });
         KGquery_graph.KGqueryGraph.data.nodes.update(newNodes);
     };
 
-    self.resetVisjEdges = function () {
+    self.resetVisjEdges = function() {
         if (!KGquery_graph.KGqueryGraph) {
             return;
         }
@@ -536,13 +626,13 @@ var KGquery_graph = (function () {
             return;
         }
 
-        edges.forEach(function (edgeId, index) {
+        edges.forEach(function(edgeId, index) {
             newVisjsEdges.push({ id: edgeId, color: Lineage_whiteboard.restrictionColor, width: 1 });
         });
         KGquery_graph.KGqueryGraph.data.edges.update(newVisjsEdges);
     };
 
-    self.outlineNode = function (nodeId) {
+    self.outlineNode = function(nodeId) {
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, color: "#b0f5f5" }]);
         /* setTimeout(function(){
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);

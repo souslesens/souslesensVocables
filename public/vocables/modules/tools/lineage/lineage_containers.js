@@ -99,7 +99,7 @@ var Lineage_containers = (function () {
     };
 
     self.search = function (memberType, callback) {
-        return Containers_tree.search();
+        return Containers_tree.search("lineage_containers_containersJstree");
 
         if (!callback) {
             callback = function () {};

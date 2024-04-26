@@ -268,26 +268,26 @@ export default function GraphManagement() {
         setUploadFile(filesList);
     };
 
-    const recursDownloadSourceUsingPythonApi = async (sourceName: string, offset: number | null, blobParts: any[], identifier: string = "") => {
-        if (offset === 0) {
-            setTransferPercent(100);
-            setAnimatedProgressBar(true);
-        }
-
-        if (cancelCurrentOperation.current) {
-            cancelCurrentOperation.current = false;
-            return [];
-        }
-        if (offset !== null) {
+    const downloadSourceUsingPythonApi = async (sourceName: string) => {
+        let offset = 0;
+        let identifier = "";
+        const blobParts = [];
+        setTransferPercent(1);
+        setAnimatedProgressBar(false);
+        while (offset !== null) {
+            if (cancelCurrentOperation.current) {
+                cancelCurrentOperation.current = false;
+                return [];
+            }
             const data = await fetchGraphPartUsingPythonApi(sourceName, offset, currentDownloadFormat, identifier, skipNamedIndividuals);
-
             // percent
             const percent = Math.min(100, (offset * 100) / data.filesize);
             setTransferPercent(percent);
             setAnimatedProgressBar(false);
 
             blobParts.push(data.data);
-            blobParts = await recursDownloadSourceUsingPythonApi(sourceName, data.next_offset, blobParts, data.identifier);
+            offset = data.next_offset;
+            identifier = data.identifier;
         }
         setTransferPercent(100);
         return blobParts;
@@ -325,7 +325,7 @@ export default function GraphManagement() {
 
                 blobParts = await recursDownloadSource(currentSource, 0, graphSize, pageSize, []);
             } else {
-                blobParts = await recursDownloadSourceUsingPythonApi(currentSource, 0, []);
+                blobParts = await downloadSourceUsingPythonApi(currentSource);
             }
 
             if (blobParts.length == 0) {

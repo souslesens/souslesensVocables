@@ -8,10 +8,11 @@ var Containers_widget = (function () {
     self.jstreeDivId = "containerWidget_treeDiv";
     self.showDialog = function (source, options, validateFn) {
         self.validateFn = validateFn;
-        $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
-            $("#mainDialogDiv").addClass("zIndexTop-10");
-            Containers_tree.search(self.jstreeDivId, options);
+        $("#mainDialogDiv").parent().show("fast", function () {
+            $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
+                $("#mainDialogDiv").addClass("zIndexTop-10");
+                Containers_tree.search(self.jstreeDivId, options);
+            });
         });
     };
 

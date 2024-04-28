@@ -427,12 +427,10 @@ var KGquery = (function () {
                         }
 
                         whereStr += predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
-                        whereStr += optionalPredicatesSparql;
-                        whereStr="{"+whereStr+"}"
                     });
 
-
-
+                    whereStr += optionalPredicatesSparql;
+                    whereStr="{"+whereStr+"}"
 
                     var fromStr = Sparql_common.getFromStr(self.currentSource);
                     query =

@@ -430,7 +430,6 @@ var KGquery = (function () {
                     });
 
                     whereStr += optionalPredicatesSparql;
-                    whereStr="{"+whereStr+"}"
 
                     var fromStr = Sparql_common.getFromStr(self.currentSource);
                     query =

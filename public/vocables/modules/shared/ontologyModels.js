@@ -1000,7 +1000,9 @@ var OntologyModels = (function () {
                     "SELECT   distinct ?class ?prop  ?datatype  " +
                     sourceGraphUriFrom +
                     "  where {\n" +
-                    " { ?s rdf:type ?class. ?class rdf:type owl:Class .?class rdfs:label ?classLabel. filter (?class!=(rdfs:Class))}\n" +
+                    " { ?s rdf:type ?class. ?class rdf:type owl:Class ." +
+                    //"?class rdfs:label ?classLabel. " +
+                    "filter (?class!=(rdfs:Class))}\n" +
                     " {\n" +
                     "   ?s ?prop ?o.\n" +
                     "      bind ( datatype(?o) as ?datatype )\n" +
@@ -1011,6 +1013,10 @@ var OntologyModels = (function () {
                     "    ?s ?prop ?o. values ?prop{rdf:value}" +
                     "    bind ( datatype(?o) as ?datatype )\n" +
                     "  }\n" +
+                    " UNION\n" +
+                    "  {\n" +
+                    "    ?s ?prop ?o. values ?prop{rdfs:label}    bind ( datatype(?o) as ?datatype )\n" +
+                    "  }"+
                     "} limit 100";
 
                 let url = Config.sparql_server.url + "?format=json&query=";

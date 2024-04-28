@@ -376,7 +376,8 @@ var KGquery = (function () {
                                 var propertyStr = pathItem[2];
 
                                 if (propertyStr == "rdfs:member") {
-                                    if (!queryElement.fromNode.data.containerFilter) var x = 3;
+                                    if (!queryElement.fromNode.data.containerFilter)
+                                        return
                                     filterStr += "\n FILTER(" + subjectVarName + "=<" + queryElement.fromNode.data.containerFilter.classId + ">)\n ";
                                     var depth = queryElement.fromNode.data.containerFilter.depth || 1;
                                     {
@@ -426,9 +427,12 @@ var KGquery = (function () {
                         }
 
                         whereStr += predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
+                        whereStr += optionalPredicatesSparql;
+                        whereStr="{"+whereStr+"}"
                     });
 
-                    whereStr += optionalPredicatesSparql;
+
+
 
                     var fromStr = Sparql_common.getFromStr(self.currentSource);
                     query =
@@ -642,8 +646,9 @@ var KGquery = (function () {
             self.queryPathesMap = {};
 
             self.divsMap = {};
-            KGquery_graph.resetVisjNodes();
-            KGquery_graph.resetVisjEdges();
+            KGquery_graph.drawVisjsModel("saved")
+          //  KGquery_graph.resetVisjNodes();
+          //  KGquery_graph.resetVisjEdges();
             //   KGquery_graph.drawVisjsModel("saved")
             $("#KGquery_pathsDiv").html("");
             self.addQuerySet();

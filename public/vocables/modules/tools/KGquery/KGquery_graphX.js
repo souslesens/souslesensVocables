@@ -6,9 +6,9 @@ import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 
-var KGquery_graph = (function() {
+var KGquery_graphX = (function() {
     var self = {};
-
+    self.maxEdgesWithlabel = 20;
     self.init = function() {
         $("#KGquery_leftPanelTabs").tabs();
 
@@ -42,8 +42,8 @@ var KGquery_graph = (function() {
                 deleteEdge: false,
 
                 addEdge: function(edgeData, callback) {
-                    // KGquery_graph.addInterGraphLink(edgeData, callback);
-                    KGquery_graph.addInterGraphProperty(edgeData, callback);
+
+                    KGquery_graphX.addInterGraphProperty(edgeData, callback);
                     return false;
                 }
             }
@@ -56,6 +56,36 @@ var KGquery_graph = (function() {
         color: "#ddd" //Lineage_whiteboard.getSourceColor(source)
     };
 
+    self.saveVisjsModelGraph = function() {
+        var fileName = KGquery.currentSource + "_KGmodelGraph.json";
+        self.KGqueryGraph.saveGraph(fileName, true);
+        return;
+    };
+    self.addInterGraphProperty = function(edgeData) {
+        var propertyId = prompt("enter property URI");
+        if (!propertyId) {
+            return;
+        }
+
+        var propertyLabel = prompt("enter property label");
+        if (!propertyLabel) {
+            return;
+        }
+
+        var edge = {
+            from: edgeData.from,
+            to: edgeData.to,
+            id: common.getRandomHexaId(10),
+            label: propertyLabel,
+            data: {
+                propertyId: propertyId,
+                source: KGquery.currentSource,
+                propertyLabel: propertyLabel
+            }
+        };
+
+        self.KGqueryGraph.data.edges.add(edge);
+    };
 
     self.drawVisjsModel = function(mode) {
         var source = KGquery.currentSource;
@@ -70,17 +100,19 @@ var KGquery_graph = (function() {
                     if (mode.indexOf("saved") < 0) {
                         return callbackSeries();
                     }
-
+                    //self.visjsOptions.visjsOptions.physics = { enabled: false };
                     self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
 
                     MainController.UI.message("loading graph display");
                     self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function(err, result) {
+
+
                         if (err) {
-                            // return callbackSeries("notFound");
+
 
                             self.DrawImportsCommonGraph(source);
-                            return callbackSeries("generate commonGraph");
+                            return callbackSeries();
                         }
                         visjsData = result;
 
@@ -120,8 +152,10 @@ var KGquery_graph = (function() {
                             }
                         });
 
+
                         visjsData.nodes = visjsData.nodes.concat(newNodes);
                         visjsData.edges = visjsData.edges.concat(newEdges);
+
 
                         callbackSeries();
                     });
@@ -177,51 +211,45 @@ var KGquery_graph = (function() {
                             callbackSeries();
                         },
                         error(err) {
-                            return callbackSeries("no decoration");
+                            //   return callbackSeries("no decoration");
+                            return callbackSeries();
+
                         }
                     });
                 },
 
+
+                //remove label on edges if too many edges
                 function(callbackSeries) {
+                    if (visjsData.edges.length > self.maxEdgesWithlabel) {
+                        visjsData.edges.forEach(function(edge) {
+                            // newEdges.push({id:edge.id,label:null})
+                            edge.label = null;
+                        });
 
-                    return callbackSeries();
-
-                    /*   var nodesSelection={}
-                           visjsData.nodes.forEach(function(node) {
-
-                               console.log( node.x+"---"+ node.y)
-
-                               if (!node.data.nonObjectProperties || node.data.nonObjectProperties.length == 0) {
-                                   node.shape = "dot";
-                                   node.color="#ddd";
-                                   node.size="5"
-                                   nodesSelection[node.id]=1
-                               }
-
-                           });
-                           if (visjsData.edges.length > self.maxEdgesWithlabel) {
-                               visjsData.edges.forEach(function(edge) {
-                                  if(  nodesSelection[node.to]){
-                                       edge.color="#ddd";
-                                      edge.arrows=null;
-                                   }
-                                   edge.label = null;
-                               });
-
-                           }
-                           callbackSeries();*/
+                    }
+                    callbackSeries();
                 },
 
                 //change shape of nodes without nonObjectProperties
                 function(callbackSeries) {
 
+                    visjsData.nodes.forEach(function(node) {
+                        // newEdges.push({id:edge.id,label:null})
+                      /*  if (!node.data.nonObjectProperties || node.data.nonObjectProperties.length == 0) {
+                            node.shape = "dot";
+                            node.color="#ddd";
+                            node.size="5"
+                        }*/
 
+                    });
                     callbackSeries();
                 }
 
+
             ],
             function(err) {
-                if (err && err != "no decoration") {
+                if (err ) {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");
                     }
@@ -230,48 +258,33 @@ var KGquery_graph = (function() {
                 }
                 MainController.UI.message("drawing graph");
 
-                    var newNodes=[]
-                        visjsData.nodes.forEach(function(node) {
-
-
-           node.x=node.x || 0;
-            node.y=node.y || 0;
-          node.fixed=false;
-            newNodes.push(node)
-
-
-                        })
-                        visjsData.nodes=newNodes
-
 
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
 
                 // cannot get colors from loadGraph ???!!
                 self.KGqueryGraph.draw(function() {
-                    self.simulationOn = true;
                     var newNodes = [];
                     visjsData.nodes.forEach(function(node) {
-
                         newNodes.push({ id: node.id, color: node.color, shape: node.shape });
                     });
-                    //    self.KGqueryGraph.data.nodes.update(visjsData.nodes);
-                    MainController.UI.message("", true);
+                    self.KGqueryGraph.data.nodes.update(visjsData.nodes);
+                    setTimeout(function() {
+                           var node= self.KGqueryGraph.data.nodes.get()[0]
+                           self.KGqueryGraph.network.focus(node.id,{scale:1})
+                        return;
+                            self.KGqueryGraph.network.physics.options.enabled = false;
+                            self.KGqueryGraph.network.stopSimulation();
+                            self.KGqueryGraph.network.fit();
+                        },
+                        200);
+
+                   // MainController.UI.message("", true);
                 });
 
 
                 //  KGquery.clearAll();
             }
         );
-    };
-
-    self.startStopSimulation = function() {
-        if (!self.simulationOn) {
-            self.KGqueryGraph.network.startSimulation();
-        } else {
-            self.KGqueryGraph.network.stopSimulation();
-        }
-        self.simulationOn = !self.simulationOn;
-
     };
 
     self.DrawImportsCommonGraph = function() {
@@ -283,6 +296,7 @@ var KGquery_graph = (function() {
         }
         var visjsData = { nodes: [], edges: [] };
         var uniqueNodes = {};
+
         self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
         async.eachSeries(
             sources,
@@ -295,9 +309,6 @@ var KGquery_graph = (function() {
                         result.nodes.forEach(function(node) {
                             if (!uniqueNodes[node.id]) {
                                 uniqueNodes[node.id] = 1;
-                                node.x = null;
-                                node.y = null;
-                                node.fixed = false;
                                 visjsData.nodes.push(node);
                             }
                         });
@@ -320,14 +331,15 @@ var KGquery_graph = (function() {
 
                 // cannot get colors from loadGraph ???!!
                 self.KGqueryGraph.draw(function() {
-                    self.simulationOn = true;
+                    //   self.KGqueryGraph.network.physics.enabled=false
                     var newNodes = [];
                     visjsData.nodes.forEach(function(node) {
                         newNodes.push({ id: node.id, color: node.color, shape: node.shape });
                     });
-                    //  self.KGqueryGraph.data.nodes.update(visjsData.nodes);
+                    self.KGqueryGraph.data.nodes.update(visjsData.nodes);
+                    MainController.UI.message("", true);
                 });
-                MainController.UI.message("", true);
+
             }
         );
     };
@@ -345,6 +357,8 @@ var KGquery_graph = (function() {
         if (!sources) {
             sources = [];
         }
+
+     //   self.visjsOptions.visjsOptions.physics = { enabled: true };
         sources.push(source);
 
         async.eachSeries(
@@ -478,6 +492,104 @@ var KGquery_graph = (function() {
         );
     };
 
+    self.getInterGraphModel = function(source, visjsData, callback) {
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "      SELECT   distinct ?sparent ?prop ?oparent where {\n" +
+            "{graph  <http://data.total/resource/tsf/new_prodom/> {?s ?x ?y.  ?s rdf:type ?sparent.  ?s rdf:type owl:NamedIndividual.?sparent rdf:type ?sparentType filter (?sparentType!=owl:NamedIndividual)\n" +
+            "  }}\n" +
+            "{graph <http://data.total/resource/tsf/dalia-lifex/> {?o ?x2 ?y2 .  ?o rdf:type ?oparent.?o rdf:type owl:NamedIndividual.?oparent rdf:type ?oparentType filter (?oparentType!=owl:NamedIndividual) } }\n" +
+            "  ?s ?prop ?o. ?p rdf:type  owl:ObjectProperty filter( ?prop !=rdfs:subClassOf)\n" +
+            "}limit 100";
+
+        var url = Config.sources[source].sparql_server.url;
+
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function(err, result) {
+            if (err) {
+                return callbackSeries(err);
+            }
+            result.results.bindings.forEach(function(item) {
+                var label = Sparql_common.getLabelFromURI(item.prop.value);
+                var x = visjsData.edges.push({
+                    id: item.prop.value,
+                    from: item.sparent.value,
+                    to: item.oparent.value,
+
+                    label: label,
+                    font: { color: Lineage_whiteboard.defaultPredicateEdgeColor },
+                    data: {
+                        propertyId: item.prop.value,
+                        source: source,
+                        propertyLabel: label
+                    },
+
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            type: "solid",
+                            scaleFactor: 0.5
+                        }
+                    },
+
+                    color: Lineage_whiteboard.defaultPredicateEdgeColor
+                });
+            });
+            return callback(null, visjsData);
+        });
+    };
+
+    self.addInterGraphLink = function(edgeData, callback) {
+        var source = KGquery.currentSource;
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "select distinct ?prop where { ?s ?prop ?o." +
+            "?s rdf:type <" +
+            edgeData.from +
+            ">.?o rdf:type <" +
+            edgeData.to +
+            ">.} limit 100";
+
+        var url = Config.sources[source].sparql_server.url;
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function(err, result) {
+            if (err) {
+                return callbackSeries(err);
+            }
+
+            if (result.results.bindings.length == 0) {
+                return alert(" no matching triples between " + edgeData.from + " and " + edgeData.to);
+            }
+
+            var visjsData = { edges: [] };
+            result.results.bindings.forEach(function(item) {
+                var label = Sparql_common.getLabelFromURI(item.prop.value);
+                var x = visjsData.edges.push({
+                    id: edgeData.from + "_" + item.prop.value + "_" + edgeData.to,
+                    from: edgeData.from,
+                    to: edgeData.to,
+
+                    label: label,
+                    font: { color: Lineage_whiteboard.defaultPredicateEdgeColor },
+                    data: {
+                        propertyId: item.prop.value,
+                        source: source,
+                        propertyLabel: label
+                    },
+
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            type: "solid",
+                            scaleFactor: 0.5
+                        }
+                    }
+                });
+            });
+
+            self.KGqueryGraph.data.edges.update(visjsData.edges);
+        });
+    };
 
     self.setEdgeMode = function() {
         self.KGqueryGraph.network.addEdgeMode();
@@ -516,15 +628,15 @@ var KGquery_graph = (function() {
     };
 
     self.resetVisjNodes = function(nodes) {
-        if (!KGquery_graph.KGqueryGraph) {
+        if (!KGquery_graphX.KGqueryGraph) {
             return;
         }
         var newNodes = [];
 
         if (!nodes) {
             nodes = [];
-            if (KGquery_graph.KGqueryGraph.data.nodes.get) {
-                nodes = KGquery_graph.KGqueryGraph.data.nodes.get();
+            if (KGquery_graphX.KGqueryGraph.data.nodes.get) {
+                nodes = KGquery_graphX.KGqueryGraph.data.nodes.get();
             } else {
                 return;
             }
@@ -539,17 +651,17 @@ var KGquery_graph = (function() {
                 color: item.initialColor
             });
         });
-        KGquery_graph.KGqueryGraph.data.nodes.update(newNodes);
+        KGquery_graphX.KGqueryGraph.data.nodes.update(newNodes);
     };
 
     self.resetVisjEdges = function() {
-        if (!KGquery_graph.KGqueryGraph) {
+        if (!KGquery_graphX.KGqueryGraph) {
             return;
         }
         var newVisjsEdges = [];
         var edges = [];
-        if (KGquery_graph.KGqueryGraph.data.edges.getIds) {
-            edges = KGquery_graph.KGqueryGraph.data.edges.getIds();
+        if (KGquery_graphX.KGqueryGraph.data.edges.getIds) {
+            edges = KGquery_graphX.KGqueryGraph.data.edges.getIds();
         } else {
             return;
         }
@@ -557,48 +669,18 @@ var KGquery_graph = (function() {
         edges.forEach(function(edgeId, index) {
             newVisjsEdges.push({ id: edgeId, color: Lineage_whiteboard.restrictionColor, width: 1 });
         });
-        KGquery_graph.KGqueryGraph.data.edges.update(newVisjsEdges);
+        KGquery_graphX.KGqueryGraph.data.edges.update(newVisjsEdges);
     };
 
     self.outlineNode = function(nodeId) {
-        KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, color: "#b0f5f5" }]);
+        KGquery_graphX.KGqueryGraph.data.nodes.update([{ id: nodeId, color: "#b0f5f5" }]);
         /* setTimeout(function(){
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
         },500)*/
-    };
-    self.saveVisjsModelGraph = function() {
-        var fileName = KGquery.currentSource + "_KGmodelGraph.json";
-        self.KGqueryGraph.saveGraph(fileName, true);
-        return;
-    };
-    self.addInterGraphProperty = function(edgeData) {
-        var propertyId = prompt("enter property URI");
-        if (!propertyId) {
-            return;
-        }
-
-        var propertyLabel = prompt("enter property label");
-        if (!propertyLabel) {
-            return;
-        }
-
-        var edge = {
-            from: edgeData.from,
-            to: edgeData.to,
-            id: common.getRandomHexaId(10),
-            label: propertyLabel,
-            data: {
-                propertyId: propertyId,
-                source: KGquery.currentSource,
-                propertyLabel: propertyLabel
-            }
-        };
-
-        self.KGqueryGraph.data.edges.add(edge);
     };
 
     return self;
 })();
 
-export default KGquery_graph;
-window.KGquery_graph = KGquery_graph;
+export default KGquery_graphX;
+window.KGquery_graph = KGquery_graphX;

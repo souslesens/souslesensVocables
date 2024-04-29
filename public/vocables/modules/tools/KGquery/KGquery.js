@@ -412,7 +412,6 @@ var KGquery = (function () {
                             });
                         });
 
-
                         for (var key in querySet.classFiltersMap) {
                             filterStr += querySet.classFiltersMap[key].filter + " \n";
                         }

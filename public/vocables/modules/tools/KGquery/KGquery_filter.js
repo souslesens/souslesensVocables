@@ -20,7 +20,7 @@ var KGquery_filter = (function () {
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
                 // queryElement.paths.forEach(function(pathItem, pathIndex) {
                 if (queryElement.fromNode) {
-                    if ( queryElement.fromNode.data.nonObjectProperties) {
+                    if (queryElement.fromNode.data.nonObjectProperties) {
                         /*   queryElement.fromNode.data.nonObjectProperties = [
                                {
                                    label: "label",
@@ -32,7 +32,7 @@ var KGquery_filter = (function () {
                         var subjectVarName = KGquery.getVarName(queryElement.fromNode, true);
                         var addLabel = true;
 
-                        queryElement.fromNode.data.nonObjectProperties.forEach(function(property) {
+                        queryElement.fromNode.data.nonObjectProperties.forEach(function (property) {
                             if (property.label.indexOf("label") > -1) {
                                 addLabel = false;
                             }
@@ -42,17 +42,15 @@ var KGquery_filter = (function () {
                                 queryNonObjectProperties.push({ varName: subjectVarName, property: property, queryElementData: queryElement.fromNode.data });
                             }
                         });
-                    }else{
-                        queryElement.fromNode.data.nonObjectProperties=[]
+                    } else {
+                        queryElement.fromNode.data.nonObjectProperties = [];
                     }
-
                 }
                 if (queryElement.toNode) {
                     if (queryElement.toNode.data.nonObjectProperties) {
-
                         var objectVarName = KGquery.getVarName(queryElement.toNode, true);
                         var addLabel = true;
-                        queryElement.toNode.data.nonObjectProperties.forEach(function(property) {
+                        queryElement.toNode.data.nonObjectProperties.forEach(function (property) {
                             if (property.label.indexOf("label") > -1) {
                                 addLabel = false;
                             }
@@ -67,8 +65,8 @@ var KGquery_filter = (function () {
                                 queryNonObjectProperties.push({ varName: objectVarName, property: labelProperty, queryElementData: queryElement.toNode.data });
                             }
                         }
-                    }else{
-                        queryElement.toNode.data.nonObjectProperties=[]
+                    } else {
+                        queryElement.toNode.data.nonObjectProperties = [];
                     }
                 }
 

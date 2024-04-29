@@ -23,30 +23,26 @@ var IndividualAggregateWidget = (function () {
                 for (var key in data) {
                     var item = data[key];
 
-                  if( item.data.nonObjectProperties) {
+                    if (item.data.nonObjectProperties) {
+                        var groupByTypes = [
+                            "http://www.w3.org/2001/XMLSchema#string",
+                            "http://www.w3.org/2001/XMLSchema#date",
+                            "http://www.w3.org/2001/XMLSchema#datetime",
+                            "http://www.w3.org/2000/01/rdf-schema#Literal",
+                        ];
 
+                        item.data.nonObjectProperties.forEach(function (prop) {
+                            var label = (item.alias || item.label) + "_" + prop.label;
 
-                      var groupByTypes = [
-                          "http://www.w3.org/2001/XMLSchema#string",
-                          "http://www.w3.org/2001/XMLSchema#date",
-                          "http://www.w3.org/2001/XMLSchema#datetime",
-                          "http://www.w3.org/2000/01/rdf-schema#Literal",
-                      ];
-
-                      item.data.nonObjectProperties.forEach(function(prop) {
-                          var label = (item.alias || item.label) + "_" + prop.label;
-
-                          var obj = { label: label, item: item, prop: prop, classLabel: item.data.label };
-                          self.allProperties[label] = obj;
-                          if (groupByTypes.indexOf(prop.datatype) > -1) {
-                              self.groupByClassesMap[label] = obj;
-                          } else {
-                              self.functionVarClassesMap[label] = obj;
-                          }
-                      });
-                  }
-
-
+                            var obj = { label: label, item: item, prop: prop, classLabel: item.data.label };
+                            self.allProperties[label] = obj;
+                            if (groupByTypes.indexOf(prop.datatype) > -1) {
+                                self.groupByClassesMap[label] = obj;
+                            } else {
+                                self.functionVarClassesMap[label] = obj;
+                            }
+                        });
+                    }
                 }
                 common.fillSelectOptions("individualAggregate_groupBySelect", Object.keys(self.groupByClassesMap), null);
 

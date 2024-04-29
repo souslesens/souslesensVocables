@@ -426,9 +426,9 @@ var KGquery = (function () {
                         }
 
                         whereStr += predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
+                        whereStr += optionalPredicatesSparql;
+                        whereStr = "{" + whereStr + "}";
                     });
-
-                    whereStr += optionalPredicatesSparql;
 
                     var fromStr = Sparql_common.getFromStr(self.currentSource);
                     query =

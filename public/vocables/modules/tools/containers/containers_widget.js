@@ -8,21 +8,21 @@ var Containers_widget = (function () {
     self.jstreeDivId = "containerWidget_treeDiv";
     self.showDialog = function (source, options, validateFn) {
         self.validateFn = validateFn;
-       // $("#mainDialogDiv") .parent().show("fast", function () {
+        // $("#mainDialogDiv") .parent().show("fast", function () {
         $("#mainDialogDiv").dialog("open");
 
         $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
-                    $("#mainDialogDiv").addClass("zIndexTop-10");
-                    Containers_tree.search(self.jstreeDivId, options);
-                });
-           // });
+            $("#mainDialogDiv").addClass("zIndexTop-10");
+            Containers_tree.search(self.jstreeDivId, options);
+        });
+        // });
     };
 
     self.validateDialog = function () {
         var selectedMembers = $("#containerWidget_treeDiv").jstree().get_selected(true);
         var depth = $("#containerWidget_depthInput").val();
-      //  $("#mainDialogDiv") .parent() .hide("fast", function () { });
-              $("#mainDialogDiv").dialog("close");
+        //  $("#mainDialogDiv") .parent() .hide("fast", function () { });
+        $("#mainDialogDiv").dialog("close");
 
         if (!selectedMembers || selectedMembers.length == 0) {
             alert("no node selected");

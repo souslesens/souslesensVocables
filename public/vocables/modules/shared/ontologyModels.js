@@ -1016,7 +1016,7 @@ var OntologyModels = (function () {
                     " UNION\n" +
                     "  {\n" +
                     "    ?s ?prop ?o. values ?prop{rdfs:label}    bind ( datatype(?o) as ?datatype )\n" +
-                    "  }"+
+                    "  }" +
                     "} limit 100";
 
                 let url = Config.sparql_server.url + "?format=json&query=";

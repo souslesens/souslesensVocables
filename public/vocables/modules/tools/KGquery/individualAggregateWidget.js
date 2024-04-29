@@ -1,5 +1,5 @@
-import common from "../shared/common.js";
-import Sparql_common from "../sparqlProxies/sparql_common.js";
+import common from "../../shared/common.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
 var IndividualAggregateWidget = (function () {
     var self = {};
@@ -15,7 +15,7 @@ var IndividualAggregateWidget = (function () {
             self.divId = divId;
             $("#smallDialogDiv").dialog("open");
         }
-        $("#" + divId).load("snippets/individualAggregateWidget.html", function () {
+        $("#" + divId).load("modules/tools/KGquery/html/individualAggregateWidget.html", function () {
             loadClassesFn(function (data) {
                 self.groupByClassesMap = {};
                 self.functionVarClassesMap = {};
@@ -23,39 +23,26 @@ var IndividualAggregateWidget = (function () {
                 for (var key in data) {
                     var item = data[key];
 
-                    var otherproperties = item.data.nonObjectProperties;
-                    var labelObj = { id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label", datatype: "http://www.w3.org/2001/XMLSchema#string" };
+                    if (item.data.nonObjectProperties) {
+                        var groupByTypes = [
+                            "http://www.w3.org/2001/XMLSchema#string",
+                            "http://www.w3.org/2001/XMLSchema#date",
+                            "http://www.w3.org/2001/XMLSchema#datetime",
+                            "http://www.w3.org/2000/01/rdf-schema#Literal",
+                        ];
 
-                    if (otherproperties) {
-                        otherproperties.splice(0, 0, labelObj);
-                    } else {
-                        otherproperties = [labelObj];
+                        item.data.nonObjectProperties.forEach(function (prop) {
+                            var label = (item.alias || item.label) + "_" + prop.label;
+
+                            var obj = { label: label, item: item, prop: prop, classLabel: item.data.label };
+                            self.allProperties[label] = obj;
+                            if (groupByTypes.indexOf(prop.datatype) > -1) {
+                                self.groupByClassesMap[label] = obj;
+                            } else {
+                                self.functionVarClassesMap[label] = obj;
+                            }
+                        });
                     }
-
-                    var groupByTypes = [
-                        "http://www.w3.org/2001/XMLSchema#string",
-                        "http://www.w3.org/2001/XMLSchema#date",
-                        "http://www.w3.org/2001/XMLSchema#datetime",
-                        "http://www.w3.org/2000/01/rdf-schema#Literal",
-                    ];
-
-                    otherproperties.forEach(function (prop) {
-                        var label = (item.alias || item.label) + "_" + prop.label;
-
-                        var obj = { label: label, item: item, prop: prop, classLabel: item.data.label };
-                        self.allProperties[label] = obj;
-                        if (groupByTypes.indexOf(prop.datatype) > -1) {
-                            self.groupByClassesMap[label] = obj;
-                        } else {
-                            self.functionVarClassesMap[label] = obj;
-                        }
-                    });
-
-                    /*  if (item.data.datatype) {
-                          self.functionVarClasses.push(item);
-                      } else {
-                          self.groupByClasses.push(item);
-                      }*/
                 }
                 common.fillSelectOptions("individualAggregate_groupBySelect", Object.keys(self.groupByClassesMap), null);
 
@@ -105,7 +92,7 @@ var IndividualAggregateWidget = (function () {
             } else if (fn == "COUNT") {
                 selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
             } else {
-                selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
+                selectStr += " (" + fn + " (?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
             }
             groupByPredicates[fnVar] = self.allProperties[fnVar];
         });

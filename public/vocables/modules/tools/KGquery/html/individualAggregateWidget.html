@@ -24,12 +24,12 @@
 <div id="individualAggregate_messageDiv"></div>
 <div id="individualAggregate_mainDiv" style="display: flex; flex-direction: row">
     <div>
-        Group by<br />
-        <select class="individualAggregate_select" id="individualAggregate_groupBySelect" size="8" multiple="multiple"></select>
+        <b> Group by</b><br />
+        <select class="individualAggregate_select" id="individualAggregate_groupBySelect" size="20" style="overflow: auto; border: none; width: 300px" multiple="multiple"></select>
     </div>
 
     <div>
-        Group function<br />
+        <b>Group function</b><br />
         <select
             class="individualAggregate_select"
             id="individualAggregate_groupFunctionSelect"
@@ -39,9 +39,8 @@
         ></select>
     </div>
     <div>
-        function variable<br />
-        <select class="individualAggregate_select" id="individualAggregate_functionVariableSelect" size="8" multiple="multiple"></select>
+        <b>function variable</b><br />
+        <select class="individualAggregate_select" id="individualAggregate_functionVariableSelect" size="20" style="overflow: auto; border: none; width: 300px" multiple="multiple"></select>
     </div>
-
-    <button id="individualAggregate_okButton" onclick="IndividualAggregateWidget.onOKbutton()">OK</button>
 </div>
+<button id="individualAggregate_okButton" onclick="IndividualAggregateWidget.onOKbutton()">OK</button>

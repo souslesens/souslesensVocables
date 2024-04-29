@@ -204,6 +204,8 @@ var KGquery_filter_bot = (function () {
                 self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"^^xsd:int ');
             } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#float") {
                 self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"^^xsd:float ');
+            } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#decimal") {
+                self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"^^xsd:decimal ');
             } else {
                 if (false && common.isNumber(propertyValue)) {
                     self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + " " + propertyValue + " ");

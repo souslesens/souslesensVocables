@@ -20,61 +20,53 @@ var KGquery_filter = (function () {
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
                 // queryElement.paths.forEach(function(pathItem, pathIndex) {
                 if (queryElement.fromNode) {
-                    if (!queryElement.fromNode.data.nonObjectProperties) {
-                        queryElement.fromNode.data.nonObjectProperties = [
-                            {
-                                label: "label",
-                                id: "rdfs:label",
-                                datatype: "http://www.w3.org/2001/XMLSchema#string",
-                            },
-                        ];
-                    }
-                    var subjectVarName = KGquery.getVarName(queryElement.fromNode, true);
-                    var addLabel = true;
+                    if (queryElement.fromNode.data.nonObjectProperties) {
+                        /*   queryElement.fromNode.data.nonObjectProperties = [
+                               {
+                                   label: "label",
+                                   id: "rdfs:label",
+                                   datatype: "http://www.w3.org/2001/XMLSchema#string",
+                               },
+                           ];*/
 
-                    queryElement.fromNode.data.nonObjectProperties.forEach(function (property) {
-                        if (property.label.indexOf("label") > -1) {
-                            addLabel = false;
-                        }
+                        var subjectVarName = KGquery.getVarName(queryElement.fromNode, true);
+                        var addLabel = true;
 
-                        if (!uniqueProps[subjectVarName + "_" + property.label]) {
-                            uniqueProps[subjectVarName + "_" + property.label] = 1;
-                            queryNonObjectProperties.push({ varName: subjectVarName, property: property, queryElementData: queryElement.fromNode.data });
-                        }
-                    });
-                    if (addLabel) {
-                        if (!uniqueProps[subjectVarName + "_" + "rdfs:label"]) {
-                            uniqueProps[subjectVarName + "_" + "rdfs:label"] = 1;
-                        }
-                        queryNonObjectProperties.push({ varName: subjectVarName, property: labelProperty, queryElementData: queryElement.fromNode.data });
+                        queryElement.fromNode.data.nonObjectProperties.forEach(function (property) {
+                            if (property.label.indexOf("label") > -1) {
+                                addLabel = false;
+                            }
+
+                            if (!uniqueProps[subjectVarName + "_" + property.label]) {
+                                uniqueProps[subjectVarName + "_" + property.label] = 1;
+                                queryNonObjectProperties.push({ varName: subjectVarName, property: property, queryElementData: queryElement.fromNode.data });
+                            }
+                        });
+                    } else {
+                        queryElement.fromNode.data.nonObjectProperties = [];
                     }
                 }
                 if (queryElement.toNode) {
-                    if (!queryElement.toNode.data.nonObjectProperties) {
-                        queryElement.toNode.data.nonObjectProperties = [
-                            {
-                                label: "label",
-                                id: "rdfs:label",
-                                datatype: "http://www.w3.org/2001/XMLSchema#string",
-                            },
-                        ];
-                    }
-                    var objectVarName = KGquery.getVarName(queryElement.toNode, true);
-                    var addLabel = true;
-                    queryElement.toNode.data.nonObjectProperties.forEach(function (property) {
-                        if (property.label.indexOf("label") > -1) {
-                            addLabel = false;
+                    if (queryElement.toNode.data.nonObjectProperties) {
+                        var objectVarName = KGquery.getVarName(queryElement.toNode, true);
+                        var addLabel = true;
+                        queryElement.toNode.data.nonObjectProperties.forEach(function (property) {
+                            if (property.label.indexOf("label") > -1) {
+                                addLabel = false;
+                            }
+                            if (!uniqueProps[objectVarName + "_" + property.label]) {
+                                uniqueProps[objectVarName + "_" + property.label] = 1;
+                                queryNonObjectProperties.push({ varName: objectVarName, property: property, queryElementData: queryElement.toNode.data });
+                            }
+                        });
+                        if (addLabel) {
+                            if (!uniqueProps[objectVarName + "_" + "rdfs:label"]) {
+                                uniqueProps[objectVarName + "_" + "rdfs:label"] = 1;
+                                queryNonObjectProperties.push({ varName: objectVarName, property: labelProperty, queryElementData: queryElement.toNode.data });
+                            }
                         }
-                        if (!uniqueProps[objectVarName + "_" + property.label]) {
-                            uniqueProps[objectVarName + "_" + property.label] = 1;
-                            queryNonObjectProperties.push({ varName: objectVarName, property: property, queryElementData: queryElement.toNode.data });
-                        }
-                    });
-                    if (addLabel) {
-                        if (!uniqueProps[objectVarName + "_" + "rdfs:label"]) {
-                            uniqueProps[objectVarName + "_" + "rdfs:label"] = 1;
-                            queryNonObjectProperties.push({ varName: objectVarName, property: labelProperty, queryElementData: queryElement.toNode.data });
-                        }
+                    } else {
+                        queryElement.toNode.data.nonObjectProperties = [];
                     }
                 }
 
@@ -174,12 +166,23 @@ var KGquery_filter = (function () {
         return callback(null, optionalPredicatesSparql);
     };
 
+    self.getAggregateFilterOptionalPredicates = function (querySet, filter) {
+        var filterStr = "";
+        for (var key in querySet.classFiltersMap) {
+            var classObj = querySet.classFiltersMap[key].class;
+            classObj.data.nonObjectProperties.forEach(function (property) {
+                var varName = KGquery.getVarName(classObj);
+                if (filter.indexOf(varName) > -1) filterStr += " OPTIONAL {" + varName + " <" + property.id + "> " + varName + "_" + property.label + ".}\n";
+            });
+        }
+        return filterStr;
+    };
+
     self.getAggregatePredicates = function (groupByPredicates) {
         var str = "";
         for (var key in groupByPredicates) {
             var obj = groupByPredicates[key];
             str += " ?" + obj.classLabel + " <" + obj.prop.id + "> ?" + obj.label + ". ";
-            console.log("++++" + str);
         }
 
         return str;

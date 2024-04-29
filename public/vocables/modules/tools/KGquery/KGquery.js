@@ -6,7 +6,7 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Export from "../../shared/export.js";
 import common from "../../shared/common.js";
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
-import IndividualAggregateWidget from "../../uiWidgets/individualAggregateWidget.js";
+import IndividualAggregateWidget from "./individualAggregateWidget.js";
 
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
@@ -209,7 +209,7 @@ var KGquery = (function () {
 
                 Containers_widget.showDialog(self.currentSource, options, function (err, result) {
                     //  KGquery_filter.selectContainerFilters(fromNode,function(err, result){
-                    fromNode.containerFilter = {
+                    fromNode.data.containerFilter = {
                         classId: result.topMember.id,
                         depth: result.depth,
                     };
@@ -376,8 +376,9 @@ var KGquery = (function () {
                                 var propertyStr = pathItem[2];
 
                                 if (propertyStr == "rdfs:member") {
-                                    filterStr += "\n FILTER(" + subjectVarName + "=<" + queryElement.fromNode.containerFilter.classId + ">)\n ";
-                                    var depth = queryElement.fromNode.containerFilter.depth || 1;
+                                    if (!queryElement.fromNode.data.containerFilter) return;
+                                    filterStr += "\n FILTER(" + subjectVarName + "=<" + queryElement.fromNode.data.containerFilter.classId + ">)\n ";
+                                    var depth = queryElement.fromNode.data.containerFilter.depth || 1;
                                     {
                                         if (depth) {
                                             var str = "";
@@ -419,6 +420,8 @@ var KGquery = (function () {
                             whereStr += options.aggregate.where;
                             var groupByPredicates = options.aggregate.groupByPredicates;
                             otherPredicatesStrs += " \n" + KGquery_filter.getAggregatePredicates(groupByPredicates);
+
+                            filterStr += KGquery_filter.getAggregateFilterOptionalPredicates(querySet, filterStr);
                         } else {
                         }
 
@@ -639,8 +642,9 @@ var KGquery = (function () {
             self.queryPathesMap = {};
 
             self.divsMap = {};
-            KGquery_graph.resetVisjNodes();
-            KGquery_graph.resetVisjEdges();
+            KGquery_graph.drawVisjsModel("saved");
+            //  KGquery_graph.resetVisjNodes();
+            //  KGquery_graph.resetVisjEdges();
             //   KGquery_graph.drawVisjsModel("saved")
             $("#KGquery_pathsDiv").html("");
             self.addQuerySet();

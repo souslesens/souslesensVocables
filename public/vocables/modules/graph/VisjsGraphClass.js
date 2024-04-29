@@ -808,8 +808,18 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 }
             }
         }
+
+        var nodes = self.data.nodes.get();
+        /*   nodes.forEach(function(node) {
+            return;
+            console.log(node.x + "---" + node.y + "___" + node.id);
+
+            node.x = node.x || 0;
+            node.y = node.y || 0;
+        });*/
+
         var data = {
-            nodes: self.data.nodes.get(),
+            nodes: nodes,
             edges: self.data.edges.get(),
             context: self.currentContext,
             positions: positions,

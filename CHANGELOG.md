@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.70.0](https://github.com/souslesens/souslesensVocables/compare/1.69.0...1.70.0) (2024-04-30)
+
+
+### Features
+
+* **GraphManagement:** catch unexpected errors during upload/download ([cb5b8fd](https://github.com/souslesens/souslesensVocables/commit/cb5b8fd603891190c452c4138d032126c7fb66a1)), closes [#701](https://github.com/souslesens/souslesensVocables/issues/701)
+* **graphManagement:** display message to warn user that upload/download can be long ([7743566](https://github.com/souslesens/souslesensVocables/commit/774356655e5bc24ab23a1b92a6537509ae2e389a))
+* **GraphManagement:** don't allow closing upload/download dialog while processing ([a807c8a](https://github.com/souslesens/souslesensVocables/commit/a807c8a0ca53c71c5b3af93d07cf8fb2967d304d)), closes [#699](https://github.com/souslesens/souslesensVocables/issues/699)
+* **GraphManagement:** set upload to 95% during last post ([9258bb9](https://github.com/souslesens/souslesensVocables/commit/9258bb9383b6cea00fa9ac000d0871c910ed5d71))
+* **GraphManagement:** stop progressing to 100% inconditionally on download ([f6403fd](https://github.com/souslesens/souslesensVocables/commit/f6403fda08d24d7d36956f666fb10c54a3749135)), closes [#700](https://github.com/souslesens/souslesensVocables/issues/700)
+
 ## [1.69.0](https://github.com/souslesens/souslesensVocables/compare/1.68.1...1.69.0) (2024-04-30)
 
 ### [1.68.1](https://github.com/souslesens/souslesensVocables/compare/1.68.0...1.68.1) (2024-04-29)

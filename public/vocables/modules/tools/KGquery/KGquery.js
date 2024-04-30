@@ -345,13 +345,12 @@ var KGquery = (function () {
                         var predicateStr = "";
                         var filterStr = "";
                         var otherPredicatesStrs = "";
-                        var emptyQueryElement = false;
 
                         querySet.elements.forEach(function (queryElement, queryElementIndex) {
                             if (!queryElement.toNode) {
+                                return;
                                 if (queryElement.fromNode) {
                                 } else {
-                                    return (emptyQueryElement = true);
                                 }
                             }
 
@@ -413,7 +412,6 @@ var KGquery = (function () {
                             });
                         });
 
-                        if (emptyQueryElement) var x = 3;
                         for (var key in querySet.classFiltersMap) {
                             filterStr += querySet.classFiltersMap[key].filter + " \n";
                         }

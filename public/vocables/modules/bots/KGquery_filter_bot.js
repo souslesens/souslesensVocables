@@ -105,7 +105,8 @@ var KGquery_filter_bot = (function () {
             return _botEngine.nextStep();
         }
 
-        var choices = [{ id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label" }];
+        //var choices = [{ id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label" }];
+        var choices = [];
         if (self.data && self.data.nonObjectProperties) {
             choices = choices.concat(self.data.nonObjectProperties);
         }

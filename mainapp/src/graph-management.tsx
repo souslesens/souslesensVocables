@@ -193,7 +193,7 @@ export default function GraphManagement() {
             for (let start = 0; start < fileSize; start += chunkSize) {
                 // set percent for progress bar
                 const percent = (start * 100) / fileSize;
-                setTransferPercent(Math.round(percent));
+                setTransferPercent(Math.min(95, Math.round(percent)));
 
                 // slice file
                 const end = start + chunkSize;

@@ -125,9 +125,11 @@ var KGquery_filter_bot = (function () {
             // propertyOperator = ">";
             choices = ["=", "<", "<=", ">", ">=", "range"];
         } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
-            choices = ["=", "<", "<=", ">", ">=", "range"];
+            choices = ["=", "<", "<=", ">", ">="]; //, "range"];
         } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#float") {
-            choices = ["=", "<", "<=", ">", ">=", "range"];
+            choices = ["=", "<", "<=", ">", ">="]; //, "range"];
+        } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#decimal") {
+            choices = ["=", "<", "<=", ">", ">="]; //, "range"];
         } else {
             choices = ["=", "!=", "contains", ">", "!contains", "ChooseInList"];
         }

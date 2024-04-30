@@ -91,7 +91,7 @@ var KGquery = (function () {
     };
 
     self.addQueryElementToQuerySet = function (querySet) {
-        $("#KGquery_SetsControlsDiv").show();
+        //  $("#KGquery_SetsControlsDiv").show();
         var queryElementDivId = KGquery_controlPanel.addQueryElementToCurrentSet(querySet.divId);
         var queryElement = {
             divId: queryElementDivId,
@@ -137,7 +137,7 @@ var KGquery = (function () {
 
         if (self.currentQuerySet.elements.length > 1) {
             var excludeSelf = false;
-            $("#KGquery_SetsControlsDiv").show();
+            //   $("#KGquery_SetsControlsDiv").show();
             KGquery_paths.getNearestNodeId(node.id, self.currentQuerySet, excludeSelf, function (err, nearestNodeId) {
                 if (err) {
                     return acllback(err.responseText);
@@ -345,12 +345,13 @@ var KGquery = (function () {
                         var predicateStr = "";
                         var filterStr = "";
                         var otherPredicatesStrs = "";
+                        var emptyQueryElement = false;
 
                         querySet.elements.forEach(function (queryElement, queryElementIndex) {
                             if (!queryElement.toNode) {
                                 if (queryElement.fromNode) {
                                 } else {
-                                    return;
+                                    return (emptyQueryElement = true);
                                 }
                             }
 
@@ -412,6 +413,7 @@ var KGquery = (function () {
                             });
                         });
 
+                        if (emptyQueryElement) var x = 3;
                         for (var key in querySet.classFiltersMap) {
                             filterStr += querySet.classFiltersMap[key].filter + " \n";
                         }
@@ -427,7 +429,7 @@ var KGquery = (function () {
 
                         whereStr += predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
                         whereStr += optionalPredicatesSparql;
-                        whereStr = "{" + whereStr + "}";
+                        //  whereStr = "{" + whereStr + "}";
                     });
 
                     var fromStr = Sparql_common.getFromStr(self.currentSource);

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.70.1](https://github.com/souslesens/souslesensVocables/compare/1.70.0...1.70.1) (2024-05-02)
+
+
+### Bug Fixes
+
+* **graphManagement:** typo in infobox ([178e95c](https://github.com/souslesens/souslesensVocables/commit/178e95cfcaebbbc5feadf331317536a329641b1d))
+
 ## [1.70.0](https://github.com/souslesens/souslesensVocables/compare/1.69.0...1.70.0) (2024-04-30)
 
 

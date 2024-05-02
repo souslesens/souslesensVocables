@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.70.2](https://github.com/souslesens/souslesensVocables/compare/1.70.1...1.70.2) (2024-05-02)
+
+
+### Bug Fixes
+
+* **api/health:** remove sqlserver from health check (externaly managed now) ([74dc868](https://github.com/souslesens/souslesensVocables/commit/74dc8681813a06b59472362d41b843dba79c9952))
+
 ### [1.70.1](https://github.com/souslesens/souslesensVocables/compare/1.70.0...1.70.1) (2024-05-02)
 
 

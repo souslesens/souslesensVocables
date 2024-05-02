@@ -423,7 +423,7 @@ export default function GraphManagement() {
             <DialogActions>
                 <Stack direction="horizontal" gap={1}>
                     <Alert sx={{ padding: "0px 16px" }} severity="info">
-                        {`${displayModal === "upload" ? "Upload" : "Download"} can take a long time and remain blocked at ${displayModal === "upload" ? "1" : "95"}% for several minutes`}
+                        {`${displayModal === "upload" ? "Upload" : "Download"} can take a long time and remain blocked at ${displayModal === "upload" ? "95" : "1"}% for several minutes`}
                     </Alert>
                 </Stack>
                 <Stack direction="horizontal" gap={1}>

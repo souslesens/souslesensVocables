@@ -5,7 +5,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_relations from "./lineage_relations.js";
 import LegendWidget from "../../uiWidgets/legendWidget.js";
-import Containers_UI from "../containers/Containers_UI.js";
+import Containers_graph from "../containers/containers_graph.js";
 
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
@@ -141,9 +141,9 @@ var Lineage_decoration = (function () {
                                             if (type.indexOf("Individual") > -1) {
                                                 newNode.shape = "triangle";
                                             } else if (type.indexOf("Bag") > -1) {
-                                                newNode.shape = Containers_UI.containerStyle.shape;
+                                                newNode.shape = Containers_graph.containerStyle.shape;
 
-                                                newNode.font = { color: Containers_UI.containerStyle.color };
+                                                newNode.font = { color: Containers_graph.containerStyle.color };
                                             } else {
                                             }
                                         }
@@ -377,8 +377,8 @@ var Lineage_decoration = (function () {
                             obj.shape = "triangle";
                         }
                         if (nodeOwlTypesMap[nodeId] && nodeOwlTypesMap[nodeId].indexOf("Bag") > -1) {
-                            obj.shape = Containers_UI.containerStyle.shape;
-                            obj.color = Containers_UI.containerStyle.color;
+                            obj.shape = Containers_graph.containerStyle.shape;
+                            obj.color = Containers_graph.containerStyle.color;
                             obj.font = { color: color };
                         }
                         if (nodeIds.indexOf(nodeId) > -1) {

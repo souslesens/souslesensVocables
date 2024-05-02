@@ -1076,7 +1076,7 @@ var query =
                             shadow: self.nodeShadow,
                             shape: Lineage_containers.containerStyle.shape,
                             size: size,
-                            font: type == "container" ? { color: "#70309f" } : null,
+                            font: type == "container" ? { color: "#fdac00" } : null,
                             color: Lineage_containers.containerStyle.color,
                             data: {
                                 type: type,

@@ -5,6 +5,7 @@ import OntologyModels from "../../shared/ontologyModels.js";
 import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
 var KGquery_graph = (function () {
     var self = {};
@@ -56,7 +57,7 @@ var KGquery_graph = (function () {
         color: "#ddd", //Lineage_whiteboard.getSourceColor(source)
     };
 
-    self.drawVisjsModel = function (mode) {
+    self.drawVisjsModel = function (mode,output) {
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
 
@@ -184,30 +185,7 @@ var KGquery_graph = (function () {
                 function (callbackSeries) {
                     return callbackSeries();
 
-                    /*   var nodesSelection={}
-                           visjsData.nodes.forEach(function(node) {
 
-                               console.log( node.x+"---"+ node.y)
-
-                               if (!node.data.nonObjectProperties || node.data.nonObjectProperties.length == 0) {
-                                   node.shape = "dot";
-                                   node.color="#ddd";
-                                   node.size="5"
-                                   nodesSelection[node.id]=1
-                               }
-
-                           });
-                           if (visjsData.edges.length > self.maxEdgesWithlabel) {
-                               visjsData.edges.forEach(function(edge) {
-                                  if(  nodesSelection[node.to]){
-                                       edge.color="#ddd";
-                                      edge.arrows=null;
-                                   }
-                                   edge.label = null;
-                               });
-
-                           }
-                           callbackSeries();*/
                 },
 
                 //change shape of nodes without nonObjectProperties
@@ -233,6 +211,11 @@ var KGquery_graph = (function () {
                     newNodes.push(node);
                 });
                 visjsData.nodes = newNodes;
+
+                if( output=="jstree"){
+                    return self.showInferredModelInJstree(visjsData)
+                }
+
 
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
 
@@ -582,6 +565,47 @@ var KGquery_graph = (function () {
 
         self.KGqueryGraph.data.edges.add(edge);
     };
+
+    self.showInferredModelInJstree=function(visjsData) {
+
+        var jstreeData = [];
+        self.graphVisjsdata = visjsData
+        visjsData.nodes.forEach(function(visjsNode) {
+            if (visjsNode.data.nonObjectProperties && visjsNode.data.nonObjectProperties.length > 0) {
+                jstreeData.push({
+                    id: visjsNode.id,
+                    text: visjsNode.label,
+                    parent: "#",
+                    data: visjsNode.data
+                })
+            }
+        })
+
+        jstreeData.sort(function(a,b){
+            if(a.text>b.text)
+                return 1;
+            if(a.text<b.text)
+                return -1
+            return 0;
+        })
+
+        var options = {
+            withCheckboxes: true,
+            selectTreeNodeFn: function (event, obj) {
+
+            },
+
+            validateFn: function (checkedNodes) {
+
+            },
+        };
+        JstreeWidget.loadJsTree(null, jstreeData, options, function () {
+            JstreeWidget.openNodeDescendants(null, "#");
+
+        });
+
+
+    }
 
     return self;
 })();

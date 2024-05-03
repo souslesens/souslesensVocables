@@ -6,7 +6,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 var Containers_graph=(function(){
 var self={}
 
-    self.containerStyle = { shape: "square", color: "#fdac00",size:15,edgeColor:"#aa1151" };
+    self.containerStyle = { shape: "square", color: "#fdac00",size:15,edgeColor:"#e7a1be",parentContainerColor:"#778dd7" };
 
     self.getContainerTypes = function (source, options, callback) {
         if (!options) {
@@ -80,7 +80,7 @@ var self={}
                         shape: Containers_graph.containerStyle.shape,
                         size: Containers_graph.containerStyle.size,
                         font: { color: color2 },
-                        color: Containers_graph.containerStyle.color,
+                        color: Containers_graph.containerStyle.parentContainerColor,
                         data: {
                             type: "container",
                             source: Lineage_sources.activeSource,
@@ -245,33 +245,7 @@ var self={}
                             });
                         }
 
-                        if (false && containerData.id != item.parent.value) {
-                            var edgeId = containerData.id + "_" + "member" + "_" + item.parent.value;
-                            if (!existingNodes[edgeId]) {
-                                existingNodes[edgeId] = 1;
 
-                                visjsData.edges.push({
-                                    id: edgeId,
-                                    from: containerData.id,
-                                    to: item.parent.value,
-                                    /*  arrows: {
-                                        middle: {
-                                            enabled: true,
-                                            type: Lineage_whiteboard.defaultEdgeArrowType,
-                                            scaleFactor: 0.5
-                                        }
-                                    },*/
-                                    data: {
-                                        from: containerData.id,
-                                        to: item.parent.value,
-                                        source: source,
-                                    },
-                                    //  dashes: true,
-                                    width: 0.5,
-                                    color: memberEdgeColor,
-                                });
-                            }
-                        }
                         if (item.member.value != item.parent.value) {
                             var edgeId = item.parent.value + "_" + "member" + "_" + item.member.value;
 
@@ -297,7 +271,7 @@ var self={}
                                     },
                                     //  dashes: true,
                                     width: type == "container" ? 1 : 0.5,
-                                    color: memberEdgeColor,
+                                    color: self.containerStyle.edgeColor,
                                 });
                             }
                         }
@@ -341,10 +315,10 @@ var self={}
                         });
                     }
 
-                    setNodesLevel(visjsData);
+                //    setNodesLevel(visjsData);
 
                     if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                        Lineage_whiteboard.drawNewGraph(visjsData);
+                        Lineage_whiteboard.drawNewGraph(visjsData, null,{noDecorations:1});
                     } else {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);

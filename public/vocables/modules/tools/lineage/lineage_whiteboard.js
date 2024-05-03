@@ -718,7 +718,7 @@ var Lineage_whiteboard = (function () {
 
             //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
 
-            if (self.lineageVisjsGraph.isGraphNotEmpty()) {
+            if (self.lineageVisjsGraph.isGraphNotEmpty() && !_options.noDecorations) {
                 Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
                 //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
             }

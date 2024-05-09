@@ -15,145 +15,48 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-        let options = null;
-        if (req.query.options) {
-            options = JSON.parse(req.query.options);
+
+        var jowlConfigUrl="https://sls.kg-alliance.org/jowl/manchester/manchester2triples"
+
+        var payload={
+            input:req.query.manchesterContent,
+            graphName:req.query.graphUri
         }
-
-        var jowlConfig = ConfigManager.config.jowlServer;
-
-        if (req.query.type == "externalUrl") {
-            var url = jowlConfig.url + "manchester/" + req.query.operation + "?filePath=" + req.query.url;
-            HttpProxy.post(jowlConfig.url, {}, function (err, result) {
-                if (err) {
-                    next(err);
-                } else {
-                    return processResponse(res, err, JSON.parse(result));
-                }
-            });
-        } else if (req.query.type == "internalGraphUri" && ConfigManager.config) {
-            var query = req.query.describeSparqlQuery;
-            var url = ConfigManager.config.sparql_server.url + "?query=";
-
-            var requestOptions = {
-                method: "POST",
-                url: url,
-                auth: {
-                    user: ConfigManager.config.sparql_server.user,
-                    pass: ConfigManager.config.sparql_server.password,
-                    sendImmediately: false,
-                },
-                headers: {
-                    Accept: "text/turtle",
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                form: {
-                    query: query,
-
-                    auth: {
-                        user: ConfigManager.config.sparql_server.user,
-                        pass: ConfigManager.config.sparql_server.password,
-                        sendImmediately: false,
-                    },
-                },
-                rejectUnauthorized: false,
-            };
-
-            var resultSize = 1001;
-            var offset = 0;
-            var size = 1000;
-            var str = "";
-
-            async.whilst(
-                function (callbackTest) {
-                    callbackTest(null, resultSize > 16);
-                },
-
-                function (callbackWhilst) {
-                    var query2 = query + " offset " + offset + " limit " + size + "";
-                    requestOptions.form.query = query2;
-
-                    request(requestOptions, function (error, response, body) {
-                        if (error) {
-                            console.log(error);
-                            return callbackWhilst(error);
-                        }
-                        resultSize = body.length;
-                        offset += size;
-                        str += body;
-                        return callbackWhilst();
-                    });
-                },
-                function (err) {
-                    if (err) {
-                        return processResponse(res, err, null);
-                    }
-
-                    var ontologyContentEncoded64 = Buffer.from(str).toString("base64");
-
-                    var payload = {
-                        ontologyContentEncoded64: ontologyContentEncoded64,
-                    };
-                    if (req.query.predicates) {
-                        payload.predicates = JSON.parse(req.query.predicates);
-                    }
                     var options = {
                         method: "POST",
                         json: payload,
                         headers: {
                             "content-type": "application/json",
                         },
-                        url: jowlConfig.url + "reasoner/" + req.query.operation,
+                        url: jowlConfigUrl,
                     };
                     request(options, function (error, response, body) {
                         return processResponse(res, error, body);
                     });
                 }
-            );
-        }
-    }
+
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],
-        summary: "Query Jowl server",
-        description: "Query Jowl server",
-        operationId: "Query Jowl server",
+        summary: "generates axioms triples from manchester syntax",
+        description: "generates axioms triples from manchester syntax",
+        operationId: "generates axioms triples from manchester syntax",
         parameters: [
             {
-                name: "operation",
-                description: "operation",
+                name: "manchesterContent",
+                description: "manchesterContent",
                 type: "string",
                 in: "query",
                 required: true,
             },
             {
-                name: "type",
-                description: "externalUrl/ internalGraphUri",
+                name: "graphUri",
+                description: "ontology graphUri",
                 in: "query",
                 type: "string",
                 required: true,
             },
-            {
-                name: "url",
-                description: "source graphUri or url",
-                in: "query",
-                type: "string",
-                required: false,
-            },
-            {
-                name: "describeSparqlQuery",
-                description: "describeSparqlQuery",
-                in: "query",
-                type: "string",
-                required: false,
-            },
-            {
-                name: "predicates",
-                description: "predicates array ",
-                in: "query",
-                type: "string",
-                required: false,
-            },
+
 
             {
                 name: "options",

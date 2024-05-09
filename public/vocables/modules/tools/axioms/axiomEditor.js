@@ -1,11 +1,14 @@
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 
+
 const AxiomEditor = (function() {
     var self = {};
-  
+
     self.init = function(divId) {
         self.currentSuggestions = [];
         self.previousTokenType = null;
+
+        self.currentNode="https://spec.industrialontologies.org/ontology/core/Core/Buyer"
 
 
         $("#smallDialogDiv").dialog("open");
@@ -20,7 +23,7 @@ const AxiomEditor = (function() {
 
         if (self.currentSuggestions.length > 0) {
             if (self.currentSuggestions.length == 1) {
-                $("axiomsEditor_suggestionsSelect").val(self.currentSuggestions[0]);
+                $("axiomsEditor_suggestionsSelect").val(self.currentSuggestions[0].id);
                 self.addSuggestion(self.currentSuggestions[0]);
                 self.onSelectSuggestion();
             } else {
@@ -49,7 +52,13 @@ const AxiomEditor = (function() {
 
     self.addSuggestion = function(suggestion, cssClass) {
         if (!cssClass) {
-            cssClass = "axiom_keyWord";
+            if (suggestion.resourceType == "ObjectProperty") {
+                cssClass = "axiom_Property";
+            } else if (suggestion.resourceType == "Class") {
+                cssClass = "axiom_Class";
+            } else {
+                cssClass = "axiom_keyWord";
+            }
         }
 
         if (typeof suggestion == "string") {
@@ -135,7 +144,6 @@ const AxiomEditor = (function() {
         ;
 
 
-
         if (choices.length == 0) {
             return;
         }
@@ -144,9 +152,9 @@ const AxiomEditor = (function() {
     };
 
     self.listFilteredClassesOrProperties = function(filterStr, resourceType) {
-            self.getAllClassesOrProperties(function(err, result) {
-                return self.filterResources(self.allResourcesArray, filterStr, resourceType);
-            });
+        self.getAllClassesOrProperties(function(err, result) {
+            return self.filterResources(self.allResourcesArray, filterStr, resourceType);
+        });
     };
 
 
@@ -185,7 +193,7 @@ const AxiomEditor = (function() {
                 return callback(err);
             }
             self.allResourcesArray = [];
-            self.allResourcesMap= {  };
+            self.allResourcesMap = {};
             properties.forEach(function(item) {
                 item.label = item.label.replace(/ /g, "_");
                 item.resourceType = "ObjectProperty";
@@ -208,9 +216,9 @@ const AxiomEditor = (function() {
 
             });
 
-            self.allResourcesArray.forEach(function(item){
-                self.allResourcesMap[item.id]=item
-            })
+            self.allResourcesArray.forEach(function(item) {
+                self.allResourcesMap[item.id] = item;
+            });
             return callback(null, self.allResourcesArray);
         });
     };
@@ -238,12 +246,11 @@ const AxiomEditor = (function() {
                     if (item.match(/^_$/g)) {// remove _ and replace by Classes
                         selectClasses = true;
                         return;
-                    } else  if (item.match(/^[A-z]$/g)) {// remove alphabetic letters and replace by ObjectProperties
+                    } else if (item.match(/^[A-z]$/g)) {// remove alphabetic letters and replace by ObjectProperties
                         selectProperties = true;
 
                         return;
-                    }
-                    else {
+                    } else {
                         suggestions.push({ id: item, label: item });
                     }
                 });
@@ -258,10 +265,10 @@ const AxiomEditor = (function() {
                         resources.forEach(function(item) {
 
                             if (selectClasses && item.resourceType == "Class") {
-                                suggestions.push(item)
+                                suggestions.push(item);
                             }
                             if (selectProperties && item.resourceType == "ObjectProperty") {
-                                suggestions.push(item)
+                                suggestions.push(item);
                             }
 
                         });
@@ -312,11 +319,16 @@ const AxiomEditor = (function() {
     };
     self.saveAxiom = function() {
     };
-    self.generateTriples = function() {
+    self.generateTriples = function(callback) {
         var options = {};
+        var content = self.getAxiomContent();
+        var sourceGraph = Config.sources[Lineage_sources.activeSource].graphUri;
+        if (!sourceGraph) {
+            return alert("no graph Uri");
+        }
         const params = new URLSearchParams({
-            source: Lineage_sources.activeSource,
-            lastToken: text,
+            graphUri: sourceGraph,
+            manchesterContent: content,
             options: JSON.stringify(options)
         });
 
@@ -348,6 +360,28 @@ const AxiomEditor = (function() {
         });
         return text;
     };
+    self.getAxiomContent = function() {
+        var frame=$("#axiomEditor_frameSelect").val()
+        var text = "<"+self.currentNode+"> "+frame+" (";
+        $(".axiom_element").each(function() {
+
+            var id = $(this).attr("id");
+            if(!id || id=="null")
+                return;
+            if (id.indexOf("http") == 0) {
+                id = "<" + id + ">";
+            }
+
+            if (text != "") {
+                text += " ";
+            }
+
+            text += id;
+        });
+        text+=")"
+        return text;
+    };
+
 
     self.clear = function() {
         self.init();

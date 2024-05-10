@@ -1,7 +1,7 @@
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 
 
-const AxiomEditor = (function() {
+const Axioms_editor = (function() {
     var self = {};
 
     self.init = function(divId) {
@@ -13,7 +13,7 @@ const AxiomEditor = (function() {
 
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Axiom Editor");
-        $("#smallDialogDiv").load("modules/tools/axioms/axiomEditor.html", function(x, y) {
+        $("#smallDialogDiv").load("modules/tools/axioms/html/axioms_editor.html", function(x, y) {
             $("#axiomsEditor_input").focus();
         });
     };
@@ -317,34 +317,7 @@ const AxiomEditor = (function() {
             }
         });
     };
-    self.saveAxiom = function() {
-    };
-    self.generateTriples = function(callback) {
-        var options = {};
-        var content = self.getAxiomContent();
-        var sourceGraph = Config.sources[Lineage_sources.activeSource].graphUri;
-        if (!sourceGraph) {
-            return alert("no graph Uri");
-        }
-        const params = new URLSearchParams({
-            graphUri: sourceGraph,
-            manchesterContent: content,
-            options: JSON.stringify(options)
-        });
 
-        $.ajax({
-            type: "GET",
-            url: Config.apiUrl + "/jowl/manchesterAxiom2triples?" + params.toString(),
-            dataType: "json",
-
-            success: function(data, _textStatus, _jqXHR) {
-                callback(null, data);
-            },
-            error(err) {
-                callback(err.responseText);
-            }
-        });
-    };
 
     self.getAxiomText = function() {
         var text = "";
@@ -391,9 +364,41 @@ const AxiomEditor = (function() {
            $("#axiomsEditor_suggestionsSelect").find("option").remove();*/
     };
 
+    self.saveAxiom = function() {
+    };
+
+
+    self.generateTriples = function(callback) {
+        var options = {};
+        var content = self.getAxiomContent();
+        var sourceGraph = Config.sources[Lineage_sources.activeSource].graphUri;
+        if (!sourceGraph) {
+            return alert("no graph Uri");
+        }
+        const params = new URLSearchParams({
+            graphUri: sourceGraph,
+            manchesterContent: content,
+            options: JSON.stringify(options)
+        });
+
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/jowl/manchesterAxiom2triples?" + params.toString(),
+            dataType: "json",
+
+            success: function(data, _textStatus, _jqXHR) {
+                Axioms_graph.drawAxiomsJowlTriples(data)
+              //  callback(null, data);
+            },
+            error(err) {
+                callback(err.responseText);
+            }
+        });
+    };
+
     return self;
 })
 ();
 
-export default AxiomEditor;
-window.AxiomEditor = AxiomEditor;
+export default Axioms_editor;
+window.AxiomEditor = Axioms_editor;

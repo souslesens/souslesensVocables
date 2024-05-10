@@ -42,26 +42,27 @@
 </style>
 <div style="display: flex; flex-direction: column; width: 800px; height: 500px">
     <div id="axiomsEditor_textDiv">
-        <input id="axiomsEditor_input" autocomplete="off" onkeyup="AxiomEditor.onInputChar($(this).val())" />
+        <input id="axiomsEditor_input" autocomplete="off" onkeyup="Axioms_editor.onInputChar($(this).val())" />
     </div>
     <div>
-        <select id="axiomsEditor_suggestionsSelect" onchange="AxiomEditor.onSelectSuggestion($(this))" size="15"></select>
+        <select id="axiomsEditor_suggestionsSelect" onchange="Axioms_editor.onSelectSuggestion($(this))" size="15"></select>
     </div>
 
     <divid id="axiomsEditor_messageDiv"></divid>
     <div>
 
-        <select id="axiomEditor_frameSelect">
+        <select id="Axioms_editor_frameSelect">
             <option>subClassOf</option>
             <option>equivalentClass</option>
             <option>disjointWith</option>
             <option>disjointUnionWith</option>
         </select>
-        <button onclick="AxiomEditor.clear()">clear</button>
-        <button onclick="AxiomEditor.checkSyntax()">checkSyntax</button>
-        <button onclick="AxiomEditor.saveAxiom()">saveAxiom</button>
-        <button onclick="AxiomEditor.generateTriples()">generateTriples</button>
+        <button onclick="Axioms_editor.clear()">clear</button>
+        <button onclick="Axioms_editor.checkSyntax()">checkSyntax</button>
+        <button onclick="Axioms_editor.saveAxiom()">saveAxiom</button>
+        <button onclick="Axioms_editor.generateTriples()">generateTriples</button>
+        <button onclick="Axioms_graph.drawAxiomsJowlTriples()">draw</button>
 
-        <div id="axiomEditor_messageDiv>"></div>
+        <div id="Axioms_editor_messageDiv>"></div>
     </div>
 </div>

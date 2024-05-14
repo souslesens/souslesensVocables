@@ -114,6 +114,7 @@
         "unzipper": "^0.10.14",
         "util": "^0.12.5",
         "winston": "^3.13.0",
+        "winston-daily-rotate-file": "^5.0.0",
         "xlsx": "^0.18.5",
         "xmldom": "^0.6.0",
         "yaml": "^2.4.1",

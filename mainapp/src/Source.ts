@@ -29,6 +29,12 @@ async function getGraphs(): Promise<string[]> {
     return json;
 }
 
+async function getMe(): Promise<string> {
+    const response = await fetch("/api/v1/auth/whoami");
+    const json = await response.json();
+    return json.user.login;
+}
+
 export async function putSources(body: ServerSource[]): Promise<ServerSource[]> {
     const sourcesToObject = body.reduce((obj, item) => ({ ...obj, [item.name]: item }), {});
     const response = await fetch("/sources", { method: "put", body: JSON.stringify(sourcesToObject, null, "\t"), headers: { "Content-Type": "application/json" } });
@@ -285,4 +291,4 @@ export type SkosSource = CommonSource & SkosSpecificSource;
 
 export type _Source = Knowledge_GraphSource | SkosSource;
 
-export { getSources, getIndices, getGraphs, defaultDataSource };
+export { getSources, getIndices, getGraphs, getMe, defaultDataSource };

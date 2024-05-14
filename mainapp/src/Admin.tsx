@@ -11,7 +11,7 @@ import { SourcesTable } from "./Component/SourcesTable";
 import { UsersTable } from "./Component/UsersTable";
 import { LogsTable } from "./Component/LogsTable";
 import { DatabasesTable } from "./Component/DatabasesTable";
-import { ServerSource, getSources, getIndices, getGraphs } from "./Source";
+import { ServerSource, getSources, getIndices, getGraphs, getMe } from "./Source";
 import { Config, getConfig } from "./Config";
 import { Database, getDatabases } from "./Database";
 import { Log, getLogs } from "./Log";
@@ -22,6 +22,7 @@ type Model = {
     sources: RD<string, ServerSource[]>;
     indices: RD<string, string[]>;
     graphs: RD<string, string[]>;
+    me: RD<string>;
     databases: RD<Database[]>;
     logs: RD<string, Log[]>;
     config: RD<string, Config>;
@@ -73,6 +74,7 @@ const initialModel: Model = {
     sources: loading(),
     indices: loading(),
     graphs: loading(),
+    me: loading(),
     databases: loading(),
     logs: loading(),
     config: loading(),
@@ -96,6 +98,7 @@ type Msg =
     | { type: "ServerRespondedWithSources"; payload: RD<string, ServerSource[]> }
     | { type: "ServerRespondedWithIndices"; payload: RD<string, string[]> }
     | { type: "ServerRespondedWithGraphs"; payload: RD<string, string[]> }
+    | { type: "ServerRespondedWithMe"; payload: RD<string> }
     | { type: "ServerRespondedWithConfig"; payload: RD<string, Config> }
     | { type: "ServerRespondedWithDatabases"; payload: RD<Database[]> }
     | { type: "ServerRespondedWithLogs"; payload: RD<string, Log[]> }
@@ -119,6 +122,9 @@ function update(model: Model, msg: Msg): Model {
 
         case "ServerRespondedWithGraphs":
             return { ...model, graphs: msg.payload };
+
+        case "ServerRespondedWithMe":
+            return { ...model, me: msg.payload };
 
         case "ServerRespondedWithSources":
             return { ...model, sources: msg.payload };
@@ -170,22 +176,20 @@ const Admin = () => {
     }, []);
 
     React.useEffect(() => {
-        getSources()
-            .then((sources) => {
+        Promise
+            .all([getMe(), getSources(), getIndices(), getGraphs()])
+            .then(([me, sources, indices, graphs]) => {
+                updateModel({ type: "ServerRespondedWithMe", payload: success(me) });
                 updateModel({ type: "ServerRespondedWithSources", payload: success(sources) });
-            })
-
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithSources", payload: failure(err.message) }));
-        getIndices()
-            .then((indices) => {
                 updateModel({ type: "ServerRespondedWithIndices", payload: success(indices) });
-            })
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithIndices", payload: failure(err.message) }));
-        getGraphs()
-            .then((graphs) => {
                 updateModel({ type: "ServerRespondedWithGraphs", payload: success(graphs) });
             })
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithIndices", payload: failure(err.message) }));
+            .catch((error) => {
+                updateModel({ type: "ServerRespondedWithMe", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithSources", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithIndices", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithGraphs", payload: failure(error.message) });
+            });
     }, []);
 
     React.useEffect(() => {

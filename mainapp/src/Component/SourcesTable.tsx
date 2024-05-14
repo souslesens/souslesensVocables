@@ -56,15 +56,8 @@ const SourcesTable = () => {
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
     }
-    const [me, setMe] = React.useState("");
-    React.useEffect(() => {
-        (async () => {
-            const response = await fetch("/api/v1/auth/whoami");
-            const json = (await response.json()) as Response;
-            setMe(json.user.login);
-        })();
-    }, []);
 
+    const me = SRD.withDefault("", model.me);
     const indices = SRD.withDefault(null, model.indices);
     const graphs = SRD.withDefault(null, model.graphs);
 

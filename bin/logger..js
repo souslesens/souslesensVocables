@@ -11,6 +11,7 @@
  */
 var path = require("path");
 var winston = require("winston");
+require("winston-daily-rotate-file");
 
 const { createLogger, format } = require("winston");
 const { combine, timestamp, json } = format;
@@ -18,33 +19,24 @@ const { config } = require("../model/config");
 
 const logDir = config.logDir ? config.logDir : "log/souslesens";
 
-/*
- * const ConfigManager = require("./configManager.");
-
-var logPaths = null;
-
-const getlogPaths = function () {
-    if (logPaths) return logPaths;
-    else {
-        // a refaire !!!!!!!!!!!!!!!!!!!!
-        var mainConfig = ConfigManager.getGeneralConfig();
-        if (!mainConfig) {
-            setTimeout(function () {
-                logPaths = mainConfig.logger;
-                return mainConfig.logger;
-            }, 500);
-        } else {
-            logPaths = mainConfig.logger;
-            return mainConfig.logger;
-        }
-    }
+const transportProps = {
+    datePattern: "YYYY-MM",
+    zippedArchive: true,
+    createSymlink: true,
 };
-*/
-// var errorsLogPath = "logs/error.log";
-// var usersLogPath = "logs/vocables.log";
 
-/*var errorsLogPath = getlogPaths().errorsLogPath;
-var usersLogPath = getlogPaths().usersLogPath;*/
+const errorTransport = new winston.transports.DailyRotateFile({
+    ...transportProps,
+    filename: `${logDir}/error.log.%DATE%`,
+    level: "error",
+    symlinkName: "error.log",
+});
+const InfoTransport = new winston.transports.DailyRotateFile({
+    ...transportProps,
+    filename: `${logDir}/vocables.log.%DATE%`,
+    level: "info",
+    symlinkName: "vocables.log",
+});
 
 const logger = createLogger({
     level: "info",
@@ -58,14 +50,7 @@ const logger = createLogger({
 
     defaultMeta: { service: "user-navigation" },
 
-    transports: [
-        //
-        // - Write to all logs with level `info` and below to `combined.log`
-        // - Write all logs error (and below) to `error.log`.
-        //
-        new winston.transports.File({ filename: logDir + "/error.log", level: "error" }),
-        new winston.transports.File({ filename: logDir + "/vocables.log", level: "info" }),
-    ],
+    transports: [errorTransport, InfoTransport],
 });
 
 if (process.env.NODE_ENV !== "production") {

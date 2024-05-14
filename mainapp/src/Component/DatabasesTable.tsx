@@ -311,6 +311,11 @@ const DatabasesTable = () => {
                                             </TableSortLabel>
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "id"} direction={order} onClick={() => handleRequestSort("id")}>
+                                                Identifier
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
                                             <TableSortLabel active={orderBy === "driver"} direction={order} onClick={() => handleRequestSort("driver")}>
                                                 Driver
                                             </TableSortLabel>

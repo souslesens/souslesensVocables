@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 
 import {
     Alert,
+    Autocomplete,
     Button,
     Checkbox,
     Dialog,
@@ -26,6 +27,7 @@ import {
     TableHead,
     TableRow,
     TableSortLabel,
+    TextField,
     Typography,
 } from "@mui/material";
 import { Cancel, Close, Done, Folder } from "@mui/icons-material";
@@ -472,6 +474,16 @@ export default function GraphManagement() {
         <>
             {dialogModal}
             <Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
+                <Autocomplete
+                    disablePortal
+                    id="search-graph"
+                    options={Object.entries(sources).map(([sourceName, _source]) => sourceName)}
+                    onInputChange={(_event, newInputValue) => {
+                        setFilteringChars(newInputValue);
+                    }}
+                    renderInput={(params) => <TextField {...params} label="Search Sources by name" />}
+                />
+
                 <TableContainer sx={{ height: "80vh" }} component={Paper}>
                     <Table stickyHeader>
                         <TableHead>
@@ -509,6 +521,7 @@ export default function GraphManagement() {
                                         return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                                     }
                                 })
+                                .filter(([_sourceName, source]) => source.name.includes(filteringChars))
                                 .map(([sourceName, source]) => {
                                     return (
                                         <TableRow>

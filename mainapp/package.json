@@ -50,6 +50,7 @@
         "@types/react": "^18.2.74",
         "@vitejs/plugin-react": "^4.2.1",
         "clsx": "1.2.1",
+        "human-number": "^2.0.4",
         "npm-check-updates": "^16.14.18",
         "react": "18.2.0",
         "react-csv-downloader": "^2.9.1",

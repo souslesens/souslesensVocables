@@ -151,6 +151,11 @@ export default function GraphManagement() {
     };
 
     const handleHideModal = () => {
+        const idle = error || transferPercent === 100 || currentOperation === null;
+        if (!idle) {
+            return;
+        }
+
         setCurrentOperation(null);
         setDisplayModal(null);
         setCurrentSource(null);
@@ -168,73 +173,79 @@ export default function GraphManagement() {
     };
 
     const uploadSource = async () => {
-        // init progress bar
-        setCurrentOperation("upload");
-        setTransferPercent(0);
-        cancelCurrentOperation.current = false;
+        try {
+            // init progress bar
+            setCurrentOperation("upload");
+            setTransferPercent(0);
+            cancelCurrentOperation.current = false;
 
-        // get file
-        const file = uploadfile[0];
+            // get file
+            const file = uploadfile[0];
 
-        // get file size and chunk size
-        const chunkSize = 1000000;
-        const fileSize = file.size;
+            // get file size and chunk size
+            const chunkSize = 1000000;
+            const fileSize = file.size;
 
-        // init values
-        let chunkId = "";
+            // init values
+            let chunkId = "";
 
-        // iterate over file and send chunks to server
-        for (let start = 0; start < fileSize; start += chunkSize) {
-            // set percent for progress bar
-            const percent = (start * 100) / fileSize;
-            setTransferPercent(Math.round(percent));
+            // iterate over file and send chunks to server
+            for (let start = 0; start < fileSize; start += chunkSize) {
+                // set percent for progress bar
+                const percent = (start * 100) / fileSize;
+                setTransferPercent(Math.min(95, Math.round(percent)));
 
-            // slice file
-            const end = start + chunkSize;
-            const chunk = new File([file.slice(start, end)], file.name, { type: file.type });
+                // slice file
+                const end = start + chunkSize;
+                const chunk = new File([file.slice(start, end)], file.name, { type: file.type });
 
-            // last ?
-            const lastChunk = start + chunkSize >= fileSize ? true : false;
-            if (lastChunk) {
-                setAnimatedProgressBar(true);
+                // last ?
+                const lastChunk = start + chunkSize >= fileSize ? true : false;
+                if (lastChunk) {
+                    setAnimatedProgressBar(true);
+                }
+
+                // build formData
+                const formData = new FormData();
+                Object.entries({
+                    source: currentSource,
+                    last: lastChunk,
+                    identifier: chunkId,
+                    clean: false,
+                    replace: replaceGraph,
+                    data: chunk,
+                }).forEach(([key, value]) => {
+                    formData.append(key, value);
+                });
+                // if cancel button is pressed, remove uploaded file and return
+                if (cancelCurrentOperation.current) {
+                    formData.set("clean", true);
+                    await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken}` }, body: formData });
+                    return;
+                }
+
+                // POST data
+                const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken}` }, body: formData });
+                if (res.status != 200) {
+                    setError(true);
+                    const message = await res.json();
+                    console.error(message.error);
+                    setErrorMessage(message.error);
+                    return;
+                } else {
+                    const json = await res.json();
+
+                    // Set values for next iteration
+                    chunkId = json.identifier;
+                }
             }
-
-            // build formData
-            const formData = new FormData();
-            Object.entries({
-                source: currentSource,
-                last: lastChunk,
-                identifier: chunkId,
-                clean: false,
-                replace: replaceGraph,
-                data: chunk,
-            }).forEach(([key, value]) => {
-                formData.append(key, value);
-            });
-            // if cancel button is pressed, remove uploaded file and return
-            if (cancelCurrentOperation.current) {
-                formData.set("clean", true);
-                await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken}` }, body: formData });
-                return;
-            }
-
-            // POST data
-            const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken}` }, body: formData });
-            if (res.status != 200) {
-                setError(true);
-                const message = await res.json();
-                console.error(message.error);
-                setErrorMessage(message.error);
-                return;
-            } else {
-                const json = await res.json();
-
-                // Set values for next iteration
-                chunkId = json.identifier;
-            }
+            setTransferPercent(100);
+            setAnimatedProgressBar(false);
+        } catch (error) {
+            console.error(error);
+            setErrorMessage((error as Error).message);
+            setError(true);
         }
-        setTransferPercent(100);
-        setAnimatedProgressBar(false);
     };
 
     const handleCancelOperation = () => {
@@ -257,26 +268,26 @@ export default function GraphManagement() {
         setUploadFile(filesList);
     };
 
-    const recursDownloadSourceUsingPythonApi = async (sourceName: string, offset: number | null, blobParts: any[], identifier: string = "") => {
-        if (offset === 0) {
-            setTransferPercent(100);
-            setAnimatedProgressBar(true);
-        }
-
-        if (cancelCurrentOperation.current) {
-            cancelCurrentOperation.current = false;
-            return [];
-        }
-        if (offset !== null) {
+    const downloadSourceUsingPythonApi = async (sourceName: string) => {
+        let offset = 0;
+        let identifier = "";
+        const blobParts = [];
+        setTransferPercent(1);
+        setAnimatedProgressBar(false);
+        while (offset !== null) {
+            if (cancelCurrentOperation.current) {
+                cancelCurrentOperation.current = false;
+                return [];
+            }
             const data = await fetchGraphPartUsingPythonApi(sourceName, offset, currentDownloadFormat, identifier, skipNamedIndividuals);
-
             // percent
             const percent = Math.min(100, (offset * 100) / data.filesize);
             setTransferPercent(percent);
             setAnimatedProgressBar(false);
 
             blobParts.push(data.data);
-            blobParts = await recursDownloadSourceUsingPythonApi(sourceName, data.next_offset, blobParts, data.identifier);
+            offset = data.next_offset;
+            identifier = data.identifier;
         }
         setTransferPercent(100);
         return blobParts;
@@ -314,7 +325,7 @@ export default function GraphManagement() {
 
                 blobParts = await recursDownloadSource(currentSource, 0, graphSize, pageSize, []);
             } else {
-                blobParts = await recursDownloadSourceUsingPythonApi(currentSource, 0, []);
+                blobParts = await downloadSourceUsingPythonApi(currentSource);
             }
 
             if (blobParts.length == 0) {
@@ -332,7 +343,7 @@ export default function GraphManagement() {
             URL.revokeObjectURL(link.href);
         } catch (error) {
             console.error(error);
-            setErrorMessage(error);
+            setErrorMessage((error as Error).message);
             setError(true);
         }
     };
@@ -410,6 +421,11 @@ export default function GraphManagement() {
                 </Stack>
             </DialogContent>
             <DialogActions>
+                <Stack direction="horizontal" gap={1}>
+                    <Alert sx={{ padding: "0px 16px" }} severity="info">
+                        {`${displayModal === "upload" ? "Upload" : "Download"} can take a long time and remain blocked at ${displayModal === "upload" ? "95" : "1"}% for several minutes`}
+                    </Alert>
+                </Stack>
                 <Stack direction="horizontal" gap={1}>
                     {!currentOperation ? (
                         <Button

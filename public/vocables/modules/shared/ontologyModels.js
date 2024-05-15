@@ -1000,10 +1000,10 @@ var OntologyModels = (function () {
                     "SELECT   distinct ?class ?prop  ?datatype  " +
                     sourceGraphUriFrom +
                     "  where {\n" +
-                    " { ?s rdf:type ?class. ?class rdf:type owl:Class ." +
+                    " { ?s rdf:type ?class.}\n"+// ?class rdf:type owl:Class ." +
                     //"?class rdfs:label ?classLabel. " +
-                    "filter (?class!=(rdfs:Class))}\n" +
-                    " {\n" +
+                  //  "filter (?class!=(rdfs:Class))}\n" +
+                   " {\n" +
                     "   ?s ?prop ?o.\n" +
                     "      bind ( datatype(?o) as ?datatype )\n" +
                     "    ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#DatatypeProperty>,rdf:Property,owl:AnnotationProperty)&& ?prop not in (rdf:type,<http://purl.org/dc/terms/created>,<http://purl.org/dc/terms/creator>,<http://purl.org/dc/terms/source>))\n" +
@@ -1090,16 +1090,24 @@ var OntologyModels = (function () {
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT distinct ?class ?datatype  FROM   <" +
+            "SELECT distinct ?class ?prop ?datatype  FROM   <" +
             sourceGraphUri +
             ">" +
-            " WHERE {   \n" +
+           " WHERE {   \n" +
+            " ?s rdf:type+ ?class.\n" +
+            "  filter (?class not in (owl:NamedIndividual))\n" +
+            "  ?s ?prop ?v.\n" +
+            "   bind (datatype(?v) as ?datatype)\n" +
+            "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>))\n" +
+            "\n" +
+            "}"
+         /*   " WHERE {   \n" +
             "  ?s rdf:type+ ?class.\n" +
             "  ?class rdf:type owl:Class.\n" +
             "  ?s owl:hasValue ?v.\n" +
             " bind (datatype(?v) as ?datatype)\n" +
             //  "   filter (t != '')\n" +
-            "}";
+            "}";*/
         let url = Config.sparql_server.url + "?format=json&query=";
 
         MainController.UI.message("loading ", false, true);

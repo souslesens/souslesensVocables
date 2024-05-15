@@ -11,11 +11,7 @@ var KGquery_filter = (function () {
     self.selectOptionalPredicates = function (querySets, callback) {
         var queryNonObjectProperties = [];
         var uniqueProps = {};
-        var labelProperty = {
-            datatype: "http://www.w3.org/2001/XMLSchema#string",
-            id: "rdfs:label",
-            label: "label",
-        };
+
         querySets.sets.forEach(function (querySet) {
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
                 // queryElement.paths.forEach(function(pathItem, pathIndex) {

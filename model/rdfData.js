@@ -47,7 +47,10 @@ class RdfDataModel {
         const query = "SELECT DISTINCT ?graph count(?s) as ?number_of_triples WHERE { GRAPH ?graph { ?s ?p ?o . }}";
         const json = await this._query(query);
         const graphs = json.map((r) => {
-            return r.graph.value;
+            return {
+                name: r.graph.value,
+                count: r.number_of_triples.value,
+            };
         });
         // default graph in virtuoso
         const graphsToExclude = [
@@ -59,7 +62,7 @@ class RdfDataModel {
             "urn:core:services:sparql",
         ];
         const cleanedGraphs = graphs.filter((g) => {
-            if (!graphsToExclude.includes(g)) {
+            if (!graphsToExclude.includes(g.name)) {
                 return g;
             }
         });

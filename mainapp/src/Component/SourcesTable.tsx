@@ -27,8 +27,8 @@ import {
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
-import { ServerSource, saveSource, defaultSource, deleteSource, sourceHelp, InputSourceSchema, InputSourceSchemaCreate } from "../Source";
-import { identity, style, joinWhenArray } from "../Utils";
+import { ServerSource, saveSource, defaultSource, deleteSource, sourceHelp, InputSourceSchema, InputSourceSchemaCreate, getGraphSize } from "../Source";
+import { identity, style, joinWhenArray, humanizeSize } from "../Utils";
 import { HelpButton } from "./HelpModal";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -98,9 +98,15 @@ const SourcesTable = () => {
                     return { ...dataWithoutCarriageReturns };
                 });
                 const sortedSources: ServerSource[] = gotSources.slice().sort((a: ServerSource, b: ServerSource) => {
-                    const left: string = a[orderBy] || ("" as string);
-                    const right: string = b[orderBy] || ("" as string);
-                    return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+                    if (orderBy == "graphSize") {
+                        const left_n: number = getGraphSize(a, graphs);
+                        const right_n: number = getGraphSize(b, graphs);
+                        return order === "asc" ? right_n > left_n : left_n > right_n;
+                    } else {
+                        const left: string = a[orderBy] || ("" as string);
+                        const right: string = b[orderBy] || ("" as string);
+                        return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+                    }
                 });
 
                 return (
@@ -128,6 +134,11 @@ const SourcesTable = () => {
                                                 Graph URI
                                             </TableSortLabel>
                                         </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                            <TableSortLabel active={orderBy === "graphSize"} direction={order} onClick={() => handleRequestSort("graphSize")}>
+                                                Graph size
+                                            </TableSortLabel>
+                                        </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold" }}>
                                             <TableSortLabel active={orderBy === "group"} direction={order} onClick={() => handleRequestSort("group")}>
                                                 Group
@@ -146,13 +157,16 @@ const SourcesTable = () => {
                                         .filter((source) => source.name.includes(filteringChars))
                                         .map((source) => {
                                             const haveIndices = indices ? indices.includes(source.name.toLowerCase()) : false;
-                                            const haveGraphs = graphs ? graphs.includes(source.graphUri || "") : false;
+                                            const graphInfo = graphs.find((g) => g.name === source.graphUri);
+                                            const haveGraphs = graphInfo !== undefined;
+
                                             return (
                                                 <TableRow key={source.name}>
                                                     <TableCell>{source.name}</TableCell>
                                                     <TableCell>
                                                         <Link href={source.graphUri}>{source.graphUri}</Link>
                                                     </TableCell>
+                                                    <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
                                                     <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" useFlexGap>

@@ -22,7 +22,7 @@ export const LogsTable = () => {
 
     const renderLogs = SRD.match(
         {
-            notAsked: () => <p>Let&aposs fetch some data!</p>,
+            notAsked: () => <p>Let&apos;s fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />

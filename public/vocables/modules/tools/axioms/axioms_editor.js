@@ -4,11 +4,14 @@ import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 const Axioms_editor = (function() {
     var self = {};
 
-    self.init = function(divId) {
+    self.init = function(divId, nodeId) {
         self.currentSuggestions = [];
         self.previousTokenType = null;
-
-        self.currentNode="https://spec.industrialontologies.org/ontology/core/Core/Buyer"
+        if (nodeId) {
+            self.currentNode = nodeId;
+        } else {
+            self.currentNode = "https://spec.industrialontologies.org/ontology/core/Core/Buyer";
+        }
 
 
         $("#smallDialogDiv").dialog("open");
@@ -289,7 +292,7 @@ const Axioms_editor = (function() {
     };
 
 
-    self.checkSyntax = function() {
+    self.checkSyntax = function(callback) {
         var axiomText = self.getAxiomText();
         var options = {};
 
@@ -306,16 +309,25 @@ const Axioms_editor = (function() {
 
             success: function(data, _textStatus, _jqXHR) {
                 var message = "";
-                if (true) {
-                    message = " syntax OK";
-                } else {
-                    message = " syntax error";
+
+                self.message(" syntax OK");
+
+
+                if (callback) {
+                    return callback();
                 }
-                $("#axiomEditor_messageDiv").html(message);
             },
             error(err) {
+                self.message(err.responseText);
+                if (callback) {
+                    return callback(err);
+                }
             }
         });
+    };
+
+    self.message = function(message, color) {
+        $("#Axioms_editor_messageDiv").html(message);
     };
 
 
@@ -334,13 +346,14 @@ const Axioms_editor = (function() {
         return text;
     };
     self.getAxiomContent = function() {
-        var frame=$("#axiomEditor_frameSelect").val()
-        var text = "<"+self.currentNode+"> "+frame+" (";
+        var frame = $("#Axioms_editor_frameSelect").val();
+        var text = "<" + self.currentNode + "> " + frame + " (";
         $(".axiom_element").each(function() {
 
             var id = $(this).attr("id");
-            if(!id || id=="null")
+            if (!id || id == "null") {
                 return;
+            }
             if (id.indexOf("http") == 0) {
                 id = "<" + id + ">";
             }
@@ -351,7 +364,7 @@ const Axioms_editor = (function() {
 
             text += id;
         });
-        text+=")"
+        text += ")";
         return text;
     };
 
@@ -375,25 +388,60 @@ const Axioms_editor = (function() {
         if (!sourceGraph) {
             return alert("no graph Uri");
         }
-        const params = new URLSearchParams({
-            graphUri: sourceGraph,
-            manchesterContent: content,
-            options: JSON.stringify(options)
-        });
 
-        $.ajax({
-            type: "GET",
-            url: Config.apiUrl + "/jowl/manchesterAxiom2triples?" + params.toString(),
-            dataType: "json",
 
-            success: function(data, _textStatus, _jqXHR) {
-                Axioms_graph.drawAxiomsJowlTriples(data)
-              //  callback(null, data);
+        var triples;
+        async.series([
+
+            function(callbackSeries) {
+                self.message("checking axiom syntax");
+                self.checkSyntax(function(err, result) {
+
+                    return callbackSeries(err);
+
+                });
+
             },
-            error(err) {
-                callback(err.responseText);
+
+
+            function(callbackSeries) {
+                const params = new URLSearchParams({
+                    graphUri: sourceGraph,
+                    manchesterContent: content,
+                    options: JSON.stringify(options)
+                });
+                self.message("generating axioms triples");
+                $.ajax({
+                    type: "GET",
+                    url: Config.apiUrl + "/jowl/manchesterAxiom2triples?" + params.toString(),
+                    dataType: "json",
+
+                    success: function(data, _textStatus, _jqXHR) {
+                        if (data.result && data.result.indexOf("Error") > -1) {
+                            return callbackSeries(data.result);
+                        }
+                        triples = data;
+                        callbackSeries();
+                        //  callback(null, data);
+                    },
+                    error(err) {
+                        callbackSeries(err.responseText);
+                    }
+                });
             }
-        });
+            , function(callbackSeries) {
+                self.message("drawing axioms triples");
+                Axioms_graph.drawAxiomsJowlTriples(null, triples);
+            }
+
+
+        ], function(err) {
+            if (err) {
+                alert(err)
+            }
+            self.message("")
+        })
+
     };
 
     return self;
@@ -401,4 +449,4 @@ const Axioms_editor = (function() {
 ();
 
 export default Axioms_editor;
-window.AxiomEditor = Axioms_editor;
+window.Axioms_editor = Axioms_editor;

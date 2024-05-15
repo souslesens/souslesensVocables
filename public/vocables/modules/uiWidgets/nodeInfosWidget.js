@@ -13,6 +13,7 @@ import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_cr
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
 import ResponsiveUI from "../../responsive/responsiveUI.js";
+import Axioms_editor from "../tools/axioms/axioms_editor.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
@@ -57,6 +58,8 @@ var NodeInfosWidget = (function () {
                         if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                             var source = self.currentSource;
                             source = Lineage_sources.mainSource;
+                           // Axioms_editor.init("axiomsGraphDiv2",self.currentNodeId)
+
                             Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
                         }
                     }, 100);

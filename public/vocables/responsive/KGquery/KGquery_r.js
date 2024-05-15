@@ -10,9 +10,7 @@ import KGquery_myQueries from "../../modules/tools/KGquery/KGquery_myQueries.js"
 var KGquery_r = (function () {
     var self = {};
     //changed files and functions
-    self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
-    self.oldshowDialog = SavedQueriesWidget.showDialog;
-    self.oldKGquery_controlPanel = window.KGquery_controlPanel;
+
     self.onLoaded = function () {
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
         SavedQueriesWidget.showDialog = self.SavedQueriesComponentShowDialogResponsive;
@@ -22,6 +20,9 @@ var KGquery_r = (function () {
         $("#waitImg").attr("id", "KGquery_waitImg");
     };
     self.unload = function () {
+        self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
+        self.oldshowDialog = SavedQueriesWidget.showDialog;
+        self.oldKGquery_controlPanel = window.KGquery_controlPanel;
         //retribute old file and functions
         Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
         SavedQueriesWidget.showDialog = self.oldshowDialog;

@@ -21,6 +21,12 @@
         width: 300px;
     }
 
+    #Axioms_editor_messageDiv {
+        width: 500px;
+        height: 250px;
+
+    }
+
     .axiom_element {
         margin: 3px;
     }
@@ -40,15 +46,17 @@
         font-weight: bold;
     }
 </style>
-<div style="display: flex; flex-direction: column; width: 800px; height: 500px">
-    <div id="axiomsEditor_textDiv">
-        <input id="axiomsEditor_input" autocomplete="off" onkeyup="Axioms_editor.onInputChar($(this).val())" />
-    </div>
-    <div>
-        <select id="axiomsEditor_suggestionsSelect" onchange="Axioms_editor.onSelectSuggestion($(this))" size="15"></select>
-    </div>
+<div>
+    <div style="display: flex; flex-direction: column; width: 800px; height: 500px">
+        <div id="axiomsEditor_textDiv">
+            <input id="axiomsEditor_input" autocomplete="off" onkeyup="Axioms_editor.onInputChar($(this).val())" />
+        </div>
+        <div>
+            <select id="axiomsEditor_suggestionsSelect" onchange="Axioms_editor.onSelectSuggestion($(this))"
+                    size="15"></select>
+        </div>
 
-    <divid id="axiomsEditor_messageDiv"></divid>
+    </div>
     <div>
 
         <select id="Axioms_editor_frameSelect">
@@ -63,6 +71,8 @@
         <button onclick="Axioms_editor.generateTriples()">generateTriples</button>
         <button onclick="Axioms_graph.drawAxiomsJowlTriples()">draw</button>
 
-        <div id="Axioms_editor_messageDiv>"></div>
+
     </div>
+    <div id="Axioms_editor_messageDiv"></div>
+
 </div>

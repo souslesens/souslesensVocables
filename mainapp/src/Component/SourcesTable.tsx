@@ -350,9 +350,12 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
 
     const _handleFieldUpdate = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value });
 
-    if (sourceModel.sourceForm.owner.length == 0) {
-        update({ type: Type.UserUpdatedField, payload: { fieldname: "owner", newValue: me } });
-    }
+    React.useEffect(() => {
+        if (sourceModel.sourceForm.owner.length == 0 && me !== "") {
+            update({ type: Type.UserUpdatedField, payload: { fieldname: "owner", newValue: me } });
+        }
+    }, [sourceModel.sourceForm.owner]
+    )
 
     const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         update({

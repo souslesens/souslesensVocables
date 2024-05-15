@@ -25,13 +25,14 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    TableSortLabel,
     Typography,
 } from "@mui/material";
 import { Cancel, Close, Done, Folder } from "@mui/icons-material";
 
 import { fetchMe, VisuallyHiddenInput, humanizeSize } from "./Utils";
 
-import { getGraphSize } from "./Source";
+import { getGraphSize, ServerSource } from "./Source";
 
 declare global {
     interface Window {
@@ -475,10 +476,20 @@ export default function GraphManagement() {
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
-                                <TableCell style={{ fontWeight: "bold" }}>Sources</TableCell>
-                                <TableCell style={{ fontWeight: "bold", width: "100%" }}>Graph URI</TableCell>
+                                <TableCell style={{ fontWeight: "bold" }}>
+                                    <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                                        Sources
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                    <TableSortLabel active={orderBy === "graphUri"} direction={order} onClick={() => handleRequestSort("graphUri")}>
+                                        Graph URI
+                                    </TableSortLabel>
+                                </TableCell>
                                 <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
-                                    Graph Size
+                                    <TableSortLabel active={orderBy === "graphSize"} direction={order} onClick={() => handleRequestSort("graphSize")}>
+                                        Graph Size
+                                    </TableSortLabel>
                                 </TableCell>
                                 <TableCell align="center" style={{ fontWeight: "bold" }}>
                                     Actions
@@ -487,8 +498,16 @@ export default function GraphManagement() {
                         </TableHead>
                         <TableBody sx={{ width: "100%", overflow: "visible" }}>
                             {Object.entries(sources)
-                                .sort(([aName, _a], [bName, _b]) => {
-                                    return aName.toLowerCase() > bName.toLowerCase();
+                                .sort(([_aName, a], [_bName, b]) => {
+                                    if (orderBy == "graphSize") {
+                                        const left_n: number = getGraphSize(a, graphs);
+                                        const right_n: number = getGraphSize(b, graphs);
+                                        return order === "asc" ? right_n > left_n : left_n > right_n;
+                                    } else {
+                                        const left: string = a[orderBy] || ("" as string);
+                                        const right: string = b[orderBy] || ("" as string);
+                                        return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+                                    }
                                 })
                                 .map(([sourceName, source]) => {
                                     return (

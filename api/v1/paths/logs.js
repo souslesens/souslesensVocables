@@ -11,8 +11,12 @@ module.exports = function () {
 
     ///// GET api/v1/logs
     function GET(req, res, _next) {
+        const fileName = req.query.file || "vocables.log";
+
+        logPath = path.resolve(path.join(config.logDir, path.basename(fileName)));
+
         const logsArray = fs
-            .readFileSync(path.resolve(config.logDir + "/vocables.log"))
+            .readFileSync(logPath)
             .toString()
             .split("\n")
             .filter((line) => line != "")

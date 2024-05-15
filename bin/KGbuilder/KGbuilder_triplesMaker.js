@@ -274,7 +274,7 @@ var KGbuilder_triplesMaker = {
                     return callback(null, null);
                 }
                 if (mapping.dataType.startsWith("xsd:date")) {
-                    var isDateOk;
+                 /*   var isDateOk;
                     try {
                         var date= new Date(str);
                         if(date=="Invalid Date" )
@@ -288,9 +288,10 @@ var KGbuilder_triplesMaker = {
                         isDateOk = true;
                     } catch (e) {
                         isDateOk = false;
-                    }
+                    }*/
 
-                    if (true || isDateOk) {
+                 //   if (true || isDateOk) {
+                      if (true ) {
                         if (mapping.dateFormat) {
 
 
@@ -584,7 +585,8 @@ var KGbuilder_triplesMaker = {
                     return callback(err);
                 }
                 KGbuilder_socket.message(options.clientSocketId, " data loaded from " + tableMappings.table, false);
-                tableData = result.data[0];
+              //  tableData = result.data[0];
+                tableData = [].concat(...Object.values(result.data));
                 callback(null, tableData);
             });
         } else if (tableMappings.datasourceConfig) {

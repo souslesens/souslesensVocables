@@ -29,7 +29,9 @@ import {
 } from "@mui/material";
 import { Cancel, Close, Done, Folder } from "@mui/icons-material";
 
-import { fetchMe, VisuallyHiddenInput } from "./Utils";
+import { fetchMe, VisuallyHiddenInput, humanizeSize } from "./Utils";
+
+import { getGraphSize } from "./Source";
 
 declare global {
     interface Window {
@@ -45,6 +47,9 @@ export default function GraphManagement() {
 
     // user info
     const [currentUserToken, setCurrentUserToken] = useState<string | null>(null);
+
+    // graph info
+    const [graphs, setGraphs] = useState([]);
 
     // status of download/upload
     const [currentSource, setCurrentSource] = useState<string | null>(null);
@@ -82,6 +87,7 @@ export default function GraphManagement() {
     useEffect(() => {
         void fetchSources();
         void fetchConfig();
+        void fetchGraphsInfo();
         (async () => {
             const response = await fetchMe();
             setCurrentUserToken(response.user.token);
@@ -106,6 +112,12 @@ export default function GraphManagement() {
         const response = await fetch("/api/v1/sources");
         const json = (await response.json()) as { resources: Record<string, any> };
         setSources(json.resources);
+    };
+
+    const fetchGraphsInfo = async () => {
+        const response = await fetch("/api/v1/sparql/graphs");
+        const json = await response.json();
+        setGraphs(json);
     };
 
     const fetchSourceInfo = async (sourceName: string) => {
@@ -465,6 +477,9 @@ export default function GraphManagement() {
                             <TableRow>
                                 <TableCell style={{ fontWeight: "bold" }}>Sources</TableCell>
                                 <TableCell style={{ fontWeight: "bold", width: "100%" }}>Graph URI</TableCell>
+                                <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                    Graph Size
+                                </TableCell>
                                 <TableCell align="center" style={{ fontWeight: "bold" }}>
                                     Actions
                                 </TableCell>
@@ -482,6 +497,7 @@ export default function GraphManagement() {
                                             <TableCell>
                                                 <Link href={source.graphUri}>{source.graphUri}</Link>
                                             </TableCell>
+                                            <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
                                             <TableCell align="center">
                                                 <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                     <Button variant="contained" disabled={source.accessControl != "readwrite"} color="secondary" value={source.name} onClick={handleUploadSource}>

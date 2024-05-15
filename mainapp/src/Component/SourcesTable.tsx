@@ -63,7 +63,7 @@ const SourcesTable = () => {
 
     const renderSources = SRD.match(
         {
-            notAsked: () => <p>Let&aposs fetch some data!</p>,
+            notAsked: () => <p>Let&apos;s fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />
@@ -831,7 +831,7 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
 
                     <Grid item xs={6}>
                         <FormControl>
-                            <InputLabel id="dataSource-type">DataSource&aposs type</InputLabel>
+                            <InputLabel id="dataSource-type">DataSource&apos;s type</InputLabel>
                             <Select
                                 labelId="dataSource-type"
                                 id="dataSource"

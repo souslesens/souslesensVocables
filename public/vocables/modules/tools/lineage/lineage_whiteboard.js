@@ -1294,7 +1294,7 @@ var Lineage_whiteboard = (function () {
 
                     result.forEach(function (item) {
                         if (item.broader1) {
-                            let nodeSource = item.broader1Graph ? Sparql_common.getSourceFromGraphUri(item.broader1Graph.value, source) : source;
+                            let nodeSource = source
                             let nodeColor = self.getSourceColor(nodeSource);
 
                             if (!existingNodes[item.subject.value]) {
@@ -1307,7 +1307,7 @@ var Lineage_whiteboard = (function () {
                                     color: nodeColor,
                                     size: Lineage_whiteboard.defaultShapeSize,
                                     data: {
-                                        source: source,
+                                        source: nodeSource,
                                         label: item.subjectLabel.value,
                                         id: item.subject.value,
                                     },
@@ -1321,6 +1321,7 @@ var Lineage_whiteboard = (function () {
                                     //skip blank nodes
                                     return;
                                 }
+                                let broaderSource = item.broaderGraphs1? Sparql_common.getSourceFromGraphUris(item.broaderGraphs1.value,source):source
                                 existingNodes[item.broader1.value] = 1;
                                 var node = {
                                     id: item.broader1.value,
@@ -1330,7 +1331,7 @@ var Lineage_whiteboard = (function () {
                                     color: nodeColor,
                                     size: Lineage_whiteboard.defaultShapeSize,
                                     data: {
-                                        source: source,
+                                        source: broaderSource,
                                         label: item.broader1Label.value,
                                         id: item.broader1.value,
                                     },

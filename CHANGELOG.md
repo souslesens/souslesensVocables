@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.71.0](https://github.com/souslesens/souslesensVocables/compare/1.70.2...1.71.0) (2024-05-16)
+
+
+### Features
+
+* allow to configure tools served as plugins ([534e902](https://github.com/souslesens/souslesensVocables/commit/534e9024abb892deeb2e182c387923cea88202cd))
+* **configEditor:** display graph size ([1b9bca0](https://github.com/souslesens/souslesensVocables/commit/1b9bca0aabb95c9069372d08dac0f40530c6c86a))
+* **graphManagement:** display graph size ([a67628c](https://github.com/souslesens/souslesensVocables/commit/a67628c15ff87be3f5a6a3cd060e6dda4c65d00b))
+* **graphManagement:** restore sorting table + add graph size sorting ([3c0bbba](https://github.com/souslesens/souslesensVocables/commit/3c0bbbaa0137c8e03a9a7ea3f7377407b34a11a0))
+* **migrations:** create a empty pluginsConfig file if not exists ([f15323c](https://github.com/souslesens/souslesensVocables/commit/f15323cac400859b3a4fe8d1f442fd93a135339c))
+
+
+### Bug Fixes
+
+* **ConfigEditor:** add the missing identifier header in DatabasesTable ([b9300b5](https://github.com/souslesens/souslesensVocables/commit/b9300b53e723fbffd8bcb27f982948a0ddaf9f92))
+* **ConfigEditor:** do not crash when select the Source tab again ([3200368](https://github.com/souslesens/souslesensVocables/commit/3200368ef44eb8964960703c1e25c6fc317b3045))
+* **graphManagement:** restore searchbar ([0bb78d9](https://github.com/souslesens/souslesensVocables/commit/0bb78d95b335dedc34eca40e303cfd62247ca6c6))
+
 ### [1.70.2](https://github.com/souslesens/souslesensVocables/compare/1.70.1...1.70.2) (2024-05-02)
 
 

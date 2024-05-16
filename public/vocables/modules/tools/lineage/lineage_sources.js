@@ -428,7 +428,7 @@ sourceDivId +
     self.showSourceDivPopupMenu = function (sourceDivId) {
         event.stopPropagation();
         var source = Lineage_sources.sourceDivsMap[sourceDivId];
-        Lineage_sources.setCurrentSource(source)
+        Lineage_sources.setCurrentSource(source);
         var html =
             ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.setSourceOpacity();"> Opacity</span>' +
             ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.closeSource();"> Close</span>' +

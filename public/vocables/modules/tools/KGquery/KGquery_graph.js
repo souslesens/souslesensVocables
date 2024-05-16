@@ -7,10 +7,10 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
-var KGquery_graph = (function() {
+var KGquery_graph = (function () {
     var self = {};
 
-    self.init = function() {
+    self.init = function () {
         $("#KGquery_leftPanelTabs").tabs();
 
         common.fillSelectWithColorPalette("KGquery_graph_nodeColorSelect");
@@ -19,7 +19,7 @@ var KGquery_graph = (function() {
     };
 
     self.visjsOptions = {
-        onclickFn: function(node, point, nodeEvent) {
+        onclickFn: function (node, point, nodeEvent) {
             if (!node) {
                 return;
             }
@@ -42,22 +42,22 @@ var KGquery_graph = (function() {
                 deleteNode: false,
                 deleteEdge: false,
 
-                addEdge: function(edgeData, callback) {
+                addEdge: function (edgeData, callback) {
                     // KGquery_graph.addInterGraphLink(edgeData, callback);
                     KGquery_graph.addInterGraphProperty(edgeData, callback);
                     return false;
-                }
-            }
-        }
+                },
+            },
+        },
     };
 
     self.visjsNodeOptions = {
         shape: "box", //Lineage_whiteboard.defaultShape,
         //   size: Lineage_whiteboard.defaultShapeSize,
-        color: "#ddd" //Lineage_whiteboard.getSourceColor(source)
+        color: "#ddd", //Lineage_whiteboard.getSourceColor(source)
     };
 
-    self.drawVisjsModel = function(mode, output) {
+    self.drawVisjsModel = function (mode, output) {
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
 
@@ -66,7 +66,7 @@ var KGquery_graph = (function() {
         async.series(
             [
                 //saved visjgraphData
-                function(callbackSeries) {
+                function (callbackSeries) {
                     if (mode.indexOf("saved") < 0) {
                         return callbackSeries();
                     }
@@ -75,7 +75,7 @@ var KGquery_graph = (function() {
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
 
                     MainController.UI.message("loading graph display");
-                    self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function(err, result) {
+                    self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                         if (err) {
                             // return callbackSeries("notFound");
 
@@ -88,12 +88,12 @@ var KGquery_graph = (function() {
                     });
                 },
                 //inferred
-                function(callbackSeries) {
+                function (callbackSeries) {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
                     MainController.UI.message("generating tbox graph from abox graph");
-                    self.getInferredModelVisjsData(KGquery.currentSource, function(err, result2) {
+                    self.getInferredModelVisjsData(KGquery.currentSource, function (err, result2) {
                         if (err) {
                             return alert(err);
                         }
@@ -101,20 +101,20 @@ var KGquery_graph = (function() {
                         var oldEdgesMap = {};
                         var newNodes = [];
                         var newEdges = [];
-                        visjsData.nodes.forEach(function(item) {
+                        visjsData.nodes.forEach(function (item) {
                             oldNodesMap[item.id] = item;
                         });
 
-                        visjsData.edges.forEach(function(item) {
+                        visjsData.edges.forEach(function (item) {
                             oldEdgesMap[item.id] = item;
                         });
 
-                        result2.nodes.forEach(function(item) {
+                        result2.nodes.forEach(function (item) {
                             if (!oldNodesMap[item.id]) {
                                 newNodes.push(item);
                             }
                         });
-                        result2.edges.forEach(function(item) {
+                        result2.edges.forEach(function (item) {
                             if (!oldEdgesMap[item.id]) {
                                 newEdges.push(item);
                             }
@@ -127,28 +127,26 @@ var KGquery_graph = (function() {
                     });
                 },
                 // load annotationProperties
-                function(callbackSeries) {
+                function (callbackSeries) {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
                     MainController.UI.message("loading datatypeProperties");
-                    OntologyModels.getKGnonObjectProperties(source, {}, function(err, nonObjectPropertiesmap) {
+                    OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
                         if (err) {
                             return callbackSeries(err);
                         }
 
-                        visjsData.nodes.forEach(function(node) {
+                        visjsData.nodes.forEach(function (node) {
                             if (nonObjectPropertiesmap[node.data.id]) {
-
-                                if(! node.data.nonObjectProperties)
-                                    node.data.nonObjectProperties =[]
-                                node.data.nonObjectProperties = node.data.nonObjectProperties.concat( nonObjectPropertiesmap[node.data.id].properties);
+                                if (!node.data.nonObjectProperties) node.data.nonObjectProperties = [];
+                                node.data.nonObjectProperties = node.data.nonObjectProperties.concat(nonObjectPropertiesmap[node.data.id].properties);
                             }
                         });
                         callbackSeries();
                     });
                 }, //Add decoration data from decorate file
-                function(callbackSeries) {
+                function (callbackSeries) {
                     if (mode.indexOf("saved") < 0) {
                         return callbackSeries();
                     }
@@ -156,7 +154,7 @@ var KGquery_graph = (function() {
                     //Get current decoration file
                     var payload = {
                         dir: "graphs/",
-                        fileName: fileName
+                        fileName: fileName,
                     };
                     //get decoration file
                     $.ajax({
@@ -164,7 +162,7 @@ var KGquery_graph = (function() {
                         url: `${Config.apiUrl}/data/file`,
                         data: payload,
                         dataType: "json",
-                        success: function(result, _textStatus, _jqXHR) {
+                        success: function (result, _textStatus, _jqXHR) {
                             var data = JSON.parse(result);
 
                             for (var node in data) {
@@ -181,22 +179,20 @@ var KGquery_graph = (function() {
                         },
                         error(err) {
                             return callbackSeries("no decoration");
-                        }
+                        },
                     });
                 },
 
-                function(callbackSeries) {
+                function (callbackSeries) {
                     return callbackSeries();
-
-
                 },
 
                 //change shape of nodes without nonObjectProperties
-                function(callbackSeries) {
+                function (callbackSeries) {
                     callbackSeries();
-                }
+                },
             ],
-            function(err) {
+            function (err) {
                 if (err && err != "no decoration") {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");
@@ -207,7 +203,7 @@ var KGquery_graph = (function() {
                 MainController.UI.message("drawing graph");
 
                 var newNodes = [];
-                visjsData.nodes.forEach(function(node) {
+                visjsData.nodes.forEach(function (node) {
                     node.x = node.x || 0;
                     node.y = node.y || 0;
                     node.fixed = false;
@@ -219,14 +215,13 @@ var KGquery_graph = (function() {
                     return self.showInferredModelInJstree(visjsData);
                 }
 
-
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
 
                 // cannot get colors from loadGraph ???!!
-                self.KGqueryGraph.draw(function() {
+                self.KGqueryGraph.draw(function () {
                     self.simulationOn = true;
                     var newNodes = [];
-                    visjsData.nodes.forEach(function(node) {
+                    visjsData.nodes.forEach(function (node) {
                         newNodes.push({ id: node.id, color: node.color, shape: node.shape });
                     });
                     //    self.KGqueryGraph.data.nodes.update(visjsData.nodes);
@@ -238,7 +233,7 @@ var KGquery_graph = (function() {
         );
     };
 
-    self.startStopSimulation = function() {
+    self.startStopSimulation = function () {
         if (!self.simulationOn) {
             self.KGqueryGraph.network.startSimulation();
         } else {
@@ -247,7 +242,7 @@ var KGquery_graph = (function() {
         self.simulationOn = !self.simulationOn;
     };
 
-    self.DrawImportsCommonGraph = function() {
+    self.DrawImportsCommonGraph = function () {
         var source = KGquery.currentSource;
         var sources = [];
         var imports = Config.sources[source].imports;
@@ -259,13 +254,13 @@ var KGquery_graph = (function() {
         self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
         async.eachSeries(
             sources,
-            function(source, callbackEach) {
+            function (source, callbackEach) {
                 var visjsGraphFileName = source + "_KGmodelGraph.json";
 
                 MainController.UI.message("loading graph display");
-                self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function(err, result) {
+                self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                     if (!err && result.nodes) {
-                        result.nodes.forEach(function(node) {
+                        result.nodes.forEach(function (node) {
                             if (!uniqueNodes[node.id]) {
                                 uniqueNodes[node.id] = 1;
                                 node.x = null;
@@ -274,7 +269,7 @@ var KGquery_graph = (function() {
                                 visjsData.nodes.push(node);
                             }
                         });
-                        result.edges.forEach(function(edge) {
+                        result.edges.forEach(function (edge) {
                             if (!uniqueNodes[edge.id]) {
                                 uniqueNodes[edge.id] = 1;
                                 visjsData.edges.push(edge);
@@ -285,17 +280,17 @@ var KGquery_graph = (function() {
                     callbackEach();
                 });
             },
-            function(err) {
+            function (err) {
                 if (err) {
                     return alert(err);
                 }
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
 
                 // cannot get colors from loadGraph ???!!
-                self.KGqueryGraph.draw(function() {
+                self.KGqueryGraph.draw(function () {
                     self.simulationOn = true;
                     var newNodes = [];
-                    visjsData.nodes.forEach(function(node) {
+                    visjsData.nodes.forEach(function (node) {
                         newNodes.push({ id: node.id, color: node.color, shape: node.shape });
                     });
                     //  self.KGqueryGraph.data.nodes.update(visjsData.nodes);
@@ -305,7 +300,7 @@ var KGquery_graph = (function() {
         );
     };
 
-    self.getInferredModelVisjsData = function(source, callback) {
+    self.getInferredModelVisjsData = function (source, callback) {
         MainController.UI.message("creating graph");
         if (!source) {
             source = self.source;
@@ -322,12 +317,12 @@ var KGquery_graph = (function() {
 
         async.eachSeries(
             sources,
-            function(source, callbackEach) {
+            function (source, callbackEach) {
                 async.series(
                     [
                         //get effective distinct ObjectProperties
-                        function(callbackSeries) {
-                            OntologyModels.getInferredModel(source, {}, function(err, result) {
+                        function (callbackSeries) {
+                            OntologyModels.getInferredModel(source, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
@@ -337,33 +332,33 @@ var KGquery_graph = (function() {
                             });
                         },
 
-                        function(callbackSeries) {
-                            OntologyModels.getInferredClassValueDataTypes(source, {}, function(err, result) {
+                        function (callbackSeries) {
+                            OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
 
-                                result.forEach(function(item) {
+                                result.forEach(function (item) {
                                     if (item.datatype) {
-                                        if(!nonObjectProperties[item.class.value] ){
-                                            nonObjectProperties[item.class.value]=[]
+                                        if (!nonObjectProperties[item.class.value]) {
+                                            nonObjectProperties[item.class.value] = [];
                                         }
-                                        nonObjectProperties[item.class.value].push( {
-                                            "label": Sparql_common.getLabelFromURI(item.prop.value),
-                                            "id": item.prop.value,
-                                            "datatype": item.datatype.value
+                                        nonObjectProperties[item.class.value].push({
+                                            label: Sparql_common.getLabelFromURI(item.prop.value),
+                                            id: item.prop.value,
+                                            datatype: item.datatype.value,
                                         });
                                     }
                                 });
                                 callbackSeries();
                             });
                         },
-                        function(callbackSeries) {
-                            OntologyModels.getContainerBreakdownClasses(source, function(err, result) {
+                        function (callbackSeries) {
+                            OntologyModels.getContainerBreakdownClasses(source, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                result.forEach(function(item) {
+                                result.forEach(function (item) {
                                     var edegId = common.getRandomHexaId(5);
                                     visjsData.edges.push({
                                         id: edegId,
@@ -374,14 +369,14 @@ var KGquery_graph = (function() {
                                         font: { ital: true },
                                         dashes: [5, 5],
                                         selfReference: { renderBehindTheNode: true, size: 50 },
-                                        data: { propertyId: "rdfs:member" }
+                                        data: { propertyId: "rdfs:member" },
                                     });
                                 });
                                 return callbackSeries();
                             });
-                        }
+                        },
                     ],
-                    function(err) {
+                    function (err) {
                         if (err) {
                             return callbackEach(err);
                         }
@@ -390,7 +385,7 @@ var KGquery_graph = (function() {
                     }
                 );
             },
-            function(err) {
+            function (err) {
                 if (err) {
                     return callback();
                 }
@@ -398,7 +393,7 @@ var KGquery_graph = (function() {
                     callback("no inferred model for source " + source);
                 }
 
-                inferredModel.forEach(function(item) {
+                inferredModel.forEach(function (item) {
                     item.sClass = item.sClass || item.sparent;
                     item.oClass = item.oClass || item.oparent;
 
@@ -435,18 +430,18 @@ var KGquery_graph = (function() {
                             data: {
                                 propertyId: item.prop.value,
                                 source: source,
-                                propertyLabel: item.propLabel.value
+                                propertyLabel: item.propLabel.value,
                             },
 
                             arrows: {
                                 to: {
                                     enabled: true,
                                     type: "solid",
-                                    scaleFactor: 0.5
-                                }
+                                    scaleFactor: 0.5,
+                                },
                             },
                             // dashes: true,
-                            color: Lineage_whiteboard.defaultPredicateEdgeColor
+                            color: Lineage_whiteboard.defaultPredicateEdgeColor,
                         };
                         if (item.sClass.value == item.oClass.value) {
                             (edge.dashes = [5, 5]), (edge.selfReference = { renderBehindTheNode: true, size: 50 });
@@ -460,23 +455,23 @@ var KGquery_graph = (function() {
         );
     };
 
-    self.setEdgeMode = function() {
+    self.setEdgeMode = function () {
         self.KGqueryGraph.network.addEdgeMode();
     };
 
-    self.setNodeAttr = function(attr, value) {
+    self.setNodeAttr = function (attr, value) {
         if (!self.currentGraphNode) {
             return;
         }
 
         var newNode = {
             id: self.currentGraphNode.id,
-            [attr]: value
+            [attr]: value,
         };
         self.KGqueryGraph.data.nodes.update(newNode);
     };
 
-    self.setAllNodesFontSize = function() {
+    self.setAllNodesFontSize = function () {
         var fontSize = prompt("font size");
         if (!fontSize) {
             return;
@@ -484,19 +479,19 @@ var KGquery_graph = (function() {
         self.setAllNodesAttr("font", { size: parseInt(fontSize) });
     };
 
-    self.setAllNodesAttr = function(attr, value) {
+    self.setAllNodesAttr = function (attr, value) {
         var nodesId = self.KGqueryGraph.data.nodes.getIds();
         var newNodes = [];
-        nodesId.forEach(function(id) {
+        nodesId.forEach(function (id) {
             newNodes.push({
                 id: id,
-                [attr]: value
+                [attr]: value,
             });
         });
         self.KGqueryGraph.data.nodes.update(newNodes);
     };
 
-    self.resetVisjNodes = function(nodes) {
+    self.resetVisjNodes = function (nodes) {
         if (!KGquery_graph.KGqueryGraph) {
             return;
         }
@@ -513,17 +508,17 @@ var KGquery_graph = (function() {
         if (!Array.isArray(nodes)) {
             nodes = [nodes];
         }
-        nodes.forEach(function(item) {
+        nodes.forEach(function (item) {
             newNodes.push({
                 id: item.id,
                 shape: item.initialShape,
-                color: item.initialColor
+                color: item.initialColor,
             });
         });
         KGquery_graph.KGqueryGraph.data.nodes.update(newNodes);
     };
 
-    self.resetVisjEdges = function() {
+    self.resetVisjEdges = function () {
         if (!KGquery_graph.KGqueryGraph) {
             return;
         }
@@ -535,24 +530,24 @@ var KGquery_graph = (function() {
             return;
         }
 
-        edges.forEach(function(edgeId, index) {
+        edges.forEach(function (edgeId, index) {
             newVisjsEdges.push({ id: edgeId, color: Lineage_whiteboard.restrictionColor, width: 1 });
         });
         KGquery_graph.KGqueryGraph.data.edges.update(newVisjsEdges);
     };
 
-    self.outlineNode = function(nodeId) {
+    self.outlineNode = function (nodeId) {
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, color: "#b0f5f5" }]);
         /* setTimeout(function(){
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
         },500)*/
     };
-    self.saveVisjsModelGraph = function() {
+    self.saveVisjsModelGraph = function () {
         var fileName = KGquery.currentSource + "_KGmodelGraph.json";
         self.KGqueryGraph.saveGraph(fileName, true);
         return;
     };
-    self.addInterGraphProperty = function(edgeData) {
+    self.addInterGraphProperty = function (edgeData) {
         var propertyId = prompt("enter property URI");
         if (!propertyId) {
             return;
@@ -571,29 +566,28 @@ var KGquery_graph = (function() {
             data: {
                 propertyId: propertyId,
                 source: KGquery.currentSource,
-                propertyLabel: propertyLabel
-            }
+                propertyLabel: propertyLabel,
+            },
         };
 
         self.KGqueryGraph.data.edges.add(edge);
     };
 
-    self.showInferredModelInJstree = function(visjsData) {
-
+    self.showInferredModelInJstree = function (visjsData) {
         var jstreeData = [];
         self.graphVisjsdata = visjsData;
-        visjsData.nodes.forEach(function(visjsNode) {
+        visjsData.nodes.forEach(function (visjsNode) {
             if (visjsNode.data.nonObjectProperties && visjsNode.data.nonObjectProperties.length > 0) {
                 jstreeData.push({
                     id: visjsNode.id,
                     text: visjsNode.label,
                     parent: "#",
-                    data: visjsNode.data
+                    data: visjsNode.data,
                 });
             }
         });
 
-        jstreeData.sort(function(a, b) {
+        jstreeData.sort(function (a, b) {
             if (a.text > b.text) {
                 return 1;
             }
@@ -605,21 +599,14 @@ var KGquery_graph = (function() {
 
         var options = {
             withCheckboxes: true,
-            selectTreeNodeFn: function(event, obj) {
+            selectTreeNodeFn: function (event, obj) {},
 
-            },
-
-            validateFn: function(checkedNodes) {
-
-            }
+            validateFn: function (checkedNodes) {},
         };
-        JstreeWidget.loadJsTree(null, jstreeData, options, function() {
+        JstreeWidget.loadJsTree(null, jstreeData, options, function () {
             JstreeWidget.openNodeDescendants(null, "#");
-
         });
-
-
-    }
+    };
 
     return self;
 })();

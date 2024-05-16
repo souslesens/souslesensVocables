@@ -1,10 +1,9 @@
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 
-
-const Axioms_editor = (function() {
+const Axioms_editor = (function () {
     var self = {};
 
-    self.init = function(divId, nodeId) {
+    self.init = function (divId, nodeId) {
         self.currentSuggestions = [];
         self.previousTokenType = null;
         if (nodeId) {
@@ -13,15 +12,14 @@ const Axioms_editor = (function() {
             self.currentNode = "https://spec.industrialontologies.org/ontology/core/Core/Buyer";
         }
 
-
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Axiom Editor");
-        $("#smallDialogDiv").load("modules/tools/axioms/html/axioms_editor.html", function(x, y) {
+        $("#smallDialogDiv").load("modules/tools/axioms/html/axioms_editor.html", function (x, y) {
             $("#axiomsEditor_input").focus();
         });
     };
 
-    self.onInputChar = function(text) {
+    self.onInputChar = function (text) {
         var text2 = text.toLowerCase();
 
         if (self.currentSuggestions.length > 0) {
@@ -32,13 +30,10 @@ const Axioms_editor = (function() {
             } else {
                 self.filterResources(self.currentSuggestions, text);
             }
-
-
         } else if (!self.previousTokenType) {
             self.listFilteredClassesOrProperties(text2);
         } else {
-
-            self.getSuggestions(text, function(err, suggestions) {
+            self.getSuggestions(text, function (err, suggestions) {
                 if (err) {
                     return alert(err.responseText);
                 }
@@ -52,8 +47,7 @@ const Axioms_editor = (function() {
         }
     };
 
-
-    self.addSuggestion = function(suggestion, cssClass) {
+    self.addSuggestion = function (suggestion, cssClass) {
         if (!cssClass) {
             if (suggestion.resourceType == "ObjectProperty") {
                 cssClass = "axiom_Property";
@@ -68,7 +62,7 @@ const Axioms_editor = (function() {
             var str = suggestion;
             suggestion = {
                 id: str,
-                label: str
+                label: str,
             };
         }
 
@@ -79,7 +73,7 @@ const Axioms_editor = (function() {
         $("#axiomsEditor_input").val("");
     };
 
-    self.onSelectSuggestion = function() {
+    self.onSelectSuggestion = function () {
         var suggestionText = $("#axiomsEditor_suggestionsSelect option:selected").text();
         suggestionText = suggestionText.replace(/ /g, "_");
         //   suggestionText = suggestionText.replace(/ /g, "_");
@@ -92,48 +86,40 @@ const Axioms_editor = (function() {
             self.previousTokenType = resource.resourceType;
             if (resource.resourceType == "ObjectProperty") {
                 self.addSuggestion(suggestionObj, "axiom_Property");
-                self.getSuggestions(suggestionText + " ", function(err, result) {
+                self.getSuggestions(suggestionText + " ", function (err, result) {
                     self.currentSuggestions = result;
                     common.fillSelectOptions("axiomsEditor_suggestionsSelect", result, false, "label", "id");
                 });
-
             } else if (resource.resourceType == "Class") {
                 self.addSuggestion(suggestionObj, "axiom_Class");
-                self.getSuggestions("_" + suggestionText + " ", function(err, result) {
+                self.getSuggestions("_" + suggestionText + " ", function (err, result) {
                     self.currentSuggestions = result;
                     common.fillSelectOptions("axiomsEditor_suggestionsSelect", result, false, "label", "id");
                 });
             }
-
-
-        } else {//keyword
+        } else {
+            //keyword
             self.addSuggestion(suggestionObj, "axiom_keyWord");
             var text = self.getAxiomText();
-            self.getSuggestions(text + " ", function(err, result) {
+            self.getSuggestions(text + " ", function (err, result) {
                 self.currentSuggestions = result;
                 common.fillSelectOptions("axiomsEditor_suggestionsSelect", result, false, "label", "id");
-
-
             });
         }
 
         return;
-
-
     };
 
-    self.filterResources = function(resources, filterStr, resourceType) {
+    self.filterResources = function (resources, filterStr, resourceType) {
         //  var str=$("##axiomsEditor_input").val()
         var resourcesMap = {};
         if (Array.isArray(resources)) {
-            resources.forEach(function(item) {
+            resources.forEach(function (item) {
                 resourcesMap[item.label] = item;
             });
-
         } else {
             resourcesMap = resources;
         }
-
 
         var choices = [];
         for (var key in resourcesMap) {
@@ -144,9 +130,6 @@ const Axioms_editor = (function() {
                 }
             }
         }
-        ;
-
-
         if (choices.length == 0) {
             return;
         }
@@ -154,14 +137,13 @@ const Axioms_editor = (function() {
         common.fillSelectOptions("axiomsEditor_suggestionsSelect", choices, false, "label", "id");
     };
 
-    self.listFilteredClassesOrProperties = function(filterStr, resourceType) {
-        self.getAllClassesOrProperties(function(err, result) {
+    self.listFilteredClassesOrProperties = function (filterStr, resourceType) {
+        self.getAllClassesOrProperties(function (err, result) {
             return self.filterResources(self.allResourcesArray, filterStr, resourceType);
         });
     };
 
-
-    self.getAllClassesOrProperties = function(callback) {
+    self.getAllClassesOrProperties = function (callback) {
         var source = Lineage_sources.activeSource;
         var classes = [];
         var properties = [];
@@ -169,68 +151,67 @@ const Axioms_editor = (function() {
             return callback(null, self.allResourcesArray);
         }
 
-        async.series([
-            function(callbackSeries) {
-
-                CommonBotFunctions.listSourceAllObjectProperties(source, null, null, function(err, result) {
-                    if (err) {
-                        return callbackSeries(err.responseText);
-                    }
-                    properties = result;
-                    callbackSeries();
-                });
-            },
-            function(callbackSeries) {
-                CommonBotFunctions.listSourceAllClasses(source, null, false, [], function(err, result) {
-
-                    if (err) {
-                        return callbackSeries(err.responseText);
-                    }
-                    classes = result;
-                    callbackSeries();
-                });
-            }
-
-        ], function(err) {
-            if (err) {
-                return callback(err);
-            }
-            self.allResourcesArray = [];
-            self.allResourcesMap = {};
-            properties.forEach(function(item) {
-                item.label = item.label.replace(/ /g, "_");
-                item.resourceType = "ObjectProperty";
-                self.allResourcesArray.push(item);
-            });
-
-            classes.forEach(function(item) {
-                item.label = item.label.replace(/ /g, "_");
-                item.resourceType = "Class";
-                self.allResourcesArray.push(item);
-            });
-            self.allResourcesArray.sort(function(a, b) {
-                if (a.label > b.label) {
-                    return 1;
+        async.series(
+            [
+                function (callbackSeries) {
+                    CommonBotFunctions.listSourceAllObjectProperties(source, null, null, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err.responseText);
+                        }
+                        properties = result;
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    CommonBotFunctions.listSourceAllClasses(source, null, false, [], function (err, result) {
+                        if (err) {
+                            return callbackSeries(err.responseText);
+                        }
+                        classes = result;
+                        callbackSeries();
+                    });
+                },
+            ],
+            function (err) {
+                if (err) {
+                    return callback(err);
                 }
-                if (a.label < b.label) {
-                    return -1;
-                }
-                return 0;
+                self.allResourcesArray = [];
+                self.allResourcesMap = {};
+                properties.forEach(function (item) {
+                    item.label = item.label.replace(/ /g, "_");
+                    item.resourceType = "ObjectProperty";
+                    self.allResourcesArray.push(item);
+                });
 
-            });
+                classes.forEach(function (item) {
+                    item.label = item.label.replace(/ /g, "_");
+                    item.resourceType = "Class";
+                    self.allResourcesArray.push(item);
+                });
+                self.allResourcesArray.sort(function (a, b) {
+                    if (a.label > b.label) {
+                        return 1;
+                    }
+                    if (a.label < b.label) {
+                        return -1;
+                    }
+                    return 0;
+                });
 
-            self.allResourcesArray.forEach(function(item) {
-                self.allResourcesMap[item.id] = item;
-            });
-            return callback(null, self.allResourcesArray);
-        });
+                self.allResourcesArray.forEach(function (item) {
+                    self.allResourcesMap[item.id] = item;
+                });
+                return callback(null, self.allResourcesArray);
+            }
+        );
     };
-    self.getSuggestions = function(text, callback) {
+    self.getSuggestions = function (text, callback) {
         var options = {};
         const params = new URLSearchParams({
             source: Lineage_sources.activeSource,
             lastToken: text,
-            options: JSON.stringify(options)
+            options: JSON.stringify(options),
         });
 
         $.ajax({
@@ -238,18 +219,20 @@ const Axioms_editor = (function() {
             url: Config.apiUrl + "/axioms/suggestion?" + params.toString(),
             dataType: "json",
 
-            success: function(data, _textStatus, _jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 var suggestions = [];
 
                 var selectClasses = false;
                 var selectProperties = false;
-                data.forEach(function(item) {
+                data.forEach(function (item) {
                     var keywords = [];
 
-                    if (item.match(/^_$/g)) {// remove _ and replace by Classes
+                    if (item.match(/^_$/g)) {
+                        // remove _ and replace by Classes
                         selectClasses = true;
                         return;
-                    } else if (item.match(/^[A-z]$/g)) {// remove alphabetic letters and replace by ObjectProperties
+                    } else if (item.match(/^[A-z]$/g)) {
+                        // remove alphabetic letters and replace by ObjectProperties
                         selectProperties = true;
 
                         return;
@@ -258,48 +241,43 @@ const Axioms_editor = (function() {
                     }
                 });
 
-                if (selectClasses || selectProperties) {// replace "_" by classes
+                if (selectClasses || selectProperties) {
+                    // replace "_" by classes
 
-                    self.getAllClassesOrProperties(function(err, resources) {
+                    self.getAllClassesOrProperties(function (err, resources) {
                         //   CommonBotFunctions.listSourceAllClasses(Lineage_sources.activeSource, null, false, [], function(err, classes) {
                         if (err) {
                             return callback(err);
                         }
-                        resources.forEach(function(item) {
-
+                        resources.forEach(function (item) {
                             if (selectClasses && item.resourceType == "Class") {
                                 suggestions.push(item);
                             }
                             if (selectProperties && item.resourceType == "ObjectProperty") {
                                 suggestions.push(item);
                             }
-
                         });
-
 
                         return callback(null, suggestions);
                     });
                 } else {
                     callback(null, suggestions);
                 }
-
-
             },
             error(err) {
                 callback(err.responseText);
-            }
+            },
         });
     };
 
-
-    self.checkSyntax = function(callback) {
+    self.checkSyntax = function (callback) {
         var axiomText = self.getAxiomText();
         var options = {};
 
         const params = new URLSearchParams({
             source: Lineage_sources.activeSource,
             axiom: axiomText,
-            options: JSON.stringify(options)
+            options: JSON.stringify(options),
         });
 
         $.ajax({
@@ -307,11 +285,10 @@ const Axioms_editor = (function() {
             url: Config.apiUrl + "/axioms/validator?" + params.toString(),
             dataType: "json",
 
-            success: function(data, _textStatus, _jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 var message = "";
 
                 self.message(" syntax OK");
-
 
                 if (callback) {
                     return callback();
@@ -322,18 +299,17 @@ const Axioms_editor = (function() {
                 if (callback) {
                     return callback(err);
                 }
-            }
+            },
         });
     };
 
-    self.message = function(message, color) {
+    self.message = function (message, color) {
         $("#Axioms_editor_messageDiv").html(message);
     };
 
-
-    self.getAxiomText = function() {
+    self.getAxiomText = function () {
         var text = "";
-        $(".axiom_element").each(function() {
+        $(".axiom_element").each(function () {
             if (text !== "") {
                 text += " ";
             }
@@ -345,11 +321,10 @@ const Axioms_editor = (function() {
         });
         return text;
     };
-    self.getAxiomContent = function() {
+    self.getAxiomContent = function () {
         var frame = $("#Axioms_editor_frameSelect").val();
         var text = "<" + self.currentNode + "> " + frame + " (";
-        $(".axiom_element").each(function() {
-
+        $(".axiom_element").each(function () {
             var id = $(this).attr("id");
             if (!id || id == "null") {
                 return;
@@ -368,8 +343,7 @@ const Axioms_editor = (function() {
         return text;
     };
 
-
-    self.clear = function() {
+    self.clear = function () {
         self.init();
         /*   $(".axiom_element").each(function() {
                $(this).remove();
@@ -377,11 +351,9 @@ const Axioms_editor = (function() {
            $("#axiomsEditor_suggestionsSelect").find("option").remove();*/
     };
 
-    self.saveAxiom = function() {
-    };
+    self.saveAxiom = function () {};
 
-
-    self.generateTriples = function(callback) {
+    self.generateTriples = function (callback) {
         var options = {};
         var content = self.getAxiomContent();
         var sourceGraph = Config.sources[Lineage_sources.activeSource].graphUri;
@@ -389,64 +361,57 @@ const Axioms_editor = (function() {
             return alert("no graph Uri");
         }
 
-
         var triples;
-        async.series([
+        async.series(
+            [
+                function (callbackSeries) {
+                    self.message("checking axiom syntax");
+                    self.checkSyntax(function (err, result) {
+                        return callbackSeries(err);
+                    });
+                },
 
-            function(callbackSeries) {
-                self.message("checking axiom syntax");
-                self.checkSyntax(function(err, result) {
+                function (callbackSeries) {
+                    const params = new URLSearchParams({
+                        graphUri: sourceGraph,
+                        manchesterContent: content,
+                        options: JSON.stringify(options),
+                    });
+                    self.message("generating axioms triples");
+                    $.ajax({
+                        type: "GET",
+                        url: Config.apiUrl + "/jowl/manchesterAxiom2triples?" + params.toString(),
+                        dataType: "json",
 
-                    return callbackSeries(err);
-
-                });
-
-            },
-
-
-            function(callbackSeries) {
-                const params = new URLSearchParams({
-                    graphUri: sourceGraph,
-                    manchesterContent: content,
-                    options: JSON.stringify(options)
-                });
-                self.message("generating axioms triples");
-                $.ajax({
-                    type: "GET",
-                    url: Config.apiUrl + "/jowl/manchesterAxiom2triples?" + params.toString(),
-                    dataType: "json",
-
-                    success: function(data, _textStatus, _jqXHR) {
-                        if (data.result && data.result.indexOf("Error") > -1) {
-                            return callbackSeries(data.result);
-                        }
-                        triples = data;
-                        callbackSeries();
-                        //  callback(null, data);
-                    },
-                    error(err) {
-                        callbackSeries(err.responseText);
-                    }
-                });
+                        success: function (data, _textStatus, _jqXHR) {
+                            if (data.result && data.result.indexOf("Error") > -1) {
+                                return callbackSeries(data.result);
+                            }
+                            triples = data;
+                            callbackSeries();
+                            //  callback(null, data);
+                        },
+                        error(err) {
+                            callbackSeries(err.responseText);
+                        },
+                    });
+                },
+                function (callbackSeries) {
+                    self.message("drawing axioms triples");
+                    Axioms_graph.drawAxiomsJowlTriples(null, triples);
+                },
+            ],
+            function (err) {
+                if (err) {
+                    alert(err);
+                }
+                self.message("");
             }
-            , function(callbackSeries) {
-                self.message("drawing axioms triples");
-                Axioms_graph.drawAxiomsJowlTriples(null, triples);
-            }
-
-
-        ], function(err) {
-            if (err) {
-                alert(err)
-            }
-            self.message("")
-        })
-
+        );
     };
 
     return self;
-})
-();
+})();
 
 export default Axioms_editor;
 window.Axioms_editor = Axioms_editor;

@@ -5,7 +5,6 @@
         background-color: #f3f1f1;
         border: none;
         margin-left: 5px;
-
     }
 
     #axiomsEditor_textDiv {
@@ -24,7 +23,6 @@
     #Axioms_editor_messageDiv {
         width: 500px;
         height: 250px;
-
     }
 
     .axiom_element {
@@ -52,13 +50,10 @@
             <input id="axiomsEditor_input" autocomplete="off" onkeyup="Axioms_editor.onInputChar($(this).val())" />
         </div>
         <div>
-            <select id="axiomsEditor_suggestionsSelect" onchange="Axioms_editor.onSelectSuggestion($(this))"
-                    size="15"></select>
+            <select id="axiomsEditor_suggestionsSelect" onchange="Axioms_editor.onSelectSuggestion($(this))" size="15"></select>
         </div>
-
     </div>
     <div>
-
         <select id="Axioms_editor_frameSelect">
             <option>subClassOf</option>
             <option>equivalentClass</option>
@@ -70,9 +65,6 @@
         <button onclick="Axioms_editor.saveAxiom()">saveAxiom</button>
         <button onclick="Axioms_editor.generateTriples()">generateTriples</button>
         <button onclick="Axioms_graph.drawAxiomsJowlTriples()">draw</button>
-
-
     </div>
     <div id="Axioms_editor_messageDiv"></div>
-
 </div>

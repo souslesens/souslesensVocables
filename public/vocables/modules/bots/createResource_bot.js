@@ -107,7 +107,7 @@ var CreateResource_bot = (function () {
             self.functions.listSuperClassesFn();
         },
         axiomaticDefinitionFn: function () {
-         /*   AxiomsEditor.init(self.params.resourceId, function (err, manchesterText) {
+            /*   AxiomsEditor.init(self.params.resourceId, function (err, manchesterText) {
                 self.params.manchesterText = manchesterText;
                 _botEngine.nextStep();
             });*/

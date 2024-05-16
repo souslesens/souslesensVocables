@@ -7,7 +7,6 @@ import Lineage_createRelation from "./lineage_createRelation.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Lineage_axioms_draw from "./lineage_axioms_draw.js";
 
-
 var Lineage_createResource = (function () {
     var self = {};
 

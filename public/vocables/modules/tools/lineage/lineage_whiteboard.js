@@ -1294,7 +1294,7 @@ var Lineage_whiteboard = (function () {
 
                     result.forEach(function (item) {
                         if (item.broader1) {
-                            let nodeSource = source
+                            let nodeSource = source;
                             let nodeColor = self.getSourceColor(nodeSource);
 
                             if (!existingNodes[item.subject.value]) {
@@ -1321,7 +1321,7 @@ var Lineage_whiteboard = (function () {
                                     //skip blank nodes
                                     return;
                                 }
-                                let broaderSource = item.broaderGraphs1? Sparql_common.getSourceFromGraphUris(item.broaderGraphs1.value,source):source
+                                let broaderSource = item.broaderGraphs1 ? Sparql_common.getSourceFromGraphUris(item.broaderGraphs1.value, source) : source;
                                 existingNodes[item.broader1.value] = 1;
                                 var node = {
                                     id: item.broader1.value,

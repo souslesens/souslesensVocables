@@ -13,17 +13,17 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var Sparql_common = (function() {
+var Sparql_common = (function () {
     var self = {};
     self.withoutImports = false;
 
-    var checkClosingBrackets = function(str) {
+    var checkClosingBrackets = function (str) {
         var c1 = (str.match(/\(/g) || []).length;
         var c2 = (str.match(/\)/g) || []).length;
         return c1 == c2;
     };
 
-    self.getLangFilter = function(source, conceptName) {
+    self.getLangFilter = function (source, conceptName) {
         var sourceObj = Config.sources[source];
         if (!sourceObj) {
             return "";
@@ -35,9 +35,9 @@ var Sparql_common = (function() {
         return " FILTER (lang(?" + conceptName + ")='" + pref_lang + "')";
     };
 
-    self.getBindingsValues = function(bindings) {
+    self.getBindingsValues = function (bindings) {
         var values = [];
-        bindings.forEach(function(item) {
+        bindings.forEach(function (item) {
             var obj = {};
             for (var key in item) {
                 obj[key] = item[key].value;
@@ -47,7 +47,7 @@ var Sparql_common = (function() {
         return values;
     };
 
-    self.setFilter = function(varName, ids, words, options) {
+    self.setFilter = function (varName, ids, words, options) {
         if (!ids && !words) {
             return "";
         }
@@ -86,7 +86,7 @@ var Sparql_common = (function() {
         }
 
         var filters = [];
-        varNames.forEach(function(varName) {
+        varNames.forEach(function (varName) {
             if (words) {
                 if (Array.isArray(words)) {
                     if (words.length == 0) {
@@ -96,7 +96,7 @@ var Sparql_common = (function() {
                         return "";
                     }
                     var conceptWordStr = "";
-                    words.forEach(function(word, _index) {
+                    words.forEach(function (word, _index) {
                         if (word.length > 1) {
                             if (options.exactMatch) {
                                 if (conceptWordStr != "") {
@@ -104,7 +104,7 @@ var Sparql_common = (function() {
                                     conceptWordStr += ",";
                                 }
                                 //conceptWordStr += "^" + formatWord(word) + "$";
-                                conceptWordStr += "\"" + formatWord(word) + "\"";
+                                conceptWordStr += '"' + formatWord(word) + '"';
                             } else {
                                 if (conceptWordStr != "") {
                                     conceptWordStr += "|";
@@ -116,7 +116,7 @@ var Sparql_common = (function() {
                     if (options.exactMatch) {
                         filters.push(" FILTER(?" + varName + "Label  in(" + conceptWordStr + "))");
                     } else {
-                        filters.push(" FILTER(regex(?" + varName + "Label , \"" + conceptWordStr + "\",\"i\")) ");
+                        filters.push(" FILTER(regex(?" + varName + 'Label , "' + conceptWordStr + '","i")) ');
                     }
                 } else {
                     if (words == null) {
@@ -127,7 +127,7 @@ var Sparql_common = (function() {
                         filters.push(" FILTER(?" + varName + "Label = '" + words + "')");
                         //filters.push(" regex(?" + varName + 'Label, "^' + words + '$", "i")');
                     } else {
-                        filters.push(" FILTER(regex(?" + varName + "Label, \"" + words + "\", \"i\"))");
+                        filters.push(" FILTER(regex(?" + varName + 'Label, "' + words + '", "i"))');
                     }
                 }
             } else if (ids) {
@@ -144,14 +144,14 @@ var Sparql_common = (function() {
                 var conceptIdsStr = "";
 
                 var uriIds = [];
-                ids.forEach(function(id, _index) {
+                ids.forEach(function (id, _index) {
                     if (true || ("" + id).indexOf(":") > -1) {
                         // literal
                         uriIds.push(id);
                     }
                 });
 
-                uriIds.forEach(function(id, _index) {
+                uriIds.forEach(function (id, _index) {
                     if (!id) {
                         return;
                     }
@@ -188,7 +188,7 @@ var Sparql_common = (function() {
         return filters[0];
 
         var filter = "";
-        filters.forEach(function(filterStr, index) {
+        filters.forEach(function (filterStr, index) {
             if (index > 0) {
                 filter += "  ";
             }
@@ -198,12 +198,12 @@ var Sparql_common = (function() {
         return filter;
     };
 
-    self.setSparqlResultPropertiesLabels = function(sourceLabel, SparqlResults, propVariable, callback) {
+    self.setSparqlResultPropertiesLabels = function (sourceLabel, SparqlResults, propVariable, callback) {
         if (SparqlResults.length == 0) {
             return callback(null, SparqlResults);
         }
         var propIds = [];
-        SparqlResults.forEach(function(item) {
+        SparqlResults.forEach(function (item) {
             if (!item[propVariable + "Label"]) {
                 if (propIds.indexOf(item[propVariable].value) < 0) {
                     propIds.push(item[propVariable].value);
@@ -217,16 +217,16 @@ var Sparql_common = (function() {
 
         //get props labels
         var filter = Sparql_common.setFilter("property", propIds);
-        Sparql_OWL.getObjectProperties(sourceLabel, { filter: filter }, function(err, resultProps) {
+        Sparql_OWL.getObjectProperties(sourceLabel, { filter: filter }, function (err, resultProps) {
             if (err) {
                 return callback(err);
             }
             var labelsMap = {};
-            resultProps.forEach(function(item) {
+            resultProps.forEach(function (item) {
                 labelsMap[item.property.value] = item.propertyLabel ? item.propertyLabel.value : Sparql_common.getLabelFromURI(item.property.value);
             });
 
-            SparqlResults.forEach(function(item) {
+            SparqlResults.forEach(function (item) {
                 if (labelsMap[item[propVariable].value]) {
                     item[propVariable + "Label"] = { type: "literal", value: labelsMap[item[propVariable].value] };
                 }
@@ -236,7 +236,7 @@ var Sparql_common = (function() {
         });
     };
 
-    self.getVariableLangLabel = function(variable, optional, skosPrefLabel, filterStr) {
+    self.getVariableLangLabel = function (variable, optional, skosPrefLabel, filterStr) {
         //lang doesnt ot work whern filter contains var label
 
         var pred = "";
@@ -255,11 +255,11 @@ var Sparql_common = (function() {
         return str;
     };
 
-    self.getUriFilter = function(varName, values) {
+    self.getUriFilter = function (varName, values) {
         if (values.value) {
             if (values.isString) {
                 var lang = values.lang ? "@" + values.lang : "";
-                str = "\"" + values.value.replace(/"/g, "'") + "\"";
+                str = '"' + values.value.replace(/"/g, "'") + '"';
                 return "filter( ?" + varName + "=" + str + lang + ").";
             }
         }
@@ -270,7 +270,7 @@ var Sparql_common = (function() {
 
         var str = "";
         var filterStr = "";
-        values.forEach(function(item, index) {
+        values.forEach(function (item, index) {
             if (index > 0) {
                 str += ",";
             }
@@ -281,7 +281,7 @@ var Sparql_common = (function() {
             }
 
             if (isLiteral) {
-                str += "\"" + item.replace(/"/g, "'") + "\"";
+                str += '"' + item.replace(/"/g, "'") + '"';
             } else {
                 str += "<" + item + ">";
             }
@@ -296,17 +296,17 @@ var Sparql_common = (function() {
         return filterStr;
     };
 
-    self.formatString = function(str, forUri) {
+    self.formatString = function (str, forUri) {
         return self.formatStringForTriple(str, forUri);
     };
 
-    self.formatStringForTriple = function(str, forUri) {
+    self.formatStringForTriple = function (str, forUri) {
         if (!str || !str.replace) {
             return null;
         }
         str = str.trim();
         str = str.replace(/\\/gm, "");
-        str = str.replace(/"/gm, "\\\"");
+        str = str.replace(/"/gm, '\\"');
         // str = str.replace(/;/gm, "\\\;")
         //  str = str.replace(/\n/gm, "\\\\n")
         str = str.replace(/\n/gm, "\\\\n");
@@ -329,23 +329,23 @@ var Sparql_common = (function() {
         return str;
     };
 
-    self.formatUrl = function(str) {
+    self.formatUrl = function (str) {
         str = str.replace(/%\d*/gm, "_");
 
         return str;
     };
 
-    self.getSourceGraphUrisMap = function(sourceLabel) {
+    self.getSourceGraphUrisMap = function (sourceLabel) {
         //set graphUrisMap
         var graphUrisMap = {};
         var sources = [sourceLabel];
         var imports = Config.sources[sourceLabel].imports;
         if (imports) {
-            imports.forEach(function(importSource) {
+            imports.forEach(function (importSource) {
                 sources.push(importSource);
             });
         }
-        sources.forEach(function(source) {
+        sources.forEach(function (source) {
             var graphUri = Config.sources[source].graphUri;
             graphUrisMap[graphUri] = source;
         });
@@ -353,7 +353,7 @@ var Sparql_common = (function() {
         return graphUrisMap;
     };
 
-    self.getSourceFromUri = function(uri, mainSource) {
+    self.getSourceFromUri = function (uri, mainSource) {
         var p = uri.lastIndexOf("#");
         if (p < 0) {
             p = uri.lastIndexOf("/");
@@ -365,9 +365,7 @@ var Sparql_common = (function() {
         return self.getSourceFromGraphUri(uri.substring(0, p + 1), mainSource);
     };
 
-
-    self.getSourceFromGraphUris = function(graphUris, mainSource) {
-
+    self.getSourceFromGraphUris = function (graphUris, mainSource) {
         if (graphUris.indexOf(Config.sources[mainSource].graphUri) > -1) {
             return mainSource;
         }
@@ -378,7 +376,7 @@ var Sparql_common = (function() {
         }
 
         var targetSource = mainSource;
-        sources.forEach(function(source) {
+        sources.forEach(function (source) {
             var graphUri = Config.sources[source].graphUri;
             if (graphUris.indexOf(graphUri) > -1) {
                 targetSource = source;
@@ -387,7 +385,7 @@ var Sparql_common = (function() {
         return targetSource;
     };
 
-    self.getSourceFromGraphUri = function(graphUri, mainSource) {
+    self.getSourceFromGraphUri = function (graphUri, mainSource) {
         if (mainSource) {
             if (!Config.sources[mainSource].imports) {
                 Config.sources[mainSource].imports = [];
@@ -396,7 +394,7 @@ var Sparql_common = (function() {
             var sourcesInScope = JSON.parse(JSON.stringify(Config.sources[mainSource].imports));
             sourcesInScope.push(mainSource);
             var graphUrisMap = [];
-            sourcesInScope.forEach(function(source) {
+            sourcesInScope.forEach(function (source) {
                 graphUrisMap[Config.sources[source].graphUri] = source;
             });
             return graphUrisMap[graphUri];
@@ -414,7 +412,7 @@ var Sparql_common = (function() {
         }
     };
 
-    self.getLabelFromURI = function(id) {
+    self.getLabelFromURI = function (id) {
         if (!id || !id.indexOf) {
             return;
         }
@@ -428,7 +426,7 @@ var Sparql_common = (function() {
         }
     };
 
-    self.setFilterGraph = function(source, filter) {
+    self.setFilterGraph = function (source, filter) {
         var graphUri;
         if (Config.basicVocabularies[source]) {
             graphUri = Config.basicVocabularies[source].graphUri;
@@ -440,7 +438,7 @@ var Sparql_common = (function() {
         return "GRAPH <" + graphUri + "> {" + filter + "}";
     };
 
-    self.getFromStr = function(source, named, withoutImports, options) {
+    self.getFromStr = function (source, named, withoutImports, options) {
         if (!options) {
             options = {};
         }
@@ -466,7 +464,7 @@ var Sparql_common = (function() {
             graphUris = [graphUris];
         }
 
-        graphUris.forEach(function(graphUri, _index) {
+        graphUris.forEach(function (graphUri, _index) {
             fromStr += from + "  <" + graphUri + "> ";
         });
         if (withoutImports === undefined) {
@@ -490,7 +488,7 @@ var Sparql_common = (function() {
 
         if (!withoutImports || self.includeImports) {
             if (imports) {
-                imports.forEach(function(source2) {
+                imports.forEach(function (source2) {
                     if (!Config.sources[source2]) {
                         return; // console.error(source2 + "not found");
                     }
@@ -516,7 +514,7 @@ var Sparql_common = (function() {
             if (!Array.isArray(options.includeSources)) {
                 options.includeSources = [options.includeSources];
             }
-            options.includeSources.forEach(function(source) {
+            options.includeSources.forEach(function (source) {
                 if (Config.sources[source] && Config.sources[source].graphUri) {
                     var importGraphUri = Config.sources[source].graphUri;
                     if (fromStr.indexOf(importGraphUri) < 0) {
@@ -529,7 +527,7 @@ var Sparql_common = (function() {
         return fromStr;
     };
 
-    self.getSparqlDate = function(date) {
+    self.getSparqlDate = function (date) {
         if (!date) {
             date = new Date();
         }
@@ -537,10 +535,10 @@ var Sparql_common = (function() {
         return str + "^^xsd:dateTime";
     };
 
-    self.getSourceFromUriInDefaultServer = function(uri, callback) {
+    self.getSourceFromUriInDefaultServer = function (uri, callback) {
         var query = "select ?g where  {graph ?g {<" + uri + "> ?p ?o}} limit 1";
         var graph;
-        Sparql_proxy.querySPARQL_GET_proxy("_default", query, "", {}, function(err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy("_default", query, "", {}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -559,13 +557,13 @@ var Sparql_common = (function() {
         });
     };
 
-    self.replaceSparqlPrefixByUri = function(str, prefixes) {
+    self.replaceSparqlPrefixByUri = function (str, prefixes) {
         for (var key in prefixes) {
             prefixes[key] = prefixes[key].replace("<", "");
             prefixes[key] = prefixes[key].replace(">", "");
             var regex = new RegExp(key + ":([\\S\\d]+)", "gm");
 
-            str = str.replace(regex, function(match, capture, offset) {
+            str = str.replace(regex, function (match, capture, offset) {
                 var p = capture.indexOf(".");
                 if (p == capture.length - 1) {
                     return "<" + prefixes[key] + capture.substring(0, capture.length - 1) + ">.";
@@ -575,14 +573,14 @@ var Sparql_common = (function() {
         }
         return str;
     };
-    self.getSpecificPredicates = function(options) {
+    self.getSpecificPredicates = function (options) {
         var str = " ";
 
         if (options.specificPredicates) {
             if (!Array.isArray(options.specificPredicates)) {
                 options.specificPredicates = [options.specificPredicates];
             }
-            options.specificPredicates.forEach(function(predicate, index) {
+            options.specificPredicates.forEach(function (predicate, index) {
                 if (index > 0) {
                     str += "|";
                 }
@@ -596,7 +594,7 @@ var Sparql_common = (function() {
         return null;
     };
 
-    self.setDateRangeSparqlFilter = function(varName, startDate, endDate, options) {
+    self.setDateRangeSparqlFilter = function (varName, startDate, endDate, options) {
         if (!options) {
             options = {};
         }
@@ -651,7 +649,7 @@ var Sparql_common = (function() {
         return filter;
     };
 
-    self.isTripleObjectString = function(property, object) {
+    self.isTripleObjectString = function (property, object) {
         if (property.toLowerCase().indexOf("label") > -1) {
             return true;
         }

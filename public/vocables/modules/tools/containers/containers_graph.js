@@ -2,11 +2,10 @@ import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
+var Containers_graph = (function () {
+    var self = {};
 
-var Containers_graph=(function(){
-var self={}
-
-    self.containerStyle = { shape: "square", color: "#fdac00",size:15,edgeColor:"#e7a1be",parentContainerColor:"#778dd7" };
+    self.containerStyle = { shape: "square", color: "#fdac00", size: 15, edgeColor: "#e7a1be", parentContainerColor: "#778dd7" };
 
     self.getContainerTypes = function (source, options, callback) {
         if (!options) {
@@ -40,7 +39,6 @@ var self={}
         });
     };
 
-
     self.graphParentContainers = function (source, ids, options, callback) {
         if (!options) {
             options = {};
@@ -58,11 +56,10 @@ var self={}
             filter += options.filter;
         }
 
-        options.depth=1
+        options.depth = 1;
 
-        Containers_query.getContainersAscendants(source, ids, options,function(err, result){
-            if(err)
-                return alert(err.responseText)
+        Containers_query.getContainersAscendants(source, ids, options, function (err, result) {
+            if (err) return alert(err.responseText);
 
             var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             var visjsData = { nodes: [], edges: [] };
@@ -71,7 +68,7 @@ var self={}
                 if (!existingNodes[item.ancestor.value]) {
                     existingNodes[item.ancestor.value] = 1;
 
-                    var label=item.ancestorLabel?item.ancestorLabel.value:Sparql_common.getLabelFromURI(item.ancestor.value)
+                    var label = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
 
                     visjsData.nodes.push({
                         id: item.ancestor.value,
@@ -117,9 +114,8 @@ var self={}
             if (callback) {
                 return callback(null, visjsData);
             }
-
-        })
-    }
+        });
+    };
 
     self.graphResources = function (source, containerData, options, callback) {
         if (!options) {
@@ -245,7 +241,6 @@ var self={}
                             });
                         }
 
-
                         if (item.member.value != item.parent.value) {
                             var edgeId = item.parent.value + "_" + "member" + "_" + item.member.value;
 
@@ -315,10 +310,10 @@ var self={}
                         });
                     }
 
-                //    setNodesLevel(visjsData);
+                    //    setNodesLevel(visjsData);
 
                     if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                        Lineage_whiteboard.drawNewGraph(visjsData, null,{noDecorations:1});
+                        Lineage_whiteboard.drawNewGraph(visjsData, null, { noDecorations: 1 });
                     } else {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
@@ -352,11 +347,8 @@ var self={}
         );
     };
 
-
-
-
     return self;
-})()
+})();
 
-export default Containers_graph
-window.Container_graph=Containers_graph
+export default Containers_graph;
+window.Container_graph = Containers_graph;

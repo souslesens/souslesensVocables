@@ -10,8 +10,8 @@ import Lineage_r from "../lineage/lineage_r.js";
 var KGcreator_r = (function () {
     var self = {};
     //changed files and functions
-    self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
-    self.oldshowDialog = SavedQueriesWidget.showDialog;
+    // self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
+    // self.oldshowDialog = SavedQueriesWidget.showDialog;
     self.currentTab = "";
 
     //self.oldshowMappingDialog=KGcreator_mappings.showMappingDialog;

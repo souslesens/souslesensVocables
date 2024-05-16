@@ -353,6 +353,38 @@ var Sparql_common = (function () {
         return graphUrisMap;
     };
 
+    self.getSourceFromUri = function (uri, mainSource) {
+        var p = uri.lastIndexOf("#");
+        if (p < 0) {
+            p = uri.lastIndexOf("/");
+        }
+        if (p < 0) {
+            return null;
+        }
+
+        return self.getSourceFromGraphUri(uri.substring(0, p + 1), mainSource);
+    };
+
+    self.getSourceFromGraphUris = function (graphUris, mainSource) {
+        if (graphUris.indexOf(Config.sources[mainSource].graphUri) > -1) {
+            return mainSource;
+        }
+
+        var sources = [mainSource];
+        if (Config.sources[mainSource].imports) {
+            sources = sources.concat(Config.sources[mainSource].imports);
+        }
+
+        var targetSource = mainSource;
+        sources.forEach(function (source) {
+            var graphUri = Config.sources[source].graphUri;
+            if (graphUris.indexOf(graphUri) > -1) {
+                targetSource = source;
+            }
+        });
+        return targetSource;
+    };
+
     self.getSourceFromGraphUri = function (graphUri, mainSource) {
         if (mainSource) {
             if (!Config.sources[mainSource].imports) {
@@ -381,7 +413,9 @@ var Sparql_common = (function () {
     };
 
     self.getLabelFromURI = function (id) {
-        if (!id || !id.indexOf) return;
+        if (!id || !id.indexOf) {
+            return;
+        }
 
         const p = id.lastIndexOf("#");
         if (p > -1) {

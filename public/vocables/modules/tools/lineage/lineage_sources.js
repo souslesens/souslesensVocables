@@ -428,6 +428,7 @@ sourceDivId +
     self.showSourceDivPopupMenu = function (sourceDivId) {
         event.stopPropagation();
         var source = Lineage_sources.sourceDivsMap[sourceDivId];
+        Lineage_sources.setCurrentSource(source);
         var html =
             ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.setSourceOpacity();"> Opacity</span>' +
             ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.closeSource();"> Close</span>' +
@@ -624,7 +625,7 @@ sourceDivId +
                 source = Lineage_sources.activeSource;
             }
             var color = Lineage_whiteboard.getSourceColor(source);
-            var color2 = common.colorToRgba(color, 0.1);
+            var color2 = common.colorToRgba(color, 0.6);
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
@@ -658,7 +659,7 @@ sourceDivId +
                     level: 1,
                     size: Lineage_whiteboard.defaultShapeSize,
                     data: { source: source },
-                    color: common.colorToRgba(color, 0.3),
+                    color: common.colorToRgba(color, 0.5),
                 };
                 visjsData.nodes.push(sourceNode);
             }

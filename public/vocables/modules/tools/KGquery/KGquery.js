@@ -219,6 +219,8 @@ var KGquery = (function () {
                 toNode.alias = toNode.label + (self.currentQueryElement.paths.length + 1);
                 return KGquery.addEdgeNodes(fromNode, toNode, edge);
             }
+        } else {
+            return KGquery.addEdgeNodes(fromNode, toNode, edge);
         }
     };
 
@@ -291,6 +293,8 @@ var KGquery = (function () {
                 self.queryResultToVisjsGraph(result);
             } else if (output == "TagsGeometry") {
                 self.queryToTagsGeometry(result.results.bindings);
+            } else if (output == "TagsCalendar") {
+                self.queryToTagsCalendar(result.results.bindings);
             }
         });
     };
@@ -541,6 +545,16 @@ var KGquery = (function () {
             setTimeout(function () {
                 //   import TagsGeometry from "../../../../plugins/TagsGeometry/public/js/main.js";
                 TagsGeometry.draw(tagsMap);
+            }, 2000);
+        });
+    };
+
+    self.queryToTagsCalendar = function (data) {
+        if (data.length == 0) return alert("no result");
+        ResponsiveUI.onToolSelect("TagsCalendar", null, function () {
+            setTimeout(function () {
+                //   import TagsGeometry from "../../../../plugins/TagsGeometry/public/js/main.js";
+                TagsCalendar.drawSparqlResultTimeLine({ data: data });
             }, 2000);
         });
     };

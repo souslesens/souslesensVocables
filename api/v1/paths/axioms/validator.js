@@ -26,8 +26,8 @@ module.exports = function() {
         if (req.query.options) {
             options = JSON.parse(req.query.options);
         }
-        if(false) {
-            ManchesterSyntaxEngine.getSuggestion(req.query.source, req.query.axiom, options, callback);
+        if(true) {
+            ManchesterSyntaxEngine.validateAxiom( req.query.axiom, callback);
             return;
         }
         var url="http://localhost:3000/parse"

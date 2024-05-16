@@ -5,7 +5,7 @@ import Lineage_selection from "./lineage_selection.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
-import Containers_UI from "../containers/Containers_UI.js";
+import Containers_graph from "../containers/containers_graph.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
@@ -115,7 +115,7 @@ var Lineage_whiteboard = (function () {
                 SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
                 $("#Lineage_containers_searchInput").bind("keydown", null, function () {
                     if (event.keyCode == 13) {
-                        Containers_UI.search();
+                        Containers_graph.search();
                     }
                 });
 
@@ -673,7 +673,7 @@ var Lineage_whiteboard = (function () {
                     var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
 
                     if (false && sourceNode.data && sourceNode.data.type != "container" && targetNode.data && targetNode.data.type == "container") {
-                        return Containers_UI.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);
+                        return Containers_graph.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);
                     }
 
                     if (Lineage_graphTraversal.inPathMode) {
@@ -718,7 +718,7 @@ var Lineage_whiteboard = (function () {
 
             //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
 
-            if (self.lineageVisjsGraph.isGraphNotEmpty()) {
+            if (self.lineageVisjsGraph.isGraphNotEmpty() && !_options.noDecorations) {
                 Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
                 //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
             }
@@ -1294,7 +1294,7 @@ var Lineage_whiteboard = (function () {
 
                     result.forEach(function (item) {
                         if (item.broader1) {
-                            let nodeSource = item.broader1Graph ? Sparql_common.getSourceFromGraphUri(item.broader1Graph.value, source) : source;
+                            let nodeSource = source;
                             let nodeColor = self.getSourceColor(nodeSource);
 
                             if (!existingNodes[item.subject.value]) {
@@ -1307,7 +1307,7 @@ var Lineage_whiteboard = (function () {
                                     color: nodeColor,
                                     size: Lineage_whiteboard.defaultShapeSize,
                                     data: {
-                                        source: source,
+                                        source: nodeSource,
                                         label: item.subjectLabel.value,
                                         id: item.subject.value,
                                     },
@@ -1321,6 +1321,7 @@ var Lineage_whiteboard = (function () {
                                     //skip blank nodes
                                     return;
                                 }
+                                let broaderSource = item.broaderGraphs1 ? Sparql_common.getSourceFromGraphUris(item.broaderGraphs1.value, source) : source;
                                 existingNodes[item.broader1.value] = 1;
                                 var node = {
                                     id: item.broader1.value,
@@ -1330,7 +1331,7 @@ var Lineage_whiteboard = (function () {
                                     color: nodeColor,
                                     size: Lineage_whiteboard.defaultShapeSize,
                                     data: {
-                                        source: source,
+                                        source: broaderSource,
                                         label: item.broader1Label.value,
                                         id: item.broader1.value,
                                     },

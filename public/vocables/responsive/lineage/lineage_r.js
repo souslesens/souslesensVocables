@@ -72,6 +72,11 @@ var Lineage_r = (function () {
                 $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
                 Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
                 self.hideShowMoreActions("hide");
+
+                if (window.location.href.indexOf("localhost") < 0) {
+                    $("#lineage_actionDiv_newAxiom").css("display", "none");
+                }
+
                 ResponsiveUI.PopUpOnHoverButtons();
                 $("#lateralPanelDiv").resizable({
                     maxWidth: 435,

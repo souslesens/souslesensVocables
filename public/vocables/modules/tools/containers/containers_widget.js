@@ -1,5 +1,5 @@
 import Lineage_sources from "../lineage/lineage_sources.js";
-import Containers_UI from "./Containers_UI.js";
+import Containers_graph from "./containers_graph.js";
 import common from "../../shared/common.js";
 import Lineage_containers from "../lineage/lineage_containers.js";
 
@@ -42,7 +42,7 @@ var Containers_widget = (function () {
             source = Lineage_sources.activeSource;
         }
         self.currentSource = source;
-        Containers_UI.getContainerTypes(source, null, function (err, types) {
+        Containers_graph.getContainerTypes(source, null, function (err, types) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -61,7 +61,7 @@ var Containers_widget = (function () {
         if (type != "all") {
             filter = " ?container rdf:type <" + type + ">. ";
         }
-        Lineage_containers.graphWhiteboardNodesContainers(self.currentSource, null, { filter: filter });
+        Containers_graph.graphParentContainers(self.currentSource, null, { filter: filter });
     };
 
     return self;

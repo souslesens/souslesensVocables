@@ -1,0 +1,70 @@
+<style>
+    #axiomsEditor_input {
+        width: 220px;
+        border-radius: 3px;
+        background-color: #f3f1f1;
+        border: none;
+        margin-left: 5px;
+    }
+
+    #axiomsEditor_textDiv {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: baseline;
+        width: 600px;
+    }
+
+    #axiomsEditor_suggestionsSelect {
+        width: 300px;
+    }
+
+    #Axioms_editor_messageDiv {
+        width: 500px;
+        height: 250px;
+    }
+
+    .axiom_element {
+        margin: 3px;
+    }
+
+    .axiom_keyWord {
+        color: gray;
+        font-weight: bold;
+    }
+
+    .axiom_Class {
+        color: green;
+        font-weight: bold;
+    }
+
+    .axiom_Property {
+        color: blue;
+        font-weight: bold;
+    }
+</style>
+<div>
+    <div style="display: flex; flex-direction: column; width: 800px; height: 500px">
+        <div id="axiomsEditor_textDiv">
+            <input id="axiomsEditor_input" autocomplete="off" onkeyup="Axioms_editor.onInputChar($(this).val())" />
+        </div>
+        <div>
+            <select id="axiomsEditor_suggestionsSelect" onchange="Axioms_editor.onSelectSuggestion($(this))" size="15"></select>
+        </div>
+    </div>
+    <div>
+        <select id="Axioms_editor_frameSelect">
+            <option>subClassOf</option>
+            <option>equivalentClass</option>
+            <option>disjointWith</option>
+            <option>disjointUnionWith</option>
+        </select>
+        <button onclick="Axioms_editor.clear()">clear</button>
+        <button onclick="Axioms_editor.checkSyntax()">checkSyntax</button>
+        <button onclick="Axioms_editor.saveAxiom()">saveAxiom</button>
+        <button onclick="Axioms_editor.generateTriples()">generateTriples</button>
+        <button onclick="Axioms_graph.drawAxiomsJowlTriples()">draw</button>
+    </div>
+    <div id="Axioms_editor_messageDiv"></div>
+</div>

@@ -14,7 +14,7 @@ import { DatabasesTable } from "./Component/DatabasesTable";
 import { ServerSource, getSources, getIndices, getGraphs, getMe } from "./Source";
 import { Config, getConfig } from "./Config";
 import { Database, getDatabases } from "./Database";
-import { Log, getLogs } from "./Log";
+import { Log, getLogs, getLogFiles } from "./Log";
 
 type Model = {
     users: RD<string, User[]>;
@@ -24,6 +24,7 @@ type Model = {
     graphs: RD<string, string[]>;
     me: RD<string>;
     databases: RD<Database[]>;
+    logfiles: RD<string, string | boolean>[];
     logs: RD<string, Log[]>;
     config: RD<string, Config>;
     isModalOpen: boolean;
@@ -102,6 +103,7 @@ type Msg =
     | { type: "ServerRespondedWithConfig"; payload: RD<string, Config> }
     | { type: "ServerRespondedWithDatabases"; payload: RD<Database[]> }
     | { type: "ServerRespondedWithLogs"; payload: RD<string, Log[]> }
+    | { type: "ServerRespondedWithLogFiles"; payload: RD<string, string | boolean>[] }
     | { type: "UserUpdatedField"; payload: UpadtedFieldPayload }
     | { type: "UserClickedSaveChanges"; payload: {} }
     | { type: "UserChangedModalState"; payload: boolean }
@@ -137,6 +139,9 @@ function update(model: Model, msg: Msg): Model {
 
         case "ServerRespondedWithLogs":
             return { ...model, logs: msg.payload };
+
+        case "ServerRespondedWithLogFiles":
+            return { ...model, logfiles: msg.payload };
 
         case "UserClickedSaveChanges":
             return { ...model, isModalOpen: false };
@@ -176,8 +181,7 @@ const Admin = () => {
     }, []);
 
     React.useEffect(() => {
-        Promise
-            .all([getMe(), getSources(), getIndices(), getGraphs()])
+        Promise.all([getMe(), getSources(), getIndices(), getGraphs()])
             .then(([me, sources, indices, graphs]) => {
                 updateModel({ type: "ServerRespondedWithMe", payload: success(me) });
                 updateModel({ type: "ServerRespondedWithSources", payload: success(sources) });
@@ -205,8 +209,8 @@ const Admin = () => {
     }, []);
 
     React.useEffect(() => {
-        getLogs()
-            .then((logs) => updateModel({ type: "ServerRespondedWithLogs", payload: success(logs) }))
+        getLogFiles()
+            .then((files) => updateModel({ type: "ServerRespondedWithLogFiles", payload: success(files) }))
             .catch((err: { message: string }) => failure(err.message));
     }, []);
 

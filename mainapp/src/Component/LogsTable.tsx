@@ -1,10 +1,32 @@
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 
-import { Box, Button, TextField, CircularProgress, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack, TableSortLabel } from "@mui/material";
+import {
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    FormControl,
+    InputAdornment,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TableSortLabel,
+    TextField,
+} from "@mui/material";
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
-import { Log } from "../Log";
+import { Log, getLogs } from "../Log";
 import CsvDownloader from "react-csv-downloader";
 
 export const LogsTable = () => {
@@ -13,14 +35,27 @@ export const LogsTable = () => {
     const [filteringChars, setFilteringChars] = React.useState("");
     const [orderBy, setOrderBy] = React.useState<keyof Log>("timestamp");
     const [order, setOrder] = React.useState<Order>("desc");
+
+    const [selectedPeriod, setSelectedPeriod] = React.useState<string>(undefined);
+    const [selectedLogs, setSelectedLogs] = React.useState<Log[]>([]);
+
     type Order = "asc" | "desc";
-    function handleRequestSort(property: keyof Log) {
+
+    const handleRequestSort = (property: keyof Log) => {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
-    }
+    };
 
-    const renderLogs = SRD.match(
+    const handleLogSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSelectedPeriod(event.target.value);
+    };
+
+    React.useEffect(() => {
+        getLogs(selectedPeriod).then((data) => setSelectedLogs(data));
+    }, [selectedPeriod]);
+
+    return SRD.match(
         {
             notAsked: () => <p>Let&apos;s fetch some data!</p>,
             loading: () => (
@@ -29,13 +64,17 @@ export const LogsTable = () => {
                 </Box>
             ),
             failure: (msg: string) => (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
-                </Box>
+                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                    {`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}
+                </Alert>
             ),
-            success: (gotLogs: Log[]) => {
+            success: () => {
+                if (selectedPeriod === undefined) {
+                    setSelectedPeriod(model.logfiles.data.find((log) => log.current).date);
+                }
+
                 const sortedLogs = () =>
-                    gotLogs
+                    selectedLogs
                         .map((item, index) => ({ ...item, key: index }))
                         .slice()
                         .sort((a: Log, b: Log) => {
@@ -46,29 +85,53 @@ export const LogsTable = () => {
                             }
                             return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                         });
-                const memoizedLogs = React.useMemo(() => sortedLogs(), [gotLogs, orderBy, order]);
+
+                const memoizedLogs = React.useMemo(() => sortedLogs(), [selectedLogs, orderBy, order]);
                 const getOptions = () =>
                     memoizedLogs.filter(function (this: Set<string>, { user }) {
                         return !this.has(user) && this.add(user);
                     }, new Set());
-                const memoizedOptions = React.useMemo(() => getOptions(), [gotLogs]);
+                const memoizedOptions = React.useMemo(() => getOptions(), [selectedLogs]);
+
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
-                        <Autocomplete
-                            disablePortal
-                            id="search-logs"
-                            options={memoizedOptions}
-                            onInputChange={(event, newInputValue) => {
-                                setFilteringChars(newInputValue);
-                            }}
-                            getOptionLabel={(option) => option.user}
-                            renderOption={(props, option) => (
-                                <li {...props} key={option.key}>
-                                    {option.user}
-                                </li>
-                            )}
-                            renderInput={(params) => <TextField {...params} label="Search logs by username" />}
-                        />
+                        <Stack direction="row" spacing={{ xs: 2 }} useFlexGap>
+                            <TextField
+                                select
+                                id="select-period"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <CalendarMonthIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                label="Select Period"
+                                onChange={handleLogSelection}
+                                size="medium"
+                                value={selectedPeriod}
+                            >
+                                {model.logfiles.data.map((file) => (
+                                    <MenuItem value={file.date}>{file.date}</MenuItem>
+                                ))}
+                            </TextField>
+                            <Autocomplete
+                                disablePortal
+                                id="search-logs"
+                                options={memoizedOptions}
+                                onInputChange={(event, newInputValue) => {
+                                    setFilteringChars(newInputValue);
+                                }}
+                                getOptionLabel={(option) => option.user}
+                                renderOption={(props, option) => (
+                                    <li {...props} key={option.key}>
+                                        {option.user}
+                                    </li>
+                                )}
+                                renderInput={(params) => <TextField {...params} label="Search logs by username" />}
+                                sx={{ flex: 1 }}
+                            />
+                        </Stack>
                         <TableContainer sx={{ height: "400px" }} component={Paper}>
                             <Table stickyHeader>
                                 <TableHead>
@@ -101,7 +164,9 @@ export const LogsTable = () => {
                                         .map((log) => {
                                             return (
                                                 <TableRow key={log.key}>
-                                                    <TableCell align="center" style={{ whiteSpace: "nowrap" }}>{log.timestamp}</TableCell>
+                                                    <TableCell align="center" style={{ whiteSpace: "nowrap" }}>
+                                                        {log.timestamp}
+                                                    </TableCell>
                                                     <TableCell align="center">{log.user}</TableCell>
                                                     <TableCell align="center">{log.tool}</TableCell>
                                                     <TableCell>{log.source}</TableCell>
@@ -112,16 +177,14 @@ export const LogsTable = () => {
                             </Table>
                         </TableContainer>
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <CsvDownloader filename="logs.csv" datas={gotLogs}>
+                            <CsvDownloader filename="logs.csv" datas={memoizedLogs}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
                         </Stack>
-                     </Stack>
+                    </Stack>
                 );
             },
         },
-        model.logs
+        model.logfiles
     );
-
-    return renderLogs;
 };

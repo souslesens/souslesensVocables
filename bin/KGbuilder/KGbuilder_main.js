@@ -197,7 +197,7 @@ var KGbuilder_main = {
                 },
 
                 function(err) {
-                    return callback(err);
+                    return callback(err,output);
                 }
             );
         });

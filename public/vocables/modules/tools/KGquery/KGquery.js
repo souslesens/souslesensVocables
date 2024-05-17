@@ -35,6 +35,7 @@ var KGquery = (function () {
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
     self.onLoaded = function () {
+        self.clearAll();
         $("#actionDivContolPanelDiv").load("modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
             KGquery_graph.init();
         });
@@ -210,8 +211,8 @@ var KGquery = (function () {
                 Containers_widget.showDialog(self.currentSource, options, function (err, result) {
                     //  KGquery_filter.selectContainerFilters(fromNode,function(err, result){
                     fromNode.data.containerFilter = {
-                        classId: result.topMember.id,
-                        depth: result.depth,
+                        classId: result ? result.topMember.id : null,
+                        depth: result ? result.depth : 1,
                     };
                     KGquery.addEdgeNodes(fromNode, toNode, edge);
                 });
@@ -342,6 +343,7 @@ var KGquery = (function () {
                     var uniqueQueries = {};
 
                     self.querySets.sets.forEach(function (querySet) {
+                        if (querySet.elements.length == 0 || !querySet.elements[0].fromNode) return;
                         if (querySet.booleanOperator) {
                             whereStr += "\n " + querySet.booleanOperator + "\n ";
                         }
@@ -383,7 +385,9 @@ var KGquery = (function () {
                                     if (!queryElement.fromNode.data.containerFilter) {
                                         return;
                                     }
-                                    filterStr += "\n FILTER(" + subjectVarName + "=<" + queryElement.fromNode.data.containerFilter.classId + ">)\n ";
+                                    if (queryElement.fromNode.data.containerFilter.classId) {
+                                        filterStr += "\n FILTER(" + subjectVarName + "=<" + queryElement.fromNode.data.containerFilter.classId + ">)\n ";
+                                    }
                                     var depth = queryElement.fromNode.data.containerFilter.depth || 1;
                                     {
                                         if (depth) {
@@ -432,7 +436,7 @@ var KGquery = (function () {
                         }
 
                         whereStr += predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
-                        if (predicateStr) {
+                        if (optionalPredicatesSparql) {
                             whereStr += optionalPredicatesSparql;
                         }
                         //  whereStr = "{" + whereStr + "}";
@@ -550,7 +554,9 @@ var KGquery = (function () {
     };
 
     self.queryToTagsCalendar = function (data) {
-        if (data.length == 0) return alert("no result");
+        if (data.length == 0) {
+            return alert("no result");
+        }
         ResponsiveUI.onToolSelect("TagsCalendar", null, function () {
             setTimeout(function () {
                 //   import TagsGeometry from "../../../../plugins/TagsGeometry/public/js/main.js";

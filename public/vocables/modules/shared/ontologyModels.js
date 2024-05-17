@@ -1098,7 +1098,7 @@ var OntologyModels = (function () {
             "  filter (?class not in (owl:NamedIndividual))\n" +
             "  ?s ?prop ?v.\n" +
             "   bind (datatype(?v) as ?datatype)\n" +
-            "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>))\n" +
+            "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))\n" +
             "\n" +
             "}";
         /*   " WHERE {   \n" +

@@ -35,6 +35,7 @@ var KGquery = (function () {
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
     self.onLoaded = function () {
+        self.clearAll();
         $("#actionDivContolPanelDiv").load("modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
             KGquery_graph.init();
         });

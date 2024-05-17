@@ -168,6 +168,7 @@ var KGcreator_bot = (function () {
                 namedIndividual: { addMappingToModelFn: self.workflowRdfType },
                 class: { listSuperClassVocabFn: { listSuperClassFn: { listClassLabelColumnFn: { addMappingToModelFn: {} } } } },
                 other: self.workflowColumnmMappingOther,
+                bag: { addMappingToModelFn: {} },
             },
         },
     };
@@ -222,7 +223,7 @@ var KGcreator_bot = (function () {
         },
 
         setUriTypeFn: function () {
-            var choices = ["namedIndividual", "blankNode", "class", "other"];
+            var choices = ["namedIndividual", "blankNode", "class", "bag", "other"];
 
             _botEngine.showList(choices, "uriType");
         },
@@ -494,6 +495,15 @@ var KGcreator_bot = (function () {
                         s: column,
                         p: "rdf:type",
                         o: "owl:NamedIndividual",
+                    };
+                    self.currentUri = column;
+                    self.params.tripleModels.push(triple);
+                    return _botEngine.nextStep();
+                } else if (uriType == "bag") {
+                    triple = {
+                        s: column,
+                        p: "rdf:type",
+                        o: "rdf:Bag",
                     };
                     self.currentUri = column;
                     self.params.tripleModels.push(triple);

@@ -302,6 +302,7 @@ var KGquery_graph = (function () {
 
     self.getInferredModelVisjsData = function (source, callback) {
         MainController.UI.message("creating graph");
+
         if (!source) {
             source = self.source;
         }

@@ -586,7 +586,10 @@ var KGbuilder_triplesMaker = {
                 }
                 KGbuilder_socket.message(options.clientSocketId, " data loaded from " + tableMappings.table, false);
               //  tableData = result.data[0];
-                tableData = [].concat(...Object.values(result.data));
+
+                result.data.forEach(function(slice) {
+                    tableData = tableData.concat(slice);
+                })
                 callback(null, tableData);
             });
         } else if (tableMappings.datasourceConfig) {

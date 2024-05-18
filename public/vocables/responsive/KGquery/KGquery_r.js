@@ -84,7 +84,7 @@ var KGquery_r = (function () {
     self.initQuery = function () {
         if ($("#tabs_Query").children().length == 0) {
             $("#tabs_Query").load("./responsive/KGquery/html/KGqueryQueryTab.html", function () {
-                KGquery.addQuerySet();
+              //  KGquery.addQuerySet();
             });
         }
     };

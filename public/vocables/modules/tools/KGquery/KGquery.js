@@ -127,7 +127,7 @@ var KGquery = (function () {
         self.divsMap[nodeDivId] = node;
     };
 
-    self.addNode = function (selectedNode, nodeEvent) {
+    self.addNode = function (selectedNode, nodeEvent,callback) {
         if (!selectedNode) {
             return;
         }
@@ -170,12 +170,16 @@ var KGquery = (function () {
 
                     var predicateLabel = KGquery_controlPanel.getQueryElementPredicateLabel(self.currentQueryElement);
                     KGquery_controlPanel.addPredicateToQueryElementDiv(self.currentQueryElement.divId, predicateLabel);
+                    if(callback)
+                        return callback()
 
                 });
             });
         } else if (!self.currentQueryElement.fromNode) {
             self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode");
             self.currentFromNode = node;
+            if(callback)
+                return callback()
         } else if (!self.currentQueryElement.toNode) {
             //give new varName to the classId
             if (self.currentQueryElement.fromNode.id == node.id) {
@@ -192,8 +196,10 @@ var KGquery = (function () {
 
                 var predicateLabel = KGquery_controlPanel.getQueryElementPredicateLabel(self.currentQueryElement);
                 KGquery_controlPanel.addPredicateToQueryElementDiv(self.currentQueryElement.divId, predicateLabel);
+                if(callback)
+                    return callback()
 
-              //  self.addQueryElementToQuerySet(self.currentQuerySet);
+
             });
         }
     };

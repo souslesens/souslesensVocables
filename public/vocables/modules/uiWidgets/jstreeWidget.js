@@ -666,6 +666,10 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
 
+    self.closeDialog=function(){
+        $("#smallDialogDiv").dialog("close")
+    }
+
     return self;
 })();
 

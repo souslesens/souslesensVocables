@@ -50,7 +50,13 @@ var KGbuilder_triplesMaker = {
                         if (!KGbuilder_triplesMaker.allColumns[key]) {
                             KGbuilder_triplesMaker.allColumns[key] = 1;
                         }
-                        line[key] = "" + line[key];
+                        if (line[key] instanceof Date) {
+                            line[key] = line[key].toISOString();
+                        } else {
+
+                            line[key] = "" + line[key];
+
+                        }
                         if (line[key] && !KGbuilder_triplesMaker.isUri(line[key])) {
                             line[key] = util.formatStringForTriple(line[key]);
                         }
@@ -76,9 +82,7 @@ var KGbuilder_triplesMaker = {
                             }
                         }
 
-                        if (mapping.p == "http://rds.posccaesar.org/ontology/lis14/rdl/before") {
-                            var x = 3;
-                        }
+
                         async.series(
                             [
                                 function(callbackSeries) {
@@ -274,53 +278,30 @@ var KGbuilder_triplesMaker = {
                     return callback(null, null);
                 }
                 if (mapping.dataType.startsWith("xsd:date")) {
-                 /*   var isDateOk;
-                    try {
-                        var date= new Date(str);
-                        if(date=="Invalid Date" )
-                            isDateOk = false;
-                        else{
-                            str=date.toISOString()
-                            mapping.dateFormat="ISO"
+                    if (str.match(/[.-]*Z/)) {//ISO string format (coming from database)
+                       str=util.convertISOStringDateForTriple(str);
+                    } else if (mapping.dateFormat) {
+                        str = util.getDateFromSLSformat(mapping.dateFormat, str);
+                        if (!str) {
+                            return callback(null, null);
                         }
+                    } else {
 
-
-                        isDateOk = true;
-                    } catch (e) {
-                        isDateOk = false;
-                    }*/
-
-                 //   if (true || isDateOk) {
-                      if (true ) {
-                        if (mapping.dateFormat) {
-
-
-                            str = util.getDateFromSLSformat(mapping.dateFormat, str);
-                            if (!str) {
-                                return callback(null, null);
-                            }
-
-                        } else {
-
-
-                            var isDate = function(date) {
-                                return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
-                            };
-
-                            var formatDate = function(date) {
-                                str = new Date(date).toISOString(); //.slice(0, 10);
-                            };
-
-                            if (!isDate(str)) {
-                                var date = util.convertFrDateStr2Date(str);
-                                if (!date) {
-                                    return;
-                                } else {
-                                    str = date.toISOString();
-                                }
+                        var isDate = function(date) {
+                            return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
+                        };
+                        var formatDate = function(date) {
+                            str = new Date(date).toISOString(); //.slice(0, 10);
+                        };
+                        if (!isDate(str)) {
+                            var date = util.convertFrDateStr2Date(str);
+                            if (!date) {
+                                return;
                             } else {
-                                str = formatDate(str);
+                                str = date.toISOString();
                             }
+                        } else {
+                            str = formatDate(str);
                         }
                     }
                 }
@@ -585,11 +566,11 @@ var KGbuilder_triplesMaker = {
                     return callback(err);
                 }
                 KGbuilder_socket.message(options.clientSocketId, " data loaded from " + tableMappings.table, false);
-              //  tableData = result.data[0];
+                //  tableData = result.data[0];
 
                 result.data.forEach(function(slice) {
                     tableData = tableData.concat(slice);
-                })
+                });
                 callback(null, tableData);
             });
         } else if (tableMappings.datasourceConfig) {

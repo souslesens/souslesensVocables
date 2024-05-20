@@ -59,6 +59,8 @@ var KGquery_nodeSelector = (function() {
             }
 
         };
+        self.alowedNodes=[]
+        self.options=options
         JstreeWidget.loadJsTree(null, jstreeData, options, function() {
             JstreeWidget.openNodeDescendants(null, "#");
         });
@@ -67,15 +69,26 @@ var KGquery_nodeSelector = (function() {
 
     self.onSelectNode = function(node) {
         var targetNodes = KGquery_paths.getNodeLinkedNodes(node.id);
-       var disabledNodes=self.jstreeData.map((v, i) => v.id)
-        $("#"+JstreeWidget.jstreeDiv).jstree().disable_checkbox(disabledNodes)
-        $("#"+JstreeWidget.jstreeDiv).jstree().disable_node(disabledNodes)
-        $("#"+JstreeWidget.jstreeDiv).jstree().enable_checkbox(targetNodes)
-        $("#"+JstreeWidget.jstreeDiv).jstree().enable_node(disabledNodes)
-        node.label = node.text;
-        KGquery.addNode(node, null, function(err, result) {
+        self.alowedNodes= self.alowedNodes.concat(targetNodes)
+        var allowedJstreeData=[]
+     self.jstreeData.forEach(function(item){
+      if( self.alowedNodes.indexOf(item.id)>-1)
+          allowedJstreeData.push(item)
+    })
 
-        });
+        JstreeWidget.loadJsTree(null, allowedJstreeData, self.options, function() {
+
+            /*
+           var disabledNodes=self.jstreeData.map((v, i) => v.id)
+            $("#"+JstreeWidget.jstreeDiv).jstree().disable_checkbox(disabledNodes)
+            $("#"+JstreeWidget.jstreeDiv).jstree().disable_node(disabledNodes)
+            $("#"+JstreeWidget.jstreeDiv).jstree().enable_checkbox(targetNodes)
+            $("#"+JstreeWidget.jstreeDiv).jstree().enable_node(disabledNodes)*/
+            node.label = node.text;
+            KGquery.addNode(node, null, function(err, result) {
+
+            });
+        })
 return
         if (!KGquery.currentQueryElement || KGquery.currentQueryElement.length == 0) {
             KGquery.addNode(node);

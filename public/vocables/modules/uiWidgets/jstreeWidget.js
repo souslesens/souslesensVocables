@@ -389,6 +389,11 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             console.error(e);
         }
     };
+    self.getjsTreeCheckedNodes = function (jstreeDiv) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+       return $("#"+jstreeDiv).jstree().get_checked(true)
+    }
+
     self.getjsTreeNodes = function (jstreeDiv, IdsOnly, parentNodeId) {
         if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         if (!parentNodeId) {

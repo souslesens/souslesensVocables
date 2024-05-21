@@ -21,6 +21,7 @@ const logDir = config.logDir ? config.logDir : "log/souslesens";
 
 const transportProps = {
     datePattern: "YYYY-MM",
+    keep: 12,
     zippedArchive: true,
     createSymlink: true,
 };

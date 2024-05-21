@@ -112,8 +112,9 @@ var KGquery_paths = (function() {
 
 
 
-    self.getNodeLinkedNodes= function(fromNodeId) {
-var maxLevels=3
+    self.getNodeLinkedNodes= function(fromNodeId,maxLevels) {
+if(!maxLevels)
+    maxLevels=1
         var edges = KGquery_graph.visjsData.edges;
 
         var linkedNodes=[]
@@ -131,6 +132,8 @@ var maxLevels=3
         function recurse(node,level){
 
             nodesMap[node].forEach(function(targetNode){
+                if(fromNodeId==targetNode)
+                    return;
                 if(level <maxLevels &&linkedNodes.indexOf(targetNode)<0) {
                     linkedNodes.push(targetNode)
                     recurse(targetNode,level+1)

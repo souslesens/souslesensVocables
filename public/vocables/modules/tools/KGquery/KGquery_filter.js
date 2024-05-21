@@ -83,7 +83,7 @@ var KGquery_filter = (function() {
             });
         });
 
-        var options = {
+        var jstreeOptions = {
             withCheckboxes: true,
             selectTreeNodeFn: function(event, obj) {
                 var node = obj.node;
@@ -96,10 +96,27 @@ var KGquery_filter = (function() {
                 });
             }
         };
-        JstreeWidget.loadJsTree(null, jstreeData, options, function() {
+        JstreeWidget.loadJsTree(null, jstreeData, jstreeOptions, function() {
             JstreeWidget.openNodeDescendants(null, "root");
-            if (true || queryNonObjectProperties.length < self.maxOptionalPredicatesInQuery) {
+            if ( queryNonObjectProperties.length < self.maxOptionalPredicatesInQuery) {
                 JstreeWidget.checkAll();
+            }else{
+                var preCheckedOptions=[]
+
+                var precheckedWords=["label","name","date"]
+                jstreeData.forEach(function(item){
+                    var str=item.text.toLowerCase()
+                    precheckedWords.forEach(function(expression){
+                        if(str.indexOf(expression)>-1)
+                            preCheckedOptions.push(item.id)
+                    })
+
+
+                })
+                jstreeWidget.setjsTreeCheckedNodes(null,preCheckedOptions)
+
+
+
             }
 
             if (options && options.output != "table") {

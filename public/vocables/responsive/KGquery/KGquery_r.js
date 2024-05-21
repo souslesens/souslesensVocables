@@ -16,6 +16,10 @@ var KGquery_r = (function () {
         SavedQueriesWidget.showDialog = self.SavedQueriesComponentShowDialogResponsive;
         //ResponsiveUI.replaceFile(KGquery_controlPanel, KGquery_controlPanelResponsive);
         ResponsiveUI.initMenuBar(self.loadSource);
+        KGquery.clearAll()
+        if (Config.clientCache.KGquery) {
+            KGquery_myQueries.load(null, Config.clientCache.KGquery);
+        }
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
     };
@@ -46,6 +50,7 @@ var KGquery_r = (function () {
                     KGquery_graph.drawVisjsModel("saved");
                     ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery_r.initQuery, "#QueryTabButton");
                     ResponsiveUI.resetWindowHeight();
+                    self.clearAll()
                     if (Config.clientCache.KGquery) {
                         setTimeout(function () {
                             KGquery_myQueries.load(null, Config.clientCache.KGquery);

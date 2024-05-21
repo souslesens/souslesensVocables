@@ -394,6 +394,11 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
        return $("#"+jstreeDiv).jstree().get_checked(true)
     }
 
+    self.setjsTreeCheckedNodes = function (jstreeDiv,checkedNodes) {
+        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        return $("#"+jstreeDiv).jstree().check_node(checkedNodes)
+    }
+
     self.getjsTreeNodes = function (jstreeDiv, IdsOnly, parentNodeId) {
         if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
         if (!parentNodeId) {
@@ -673,6 +678,19 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
 
     self.closeDialog=function(){
         $("#smallDialogDiv").dialog("close")
+    }
+
+    self.searchValue=function(value){
+
+
+
+        if (event.keyCode != 13 && event.keyCode != 9) {
+            return;
+        }
+        $("#" + self.jstreeDiv)
+            .jstree(true)
+            .search(value);
+        $("#jstreeWidget_searchInput").val("");
     }
 
     return self;

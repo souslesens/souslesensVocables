@@ -34,6 +34,11 @@ var KGquery_nodeSelector = (function() {
         var options = {
             withCheckboxes: true,
            tie_selection: true,
+            searchPlugin:{
+                case_insensitive: true,
+                fuzzy: false,
+                show_only_matches: true,
+            },
             selectTreeNodeFn: function(event, obj) {
 
                 KGquery_nodeSelector.onSelectNode(obj.node);
@@ -42,9 +47,10 @@ var KGquery_nodeSelector = (function() {
             },
 
             validateFn: function(checkedNodes) {
-                KGquery.clearAll();
+
                 JstreeWidget.closeDialog();
-                /*   async.eachSeries(checkedNodes, function(node, callbackEach) {
+                /*                 KGquery.clearAll();
+                  async.eachSeries(checkedNodes, function(node, callbackEach) {
                        node.label = node.text;
                        KGquery.addNode(node, null, function(err, result) {
                            callbackEach(err)
@@ -69,7 +75,7 @@ var KGquery_nodeSelector = (function() {
 
     self.onSelectNode = function(node) {
         var targetNodes = KGquery_paths.getNodeLinkedNodes(node.id);
-        self.alowedNodes= self.alowedNodes.concat(targetNodes)
+        self.alowedNodes= targetNodes //self.alowedNodes.concat(targetNodes)
         var allowedJstreeData=[]
      self.jstreeData.forEach(function(item){
       if( self.alowedNodes.indexOf(item.id)>-1)

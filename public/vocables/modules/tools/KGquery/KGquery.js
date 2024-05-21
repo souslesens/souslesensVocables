@@ -31,14 +31,15 @@ var KGquery = (function() {
     self.allPathEdges = {};
     self.isLoaded = false;
     self.maxResultSizeforLineageViz = 1000;
-    self.maxOptionalPredicatesInQuery = 8;
+    self.maxOptionalPredicatesInQuery = 10;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
     self.onLoaded = function() {
-        self.clearAll();
+
         $("#actionDivContolPanelDiv").load("modules/tools/KGquery/html/KGquery_leftPanel.html", function() {
             KGquery_graph.init();
             if (Config.clientCache.KGquery) {
+                self.clearAll()
                 KGquery_myQueries.load(null, Config.clientCache.KGquery);
             }
         });
@@ -54,6 +55,7 @@ var KGquery = (function() {
     };
 
     self.showSourcesDialog = function(forceDialog) {
+        self.clearAll()
         if (!forceDialog && Config.userTools["KGquery"].urlParam_source) {
             self.currentSource = Config.userTools["KGquery"].urlParam_source;
             self.init();

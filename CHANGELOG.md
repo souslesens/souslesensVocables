@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.72.0](https://github.com/souslesens/souslesensVocables/compare/1.71.0...1.72.0) (2024-05-21)
+
+
+### Features
+
+* **api:** add a route to retrieve the log from a period ([8db082c](https://github.com/souslesens/souslesensVocables/commit/8db082c6d1fb739c5a4acbbcfa0b547d69fe7843))
+* **api:** logs: add a query parameter to get a log file ([cb2e590](https://github.com/souslesens/souslesensVocables/commit/cb2e5905e83ad4c82806e1094d1041f3afc9e1be))
+* **ConfigEditor:** add the possibility to visualize logs period ([443bd57](https://github.com/souslesens/souslesensVocables/commit/443bd5753970654168e40ccafaf55fcbe7063976))
+* **logger:** only keep 12 log files with winston ([6c92247](https://github.com/souslesens/souslesensVocables/commit/6c922470fba903c5a869e26b70ea8b7d0d661134))
+* **logging:** rotate logs every month ([8e63158](https://github.com/souslesens/souslesensVocables/commit/8e631587247eec6a4ec7ac91050c056a851664e3))
+* **migrations:** migrate log files ([9125f5d](https://github.com/souslesens/souslesensVocables/commit/9125f5d837af068114a46d7a8833189ee8bb3a83))
+
 ## [1.71.0](https://github.com/souslesens/souslesensVocables/compare/1.70.2...1.71.0) (2024-05-16)
 
 

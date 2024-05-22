@@ -324,8 +324,6 @@ var KGcreator_graph = (function () {
         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(edges);
     };
 
-
-
     self.graphTablesJoins = function (dataSource) {
         var tableJoins = KGcreator.rawConfig.databaseSources[dataSource].tableJoins;
         if (!tableJoins) {

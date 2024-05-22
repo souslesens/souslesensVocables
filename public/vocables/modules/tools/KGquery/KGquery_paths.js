@@ -3,18 +3,18 @@ import KGquery_graph from "./KGquery_graph.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
-var KGquery_paths = (function() {
+var KGquery_paths = (function () {
     var self = {};
     //  self.pathDivsMap = {};
 
-    self.setQueryElementPath = function(queryElement, callback) {
-        self.getPathBetweenNodes(queryElement.fromNode.id, queryElement.toNode.id, function(err, path) {
+    self.setQueryElementPath = function (queryElement, callback) {
+        self.getPathBetweenNodes(queryElement.fromNode.id, queryElement.toNode.id, function (err, path) {
             if (err) {
                 return callback(err);
             }
 
             path = JSON.parse(JSON.stringify(path));
-            self.managePathAmbiguousEdges(path, function(unAmbiguousPath) {
+            self.managePathAmbiguousEdges(path, function (unAmbiguousPath) {
                 self.drawPathOnGraph(unAmbiguousPath);
 
                 var pathWithVarNames = self.substituteClassIdToVarNameInPath(queryElement, unAmbiguousPath);
@@ -24,8 +24,8 @@ var KGquery_paths = (function() {
         });
     };
 
-    self.substituteClassIdToVarNameInPath = function(queryElement, path) {
-        path.forEach(function(item, index) {
+    self.substituteClassIdToVarNameInPath = function (queryElement, path) {
+        path.forEach(function (item, index) {
             if (item[0] == queryElement.fromNode.id) {
                 item[0] = KGquery.getVarName(queryElement.fromNode);
                 if (item[1] == queryElement.toNode.id) {
@@ -57,11 +57,11 @@ var KGquery_paths = (function() {
      when we have several paths in a set they  need to intersect
 
      */
-    self.isPathValid = function(querySet, targetNodeId) {
+    self.isPathValid = function (querySet, targetNodeId) {
         if (querySet.elements.length > 1) {
             var ok = false;
-            querySet.elements.forEach(function(element) {
-                element.paths.forEach(function(path) {
+            querySet.elements.forEach(function (element) {
+                element.paths.forEach(function (path) {
                     if (path[0] == targetNodeId || path[0] == element.fromNode.id) {
                         ok = true;
                     }
@@ -76,9 +76,9 @@ var KGquery_paths = (function() {
         }
     };
 
-    self.processPathDuplicateClassIds = function(path, currentQueryElement) {
+    self.processPathDuplicateClassIds = function (path, currentQueryElement) {
         //manage multiple instance or sameClass
-        path.forEach(function(pathItem, index) {
+        path.forEach(function (pathItem, index) {
             for (var i = 0; i < 2; i++) {
                 if (pathItem[i] == currentQueryElement.fromNode.id && currentQueryElement.fromNode.newInstance) {
                     path[index][i] = pathItem[i] + "_" + currentQueryElement.fromNode.newInstance;
@@ -91,10 +91,10 @@ var KGquery_paths = (function() {
         return path;
     };
 
-    self.drawPathOnGraph = function(path) {
+    self.drawPathOnGraph = function (path) {
         //update of graph edges color
         var newVisjsEdges = [];
-        path.forEach(function(pathItem, index) {
+        path.forEach(function (pathItem, index) {
             var edgeId;
             if (true || pathItem.length == 3) {
                 edgeId = pathItem[0] + "_" + pathItem[2] + "_" + pathItem[1];
@@ -110,50 +110,40 @@ var KGquery_paths = (function() {
         }
     };
 
-
-
-    self.getNodeLinkedNodes= function(fromNodeId,maxLevels) {
-if(!maxLevels)
-    maxLevels=1
+    self.getNodeLinkedNodes = function (fromNodeId, maxLevels) {
+        if (!maxLevels) maxLevels = 1;
         var edges = KGquery_graph.visjsData.edges;
 
-        var linkedNodes=[]
-        var nodesMap= {  }
+        var linkedNodes = [];
+        var nodesMap = {};
 
-        edges.forEach(function(edge) {
-          if(!nodesMap[edge.from])
-              nodesMap[edge.from]=[]
-            nodesMap[edge.from].push(edge.to)
+        edges.forEach(function (edge) {
+            if (!nodesMap[edge.from]) nodesMap[edge.from] = [];
+            nodesMap[edge.from].push(edge.to);
 
-            if(!nodesMap[edge.to])
-                nodesMap[edge.to]=[]
-            nodesMap[edge.to].push(edge.from)
-        })
-        function recurse(node,level){
-
-            nodesMap[node].forEach(function(targetNode){
-                if(fromNodeId==targetNode)
-                    return;
-                if(level <maxLevels &&linkedNodes.indexOf(targetNode)<0) {
-                    linkedNodes.push(targetNode)
-                    recurse(targetNode,level+1)
+            if (!nodesMap[edge.to]) nodesMap[edge.to] = [];
+            nodesMap[edge.to].push(edge.from);
+        });
+        function recurse(node, level) {
+            nodesMap[node].forEach(function (targetNode) {
+                if (fromNodeId == targetNode) return;
+                if (level < maxLevels && linkedNodes.indexOf(targetNode) < 0) {
+                    linkedNodes.push(targetNode);
+                    recurse(targetNode, level + 1);
                 }
-            })
-
+            });
         }
-        recurse(fromNodeId,0)
+        recurse(fromNodeId, 0);
 
         return linkedNodes;
+    };
 
-
-    }
-
-    self.getPathBetweenNodes = function(fromNodeId, toNodeId, callback) {
+    self.getPathBetweenNodes = function (fromNodeId, toNodeId, callback) {
         if (!self.vicinityArray) {
             self.vicinityArray = [];
             // var edges = KGquery_graph.KGqueryGraph.data.edges.get();
             var edges = KGquery_graph.visjsData.edges;
-            edges.forEach(function(edge) {
+            edges.forEach(function (edge) {
                 if (!edge.data) {
                     return;
                 }
@@ -164,7 +154,7 @@ if(!maxLevels)
         if (fromNodeId == toNodeId) {
             var pathes = [];
 
-            self.vicinityArray.forEach(function(path) {
+            self.vicinityArray.forEach(function (path) {
                 if (path[0] == path[1] && path[1] == fromNodeId) {
                     pathes.push(path);
                 }
@@ -174,11 +164,11 @@ if(!maxLevels)
         var body = {
             fromNodeUri: fromNodeId,
             toNodeUri: toNodeId,
-            vicinityArray: self.vicinityArray
+            vicinityArray: self.vicinityArray,
         };
 
         var payload = {
-            body: body
+            body: body,
         };
 
         $.ajax({
@@ -186,18 +176,18 @@ if(!maxLevels)
             url: `${Config.apiUrl}/shortestPath`,
             data: payload,
             dataType: "json",
-            success: function(data, _textStatus, _jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 return callback(null, data);
             },
-            error: function(err) {
+            error: function (err) {
                 return callback(err);
-            }
+            },
         });
     };
 
-    self.countNodeVarExistingInSet = function(nodeId, querySet) {
+    self.countNodeVarExistingInSet = function (nodeId, querySet) {
         var count = 0;
-        querySet.elements.forEach(function(queryElement) {
+        querySet.elements.forEach(function (queryElement) {
             if (nodeId == queryElement.fromNode.id) {
                 count += 1;
             }
@@ -208,13 +198,13 @@ if(!maxLevels)
         return count;
     };
 
-    self.getNearestNodeId = function(nodeId, querySet, excludeSelf, callback) {
+    self.getNearestNodeId = function (nodeId, querySet, excludeSelf, callback) {
         var allCandidateNodesMap = {};
 
-        querySet.elements.forEach(function(queryElement) {
+        querySet.elements.forEach(function (queryElement) {
             if (false) {
                 // take all nodes in the path
-                queryElement.paths.forEach(function(pathItem) {
+                queryElement.paths.forEach(function (pathItem) {
                     allCandidateNodesMap[pathItem[0]] = 0;
                     allCandidateNodesMap[pathItem[1]] = 0;
                 });
@@ -231,8 +221,8 @@ if(!maxLevels)
         var allCandidateNodesArray = Object.keys(allCandidateNodesMap);
         async.eachSeries(
             allCandidateNodesArray,
-            function(candidateNodeId, callbackEach) {
-                self.getPathBetweenNodes(candidateNodeId, nodeId, function(err, path) {
+            function (candidateNodeId, callbackEach) {
+                self.getPathBetweenNodes(candidateNodeId, nodeId, function (err, path) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -241,7 +231,7 @@ if(!maxLevels)
                     callbackEach();
                 });
             },
-            function(err) {
+            function (err) {
                 if (err) {
                     return callback(err);
                 }
@@ -258,9 +248,9 @@ if(!maxLevels)
         );
     };
 
-    self.managePathAmbiguousEdges = function(path, callback) {
+    self.managePathAmbiguousEdges = function (path, callback) {
         var fromToMap = {};
-        path.forEach(function(pathItem, pathIndex) {
+        path.forEach(function (pathItem, pathIndex) {
             var fromTo = [pathItem[0] + "_" + pathItem[1]];
             if (!fromToMap[fromTo]) {
                 fromToMap[fromTo] = [];
@@ -280,16 +270,16 @@ if(!maxLevels)
         var pathsToDelete = [];
         async.eachSeries(
             ambiguousEdges,
-            function(ambiguousEdge, callbackEach) {
+            function (ambiguousEdge, callbackEach) {
                 if (ambiguousEdge && ambiguousEdge.properties.length > 0) {
                     return SimpleListSelectorWidget.showDialog(
                         null,
-                        function(callbackLoad) {
+                        function (callbackLoad) {
                             return callbackLoad(ambiguousEdge.properties);
                         },
-                        function(selectedProperty) {
+                        function (selectedProperty) {
                             ambiguousEdge.selectedProperty = selectedProperty;
-                            path.forEach(function(pathItem, pathIndex) {
+                            path.forEach(function (pathItem, pathIndex) {
                                 if (ambiguousEdge.id == [pathItem[0] + "_" + pathItem[1]] || ambiguousEdge.id == [pathItem[1] + "_" + pathItem[0]]) {
                                     if (pathItem[2] != ambiguousEdge.selectedProperty) {
                                         pathsToDelete.push(pathIndex);
@@ -302,9 +292,9 @@ if(!maxLevels)
                     );
                 }
             },
-            function(err) {
+            function (err) {
                 var unambiguousPaths = [];
-                path.forEach(function(pathItem, pathIndex) {
+                path.forEach(function (pathItem, pathIndex) {
                     if (pathsToDelete.indexOf(pathIndex) < 0) {
                         unambiguousPaths.push(pathItem);
                     }

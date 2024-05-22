@@ -391,13 +391,17 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     };
     self.getjsTreeCheckedNodes = function (jstreeDiv) {
         if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
-       return $("#"+jstreeDiv).jstree().get_checked(true)
-    }
+        return $("#" + jstreeDiv)
+            .jstree()
+            .get_checked(true);
+    };
 
-    self.setjsTreeCheckedNodes = function (jstreeDiv,checkedNodes) {
+    self.setjsTreeCheckedNodes = function (jstreeDiv, checkedNodes) {
         if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
-        return $("#"+jstreeDiv).jstree().check_node(checkedNodes)
-    }
+        return $("#" + jstreeDiv)
+            .jstree()
+            .check_node(checkedNodes);
+    };
 
     self.getjsTreeNodes = function (jstreeDiv, IdsOnly, parentNodeId) {
         if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
@@ -676,14 +680,11 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
 
-    self.closeDialog=function(){
-        $("#smallDialogDiv").dialog("close")
-    }
+    self.closeDialog = function () {
+        $("#smallDialogDiv").dialog("close");
+    };
 
-    self.searchValue=function(value){
-
-
-
+    self.searchValue = function (value) {
         if (event.keyCode != 13 && event.keyCode != 9) {
             return;
         }
@@ -691,7 +692,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .jstree(true)
             .search(value);
         $("#jstreeWidget_searchInput").val("");
-    }
+    };
 
     return self;
 })();

@@ -5,18 +5,17 @@ var KGquery_myQueries = (function () {
     var self = {};
 
     self.save = function (callback) {
-     //   KGquery.execPathQuery({ dontExecute: true }, function (err, query) {
-            var data = {
-                querySets: KGquery.querySets,
-                sparqlQuery:  KGquery.currentSparqlQuery,
-            };
-            return callback(null, data);
-      //  });
+        //   KGquery.execPathQuery({ dontExecute: true }, function (err, query) {
+        var data = {
+            querySets: KGquery.querySets,
+            sparqlQuery: KGquery.currentSparqlQuery,
+        };
+        return callback(null, data);
+        //  });
     };
 
     self.load = function (err, result) {
-
-        return;// ! not working correctly !!!!!!!!!!!!!!!!!!!!!!!!
+        return; // ! not working correctly !!!!!!!!!!!!!!!!!!!!!!!!
         if (err) {
             return alert(err.responseText);
         }

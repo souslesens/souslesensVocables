@@ -4,7 +4,6 @@ import common from "../shared/common.js";
 import Sparql_OWL from "./sparql_OWL.js";
 import searchUtil from "../search/searchUtil.js";
 
-
 //biblio
 //https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf
 
@@ -589,49 +588,42 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         var fromGraphUri = Config.sources[fromSourceLabel].graphUri;
         var query = " COPY <" + fromGraphUri + "> TO <" + toGraphUri + ">;";
 
-
-        var query = "with <" + fromGraphUri + ">\n" +
-
-            "insert {graph <" + toGraphUri + "> {?s ?p ?o}}\n" +
-            "where {?s ?p ?o}"
+        var query = "with <" + fromGraphUri + ">\n" + "insert {graph <" + toGraphUri + "> {?s ?p ?o}}\n" + "where {?s ?p ?o}";
 
         var offset = 0;
-        var step = 100000
-        var limit = step
-        var resultSize = step + 1
-        var totalSize = 0
+        var step = 100000;
+        var limit = step;
+        var resultSize = step + 1;
+        var totalSize = 0;
         var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
 
         async.whilst(
-            function(callbackTest) {
-                callbackTest(null, resultSize==step);
+            function (callbackTest) {
+                callbackTest(null, resultSize == step);
             },
 
-            function(callbackWhilst) {
-var queryOffest=query+" offset="+offset+"limit ="+limit
-                Sparql_proxy.querySPARQL_GET_proxy(url, queryOffest, null, { source: fromSourceLabel }, function(err, _result) {
+            function (callbackWhilst) {
+                var queryOffest = query + " offset=" + offset + "limit =" + limit;
+                Sparql_proxy.querySPARQL_GET_proxy(url, queryOffest, null, { source: fromSourceLabel }, function (err, _result) {
+                    var result = result.results.bindings[0]["callret-0"].value;
 
-                    var result =  result.results.bindings[0]["callret-0"].value;
-
-                    try{
-                        var regex=/ (\d)+ /
-                        resultSize=result.match(regex)[1]
-                        if(resultSize)
-                            resultSize=parseInt(resultSize)
-
-                    }catch(e){
-                        console.log(e)
-                        resultSize=-1
+                    try {
+                        var regex = / (\d)+ /;
+                        resultSize = result.match(regex)[1];
+                        if (resultSize) resultSize = parseInt(resultSize);
+                    } catch (e) {
+                        console.log(e);
+                        resultSize = -1;
                     }
-                    totalSize += resultSize
+                    totalSize += resultSize;
                     offset += step;
                     return callbackWhilst(err);
                 });
             },
-            function(err) {
-                return callback(err, resultSize)
-            })
-
+            function (err) {
+                return callback(err, resultSize);
+            }
+        );
     };
     self.getDistinctPredicates = function (sourceLabel, options, callback) {
         $("#waitImg").css("display", "block");
@@ -732,8 +724,8 @@ var queryOffest=query+" offset="+offset+"limit ="+limit
                                 options.setObjectFn(item);
                             }
 
-                           var subject = getTargetUri(item.id.value, item);
-                           var prop = item.prop.value;
+                            var subject = getTargetUri(item.id.value, item);
+                            var prop = item.prop.value;
                             if (options.excludedProperties && options.excludedProperties.indexOf(prop) > -1) {
                                 return;
                             }

@@ -156,7 +156,7 @@ var ResponsiveUI = (function () {
         MainController.currentSource = source;
         ResponsiveUI.source = source;
         $("#selectedSource").html(MainController.currentSource);
-
+        MainController.writeUserLog(authentication.currentUser, MainController.currentTool, source);
         $("#mainDialogDiv").parent().hide();
         self.initTool(MainController.currentTool, function (err, result) {
             if (err) {
@@ -173,6 +173,7 @@ var ResponsiveUI = (function () {
         }
 
         MainController.currentSource = obj.node.data.id;
+        MainController.writeUserLog(authentication.currentUser, MainController.currentTool, MainController.currentSource);
         $("#selectedSource").html(MainController.currentSource);
         $("#mainDialogDiv").parent().hide();
         Lineage_r.loadSources();
@@ -181,12 +182,12 @@ var ResponsiveUI = (function () {
     self.initTool = function (toolId, callback) {
         var toolObj = Config.userTools[toolId];
         MainController.initControllers();
-        MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
+       // MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
 
         if (Config.userTools[toolId].controller.onLoaded) {
-            MainController.writeUserLog(authentication.currentUser, toolId, "");
+          //  MainController.writeUserLog(authentication.currentUser, toolId, "");
             Config.userTools[toolId].controller.onLoaded();
         } else {
             if (true) {

@@ -1,10 +1,7 @@
 import KGquery from "../../modules/tools/KGquery/KGquery.js";
 import KGquery_graph from "../../modules/tools/KGquery/KGquery_graph.js";
 import SavedQueriesWidget from "../../modules/uiWidgets/savedQueriesWidget.js";
-import Lineage_r from "../lineage/lineage_r.js";
 import ResponsiveUI from "../responsiveUI.js";
-import KGquery_controlPanel from "../../modules/tools/KGquery/KGquery_controlPanel.js";
-import VisjsGraphClass from "../../modules/graph/VisjsGraphClass.js";
 import KGquery_myQueries from "../../modules/tools/KGquery/KGquery_myQueries.js";
 
 var KGquery_r = (function () {
@@ -27,7 +24,6 @@ var KGquery_r = (function () {
         self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
         self.oldshowDialog = SavedQueriesWidget.showDialog;
         self.oldKGquery_controlPanel = window.KGquery_controlPanel;
-        //retribute old file and functions
         Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
         SavedQueriesWidget.showDialog = self.oldshowDialog;
         window.KGquery_controlPanel = self.oldKGquery_controlPanel;
@@ -50,7 +46,7 @@ var KGquery_r = (function () {
                     KGquery_graph.drawVisjsModel("saved");
                     ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery_r.initQuery, "#QueryTabButton");
                     ResponsiveUI.resetWindowHeight();
-                    self.clearAll()
+                    KGquery.clearAll()
                     if (Config.clientCache.KGquery) {
                         setTimeout(function () {
                             KGquery_myQueries.load(null, Config.clientCache.KGquery);

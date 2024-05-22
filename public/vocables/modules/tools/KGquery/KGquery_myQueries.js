@@ -15,6 +15,8 @@ var KGquery_myQueries = (function () {
     };
 
     self.load = function (err, result) {
+
+        return;// ! not working correctly !!!!!!!!!!!!!!!!!!!!!!!!
         if (err) {
             return alert(err.responseText);
         }

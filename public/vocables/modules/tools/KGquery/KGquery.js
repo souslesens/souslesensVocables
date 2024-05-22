@@ -39,7 +39,7 @@ var KGquery = (function() {
         $("#actionDivContolPanelDiv").load("modules/tools/KGquery/html/KGquery_leftPanel.html", function() {
             KGquery_graph.init();
             if (Config.clientCache.KGquery) {
-                self.clearAll()
+                self.clearAll();
                 KGquery_myQueries.load(null, Config.clientCache.KGquery);
             }
         });
@@ -55,7 +55,7 @@ var KGquery = (function() {
     };
 
     self.showSourcesDialog = function(forceDialog) {
-        self.clearAll()
+        self.clearAll();
         if (!forceDialog && Config.userTools["KGquery"].urlParam_source) {
             self.currentSource = Config.userTools["KGquery"].urlParam_source;
             self.init();
@@ -354,7 +354,7 @@ var KGquery = (function() {
                     }
 
 
-                    KGquery_filter.selectOptionalPredicates(self.querySets,options, function(err, result) {
+                    KGquery_filter.selectOptionalPredicates(self.querySets, options, function(err, result) {
                         if (err) {
                             MainController.UI.message(err, true);
                             callbackSeries(err);
@@ -693,24 +693,18 @@ var KGquery = (function() {
         self.querySets = { sets: [], groups: [], currentIndex: -1 };
         self.divsMap = {};
         self.currentQuerySet = null;
-        //  self.currentQuerySet = self.addQuerySet();
         self.allPathEdges = {};
         KGquery_filter.containersFilterMap = {};
-        /* $("#KGquery_graphDiv").css("display", "flex");
-        $("#KGquery_dataTableDiv").css("display", "none");*/
         if (!exceptSetQueries) {
             self.classeMap = {};
             self.SetQueries = [];
             self.queryPathesMap = {};
 
             self.divsMap = {};
-            KGquery_graph.drawVisjsModel("saved");
-            //  KGquery_graph.resetVisjNodes();
-            //  KGquery_graph.resetVisjEdges();
-            //   KGquery_graph.drawVisjsModel("saved")
+            if (self.currentSource) {
+                KGquery_graph.drawVisjsModel("saved");
+            }
             $("#KGquery_pathsDiv").html("");
-            //  self.addQuerySet();
-            //Hide Union and minus showToClaude
             $("#KGquery_SetsControlsDiv").hide();
         }
     };

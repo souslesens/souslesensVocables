@@ -98,7 +98,7 @@ var KGquery_filter = (function() {
         };
         JstreeWidget.loadJsTree(null, jstreeData, jstreeOptions, function() {
             JstreeWidget.openNodeDescendants(null, "root");
-            if ( queryNonObjectProperties.length < self.maxOptionalPredicatesInQuery) {
+            if ( queryNonObjectProperties.length < KGquery.maxOptionalPredicatesInQuery ) {
                 JstreeWidget.checkAll();
             }else{
                 var preCheckedOptions=[]
@@ -119,7 +119,7 @@ var KGquery_filter = (function() {
 
             }
 
-            if (options && options.output != "table") {
+            if (false && options && options.output != "table") {
                 var checkedNodes = JstreeWidget.getjsTreeCheckedNodes();
                 KGquery_filter.getOptionalPredicates(checkedNodes, function(err, result) {
                     JstreeWidget.closeDialog();
@@ -142,7 +142,7 @@ var KGquery_filter = (function() {
             }
         });
 
-        if (selectedPropertyNodes.length > self.maxOptionalPredicatesInQuery) {
+        if (selectedPropertyNodes.length > KGquery.maxOptionalPredicatesInQuery) {
             if (confirm("many properties have been selected. Query may take time or abort, Continue anyway?")) {
                 //  return callback(null, queryNonObjectProperties);
             } else {

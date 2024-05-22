@@ -81,7 +81,7 @@ var KGquery_graph = (function() {
                             // return callbackSeries("notFound");
 
                             self.DrawImportsCommonGraph(source);
-                            return callbackSeries("generate commonGraph");
+                          ///  return callbackSeries("generate commonGraph");
                         }
                         visjsData = result;
                         if (result.options && result.options.output) {

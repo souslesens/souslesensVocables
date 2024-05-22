@@ -1,3 +1,9 @@
+<input
+    id="jstreeWidget_searchInput"
+    style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px"
+    value=""
+    onkeyup="if (event.keyCode == 13 || event.keyCode == 9){JstreeWidget.searchValue($(this).val())}"
+/>
 <div style="width: 600px; height: 500px; overflow: auto">
     <div id="jstreeWidget_treeDiv"></div>
 </div>

@@ -28,25 +28,35 @@ var KGquery_paths = (function () {
         path.forEach(function (item, index) {
             if (item[0] == queryElement.fromNode.id) {
                 item[0] = KGquery.getVarName(queryElement.fromNode);
-                if (item[1] == queryElement.toNode.id) item[1] = KGquery.getVarName(queryElement.toNode);
-                else item[1] = "?" + Sparql_common.getLabelFromURI(item[1]);
+                if (item[1] == queryElement.toNode.id) {
+                    item[1] = KGquery.getVarName(queryElement.toNode);
+                } else {
+                    item[1] = "?" + Sparql_common.getLabelFromURI(item[1]);
+                }
             }
 
             if (item[1] == queryElement.fromNode.id) {
                 item[1] = KGquery.getVarName(queryElement.fromNode);
-                if (item[0] == queryElement.toNode.id) item[0] = KGquery.getVarName(queryElement.toNode);
-                else item[0] = "?" + Sparql_common.getLabelFromURI(item[0]);
+                if (item[0] == queryElement.toNode.id) {
+                    item[0] = KGquery.getVarName(queryElement.toNode);
+                } else {
+                    item[0] = "?" + Sparql_common.getLabelFromURI(item[0]);
+                }
             }
-            if (item[0].indexOf("?") < 0) item[0] = "?" + Sparql_common.getLabelFromURI(item[0]);
-            if (item[1].indexOf("?") < 0) item[1] = "?" + Sparql_common.getLabelFromURI(item[1]);
+            if (item[0].indexOf("?") < 0) {
+                item[0] = "?" + Sparql_common.getLabelFromURI(item[0]);
+            }
+            if (item[1].indexOf("?") < 0) {
+                item[1] = "?" + Sparql_common.getLabelFromURI(item[1]);
+            }
         });
         return path;
     };
 
     /**
-   when we have several paths in a set they  need to intersect
+     when we have several paths in a set they  need to intersect
 
-   */
+     */
     self.isPathValid = function (querySet, targetNodeId) {
         if (querySet.elements.length > 1) {
             var ok = false;
@@ -95,14 +105,44 @@ var KGquery_paths = (function () {
             var color = KGquery.currentQuerySet.color;
             newVisjsEdges.push({ id: edgeId, color: color, width: 3 });
         });
+        if (KGquery_graph.KGqueryGraph.data.edges.update) {
+            KGquery_graph.KGqueryGraph.data.edges.update(newVisjsEdges);
+        }
+    };
 
-        KGquery_graph.KGqueryGraph.data.edges.update(newVisjsEdges);
+    self.getNodeLinkedNodes = function (fromNodeId, maxLevels) {
+        if (!maxLevels) maxLevels = 1;
+        var edges = KGquery_graph.visjsData.edges;
+
+        var linkedNodes = [];
+        var nodesMap = {};
+
+        edges.forEach(function (edge) {
+            if (!nodesMap[edge.from]) nodesMap[edge.from] = [];
+            nodesMap[edge.from].push(edge.to);
+
+            if (!nodesMap[edge.to]) nodesMap[edge.to] = [];
+            nodesMap[edge.to].push(edge.from);
+        });
+        function recurse(node, level) {
+            nodesMap[node].forEach(function (targetNode) {
+                if (fromNodeId == targetNode) return;
+                if (level < maxLevels && linkedNodes.indexOf(targetNode) < 0) {
+                    linkedNodes.push(targetNode);
+                    recurse(targetNode, level + 1);
+                }
+            });
+        }
+        recurse(fromNodeId, 0);
+
+        return linkedNodes;
     };
 
     self.getPathBetweenNodes = function (fromNodeId, toNodeId, callback) {
         if (!self.vicinityArray) {
             self.vicinityArray = [];
-            var edges = KGquery_graph.KGqueryGraph.data.edges.get();
+            // var edges = KGquery_graph.KGqueryGraph.data.edges.get();
+            var edges = KGquery_graph.visjsData.edges;
             edges.forEach(function (edge) {
                 if (!edge.data) {
                     return;
@@ -148,8 +188,12 @@ var KGquery_paths = (function () {
     self.countNodeVarExistingInSet = function (nodeId, querySet) {
         var count = 0;
         querySet.elements.forEach(function (queryElement) {
-            if (nodeId == queryElement.fromNode.id) count += 1;
-            if (nodeId == queryElement.toNode.id) count += 1;
+            if (nodeId == queryElement.fromNode.id) {
+                count += 1;
+            }
+            if (nodeId == queryElement.toNode.id) {
+                count += 1;
+            }
         });
         return count;
     };
@@ -166,8 +210,12 @@ var KGquery_paths = (function () {
                 });
             } else {
                 // only terminaisons of path
-                if (queryElement.fromNode && (!excludeSelf || queryElement.fromNode.id != nodeId)) allCandidateNodesMap[queryElement.fromNode.id] = 0;
-                if (queryElement.toNode && (!excludeSelf || queryElement.toNode.id != nodeId)) allCandidateNodesMap[queryElement.toNode.id] = 0;
+                if (queryElement.fromNode && (!excludeSelf || queryElement.fromNode.id != nodeId)) {
+                    allCandidateNodesMap[queryElement.fromNode.id] = 0;
+                }
+                if (queryElement.toNode && (!excludeSelf || queryElement.toNode.id != nodeId)) {
+                    allCandidateNodesMap[queryElement.toNode.id] = 0;
+                }
             }
         });
         var allCandidateNodesArray = Object.keys(allCandidateNodesMap);
@@ -216,7 +264,9 @@ var KGquery_paths = (function () {
             }
         }
 
-        if (ambiguousEdges.length == 0) return callback(path);
+        if (ambiguousEdges.length == 0) {
+            return callback(path);
+        }
         var pathsToDelete = [];
         async.eachSeries(
             ambiguousEdges,

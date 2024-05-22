@@ -888,6 +888,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 var positions = data.positions;
                 var options = data.context.options;
                 var visjsData = { nodes: [], edges: [] };
+                visjsData.options = data.options;
                 var existingNodes = {};
                 if (addToCurrentGraph) {
                     existingNodes = self.getExistingIdsMap();

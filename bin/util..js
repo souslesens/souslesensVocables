@@ -559,6 +559,31 @@ var util = {
 
     },
 
+    convertISOStringDateForTriple:function(isoStringdate){
+       // isoString 2022-12-31T230000.000Z
+      //  internal virtuoso date YYYY.MM.DD hh:mm.ss
+        var regex=/(\d{4})-(\d{2})-(\d{2})T(\d{2})(\d{2})(\d{2})/
+        var array=isoStringdate.match(regex)
+        if(!array)
+            return null;
+        var str=array[1]+"."+array[2]+"."+array[3]
+
+        if(array.length>4){
+            str+=" "+array[4]
+        }
+        if(array.length>5){
+            str+=":"+array[5]
+        }
+        if(array.length>6){
+            str+=":"+array[6]
+        }
+        return str
+
+
+
+
+    },
+
     /** Retrieve the authorization scheme and token from the HTTP header
      *
      * @param  {string} header
@@ -577,5 +602,7 @@ var util = {
 };
 
 module.exports = util;
+
+util.convertISOStringDateForTriple("2022-12-31T230000.000Z")
 
 

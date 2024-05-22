@@ -462,7 +462,7 @@ var Sparql_generic = (function () {
         var objectStr;
 
         if (item.lang) {
-            langStr = "@" + item.lang;
+            var langStr = "@" + item.lang;
             objectStr = "'" + item.object + "'" + langStr;
         }
         if (item.isString) {
@@ -587,10 +587,43 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
     self.copyGraph = function (fromSourceLabel, toGraphUri, callback) {
         var fromGraphUri = Config.sources[fromSourceLabel].graphUri;
         var query = " COPY <" + fromGraphUri + "> TO <" + toGraphUri + ">;";
+
+        var query = "with <" + fromGraphUri + ">\n" + "insert {graph <" + toGraphUri + "> {?s ?p ?o}}\n" + "where {?s ?p ?o}";
+
+        var offset = 0;
+        var step = 100000;
+        var limit = step;
+        var resultSize = step + 1;
+        var totalSize = 0;
         var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: fromSourceLabel }, function (err, _result) {
-            return callback(err);
-        });
+
+        async.whilst(
+            function (callbackTest) {
+                callbackTest(null, resultSize == step);
+            },
+
+            function (callbackWhilst) {
+                var queryOffest = query + " offset=" + offset + "limit =" + limit;
+                Sparql_proxy.querySPARQL_GET_proxy(url, queryOffest, null, { source: fromSourceLabel }, function (err, _result) {
+                    var result = result.results.bindings[0]["callret-0"].value;
+
+                    try {
+                        var regex = / (\d)+ /;
+                        resultSize = result.match(regex)[1];
+                        if (resultSize) resultSize = parseInt(resultSize);
+                    } catch (e) {
+                        console.log(e);
+                        resultSize = -1;
+                    }
+                    totalSize += resultSize;
+                    offset += step;
+                    return callbackWhilst(err);
+                });
+            },
+            function (err) {
+                return callback(err, resultSize);
+            }
+        );
     };
     self.getDistinctPredicates = function (sourceLabel, options, callback) {
         $("#waitImg").css("display", "block");
@@ -691,8 +724,8 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                 options.setObjectFn(item);
                             }
 
-                            subject = getTargetUri(item.id.value, item);
-                            prop = item.prop.value;
+                            var subject = getTargetUri(item.id.value, item);
+                            var prop = item.prop.value;
                             if (options.excludedProperties && options.excludedProperties.indexOf(prop) > -1) {
                                 return;
                             }

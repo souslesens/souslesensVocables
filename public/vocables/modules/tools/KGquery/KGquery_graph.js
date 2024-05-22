@@ -4,11 +4,11 @@ import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
-import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
+import KGquery_nodeSelector from "./KGquery_nodeSelector.js";
 
 var KGquery_graph = (function () {
     var self = {};
+    self.visjsData = null;
 
     self.init = function () {
         $("#KGquery_leftPanelTabs").tabs();
@@ -57,7 +57,8 @@ var KGquery_graph = (function () {
         color: "#ddd", //Lineage_whiteboard.getSourceColor(source)
     };
 
-    self.drawVisjsModel = function (mode, output) {
+    self.drawVisjsModel = function (mode) {
+        var display = "graph";
         var source = KGquery.currentSource;
         var visjsData = { nodes: [], edges: [] };
 
@@ -74,15 +75,18 @@ var KGquery_graph = (function () {
                     self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
 
-                    MainController.UI.message("loading graph display");
+                    KGquery_graph.message("loading graph display");
                     self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                         if (err) {
                             // return callbackSeries("notFound");
 
                             self.DrawImportsCommonGraph(source);
-                            return callbackSeries("generate commonGraph");
+                            ///  return callbackSeries("generate commonGraph");
                         }
                         visjsData = result;
+                        if (result.options && result.options.output) {
+                            display = result.options.output;
+                        }
 
                         return callbackSeries();
                     });
@@ -92,7 +96,7 @@ var KGquery_graph = (function () {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
-                    MainController.UI.message("generating tbox graph from abox graph");
+                    KGquery_graph.message("generating tbox graph from abox graph");
                     self.getInferredModelVisjsData(KGquery.currentSource, function (err, result2) {
                         if (err) {
                             return alert(err);
@@ -131,7 +135,7 @@ var KGquery_graph = (function () {
                     if (mode.indexOf("inferred") < 0) {
                         return callbackSeries();
                     }
-                    MainController.UI.message("loading datatypeProperties");
+                    KGquery_graph.message("loading datatypeProperties");
                     OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
                         if (err) {
                             return callbackSeries(err);
@@ -139,7 +143,9 @@ var KGquery_graph = (function () {
 
                         visjsData.nodes.forEach(function (node) {
                             if (nonObjectPropertiesmap[node.data.id]) {
-                                if (!node.data.nonObjectProperties) node.data.nonObjectProperties = [];
+                                if (!node.data.nonObjectProperties) {
+                                    node.data.nonObjectProperties = [];
+                                }
                                 node.data.nonObjectProperties = node.data.nonObjectProperties.concat(nonObjectPropertiesmap[node.data.id].properties);
                             }
                         });
@@ -169,8 +175,9 @@ var KGquery_graph = (function () {
                                 var visjsCorrespondingNode = visjsData.nodes.filter((attr) => attr.id === node)[0];
                                 for (var decoration in data[node]) {
                                     //decoration = clé de décoration
-
-                                    visjsCorrespondingNode[decoration] = data[node][decoration];
+                                    if (visjsCorrespondingNode) {
+                                        visjsCorrespondingNode[decoration] = data[node][decoration];
+                                    }
                                 }
                             }
                             // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
@@ -197,10 +204,10 @@ var KGquery_graph = (function () {
                     if (err == "notFound") {
                         return self.drawVisjsModel("inferred");
                     }
-                    MainController.UI.message("", true);
+                    KGquery_graph.message("", true);
                     return alert(err);
                 }
-                MainController.UI.message("drawing graph");
+                KGquery_graph.message("drawing graph");
 
                 var newNodes = [];
                 visjsData.nodes.forEach(function (node) {
@@ -210,9 +217,9 @@ var KGquery_graph = (function () {
                     newNodes.push(node);
                 });
                 visjsData.nodes = newNodes;
-
-                if (output == "jstree") {
-                    return self.showInferredModelInJstree(visjsData);
+                self.visjsData = visjsData;
+                if (display == "list") {
+                    return KGquery_nodeSelector.showInferredModelInJstree(visjsData);
                 }
 
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
@@ -225,7 +232,7 @@ var KGquery_graph = (function () {
                         newNodes.push({ id: node.id, color: node.color, shape: node.shape });
                     });
                     //    self.KGqueryGraph.data.nodes.update(visjsData.nodes);
-                    MainController.UI.message("", true);
+                    KGquery_graph.message("", true);
                 });
 
                 //  KGquery.clearAll();
@@ -257,7 +264,7 @@ var KGquery_graph = (function () {
             function (source, callbackEach) {
                 var visjsGraphFileName = source + "_KGmodelGraph.json";
 
-                MainController.UI.message("loading graph display");
+                KGquery_graph.message("loading graph display");
                 self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                     if (!err && result.nodes) {
                         result.nodes.forEach(function (node) {
@@ -295,13 +302,13 @@ var KGquery_graph = (function () {
                     });
                     //  self.KGqueryGraph.data.nodes.update(visjsData.nodes);
                 });
-                MainController.UI.message("", true);
+                KGquery_graph.message("xx3", true);
             }
         );
     };
 
     self.getInferredModelVisjsData = function (source, callback) {
-        MainController.UI.message("creating graph");
+        KGquery_graph.message("creating graph");
 
         if (!source) {
             source = self.source;
@@ -323,6 +330,7 @@ var KGquery_graph = (function () {
                     [
                         //get effective distinct ObjectProperties
                         function (callbackSeries) {
+                            KGquery_graph.message("getInferredModel");
                             OntologyModels.getInferredModel(source, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -334,6 +342,7 @@ var KGquery_graph = (function () {
                         },
 
                         function (callbackSeries) {
+                            KGquery_graph.message("getInferredClassValueDataTypes");
                             OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -355,6 +364,7 @@ var KGquery_graph = (function () {
                             });
                         },
                         function (callbackSeries) {
+                            KGquery_graph.message("getContainerBreakdownClasses");
                             OntologyModels.getContainerBreakdownClasses(source, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -378,6 +388,7 @@ var KGquery_graph = (function () {
                         },
                     ],
                     function (err) {
+                        KGquery_graph.message("");
                         if (err) {
                             return callbackEach(err);
                         }
@@ -450,7 +461,7 @@ var KGquery_graph = (function () {
                         visjsData.edges.push(edge);
                     }
                 });
-                MainController.UI.message("", true);
+                KGquery_graph.message("xx4", true);
                 return callback(null, visjsData);
             }
         );
@@ -538,6 +549,9 @@ var KGquery_graph = (function () {
     };
 
     self.outlineNode = function (nodeId) {
+        if (!KGquery_graph.KGqueryGraph.data.nodes.update) {
+            return;
+        }
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, color: "#b0f5f5" }]);
         /* setTimeout(function(){
         KGquery_graph.KGqueryGraph.data.nodes.update([{ id: nodeId, shape: "ellipse", color: "#b0f5f5" }]);
@@ -574,39 +588,8 @@ var KGquery_graph = (function () {
         self.KGqueryGraph.data.edges.add(edge);
     };
 
-    self.showInferredModelInJstree = function (visjsData) {
-        var jstreeData = [];
-        self.graphVisjsdata = visjsData;
-        visjsData.nodes.forEach(function (visjsNode) {
-            if (visjsNode.data.nonObjectProperties && visjsNode.data.nonObjectProperties.length > 0) {
-                jstreeData.push({
-                    id: visjsNode.id,
-                    text: visjsNode.label,
-                    parent: "#",
-                    data: visjsNode.data,
-                });
-            }
-        });
-
-        jstreeData.sort(function (a, b) {
-            if (a.text > b.text) {
-                return 1;
-            }
-            if (a.text < b.text) {
-                return -1;
-            }
-            return 0;
-        });
-
-        var options = {
-            withCheckboxes: true,
-            selectTreeNodeFn: function (event, obj) {},
-
-            validateFn: function (checkedNodes) {},
-        };
-        JstreeWidget.loadJsTree(null, jstreeData, options, function () {
-            JstreeWidget.openNodeDescendants(null, "#");
-        });
+    self.message = function (message, stopWaitImage) {
+        $("#KGquery_graph_messageDiv").html(message);
     };
 
     return self;

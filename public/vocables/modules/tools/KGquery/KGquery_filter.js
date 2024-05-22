@@ -8,7 +8,7 @@ var KGquery_filter = (function () {
 
     self.containersFilterMap = {};
 
-    self.selectOptionalPredicates = function (querySets, callback) {
+    self.selectOptionalPredicates = function (querySets, options, callback) {
         var queryNonObjectProperties = [];
         var uniqueProps = {};
 
@@ -19,7 +19,9 @@ var KGquery_filter = (function () {
                     if (queryElement.fromNode.data.nonObjectProperties) {
                         var subjectVarName = KGquery.getVarName(queryElement.fromNode, true);
                         queryElement.fromNode.data.nonObjectProperties.forEach(function (property) {
-                            if (property.id == "http://purl.org/dc/terms/created") return;
+                            if (property.id == "http://purl.org/dc/terms/created") {
+                                return;
+                            }
                             if (!uniqueProps[subjectVarName + "_" + property.label]) {
                                 uniqueProps[subjectVarName + "_" + property.label] = 1;
                                 queryNonObjectProperties.push({ varName: subjectVarName, property: property, queryElementData: queryElement.fromNode.data });
@@ -33,7 +35,9 @@ var KGquery_filter = (function () {
                     if (queryElement.toNode.data.nonObjectProperties) {
                         var objectVarName = KGquery.getVarName(queryElement.toNode, true);
                         queryElement.toNode.data.nonObjectProperties.forEach(function (property) {
-                            if (property.id == "http://purl.org/dc/terms/created") return;
+                            if (property.id == "http://purl.org/dc/terms/created") {
+                                return;
+                            }
                             if (!uniqueProps[objectVarName + "_" + property.label]) {
                                 uniqueProps[objectVarName + "_" + property.label] = 1;
                                 queryNonObjectProperties.push({ varName: objectVarName, property: property, queryElementData: queryElement.toNode.data });
@@ -78,7 +82,7 @@ var KGquery_filter = (function () {
             });
         });
 
-        var options = {
+        var jstreeOptions = {
             withCheckboxes: true,
             selectTreeNodeFn: function (event, obj) {
                 var node = obj.node;
@@ -91,10 +95,29 @@ var KGquery_filter = (function () {
                 });
             },
         };
-        JstreeWidget.loadJsTree(null, jstreeData, options, function () {
+        JstreeWidget.loadJsTree(null, jstreeData, jstreeOptions, function () {
             JstreeWidget.openNodeDescendants(null, "root");
-            if (true || queryNonObjectProperties.length < self.maxOptionalPredicatesInQuery) {
+            if (queryNonObjectProperties.length < KGquery.maxOptionalPredicatesInQuery) {
                 JstreeWidget.checkAll();
+            } else {
+                var preCheckedOptions = [];
+
+                var precheckedWords = ["label", "name", "date"];
+                jstreeData.forEach(function (item) {
+                    var str = item.text.toLowerCase();
+                    precheckedWords.forEach(function (expression) {
+                        if (str.indexOf(expression) > -1) preCheckedOptions.push(item.id);
+                    });
+                });
+                jstreeWidget.setjsTreeCheckedNodes(null, preCheckedOptions);
+            }
+
+            if (false && options && options.output != "table") {
+                var checkedNodes = JstreeWidget.getjsTreeCheckedNodes();
+                KGquery_filter.getOptionalPredicates(checkedNodes, function (err, result) {
+                    JstreeWidget.closeDialog();
+                    return callback(err, result);
+                });
             }
         });
     };
@@ -110,7 +133,7 @@ var KGquery_filter = (function () {
             }
         });
 
-        if (selectedPropertyNodes.length > self.maxOptionalPredicatesInQuery) {
+        if (selectedPropertyNodes.length > KGquery.maxOptionalPredicatesInQuery) {
             if (confirm("many properties have been selected. Query may take time or abort, Continue anyway?")) {
                 //  return callback(null, queryNonObjectProperties);
             } else {
@@ -152,7 +175,9 @@ var KGquery_filter = (function () {
             var classObj = querySet.classFiltersMap[key].class;
             classObj.data.nonObjectProperties.forEach(function (property) {
                 var varName = KGquery.getVarName(classObj);
-                if (filter.indexOf(varName) > -1) filterStr += " OPTIONAL {" + varName + " <" + property.id + "> " + varName + "_" + property.label + ".}\n";
+                if (filter.indexOf(varName) > -1) {
+                    filterStr += " OPTIONAL {" + varName + " <" + property.id + "> " + varName + "_" + property.label + ".}\n";
+                }
             });
         }
         return filterStr;

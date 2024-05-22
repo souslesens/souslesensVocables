@@ -6,6 +6,7 @@ const KGbuilder_socket = require("./KGbuilder_socket");
 const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker.js");
 
 
+
 const KGbuilder_triplesWriter = {
     sparqlPrefixes: {
         xs: "<http://www.w3.org/2001/XMLSchema#>",
@@ -131,22 +132,68 @@ const KGbuilder_triplesWriter = {
             query += "with  <" + graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGbuilder_triplesMaker.mappingFilePredicate + "> ?table }";
 
         }
-        var params = { query: query };
-        if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
-            params.auth = {
-                user: ConfigManager.config.sparql_server.user,
-                pass: ConfigManager.config.sparql_server.password,
-                sendImmediately: false,
-            };
-        }
-        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
-            if (err) {
-                var x = query;
-                return callback(err);
-            }
 
-            return callback(null, result.results.bindings[0]["callret-0"].value);
-        });
+
+        var offset = 0;
+        var step = 100000
+        var limit = step
+        var resultSize = step + 1
+        var totalSize = 0
+
+
+        async.whilst(
+            function(callbackTest) {
+                callbackTest(null, resultSize > 0);
+            },
+
+            function(callbackWhilst) {
+                var queryOffest=query+" limit "+limit
+                var params = { query: queryOffest };
+                if (ConfigManager.config && ConfigManager.config.sparql_server.user) {
+                    params.auth = {
+                        user: ConfigManager.config.sparql_server.user,
+                        pass: ConfigManager.config.sparql_server.password,
+                        sendImmediately: false,
+                    };
+                }
+
+                httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                    if (err) {
+                        var x = query;
+                        return callbackWhilst(err);
+                    }
+
+                  //  return callback(null, result.results.bindings[0]["callret-0"].value);
+
+                    var result =  result.results.bindings[0]["callret-0"].value;
+
+                    try{
+                        var regex=/ (\d)+ /
+                        resultSize=result.match(regex)[1]
+                        if(resultSize)
+                            resultSize=parseInt(resultSize)
+
+                    }catch(e){
+                        console.log(e)
+                        resultSize=-1
+                    }
+
+
+
+                    totalSize += resultSize
+                    offset += limit;
+                    return callbackWhilst(err);
+                });
+            },
+            function(err) {
+                return callback(err, totalSize)
+            })
+
+
+
+
+
+
     },
 
 

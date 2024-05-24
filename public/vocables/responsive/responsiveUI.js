@@ -181,12 +181,10 @@ var ResponsiveUI = (function () {
     self.initTool = function (toolId, callback) {
         var toolObj = Config.userTools[toolId];
         MainController.initControllers();
-        MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
 
         if (Config.userTools[toolId].controller.onLoaded) {
-            MainController.writeUserLog(authentication.currentUser, toolId, "");
             Config.userTools[toolId].controller.onLoaded();
         } else {
             if (true) {

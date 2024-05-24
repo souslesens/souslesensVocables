@@ -12,4 +12,17 @@ async function getLogs(file): Promise<Log[]> {
     return json;
 }
 
-export { Log, getLogFiles, getLogs };
+async function writeLog(user: string, tool: string, source: string): number {
+    const body = { infos: `${user},${tool},${source}` };
+
+    const response = await fetch(endpoint, {
+        method: "post",
+        body: JSON.stringify(body),
+        headers: { "Content-Type": "application/json" },
+    });
+    await response.json();
+
+    return response.status;
+}
+
+export { Log, getLogFiles, getLogs, writeLog };

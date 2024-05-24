@@ -41,6 +41,7 @@ import {
     editDatabase,
     SourceAccessControl,
 } from "../Database";
+import { writeLog } from "../Log";
 import { style } from "../Utils";
 
 const enum Type {
@@ -59,6 +60,7 @@ type DatabaseEditionState = {
 };
 
 type DatabaseFormProps = {
+    me: string;
     database?: Database;
     create?: boolean;
 };
@@ -93,7 +95,7 @@ const validateForm = (form: DatabaseFormProps) => {
     return errors;
 };
 
-const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false }: DatabaseFormProps) => {
+const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false, me = "" }: DatabaseFormProps) => {
     const { updateModel } = useModel();
     const [databaseModel, update] = React.useReducer(updateDatabase, { form: database });
     const [displayPassword, setDisplayPassword] = React.useState(false);
@@ -119,6 +121,8 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
             } else {
                 void editDatabase(databaseModel.form, updateModel);
             }
+            const mode = create ? "create" : "edit";
+            writeLog(me, "ConfigEditor", `${mode} the database ${databaseModel.form.id} (${databaseModel.form.name})`);
 
         }
     };
@@ -244,6 +248,8 @@ const DatabasesTable = () => {
     const [snackOpen, setSnackOpen] = React.useState<bool>(false);
     const [snackMessage, setSnackMessage] = React.useState<string>("");
 
+    const me = SRD.withDefault("", model.me);
+
     type Order = "asc" | "desc";
 
     const handleCopyIdentifier = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -265,6 +271,11 @@ const DatabasesTable = () => {
         }
         setSnackOpen(false);
     }
+
+    const handleDeleteDatabase = async (database: Database, updateModel) => {
+        deleteDatabase(database, updateModel);
+        writeLog(me, "ConfigEditor", `delete the database ${database.id} (${database.name})`);
+    };
 
     const renderDatabases = SRD.match(
         {
@@ -348,8 +359,8 @@ const DatabasesTable = () => {
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <DatabaseFormDialog database={database} />
-                                                            <ButtonWithConfirmation label="Delete" msg={() => deleteDatabase(database, updateModel)} />
+                                                            <DatabaseFormDialog database={database} me={me} />
+                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteDatabase(database, updateModel)} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>
@@ -359,7 +370,7 @@ const DatabasesTable = () => {
                             </Table>
                         </TableContainer>
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <DatabaseFormDialog create={true} />
+                            <DatabaseFormDialog create={true} me={me} />
                         </Stack>
                     </Stack>
                 );

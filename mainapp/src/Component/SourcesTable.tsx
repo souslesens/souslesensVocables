@@ -28,6 +28,7 @@ import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
 import { ServerSource, saveSource, defaultSource, deleteSource, sourceHelp, InputSourceSchema, InputSourceSchemaCreate, getGraphSize } from "../Source";
+import { writeLog } from "../Log";
 import { identity, style, joinWhenArray, humanizeSize } from "../Utils";
 import { HelpButton } from "./HelpModal";
 import { ulid } from "ulid";
@@ -60,6 +61,11 @@ const SourcesTable = () => {
     const me = SRD.withDefault("", model.me);
     const indices = SRD.withDefault(null, model.indices);
     const graphs = SRD.withDefault(null, model.graphs);
+
+    const handleDeleteSource = async (source: ServerSource, updateModel) => {
+        deleteSource(source, updateModel)
+        writeLog(me, "ConfigEditor", `delete the source ${source.id} (${source.name})`);
+    };
 
     const renderSources = SRD.match(
         {
@@ -181,7 +187,7 @@ const SourcesTable = () => {
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             <SourceForm source={source} me={me} />
-                                                            <ButtonWithConfirmation label="Delete" msg={() => deleteSource(source, updateModel)} />
+                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteSource(source, updateModel)} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>
@@ -311,6 +317,7 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
 };
 
 type SourceFormProps = {
+    me: string;
     source?: ServerSource;
     create?: boolean;
 };
@@ -416,6 +423,8 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
     }
     const saveSources = () => {
         void saveSource(fromFormData(sourceModel.sourceForm), create ? Mode.Creation : Mode.Edition, updateModel, update);
+        const mode = create ? "create" : "edit";
+        writeLog(me, "ConfigEditor", `${mode} the source ${sourceModel.sourceForm.id} (${sourceModel.sourceForm.name})`);
     };
     const createIssues = (issue: ZodCustomIssueWithMessage[]) => setIssues(issue);
     const validateAfterSubmission = () => {

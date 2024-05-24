@@ -43,6 +43,7 @@ import * as React from "react";
 import { SRD } from "srd";
 import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate } from "../Profile";
 import { ServerSource } from "../Source";
+import { writeLog } from "../Log";
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -56,12 +57,22 @@ const ProfilesTable = () => {
     const [filteringChars, setFilteringChars] = React.useState("");
     const [orderBy, setOrderBy] = React.useState<keyof Profile>("name");
     const [order, setOrder] = React.useState<Order>("asc");
+
+    const me = SRD.withDefault("", model.me);
+
     type Order = "asc" | "desc";
+
     function handleRequestSort(property: keyof Profile) {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
     }
+
+    const handleDeleteProfile = async (profile: Profile, updateModel) => {
+        deleteProfile(profile, updateModel);
+        writeLog(me, "ConfigEditor", `delete the profile ${profile.id} (${profile.name})`);
+    };
+
     const renderProfiles = SRD.match(
         {
             // eslint-disable-next-line react/no-unescaped-entities
@@ -151,8 +162,8 @@ const ProfilesTable = () => {
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <ProfileForm profile={profile} />
-                                                            <ButtonWithConfirmation label="Delete" msg={() => deleteProfile(profile, updateModel)} />
+                                                    <ProfileForm profile={profile} me={me} />
+                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteProfile(profile, updateModel)} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>
@@ -165,7 +176,7 @@ const ProfilesTable = () => {
                             <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas as Datas}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
-                            <ProfileForm create={true} />
+                            <ProfileForm create={true} me={me} />
                         </Stack>
                     </Stack>
                 );
@@ -240,11 +251,12 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
 };
 
 type ProfileFormProps = {
+    me: string;
     profile?: Profile;
     create?: boolean;
 };
 
-const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: ProfileFormProps) => {
+const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = "" }: ProfileFormProps) => {
     const [nodesClicked, setNodeToExpand] = React.useState<Array<string>>([]);
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
@@ -346,6 +358,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     }
     const saveProfiles = () => {
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
+        const mode = create ? "create" : "edit";
+        writeLog(me, "ConfigEditor", `${mode} the profile ${profileModel.profileForm.id} (${profileModel.profileForm.name})`);
     };
 
     const getAvailableThemes = () => {

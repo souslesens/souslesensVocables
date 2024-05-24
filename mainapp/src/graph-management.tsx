@@ -34,6 +34,7 @@ import { Cancel, Close, Done, Folder } from "@mui/icons-material";
 
 import { fetchMe, VisuallyHiddenInput, humanizeSize } from "./Utils";
 
+import { writeLog } from "./Log";
 import { getGraphSize, ServerSource } from "./Source";
 
 declare global {
@@ -50,6 +51,7 @@ export default function GraphManagement() {
 
     // user info
     const [currentUserToken, setCurrentUserToken] = useState<string | null>(null);
+    const [currentUserName, setCurrentUserName] = useState<string>("");
 
     // graph info
     const [graphs, setGraphs] = useState([]);
@@ -93,6 +95,7 @@ export default function GraphManagement() {
         void fetchGraphsInfo();
         (async () => {
             const response = await fetchMe();
+            setCurrentUserName(response.user.login);
             setCurrentUserToken(response.user.token);
         })();
     }, []);
@@ -188,6 +191,8 @@ export default function GraphManagement() {
     };
 
     const uploadSource = async () => {
+        await writeLog(currentUserName, "GraphManagement", `upload a new source for ${currentSource}`);
+
         try {
             // init progress bar
             setCurrentOperation("upload");
@@ -328,6 +333,8 @@ export default function GraphManagement() {
 
     const downloadSource = async () => {
         try {
+            await writeLog(currentUserName, "GraphManagement", `download the source ${currentSource}`);
+
             setTransferPercent(0);
             setCurrentOperation("download");
             cancelCurrentOperation.current = false;

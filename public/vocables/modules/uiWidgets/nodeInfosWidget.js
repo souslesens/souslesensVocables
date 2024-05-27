@@ -271,6 +271,7 @@ var NodeInfosWidget = (function () {
     };
 
     self.configureEditPredicateWidget = function () {
+        $("#editPredicate_savePredicateButton").off("click");
         $("#editPredicate_savePredicateButton").click(function () {
             self.addPredicate();
         });

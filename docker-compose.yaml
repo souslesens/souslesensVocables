@@ -11,8 +11,7 @@ services:
         volumes:
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/config:/app/config"
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/logs:/app/logs"
-            - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/data/CSV:/app/data/CSV"
-            - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/data/mappings:/app/data/mappings"
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/data:/app/data"
             - "${DATA_ROOT_DIR:-/tmp}/slsv-plugins:/app/plugins:ro"
 
         environment:

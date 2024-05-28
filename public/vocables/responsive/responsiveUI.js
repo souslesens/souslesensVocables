@@ -77,12 +77,10 @@ var ResponsiveUI = (function () {
         }
 
         $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 7);
-        if($("#lateralPanelDiv").data("ui-resizable")!=undefined){
-
-            
+        if ($("#lateralPanelDiv").data("ui-resizable") != undefined) {
             $("#lateralPanelDiv").resizable("destroy");
             $("#lateralPanelDiv").resizable({
-                maxWidth: $(window).width()-100,
+                maxWidth: $(window).width() - 100,
                 minWidth: 150,
                 stop: function (event, ui) {
                     ResponsiveUI.resetWindowHeight();
@@ -391,7 +389,7 @@ var ResponsiveUI = (function () {
                     sourceDivId +
                     "\")'/> </button></div>";
                 $("#lineage_drawnSources").append(html);
-                $('#lineage_drawnSources').find('.arrow-icon').hide();
+                $("#lineage_drawnSources").find(".arrow-icon").hide();
                 /*
                 $("#" + sourceDivId).bind("click", function (e) {
                     var sourceDivId = $(this).attr("id");

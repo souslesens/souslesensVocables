@@ -78,9 +78,9 @@ var Lineage_r = (function () {
                 }
 
                 ResponsiveUI.PopUpOnHoverButtons();
-                
+
                 $("#lateralPanelDiv").resizable({
-                    maxWidth: $(window).width()-100,
+                    maxWidth: $(window).width() - 100,
                     minWidth: 150,
                     stop: function (event, ui) {
                         ResponsiveUI.resetWindowHeight();

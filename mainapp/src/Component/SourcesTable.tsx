@@ -393,6 +393,16 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
     const knownGroup = [...new Set(sources.flatMap((source) => source.group))].filter((group) => group.length > 0);
     const knownTaxonomyPredicates = [...new Set(sources.flatMap((source) => source.taxonomyPredicates))];
 
+    function validateSourceGroup(source: ServerSource) {
+        const issues = createCustomIssues(InputSourceSchema);
+        if (source.group.startsWith("PRIVATE/") && source.published) {
+            issues.group("Published source can't be in PRIVATE group");
+        }
+        return {
+            issues: issues.toArray(),
+        };
+    }
+
     function validateSourceName(sourceName: string) {
         const issues = createCustomIssues(InputSourceSchema);
 
@@ -473,7 +483,15 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                         <Grid item>
                             <Grid alignItems="center" container wrap="nowrap">
                                 <Grid item flex={1}>
-                                    <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.published} onChange={handleCheckbox("published")} />} label="Published?" />
+                                    <FormControlLabel
+                                        onBlur={() => {
+                                            const res = validateSourceGroup(sourceModel.sourceForm);
+                                            createIssues(res.issues);
+                                            validateAfterSubmission();
+                                        }}
+                                        control={<Checkbox checked={sourceModel.sourceForm.published} onChange={handleCheckbox("published")} />}
+                                        label="Published?"
+                                    />
                                 </Grid>
                                 <Grid item>
                                     <HelpButton title="published" message={sourceHelp.published} />
@@ -690,7 +708,11 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                 options={knownGroup}
                                 label={"Group"}
                                 onInputChange={(_e, newValue) => handleGroupUpdate(newValue)}
-                                onBlur={validateAfterSubmission}
+                                onBlur={() => {
+                                    const res = validateSourceGroup(sourceModel.sourceForm);
+                                    createIssues(res.issues);
+                                    validateAfterSubmission();
+                                }}
                                 inputValue={sourceModel.sourceForm.group}
                                 id="group"
                                 renderInput={(params) => (

@@ -38,6 +38,7 @@ import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CsvDownloader from "react-csv-downloader";
+import { writeLog } from "../Log";
 
 const UsersTable = () => {
     const { model, updateModel } = useModel();
@@ -45,11 +46,19 @@ const UsersTable = () => {
     const [orderBy, setOrderBy] = React.useState<keyof User>("login");
     const [order, setOrder] = React.useState<Order>("asc");
     type Order = "asc" | "desc";
+
+    const me = SRD.withDefault("", model.me);
+
     function handleRequestSort(property: keyof User) {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
     }
+
+    const handleDeleteUser = async (user: User, updateModel) => {
+        deleteUser(user, updateModel);
+        writeLog(me, "ConfigEditor", `delete the user ${user.login}`);
+    };
 
     const renderUsers = SRD.match(
         {
@@ -118,7 +127,9 @@ const UsersTable = () => {
                                                 Profiles
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Actions
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody sx={{ width: "100%", overflow: "visible" }}>
@@ -131,13 +142,15 @@ const UsersTable = () => {
                                                     <TableCell>{user.login}</TableCell>
                                                     <TableCell>
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            {user.groups.map((group) => <Chip label={group} size="small" />)}
+                                                            {user.groups.map((group) => (
+                                                                <Chip label={group} size="small" />
+                                                            ))}
                                                         </Stack>
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <UserForm id={`edit-button-${user.id}`} maybeuser={user} />
-                                                            <ButtonWithConfirmation label="Delete" msg={() => deleteUser(user, updateModel)} />
+                                                            <UserForm id={`edit-button-${user.id}`} maybeuser={user} me={me} />
+                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteUser(user, updateModel)} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>
@@ -150,7 +163,7 @@ const UsersTable = () => {
                             <CsvDownloader separator="&#9;" filename="users" extension=".tsv" datas={datas as Datas}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
-                            <UserForm id={`create-button`} create={true} />
+                            <UserForm id={`create-button`} create={true} me={me} />
                         </Stack>
                     </Stack>
                 );
@@ -201,12 +214,13 @@ const updateUser = (userEditionState: UserEditionState, msg: Msg_): UserEditionS
 };
 
 type UserFormProps = {
+    me: string;
     maybeuser?: User;
     create?: boolean;
     id: string;
 };
 
-const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) => {
+const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFormProps) => {
     const user = maybeUser ? maybeUser : newUser(ulid());
     const { model, updateModel } = useModel();
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
@@ -237,12 +251,10 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
         }
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: value } });
     };
-    const saveSources = () => {
-        if (create) {
-            void putUsersBis(userModel.userForm, Mode.Creation, updateModel, update);
-        } else {
-            void putUsersBis(userModel.userForm, Mode.Edition, updateModel, update);
-        }
+    const saveUser = () => {
+        void putUsersBis(userModel.userForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
+        const mode = create ? "create" : "edit";
+        writeLog(me, "ConfigEditor", `${mode} the user ${userModel.userForm.login}`);
     };
 
     const config = SRD.unwrap({ auth: "json", tools_available: [] }, identity, model.config);
@@ -316,7 +328,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                             />
                         </FormControl>
 
-                        <Button id="btn-save-user" color="primary" variant="contained" onClick={saveSources}>
+                        <Button id="btn-save-user" color="primary" variant="contained" onClick={saveUser}>
                             Save User
                         </Button>
                     </Stack>

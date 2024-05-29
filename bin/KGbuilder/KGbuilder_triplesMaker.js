@@ -184,8 +184,9 @@ var KGbuilder_triplesMaker = {
         } else if (tableMappings.transform && tableMappings.transform[mapping.s]) {
             try {
                 if (line[mapping.s]) {
+                   
                     subjectStr = tableMappings.transform[mapping.s]( util.formatStringForTriple(line[mapping.s],true), "s", mapping.p, line, mapping);
-                }
+                } 
                 //   return callback(null,subjectStr);
             } catch (e) {
                 return callback((lineError = e + " " + mapping.s));
@@ -272,7 +273,7 @@ var KGbuilder_triplesMaker = {
                             objectStr = tableMappings.transform[mapping.o](util.formatStringForTriple(line[mapping.o],false), "o", mapping.p, line, mapping);
                         }else{
                             objectStr = tableMappings.transform[mapping.o](util.formatStringForTriple(line[mapping.o],true), "o", mapping.p, line, mapping);
-
+                            
                         }
                         isTransform=true;
                     } else {
@@ -336,7 +337,7 @@ var KGbuilder_triplesMaker = {
                 if(isTransform==false){
                     objectStr = line[mapping.o];
                 } 
-                objectStr = line[mapping.o];
+                
             }
 
             if (mapping.lookup_o) {

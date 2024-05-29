@@ -251,7 +251,7 @@ var KGquery_graph = (function () {
 
     self.DrawImportsCommonGraph = function () {
         var source = KGquery.currentSource;
-        var sources = [];
+        var sources = [source];
         var imports = Config.sources[source].imports;
         if (imports) {
             sources = sources.concat(imports);

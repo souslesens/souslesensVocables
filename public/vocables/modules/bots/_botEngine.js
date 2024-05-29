@@ -10,7 +10,11 @@ var _botEngine = (function () {
         self.currentBot = botModule;
         self.currentObj = initialWorkflow;
         self.initialWorkflow = initialWorkflow;
-        self.history = [];
+        self.history = {};
+        self.history.workflowObjects = [];
+        self.history.returnValues=[];
+        //Object {VarFilled:'',valueFilled:''}
+        self.history.VarFilling={};
         self.history.currentIndex = 0;
         self.currentList = [];
 
@@ -67,8 +71,9 @@ var _botEngine = (function () {
 
     self.nextStep = function (returnValue, varToFill) {
         $("#botFilterProposalDiv").hide();
-        self.history.push(JSON.parse(JSON.stringify(self.currentObj)));
-        self.history.currentIndex += 1;
+        self.history.workflowObjects.push(JSON.parse(JSON.stringify(self.currentObj)));
+        self.history.currentIndex+=1;
+        self.history.returnValues.push(returnValue);
         if (!self.currentObj) {
             return self.end();
         }
@@ -143,14 +148,14 @@ var _botEngine = (function () {
         if (self.history.currentIndex > 1) {
             $("#botPromptInput").css("display", "none");
             self.history.currentIndex -= 2;
-
-            self.currentObj = self.history[self.history.currentIndex];
+            self.currentObj = self.history.workflowObjects[self.history.currentIndex];
+            //self.currentObj = self.history[self.history.currentIndex];
 
             //delete last 3 message sended
             var childrens = $("#botTA").children();
             // last is bot_input --> don't count
             $("#botTA").children().slice(-4).filter("span").remove();
-            if (self.currentObj._OR != undefined) {
+            /*if (self.currentObj._OR != undefined) {
                 if (self.OrReturnValues != []) {
                     var lastOrReturnValue = self.OrReturnValues.slice(-1);
                     self.OrReturnValues.pop();
@@ -158,7 +163,31 @@ var _botEngine = (function () {
                 }
             } else {
                 self.nextStep();
+            }*/
+            var VarFillingKeys=Object.keys(self.history.VarFilling);
+            var MaxIndexVarFilling=VarFillingKeys[VarFillingKeys.length - 1];
+            if(MaxIndexVarFilling>self.history.currentIndex){
+                // Annuler les trucks fill dans le bot qui ont une clé supérieure au currentIndex
+                var VarToUnfill=VarFillingKeys.filter(key => key>self.history.currentIndex);
+                for (const key in VarToUnfill) {
+                    if(self.history.VarFilling[VarToUnfill[key]]){
+                        var VarFilled=self.history.VarFilling[VarToUnfill[key]].VarFilled;
+                        var ValueFilled=self.history.VarFilling[VarToUnfill[key]].valueFilled;
+                        if(Array.isArray(self.currentBot.params[VarFilled])){
+                            self.currentBot.params[VarFilled]=self.currentBot.params[VarFilled].filter(item => item !== ValueFilled);
+                        }
+                        else{
+                            self.currentBot.params[VarFilled]='';
+                        }
+                    }
+                }
+
             }
+            //Supprimer tous l'historique jusqu'au currentIndex
+            self.nextStep(self.history.returnValues[self.history.currentIndex]);
+
+
+            
         } else {
             self.reset();
         }
@@ -251,6 +280,8 @@ var _botEngine = (function () {
                 return callback(selectedValue);
             }
             if (varToFill) {
+                //Il faut attribuer l'objet aux bon numéro de currentObject
+                self.history.VarFilling[self.history.currentIndex]={'VarFilled':varToFill,'valueFilled':selectedValue};
                 if (Array.isArray(self.currentBot.params[varToFill])) {
                     self.currentBot.params[varToFill].push(selectedValue);
                 } else {
@@ -303,6 +334,9 @@ var _botEngine = (function () {
                 if (!varToFill) {
                     return _botEngine.previousStep();
                 }
+                //Il faut attribuer l'objet aux bon numéro de currentObject
+                self.history.VarFilling[self.history.currentIndex]={'VarFilled':varToFill,'valueFilled':value.trim()};
+                
                 _botEngine.currentBot.params[varToFill] = value.trim();
                 self.writeCompletedHtml(value);
                 $("#botPromptInput").off();

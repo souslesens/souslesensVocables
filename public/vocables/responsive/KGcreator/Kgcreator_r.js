@@ -103,7 +103,6 @@ var KGcreator_r = (function () {
                     ResponsiveUI.PopUpOnHoverButtons();
                     if (KGcreator.currentTreeNode != undefined) {
                         $(document.getElementById(KGcreator.currentTreeNode.id + "_anchor")).click();
-                        
                     }
                 });
             });

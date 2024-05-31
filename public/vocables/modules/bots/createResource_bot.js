@@ -16,6 +16,22 @@ var CreateResource_bot = (function () {
     self.title = "Create Resource";
 
     self.start = function (workflow, _params, callback) {
+        _botEngine.startParams = [];
+        if (workflow) {
+            _botEngine.startParams.push(JSON.parse(JSON.stringify(workflow)));
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+        if (_params) {
+            _botEngine.startParams.push(JSON.parse(JSON.stringify(_params)));
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+        if (callback) {
+            _botEngine.startParams.push(callback);
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
         self.callback = callback;
         if (!workflow) workflow = self.workflow;
         _botEngine.init(CreateResource_bot, workflow, null, function () {

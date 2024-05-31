@@ -11,6 +11,23 @@ var KGquery_filter_bot = (function () {
     self.title = "Filter Class";
 
     self.start = function (data, currentQuery, validateFn) {
+        _botEngine.startParams = [];
+        if (data) {
+            _botEngine.startParams.push(JSON.parse(JSON.stringify(data)));
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+        if (currentQuery) {
+            _botEngine.startParams.push(JSON.parse(JSON.stringify(currentQuery)));
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+        if (validateFn) {
+            _botEngine.startParams.push(validateFn);
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+
         self.data = data;
         self.filter = "";
         self.filterItems = [];

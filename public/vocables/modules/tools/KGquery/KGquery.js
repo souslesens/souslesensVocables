@@ -665,7 +665,8 @@ var KGquery = (function () {
                 var dataItem = self.currentData[datasetIndex];
                 var varName = self.tableCols[index.column].title;
                 if (true || !dataItem[varName]) {
-                    varName = varName.split("_")[0];
+                    varName = KGquery.currentSelectedPredicates.filter((key) => key.id == varName)[0].data.varName;
+                    //varName = varName.split("_")[0];
                 }
                 var uri = dataItem[varName].value;
                 var node = { data: { id: uri } };

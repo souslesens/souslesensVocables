@@ -1,7 +1,6 @@
 var _botEngine = (function () {
     var self = {};
     self.firstLoad = true;
-    self.OrReturnValues = [];
     self.lastFilterListStr = "";
     self.init = function (botModule, initialWorkflow, options, callback) {
         if (!options) {
@@ -12,10 +11,12 @@ var _botEngine = (function () {
         self.initialWorkflow = initialWorkflow;
         self.history = {};
         self.history.workflowObjects = [];
-        self.history.returnValues=[];
+        self.history.returnValues = [];
         //Object {VarFilled:'',valueFilled:''}
-        self.history.VarFilling={};
-        self.history.currentIndex = 0;
+        self.history.VarFilling = {};
+        self.history.currentIndex = -1;
+        // Step is the indexes when currentBot.nextStep is a function when the choice is let to the user
+        self.history.step = [];
         self.currentList = [];
 
         var divId;
@@ -72,7 +73,7 @@ var _botEngine = (function () {
     self.nextStep = function (returnValue, varToFill) {
         $("#botFilterProposalDiv").hide();
         self.history.workflowObjects.push(JSON.parse(JSON.stringify(self.currentObj)));
-        self.history.currentIndex+=1;
+        self.history.currentIndex += 1;
         self.history.returnValues.push(returnValue);
         if (!self.currentObj) {
             return self.end();
@@ -91,7 +92,6 @@ var _botEngine = (function () {
             // if  return value execute function linked to return value in alternative
             if (returnValue) {
                 if (alternatives[returnValue]) {
-                    self.OrReturnValues.push(returnValue);
                     var obj = self.currentObj["_OR"][returnValue];
                     var key0 = Object.keys(obj)[0];
                     if (!key0) {
@@ -141,53 +141,58 @@ var _botEngine = (function () {
         }
     };
 
-    self.previousStep = function (message) {
+    self.previousStep = function () {
+        /*
         if (message) {
             self.message(message);
-        }
-        if (self.history.currentIndex > 1) {
+        }*/
+        if (self.history.currentIndex > 0) {
             $("#botPromptInput").css("display", "none");
-            self.history.currentIndex -= 2;
-            self.currentObj = self.history.workflowObjects[self.history.currentIndex];
+
+            //self.history.currentIndex -= 2;
+            var lastStepIndex = self.history.step[self.history.step.length - 2];
+            if (lastStepIndex == 0) {
+                return self.reset();
+            }
+            self.currentObj = self.history.workflowObjects[lastStepIndex];
+            var returnValue = self.history.returnValues[lastStepIndex];
             //self.currentObj = self.history[self.history.currentIndex];
 
             //delete last 3 message sended
             var childrens = $("#botTA").children();
             // last is bot_input --> don't count
             $("#botTA").children().slice(-4).filter("span").remove();
-            /*if (self.currentObj._OR != undefined) {
-                if (self.OrReturnValues != []) {
-                    var lastOrReturnValue = self.OrReturnValues.slice(-1);
-                    self.OrReturnValues.pop();
-                    self.nextStep(lastOrReturnValue);
-                }
-            } else {
-                self.nextStep();
-            }*/
-            var VarFillingKeys=Object.keys(self.history.VarFilling);
-            var MaxIndexVarFilling=VarFillingKeys[VarFillingKeys.length - 1];
-            if(MaxIndexVarFilling>self.history.currentIndex){
-                // Annuler les trucks fill dans le bot qui ont une clé supérieure au currentIndex
-                var VarToUnfill=VarFillingKeys.filter(key => key>self.history.currentIndex);
+
+            // Annuler les variables filled dans le bot qui ont une clé supérieure ou égale au lastStepIndex (été faites après l'application de l'étape)
+            var VarFillingKeys = Object.keys(self.history.VarFilling);
+            var VarToUnfill = VarFillingKeys.filter((key) => key >= lastStepIndex);
+            if (VarToUnfill.length > 0) {
                 for (const key in VarToUnfill) {
-                    if(self.history.VarFilling[VarToUnfill[key]]){
-                        var VarFilled=self.history.VarFilling[VarToUnfill[key]].VarFilled;
-                        var ValueFilled=self.history.VarFilling[VarToUnfill[key]].valueFilled;
-                        if(Array.isArray(self.currentBot.params[VarFilled])){
-                            self.currentBot.params[VarFilled]=self.currentBot.params[VarFilled].filter(item => item !== ValueFilled);
+                    if (self.history.VarFilling[VarToUnfill[key]]) {
+                        var VarFilled = self.history.VarFilling[VarToUnfill[key]].VarFilled;
+                        var ValueFilled = self.history.VarFilling[VarToUnfill[key]].valueFilled;
+                        if (Array.isArray(self.currentBot.params[VarFilled])) {
+                            self.currentBot.params[VarFilled] = self.currentBot.params[VarFilled].filter((item) => item !== ValueFilled);
+                        } else {
+                            self.currentBot.params[VarFilled] = "";
                         }
-                        else{
-                            self.currentBot.params[VarFilled]='';
-                        }
+                        delete self.history.VarFilling[VarToUnfill[key]];
                     }
                 }
-
             }
             //Supprimer tous l'historique jusqu'au currentIndex
-            self.nextStep(self.history.returnValues[self.history.currentIndex]);
+            self.history.currentIndex = lastStepIndex - 1;
+            self.history.workflowObjects = self.history.workflowObjects.filter(function (element, index, array) {
+                return index < lastStepIndex;
+            });
+            self.history.returnValues = self.history.returnValues.filter(function (element, index, array) {
+                return index < lastStepIndex;
+            });
+            self.history.step = self.history.step.filter(function (element, index, array) {
+                return index < lastStepIndex;
+            });
 
-
-            
+            self.nextStep(returnValue);
         } else {
             self.reset();
         }
@@ -233,7 +238,11 @@ var _botEngine = (function () {
     };
 
     self.reset = function () {
-        self.currentBot.start();
+        if (self.startParams && self.startParams.length > 0) {
+            self.currentBot.start(...self.startParams);
+        } else {
+            self.currentBot.start();
+        }
     };
 
     self.close = function () {
@@ -252,6 +261,9 @@ var _botEngine = (function () {
                 }
                 return 0;
             });
+        }
+        if (!self.history.step.includes(self.history.currentIndex)) {
+            self.history.step.push(self.history.currentIndex);
         }
 
         $("#bot_resourcesProposalSelect").css("display", "block");
@@ -281,7 +293,7 @@ var _botEngine = (function () {
             }
             if (varToFill) {
                 //Il faut attribuer l'objet aux bon numéro de currentObject
-                self.history.VarFilling[self.history.currentIndex]={'VarFilled':varToFill,'valueFilled':selectedValue};
+                self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: selectedValue };
                 if (Array.isArray(self.currentBot.params[varToFill])) {
                     self.currentBot.params[varToFill].push(selectedValue);
                 } else {
@@ -335,8 +347,8 @@ var _botEngine = (function () {
                     return _botEngine.previousStep();
                 }
                 //Il faut attribuer l'objet aux bon numéro de currentObject
-                self.history.VarFilling[self.history.currentIndex]={'VarFilled':varToFill,'valueFilled':value.trim()};
-                
+                self.history.VarFilling[self.history.currentIndex] = { VarFilled: varToFill, valueFilled: value.trim() };
+
                 _botEngine.currentBot.params[varToFill] = value.trim();
                 self.writeCompletedHtml(value);
                 $("#botPromptInput").off();
@@ -352,6 +364,9 @@ var _botEngine = (function () {
         $("#botPromptInput").val(defaultValue || "");
         $("#botPromptInput").css("display", "block");
         $("#botPromptInput").focus();
+        if (!self.history.step.includes(self.history.currentIndex)) {
+            self.history.step.push(self.history.currentIndex);
+        }
     };
 
     self.writeCompletedHtml = function (str, options) {
@@ -383,6 +398,7 @@ var _botEngine = (function () {
         for (var key in alternatives) {
             choices.push({ id: key, label: key });
         }
+
         self.showList(choices, varToFill);
         self.setStepMessage();
     };

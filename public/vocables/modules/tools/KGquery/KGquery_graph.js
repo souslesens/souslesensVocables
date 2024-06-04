@@ -84,7 +84,7 @@ var KGquery_graph = (function () {
                             ///  return callbackSeries("generate commonGraph");
                         }
                         visjsData = result;
-                        if (result.options && result.options.output) {
+                        if (result && result.options && result.options.output) {
                             display = result.options.output;
                         }
 
@@ -251,7 +251,7 @@ var KGquery_graph = (function () {
 
     self.DrawImportsCommonGraph = function () {
         var source = KGquery.currentSource;
-        var sources = [];
+        var sources = [source];
         var imports = Config.sources[source].imports;
         if (imports) {
             sources = sources.concat(imports);

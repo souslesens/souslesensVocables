@@ -31,6 +31,15 @@ var _botEngine = (function () {
         }
 
         $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
+
+            if (window.location.href.indexOf("localhost") < 0) {
+                $("#KGcreatorBot_exportToGraph").css("display", "none");
+            }
+
+
+
+
+
             if (!self.firstLoad) {
                 //$("#resetButtonBot").remove();
                 //$("#previousButtonBot").remove();
@@ -428,7 +437,9 @@ var _botEngine = (function () {
         var x = visjsData;
 
         $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").html("<div id='botGraphDiv' style='width:800px;height:800px'></div>");
+        $("#mainDialogDiv").html("" +
+            "<div><button onclick='  Lineage_whiteboard.lineageVisjsGraph.toSVG();'>toSVG</button> </div>" +
+            "<div id='botGraphDiv' style='width:1200px;height:800px'></div>");
         $("#mainDialogDiv").parent().css("z-index", 1);
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
             layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
@@ -440,4 +451,4 @@ var _botEngine = (function () {
 })();
 export default _botEngine;
 
-window.BotEngine = _botEngine;
+window._botEngine = _botEngine;

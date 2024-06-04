@@ -12,10 +12,11 @@ var Containers_tree = (function () {
     var self = {};
     self.jstreeDivId = "lineage_containers_containersJstree";
 
-    self.search = function (jstreeDivId, options, callback) {
+    self.search = function (jstreeDivId,source, options, callback) {
         if (jstreeDivId) {
             self.jstreeDivId = jstreeDivId;
         }
+
         if (!options) {
             options = {};
         }
@@ -24,18 +25,22 @@ var Containers_tree = (function () {
         }
 
         var term = $("#Lineage_containers_searchInput").val();
-        var source = Lineage_sources.activeSource;
+        if(source)
+        self.currentSource=source;
+        else{
+            self.currentSource=Lineage_sources.activeSource
+        }
 
         var filter = "";
         if (term) {
-            Containers_tree.drawContainerAndAncestorsJsTree(source, term, {}, function (err, result) {
+            Containers_tree.drawContainerAndAncestorsJsTree( self.currentSource, term, {}, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
             });
         } else {
-            Containers_query.getTopContainer(source, options, function (err, result) {
-                self.drawTree(self.jstreeDivId, source, "#", result.results.bindings, options);
+            Containers_query.getTopContainer( self.currentSource, options, function (err, result) {
+                self.drawTree(self.jstreeDivId,  self.currentSource, "#", result.results.bindings, options);
             });
         }
     };
@@ -213,7 +218,7 @@ var Containers_tree = (function () {
                             var shape = Lineage_containers.containerStyle.shape;
                             var type = "container";
                             if (item.memberTypes.value.indexOf("Bag") < 0) {
-                                color = Lineage_whiteboard.getSourceColor(Lineage_sources.activeSource);
+                                color = Lineage_whiteboard.getSourceColor(self.currentSource);
                                 if (item.memberTypes.value.indexOf("Individual") > -1) {
                                     type = "individual";
                                     shape = "triangle";
@@ -350,7 +355,7 @@ var Containers_tree = (function () {
                     Lineage_whiteboard.lineageVisjsGraph.network.fit();
                     $("#waitImg").css("display", "none");
                     if (objectProperties.length > 0) {
-                        source = Lineage_sources.activeSource;
+                        source = self.currentSource;
                         var options = {
                             filter: Sparql_common.setFilter("prop", objectProperties),
                         };
@@ -553,14 +558,14 @@ var Containers_tree = (function () {
         items["NodeInfos"] = {
             label: "Node infos",
             action: function (_e) {
-                NodeInfosWidget.showNodeInfos(Lineage_sources.activeSource, self.currentContainer, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentSource, self.currentContainer, "mainDialogDiv");
             },
         };
         items["GraphNode"] = {
             label: "Graph node",
             action: function (_e) {
                 if (self.currentContainer.data.type == "container") {
-                    Containers_graph.graphResources(Lineage_sources.activeSource, self.currentContainer.data, { onlyOneLevel: true });
+                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { onlyOneLevel: true });
                 } else {
                     Lineage_whiteboard.drawNodesAndParents(self.currentContainer, 0);
                 }
@@ -570,7 +575,7 @@ var Containers_tree = (function () {
             label: "Open node",
             action: function (_e) {
                 // $("#lineage_containers_containersJstree").jstree().open_all(self.currentContainer.id);
-                Containers_tree.menuActions.listContainerResources(Lineage_sources.activeSource, self.currentContainer, { onlyOneLevel: true, leaves: true });
+                Containers_tree.menuActions.listContainerResources(self.currentSource, self.currentContainer, { onlyOneLevel: true, leaves: true });
             },
         };
         items.copyNodes = {
@@ -586,33 +591,33 @@ var Containers_tree = (function () {
             label: "Add selected node to container",
             action: function (_e) {
                 var graphNodeData = Lineage_whiteboard.currentGraphNode.data;
-                Containers_tree.menuActions.addResourcesToContainer(Lineage_sources.activeSource, self.currentContainer, graphNodeData);
+                Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData);
             },
         };
         items["PasteNodesInContainer"] = {
             label: "Paste nodes in container",
             action: function (_e) {
-                Containers_tree.menuActions.pasteNodesInContainer(Lineage_sources.activeSource, self.currentContainer);
+                Containers_tree.menuActions.pasteNodesInContainer(self.currentSource, self.currentContainer);
             },
         };
 
         items["DeleteContainer"] = {
             label: "Delete container",
             action: function (_e) {
-                Containers_tree.menuActions.deleteContainer(Lineage_sources.activeSource, self.currentContainer);
+                Containers_tree.menuActions.deleteContainer(self.currentSource, self.currentContainer);
             },
         };
 
         items["GraphContainerDescendant"] = {
             label: "Graph  descendants",
             action: function (_e) {
-                Containers_graph.graphResources(Lineage_sources.activeSource, self.currentContainer.data, { descendants: true });
+                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { descendants: true });
             },
         };
         items["GraphContainerDescendantAndLeaves"] = {
             label: "Graph  descendants + leaves",
             action: function (_e) {
-                Containers_graph.graphResources(Lineage_sources.activeSource, self.currentContainer.data, { leaves: true });
+                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });
             },
         };
 
@@ -621,7 +626,7 @@ var Containers_tree = (function () {
 
     self.menuActions.addContainer = function (source) {
         if (!source) {
-            source = Lineage_sources.activeSource;
+            source = self.currentSource;
         }
 
         var newContainerLabel = prompt("enter new container label)");
@@ -670,7 +675,7 @@ var Containers_tree = (function () {
 
             if (!$("#lineage_containers_containersJstree").jstree) {
                 // initialize jstree
-                self.search(function (err, result) {
+                self.search(self.jstreeDivId,self.currentSource,null,function (err, result) {
                     $("#lineage_containers_containersJstree")
                         .jstree()
                         .create_node(parent, newNode, "first", function (err, result) {
@@ -837,7 +842,7 @@ var Containers_tree = (function () {
     };
 
     self.menuActions.writeMovedNodeNewParent = function (movedNodeInfos) {
-        var graphUri = Config.sources[Lineage_sources.activeSource].graphUri;
+        var graphUri = Config.sources[self.currentSource].graphUri;
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "with <" +
@@ -853,9 +858,9 @@ var Containers_tree = (function () {
             movedNodeInfos.nodeId +
             ">}";
 
-        var url = Config.sources[Lineage_sources.activeSource].sparql_server.url + "?format=json&query=";
+        var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Lineage_sources.activeSource }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource }, function (err, result) {
             if (err) {
                 return callback(err);
             }

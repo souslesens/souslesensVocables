@@ -330,9 +330,7 @@ var KGbuilder_triplesMaker = {
                     return callback(null, null);
                 }
                 if (mapping.dataType == "xsd:string") {
-                    if(str.indexOf('0.75')>-1){
-                        console.log('here');
-                    }
+                    
                     str = util.formatStringForTriple(str, false);
                 }
 

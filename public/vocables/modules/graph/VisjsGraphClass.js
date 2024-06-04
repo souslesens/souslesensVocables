@@ -98,8 +98,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         } else {
             $("#visjsGraph_layoutSelect").val("");
         }
-
+        /*
         self.globalOptions = options;
+        
+        options.visjsOptions.physics={};
+        options.visjsOptions.physics.stabilization = {
+            enabled: true,
+            iterations: 1000, // Nombre d'itérations pour stabiliser le réseau
+            updateInterval: 25,
+            onlyDynamicEdges: false,
+            fit: false
+          };*/
         self.network = new vis.Network(container, self.data, options.visjsOptions);
         self.simulationOn = true;
 
@@ -196,12 +205,21 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
                 newNodes.push({ id: nodeId, fixed: fixed });
                 self.data.nodes.update(newNodes);
+                /*self.network.setOptions({ physics: {enabled: true,
+                    stabilization: {
+                      enabled: true,
+                      iterations: 1000, // Nombre d'itérations pour stabiliser le réseau
+                      updateInterval: 25,
+                      onlyDynamicEdges: false,
+                      fit: true
+                    }} });*/
             })
             .on("controlNodeDragging", function (params) {
                 self.currentDraggingMousePosition = params.pointer.DOM;
             })
             .on("dragging", function (_params) {})
             .on("dragEnd", function (/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
+                //self.network.setOptions({ physics: { enabled: false } });
                 if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
                     var dropCtrlNodeId = self.network.getNodeAt(params.pointer.DOM);
                     if (!dropCtrlNodeId) {
@@ -427,6 +445,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                             node.size = size;
                             node.font = { size: fontSize };
                             self.labelsVisible = true;
+                            node.fixed=false;
                         } else {
                             node.label = null;
                             node.size = size;
@@ -896,10 +915,10 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 data.nodes.forEach(function (node) {
                     if (!existingNodes[node.id]) {
                         existingNodes[node.id] = 1;
-                        if (node.fixed && positions[node.id]) {
+                        if (positions[node.id]) {
                             node.x = positions[node.id].x;
                             node.y = positions[node.id].y;
-                            node.fixed = { x: true, y: true };
+                            //node.fixed = { x: false, y: false };
                         }
                         visjsData.nodes.push(node);
                     }

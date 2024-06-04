@@ -58,7 +58,8 @@ var KGbuilder_triplesMaker = {
 
                         }
                         if (line[key] && !KGbuilder_triplesMaker.isUri(line[key])) {
-                            line[key] = util.formatStringForTriple(line[key]);
+                            //applied two times
+                            //line[key] = util.formatStringForTriple(line[key]);
                         }
                     }
                 }
@@ -329,6 +330,9 @@ var KGbuilder_triplesMaker = {
                     return callback(null, null);
                 }
                 if (mapping.dataType == "xsd:string") {
+                    if(str.indexOf('0.75')>-1){
+                        console.log('here');
+                    }
                     str = util.formatStringForTriple(str, false);
                 }
 

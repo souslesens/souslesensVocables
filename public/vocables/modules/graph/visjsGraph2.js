@@ -412,7 +412,6 @@ var visjsGraph = (function () {
                             node.size = size;
                             node.font = { size: fontSize };
                             self.labelsVisible = true;
-                            
                         } else {
                             node.label = null;
                             node.size = size;

@@ -48,7 +48,6 @@ var KGquery_graph = (function () {
                     return false;
                 },
             },
-            
         },
     };
 
@@ -242,16 +241,16 @@ var KGquery_graph = (function () {
                     //    self.KGqueryGraph.data.nodes.update(visjsData.nodes);
                     KGquery_graph.message("", true);
                     self.KGqueryGraph.network.moveTo({
-                        position: {x: 0, y: 0}, // Position centrale, à ajuster si nécessaire
+                        position: { x: 0, y: 0 }, // Position centrale, à ajuster si nécessaire
                         scale: 1.1, // Facteur de zoom très faible pour dézoomer au maximum
                         animation: {
-                          duration: 1000,
-                          easingFunction: "easeInOutQuad"
-                        }
-                      });
-                      self.KGqueryGraph.onScaleChange();
-                      var nodes_wt_position=[];
-                      self.KGqueryGraph.data.nodes.get().forEach(function(node){
+                            duration: 1000,
+                            easingFunction: "easeInOutQuad",
+                        },
+                    });
+                    self.KGqueryGraph.onScaleChange();
+                    var nodes_wt_position = [];
+                    self.KGqueryGraph.data.nodes.get().forEach(function (node) {
                         delete node.x;
                         delete node.y;
                         nodes_wt_position.push(node);

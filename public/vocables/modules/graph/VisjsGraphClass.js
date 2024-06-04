@@ -445,7 +445,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                             node.size = size;
                             node.font = { size: fontSize };
                             self.labelsVisible = true;
-                            node.fixed=false;
+                            node.fixed = false;
                         } else {
                             node.label = null;
                             node.size = size;

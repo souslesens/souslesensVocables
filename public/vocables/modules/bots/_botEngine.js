@@ -330,15 +330,17 @@ var _botEngine = (function () {
         $("#bot_resourcesProposalSelect").hide();
 
         if (options && options.datePicker) {
+            //DateWidget.unsetDatePickerOnInput("botPromptInput");
             DateWidget.setDatePickerOnInput("botPromptInput", null, function (date) {
                 _botEngine.currentBot.params[varToFill] = date.getTime();
-                DateWidget.unsetDatePickerOnInput("botPromptInput");
+
                 // self.nextStep();
             });
         }
 
         $("#botPromptInput").on("keyup", function (key) {
             if (event.keyCode == 13 || event.keyCode == 9) {
+                DateWidget.unsetDatePickerOnInput("botPromptInput");
                 $("#bot_resourcesProposalSelect").show();
                 $("#botPromptInput").css("display", "none");
                 var value = $(this).val();

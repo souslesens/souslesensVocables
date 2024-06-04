@@ -256,6 +256,10 @@ var KGquery_filter_bot = (function () {
             BotEngine.nextStep();
         } else {
             _botEngine.currentObj = self.workflow_filterClass;
+            _botEngine.currentBot.params.property = "";
+            _botEngine.currentBot.params.propertyDatatype = "";
+            _botEngine.currentBot.params.propertyOperator = "";
+            _botEngine.currentBot.params.propertyValue = "";
             _botEngine.nextStep();
         }
     };

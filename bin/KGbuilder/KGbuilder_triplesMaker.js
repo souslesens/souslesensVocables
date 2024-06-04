@@ -293,6 +293,7 @@ var KGbuilder_triplesMaker = {
                 }
                 if (mapping.dataType.startsWith("xsd:date")) {
                     if (str.match(/[.-]*Z/)) {//ISO string format (coming from database)
+                       str=util.formatStringForTriple(str);
                        str=util.convertISOStringDateForTriple(str);
                     } else if (mapping.dateFormat) {
                         str = util.getDateFromSLSformat(mapping.dateFormat, str);

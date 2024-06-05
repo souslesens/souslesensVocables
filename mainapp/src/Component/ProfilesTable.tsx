@@ -70,7 +70,7 @@ const ProfilesTable = () => {
 
     const handleDeleteProfile = async (profile: Profile, updateModel) => {
         deleteProfile(profile, updateModel);
-        writeLog(me, "ConfigEditor", `delete the profile ${profile.id} (${profile.name})`);
+        writeLog(me, "ConfigEditor", "delete", profile.name);
     };
 
     const renderProfiles = SRD.match(
@@ -107,7 +107,8 @@ const ProfilesTable = () => {
                     );
                     return { ...dataWithoutCarriageReturns };
                 });
-                const sortedProfiles: Profile[] = gotProfiles.slice().sort((a: Profile, b: Profile) => {let left: string = "";
+                const sortedProfiles: Profile[] = gotProfiles.slice().sort((a: Profile, b: Profile) => {
+                    let left: string = "";
                     let right: string = "";
 
                     if (a[orderBy] instanceof Array) {
@@ -145,7 +146,9 @@ const ProfilesTable = () => {
                                                 Allowed Sources
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Actions
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody sx={{ width: "100%", overflow: "visible" }}>
@@ -157,12 +160,14 @@ const ProfilesTable = () => {
                                                     <TableCell>{profile.name}</TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            {profile.allowedSourceSchemas.map((source) => <Chip label={source} size="small" />)}
+                                                            {profile.allowedSourceSchemas.map((source) => (
+                                                                <Chip label={source} size="small" />
+                                                            ))}
                                                         </Stack>
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                    <ProfileForm profile={profile} me={me} />
+                                                            <ProfileForm profile={profile} me={me} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteProfile(profile, updateModel)} />
                                                         </Stack>
                                                     </TableCell>
@@ -359,12 +364,11 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     const saveProfiles = () => {
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";
-        writeLog(me, "ConfigEditor", `${mode} the profile ${profileModel.profileForm.id} (${profileModel.profileForm.name})`);
+        writeLog(me, "ConfigEditor", mode, profileModel.profileForm.name);
     };
 
     const getAvailableThemes = () => {
-        return Object.keys(Config.slsvColorThemes)
-            .sort((a, b) => a.localeCompare(b));
+        return Object.keys(Config.slsvColorThemes).sort((a, b) => a.localeCompare(b));
     };
 
     const fieldsFromSource = (source: ServerSource) => {
@@ -610,7 +614,9 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                             onChange={handleFieldUpdate("theme")}
                             select
                         >
-                            {getAvailableThemes().map((theme) => <MenuItem value={theme}>{theme}</MenuItem>)}
+                            {getAvailableThemes().map((theme) => (
+                                <MenuItem value={theme}>{theme}</MenuItem>
+                            ))}
                         </TextField>
                         <Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} type="submit" variant="contained" color="primary">
                             Save Profile

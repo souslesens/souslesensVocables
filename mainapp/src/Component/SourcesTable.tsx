@@ -63,8 +63,8 @@ const SourcesTable = () => {
     const graphs = SRD.withDefault(null, model.graphs);
 
     const handleDeleteSource = async (source: ServerSource, updateModel) => {
-        deleteSource(source, updateModel)
-        writeLog(me, "ConfigEditor", `delete the source ${source.id} (${source.name})`);
+        deleteSource(source, updateModel);
+        writeLog(me, "ConfigEditor", "delete", source.name);
     };
 
     const renderSources = SRD.match(
@@ -424,7 +424,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
     const saveSources = () => {
         void saveSource(fromFormData(sourceModel.sourceForm), create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";
-        writeLog(me, "ConfigEditor", `${mode} the source ${sourceModel.sourceForm.id} (${sourceModel.sourceForm.name})`);
+        writeLog(me, "ConfigEditor", mode, sourceModel.sourceForm.name);
     };
     const createIssues = (issue: ZodCustomIssueWithMessage[]) => setIssues(issue);
     const validateAfterSubmission = () => {

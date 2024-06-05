@@ -108,9 +108,9 @@ var MainController = (function () {
         });
     };
 
-    self.writeUserLog = function (user, tool, source) {
+    self.writeUserLog = function (user, tool, source, action = "") {
         var payload = {
-            infos: user.identifiant + "," + tool + "," + source,
+            infos: `${user.identifiant},${tool},${source},${action}`,
         };
         $.ajax({
             type: "POST",

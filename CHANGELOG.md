@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.73.0](https://github.com/souslesens/souslesensVocables/compare/1.72.1...1.73.0) (2024-06-05)
+
+
+### Features
+
+* **configEditor:** Do not allow to publish source in PRIVATE group ([2a69032](https://github.com/souslesens/souslesensVocables/commit/2a69032223546d0a21dda5aae671a1f82a5bd4b7))
+* **ConfigEditor:** store database events in the main log ([c900052](https://github.com/souslesens/souslesensVocables/commit/c9000525bcf3de9a21b3bb9d47106d2d66c4821e))
+* **ConfigEditor:** store profile events in the main log ([b2195d2](https://github.com/souslesens/souslesensVocables/commit/b2195d2de2475e5947409c97e9954de950446cee))
+* **ConfigEditor:** store source events in the main log ([db113d5](https://github.com/souslesens/souslesensVocables/commit/db113d505621496ee0847f80783135cef2284533))
+* **ConfigEditor:** store user events in the main log ([f7f179e](https://github.com/souslesens/souslesensVocables/commit/f7f179e4ffd5523ac2451c1b30d3740e599c6255))
+* **GraphManagement:** write log events during upload and download process ([e7bab68](https://github.com/souslesens/souslesensVocables/commit/e7bab68ae2e7077a3db1ae0b8516c314b0bb357e))
+* **logs:** add action to logs ([73fa031](https://github.com/souslesens/souslesensVocables/commit/73fa0312a66d27aa680bfa41e5480d3f83bafd06))
+* **logs:** log tools with his source (if available) ([3025b71](https://github.com/souslesens/souslesensVocables/commit/3025b7108a556836d6709d2218b242d635d91586))
+* **mainapp:** add a function to write event in the vocables.log ([b58ad96](https://github.com/souslesens/souslesensVocables/commit/b58ad96a151b9df8e11d13b5ed56fd551bb5f566))
+* **migrations:** add a field to vocables log (action) ([0204031](https://github.com/souslesens/souslesensVocables/commit/02040310edc45b1a177f3a59d9937ce10a7cbdc8))
+* **responsive:** remove useless logs ([7796e01](https://github.com/souslesens/souslesensVocables/commit/7796e015c27371b16b1e62a3c51e56570863eb78))
+
 ### [1.72.1](https://github.com/souslesens/souslesensVocables/compare/1.72.0...1.72.1) (2024-05-22)
 
 ## [1.72.0](https://github.com/souslesens/souslesensVocables/compare/1.71.0...1.72.0) (2024-05-21)

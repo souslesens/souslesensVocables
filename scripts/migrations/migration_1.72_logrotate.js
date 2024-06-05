@@ -27,15 +27,23 @@ const lastValidDate = new Date(today.getFullYear() - 1, today.getMonth());
     }
 
     const logsPeriods = new Map();
-    fs.readFileSync(vocablesLogPath, "utf-8").split(/\r?\n/).forEach((line) => {
-        if (line) {
-            const date = JSON.parse(line).timestamp.split(" ")[0].slice(0, 7);
-            if (!logsPeriods.has(date)) {
-                logsPeriods.set(date, []);
+    fs.readFileSync(vocablesLogPath, "utf-8")
+        .split(/\r?\n/)
+        .forEach((line) => {
+            if (line) {
+                const json_line = JSON.parse(line);
+                if (logfile == "vocables.log") {
+                    const message_json = json_line.message.split(",");
+                    message_json.splice(3, 0, "");
+                    json_line.message = message_json.join(",");
+                }
+                const date = json_line.timestamp.split(" ")[0].slice(0, 7);
+                if (!logsPeriods.has(date)) {
+                    logsPeriods.set(date, []);
+                }
+                logsPeriods.get(date).push(JSON.stringify(json_line));
             }
-            logsPeriods.get(date).push(line);
-        }
-    });
+        });
 
     logsPeriods.forEach((value, key) => {
         const monthlyLogPath = path.resolve(mainconfig.logDir || path.join("log", "souslesens"), `${logfile}.${key}`);

@@ -132,6 +132,12 @@ var ResponsiveUI = (function () {
         } else {
             self.initTool(toolId);
         }
+
+        // set or replace tool in url params
+        const params = new URLSearchParams(document.location.search);
+        params.set("tool", toolId);
+        window.history.replaceState(null, "", `?${params.toString()}`);
+
         if (callback) {
             callback();
         }

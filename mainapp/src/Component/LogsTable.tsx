@@ -21,7 +21,7 @@ import {
     TableSortLabel,
     TextField,
 } from "@mui/material";
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
 import { useModel } from "../Admin";
 import * as React from "react";
@@ -151,6 +151,11 @@ export const LogsTable = () => {
                                                 Tool
                                             </TableSortLabel>
                                         </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "action"} direction={order} onClick={() => handleRequestSort("action")}>
+                                                Action
+                                            </TableSortLabel>
+                                        </TableCell>
                                         <TableCell style={{ fontWeight: "bold", width: "100%" }}>
                                             <TableSortLabel active={orderBy === "source"} direction={order} onClick={() => handleRequestSort("source")}>
                                                 Source
@@ -169,6 +174,7 @@ export const LogsTable = () => {
                                                     </TableCell>
                                                     <TableCell align="center">{log.user}</TableCell>
                                                     <TableCell align="center">{log.tool}</TableCell>
+                                                    <TableCell align="center">{log.action}</TableCell>
                                                     <TableCell>{log.source}</TableCell>
                                                 </TableRow>
                                             );

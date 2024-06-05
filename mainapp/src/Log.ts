@@ -1,4 +1,4 @@
-type Log = { user: string; tool: string; source: string; timestamp: string };
+type Log = { user: string; tool: string; source: string; action: string; timestamp: string };
 
 const endpoint = "/api/v1/logs";
 async function getLogFiles(): Promise<Log[]> {
@@ -12,8 +12,8 @@ async function getLogs(file): Promise<Log[]> {
     return json;
 }
 
-async function writeLog(user: string, tool: string, source: string): number {
-    const body = { infos: `${user},${tool},${source}` };
+async function writeLog(user: string, tool: string, action: string, source: string): number {
+    const body = { infos: `${user},${tool},${source},${action}` };
 
     const response = await fetch(endpoint, {
         method: "post",

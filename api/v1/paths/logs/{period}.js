@@ -10,12 +10,9 @@ module.exports = () => {
         // XXX: Check format
         const date = req.params.period;
 
-        const logPath = path.join(
-            config.logDir,
-            date === "current" ? "vocables.log" : `vocables.log.${date}`
-        );
+        const logPath = path.join(config.logDir, date === "current" ? "vocables.log" : `vocables.log.${date}`);
 
-        if (! fs.existsSync(logPath)) {
+        if (!fs.existsSync(logPath)) {
             return res.status(500);
         }
 
@@ -31,12 +28,13 @@ module.exports = () => {
                     user: message[0],
                     tool: message[1],
                     source: message[2],
+                    action: message[3],
                     timestamp: jsonLine.timestamp,
-                }
+                };
             });
 
         return res.status(200).json(logsArray);
-    };
+    }
 
     GET.apiDoc = {
         security: [{ restrictAdmin: [] }],
@@ -55,6 +53,12 @@ module.exports = () => {
                                 type: "string",
                             },
                             tool: {
+                                type: "string",
+                            },
+                            source: {
+                                type: "string",
+                            },
+                            action: {
                                 type: "string",
                             },
                             timestamp: {

@@ -57,7 +57,7 @@ const UsersTable = () => {
 
     const handleDeleteUser = async (user: User, updateModel) => {
         deleteUser(user, updateModel);
-        writeLog(me, "ConfigEditor", `delete the user ${user.login}`);
+        writeLog(me, "ConfigEditor", "delete", user.login);
     };
 
     const renderUsers = SRD.match(
@@ -254,7 +254,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
     const saveUser = () => {
         void putUsersBis(userModel.userForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";
-        writeLog(me, "ConfigEditor", `${mode} the user ${userModel.userForm.login}`);
+        writeLog(me, "ConfigEditor", mode, userModel.userForm.login);
     };
 
     const config = SRD.unwrap({ auth: "json", tools_available: [] }, identity, model.config);

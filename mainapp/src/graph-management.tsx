@@ -191,7 +191,7 @@ export default function GraphManagement() {
     };
 
     const uploadSource = async () => {
-        await writeLog(currentUserName, "GraphManagement", `upload a new source for ${currentSource}`);
+        await writeLog(currentUserName, "GraphManagement", "upload", currentSource);
 
         try {
             // init progress bar
@@ -333,7 +333,7 @@ export default function GraphManagement() {
 
     const downloadSource = async () => {
         try {
-            await writeLog(currentUserName, "GraphManagement", `download the source ${currentSource}`);
+            await writeLog(currentUserName, "GraphManagement", "download", currentSource);
 
             setTransferPercent(0);
             setCurrentOperation("download");

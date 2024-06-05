@@ -90,6 +90,8 @@ var ResponsiveUI = (function () {
     };
     //  MainController --> onToolSelect.initTool   when click on a button of a tool
     self.onToolSelect = function (toolId, event, callback) {
+        // reset source on tool select to not have the previous source
+        self.source = null;
         if (event) {
             var clickedElement = event.target;
             // if class
@@ -116,7 +118,6 @@ var ResponsiveUI = (function () {
         if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
             Lineage_sources.registerSource = self.registerSourceWithoutImports;
         }
-
         $("#currentToolTitle").html(toolId);
         if (self.currentTheme["@" + toolId + "-logo"]) {
             $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
@@ -179,6 +180,7 @@ var ResponsiveUI = (function () {
     };
     // What is the goal of this function? --> MainController?
     self.initTool = function (toolId, callback) {
+        MainController.writeUserLog(authentication.currentUser, self.currentTool, self.source || "");
         var toolObj = Config.userTools[toolId];
         MainController.initControllers();
         Clipboard.clear();

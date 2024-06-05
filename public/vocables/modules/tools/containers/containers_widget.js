@@ -2,17 +2,18 @@ import Lineage_sources from "../lineage/lineage_sources.js";
 import Containers_graph from "./containers_graph.js";
 import common from "../../shared/common.js";
 import Lineage_containers from "../lineage/lineage_containers.js";
+import ResponsiveUI from "../../../responsive/responsiveUI.js";
 
 var Containers_widget = (function () {
     var self = {};
     self.jstreeDivId = "containerWidget_treeDiv";
     self.showDialog = function (source, options, validateFn) {
         self.validateFn = validateFn;
+        $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv")
             .parent()
             .show("fast", function () {
-                //$("#mainDialogDiv").dialog("open");
-
+                $("#mainDialogDiv").dialog("option", "title", "Containers widget");
                 $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
                     $("#mainDialogDiv").addClass("zIndexTop-10");
                     Containers_tree.search(self.jstreeDivId, options);
@@ -65,7 +66,20 @@ var Containers_widget = (function () {
         }
         Containers_graph.graphParentContainers(self.currentSource, null, { filter: filter });
     };
-
+    self.search = function () {
+        var term = $("#containerWidget_searchInput").val();
+        if (term) {
+            Containers_tree.drawContainerAndAncestorsJsTree(KGquery.currentSource, term, {}, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+            });
+        } else {
+            Containers_query.getTopContainer(KGquery.currentSource, {}, function (err, result) {
+                Containers_tree.drawTree(self.jstreeDivId, KGquery.currentSource, "#", result.results.bindings, {});
+            });
+        }
+    };
     return self;
 })();
 

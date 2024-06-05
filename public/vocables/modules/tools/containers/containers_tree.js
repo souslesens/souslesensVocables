@@ -524,7 +524,7 @@ var Containers_tree = (function () {
                 $("#" + self.jstreeDivId)
                     .jstree()
                     .open_all();
-                self.menuActions.bindMoveNode(jstreeDiv);
+                self.menuActions.bindMoveNode(self.jstreeDivId);
             });
         });
     };

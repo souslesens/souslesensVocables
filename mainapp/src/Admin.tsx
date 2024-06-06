@@ -156,6 +156,11 @@ function update(model: Model, msg: Msg): Model {
         }
 
         case "UserClickedNewTab":
+            const params = new URLSearchParams(document.location.search);
+            params.set("tab", msg.payload);
+            // Insert or replace the tab key in the URL
+            window.history.replaceState(null, "", `?${params.toString()}`);
+
             return { ...model, currentEditionTab: editionTabToString(msg.payload) };
 
         default:
@@ -165,6 +170,14 @@ function update(model: Model, msg: Msg): Model {
 
 const Admin = () => {
     const [model, updateModel] = React.useReducer(update, initialModel);
+
+    React.useEffect(() => {
+        const params = new URLSearchParams(document.location.search);
+        if (params.has("tab")) {
+            const tabIndex = parseInt(params.get("tab"));
+            model.currentEditionTab = editionTabToString(tabIndex);
+        }
+    }, []);
 
     //TODO: combine both fetch with promise.all() or something like that
 

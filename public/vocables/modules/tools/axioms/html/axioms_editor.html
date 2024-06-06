@@ -45,6 +45,7 @@
     }
 </style>
 <div>
+
     <div style="display: flex; flex-direction: column; width: 800px; height: 500px">
         <div id="axiomsEditor_textDiv">
             <input id="axiomsEditor_input" autocomplete="off" onkeyup="Axioms_editor.onInputChar($(this).val())" />
@@ -54,6 +55,7 @@
         </div>
     </div>
     <div>
+        <select id="axiomsEditor_classes"></select>
         <select id="Axioms_editor_frameSelect">
             <option>subClassOf</option>
             <option>equivalentClass</option>

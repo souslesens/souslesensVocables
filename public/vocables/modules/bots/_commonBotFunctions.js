@@ -180,6 +180,30 @@ var CommonBotFunctions = (function () {
             }
         );
     };
+    self.listSourceAllObjectPropertiesConstraints = function (source, varToFill,  callback) {
+        var sources = self.getSourceAndImports(source);
+        var allConstraints = {};
+        async.eachSeries(
+            sources,
+            function(source, callbackEach) {
+                var constraints = Config.ontologiesVocabularyModels[vocab].constraints;
+                if (err) {
+                    return callbackEach(err);
+                }
+                for (var prop in constraints) {
+                    allConstraints[prop] = constraints[prop]
+                }
+
+                callbackEach();
+            }
+
+            ,function (err) {
+                return callback(err, allConstraints);
+            });
+
+    };
+
+
 
     self.getSourceAndImports = function (source) {
         var sources = [source];

@@ -166,7 +166,7 @@ var KGcreator_bot = (function () {
                 //   columnBlankNode: { addMappingToModelFn: self.workflowRdfType },
                 blankNode: { addMappingToModelFn: self.workflowRdfType },
                 namedIndividual: { addMappingToModelFn: self.workflowRdfType },
-                class: { listSuperClassVocabFn: { listSuperClassFn: { listClassLabelColumnFn: { addMappingToModelFn: {} } } } },
+              class: { listSuperClassVocabFn: { listSuperClassFn: { listClassLabelColumnFn: { addMappingToModelFn: self.workflowRdfType } } } },
                 other: self.workflowColumnmMappingOther,
                 bag: { addMappingToModelFn: {} },
             },
@@ -205,6 +205,9 @@ var KGcreator_bot = (function () {
         setPredicateObjectColumnUriTypeFn: "Choose object URI type",
         listLitteralFormatFn: "choose date format",
         createSubPropertyFn: "Enter subProperty label",
+        listSuperClassVocabFn: "choose Super Class ontology",
+        listSuperClassFn: "choose Super Class ",
+        listClassLabelColumnFn:"choose class label column"
     };
 
     self.functions = {
@@ -696,8 +699,17 @@ var KGcreator_bot = (function () {
             if (virtualColumns) {
                 columns = virtualColumns.concat(columns);
             }
+            columns.sort();
+           /* function(a,b){
+                if(a.label>b.label)
+                    return 1;
+                if(a.label<b.label)
+                    return -1;
+                return 0;
+            })*/
 
             _botEngine.showList(columns, "classLabelColumn", true);
+            $("#bot_resourcesProposalSelect").val(self.params.column)
         },
 
         saveFn: function (callback) {

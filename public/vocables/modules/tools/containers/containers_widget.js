@@ -13,7 +13,7 @@ var Containers_widget = (function () {
 
         $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
             $("#mainDialogDiv").addClass("zIndexTop-10");
-            Containers_tree.search(self.jstreeDivId,null, options);
+            Containers_tree.search(self.jstreeDivId, null, options);
         });
         // });
     };

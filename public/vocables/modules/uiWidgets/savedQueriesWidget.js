@@ -3,14 +3,14 @@ import common from "../shared/common.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
-var SavedQueriesWidget = (function() {
+var SavedQueriesWidget = (function () {
     var self = {};
 
     self.contentPredicate = "hasContent";
     self.scopePredicate = "hasScope";
     self.sourcePredicate = "hasSource";
 
-    self.init = function(CRUDsource) {
+    self.init = function (CRUDsource) {
         if (false && self.currentCRUDsourceLabel) {
             return;
         }
@@ -22,7 +22,7 @@ var SavedQueriesWidget = (function() {
         Config.sources[CRUDsource] = self.currentCRUDsourceObject;
     };
 
-    self.showDialog = function(CRUDsource, targetDiv, slsvSource, scope, saveQueryFn, loadQueryFn) {
+    self.showDialog = function (CRUDsource, targetDiv, slsvSource, scope, saveQueryFn, loadQueryFn) {
         self.init(CRUDsource);
         self.saveQueryFn = saveQueryFn;
         self.loadQueryFn = loadQueryFn;
@@ -30,14 +30,14 @@ var SavedQueriesWidget = (function() {
         if (targetDiv.indexOf("Dialog") > -1) {
             $("#" + targetDiv).dialog("open");
         }
-        $("#" + targetDiv).load("snippets/savedQueriesWidget.html", function() {
+        $("#" + targetDiv).load("snippets/savedQueriesWidget.html", function () {
             if (slsvSource) {
                 self.list(CRUDsource, slsvSource, scope);
             }
         });
     };
 
-    self.list = function(CRUDsource, slsvSource, scope, targetSelect, callback) {
+    self.list = function (CRUDsource, slsvSource, scope, targetSelect, callback) {
         self.init(CRUDsource);
         self.currentCRUDsourceLabel;
 
@@ -65,9 +65,9 @@ var SavedQueriesWidget = (function() {
         var options = {
             selectVars: "distinct ?s ?o",
             filter: filter,
-            orderBy: "?o"
+            orderBy: "?o",
         };
-        Sparql_OWL.getTriples(CRUDsource, options, function(err, result) {
+        Sparql_OWL.getTriples(CRUDsource, options, function (err, result) {
             if (err) {
                 if (callback) {
                     callback(err);
@@ -76,7 +76,7 @@ var SavedQueriesWidget = (function() {
             }
             var data = [];
 
-            result.forEach(function(item) {
+            result.forEach(function (item) {
                 data.push({ label: item.o.value, id: item.s.value });
             });
             common.fillSelectOptions(targetSelect, data, false, "label", "id");
@@ -86,19 +86,19 @@ var SavedQueriesWidget = (function() {
         });
     };
 
-    self.loadItem = function(uri, options, callback) {
+    self.loadItem = function (uri, options, callback) {
         var filter = "FILTER (?s =<" + uri + ">) ";
         var options = {
-            filter: filter
+            filter: filter,
         };
-        Sparql_OWL.getTriples(self.currentCRUDsourceLabel, options, function(err, result) {
+        Sparql_OWL.getTriples(self.currentCRUDsourceLabel, options, function (err, result) {
             if (err) {
                 return self.loadQueryFn(err.responseText);
             }
 
             var contentPredicate = self.currentCRUDsourceObject.graphUri + self.contentPredicate;
 
-            result.forEach(function(triple) {
+            result.forEach(function (triple) {
                 var predicate = triple.p.value;
                 if (predicate.indexOf(self.contentPredicate) > -1) {
                     var content = JSON.parse(atob(triple.o.value));
@@ -111,8 +111,8 @@ var SavedQueriesWidget = (function() {
         });
     };
 
-    self.save = function(slsvSource, scope, callback) {
-        self.saveQueryFn(function(err, result) {
+    self.save = function (slsvSource, scope, callback) {
+        self.saveQueryFn(function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -152,33 +152,33 @@ var SavedQueriesWidget = (function() {
             triples.push({
                 subject: queryUri,
                 predicate: "rdfs:label",
-                object: label
+                object: label,
             });
             triples.push({
                 subject: queryUri,
                 predicate: "rdf:type",
-                object: self.currentCRUDsourceObject.type
+                object: self.currentCRUDsourceObject.type,
             });
             triples.push({
                 subject: queryUri,
                 predicate: "slsv:" + self.contentPredicate,
-                object: content64
+                object: content64,
             });
             triples.push({
                 subject: queryUri,
                 predicate: "slsv:" + self.sourcePredicate,
-                object: slsvSource
+                object: slsvSource,
             });
             triples.push({
                 subject: queryUri,
                 predicate: "slsv:" + self.scopePredicate,
-                object: scope
+                object: scope,
             });
             triples = triples.concat(Lineage_createRelation.getCommonMetaDataTriples(queryUri, self.currentCRUDsourceLabel));
             var options = {
-                sparqlPrefixes: { slsv: self.currentCRUDsourceObject.graphUri }
+                sparqlPrefixes: { slsv: self.currentCRUDsourceObject.graphUri },
             };
-            Sparql_generic.insertTriples(self.currentCRUDsourceLabel, triples, options, function(err, result) {
+            Sparql_generic.insertTriples(self.currentCRUDsourceLabel, triples, options, function (err, result) {
                 if (err) {
                     if (callback) {
                         return callback(err);
@@ -193,7 +193,7 @@ var SavedQueriesWidget = (function() {
         });
     };
 
-    self.delete = function(uri, callback) {
+    self.delete = function (uri, callback) {
         if (!uri) {
             uri = $("#SavedQueriesComponent_itemsSelect").val();
         }
@@ -202,7 +202,7 @@ var SavedQueriesWidget = (function() {
         }
         if (confirm("delete selected query")) {
             var CRUDsource = self.currentCRUDsourceLabel;
-            Sparql_generic.deleteTriples(CRUDsource, uri, null, null, function(err, result) {
+            Sparql_generic.deleteTriples(CRUDsource, uri, null, null, function (err, result) {
                 $("#SavedQueriesComponent_itemsSelect option[value='" + uri + "']").remove();
                 if (callback) {
                     return callback();

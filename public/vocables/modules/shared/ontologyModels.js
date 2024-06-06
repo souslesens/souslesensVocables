@@ -6,9 +6,9 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 //import fflate from "fflate";
 
 // eslint-disable-next-line no-global-assign
-var OntologyModels = (function() {
+var OntologyModels = (function () {
     self.loadedSources = {};
-    self.registerSourcesModel = function(sources, callback) {
+    self.registerSourcesModel = function (sources, callback) {
         MainController.UI.message("loading ontology models");
         if (!Array.isArray(sources)) {
             sources = [sources];
@@ -20,7 +20,7 @@ var OntologyModels = (function() {
 
         async.eachSeries(
             sources,
-            function(source, callbackEach) {
+            function (source, callbackEach) {
                 var graphUri;
                 if (!Config.ontologiesVocabularyModels[source]) {
                     if (!Config.sources[source]) {
@@ -53,8 +53,8 @@ var OntologyModels = (function() {
 
                 async.series(
                     [
-                        function(callbackSeries) {
-                            self.readModelOnServerCache(source, function(err, result) {
+                        function (callbackSeries) {
+                            self.readModelOnServerCache(source, function (err, result) {
                                 self.loadedSources[source] = 1;
                                 if (result) {
                                     Config.ontologiesVocabularyModels[source] = result;
@@ -82,7 +82,7 @@ var OntologyModels = (function() {
                         },
 
                         // set properties
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             var query =
                                 queryP +
                                 " SELECT distinct ?prop ?propLabel ?inverseProp ?superProperty from <" +
@@ -93,12 +93,12 @@ var OntologyModels = (function() {
                                 "optional{?prop owl:inverseOf ?inverseProp}" +
                                 "optional{?prop rdfs:subPropertyOf ?superProperty}" +
                                 " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty owl:AnnotationProperty} }";
-                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
 
-                                result.results.bindings.forEach(function(item) {
+                                result.results.bindings.forEach(function (item) {
                                     if (item.superProperty) {
                                         var x = 3;
                                     }
@@ -108,7 +108,7 @@ var OntologyModels = (function() {
                                             id: item.prop.value,
                                             label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
                                             inverseProp: item.inverseProp ? item.inverseProp.value : null,
-                                            superProp: item.superProperty ? item.superProperty.value : null
+                                            superProp: item.superProperty ? item.superProperty.value : null,
                                         };
                                     }
                                     if (item.inverseProp) {
@@ -122,7 +122,7 @@ var OntologyModels = (function() {
                             });
                         },
                         //set AnnotationProperties and datatypeProperties
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             var query =
                                 queryP +
                                 " SELECT distinct ?prop ?propLabel ?propDomain ?propRange  from <" +
@@ -132,19 +132,19 @@ var OntologyModels = (function() {
                                 Sparql_common.getVariableLangLabel("prop", true, true) +
                                 "OPTIONAL {?prop rdfs:domain ?propDomain} OPTIONAL {?prop rdfs:range ?propRange}" +
                                 "} limit 10000";
-                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
 
-                                result.results.bindings.forEach(function(item) {
+                                result.results.bindings.forEach(function (item) {
                                     if (true || !uniqueProperties[item.prop.value]) {
                                         uniqueProperties[item.prop.value] = 1;
                                         Config.ontologiesVocabularyModels[source].nonObjectProperties[item.prop.value] = {
                                             id: item.prop.value,
                                             label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
                                             domain: item.propDomain ? item.propDomain.value : null,
-                                            range: item.propRange ? item.propRange.value : null
+                                            range: item.propRange ? item.propRange.value : null,
                                         };
                                     }
                                 });
@@ -154,9 +154,9 @@ var OntologyModels = (function() {
                         },
 
                         // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             var query = queryP + " select (count (distinct ?sub) as ?numberOfClasses)  FROM <" + graphUri + "> where{" + " ?sub rdf:type owl:Class.} ";
-                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
@@ -176,11 +176,11 @@ var OntologyModels = (function() {
                                         " OPTIONAL {?superClass rdfs:label ?superClassLabel}}" +
                                         Sparql_common.getVariableLangLabel("sub", true, true) +
                                         " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
-                                    Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+                                    Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                         if (err) {
                                             return callbackSeries(err);
                                         }
-                                        result.results.bindings.forEach(function(item) {
+                                        result.results.bindings.forEach(function (item) {
                                             if (!Config.ontologiesVocabularyModels[source].classes[item.sub.value]) {
                                                 Config.ontologiesVocabularyModels[source].classes[item.sub.value] = {
                                                     id: item.sub.value,
@@ -190,7 +190,7 @@ var OntologyModels = (function() {
                                                         ? item.superClassLabel
                                                             ? item.superClassLabel.value
                                                             : Sparql_common.getLabelFromURI(item.superClass.value)
-                                                        : null
+                                                        : null,
                                                 };
                                             }
                                         });
@@ -201,7 +201,7 @@ var OntologyModels = (function() {
                         },
 
                         //set domain constraints
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             var query =
                                 queryP +
                                 "" +
@@ -211,11 +211,11 @@ var OntologyModels = (function() {
                                 " ?prop rdfs:domain ?domain." +
                                 Sparql_common.getVariableLangLabel("domain", true, true) +
                                 " }";
-                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                result.results.bindings.forEach(function(item) {
+                                result.results.bindings.forEach(function (item) {
                                     if (!Config.ontologiesVocabularyModels[source].constraints[item.prop.value]) {
                                         Config.ontologiesVocabularyModels[source].constraints[item.prop.value] = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
                                     }
@@ -228,14 +228,14 @@ var OntologyModels = (function() {
                             });
                         },
                         //set range constraints
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             var query =
                                 queryP + " select distinct ?prop ?range FROM <" + graphUri + "> where{" + " ?prop rdfs:range ?range." + Sparql_common.getVariableLangLabel("range", true, true) + " }";
-                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                result.results.bindings.forEach(function(item) {
+                                result.results.bindings.forEach(function (item) {
                                     if (!Config.ontologiesVocabularyModels[source].constraints[item.prop.value]) {
                                         Config.ontologiesVocabularyModels[source].constraints[item.prop.value] = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
                                     }
@@ -249,13 +249,13 @@ var OntologyModels = (function() {
                         },
 
                         // set retrictions constraints
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             // only relations  declared in sources.json
                             if (!Config.sources[source]) {
                                 return callbackSeries();
                             }
-                            Sparql_OWL.getObjectRestrictions(source, null, { withoutBlankNodes: 1, withoutImports: 1 }, function(err, result) {
-                                result.forEach(function(item) {
+                            Sparql_OWL.getObjectRestrictions(source, null, { withoutBlankNodes: 1, withoutImports: 1 }, function (err, result) {
+                                result.forEach(function (item) {
                                     var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
                                     var domainLabel = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
                                     var rangeLabel = item.valueLabel ? item.valueLabel.value : Sparql_common.getLabelFromURI(item.value.value);
@@ -265,7 +265,7 @@ var OntologyModels = (function() {
                                         uniqueProperties[item.prop.value] = 1;
                                         Config.ontologiesVocabularyModels[source].properties[item.prop.value] = {
                                             id: item.prop.value,
-                                            label: propLabel
+                                            label: propLabel,
                                         };
                                     }
                                     if (!Config.ontologiesVocabularyModels[source].restrictions[item.prop.value]) {
@@ -275,7 +275,7 @@ var OntologyModels = (function() {
                                         domain: item.subject.value,
                                         range: item.value.value,
                                         domainLabel: domainLabel,
-                                        rangeLabel: rangeLabel
+                                        rangeLabel: rangeLabel,
                                     });
                                 });
 
@@ -284,13 +284,13 @@ var OntologyModels = (function() {
                         },
 
                         //set inverse Props constraints
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             self.setInversePropertiesConstaints(source, inversePropsMap);
                             callbackSeries();
                         },
 
                         //set inherited Constraints
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             if (!Config.sources[source] || !Config.topLevelOntologies[source]) {
                                 return callbackSeries();
                             }
@@ -313,12 +313,12 @@ var OntologyModels = (function() {
                         },
 
                         //set inherited domains
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             var props = propsWithoutDomain.concat(propsWithoutRange);
                             if (props.length == 0) {
                                 return callbackSeries();
                             }
-                            Sparql_OWL.getPropertiesInheritedConstraints(source, props, { withoutImports: 0 }, function(err, propsMap) {
+                            Sparql_OWL.getPropertiesInheritedConstraints(source, props, { withoutImports: 0 }, function (err, propsMap) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
@@ -357,7 +357,7 @@ var OntologyModels = (function() {
                         },
 
                         // set constraints prop label and superProp
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             for (var prop in Config.ontologiesVocabularyModels[source].properties) {
                                 var property = Config.ontologiesVocabularyModels[source].properties[prop];
                                 if (Config.ontologiesVocabularyModels[source].constraints[property.id]) {
@@ -370,13 +370,13 @@ var OntologyModels = (function() {
                         },
 
                         //set inverse Props constraints
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             self.setInversePropertiesConstaints(source, inversePropsMap);
                             callbackSeries();
                         },
 
                         // set transSourceRangeAndDomainLabels
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             if (!Config.sources[source]) {
                                 return callbackSeries();
                             }
@@ -393,7 +393,7 @@ var OntologyModels = (function() {
                             if (classes.length == 0) {
                                 return callbackSeries();
                             }
-                            Sparql_OWL.getLabelsMapFromLabelsGraph(classes, function(err, labelsMap) {
+                            Sparql_OWL.getLabelsMapFromLabelsGraph(classes, function (err, labelsMap) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
@@ -411,34 +411,34 @@ var OntologyModels = (function() {
                         },
 
                         //register source in Config.sources
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             if (!Config.sources[source]) {
                                 Config.sources[source] = {
                                     graphUri: graphUri,
                                     controllerName: Sparql_OWL,
                                     controller: Sparql_OWL,
-                                    sparql_server: { url: Config.sparql_server.url }
+                                    sparql_server: { url: Config.sparql_server.url },
                                 };
                             }
                             return callbackSeries();
                         },
-                        function(callbackSeries) {
+                        function (callbackSeries) {
                             if (true || Config.basicVocabularies[source]) {
-                                self.writeModelOnServerCache(source, Config.ontologiesVocabularyModels[source], function(err, result) {
+                                self.writeModelOnServerCache(source, Config.ontologiesVocabularyModels[source], function (err, result) {
                                     if (err) {
                                         console.log(err);
                                     }
                                     return callbackSeries();
                                 });
                             }
-                        }
+                        },
                     ],
-                    function(err) {
+                    function (err) {
                         callbackEach(err);
                     }
                 );
             },
-            function(err) {
+            function (err) {
                 MainController.UI.message("", true);
                 if (callback) {
                     return callback(err);
@@ -447,7 +447,7 @@ var OntologyModels = (function() {
         );
     };
 
-    self.setInversePropertiesConstaints = function(source, inversePropsMap) {
+    self.setInversePropertiesConstaints = function (source, inversePropsMap) {
         for (var propId in inversePropsMap) {
             var propConstraints = Config.ontologiesVocabularyModels[source].constraints[propId];
             var inversePropConstraints = Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]];
@@ -480,7 +480,7 @@ var OntologyModels = (function() {
         }
     };
 
-    self.getPropertiesArray = function(source) {
+    self.getPropertiesArray = function (source) {
         var array = [];
         for (var prop in Config.ontologiesVocabularyModels[source].properties) {
             array.push(Config.ontologiesVocabularyModels[source].properties[prop]);
@@ -488,7 +488,7 @@ var OntologyModels = (function() {
         return array;
     };
 
-    self.getAnnotationProperties = function(source) {
+    self.getAnnotationProperties = function (source) {
         var array = [];
         for (var prop in Config.ontologiesVocabularyModels[source].nonObjectProperties) {
             array.push(Config.ontologiesVocabularyModels[source].nonObjectProperties[prop]);
@@ -496,7 +496,7 @@ var OntologyModels = (function() {
         return array;
     };
 
-    self.unRegisterSourceModel = function() {
+    self.unRegisterSourceModel = function () {
         var basicsSources = Object.keys(Config.basicVocabularies);
         for (var source in Config.ontologiesVocabularyModels) {
             if (basicsSources.indexOf(source) < 0) {
@@ -505,9 +505,9 @@ var OntologyModels = (function() {
         }
     };
 
-    self.readModelOnServerCache = function(source, callback) {
+    self.readModelOnServerCache = function (source, callback) {
         const params = new URLSearchParams({
-            source: source
+            source: source,
         });
 
         $.ajax({
@@ -515,16 +515,16 @@ var OntologyModels = (function() {
             url: Config.apiUrl + "/ontologyModels?" + params.toString(),
             dataType: "json",
 
-            success: function(data, _textStatus, _jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 return callback(null, data);
             },
-            error: function(err) {
+            error: function (err) {
                 return callback(err);
-            }
+            },
         });
     };
 
-    self.updateModel = function(source, data, options, callback) {
+    self.updateModel = function (source, data, options, callback) {
         if (!options) {
             options = {};
         }
@@ -556,7 +556,7 @@ var OntologyModels = (function() {
             self.updateModelOnServerCache(
                 source,
                 data,
-                function(err, result) {
+                function (err, result) {
                     callback(err);
                 },
                 options
@@ -566,11 +566,11 @@ var OntologyModels = (function() {
         }
     };
 
-    self.updateModelOnServerCache = function(source, data, callback, options) {
+    self.updateModelOnServerCache = function (source, data, callback, options) {
         var payload = {
             source: source,
             data: data,
-            options: options
+            options: options,
         };
 
         $.ajax({
@@ -579,38 +579,38 @@ var OntologyModels = (function() {
             data: payload,
             dataType: "json",
 
-            success: function(data, _textStatus, _jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 return callback(null, data);
             },
-            error: function(err) {
+            error: function (err) {
                 return callback(err);
-            }
+            },
         });
     };
 
-    self.writeModelOnServerCache = function(source, model, callback) {
+    self.writeModelOnServerCache = function (source, model, callback) {
         var keys = Object.keys(model);
         async.eachSeries(
             keys,
-            function(key, callbackEach) {
+            function (key, callbackEach) {
                 var payload = {
                     source: source,
                     model: JSON.stringify(model[key]),
-                    key: key
+                    key: key,
                 };
                 $.ajax({
                     type: "POST",
                     url: `${Config.apiUrl}/ontologyModels`,
                     data: payload,
-                    success: function(data, _textStatus, _jqXHR) {
+                    success: function (data, _textStatus, _jqXHR) {
                         return callbackEach(null, data);
                     },
-                    error: function(err) {
+                    error: function (err) {
                         return callbackEach(err);
-                    }
+                    },
                 });
             },
-            function(err) {
+            function (err) {
                 callback(err);
             }
         );
@@ -619,23 +619,23 @@ var OntologyModels = (function() {
 
         var payload = {
             source: source,
-            model: model
+            model: model,
         };
 
         $.ajax({
             type: "POST",
             url: `${Config.apiUrl}/ontologyModels`,
             data: payload,
-            success: function(data, _textStatus, _jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 return callback(null, data);
             },
-            error: function(err) {
+            error: function (err) {
                 return callback(err);
-            }
+            },
         });
     };
 
-    self.getAllowedPropertiesBetweenNodes = function(source, startNodeIds, endNodeIds, callback) {
+    self.getAllowedPropertiesBetweenNodes = function (source, startNodeIds, endNodeIds, callback) {
         var startNodeAncestors = [];
         var endNodeAncestors = [];
 
@@ -665,11 +665,11 @@ var OntologyModels = (function() {
         }
         async.series(
             [
-                function(callbackSeries) {
-                    if (startNodeIds.length==0) {
+                function (callbackSeries) {
+                    if (startNodeIds.length == 0) {
                         return callbackSeries();
                     }
-                    Sparql_OWL.getNodesAncestorsOrDescendants(source, startNodeIds, { excludeItself: 0, filter: filter }, function(err, result) {
+                    Sparql_OWL.getNodesAncestorsOrDescendants(source, startNodeIds, { excludeItself: 0, filter: filter }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -677,11 +677,11 @@ var OntologyModels = (function() {
                         callbackSeries();
                     });
                 },
-                function(callbackSeries) {
-                    if (endNodeIds.length==0) {
+                function (callbackSeries) {
+                    if (endNodeIds.length == 0) {
                         return callbackSeries();
                     }
-                    Sparql_OWL.getNodesAncestorsOrDescendants(source, endNodeIds, { excludeItself: 0, filter: filter }, function(err, result) {
+                    Sparql_OWL.getNodesAncestorsOrDescendants(source, endNodeIds, { excludeItself: 0, filter: filter }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -693,7 +693,7 @@ var OntologyModels = (function() {
                         callbackSeries();
                     });
                 }, //get matching properties
-                function(callbackSeries) {
+                function (callbackSeries) {
                     if (Config.sources[source].imports) {
                         allSources = allSources.concat(Config.sources[source].imports);
                     }
@@ -701,22 +701,22 @@ var OntologyModels = (function() {
                     var allDomains = {};
                     var allRanges = {};
 
-                    startNodeIds.forEach(function(startNodeId) {
+                    startNodeIds.forEach(function (startNodeId) {
                         startNodeAncestorIds.push(startNodeId);
-                        hierarchies[startNodeId].forEach(function(item) {
+                        hierarchies[startNodeId].forEach(function (item) {
                             startNodeAncestorIds.push(item.superClass.value);
                         });
                     });
-                    endNodeIds.forEach(function(endNodeId) {
+                    endNodeIds.forEach(function (endNodeId) {
                         if (endNodeId) {
                             endNodeAncestorIds.push(endNodeId);
-                            hierarchies[endNodeId].forEach(function(item, startNodeIndex) {
+                            hierarchies[endNodeId].forEach(function (item, startNodeIndex) {
                                 endNodeAncestorIds.push(item.superClass.value);
                             });
                         }
                     });
 
-                    allSources.forEach(function(_source) {
+                    allSources.forEach(function (_source) {
                         if (!Config.ontologiesVocabularyModels[_source]) {
                             return;
                         }
@@ -737,14 +737,18 @@ var OntologyModels = (function() {
                                 var x = 3;
                             }
 
-                            sourceConstraintsAndRestrictions[property].forEach(function(constraint) {
+                            sourceConstraintsAndRestrictions[property].forEach(function (constraint) {
                                 constraint.source = _source;
                                 var domainOK = false;
                                 if (true || !allConstraints[property]) {
                                     allConstraints[property] = constraint;
 
                                     if (constraint.domain) {
-                                        if (startNodeAncestorIds.length==0 || startNodeAncestorIds.indexOf(constraint.domain) > -1 || startNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class") {
+                                        if (
+                                            startNodeAncestorIds.length == 0 ||
+                                            startNodeAncestorIds.indexOf(constraint.domain) > -1 ||
+                                            startNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class"
+                                        ) {
                                             if (!constraint.range || constraint.range.indexOf("http") < 0 || endNodeIds.length == 0) {
                                                 propertiesMatchingStartNode.push(property);
                                             } else {
@@ -753,7 +757,7 @@ var OntologyModels = (function() {
                                         }
                                     }
                                     if (constraint.range) {
-                                        if (endNodeAncestorIds.length==0 || endNodeAncestorIds.indexOf(constraint.range) > -1 || endNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class") {
+                                        if (endNodeAncestorIds.length == 0 || endNodeAncestorIds.indexOf(constraint.range) > -1 || endNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class") {
                                             if (domainOK) {
                                                 propertiesMatchingBoth.push(property);
                                             } else {
@@ -775,7 +779,7 @@ var OntologyModels = (function() {
                 },
 
                 //remove matching superproperties
-                function(callbackSeries) {
+                function (callbackSeries) {
                     var propsToRemove = [];
 
                     function recurse(propId) {
@@ -792,41 +796,41 @@ var OntologyModels = (function() {
                         }
                     }
 
-                    propertiesMatchingBoth.forEach(function(propId) {
+                    propertiesMatchingBoth.forEach(function (propId) {
                         recurse(propId);
                     });
-                    propertiesMatchingStartNode.forEach(function(propId) {
+                    propertiesMatchingStartNode.forEach(function (propId) {
                         recurse(propId);
                     });
-                    propertiesMatchingEndNode.forEach(function(propId) {
+                    propertiesMatchingEndNode.forEach(function (propId) {
                         recurse(propId);
                     });
 
                     validConstraints = { both: {}, domain: {}, range: {}, noConstraints: {} };
 
-                    propertiesMatchingBoth.forEach(function(propId) {
+                    propertiesMatchingBoth.forEach(function (propId) {
                         if (propsToRemove.indexOf(propId) < 0) {
                             validConstraints["both"][propId] = allConstraints[propId];
                         }
                     });
-                    propertiesMatchingStartNode.forEach(function(propId) {
+                    propertiesMatchingStartNode.forEach(function (propId) {
                         if (propsToRemove.indexOf(propId) < 0) {
                             validConstraints["domain"][propId] = allConstraints[propId];
                         }
                     });
 
-                    propertiesMatchingEndNode.forEach(function(propId) {
+                    propertiesMatchingEndNode.forEach(function (propId) {
                         if (propsToRemove.indexOf(propId) < 0) {
                             validConstraints["range"][propId] = allConstraints[propId];
                         }
                     });
-                    noConstaintsArray.forEach(function(propId) {
+                    noConstaintsArray.forEach(function (propId) {
                         validConstraints["noConstraints"][propId] = allConstraints[propId];
                     });
                     callbackSeries();
                 },
                 //add subProperties with superProporties constaints
-                function(callbackSeries) {
+                function (callbackSeries) {
                     for (var key in validConstraints) {
                         var subPropConstraints = {};
                         var constraints = validConstraints[key];
@@ -854,16 +858,15 @@ var OntologyModels = (function() {
                     }
 
                     callbackSeries();
-                }
+                },
             ],
-            function(err) {
+            function (err) {
                 return callback(err, { constraints: validConstraints, nodes: { startNode: startNodeAncestorIds, endNode: endNodeAncestorIds } });
             }
         );
     };
 
-
-    self.getClassesConstraints = function(source, fromClass, toClass) {
+    self.getClassesConstraints = function (source, fromClass, toClass) {
         var constraints = {};
         var objs = Config.ontologiesVocabularyModels[source].constraints;
         for (var prop in objs) {
@@ -871,7 +874,7 @@ var OntologyModels = (function() {
             if (!Array.isArray(constraintsArray)) {
                 constraintsArray = [constraintsArray];
             }
-            constraintsArray.forEach(function(constraint) {
+            constraintsArray.forEach(function (constraint) {
                 if ((!fromClass || constraint.domain == fromClass) && (!toClass || constraint.range == toClass)) {
                     constraints[prop] = constraint;
                 }
@@ -879,12 +882,12 @@ var OntologyModels = (function() {
         }
         return constraints;
     };
-    self.getClassesRestrictions = function(source, fromClass, toClass) {
+    self.getClassesRestrictions = function (source, fromClass, toClass) {
         var restrictions = {};
         var objs = Config.ontologiesVocabularyModels[source].restrictions;
         for (var prop in objs) {
             var restrictionsArray = objs[prop];
-            restrictionsArray.forEach(function(restriction) {
+            restrictionsArray.forEach(function (restriction) {
                 if ((!fromClass || !restriction.domain || restriction.domain == fromClass) && (!toClass || !restriction.range || restriction.range == toClass)) {
                     restrictions[prop] = restriction;
                 }
@@ -893,7 +896,7 @@ var OntologyModels = (function() {
         return restrictions;
     };
 
-    self.getInferredModel = function(source, options, callback) {
+    self.getInferredModel = function (source, options, callback) {
         if (!options) {
             options = {};
         }
@@ -931,7 +934,7 @@ var OntologyModels = (function() {
                 "  ?o rdf:type ?oClass. \n" +
                 "filter(?sClass not in (owl:Class,owl:NamedIndividual,owl:Restriction,rdf:Bag)) \n" +
                 " filter(?oClass not in (owl:Class,owl:NamedIndividual,owl:Restriction,rdf:Bag)) " +
-                "  filter (!regex(str(?prop),\"rdf\",\"i\"))\n" +
+                '  filter (!regex(str(?prop),"rdf","i"))\n' +
                 "  filter (?s != ?o)\n" +
                 "    }\n" +
                 "    }\n" +
@@ -956,7 +959,7 @@ var OntologyModels = (function() {
                 "   {?o rdf:type ?oClass.} \n" +
                 "filter(?sClass not in (owl:Class,owl:NamedIndividual,owl:Restriction,rdf:Bag)) \n" +
                 " filter(?oClass not in (owl:Class,owl:NamedIndividual,owl:Restriction,rdf:Bag)) " +
-                " filter (!regex(str(?prop),\"rdf\",\"i\")) filter (?prop not in (<http://purl.org/dc/terms/created>, <http://souslesens.org/KGcreator#mappingFile>))" +
+                ' filter (!regex(str(?prop),"rdf","i")) filter (?prop not in (<http://purl.org/dc/terms/created>, <http://souslesens.org/KGcreator#mappingFile>))' +
                 "  filter (?s != ?o)\n" +
                 "    }\n" +
                 "    }\n" +
@@ -965,7 +968,7 @@ var OntologyModels = (function() {
                 "  ";
 
             let url = Config.sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function(err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
@@ -978,7 +981,7 @@ var OntologyModels = (function() {
         }
     };
 
-    self.getKGnonObjectProperties = function(source, options, callback) {
+    self.getKGnonObjectProperties = function (source, options, callback) {
         if (!options) {
             options = {};
         }
@@ -998,7 +1001,7 @@ var OntologyModels = (function() {
         MainController.UI.message("loading KG nonObjectProperties", false, true);
         async.eachSeries(
             sources,
-            function(source, callbackEach) {
+            function (source, callbackEach) {
                 var sourceGraphUriFrom = Sparql_common.getFromStr(source, false, true);
                 var queryNew =
                     "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
@@ -1028,20 +1031,20 @@ var OntologyModels = (function() {
                     "} limit 100";
 
                 let url = Config.sparql_server.url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function(err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, queryNew, null, {}, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
                     result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "class"]);
 
-                    result.results.bindings.forEach(function(item) {
+                    result.results.bindings.forEach(function (item) {
                         if (!nonObjectPropertiesmap[item.class.value]) {
                             nonObjectPropertiesmap[item.class.value] = { label: item.classLabel.value, id: item.class.value, properties: [] };
                         }
                         nonObjectPropertiesmap[item.class.value].properties.push({
                             label: item.propLabel.value,
                             id: item.prop.value,
-                            datatype: item.datatype ? item.datatype.value : "string"
+                            datatype: item.datatype ? item.datatype.value : "string",
                         });
                     });
 
@@ -1049,7 +1052,7 @@ var OntologyModels = (function() {
                     //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
                 });
             },
-            function(err) {
+            function (err) {
                 Config.ontologiesVocabularyModels[source].KGnonObjectProperties = nonObjectPropertiesmap;
                 MainController.UI.message("", true);
                 return callback(null, nonObjectPropertiesmap);
@@ -1057,7 +1060,7 @@ var OntologyModels = (function() {
         );
     };
 
-    self.getContainerBreakdownClasses = function(source, callback) {
+    self.getContainerBreakdownClasses = function (source, callback) {
         var fromStr = Sparql_common.getFromStr(source, false, true);
 
         var query =
@@ -1075,7 +1078,7 @@ var OntologyModels = (function() {
             "  }";
 
         let url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1084,7 +1087,7 @@ var OntologyModels = (function() {
         });
     };
 
-    self.getInferredClassValueDataTypes = function(source, options, callback) {
+    self.getInferredClassValueDataTypes = function (source, options, callback) {
         if (!options) {
             options = {};
         }
@@ -1119,7 +1122,7 @@ var OntologyModels = (function() {
         let url = Config.sparql_server.url + "?format=json&query=";
 
         MainController.UI.message("loading ", false, true);
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1129,7 +1132,7 @@ var OntologyModels = (function() {
         });
     };
 
-    self.getClassHierarchyTreeData = function(sourcelabel, baseClassId, direction, options) {
+    self.getClassHierarchyTreeData = function (sourcelabel, baseClassId, direction, options) {
         if (!options) {
             options = {};
         }
@@ -1141,7 +1144,7 @@ var OntologyModels = (function() {
 
         var classes = {};
 
-        sources.forEach(function(source) {
+        sources.forEach(function (source) {
             if (!Config.ontologiesVocabularyModels[source]) {
                 return;
             }
@@ -1198,7 +1201,7 @@ var OntologyModels = (function() {
                     return;
                 }
                 if (childrenMap[classId]) {
-                    childrenMap[classId].forEach(function(item) {
+                    childrenMap[classId].forEach(function (item) {
                         if (!uniqueIds[item.id]) {
                             uniqueIds[item.id] = 1;
                             hierarchyArray.push(item);

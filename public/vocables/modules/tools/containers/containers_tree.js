@@ -12,7 +12,7 @@ var Containers_tree = (function () {
     var self = {};
     self.jstreeDivId = "lineage_containers_containersJstree";
 
-    self.search = function (jstreeDivId,source, options, callback) {
+    self.search = function (jstreeDivId, source, options, callback) {
         if (jstreeDivId) {
             self.jstreeDivId = jstreeDivId;
         }
@@ -25,22 +25,21 @@ var Containers_tree = (function () {
         }
 
         var term = $("#Lineage_containers_searchInput").val();
-        if(source)
-        self.currentSource=source;
-        else{
-            self.currentSource=Lineage_sources.activeSource
+        if (source) self.currentSource = source;
+        else {
+            self.currentSource = Lineage_sources.activeSource;
         }
 
         var filter = "";
         if (term) {
-            Containers_tree.drawContainerAndAncestorsJsTree( self.currentSource, term, {}, function (err, result) {
+            Containers_tree.drawContainerAndAncestorsJsTree(self.currentSource, term, {}, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
             });
         } else {
-            Containers_query.getTopContainer( self.currentSource, options, function (err, result) {
-                self.drawTree(self.jstreeDivId,  self.currentSource, "#", result.results.bindings, options);
+            Containers_query.getTopContainer(self.currentSource, options, function (err, result) {
+                self.drawTree(self.jstreeDivId, self.currentSource, "#", result.results.bindings, options);
             });
         }
     };
@@ -675,7 +674,7 @@ var Containers_tree = (function () {
 
             if (!$("#lineage_containers_containersJstree").jstree) {
                 // initialize jstree
-                self.search(self.jstreeDivId,self.currentSource,null,function (err, result) {
+                self.search(self.jstreeDivId, self.currentSource, null, function (err, result) {
                     $("#lineage_containers_containersJstree")
                         .jstree()
                         .create_node(parent, newNode, "first", function (err, result) {

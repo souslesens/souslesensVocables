@@ -3,9 +3,9 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import common from "../../shared/common.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
-var Containers_query = (function() {
+var Containers_query = (function () {
     var self = {};
-    self.getTopContainer = function(source, options, callback) {
+    self.getTopContainer = function (source, options, callback) {
         if (!options) {
             options = {};
         }
@@ -33,7 +33,7 @@ var Containers_query = (function() {
 
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
             if (err) {
                 return alert(err);
             }
@@ -75,7 +75,7 @@ var Containers_query = (function() {
         });
     };
 
-    self.getContainerDescendants = function(source, containerId, options, callback) {
+    self.getContainerDescendants = function (source, containerId, options, callback) {
         var fromStr = Sparql_common.getFromStr(source, false, false);
         var filter = options.filter || "";
         if (containerId) {
@@ -112,7 +112,7 @@ var Containers_query = (function() {
 
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -128,7 +128,7 @@ var Containers_query = (function() {
      * @param options
      * @param callback
      */
-    self.getContainersAscendants = function(source, containerIds, options, callback) {
+    self.getContainersAscendants = function (source, containerIds, options, callback) {
         var fromStr = Sparql_common.getFromStr(source, false, false);
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
@@ -157,7 +157,7 @@ var Containers_query = (function() {
                 "  }\n" +
                 "} limit 10000 ";
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
@@ -173,9 +173,9 @@ var Containers_query = (function() {
 
             async.eachSeries(
                 slices,
-                function(slice, callbackEach) {
+                function (slice, callbackEach) {
                     filter = Sparql_common.setFilter("child", slice, null, { useFilterKeyWord: 1 });
-                    execQuery(filter, function(err, result) {
+                    execQuery(filter, function (err, result) {
                         if (err) {
                             return callbackEach(err);
                         }
@@ -183,14 +183,14 @@ var Containers_query = (function() {
                         callbackEach();
                     });
                 },
-                function(err) {
+                function (err) {
                     return callback(err, allResults);
                 }
             );
         } else {
             // search label
             var filter = options.filter || "";
-            execQuery(filter, function(err, result) {
+            execQuery(filter, function (err, result) {
                 if (err) {
                     return call(err);
                 }
@@ -198,7 +198,7 @@ var Containers_query = (function() {
             });
         }
     };
-    self.getContainerDescendantsOld = function(source, containerId, options, callback) {
+    self.getContainerDescendantsOld = function (source, containerId, options, callback) {
         var fromStr = Sparql_common.getFromStr(source, false, false);
         var filterContainer0Str = "";
         if (containerId) {
@@ -252,7 +252,7 @@ var Containers_query = (function() {
                 */
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -260,7 +260,7 @@ var Containers_query = (function() {
         });
     };
 
-    self.writeMovedNodeNewParent = function(movedNodeInfos) {
+    self.writeMovedNodeNewParent = function (movedNodeInfos) {
         var graphUri = Config.sources[Lineage_sources.activeSource].graphUri;
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -279,7 +279,7 @@ var Containers_query = (function() {
 
         var url = Config.sources[Lineage_sources.activeSource].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Lineage_sources.activeSource }, function(err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Lineage_sources.activeSource }, function (err, result) {
             if (err) {
                 return callback(err);
             }

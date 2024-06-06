@@ -160,7 +160,7 @@ var KGquery = (function () {
                     return alert(err.responseText);
                 }
 
-               self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode");
+                self.addNodeToQueryElement(self.currentQueryElement, node, "fromNode");
                 var nearestNode = self.classeMap[nearestNodeId];
                 self.addNodeToQueryElement(self.currentQueryElement, nearestNode, "toNode");
 

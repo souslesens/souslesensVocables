@@ -135,6 +135,9 @@ var ResponsiveUI = (function () {
 
         // set or replace tool in url params
         const params = new URLSearchParams(document.location.search);
+        if (toolId != "ConfigEditor") {
+            params.delete("tab");
+        }
         params.set("tool", toolId);
         window.history.replaceState(null, "", `?${params.toString()}`);
 

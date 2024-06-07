@@ -179,52 +179,30 @@ const Admin = () => {
         }
     }, []);
 
-    //TODO: combine both fetch with promise.all() or something like that
-
     React.useEffect(() => {
-        getProfiles()
-            .then((profiles) => updateModel({ type: "ServerRespondedWithProfiles", payload: success(profiles) }))
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithProfiles", payload: failure(err.message) }));
-    }, []);
-
-    React.useEffect(() => {
-        getUsers()
-            .then((person) => updateModel({ type: "ServerRespondedWithUsers", payload: success(person) }))
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err.message) }));
-    }, []);
-
-    React.useEffect(() => {
-        Promise.all([getMe(), getSources(), getIndices(), getGraphs()])
-            .then(([me, sources, indices, graphs]) => {
+        Promise.all([getMe(), getSources(), getIndices(), getGraphs(), getProfiles(), getUsers(), getConfig(), getDatabases(), getLogFiles()])
+            .then(([me, sources, indices, graphs, profiles, users, config, databases, logs]) => {
                 updateModel({ type: "ServerRespondedWithMe", payload: success(me) });
                 updateModel({ type: "ServerRespondedWithSources", payload: success(sources) });
                 updateModel({ type: "ServerRespondedWithIndices", payload: success(indices) });
                 updateModel({ type: "ServerRespondedWithGraphs", payload: success(graphs) });
+                updateModel({ type: "ServerRespondedWithProfiles", payload: success(profiles) });
+                updateModel({ type: "ServerRespondedWithUsers", payload: success(users) });
+                updateModel({ type: "ServerRespondedWithConfig", payload: success(config) });
+                updateModel({ type: "ServerRespondedWithDatabases", payload: success(databases) });
+                updateModel({ type: "ServerRespondedWithLogFiles", payload: success(logs) });
             })
             .catch((error) => {
                 updateModel({ type: "ServerRespondedWithMe", payload: failure(error.message) });
                 updateModel({ type: "ServerRespondedWithSources", payload: failure(error.message) });
                 updateModel({ type: "ServerRespondedWithIndices", payload: failure(error.message) });
                 updateModel({ type: "ServerRespondedWithGraphs", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithProfiles", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithUsers", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithConfig", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithDatabases", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithLogFiles", payload: failure(error.message) });
             });
-    }, []);
-
-    React.useEffect(() => {
-        getConfig()
-            .then((config) => updateModel({ type: "ServerRespondedWithConfig", payload: success(config) }))
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithConfig", payload: failure(err.message) }));
-    }, []);
-
-    React.useEffect(() => {
-        getDatabases()
-            .then((databases) => updateModel({ type: "ServerRespondedWithDatabases", payload: success(databases) }))
-            .catch((err: { message: string }) => failure(err.message));
-    }, []);
-
-    React.useEffect(() => {
-        getLogFiles()
-            .then((files) => updateModel({ type: "ServerRespondedWithLogFiles", payload: success(files) }))
-            .catch((err: { message: string }) => failure(err.message));
     }, []);
 
     return (

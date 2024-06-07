@@ -10,6 +10,11 @@ for file in $files;do
     git mv "${file}" "${new_file}"
 done
 
+if test "$files" != "";then
+    line=$(grep -no "## \[${release}\]" CHANGELOG.md | cut -d ":" -f 1)
+    node scripts/post_release.js "${release}" "${line}"
+fi
+
 git add package* CHANGELOG.md
 git commit -m "chore: release ${release}"
 git tag ${release}

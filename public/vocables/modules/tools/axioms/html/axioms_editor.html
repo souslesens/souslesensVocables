@@ -50,17 +50,22 @@
             <input id="axiomsEditor_input" autocomplete="off" onkeyup="Axioms_editor.onInputChar($(this).val())" />
         </div>
         <div>
-            <select id="axiomsEditor_suggestionsSelect" onchange="Axioms_editor.onSelectSuggestion($(this))" size="15"></select>
+            <select id="axiomsEditor_suggestionsSelect" onchange="Axioms_editor.onSelectSuggestion($(this))"
+                    size="15"></select>
         </div>
     </div>
     <div>
-        <select id="axiomsEditor_classes"></select>
+        Classes<select id="axiomsEditor_allClasses" on onchange="Axioms_editor.setCurrentResource($(this))"></select>
+
+
         <select id="Axioms_editor_frameSelect">
             <option>subClassOf</option>
             <option>equivalentClass</option>
             <option>disjointWith</option>
             <option>disjointUnionWith</option>
         </select>
+    </div>
+    <div>
         <button onclick="Axioms_editor.clear()">clear</button>
         <button onclick="Axioms_editor.checkSyntax()">checkSyntax</button>
         <button onclick="Axioms_editor.saveAxiom()">saveAxiom</button>

@@ -96,6 +96,9 @@ var CommonBotFunctions = (function () {
                 props.push({ id: prop.id, label: prop.label });
             }
             if (props.length == 0) {
+                if (callback) {
+                    return callback(null, props);
+                }
                 return _botEngine.previousStep("no values found, try another option");
             }
 
@@ -131,6 +134,9 @@ var CommonBotFunctions = (function () {
             },
             function (err) {
                 if (props.length == 0) {
+                    if (callback) {
+                        return callback(null, props);
+                }
                     return _botEngine.previousStep("no values found, try another option");
                 }
                 self.sortList(props);

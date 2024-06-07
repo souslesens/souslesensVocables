@@ -180,6 +180,9 @@ var ResponsiveUI = (function () {
     };
     // What is the goal of this function? --> MainController?
     self.initTool = function (toolId, callback) {
+        setTimeout(function(){
+
+
         var toolObj = Config.userTools[toolId];
         MainController.initControllers();
         // MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
@@ -201,6 +204,7 @@ var ResponsiveUI = (function () {
                 window.location.href = url;
             }
         }
+        },500)
     };
     // To remove? --> unused
     self.showDiv = function (modalDiv) {

@@ -166,7 +166,7 @@ var KGcreator_bot = (function () {
                 //   columnBlankNode: { addMappingToModelFn: self.workflowRdfType },
                 blankNode: { addMappingToModelFn: self.workflowRdfType },
                 namedIndividual: { addMappingToModelFn: self.workflowRdfType },
-                class: { listSuperClassVocabFn: { listSuperClassFn: { listClassLabelColumnFn: { addMappingToModelFn: self.workflowRdfType } } } },
+                class: { listSuperClassVocabFn: { listSuperClassFn: { listClassLabelColumnFn: { addMappingToModelFn: self.workflowColumnmMappingOther } } } },
                 other: self.workflowColumnmMappingOther,
                 bag: { addMappingToModelFn: {} },
             },
@@ -267,7 +267,7 @@ var KGcreator_bot = (function () {
             }
 
             self.params.predicateObjectTable = self.params.table;
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         },
         listTableColumnsFn: function () {
             var table = self.params.predicateObjectTable || self.params.table;
@@ -548,6 +548,7 @@ var KGcreator_bot = (function () {
                         s: self.currentUri,
                         p: "rdfs:label",
                         o: classLabelColumn,
+                        isString:true
                     }
                 );
                 return self.functions.saveFn();
@@ -739,7 +740,7 @@ var KGcreator_bot = (function () {
     self.getColumnClasses = function (tripleModels, columnName) {
         var columnClasses = [];
         tripleModels.forEach(function (item) {
-            if ((item.s == columnName || item.s == columnName + "_$") && item.p == "rdf:type") {
+            if ((item.s == columnName || item.s == columnName + "_$") && (item.p == "rdf:type" || item.p == "rdfs:subClassOf")) {
                 if (item.o.indexOf("owl:") < 0) {
                     if (!columnClasses) {
                     }

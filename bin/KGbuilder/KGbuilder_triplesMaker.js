@@ -381,12 +381,12 @@ var KGbuilder_triplesMaker = {
         }
         return callback(null, propertyStr);
     },
-    getRestrictionTriples: function(mapping, subjectStr, propertyStr, ObjectStr, callback) {
+    getRestrictionTriples: function(mapping, subjectStr, propertyStr, objectStr, callback) {
         var restrictionTriples = [];
         var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
 
-        if (!KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + prop + "_" + objectStr]) {
-            KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + prop + "_" + objectStr] = 1;
+        if (!KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr]) {
+            KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
             restrictionTriples.push({
                 s: blankNode,
                 p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",

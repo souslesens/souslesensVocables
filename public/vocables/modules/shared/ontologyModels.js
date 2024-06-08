@@ -785,9 +785,9 @@ var OntologyModels = (function() {
 
                             var superProp = allConstraints[propId].superProp;
                             if (superProp) {
-                                if(allConstraints[propId]){// if prop has constraints remove all valide superProps
+                                if (allConstraints[propId]) {// if prop has constraints remove all valide superProps
                                     propsToRemove.push(superProp);
-                                }else {
+                                } else {
                                     if (validProperties.indexOf(superProp) > -1) {
                                         if (propsToRemove.indexOf(superProp) < 0) {
                                             propsToRemove.push(superProp);
@@ -870,13 +870,11 @@ var OntologyModels = (function() {
         );
     };
 
-    self.getPropertyDomainAndRange = function(source, propId, callback) {
+    self.getPropertyDomainAndRange = function(source, propId, objectType, callback) {
 
-if(!propId)
-    return callback(null)
-
-
-
+        if (!propId) {
+            return callback(null);
+        }
 
 
         var allSources = [];
@@ -884,48 +882,92 @@ if(!propId)
             allSources = allSources.concat(Config.sources[source].imports);
         }
 
-        var allDomains = [];
-        var allRanges = [];
+        var allDomains = {};
+        var allRanges = {};
+        async.eachSeries(allSources, function(source, callbackEach) {
+            async.series([
+                function(callbackSeries) {
+
+                    if (!Config.ontologiesVocabularyModels[source]) {
+                        return callbackSeries();
+                    }
+
+                    var constraint = Config.ontologiesVocabularyModels[source].restrictions[propId] || [];
+                    var constraints2 = Config.ontologiesVocabularyModels[source].constraints[propId] || [];
+
+                    if (!Array.isArray(constraints2)) {
+                        constraints2 = [constraints2];
+                    }
+                    if (constraints2.length == 0) {
+
+                    }
+                    constraint = constraint.concat(constraints2);
 
 
+                    constraint.forEach(function(item) {
+                        if (item.range) {
+                            if (!allRanges[item.range]) {
+                                allRanges[item.range] = { id: item.id, label: item.label };
+                            }
+                        }
+                        if (item.domain) {
+                            if (!allDomains[item.domain]) {
+                                allDomains[item.domain] = { id: item.id, label: item.label };
+                            }
+
+                        }
+                    });
+                    return callbackSeries();
+
+                },
+                function(callbackSeries) {//range subClasses
+                    if (objectType && objectType == "domain") {
+                        return callbackSeries();
+                    }
+                    Sparql_OWL.getAllDescendants(source, Object.keys(allRanges), "rdfs:subClassOf", {}, function(err, result) {
+                        if (err) {
+                            return callback(err);
+                        }
+
+                        result.forEach(function(item) {
+                            if (!allRanges[item.descendant.value]) {
+                                allRanges[item.descendant.value] = {
+                                    id: item.descendant.value,
+                                    label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value)
+                                };
+                            }
+                        });
+                        callbackSeries();
+                    });
+                },
+                function(callbackSeries) {
+                    if (objectType && objectType == "range") {
+                        return callbackSeries();
+                    }
+                    Sparql_OWL.getAllDescendants(source, Object.keys(allDomains), "rdfs:subClassOf", {}, function(err, result) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        if (!allDomains[item.descendant.value]) {
+                            allDomains[item.descendant.value] = {
+                                id: item.descendant.value,
+                                label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value)
+                            };
+                        }
 
 
+                        callbackSeries();
+                    });
 
-
-
-        allSources.forEach(function(_source) {
-            if (!Config.ontologiesVocabularyModels[_source]) {
-                return;
-            }
-
-            var constraint = Config.ontologiesVocabularyModels[_source].restrictions[propId] || [];
-            var constraints2 = Config.ontologiesVocabularyModels[_source].constraints[propId] || []
-
-
-
-
-
-            if (!Array.isArray(constraints2))
-                constraints2 = [constraints2]
-            if(constraints2.length==0){
-
-            }
-
-            constraint = constraint.concat(constraints2);
-
-
-            constraint.forEach(function(item) {
-                if (item.range) {
-                    allRanges.push(item.range);
                 }
-                if (item.domain) {
-                    allDomains.push(item.domain);
-                }
+            ], function(err) {
+                callbackEach(err);
             });
+        }, function(err) {
 
-        })
+
             return callback(null, { ranges: allRanges, domains: allDomains });
-
+        });
 
 
     };
@@ -1176,13 +1218,7 @@ if(!propId)
             "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))\n" +
             "\n" +
             "}";
-        /*   " WHERE {   \n" +
-            "  ?s rdf:type+ ?class.\n" +
-            "  ?class rdf:type owl:Class.\n" +
-            "  ?s owl:hasValue ?v.\n" +
-            " bind (datatype(?v) as ?datatype)\n" +
-            //  "   filter (t != '')\n" +
-            "}";*/
+
         let url = Config.sparql_server.url + "?format=json&query=";
 
         MainController.UI.message("loading ", false, true);
@@ -1282,7 +1318,8 @@ if(!propId)
     };
 
     return self;
-})();
+})
+();
 
 export default OntologyModels;
 

@@ -40,14 +40,28 @@ const Axioms_editor = (function() {
     };
 
     self.setCurrentResource = function(node) {
-        self.currentNode ={
-           label: $("#axiomsEditor_allClasses option:selected").text(),
+        self.clearAll();
+        self.currentNode = {
+            label: $("#axiomsEditor_allClasses option:selected").text(),
             id: node.val(),
             resourceType: "Class"
 
         };
-        self.clearAll();
-        self.onInputChar("*");
+
+        if (!self.currentNode) {
+            return alert("select a resource");
+        }
+        Axioms_suggestions.getAxiomNextResourcesList(self.currentNode.id, null, "domain", function(err, result) {
+           self.filterResources(result, "*", "ObjectProperty");
+
+
+            self.addSuggestion({
+                    id: self.currentNode.id,
+                    label: self.currentNode.label,
+                    resourceType: "Class"
+                }
+            );
+        });
     };
 
     self.onInputChar = function(text) {
@@ -62,22 +76,10 @@ const Axioms_editor = (function() {
             } else {
                 self.filterResources(self.currentSuggestions, text);
             }
-        } else if (!self.previousTokenType) {
-            if (!self.currentNode) {
-                return alert("selec ta resource");
-            }
-            self.setCurrentValidResourcesFilter(self.currentNode.id, null, "domain", function(err, result) {
-                self.listFilteredClassesOrProperties(text2);
+        } else if (!self.previousTokenType) {// at the begining of the axiom
 
-                self.addSuggestion({
-                        id: self.currentNode.id,
-                        label: self.currentNode.label,
-                        resourceType: "Class"
-                    }
-                );
-            });
         } else {
-            self.getSuggestions(text, function(err, suggestions) {
+            Axioms_suggestions.getManchesterParserSuggestions(text, function(err, suggestions) {
                 if (err) {
                     return alert(err.responseText);
                 }
@@ -130,13 +132,13 @@ const Axioms_editor = (function() {
             self.previousTokenType = resource.resourceType;
             if (resource.resourceType == "ObjectProperty") {
                 self.addSuggestion(suggestionObj, "axiom_Property");
-                self.getSuggestions(suggestionText + " ", function(err, result) {
+                Axioms_suggestions.getManchesterParserSuggestions(suggestionText + " ", function(err, result) {
                     self.currentSuggestions = result;
                     common.fillSelectOptions("axiomsEditor_suggestionsSelect", result, false, "label", "id");
                 });
             } else if (resource.resourceType == "Class") {
                 self.addSuggestion(suggestionObj, "axiom_Class");
-                self.getSuggestions("_" + suggestionText + " ", function(err, result) {
+                Axioms_suggestions.getManchesterParserSuggestions("_" + suggestionText + " ", function(err, result) {
                     self.currentSuggestions = result;
                     common.fillSelectOptions("axiomsEditor_suggestionsSelect", result, false, "label", "id");
                 });
@@ -145,7 +147,7 @@ const Axioms_editor = (function() {
             //keyword
             self.addSuggestion(suggestionObj, "axiom_keyWord");
             var text = self.getAxiomText();
-            self.getSuggestions(text + " ", function(err, result) {
+            Axioms_suggestions.getManchesterParserSuggestions(text + " ", function(err, result) {
                 self.currentSuggestions = result;
                 common.fillSelectOptions("axiomsEditor_suggestionsSelect", result, false, "label", "id");
             });
@@ -173,9 +175,9 @@ const Axioms_editor = (function() {
             var item = resourcesMap[key];
             if (!filterStr || item.label.toLowerCase().startsWith(filterStr)) {
                 if (!resourceType || item.resourceType == resourceType) {
-                    if (!self.currentValidResourceFilter || self.currentValidResourceFilter[item.id]) {
-                        choices.push(item);
-                    }
+
+                    choices.push(item);
+
                 }
             }
         }
@@ -255,189 +257,7 @@ const Axioms_editor = (function() {
             }
         );
     };
-    self.getSuggestions = function(text, callback) {
-        var options = {};
-        const params = new URLSearchParams({
-            source: self.currentSource,
-            lastToken: text,
-            options: JSON.stringify(options)
-        });
-
-        $.ajax({
-            type: "GET",
-            url: Config.apiUrl + "/axioms/suggestion?" + params.toString(),
-            dataType: "json",
-
-            success: function(data, _textStatus, _jqXHR) {
-                var suggestions = [];
-
-                var selectClasses = false;
-                var selectProperties = false;
-                data.forEach(function(item) {
-                    var keywords = [];
-
-                    if (item.match(/^_$/g)) {
-                        // remove _ and replace by Classes
-                        selectClasses = true;
-                        return;
-                    } else if (item.match(/^[A-z]$/g)) {
-                        // remove alphabetic letters and replace by ObjectProperties
-                        selectProperties = true;
-
-                        return;
-                    } else {
-                        suggestions.push({ id: item, label: item });
-                    }
-                });
-
-                if (selectClasses || selectProperties) {
-                    // replace "_" by classes
-                    self.setCurrentValidResourcesFilter();
-                    self.getAllClassesOrProperties(function(err, resources) {
-                        //   CommonBotFunctions.listSourceAllClasses(self.currentSource, null, false, [], function(err, classes) {
-                        if (err) {
-                            return callback(err);
-                        }
-                        resources.forEach(function(item) {
-                            if (selectClasses && item.resourceType == "Class") {
-                                suggestions.push(item);
-                            }
-                            if (selectProperties && item.resourceType == "ObjectProperty") {
-                                suggestions.push(item);
-                            }
-                        });
-
-                        return callback(null, suggestions);
-                    });
-                } else {
-                    callback(null, suggestions);
-                }
-            },
-            error(err) {
-                callback(err.responseText);
-            }
-        });
-    };
-
-    self.setCurrentValidResourcesFilter = function(classId, propId, role, callback) {
-        /*
-         Classs1 and participatesIn some * - here the filtering criteria is the range of participantsIn, i.e., all processes.
- Class1 and participantsIn some (Class2 and *) - still the range of participantsIn, i.e., all processes. It needs to remember the context.
- Class1 and participantsIn some (Class2 and (realises only * - now the filtering will change to the range of realises - i.e., RealizableEnitities.
- Class1 and participantsIn some (Class2 and (realises only Class3) and *) - again switch back to the range of participantsIn
- Similarly for properties but with each cascading it needs to filter properties by matching the domain to the previous class.
- Classs1 and * - only properties whose domains are superclass of Class1 or the Class1 itself.
- .Class1 and participantsIn some (Class2 and (* - only properties whose domains are superclass of Class2 or the Class2 itself.
- Complex case:
- Class1 and participantsIn some (* - here they can insert class or properties - possible classes are filtered by range of participatesIn and properties filtered by the domain matching the range of participatesIn.
-
-
-         */
-
-
-        function getLastProp() {
-            var lastProp = null;
-            elements.forEach(function(item) {
-                if (item.type == "ObjectProperty") {
-                    lastProp = item.id;
-                }
-            });
-            return lastProp;
-        }
-
-        function getLastClass() {
-            var lastProp = null;
-            elements.forEach(function(item) {
-                if (item.type == "class") {
-                    lastProp = item.id;
-                }
-            });
-            return lastProp;
-        }
-
-        if (!classId) {
-            var elements = self.getAxiomElements();
-            classId = elements[0].id;
-            propId = getLastProp();
-            OntologyModels.getPropertyDomainAndRange(self.currentSource, propId, function(err, result) {
-                if (err) {
-                    return alert(err);
-                }
-                var ranges = result.ranges;
-            });
-
-        } else {
-
-
-            OntologyModels.getAllowedPropertiesBetweenNodes(self.currentSource, classId, null, function(err, result) {
-                if (err) {
-                    return alert(err);
-                }
-                var data = {};
-                if (!propId) {
-
-                    for (var prop in result.constraints) {
-                        if (role == "both") {
-                            for (var prop in result.constraints.both) {
-                                data[prop] = {
-                                    id: prop,
-                                    label: result.constraints.both[prop].label
-                                };
-                            }
-                        }
-                        if (role == "domain") {
-                            for (var prop in result.constraints.domain) {
-                                data[prop] = {
-                                    id: prop,
-                                    label: result.constraints.domain[prop].label
-                                };
-                            }
-                        }
-                        if (role == "range") {
-                            for (var prop in result.constraints.range) {
-                                data[prop] = {
-                                    id: prop,
-                                    label: result.constraints.range[prop].label
-                                };
-                            }
-                        }
-                    }
-                } else {
-                    for (var prop in result.constraints) {
-                        for (var prop in result.constraints.both) {
-                            if ((prop = propId)) {
-                                data[prop] = {
-                                    id: prop,
-                                    label: result.constraints.both[prop].label
-                                };
-                            }
-                        }
-
-                        for (var prop in result.constraints.domain) {
-                            if ((prop = propId)) {
-                                data[prop] = {
-                                    id: prop,
-                                    label: result.constraints.domain[prop].label
-                                };
-                            }
-                        }
-                        for (var prop in result.constraints.range) {
-                            if ((prop = propId)) {
-                                data[prop] = {
-                                    id: prop,
-                                    label: result.constraints.range[prop].label
-                                };
-                            }
-                        }
-                    }
-                }
-                self.currentValidResourceFilter = data;
-                if (callback) {
-                    return callback(null, data);
-                }
-            });
-        }
-    };
+  
 
     self.checkSyntax = function(callback) {
         var axiomText = self.getAxiomText();

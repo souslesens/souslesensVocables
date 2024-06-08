@@ -2665,6 +2665,48 @@ var Sparql_OWL = (function () {
         });
     };
 
+    self.getAllDescendants = function (source, resourcesIds,taxonomyPredicate, options, callback) {
+
+        if(!options){
+            options={}
+        }
+        var fromStr = Sparql_common.getFromStr(source, false, false);
+        var filter = options.filter || "";
+        if (resourcesIds) {
+            // needs options.useFilterKeyWord because VALUES dont work
+            filter = Sparql_common.setFilter("parent", resourcesIds, null, { useFilterKeyWord: 1 });
+        }
+
+        var pathOperator = "";
+
+
+            pathOperator = "{1," + options.depth||"*" + "}";
+
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+            "SELECT distinct ?descendant ?descendantParent ?descendantLabel ?descendantParentLabel " +
+            fromStr +
+            " WHERE {\n" +
+            "?descendant rdfs:subClassOf ?descendantParent.\n" +
+            "  OPTIONAL{?descendant rdfs:label ?descendantLabel}   \n" +
+            "  OPTIONAL{?descendantParent rdfs:label ?descendantParentLabel}  \n" +
+            "  ?parent  ^rdfs:subClassOf{1,10} ?descendant.\n" +
+
+            filter +
+            "} " +
+            "      ";
+
+        var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, result.results.bindings);
+        });
+    };
+
     return self;
 })();
 

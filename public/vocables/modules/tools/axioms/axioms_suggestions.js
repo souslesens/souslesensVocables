@@ -1,16 +1,26 @@
 import Axioms_editor from "./axioms_editor.js";
 
-var Axioms_suggestions=(function(){
-    var self={}
+var Axioms_suggestions = (function() {
+    var self = {};
 
 
-    self.getManchesterParserSuggestions = function(text, callback) {
+    self.getManchesterParserSuggestions = function(selectedObject, callback) {
+        var axiomText = Axioms_editor.getAxiomText() + " ";
+        var selectedLabel = selectedObject.label;
+        if (selectedObject.resourceType == "Class") {
+            selectedLabel = "_" + selectedLabel;
+
+        }
+        axiomText += selectedLabel + " ";
+
+console.log(axiomText)
         var options = {};
         const params = new URLSearchParams({
             source: Axioms_editor.currentSource,
-            lastToken: text,
+            lastToken: axiomText,
             options: JSON.stringify(options)
         });
+
 
         $.ajax({
             type: "GET",
@@ -18,47 +28,92 @@ var Axioms_suggestions=(function(){
             dataType: "json",
 
             success: function(data, _textStatus, _jqXHR) {
-                var suggestions = [];
-
+                var keywordSuggestions = [];
                 var selectClasses = false;
                 var selectProperties = false;
                 data.forEach(function(item) {
-                    var keywords = [];
-
-                    if (item.match(/^_$/g)) {
-                        // remove _ and replace by Classes
+                    if (item.match(/^_$/g)) {                        // remove _ and replace by Classes
                         selectClasses = true;
                         return;
-                    } else if (item.match(/^[A-z]$/g)) {
-                        // remove alphabetic letters and replace by ObjectProperties
+                    } else if (item.match(/^[A-z]$/g)) { // remove alphabetic letters and replace by ObjectProperties
                         selectProperties = true;
-
                         return;
                     } else {
-                        suggestions.push({ id: item, label: item });
+                        keywordSuggestions.push({ id: item, label: item });
                     }
                 });
 
                 if (selectClasses || selectProperties) {
-                    // replace "_" by classes
-                    self.getAxiomNextResourcesList(null, null, "", function(err, resources) {
 
-                        if (err) {
-                            return callback(err);
-                        }
-                        resources.forEach(function(item) {
-                            if (selectClasses && item.resourceType == "Class") {
-                                suggestions.push(item);
+                    if (Axioms_editor.axiomContext.lastResourceType == "Class") {
+                        var classId = Axioms_editor.axiomContext.classes[Axioms_editor.axiomContext.currentClassIndex];
+                        OntologyModels.getAllowedPropertiesBetweenNodes(Axioms_editor.currentSource, classId, null, function(err, result) {
+                            if (err) {
+                                return callback(err);
                             }
-                            if (selectProperties && item.resourceType == "ObjectProperty") {
-                                suggestions.push(item);
+                            var data = [];
+
+
+                            for (var prop in result.constraints) {
+                                if (role == "both") {
+                                    for (var prop in result.constraints.both) {
+                                        data.push({
+                                            id: prop,
+                                            label: result.constraints.both[prop].label,
+                                            resourceType: "ObjectProperty"
+                                        });
+                                    }
+                                }
+                                if (role == "domain") {
+                                    for (var prop in result.constraints.domain) {
+                                        data.push({
+                                            id: prop,
+                                            label: result.constraints.domain[prop].label,
+                                            resourceType: "ObjectProperty"
+                                        });
+                                    }
+                                }
+                                if (role == "range") {
+                                    for (var prop in result.constraints.range) {
+                                        data.push({
+                                            id: prop,
+                                            label: result.constraints.range[prop].label,
+                                            resourceType: "ObjectProperty"
+                                        });
+                                    }
+                                }
                             }
+                            data = common.array.sort(data, "label");
+                            data = keywordSuggestions.concat(data);
+                            Axioms_editor.axiomContext.lastResourceType = "ObjectProperty";
+                            return callback(null, data);
+
                         });
+                    } else if (Axioms_editor.axiomContext.lastResourceType == "ObjectProperty") {
+                        var propId = Axioms_editor.axiomContext.properties[Axioms_editor.axiomContext.currentPropertyIndex];
+                        var elements = Axioms_editor.getAxiomElements();
+                        OntologyModels.getPropertyDomainsAndRanges(Axioms_editor.currentSource, propId, "range", function(err, result) {
+                            if (err) {
+                                return callback(err);
+                            }
+                            var ranges = result.ranges;
+                            var data = [];
+                            for (var key in result.ranges) {
+                                result.ranges[key].resourceType = "Class";
+                                data.push(result.ranges[key]);
+                            }
 
-                        return callback(null, suggestions);
-                    });
+                            Axioms_editor.axiomContext.lastResourceType = "Class";
+                            data = common.array.sort(data, "label");
+                            data = keywordSuggestions.concat(data);
+                            return callback(null, data);
+                        });
+                    }
+
+
                 } else {
-                    callback(null, suggestions);
+
+                    callback(null, keywordSuggestions);
                 }
             },
             error(err) {
@@ -105,9 +160,7 @@ var Axioms_suggestions=(function(){
 
         if (!classId) {
             var elements = Axioms_editor.getAxiomElements();
-            classId = elements[0].id;
-            propId = getLastProp();
-            OntologyModels.getPropertyDomainAndRange(Axioms_editor.currentSource, propId, "range", function(err, result) {
+            OntologyModels.getPropertyDomainsAndRanges(Axioms_editor.currentSource, propId, "range", function(err, result) {
                 if (err) {
                     return callback(err);
                 }
@@ -119,6 +172,7 @@ var Axioms_suggestions=(function(){
                 }
                 data = common.array.sort(data, "label");
 
+                Axioms_editor.axiomContext.lastResourceType = "Class";
                 return callback(null, data);
             });
 
@@ -162,19 +216,25 @@ var Axioms_suggestions=(function(){
                     }
                 }
                 data = common.array.sort(data, "label");
-
+                Axioms_editor.axiomContext.lastResourceType = "ObjectProperty";
                 return callback(null, data);
 
             });
         }
     };
-    
-    
-    
-    
-    
-    
+
+
+    self.setAxiomContext = function() {
+
+
+    };
+
+
     return self;
-})()
-export default Axioms_suggestions
-window.Axioms_suggestions=Axioms_suggestions
+})
+();
+export default Axioms_suggestions;
+window.Axioms_suggestions = Axioms_suggestions;
+
+
+

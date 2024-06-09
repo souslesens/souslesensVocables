@@ -870,14 +870,14 @@ var OntologyModels = (function() {
         );
     };
 
-    self.getPropertyDomainAndRange = function(source, propId, objectType, callback) {
+    self.getPropertyDomainsAndRanges = function(source, propId, objectType, callback) {
 
         if (!propId) {
             return callback(null);
         }
 
 
-        var allSources = [];
+        var allSources = [source];
         if (Config.sources[source].imports) {
             allSources = allSources.concat(Config.sources[source].imports);
         }
@@ -907,12 +907,12 @@ var OntologyModels = (function() {
                     constraint.forEach(function(item) {
                         if (item.range) {
                             if (!allRanges[item.range]) {
-                                allRanges[item.range] = { id: item.id, label: item.label };
+                                allRanges[item.range] = { id: item.range, label: item.rangeLabel };
                             }
                         }
                         if (item.domain) {
                             if (!allDomains[item.domain]) {
-                                allDomains[item.domain] = { id: item.id, label: item.label };
+                                allDomains[item.domain] = { id: item.domain, label: item.domainLabel };
                             }
 
                         }

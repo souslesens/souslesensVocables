@@ -565,22 +565,16 @@ var KGbuilder_triplesMaker = {
                 callback(null, tableData);
             });
         } else if (tableMappings.datasourceConfig) {
-            databaseModel.getConnection(tableMappings.datasourceConfig.dbName).then((connection) => {
-                const request = connection.select("*").from(tableMappings.table);
-                if (options.sampleSize) {
-                    request.limit(options.sampleSize);
-                }
-
-                request
-                    .then((result) => {
-                        tableData = result;
-                        KGbuilder_socket.message(options.clientSocketId, " data loaded ,table " + tableMappings.table, false);
-                        return callback(null, tableData);
-                    })
-                    .catch((err) => {
-                        return callback(err);
-                    });
-            });
+            databaseModel
+                .batchSelect(tableMappings.datasourceConfig.dbName, tableMappings.table, { limit: options.sampleSize || 1000, noRecurs: Boolean(options.sampleSize) })
+                .then((result) => {
+                    tableData = result;
+                    KGbuilder_socket.message(options.clientSocketId, " data loaded ,table " + tableMappings.table, false);
+                    return callback(null, tableData);
+                })
+                .catch((err) => {
+                    return callback(err);
+                });
         }
     },
 };

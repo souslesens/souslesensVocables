@@ -4,18 +4,129 @@ import Lineage_sources from "../lineage/lineage_sources.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import common from "../../shared/common.js";
+import Export from "../../shared/export.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 
 var Axioms_graph = (function () {
     var self = {};
 
-    self.drawNodeAxioms = function (sourceLabel, nodeId, divId, depth, options, callback) {
-        if (!sourceLabel) {
-            sourceLabel = Lineage_sources.activeSource;
-        }
 
-        if (!options) {
+
+
+   self.manchesterriplestoSparqlBindings= function(source,manchesterTriples,callback){
+
+
+       var escapeMarkup = function (str) {
+           var str2 = str.replace(/</g, "&lt;");
+           var str2 = str2.replace(/>/g, "&gt;");
+           return str2;
+       };
+
+
+       var urisMap={}
+       manchesterTriples.forEach(function(item){
+           var uri=item.subject.replace("[OntObject]","")
+           urisMap[uri]={isBlank:!uri.startsWith("http")}
+
+           var uri=item.object.replace("[OntObject]","")
+           urisMap[uri]={isBlank:!uri.startsWith("http")}
+       })
+
+
+       var resourceIds=[]
+       for(var uri in urisMap){
+           if(!urisMap[uri].isBlank)
+               resourceIds.push(uri)
+
+       }
+       var fromStr = Sparql_common.getFromStr(source, false, false);
+       var filterStr = Sparql_common.setFilter("s",resourceIds)
+       var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+
+       var query="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+           " SELECT distinct ?sGraph ?oGraph ?s ?p  ?o ?sType ?oType  ?sLabel ?pLabel  ?oLabel ?sIsBlank ?oIsBlank " +
+           fromStr+
+           "      WHERE {   ?s ?p ?o." +
+           "  optional{ ?s rdf:type ?sType.}\n" +
+           "  optional{    ?o rdf:type ?oType.}\n" +
+           "  optional{   ?s rdfs:label ?sLabel.}\n" +
+           "  optional{   ?o rdfs:label ?oLabel.}\n" +
+           "  optional{    ?p rdfs:label ?pLabel.} \n" +
+            filterStr  +
+           "} limit 10000"
+
+       Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
+           if (err) {
+               return callback(err);
+           }
+
+           var bindings=[]
+           manchesterTriples.forEach(function(item) {
+               var subjectUri=item.subject.replace("[OntObject]","")
+               var predicateUri=item.predicate.replace("[OntObject]","")
+               var objectUr=item.predicate.replace("[OntObject]","")
+               result.push("<")
+
+               var uri=item.object.replace("[OntObject]","")
+           })
+
+
+           return callback(null, result.results.bindings);
+       });
+
+
+
+
+
+
+
+
+
+   }
+
+
+self.drawTriples=function(){
+    self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource,self.sampleTriples,null,{},function(err, result){
+
+    })
+
+}
+
+    self.showTriplesInDataTable = function (divId,data) {
+        var escapeMarkup = function (str) {
+            var str2 = str.replace(/</g, "&lt;");
+            var str2 = str2.replace(/>/g, "&gt;");
+            return str2;
+        };
+
+        var tableCols = [];
+        var hearders = ["subject", "predicate", "object"];
+        hearders.forEach(function (item) {
+            tableCols.push({ title: item, defaultContent: "", width: "30%" });
+        });
+
+        var tableData = [];
+        data.forEach(function (item, index) {
+            tableData.push([escapeMarkup(item.subject), escapeMarkup(item.predicate), escapeMarkup(item.object)]);
+        });
+
+        var str = "<table><tr><td>subject</td><td>predicate</td><td>object</td></tr>";
+        data.forEach(function (item, index) {
+            str += "<tr><td>" + escapeMarkup(item.subject) + "</td><td>" + escapeMarkup(item.predicate) + "</td><td>" + escapeMarkup(item.object) + "</td></tr>";
+        });
+        str += "</table>";
+
+        /*  $("#KGcreator_triplesDataTableDiv").html(str)
+          return;*/
+        Export.showDataTable(divId, tableCols, tableData, null, { paging: true }, function (err, datatable) {});
+    };
+
+    self.drawNodeAxioms = function (sourceLabel, nodeId, divId, options, callback) {
+
+
+        if (!options)
             options = {};
-        }
+
 
         options.skipRestrictions = false;
 
@@ -27,7 +138,8 @@ var Axioms_graph = (function () {
             [
                 //get all elementary axioms
                 function (callbackSeries) {
-                    self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
+                    self.manchesterriplestoSparqlBindings(sourceLabelAxioms_editor.currentSource,self.sampleTriples,function(err, result){
+                  //  self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
                         if (err) {
                             return callback(err);
                         }
@@ -447,6 +559,94 @@ enabled:true},*/
 
 
     };
+
+    self.sampleTriples=[
+        {
+            "subject": "[OntObject]05a9d835-07a3-4b3e-b552-5d20a89c94b1",
+            "predicate": "http://www.w3.org/2002/07/owl#intersectionOf",
+            "object": "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69"
+        },
+        {
+            "subject": "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            "object": "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/PlanSpecification"
+        },
+        {
+            "subject": "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
+            "predicate": "http://www.w3.org/2002/07/owl#onProperty",
+            "object": "[OntObject]http://purl.obolibrary.org/obo/BFO_0000219"
+        },
+        {
+            "subject": "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
+            "predicate": "http://www.w3.org/2002/07/owl#onProperty",
+            "object": "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/prescribedBy"
+        },
+        {
+            "subject": "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            "object": "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"
+        },
+        {
+            "subject": "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            "object": "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4"
+        },
+        {
+            "subject": "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
+            "predicate": "http://www.w3.org/2002/07/owl#someValuesFrom",
+            "object": "[OntObject]05a9d835-07a3-4b3e-b552-5d20a89c94b1"
+        },
+        {
+            "subject": "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            "object": "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402"
+        },
+        {
+            "subject": "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
+            "predicate": "http://www.w3.org/2002/07/owl#onProperty",
+            "object": "[OntObject]http://purl.obolibrary.org/obo/BFO_0000111"
+        },
+        {
+            "subject": "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            "object": "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9"
+        },
+        {
+            "subject": "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            "object": "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8"
+        },
+        {
+            "subject": "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            "object": "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/ObjectiveSpecification"
+        },
+        {
+            "subject": "[OntObject]d674942f-d3d6-4c9b-94dc-7c16086c020c",
+            "predicate": "http://www.w3.org/2002/07/owl#intersectionOf",
+            "object": "[OntObject]a5720162-c324-4444-9b75-936c8f211eda"
+        },
+        {
+            "subject": "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
+            "predicate": "http://www.w3.org/2002/07/owl#someValuesFrom",
+            "object": "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BusinessOrganization"
+        },
+        {
+            "subject": "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
+            "predicate": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            "object": "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13"
+        },
+        {
+            "subject": "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
+            "predicate": "http://www.w3.org/2002/07/owl#someValuesFrom",
+            "object": "[OntObject]d674942f-d3d6-4c9b-94dc-7c16086c020c"
+        },
+        {
+            "subject": "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            "object": "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"
+        }
+    ]
 
     return self;
 })();

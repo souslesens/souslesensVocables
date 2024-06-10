@@ -9,6 +9,8 @@ const Axioms_editor = (function() {
         self.currentSource = source || Lineage_sources.activeSource;
 
 
+
+
         if (nodeId) {
             self.currentNode = nodeId;
         } else {
@@ -19,6 +21,14 @@ const Axioms_editor = (function() {
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Axiom Editor");
         $("#smallDialogDiv").load("modules/tools/axioms/html/axioms_editor.html", function(x, y) {
+
+            $("#axiomsEditor_input").on('keyup', function(evt){
+                if(evt.key=="Backspace"){
+                    Axioms_editor.removeLastElement();
+                }else{
+                    Axioms_editor.onInputChar($("#axiomsEditor_input").val())
+                }
+            })
             $("#axiomsEditor_input").focus();
             self.getAllClassesOrProperties(function(err, result) {
                 var classes = [];
@@ -33,6 +43,7 @@ const Axioms_editor = (function() {
     };
 
     self.clearAll = function() {
+        self.textoffset = 0;
         self.axiomContext = {
             properties: [],
             classes: [],
@@ -61,16 +72,17 @@ const Axioms_editor = (function() {
         if (!self.currentNode) {
             return alert("select a resource");
         }
-        Axioms_suggestions.getAxiomNextResourcesList(self.currentNode.id, null, "domain", function(err, result) {
+        /*   self.addSuggestion({
+                   id: self.currentNode.id,
+                   label: self.currentNode.label,
+                   resourceType: "Class"
+               }
+           );*/
+        self.axiomContext.classes.push(self.currentNode.id);
+        self.axiomContext.currentClassIndex += 1;
+        Axioms_suggestions.getManchesterParserSuggestions(self.currentNode, function(err, result) {
             self.filterResources(result, "*", "ObjectProperty");
 
-
-            self.addSuggestion({
-                    id: self.currentNode.id,
-                    label: self.currentNode.label,
-                    resourceType: "Class"
-                }
-            );
         });
     };
 
@@ -80,8 +92,9 @@ const Axioms_editor = (function() {
 
         if (self.currentSuggestions.length > 0) {
             if (self.currentSuggestions.length == 1) {
+
                 $("axiomsEditor_suggestionsSelect").val(self.currentSuggestions[0].id);
-                self.addSuggestion(self.currentSuggestions[0]);
+                //  self.addSuggestion(self.currentSuggestions[0].replace(/ /g,"_"));
                 self.onSelectSuggestion();
             } else {
                 self.filterResources(self.currentSuggestions, text);
@@ -140,10 +153,19 @@ const Axioms_editor = (function() {
             };
         }
 
+        var separatorStr = "";
+        if (suggestion.id == "(") {
+            separatorStr = "<br>";
+            self.textoffset += 1;
+            for (var i = 0; i < self.textoffset; i++) {
+                separatorStr += "&nbsp;&nbsp;&nbsp;";
+            }
+        }
+
         $("#axiomsEditor_input").val("");
         $("#axiomsEditor_input").focus();
         //   self.onInputChar(suggestion.label);
-        $("#axiomsEditor_input").before("<span class='axiom_element " + cssClass + "' id='" + suggestion.id + "'>" + suggestion.label + "</span>");
+        $("#axiomsEditor_input").before(separatorStr + "<span class='axiom_element " + cssClass + "' id='" + suggestion.id + "'>" + suggestion.label + "</span>");
         $("#axiomsEditor_input").val("");
     };
 
@@ -169,7 +191,6 @@ const Axioms_editor = (function() {
             common.fillSelectOptions("axiomsEditor_suggestionsSelect", result, false, "label", "id");
             self.addSuggestion(selectedObject);
         });
-
 
 
     };
@@ -338,7 +359,7 @@ const Axioms_editor = (function() {
     };
     self.getAxiomContent = function() {
         var frame = $("#Axioms_editor_frameSelect").val();
-        var text = "<" + self.currentNode + "> " + frame + " (";
+        var text = "<" + self.currentNode.id + "> " + frame + " (";
         $(".axiom_element").each(function() {
             var id = $(this).attr("id");
             if (!id || id == "null") {
@@ -357,6 +378,41 @@ const Axioms_editor = (function() {
         text += ")";
         return text;
     };
+
+    self.removeLastElement=function(){
+
+       var lastElement= $('.axiom_element:last')
+       lastElement.remove()
+         lastElement= $('.axiom_element:last')
+        if(!lastElement) {
+            self.clearAll()
+            return self.setCurrentResource()
+        }
+        var cssClasses =lastElement.attr("class");
+
+        var type = null;
+        if (cssClasses.indexOf("axiom_Class") > -1) {
+            type = "Class";
+        } else if (cssClasses.indexOf("axiom_Property") > -1) {
+            type = "ObjectProperty";
+        } else if (cssClasses.indexOf("axiom_keyWord") > -1) {
+            type = "axiom_keyWord";
+        } else {
+            return;
+        }
+        var id = $(this).attr("id");
+        var object={
+            id:id,
+            type:type
+        }
+        Axioms_suggestions.getManchesterParserSuggestions(selectedObject, function(err, result) {
+            self.currentSuggestions = result;
+            common.fillSelectOptions("axiomsEditor_suggestionsSelect", result, false, "label", "id");
+
+        })
+    }
+
+
     self.getAxiomElements = function() {
         var frame = $("#Axioms_editor_frameSelect").val();
         var text = "<" + self.currentNode + "> " + frame + " (";
@@ -413,6 +469,10 @@ const Axioms_editor = (function() {
             return alert("no graph Uri");
         }
 
+
+        console.log(content);
+
+
         var triples;
         async.series(
             [
@@ -450,7 +510,7 @@ const Axioms_editor = (function() {
                 },
                 function(callbackSeries) {
                     self.message("drawing axioms triples");
-                    Axioms_graph.drawNodeAxioms(null, triples);
+                   var html= Axioms_graph.showTriplesInDataTable("Axioms_editor_triplesDataTableDiv",triples)
                 }
             ],
             function(err) {

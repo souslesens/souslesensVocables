@@ -635,7 +635,11 @@ var OntologyModels = (function() {
         });
     };
 
-    self.getAllowedPropertiesBetweenNodes = function(source, startNodeIds, endNodeIds, callback) {
+    self.getAllowedPropertiesBetweenNodes = function(source, startNodeIds, endNodeIds,options, callback) {
+
+        if(!options){
+            options={}
+        }
         var startNodeAncestors = [];
         var endNodeAncestors = [];
 
@@ -741,31 +745,37 @@ var OntologyModels = (function() {
                                 if (true || !allConstraints[property]) {
                                     allConstraints[property] = constraint;
 
-                                    if (constraint.domain) {
+                                    if (constraint.domain && constraint.domain.startsWith("http")) {
+
                                         if (
                                             startNodeAncestorIds.length == 0 ||
                                             startNodeAncestorIds.indexOf(constraint.domain) > -1 ||
                                             startNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class"
                                         ) {
                                             if (!constraint.range || constraint.range.indexOf("http") < 0 || endNodeIds.length == 0) {
+                                                if(propertiesMatchingStartNode.indexOf(property)<0)
                                                 propertiesMatchingStartNode.push(property);
                                             } else {
                                                 domainOK = true;
                                             }
                                         }
                                     }
-                                    if (constraint.range) {
+                                    if (constraint.range && constraint.range.startsWith("http")) {
                                         if (endNodeAncestorIds.length == 0 || endNodeAncestorIds.indexOf(constraint.range) > -1 || endNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class") {
                                             if (domainOK) {
+                                                if( propertiesMatchingBoth.indexOf(property)<0)
                                                 propertiesMatchingBoth.push(property);
                                             } else {
                                                 if (!constraint.domain || constraint.domain.indexOf("http") < 0) {
+
+                                                    if( propertiesMatchingEndNode.indexOf(property)<0)
                                                     propertiesMatchingEndNode.push(property);
                                                 }
                                             }
                                         }
                                     }
                                     if (!constraint.domain && !constraint.range) {
+                                        if(noConstaintsArray.indexOf(property)<0)
                                         noConstaintsArray.push(property);
                                     }
                                 }
@@ -780,35 +790,47 @@ var OntologyModels = (function() {
                 function(callbackSeries) {
                     var propsToRemove = [];
 
-                    function recurse(propId) {
-                        if (allConstraints[propId]) {
 
-                            var superProp = allConstraints[propId].superProp;
-                            if (superProp) {
-                                if (allConstraints[propId]) {// if prop has constraints remove all valide superProps
-                                    propsToRemove.push(superProp);
-                                } else {
-                                    if (validProperties.indexOf(superProp) > -1) {
-                                        if (propsToRemove.indexOf(superProp) < 0) {
-                                            propsToRemove.push(superProp);
+                    if(!options.keepSuperClasses) {
+
+                        function recurse(propId) {
+                            if (allConstraints[propId]) {
+
+                                var superProp = allConstraints[propId].superProp;
+
+                                if (superProp) {
+                                    if(propId=="http://purl.obolibrary.org/obo/BFO_0000111")
+                                        var x=4
+                                    if (allConstraints[propId]) {// if prop has constraints remove all valide superProps
+                                        if(superProp=="http://purl.obolibrary.org/obo/BFO_0000110")
+                                            var x=3
+                                        if(superProp=="http://purl.obolibrary.org/obo/BFO_0000111")
+                                            var x=4
+                                        propsToRemove.push(superProp);
+                                    } else {
+                                        if (validProperties.indexOf(superProp) > -1) {
+                                            if (propsToRemove.indexOf(superProp) < 0) {
+                                                propsToRemove.push(superProp);
+                                            }
                                         }
                                     }
-                                }
-                                recurse(superProp);
+                                    recurse(superProp);
 
+                                }
                             }
                         }
-                    }
 
-                    propertiesMatchingBoth.forEach(function(propId) {
-                        recurse(propId);
-                    });
-                    propertiesMatchingStartNode.forEach(function(propId) {
-                        recurse(propId);
-                    });
-                    propertiesMatchingEndNode.forEach(function(propId) {
-                        recurse(propId);
-                    });
+
+                        propertiesMatchingBoth.forEach(function(propId) {
+                            recurse(propId);
+                        });
+                        propertiesMatchingStartNode.forEach(function(propId) {
+                            recurse(propId);
+                        });
+                        propertiesMatchingEndNode.forEach(function(propId) {
+                            recurse(propId);
+                        });
+                    }
 
                     validConstraints = { both: {}, domain: {}, range: {}, noConstraints: {} };
 
@@ -818,7 +840,10 @@ var OntologyModels = (function() {
                         }
                     });
                     propertiesMatchingStartNode.forEach(function(propId) {
+                        if(propId=="http://purl.obolibrary.org/obo/BFO_0000111")
+                            var x=4
                         if (propsToRemove.indexOf(propId) < 0) {
+
                             validConstraints["domain"][propId] = allConstraints[propId];
                         }
                     });

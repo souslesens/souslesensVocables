@@ -151,7 +151,7 @@ var Lineage_createRelation = (function () {
                     },
 
                     function (callbackSeries) {
-                        OntologyModels.getAllowedPropertiesBetweenNodes(source, self.sourceNode.id, self.targetNode.id, function (err, result) {
+                        OntologyModels.getAllowedPropertiesBetweenNodes(source, self.sourceNode.id, self.targetNode.id, null,function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }

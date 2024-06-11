@@ -62,6 +62,7 @@ th, td{
     overflow: unset;
     display: flex;
 }
+
 .nodesInfosAdditionalInfos {
     background-color: @background-color !important;
     border-radius: 14px !important;

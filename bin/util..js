@@ -562,8 +562,8 @@ var util = {
     },
 
     convertISOStringDateForTriple:function(isoStringdate){
-       // isoString 2022-12-31T230000.000Z
-      //  internal virtuoso date YYYY.MM.DD hh:mm.ss
+       //isoString 2022-12-31T230000.000Z
+      //internal virtuoso date YYYY.MM.DD hh:mm.ss
         var regex=/(\d{4})-(\d{2})-(\d{2})T(\d{2})(\d{2})(\d{2})/
         var array=isoStringdate.match(regex)
         if(!array)

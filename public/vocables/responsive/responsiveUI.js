@@ -100,8 +100,6 @@ var ResponsiveUI = (function () {
     };
     //  MainController --> onToolSelect.initTool   when click on a button of a tool
     self.onToolSelect = function (toolId, event, callback) {
-        // reset source on tool select to not have the previous source
-        self.source = null;
         if (event) {
             var clickedElement = event.target;
             // if class
@@ -145,6 +143,7 @@ var ResponsiveUI = (function () {
             }
         } else {
             self.initTool(toolId);
+            self.source = null;
         }
 
         // set or replace tool in url params
@@ -153,6 +152,12 @@ var ResponsiveUI = (function () {
             params.delete("tab");
         }
         params.set("tool", toolId);
+        if (self.source) {
+            params.set("source", self.source);
+        } else {
+            params.delete("source");
+        }
+
         window.history.replaceState(null, "", `?${params.toString()}`);
 
         if (callback) {
@@ -179,9 +184,15 @@ var ResponsiveUI = (function () {
     self.sourceSelect = function (source) {
         MainController.currentSource = source;
         ResponsiveUI.source = source;
+
         $("#selectedSource").html(MainController.currentSource);
 
         $("#mainDialogDiv").parent().hide();
+        const params = new URLSearchParams(document.location.search);
+        if (self.source) {
+            params.set("source", self.source);
+        }
+        window.history.replaceState(null, "", `?${params.toString()}`);
         self.initTool(MainController.currentTool, function (err, result) {
             if (err) {
                 return self.alert(err.responseText);

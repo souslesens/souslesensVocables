@@ -214,7 +214,18 @@ var NodeInfosWidget = (function () {
                     });
                 },
                 function (callbackSeries) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
+                        return callbackSeries();
+                    }
                     self.showClassesBreakDown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function (err) {
+                        callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
+                        return callbackSeries();
+                    }
+                    self.showPropBreakdown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function (err) {
                         callbackSeries(err);
                     });
                 },

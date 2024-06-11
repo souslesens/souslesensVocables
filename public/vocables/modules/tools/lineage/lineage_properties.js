@@ -163,8 +163,13 @@ var Lineage_properties = (function () {
                                 distinctIds[item.prop.value] = 1;
 
                                 var parent = source;
+                                /*
                                 if (item.subProp) {
                                     parent = item.subProp.value;
+                                }*/
+                                var superProp = Config.ontologiesVocabularyModels[source].properties[item.prop.value].superProp;
+                                if (superProp != null) {
+                                    parent = superProp;
                                 }
                                 jstreeData.push({
                                     text: item.propLabel.value,
@@ -917,7 +922,12 @@ var Lineage_properties = (function () {
                         result.forEach(function (item) {
                             if (!uniqueIds[item.id]) {
                                 uniqueIds[item.id] = 1;
-                                item.parent = sourceLabel;
+                                //item.parent = sourceLabel;
+                                if (item.parent != sourceLabel) {
+                                    if (result.filter((node) => node.id == item.parent).length == 0) {
+                                        item.parent = sourceLabel;
+                                    }
+                                }
                                 item.type = "Property";
                                 jstreeData.push(item);
                             }

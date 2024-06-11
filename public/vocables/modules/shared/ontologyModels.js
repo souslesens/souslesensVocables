@@ -1318,6 +1318,90 @@ var OntologyModels = (function () {
 
         return hierarchyArray;
     };
+    self.getPropHierarchyTreeData = function (sourcelabel, baseClassId, direction, options) {
+        if (!options) {
+            options = {};
+        }
+
+        var sources = [sourcelabel];
+        if (Config.sources[sourcelabel].imports) {
+            sources = sources.concat(Config.sources[sourcelabel].imports);
+        }
+
+        var props = {};
+
+        sources.forEach(function (source) {
+            if (!Config.ontologiesVocabularyModels[source]) {
+                return;
+            }
+            for (var key in Config.ontologiesVocabularyModels[source].properties) {
+                var item = Config.ontologiesVocabularyModels[source].properties[key];
+                if (props[key]) {
+                    props[key].superClass = item.superProp;
+                } else {
+                    props[key] = item;
+                }
+            }
+        });
+        var hierarchyArray = [];
+        var uniqueIds = {};
+        if (direction == "ancestors") {
+            function recurse(propId) {
+                if (props[propId] && !uniqueIds[propId]) {
+                    uniqueIds[propId] = 1;
+                    hierarchyArray.push(props[propId]);
+                    if (props[propId].superProp) {
+                        recurse(props[propId].superProp);
+                    }
+                }
+            }
+
+            recurse(baseClassId);
+        } else if (direction == "descendants") {
+            if (!options.depth) {
+                var nClasses = Object.keys(props).length;
+                if (nClasses < 50) {
+                    options.depth = 4;
+                } else if (nClasses < 200) {
+                    options.depth = 2;
+                } else {
+                    options.depth = 1;
+                }
+            }
+
+            var childrenMap = {};
+            var uniqueIds = {};
+            hierarchyArray.push(props[baseClassId]);
+            for (var key in props) {
+                if (key == baseClassId) {
+                    var x = 3;
+                }
+                if (!childrenMap[props[key].superProp]) {
+                    childrenMap[props[key].superProp] = [];
+                }
+                childrenMap[props[key].superProp].push(props[key]);
+            }
+
+            function recurse(propId, depth) {
+                if (depth >= options.depth) {
+                    return;
+                }
+                if (childrenMap[propId]) {
+                    childrenMap[propId].forEach(function (item) {
+                        if (!uniqueIds[item.id]) {
+                            uniqueIds[item.id] = 1;
+                            hierarchyArray.push(item);
+                            recurse(item.id, depth + 1);
+                        }
+                    });
+                }
+            }
+
+            recurse(baseClassId, 0);
+        }
+
+        return hierarchyArray;
+    };
 
     return self;
 })();

@@ -165,7 +165,7 @@ var KGquery_filter = (function () {
             var str = optionalStr + " {?" + data.varName + " " + propertyStr + " ?" + data.varName + "_" + data.property.label + ".}\n";
             optionalPredicatesSparql = addToStringIfNotExists(str, optionalPredicatesSparql);
         });
-
+        KGquery.currentSelectedPredicates = selectedPropertyNodes;
         return callback(null, optionalPredicatesSparql);
     };
 

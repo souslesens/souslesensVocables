@@ -281,7 +281,6 @@ var visjsGraph = (function () {
                 smooth: {
                     type: "cubicBezier",
                     forceDirection: "horizontal",
-
                     roundness: 0.4,
                 },
             };

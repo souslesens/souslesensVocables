@@ -163,7 +163,7 @@ const KGbuilder_triplesWriter = {
                         return callbackWhilst(err);
                     }
 
-                  //  return callback(null, result.results.bindings[0]["callret-0"].value);
+                  //return callback(null, result.results.bindings[0]["callret-0"].value);
 
                     var result =  result.results.bindings[0]["callret-0"].value;
 

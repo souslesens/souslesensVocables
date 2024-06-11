@@ -8,14 +8,16 @@ var Containers_widget = (function () {
     self.jstreeDivId = "containerWidget_treeDiv";
     self.showDialog = function (source, options, validateFn) {
         self.validateFn = validateFn;
-        // $("#mainDialogDiv") .parent().show("fast", function () {
         $("#mainDialogDiv").dialog("open");
-
-        $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
-            $("#mainDialogDiv").addClass("zIndexTop-10");
-            Containers_tree.search(self.jstreeDivId, null, options);
-        });
-        // });
+        $("#mainDialogDiv")
+            .parent()
+            .show("fast", function () {
+                $("#mainDialogDiv").dialog("option", "title", "Containers widget");
+                $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
+                    $("#mainDialogDiv").addClass("zIndexTop-10");
+                    Containers_tree.search(self.jstreeDivId, options);
+                });
+            });
     };
 
     self.validateDialog = function () {
@@ -63,7 +65,20 @@ var Containers_widget = (function () {
         }
         Containers_graph.graphParentContainers(self.currentSource, null, { filter: filter });
     };
-
+    self.search = function () {
+        var term = $("#containerWidget_searchInput").val();
+        if (term) {
+            Containers_tree.drawContainerAndAncestorsJsTree(KGquery.currentSource, term, {}, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+            });
+        } else {
+            Containers_query.getTopContainer(KGquery.currentSource, {}, function (err, result) {
+                Containers_tree.drawTree(self.jstreeDivId, KGquery.currentSource, "#", result.results.bindings, {});
+            });
+        }
+    };
     return self;
 })();
 

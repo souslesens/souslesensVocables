@@ -13,17 +13,18 @@
     padding: 20px;
 }
 #KGcreator_classicMappingDiv input {
-    width: 240px;
+    /* width: 240px;
     margin: 3px;
     padding: 0px;
     border-radius: 14px !important;
     background-color: @dark-background-color;
     color: @button1-color !important;
-    margin-left: 0px;
+    margin-left: 0px;*/
 }
 #KGcreator_classicMappingDiv select {
     min-width: 100px;
     margin: 2px;
+    margin-top: 5px;
     border-radius: 14px !important;
     background-color: @dark-background-color;
     color: @button1-color !important;

@@ -644,7 +644,14 @@ if (callback) return callback(err);
             }
             return str;
         });
-
+    self.ISODateStrToRDFString = function (date) {
+        if (date) {
+            date = date.replace(/-/g, ".");
+            date = date.replace("T", " ");
+            date = date.replace("Z", "");
+        }
+        return date;
+    };
     // var dateTime='2000-01-15T00:00:00'
 
     self.dateToRDFString = function (date, time) {

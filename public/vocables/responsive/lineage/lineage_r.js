@@ -39,7 +39,7 @@ var Lineage_r = (function () {
     };
     self.unload = function () {
         $("#graphDiv").empty();
-        $("#lateralPanelDiv").off();
+        $("#lateralPanelDiv").resizable("destroy");
         $("#lateralPanelDiv").css("width", "435px");
     };
     self.loadSources = function () {
@@ -78,8 +78,9 @@ var Lineage_r = (function () {
                 }
 
                 ResponsiveUI.PopUpOnHoverButtons();
+
                 $("#lateralPanelDiv").resizable({
-                    maxWidth: 435,
+                    maxWidth: $(window).width() - 100,
                     minWidth: 150,
                     stop: function (event, ui) {
                         ResponsiveUI.resetWindowHeight();
@@ -98,13 +99,14 @@ var Lineage_r = (function () {
                     $("#GenericTools_searchInAllSources").prop("checked", false);
                     $("#Lineage_MoreClassesOptions").hide();
                     SearchWidget.showTopConcepts();
+                    /*
                     $("#lateralPanelDiv").resizable({
                         maxWidth: 435,
                         minWidth: 150,
                         stop: function (event, ui) {
                             ResponsiveUI.resetWindowHeight();
                         },
-                    });
+                    });*/
                 });
             });
         }

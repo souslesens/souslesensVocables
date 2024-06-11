@@ -52,8 +52,8 @@ var DateWidget = (function () {
         });
     };
     self.unsetDatePickerOnInput = function (inputId, options) {
-        if ($("#" + inputId).datepicker && $("#" + inputId).datepicker.destroy) {
-            $("#" + inputId).datepicker.destroy();
+        if ($("#" + inputId).data("datepicker")) {
+            $("#" + inputId).datepicker("destroy");
         }
     };
 

@@ -77,6 +77,16 @@ var ResponsiveUI = (function () {
         }
 
         $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 7);
+        if ($("#lateralPanelDiv").data("ui-resizable") != undefined) {
+            $("#lateralPanelDiv").resizable("destroy");
+            $("#lateralPanelDiv").resizable({
+                maxWidth: $(window).width() - 100,
+                minWidth: 150,
+                stop: function (event, ui) {
+                    ResponsiveUI.resetWindowHeight();
+                },
+            });
+        }
         //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
@@ -194,7 +204,6 @@ var ResponsiveUI = (function () {
         MainController.initControllers();
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
-
         if (Config.userTools[toolId].controller.onLoaded) {
             Config.userTools[toolId].controller.onLoaded();
         } else {
@@ -389,12 +398,14 @@ var ResponsiveUI = (function () {
                     sourceDivId +
                     "\")'/> </button></div>";
                 $("#lineage_drawnSources").append(html);
-
+                $("#lineage_drawnSources").find(".arrow-icon").hide();
+                /*
                 $("#" + sourceDivId).bind("click", function (e) {
                     var sourceDivId = $(this).attr("id");
                     var source = self.sourceDivsMap[sourceDivId];
                     Lineage_sources.setCurrentSource(source);
                 });
+                */
                 return callback();
             } else {
                 return callback();

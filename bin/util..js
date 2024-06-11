@@ -236,7 +236,9 @@ var util = {
         if (!str || !str.replace) {
             return null;
         }
+        
         str = str.trim();
+       
         str = str.replace(/\\/gm, "_");
         str = str.replace(/\n/gm, "\\\\n");
 

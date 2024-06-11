@@ -11,6 +11,23 @@ var KGquery_filter_bot = (function () {
     self.title = "Filter Class";
 
     self.start = function (data, currentQuery, validateFn) {
+        _botEngine.startParams = [];
+        if (data) {
+            _botEngine.startParams.push(JSON.parse(JSON.stringify(data)));
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+        if (currentQuery) {
+            _botEngine.startParams.push(JSON.parse(JSON.stringify(currentQuery)));
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+        if (validateFn) {
+            _botEngine.startParams.push(validateFn);
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+
         self.data = data;
         self.filter = "";
         self.filterItems = [];
@@ -122,7 +139,7 @@ var KGquery_filter_bot = (function () {
         });
         self.params.propertyDatatype = datatype;
         var choices = [];
-        if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
+        if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#dateTime") {
             // propertyOperator = ">";
             choices = ["=", "<", "<=", ">", ">=", "range"];
         } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
@@ -149,7 +166,7 @@ var KGquery_filter_bot = (function () {
         } else if (
             !self.params.propertyDatatype ||
             self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" ||
-            self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#datetime"
+            self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#dateTime"
         ) {
             if (self.params.propertyOperator == "range") {
                 DateWidget.showDateRangePicker("widgetGenericDialogDiv", null, null, function (minDate, maxDate) {
@@ -197,11 +214,14 @@ var KGquery_filter_bot = (function () {
         if (dateValueRange) {
             var minDate = new Date(dateValueRange.minDate).toISOString();
             var maxDate = new Date(dateValueRange.maxDate).toISOString();
+            minDate = common.ISODateStrToRDFString(minDate);
+            maxDate = common.ISODateStrToRDFString(maxDate);
             self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + ">=" + ' "' + minDate + '"^^xsd:dateTime ');
             self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + "<=" + ' "' + maxDate + '"^^xsd:dateTime  &&');
         } else if (propertyValue) {
-            if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#datetime") {
+            if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" || self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#dateTime") {
                 var dateStr = new Date(propertyValue).toISOString();
+                dateStr = common.ISODateStrToRDFString(dateStr);
                 self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + dateStr + '"^^xsd:dateTime');
             } else if (self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#int") {
                 self.filterItems.push(filterBooleanOperator + "?" + varName + "_" + propLabel + " " + propertyOperator + ' "' + propertyValue + '"^^xsd:int ');
@@ -239,6 +259,10 @@ var KGquery_filter_bot = (function () {
             BotEngine.nextStep();
         } else {
             _botEngine.currentObj = self.workflow_filterClass;
+            _botEngine.currentBot.params.property = "";
+            _botEngine.currentBot.params.propertyDatatype = "";
+            _botEngine.currentBot.params.propertyOperator = "";
+            _botEngine.currentBot.params.propertyValue = "";
             _botEngine.nextStep();
         }
     };

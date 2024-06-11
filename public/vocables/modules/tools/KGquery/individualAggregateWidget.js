@@ -27,7 +27,7 @@ var IndividualAggregateWidget = (function () {
                         var groupByTypes = [
                             "http://www.w3.org/2001/XMLSchema#string",
                             "http://www.w3.org/2001/XMLSchema#date",
-                            "http://www.w3.org/2001/XMLSchema#datetime",
+                            "http://www.w3.org/2001/XMLSchema#dateTime",
                             "http://www.w3.org/2000/01/rdf-schema#Literal",
                         ];
 

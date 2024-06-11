@@ -180,31 +180,29 @@ var ResponsiveUI = (function () {
     };
     // What is the goal of this function? --> MainController?
     self.initTool = function (toolId, callback) {
-        setTimeout(function(){
+        setTimeout(function () {
+            var toolObj = Config.userTools[toolId];
+            MainController.initControllers();
+            // MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
+            Clipboard.clear();
+            Lineage_sources.loadedSources = {};
 
-
-        var toolObj = Config.userTools[toolId];
-        MainController.initControllers();
-        // MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
-        Clipboard.clear();
-        Lineage_sources.loadedSources = {};
-
-        if (Config.userTools[toolId].controller.onLoaded) {
-            //  MainController.writeUserLog(authentication.currentUser, toolId, "");
-            Config.userTools[toolId].controller.onLoaded();
-        } else {
-            if (true) {
-                var url = window.location.href;
-                var p = url.indexOf("?");
-                if (p > -1) {
-                    url = url.substring(0, p);
+            if (Config.userTools[toolId].controller.onLoaded) {
+                //  MainController.writeUserLog(authentication.currentUser, toolId, "");
+                Config.userTools[toolId].controller.onLoaded();
+            } else {
+                if (true) {
+                    var url = window.location.href;
+                    var p = url.indexOf("?");
+                    if (p > -1) {
+                        url = url.substring(0, p);
+                    }
+                    url = url.replace("index_r.html", "");
+                    url += "?tool=" + toolId;
+                    window.location.href = url;
                 }
-                url = url.replace("index_r.html", "");
-                url += "?tool=" + toolId;
-                window.location.href = url;
             }
-        }
-        },500)
+        }, 500);
     };
     // To remove? --> unused
     self.showDiv = function (modalDiv) {

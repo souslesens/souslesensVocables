@@ -10,129 +10,92 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 var Axioms_graph = (function () {
     var self = {};
 
+    self.manchesterriplestoSparqlBindings = function (source, manchesterTriples, callback) {
+        var escapeMarkup = function (str) {
+            var str2 = str.replace(/</g, "&lt;");
+            var str2 = str2.replace(/>/g, "&gt;");
+            return str2;
+        };
 
+        var triplesMap = {};
+        manchesterTriples.forEach(function (item) {
+            var uri = item.subject.replace("[OntObject]", "");
+            triplesMap[uri] = { isBlank: !uri.startsWith("http") };
 
+            var uri = item.object.replace("[OntObject]", "");
+            triplesMap[uri] = { isBlank: !uri.startsWith("http") };
+        });
 
-   self.manchesterriplestoSparqlBindings= function(source,manchesterTriples,callback){
+        var resourceIds = [];
+        for (var uri in triplesMap) {
+            if (!triplesMap[uri].isBlank) resourceIds.push(uri);
+        }
+        var fromStr = Sparql_common.getFromStr(source, false, false);
+        var filterStr = Sparql_common.setFilter("s", resourceIds);
+        var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
+        var query =
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+            " SELECT distinct ?sGraph ?oGraph ?s ?p  ?o ?sType ?oType  ?sLabel ?pLabel  ?oLabel ?sIsBlank ?oIsBlank " +
+            fromStr +
+            "      WHERE {   ?s ?p ?o." +
+            "  optional{ ?s rdf:type ?sType.}\n" +
+            "  optional{    ?o rdf:type ?oType.}\n" +
+            "  optional{   ?s rdfs:label ?sLabel.}\n" +
+            "  optional{   ?o rdfs:label ?oLabel.}\n" +
+            "  optional{    ?p rdfs:label ?pLabel.} \n" +
+            "  filter (?p in (rdf:type,rdfs:label))" +
+            filterStr +
+            "} limit 10000";
 
-       var escapeMarkup = function (str) {
-           var str2 = str.replace(/</g, "&lt;");
-           var str2 = str2.replace(/>/g, "&gt;");
-           return str2;
-       };
-
-
-       var triplesMap={}
-       manchesterTriples.forEach(function(item){
-           var uri=item.subject.replace("[OntObject]","")
-           triplesMap[uri]={isBlank:!uri.startsWith("http")}
-
-           var uri=item.object.replace("[OntObject]","")
-           triplesMap[uri]={isBlank:!uri.startsWith("http")}
-       })
-
-
-       var resourceIds=[]
-       for(var uri in triplesMap){
-           if(!triplesMap[uri].isBlank)
-               resourceIds.push(uri)
-
-       }
-       var fromStr = Sparql_common.getFromStr(source, false, false);
-       var filterStr = Sparql_common.setFilter("s",resourceIds)
-       var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-
-       var query="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-           " SELECT distinct ?sGraph ?oGraph ?s ?p  ?o ?sType ?oType  ?sLabel ?pLabel  ?oLabel ?sIsBlank ?oIsBlank " +
-           fromStr+
-           "      WHERE {   ?s ?p ?o." +
-           "  optional{ ?s rdf:type ?sType.}\n" +
-           "  optional{    ?o rdf:type ?oType.}\n" +
-           "  optional{   ?s rdfs:label ?sLabel.}\n" +
-           "  optional{   ?o rdfs:label ?oLabel.}\n" +
-           "  optional{    ?p rdfs:label ?pLabel.} \n" +
-           "  filter (?p in (rdfs:subPropertyOf,rdfs:range,rdfs:domain,rdfs:subClassOf,owl:inverseOf,owl:equivalentClass,rdf:type,rdfs:label))"+
-            filterStr  +
-           "} limit 10000"
-
-       Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
-           if (err) {
-               return callback(err);
-           }
-
-         
-
-
-
-
-           var bindings=[]
-           var data=result.results.bindings
-
-
-
-
-
-           manchesterTriples.forEach(function(item) {
-               var subjectUri=item.subject.replace("[OntObject]","")
-               var predicateUri=item.predicate.replace("[OntObject]","")
-               var objectUri=item.object.replace("[OntObject]","")
-
-            function getType(uri){
-                   if(uri.indexOf("http")>-1)
-                       return "uri"
-                return "bnode"
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+            if (err) {
+                return callback(err);
             }
 
-               data.push( {
-                       "s": {
-                           "type": getType(subjectUri),
-                           "value": subjectUri
-                       },
-                       "p": {
-                           "type": getType(predicateUri),
-                           "value": predicateUri
-                       },
-                       "o": {
-                           "type":  getType(objectUri),
-                           "value": objectUri
-                       },
+            var bindings = [];
+            var data = []; //result.results.bindings
 
-                   })
+            manchesterTriples.forEach(function (item) {
+                var subjectUri = item.subject.replace("[OntObject]", "");
+                var predicateUri = item.predicate.replace("[OntObject]", "");
+                var objectUri = item.object.replace("[OntObject]", "");
 
+                function getType(uri) {
+                    if (uri.indexOf("http") > -1) return "uri";
+                    return "bnode";
+                }
 
+                data.push({
+                    s: {
+                        type: getType(subjectUri),
+                        value: subjectUri,
+                    },
+                    p: {
+                        type: getType(predicateUri),
+                        value: predicateUri,
+                    },
+                    o: {
+                        type: getType(objectUri),
+                        value: objectUri,
+                    },
+                });
+            });
 
+            return callback(null, data);
+        });
+    };
 
+    self.drawTriples = function (divId) {
+        divId = "Axioms_editor_triplesDataTableDiv";
+        self.currentSource = Axioms_editor.currentSource;
+        self.graphDivContainer = divId;
+        self.drawNodeAxioms(Axioms_editor.currentSource, Axioms_editor.currentNode.id, divId, {}, function (err, result) {
+            //   self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource,self.sampleTriples,null,{},function(err, result){
+        });
+    };
 
-           })
-
-
-           return callback(null,data);
-       });
-
-
-
-
-
-
-
-
-
-   }
-
-
-self.drawTriples=function(divId){
-       divId="Axioms_editor_triplesDataTableDiv"
-    self.currentSource=Axioms_editor.currentSource
-    self.graphDivContainer=divId
-    self.drawNodeAxioms  (Axioms_editor.currentSource, Axioms_editor.currentNode.id, divId, {  }, function(err, result){
- //   self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource,self.sampleTriples,null,{},function(err, result){
-
-    })
-
-}
-
-    self.showTriplesInDataTable = function (divId,data) {
+    self.showTriplesInDataTable = function (divId, data) {
         var escapeMarkup = function (str) {
             var str2 = str.replace(/</g, "&lt;");
             var str2 = str2.replace(/>/g, "&gt;");
@@ -162,11 +125,7 @@ self.drawTriples=function(divId){
     };
 
     self.drawNodeAxioms = function (sourceLabel, nodeId, divId, options, callback) {
-
-
-        if (!options)
-            options = {};
-
+        if (!options) options = {};
 
         options.skipRestrictions = false;
 
@@ -178,12 +137,12 @@ self.drawTriples=function(divId){
             [
                 //get all elementary axioms
                 function (callbackSeries) {
-                    self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource,self.sampleTriples,function(err, result){
-                  //  self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
+                    self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource, self.sampleTriples, function (err, result) {
+                        //  self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
                         if (err) {
                             return callback(err);
                         }
-                        var graphtriplesMap = {};//Sparql_common.getSourceGraphtriplesMap(self.currentSource);
+                        var graphtriplesMap = {}; //Sparql_common.getSourceGraphtriplesMap(self.currentSource);
                         result.forEach(function (item) {
                             var sType = item.sType ? item.sType.value : null;
                             var oType = item.oType ? item.oType.value : null;
@@ -233,9 +192,7 @@ self.drawTriples=function(divId){
 
                 //get nodes Source
                 function (callbackSeries) {
-
-                   return  callbackSeries ()
-
+                    return callbackSeries();
 
                     var ids = Object.keys(allBasicAxioms);
                     Sparql_OWL.getUrisNamedGraph(self.currentSource, ids, { onlySourceAndImports: 1 }, function (err, result) {
@@ -257,10 +214,7 @@ self.drawTriples=function(divId){
                 //escape some blank nodes
 
                 function (callbackSeries) {
-
-
-                  return callbackSeries()
-
+                    return callbackSeries();
 
                     for (var key in allBasicAxioms) {
                         var subject = allBasicAxioms[key];
@@ -421,6 +375,7 @@ self.drawTriples=function(divId){
                                 if (false && object.oSource && object.oSource != sourceLabel) {
                                     return;
                                 }
+                                if (!object || !object.o) return;
 
                                 if (existingNodes[object.o] < level) {
                                     // dont draw backward edges
@@ -501,8 +456,6 @@ self.drawTriples=function(divId){
                 // filter FOL nodes
                 function (callbackSeries) {
                     return callbackSeries();
-
-
                 },
 
                 //draw graph
@@ -528,9 +481,6 @@ self.drawTriples=function(divId){
     };
 
     self.drawGraph = function (visjsData) {
-
-
-
         var xOffset = 60;
         var yOffset = 130;
         xOffset = parseInt($("#axiomsDraw_xOffset").val());
@@ -566,11 +516,10 @@ enabled:true},*/
             onHoverNodeFn: Lineage_axioms_draw.selectNodesOnHover,
         };
 
-
         $("#" + self.graphDivContainer).html(
             "<span style='font-size: 16px;color: blue; font-weight: bold'> WORK IN PROGRESS</span>" +
-            '  <button onclick="AxiomEditor.init()">Edit Axiom</button>' +
-            "<div id='axiomsGraphDiv3' style='width:800px;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
+                '  <button onclick="AxiomEditor.init()">Edit Axiom</button>' +
+                "<div id='axiomsGraphDiv3' style='width:800px;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
         );
         self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv3", visjsData, options);
         self.axiomsVisjsGraph.draw(function () {});
@@ -583,97 +532,95 @@ enabled:true},*/
         }
         self.showNodeInfos(node, point, nodeEvent);
         return;
-
-
     };
 
-    self.sampleTriples=[
+    self.sampleTriples = [
         {
-            "subject": "[OntObject]05a9d835-07a3-4b3e-b552-5d20a89c94b1",
-            "predicate": "http://www.w3.org/2002/07/owl#intersectionOf",
-            "object": "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69"
+            subject: "[OntObject]05a9d835-07a3-4b3e-b552-5d20a89c94b1",
+            predicate: "http://www.w3.org/2002/07/owl#intersectionOf",
+            object: "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
         },
         {
-            "subject": "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
-            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            "object": "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/PlanSpecification"
+            subject: "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/PlanSpecification",
         },
         {
-            "subject": "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
-            "predicate": "http://www.w3.org/2002/07/owl#onProperty",
-            "object": "[OntObject]http://purl.obolibrary.org/obo/BFO_0000219"
+            subject: "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
+            predicate: "http://www.w3.org/2002/07/owl#onProperty",
+            object: "[OntObject]http://purl.obolibrary.org/obo/BFO_0000219",
         },
         {
-            "subject": "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
-            "predicate": "http://www.w3.org/2002/07/owl#onProperty",
-            "object": "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/prescribedBy"
+            subject: "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
+            predicate: "http://www.w3.org/2002/07/owl#onProperty",
+            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/prescribedBy",
         },
         {
-            "subject": "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
-            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            "object": "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"
+            subject: "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            object: "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
         },
         {
-            "subject": "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
-            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            "object": "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4"
+            subject: "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            object: "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
         },
         {
-            "subject": "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
-            "predicate": "http://www.w3.org/2002/07/owl#someValuesFrom",
-            "object": "[OntObject]05a9d835-07a3-4b3e-b552-5d20a89c94b1"
+            subject: "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
+            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            object: "[OntObject]05a9d835-07a3-4b3e-b552-5d20a89c94b1",
         },
         {
-            "subject": "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
-            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            "object": "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402"
+            subject: "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            object: "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
         },
         {
-            "subject": "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
-            "predicate": "http://www.w3.org/2002/07/owl#onProperty",
-            "object": "[OntObject]http://purl.obolibrary.org/obo/BFO_0000111"
+            subject: "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
+            predicate: "http://www.w3.org/2002/07/owl#onProperty",
+            object: "[OntObject]http://purl.obolibrary.org/obo/BFO_0000111",
         },
         {
-            "subject": "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
-            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            "object": "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9"
+            subject: "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            object: "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
         },
         {
-            "subject": "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
-            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            "object": "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8"
+            subject: "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            object: "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
         },
         {
-            "subject": "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
-            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            "object": "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/ObjectiveSpecification"
+            subject: "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/ObjectiveSpecification",
         },
         {
-            "subject": "[OntObject]d674942f-d3d6-4c9b-94dc-7c16086c020c",
-            "predicate": "http://www.w3.org/2002/07/owl#intersectionOf",
-            "object": "[OntObject]a5720162-c324-4444-9b75-936c8f211eda"
+            subject: "[OntObject]d674942f-d3d6-4c9b-94dc-7c16086c020c",
+            predicate: "http://www.w3.org/2002/07/owl#intersectionOf",
+            object: "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
         },
         {
-            "subject": "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
-            "predicate": "http://www.w3.org/2002/07/owl#someValuesFrom",
-            "object": "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BusinessOrganization"
+            subject: "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
+            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BusinessOrganization",
         },
         {
-            "subject": "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
-            "predicate": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-            "object": "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13"
+            subject: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
+            predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            object: "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
         },
         {
-            "subject": "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
-            "predicate": "http://www.w3.org/2002/07/owl#someValuesFrom",
-            "object": "[OntObject]d674942f-d3d6-4c9b-94dc-7c16086c020c"
+            subject: "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
+            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            object: "[OntObject]d674942f-d3d6-4c9b-94dc-7c16086c020c",
         },
         {
-            "subject": "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
-            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            "object": "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"
-        }
-    ]
+            subject: "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            object: "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
+        },
+    ];
 
     return self;
 })();

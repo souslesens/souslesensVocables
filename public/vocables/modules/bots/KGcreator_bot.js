@@ -350,7 +350,7 @@ var KGcreator_bot = (function () {
             if (!columnClasses || columnClasses.lengh == 0) return _botEngine.abort("cannot find column type");
 
             var source = self.params.predicateObjectColumnVocabulary || self.params.source; // both cases existing or not predicate object
-            OntologyModels.getAllowedPropertiesBetweenNodes(source, columnClasses, self.params.predicateObjectColumnClass,null, function (err, result) {
+            OntologyModels.getAllowedPropertiesBetweenNodes(source, columnClasses, self.params.predicateObjectColumnClass, null, function (err, result) {
                 self.params.predicateObjectColumnClass = null; // not used after properties are found
 
                 if (err) {
@@ -548,7 +548,7 @@ var KGcreator_bot = (function () {
                         s: self.currentUri,
                         p: "rdfs:label",
                         o: classLabelColumn,
-                        isString:true
+                        isString: true,
                     }
                 );
                 return self.functions.saveFn();

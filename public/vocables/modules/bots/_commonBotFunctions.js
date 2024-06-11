@@ -136,7 +136,7 @@ var CommonBotFunctions = (function () {
                 if (props.length == 0) {
                     if (callback) {
                         return callback(null, props);
-                }
+                    }
                     return _botEngine.previousStep("no values found, try another option");
                 }
                 self.sortList(props);

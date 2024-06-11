@@ -43,6 +43,7 @@ import * as React from "react";
 import { SRD } from "srd";
 import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate } from "../Profile";
 import { ServerSource } from "../Source";
+import { writeLog } from "../Log";
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -56,12 +57,22 @@ const ProfilesTable = () => {
     const [filteringChars, setFilteringChars] = React.useState("");
     const [orderBy, setOrderBy] = React.useState<keyof Profile>("name");
     const [order, setOrder] = React.useState<Order>("asc");
+
+    const me = SRD.withDefault("", model.me);
+
     type Order = "asc" | "desc";
+
     function handleRequestSort(property: keyof Profile) {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
     }
+
+    const handleDeleteProfile = async (profile: Profile, updateModel) => {
+        deleteProfile(profile, updateModel);
+        writeLog(me, "ConfigEditor", "delete", profile.name);
+    };
+
     const renderProfiles = SRD.match(
         {
             // eslint-disable-next-line react/no-unescaped-entities
@@ -96,7 +107,8 @@ const ProfilesTable = () => {
                     );
                     return { ...dataWithoutCarriageReturns };
                 });
-                const sortedProfiles: Profile[] = gotProfiles.slice().sort((a: Profile, b: Profile) => {let left: string = "";
+                const sortedProfiles: Profile[] = gotProfiles.slice().sort((a: Profile, b: Profile) => {
+                    let left: string = "";
                     let right: string = "";
 
                     if (a[orderBy] instanceof Array) {
@@ -134,7 +146,9 @@ const ProfilesTable = () => {
                                                 Allowed Sources
                                             </TableSortLabel>
                                         </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            Actions
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody sx={{ width: "100%", overflow: "visible" }}>
@@ -146,13 +160,15 @@ const ProfilesTable = () => {
                                                     <TableCell>{profile.name}</TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            {profile.allowedSourceSchemas.map((source) => <Chip label={source} size="small" />)}
+                                                            {profile.allowedSourceSchemas.map((source) => (
+                                                                <Chip label={source} size="small" />
+                                                            ))}
                                                         </Stack>
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <ProfileForm profile={profile} />
-                                                            <ButtonWithConfirmation label="Delete" msg={() => deleteProfile(profile, updateModel)} />
+                                                            <ProfileForm profile={profile} me={me} />
+                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteProfile(profile, updateModel)} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>
@@ -165,7 +181,7 @@ const ProfilesTable = () => {
                             <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas as Datas}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
-                            <ProfileForm create={true} />
+                            <ProfileForm create={true} me={me} />
                         </Stack>
                     </Stack>
                 );
@@ -240,11 +256,12 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
 };
 
 type ProfileFormProps = {
+    me: string;
     profile?: Profile;
     create?: boolean;
 };
 
-const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: ProfileFormProps) => {
+const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = "" }: ProfileFormProps) => {
     const [nodesClicked, setNodeToExpand] = React.useState<Array<string>>([]);
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
@@ -346,11 +363,12 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     }
     const saveProfiles = () => {
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
+        const mode = create ? "create" : "edit";
+        writeLog(me, "ConfigEditor", mode, profileModel.profileForm.name);
     };
 
     const getAvailableThemes = () => {
-        return Object.keys(Config.slsvColorThemes)
-            .sort((a, b) => a.localeCompare(b));
+        return Object.keys(Config.slsvColorThemes).sort((a, b) => a.localeCompare(b));
     };
 
     const fieldsFromSource = (source: ServerSource) => {
@@ -596,7 +614,9 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                             onChange={handleFieldUpdate("theme")}
                             select
                         >
-                            {getAvailableThemes().map((theme) => <MenuItem value={theme}>{theme}</MenuItem>)}
+                            {getAvailableThemes().map((theme) => (
+                                <MenuItem value={theme}>{theme}</MenuItem>
+                            ))}
                         </TextField>
                         <Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} type="submit" variant="contained" color="primary">
                             Save Profile

@@ -27,8 +27,9 @@ import {
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
-import { ServerSource, saveSource, defaultSource, deleteSource, sourceHelp, InputSourceSchema, InputSourceSchemaCreate } from "../Source";
-import { identity, style, joinWhenArray } from "../Utils";
+import { ServerSource, saveSource, defaultSource, deleteSource, sourceHelp, InputSourceSchema, InputSourceSchemaCreate, getGraphSize } from "../Source";
+import { writeLog } from "../Log";
+import { identity, style, joinWhenArray, humanizeSize } from "../Utils";
 import { HelpButton } from "./HelpModal";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -56,21 +57,19 @@ const SourcesTable = () => {
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
     }
-    const [me, setMe] = React.useState("");
-    React.useEffect(() => {
-        (async () => {
-            const response = await fetch("/api/v1/auth/whoami");
-            const json = (await response.json()) as Response;
-            setMe(json.user.login);
-        })();
-    }, []);
 
+    const me = SRD.withDefault("", model.me);
     const indices = SRD.withDefault(null, model.indices);
     const graphs = SRD.withDefault(null, model.graphs);
 
+    const handleDeleteSource = async (source: ServerSource, updateModel) => {
+        deleteSource(source, updateModel);
+        writeLog(me, "ConfigEditor", "delete", source.name);
+    };
+
     const renderSources = SRD.match(
         {
-            notAsked: () => <p>Let&aposs fetch some data!</p>,
+            notAsked: () => <p>Let&apos;s fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />
@@ -105,9 +104,15 @@ const SourcesTable = () => {
                     return { ...dataWithoutCarriageReturns };
                 });
                 const sortedSources: ServerSource[] = gotSources.slice().sort((a: ServerSource, b: ServerSource) => {
-                    const left: string = a[orderBy] || ("" as string);
-                    const right: string = b[orderBy] || ("" as string);
-                    return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+                    if (orderBy == "graphSize") {
+                        const left_n: number = getGraphSize(a, graphs);
+                        const right_n: number = getGraphSize(b, graphs);
+                        return order === "asc" ? right_n > left_n : left_n > right_n;
+                    } else {
+                        const left: string = a[orderBy] || ("" as string);
+                        const right: string = b[orderBy] || ("" as string);
+                        return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+                    }
                 });
 
                 return (
@@ -135,6 +140,11 @@ const SourcesTable = () => {
                                                 Graph URI
                                             </TableSortLabel>
                                         </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                            <TableSortLabel active={orderBy === "graphSize"} direction={order} onClick={() => handleRequestSort("graphSize")}>
+                                                Graph size
+                                            </TableSortLabel>
+                                        </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold" }}>
                                             <TableSortLabel active={orderBy === "group"} direction={order} onClick={() => handleRequestSort("group")}>
                                                 Group
@@ -153,13 +163,16 @@ const SourcesTable = () => {
                                         .filter((source) => source.name.includes(filteringChars))
                                         .map((source) => {
                                             const haveIndices = indices ? indices.includes(source.name.toLowerCase()) : false;
-                                            const haveGraphs = graphs ? graphs.includes(source.graphUri || "") : false;
+                                            const graphInfo = graphs.find((g) => g.name === source.graphUri);
+                                            const haveGraphs = graphInfo !== undefined;
+
                                             return (
                                                 <TableRow key={source.name}>
                                                     <TableCell>{source.name}</TableCell>
                                                     <TableCell>
                                                         <Link href={source.graphUri}>{source.graphUri}</Link>
                                                     </TableCell>
+                                                    <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
                                                     <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" useFlexGap>
@@ -174,7 +187,7 @@ const SourcesTable = () => {
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             <SourceForm source={source} me={me} />
-                                                            <ButtonWithConfirmation label="Delete" msg={() => deleteSource(source, updateModel)} />
+                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteSource(source, updateModel)} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>
@@ -304,6 +317,7 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
 };
 
 type SourceFormProps = {
+    me: string;
     source?: ServerSource;
     create?: boolean;
 };
@@ -336,9 +350,12 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
 
     const _handleFieldUpdate = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value });
 
-    if (sourceModel.sourceForm.owner.length == 0) {
-        update({ type: Type.UserUpdatedField, payload: { fieldname: "owner", newValue: me } });
-    }
+    React.useEffect(() => {
+        if (sourceModel.sourceForm.owner.length == 0 && me !== "") {
+            update({ type: Type.UserUpdatedField, payload: { fieldname: "owner", newValue: me } });
+        }
+    }, [sourceModel.sourceForm.owner]
+    )
 
     const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         update({
@@ -386,6 +403,16 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
     const knownGroup = [...new Set(sources.flatMap((source) => source.group))].filter((group) => group.length > 0);
     const knownTaxonomyPredicates = [...new Set(sources.flatMap((source) => source.taxonomyPredicates))];
 
+    function validateSourceGroup(source: ServerSource) {
+        const issues = createCustomIssues(InputSourceSchema);
+        if (source.group.startsWith("PRIVATE/") && source.published) {
+            issues.group("Published source can't be in PRIVATE group");
+        }
+        return {
+            issues: issues.toArray(),
+        };
+    }
+
     function validateSourceName(sourceName: string) {
         const issues = createCustomIssues(InputSourceSchema);
 
@@ -399,6 +426,8 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
     }
     const saveSources = () => {
         void saveSource(fromFormData(sourceModel.sourceForm), create ? Mode.Creation : Mode.Edition, updateModel, update);
+        const mode = create ? "create" : "edit";
+        writeLog(me, "ConfigEditor", mode, sourceModel.sourceForm.name);
     };
     const createIssues = (issue: ZodCustomIssueWithMessage[]) => setIssues(issue);
     const validateAfterSubmission = () => {
@@ -466,7 +495,15 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                         <Grid item>
                             <Grid alignItems="center" container wrap="nowrap">
                                 <Grid item flex={1}>
-                                    <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.published} onChange={handleCheckbox("published")} />} label="Published?" />
+                                    <FormControlLabel
+                                        onBlur={() => {
+                                            const res = validateSourceGroup(sourceModel.sourceForm);
+                                            createIssues(res.issues);
+                                            validateAfterSubmission();
+                                        }}
+                                        control={<Checkbox checked={sourceModel.sourceForm.published} onChange={handleCheckbox("published")} />}
+                                        label="Published?"
+                                    />
                                 </Grid>
                                 <Grid item>
                                     <HelpButton title="published" message={sourceHelp.published} />
@@ -683,7 +720,11 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                 options={knownGroup}
                                 label={"Group"}
                                 onInputChange={(_e, newValue) => handleGroupUpdate(newValue)}
-                                onBlur={validateAfterSubmission}
+                                onBlur={() => {
+                                    const res = validateSourceGroup(sourceModel.sourceForm);
+                                    createIssues(res.issues);
+                                    validateAfterSubmission();
+                                }}
                                 inputValue={sourceModel.sourceForm.group}
                                 id="group"
                                 renderInput={(params) => (
@@ -838,7 +879,7 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
 
                     <Grid item xs={6}>
                         <FormControl>
-                            <InputLabel id="dataSource-type">DataSource&aposs type</InputLabel>
+                            <InputLabel id="dataSource-type">DataSource&apos;s type</InputLabel>
                             <Select
                                 labelId="dataSource-type"
                                 id="dataSource"

@@ -17,16 +17,31 @@ async function getSources(): Promise<ServerSource[]> {
     return mapSources(json.resources);
 }
 
+const getGraphSize = (source: ServerSource, graphs: GraphInfo[]) => {
+    const graphInfo = graphs.find((g) => g.name == source.graphUri);
+    return graphInfo === undefined ? 0 : Number.parseInt(graphInfo.count);
+};
+
 async function getIndices(): Promise<string[]> {
     const response = await fetch(indicesEndpoint);
     const json = await response.json();
     return json;
 }
 
-async function getGraphs(): Promise<string[]> {
+interface GraphInfo {
+    count: string;
+    name: string;
+}
+async function getGraphs(): Promise<GraphInfo[]> {
     const response = await fetch(graphsEndpoint);
     const json = await response.json();
     return json;
+}
+
+async function getMe(): Promise<string> {
+    const response = await fetch("/api/v1/auth/whoami");
+    const json = await response.json();
+    return json.user.login;
 }
 
 export async function putSources(body: ServerSource[]): Promise<ServerSource[]> {
@@ -285,4 +300,4 @@ export type SkosSource = CommonSource & SkosSpecificSource;
 
 export type _Source = Knowledge_GraphSource | SkosSource;
 
-export { getSources, getIndices, getGraphs, defaultDataSource };
+export { getSources, getIndices, getGraphs, getMe, defaultDataSource, getGraphSize };

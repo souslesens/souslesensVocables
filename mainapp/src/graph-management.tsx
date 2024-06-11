@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 
 import {
     Alert,
+    Autocomplete,
     Button,
     Checkbox,
     Dialog,
@@ -25,11 +26,16 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    TableSortLabel,
+    TextField,
     Typography,
 } from "@mui/material";
 import { Cancel, Close, Done, Folder } from "@mui/icons-material";
 
-import { fetchMe, VisuallyHiddenInput } from "./Utils";
+import { fetchMe, VisuallyHiddenInput, humanizeSize } from "./Utils";
+
+import { writeLog } from "./Log";
+import { getGraphSize, ServerSource } from "./Source";
 
 declare global {
     interface Window {
@@ -45,6 +51,10 @@ export default function GraphManagement() {
 
     // user info
     const [currentUserToken, setCurrentUserToken] = useState<string | null>(null);
+    const [currentUserName, setCurrentUserName] = useState<string>("");
+
+    // graph info
+    const [graphs, setGraphs] = useState([]);
 
     // status of download/upload
     const [currentSource, setCurrentSource] = useState<string | null>(null);
@@ -82,8 +92,10 @@ export default function GraphManagement() {
     useEffect(() => {
         void fetchSources();
         void fetchConfig();
+        void fetchGraphsInfo();
         (async () => {
             const response = await fetchMe();
+            setCurrentUserName(response.user.login);
             setCurrentUserToken(response.user.token);
         })();
     }, []);
@@ -106,6 +118,12 @@ export default function GraphManagement() {
         const response = await fetch("/api/v1/sources");
         const json = (await response.json()) as { resources: Record<string, any> };
         setSources(json.resources);
+    };
+
+    const fetchGraphsInfo = async () => {
+        const response = await fetch("/api/v1/sparql/graphs");
+        const json = await response.json();
+        setGraphs(json);
     };
 
     const fetchSourceInfo = async (sourceName: string) => {
@@ -173,6 +191,8 @@ export default function GraphManagement() {
     };
 
     const uploadSource = async () => {
+        await writeLog(currentUserName, "GraphManagement", "upload", currentSource);
+
         try {
             // init progress bar
             setCurrentOperation("upload");
@@ -183,7 +203,7 @@ export default function GraphManagement() {
             const file = uploadfile[0];
 
             // get file size and chunk size
-            const chunkSize = 1000000;
+            const chunkSize = 10_000_000; // 10Mb
             const fileSize = file.size;
 
             // init values
@@ -313,6 +333,8 @@ export default function GraphManagement() {
 
     const downloadSource = async () => {
         try {
+            await writeLog(currentUserName, "GraphManagement", "download", currentSource);
+
             setTransferPercent(0);
             setCurrentOperation("download");
             cancelCurrentOperation.current = false;
@@ -459,12 +481,35 @@ export default function GraphManagement() {
         <>
             {dialogModal}
             <Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
+                <Autocomplete
+                    disablePortal
+                    id="search-graph"
+                    options={Object.entries(sources).map(([sourceName, _source]) => sourceName)}
+                    onInputChange={(_event, newInputValue) => {
+                        setFilteringChars(newInputValue);
+                    }}
+                    renderInput={(params) => <TextField {...params} label="Search Sources by name" />}
+                />
+
                 <TableContainer sx={{ height: "80vh" }} component={Paper}>
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
-                                <TableCell style={{ fontWeight: "bold" }}>Sources</TableCell>
-                                <TableCell style={{ fontWeight: "bold", width: "100%" }}>Graph URI</TableCell>
+                                <TableCell style={{ fontWeight: "bold" }}>
+                                    <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                                        Sources
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                    <TableSortLabel active={orderBy === "graphUri"} direction={order} onClick={() => handleRequestSort("graphUri")}>
+                                        Graph URI
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                    <TableSortLabel active={orderBy === "graphSize"} direction={order} onClick={() => handleRequestSort("graphSize")}>
+                                        Graph Size
+                                    </TableSortLabel>
+                                </TableCell>
                                 <TableCell align="center" style={{ fontWeight: "bold" }}>
                                     Actions
                                 </TableCell>
@@ -472,9 +517,18 @@ export default function GraphManagement() {
                         </TableHead>
                         <TableBody sx={{ width: "100%", overflow: "visible" }}>
                             {Object.entries(sources)
-                                .sort(([aName, _a], [bName, _b]) => {
-                                    return aName.toLowerCase() > bName.toLowerCase();
+                                .sort(([_aName, a], [_bName, b]) => {
+                                    if (orderBy == "graphSize") {
+                                        const left_n: number = getGraphSize(a, graphs);
+                                        const right_n: number = getGraphSize(b, graphs);
+                                        return order === "asc" ? right_n > left_n : left_n > right_n;
+                                    } else {
+                                        const left: string = a[orderBy] || ("" as string);
+                                        const right: string = b[orderBy] || ("" as string);
+                                        return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+                                    }
                                 })
+                                .filter(([_sourceName, source]) => source.name.includes(filteringChars))
                                 .map(([sourceName, source]) => {
                                     return (
                                         <TableRow>
@@ -482,6 +536,7 @@ export default function GraphManagement() {
                                             <TableCell>
                                                 <Link href={source.graphUri}>{source.graphUri}</Link>
                                             </TableCell>
+                                            <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
                                             <TableCell align="center">
                                                 <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                     <Button variant="contained" disabled={source.accessControl != "readwrite"} color="secondary" value={source.name} onClick={handleUploadSource}>

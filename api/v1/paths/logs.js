@@ -11,22 +11,26 @@ module.exports = function () {
 
     ///// GET api/v1/logs
     function GET(req, res, _next) {
-        const logsArray = fs
-            .readFileSync(path.resolve(config.logDir + "/vocables.log"))
-            .toString()
-            .split("\n")
-            .filter((line) => line != "")
-            .map((line) => {
-                const jsonLine = JSON.parse(line);
-                const message = jsonLine.message.split(",");
-                return {
-                    user: message[0],
-                    tool: message[1],
-                    source: message[2],
-                    timestamp: jsonLine.timestamp,
-                };
+        const vocablesLog = path.join(config.logDir, "vocables.log");
+        if (! fs.existsSync(vocablesLog)) {
+            return res.status(500);
+        }
+
+        const vocablesLogStats = fs.lstatSync(vocablesLog);
+        if (! vocablesLogStats.isSymbolicLink()) {
+            return res.status(500);
+        }
+
+        const symlink = fs.readlinkSync(vocablesLog);
+        const files = fs
+            .readdirSync(config.logDir)
+            .filter((file) => file.startsWith("vocables.log."))
+            .map((file) => {
+                date = path.extname(file).substring(1);
+                return { date: date, current: file == symlink };
             });
-        return res.status(200).json(logsArray);
+
+        return res.status(200).json(files);
     }
     GET.apiDoc = {
         security: [{ restrictAdmin: [] }],

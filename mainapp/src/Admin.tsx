@@ -11,10 +11,10 @@ import { SourcesTable } from "./Component/SourcesTable";
 import { UsersTable } from "./Component/UsersTable";
 import { LogsTable } from "./Component/LogsTable";
 import { DatabasesTable } from "./Component/DatabasesTable";
-import { ServerSource, getSources, getIndices, getGraphs } from "./Source";
+import { ServerSource, getSources, getIndices, getGraphs, getMe } from "./Source";
 import { Config, getConfig } from "./Config";
 import { Database, getDatabases } from "./Database";
-import { Log, getLogs } from "./Log";
+import { Log, getLogs, getLogFiles } from "./Log";
 
 type Model = {
     users: RD<string, User[]>;
@@ -22,7 +22,9 @@ type Model = {
     sources: RD<string, ServerSource[]>;
     indices: RD<string, string[]>;
     graphs: RD<string, string[]>;
+    me: RD<string>;
     databases: RD<Database[]>;
+    logfiles: RD<string, string | boolean>[];
     logs: RD<string, Log[]>;
     config: RD<string, Config>;
     isModalOpen: boolean;
@@ -73,6 +75,7 @@ const initialModel: Model = {
     sources: loading(),
     indices: loading(),
     graphs: loading(),
+    me: loading(),
     databases: loading(),
     logs: loading(),
     config: loading(),
@@ -96,9 +99,11 @@ type Msg =
     | { type: "ServerRespondedWithSources"; payload: RD<string, ServerSource[]> }
     | { type: "ServerRespondedWithIndices"; payload: RD<string, string[]> }
     | { type: "ServerRespondedWithGraphs"; payload: RD<string, string[]> }
+    | { type: "ServerRespondedWithMe"; payload: RD<string> }
     | { type: "ServerRespondedWithConfig"; payload: RD<string, Config> }
     | { type: "ServerRespondedWithDatabases"; payload: RD<Database[]> }
     | { type: "ServerRespondedWithLogs"; payload: RD<string, Log[]> }
+    | { type: "ServerRespondedWithLogFiles"; payload: RD<string, string | boolean>[] }
     | { type: "UserUpdatedField"; payload: UpadtedFieldPayload }
     | { type: "UserClickedSaveChanges"; payload: {} }
     | { type: "UserChangedModalState"; payload: boolean }
@@ -120,6 +125,9 @@ function update(model: Model, msg: Msg): Model {
         case "ServerRespondedWithGraphs":
             return { ...model, graphs: msg.payload };
 
+        case "ServerRespondedWithMe":
+            return { ...model, me: msg.payload };
+
         case "ServerRespondedWithSources":
             return { ...model, sources: msg.payload };
 
@@ -131,6 +139,9 @@ function update(model: Model, msg: Msg): Model {
 
         case "ServerRespondedWithLogs":
             return { ...model, logs: msg.payload };
+
+        case "ServerRespondedWithLogFiles":
+            return { ...model, logfiles: msg.payload };
 
         case "UserClickedSaveChanges":
             return { ...model, isModalOpen: false };
@@ -145,6 +156,11 @@ function update(model: Model, msg: Msg): Model {
         }
 
         case "UserClickedNewTab":
+            const params = new URLSearchParams(document.location.search);
+            params.set("tab", msg.payload);
+            // Insert or replace the tab key in the URL
+            window.history.replaceState(null, "", `?${params.toString()}`);
+
             return { ...model, currentEditionTab: editionTabToString(msg.payload) };
 
         default:
@@ -155,55 +171,38 @@ function update(model: Model, msg: Msg): Model {
 const Admin = () => {
     const [model, updateModel] = React.useReducer(update, initialModel);
 
-    //TODO: combine both fetch with promise.all() or something like that
-
     React.useEffect(() => {
-        getProfiles()
-            .then((profiles) => updateModel({ type: "ServerRespondedWithProfiles", payload: success(profiles) }))
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithProfiles", payload: failure(err.message) }));
+        const params = new URLSearchParams(document.location.search);
+        if (params.has("tab")) {
+            const tabIndex = parseInt(params.get("tab"));
+            model.currentEditionTab = editionTabToString(tabIndex);
+        }
     }, []);
 
     React.useEffect(() => {
-        getUsers()
-            .then((person) => updateModel({ type: "ServerRespondedWithUsers", payload: success(person) }))
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err.message) }));
-    }, []);
-
-    React.useEffect(() => {
-        getSources()
-            .then((sources) => {
+        Promise.all([getMe(), getSources(), getIndices(), getGraphs(), getProfiles(), getUsers(), getConfig(), getDatabases(), getLogFiles()])
+            .then(([me, sources, indices, graphs, profiles, users, config, databases, logs]) => {
+                updateModel({ type: "ServerRespondedWithMe", payload: success(me) });
                 updateModel({ type: "ServerRespondedWithSources", payload: success(sources) });
-            })
-
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithSources", payload: failure(err.message) }));
-        getIndices()
-            .then((indices) => {
                 updateModel({ type: "ServerRespondedWithIndices", payload: success(indices) });
-            })
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithIndices", payload: failure(err.message) }));
-        getGraphs()
-            .then((graphs) => {
                 updateModel({ type: "ServerRespondedWithGraphs", payload: success(graphs) });
+                updateModel({ type: "ServerRespondedWithProfiles", payload: success(profiles) });
+                updateModel({ type: "ServerRespondedWithUsers", payload: success(users) });
+                updateModel({ type: "ServerRespondedWithConfig", payload: success(config) });
+                updateModel({ type: "ServerRespondedWithDatabases", payload: success(databases) });
+                updateModel({ type: "ServerRespondedWithLogFiles", payload: success(logs) });
             })
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithIndices", payload: failure(err.message) }));
-    }, []);
-
-    React.useEffect(() => {
-        getConfig()
-            .then((config) => updateModel({ type: "ServerRespondedWithConfig", payload: success(config) }))
-            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithConfig", payload: failure(err.message) }));
-    }, []);
-
-    React.useEffect(() => {
-        getDatabases()
-            .then((databases) => updateModel({ type: "ServerRespondedWithDatabases", payload: success(databases) }))
-            .catch((err: { message: string }) => failure(err.message));
-    }, []);
-
-    React.useEffect(() => {
-        getLogs()
-            .then((logs) => updateModel({ type: "ServerRespondedWithLogs", payload: success(logs) }))
-            .catch((err: { message: string }) => failure(err.message));
+            .catch((error) => {
+                updateModel({ type: "ServerRespondedWithMe", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithSources", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithIndices", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithGraphs", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithProfiles", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithUsers", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithConfig", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithDatabases", payload: failure(error.message) });
+                updateModel({ type: "ServerRespondedWithLogFiles", payload: failure(error.message) });
+            });
     }, []);
 
     return (

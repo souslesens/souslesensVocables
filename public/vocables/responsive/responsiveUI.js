@@ -90,6 +90,8 @@ var ResponsiveUI = (function () {
     };
     //  MainController --> onToolSelect.initTool   when click on a button of a tool
     self.onToolSelect = function (toolId, event, callback) {
+        // reset source on tool select to not have the previous source
+        self.source = null;
         if (event) {
             var clickedElement = event.target;
             // if class
@@ -116,7 +118,6 @@ var ResponsiveUI = (function () {
         if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
             Lineage_sources.registerSource = self.registerSourceWithoutImports;
         }
-
         $("#currentToolTitle").html(toolId);
         if (self.currentTheme["@" + toolId + "-logo"]) {
             $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
@@ -131,6 +132,15 @@ var ResponsiveUI = (function () {
         } else {
             self.initTool(toolId);
         }
+
+        // set or replace tool in url params
+        const params = new URLSearchParams(document.location.search);
+        if (toolId != "ConfigEditor") {
+            params.delete("tab");
+        }
+        params.set("tool", toolId);
+        window.history.replaceState(null, "", `?${params.toString()}`);
+
         if (callback) {
             callback();
         }
@@ -156,7 +166,7 @@ var ResponsiveUI = (function () {
         MainController.currentSource = source;
         ResponsiveUI.source = source;
         $("#selectedSource").html(MainController.currentSource);
-        MainController.writeUserLog(authentication.currentUser, MainController.currentTool, source);
+
         $("#mainDialogDiv").parent().hide();
         self.initTool(MainController.currentTool, function (err, result) {
             if (err) {
@@ -173,36 +183,32 @@ var ResponsiveUI = (function () {
         }
 
         MainController.currentSource = obj.node.data.id;
-        MainController.writeUserLog(authentication.currentUser, MainController.currentTool, MainController.currentSource);
         $("#selectedSource").html(MainController.currentSource);
         $("#mainDialogDiv").parent().hide();
         Lineage_r.loadSources();
     };
     // What is the goal of this function? --> MainController?
     self.initTool = function (toolId, callback) {
-        setTimeout(function () {
-            var toolObj = Config.userTools[toolId];
-            MainController.initControllers();
-            // MainController.writeUserLog(authentication.currentUser, MainController.currentTool, "");
-            Clipboard.clear();
-            Lineage_sources.loadedSources = {};
+        MainController.writeUserLog(authentication.currentUser, self.currentTool, self.source || "");
+        var toolObj = Config.userTools[toolId];
+        MainController.initControllers();
+        Clipboard.clear();
+        Lineage_sources.loadedSources = {};
 
-            if (Config.userTools[toolId].controller.onLoaded) {
-                //  MainController.writeUserLog(authentication.currentUser, toolId, "");
-                Config.userTools[toolId].controller.onLoaded();
-            } else {
-                if (true) {
-                    var url = window.location.href;
-                    var p = url.indexOf("?");
-                    if (p > -1) {
-                        url = url.substring(0, p);
-                    }
-                    url = url.replace("index_r.html", "");
-                    url += "?tool=" + toolId;
-                    window.location.href = url;
+        if (Config.userTools[toolId].controller.onLoaded) {
+            Config.userTools[toolId].controller.onLoaded();
+        } else {
+            if (true) {
+                var url = window.location.href;
+                var p = url.indexOf("?");
+                if (p > -1) {
+                    url = url.substring(0, p);
                 }
+                url = url.replace("index_r.html", "");
+                url += "?tool=" + toolId;
+                window.location.href = url;
             }
-        }, 500);
+        }
     };
     // To remove? --> unused
     self.showDiv = function (modalDiv) {

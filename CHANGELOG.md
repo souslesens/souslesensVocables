@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.73.0](https://github.com/souslesens/souslesensVocables/compare/1.72.1...1.73.0) (2024-06-05)
+
+
+### Features
+
+* **configEditor:** Do not allow to publish source in PRIVATE group ([2a69032](https://github.com/souslesens/souslesensVocables/commit/2a69032223546d0a21dda5aae671a1f82a5bd4b7))
+* **ConfigEditor:** store database events in the main log ([c900052](https://github.com/souslesens/souslesensVocables/commit/c9000525bcf3de9a21b3bb9d47106d2d66c4821e))
+* **ConfigEditor:** store profile events in the main log ([b2195d2](https://github.com/souslesens/souslesensVocables/commit/b2195d2de2475e5947409c97e9954de950446cee))
+* **ConfigEditor:** store source events in the main log ([db113d5](https://github.com/souslesens/souslesensVocables/commit/db113d505621496ee0847f80783135cef2284533))
+* **ConfigEditor:** store user events in the main log ([f7f179e](https://github.com/souslesens/souslesensVocables/commit/f7f179e4ffd5523ac2451c1b30d3740e599c6255))
+* **GraphManagement:** write log events during upload and download process ([e7bab68](https://github.com/souslesens/souslesensVocables/commit/e7bab68ae2e7077a3db1ae0b8516c314b0bb357e))
+* **logs:** add action to logs ([73fa031](https://github.com/souslesens/souslesensVocables/commit/73fa0312a66d27aa680bfa41e5480d3f83bafd06))
+* **logs:** log tools with his source (if available) ([3025b71](https://github.com/souslesens/souslesensVocables/commit/3025b7108a556836d6709d2218b242d635d91586))
+* **mainapp:** add a function to write event in the vocables.log ([b58ad96](https://github.com/souslesens/souslesensVocables/commit/b58ad96a151b9df8e11d13b5ed56fd551bb5f566))
+* **migrations:** add a field to vocables log (action) ([0204031](https://github.com/souslesens/souslesensVocables/commit/02040310edc45b1a177f3a59d9937ce10a7cbdc8))
+* **responsive:** remove useless logs ([7796e01](https://github.com/souslesens/souslesensVocables/commit/7796e015c27371b16b1e62a3c51e56570863eb78))
+
+### [1.72.1](https://github.com/souslesens/souslesensVocables/compare/1.72.0...1.72.1) (2024-05-22)
+
+## [1.72.0](https://github.com/souslesens/souslesensVocables/compare/1.71.0...1.72.0) (2024-05-21)
+
+
+### Features
+
+* **api:** add a route to retrieve the log from a period ([8db082c](https://github.com/souslesens/souslesensVocables/commit/8db082c6d1fb739c5a4acbbcfa0b547d69fe7843))
+* **api:** logs: add a query parameter to get a log file ([cb2e590](https://github.com/souslesens/souslesensVocables/commit/cb2e5905e83ad4c82806e1094d1041f3afc9e1be))
+* **ConfigEditor:** add the possibility to visualize logs period ([443bd57](https://github.com/souslesens/souslesensVocables/commit/443bd5753970654168e40ccafaf55fcbe7063976))
+* **logger:** only keep 12 log files with winston ([6c92247](https://github.com/souslesens/souslesensVocables/commit/6c922470fba903c5a869e26b70ea8b7d0d661134))
+* **logging:** rotate logs every month ([8e63158](https://github.com/souslesens/souslesensVocables/commit/8e631587247eec6a4ec7ac91050c056a851664e3))
+* **migrations:** migrate log files ([9125f5d](https://github.com/souslesens/souslesensVocables/commit/9125f5d837af068114a46d7a8833189ee8bb3a83))
+
+## [1.71.0](https://github.com/souslesens/souslesensVocables/compare/1.70.2...1.71.0) (2024-05-16)
+
+
+### Features
+
+* allow to configure tools served as plugins ([534e902](https://github.com/souslesens/souslesensVocables/commit/534e9024abb892deeb2e182c387923cea88202cd))
+* **configEditor:** display graph size ([1b9bca0](https://github.com/souslesens/souslesensVocables/commit/1b9bca0aabb95c9069372d08dac0f40530c6c86a))
+* **graphManagement:** display graph size ([a67628c](https://github.com/souslesens/souslesensVocables/commit/a67628c15ff87be3f5a6a3cd060e6dda4c65d00b))
+* **graphManagement:** restore sorting table + add graph size sorting ([3c0bbba](https://github.com/souslesens/souslesensVocables/commit/3c0bbbaa0137c8e03a9a7ea3f7377407b34a11a0))
+* **migrations:** create a empty pluginsConfig file if not exists ([f15323c](https://github.com/souslesens/souslesensVocables/commit/f15323cac400859b3a4fe8d1f442fd93a135339c))
+
+
+### Bug Fixes
+
+* **ConfigEditor:** add the missing identifier header in DatabasesTable ([b9300b5](https://github.com/souslesens/souslesensVocables/commit/b9300b53e723fbffd8bcb27f982948a0ddaf9f92))
+* **ConfigEditor:** do not crash when select the Source tab again ([3200368](https://github.com/souslesens/souslesensVocables/commit/3200368ef44eb8964960703c1e25c6fc317b3045))
+* **graphManagement:** restore searchbar ([0bb78d9](https://github.com/souslesens/souslesensVocables/commit/0bb78d95b335dedc34eca40e303cfd62247ca6c6))
+
 ### [1.70.2](https://github.com/souslesens/souslesensVocables/compare/1.70.1...1.70.2) (2024-05-02)
 
 

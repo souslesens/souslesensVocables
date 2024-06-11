@@ -1,4 +1,5 @@
-import { styled } from '@mui/material/styles';
+import humanNumber from "human-number";
+import { styled } from "@mui/material/styles";
 
 const identity = <Type>(a: Type): Type => a;
 
@@ -9,6 +10,15 @@ function joinWhenArray(stringOrArray: string | string[]): string {
 function sanitizeValue(value: string | string[]): string[] {
     return typeof value === "string" ? value.split(",") : value;
 }
+
+const humanizeSize = (size: string) => {
+    return humanNumber(size, (n: string | number) => {
+        if (Number.isInteger(n)) {
+            return n;
+        }
+        return Number.parseFloat(n).toFixed(1);
+    });
+};
 
 function exhaustiveCheck(): never {
     throw new Error("Missing type");
@@ -45,4 +55,4 @@ async function fetchMe() {
     return json;
 }
 
-export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput };
+export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput, humanizeSize };

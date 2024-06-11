@@ -32,15 +32,8 @@ import { useModel } from "../Admin";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
 import { TestingButton } from "./TestingButton";
-import {
-    addDatabase,
-    Database,
-    DatabaseSchema,
-    defaultDatabase,
-    deleteDatabase,
-    editDatabase,
-    SourceAccessControl,
-} from "../Database";
+import { addDatabase, Database, DatabaseSchema, defaultDatabase, deleteDatabase, editDatabase, SourceAccessControl } from "../Database";
+import { writeLog } from "../Log";
 import { style } from "../Utils";
 
 const enum Type {
@@ -59,13 +52,12 @@ type DatabaseEditionState = {
 };
 
 type DatabaseFormProps = {
+    me: string;
     database?: Database;
     create?: boolean;
 };
 
-type Msg_ =
-    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
-
+type Msg_ = { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } };
 
 const updateDatabase = (databaseEditionState: DatabaseEditionState, msg: Msg_): DatabaseEditionState => {
     switch (msg.type) {
@@ -77,23 +69,23 @@ const updateDatabase = (databaseEditionState: DatabaseEditionState, msg: Msg_): 
                 form: {
                     ...databaseEditionState.form,
                     [msg.payload.id]: msg.payload.value,
-                }
+                },
             };
     }
-}
+};
 
 const validateForm = (form: DatabaseFormProps) => {
     const validation = DatabaseSchema.safeParse(form);
 
     let errors = {};
     if (!validation.success) {
-        validation.error.issues.map(item => item.path.map(path => errors[path] = item.message));
+        validation.error.issues.map((item) => item.path.map((path) => (errors[path] = item.message)));
     }
 
     return errors;
 };
 
-const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false }: DatabaseFormProps) => {
+const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false, me = "" }: DatabaseFormProps) => {
     const { updateModel } = useModel();
     const [databaseModel, update] = React.useReducer(updateDatabase, { form: database });
     const [displayPassword, setDisplayPassword] = React.useState(false);
@@ -101,7 +93,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
     const [open, setOpen] = React.useState(false);
 
     const handleOpen = () => {
-        update({ type: Type.ResetDatabase, payload: database})
+        update({ type: Type.ResetDatabase, payload: database });
         setErrors({});
         setOpen(true);
     };
@@ -119,7 +111,8 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
             } else {
                 void editDatabase(databaseModel.form, updateModel);
             }
-
+            const mode = create ? "create" : "edit";
+            writeLog(me, "ConfigEditor", mode, databaseModel.form.name);
         }
     };
 
@@ -142,13 +135,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
             <Button variant="contained" color="primary" onClick={handleOpen}>
                 {create ? "Create Database" : "Edit"}
             </Button>
-            <Dialog
-                fullWidth={true}
-                maxWidth="md"
-                onClose={handleClose}
-                open={open}
-                PaperProps={{ component: "form" }}
-            >
+            <Dialog fullWidth={true} maxWidth="md" onClose={handleClose} open={open} PaperProps={{ component: "form" }}>
                 <DialogContent sx={{ marginTop: "1em" }}>
                     <Stack spacing={4}>
                         <TextField
@@ -221,14 +208,9 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button
-                        color="primary"
-                        component="label"
-                        onClick={handleValidation}
-                        startIcon={<Done />}
-                        type="submit"
-                        variant="contained"
-                    >Submit</Button>
+                    <Button color="primary" component="label" onClick={handleValidation} startIcon={<Done />} type="submit" variant="contained">
+                        Submit
+                    </Button>
                 </DialogActions>
             </Dialog>
         </>
@@ -243,6 +225,8 @@ const DatabasesTable = () => {
 
     const [snackOpen, setSnackOpen] = React.useState<bool>(false);
     const [snackMessage, setSnackMessage] = React.useState<string>("");
+
+    const me = SRD.withDefault("", model.me);
 
     type Order = "asc" | "desc";
 
@@ -264,7 +248,12 @@ const DatabasesTable = () => {
             return;
         }
         setSnackOpen(false);
-    }
+    };
+
+    const handleDeleteDatabase = async (database: Database, updateModel) => {
+        deleteDatabase(database, updateModel);
+        writeLog(me, "ConfigEditor", "delete", database.name);
+    };
 
     const renderDatabases = SRD.match(
         {
@@ -290,14 +279,16 @@ const DatabasesTable = () => {
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
                         <Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
-                            <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+                            <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: "100%" }}>
                                 {snackMessage}
                             </Alert>
                         </Snackbar>
                         <Autocomplete
                             disablePortal
                             id="filter databases"
-                            options={sortedDatabases.map((database: Database) => { return database.name })}
+                            options={sortedDatabases.map((database: Database) => {
+                                return database.name;
+                            })}
                             onInputChange={(event, newInputValue) => setFilteringChars(newInputValue)}
                             renderInput={(params) => <TextField {...params} label="Search Databases by name" />}
                         />
@@ -308,6 +299,11 @@ const DatabasesTable = () => {
                                         <TableCell style={{ fontWeight: "bold", width: "100%" }}>
                                             <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
                                                 Name
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "id"} direction={order} onClick={() => handleRequestSort("id")}>
+                                                Identifier
                                             </TableSortLabel>
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold" }}>
@@ -329,9 +325,7 @@ const DatabasesTable = () => {
                                         .map((database: Database) => {
                                             return (
                                                 <TableRow key={database.name}>
-                                                    <TableCell>
-                                                        {database.name}
-                                                    </TableCell>
+                                                    <TableCell>{database.name}</TableCell>
                                                     <TableCell align="center">
                                                         <Chip label={database.id} onClick={handleCopyIdentifier} size="small" />
                                                     </TableCell>
@@ -343,8 +337,8 @@ const DatabasesTable = () => {
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <DatabaseFormDialog database={database} />
-                                                            <ButtonWithConfirmation label="Delete" msg={() => deleteDatabase(database, updateModel)} />
+                                                            <DatabaseFormDialog database={database} me={me} />
+                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteDatabase(database, updateModel)} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>
@@ -354,7 +348,7 @@ const DatabasesTable = () => {
                             </Table>
                         </TableContainer>
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <DatabaseFormDialog create={true} />
+                            <DatabaseFormDialog create={true} me={me} />
                         </Stack>
                     </Stack>
                 );

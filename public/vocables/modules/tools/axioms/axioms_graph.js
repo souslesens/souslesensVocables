@@ -23,19 +23,19 @@ var Axioms_graph = (function () {
        };
 
 
-       var urisMap={}
+       var triplesMap={}
        manchesterTriples.forEach(function(item){
            var uri=item.subject.replace("[OntObject]","")
-           urisMap[uri]={isBlank:!uri.startsWith("http")}
+           triplesMap[uri]={isBlank:!uri.startsWith("http")}
 
            var uri=item.object.replace("[OntObject]","")
-           urisMap[uri]={isBlank:!uri.startsWith("http")}
+           triplesMap[uri]={isBlank:!uri.startsWith("http")}
        })
 
 
        var resourceIds=[]
-       for(var uri in urisMap){
-           if(!urisMap[uri].isBlank)
+       for(var uri in triplesMap){
+           if(!triplesMap[uri].isBlank)
                resourceIds.push(uri)
 
        }
@@ -52,6 +52,7 @@ var Axioms_graph = (function () {
            "  optional{   ?s rdfs:label ?sLabel.}\n" +
            "  optional{   ?o rdfs:label ?oLabel.}\n" +
            "  optional{    ?p rdfs:label ?pLabel.} \n" +
+           "  filter (?p in (rdfs:subPropertyOf,rdfs:range,rdfs:domain,rdfs:subClassOf,owl:inverseOf,owl:equivalentClass,rdf:type,rdfs:label))"+
             filterStr  +
            "} limit 10000"
 
@@ -60,18 +61,53 @@ var Axioms_graph = (function () {
                return callback(err);
            }
 
+         
+
+
+
+
            var bindings=[]
+           var data=result.results.bindings
+
+
+
+
+
            manchesterTriples.forEach(function(item) {
                var subjectUri=item.subject.replace("[OntObject]","")
                var predicateUri=item.predicate.replace("[OntObject]","")
-               var objectUr=item.predicate.replace("[OntObject]","")
-               result.push("<")
+               var objectUri=item.object.replace("[OntObject]","")
 
-               var uri=item.object.replace("[OntObject]","")
+            function getType(uri){
+                   if(uri.indexOf("http")>-1)
+                       return "uri"
+                return "bnode"
+            }
+
+               data.push( {
+                       "s": {
+                           "type": getType(subjectUri),
+                           "value": subjectUri
+                       },
+                       "p": {
+                           "type": getType(predicateUri),
+                           "value": predicateUri
+                       },
+                       "o": {
+                           "type":  getType(objectUri),
+                           "value": objectUri
+                       },
+
+                   })
+
+
+
+
+
            })
 
 
-           return callback(null, result.results.bindings);
+           return callback(null,data);
        });
 
 
@@ -85,8 +121,12 @@ var Axioms_graph = (function () {
    }
 
 
-self.drawTriples=function(){
-    self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource,self.sampleTriples,null,{},function(err, result){
+self.drawTriples=function(divId){
+       divId="Axioms_editor_triplesDataTableDiv"
+    self.currentSource=Axioms_editor.currentSource
+    self.graphDivContainer=divId
+    self.drawNodeAxioms  (Axioms_editor.currentSource, Axioms_editor.currentNode.id, divId, {  }, function(err, result){
+ //   self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource,self.sampleTriples,null,{},function(err, result){
 
     })
 
@@ -138,12 +178,12 @@ self.drawTriples=function(){
             [
                 //get all elementary axioms
                 function (callbackSeries) {
-                    self.manchesterriplestoSparqlBindings(sourceLabelAxioms_editor.currentSource,self.sampleTriples,function(err, result){
+                    self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource,self.sampleTriples,function(err, result){
                   //  self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
                         if (err) {
                             return callback(err);
                         }
-                        var graphUrisMap = Sparql_common.getSourceGraphUrisMap(self.currentSource);
+                        var graphtriplesMap = {};//Sparql_common.getSourceGraphtriplesMap(self.currentSource);
                         result.forEach(function (item) {
                             var sType = item.sType ? item.sType.value : null;
                             var oType = item.oType ? item.oType.value : null;
@@ -152,8 +192,8 @@ self.drawTriples=function(){
                             var oLabel = item.oLabel ? item.oLabel.value : Sparql_common.getLabelFromURI(item.o.value);
                             var sIsBlank = item.s.type == "bnode";
                             var oIsBlank = item.o.type == "bnode";
-                            var sSource = item.sGraph ? graphUrisMap[item.sGraph.value] : null;
-                            var oSource = item.oGraph ? graphUrisMap[item.oGraph.value] : null;
+                            var sSource = item.sGraph ? graphtriplesMap[item.sGraph.value] : null;
+                            var oSource = item.oGraph ? graphtriplesMap[item.oGraph.value] : null;
 
                             if (!allBasicAxioms[item.s.value]) {
                                 allBasicAxioms[item.s.value] = {
@@ -193,6 +233,10 @@ self.drawTriples=function(){
 
                 //get nodes Source
                 function (callbackSeries) {
+
+                   return  callbackSeries ()
+
+
                     var ids = Object.keys(allBasicAxioms);
                     Sparql_OWL.getUrisNamedGraph(self.currentSource, ids, { onlySourceAndImports: 1 }, function (err, result) {
                         if (err) {
@@ -213,7 +257,11 @@ self.drawTriples=function(){
                 //escape some blank nodes
 
                 function (callbackSeries) {
-                    //  return callbackSeries()
+
+
+                  return callbackSeries()
+
+
                     for (var key in allBasicAxioms) {
                         var subject = allBasicAxioms[key];
                         //  var escapeProperties = ["http://www.w3.org/1999/02/22-rdf-syntax-ns#first", "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"];
@@ -454,31 +502,7 @@ self.drawTriples=function(){
                 function (callbackSeries) {
                     return callbackSeries();
 
-                    /*    var strFrom=Sparql_common.getFromStr(self.currentSource,false,true)
-var query="SELECT distinct ?fol "+strFrom+" WHERE {\n" +
-"<"+nodeId+">  <https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/firstOrderLogicDefinition> ?fol .}"
 
-
-
-var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
-if (err) {
-return callback(err);
-}
-
-if(result.results.bindings.length==0)
-return callbackSeries();
-var fol=result.results.bindings[0].fol.value.toLowerCase()
-
-var folNodes=[]
-visjsData.nodes.forEach(function(node){
-if(fol.indexOf(node.data.label.toLowerCase())>-1)
-folNodes.push(node)
-})
-visjsData.nodes=folNodes
-
-callbackSeries();
-});*/
                 },
 
                 //draw graph
@@ -504,6 +528,9 @@ callbackSeries();
     };
 
     self.drawGraph = function (visjsData) {
+
+
+
         var xOffset = 60;
         var yOffset = 130;
         xOffset = parseInt($("#axiomsDraw_xOffset").val());
@@ -513,7 +540,7 @@ callbackSeries();
             /* physics: {
 enabled:true},*/
 
-            layoutHierarchical: {
+            layoutHierarchicalXX: {
                 direction: "LR",
                 sortMethod: "hubsize",
                 levelSeparation: xOffset,
@@ -539,13 +566,13 @@ enabled:true},*/
             onHoverNodeFn: Lineage_axioms_draw.selectNodesOnHover,
         };
 
-        var graphDivContainer = "axiomsGraphDivContainer";
-        $("#" + graphDivContainer).html(
+
+        $("#" + self.graphDivContainer).html(
             "<span style='font-size: 16px;color: blue; font-weight: bold'> WORK IN PROGRESS</span>" +
             '  <button onclick="AxiomEditor.init()">Edit Axiom</button>' +
-            "<div id='axiomsGraphDiv2' style='width:100%;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
+            "<div id='axiomsGraphDiv3' style='width:800px;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
         );
-        self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv2", visjsData, options);
+        self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv3", visjsData, options);
         self.axiomsVisjsGraph.draw(function () {});
     };
 

@@ -61,6 +61,14 @@ var Axioms_suggestions = (function () {
                         return callbackSeries();
                     }
                     var classId = Axioms_editor.axiomContext.classes[Axioms_editor.axiomContext.currentClassIndex];
+                    if(!classId){
+                        var props=[];
+                        Axioms_editor.getAllClassesOrProperties().forEach(function(item){
+                            if(item.resourceType=="ObjectProperty")
+                                props.push(item);
+                        })
+                        return callback(null,props)
+                    }
                     self.getValidPropertiesForClass(classId, function (err, result) {
                         if (err) {
                             return callback(err);
@@ -76,6 +84,17 @@ var Axioms_suggestions = (function () {
                         return callbackSeries();
                     }
                     var propId = Axioms_editor.axiomContext.properties[Axioms_editor.axiomContext.currentPropertyIndex];
+
+                    if(!propId){
+                        var classes=[];
+                        Axioms_editor.getAllClassesOrProperties().forEach(function(item){
+                            if(item.resourceType=="Class")
+                                classes.push(item);
+                        })
+                        return callback(null,classes)
+                    }
+
+
                     self.getValidClassesForProperty(propId, function (err, result) {
                         if (err) {
                             return callback(err);

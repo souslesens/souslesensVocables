@@ -777,7 +777,7 @@ var OntologyModels = (function () {
                     callbackSeries();
                 },
 
-                //remove matching superproperties if any in prop
+                //remove matching superproperties if any in prop if !keepSuperClasses
                 function (callbackSeries) {
                     var propsToRemove = [];
 
@@ -787,11 +787,9 @@ var OntologyModels = (function () {
                                 var superProp = allConstraints[propId].superProp;
 
                                 if (superProp) {
-                                    if (propId == "http://purl.obolibrary.org/obo/BFO_0000111") var x = 4;
+
                                     if (allConstraints[propId]) {
                                         // if prop has constraints remove all valide superProps
-                                        if (superProp == "http://purl.obolibrary.org/obo/BFO_0000110") var x = 3;
-                                        if (superProp == "http://purl.obolibrary.org/obo/BFO_0000111") var x = 4;
                                         propsToRemove.push(superProp);
                                     } else {
                                         if (validProperties.indexOf(superProp) > -1) {

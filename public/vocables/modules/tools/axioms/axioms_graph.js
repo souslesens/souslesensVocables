@@ -33,7 +33,7 @@ var Axioms_graph = (function () {
         var fromStr = Sparql_common.getFromStr(source, false, false);
         var filterStr = Sparql_common.setFilter("s", resourceIds);
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-
+/*
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
             " SELECT distinct ?sGraph ?oGraph ?s ?p  ?o ?sType ?oType  ?sLabel ?pLabel  ?oLabel ?sIsBlank ?oIsBlank " +
@@ -55,8 +55,10 @@ var Axioms_graph = (function () {
 
             var bindings = [];
             var data = []; //result.results.bindings
-
-            manchesterTriples.forEach(function (item) {
+            /*
+ */
+        var data = [];
+        manchesterTriples.forEach(function (item) {
                 var subjectUri = item.subject.replace("[OntObject]", "");
                 var predicateUri = item.predicate.replace("[OntObject]", "");
                 var objectUri = item.object.replace("[OntObject]", "");
@@ -83,7 +85,7 @@ var Axioms_graph = (function () {
             });
 
             return callback(null, data);
-        });
+       // });
     };
 
     self.drawTriples = function (divId) {
@@ -123,6 +125,9 @@ var Axioms_graph = (function () {
           return;*/
         Export.showDataTable(divId, tableCols, tableData, null, { paging: true }, function (err, datatable) {});
     };
+
+
+
 
     self.drawNodeAxioms = function (sourceLabel, nodeId, divId, options, callback) {
         if (!options) options = {};
@@ -534,7 +539,7 @@ enabled:true},*/
         return;
     };
 
-    self.sampleTriples = [
+    self.sampleTriplesOld = [
         {
             subject: "[OntObject]05a9d835-07a3-4b3e-b552-5d20a89c94b1",
             predicate: "http://www.w3.org/2002/07/owl#intersectionOf",
@@ -621,7 +626,83 @@ enabled:true},*/
             object: "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
         },
     ];
-
+    self.sampleTriples=[
+        {
+            "subject": "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
+            "predicate": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            "object": "_cf23908b-4568-4f73-9c09-fbf688aaa92f"
+        },
+        {
+            "subject": "https://spec.industrialontologies.org/ontology/core/Core/CommercialServiceAgreement",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://www.w3.org/2002/07/owl#Class"
+        },
+        {
+            "subject": "_cf23908b-4568-4f73-9c09-fbf688aaa92f",
+            "predicate": "http://www.w3.org/2002/07/owl#onProperty",
+            "object": "http://purl.obolibrary.org/obo/BFO_0000167"
+        },
+        {
+            "subject": "http://purl.obolibrary.org/obo/BFO_0000167",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://www.w3.org/2002/07/owl#ObjectProperty"
+        },
+        {
+            "subject": "_c44c5bfa-6011-413e-8c2c-c4d08a7c24fa",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://www.w3.org/2002/07/owl#Ontology"
+        },
+        {
+            "subject": "_2cba2cae-ed14-45ca-a705-193ae9d044b2",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            "object": "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"
+        },
+        {
+            "subject": "_cf23908b-4568-4f73-9c09-fbf688aaa92f",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://www.w3.org/2002/07/owl#Restriction"
+        },
+        {
+            "subject": "_81b2dbe0-c5aa-4dd6-8f30-d98590de9af7",
+            "predicate": "http://www.w3.org/2002/07/owl#unionOf",
+            "object": "_db33cc04-5921-48cd-8171-c4d286549abd"
+        },
+        {
+            "subject": "_db33cc04-5921-48cd-8171-c4d286549abd",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            "object": "_2cba2cae-ed14-45ca-a705-193ae9d044b2"
+        },
+        {
+            "subject": "_81b2dbe0-c5aa-4dd6-8f30-d98590de9af7",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://www.w3.org/2002/07/owl#Class"
+        },
+        {
+            "subject": "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://www.w3.org/2002/07/owl#Class"
+        },
+        {
+            "subject": "https://spec.industrialontologies.org/ontology/core/Core/MaterialProduct",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://www.w3.org/2002/07/owl#Class"
+        },
+        {
+            "subject": "_cf23908b-4568-4f73-9c09-fbf688aaa92f",
+            "predicate": "http://www.w3.org/2002/07/owl#someValuesFrom",
+            "object": "_81b2dbe0-c5aa-4dd6-8f30-d98590de9af7"
+        },
+        {
+            "subject": "_2cba2cae-ed14-45ca-a705-193ae9d044b2",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            "object": "https://spec.industrialontologies.org/ontology/core/Core/MaterialProduct"
+        },
+        {
+            "subject": "_db33cc04-5921-48cd-8171-c4d286549abd",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            "object": "https://spec.industrialontologies.org/ontology/core/Core/CommercialServiceAgreement"
+        }
+    ]
     return self;
 })();
 

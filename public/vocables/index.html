@@ -277,11 +277,7 @@
                                 callBackSeries(err);
                             });
                         },
-                        function (callBackSeries) {
-                            MainController.onAfterLogin(function (err) {
-                                callBackSeries(err);
-                            });
-                        },
+
 
                         function (callbackSeries) {
                             try {
@@ -291,6 +287,11 @@
                             } catch (error) {
                                 console.error("Failed to load tools and plugins", error);
                             }
+                        },
+                        function (callBackSeries) {
+                            MainController.onAfterLogin(function (err) {
+                                callBackSeries(err);
+                            });
                         },
                     ],
                     function (err) {

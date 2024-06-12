@@ -26,12 +26,16 @@ const Axioms_editor = (function () {
             $("#axiomsEditor_input").focus();
             self.getAllClassesOrProperties(function (err, result) {
                 var classes = [];
+                var properties = [];
                 result.forEach(function (item) {
-                    if (item.resourceType == "Class") {
+                    if ( item.resourceType == "Class") {
                         classes.push(item);
+                    }else{
+                        properties.push(item);
                     }
                 });
                 common.fillSelectOptions("axiomsEditor_allClasses", classes, true, "label", "id");
+                common.fillSelectOptions("axiomsEditor_allProperties", properties, true, "label", "id");
             });
         });
     };
@@ -52,13 +56,21 @@ const Axioms_editor = (function () {
         //   $("#axiomsEditor_textDiv").html("");
     };
 
-    self.setCurrentResource = function (node) {
+    self.setCurrentResource = function (node,isProperty) {
         self.clearAll();
-        self.currentNode = {
-            label: $("#axiomsEditor_allClasses option:selected").text(),
-            id: node.val(),
-            resourceType: "Class",
-        };
+        if(isProperty){
+            self.currentNode = {
+                label: $("#axiomsEditor_allClasses option:selected").text(),
+                id: node.val(),
+                resourceType: "ObjectProperty",
+            };
+        }else {
+            self.currentNode = {
+                label: $("#axiomsEditor_allClasses option:selected").text(),
+                id: node.val(),
+                resourceType: "Class",
+            };
+        }
 
         if (!self.currentNode) {
             return alert("select a resource");
@@ -72,7 +84,7 @@ const Axioms_editor = (function () {
         self.axiomContext.classes.push(self.currentNode.id);
         self.axiomContext.currentClassIndex += 1;
         Axioms_suggestions.getManchesterParserSuggestions(self.currentNode, function (err, result) {
-            self.filterResources(result, "*", "ObjectProperty");
+            self.filterResources(result, "*");
         });
     };
 

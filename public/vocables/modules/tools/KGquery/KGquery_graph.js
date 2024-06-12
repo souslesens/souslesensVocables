@@ -242,8 +242,7 @@ var KGquery_graph = (function () {
                     KGquery_graph.message("", true);
                     self.KGqueryGraph.network.moveTo({
                         position: { x: 0, y: 0 }, // Position centrale, à ajuster si nécessaire
-                        scale: 1.7 // Facteur de zoom très faible pour dézoomer au maximum
-                      
+                        scale: 1.7, // Facteur de zoom très faible pour dézoomer au maximum
                     });
                     self.KGqueryGraph.onScaleChange();
                     var nodes_wt_position = [];

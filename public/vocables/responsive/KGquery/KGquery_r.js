@@ -7,9 +7,11 @@ import KGquery_myQueries from "../../modules/tools/KGquery/KGquery_myQueries.js"
 var KGquery_r = (function () {
     var self = {};
     //changed files and functions
-
+    self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
+    self.oldshowDialog = SavedQueriesWidget.showDialog;
     self.onLoaded = function () {
         Lineage_sources.showHideEditButtons = self.showHideEditButtons;
+
         SavedQueriesWidget.showDialog = self.SavedQueriesComponentShowDialogResponsive;
         //ResponsiveUI.replaceFile(KGquery_controlPanel, KGquery_controlPanelResponsive);
         ResponsiveUI.initMenuBar(self.loadSource);
@@ -21,12 +23,11 @@ var KGquery_r = (function () {
         $("#waitImg").attr("id", "KGquery_waitImg");
     };
     self.unload = function () {
-        self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
-        self.oldshowDialog = SavedQueriesWidget.showDialog;
-        self.oldKGquery_controlPanel = window.KGquery_controlPanel;
         Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
         SavedQueriesWidget.showDialog = self.oldshowDialog;
-        window.KGquery_controlPanel = self.oldKGquery_controlPanel;
+        self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
+        self.oldshowDialog = SavedQueriesWidget.showDialog;
+
         Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
         //reapply changed DOM
 

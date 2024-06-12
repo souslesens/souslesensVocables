@@ -883,6 +883,68 @@ defaultLang = 'en';*/
 
         callback();
     };
+    self.showPropBreakdown = function (sourceLabel, nodeId, divId, callback) {
+        var jstreeData = [];
+        var ancestors = OntologyModels.getPropHierarchyTreeData(sourceLabel, nodeId, "ancestors");
+        var uniqueIds = {};
+        if (ancestors.length > 0) {
+            ancestors.forEach(function (item) {
+                if (!uniqueIds[item.id]) {
+                    var parent = item.superProp || "#";
+                    uniqueIds[item.id] = 1;
+                    jstreeData.push({
+                        id: item.id,
+                        text: item.label,
+                        parent: parent,
+                        type: "Property",
+                        data: {
+                            id: item.id,
+                            source: sourceLabel,
+                        },
+                    });
+                }
+            });
+        }
+        var html = "<b><div  class='nodesInfos_titles'>Properties hierarchy</div></b>" + "<div id='classHierarchyTreeDiv' style='width:300px;height: 330px;overflow: auto;font-size: 12px'></div>";
+
+        $("#" + divId).html(html);
+
+        var options = {
+            openAll: true,
+            selectTreeNodeFn: function (event, obj) {
+                if (!obj.event.ctrlKey) {
+                    var descendants = OntologyModels.getPropHierarchyTreeData(sourceLabel, obj.node.id, "descendants");
+                    var jstreeData = [];
+                    var uniqueIds = JstreeWidget.getNodeDescendants("classHierarchyTreeDiv", "#", null, true);
+                    if (descendants.length > 0) {
+                        descendants.forEach(function (item) {
+                            if (!uniqueIds[item.id]) {
+                                uniqueIds[item.id] = 1;
+                                jstreeData.push({
+                                    id: item.id,
+                                    text: item.label,
+                                    parent: item.superProp,
+                                    type: "Property",
+                                    data: {
+                                        id: item.id,
+                                        source: sourceLabel,
+                                    },
+                                });
+                            }
+                        });
+
+                        JstreeWidget.addNodesToJstree("classHierarchyTreeDiv", null, jstreeData);
+                    }
+                } else {
+                    NodeInfosWidget.showNodeInfos(sourceLabel, obj.node, "mainDialogDiv");
+                }
+            },
+        };
+
+        JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
+
+        callback();
+    };
 
     self.onClickLink = function (nodeId) {
         /*  var filter=Sparql_common.setFilter("subject",[nodeId])

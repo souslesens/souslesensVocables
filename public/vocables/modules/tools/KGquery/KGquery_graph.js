@@ -84,7 +84,7 @@ var KGquery_graph = (function () {
                             ///  return callbackSeries("generate commonGraph");
                         }
                         visjsData = result;
-                        if (result.options && result.options.output) {
+                        if (result && result.options && result.options.output) {
                             display = result.options.output;
                         }
 
@@ -213,7 +213,7 @@ var KGquery_graph = (function () {
                 visjsData.nodes.forEach(function (node) {
                     node.x = node.x || 0;
                     node.y = node.y || 0;
-                    node.fixed = false;
+                    //node.fixed = false;
                     newNodes.push(node);
                 });
                 visjsData.nodes = newNodes;
@@ -221,7 +221,14 @@ var KGquery_graph = (function () {
                 if (display == "list") {
                     return KGquery_nodeSelector.showInferredModelInJstree(visjsData);
                 }
-
+                /*self.visjsOptions.visjsOptions.physics={enabled: true,
+                stabilization: {
+                  enabled: true,
+                  iterations: 1000, // Nombre d'itérations pour stabiliser le réseau
+                  updateInterval: 25,
+                  onlyDynamicEdges: false,
+                  fit: true
+                }};*/
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
 
                 // cannot get colors from loadGraph ???!!
@@ -233,6 +240,22 @@ var KGquery_graph = (function () {
                     });
                     //    self.KGqueryGraph.data.nodes.update(visjsData.nodes);
                     KGquery_graph.message("", true);
+                    self.KGqueryGraph.network.moveTo({
+                        position: { x: 0, y: 0 }, // Position centrale, à ajuster si nécessaire
+                        scale: 1.1, // Facteur de zoom très faible pour dézoomer au maximum
+                        animation: {
+                            duration: 1000,
+                            easingFunction: "easeInOutQuad",
+                        },
+                    });
+                    self.KGqueryGraph.onScaleChange();
+                    var nodes_wt_position = [];
+                    self.KGqueryGraph.data.nodes.get().forEach(function (node) {
+                        delete node.x;
+                        delete node.y;
+                        nodes_wt_position.push(node);
+                    });
+                    self.KGqueryGraph.data.nodes.update(nodes_wt_position);
                 });
 
                 //  KGquery.clearAll();
@@ -251,7 +274,7 @@ var KGquery_graph = (function () {
 
     self.DrawImportsCommonGraph = function () {
         var source = KGquery.currentSource;
-        var sources = [];
+        var sources = [source];
         var imports = Config.sources[source].imports;
         if (imports) {
             sources = sources.concat(imports);
@@ -272,7 +295,7 @@ var KGquery_graph = (function () {
                                 uniqueNodes[node.id] = 1;
                                 node.x = null;
                                 node.y = null;
-                                node.fixed = false;
+                                //node.fixed = false;
                                 visjsData.nodes.push(node);
                             }
                         });
@@ -291,6 +314,7 @@ var KGquery_graph = (function () {
                 if (err) {
                     return alert(err);
                 }
+
                 self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", visjsData, self.visjsOptions);
 
                 // cannot get colors from loadGraph ???!!

@@ -17,6 +17,18 @@ var KGcreator_bot = (function () {
     self.title = "Create mappings";
     self.lastObj = null;
     self.start = function (node, callbackFn) {
+        _botEngine.startParams = [];
+        if (node) {
+            _botEngine.startParams.push(JSON.parse(JSON.stringify(node)));
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+        if (callbackFn) {
+            _botEngine.startParams.push(callbackFn);
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+
         self.currentUri = null;
 
         var workflow = null;
@@ -166,7 +178,7 @@ var KGcreator_bot = (function () {
                 //   columnBlankNode: { addMappingToModelFn: self.workflowRdfType },
                 blankNode: { addMappingToModelFn: self.workflowRdfType },
                 namedIndividual: { addMappingToModelFn: self.workflowRdfType },
-                class: { listSuperClassVocabFn: { listSuperClassFn: { listClassLabelColumnFn: { addMappingToModelFn: {} } } } },
+                class: { listSuperClassVocabFn: { listSuperClassFn: { listClassLabelColumnFn: { addMappingToModelFn: self.workflowColumnmMappingOther } } } },
                 other: self.workflowColumnmMappingOther,
                 bag: { addMappingToModelFn: {} },
             },
@@ -205,6 +217,9 @@ var KGcreator_bot = (function () {
         setPredicateObjectColumnUriTypeFn: "Choose object URI type",
         listLitteralFormatFn: "choose date format",
         createSubPropertyFn: "Enter subProperty label",
+        listSuperClassVocabFn: "choose Super Class ontology",
+        listSuperClassFn: "choose Super Class ",
+        listClassLabelColumnFn: "choose class label column",
     };
 
     self.functions = {
@@ -264,7 +279,7 @@ var KGcreator_bot = (function () {
             }
 
             self.params.predicateObjectTable = self.params.table;
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         },
         listTableColumnsFn: function () {
             var table = self.params.predicateObjectTable || self.params.table;
@@ -347,7 +362,7 @@ var KGcreator_bot = (function () {
             if (!columnClasses || columnClasses.lengh == 0) return _botEngine.abort("cannot find column type");
 
             var source = self.params.predicateObjectColumnVocabulary || self.params.source; // both cases existing or not predicate object
-            OntologyModels.getAllowedPropertiesBetweenNodes(source, columnClasses, self.params.predicateObjectColumnClass, function (err, result) {
+            OntologyModels.getAllowedPropertiesBetweenNodes(source, columnClasses, self.params.predicateObjectColumnClass, null, function (err, result) {
                 self.params.predicateObjectColumnClass = null; // not used after properties are found
 
                 if (err) {
@@ -545,6 +560,7 @@ var KGcreator_bot = (function () {
                         s: self.currentUri,
                         p: "rdfs:label",
                         o: classLabelColumn,
+                        isString: true,
                     }
                 );
                 return self.functions.saveFn();
@@ -696,8 +712,17 @@ var KGcreator_bot = (function () {
             if (virtualColumns) {
                 columns = virtualColumns.concat(columns);
             }
+            columns.sort();
+            /* function(a,b){
+                if(a.label>b.label)
+                    return 1;
+                if(a.label<b.label)
+                    return -1;
+                return 0;
+            })*/
 
             _botEngine.showList(columns, "classLabelColumn", true);
+            $("#bot_resourcesProposalSelect").val(self.params.column);
         },
 
         saveFn: function (callback) {
@@ -727,7 +752,7 @@ var KGcreator_bot = (function () {
     self.getColumnClasses = function (tripleModels, columnName) {
         var columnClasses = [];
         tripleModels.forEach(function (item) {
-            if ((item.s == columnName || item.s == columnName + "_$") && item.p == "rdf:type") {
+            if ((item.s == columnName || item.s == columnName + "_$") && (item.p == "rdf:type" || item.p == "rdfs:subClassOf")) {
                 if (item.o.indexOf("owl:") < 0) {
                     if (!columnClasses) {
                     }

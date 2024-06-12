@@ -27,7 +27,7 @@ var IndividualAggregateWidget = (function () {
                         var groupByTypes = [
                             "http://www.w3.org/2001/XMLSchema#string",
                             "http://www.w3.org/2001/XMLSchema#date",
-                            "http://www.w3.org/2001/XMLSchema#datetime",
+                            "http://www.w3.org/2001/XMLSchema#dateTime",
                             "http://www.w3.org/2000/01/rdf-schema#Literal",
                         ];
 
@@ -80,8 +80,8 @@ var IndividualAggregateWidget = (function () {
         }
 
         whereStr += getWhereClause(groupByObj);
-        selectStr += " ?" + groupByObj.label + "   ";
-        groupByStr += " ?" + groupByObj.label + "   ";
+        selectStr += " ?" + groupByObj.label + " ?" + groupByObj.classLabel + "  ";
+        groupByStr += " ?" + groupByObj.label + " ?" + groupByObj.classLabel + "  ";
         var groupByPredicates = {};
         groupByPredicates[groupByObj.label] = self.allProperties[groupByObj.label];
         groupFunctions.forEach(function (fn) {

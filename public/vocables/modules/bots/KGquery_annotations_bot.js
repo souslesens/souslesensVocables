@@ -8,6 +8,18 @@ var KGquery_annotations_bot = (function () {
     self.title = "Filter Class";
 
     self.start = function (currentQuery, validateFn) {
+        _botEngine.startParams = [];
+        if (currentQuery) {
+            _botEngine.startParams.push(JSON.parse(JSON.stringify(currentQuery)));
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+        if (validateFn) {
+            _botEngine.startParams.push(validateFn);
+        } else {
+            _botEngine.startParams.push(undefined);
+        }
+        _botEngine.startParams = [JSON.parse(JSON.stringify(currentQuery)), validateFn];
         BotEngine.init(KGquery_annotations_bot, self.workflow_selectproperties, null, function () {
             self.validateFn = validateFn;
             self.callbackFn = function () {

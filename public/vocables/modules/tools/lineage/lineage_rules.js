@@ -137,7 +137,7 @@ var Lineage_rules = (function () {
     };
 
     self.addPropertiesToTree = function (node) {
-        OntologyModels.getAllowedPropertiesBetweenNodes(node.data.source, node.data.id, null, function (err, result) {
+        OntologyModels.getAllowedPropertiesBetweenNodes(node.data.source, node.data.id, null, null, function (err, result) {
             if (err) {
                 return callbackSeries(err);
             }

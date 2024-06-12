@@ -100,6 +100,7 @@ var KGcreator_r = (function () {
             self.currentTab = "Map";
             $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/linkTab.html", function () {
                 $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function () {
+                    ResponsiveUI.PopUpOnHoverButtons();
                     if (KGcreator.currentTreeNode != undefined) {
                         $(document.getElementById(KGcreator.currentTreeNode.id + "_anchor")).click();
                     }

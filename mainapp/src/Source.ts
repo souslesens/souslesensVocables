@@ -237,7 +237,7 @@ export const InputSourceSchemaCreate = {
 };
 
 export const sourceHelp = {
-    name: "The source name can only contain alphanum and - or _ chars and must be uniq",
+    name: "The source name can only contain alphanum and - or _ chars and must be unique",
     graphUri: "Graph URI is mandatory when using the default SPARQL server",
     sparql_server: {
         url: "_default if using the default SPARQL server, else, the URL of the SPARQL server",
@@ -256,7 +256,7 @@ export const sourceHelp = {
     predicates: "",
     group: "Group and subgroups (AAA/BBB) used to order the sources",
     imports: "List of imported sources",
-    taxonomyPredicates: "List of properties used to draw the taxonomies of classes and named individuals",
+    taxonomyPredicates: "List of properties used to draw the taxonomies of classes and named individuals in lineage actions",
     published: "The source will be visible by all user (with right permission to see it)",
     owner: "User that own the source. The user will have all right on the source.",
 };

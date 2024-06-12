@@ -77,6 +77,16 @@ var ResponsiveUI = (function () {
         }
 
         $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 7);
+        if ($("#lateralPanelDiv").data("ui-resizable") != undefined) {
+            $("#lateralPanelDiv").resizable("destroy");
+            $("#lateralPanelDiv").resizable({
+                maxWidth: $(window).width() - 100,
+                minWidth: 150,
+                stop: function (event, ui) {
+                    ResponsiveUI.resetWindowHeight();
+                },
+            });
+        }
         //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
@@ -90,8 +100,6 @@ var ResponsiveUI = (function () {
     };
     //  MainController --> onToolSelect.initTool   when click on a button of a tool
     self.onToolSelect = function (toolId, event, callback) {
-        // reset source on tool select to not have the previous source
-        self.source = null;
         if (event) {
             var clickedElement = event.target;
             // if class
@@ -110,7 +118,11 @@ var ResponsiveUI = (function () {
 
         if (self.currentTool != null) {
             if (Config.userTools[self.currentTool].controller.unload) {
-                Config.userTools[self.currentTool].controller.unload();
+                try {
+                    Config.userTools[self.currentTool].controller.unload();
+                } catch (e) {
+                    console.log(e);
+                }
             }
         }
         self.currentTool = toolId;
@@ -131,6 +143,7 @@ var ResponsiveUI = (function () {
             }
         } else {
             self.initTool(toolId);
+            self.source = null;
         }
 
         // set or replace tool in url params
@@ -139,6 +152,12 @@ var ResponsiveUI = (function () {
             params.delete("tab");
         }
         params.set("tool", toolId);
+        if (self.source) {
+            params.set("source", self.source);
+        } else {
+            params.delete("source");
+        }
+
         window.history.replaceState(null, "", `?${params.toString()}`);
 
         if (callback) {
@@ -165,9 +184,15 @@ var ResponsiveUI = (function () {
     self.sourceSelect = function (source) {
         MainController.currentSource = source;
         ResponsiveUI.source = source;
+
         $("#selectedSource").html(MainController.currentSource);
 
         $("#mainDialogDiv").parent().hide();
+        const params = new URLSearchParams(document.location.search);
+        if (self.source) {
+            params.set("source", self.source);
+        }
+        window.history.replaceState(null, "", `?${params.toString()}`);
         self.initTool(MainController.currentTool, function (err, result) {
             if (err) {
                 return self.alert(err.responseText);
@@ -194,7 +219,6 @@ var ResponsiveUI = (function () {
         MainController.initControllers();
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
-
         if (Config.userTools[toolId].controller.onLoaded) {
             Config.userTools[toolId].controller.onLoaded();
         } else {
@@ -389,12 +413,14 @@ var ResponsiveUI = (function () {
                     sourceDivId +
                     "\")'/> </button></div>";
                 $("#lineage_drawnSources").append(html);
-
+                $("#lineage_drawnSources").find(".arrow-icon").hide();
+                /*
                 $("#" + sourceDivId).bind("click", function (e) {
                     var sourceDivId = $(this).attr("id");
                     var source = self.sourceDivsMap[sourceDivId];
                     Lineage_sources.setCurrentSource(source);
                 });
+                */
                 return callback();
             } else {
                 return callback();

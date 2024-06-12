@@ -96,6 +96,9 @@ var CommonBotFunctions = (function () {
                 props.push({ id: prop.id, label: prop.label });
             }
             if (props.length == 0) {
+                if (callback) {
+                    return callback(null, props);
+                }
                 return _botEngine.previousStep("no values found, try another option");
             }
 
@@ -131,6 +134,9 @@ var CommonBotFunctions = (function () {
             },
             function (err) {
                 if (props.length == 0) {
+                    if (callback) {
+                        return callback(null, props);
+                    }
                     return _botEngine.previousStep("no values found, try another option");
                 }
                 self.sortList(props);
@@ -177,6 +183,28 @@ var CommonBotFunctions = (function () {
             },
             function (err) {
                 return callback(err, allProps);
+            }
+        );
+    };
+    self.listSourceAllObjectPropertiesConstraints = function (source, varToFill, callback) {
+        var sources = self.getSourceAndImports(source);
+        var allConstraints = {};
+        async.eachSeries(
+            sources,
+            function (source, callbackEach) {
+                var constraints = Config.ontologiesVocabularyModels[vocab].constraints;
+                if (err) {
+                    return callbackEach(err);
+                }
+                for (var prop in constraints) {
+                    allConstraints[prop] = constraints[prop];
+                }
+
+                callbackEach();
+            },
+
+            function (err) {
+                return callback(err, allConstraints);
             }
         );
     };

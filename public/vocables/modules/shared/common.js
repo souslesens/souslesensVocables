@@ -644,7 +644,14 @@ if (callback) return callback(err);
             }
             return str;
         });
-
+    self.ISODateStrToRDFString = function (date) {
+        if (date) {
+            date = date.replace(/-/g, ".");
+            date = date.replace("T", " ");
+            date = date.replace("Z", "");
+        }
+        return date;
+    };
     // var dateTime='2000-01-15T00:00:00'
 
     self.dateToRDFString = function (date, time) {
@@ -908,6 +915,25 @@ if (callback) return callback(err);
         const array = string.match(new RegExp(char, "g"));
         if (!array) return 0;
         return array.length;
+    };
+
+    self.ISODateStrToRDFString = function (isoStringdate) {
+        // isoString 2022-12-31T230000.000Z
+        //  internal virtuoso date YYYY.MM.DD hh:mm.ss
+        var regex = /(\d{4})-(\d{2})-(\d{2})T(\d{2})(\d{2})(\d{2})/;
+        var array = isoStringdate.match(regex);
+        if (!array) return null;
+        var str = array[1] + "." + array[2] + "." + array[3];
+        if (array.length > 4) {
+            str += " " + array[4];
+        }
+        if (array.length > 5) {
+            str += ":" + array[5];
+        }
+        if (array.length > 6) {
+            str += ":" + array[6];
+        }
+        return str;
     };
 
     return self;

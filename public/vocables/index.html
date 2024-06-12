@@ -130,6 +130,7 @@
 
         <script type="module" src="modules/tools/axioms/axioms_editor.js"></script>
         <script type="module" src="modules/tools/axioms/axioms_graph.js"></script>
+        <script type="module" src="modules/tools/axioms/axioms_suggestions.js"></script>
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
@@ -276,12 +277,6 @@
                                 callBackSeries(err);
                             });
                         },
-                        function (callBackSeries) {
-                            MainController.onAfterLogin(function (err) {
-                                callBackSeries(err);
-                            });
-                        },
-
                         function (callbackSeries) {
                             try {
                                 loadToolsAndPlugins(function () {
@@ -290,6 +285,11 @@
                             } catch (error) {
                                 console.error("Failed to load tools and plugins", error);
                             }
+                        },
+                        function (callBackSeries) {
+                            MainController.onAfterLogin(function (err) {
+                                callBackSeries(err);
+                            });
                         },
                     ],
                     function (err) {

@@ -1,201 +1,486 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axioms_editor from "./axioms_editor.js";
+import Lineage_sources from "../lineage/lineage_sources.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import common from "../../shared/common.js";
+import Export from "../../shared/export.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 
 var Axioms_graph = (function () {
     var self = {};
 
-    self.drawAxiomsJowlTriples = function (graphDiv, triples) {
-        if (!triples) {
-            triples = self.getTestTriples();
-        }
+    self.manchesterriplestoSparqlBindings = function (source, manchesterTriples, callback) {
+        var escapeMarkup = function (str) {
+            var str2 = str.replace(/</g, "&lt;");
+            var str2 = str2.replace(/>/g, "&gt;");
+            return str2;
+        };
 
-        if (!graphDiv) {
-            $("#smallDialogDiv").dialog("close");
-            graphDiv = "axiomsGraphDiv";
-            $("#mainDialogDiv").dialog("open");
-            var html = "<div id='" + graphDiv + "' style='width:850px;height:500px'></div>";
-            $("#mainDialogDiv").html(html);
-        }
-
-        var visjsData = self.getVisjsData(triples);
-        //  var visjsData = self.getManchesterVisjsData();
-        self.drawGraph(graphDiv, visjsData);
-    };
-
-    self.processTriples = function (triples) {
         var triplesMap = {};
-        var resourcesMap = [];
-        triples.forEach(function (item) {
-            if (item.object.indexOf("#nil") == 0) {
-                return;
-            }
+        manchesterTriples.forEach(function (item) {
+            var uri = item.subject.replace("[OntObject]", "");
+            triplesMap[uri] = { isBlank: !uri.startsWith("http") };
 
-            if (item.subject.startsWith("[OntObject]")) {
-            } else {
-                resourcesMap[item.subject] = {};
-            }
-            if (item.object.startsWith("[OntObject]")) {
-            } else {
-                resourcesMap[item.object] = {};
-            }
+            var uri = item.object.replace("[OntObject]", "");
+            triplesMap[uri] = { isBlank: !uri.startsWith("http") };
         });
-    };
 
-    self.getEdge = function (id, from, to) {
-        var edge = {
-            id: id,
-            from: from,
-            to: to,
-            // label: symbol,
-            arrows: {
-                to: {
-                    enabled: true,
-                    type: "solid",
-                    scaleFactor: 0.5,
-                },
-            },
-            data: {
-                id: id,
-                from: from,
-                to: to,
-                // label: item.predicate,
-                type: "sss",
-            },
-        };
-        return edge;
-    };
+        var resourceIds = [];
+        for (var uri in triplesMap) {
+            if (!triplesMap[uri].isBlank) resourceIds.push(uri);
+        }
+        var fromStr = Sparql_common.getFromStr(source, false, false);
+        var filterStr = Sparql_common.setFilter("s", resourceIds);
+        var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
-    self.getVisjsData = function (triples) {
-        var cleanUri = function (uri) {
-            return uri.replace("[OntObject]", "");
-        };
-        var getLabel = function (uri, predicateUri) {
-            if (uri.indexOf("http") < 0) {
-                if (false && predicateUri) {
-                    return Sparql_common.getLabelFromURI(predicateUri);
-                } else {
-                    return "";
+        var query =
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+            " SELECT distinct ?sGraph ?oGraph ?s ?p  ?o ?sType ?oType  ?sLabel ?pLabel  ?oLabel ?sIsBlank ?oIsBlank " +
+            fromStr +
+            "      WHERE {   ?s ?p ?o." +
+            "  optional{ ?s rdf:type ?sType.}\n" +
+            "  optional{    ?o rdf:type ?oType.}\n" +
+            "  optional{   ?s rdfs:label ?sLabel.}\n" +
+            "  optional{   ?o rdfs:label ?oLabel.}\n" +
+            "  optional{    ?p rdfs:label ?pLabel.} \n" +
+            "  filter (?p in (rdf:type,rdfs:label))" +
+            filterStr +
+            "} limit 10000";
+
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+
+            var bindings = [];
+            var data = []; //result.results.bindings
+
+            manchesterTriples.forEach(function (item) {
+                var subjectUri = item.subject.replace("[OntObject]", "");
+                var predicateUri = item.predicate.replace("[OntObject]", "");
+                var objectUri = item.object.replace("[OntObject]", "");
+
+                function getType(uri) {
+                    if (uri.indexOf("http") > -1) return "uri";
+                    return "bnode";
                 }
-            } else {
-                return Sparql_common.getLabelFromURI(uri);
-            }
-        };
 
-        var triplesMap = {};
-        triples.forEach(function (item) {
-            triplesMap[item.object] = { label: getLabel(item.object, item.predicate) };
-            if (!triplesMap[item.subject]) {
-                triplesMap[item.subject] = { label: getLabel(item.subject) };
-            }
-        });
-
-        var visjsData = { nodes: [], edges: [] };
-        var existingNodes = {};
-        var existingEdges = {};
-
-        var symbol = "dot";
-        var style = {
-            label: "dddd",
-            shape: "dot",
-            color: "green",
-        };
-        var level = 0;
-        triples.forEach(function (item) {
-            //   item.subject = cleanUri(item.subject);
-            //   item.object = cleanUri(item.object);
-
-            if (item.object.indexOf("nil") > -1) {
-                return;
-            }
-
-            if (!existingNodes[item.object]) {
-                var label = triplesMap[item.object].label;
-                existingNodes[item.object] = {
-                    id: item.object,
-                    label: label,
-                    shape: "dot",
-                    color: symbol ? "#9db99d" : style.color,
-                    size: 8,
-                    level: ++level,
-                    data: {
-                        id: item.object,
-                        label: label,
-                        type: "ss",
-                        source: "dd",
+                data.push({
+                    s: {
+                        type: getType(subjectUri),
+                        value: subjectUri,
                     },
-                };
-            }
-
-            if (!existingNodes[item.subject]) {
-                var label = triplesMap[item.subject].label;
-                existingNodes[item.subject] = {
-                    id: item.subject,
-                    label: label,
-                    shape: "dot",
-                    color: symbol ? "#9db99d" : style.color,
-                    size: 8,
-                    level: level,
-                    data: {
-                        id: item.subject,
-                        label: label,
-                        type: "ss",
-                        source: "dd",
+                    p: {
+                        type: getType(predicateUri),
+                        value: predicateUri,
                     },
-                };
-            }
-
-            var edgeId = item.subject + "_" + item.object;
-
-            if (!existingEdges[edgeId]) {
-                existingEdges[edgeId] = 1;
-                visjsData.edges.push({
-                    id: edgeId,
-                    from: item.subject,
-                    to: item.object,
-                    label: Sparql_common.getLabelFromURI(item.predicate),
-                    arrows: {
-                        to: {
-                            enabled: true,
-                            type: "solid",
-                            scaleFactor: 0.5,
-                        },
-                    },
-                    data: {
-                        id: edgeId,
-                        from: item.subject,
-                        to: item.object,
-                        label: item.predicate,
-                        type: "sss",
+                    o: {
+                        type: getType(objectUri),
+                        value: objectUri,
                     },
                 });
-            }
+            });
+
+            return callback(null, data);
         });
-
-        visjsData.edges.forEach(function (edge, index) {
-            if (edge.from.indexOf("http") < 0 && edge.to.indexOf("http") < 0) {
-                edge.length = 0;
-                edge.arrows = null;
-
-                existingNodes[edge.to].shape = "text";
-                existingNodes[edge.to].label = "";
-            }
-            if (edge.label == "intersectionOf") {
-                edge.length = 0;
-                edge.label = "";
-                edge.arrows = null;
-
-                existingNodes[edge.to].label = "intersectionOf";
-            }
-        });
-
-        for (var key in existingNodes) {
-            visjsData.nodes.push(existingNodes[key]);
-        }
-
-        return visjsData;
     };
 
-    self.drawGraph = function (graphDiv, visjsData) {
+    self.drawTriples = function (divId) {
+        divId = "Axioms_editor_triplesDataTableDiv";
+        self.currentSource = Axioms_editor.currentSource;
+        self.graphDivContainer = divId;
+        self.drawNodeAxioms(Axioms_editor.currentSource, Axioms_editor.currentNode.id, divId, {}, function (err, result) {
+            //   self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource,self.sampleTriples,null,{},function(err, result){
+        });
+    };
+
+    self.showTriplesInDataTable = function (divId, data) {
+        var escapeMarkup = function (str) {
+            var str2 = str.replace(/</g, "&lt;");
+            var str2 = str2.replace(/>/g, "&gt;");
+            return str2;
+        };
+
+        var tableCols = [];
+        var hearders = ["subject", "predicate", "object"];
+        hearders.forEach(function (item) {
+            tableCols.push({ title: item, defaultContent: "", width: "30%" });
+        });
+
+        var tableData = [];
+        data.forEach(function (item, index) {
+            tableData.push([escapeMarkup(item.subject), escapeMarkup(item.predicate), escapeMarkup(item.object)]);
+        });
+
+        var str = "<table><tr><td>subject</td><td>predicate</td><td>object</td></tr>";
+        data.forEach(function (item, index) {
+            str += "<tr><td>" + escapeMarkup(item.subject) + "</td><td>" + escapeMarkup(item.predicate) + "</td><td>" + escapeMarkup(item.object) + "</td></tr>";
+        });
+        str += "</table>";
+
+        /*  $("#KGcreator_triplesDataTableDiv").html(str)
+          return;*/
+        Export.showDataTable(divId, tableCols, tableData, null, { paging: true }, function (err, datatable) {});
+    };
+
+    self.drawNodeAxioms = function (sourceLabel, nodeId, divId, options, callback) {
+        if (!options) options = {};
+
+        options.skipRestrictions = false;
+
+        var allBasicAxioms = {};
+        var nodeIdTree = {};
+        var visjsData = { nodes: [], edges: [] };
+
+        async.series(
+            [
+                //get all elementary axioms
+                function (callbackSeries) {
+                    self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource, self.sampleTriples, function (err, result) {
+                        //  self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        var graphtriplesMap = {}; //Sparql_common.getSourceGraphtriplesMap(self.currentSource);
+                        result.forEach(function (item) {
+                            var sType = item.sType ? item.sType.value : null;
+                            var oType = item.oType ? item.oType.value : null;
+                            var sLabel = item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value);
+                            var pLabel = item.pLabel ? item.pLabel.value : Sparql_common.getLabelFromURI(item.p.value);
+                            var oLabel = item.oLabel ? item.oLabel.value : Sparql_common.getLabelFromURI(item.o.value);
+                            var sIsBlank = item.s.type == "bnode";
+                            var oIsBlank = item.o.type == "bnode";
+                            var sSource = item.sGraph ? graphtriplesMap[item.sGraph.value] : null;
+                            var oSource = item.oGraph ? graphtriplesMap[item.oGraph.value] : null;
+
+                            if (!allBasicAxioms[item.s.value]) {
+                                allBasicAxioms[item.s.value] = {
+                                    s: item.s.value,
+                                    sType: sType,
+                                    sLabel: sLabel,
+                                    sIsBlank: sIsBlank,
+                                    sSource: sSource,
+                                };
+                                allBasicAxioms[item.s.value].objects = [];
+                            }
+
+                            if (!allBasicAxioms[item.o.value]) {
+                                allBasicAxioms[item.o.value] = {
+                                    s: item.o.value,
+                                    sType: oType,
+                                    sLabel: oLabel,
+                                    sIsBlank: oIsBlank,
+                                    sSource: oSource,
+                                };
+                                allBasicAxioms[item.o.value].objects = [];
+                            }
+
+                            allBasicAxioms[item.s.value].objects.push({
+                                o: item.o.value,
+                                oType: oType,
+                                oLabel: oLabel,
+                                oIsBlank: oIsBlank,
+                                oSource: oSource,
+                                p: item.p.value,
+                                pLabel: pLabel,
+                            });
+                        });
+                        return callbackSeries();
+                    });
+                },
+
+                //get nodes Source
+                function (callbackSeries) {
+                    return callbackSeries();
+
+                    var ids = Object.keys(allBasicAxioms);
+                    Sparql_OWL.getUrisNamedGraph(self.currentSource, ids, { onlySourceAndImports: 1 }, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        result.forEach(function (item) {
+                            allBasicAxioms[item.id.value].sSource = Sparql_common.getSourceFromGraphUri(item.g.value, self.currentSource);
+                        });
+                        for (var id in allBasicAxioms) {
+                            allBasicAxioms[id].objects.forEach(function (object) {
+                                object.oSource = allBasicAxioms[object.o].sSource;
+                            });
+                        }
+                        callbackSeries();
+                    });
+                },
+
+                //escape some blank nodes
+
+                function (callbackSeries) {
+                    return callbackSeries();
+
+                    for (var key in allBasicAxioms) {
+                        var subject = allBasicAxioms[key];
+                        //  var escapeProperties = ["http://www.w3.org/1999/02/22-rdf-syntax-ns#first", "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"];
+                        var escapeProperties = [
+                            "http://www.w3.org/2002/07/owl#unionOf",
+                            "http://www.w3.org/2002/07/owl#intersectionOf",
+                            //  "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"
+                        ];
+
+                        subject.objects.forEach(function (object, index) {
+                            escapeProperties.forEach(function (escapeProperty) {
+                                if (object && object.p == escapeProperty) {
+                                    var jumper = allBasicAxioms[object.o];
+                                    if (jumper) {
+                                        allBasicAxioms[key].objects = jumper.objects;
+                                        allBasicAxioms[key].disjonction = escapeProperty;
+                                    }
+                                }
+                            });
+                        });
+                    }
+
+                    for (var key in allBasicAxioms) {
+                        var subject = allBasicAxioms[key];
+                        //  var escapeProperties = ["http://www.w3.org/1999/02/22-rdf-syntax-ns#first", "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"];
+                        var escapeProperties = ["http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"];
+
+                        subject.objects.forEach(function (object, index) {
+                            escapeProperties.forEach(function (escapeProperty) {
+                                if (object && object.p == escapeProperty) {
+                                    var jumper = allBasicAxioms[object.o];
+                                    if (jumper) {
+                                        allBasicAxioms[key].objects[index] = jumper.objects[0];
+                                    }
+                                }
+                            });
+                        });
+                    }
+
+                    callbackSeries();
+                },
+
+                //recurse draw tree to visjsdata
+                function (callbackSeries) {
+                    var geNodeStyle = function (id, type, label, source) {
+                        var obj = {
+                            label: label,
+                            color: "#00afef",
+                            shape: "box",
+                            edgeStyle: null,
+                        };
+                        if (!type || !label) {
+                            return obj;
+                        }
+
+                        if (type.indexOf("roperty") > -1) {
+                            obj.edgeStyle = "property";
+                            obj.shape = "box";
+                            obj.color = "#f5ef39";
+                            obj.size = self.defaultNodeSize;
+                        }
+
+                        if (type.indexOf("List") > -1) {
+                            //    options.edgeStyle  = "property";
+                            obj.shape = "text";
+                            obj.color = "#00efdb";
+                            obj.label = "L"; //"∀";
+                            obj.size = self.defaultNodeSize;
+                        } else if (type.indexOf("Restriction") > -1) {
+                            obj.edgeStyle = "restriction";
+                            obj.shape = "box";
+                            obj.label = "R"; //"∀";
+                            obj.color = "#cb9801";
+                            obj.size = self.defaultNodeSize;
+                        } else if (type.indexOf("Individual") > -1) {
+                            obj.edgeStyle = "individual";
+                            obj.shape = "star";
+                            // options.label = "R"; //"∀";
+                            obj.color = "#blue";
+                            obj.size = self.defaultNodeSize;
+                        } else {
+                            //  options.color = Lineage_whiteboard.getSourceColor(targetItem.g.value || self.defaultNodeColor);
+                        }
+
+                        return obj;
+                    };
+
+                    var existingNodes = {};
+                    var stop = false;
+
+                    function recurse(_nodeId, level, symbol) {
+                        if (level > 1) {
+                        } // return
+
+                        if (stop) {
+                            return;
+                        }
+
+                        var node = allBasicAxioms[_nodeId];
+                        if (!node) {
+                            return;
+                        }
+
+                        if (node.sType == "http://www.w3.org/2002/07/owl#Restriction") {
+                            var x = 3;
+                        }
+
+                        if (node.s == "http://purl.obolibrary.org/obo/BFO_0000001") {
+                            //  stop = true;
+                        }
+                        if (node.s == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil") {
+                            return;
+                        }
+
+                        if (existingNodes[_nodeId]) {
+                            visjsData.nodes.forEach(function (node, nodeIndex) {
+                                if (node.id == _nodeId && node.level > level) {
+                                    visjsData.nodes[nodeIndex].level = level;
+                                }
+                            });
+                        } else {
+                            var style = geNodeStyle(node.s, node.sType, node.sLabel);
+
+                            if (node.disjonction) {
+                                style.shape = "circle";
+                                style.label = Config.Lineage.logicalOperatorsMap[node.disjonction];
+                                style.color = "#70ac47";
+                                symbol = null;
+                            }
+
+                            if (style.color == "#00afef" && node.sSource) {
+                                style.color = common.getResourceColor("source", node.sSource);
+                            }
+
+                            existingNodes[node.s] = level;
+                            //  var objectLevel = node.sType && node.sType.indexOf("roperty") > -1 ? level - 1 : level;
+
+                            visjsData.nodes.push({
+                                id: node.s,
+                                label: symbol || style.label,
+                                shape: symbol ? "circle" : style.shape,
+                                color: symbol ? "#9db99d" : style.color,
+                                size: 8,
+                                level: level,
+                                data: {
+                                    id: node.s,
+                                    label: node.sLabel,
+                                    type: node.sType,
+                                    source: node.sSource,
+                                },
+                            });
+                        }
+
+                        // children
+                        if (node.objects) {
+                            node.objects.forEach(function (object) {
+                                if (false && object.oSource && object.oSource != sourceLabel) {
+                                    return;
+                                }
+                                if (!object || !object.o) return;
+
+                                if (existingNodes[object.o] < level) {
+                                    // dont draw backward edges
+                                    return;
+                                }
+
+                                var edgeId = node.s + "_" + object.o;
+                                var symbol = Config.Lineage.logicalOperatorsMap[object.p] || object.pLabel;
+
+                                if (!existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1;
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: node.s,
+                                        to: object.o,
+                                        // label: symbol,
+                                        arrows: {
+                                            to: {
+                                                enabled: true,
+                                                type: "solid",
+                                                scaleFactor: 0.5,
+                                            },
+                                        },
+                                        data: {
+                                            id: edgeId,
+                                            from: node.s,
+                                            to: object.o,
+                                            label: node.pLabel,
+                                            type: node.sType,
+                                        },
+                                    });
+                                    var symbol = null;
+                                    if (object.oIsBlank && object.oType != "http://www.w3.org/2002/07/owl#Restriction") {
+                                        symbol = Config.Lineage.logicalOperatorsMap[object.p] || null;
+                                    }
+
+                                    if (false && level == 0 && object.p != "http://www.w3.org/2002/07/owl#equivalentClass") {
+                                        return;
+                                    }
+
+                                    if (false && object.oSource != self.currentSource) {
+                                        return;
+                                    }
+                                    var objectLevel = level + 1;
+                                    if (false && (object.p.indexOf("Value") > -1 || object.p.indexOf("onProperty") > -1)) {
+                                        objectLevel = level;
+                                    }
+
+                                    // stop draw children when subClassof a class
+                                    //   if ( level >0 && object.oType == "http://www.w3.org/2002/07/owl#Class" && object.p.indexOf("subClassOf")>-1) {
+                                    if (false && object.oSource != sourceLabel) {
+                                        return;
+                                    }
+                                    recurse(object.o, objectLevel, symbol);
+                                }
+                            });
+                        }
+                    }
+
+                    var level = 0;
+
+                    recurse(nodeId, level);
+                    //   console.log(JSON.stringify(visjsData));
+                    return callbackSeries();
+                },
+
+                //set hide nodes of level > maxLevels
+                function (callbackSeries) {
+                    var maxLevels = 10;
+                    visjsData.nodes.forEach(function (node, nodeIndex) {
+                        if (node.level > maxLevels) {
+                            visjsData.nodes[nodeIndex].hidden = true;
+                        }
+                    });
+                    callbackSeries();
+                },
+
+                // filter FOL nodes
+                function (callbackSeries) {
+                    return callbackSeries();
+                },
+
+                //draw graph
+
+                function (callbackSeries) {
+                    if (options.addToGraph && self.axiomsVisjsGraph) {
+                        self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
+                        self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
+                    } else {
+                        self.drawGraph(visjsData);
+                        self.currentVisjsData = visjsData;
+                    }
+                    return callbackSeries();
+                },
+            ],
+
+            function (err) {
+                if (callback) {
+                    return callback(err);
+                }
+            }
+        );
+    };
+
+    self.drawGraph = function (visjsData) {
         var xOffset = 60;
         var yOffset = 130;
         xOffset = parseInt($("#axiomsDraw_xOffset").val());
@@ -203,18 +488,18 @@ var Axioms_graph = (function () {
         var options = {
             keepNodePositionOnDrag: true,
             /* physics: {
-    enabled:true},*/
+enabled:true},*/
 
-            /*   layoutHierarchical: {
-                       direction: "LR",
-                       sortMethod: "hubsize",
-                       levelSeparation: xOffset,
-                       parentCentralization: true,
-                       shakeTowards: "roots",
-                       blockShifting: true,
+            layoutHierarchicalXX: {
+                direction: "LR",
+                sortMethod: "hubsize",
+                levelSeparation: xOffset,
+                parentCentralization: true,
+                shakeTowards: "roots",
+                blockShifting: true,
 
-                       nodeSpacing: yOffset
-                   },*/
+                nodeSpacing: yOffset,
+            },
             visjsOptions: {
                 edges: {
                     smooth: {
@@ -231,13 +516,12 @@ var Axioms_graph = (function () {
             onHoverNodeFn: Lineage_axioms_draw.selectNodesOnHover,
         };
 
-        /*   var graphDivContainer = "axiomsGraphDivContainer";
-               $("#" + graphDivContainer).html(
-                   "<span style='font-size: 16px;color: blue; font-weight: bold'> WORK IN PROGRESS</span>" +
-                   "  <button onclick=\"AxiomEditor.init()\">Edit Axiom</button>" +
-                   "<div id='axiomsGraphDiv' style='width:100%;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
-               );*/
-        self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
+        $("#" + self.graphDivContainer).html(
+            "<span style='font-size: 16px;color: blue; font-weight: bold'> WORK IN PROGRESS</span>" +
+                '  <button onclick="AxiomEditor.init()">Edit Axiom</button>' +
+                "<div id='axiomsGraphDiv3' style='width:800px;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
+        );
+        self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv3", visjsData, options);
         self.axiomsVisjsGraph.draw(function () {});
     };
 
@@ -250,232 +534,94 @@ var Axioms_graph = (function () {
         return;
     };
 
-    /* self.getManchesterVisjsData = function() {
+    self.sampleTriples = [
+        {
+            subject: "[OntObject]05a9d835-07a3-4b3e-b552-5d20a89c94b1",
+            predicate: "http://www.w3.org/2002/07/owl#intersectionOf",
+            object: "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
+        },
+        {
+            subject: "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/PlanSpecification",
+        },
+        {
+            subject: "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
+            predicate: "http://www.w3.org/2002/07/owl#onProperty",
+            object: "[OntObject]http://purl.obolibrary.org/obo/BFO_0000219",
+        },
+        {
+            subject: "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
+            predicate: "http://www.w3.org/2002/07/owl#onProperty",
+            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/prescribedBy",
+        },
+        {
+            subject: "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            object: "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
+        },
+        {
+            subject: "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            object: "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
+        },
+        {
+            subject: "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
+            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            object: "[OntObject]05a9d835-07a3-4b3e-b552-5d20a89c94b1",
+        },
+        {
+            subject: "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            object: "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
+        },
+        {
+            subject: "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
+            predicate: "http://www.w3.org/2002/07/owl#onProperty",
+            object: "[OntObject]http://purl.obolibrary.org/obo/BFO_0000111",
+        },
+        {
+            subject: "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            object: "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
+        },
+        {
+            subject: "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            object: "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
+        },
+        {
+            subject: "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
+            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/ObjectiveSpecification",
+        },
+        {
+            subject: "[OntObject]d674942f-d3d6-4c9b-94dc-7c16086c020c",
+            predicate: "http://www.w3.org/2002/07/owl#intersectionOf",
+            object: "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
+        },
+        {
+            subject: "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
+            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BusinessOrganization",
+        },
+        {
+            subject: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
+            predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            object: "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
+        },
+        {
+            subject: "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
+            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            object: "[OntObject]d674942f-d3d6-4c9b-94dc-7c16086c020c",
+        },
+        {
+            subject: "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+            object: "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
+        },
+    ];
 
-             var x = " <https://spec.industrialontologies.org/ontology/core/Core/BusinessProcess>" +
-                 " SubClassOf: (" +
-                 " <https://spec.industrialontologies.org/ontology/core/Core/prescribedBy> some (<https://spec.industrialontologies.org/ontology/core/Core/PlanSpecification> and ( <http://purl.obolibrary.org/obo/BFO_0000110> some (<https://spec.industrialontologies.org/ontology/core/Core/ObjectiveSpecification> and (<http://purl.obolibrary.org/obo/BFO_0000084> some <https://spec.industrialontologies.org/ontology/core/Core/BusinessOrganization>)))))";
-
- //var x="<https://spec.industrialontologies.org/ontology/core/Core/BusinessProcess> subClassOf: (<http://purl.obolibrary.org/obo/BFO_0000054> only <https://spec.industrialontologies.org/ontology/core/Core/BusinessProcess>)"
-
-
-             var regex = /\([^\(\)]*(?:(\([^\(\)]*(?:(\([^\(\)]*(?:(\([^\(\)]*(?:(\([^\(\)]*(?:(\([^\(\)]*(?:(\([^\(\)]*(?:(\([^\(\)]*(?:(\([^\(\)]*(?:(\([^\(\)]*(?:(\([^\(\)]*?\))+?[^\(\)]*)*?\))+?[^\(\)]*)*?\))+?[^\(\)]*)*?\))+?[^\(\)]*)*?\))+?[^\(\)]*)*?\))+?[^\(\)]*)*?\))+?[^\(\)]*)*?\))+?[^\(\)]*)*?\))+?[^\(\)]*)*?\))+?[^\(\)]*)*?\)/gm;
-
-
-             var groups = regex.exec("(" + x + ")");
-
-
-             var triples = [];
-
-             var previousItem = "";
-
-             //clean items from redanadant previousItem
-             groups.forEach(function(item, index) {
-                 if (item) {
-                     if (index < groups.length - 1) {
-                         item = item.replace(groups[index + 1], "");
-                     }
-                     item = item.replace("(", "").replace(")", "");
-                     var array = item.trim().split(" ");
-
-
-
-                     var obj = [];
-
-
-                     array.forEach(function(item2, index2) {
-
-                         if (index2 == 1) {
-
-                             obj.push({ id: common.getRandomHexaId(7), label: item2 });
-                         } else {
-                             obj.push({ id: item2, label: Sparql_common.getLabelFromURI(item2) });
-                         }
-
-
-                     });
-                     triples.push(obj);
-
-                 }
-
-
-             });
-             var visjsData = { nodes: [], edges: [] };
-             var existingIds = {};
-
-             var symbol = "dot";
-             var style = {
-                 label: "dddd",
-                 shape: "dot",
-                 color: "green"
-             };
-             var lastAndOrNode;
-             triples.forEach(function(item, index) {
-
-                 item.forEach(function(item2, index2) {
-
-
-                     if(item2.label=="and") {
-
-                         return;
-                     }
-
-                     if (!existingIds[item2.id]) {
-                         existingIds[item2.id] = 1;
-                         visjsData.nodes.push({
-                             id: item2.id,
-                             label: item2.label,
-                             shape: "dot",
-                             color: symbol ? "#9db99d" : style.color,
-                             size: 8,
-                             data: {
-                                 id: item2.id,
-                                 label: item2.label,
-                                 type: "ss",
-                                 source: "dd"
-                             }
-                         });
-
-                     }
-
-                     var from, to;
-                     if (index2 > 0) {
-                         from = item[index2 - 1].id;
-                         to = item2.id;
-
-                         var edgeId = common.getRandomHexaId(5);
-                         visjsData.edges.push( self.getEdge(edgeId,from,to) )
-
-
-                     }
-                 });
-
-
-                 if (index> 0) {
-                     var to = item[0].id;
-                     var from = triples[index - 1][1].id;
-
-                     var edgeId = common.getRandomHexaId(5);
-                     visjsData.edges.push( self.getEdge(edgeId,from,to) )
-
-
-                 }
-
-
-             });
-
-             return visjsData;
-
-         };*/
-
-    self.getTestTriples = function () {
-        var triples = [
-            {
-                subject: "[OntObject]da24fcfc-796f-4dac-91a7-4154abdf7f22",
-                predicate: "http://www.w3.org/2002/07/owl#allValuesFrom",
-                object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BusinessProcess",
-            },
-            {
-                subject: "[OntObject]da24fcfc-796f-4dac-91a7-4154abdf7f22",
-                predicate: "http://www.w3.org/2002/07/owl#onProperty",
-                object: "[OntObject]http://purl.obolibrary.org/obo/BFO_0000054",
-            },
-            {
-                subject: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BusinessProcess",
-                predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-                object: "[OntObject]da24fcfc-796f-4dac-91a7-4154abdf7f22",
-            },
-        ];
-
-        triples = [
-            {
-                subject: "[OntObject]eb2b3d52-c5ae-4bbf-a52a-8ad9285bbe51",
-                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-                object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/PlanSpecification",
-            },
-            {
-                subject: "[OntObject]fe52eb26-6606-4153-9fab-062cc7c59c6c",
-                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-                object: "[OntObject]13501abe-51f3-4efc-ab99-ed7dc09bb338",
-            },
-            {
-                subject: "[OntObject]277998be-4825-4dff-a482-86324537737f",
-                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-                object: "[OntObject]fe52eb26-6606-4153-9fab-062cc7c59c6c",
-            },
-            {
-                subject: "[OntObject]13501abe-51f3-4efc-ab99-ed7dc09bb338",
-                predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-                object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BusinessOrganization",
-            },
-            {
-                subject: "[OntObject]13501abe-51f3-4efc-ab99-ed7dc09bb338",
-                predicate: "http://www.w3.org/2002/07/owl#onProperty",
-                object: "[OntObject]http://purl.obolibrary.org/obo/BFO_0000084",
-            },
-            {
-                subject: "[OntObject]d567db23-43c9-48de-9c63-3929d0ae14d8",
-                predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-                object: "[OntObject]f5d543ef-cddc-42d5-8b85-85f0f0cf624a",
-            },
-            {
-                subject: "[OntObject]a5d6384d-1090-4108-865a-30fdfc2abd78",
-                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-                object: "[OntObject]cdfab58a-7a6e-41fa-b58c-1c9531698af2",
-            },
-            {
-                subject: "[OntObject]d8adc221-3bbb-4577-b38f-007ccbd93671",
-                predicate: "http://www.w3.org/2002/07/owl#intersectionOf",
-                object: "[OntObject]277998be-4825-4dff-a482-86324537737f",
-            },
-            {
-                subject: "[OntObject]fe52eb26-6606-4153-9fab-062cc7c59c6c",
-                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-                object: "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
-            },
-            {
-                subject: "[OntObject]cdfab58a-7a6e-41fa-b58c-1c9531698af2",
-                predicate: "http://www.w3.org/2002/07/owl#onProperty",
-                object: "[OntObject]http://purl.obolibrary.org/obo/BFO_0000110",
-            },
-            {
-                subject: "[OntObject]f5d543ef-cddc-42d5-8b85-85f0f0cf624a",
-                predicate: "http://www.w3.org/2002/07/owl#intersectionOf",
-                object: "[OntObject]eb2b3d52-c5ae-4bbf-a52a-8ad9285bbe51",
-            },
-            {
-                subject: "[OntObject]a5d6384d-1090-4108-865a-30fdfc2abd78",
-                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-                object: "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
-            },
-            {
-                subject: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BusinessProcess",
-                predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-                object: "[OntObject]d567db23-43c9-48de-9c63-3929d0ae14d8",
-            },
-            {
-                subject: "[OntObject]eb2b3d52-c5ae-4bbf-a52a-8ad9285bbe51",
-                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-                object: "[OntObject]a5d6384d-1090-4108-865a-30fdfc2abd78",
-            },
-            {
-                subject: "[OntObject]277998be-4825-4dff-a482-86324537737f",
-                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-                object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/ObjectiveSpecification",
-            },
-            {
-                subject: "[OntObject]cdfab58a-7a6e-41fa-b58c-1c9531698af2",
-                predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-                object: "[OntObject]d8adc221-3bbb-4577-b38f-007ccbd93671",
-            },
-            {
-                subject: "[OntObject]d567db23-43c9-48de-9c63-3929d0ae14d8",
-                predicate: "http://www.w3.org/2002/07/owl#onProperty",
-                object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/prescribedBy",
-            },
-        ];
-        return triples;
-    };
     return self;
 })();
 

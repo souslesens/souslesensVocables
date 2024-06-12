@@ -58,7 +58,8 @@ var KGbuilder_triplesMaker = {
 
                         }
                         if (line[key] && !KGbuilder_triplesMaker.isUri(line[key])) {
-                            line[key] = util.formatStringForTriple(line[key]);
+                            //applied two times
+                            //line[key] = util.formatStringForTriple(line[key]);
                         }
                     }
                 }
@@ -88,6 +89,9 @@ var KGbuilder_triplesMaker = {
                                 function(callbackSeries) {
                                     KGbuilder_triplesMaker.getTripleSubject(tableMappings, mapping, line, function(err, result) {
                                         if (err) {
+                                            if(err.indexOf('no mapping.subject')>-1){
+                                                return callbackEachMapping();
+                                            }
                                             return callbackSeries(err);
                                         }
                                         subjectStr = result;
@@ -181,10 +185,9 @@ var KGbuilder_triplesMaker = {
         } else if (tableMappings.transform && tableMappings.transform[mapping.s]) {
             try {
                 if (line[mapping.s]) {
-                    subjectStr = tableMappings.transform[mapping.s](line[mapping.s], "s", mapping.p, line, mapping);
-                } else {
-                    subjectStr = tableMappings.transform[mapping.s](mapping.s, "s", mapping.p, line, mapping);
-                }
+                   
+                    subjectStr = tableMappings.transform[mapping.s]( util.formatStringForTriple(line[mapping.s],true), "s", mapping.p, line, mapping);
+                } 
                 //   return callback(null,subjectStr);
             } catch (e) {
                 return callback((lineError = e + " " + mapping.s));
@@ -258,27 +261,39 @@ var KGbuilder_triplesMaker = {
         } else if (typeof mapping.o === "string" && mapping.o.endsWith("_$") || mapping.isObjectBlankNode) {
             objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
             return callback(null, objectStr);
-        } else if (tableMappings.transform && tableMappings.transform[mapping.o]) {
-            try {
-                if (line[mapping.o]) {
-                    objectStr = tableMappings.transform[mapping.o](line[mapping.o], "o", mapping.p, line, mapping);
-                } else {
-                    objectStr = "";//tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
-                }
-                // return callback(null,objectStr);
-            } catch (e) {
-                return (lineError = e + " " + mapping.o);
-            }
-        } else {
+        } 
+        else {
+            var isTransform=false;
             if (!line[mapping.o] || line[mapping.o] == "null") {
                 return callback(null, null);
-            } else if (mapping.dataType) {
+            } 
+            if (tableMappings.transform && tableMappings.transform[mapping.o]) {
+                try {
+                    if (line[mapping.o]) {
+                        if(mapping.dataType||mapping.isString){
+                            objectStr = tableMappings.transform[mapping.o](util.formatStringForTriple(line[mapping.o],false), "o", mapping.p, line, mapping);
+                        }else{
+                            objectStr = tableMappings.transform[mapping.o](util.formatStringForTriple(line[mapping.o],true), "o", mapping.p, line, mapping);
+                            
+                        }
+                        isTransform=true;
+                    } else {
+                        objectStr = "";//tableMappings.transform[mapping.o](mapping.o, "o", mapping.p, line, mapping);
+                    }
+                    // return callback(null,objectStr);
+                } catch (e) {
+                    return (lineError = e + " " + mapping.o);
+                }
+            } 
+            
+            if (mapping.dataType) {
                 var str = line[mapping.o];
                 if (!str || str == "null") {
                     return callback(null, null);
                 }
                 if (mapping.dataType.startsWith("xsd:date")) {
                     if (str.match(/[.-]*Z/)) {//ISO string format (coming from database)
+                       str=util.formatStringForTriple(str);
                        str=util.convertISOStringDateForTriple(str);
                     } else if (mapping.dateFormat) {
                         str = util.getDateFromSLSformat(mapping.dateFormat, str);
@@ -316,12 +331,16 @@ var KGbuilder_triplesMaker = {
                     return callback(null, null);
                 }
                 if (mapping.dataType == "xsd:string") {
+                    
                     str = util.formatStringForTriple(str, false);
                 }
 
                 objectStr = "\"" + str + "\"^^" + mapping.dataType;
             } else {
-                objectStr = line[mapping.o];
+                if(isTransform==false){
+                    objectStr = line[mapping.o];
+                } 
+                
             }
 
             if (mapping.lookup_o) {
@@ -381,12 +400,12 @@ var KGbuilder_triplesMaker = {
         }
         return callback(null, propertyStr);
     },
-    getRestrictionTriples: function(mapping, subjectStr, propertyStr, ObjectStr, callback) {
+    getRestrictionTriples: function(mapping, subjectStr, propertyStr, objectStr, callback) {
         var restrictionTriples = [];
         var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
 
-        if (!KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + prop + "_" + objectStr]) {
-            KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + prop + "_" + objectStr] = 1;
+        if (!KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr]) {
+            KGbuilder_triplesMaker.existingTriples[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
             restrictionTriples.push({
                 s: blankNode,
                 p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",

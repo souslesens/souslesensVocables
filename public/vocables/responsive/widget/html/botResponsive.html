@@ -9,8 +9,9 @@
         <button id="displayGraphBot" class="w3-button slsv-invisible-button" onclick="BotEngine.exportToGraph()" style="display: none" popUpComment="Graph">G</button>
         <button id="previousButtonBot" class="w3-button slsv-invisible-button previousIcon" onclick="BotEngine.previousStep()" popUpComment="Previous"></button>
         <button id="resetButtonBot" class="w3-button slsv-invisible-button resetIcon" onclick="BotEngine.reset()" popUpComment="Reset"></button>
+        <button id="KGcreatorBot_exportToGraph" onclick="_botEngine.exportToGraph()">Graph</button>
     </div>
-    <div style="display: flex; flex-direction: column; justify-content: center; width: 100%; margin-bottom: 20px">
+    <div style="display: flex; flex-direction: column; justify-content: center; width: 100%; margin-bottom: 20px; margin-left: 10px">
         <!--<div id="botFilterProposalDiv">filter <input id="botFilterProposalInput" /></div>-->
 
         <div id="botFilterProposalDiv" class="input-group mb-3" style="width: 100%; margin-top: 20px">
@@ -21,6 +22,7 @@
             </div>
             <input id="botFilterProposalInput" style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px" value="" onkeyup="BotEngine.filterList(event)" />
         </div>
+
         <select id="bot_resourcesProposalSelect" size="10"></select>
     </div>
 </div>

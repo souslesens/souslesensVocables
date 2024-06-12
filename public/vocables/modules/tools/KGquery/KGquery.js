@@ -632,7 +632,7 @@ var KGquery = (function () {
                     value = item[col].value;
 
                     //format date
-                    if (item[col].datatype == "http://www.w3.org/2001/XMLSchema#datetime") {
+                    if (item[col].datatype == "http://www.w3.org/2001/XMLSchema#dateTime") {
                         var p = value.indexOf("T00:00:00.000Z");
                         if (p > -1) {
                             value = value.substring(0, p);
@@ -665,7 +665,8 @@ var KGquery = (function () {
                 var dataItem = self.currentData[datasetIndex];
                 var varName = self.tableCols[index.column].title;
                 if (true || !dataItem[varName]) {
-                    varName = varName.split("_")[0];
+                    varName = KGquery.currentSelectedPredicates.filter((key) => key.id == varName)[0].data.varName;
+                    //varName = varName.split("_")[0];
                 }
                 var uri = dataItem[varName].value;
                 var node = { data: { id: uri } };

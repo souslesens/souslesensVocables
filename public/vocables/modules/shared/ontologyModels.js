@@ -92,7 +92,7 @@ var OntologyModels = (function () {
                                 Sparql_common.getVariableLangLabel("prop", true, true) +
                                 "optional{?prop owl:inverseOf ?inverseProp}" +
                                 "optional{?prop rdfs:subPropertyOf ?superProperty}" +
-                                " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty owl:AnnotationProperty} }";
+                                " VALUES ?o {rdf:Property owl:ObjectProperty}}"; // owl:OntologyProperty owl:AnnotationProperty} }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -635,7 +635,10 @@ var OntologyModels = (function () {
         });
     };
 
-    self.getAllowedPropertiesBetweenNodes = function (source, startNodeIds, endNodeIds, callback) {
+    self.getAllowedPropertiesBetweenNodes = function (source, startNodeIds, endNodeIds, options, callback) {
+        if (!options) {
+            options = {};
+        }
         var startNodeAncestors = [];
         var endNodeAncestors = [];
 
@@ -653,15 +656,22 @@ var OntologyModels = (function () {
         var startNodeAncestorIds = [];
         var endNodeAncestorIds = [];
         var allSources = [source];
-        if (!Array.isArray(startNodeIds)) {
+        if (!startNodeIds) {
+            startNodeIds = [];
+        } else if (!Array.isArray(startNodeIds)) {
             startNodeIds = [startNodeIds];
         }
-        if (!Array.isArray(endNodeIds)) {
+        if (!endNodeIds) {
+            endNodeIds = [];
+        } else if (endNodeIds && !Array.isArray(endNodeIds)) {
             endNodeIds = [endNodeIds];
         }
         async.series(
             [
                 function (callbackSeries) {
+                    if (startNodeIds.length == 0) {
+                        return callbackSeries();
+                    }
                     Sparql_OWL.getNodesAncestorsOrDescendants(source, startNodeIds, { excludeItself: 0, filter: filter }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -671,7 +681,7 @@ var OntologyModels = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    if (!endNodeIds) {
+                    if (endNodeIds.length == 0) {
                         return callbackSeries();
                     }
                     Sparql_OWL.getNodesAncestorsOrDescendants(source, endNodeIds, { excludeItself: 0, filter: filter }, function (err, result) {
@@ -726,38 +736,38 @@ var OntologyModels = (function () {
                         }
 
                         for (var property in sourceConstraintsAndRestrictions) {
-                            if (property == "http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality") {
-                                var x = 3;
-                            }
-
                             sourceConstraintsAndRestrictions[property].forEach(function (constraint) {
                                 constraint.source = _source;
                                 var domainOK = false;
                                 if (true || !allConstraints[property]) {
                                     allConstraints[property] = constraint;
 
-                                    if (constraint.domain) {
-                                        if (startNodeAncestorIds.indexOf(constraint.domain) > -1 || startNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class") {
+                                    if (constraint.domain && constraint.domain.startsWith("http")) {
+                                        if (
+                                            startNodeAncestorIds.length == 0 ||
+                                            startNodeAncestorIds.indexOf(constraint.domain) > -1 ||
+                                            startNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class"
+                                        ) {
                                             if (!constraint.range || constraint.range.indexOf("http") < 0 || endNodeIds.length == 0) {
-                                                propertiesMatchingStartNode.push(property);
+                                                if (propertiesMatchingStartNode.indexOf(property) < 0) propertiesMatchingStartNode.push(property);
                                             } else {
                                                 domainOK = true;
                                             }
                                         }
                                     }
-                                    if (constraint.range) {
-                                        if (endNodeAncestorIds.indexOf(constraint.range) > -1 || endNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class") {
+                                    if (constraint.range && constraint.range.startsWith("http")) {
+                                        if (endNodeAncestorIds.length == 0 || endNodeAncestorIds.indexOf(constraint.range) > -1 || endNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class") {
                                             if (domainOK) {
-                                                propertiesMatchingBoth.push(property);
+                                                if (propertiesMatchingBoth.indexOf(property) < 0) propertiesMatchingBoth.push(property);
                                             } else {
                                                 if (!constraint.domain || constraint.domain.indexOf("http") < 0) {
-                                                    propertiesMatchingEndNode.push(property);
+                                                    if (propertiesMatchingEndNode.indexOf(property) < 0) propertiesMatchingEndNode.push(property);
                                                 }
                                             }
                                         }
                                     }
                                     if (!constraint.domain && !constraint.range) {
-                                        noConstaintsArray.push(property);
+                                        if (noConstaintsArray.indexOf(property) < 0) noConstaintsArray.push(property);
                                     }
                                 }
                             });
@@ -767,33 +777,44 @@ var OntologyModels = (function () {
                     callbackSeries();
                 },
 
-                //remove matching superproperties
+                //remove matching superproperties if any in prop
                 function (callbackSeries) {
                     var propsToRemove = [];
 
-                    function recurse(propId) {
-                        if (allConstraints[propId]) {
-                            var superProp = allConstraints[propId].superProp;
-                            if (superProp) {
-                                if (validProperties.indexOf(superProp) > -1) {
-                                    if (propsToRemove.indexOf(superProp) < 0) {
+                    if (!options.keepSuperClasses) {
+                        function recurse(propId) {
+                            if (allConstraints[propId]) {
+                                var superProp = allConstraints[propId].superProp;
+
+                                if (superProp) {
+                                    if (propId == "http://purl.obolibrary.org/obo/BFO_0000111") var x = 4;
+                                    if (allConstraints[propId]) {
+                                        // if prop has constraints remove all valide superProps
+                                        if (superProp == "http://purl.obolibrary.org/obo/BFO_0000110") var x = 3;
+                                        if (superProp == "http://purl.obolibrary.org/obo/BFO_0000111") var x = 4;
                                         propsToRemove.push(superProp);
+                                    } else {
+                                        if (validProperties.indexOf(superProp) > -1) {
+                                            if (propsToRemove.indexOf(superProp) < 0) {
+                                                propsToRemove.push(superProp);
+                                            }
+                                        }
                                     }
+                                    recurse(superProp);
                                 }
-                                recurse(superProp);
                             }
                         }
-                    }
 
-                    propertiesMatchingBoth.forEach(function (propId) {
-                        recurse(propId);
-                    });
-                    propertiesMatchingStartNode.forEach(function (propId) {
-                        recurse(propId);
-                    });
-                    propertiesMatchingEndNode.forEach(function (propId) {
-                        recurse(propId);
-                    });
+                        propertiesMatchingBoth.forEach(function (propId) {
+                            recurse(propId);
+                        });
+                        propertiesMatchingStartNode.forEach(function (propId) {
+                            recurse(propId);
+                        });
+                        propertiesMatchingEndNode.forEach(function (propId) {
+                            recurse(propId);
+                        });
+                    }
 
                     validConstraints = { both: {}, domain: {}, range: {}, noConstraints: {} };
 
@@ -803,6 +824,7 @@ var OntologyModels = (function () {
                         }
                     });
                     propertiesMatchingStartNode.forEach(function (propId) {
+                        if (propId == "http://purl.obolibrary.org/obo/BFO_0000111") var x = 4;
                         if (propsToRemove.indexOf(propId) < 0) {
                             validConstraints["domain"][propId] = allConstraints[propId];
                         }
@@ -851,6 +873,103 @@ var OntologyModels = (function () {
             ],
             function (err) {
                 return callback(err, { constraints: validConstraints, nodes: { startNode: startNodeAncestorIds, endNode: endNodeAncestorIds } });
+            }
+        );
+    };
+
+    self.getPropertyDomainsAndRanges = function (source, propId, objectType, callback) {
+        if (!propId) {
+            return callback(null);
+        }
+
+        var allSources = [source];
+        if (Config.sources[source].imports) {
+            allSources = allSources.concat(Config.sources[source].imports);
+        }
+
+        var allDomains = {};
+        var allRanges = {};
+        async.eachSeries(
+            allSources,
+            function (source, callbackEach) {
+                async.series(
+                    [
+                        function (callbackSeries) {
+                            if (!Config.ontologiesVocabularyModels[source]) {
+                                return callbackSeries();
+                            }
+
+                            var constraint = Config.ontologiesVocabularyModels[source].restrictions[propId] || [];
+                            var constraints2 = Config.ontologiesVocabularyModels[source].constraints[propId] || [];
+
+                            if (!Array.isArray(constraints2)) {
+                                constraints2 = [constraints2];
+                            }
+                            if (constraints2.length == 0) {
+                            }
+                            constraint = constraint.concat(constraints2);
+
+                            constraint.forEach(function (item) {
+                                if (item.range) {
+                                    if (!allRanges[item.range]) {
+                                        allRanges[item.range] = { id: item.range, label: item.rangeLabel };
+                                    }
+                                }
+                                if (item.domain) {
+                                    if (!allDomains[item.domain]) {
+                                        allDomains[item.domain] = { id: item.domain, label: item.domainLabel };
+                                    }
+                                }
+                            });
+                            return callbackSeries();
+                        },
+                        function (callbackSeries) {
+                            //range subClasses
+                            if (objectType && objectType == "domain") {
+                                return callbackSeries();
+                            }
+                            Sparql_OWL.getAllDescendants(source, Object.keys(allRanges), "rdfs:subClassOf", {}, function (err, result) {
+                                if (err) {
+                                    return callback(err);
+                                }
+
+                                result.forEach(function (item) {
+                                    if (!allRanges[item.descendant.value]) {
+                                        allRanges[item.descendant.value] = {
+                                            id: item.descendant.value,
+                                            label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value),
+                                        };
+                                    }
+                                });
+                                callbackSeries();
+                            });
+                        },
+                        function (callbackSeries) {
+                            if (objectType && objectType == "range") {
+                                return callbackSeries();
+                            }
+                            Sparql_OWL.getAllDescendants(source, Object.keys(allDomains), "rdfs:subClassOf", {}, function (err, result) {
+                                if (err) {
+                                    return callback(err);
+                                }
+                                if (!allDomains[item.descendant.value]) {
+                                    allDomains[item.descendant.value] = {
+                                        id: item.descendant.value,
+                                        label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value),
+                                    };
+                                }
+
+                                callbackSeries();
+                            });
+                        },
+                    ],
+                    function (err) {
+                        callbackEach(err);
+                    }
+                );
+            },
+            function (err) {
+                return callback(null, { ranges: allRanges, domains: allDomains });
             }
         );
     };
@@ -1101,13 +1220,7 @@ var OntologyModels = (function () {
             "  filter (?prop not in (<http://souslesens.org/KGcreator#mappingFile>,<http://purl.org/dc/terms/created>))\n" +
             "\n" +
             "}";
-        /*   " WHERE {   \n" +
-            "  ?s rdf:type+ ?class.\n" +
-            "  ?class rdf:type owl:Class.\n" +
-            "  ?s owl:hasValue ?v.\n" +
-            " bind (datatype(?v) as ?datatype)\n" +
-            //  "   filter (t != '')\n" +
-            "}";*/
+
         let url = Config.sparql_server.url + "?format=json&query=";
 
         MainController.UI.message("loading ", false, true);
@@ -1191,6 +1304,90 @@ var OntologyModels = (function () {
                 }
                 if (childrenMap[classId]) {
                     childrenMap[classId].forEach(function (item) {
+                        if (!uniqueIds[item.id]) {
+                            uniqueIds[item.id] = 1;
+                            hierarchyArray.push(item);
+                            recurse(item.id, depth + 1);
+                        }
+                    });
+                }
+            }
+
+            recurse(baseClassId, 0);
+        }
+
+        return hierarchyArray;
+    };
+    self.getPropHierarchyTreeData = function (sourcelabel, baseClassId, direction, options) {
+        if (!options) {
+            options = {};
+        }
+
+        var sources = [sourcelabel];
+        if (Config.sources[sourcelabel].imports) {
+            sources = sources.concat(Config.sources[sourcelabel].imports);
+        }
+
+        var props = {};
+
+        sources.forEach(function (source) {
+            if (!Config.ontologiesVocabularyModels[source]) {
+                return;
+            }
+            for (var key in Config.ontologiesVocabularyModels[source].properties) {
+                var item = Config.ontologiesVocabularyModels[source].properties[key];
+                if (props[key]) {
+                    props[key].superClass = item.superProp;
+                } else {
+                    props[key] = item;
+                }
+            }
+        });
+        var hierarchyArray = [];
+        var uniqueIds = {};
+        if (direction == "ancestors") {
+            function recurse(propId) {
+                if (props[propId] && !uniqueIds[propId]) {
+                    uniqueIds[propId] = 1;
+                    hierarchyArray.push(props[propId]);
+                    if (props[propId].superProp) {
+                        recurse(props[propId].superProp);
+                    }
+                }
+            }
+
+            recurse(baseClassId);
+        } else if (direction == "descendants") {
+            if (!options.depth) {
+                var nClasses = Object.keys(props).length;
+                if (nClasses < 50) {
+                    options.depth = 4;
+                } else if (nClasses < 200) {
+                    options.depth = 2;
+                } else {
+                    options.depth = 1;
+                }
+            }
+
+            var childrenMap = {};
+            var uniqueIds = {};
+            hierarchyArray.push(props[baseClassId]);
+            for (var key in props) {
+                if (key == baseClassId) {
+                    var x = 3;
+                }
+                if (!childrenMap[props[key].superProp]) {
+                    childrenMap[props[key].superProp] = [];
+                }
+                childrenMap[props[key].superProp].push(props[key]);
+            }
+
+            function recurse(propId, depth) {
+                if (depth >= options.depth) {
+                    return;
+                }
+                if (childrenMap[propId]) {
+                    childrenMap[propId].forEach(function (item) {
                         if (!uniqueIds[item.id]) {
                             uniqueIds[item.id] = 1;
                             hierarchyArray.push(item);

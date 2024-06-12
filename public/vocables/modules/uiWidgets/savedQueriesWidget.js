@@ -86,7 +86,7 @@ var SavedQueriesWidget = (function () {
         });
     };
 
-    self.loadItem = function (uri, options) {
+    self.loadItem = function (uri, options, callback) {
         var filter = "FILTER (?s =<" + uri + ">) ";
         var options = {
             filter: filter,
@@ -102,7 +102,9 @@ var SavedQueriesWidget = (function () {
                 var predicate = triple.p.value;
                 if (predicate.indexOf(self.contentPredicate) > -1) {
                     var content = JSON.parse(atob(triple.o.value));
-
+                    if (callback) {
+                        return callback(null, content);
+                    }
                     return self.loadQueryFn(null, content);
                 }
             });

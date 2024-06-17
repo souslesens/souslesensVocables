@@ -264,6 +264,9 @@ var KGbuilder_triplesMaker = {
         } 
         else {
             var isTransform=false;
+            if(line[mapping.o]===0){
+                line[mapping.o]='0';
+            }
             if (!line[mapping.o] || line[mapping.o] == "null") {
                 return callback(null, null);
             } 

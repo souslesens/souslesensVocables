@@ -37,41 +37,7 @@ var Containers_query = (function () {
             if (err) {
                 return alert(err);
             }
-            var jstreeData = [];
-
-            var existingNodes = {};
-            result.results.bindings.forEach(function (item) {
-                var id = item.descendant.value;
-                var label = item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value);
-                var jstreeId = "_" + common.getRandomHexaId(5);
-
-                var parent = self.idsMap[item.descendantParent.value];
-
-                if (!self.idsMap[id]) {
-                    self.idsMap[id] = jstreeId;
-                }
-
-                if (!existingNodes[jstreeId]) {
-                    existingNodes[jstreeId] = 1;
-                }
-                var node = {
-                    id: self.idsMap[id],
-                    text: label,
-                    parent: parent,
-                    type: "Container",
-                    data: {
-                        type: "Container",
-                        source: source,
-                        id: id,
-                        label: label,
-                        parent: parent,
-                        //tabId: options.tabId,
-                    },
-                };
-                jstreeData.push(node);
-            });
-            var parent = self.idsMap[container.data.id];
-            JstreeWidget.addNodesToJstree(self.jstreeDivId, parent, jstreeData);
+            callback(err,result);
         });
     };
 

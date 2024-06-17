@@ -2306,6 +2306,10 @@ var Sparql_OWL = (function () {
         });
     };
 
+
+
+
+
     self.getAllTriples = function (sourceLabel, role, ids, options, callback) {
         if (!options) {
             options = {};

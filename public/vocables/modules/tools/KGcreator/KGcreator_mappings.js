@@ -295,7 +295,7 @@ tripleObj.objectIsSpecificUri = true;
         if (!prefix) {
             return;
         }
-        var str = "if(mapping.isString && role=='o') return value; else return '" + prefix + "-'+value;";
+        var str = "if((mapping.isString||mapping.dataType) && role=='o') return value; else return '" + prefix + "-'+value;";
         $("#KGcreator_fnBody").val(str);
     };
     self.testFunction = function () {

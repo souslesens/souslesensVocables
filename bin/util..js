@@ -230,7 +230,7 @@ var util = {
             return str;
         }
         str = str.trim();
-        if (str.indexOf("http://") == 0) {
+        if (str.indexOf("http://") == 0 || str.indexOf("https://") == 0 ) {
             return str;
         }
         if (!str || !str.replace) {

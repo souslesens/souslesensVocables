@@ -753,16 +753,16 @@ defaultLang = 'en';*/
 
             var str = "<b>Property restrictions</b><table>";
             result.forEach(function (item) {
-                var sourceLabel = item.sourceClassLabel ? item.sourceClassLabel.value : Sparql_common.getLabelFromURI(item.sourceClass.value);
-                var targetLabel = item.targetClassLabel ? item.targetClassLabel.value : Sparql_common.getLabelFromURI(item.targetClass.value);
-
                 str += "<tr class='infos_table'>";
-
-                str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.sourceClass.value + "\")'>" + sourceLabel + "</td>";
-
+                if (item.sourceClass) {
+                    var sourceLabel = item.sourceClassLabel ? item.sourceClassLabel.value : Sparql_common.getLabelFromURI(item.sourceClass.value);
+                    str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.sourceClass.value + "\")'>" + sourceLabel + "</td>";
+                }
                 str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.restriction.value + "\")'>" + item.restriction.value + "</td>";
-
-                str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.targetClass.value + "\")'>" + targetLabel + "</td>";
+                if (item.targetClass) {
+                    var targetLabel = item.targetClassLabel ? item.targetClassLabel.value : Sparql_common.getLabelFromURI(item.targetClass.value);
+                    str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.targetClass.value + "\")'>" + targetLabel + "</td>";
+                }
 
                 str += "</tr>";
             });
@@ -841,6 +841,11 @@ defaultLang = 'en';*/
                     });
                 }
             });
+            jstreeData.forEach(function (item) {
+                if (!uniqueIds[item.parent]) {
+                    item.parent = "#";
+                }
+            });
         }
 
         var html = "<b><div  class='nodesInfos_titles'>Class hierarchy</div></b>" + "<div id='classHierarchyTreeDiv' style='width:300px;height: 330px;overflow: auto;font-size: 12px'></div>";
@@ -868,6 +873,82 @@ defaultLang = 'en';*/
                                         source: sourceLabel,
                                     },
                                 });
+                            }
+                        });
+                        jstreeData.forEach(function (item) {
+                            if (!uniqueIds[item.parent]) {
+                                item.parent = "#";
+                            }
+                        });
+                        JstreeWidget.addNodesToJstree("classHierarchyTreeDiv", null, jstreeData);
+                    }
+                } else {
+                    NodeInfosWidget.showNodeInfos(sourceLabel, obj.node, "mainDialogDiv");
+                }
+            },
+        };
+
+        JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
+
+        callback();
+    };
+    self.showPropBreakdown = function (sourceLabel, nodeId, divId, callback) {
+        var jstreeData = [];
+        var ancestors = OntologyModels.getPropHierarchyTreeData(sourceLabel, nodeId, "ancestors");
+        var uniqueIds = {};
+        if (ancestors.length > 0) {
+            ancestors.forEach(function (item) {
+                if (!uniqueIds[item.id]) {
+                    var parent = item.superProp || "#";
+                    uniqueIds[item.id] = 1;
+                    jstreeData.push({
+                        id: item.id,
+                        text: item.label,
+                        parent: parent,
+                        type: "Property",
+                        data: {
+                            id: item.id,
+                            source: sourceLabel,
+                        },
+                    });
+                }
+            });
+            jstreeData.forEach(function (item) {
+                if (!uniqueIds[item.parent]) {
+                    item.parent = "#";
+                }
+            });
+        }
+        var html = "<b><div  class='nodesInfos_titles'>Properties hierarchy</div></b>" + "<div id='classHierarchyTreeDiv' style='width:300px;height: 330px;overflow: auto;font-size: 12px'></div>";
+
+        $("#" + divId).html(html);
+
+        var options = {
+            openAll: true,
+            selectTreeNodeFn: function (event, obj) {
+                if (!obj.event.ctrlKey) {
+                    var descendants = OntologyModels.getPropHierarchyTreeData(sourceLabel, obj.node.id, "descendants");
+                    var jstreeData = [];
+                    var uniqueIds = JstreeWidget.getNodeDescendants("classHierarchyTreeDiv", "#", null, true);
+                    if (descendants.length > 0) {
+                        descendants.forEach(function (item) {
+                            if (!uniqueIds[item.id]) {
+                                uniqueIds[item.id] = 1;
+                                jstreeData.push({
+                                    id: item.id,
+                                    text: item.label,
+                                    parent: item.superProp,
+                                    type: "Property",
+                                    data: {
+                                        id: item.id,
+                                        source: sourceLabel,
+                                    },
+                                });
+                            }
+                        });
+                        jstreeData.forEach(function (item) {
+                            if (!uniqueIds[item.parent]) {
+                                item.parent = "#";
                             }
                         });
 

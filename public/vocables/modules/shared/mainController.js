@@ -434,11 +434,11 @@ var MainController = (function () {
                     ResponsiveUI.source = source;
                 }
                 ResponsiveUI.onToolSelect(tool);
-
+                /*
                 if (window.history.pushState && url.indexOf("localhost") < 0) {
                     var url = url.substring(0, url.indexOf("?"));
                     window.history.pushState({}, "SLS", url);
-                }
+                }*/
             }
         } else {
             callback();

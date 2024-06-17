@@ -753,16 +753,16 @@ defaultLang = 'en';*/
 
             var str = "<b>Property restrictions</b><table>";
             result.forEach(function (item) {
-                var sourceLabel = item.sourceClassLabel ? item.sourceClassLabel.value : Sparql_common.getLabelFromURI(item.sourceClass.value);
-                var targetLabel = item.targetClassLabel ? item.targetClassLabel.value : Sparql_common.getLabelFromURI(item.targetClass.value);
-
                 str += "<tr class='infos_table'>";
-
-                str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.sourceClass.value + "\")'>" + sourceLabel + "</td>";
-
+                if (item.sourceClass) {
+                    var sourceLabel = item.sourceClassLabel ? item.sourceClassLabel.value : Sparql_common.getLabelFromURI(item.sourceClass.value);
+                    str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.sourceClass.value + "\")'>" + sourceLabel + "</td>";
+                }
                 str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.restriction.value + "\")'>" + item.restriction.value + "</td>";
-
-                str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.targetClass.value + "\")'>" + targetLabel + "</td>";
+                if (item.targetClass) {
+                    var targetLabel = item.targetClassLabel ? item.targetClassLabel.value : Sparql_common.getLabelFromURI(item.targetClass.value);
+                    str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.targetClass.value + "\")'>" + targetLabel + "</td>";
+                }
 
                 str += "</tr>";
             });
@@ -841,6 +841,11 @@ defaultLang = 'en';*/
                     });
                 }
             });
+            jstreeData.forEach(function (item) {
+                if (!uniqueIds[item.parent]) {
+                    item.parent = "#";
+                }
+            });
         }
 
         var html = "<b><div  class='nodesInfos_titles'>Class hierarchy</div></b>" + "<div id='classHierarchyTreeDiv' style='width:300px;height: 330px;overflow: auto;font-size: 12px'></div>";
@@ -870,7 +875,11 @@ defaultLang = 'en';*/
                                 });
                             }
                         });
-
+                        jstreeData.forEach(function (item) {
+                            if (!uniqueIds[item.parent]) {
+                                item.parent = "#";
+                            }
+                        });
                         JstreeWidget.addNodesToJstree("classHierarchyTreeDiv", null, jstreeData);
                     }
                 } else {
@@ -904,6 +913,11 @@ defaultLang = 'en';*/
                     });
                 }
             });
+            jstreeData.forEach(function (item) {
+                if (!uniqueIds[item.parent]) {
+                    item.parent = "#";
+                }
+            });
         }
         var html = "<b><div  class='nodesInfos_titles'>Properties hierarchy</div></b>" + "<div id='classHierarchyTreeDiv' style='width:300px;height: 330px;overflow: auto;font-size: 12px'></div>";
 
@@ -930,6 +944,11 @@ defaultLang = 'en';*/
                                         source: sourceLabel,
                                     },
                                 });
+                            }
+                        });
+                        jstreeData.forEach(function (item) {
+                            if (!uniqueIds[item.parent]) {
+                                item.parent = "#";
                             }
                         });
 

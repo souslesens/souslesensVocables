@@ -37,7 +37,7 @@ var Containers_query = (function () {
             if (err) {
                 return alert(err);
             }
-            callback(err,result);
+            callback(err, result);
         });
     };
 

@@ -754,16 +754,16 @@ defaultLang = 'en';*/
             var str = "<b>Property restrictions</b><table>";
             result.forEach(function (item) {
                 str += "<tr class='infos_table'>";
-                if(item.sourceClass){
+                if (item.sourceClass) {
                     var sourceLabel = item.sourceClassLabel ? item.sourceClassLabel.value : Sparql_common.getLabelFromURI(item.sourceClass.value);
                     str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.sourceClass.value + "\")'>" + sourceLabel + "</td>";
                 }
                 str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.restriction.value + "\")'>" + item.restriction.value + "</td>";
-                if(item.targetClass){
+                if (item.targetClass) {
                     var targetLabel = item.targetClassLabel ? item.targetClassLabel.value : Sparql_common.getLabelFromURI(item.targetClass.value);
                     str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.targetClass.value + "\")'>" + targetLabel + "</td>";
                 }
-                
+
                 str += "</tr>";
             });
             $("#" + divId).append(str);
@@ -841,9 +841,9 @@ defaultLang = 'en';*/
                     });
                 }
             });
-            jstreeData.forEach(function(item){
-                if(!uniqueIds[item.parent]){
-                    item.parent='#';
+            jstreeData.forEach(function (item) {
+                if (!uniqueIds[item.parent]) {
+                    item.parent = "#";
                 }
             });
         }
@@ -875,9 +875,9 @@ defaultLang = 'en';*/
                                 });
                             }
                         });
-                        jstreeData.forEach(function(item){
-                            if(!uniqueIds[item.parent]){
-                                item.parent='#';
+                        jstreeData.forEach(function (item) {
+                            if (!uniqueIds[item.parent]) {
+                                item.parent = "#";
                             }
                         });
                         JstreeWidget.addNodesToJstree("classHierarchyTreeDiv", null, jstreeData);
@@ -913,9 +913,9 @@ defaultLang = 'en';*/
                     });
                 }
             });
-            jstreeData.forEach(function(item){
-                if(!uniqueIds[item.parent]){
-                    item.parent='#';
+            jstreeData.forEach(function (item) {
+                if (!uniqueIds[item.parent]) {
+                    item.parent = "#";
                 }
             });
         }
@@ -946,9 +946,9 @@ defaultLang = 'en';*/
                                 });
                             }
                         });
-                        jstreeData.forEach(function(item){
-                            if(!uniqueIds[item.parent]){
-                                item.parent='#';
+                        jstreeData.forEach(function (item) {
+                            if (!uniqueIds[item.parent]) {
+                                item.parent = "#";
                             }
                         });
 

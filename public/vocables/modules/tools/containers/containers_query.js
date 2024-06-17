@@ -37,6 +37,9 @@ var Containers_query = (function () {
             if (err) {
                 return alert(err);
             }
+
+            return callback(null, result);
+
             var jstreeData = [];
 
             var existingNodes = {};

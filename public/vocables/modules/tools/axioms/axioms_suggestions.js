@@ -13,6 +13,11 @@ var Axioms_suggestions = (function() {
                 function(callbackSeries) {
                     //call sever for Manchester suggestions
                     var axiomText = Axioms_editor.getAxiomText() + " ";
+
+                    var content=Axioms_editor.getAxiomContent();
+                    console.log(content.toString())
+
+
                     var selectedLabel = selectedObject.label;
                     if (selectedObject.resourceType == "Class") {
                         selectedLabel = "_" + selectedLabel;
@@ -147,6 +152,9 @@ var Axioms_suggestions = (function() {
         if (!classId) {
             return callback(null, []);
         }
+
+
+
         OntologyModels.getAllowedPropertiesBetweenNodes(Axioms_editor.currentSource, classId, null, { keepSuperClasses: true }, function(err, result) {
             if (err) {
                 return callback(err);

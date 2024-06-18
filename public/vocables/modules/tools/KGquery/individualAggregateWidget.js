@@ -35,6 +35,7 @@ var IndividualAggregateWidget = (function () {
                             var label = (item.alias || item.label) + "_" + prop.label;
 
                             var obj = { label: label, item: item, prop: prop, classLabel: item.data.label };
+
                             self.allProperties[label] = obj;
                             if (groupByTypes.indexOf(prop.datatype) > -1) {
                                 self.groupByClassesMap[label] = obj;
@@ -80,8 +81,8 @@ var IndividualAggregateWidget = (function () {
         }
 
         whereStr += getWhereClause(groupByObj);
-        selectStr += " ?" + groupByObj.label + " ?" + groupByObj.classLabel + "  ";
-        groupByStr += " ?" + groupByObj.label + " ?" + groupByObj.classLabel + "  ";
+        selectStr += " ?" + groupByObj.label;// + " ?" + groupByObj.classLabel + "  ";
+        groupByStr += " ?" + groupByObj.label;//+ " ?" + groupByObj.classLabel + "  ";
         var groupByPredicates = {};
         groupByPredicates[groupByObj.label] = self.allProperties[groupByObj.label];
         groupFunctions.forEach(function (fn) {

@@ -240,18 +240,24 @@ var KGquery_graph = (function () {
                     });
                     //    self.KGqueryGraph.data.nodes.update(visjsData.nodes);
                     KGquery_graph.message("", true);
+
                     self.KGqueryGraph.network.moveTo({
                         position: { x: 0, y: 0 }, // Position centrale, à ajuster si nécessaire
-                        scale: 1.7, // Facteur de zoom très faible pour dézoomer au maximum
+                        scale: 1 / 0.9,
                     });
                     self.KGqueryGraph.onScaleChange();
-                    var nodes_wt_position = [];
+
+                    var nodes_sizes = [];
                     self.KGqueryGraph.data.nodes.get().forEach(function (node) {
-                        delete node.x;
-                        delete node.y;
-                        nodes_wt_position.push(node);
+                        //delete node.x;
+                        //delete node.y;
+                        if (node.size) {
+                            node.originalSize = node.size;
+                        }
+
+                        nodes_sizes.push(node);
                     });
-                    self.KGqueryGraph.data.nodes.update(nodes_wt_position);
+                    self.KGqueryGraph.data.nodes.update(nodes_sizes);
                 });
 
                 //  KGquery.clearAll();

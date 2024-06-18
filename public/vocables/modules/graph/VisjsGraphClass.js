@@ -254,7 +254,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     }
                 }
             });
-
         if (callback) {
             var intervalIncrement = 0;
             var interval = setInterval(function () {
@@ -445,7 +444,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                             node.size = size;
                             node.font = { size: fontSize };
                             self.labelsVisible = true;
-                            node.fixed = false;
+                            //node.fixed = false;
                         } else {
                             node.label = null;
                             node.size = size;
@@ -454,7 +453,13 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
                         //nodes.push(node);
                     }
+                    if (node.x || node.y) {
+                        var currentPositions = self.network.getPositions(node.id);
+                        node.x = currentPositions[node.id].x;
+                        node.y = currentPositions[node.id].y;
+                    }
                 });
+
                 self.data.nodes.update(nodes);
             }
             self.currentScale = scale;

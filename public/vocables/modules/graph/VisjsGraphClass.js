@@ -453,14 +453,13 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
                         //nodes.push(node);
                     }
-                    if(node.x || node.y){
-                        var currentPositions=self.network.getPositions(node.id);
-                        node.x=currentPositions[node.id].x;
-                        node.y=currentPositions[node.id].y;
+                    if (node.x || node.y) {
+                        var currentPositions = self.network.getPositions(node.id);
+                        node.x = currentPositions[node.id].x;
+                        node.y = currentPositions[node.id].y;
                     }
                 });
 
-                
                 self.data.nodes.update(nodes);
             }
             self.currentScale = scale;
@@ -842,7 +841,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             node.x = node.x || 0;
             node.y = node.y || 0;
         });*/
-   
+
         var data = {
             nodes: nodes,
             edges: self.data.edges.get(),

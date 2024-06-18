@@ -253,7 +253,22 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                         self.data.nodes.update(newNodes);
                     }
                 }
-            });
+            }).on('stabilized', function (params) {
+                    // Position updating after moving;
+                    /*var nodes=self.data.nodes.get();
+                    if(nodes){
+                        nodes.forEach(function(node){
+                            if(node.x || node.y){
+                                var currentPositions=self.network.getPositions(node.id);
+                                node.x=currentPositions[node.id].x;
+                                node.y=currentPositions[node.id].y;
+                            }
+    
+                        });
+                        self.data.nodes.update(nodes);
+                    }
+                    */
+             });
 
         if (callback) {
             var intervalIncrement = 0;
@@ -445,7 +460,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                             node.size = size;
                             node.font = { size: fontSize };
                             self.labelsVisible = true;
-                            node.fixed = false;
+                            //node.fixed = false;
                         } else {
                             node.label = null;
                             node.size = size;
@@ -454,7 +469,14 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
                         //nodes.push(node);
                     }
+                    if(node.x || node.y){
+                        var currentPositions=self.network.getPositions(node.id);
+                        node.x=currentPositions[node.id].x;
+                        node.y=currentPositions[node.id].y;
+                    }
                 });
+
+                
                 self.data.nodes.update(nodes);
             }
             self.currentScale = scale;
@@ -836,7 +858,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             node.x = node.x || 0;
             node.y = node.y || 0;
         });*/
-
+        var scale= self.network.getScale();
         var data = {
             nodes: nodes,
             edges: self.data.edges.get(),

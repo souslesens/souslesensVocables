@@ -256,8 +256,6 @@ var KGquery_graph = (function () {
                         scale: 1 / 0.9,
                     });
                     self.KGqueryGraph.onScaleChange();
-
-                    
                 });
 
                 //  KGquery.clearAll();

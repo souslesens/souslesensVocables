@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.75.1](https://github.com/souslesens/souslesensVocables/compare/1.75.0...1.75.1) (2024-06-19)
+
 ## [1.75.0](https://github.com/souslesens/souslesensVocables/compare/1.74.2...1.75.0) (2024-06-19)
 
 ### [1.74.2](https://github.com/souslesens/souslesensVocables/compare/1.74.1...1.74.2) (2024-06-12)

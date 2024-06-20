@@ -1,10 +1,5 @@
-const path = require("path");
-const ulid = require("ulid");
-const { configPath } = require("../../../model/config");
 const { profileModel } = require("../../../model/profiles");
-const profilesJSON = path.resolve(configPath + "/profiles.json");
-exports.profilesJSON = profilesJSON;
-const { sortObjectByKey, readResource, writeResource, resourceFetched, resourceUpdated, responseSchema, resourceCreated } = require("./utils");
+const { resourceFetched, responseSchema, resourceCreated } = require("./utils");
 const userManager = require("../../../bin/user.");
 
 module.exports = function () {

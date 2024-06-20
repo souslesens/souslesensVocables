@@ -84,7 +84,7 @@ async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>)
 
 type ProfileJson = {
     id?: string;
-    name?: string;
+    name: string;
     allowedSourceSchemas: string[];
     sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string[] | string;

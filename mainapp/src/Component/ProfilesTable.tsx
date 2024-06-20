@@ -293,7 +293,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
     const profilesSchema = create ? ProfileSchemaCreate : ProfileSchema;
-    const zo = useZorm("form", z.object(profilesSchema), { setupListeners: false, customIssues: issues });
+    const zo = useZorm("form", profilesSchema, { setupListeners: false, customIssues: issues });
     const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const treeStr = src.treeStr;
 

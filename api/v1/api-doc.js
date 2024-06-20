@@ -48,6 +48,24 @@ const apiDoc = {
             type: "object",
             additionalProperties: { $ref: "#/definitions/Database" },
         },
+        Tool: {
+            type: "object",
+            properties: {
+                type: {
+                    enum: ["tool", "plugin"],
+                },
+                name: {
+                    type: "string",
+                },
+                config: {},
+            },
+        },
+        Tools: {
+            type: "array",
+            items: {
+                $ref: "#/definitions/Tool",
+            },
+        },
         BlenderSources: {
             type: "object",
             additionalProperties: { $ref: "#/definitions/BlenderSource" },

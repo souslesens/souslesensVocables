@@ -1,12 +1,11 @@
 const { rdfDataModel } = require("../../../../model/rdfData");
-const { config } = require("../../../../model/config");
+const { mainConfigModel } = require("../../../../model/mainConfig");
 const userManager = require("../../../../bin/user.");
-const { sourceModel, SourceModel } = require("../../../../model/sources");
+const { sourceModel } = require("../../../../model/sources");
 const { ulid } = require("ulid");
 const path = require("path");
 const fs = require("fs");
 const os = require("node:os");
-
 
 module.exports = function () {
     let operations = {
@@ -14,7 +13,7 @@ module.exports = function () {
         POST,
     };
 
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
         try {
             const sourceName = req.query.source;
             const limit = req.query.limit;
@@ -38,7 +37,8 @@ module.exports = function () {
         }
     }
 
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
+        const config = await mainConfigModel.getConfig();
         const last = req.body.last;
         const id = req.body.identifier || ulid();
         const clean = req.body.clean;

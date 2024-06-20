@@ -1,15 +1,15 @@
 const fs = require("fs");
 const path = require("path");
 
-const { config } = require(path.resolve("model/config"));
+const { mainConfigModel } = require("../../../../model/mainConfig");
 
 module.exports = () => {
     const operations = { GET };
 
-    function GET(req, res, _next) {
+    async function GET(req, res, _next) {
         // XXX: Check format
         const date = req.params.period;
-
+        const config = await mainConfigModel.getConfig();
         const logPath = path.join(config.logDir, date === "current" ? "vocables.log" : `vocables.log.${date}`);
 
         if (!fs.existsSync(logPath)) {

@@ -1,12 +1,12 @@
-const path = require("path");
-const { config } = require(path.resolve("model/config"));
+const { mainConfigModel } = require("../../../../model/mainConfig");
 
 module.exports = function () {
     let operations = {
         GET,
     };
 
-    function GET(req, res, next) {
+    async function GET(req, res, next) {
+        const config = await mainConfigModel.getConfig();
         const result = {};
         // logout if aut is not disable
         if (config.auth !== "disabled") {

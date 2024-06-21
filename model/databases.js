@@ -188,8 +188,29 @@ class DatabaseModel {
         const result = await conn.raw(query);
         return { rowCount: result.rowCount, rows: result.rows };
     };
-}
 
+    /**
+     * @param {string} databaseId - the database id
+     * @param {string} tableName - the database table name
+     * @param {any[]} values - array of rows
+     * @params {string} select - select query
+     * @params {number} offset - query offset
+     * @params {number} limit - query limit
+     * @returns {Promise<any[]>} query result
+     */
+    batchSelect = async (databaseId, tableName, { values = [], select = "*", offset = 0, limit = 1000, noRecurs = false }) => {
+        const connection = await this.getConnection(databaseId);
+        const res = await connection.select(select).from(tableName).limit(limit).offset(offset);
+
+        const concat = values.concat(res);
+
+        if (noRecurs || res.length == 0) {
+            return concat;
+        }
+
+        return await this.batchSelect(databaseId, tableName, { values: concat, select: select, offset: offset + limit, limit: limit });
+    };
+}
 const databaseModel = new DatabaseModel(configDatabasesPath);
 
 module.exports = { DatabaseModel, databaseModel };

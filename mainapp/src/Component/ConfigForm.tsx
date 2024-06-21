@@ -107,10 +107,6 @@ const ConfigForm = () => {
                 <form ref={zo.ref}>
                     {notifier.element}
                     <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
-                        <Mui.Divider>
-                            <Mui.Chip label="Groups" size="small" />
-                        </Mui.Divider>
-
                         <Mui.Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
                             <Mui.FormControl>
                                 <Mui.InputLabel id={"default-groups-label"}>Default groups</Mui.InputLabel>
@@ -135,10 +131,6 @@ const ConfigForm = () => {
                             </Mui.FormControl>
                         </Mui.Stack>
 
-                        <Mui.Divider>
-                            <Mui.Chip label="Tools" size="small" />
-                        </Mui.Divider>
-
                         <Mui.Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
                             <Mui.FormControl>
                                 <Mui.InputLabel id={"available-tools-label"}>Available tools</Mui.InputLabel>
@@ -162,10 +154,6 @@ const ConfigForm = () => {
                                 {errorMessage(zo.errors.tools_available)}
                             </Mui.FormControl>
                         </Mui.Stack>
-
-                        <Mui.Divider>
-                            <Mui.Chip label="Theme" size="small" />
-                        </Mui.Divider>
 
                         <Mui.Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
                             <Mui.Autocomplete

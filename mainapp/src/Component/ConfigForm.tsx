@@ -185,9 +185,9 @@ const ConfigForm = () => {
                             {errorMessage(zo.errors.theme.selector)}
                         </Mui.Stack>
 
-                        <Mui.Stack direction="row">
+                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                             <Mui.Button type="submit" variant="contained">
-                                Save
+                                Save Settings
                             </Mui.Button>
                         </Mui.Stack>
                     </Mui.Stack>

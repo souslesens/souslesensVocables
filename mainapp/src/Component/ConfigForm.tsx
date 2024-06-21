@@ -36,6 +36,31 @@ function ZormStringArrayInputs({ arrayField, values }: { arrayField: FieldChain;
     );
 }
 
+interface Notification {
+    message: string;
+    severity?: Mui.AlertProps["severity"];
+}
+
+function useNotifier(): { notify: (state: Notification) => void; element: JSX.Element } {
+    const [notification, setNotification] = React.useState<Notification | null>(null);
+
+    const element = (
+        <Mui.Snackbar autoHideDuration={2000} open={notification !== null} onClose={() => setNotification(null)}>
+            {notification !== null ? (
+                <Mui.Alert onClose={() => setNotification(null)} severity={notification.severity} sx={{ width: "100%" }}>
+                    {notification.message}
+                </Mui.Alert>
+            ) : undefined}
+        </Mui.Snackbar>
+    );
+    return {
+        element,
+        notify(newNotification) {
+            setNotification(newNotification);
+        },
+    };
+}
+
 const ConfigForm = () => {
     const [allProfilesRD, setAllProfilesRD] = React.useState<RD<string, Profile[]>>(loading());
     const [allToolsRD, setAllToolsRD] = React.useState<RD<string, Tool[]>>(loading());
@@ -43,6 +68,8 @@ const ConfigForm = () => {
     const [availableTools, setAvailableTools] = React.useState<string[]>([]);
     const [defaultGroups, setDefaultGroups] = React.useState<string[]>([]);
     const allThemes = React.useMemo(() => getAvailableThemes(), []);
+
+    const notifier = useNotifier();
 
     const loadConfig = React.useCallback(() => {
         getConfig()
@@ -68,6 +95,7 @@ const ConfigForm = () => {
         onValidSubmit(event) {
             event.preventDefault();
             void updateConfig(event.data)
+                .then(() => notifier.notify({ message: "Settings correctly saved", severity: "success" }))
                 .catch(() => setConfigRD(failure("Couldn't save configuration")))
                 .then(loadConfig);
         },
@@ -77,6 +105,7 @@ const ConfigForm = () => {
         (config, allProfiles, allTools) => {
             return (
                 <form ref={zo.ref}>
+                    {notifier.element}
                     <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
                         <Mui.Divider>
                             <Mui.Chip label="Groups" size="small" />

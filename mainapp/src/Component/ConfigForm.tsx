@@ -120,10 +120,12 @@ const ConfigForm = () => {
                                     labelId="default-groups-label"
                                     value={defaultGroups}
                                     onChange={(e) => setDefaultGroups(e.target.value as string[])}
+                                    renderValue={(v) => v.join(", ")}
                                     multiple
                                 >
                                     {allProfiles.map((profile) => (
                                         <Mui.MenuItem key={profile.id} value={profile.id}>
+                                            <Mui.Checkbox checked={defaultGroups.includes(profile.id)} />
                                             {profile.id}
                                         </Mui.MenuItem>
                                     ))}
@@ -151,6 +153,7 @@ const ConfigForm = () => {
                                 >
                                     {allTools.map((tool) => (
                                         <Mui.MenuItem key={tool.name} value={tool.name} disabled={tool.name === "ConfigEditor"}>
+                                            <Mui.Checkbox checked={availableTools.includes(tool.name)} />
                                             {tool.name}&nbsp;<i style={{ opacity: 0.5 }}>({tool.type})</i>
                                         </Mui.MenuItem>
                                     ))}

@@ -1,7 +1,11 @@
 const fs = require("fs");
-const { SourceModel } = require("../model/sources");
-const { ProfileModel } = require("../model/profiles");
 const path = require("path");
+const { ToolModel } = require("../model/tools");
+const { ProfileModel } = require("../model/profiles");
+const { SourceModel } = require("../model/sources");
+
+const TOOL_MODEL = new ToolModel(path.join(__dirname, "data/plugins"));
+const PROFILE_MODEL = new ProfileModel(TOOL_MODEL, path.join(__dirname, "data/config/profiles.json"));
 
 describe("SourceModel", () => {
     /**
@@ -11,12 +15,12 @@ describe("SourceModel", () => {
     let sourceModel;
     let sourcesFromFiles;
     beforeAll(async () => {
-        sourceModel = new SourceModel(path.join(__dirname, "data/config/sources.json"), path.join(__dirname, "data/config/profiles.json"));
+        sourceModel = new SourceModel(PROFILE_MODEL, path.join(__dirname, "data/config/sources.json"));
         sourcesFromFiles = await fs.promises.readFile(path.join(__dirname, "data/config/sources.json")).then((data) => JSON.parse(data.toString()));
     });
 
     test("Can create instance", async () => {
-        new SourceModel(path.join(__dirname, "data/config/sources.json"));
+        new SourceModel(PROFILE_MODEL, path.join(__dirname, "data/config/sources.json"));
     });
 
     test("Can get all sources with readwrite access if user is admin", async () => {

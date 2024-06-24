@@ -1,7 +1,6 @@
 const fs = require("fs");
-const path = require("path");
 const { Lock } = require("async-await-mutex-lock");
-const { configProfilesPath, config, configPlugins } = require("./config");
+const { configProfilesPath, config } = require("./config");
 const { toolModel } = require("./tools");
 
 /**

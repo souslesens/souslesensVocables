@@ -1,7 +1,13 @@
 const allTools = {
     lineage: { label: "lineage", noSource: 0, controller: Lineage_r, toolDescriptionImg: null },
     KGcreator: { label: "KGcreator", noSource: 1, controller: KGcreator_r, toolDescriptionImg: null },
-    KGquery: { label: "KGquery", noSource: 0, controller: KGquery_r, toolDescriptionImg: null },
+    KGquery: {
+        label: "KGquery",
+        noSource: 0,
+        controller: KGquery_r,
+        toolDescriptionImg: null,
+        toTools: { Graph: "queryResultToVisjsGraph", TagsGeometry: "queryToTagsGeometry", TagsCalendar: "queryToTagsCalendar" },
+    },
     Standardizer: { label: "Standardizer", multiSources: 0, controller: Standardizer, toolDescriptionImg: null },
     TSF_Dictionary: { label: "TSF_Dictionary", noSource: 1, controller: Lineage_dictionary, toolDescriptionImg: null },
     SPARQL: { label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null },
@@ -27,8 +33,16 @@ async function loadToolsAndPlugins(callback) {
     }
 
     const userTools = {};
+    const availableToolName = allowedTools.resources.map((tool) => tool.name);
     allowedTools.resources.forEach(function (item) {
         userTools[item.name] = allTools[item.name];
+        if ("toTools" in userTools[item.name]) {
+            for (const toolName in allTools[item.name]) {
+                if (!toolName in availableToolName) {
+                    delete userTools[item.name].toTools[toolName];
+                }
+            }
+        }
     });
 
     // We mutate Config.userTools with an object merging plugins and tools

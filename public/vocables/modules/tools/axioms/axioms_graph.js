@@ -1,24 +1,23 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axioms_editor from "./axioms_editor.js";
-import Lineage_sources from "../lineage/lineage_sources.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import common from "../../shared/common.js";
 import Export from "../../shared/export.js";
-import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 
-var Axioms_graph = (function () {
+
+var Axioms_graph = (function() {
     var self = {};
 
-    self.manchesterriplestoSparqlBindings = function (source, manchesterTriples, callback) {
-        var escapeMarkup = function (str) {
+    self.manchesterriplestoSparqlBindings = function(source, manchesterTriples, callback) {
+        var escapeMarkup = function(str) {
             var str2 = str.replace(/</g, "&lt;");
             var str2 = str2.replace(/>/g, "&gt;");
             return str2;
         };
 
         var triplesMap = {};
-        manchesterTriples.forEach(function (item) {
+        manchesterTriples.forEach(function(item) {
             var uri = item.subject.replace("[OntObject]", "");
             triplesMap[uri] = { isBlank: !uri.startsWith("http") };
 
@@ -28,132 +27,178 @@ var Axioms_graph = (function () {
 
         var resourceIds = [];
         for (var uri in triplesMap) {
-            if (!triplesMap[uri].isBlank) resourceIds.push(uri);
+            if (!triplesMap[uri].isBlank) {
+                resourceIds.push(uri);
+            }
         }
-        var fromStr = Sparql_common.getFromStr(source, false, false);
-        var filterStr = Sparql_common.setFilter("s", resourceIds);
-        var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-/*
-        var query =
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-            " SELECT distinct ?sGraph ?oGraph ?s ?p  ?o ?sType ?oType  ?sLabel ?pLabel  ?oLabel ?sIsBlank ?oIsBlank " +
-            fromStr +
-            "      WHERE {   ?s ?p ?o." +
-            "  optional{ ?s rdf:type ?sType.}\n" +
-            "  optional{    ?o rdf:type ?oType.}\n" +
-            "  optional{   ?s rdfs:label ?sLabel.}\n" +
-            "  optional{   ?o rdfs:label ?oLabel.}\n" +
-            "  optional{    ?p rdfs:label ?pLabel.} \n" +
-            "  filter (?p in (rdf:type,rdfs:label))" +
-            filterStr +
-            "} limit 10000";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
-            if (err) {
-                return callback(err);
+        var data = [];
+        manchesterTriples.forEach(function(item) {
+            var subjectUri = item.subject.replace("[OntObject]", "");
+            var predicateUri = item.predicate.replace("[OntObject]", "");
+            var objectUri = item.object.replace("[OntObject]", "");
+
+            function getType(uri) {
+                if (uri.indexOf("http") > -1) {
+                    return "uri";
+                }
+                return "bnode";
             }
 
-            var bindings = [];
-            var data = []; //result.results.bindings
-            /*
- */
-        var data = [];
-        manchesterTriples.forEach(function (item) {
-                var subjectUri = item.subject.replace("[OntObject]", "");
-                var predicateUri = item.predicate.replace("[OntObject]", "");
-                var objectUri = item.object.replace("[OntObject]", "");
-
-                function getType(uri) {
-                    if (uri.indexOf("http") > -1) return "uri";
-                    return "bnode";
+            data.push({
+                s: {
+                    type: getType(subjectUri),
+                    value: subjectUri
+                },
+                p: {
+                    type: getType(predicateUri),
+                    value: predicateUri
+                },
+                o: {
+                    type: getType(objectUri),
+                    value: objectUri
                 }
-
-                data.push({
-                    s: {
-                        type: getType(subjectUri),
-                        value: subjectUri,
-                    },
-                    p: {
-                        type: getType(predicateUri),
-                        value: predicateUri,
-                    },
-                    o: {
-                        type: getType(objectUri),
-                        value: objectUri,
-                    },
-                });
             });
+        });
 
-            return callback(null, data);
-       // });
+        return callback(null, data);
+
     };
 
-    self.drawTriples = function (divId) {
+    self.drawTriples = function(divId) {
         divId = "Axioms_editor_triplesDataTableDiv";
         self.currentSource = Axioms_editor.currentSource;
         self.graphDivContainer = divId;
-        self.drawNodeAxioms(Axioms_editor.currentSource, Axioms_editor.currentNode.id, divId, {}, function (err, result) {
+        self.drawNodeAxiomsX(Axioms_editor.currentSource, Axioms_editor.currentNode.id, divId, {}, function(err, result) {
             //   self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource,self.sampleTriples,null,{},function(err, result){
         });
     };
 
-    self.showTriplesInDataTable = function (divId, data) {
-        var escapeMarkup = function (str) {
-            var str2 = str.replace(/</g, "&lt;");
-            var str2 = str2.replace(/>/g, "&gt;");
-            return str2;
-        };
-
-        var tableCols = [];
-        var hearders = ["subject", "predicate", "object"];
-        hearders.forEach(function (item) {
-            tableCols.push({ title: item, defaultContent: "", width: "30%" });
-        });
-
-        var tableData = [];
-        data.forEach(function (item, index) {
-            tableData.push([escapeMarkup(item.subject), escapeMarkup(item.predicate), escapeMarkup(item.object)]);
-        });
-
-        var str = "<table><tr><td>subject</td><td>predicate</td><td>object</td></tr>";
-        data.forEach(function (item, index) {
-            str += "<tr><td>" + escapeMarkup(item.subject) + "</td><td>" + escapeMarkup(item.predicate) + "</td><td>" + escapeMarkup(item.object) + "</td></tr>";
-        });
-        str += "</table>";
-
-        /*  $("#KGcreator_triplesDataTableDiv").html(str)
-          return;*/
-        Export.showDataTable(divId, tableCols, tableData, null, { paging: true }, function (err, datatable) {});
-    };
-
-
-
-
-    self.drawNodeAxioms = function (sourceLabel, nodeId, divId, options, callback) {
-        if (!options) options = {};
-
-        options.skipRestrictions = false;
-
-        var allBasicAxioms = {};
+    self.drawNodeAxioms = function(sourceLabel, nodeId, manchesterTriples, divId, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        self.graphDivContainer = divId;
         var nodeIdTree = {};
         var visjsData = { nodes: [], edges: [] };
+        if (!manchesterTriples) {
+            manchesterTriples = self.sampleTriples;
+        }
+        var triplesMap = {};
+
 
         async.series(
             [
                 //get all elementary axioms
-                function (callbackSeries) {
-                    self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource, self.sampleTriples, function (err, result) {
+                function(callbackSeries) {
+                    self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource, manchesterTriples, function(err, result) {
                         //  self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
                         if (err) {
                             return callback(err);
                         }
                         var graphtriplesMap = {}; //Sparql_common.getSourceGraphtriplesMap(self.currentSource);
-                        result.forEach(function (item) {
+                        result.forEach(function(item) {
                             var sType = item.sType ? item.sType.value : null;
                             var oType = item.oType ? item.oType.value : null;
                             var sLabel = item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value);
                             var pLabel = item.pLabel ? item.pLabel.value : Sparql_common.getLabelFromURI(item.p.value);
                             var oLabel = item.oLabel ? item.oLabel.value : Sparql_common.getLabelFromURI(item.o.value);
+                            if (Axioms_editor.allResourcesMap[item.p.value]) {
+                                sLabel = item.sLabel ? item.sLabel.value : Axioms_editor.allResourcesMap[item.s.value].label;
+                            }
+                            if (Axioms_editor.allResourcesMap[item.p.value]) {
+                                pLabel = item.pLabel ? item.pLabel.value : Axioms_editor.allResourcesMap[item.p.value].label;
+                            }
+                            if (Axioms_editor.allResourcesMap[item.o.value]) {
+                                oLabel = item.oLabel ? item.oLabel.value : Axioms_editor.allResourcesMap[item.o.value].label;
+                            }
+
+
+                            var sIsBlank = item.s.type == "bnode";
+                            var oIsBlank = item.o.type == "bnode";
+                            var sSource = item.sGraph ? graphtriplesMap[item.sGraph.value] : null;
+                            var oSource = item.oGraph ? graphtriplesMap[item.oGraph.value] : null;
+
+                            if (!triplesMap[item.s.value]) {
+
+                                triplesMap[item.s.value] = {
+                                    s: item.s.value,
+                                    sType: sType,
+                                    sLabel: sLabel,
+                                    sIsBlank: sIsBlank,
+                                    sSource: sSource
+                                };
+                                triplesMap[item.s.value].predicates = [];
+                            }
+                            if (item.p.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+                                triplesMap[item.s.value].sType = item.o.value;
+                            } else {
+                                triplesMap[item.s.value].predicates.push({ p: item.p.value, o: item.o.value });
+                            }
+
+                        });
+
+
+                        return callbackSeries();
+
+                    });
+                },
+
+                function(callbackSeries) {
+                    return callbackSeries();
+                }], function(err) {
+                if (err) {
+                    return alert(err);
+                    var x = triplesMap;
+                }
+            });
+
+
+    };
+
+    self.drawNodeAxiomsX = function(sourceLabel, nodeId, manchesterTiples, divId, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        self.graphDivContainer = divId;
+        options.skipRestrictions = false;
+
+        var allBasicAxioms = {};
+        var nodeIdTree = {};
+        var visjsData = { nodes: [], edges: [] };
+        if (!manchesterTiples) {
+            manchesterTiples = self.sampleTriples;
+        }
+
+        var nodeStyles = {};
+
+        async.series(
+            [
+                //get all elementary axioms
+                function(callbackSeries) {
+                    self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource, manchesterTiples, function(err, result) {
+                        //  self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        var graphtriplesMap = {}; //Sparql_common.getSourceGraphtriplesMap(self.currentSource);
+                        result.forEach(function(item) {
+                            var sType = item.sType ? item.sType.value : null;
+                            var oType = item.oType ? item.oType.value : null;
+                            var sLabel = item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value);
+                            var pLabel = item.pLabel ? item.pLabel.value : Sparql_common.getLabelFromURI(item.p.value);
+                            var oLabel = item.oLabel ? item.oLabel.value : Sparql_common.getLabelFromURI(item.o.value);
+                            if (Axioms_editor.allResourcesMap[item.p.value]) {
+                                sLabel = item.sLabel ? item.sLabel.value : Axioms_editor.allResourcesMap[item.s.value].label;
+                            }
+                            if (Axioms_editor.allResourcesMap[item.p.value]) {
+                                pLabel = item.pLabel ? item.pLabel.value : Axioms_editor.allResourcesMap[item.p.value].label;
+                            }
+                            if (Axioms_editor.allResourcesMap[item.o.value]) {
+                                oLabel = item.oLabel ? item.oLabel.value : Axioms_editor.allResourcesMap[item.o.value].label;
+                            }
+
+
                             var sIsBlank = item.s.type == "bnode";
                             var oIsBlank = item.o.type == "bnode";
                             var sSource = item.sGraph ? graphtriplesMap[item.sGraph.value] : null;
@@ -165,7 +210,7 @@ var Axioms_graph = (function () {
                                     sType: sType,
                                     sLabel: sLabel,
                                     sIsBlank: sIsBlank,
-                                    sSource: sSource,
+                                    sSource: sSource
                                 };
                                 allBasicAxioms[item.s.value].objects = [];
                             }
@@ -176,7 +221,7 @@ var Axioms_graph = (function () {
                                     sType: oType,
                                     sLabel: oLabel,
                                     sIsBlank: oIsBlank,
-                                    sSource: oSource,
+                                    sSource: oSource
                                 };
                                 allBasicAxioms[item.o.value].objects = [];
                             }
@@ -188,7 +233,7 @@ var Axioms_graph = (function () {
                                 oIsBlank: oIsBlank,
                                 oSource: oSource,
                                 p: item.p.value,
-                                pLabel: pLabel,
+                                pLabel: pLabel
                             });
                         });
                         return callbackSeries();
@@ -196,19 +241,19 @@ var Axioms_graph = (function () {
                 },
 
                 //get nodes Source
-                function (callbackSeries) {
-                    return callbackSeries();
+                function(callbackSeries) {
+                 return callbackSeries();
 
                     var ids = Object.keys(allBasicAxioms);
-                    Sparql_OWL.getUrisNamedGraph(self.currentSource, ids, { onlySourceAndImports: 1 }, function (err, result) {
+                    Sparql_OWL.getUrisNamedGraph(self.currentSource, ids, { onlySourceAndImports: 1 }, function(err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        result.forEach(function (item) {
+                        result.forEach(function(item) {
                             allBasicAxioms[item.id.value].sSource = Sparql_common.getSourceFromGraphUri(item.g.value, self.currentSource);
                         });
                         for (var id in allBasicAxioms) {
-                            allBasicAxioms[id].objects.forEach(function (object) {
+                            allBasicAxioms[id].objects.forEach(function(object) {
                                 object.oSource = allBasicAxioms[object.o].sSource;
                             });
                         }
@@ -218,20 +263,20 @@ var Axioms_graph = (function () {
 
                 //escape some blank nodes
 
-                function (callbackSeries) {
-                    return callbackSeries();
+                function(callbackSeries) {
+               return callbackSeries();
 
                     for (var key in allBasicAxioms) {
                         var subject = allBasicAxioms[key];
                         //  var escapeProperties = ["http://www.w3.org/1999/02/22-rdf-syntax-ns#first", "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"];
                         var escapeProperties = [
                             "http://www.w3.org/2002/07/owl#unionOf",
-                            "http://www.w3.org/2002/07/owl#intersectionOf",
+                            "http://www.w3.org/2002/07/owl#intersectionOf"
                             //  "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"
                         ];
 
-                        subject.objects.forEach(function (object, index) {
-                            escapeProperties.forEach(function (escapeProperty) {
+                        subject.objects.forEach(function(object, index) {
+                            escapeProperties.forEach(function(escapeProperty) {
                                 if (object && object.p == escapeProperty) {
                                     var jumper = allBasicAxioms[object.o];
                                     if (jumper) {
@@ -248,8 +293,8 @@ var Axioms_graph = (function () {
                         //  var escapeProperties = ["http://www.w3.org/1999/02/22-rdf-syntax-ns#first", "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"];
                         var escapeProperties = ["http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"];
 
-                        subject.objects.forEach(function (object, index) {
-                            escapeProperties.forEach(function (escapeProperty) {
+                        subject.objects.forEach(function(object, index) {
+                            escapeProperties.forEach(function(escapeProperty) {
                                 if (object && object.p == escapeProperty) {
                                     var jumper = allBasicAxioms[object.o];
                                     if (jumper) {
@@ -264,17 +309,18 @@ var Axioms_graph = (function () {
                 },
 
                 //recurse draw tree to visjsdata
-                function (callbackSeries) {
-                    var geNodeStyle = function (id, type, label, source) {
+                function(callbackSeries) {
+                    var geNodeStyle = function(id, type, label, source) {
                         var obj = {
                             label: label,
                             color: "#00afef",
                             shape: "box",
-                            edgeStyle: null,
+                            edgeStyle: null
                         };
                         if (!type || !label) {
                             return obj;
                         }
+
 
                         if (type.indexOf("roperty") > -1) {
                             obj.edgeStyle = "property";
@@ -312,8 +358,7 @@ var Axioms_graph = (function () {
                     var stop = false;
 
                     function recurse(_nodeId, level, symbol) {
-                        if (level > 1) {
-                        } // return
+
 
                         if (stop) {
                             return;
@@ -324,19 +369,13 @@ var Axioms_graph = (function () {
                             return;
                         }
 
-                        if (node.sType == "http://www.w3.org/2002/07/owl#Restriction") {
-                            var x = 3;
-                        }
 
-                        if (node.s == "http://purl.obolibrary.org/obo/BFO_0000001") {
-                            //  stop = true;
-                        }
                         if (node.s == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil") {
                             return;
                         }
 
                         if (existingNodes[_nodeId]) {
-                            visjsData.nodes.forEach(function (node, nodeIndex) {
+                            visjsData.nodes.forEach(function(node, nodeIndex) {
                                 if (node.id == _nodeId && node.level > level) {
                                     visjsData.nodes[nodeIndex].level = level;
                                 }
@@ -351,9 +390,13 @@ var Axioms_graph = (function () {
                                 symbol = null;
                             }
 
+
+
                             if (style.color == "#00afef" && node.sSource) {
                                 style.color = common.getResourceColor("source", node.sSource);
                             }
+
+
 
                             existingNodes[node.s] = level;
                             //  var objectLevel = node.sType && node.sType.indexOf("roperty") > -1 ? level - 1 : level;
@@ -369,18 +412,20 @@ var Axioms_graph = (function () {
                                     id: node.s,
                                     label: node.sLabel,
                                     type: node.sType,
-                                    source: node.sSource,
-                                },
+                                    source: node.sSource
+                                }
                             });
                         }
 
                         // children
                         if (node.objects) {
-                            node.objects.forEach(function (object) {
+                            node.objects.forEach(function(object) {
                                 if (false && object.oSource && object.oSource != sourceLabel) {
                                     return;
                                 }
-                                if (!object || !object.o) return;
+                                if (!object || !object.o) {
+                                    return;
+                                }
 
                                 if (existingNodes[object.o] < level) {
                                     // dont draw backward edges
@@ -389,6 +434,24 @@ var Axioms_graph = (function () {
 
                                 var edgeId = node.s + "_" + object.o;
                                 var symbol = Config.Lineage.logicalOperatorsMap[object.p] || object.pLabel;
+
+
+                                if (object.o == "http://www.w3.org/2002/07/owl#Class") {
+                                    nodeStyles[node.s] = "owl:Class";
+                                    return;
+                                }
+
+
+                                if (object.o == "http://www.w3.org/2002/07/owl#ObjectProperty") {
+                                    nodeStyles[node.s] = "owl:ObjectProperty";
+                                    return;
+                                }
+                                if (object.o == "http://www.w3.org/2002/07/owl#Restriction") {
+                                    nodeStyles[node.s] = "owl:Restriction";
+                                    return;
+                                }
+
+
 
                                 if (!existingNodes[edgeId]) {
                                     existingNodes[edgeId] = 1;
@@ -401,39 +464,67 @@ var Axioms_graph = (function () {
                                             to: {
                                                 enabled: true,
                                                 type: "solid",
-                                                scaleFactor: 0.5,
-                                            },
+                                                scaleFactor: 0.5
+                                            }
                                         },
                                         data: {
                                             id: edgeId,
                                             from: node.s,
                                             to: object.o,
                                             label: node.pLabel,
-                                            type: node.sType,
-                                        },
+                                            type: node.sType
+                                        }
                                     });
+
+
+                                    visjsData.nodes.forEach(function(node) {
+                                        var style = nodeStyles[node.id];
+                                        if (style == "owl:Class") {
+                                            node.color = "#00afef";
+                                            node.shape = "box";
+
+                                        } else if (style == "owl:ObjectProperty") {
+                                            node.color = "#f5ef39";
+                                            node.shape = "box";
+
+                                        } else if (style == "owl:Restriction") {
+                                            node.color = "#cb9801";
+                                            node.label = "some";
+                                            node.shape = "box";
+
+                                        }
+                                        else    if(node.label =="r"){
+                                            node.color = "#9db99d";
+                                            node.label = "";
+                                            node.shape = "dot";
+                                            node.size=2
+                                        }
+                                        else    if(node.label =="f"){
+                                            node.color = "#9db99d";
+                                            node.label = "";
+                                            node.shape = "dot";
+                                            node.size=2
+                                        }
+                                        else    if(node.label =="∃"){
+                                            node.color = "#9db99d";
+                                            node.label = "";
+                                            node.shape = "dot";
+                                            node.size=2
+                                        }
+
+                                    });
+
+
                                     var symbol = null;
                                     if (object.oIsBlank && object.oType != "http://www.w3.org/2002/07/owl#Restriction") {
                                         symbol = Config.Lineage.logicalOperatorsMap[object.p] || null;
                                     }
 
-                                    if (false && level == 0 && object.p != "http://www.w3.org/2002/07/owl#equivalentClass") {
-                                        return;
-                                    }
 
-                                    if (false && object.oSource != self.currentSource) {
-                                        return;
-                                    }
+
+
                                     var objectLevel = level + 1;
-                                    if (false && (object.p.indexOf("Value") > -1 || object.p.indexOf("onProperty") > -1)) {
-                                        objectLevel = level;
-                                    }
 
-                                    // stop draw children when subClassof a class
-                                    //   if ( level >0 && object.oType == "http://www.w3.org/2002/07/owl#Class" && object.p.indexOf("subClassOf")>-1) {
-                                    if (false && object.oSource != sourceLabel) {
-                                        return;
-                                    }
                                     recurse(object.o, objectLevel, symbol);
                                 }
                             });
@@ -448,9 +539,9 @@ var Axioms_graph = (function () {
                 },
 
                 //set hide nodes of level > maxLevels
-                function (callbackSeries) {
-                    var maxLevels = 10;
-                    visjsData.nodes.forEach(function (node, nodeIndex) {
+                function(callbackSeries) {
+                    var maxLevels = 15;
+                    visjsData.nodes.forEach(function(node, nodeIndex) {
                         if (node.level > maxLevels) {
                             visjsData.nodes[nodeIndex].hidden = true;
                         }
@@ -458,14 +549,69 @@ var Axioms_graph = (function () {
                     callbackSeries();
                 },
 
-                // filter FOL nodes
-                function (callbackSeries) {
-                    return callbackSeries();
+                // filter rest nodes
+            function(callbackSeries) {
+
+         return callbackSeries()
+                    var restNodes = [];
+                    visjsData.nodes.forEach(function(node) {
+                        if (node.label == "r") {
+                            restNodes.push(node.id);
+                        }
+                    });
+                    var filteredNodes = [];
+                    visjsData.nodes.forEach(function(node) {
+                        if (restNodes.indexOf(node.id) < 0) {
+                            filteredNodes.push(node);
+                        }
+                    });
+                    visjsData.nodes = filteredNodes;
+
+                    var edgesToskip={}
+                var existingEdges={}
+                var filteredEdges = [];
+                    visjsData.edges.forEach(function(edge) {
+                        if (restNodes.indexOf(edge.to) >-1) {
+                            edgesToskip[edge.from]=edge.to
+                        }else{
+                          ;// filteredEdges.push(edge);
+                        }
+                    });
+
+                    function recurseGetEdgeTo(edgeTo){
+
+                        var nextEdgeTo=edgesToskip[edgeTo]
+                        if(nextEdgeTo && nextEdgeTo!="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil" ){
+                            console.log("recurse " +nextEdgeTo)
+                          return  recurseGetEdgeTo(nextEdgeTo)
+
+                        }else{
+
+                            return edgeTo
+                        }
+
+
+                    }
+
+                    visjsData.edges.forEach(function(edge) {
+                        if(!existingEdges[edge.id]){
+                            existingEdges[edge.id]=1
+                            if(edgesToskip[edge.to]) {
+                                edge.to=  recurseGetEdgeTo(edge.to)
+                            }
+                                filteredEdges.push(edge)
+
+                        }
+                        visjsData.edges=filteredEdges
+
+
+                    })
+                callbackSeries();
                 },
 
                 //draw graph
 
-                function (callbackSeries) {
+                function(callbackSeries) {
                     if (options.addToGraph && self.axiomsVisjsGraph) {
                         self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
                         self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
@@ -474,10 +620,10 @@ var Axioms_graph = (function () {
                         self.currentVisjsData = visjsData;
                     }
                     return callbackSeries();
-                },
+                }
             ],
 
-            function (err) {
+            function(err) {
                 if (callback) {
                     return callback(err);
                 }
@@ -485,25 +631,25 @@ var Axioms_graph = (function () {
         );
     };
 
-    self.drawGraph = function (visjsData) {
-        var xOffset = 60;
-        var yOffset = 130;
-        xOffset = parseInt($("#axiomsDraw_xOffset").val());
-        yOffset = parseInt($("#axiomsDraw_yOffset").val());
+    self.drawGraph = function(visjsData) {
+        var xOffset = 90;
+        var yOffset = 100;
+        //    xOffset = parseInt($("#axiomsDraw_xOffset").val());
+        //   yOffset = parseInt($("#axiomsDraw_yOffset").val());
         var options = {
             keepNodePositionOnDrag: true,
             /* physics: {
 enabled:true},*/
 
-            layoutHierarchicalXX: {
+            layoutHierarchical: {
                 direction: "LR",
                 sortMethod: "hubsize",
                 levelSeparation: xOffset,
-                parentCentralization: true,
+                parentCentralization: false,
                 shakeTowards: "roots",
                 blockShifting: true,
 
-                nodeSpacing: yOffset,
+                nodeSpacing: yOffset
             },
             visjsOptions: {
                 edges: {
@@ -512,25 +658,26 @@ enabled:true},*/
                         // type: "diagonalCross",
                         forceDirection: "horizontal",
 
-                        roundness: 0.4,
-                    },
-                },
+                        roundness: 0.4
+                    }
+                }
             },
             onclickFn: Lineage_axioms_draw.onNodeClick,
             onRightClickFn: Lineage_axioms_draw.showGraphPopupMenu,
-            onHoverNodeFn: Lineage_axioms_draw.selectNodesOnHover,
+            onHoverNodeFn: Lineage_axioms_draw.selectNodesOnHover
         };
 
-        $("#" + self.graphDivContainer).html(
-            "<span style='font-size: 16px;color: blue; font-weight: bold'> WORK IN PROGRESS</span>" +
-                '  <button onclick="AxiomEditor.init()">Edit Axiom</button>' +
-                "<div id='axiomsGraphDiv3' style='width:800px;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
-        );
-        self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv3", visjsData, options);
-        self.axiomsVisjsGraph.draw(function () {});
+        /*   $("#" + self.graphDivContainer).html(
+               "<span style='font-size: 16px;color: blue; font-weight: bold'> WORK IN PROGRESS</span>" +
+               "  <button onclick=\"AxiomEditor.init()\">Edit Axiom</button>" +
+               "<div id='axiomsGraphDiv3' style='width:800px;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
+           );*/
+        self.axiomsVisjsGraph = new VisjsGraphClass(self.graphDivContainer, visjsData, options);
+        self.axiomsVisjsGraph.draw(function() {
+        });
     };
 
-    self.onNodeClick = function (node, point, nodeEvent) {
+    self.onNodeClick = function(node, point, nodeEvent) {
         self.currentGraphNode = node;
         if (nodeEvent.ctrlKey) {
             return self.expandNode(node);
@@ -539,94 +686,8 @@ enabled:true},*/
         return;
     };
 
-    self.sampleTriplesOld = [
-        {
-            subject: "[OntObject]05a9d835-07a3-4b3e-b552-5d20a89c94b1",
-            predicate: "http://www.w3.org/2002/07/owl#intersectionOf",
-            object: "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
-        },
-        {
-            subject: "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/PlanSpecification",
-        },
-        {
-            subject: "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
-            predicate: "http://www.w3.org/2002/07/owl#onProperty",
-            object: "[OntObject]http://purl.obolibrary.org/obo/BFO_0000219",
-        },
-        {
-            subject: "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
-            predicate: "http://www.w3.org/2002/07/owl#onProperty",
-            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/prescribedBy",
-        },
-        {
-            subject: "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            object: "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
-        },
-        {
-            subject: "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            object: "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
-        },
-        {
-            subject: "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
-            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-            object: "[OntObject]05a9d835-07a3-4b3e-b552-5d20a89c94b1",
-        },
-        {
-            subject: "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            object: "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
-        },
-        {
-            subject: "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
-            predicate: "http://www.w3.org/2002/07/owl#onProperty",
-            object: "[OntObject]http://purl.obolibrary.org/obo/BFO_0000111",
-        },
-        {
-            subject: "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            object: "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
-        },
-        {
-            subject: "[OntObject]f73224b7-009f-492c-99b8-2b11c731df69",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            object: "[OntObject]0ea67f4e-3cad-46a0-be67-d1d8ff3190b8",
-        },
-        {
-            subject: "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/ObjectiveSpecification",
-        },
-        {
-            subject: "[OntObject]d674942f-d3d6-4c9b-94dc-7c16086c020c",
-            predicate: "http://www.w3.org/2002/07/owl#intersectionOf",
-            object: "[OntObject]a5720162-c324-4444-9b75-936c8f211eda",
-        },
-        {
-            subject: "[OntObject]9af282e7-5a09-4766-8de8-e5a8ba1d1ee9",
-            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-            object: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BusinessOrganization",
-        },
-        {
-            subject: "[OntObject]https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
-            predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-            object: "[OntObject]bc378237-cf88-473a-b0e3-b8dbdac21a13",
-        },
-        {
-            subject: "[OntObject]4c92b75c-0e0c-4be9-880d-d827a5a70402",
-            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-            object: "[OntObject]d674942f-d3d6-4c9b-94dc-7c16086c020c",
-        },
-        {
-            subject: "[OntObject]d6c7cdb4-9e96-4369-9882-63691adc85f4",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            object: "[OntObject]http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
-        },
-    ];
-    self.sampleTriples=[
+
+    self.sampleTriples = [
         {
             "subject": "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
             "predicate": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
@@ -702,7 +763,7 @@ enabled:true},*/
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
             "object": "https://spec.industrialontologies.org/ontology/core/Core/CommercialServiceAgreement"
         }
-    ]
+    ];
     return self;
 })();
 

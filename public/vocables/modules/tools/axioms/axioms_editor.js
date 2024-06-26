@@ -1,5 +1,6 @@
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
-import Axioms_suggestions from "./axioms_suggestions.js";
+import Axioms_graph from "./axioms_graph.js";
+import Export from "../../shared/export.js";
 
 const Axioms_editor = (function() {
     var self = {};
@@ -37,7 +38,7 @@ const Axioms_editor = (function() {
                 common.fillSelectOptions("axiomsEditor_allProperties", properties, true, "label", "id");
             });
 
-            Axioms_suggestions.compileAxiomStr()
+            Axioms_suggestions.compileAxiomStr();
         });
     };
 
@@ -141,18 +142,25 @@ const Axioms_editor = (function() {
                 self.axiomContext.properties.push(suggestion.id || suggestion);
                 self.axiomContext.currentPropertyIndex += 1;
             } else if (self.axiomContext.lastKeyword == ")") {
+               if (self.axiomContext.currentPropertyIndex>0)
                 self.axiomContext.currentPropertyIndex -= 1;
             }
         } else if (suggestion.resourceType == "Class") {
             cssClass = "axiom_Class";
             if (!self.axiomContext.lastKeyword || self.axiomContext.lastKeyword == "(") {
+
                 self.axiomContext.classes.push(suggestion.id || suggestion);
                 self.axiomContext.currentClassIndex += 1;
             } else if (self.axiomContext.lastKeyword == ")") {
+                if (self.axiomContext.currentClassIndex>0)
                 self.axiomContext.currentClassIndex -= 1;
             }
         } else {
             cssClass = "axiom_keyWord";
+            if (suggestion.id == "and") {
+                if (self.axiomContext.currentClassIndex>0)
+                self.axiomContext.currentClassIndex -= 1;
+            }
             self.axiomContext.lastKeyWord = suggestion;
         }
 
@@ -271,6 +279,8 @@ const Axioms_editor = (function() {
     };
 
     self.drawSuggestions = function(data) {
+
+
         common.fillSelectOptions("axiomsEditor_suggestionsSelect", data, false, "label", "id");
 
         $("#axiomsEditor_suggestionsSelect  option").each(function() {
@@ -302,7 +312,13 @@ const Axioms_editor = (function() {
                 }*/
 
             $(this).css("background-color", color);
+
         });
+        setTimeout(function() {
+            $("#axiomsEditor_suggestionsSelect option:first").focus();
+        }, 200);
+
+
     };
 
 
@@ -541,7 +557,8 @@ const Axioms_editor = (function() {
                 },
                 function(callbackSeries) {
                     self.message("drawing axioms triples");
-                    var html = Axioms_graph.showTriplesInDataTable("Axioms_editor_triplesDataTableDiv", triples);
+                    var html = Axioms_editor.showTriplesInDataTable("Axioms_editor_triplesDataTableDiv", triples);
+                    callbackSeries();
                 }
             ],
             function(err) {
@@ -549,8 +566,127 @@ const Axioms_editor = (function() {
                     alert(err);
                 }
                 self.message("");
+                if (callback) {
+                    return callback(null, triples);
+                }
             }
         );
+    };
+
+
+    self.drawTriples = function() {
+
+        self.generateTriples(function(err, triples) {
+            if (err) {
+                return alert(err.responseText);
+            }
+            Axioms_graph.drawNodeAxiomsX(self.currentSource,self.currentNode.id ,triples, "axiomsGraphDiv", {}, function(err) {
+
+            });
+
+        });
+    };
+    self.drawTriplesTest = function() {
+
+        self.generateTriples(function(err, triples) {
+            if (err) {
+                return alert(err.responseText);
+            }
+            Axioms_graph.drawNodeAxioms(self.currentSource,self.currentNode.id ,triples, "axiomsGraphDiv", {}, function(err) {
+
+            });
+
+        });
+    };
+
+
+    self.test = function() {
+        self.currentNode = {
+            id: "https://spec.industrialontologies.org/ontology/core/Core/MeasurementInformationContentEntity",
+            label: "MeasurementInformationContentEntity"
+        };
+        var html = "<span class=\"axiom_element axiom_Class\" id=\"https://spec.industrialontologies.org/ontology/core/Core/InformationContentEntity\">information_content_entity</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"and\">and</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_Property\" id=\"http://purl.obolibrary.org/obo/BFO_0000110\">has_continuant_part_at_all_times</span>            <span class=\"axiom_element axiom_keyWord\" id=\"some\">some</span>\n" +
+            "<span class=\"axiom_element axiom_Class\" id=\"https://spec.industrialontologies.org/ontology/core/Core/MeasuredValueExpression\">measured_value_expression</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"and\">and</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_Property\" id=\"https://spec.industrialontologies.org/ontology/core/Core/describes\">describes</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"some\">some</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000008\">temporal_region</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"or\">or</span>\n" +
+            "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000020\">specifically_dependent_continuant</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"or\">or</span>\n" +
+            "<span class=\"axiom_element axiom_Class\" id=\"https://spec.industrialontologies.org/ontology/core/Core/ProcessCharacteristic\">process_characteristic</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
+            "            <span class=\"axiom_element axiom_keyWord\" id=\"and\">and</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_Property\" id=\"https://spec.industrialontologies.org/ontology/core/Core/isAbout\">is_about</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"some\">some</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000015\">process</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"or\">or</span>\n" +
+            "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000035\">process_boundary</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"or\">or</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000004\">independent_continuant</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"and\">and</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"not\">not</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000006\">spatial_region</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
+
+            "            <span class=\"axiom_element axiom_keyWord\" id=\"and\">and</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_Property\" id=\"https://spec.industrialontologies.org/ontology/core/Core/isOutputOf\">is_output_of</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\"some\">some</span>\n" +
+            "<span class=\"axiom_element axiom_Class\" id=\"https://spec.industrialontologies.org/ontology/core/Core/MeasurementProcess\">measurement_process</span>\n" +
+            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>";
+        //  "<span class=\"axiom_element axiom_keyWord\" id=\"and\">and</span> "
+
+
+        common.fillSelectOptions("axiomsEditor_suggestionsSelect", [{ id: "and", label: "and" }], true, "label", "id");
+        $("#axiomsEditor_textDiv").prepend(html);
+
+
+    };
+    self.showTriplesInDataTable = function(divId, data) {
+        var escapeMarkup = function(str) {
+            var str2 = str.replace(/</g, "&lt;");
+            var str2 = str2.replace(/>/g, "&gt;");
+            return str2;
+        };
+
+        var tableCols = [];
+        var hearders = ["subject", "predicate", "object"];
+        hearders.forEach(function(item) {
+            tableCols.push({ title: item, defaultContent: "", width: "30%" });
+        });
+
+        var tableData = [];
+        data.forEach(function(item, index) {
+            tableData.push([escapeMarkup(item.subject), escapeMarkup(item.predicate), escapeMarkup(item.object)]);
+        });
+
+        var str = "<table><tr><td>subject</td><td>predicate</td><td>object</td></tr>";
+        data.forEach(function(item, index) {
+            str += "<tr><td>" + escapeMarkup(item.subject) + "</td><td>" + escapeMarkup(item.predicate) + "</td><td>" + escapeMarkup(item.object) + "</td></tr>";
+        });
+        str += "</table>";
+
+        /*  $("#KGcreator_triplesDataTableDiv").html(str)
+          return;*/
+        Export.showDataTable(divId, tableCols, tableData, null, { paging: true }, function(err, datatable) {
+        });
     };
 
 

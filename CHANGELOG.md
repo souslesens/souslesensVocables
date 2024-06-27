@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.75.2](https://github.com/souslesens/souslesensVocables/compare/1.75.1...1.75.2) (2024-06-27)
+
+
+### Features
+
+* **KGbuilder:** batch select data in database ([63c9120](https://github.com/souslesens/souslesensVocables/commit/63c912077daf1a9206a631cd944feabe5b8c3e9a))
+
 ### [1.75.1](https://github.com/souslesens/souslesensVocables/compare/1.75.0...1.75.1) (2024-06-19)
 
 ## [1.75.0](https://github.com/souslesens/souslesensVocables/compare/1.74.2...1.75.0) (2024-06-19)

@@ -22,7 +22,12 @@
             <div class="w3-button classesPannelButton size-of-button-small" onclick="Containers_widget.showParentContainersDialog()">Parent Containers</div>
             <div>type<select id="containerSearchWidget_typesSelect" style="display: none" onchange="Containers_widget.execParentContainersSearch()"></select></div>
             <div>
-                <div id="Lineage_addContainer_button" class="w3-button classesPannelButton size-of-button-small" style="padding: 3px 5px !important" onclick="Containers_tree.menuActions.addContainer()">
+                <div
+                    id="Lineage_addContainer_button"
+                    class="w3-button classesPannelButton size-of-button-small"
+                    style="padding: 3px 5px !important"
+                    onclick="Containers_tree.menuActions.addContainer()"
+                >
                     <button class="slsv-invisible-button add-icon" style="height: 25px; width: 29px"></button>
                 </div>
                 <button class="w3-button classesPannelButton size-of-button-small" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all">

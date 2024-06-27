@@ -7,6 +7,15 @@
     margin-top: 20px;
     width: 90%;
 }
+.Kgquery_queriesSelect {
+    background-color: @background-color;
+    border-radius: 14px;
+    color: @button1-color;
+    overflow: auto;
+    padding: 5px;
+    margin-top: 20px;
+    width: 90%;
+}
 .KGquery_pathDiv {
     border: 1px saddlebrown solid;
     margin: 3px;

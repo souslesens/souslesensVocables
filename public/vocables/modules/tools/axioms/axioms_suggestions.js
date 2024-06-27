@@ -15,7 +15,7 @@ var Axioms_suggestions = (function() {
                     var axiomText = Axiom_editor.getAxiomText() + " ";
 
                     var content=Axiom_editor.getAxiomContent();
-                    console.log(content.toString())
+
 
 
                     var selectedLabel = selectedObject.label;
@@ -23,7 +23,6 @@ var Axioms_suggestions = (function() {
                         selectedLabel = "_" + selectedLabel;
                     }
                     axiomText += selectedLabel + " ";
-                    console.log(axiomText);
 
                     var options = {};
                     const params = new URLSearchParams({
@@ -120,6 +119,7 @@ var Axioms_suggestions = (function() {
             ],
             function(err) {
                 allSuggestions = keywordSuggestions.concat(allSuggestions);
+
                 return callback(err, allSuggestions);
             }
         );

@@ -38,7 +38,10 @@ $("#smallDialogDiv").dialog("open")
         });
         Axiom_editor.getAllProperties(function(err, properties) {
             common.fillSelectOptions("axiomsEditor_allProperties", properties, true, "label", "id");
+
         });
+
+
 
     })
 
@@ -64,10 +67,12 @@ var resourceNode
                 resourceType: "Class"
             };
         }
-
-        $("#axiomsEditor_input_currentClassDiv").html("")
-        Axiom_editor.axiomType = $("#Axioms_editor_axiomTypeSelect")
         Axiom_editor.setCurrentResource(resourceNode, isProperty)
+
+        Axiom_editor.axiomType = $("#Axioms_editor_axiomTypeSelect").val()
+
+        var html=resourceNode.resourceType+" "+resourceNode.label+ " "+Axiom_editor.axiomType
+        $("#axiomsEditor_input_currentClassDiv").html(html)
     }
 
 

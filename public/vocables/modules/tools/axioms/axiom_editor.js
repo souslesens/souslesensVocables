@@ -65,8 +65,8 @@ const Axiom_editor = (function() {
     };
 
     self.clearAll = function() {
-$("#axiomsEditor_suggestionsSelect").empty();
-$("#axiomsEditor_textDiv").html("")
+        $("#axiomsEditor_suggestionsSelect").empty();
+        $("#axiomsEditor_textDiv").html("");
         self.textoffset = 0;
         self.axiomContext = {
             properties: [],
@@ -99,7 +99,7 @@ $("#axiomsEditor_textDiv").html("")
         //   $("#axiomsEditor_textDiv").html("");
     };
 
-    self.setCurrentResource = function(resourceNode, isProperty) {
+    self.setCurrentResource = function(resourceNode) {
         self.currentNode = resourceNode;
         self.clearAll();
         if (!self.currentNode) {
@@ -197,10 +197,15 @@ $("#axiomsEditor_textDiv").html("")
         $("#axiomsEditor_input").focus();
         //   self.onInputChar(suggestion.label);
 
-        var spanStr="<span class='axiom_element " + cssClass + "' id='" + suggestion.id + "'>" + suggestion.label + "</span>"
+        var spanStr = "<span class='axiom_element " + cssClass + "' id='" + suggestion.id + "'>" + suggestion.label + "</span>";
         $("#axiomsEditor_textDiv").append(separatorStr + spanStr);
-       // $("#axiomsEditor_input").before(separatorStr + spanStr);
+        // $("#axiomsEditor_input").before(separatorStr + spanStr);
         $("#axiomsEditor_input").val("");
+        Axiom_editor.checkSyntax(function(err, result){
+            if(result){
+                Axiom_editor.drawTriples()
+            }
+        })
     };
 
     self.onSelectSuggestion = function() {
@@ -312,19 +317,6 @@ $("#axiomsEditor_textDiv").html("")
                 color = Axiom_editor.keywordColor;
             }
 
-            /*    self.getAllClasses().forEach(function(item) {
-                    if (item.id == id) {
-                        color = Axiom_editor.classColor;
-                    }
-                });
-                self.getAllProperties().forEach(function(item) {
-                    if (item.id == id) {
-                        color = Axiom_editor.propertyColor;
-                    }
-                });
-                if (!color) {
-                    color = Axiom_editor.keywordColor;
-                }*/
 
             $(this).css("background-color", color);
 
@@ -389,18 +381,21 @@ $("#axiomsEditor_textDiv").html("")
             dataType: "json",
 
             success: function(data, _textStatus, _jqXHR) {
-                var message = "";
+                var message = "syntax OK";
 
-                self.message(" syntax OK");
 
                 if (callback) {
-                    return callback();
+                    return callback(null,message);
+                } else {
+                    self.message(message);
                 }
             },
             error(err) {
-                self.message(err.responseText);
+
                 if (callback) {
                     return callback(err);
+                } else {
+                    self.message(err.responseText);
                 }
             }
         });
@@ -517,10 +512,8 @@ $("#axiomsEditor_textDiv").html("")
 
     self.clear = function() {
         self.clearAll();
-        /*   $(".axiom_element").each(function() {
-               $(this).remove();
-           });
-           $("#axiomsEditor_suggestionsSelect").find("option").remove();*/
+        Axiom_editor.setCurrentResource(self.currentNode)
+
     };
 
     self.saveAxiom = function() {
@@ -534,7 +527,7 @@ $("#axiomsEditor_textDiv").html("")
             return alert("no graph Uri");
         }
 
-        console.log(content);
+
 
         var triples;
         async.series(
@@ -596,13 +589,12 @@ $("#axiomsEditor_textDiv").html("")
             if (err) {
                 return alert(err.responseText);
             }
-            Axioms_graph.drawNodeAxioms(self.currentSource, self.currentNode.id, triples, "axiomGraphDiv", {}, function(err) {
+            Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentNode.id, triples, "axiomGraphDiv", {}, function(err) {
 
             });
 
         });
     };
-
 
 
     self.test = function() {
@@ -659,7 +651,7 @@ $("#axiomsEditor_textDiv").html("")
         //  "<span class=\"axiom_element axiom_keyWord\" id=\"and\">and</span> "
 
 
-        Axiom_editor.axiomType="subClassOf"
+        Axiom_editor.axiomType = "subClassOf";
         common.fillSelectOptions("axiomsEditor_suggestionsSelect", [{ id: "and", label: "and" }], true, "label", "id");
         $("#axiomsEditor_textDiv").prepend(html);
 

@@ -69,3 +69,13 @@
     height: 100%;
     width: 100%;
 }
+
+.Kgquery_queriesSelect{
+    background-color: @background-color;
+    border-radius: 14px;
+    color: @button1-color;
+    overflow: auto;
+    padding: 5px;
+    margin-top: 20px;
+    width: 90%;
+}

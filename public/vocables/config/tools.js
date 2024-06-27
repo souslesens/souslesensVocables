@@ -1,3 +1,5 @@
+import Axiom_editor from "../modules/tools/axioms/axiom_editor.js";
+
 const allTools = {
     lineage: { label: "lineage", noSource: 0, controller: Lineage_r, toolDescriptionImg: null },
     KGcreator: { label: "KGcreator", noSource: 1, controller: KGcreator_r, toolDescriptionImg: null },
@@ -10,6 +12,7 @@ const allTools = {
     GraphManagement: { label: "GraphManagement", noSource: 1, controller: GraphManagement, toolDescriptionImg: null },
     UserManagement: { label: "UserManagement", noSource: 1, controller: UserManagement, toolDescriptionImg: null },
     OntoCreator: { label: "OntoCreator", noSource: 1, controller: Lineage_createSLSVsource, toolDescriptionImg: null },
+    AxiomEditor: { label: "AxiomEditor", noSource: 1, controller: Axiom_editor, toolDescriptionImg: null },
 };
 
 async function loadToolsAndPlugins(callback) {

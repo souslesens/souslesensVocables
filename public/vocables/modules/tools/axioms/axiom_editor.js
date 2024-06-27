@@ -1,49 +1,72 @@
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 import Axioms_graph from "./axioms_graph.js";
 import Export from "../../shared/export.js";
+import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 
-const Axioms_editor = (function() {
+const Axiom_editor = (function() {
     var self = {};
     self.classColor = "#bfbfe8";
     self.propertyColor = "#aaecaa";
     self.keywordColor = "#1aa";
 
-    self.init = function(divId, nodeId, source) {
-        self.currentSource = source || Lineage_sources.activeSource;
-        self.clearAll();
 
+    self.onLoaded = function() {
+        self.showSourcesDialog(function(err, source) {
+            if (err) {
+                return alert(err);
+            }
+            if (!source) {
 
-        if (nodeId) {
-            self.currentNode = nodeId;
-        } else {
-            //  self.currentNode = "https://spec.industrialontologies.org/ontology/core/Core/Buyer";
-        }
+                return alert("choose a source");
+            }
 
-        $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").dialog("option", "title", "Axiom Editor");
-        $("#smallDialogDiv").load("modules/tools/axioms/html/axioms_editor.html", function(x, y) {
-            $("#axiomsEditor_input").on("keyup", function(evt) {
-                if (evt.key == "Backspace") {
-                    Axioms_editor.removeLastElement();
-                } else {
-                    Axioms_editor.onInputChar($("#axiomsEditor_input").val());
-                }
-            });
-            $("#axiomsEditor_input").focus();
-            self.getAllClasses(function(err, classes) {
-
-                common.fillSelectOptions("axiomsEditor_allClasses", classes, true, "label", "id");
-            });
-            self.getAllProperties(function(err, properties) {
-                common.fillSelectOptions("axiomsEditor_allProperties", properties, true, "label", "id");
-            });
-
-            Axioms_suggestions.compileAxiomStr();
+            self.init("mainDialogDiv", null, source);
         });
     };
 
-    self.clearAll = function() {
+    self.showSourcesDialog = function(callback) {
+        if (Config.userTools["AxiomEditor"].urlParam_source) {
+            var source = Config.userTools["AxiomEditor"].urlParam_source;
+            if (!source) {
+                source = "IOF-CORE-202401";
+            }
+            return callback(null, source);
+        } else {
+            source = "IOF-CORE-202401";
+            return callback(null, source);
+        }
 
+        var options = {
+            withCheckboxes: false
+        };
+        var selectTreeNodeFn = function() {
+            var source = SourceSelectorWidget.getSelectedSource()[0];
+            $("#AxiomEditor_sourceDiv").html(self.currentSlsvSource);
+            $("#KGcreator_dialogDiv").dialog("close");
+
+            return callback(null, source);
+            //  self.initCentralPanel();
+        };
+
+        SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
+        if (callback) {
+            callback();
+        }
+    };
+
+    self.init = function(divId, nodeId, source) {
+        self.currentSource = source;
+        self.clearAll();
+        if (nodeId) {
+            self.currentNode = nodeId;
+        }
+        Axiom_editorUI.initUI();
+
+    };
+
+    self.clearAll = function() {
+$("#axiomsEditor_suggestionsSelect").empty();
+$("#axiomsEditor_textDiv").html("")
         self.textoffset = 0;
         self.axiomContext = {
             properties: [],
@@ -58,45 +81,31 @@ const Axioms_editor = (function() {
         self.allProperties = null;
         self.currentSuggestions = [];
         self.previousTokenType = null;
-        self.getAllClasses();
-        self.getAllProperties();
-        self.allResourcesMap = {};
-        self.getAllClasses().forEach(function(item) {
-            self.allResourcesMap[item.id] = item;
-        });
-        self.getAllProperties().forEach(function(item) {
-            self.allResourcesMap[item.id] = item;
+        self.getAllClasses(function() {
+            self.getAllProperties(function() {
+
+
+                self.allResourcesMap = {};
+                self.getAllClasses().forEach(function(item) {
+                    self.allResourcesMap[item.id] = item;
+                });
+                self.getAllProperties().forEach(function(item) {
+                    self.allResourcesMap[item.id] = item;
+                });
+            });
         });
 
 
         //   $("#axiomsEditor_textDiv").html("");
     };
 
-    self.setCurrentResource = function(node, isProperty) {
+    self.setCurrentResource = function(resourceNode, isProperty) {
+        self.currentNode = resourceNode;
         self.clearAll();
-        if (isProperty) {
-            self.currentNode = {
-                label: $("#axiomsEditor_allClasses option:selected").text(),
-                id: node.val(),
-                resourceType: "ObjectProperty"
-            };
-        } else {
-            self.currentNode = {
-                label: $("#axiomsEditor_allClasses option:selected").text(),
-                id: node.val(),
-                resourceType: "Class"
-            };
-        }
-
         if (!self.currentNode) {
             return alert("select a resource");
         }
-        /*   self.addSuggestion({
-                   id: self.currentNode.id,
-                   label: self.currentNode.label,
-                   resourceType: "Class"
-               }
-           );*/
+
         self.axiomContext.classes.push(self.currentNode.id);
         self.axiomContext.currentClassIndex += 1;
         Axioms_suggestions.getManchesterParserSuggestions(self.currentNode, function(err, result) {
@@ -142,8 +151,9 @@ const Axioms_editor = (function() {
                 self.axiomContext.properties.push(suggestion.id || suggestion);
                 self.axiomContext.currentPropertyIndex += 1;
             } else if (self.axiomContext.lastKeyword == ")") {
-               if (self.axiomContext.currentPropertyIndex>0)
-                self.axiomContext.currentPropertyIndex -= 1;
+                if (self.axiomContext.currentPropertyIndex > 0) {
+                    self.axiomContext.currentPropertyIndex -= 1;
+                }
             }
         } else if (suggestion.resourceType == "Class") {
             cssClass = "axiom_Class";
@@ -152,14 +162,16 @@ const Axioms_editor = (function() {
                 self.axiomContext.classes.push(suggestion.id || suggestion);
                 self.axiomContext.currentClassIndex += 1;
             } else if (self.axiomContext.lastKeyword == ")") {
-                if (self.axiomContext.currentClassIndex>0)
-                self.axiomContext.currentClassIndex -= 1;
+                if (self.axiomContext.currentClassIndex > 0) {
+                    self.axiomContext.currentClassIndex -= 1;
+                }
             }
         } else {
             cssClass = "axiom_keyWord";
             if (suggestion.id == "and") {
-                if (self.axiomContext.currentClassIndex>0)
-                self.axiomContext.currentClassIndex -= 1;
+                if (self.axiomContext.currentClassIndex > 0) {
+                    self.axiomContext.currentClassIndex -= 1;
+                }
             }
             self.axiomContext.lastKeyWord = suggestion;
         }
@@ -184,7 +196,10 @@ const Axioms_editor = (function() {
         $("#axiomsEditor_input").val("");
         $("#axiomsEditor_input").focus();
         //   self.onInputChar(suggestion.label);
-        $("#axiomsEditor_input").before(separatorStr + "<span class='axiom_element " + cssClass + "' id='" + suggestion.id + "'>" + suggestion.label + "</span>");
+
+        var spanStr="<span class='axiom_element " + cssClass + "' id='" + suggestion.id + "'>" + suggestion.label + "</span>"
+        $("#axiomsEditor_textDiv").append(separatorStr + spanStr);
+       // $("#axiomsEditor_input").before(separatorStr + spanStr);
         $("#axiomsEditor_input").val("");
     };
 
@@ -290,25 +305,25 @@ const Axioms_editor = (function() {
 
             var resource = self.allResourcesMap[id];
             if (resource && resource.resourceType == "Class") {
-                color = Axioms_editor.classColor;
+                color = Axiom_editor.classColor;
             } else if (resource && resource.resourceType == "ObjectProperty") {
-                color = Axioms_editor.propertyColor;
+                color = Axiom_editor.propertyColor;
             } else {
-                color = Axioms_editor.keywordColor;
+                color = Axiom_editor.keywordColor;
             }
 
             /*    self.getAllClasses().forEach(function(item) {
                     if (item.id == id) {
-                        color = Axioms_editor.classColor;
+                        color = Axiom_editor.classColor;
                     }
                 });
                 self.getAllProperties().forEach(function(item) {
                     if (item.id == id) {
-                        color = Axioms_editor.propertyColor;
+                        color = Axiom_editor.propertyColor;
                     }
                 });
                 if (!color) {
-                    color = Axioms_editor.keywordColor;
+                    color = Axiom_editor.keywordColor;
                 }*/
 
             $(this).css("background-color", color);
@@ -410,8 +425,9 @@ const Axioms_editor = (function() {
         return text;
     };
     self.getAxiomContent = function() {
-        var frame = $("#Axioms_editor_frameSelect").val();
-        var text = "<" + self.currentNode.id + "> " + frame + " (";
+
+
+        var text = "<" + self.currentNode.id + "> " + Axiom_editor.axiomType + " (";
         $(".axiom_element").each(function() {
             var id = $(this).attr("id");
             if (!id || id == "null") {
@@ -463,15 +479,15 @@ const Axioms_editor = (function() {
     };
 
     self.getAxiomElements = function() {
-        var frame = $("#Axioms_editor_frameSelect").val();
-        var text = "<" + self.currentNode + "> " + frame + " (";
+        //  var frame = $("#Axioms_editor_frameSelect").val();
+        var text = "<" + self.currentNode + "> " + self.axiomType + " (";
         var elements = [
             {
                 id: self.currentNode,
                 type: "class"
             },
             {
-                id: frame,
+                id: self.axiomType,
                 type: "property"
             }
         ];
@@ -500,7 +516,7 @@ const Axioms_editor = (function() {
     };
 
     self.clear = function() {
-        self.init();
+        self.clearAll();
         /*   $(".axiom_element").each(function() {
                $(this).remove();
            });
@@ -557,7 +573,7 @@ const Axioms_editor = (function() {
                 },
                 function(callbackSeries) {
                     self.message("drawing axioms triples");
-                    var html = Axioms_editor.showTriplesInDataTable("Axioms_editor_triplesDataTableDiv", triples);
+                    var html = Axiom_editor.showTriplesInDataTable("Axioms_editor_triplesDataTableDiv", triples);
                     callbackSeries();
                 }
             ],
@@ -580,24 +596,13 @@ const Axioms_editor = (function() {
             if (err) {
                 return alert(err.responseText);
             }
-            Axioms_graph.drawNodeAxiomsX(self.currentSource,self.currentNode.id ,triples, "axiomsGraphDiv", {}, function(err) {
+            Axioms_graph.drawNodeAxioms(self.currentSource, self.currentNode.id, triples, "axiomGraphDiv", {}, function(err) {
 
             });
 
         });
     };
-    self.drawTriplesTest = function() {
 
-        self.generateTriples(function(err, triples) {
-            if (err) {
-                return alert(err.responseText);
-            }
-            Axioms_graph.drawNodeAxioms(self.currentSource,self.currentNode.id ,triples, "axiomsGraphDiv", {}, function(err) {
-
-            });
-
-        });
-    };
 
 
     self.test = function() {
@@ -654,6 +659,7 @@ const Axioms_editor = (function() {
         //  "<span class=\"axiom_element axiom_keyWord\" id=\"and\">and</span> "
 
 
+        Axiom_editor.axiomType="subClassOf"
         common.fillSelectOptions("axiomsEditor_suggestionsSelect", [{ id: "and", label: "and" }], true, "label", "id");
         $("#axiomsEditor_textDiv").prepend(html);
 
@@ -690,9 +696,8 @@ const Axioms_editor = (function() {
     };
 
 
-
     return self;
 })();
 
-export default Axioms_editor;
-window.Axioms_editor = Axioms_editor;
+export default Axiom_editor;
+window.Axiom_editor = Axiom_editor;

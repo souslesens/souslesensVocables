@@ -1,0 +1,87 @@
+<style>
+    #axiomsEditor_input {
+        border-radius: 3px;
+        border: 1px solid black;
+        margin: 5px;
+        width: 300px;
+        background-color: #d9dde1;
+    }
+
+    #axiomsEditor_textDiv {
+    / / display: flex;
+    / / flex-direction: row;
+    / / flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: baseline;
+        width: 400px;
+        background-color: #ddd;
+    }
+
+    #axiomsEditor_suggestionsSelect {
+        width: 300px;
+    }
+
+    #Axioms_editor_messageDiv {
+        width: 500px;
+    / / height: 250 px;
+    }
+
+    .axiom_element {
+        margin: 3px;
+    }
+
+    .axiom_keyWord {
+        color: gray;
+        font-weight: bold;
+    }
+
+    .axiom_Class {
+        color: green;
+        font-weight: bold;
+    }
+
+    .axiom_Property {
+        color: blue;
+        font-weight: bold;
+    }
+</style>
+<div id="axiomsEditor_input_currentClassDiv" class="axiom_Property"></div>
+<div style="display: flex;flex-direction: column">
+    <div style="display: flex; flex-direction: row; width: 100%; height: 400px; margin:5px;padding:5px">
+        <div id="axiomsEditor_textDiv">
+
+        </div>
+
+        <div style="display: flex;flex-direction: column; margin:5px;padding:5px" >
+            <input id="axiomsEditor_input" autocomplete="off" />
+
+            <select id="axiomsEditor_suggestionsSelect" onchange="Axiom_editor.onSelectSuggestion($(this))"
+                    size="15"></select>
+        </div>
+
+
+
+        <div style=" margin:5px;padding:5px">
+            <div style="margin:5px;padding:5px" id="Axioms_editor_messageDiv" ></div>
+            <div style="display: flex;flex-direction: column;width:300px;    height: 250px;
+    justify-content: space-evenly;">
+            <button onclick="Axiom_editor.clear()">clear</button>
+            <button onclick="Axiom_editor.checkSyntax()">checkSyntax</button>
+            <button onclick="Axiom_editor.saveAxiom()">saveAxiom</button>
+            <button onclick="Axiom_editor.generateTriples()">generateTriples</button>
+            <button onclick="Axiom_editor.drawTriples()">draw</button>
+
+
+            <button onclick="Axiom_editor.test()">Test</button>
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <div id="axiomGraphDiv" style=" width: 100%; height: 400px;background-color: #ddd; margin:5px;padding:5px"></div>
+    <div id="Axioms_editor_triplesDataTableDiv" style="width: 100%; height: 500px; margin:5px;padding:5px"></div>
+
+
+</div>

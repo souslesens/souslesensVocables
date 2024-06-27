@@ -50,14 +50,14 @@
             <input id="axiomsEditor_input" autocomplete="off" />
         </div>
         <div>
-            <select id="axiomsEditor_suggestionsSelect" onchange="Axioms_editor.onSelectSuggestion($(this))" size="15"></select>
+            <select id="axiomsEditor_suggestionsSelect" onchange="Axiom_editor.onSelectSuggestion($(this))" size="15"></select>
         </div>
     </div>
     <div>
         <select id="testSelect" onclick="Axioms_suggestions.onTestSelect($(this).val())"></select><br>
 
-        Classes<select id="axiomsEditor_allClasses" on onchange="Axioms_editor.setCurrentResource($(this))"></select>
-        <br/>Properties<select id="axiomsEditor_allProperties" on onchange="Axioms_editor.setCurrentResource($(this),true)"></select>
+        Classes<select id="axiomsEditor_allClasses" on onchange="Axiom_editor.setCurrentResource($(this))"></select>
+        <br/>Properties<select id="axiomsEditor_allProperties" on onchange="Axiom_editor.setCurrentResource($(this),true)"></select>
 
         <select id="Axioms_editor_frameSelect">
             <option>subClassOf</option>
@@ -67,14 +67,14 @@
         </select>
     </div>
     <div>
-        <button onclick="Axioms_editor.clear()">clear</button>
-        <button onclick="Axioms_editor.checkSyntax()">checkSyntax</button>
-        <button onclick="Axioms_editor.saveAxiom()">saveAxiom</button>
-        <button onclick="Axioms_editor.generateTriples()">generateTriples</button>
-        <button onclick="Axioms_editor.drawTriples()">draw</button>
+        <button onclick="Axiom_editor.clear()">clear</button>
+        <button onclick="Axiom_editor.checkSyntax()">checkSyntax</button>
+        <button onclick="Axiom_editor.saveAxiom()">saveAxiom</button>
+        <button onclick="Axiom_editor.generateTriples()">generateTriples</button>
+        <button onclick="Axiom_editor.drawTriples()">draw</button>
 
 
-        <button onclick="Axioms_editor.test()">Test</button>
+        <button onclick="Axiom_editor.test()">Test</button>
     </div>
     <div id="Axioms_editor_messageDiv"></div>
     <hr />

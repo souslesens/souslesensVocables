@@ -1,4 +1,4 @@
-import Axioms_editor from "./axioms_editor.js";
+import Axiom_editor from "./axiom_editor.js";
 
 var Axioms_suggestions = (function() {
     var self = {};
@@ -12,9 +12,9 @@ var Axioms_suggestions = (function() {
             [
                 function(callbackSeries) {
                     //call sever for Manchester suggestions
-                    var axiomText = Axioms_editor.getAxiomText() + " ";
+                    var axiomText = Axiom_editor.getAxiomText() + " ";
 
-                    var content=Axioms_editor.getAxiomContent();
+                    var content=Axiom_editor.getAxiomContent();
                     console.log(content.toString())
 
 
@@ -27,7 +27,7 @@ var Axioms_suggestions = (function() {
 
                     var options = {};
                     const params = new URLSearchParams({
-                        source: Axioms_editor.currentSource,
+                        source: Axiom_editor.currentSource,
                         lastToken: axiomText,
                         options: JSON.stringify(options)
                     });
@@ -39,12 +39,13 @@ var Axioms_suggestions = (function() {
 
                         success: function(data, _textStatus, _jqXHR) {
                             data.forEach(function(item) {
-                                if (item.match(/^_$/g)) {
+                                if (item.match(/^_$/g) ) {
                                     // remove _ and replace by Classes
                                     selectClasses = true;
                                     return;
                                 } else if (item.match(/^[A-z]$/g)) {
                                     // remove alphabetic letters and replace by ObjectProperties
+                                    if( selectedObject.id!="some" && selectedObject.id!="only")
                                     selectProperties = true;
                                     return;
                                 } else {
@@ -62,14 +63,14 @@ var Axioms_suggestions = (function() {
 
                 function(callbackSeries) {
                     //get  properties for current class (properties withe domain this class)
-                    if (!selectClasses) {
+                    if (!selectProperties) {
                         return callbackSeries();
                     }
-                    var index=Math.max(Axioms_editor.axiomContext.currentClassIndex,0)
-                    var classId = Axioms_editor.axiomContext.classes[index];
+                    var index=Math.max(Axiom_editor.axiomContext.currentClassIndex,0)
+                    var classId = Axiom_editor.axiomContext.classes[index];
                     if (!classId) {
                         var props = [];
-                        Axioms_editor.getAllProperties().forEach(function(item) {
+                        Axiom_editor.getAllProperties().forEach(function(item) {
                             if (item.resourceType == "ObjectProperty") {
                                 props.push(item);
                             }
@@ -89,15 +90,15 @@ var Axioms_suggestions = (function() {
                 },
                 function(callbackSeries) {
                     ////get  classes for current property (classes wich are   range of the current property)
-                    if (!selectProperties) {
+                    if (!selectClasses) {
                         return callbackSeries();
                     }
-                    var index=Math.max(Axioms_editor.axiomContext.currentPropertyIndex,0)
-                    var propId = Axioms_editor.axiomContext.properties[index];
+                    var index=Math.max(Axiom_editor.axiomContext.currentPropertyIndex,0)
+                    var propId = Axiom_editor.axiomContext.properties[index];
 
                     if (!propId) {
                         var classes = [];
-                        Axioms_editor.getAllClasses().forEach(function(item) {
+                        Axiom_editor.getAllClasses().forEach(function(item) {
                             if (item.resourceType == "Class") {
                                 classes.push(item);
                             }
@@ -133,7 +134,7 @@ var Axioms_suggestions = (function() {
         if (!propId) {
             return callback(null, []);
         }
-        OntologyModels.getPropertyDomainsAndRanges(Axioms_editor.currentSource, propId, "range", function(err, result) {
+        OntologyModels.getPropertyDomainsAndRanges(Axiom_editor.currentSource, propId, "range", function(err, result) {
             if (err) {
                 return callback(err);
             }
@@ -157,7 +158,7 @@ var Axioms_suggestions = (function() {
 
 
 
-        OntologyModels.getAllowedPropertiesBetweenNodes(Axioms_editor.currentSource, classId, null, { keepSuperClasses: true }, function(err, result) {
+        OntologyModels.getAllowedPropertiesBetweenNodes(Axiom_editor.currentSource, classId, null, { keepSuperClasses: true }, function(err, result) {
             if (err) {
                 return callback(err);
             }
@@ -203,33 +204,7 @@ var Axioms_suggestions = (function() {
         });
     };
 
-    self.compileAxiomStr = function() {
-        var str = "InformationContentEntity and ( has_continuant_part_at_all_times some MeasuredValueExpression )" +
-            " and ( describes some ( temporal_region or specifically_dependent_continuant or ProcessCharacteristic ) )" +
-            " and ( isAbout some ( process or process_boundary or ( independent_continuant and ( not ( spatial_region ) ) ) ) )" +
-            " and ( isOutputOf some MeasurementProcess)";
 
-        str = str.replace(/\n/, "");
-        var tokens = str.split(" ");
-
-        var data = [];
-        tokens.forEach(function(token) {
-            token=token.replace(/ /,"_")
-            for (var id in Axioms_editor.allResourcesMap) {
-                if (Axioms_editor.allResourcesMap[id].label == token) {
-                    data.push({ id: id, label: token });
-                }
-            }
-        });
-
-
-        common.fillSelectOptions("testSelect", data,null,"label","id");
-
-    };
-    self.onTestSelect = function(id) {
-        $("#axiomsEditor_suggestionsSelect").val(id);
-        Axioms_editor.onSelectSuggestion()
-    }
 
     return self;
 })();

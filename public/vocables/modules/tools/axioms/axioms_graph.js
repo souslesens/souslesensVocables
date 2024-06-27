@@ -1,5 +1,5 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
-import Axioms_editor from "./axioms_editor.js";
+import Axiom_editor from "./axiom_editor.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import common from "../../shared/common.js";
@@ -65,98 +65,11 @@ var Axioms_graph = (function() {
 
     };
 
-    self.drawTriples = function(divId) {
-        divId = "Axioms_editor_triplesDataTableDiv";
-        self.currentSource = Axioms_editor.currentSource;
-        self.graphDivContainer = divId;
-        self.drawNodeAxiomsX(Axioms_editor.currentSource, Axioms_editor.currentNode.id, divId, {}, function(err, result) {
-            //   self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource,self.sampleTriples,null,{},function(err, result){
-        });
-    };
-
-    self.drawNodeAxioms = function(sourceLabel, nodeId, manchesterTriples, divId, options, callback) {
-        if (!options) {
-            options = {};
-        }
-        self.graphDivContainer = divId;
-        var nodeIdTree = {};
-        var visjsData = { nodes: [], edges: [] };
-        if (!manchesterTriples) {
-            manchesterTriples = self.sampleTriples;
-        }
-        var triplesMap = {};
 
 
-        async.series(
-            [
-                //get all elementary axioms
-                function(callbackSeries) {
-                    self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource, manchesterTriples, function(err, result) {
-                        //  self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
-                        if (err) {
-                            return callback(err);
-                        }
-                        var graphtriplesMap = {}; //Sparql_common.getSourceGraphtriplesMap(self.currentSource);
-                        result.forEach(function(item) {
-                            var sType = item.sType ? item.sType.value : null;
-                            var oType = item.oType ? item.oType.value : null;
-                            var sLabel = item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value);
-                            var pLabel = item.pLabel ? item.pLabel.value : Sparql_common.getLabelFromURI(item.p.value);
-                            var oLabel = item.oLabel ? item.oLabel.value : Sparql_common.getLabelFromURI(item.o.value);
-                            if (Axioms_editor.allResourcesMap[item.p.value]) {
-                                sLabel = item.sLabel ? item.sLabel.value : Axioms_editor.allResourcesMap[item.s.value].label;
-                            }
-                            if (Axioms_editor.allResourcesMap[item.p.value]) {
-                                pLabel = item.pLabel ? item.pLabel.value : Axioms_editor.allResourcesMap[item.p.value].label;
-                            }
-                            if (Axioms_editor.allResourcesMap[item.o.value]) {
-                                oLabel = item.oLabel ? item.oLabel.value : Axioms_editor.allResourcesMap[item.o.value].label;
-                            }
 
 
-                            var sIsBlank = item.s.type == "bnode";
-                            var oIsBlank = item.o.type == "bnode";
-                            var sSource = item.sGraph ? graphtriplesMap[item.sGraph.value] : null;
-                            var oSource = item.oGraph ? graphtriplesMap[item.oGraph.value] : null;
-
-                            if (!triplesMap[item.s.value]) {
-
-                                triplesMap[item.s.value] = {
-                                    s: item.s.value,
-                                    sType: sType,
-                                    sLabel: sLabel,
-                                    sIsBlank: sIsBlank,
-                                    sSource: sSource
-                                };
-                                triplesMap[item.s.value].predicates = [];
-                            }
-                            if (item.p.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
-                                triplesMap[item.s.value].sType = item.o.value;
-                            } else {
-                                triplesMap[item.s.value].predicates.push({ p: item.p.value, o: item.o.value });
-                            }
-
-                        });
-
-
-                        return callbackSeries();
-
-                    });
-                },
-
-                function(callbackSeries) {
-                    return callbackSeries();
-                }], function(err) {
-                if (err) {
-                    return alert(err);
-                    var x = triplesMap;
-                }
-            });
-
-
-    };
-
-    self.drawNodeAxiomsX = function(sourceLabel, nodeId, manchesterTiples, divId, options, callback) {
+    self.drawNodeAxioms = function(sourceLabel, nodeId, manchesterTiples, divId, options, callback) {
         if (!options) {
             options = {};
         }
@@ -176,7 +89,7 @@ var Axioms_graph = (function() {
             [
                 //get all elementary axioms
                 function(callbackSeries) {
-                    self.manchesterriplestoSparqlBindings(Axioms_editor.currentSource, manchesterTiples, function(err, result) {
+                    self.manchesterriplestoSparqlBindings(Axiom_editor.currentSource, manchesterTiples, function(err, result) {
                         //  self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
                         if (err) {
                             return callback(err);
@@ -188,14 +101,14 @@ var Axioms_graph = (function() {
                             var sLabel = item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value);
                             var pLabel = item.pLabel ? item.pLabel.value : Sparql_common.getLabelFromURI(item.p.value);
                             var oLabel = item.oLabel ? item.oLabel.value : Sparql_common.getLabelFromURI(item.o.value);
-                            if (Axioms_editor.allResourcesMap[item.p.value]) {
-                                sLabel = item.sLabel ? item.sLabel.value : Axioms_editor.allResourcesMap[item.s.value].label;
+                            if (Axiom_editor.allResourcesMap[item.p.value]) {
+                                sLabel = item.sLabel ? item.sLabel.value : Axiom_editor.allResourcesMap[item.s.value].label;
                             }
-                            if (Axioms_editor.allResourcesMap[item.p.value]) {
-                                pLabel = item.pLabel ? item.pLabel.value : Axioms_editor.allResourcesMap[item.p.value].label;
+                            if (Axiom_editor.allResourcesMap[item.p.value]) {
+                                pLabel = item.pLabel ? item.pLabel.value : Axiom_editor.allResourcesMap[item.p.value].label;
                             }
-                            if (Axioms_editor.allResourcesMap[item.o.value]) {
-                                oLabel = item.oLabel ? item.oLabel.value : Axioms_editor.allResourcesMap[item.o.value].label;
+                            if (Axiom_editor.allResourcesMap[item.o.value]) {
+                                oLabel = item.oLabel ? item.oLabel.value : Axiom_editor.allResourcesMap[item.o.value].label;
                             }
 
 

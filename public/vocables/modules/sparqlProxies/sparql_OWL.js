@@ -89,6 +89,12 @@ var Sparql_OWL = (function () {
      * @param callback returns triples matching  source.topClassFilter field value or _default topClassFilter
      *  variables : [?subjectGraph] ?topConcept  ?topConceptLabel  ?subjectGraph
      */
+
+
+
+
+
+
     self.getTopConcepts = function (sourceLabel, options, callback) {
         if (!options) {
             options = {};
@@ -744,7 +750,7 @@ var Sparql_OWL = (function () {
 
         query += "}}} LIMIT 1000";
 
-        var url = self.sparql_url + "?format=json&query=";
+        var url = Config.sources[sourceLabel].sparql_server.url+ "?format=json&query=";
         self.no_params = true;
         if (Config.sources[sourceLabel]) {
             self.no_params = Config.sources[sourceLabel].sparql_server.no_params;

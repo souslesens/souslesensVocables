@@ -19,6 +19,12 @@ var Axiom_editorUI = (function() {
             });
             $("#axiomsEditor_input").focus();
 
+
+
+            $("#axiom_triplesTab").tabs()
+
+
+
             $("#lateralPanelDiv").load("modules/tools/axioms/html/leftPanel.html", function(x, y) {
 
 

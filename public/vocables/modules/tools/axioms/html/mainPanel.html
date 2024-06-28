@@ -13,7 +13,7 @@
     / / flex-wrap: nowrap;
         justify-content: flex-start;
         align-items: baseline;
-        width: 400px;
+        width: 350px;
         background-color: #ddd;
     }
 
@@ -52,7 +52,7 @@
 
         </div>
 
-        <div style="display: flex;flex-direction: column; margin:5px;padding:5px" >
+        <div style="display: flex;flex-direction: column; margin:5px;padding:5px">
             <input id="axiomsEditor_input" autocomplete="off" />
 
             <select id="axiomsEditor_suggestionsSelect" onchange="Axiom_editor.onSelectSuggestion($(this))"
@@ -60,28 +60,35 @@
         </div>
 
 
-
         <div style=" margin:5px;padding:5px">
-            <div style="margin:5px;padding:5px" id="Axioms_editor_messageDiv" ></div>
+            <div style="margin:5px;padding:5px" id="Axioms_editor_messageDiv"></div>
             <div style="display: flex;flex-direction: column;width:300px;    height: 250px;
     justify-content: space-evenly;">
-            <button onclick="Axiom_editor.clear()">clear</button>
-            <button onclick="Axiom_editor.checkSyntax()">checkSyntax</button>
-            <button onclick="Axiom_editor.saveAxiom()">saveAxiom</button>
-            <button onclick="Axiom_editor.generateTriples()">generateTriples</button>
-            <button onclick="Axiom_editor.drawTriples()">draw</button>
+                <button onclick="Axiom_editor.clear()">clear</button>
+                <button onclick="Axiom_editor.checkSyntax()">checkSyntax</button>
+                <button onclick="Axiom_editor.saveAxiom()">saveAxiom</button>
+                <button onclick="Axiom_editor.generateTriples()">generateTriples</button>
+                <button onclick="Axiom_editor.drawTriples()">draw</button>
 
 
-            <button onclick="Axiom_editor.test()">Test</button>
+                <button onclick="Axiom_editor.test()">Test</button>
             </div>
         </div>
 
 
     </div>
 
-
-    <div id="axiomGraphDiv" style=" width: 100%; height: 400px;background-color: #ddd; margin:5px;padding:5px"></div>
-    <div id="Axioms_editor_triplesDataTableDiv" style="width: 100%; height: 500px; margin:5px;padding:5px"></div>
-
+    <div id="axiom_triplesTab">
+        <ul>
+            <li class="nodeInfosWidget_tabDiv"><a href="#axiomGraphDiv">Graph</a></li>
+            <li class="nodeInfosWidget_tabDiv"><a href="#Axioms_editor_triplesDataTableDiv">Triples</a></li>
+        </ul>
+        <div id="axiomGraphDiv"
+             style=" width: 100%; height: 500px;background-color: #ddd; margin:5px;padding:5px"></div>
+        <div id="Axioms_editor_triplesDataTableDiv" style="width: 100%; height: 500px; margin:5px;padding:5px"></div>
+    </div>
 
 </div>
+
+
+

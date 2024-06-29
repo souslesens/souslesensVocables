@@ -4,7 +4,7 @@
         border: 1px solid black;
         margin: 5px;
         width: 300px;
-        background-color: #d9dde1;
+        background-color:#ddd;
     }
 
     #axiomsEditor_textDiv {
@@ -13,12 +13,15 @@
     / / flex-wrap: nowrap;
         justify-content: flex-start;
         align-items: baseline;
-        width: 350px;
-        background-color: #ddd;
+        width: 500px;
+        padding:10px;
+        height: 330px;
+        background-color: #212529;
     }
 
     #axiomsEditor_suggestionsSelect {
         width: 300px;
+        background-color: #212529;
     }
 
     #Axioms_editor_messageDiv {
@@ -31,23 +34,23 @@
     }
 
     .axiom_keyWord {
-        color: gray;
-        font-weight: bold;
+        color: #cb9801;
+       font-weight: bold;
     }
 
     .axiom_Class {
-        color: green;
-        font-weight: bold;
+        color: #00afef;
+        font-weight: normal;
     }
 
     .axiom_Property {
-        color: blue;
-        font-weight: bold;
+        color: #f5ef39;
+        font-weight: normal;
     }
 </style>
 <div id="axiomsEditor_input_currentClassDiv" class="axiom_Property"></div>
 <div style="display: flex;flex-direction: column">
-    <div style="display: flex; flex-direction: row; width: 100%; height: 400px; margin:5px;padding:5px">
+    <div style="display: flex; flex-direction: row; width: 100%; height: 330px; margin:5px;padding:5px">
         <div id="axiomsEditor_textDiv">
 
         </div>
@@ -66,11 +69,11 @@
     justify-content: space-evenly;">
                 <button onclick="Axiom_editor.clear()">clear</button>
                 <button onclick="Axiom_editor.checkSyntax()">checkSyntax</button>
-                <button onclick="Axiom_editor.saveAxiom()">saveAxiom</button>
+
                 <button onclick="Axiom_editor.generateTriples()">generateTriples</button>
                 <button onclick="Axiom_editor.drawTriples()">draw</button>
 
-
+                <button onclick="Axiom_editorUI.saveAxiom()">save Axiom</button>
                 <button onclick="Axiom_editor.test()">Test</button>
             </div>
         </div>

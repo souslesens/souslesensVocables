@@ -2,12 +2,13 @@ import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 import Axioms_graph from "./axioms_graph.js";
 import Export from "../../shared/export.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 const Axiom_editor = (function() {
     var self = {};
-    self.classColor = "#bfbfe8";
-    self.propertyColor = "#aaecaa";
-    self.keywordColor = "#1aa";
+    self.classColor = "#00afef";
+    self.propertyColor = "#f5ef39";
+    self.keywordColor = "#cb9801";
 
 
     self.onLoaded = function() {
@@ -318,7 +319,7 @@ const Axiom_editor = (function() {
             }
 
 
-            $(this).css("background-color", color);
+            $(this).css("color", color);
 
         });
         setTimeout(function() {
@@ -516,8 +517,7 @@ const Axiom_editor = (function() {
 
     };
 
-    self.saveAxiom = function() {
-    };
+
 
     self.generateTriples = function(callback) {
         var options = {};

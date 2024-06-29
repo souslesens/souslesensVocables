@@ -3,7 +3,7 @@
         border-radius: 3px;
         border: 1px solid black;
         margin: 5px;
-        width: 300px;
+        width: 260px;
         background-color:#ddd;
     }
 
@@ -56,7 +56,7 @@
         </div>
 
         <div style="display: flex;flex-direction: column; margin:5px;padding:5px">
-            <input id="axiomsEditor_input" autocomplete="off" />
+            <div>  <input id="axiomsEditor_input" autocomplete="off" /><button onclick="Axiom_editor.showAllResource()">+</button> </div>
 
             <select id="axiomsEditor_suggestionsSelect" onchange="Axiom_editor.onSelectSuggestion($(this))"
                     size="15"></select>

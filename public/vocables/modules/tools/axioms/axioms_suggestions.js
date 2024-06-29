@@ -3,7 +3,8 @@ import Axiom_editor from "./axiom_editor.js";
 var Axioms_suggestions = (function() {
     var self = {};
 
-    self.getManchesterParserSuggestions = function(selectedObject, callback) {
+    self.getManchesterParserSuggestions = function(selectedObject, allClasses,allobjectProperties,callback) {
+        self.currentObject=selectedObject
         var allSuggestions = [];
         var keywordSuggestions = [];
         var selectClasses = false;
@@ -67,7 +68,7 @@ var Axioms_suggestions = (function() {
                     }
                     var index=Math.max(Axiom_editor.axiomContext.currentClassIndex,0)
                     var classId = Axiom_editor.axiomContext.classes[index];
-                    if (!classId) {
+                    if (!classId || allobjectProperties) {
                         var props = [];
                         Axiom_editor.getAllProperties().forEach(function(item) {
                             if (item.resourceType == "ObjectProperty") {
@@ -95,7 +96,7 @@ var Axioms_suggestions = (function() {
                     var index=Math.max(Axiom_editor.axiomContext.currentPropertyIndex,0)
                     var propId = Axiom_editor.axiomContext.properties[index];
 
-                    if (!propId) {
+                    if (!propId || allClasses) {
                         var classes = [];
                         Axiom_editor.getAllClasses().forEach(function(item) {
                             if (item.resourceType == "Class") {

@@ -324,6 +324,8 @@ GitHub releases and docker images are created on tags with GitHub Actions.
 
 ### Plugins system
 
+#### Create a plugin
+
 In root create a plugins folder
 
 `mkdir plugins`
@@ -361,6 +363,8 @@ Once it done, don't forget to add the plugin's name to `mainConfig.tools_availab
 If you still don't see the plugin in the jsTree, check that your user's profile allows to see this plugin.
 The function onLoaded is loaded when you select the tool.
 
+#### Plugin configuration
+
 If a plugin requires configuration, it can be added to the `config/pluginsConfig.json` file:
 
 ```
@@ -372,6 +376,14 @@ If a plugin requires configuration, it can be added to the `config/pluginsConfig
 ```
 
 This configuration will be provided to the plugin by calling the `setConfig` method.
+
+#### Use SousLesens modules on plugin
+
+SousLesens modules can be imported form plugins using `import`. For example:
+
+```js
+import common from "/vocables/modules/shared/common.js;
+```
 
 The following Github Repository contains all the plugins of SLS and give more informations about them :
 https://github.com/souslesens/slsv-plugins/

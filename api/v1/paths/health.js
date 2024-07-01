@@ -1,6 +1,4 @@
-const path = require("path");
-const { config } = require(path.resolve("model/config"));
-const sql = require("mssql");
+const { mainConfigModel } = require("../../../model/mainConfig");
 
 module.exports = function () {
     let operations = {
@@ -8,21 +6,22 @@ module.exports = function () {
     };
 
     ///// GET api/v1/health
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
+        const config = await mainConfigModel.getConfig();
         const enabledServices = config.health_enabled_services ? config.health_enabled_services : ["virtuoso", "elasticsearch", "spacyserver"];
         const sparqlUrl = `${config.sparql_server.url}/?default-graph-uri=&query=SELECT+*%0D%0AWHERE+%7B%3Fs+%3Fp+%3Fo%7D%0D%0ALIMIT+10&format=application%2Fsparql-results%2Bjson`;
         const elasticSearchUrl = `${config.ElasticSearch.url}/_cat/health`;
         const spacyServerUrl = `${config.annotator.spacyServerUrl}/health_check`.replace("/pos", "");
         try {
             const fetchVirtuoso = fetch(sparqlUrl)
-                .then((r) => ({ name: "virtuoso", health: true }))
-                .catch((e) => ({ name: "virtuoso", health: false }));
+                .then(() => ({ name: "virtuoso", health: true }))
+                .catch(() => ({ name: "virtuoso", health: false }));
             const fetchElasticSearch = fetch(elasticSearchUrl)
-                .then((r) => ({ name: "elasticsearch", health: true }))
-                .catch((e) => ({ name: "elasticsearch", health: false }));
+                .then(() => ({ name: "elasticsearch", health: true }))
+                .catch(() => ({ name: "elasticsearch", health: false }));
             const fetchSpacyServer = fetch(spacyServerUrl)
-                .then((r) => ({ name: "spacyserver", health: true }))
-                .catch((e) => ({ name: "spacyserver", health: false }));
+                .then(() => ({ name: "spacyserver", health: true }))
+                .catch(() => ({ name: "spacyserver", health: false }));
             const results = await Promise.all([fetchVirtuoso, fetchElasticSearch, fetchSpacyServer].map((p) => p.catch((e) => e)));
             const health = Object.fromEntries(
                 results

@@ -7,6 +7,7 @@ type Profile = {
     forbiddenTools: string[];
     defaultSourceAccessControl: string;
     sourcesAccessControl: {};
+    theme: string;
 };
 
 export { Profile };

@@ -1,7 +1,6 @@
 const path = require("path");
 
-const { configPath, configProfilesPath } = require("../../../model/config");
-const { sourceModel, SourceModel } = require("../../../model/sources");
+const { sourceModel } = require("../../../model/sources");
 const { userModel } = require("../../../model/users");
 const { responseSchema } = require("./utils");
 const userManager = require(path.resolve("bin/user."));

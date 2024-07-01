@@ -3,22 +3,18 @@ import Axiom_editor from "./axiom_editor.js";
 var Axioms_suggestions = (function() {
     var self = {};
 
-    self.getManchesterParserSuggestions = function(selectedObject, allClasses,allobjectProperties,callback) {
+    self.getManchesterParserSuggestions = function(selectedObject, allClasses,allObjectProperties,callback) {
         self.currentObject=selectedObject
         var allSuggestions = [];
         var keywordSuggestions = [];
-        var selectClasses = false;
-        var selectProperties = false;
+        var selectClasses = allClasses;
+        var selectProperties = allObjectProperties;
         async.series(
             [
                 function(callbackSeries) {
+
                     //call sever for Manchester suggestions
                     var axiomText = Axiom_editor.getAxiomText() + " ";
-
-                    var content=Axiom_editor.getAxiomContent();
-
-
-
                     var selectedLabel = selectedObject.label;
                     if (selectedObject.resourceType == "Class") {
                         selectedLabel = "_" + selectedLabel;
@@ -31,6 +27,7 @@ var Axioms_suggestions = (function() {
                         lastToken: axiomText,
                         options: JSON.stringify(options)
                     });
+
 
                     $.ajax({
                         type: "GET",
@@ -68,7 +65,7 @@ var Axioms_suggestions = (function() {
                     }
                     var index=Math.max(Axiom_editor.axiomContext.currentClassIndex,0)
                     var classId = Axiom_editor.axiomContext.classes[index];
-                    if (!classId || allobjectProperties) {
+                    if (!classId || allObjectProperties) {
                         var props = [];
                         Axiom_editor.getAllProperties().forEach(function(item) {
                             if (item.resourceType == "ObjectProperty") {

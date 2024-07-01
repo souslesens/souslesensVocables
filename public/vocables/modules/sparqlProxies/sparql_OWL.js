@@ -2364,10 +2364,10 @@ var Sparql_OWL = (function() {
         }
         var fromStr;
         if (!sourceLabel) {
-            if(options.graphUri)
-            fromStr = " FROM <" + options.graphUri + "> ";
-            else{
-                return callback("no graphUri or source")
+            if (options.graphUri) {
+                fromStr = " FROM <" + options.graphUri + "> ";
+            } else {
+                return callback("no graphUri or source");
             }
         } else {
             fromStr = Sparql_common.getFromStr(sourceLabel);
@@ -2397,7 +2397,7 @@ var Sparql_OWL = (function() {
         }
         query += " LIMIT 10000";
 
-        var url = Config.sources[sourceLabel]?Config.sources[sourceLabel].sparql_server.url:Config.sparql_server.url + "?format=json&query=";
+        var url = Config.sources[sourceLabel] ? Config.sources[sourceLabel].sparql_server.url : Config.sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function(err, _result) {
             if (err) {
                 return callback(err);
@@ -2575,68 +2575,27 @@ var Sparql_OWL = (function() {
         });
     };
 
-    self.reCreateAllSourcesLabelGraph = function(options, callback) {
-        async.series(
-            [
-                function(callbackSeries) {
-                    // return callbackSeries();
-                    const payload = { graphUri: Config.labelsGraphUri };
-                    $.ajax({
-                        type: "POST",
-                        url: `${Config.apiUrl}/kg/clearGraph`,
-                        data: payload,
-                        dataType: "json",
-                        success: function(_result, _textStatus, _jqXHR) {
-                            MainController.UI.message("graph deleted " + Config.labelsGraphUri);
-                            callbackSeries();
-                        },
-                        error(err) {
-                            callbackSeries(err);
-                        }
-                    });
-                },
-                function(callbackSeries) {
-                    var graphUrisStr = "";
-                    for (var key in Config.sources) {
-                        var source = Config.sources[key];
-                        if (source.schemaType == "OWL") {
-                            if (source.graphUri && source.graphUri.indexOf("industryportal") < 0) {
-                                graphUrisStr += "FROM <" + source.graphUri + "> ";
-                            }
-                        }
-                    }
 
-                    var query =
-                        "PREFIX http: <http://www.w3.org/2011/http#>\n" +
-                        "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                        "with graph <" +
-                        Config.labelsGraphUri +
-                        ">" +
-                        "insert {" +
-                        "?sub rdfs:label ?label " +
-                        "}" +
-                        "{" +
-                        "SELECT    distinct ?sub ?label " +
-                        graphUrisStr +
-                        " WHERE {?sub rdfs:label ?label } }";
-                    var url = Config.sparql_server.url + "?query=";
-                    Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function(err, _result) {
-                        if (err) {
-                            return callback(err);
-                        }
-                        return callbackSeries(_result.results.bindings);
-                    });
-                }
-            ],
-            function(err) {
-                if (err) {
-                    alert(err.responseText);
-                }
-                callback(null, "all Sources labels graph recreated");
+    self.clearGraph = function(graphUri, callback) {
+
+        // return callbackSeries();
+        const payload = { graphUri:graphUri};
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/kg/clearGraph`,
+            data: payload,
+            dataType: "json",
+            success: function(_result, _textStatus, _jqXHR) {
+                MainController.UI.message("graph deleted " + Config.labelsGraphUri);
+                callback();
+            },
+            error(err) {
+                callback(err);
             }
-        );
+        });
     };
+
+
 
     self.getClassIndividualsDistinctProperties = function(sourceLabel, classId, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel);

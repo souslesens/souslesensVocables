@@ -11,13 +11,8 @@ var Axiom_editorUI = (function() {
 
         $("#graphDiv").load("modules/tools/axioms/html/mainPanel.html", function(x, y) {
 
-            $("#axiomsEditor_input").on("keyup", function(evt) {
-                if (evt.key == "Backspace") {
-                    Axiom_editor.removeLastElement();
-                } else {
-                    Axiom_editor.onInputChar($("#axiomsEditor_input").val());
-                }
-            });
+            $("#axiomsEditor_input").on("keyup", Axiom_editor.onAxiomIntputKey)
+            $("#axiomsEditor_input").on("keydown", Axiom_editor.onAxiomIntputKey)
             $("#axiomsEditor_input").focus();
 
 

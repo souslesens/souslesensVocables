@@ -8,20 +8,18 @@
     }
 
     #axiomsEditor_textDiv {
-    / / display: flex;
-    / / flex-direction: row;
-    / / flex-wrap: nowrap;
-        justify-content: flex-start;
-        align-items: baseline;
         width: 500px;
         padding:10px;
-        height: 330px;
-        background-color: #212529;
+        height: 300px;
+        border-radius: 10px;
+        background-color: #141414;
+
     }
 
     #axiomsEditor_suggestionsSelect {
         width: 300px;
-        background-color: #212529;
+        background-color: #141414;
+
     }
 
     #Axioms_editor_messageDiv {
@@ -30,7 +28,9 @@
     }
 
     .axiom_element {
-        margin: 3px;
+        margin: 2px;
+        padding:1px;
+        border-radius:3px
     }
 
     .axiom_keyWord {
@@ -44,20 +44,26 @@
     }
 
     .axiom_Property {
-        color: #f5ef39;
+        background-color: #f5ef39;
         font-weight: normal;
     }
+
+    .axiom_and_or{
+        color: #70ac47;
+        font-weight: bold;
+
+    }
 </style>
-<div id="axiomsEditor_input_currentClassDiv" class="axiom_Property"></div>
+<div id="axiomsEditor_input_currentClassDiv" ></div>
 <div style="display: flex;flex-direction: column">
     <div style="display: flex; flex-direction: row; width: 100%; height: 330px; margin:5px;padding:5px">
         <div id="axiomsEditor_textDiv">
-
+          <input id="axiomsEditor_input" autocomplete="off" />
         </div>
 
         <div style="display: flex;flex-direction: column; margin:5px;padding:5px">
-            <div>  <input id="axiomsEditor_input" autocomplete="off" /><button onclick="Axiom_editor.showAllResource()">+</button> </div>
 
+            <button onclick="Axiom_editor.showAllResource()">+</button>
             <select id="axiomsEditor_suggestionsSelect" onchange="Axiom_editor.onSelectSuggestion($(this))"
                     size="15"></select>
         </div>

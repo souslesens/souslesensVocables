@@ -47,7 +47,7 @@ var Axioms_graph = (function() {
             data: {
                 id: node.id,
                 label: node.label || "",
-                type: node.type,
+                type: node.owlType,
                 source: node.source
             }
         };
@@ -57,6 +57,7 @@ var Axioms_graph = (function() {
 
 
     self.drawNodeAxioms2 = function(sourceLabel, nodeId, manchesterTriples, divId, options, callback) {
+        self.graphDivId=divId
         var nodesMap = {};
         var visjsData = { nodes: [], edges: [] };
         var edgesToRemove = {};
@@ -329,13 +330,19 @@ enabled:true},*/
     };
 
     self.onNodeClick = function(node, point, nodeEvent) {
+        if(node && node.data )
+            if(node.data.type.indexOf("Class")>-1 ||node.data.type.indexOf("ObjectProperty")>-1) {
+                NodeInfosWidget.showNodeInfos(Axiom_editor.currentSource, node, "mainDialogDiv")
+            }
 
-
-        return;
     };
     self.showGraphPopupMenu = function() {
 
     };
+
+    self.clearGraph=function(){
+        $("#"+self.graphDivId).html("")
+    }
 
 
     self.sampleTriples = [

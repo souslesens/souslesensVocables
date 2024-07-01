@@ -418,36 +418,18 @@ $("#sourceDivControlPanelDiv").html(html);*/
             return;
         }
         const payload = { graphUri: graphUri };
-        $.ajax({
-            type: "POST",
-            url: `${Config.apiUrl}/kg/clearGraph`,
-            data: payload,
-            dataType: "json",
-            success: function (_result, _textStatus, _jqXHR) {
-                return MainController.UI.message("graph source " + source + " cleared ", true);
-            },
-            error(err) {
-                return MainController.UI.message(err);
-            },
-        });
+
+        Sparql_OWL.clearGraph(graphUri,function(err,result){
+            if(err)
+                return alert(err);
+            return MainController.UI.message("graph source " + source + " cleared ", true);
+
+        })
+
+
     };
 
-    self.reCreateAllSourcesLabelGraph = function () {
-        if (confirm("reCreateAllSourcesLabelGraph (it will take some time...")) {
-            var t1 = new Date();
 
-            MainController.UI.message("reCreating AllSourcesLabelGraph (it will take some time...");
-            $("#waitImg").css("display", "block");
-            Sparql_OWL.reCreateAllSourcesLabelGraph(null, function (err, result) {
-                $("#waitImg").css("display", "block");
-                if (err) {
-                    return alert(err.response);
-                }
-                var duration = Math.round((new Date() - t1) / 1000);
-                MainController.UI.message(result + "  in sec." + duration, true);
-            });
-        }
-    };
 
     return self;
 })();

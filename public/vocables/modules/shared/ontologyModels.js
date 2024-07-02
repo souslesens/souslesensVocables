@@ -889,8 +889,8 @@ var OntologyModels = (function () {
 
         var allDomains = {};
         var allRanges = {};
-        var anyRange=false;
-        var anyDomain=false;
+        var anyRange = false;
+        var anyDomain = false;
         async.eachSeries(
             allSources,
             function (source, callbackEach) {
@@ -930,8 +930,8 @@ var OntologyModels = (function () {
                             if (objectType && objectType == "domain") {
                                 return callbackSeries();
                             }
-                            if(Object.keys(allRanges).length==0){
-                                anyRange=true;
+                            if (Object.keys(allRanges).length == 0) {
+                                anyRange = true;
                             }
                             Sparql_OWL.getAllDescendants(source, Object.keys(allRanges), "rdfs:subClassOf", {}, function (err, result) {
                                 if (err) {
@@ -953,8 +953,8 @@ var OntologyModels = (function () {
                             if (objectType && objectType == "range") {
                                 return callbackSeries();
                             }
-                            if(Object.keys(allDomains).length==0){
-                                anyDomain=true;
+                            if (Object.keys(allDomains).length == 0) {
+                                anyDomain = true;
                             }
                             Sparql_OWL.getAllDescendants(source, Object.keys(allDomains), "rdfs:subClassOf", {}, function (err, result) {
                                 if (err) {
@@ -979,7 +979,7 @@ var OntologyModels = (function () {
                 );
             },
             function (err) {
-                return callback(null, { ranges: allRanges, domains: allDomains, anyRange:anyRange,anyDomain:anyDomain});
+                return callback(null, { ranges: allRanges, domains: allDomains, anyRange: anyRange, anyDomain: anyDomain });
             }
         );
     };

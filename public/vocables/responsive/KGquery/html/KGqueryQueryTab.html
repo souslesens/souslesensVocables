@@ -10,9 +10,6 @@
             <button class="slsv-button-1" onclick="KGquery.aggregateQuery()">Aggregate</button>
             <select id="KGquery_outputTypeSelect" onchange="KGquery.onOutputTypeSelect($(this).val());">
                 <option></option>
-                <option>Graph</option>
-                <option>TagsGeometry</option>
-                <option>TagsCalendar</option>
             </select>
             <!-- <button onclick="KGquery.queryKG('table',null,true)">Query database</button>-->
 
@@ -30,3 +27,6 @@
         <div id="KGquery_pathsDiv"></div>
     </div>
 </div>
+<script>
+    KGquery.initOutputType();
+</script>

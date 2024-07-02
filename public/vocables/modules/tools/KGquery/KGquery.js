@@ -53,6 +53,13 @@ var KGquery = (function () {
         SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
     };
 
+    self.initOutputType = function () {
+        const KGquery_outputTypeSelectNode = $("#KGquery_outputTypeSelect");
+        for (const toolName in Config.userTools.KGquery.toTools) {
+            KGquery_outputTypeSelectNode.append(`<option>${toolName}</option>`);
+        }
+    };
+
     self.showSourcesDialog = function (forceDialog) {
         self.clearAll();
         if (!forceDialog && Config.userTools["KGquery"].urlParam_source) {
@@ -322,12 +329,8 @@ var KGquery = (function () {
 
             if (output == "table") {
                 self.queryResultToTable(result);
-            } else if (output == "Graph") {
-                self.queryResultToVisjsGraph(result);
-            } else if (output == "TagsGeometry") {
-                self.queryToTagsGeometry(result.results.bindings);
-            } else if (output == "TagsCalendar") {
-                self.queryToTagsCalendar(result.results.bindings);
+            } else {
+                Config.userTools.KGquery.toTools[output](result);
             }
         });
     };
@@ -563,7 +566,8 @@ var KGquery = (function () {
             }, 2000);
         });
     };
-    self.queryToTagsGeometry = function (data) {
+    self.queryToTagsGeometry = function (result) {
+        const data = result.results.bindings;
         var tagsMap = {};
         data.forEach(function (item) {
             for (var key in item) {
@@ -580,7 +584,8 @@ var KGquery = (function () {
         });
     };
 
-    self.queryToTagsCalendar = function (data) {
+    self.queryToTagsCalendar = function (result) {
+        const data = result.results.bindings;
         if (data.length == 0) {
             return alert("no result");
         }

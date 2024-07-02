@@ -1,7 +1,7 @@
 import Lineage_sources from "../lineage/lineage_sources.js";
 import Containers_graph from "./containers_graph.js";
 import common from "../../shared/common.js";
-import Lineage_containers from "../lineage/lineage_containers.js";
+
 
 var Containers_widget = (function () {
     var self = {};

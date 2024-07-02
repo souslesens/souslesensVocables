@@ -178,10 +178,10 @@ var Containers_tree = (function () {
                             id: containerData.id,
                             label: containerData.label,
                             shadow: self.nodeShadow,
-                            shape: Lineage_containers.containerStyle.shape,
+                            shape: Containers_graph.containerStyle.shape,
                             size: size,
                             font: type == "container" ? { color: "#70309f" } : null,
-                            color: Lineage_containers.containerStyle.color,
+                            color: Containers_graph.containerStyle.color,
                             data: {
                                 type: type,
                                 source: source,
@@ -199,10 +199,10 @@ var Containers_tree = (function () {
                                 id: item.parent.value,
                                 label: item.parentLabel.value,
                                 shadow: self.nodeShadow,
-                                shape: type == "container" ? Lineage_containers.containerStyle.shape : shape,
+                                shape: type == "container" ? Containers_graph.containerStyle.shape : shape,
                                 size: size,
                                 font: type == "container" ? { color: color2, size: 10 } : null,
-                                color: Lineage_containers.containerStyle.color,
+                                color: Containers_graph.containerStyle.color,
                                 data: {
                                     type: type,
                                     source: source,
@@ -213,8 +213,8 @@ var Containers_tree = (function () {
                         }
 
                         if (!existingNodes[item.member.value]) {
-                            var color = Lineage_containers.containerStyle.color;
-                            var shape = Lineage_containers.containerStyle.shape;
+                            var color = Containers_graph.containerStyle.color;
+                            var shape = Containers_graph.containerStyle.shape;
                             var type = "container";
                             if (item.memberTypes.value.indexOf("Bag") < 0) {
                                 color = Lineage_whiteboard.getSourceColor(self.currentSource);

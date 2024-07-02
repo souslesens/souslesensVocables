@@ -13,6 +13,7 @@ import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_cr
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
 import ResponsiveUI from "../../responsive/responsiveUI.js";
+import OntologyModels from "../shared/ontologyModels.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
@@ -205,14 +206,7 @@ var NodeInfosWidget = (function () {
                         callbackSeries(_err);
                     });
                 },
-                function (callbackSeries) {
-                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
-                        return callbackSeries();
-                    }
-                    self.showAssociatedProperties(self.currentNodeRealSource, nodeId, "nodeInfos_associatedPropertiesDiv", function (err) {
-                        callbackSeries(err);
-                    });
-                },
+                
                 function (callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
                         return callbackSeries();
@@ -228,6 +222,15 @@ var NodeInfosWidget = (function () {
                     self.showPropBreakdown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function (err) {
                         callbackSeries(err);
                     });
+                },
+                function (callbackSeries) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
+                        return callbackSeries();
+                    }
+                    self.showInheritedRangeAndDomainClasses(self.currentNodeRealSource, nodeId, function (err) {
+                        callbackSeries(err);
+                    });
+
                 },
             ],
             function (err) {
@@ -567,7 +570,7 @@ defaultLang = 'en';*/
                 str +=
                     " <div id='nodeInfos_listsDiv' >" +
                     "<div id='nodeInfos_classHierarchyDiv' class='nodeInfos_rigthDiv' ></div><br>" +
-                    "<div id='nodeInfos_associatedPropertiesDiv' class='nodeInfos_rigthDiv' ></div><br>" +
+                    "<div id='nodeInfos_associatedPropertiesDiv' class='nodeInfos_rigthDiv' style='display:flex;flex-direction:column;'></div><br>" +
                     "<div id='nodeInfos_restrictionsDiv' class='nodeInfos_rigthDiv'  style='display:table-caption;'></div>" +
                     "<div id='nodeInfos_individualsDiv' class='nodeInfos_rigthDiv' style=' display:flex;flex-direction: ></div></div>";
 
@@ -750,8 +753,8 @@ defaultLang = 'en';*/
                 //  alert(err.responseText);
                 return MainController.UI.message(err.responseText || err, true);
             }
-
-            var str = "<b>Property restrictions</b><table>";
+            $('#nodeInfos_restrictionsDiv').show();
+            var str = "<b class='nodesInfos_titles'>Property restrictions</b><table>";
             result.forEach(function (item) {
                 str += "<tr class='infos_table'>";
                 if (item.sourceClass) {
@@ -767,7 +770,9 @@ defaultLang = 'en';*/
                 str += "</tr>";
             });
             $("#" + divId).append(str);
-
+            if(result.length==0){
+                $('#'+divId).hide();
+            }
             return _callback();
         });
     };
@@ -964,7 +969,51 @@ defaultLang = 'en';*/
 
         callback();
     };
-
+    self.showInheritedRangeAndDomainClasses=function(sourceLabel,propId,callback){
+        
+        $('#nodeInfos_associatedPropertiesDiv').show();
+        var html='<div class="nodesInfos_titles">Inherited Ranges and Domains Classes</div><div style="margin-top:10px;display:flex;flex-direction:right">';
+        
+        OntologyModels.getPropertyDomainsAndRanges(sourceLabel,propId,'',function(err,result){
+            
+            html+="<table class='infosTable' style='margin-left:15px;margin-right:15px;'>";
+            html+="<tr class='infos_table'> <td class='detailsCellName' style='width:20px;height:10px;'>Range </td> </tr>";
+            if(result.anyRange){
+                html+="<tr class='infos_table'><td class='detailsCellValue' style='width:20px;height:10px;'> Any</td> </tr> ";
+            }
+            else{
+                for (let range in result.ranges){
+                    html+="<tr class='infos_table'>";
+                    html += `<td class='detailsCellValue' style='width:20px;height:10px;height:10px;'> <a target='_slsvCallback' href='${result.ranges[range].id}'>
+                    ${result.ranges[range].label} </a> </td>`;
+                    html+="</tr>"
+                }
+                
+            }
+            html+="</table>"
+            html+="<table class='infosTable' style='margin-left:15px;margin-right:15px;'>";
+            html+="<tr class='infos_table'><td class='detailsCellName' style='width:20px;height:10px;'>Domain </td></tr>";
+            if(result.anyDomain){
+                html+="<tr class='infos_table' ><td class='detailsCellValue' style='width:20px;height:10px;'> Any</td> </tr> ";
+            }
+            else{
+                for (let domain in result.domains){
+                    html+="<tr class='infos_table'>";
+                    html += "<td class='detailsCellValue' style='width:20px;height:10px;'> <a target='_slsvCallback' href='" +result.domains[domain].id+"'>"+
+                    result.domains[domain].label+
+                    "</a>"+"</td></tr>";
+                }
+            }
+            html+="</table></div>"
+            $('#nodeInfos_associatedPropertiesDiv').html(html);
+            if(result.length==0){
+                $('#nodeInfos_associatedPropertiesDiv').hide();
+            }
+            if(callback){
+                callback();
+            }
+        });
+    }
     self.onClickLink = function (nodeId) {
         /*  var filter=Sparql_common.setFilter("subject",[nodeId])
 Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(err, result){

@@ -469,6 +469,9 @@ var ResponsiveUI = (function () {
             ResponsiveUI.resetWindowHeight();
         }
     };
+    self.homePage=function(){
+        window.document.location.href=window.document.location.origin+'/vocables/';
+    }
 
     return self;
 })();

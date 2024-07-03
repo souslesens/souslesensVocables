@@ -9,20 +9,20 @@ const { configPlugins } = require("./config");
 /**
  * @type {Tool[]}
  */
+
 const NATIVE_TOOLS = [
-    // This list must be synced with /public/vocables/config/tools.js
-    "lineage",
-    "KGcreator",
-    "KGquery",
-    "Standardizer",
-    "TSF_Dictionary",
-    "SPARQL",
-    "admin",
-    "ConfigEditor",
-    "GraphManagement",
-    "UserManagement",
-    "OntoCreator",
-].map((tool) => ({ type: "tool", name: tool }));
+    { name: "lineage", controller: "Lineage_r", useSource: true, multiSources: false },
+    { name: "KGcreator", controller: "KGcreator_r", useSource: false, multiSources: false },
+    { name: "KGquery", controller: "KGquery_r", useSource: true, multiSources: false, toTools: { Graph: "queryResultToVisjsGraph" } },
+    { name: "Standardizer", controller: "Standardizer", useSource: true, multiSources: false },
+    { name: "TSF_Dictionary", controller: "Lineage_dictionary", useSource: false, multiSources: false },
+    { name: "SPARQL", label: "SPARQL endpoint", controller: "SPARQL_endpoint", useSource: true, multiSources: false },
+    { name: "admin", label: "Admin", controller: "Admin", useSource: true, multiSources: false },
+    { name: "ConfigEditor", controller: "ConfigEditor", useSource: false, multiSources: false },
+    { name: "GraphManagement", controller: "GraphManagement", useSource: false, multiSources: false },
+    { name: "UserManagement", controller: "UserManagement", useSource: false, multiSources: false },
+    { name: "OntoCreator", controller: "Lineage_createSLSVsource", useSource: false, multiSources: false },
+].map((tool) => ({ type: "tool", label: tool.label ?? tool.name, ...tool }));
 
 class ToolModel {
     /**

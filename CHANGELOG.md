@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.77.0](https://github.com/souslesens/souslesensVocables/compare/1.76.0...1.77.0) (2024-07-03)
+
+
+### Features
+
+* **KGquery:** Add a generic configuration to define links between tools ([62573d1](https://github.com/souslesens/souslesensVocables/commit/62573d1111a42c51a97c912066ffcdf9bac4eeda)), closes [#777](https://github.com/souslesens/souslesensVocables/issues/777)
+* **tools:** toTools is defined plugin side ([a709430](https://github.com/souslesens/souslesensVocables/commit/a709430986392f41a091db28b6cc83ae69c3bb81))
+
 ## [1.76.0](https://github.com/souslesens/souslesensVocables/compare/1.75.2...1.76.0) (2024-07-01)
 
 

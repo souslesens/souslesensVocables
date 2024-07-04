@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.77.1](https://github.com/souslesens/souslesensVocables/compare/1.77.0...1.77.1) (2024-07-04)
+
+
+### Bug Fixes
+
+* **api:** allow user to get rdf graphs (only allowed graphs) ([a52db6a](https://github.com/souslesens/souslesensVocables/commit/a52db6a5f65bba7d1c0f91177aa45e5ec2d38ba9))
+
 ## [1.77.0](https://github.com/souslesens/souslesensVocables/compare/1.76.0...1.77.0) (2024-07-03)
 
 

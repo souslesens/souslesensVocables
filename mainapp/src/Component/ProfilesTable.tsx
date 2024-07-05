@@ -85,10 +85,9 @@ const ProfilesTable = () => {
             ),
             success: (gotProfiles: Profile[]) => {
                 const datas = gotProfiles.map((profile) => {
-                    const { allowedSourceSchemas, forbiddenTools, allowedTools, sourcesAccessControl, ...restOfProperties } = profile;
+                    const { allowedSourceSchemas, allowedTools, sourcesAccessControl, ...restOfProperties } = profile;
                     const processedData = {
                         ...restOfProperties,
-                        forbiddenTools: joinWhenArray(forbiddenTools),
                         allowedTools: joinWhenArray(allowedTools),
                         allowedSourceSchemas: allowedSourceSchemas.join(";"),
                         sourcesAccessControl: JSON.stringify(sourcesAccessControl),
@@ -281,11 +280,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         model.config
     );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
-
-    // tools is all available tools (described in mainconfig.json) + tools that are found in forbiddenTools + ALL
-    const tools: string[] = ["ALL", ...profileModel.profileForm.forbiddenTools, ...config.tools_available].filter((val, idx, array) => {
-        return array.indexOf(val) === idx;
-    });
 
     useEffect(() => {
         update({ type: Type.ResetProfile, payload: profile });
@@ -570,43 +564,20 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 <SourcesTreeView />
                             </FormControl>
                         </Box>
-                        <FormGroup>
-                            <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
-
-                            <FormControl style={{ display: profileModel.profileForm.allowedTools === "ALL" ? "none" : "" }} disabled={profileModel.profileForm.allowedTools === "ALL"}>
-                                <InputLabel id="allowedTools-label">Allowed tools</InputLabel>
-                                <Select
-                                    labelId="allowedTools-label"
-                                    id="allowedTools"
-                                    multiple
-                                    value={!Array.isArray(profileModel.profileForm.allowedTools) ? [] : profileModel.profileForm.allowedTools}
-                                    label="select-allowedTools-label"
-                                    renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
-                                    onChange={handleFieldUpdate("allowedTools")}
-                                >
-                                    {tools.map((tool) => (
-                                        <MenuItem key={tool} value={tool}>
-                                            {tool}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </FormGroup>
                         <FormControl>
-                            <InputLabel id="forbiddenTools-label">Forbidden tools</InputLabel>
+                            <InputLabel id="allowedTools-label">Allowed tools</InputLabel>
                             <Select
-                                labelId="forbiddenTools-label"
-                                id="forbiddenTools"
+                                labelId="allowedTools-label"
+                                id="allowedTools"
                                 multiple
-                                value={!Array.isArray(profileModel.profileForm.forbiddenTools) ? [] : profileModel.profileForm.forbiddenTools}
-                                label="select-forbiddenTools-label"
-                                fullWidth
+                                value={profileModel.profileForm.allowedTools}
+                                label="select-allowedTools-label"
                                 renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
-                                onChange={handleFieldUpdate("forbiddenTools")}
+                                onChange={handleFieldUpdate("allowedTools")}
                             >
-                                {tools.map((tool) => (
+                                {config.tools_available.map((tool) => (
                                     <MenuItem key={tool} value={tool}>
-                                        <Checkbox checked={profileModel.profileForm.forbiddenTools.indexOf(tool) > -1} />
+                                        <Checkbox checked={profileModel.profileForm.allowedTools.includes(tool)} />
                                         {tool}
                                     </MenuItem>
                                 ))}

@@ -26,6 +26,8 @@ Object.entries(profiles).forEach(([key, profile]) => {
 });
 
 if (argv.w) {
+    // backup
+    fs.cpSync(profilesFilePath, path.resolve(argv.config, `profiles_${Date.now()}_backup.json`));
     fs.writeFileSync(profilesFilePath, JSON.stringify(profiles, null, 2));
 } else {
     console.log(profiles);

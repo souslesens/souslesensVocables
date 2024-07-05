@@ -3,6 +3,7 @@ import Axioms_graph from "./axioms_graph.js";
 import Export from "../../shared/export.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import axioms_manager from "./axioms_manager.js";
 
 const Axiom_editor = (function() {
     var self = {};
@@ -67,7 +68,7 @@ const Axiom_editor = (function() {
 
     self.clearAll = function() {
         $("#axiomsEditor_suggestionsSelect").empty();
-        //  $("#axiomsEditor_textDiv").html("");
+        $(".axiom_element").remove()
 
         Axioms_graph.clearGraph();
         self.textoffset = 0;
@@ -113,6 +114,7 @@ const Axiom_editor = (function() {
         self.axiomContext.currentClassIndex += 1;
         Axioms_suggestions.getManchesterParserSuggestions(self.currentNode, false, false, function(err, result) {
             self.filterResources(result, "*");
+            $("#axiomsEditor_input").focus()
         });
     };
 
@@ -206,7 +208,7 @@ const Axiom_editor = (function() {
                 }
             }
         } else {
-            cssClass = "axiom_keyWord";
+            cssClass = "axiom_keyword";
             if (suggestion.id == "and") {
                 if (self.axiomContext.currentClassIndex > 0) {
                     self.axiomContext.currentClassIndex -= 1;
@@ -286,6 +288,7 @@ const Axiom_editor = (function() {
         Axioms_suggestions.getManchesterParserSuggestions(selectedObject, false, false, function(err, result) {
             self.currentSuggestions = result;
             self.drawSuggestions(result);
+            $("#axiomsEditor_input").focus()
             self.addSuggestion(selectedObject);
         });
     };
@@ -453,7 +456,7 @@ const Axiom_editor = (function() {
                 if (callback) {
                     return callback(err);
                 } else {
-                    self.message(err.responseText);
+                   alert (err.responseText);
                 }
             }
         });
@@ -523,8 +526,8 @@ const Axiom_editor = (function() {
             type = "Class";
         } else if (cssClasses.indexOf("axiom_Property") > -1) {
             type = "ObjectProperty";
-        } else if (cssClasses.indexOf("axiom_keyWord") > -1) {
-            type = "axiom_keyWord";
+        } else if (cssClasses.indexOf("axiom_keyword") > -1) {
+            type = "axiom_keyword";
         } else {
             return;
         }
@@ -564,8 +567,8 @@ const Axiom_editor = (function() {
                 type = "Class";
             } else if (cssClasses.indexOf("axiom_Property") > -1) {
                 type = "ObjectProperty";
-            } else if (cssClasses.indexOf("axiom_keyWord") > -1) {
-                type = "axiom_keyWord";
+            } else if (cssClasses.indexOf("axiom_keyword") > -1) {
+                type = "axiom_keyword";
             } else {
                 return;
             }
@@ -585,72 +588,12 @@ const Axiom_editor = (function() {
     };
 
 
-    self.generateTriples = function(callback) {
-        var options = {};
-        var content = self.getAxiomContent();
-        var sourceGraph = Config.sources[self.currentSource].graphUri;
-        if (!sourceGraph) {
-            return alert("no graph Uri");
-        }
 
-
-        var triples;
-        async.series(
-            [
-                function(callbackSeries) {
-                    self.message("checking axiom syntax");
-                    self.checkSyntax(function(err, result) {
-                        return callbackSeries(err);
-                    });
-                },
-
-                function(callbackSeries) {
-                    const params = new URLSearchParams({
-                        graphUri: sourceGraph,
-                        manchesterContent: content,
-                        options: JSON.stringify(options)
-                    });
-                    self.message("generating axioms triples");
-                    $.ajax({
-                        type: "GET",
-                        url: Config.apiUrl + "/jowl/manchesterAxiom2triples?" + params.toString(),
-                        dataType: "json",
-
-                        success: function(data, _textStatus, _jqXHR) {
-                            if (data.result && data.result.indexOf("Error") > -1) {
-                                return callbackSeries(data.result);
-                            }
-                            triples = data;
-                            callbackSeries();
-                            //  callback(null, data);
-                        },
-                        error(err) {
-                            callbackSeries(err.responseText);
-                        }
-                    });
-                },
-                function(callbackSeries) {
-                    self.message("drawing axioms triples");
-                    var html = Axiom_editor.showTriplesInDataTable("Axioms_editor_triplesDataTableDiv", triples);
-                    callbackSeries();
-                }
-            ],
-            function(err) {
-                if (err) {
-                    alert(err);
-                }
-                self.message("");
-                if (callback) {
-                    return callback(null, triples);
-                }
-            }
-        );
-    };
 
 
     self.drawTriples = function() {
 
-        self.generateTriples(function(err, triples) {
+        Axiom_manager.generateTriples(function(err, triples) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -660,6 +603,21 @@ const Axiom_editor = (function() {
 
         });
     };
+    self.listTriples = function() {
+
+        Axiom_manager.generateTriples(function(err, triples) {
+            if (err) {
+                return alert(err.responseText);
+            }
+            Axiom_editor.showTriplesInDataTable("Axioms_editor_triplesDataTableDiv", triples);
+
+
+
+
+        });
+    };
+
+
 
 
     self.test = function() {
@@ -669,56 +627,57 @@ const Axiom_editor = (function() {
         };
         var html = "<span class=\"axiom_element axiom_Class\" id=\"https://spec.industrialontologies.org/ontology/core/Core/InformationContentEntity\">information_content_entity</span>\n" +
             "<span class=\"axiom_element axiom_and_or\" id=\"and\">and</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
-            "<span class=\"axiom_element axiom_Property\" id=\"http://purl.obolibrary.org/obo/BFO_0000110\">has_continuant_part_at_all_times</span>            <span class=\"axiom_element axiom_keyWord\" id=\"some\">some</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_Property\" id=\"http://purl.obolibrary.org/obo/BFO_0000110\">has_continuant_part_at_all_times</span>            <span class=\"axiom_element axiom_keyword\" id=\"some\">some</span>\n" +
             "<span class=\"axiom_element axiom_Class\" id=\"https://spec.industrialontologies.org/ontology/core/Core/MeasuredValueExpression\">measured_value_expression</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\")\">)</span>\n" +
             "<span class=\"axiom_element axiom_and_or\" id=\"and\">and</span>\n" +
-            "<br>&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyword\" id=\"(\">(</span>\n" +
             "<span class=\"axiom_element axiom_Property\" id=\"https://spec.industrialontologies.org/ontology/core/Core/describes\">describes</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\"some\">some</span>\n" +
-            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\"some\">some</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyword\" id=\"(\">(</span>\n" +
             "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000008\">temporal_region</span>\n" +
             "<span class=\"axiom_element axiom_and_or\" id=\"or\">or</span>\n" +
             "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000020\">specifically_dependent_continuant</span>\n" +
             "<span class=\"axiom_element axiom_and_or\" id=\"or\">or</span>\n" +
             "<span class=\"axiom_element axiom_Class\" id=\"https://spec.industrialontologies.org/ontology/core/Core/ProcessCharacteristic\">process_characteristic</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\")\">)</span>\n" +
             "            <span class=\"axiom_element axiom_and_or\" id=\"and\">and</span>\n" +
-            "<br>&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyword\" id=\"(\">(</span>\n" +
             "<span class=\"axiom_element axiom_Property\" id=\"https://spec.industrialontologies.org/ontology/core/Core/isAbout\">is_about</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\"some\">some</span>\n" +
-            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\"some\">some</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyword\" id=\"(\">(</span>\n" +
             "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000015\">process</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\"or\">or</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\"or\">or</span>\n" +
             "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000035\">process_boundary</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\"or\">or</span>\n" +
-            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\"or\">or</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyword\" id=\"(\">(</span>\n" +
             "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000004\">independent_continuant</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\"and\">and</span>\n" +
-            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\"not\">not</span>\n" +
-            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\"and\">and</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyword\" id=\"(\">(</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\"not\">not</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyword\" id=\"(\">(</span>\n" +
             "<span class=\"axiom_element axiom_Class\" id=\"http://purl.obolibrary.org/obo/BFO_0000006\">spatial_region</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\")\">)</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\")\">)</span>\n" +
 
-            "            <span class=\"axiom_element axiom_keyWord\" id=\"and\">and</span>\n" +
-            "<br>&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyWord\" id=\"(\">(</span>\n" +
+            "            <span class=\"axiom_element axiom_keyword\" id=\"and\">and</span>\n" +
+            "<br>&nbsp;&nbsp;&nbsp;<span class=\"axiom_element axiom_keyword\" id=\"(\">(</span>\n" +
             "<span class=\"axiom_element axiom_Property\" id=\"https://spec.industrialontologies.org/ontology/core/Core/isOutputOf\">is_output_of</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\"some\">some</span>\n" +
+            "<span class=\"axiom_element axiom_keyword\" id=\"some\">some</span>\n" +
             "<span class=\"axiom_element axiom_Class\" id=\"https://spec.industrialontologies.org/ontology/core/Core/MeasurementProcess\">measurement_process</span>\n" +
-            "<span class=\"axiom_element axiom_keyWord\" id=\")\">)</span>";
-        //  "<span class=\"axiom_element axiom_keyWord\" id=\"and\">and</span> "
+            "<span class=\"axiom_element axiom_keyword\" id=\")\">)</span>";
+        //  "<span class=\"axiom_element axiom_keyword\" id=\"and\">and</span> "
 
 
         Axiom_editor.axiomType = "subClassOf";
         common.fillSelectOptions("axiomsEditor_suggestionsSelect", [{ id: "and", label: "and" }], true, "label", "id");
         $("#axiomsEditor_textDiv").prepend(html);
+
 
 
     };

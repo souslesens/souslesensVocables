@@ -10,21 +10,19 @@ var Axioms_graph = (function() {
     var self = {};
 
 
-
-
     self.getVisjsNode = function(node, level) {
         var color = "#ddd";
         var shape = "box";
         var label = node.symbol || node.label || "";
         var size = 8;
-        var font=null
+        var font = null;
         if (node.symbol) {
             shape = "circle";
             color = "#70ac47";
         } else if (node.owlType && node.owlType.indexOf("Class") > -1) {
             color = "#00afef";
-            shape="dot"
-            font={bold:true,color:color}
+            shape = "dot";
+            font = { bold: true, color: color };
         } else if (node.owlType && node.owlType.indexOf("ObjectProperty") > -1) {
             color = "#f5ef39";
         } else if (node.owlType && node.owlType.indexOf("Restriction") > -1) {
@@ -43,7 +41,7 @@ var Axioms_graph = (function() {
             color: color,
             size: size,
             level: level,
-            font:font,
+            font: font,
             data: {
                 id: node.id,
                 label: node.label || "",
@@ -57,7 +55,7 @@ var Axioms_graph = (function() {
 
 
     self.drawNodeAxioms2 = function(sourceLabel, nodeId, manchesterTriples, divId, options, callback) {
-        self.graphDivId=divId
+        self.graphDivId = divId;
         var nodesMap = {};
         var visjsData = { nodes: [], edges: [] };
         var edgesToRemove = {};
@@ -82,7 +80,7 @@ var Axioms_graph = (function() {
                             nodesMap[s] = { id: s };
                             if (s.indexOf("http") == 0) {
                                 var obj = Axiom_editor.allResourcesMap[s];
-                                nodesMap[s].label = obj ? obj.label.replace(/_/g," ")  : null;
+                                nodesMap[s].label = obj ? obj.label.replace(/_/g, " ") : null;
                             }
                         }
                         if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && !nodesMap[s].owlType) {
@@ -95,8 +93,8 @@ var Axioms_graph = (function() {
                             }
 
 
-                            var obj = Axiom_editor.allResourcesMap[p]
-                            nodesMap[s].predicates.push({ p: p, o: o, pLabel: obj ? obj.label.replace(/_/g," ") : null });
+                            var obj = Axiom_editor.allResourcesMap[p];
+                            nodesMap[s].predicates.push({ p: p, o: o, pLabel: obj ? obj.label.replace(/_/g, " ") : null });
 
                         }
 
@@ -112,8 +110,6 @@ var Axioms_graph = (function() {
                             nodesMap[s].owlType = "complementOf";
                             nodesMap[s].symbol = "┓";
                         }
-
-
 
 
                     });
@@ -140,7 +136,6 @@ var Axioms_graph = (function() {
                         if (node.id == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil") {
                             return;
                         }
-
 
 
                         // children
@@ -172,6 +167,9 @@ var Axioms_graph = (function() {
                                 var edgeId = node.id + "_" + childNode.id;
 
                                 var arrows = null;
+                                if (!visjsNode) {
+                                return
+                                }
                                 if (visjsNode.shape != "dot") {
                                     arrows = {
                                         to: {
@@ -200,7 +198,6 @@ var Axioms_graph = (function() {
                                     recurse(predicate.o, level + 1);
                                 }
                             });
-
 
 
                             if (existingNodes[nodeId]) {
@@ -278,7 +275,6 @@ var Axioms_graph = (function() {
     };
 
 
-
     self.drawGraph = function(visjsData, graphDiv) {
         var xOffset = 80;
         var yOffset = 80;
@@ -293,11 +289,11 @@ enabled:true},*/
                 direction: "LR",
                 sortMethod: "hubsize",
                 levelSeparation: xOffset,
-               // parentCentralization: false,
+                // parentCentralization: false,
                 shakeTowards: "roots",
                 blockShifting: true,
-                edgeMinimization:true,
-                parentCentralization:true,
+                edgeMinimization: true,
+                parentCentralization: true,
 
                 nodeSpacing: yOffset
             },
@@ -330,19 +326,20 @@ enabled:true},*/
     };
 
     self.onNodeClick = function(node, point, nodeEvent) {
-        if(node && node.data )
-            if(node.data.type.indexOf("Class")>-1 ||node.data.type.indexOf("ObjectProperty")>-1) {
-                NodeInfosWidget.showNodeInfos(Axiom_editor.currentSource, node, "mainDialogDiv")
+        if (node && node.data) {
+            if (node.data.type.indexOf("Class") > -1 || node.data.type.indexOf("ObjectProperty") > -1) {
+                NodeInfosWidget.showNodeInfos(Axiom_editor.currentSource, node, "mainDialogDiv");
             }
+        }
 
     };
     self.showGraphPopupMenu = function() {
 
     };
 
-    self.clearGraph=function(){
-        $("#"+self.graphDivId).html("")
-    }
+    self.clearGraph = function() {
+        $("#" + self.graphDivId).html("");
+    };
 
 
     self.sampleTriples = [

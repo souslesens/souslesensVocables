@@ -1,6 +1,7 @@
 import Axiom_editor from "./axiom_editor.js";
 import Axioms_manager from "./axioms_manager.js";
 import Axioms_graph from "./axioms_graph.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 var Axiom_editorUI = (function() {
     var self = {};
@@ -11,8 +12,8 @@ var Axiom_editorUI = (function() {
 
         $("#graphDiv").load("modules/tools/axioms/html/mainPanel.html", function(x, y) {
 
-            $("#axiomsEditor_input").on("keyup", Axiom_editor.onAxiomIntputKey)
-            $("#axiomsEditor_input").on("keydown", Axiom_editor.onAxiomIntputKey)
+            $("#axiomsEditor_input").on("keyup", Axiom_editor.onAxiomIntputKey);
+            $("#axiomsEditor_input").on("keydown", Axiom_editor.onAxiomIntputKey);
             $("#axiomsEditor_input").focus();
 
 
@@ -69,9 +70,16 @@ var Axiom_editorUI = (function() {
         Axiom_editor.setCurrentResource(resourceNode, isProperty);
 
         Axiom_editor.axiomType = $("#Axioms_editor_axiomTypeSelect").val();
-
-        var html = resourceNode.resourceType + " " + resourceNode.label + " " + Axiom_editor.axiomType;
+        var cssClass
+        if (isProperty) {
+            cssClass = "axiom_Property";
+        }
+        else  {
+            cssClass = "axiom_Class";
+        }
+        var html = "<span class='"+cssClass+"'><b>"+resourceNode.resourceType + " " + resourceNode.label + "  </b></span><span class='axiom_keyword'><b>" + Axiom_editor.axiomType+"</b></span>"
         $("#axiomsEditor_input_currentClassDiv").html(html);
+        Axiom_editor.getAllClasses()
     };
 
 
@@ -82,61 +90,86 @@ var Axiom_editorUI = (function() {
             if (err) {
                 return alert(err);
             }
-            var jstreeData=[]
-            var uniqueNodes={}
-            for (var  className in subGraphsMap) {
+            var jstreeData = [];
+            var uniqueNodes = {};
+            for (var className in subGraphsMap) {
 
-               var resource= Axiom_editor.allResourcesMap[ className];
+                var resource = Axiom_editor.allResourcesMap[className];
 
-               for(var uri in Axiom_editor.allResourcesMap){
-                   if(uri.endsWith(className)){
-                       resource= Axiom_editor.allResourcesMap[uri]
-                   }
-               }
-               if(!resource){
-                   return alert(" resource not found "+className);
-               }
-
+                for (var uri in Axiom_editor.allResourcesMap) {
+                    if (uri.endsWith(className)) {
+                        resource = Axiom_editor.allResourcesMap[uri];
+                    }
+                }
+                if (!resource) {
+                    return alert(" resource not found " + className);
+                }
 
 
                 jstreeData.push({
                     id: className,
-                    text:resource.label,
-                    parent:"#"
-                })
-                for (var axiomType in subGraphsMap[ className]) {
-                    if(!uniqueNodes[axiomType]){
+                    text: resource.label,
+                    parent: "#",
+                    data:{type: "resource"}
+                });
+                for (var axiomType in subGraphsMap[className]) {
+                    if (!uniqueNodes[axiomType]) {
                         jstreeData.push({
-                            id:axiomType+"_"+ className,
-                            text:axiomType,
-                            parent: className
-                        })
+                            id: axiomType + "_" + className,
+                            text: axiomType,
+                            parent: className,
+                            data:{type: "axiomType"}
+                        });
                     }
-
-                    subGraphsMap[ className][axiomType].forEach(function(item,index){
+                    var graphUri=subGraphsMap[className].graphUri
+                    subGraphsMap[className][axiomType].forEach(function(item, index) {
                         jstreeData.push({
-                            id:axiomType+"_"+ className+"_"+item.id,
-                            text:"_"+index,
-                            type:"axiom",
-                            parent:axiomType+"_"+ className,
-                            data:{
-                                id:item.id,
-                                label:index,
-                                source:source,
-                               resource:resource,
-                                triples:item.triples
+                            id: axiomType + "_" + className + "_" + item.id,
+                            text: "_" + index,
+                            type: "axiom",
+                            parent: axiomType + "_" + className,
+                            data: {
+                                id: item.id,
+                                label: index,
+                                graphUri:item.graphUri,
+                                source: source,
+                                type: "axiom",
+                                resource: resource,
+                                triples: item.triples
 
 
                             }
-                        })
-                    })
+                        });
+                    });
                 }
                 var options = {
                     selectTreeNodeFn: self.onConceptsJstreeSelectNode,
 
-                };
 
-                JstreeWidget.loadJsTree( "axiom_editor_conceptsJstreeDiv", jstreeData, options,);
+                    contextMenu: function(node) {
+                        var items = {};
+
+                        if(node.data.type=='axiom')
+                        items.delete = {
+                            label: "delete",
+                            action: function(/** @type {any} */ _e) {
+
+                                    if (confirm("delete axiom")) {
+                                        Sparql_OWL.clearGraph(node.data.graphUri, function(err, result) {
+                                            if (err) {
+                                                return alert(err);
+                                            }
+                                            JstreeWidget.deleteNode("axiom_editor_conceptsJstreeDiv", self.currentAxiomsTreeNode.id);
+
+
+                                        });
+                                    }
+                            }
+                        };
+                        return items;
+                    }
+                };
+                JstreeWidget.loadJsTree("axiom_editor_conceptsJstreeDiv", jstreeData, options);
 
 
             }
@@ -146,23 +179,29 @@ var Axiom_editorUI = (function() {
 
     };
 
-    self.onConceptsJstreeSelectNode=function(event,obj){
 
-        var node=obj.node;
+    self.onConceptsJstreeSelectNode = function(event, obj) {
 
-        if(node.data && node.data.triples){
-            Axiom_editor.currentSource=node.data.source;
-            Axiom_editor.currentNode=node.data.resource;
+        var node = obj.node;
+        self.currentAxiomsTreeNode = node;
+        if (node.data && node.data.triples) {
+            Axiom_editor.currentSource = node.data.source;
+            Axiom_editor.currentNode = node.data.resource;
+            Axioms_manager.getManchesterAxiomsFromTriples(Axiom_editor.currentSource, node.data.triples,function(err, result){
+                if(err)
+                    return alert(err)
+               $("#axiomsEditor_textDiv").html(result)
+            })
             Axioms_graph.drawNodeAxioms2(Axiom_editor.currentSource, Axiom_editor.currentNode.id, node.data.triples, "axiomGraphDiv", {}, function(err) {
 
             });
         }
-    }
+    };
 
     self.saveAxiom = function() {
 
 
-        Axiom_editor.generateTriples(function(err, rawAxioms) {
+        Axioms_manager.generateTriples(function(err, rawAxioms) {
 
 
             //c lean raw axioms from jowl
@@ -181,7 +220,10 @@ var Axiom_editorUI = (function() {
         });
     };
 
-
+self.showNodeInfos=function(id){
+    var node={data:{id:id}}
+    NodeInfosWidget.showNodeInfos(Axiom_editor.currentSource, node, "mainDialogDiv")
+}
     return self;
 
 

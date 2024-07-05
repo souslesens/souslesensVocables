@@ -1,4 +1,6 @@
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import elasticSearchProxy from "../../search/elasticSearchProxy.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 
 
 /**
@@ -73,7 +75,7 @@ var Axioms_manager = (function() {
 
                 Sparql_OWL.getGraphsWithSameClasses(sourceLabel, function(err, result) {
                     result.forEach(function(item) {
-                        if (item.g.value.startsWith(graphUriRoot+  conceptStr)) {
+                        if (item.g.value.startsWith(graphUriRoot + conceptStr)) {
                             subGraphsMap[item.g.value] = [];
 
                         }
@@ -99,9 +101,9 @@ var Axioms_manager = (function() {
             },
             function(callbackSeries) {
 
-                for (var key in subGraphsMap) {
+                for (var subGraphUri in subGraphsMap) {
                     var triples = [];
-                    subGraphsMap[key].forEach(function(item) {
+                    subGraphsMap[subGraphUri].forEach(function(item) {
                         triples.push({
                             subject: item.s.value,
                             predicate: item.p.value,
@@ -109,7 +111,7 @@ var Axioms_manager = (function() {
                         });
                     });
 
-                    var array = key.replace(graphUriRoot , "").split("/");
+                    var array = subGraphUri.replace(graphUriRoot, "").split("/");
                     var className = array[1];
 
                     var axiomType = array[2];
@@ -120,7 +122,7 @@ var Axioms_manager = (function() {
                     if (!sourceAxiomsMap[className][axiomType]) {
                         sourceAxiomsMap[className][axiomType] = [];
                     }
-                    sourceAxiomsMap[className][axiomType].push({id:axiomId,triples:triples})
+                    sourceAxiomsMap[className][axiomType].push({ id: axiomId, triples: triples, graphUri: subGraphUri });
                 }
 
                 return callbackSeries();
@@ -130,6 +132,257 @@ var Axioms_manager = (function() {
         });
 
     };
+
+
+    self.getManchesterAxiomsFromTriples = function(source, triples, callback) {
+
+        var rawManchesterStr = "";
+
+
+        var axiomText = "";
+        var axiomtype = "";
+        async.series(
+            [
+
+                function(callbackSeries) {
+                    const params = new URLSearchParams({
+                        ontologyGraphUri: Config.sources[source].graphUri,
+                        axiomTriples: JSON.stringify(triples)
+
+                    });
+                    Axiom_editor.message("generating manchester syntax ");
+                    $.ajax({
+                        type: "GET",
+                        url: Config.apiUrl + "/jowl/axiomTriples2manchester?" + params.toString(),
+                        dataType: "json",
+
+                        success: function(data, _textStatus, _jqXHR) {
+                            if (data.result && data.result.indexOf("Error") > -1) {
+
+                                return callbackSeries(data.result);
+
+                            }
+                            rawManchesterStr = data.result;
+                            callbackSeries();
+
+                        },
+                        error(err) {
+                            callbackSeries(err.responseText);
+                        }
+                    });
+                },
+
+                //parse rawManchesterSyntax
+                function(callbackSeries) {
+                    var lines = rawManchesterStr.split("\n");
+                    var recording = false;
+
+                    lines.forEach(function(line, index) {
+                        if(line.trim()=="")
+                            return;
+                        if (line.startsWith("Class") || line.startsWith("ObjectProperty")) {
+                            return;
+                        }
+                        if (line.indexOf("SubClassOf") > -1) {
+                            axiomtype = lines[index - 1];
+                            recording = true;
+                        }
+                        if (line.indexOf("]") > -1) {
+                            recording = false;
+                        }
+
+                        if (recording) {
+                            axiomText += line + "\n";
+                        }
+                    });
+
+                    var x=axiomText
+
+
+
+                      var regex = /<([^>]+)>/g
+                       var array = [];
+                       var urisMap = {  };
+
+
+                    while ((array = regex.exec(axiomText)) !== null) {
+                           if (array.length == 2) {
+                               urisMap[array[0]]=Axiom_editor.allResourcesMap[array[1]]
+                           }
+                       }
+              for(var uri in urisMap){
+                  var resource=urisMap[uri]
+                  var cssClass
+                  if(resource.resourceType=="Class"){
+                      cssClass="axiom_Class"
+
+                  }else{
+                      cssClass="axiom_Property"
+                  }
+                  axiomText=axiomText.replace(uri, "<span class='"+cssClass+"' " +
+                     // "onclick=Axiom_editorUI.showNodeInfos('"+uri+"')" +
+                      ">"+resource.label+"</span>")
+              }
+
+                    axiomText="<div class='axiom_keyword'>"+axiomText+"</div>"
+
+                    callbackSeries();
+                }
+
+
+            ],
+            function(err) {
+                if (err) {
+                    alert(err);
+                }
+                Axiom_editor.message("");
+                if (callback) {
+                    return callback(null, axiomText);
+                }
+            }
+        );
+    };
+
+
+    self.generateTriples = function(callback) {
+        var content = Axiom_editor.getAxiomContent();
+        var sourceGraph = Config.sources[Axiom_editor.currentSource].graphUri;
+        if (!sourceGraph) {
+            return alert("no graph Uri");
+        }
+
+
+        var triples;
+        async.series(
+            [
+                function(callbackSeries) {
+                    Axiom_editor.message("checking axiom syntax");
+                    Axiom_editor.checkSyntax(function(err, result) {
+                        return callbackSeries(err);
+                    });
+                },
+
+                function(callbackSeries) {
+                    const params = new URLSearchParams({
+                        graphUri: sourceGraph,
+                        manchesterContent: content,
+                        "classUri": Axiom_editor.currentNode.id,
+                        "axiomType": Axiom_editor.axiomType,
+                        "saveTriples": false,
+                        "checkConsistency": true
+
+                    });
+                    Axiom_editor.message("generating axioms triples");
+                    $.ajax({
+                        type: "GET",
+                        url: Config.apiUrl + "/jowl/manchesterAxiom2triples?" + params.toString(),
+                        dataType: "json",
+
+                        success: function(data, _textStatus, _jqXHR) {
+                            if (data.result && data.result.indexOf("Error") > -1) {
+                                return callbackSeries(data.result);
+                            }
+                            triples = data;
+                            callbackSeries();
+                            //  callback(null, data);
+                        },
+                        error(err) {
+                            callbackSeries(err.responseText);
+                        }
+                    });
+                },
+                function(callbackSeries) {
+
+
+                    callbackSeries();
+                }
+            ],
+            function(err) {
+                if (err) {
+                    alert(err);
+                }
+                Axiom_editor.message("");
+                if (callback) {
+                    return callback(null, triples);
+                }
+            }
+        );
+    };
+
+
+    self.mergeAxiomsToSeparateGraphs=function(sourceLabel){
+        if(!sourceLabel)
+            sourceLabel=Axiom_editor.currentSource
+
+        var triples=[]
+        async.series([
+            function(callbackSeries){
+                var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "SELECT distinct ?o2 ?p2 ?o3 from <https://spec.industrialontologies.org/ontology/202401/core/Core/> WHERE {\n" +
+                    "  \n" +
+                    "     ?o3 ^(<http://www.w3.org/2002/07/owl#complementOf>|<http://www.w3.org/2002/07/owl#hasKey>|<http://www.w3.org/2002/07/owl#unionOf>|<http://www.w3.org/2002/07/owl#intersectionOf>|<http://www.w3.org/2002/07/owl#oneOf>|<http://www.w3.org/2000/01/rdf-schema#subClassOf>|<http://www.w3.org/2002/07/owl#Restriction>|<http://www.w3.org/2002/07/owl#onProperty>|<http://www.w3.org/2002/07/owl#someValuesFrom>|<http://www.w3.org/2002/07/owl#allValuesFrom>|<http://www.w3.org/2002/07/owl#hasValue>|<http://www.w3.org/2002/07/owl#minCardinality>|<http://www.w3.org/2002/07/owl#maxCardinality>|<http://www.w3.org/2002/07/owl#cardinality>|<http://www.w3.org/2002/07/owl#maxQualifiedCardinality>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#first>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#List>|rdf:type) ?o2.\n" +
+                    "  ?o2 ?p2 ?o3\n" +
+                    "  \n" +
+                    "{ select * where{\n" +
+                    "\n" +
+                    "  <https://spec.industrialontologies.org/ontology/core/Core/MeasurementInformationContentEntity> ?p ?o . \n" +
+                    "  filter (isblank(?o))\n" +
+                    "  filter ( ?p in (<http://www.w3.org/2002/07/owl#disjointWith>,<http://www.w3.org/2002/07/owl#disjointUnionOf>,<http://www.w3.org/2002/07/owl#equivalentClass>,rdfs:subClassOf))\n" +
+                    "  \n" +
+                    " ?o (<http://www.w3.org/2002/07/owl#complementOf>|<http://www.w3.org/2002/07/owl#hasKey>|<http://www.w3.org/2002/07/owl#unionOf>|<http://www.w3.org/2002/07/owl#intersectionOf>|<http://www.w3.org/2002/07/owl#oneOf>|<http://www.w3.org/2000/01/rdf-schema#subClassOf>|<http://www.w3.org/2002/07/owl#Restriction>|<http://www.w3.org/2002/07/owl#onProperty>|<http://www.w3.org/2002/07/owl#someValuesFrom>|<http://www.w3.org/2002/07/owl#allValuesFrom>|<http://www.w3.org/2002/07/owl#hasValue>|<http://www.w3.org/2002/07/owl#minCardinality>|<http://www.w3.org/2002/07/owl#maxCardinality>|<http://www.w3.org/2002/07/owl#cardinality>|<http://www.w3.org/2002/07/owl#maxQualifiedCardinality>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#first>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#List>)+ ?o2.\n" +
+                    "  \n" +
+                    "    }}\n" +
+                    "\n" +
+                    "} LIMIT 1000"
+
+                var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
+                    if (err) {
+                        return callbackSeries(err);
+                    }
+                    triples=result.results.bindings
+                    return callbackSeries();
+                });
+            },
+            function(callbackSeries) {
+
+            var query="\n" +
+                "\n" +
+                "\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                " with <https://spec.industrialontologies.org/ontology/202401/core/Core/> \n" +
+                "insert  {graph  <https://spec.industrialontologies.org/ontology/202401/core/Core/concept/MeasurementInformationContentEntity/subClassOf/TEST> {?o2 ?p2 ?o3}}\n" +
+                "\n" +
+                "WHERE {\n" +
+                "  \n" +
+                "     ?o3 ^(<http://www.w3.org/2002/07/owl#complementOf>|<http://www.w3.org/2002/07/owl#hasKey>|<http://www.w3.org/2002/07/owl#unionOf>|<http://www.w3.org/2002/07/owl#intersectionOf>|<http://www.w3.org/2002/07/owl#oneOf>|<http://www.w3.org/2000/01/rdf-schema#subClassOf>|<http://www.w3.org/2002/07/owl#Restriction>|<http://www.w3.org/2002/07/owl#onProperty>|<http://www.w3.org/2002/07/owl#someValuesFrom>|<http://www.w3.org/2002/07/owl#allValuesFrom>|<http://www.w3.org/2002/07/owl#hasValue>|<http://www.w3.org/2002/07/owl#minCardinality>|<http://www.w3.org/2002/07/owl#maxCardinality>|<http://www.w3.org/2002/07/owl#cardinality>|<http://www.w3.org/2002/07/owl#maxQualifiedCardinality>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#first>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#List>|rdf:type) ?o2.\n" +
+                "  ?o2 ?p2 ?o3\n" +
+                "  \n" +
+                "{ select distinct * where{\n" +
+                "\n" +
+                "  <https://spec.industrialontologies.org/ontology/core/Core/MeasurementInformationContentEntity> ?p ?o . \n" +
+                "  filter (isblank(?o))\n" +
+                "  filter ( ?p in (<http://www.w3.org/2002/07/owl#disjointWith>,<http://www.w3.org/2002/07/owl#disjointUnionOf>,<http://www.w3.org/2002/07/owl#equivalentClass>,rdfs:subClassOf))\n" +
+                "  \n" +
+                " ?o (<http://www.w3.org/2002/07/owl#complementOf>|<http://www.w3.org/2002/07/owl#hasKey>|<http://www.w3.org/2002/07/owl#unionOf>|<http://www.w3.org/2002/07/owl#intersectionOf>|<http://www.w3.org/2002/07/owl#oneOf>|<http://www.w3.org/2000/01/rdf-schema#subClassOf>|<http://www.w3.org/2002/07/owl#Restriction>|<http://www.w3.org/2002/07/owl#onProperty>|<http://www.w3.org/2002/07/owl#someValuesFrom>|<http://www.w3.org/2002/07/owl#allValuesFrom>|<http://www.w3.org/2002/07/owl#hasValue>|<http://www.w3.org/2002/07/owl#minCardinality>|<http://www.w3.org/2002/07/owl#maxCardinality>|<http://www.w3.org/2002/07/owl#cardinality>|<http://www.w3.org/2002/07/owl#maxQualifiedCardinality>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#first>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>|<http://www.w3.org/1999/02/22-rdf-syntax-ns#List>)+ ?o2.\n" +
+                "  \n" +
+                "    }}\n" +
+                "\n" +
+                "} \n" +
+                "\n" +
+                "\n"
+                triples.forEach(function(item) {
+                       // item.?o2 ?p2 ?o3
+                })
+            }
+        ], function(err){
+
+        })
+
+    }
 
 
     return self;

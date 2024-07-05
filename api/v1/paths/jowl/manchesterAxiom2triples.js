@@ -1,8 +1,4 @@
-const HttpProxy = require("../../../../bin/httpProxy.");
-const ConfigManager = require("../../../../bin/configManager.");
-const GraphStore = require("../../../../bin/graphStore.");
-const Util = require("../../../../bin/util.");
-const fs = require("fs");
+
 const { processResponse } = require("../utils");
 const request = require("request");
 const async = require("async");
@@ -20,7 +16,11 @@ module.exports = function () {
 
         var payload={
             input:req.query.manchesterContent,
-            graphName:req.query.graphUri
+            graphName:req.query.graphUri,
+            "classUri": req.query.classUri,
+            "axiomType":  req.query.axiomType,
+            "saveTriples": (req.query.saveTriples=="true")?true:false,
+            "checkConsistency": (req.query.checkConsistency=="true")?true:false,
         }
                     var options = {
                         method: "POST",
@@ -59,7 +59,28 @@ module.exports = function () {
 
 
             {
-                name: "options",
+                name: "classUri",
+                description: "JSON ",
+                in: "query",
+                type: "string",
+                required: false,
+            },
+            {
+                name: "axiomType",
+                description: "JSON ",
+                in: "query",
+                type: "string",
+                required: false,
+            },
+            {
+                name: "saveTriples",
+                description: "JSON ",
+                in: "query",
+                type: "string",
+                required: false,
+            },
+            {
+                name: "checkConsistency",
                 description: "JSON ",
                 in: "query",
                 type: "string",

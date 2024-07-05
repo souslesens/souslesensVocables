@@ -1,9 +1,6 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axiom_editor from "./axiom_editor.js";
-import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-import common from "../../shared/common.js";
-import Export from "../../shared/export.js";
+import Axiom_activeLegend from "./axiom_activeLegend.js";
 
 
 var Axioms_graph = (function() {
@@ -168,7 +165,7 @@ var Axioms_graph = (function() {
 
                                 var arrows = null;
                                 if (!visjsNode) {
-                                return
+                                    return;
                                 }
                                 if (visjsNode.shape != "dot") {
                                     arrows = {
@@ -320,10 +317,15 @@ enabled:true},*/
                "  <button onclick=\"AxiomEditor.init()\">Edit Axiom</button>" +
                "<div id='axiomsGraphDiv3' style='width:800px;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
            );*/
+
         self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
         self.axiomsVisjsGraph.draw(function() {
+
         });
     };
+
+
+
 
     self.onNodeClick = function(node, point, nodeEvent) {
         if (node && node.data) {

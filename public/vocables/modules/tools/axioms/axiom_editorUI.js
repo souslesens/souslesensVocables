@@ -2,6 +2,7 @@ import Axiom_editor from "./axiom_editor.js";
 import Axioms_manager from "./axioms_manager.js";
 import Axioms_graph from "./axioms_graph.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import Axiom_activeLegend from "./axiom_activeLegend.js";
 
 var Axiom_editorUI = (function() {
     var self = {};
@@ -15,6 +16,7 @@ var Axiom_editorUI = (function() {
             $("#axiomsEditor_input").on("keyup", Axiom_editor.onAxiomIntputKey);
             $("#axiomsEditor_input").on("keydown", Axiom_editor.onAxiomIntputKey);
             $("#axiomsEditor_input").focus();
+            Axiom_activeLegend.draw()
 
 
             $("#axiom_triplesTab").tabs();
@@ -80,6 +82,7 @@ var Axiom_editorUI = (function() {
         var html = "<span class='"+cssClass+"'><b>"+resourceNode.resourceType + " " + resourceNode.label + "  </b></span><span class='axiom_keyword'><b>" + Axiom_editor.axiomType+"</b></span>"
         $("#axiomsEditor_input_currentClassDiv").html(html);
         Axiom_editor.getAllClasses()
+        Axiom_activeLegend.hideForbiddenResources(null)
     };
 
 

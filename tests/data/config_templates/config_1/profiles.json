@@ -4,8 +4,7 @@
         "_type": "profile",
         "id": "admin",
         "allowedSourceSchemas": ["SKOS", "OWL", "INDIVIDUAL"],
-        "allowedTools": "ALL",
-        "forbiddenTools": [],
+        "allowedTools": ["lineage", "KGcreator", "KGquery"],
         "defaultSourceAccessControl": "read",
         "sourcesAccessControl": {
             "Dbpedia": "forbidden"
@@ -16,8 +15,7 @@
         "_type": "profile",
         "id": "owl_only",
         "allowedSourceSchemas": ["OWL"],
-        "allowedTools": "ALL",
-        "forbiddenTools": [],
+        "allowedTools": ["lineage", "KGcreator", "KGquery"],
         "defaultSourceAccessControl": "read",
         "sourcesAccessControl": {
             "Dbpedia": "forbidden"
@@ -28,8 +26,7 @@
         "_type": "profile",
         "id": "skos_only",
         "allowedSourceSchemas": ["SKOS"],
-        "allowedTools": "ALL",
-        "forbiddenTools": [],
+        "allowedTools": ["lineage", "KGcreator", "KGquery"],
         "defaultSourceAccessControl": "read",
         "sourcesAccessControl": {
             "Dbpedia": "forbidden"

@@ -87,8 +87,7 @@ type ProfileJson = {
     name: string;
     allowedSourceSchemas: string[];
     sourcesAccessControl: Record<string, SourceAccessControl>;
-    allowedTools: string[] | string;
-    forbiddenTools: string[];
+    allowedTools: string[];
     theme?: string;
 };
 
@@ -100,7 +99,6 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         allowedSourceSchemas: profile.allowedSourceSchemas,
         sourcesAccessControl: profile.sourcesAccessControl,
         allowedTools: profile.allowedTools,
-        forbiddenTools: profile.forbiddenTools,
         theme: profile.theme,
     };
 };
@@ -117,8 +115,7 @@ const ProfileSchema = z.object({
         .nullish()
         .transform((a) => (a ?? []).flatMap((item) => (item ? item : []))),
     sourcesAccessControl: z.record(SourceAccessControlSchema).default({}),
-    allowedTools: z.union([z.string(), z.array(z.string())]).default("ALL"),
-    forbiddenTools: z.array(z.string()).default([]),
+    allowedTools: z.array(z.string()).default([]),
 });
 
 export const ProfileSchemaCreate = ProfileSchema.merge(
@@ -139,8 +136,7 @@ export const defaultProfile = (uuid: string): Profile => {
         id: uuid,
         allowedSourceSchemas: [],
         sourcesAccessControl: {},
-        allowedTools: "ALL",
-        forbiddenTools: [],
+        allowedTools: [],
     };
 };
 export { getProfiles, deleteProfile, Profile, SourceAccessControl, ProfileSchema };

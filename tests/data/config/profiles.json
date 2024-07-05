@@ -4,8 +4,7 @@
         "_type": "profile",
         "id": "all_forbidden",
         "allowedSourceSchemas": ["OWL"],
-        "allowedTools": "ALL",
-        "forbiddenTools": [],
+        "allowedTools": ["lineage", "KGcreator", "KGquery"],
         "defaultSourceAccessControl": "forbidden",
         "sourcesAccessControl": {}
     },
@@ -14,8 +13,7 @@
         "_type": "profile",
         "id": "read_folder_1",
         "allowedSourceSchemas": ["OWL"],
-        "allowedTools": "ALL",
-        "forbiddenTools": [],
+        "allowedTools": ["lineage", "KGcreator", "KGquery"],
         "defaultSourceAccessControl": "forbidden",
         "sourcesAccessControl": {
             "OWL/FOLDER_1": "read"
@@ -26,8 +24,7 @@
         "_type": "profile",
         "id": "readwrite_folder_1",
         "allowedSourceSchemas": ["OWL"],
-        "allowedTools": "ALL",
-        "forbiddenTools": [],
+        "allowedTools": ["lineage", "KGcreator", "KGquery"],
         "defaultSourceAccessControl": "forbidden",
         "sourcesAccessControl": {
             "OWL/FOLDER_1": "readwrite"

@@ -5,6 +5,128 @@ var Axiom_activeLegend=(function(){
 
 var self={}
     self.axiomsLegendVisjsGraph=null
+
+
+
+
+    self.filterSuggestion=function(suggestions,resourceType){
+    var selection=[]
+        suggestions.forEach(function(item){
+            if(item.resourceType==resourceType)
+                selection.push(item)
+        })
+        return selection;
+
+    }
+    self.onLegendNodeClick=function(node, point, nodeEvent) {
+
+
+        if (node && node.data) {
+            if (node.data.type == "add_Class") {
+                Axioms_suggestions.getManchesterParserSuggestions(Axiom_editor.currentNode, false, false, function(err, result) {
+
+                  var suggestions=self.filterSuggestion(result,"Class")
+                    common.fillSelectOptions("axioms_legend_suggestionsSelect", suggestions, false, "label", "id")
+                })
+            }
+            if (node && node.data) {
+                if (node.data.type == "add_ObjectProperty") {
+                    Axioms_suggestions.getManchesterParserSuggestions(Axiom_editor.currentNode, false, false, function(err, result) {
+
+                        var suggestions=self.filterSuggestion(result,"ObjectProperty")
+                        common.fillSelectOptions("axioms_legend_suggestionsSelect", suggestions, false, "label", "id")
+                    })
+                }
+            }
+        }
+
+
+    }
+    self.onSuggestionsSelect=function(selectedObject){
+    var resource
+       var  currentNode
+        if (!selectedObject) {
+            var selectedText = $("#axioms_legend_suggestionsSelect option:selected").text();
+            selectedText = selectedText.replace(/ /g, "_");
+            var selectedId = $("#axioms_legend_suggestionsSelect").val();
+            var selectedObject = { id: selectedId, label: selectedText };
+            resource = Axiom_editor.allResourcesMap[selectedId];
+        } else {
+            resource = Axiom_editor.allResourcesMap[selectedObject.id];
+        }
+
+        if (resource) {
+            //class or Property
+            Axiom_editor.previousTokenType = resource.resourceType;
+            selectedObject.resourceType = resource.resourceType;
+        } else {
+            //keyword
+            selectedObject.resourceType = "keyword";
+        }
+
+        if(selectedObject.resourceType=="Class") {
+            currentNode = {
+                id: selectedObject.id,
+                label: selectedObject.label,
+                symbol: null,
+                owlType: "Class"
+
+            }
+        } if(selectedObject.resourceType=="ObjectProperty"){
+
+        }else{
+
+        }
+
+        var visjsData={nodes:[],edges:[]};
+        visjsData.nodes.push(Axioms_graph.getVisjsNode(resource))
+        if ( Axioms_graph.axiomsVisjsGraph) {
+            Axioms_graph.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
+            // self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
+        } else {
+            Axioms_graph.drawGraph(visjsData, "axiomGraphDiv");
+
+        }
+
+
+        Axioms_suggestions.getValidResourceTypes(selectedObject, false, false, function(err, result) {
+           if(err)
+               return alert(err)
+
+
+
+
+            if(result.selectClasses){
+
+
+
+            }
+            if(result.selectProperties){
+
+            }else{
+
+            }
+
+
+        });
+
+    }
+
+    self.hideForbiddenResources=function(suggestions){
+    var legendNodes=self.axiomsLegendVisjsGraph.data.nodes.getIds()
+        return;
+        if(result.selectClasses){
+
+
+
+        }
+        if(result.selectProperties){
+
+        }else{
+
+        }
+    }
+
     self.draw = function() {
         var visjsData = { nodes: [], edges: [] };
         visjsData.nodes.push({
@@ -113,7 +235,7 @@ var self={}
 
 
 
-            );
+        );
         var options = {
 
             physics: {
@@ -132,57 +254,6 @@ var self={}
         self.axiomsLegendVisjsGraph.draw(function() {
 
         })
-    }
-
-
-
-    self.filterSuggestion=function(suggestions,resourceType){
-    var selection=[]
-        suggestions.forEach(function(item){
-            if(item.resourceType==resourceType)
-                selection.push(item)
-        })
-        return selection;
-
-    }
-    self.onLegendNodeClick=function(node, point, nodeEvent) {
-
-
-        if (node && node.data) {
-            if (node.data.type == "add_Class") {
-                Axioms_suggestions.getManchesterParserSuggestions(Axiom_editor.currentNode, false, false, function(err, result) {
-
-                  var suggestions=self.filterSuggestion(result,"Class")
-                    common.fillSelectOptions("axioms_legend_suggestionsSelect", suggestions, false, "label", "id")
-                })
-            }
-            if (node && node.data) {
-                if (node.data.type == "add_ObjectProperty") {
-                    Axioms_suggestions.getManchesterParserSuggestions(Axiom_editor.currentNode, false, false, function(err, result) {
-
-                        var suggestions=self.filterSuggestion(result,"ObjectProperty")
-                        common.fillSelectOptions("axioms_legend_suggestionsSelect", suggestions, false, "label", "id")
-                    })
-                }
-            }
-        }
-
-
-    }
-
-    self.hideForbiddenResources=function(suggestions){
-
-
-    var legendNodes=self.axiomsLegendVisjsGraph.data.nodes.getIds()
-
-
-
-
-
-
-
-
-
     }
     return self;
 

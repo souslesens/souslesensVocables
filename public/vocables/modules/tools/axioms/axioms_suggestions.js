@@ -3,8 +3,67 @@ import Axiom_editor from "./axiom_editor.js";
 var Axioms_suggestions = (function() {
     var self = {};
 
-    self.getManchesterParserSuggestions = function(selectedObject, allClasses,allObjectProperties,callback) {
-        self.currentObject=selectedObject
+
+    self.getValidResourceTypes = function(selectedObject, allClasses, allObjectProperties, callback) {
+        self.currentObject = selectedObject;
+        var selectClasses = allClasses;
+        var selectProperties = allObjectProperties;
+        var keywordSuggestions = [];
+
+
+        //call sever for Manchester suggestions
+        var axiomText = Axiom_editor.getAxiomText() + " ";
+        var selectedLabel = selectedObject.label;
+        if (selectedObject.resourceType == "Class") {
+            selectedLabel = "_" + selectedLabel;
+        }
+        axiomText += selectedLabel + " ";
+
+        var options = {};
+        const params = new URLSearchParams({
+            source: Axiom_editor.currentSource,
+            lastToken: axiomText,
+            options: JSON.stringify(options)
+        });
+
+
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/axioms/suggestion?" + params.toString(),
+            dataType: "json",
+
+            success: function(data, _textStatus, _jqXHR) {
+                data.forEach(function(item) {
+                    if (item.match(/^_$/g)) {
+                        // remove _ and replace by Classes
+                        selectClasses = true;
+                        return;
+                    } else if (item.match(/^[A-z]$/g)) {
+                        // remove alphabetic letters and replace by ObjectProperties
+                        if (selectedObject.id != "some" && selectedObject.id != "only") {
+                            selectProperties = true;
+                        }
+                        return;
+                    } else {
+                        keywordSuggestions.push({ id: item, label: item });
+                    }
+                });
+
+                callback(null, {
+                    selectClasses: selectClasses,
+                    selectProperties: selectProperties,
+                    keywordSuggestions: keywordSuggestions
+                });
+            },
+            error(err) {
+                callback(err.responseText);
+            }
+        });
+    };
+
+
+    self.getManchesterParserSuggestions = function(selectedObject, allClasses, allObjectProperties, callback) {
+        self.currentObject = selectedObject;
         var allSuggestions = [];
         var keywordSuggestions = [];
         var selectClasses = allClasses;
@@ -13,48 +72,16 @@ var Axioms_suggestions = (function() {
             [
                 function(callbackSeries) {
 
-                    //call sever for Manchester suggestions
-                    var axiomText = Axiom_editor.getAxiomText() + " ";
-                    var selectedLabel = selectedObject.label;
-                    if (selectedObject.resourceType == "Class") {
-                        selectedLabel = "_" + selectedLabel;
-                    }
-                    axiomText += selectedLabel + " ";
-
-                    var options = {};
-                    const params = new URLSearchParams({
-                        source: Axiom_editor.currentSource,
-                        lastToken: axiomText,
-                        options: JSON.stringify(options)
-                    });
-
-
-                    $.ajax({
-                        type: "GET",
-                        url: Config.apiUrl + "/axioms/suggestion?" + params.toString(),
-                        dataType: "json",
-
-                        success: function(data, _textStatus, _jqXHR) {
-                            data.forEach(function(item) {
-                                if (item.match(/^_$/g) ) {
-                                    // remove _ and replace by Classes
-                                    selectClasses = true;
-                                    return;
-                                } else if (item.match(/^[A-z]$/g)) {
-                                    // remove alphabetic letters and replace by ObjectProperties
-                                    if( selectedObject.id!="some" && selectedObject.id!="only")
-                                    selectProperties = true;
-                                    return;
-                                } else {
-                                    keywordSuggestions.push({ id: item, label: item });
-                                }
-                            });
-
-                            callbackSeries();
-                        },
-                        error(err) {
-                            callbackSeries(err.responseText);
+                    self.getValidResourceTypes(selectedObject, allClasses, allObjectProperties, function(err, result) {
+                        if (err) {
+                            return callbackSeries(err.responseText);
                         }
+                        selectClasses = result.selectClasses;
+                        selectProperties = result.selectProperties;
+                        keywordSuggestions = result.keywordSuggestions;
+
+                        callbackSeries();
+
                     });
                 },
 
@@ -63,7 +90,7 @@ var Axioms_suggestions = (function() {
                     if (!selectProperties) {
                         return callbackSeries();
                     }
-                    var index=Math.max(Axiom_editor.axiomContext.currentClassIndex,0)
+                    var index = Math.max(Axiom_editor.axiomContext.currentClassIndex, 0);
                     var classId = Axiom_editor.axiomContext.classes[index];
                     if (!classId || allObjectProperties) {
                         var props = [];
@@ -90,7 +117,7 @@ var Axioms_suggestions = (function() {
                     if (!selectClasses) {
                         return callbackSeries();
                     }
-                    var index=Math.max(Axiom_editor.axiomContext.currentPropertyIndex,0)
+                    var index = Math.max(Axiom_editor.axiomContext.currentPropertyIndex, 0);
                     var propId = Axiom_editor.axiomContext.properties[index];
 
                     if (!propId || allClasses) {
@@ -117,6 +144,8 @@ var Axioms_suggestions = (function() {
             ],
             function(err) {
                 allSuggestions = keywordSuggestions.concat(allSuggestions);
+                allSuggestions.selectClasses=selectClasses
+                allSuggestions.selectProperties=selectProperties
 
                 return callback(err, allSuggestions);
             }
@@ -153,7 +182,6 @@ var Axioms_suggestions = (function() {
         if (!classId) {
             return callback(null, []);
         }
-
 
 
         OntologyModels.getAllowedPropertiesBetweenNodes(Axiom_editor.currentSource, classId, null, { keepSuperClasses: true }, function(err, result) {
@@ -201,7 +229,6 @@ var Axioms_suggestions = (function() {
             return callback(null, data);
         });
     };
-
 
 
     return self;

@@ -1,32 +1,31 @@
 import { useState, useMemo, useReducer, useEffect, ChangeEvent, forwardRef, Ref, Dispatch, MouseEventHandler } from "react";
 import {
     Box,
-    CircularProgress,
-    Stack,
-    TextField,
-    TableContainer,
-    Paper,
-    Table,
-    TableHead,
-    TableRow,
-    TableCell,
-    TableSortLabel,
-    TableBody,
-    Chip,
     Button,
-    Grid,
+    Checkbox,
+    Chip,
+    CircularProgress,
     FormControl,
+    FormLabel,
+    Grid,
     InputLabel,
-    Select,
     MenuItem,
     Modal,
-    Checkbox,
-    FormLabel,
-    FormGroup,
-    FormControlLabel,
+    Paper,
+    Select,
+    SelectChangeEvent,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TableSortLabel,
+    TextField,
+    Tooltip,
     Typography,
     styled,
-    SelectChangeEvent,
 } from "@mui/material";
 import { ExpandMore, ChevronRight } from "@mui/icons-material";
 
@@ -135,6 +134,11 @@ const ProfilesTable = () => {
                                             </TableSortLabel>
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                            <TableSortLabel active={orderBy === "allowedTools"} direction={order} onClick={() => handleRequestSort("allowedTools")}>
+                                                Allowed Tools
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
                                             <TableSortLabel active={orderBy === "allowedSourceSchemas"} direction={order} onClick={() => handleRequestSort("allowedSourceSchemas")}>
                                                 Allowed Sources
                                             </TableSortLabel>
@@ -151,6 +155,18 @@ const ProfilesTable = () => {
                                             return (
                                                 <TableRow key={profile.id}>
                                                     <TableCell>{profile.name}</TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            {profile.allowedTools.slice(0, 3).map((tool) => (
+                                                                <Chip key={tool} label={tool} size="small" />
+                                                            ))}
+                                                            {profile.allowedTools.slice(3).length > 0 ? (
+                                                                <Tooltip title={profile.allowedTools.slice(3).join(", ")}>
+                                                                    <Chip label={`+ ${profile.allowedTools.slice(3).length}`} size="small" color="info" variant="outlined" />
+                                                                </Tooltip>
+                                                            ) : null}
+                                                        </Stack>
+                                                    </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             {profile.allowedSourceSchemas.map((source) => (
@@ -346,9 +362,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
             update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: srcNode.treeStr, newValue: null as SourceAccessControl | null } });
         });
     };
-
-    const handleCheckedAll = (fieldname: string) => (event: ChangeEvent<HTMLInputElement>) =>
-        update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } });
 
     function validateProfileName(profileName: string) {
         const issues = createCustomIssues(ProfileSchema);

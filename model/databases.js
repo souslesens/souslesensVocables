@@ -200,6 +200,20 @@ class DatabaseModel {
      */
     batchSelect = async (databaseId, tableName, { values = [], select = "*", offset = 0, limit = 1000, noRecurs = false }) => {
         const connection = await this.getConnection(databaseId);
+        return await this.recurseBatchSelect(connection, databaseId, tableName, { values: values, select: select, offset: offset, limit: limit, noRecurs: noRecurs });
+    };
+
+    /**
+     * @param {any} connection - the knex connection
+     * @param {string} databaseId - the database id
+     * @param {string} tableName - the database table name
+     * @param {any[]} values - array of rows
+     * @params {string} select - select query
+     * @params {number} offset - query offset
+     * @params {number} limit - query limit
+     * @returns {Promise<any[]>} query result
+     */
+    recurseBatchSelect = async (connection, databaseId, tableName, { values = [], select = "*", offset = 0, limit = 1000, noRecurs = false }) => {
         const res = await connection.select(select).from(tableName).limit(limit).offset(offset);
 
         const concat = values.concat(res);
@@ -208,7 +222,7 @@ class DatabaseModel {
             return concat;
         }
 
-        return await this.batchSelect(databaseId, tableName, { values: concat, select: select, offset: offset + limit, limit: limit });
+        return await this.batchSelect(connection, databaseId, tableName, { values: concat, select: select, offset: offset + limit, limit: limit });
     };
 }
 const databaseModel = new DatabaseModel(configDatabasesPath);

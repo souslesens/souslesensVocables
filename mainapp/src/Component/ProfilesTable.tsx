@@ -18,6 +18,7 @@ import {
     Table,
     TableBody,
     TableCell,
+    Tooltip,
     Paper,
     TableContainer,
     TableHead,
@@ -141,6 +142,11 @@ const ProfilesTable = () => {
                                             </TableSortLabel>
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                            <TableSortLabel active={orderBy === "allowedTools"} direction={order} onClick={() => handleRequestSort("allowedTools")}>
+                                                Allowed Tools
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
                                             <TableSortLabel active={orderBy === "allowedSourceSchemas"} direction={order} onClick={() => handleRequestSort("allowedSourceSchemas")}>
                                                 Allowed Sources
                                             </TableSortLabel>
@@ -157,6 +163,18 @@ const ProfilesTable = () => {
                                             return (
                                                 <TableRow key={profile.id}>
                                                     <TableCell>{profile.name}</TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            {profile.allowedTools.slice(0, 3).map((tool) => (
+                                                                <Chip label={tool} size="small" />
+                                                            ))}
+                                                            {profile.allowedTools.slice(3).length > 0 ? (
+                                                                <Tooltip title={profile.allowedTools.slice(3).join(", ")}>
+                                                                    <Chip label={"+ " + profile.allowedTools.slice(3).length} size="small" color="info" variant="outlined" />
+                                                                </Tooltip>
+                                                            ) : null}
+                                                        </Stack>
+                                                    </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             {profile.allowedSourceSchemas.map((source) => (

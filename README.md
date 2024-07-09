@@ -377,6 +377,20 @@ If a plugin requires configuration, it can be added to the `config/pluginsConfig
 
 This configuration will be provided to the plugin by calling the `setConfig` method.
 
+#### Plugin communication with other tools
+
+Other tools can communicate with plugins. To configure a communication from a tool to a plugin,
+use a `getToolRelations` function that must return an object like:
+
+```javascript
+self.getToolRelations = function () {
+    return { KGquery: "queryToTagsCalendar" };
+};
+```
+
+This mean that the `KGquery` tool will be able to communicate with the plugin using the
+`queryToTagsCalendar` function (defined in souslesens).
+
 #### Use SousLesens modules on plugin
 
 SousLesens modules can be imported form plugins using `import`. For example:

@@ -2,6 +2,64 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.78.0](https://github.com/souslesens/souslesensVocables/compare/1.77.1...1.78.0) (2024-07-04)
+
+
+### Features
+
+* add mainConfig.js model and allow editing settings ([2f1e01a](https://github.com/souslesens/souslesensVocables/commit/2f1e01a0786ceb2037407d2b398814f102bea377))
+* center save button of Settings form ([617a74f](https://github.com/souslesens/souslesensVocables/commit/617a74f62aa8078112113fe93f21389a7164d804))
+* **ConfigEditor:** add a settings tab to configure basic mainConfig options ([cc9905a](https://github.com/souslesens/souslesensVocables/commit/cc9905a6c899063732878580e299326a75350801))
+* extract tool logic into model/tools.js ([a585c3d](https://github.com/souslesens/souslesensVocables/commit/a585c3d2ab9bcf417dc78156ddc9fece5e743eb1))
+* **mainapp:** add a Tool.ts file to connect to admin/all-tools endpoint ([f8615e7](https://github.com/souslesens/souslesensVocables/commit/f8615e744cbaff664dcaa36fd1a3fb82b1405633))
+* make all known tools retrievable on admin/all-tools route ([9f4998a](https://github.com/souslesens/souslesensVocables/commit/9f4998a5b4f2fa2ee12f2779924809cb3e3e8e9b))
+* manage tools server side ([6f5be84](https://github.com/souslesens/souslesensVocables/commit/6f5be84b407de34c835755348d2ef7e7d7b785e6))
+* remove dividers ([4feaa9f](https://github.com/souslesens/souslesensVocables/commit/4feaa9fbcda655179a49bf3c98f75c74525333a5))
+* show feedback when saving settings ([e0667af](https://github.com/souslesens/souslesensVocables/commit/e0667afcbd86757aa88f8c8d0d4f9a0f6dbe1ed5))
+* use checkboxes to render settings Select options ([5b5c287](https://github.com/souslesens/souslesensVocables/commit/5b5c287f9e7d04b8e58c2cd870426efdb000ebe2))
+
+
+### Bug Fixes
+
+* add missing theme property to Profile type declaration ([9d05bee](https://github.com/souslesens/souslesensVocables/commit/9d05bee5e0638e8adb936f0932b5bc85ac916d6b))
+* correct specification of Profile zod schema ([39d22f0](https://github.com/souslesens/souslesensVocables/commit/39d22f090f2a7f012b71f306442c54f6b7dc4d2f))
+* pass models to model constructors and update tests ([17466a7](https://github.com/souslesens/souslesensVocables/commit/17466a7886bd6d37277ad2c8f4cc827a20af2e09))
+
+### [1.77.1](https://github.com/souslesens/souslesensVocables/compare/1.77.0...1.77.1) (2024-07-04)
+
+
+### Bug Fixes
+
+* **api:** allow user to get rdf graphs (only allowed graphs) ([a52db6a](https://github.com/souslesens/souslesensVocables/commit/a52db6a5f65bba7d1c0f91177aa45e5ec2d38ba9))
+
+## [1.77.0](https://github.com/souslesens/souslesensVocables/compare/1.76.0...1.77.0) (2024-07-03)
+
+
+### Features
+
+* **KGquery:** Add a generic configuration to define links between tools ([62573d1](https://github.com/souslesens/souslesensVocables/commit/62573d1111a42c51a97c912066ffcdf9bac4eeda)), closes [#777](https://github.com/souslesens/souslesensVocables/issues/777)
+* **tools:** toTools is defined plugin side ([a709430](https://github.com/souslesens/souslesensVocables/commit/a709430986392f41a091db28b6cc83ae69c3bb81))
+
+## [1.76.0](https://github.com/souslesens/souslesensVocables/compare/1.75.2...1.76.0) (2024-07-01)
+
+
+### Bug Fixes
+
+* **logs:** don't zip old logs ([f5aa6a7](https://github.com/souslesens/souslesensVocables/commit/f5aa6a75b02657f0bce113e5f2254436f835aff1))
+
+### [1.75.2](https://github.com/souslesens/souslesensVocables/compare/1.75.1...1.75.2) (2024-06-27)
+
+
+### Features
+
+* **KGbuilder:** batch select data in database ([63c9120](https://github.com/souslesens/souslesensVocables/commit/63c912077daf1a9206a631cd944feabe5b8c3e9a))
+
+### [1.75.1](https://github.com/souslesens/souslesensVocables/compare/1.75.0...1.75.1) (2024-06-19)
+
+## [1.75.0](https://github.com/souslesens/souslesensVocables/compare/1.74.2...1.75.0) (2024-06-19)
+
+### [1.74.2](https://github.com/souslesens/souslesensVocables/compare/1.74.1...1.74.2) (2024-06-12)
+
 ### [1.74.1](https://github.com/souslesens/souslesensVocables/compare/1.74.0...1.74.1) (2024-06-12)
 
 ## [1.74.0](https://github.com/souslesens/souslesensVocables/compare/1.73.0...1.74.0) (2024-06-12)

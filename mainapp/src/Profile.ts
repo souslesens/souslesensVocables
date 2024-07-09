@@ -84,7 +84,7 @@ async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>)
 
 type ProfileJson = {
     id?: string;
-    name?: string;
+    name: string;
     allowedSourceSchemas: string[];
     sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string[] | string;
@@ -109,7 +109,7 @@ type Profile = z.infer<typeof ProfileSchema>;
 
 const SourceAccessControlSchema = z.union([z.literal("forbidden"), z.literal("read"), z.literal("readwrite")]);
 
-const ProfileSchema = {
+const ProfileSchema = z.object({
     _type: z.string().optional(),
     id: z.string().default(ulid()),
     allowedSourceSchemas: z
@@ -119,15 +119,16 @@ const ProfileSchema = {
     sourcesAccessControl: z.record(SourceAccessControlSchema).default({}),
     allowedTools: z.union([z.string(), z.array(z.string())]).default("ALL"),
     forbiddenTools: z.array(z.string()).default([]),
-};
+});
 
-export const ProfileSchemaCreate = {
-    ...ProfileSchema,
-    name: z
-        .string()
-        .refine((val) => val !== "admin", { message: "Name can't be admin" })
-        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
-};
+export const ProfileSchemaCreate = ProfileSchema.merge(
+    z.object({
+        name: z
+            .string()
+            .refine((val) => val !== "admin", { message: "Name can't be admin" })
+            .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
+    })
+);
 
 type SourceAccessControl = z.infer<typeof SourceAccessControlSchema>;
 

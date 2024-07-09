@@ -329,6 +329,8 @@ var KGquery = (function () {
 
             if (output == "table") {
                 self.queryResultToTable(result);
+            } else if (output == "Graph") {
+                self.queryResultToVisjsGraph(result);
             } else {
                 Config.userTools.KGquery.toTools[output](result);
             }

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.78.1](https://github.com/souslesens/souslesensVocables/compare/1.78.0...1.78.1) (2024-07-09)
+
+
+### Bug Fixes
+
+* **model/databases:** use one connection when batchSelect ([ce492ec](https://github.com/souslesens/souslesensVocables/commit/ce492ec564c7d1332a3aecb004e0216514846630))
+
 ## [1.78.0](https://github.com/souslesens/souslesensVocables/compare/1.77.1...1.78.0) (2024-07-04)
 
 

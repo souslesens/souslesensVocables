@@ -2,7 +2,6 @@ import Lineage_sources from "../lineage/lineage_sources.js";
 import Containers_graph from "./containers_graph.js";
 import common from "../../shared/common.js";
 
-
 var Containers_widget = (function () {
     var self = {};
     self.jstreeDivId = "containerWidget_treeDiv";

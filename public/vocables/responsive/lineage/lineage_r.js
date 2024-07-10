@@ -8,7 +8,6 @@ import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelector
 import Lineage_createResource from "../../modules/tools/lineage/lineage_createResource.js";
 import PopupMenuWidget from "../../modules/uiWidgets/popupMenuWidget.js";
 
-
 var Lineage_r = (function () {
     var self = {};
     self.isResponsiveLoading = false;

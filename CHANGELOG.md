@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.78.2](https://github.com/souslesens/souslesensVocables/compare/1.78.1...1.78.2) (2024-07-11)
+
+
+### Bug Fixes
+
+* **KGquery:** Graph is a KG feature, not a tool ([14515c0](https://github.com/souslesens/souslesensVocables/commit/14515c0a6badf6c1b1a7633c1e519cf70dbc3c6e))
+* **model/databases:** fix fonction name ([66779d4](https://github.com/souslesens/souslesensVocables/commit/66779d4229254f04cff4e173cb75835f6129d190))
+
 ### [1.78.1](https://github.com/souslesens/souslesensVocables/compare/1.78.0...1.78.1) (2024-07-09)
 
 

@@ -222,7 +222,7 @@ class DatabaseModel {
             return concat;
         }
 
-        return await this.batchSelect(connection, databaseId, tableName, { values: concat, select: select, offset: offset + limit, limit: limit });
+        return await this.recurseBatchSelect(connection, databaseId, tableName, { values: concat, select: select, offset: offset + limit, limit: limit });
     };
 }
 const databaseModel = new DatabaseModel(configDatabasesPath);

@@ -12,13 +12,15 @@ const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
 const querystring = require("querystring");
 require("./bin/authentication.");
-const { config } = require("./model/config");
+const { readMainConfig } = require("./model/config");
 const util = require("./bin/util.");
 
 const app = express();
 const Sentry = require("@sentry/node");
 const { userModel } = require("./model/users");
 const { profileModel } = require("./model/profiles");
+
+const config = readMainConfig();
 
 // sentry/glitchtip
 if (config.sentryDsnNode) {

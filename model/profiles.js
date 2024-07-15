@@ -1,6 +1,6 @@
 const fs = require("fs");
 const { Lock } = require("async-await-mutex-lock");
-const { configProfilesPath, config } = require("./config");
+const { configProfilesPath, readMainConfig } = require("./config");
 const { toolModel } = require("./tools");
 
 /**
@@ -46,6 +46,7 @@ class ProfileModel {
      * @returns {Promise<Record<string, Profile>>} a collection of profiles
      */
     _getAdminProfiles = async (profiles) => {
+        const config = readMainConfig();
         const adminProfile = {
             name: "admin",
             _type: "profile",
@@ -93,6 +94,7 @@ class ProfileModel {
      */
     getUserTools = async (user) => {
         try {
+            const config = readMainConfig();
             const availableToolsNames = new Set(config.tools_available);
             if (user.login === "admin" || user?.groups.includes("admin")) {
                 return this._toolModel.allTools.filter((tool) => availableToolsNames.has(tool.name));

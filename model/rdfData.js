@@ -1,4 +1,4 @@
-const { config } = require("./config");
+const { readMainConfig } = require("./config");
 const DigestClient = require("digest-fetch");
 
 class RdfDataModel {
@@ -132,6 +132,8 @@ class RdfDataModel {
         return json;
     };
 }
+
+const config = readMainConfig();
 
 const rdfDataModel = new RdfDataModel(config.sparql_server.url, config.sparql_server.user, config.sparql_server.password);
 

@@ -18,7 +18,8 @@ const KeyCloakStrategy = require("passport-keycloak-oauth2-oidc").Strategy;
 const ULID = require("ulid");
 
 // Get config
-const { config } = require("../model/config");
+const { readMainConfig } = require("../model/config");
+const config = readMainConfig();
 
 if (config.auth == "keycloak") {
     passport.use(

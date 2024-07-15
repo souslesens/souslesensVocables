@@ -6,7 +6,8 @@
 
 //global.__base = __dirname ;
 const http = require("http");
-const { config } = require("../model/config");
+const { readMainConfig } = require("../model/config");
+const config = readMainConfig();
 
 /**
  * Normalize a port into a number, string, or false.

@@ -95,8 +95,11 @@
         <div style="display: flex;flex-direction: row">
 
             <div style="width: 200px;height: 500px;">
-                <select id="axioms_legend_input"></select>
-                <select id="axioms_legend_suggestionsSelect" onclick="Axiom_activeLegend.onSuggestionsSelect()" size="20" style="width:250px;overflow: auto"></select>
+                <button onclick="Axiom_editorUI.onNewAxiomClick()">new Axiom</button>
+                <button onclick="Axiom_activeLegend.clearAxiom()">Clear</button>
+                <input id="axioms_legend_input"></input>
+                <select id="axioms_legend_suggestionsSelect" onclick="Axiom_activeLegend.onSuggestionsSelect()"
+                        size="20" style="width:250px;overflow: auto"></select>
             </div>
             <div id="axioms_legend_div" style="width: 100px; height: 500px;background-color:#ddd"></div>
             <div id="axiomGraphDiv"

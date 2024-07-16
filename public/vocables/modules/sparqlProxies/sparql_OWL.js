@@ -2517,6 +2517,30 @@ var Sparql_OWL = (function() {
         });
     };
 
+
+    self.getDataTypePropertyValues = function(sourceLabel, propertyUri, callback) {
+        var fromStr = Sparql_common.getFromStr(sourceLabel);
+
+
+        var query =
+            "" +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            " Select distinct ?o    " +
+            fromStr +
+            " where { ?s  <"+propertyUri+"> ?o } LIMIT 10000"
+        var url = Config.sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function(err, _result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, _result.results.bindings);
+        });
+
+    };
+
+
     self.getClassIndividuals = function(sourceLabel, classIds, options, callback) {
         if (!options) {
             options = {};
@@ -2615,6 +2639,8 @@ var Sparql_OWL = (function() {
             ">. " +
             " ?s  ?p ?o.   ?o rdf:type ?oType";
     };
+
+
 
     self.copyUriTriplesFromSourceToSource = function(fromSource, toSource, subjectUri, callback) {
         self.getNodeInfos(fromSource, subjectUri, null, function(err, result) {

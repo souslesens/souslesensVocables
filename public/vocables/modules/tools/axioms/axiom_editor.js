@@ -257,7 +257,7 @@ const Axiom_editor = (function() {
         $("#axiomsEditor_input").val("");
         Axiom_editor.checkSyntax(function(err, result) {
             if (result) {
-                Axiom_editor.drawTriples();
+              //  Axiom_editor.drawTriples();
             }
         });
     };

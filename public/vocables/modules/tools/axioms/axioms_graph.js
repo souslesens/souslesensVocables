@@ -328,10 +328,17 @@ enabled:true},*/
 
 
     self.onNodeClick = function(node, point, nodeEvent) {
+
         if (node && node.data) {
-            if (node.data.type.indexOf("Class") > -1 || node.data.type.indexOf("ObjectProperty") > -1) {
-                NodeInfosWidget.showNodeInfos(Axiom_editor.currentSource, node, "mainDialogDiv");
+            self.currentGraphNode=node
+            Axiom_activeLegend.hideForbiddenResources("add_"+node.data.type)
+            if(nodeEvent.ctrlKey) {
+                if (node.data.type.indexOf("Class") > -1 || node.data.type.indexOf("ObjectProperty") > -1) {
+                    NodeInfosWidget.showNodeInfos(Axiom_editor.currentSource, node, "mainDialogDiv");
+                }
             }
+        }else{
+            self.currentGraphNode=null
         }
 
     };

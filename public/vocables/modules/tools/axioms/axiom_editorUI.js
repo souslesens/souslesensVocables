@@ -16,7 +16,7 @@ var Axiom_editorUI = (function() {
             $("#axiomsEditor_input").on("keyup", Axiom_editor.onAxiomIntputKey);
             $("#axiomsEditor_input").on("keydown", Axiom_editor.onAxiomIntputKey);
             $("#axiomsEditor_input").focus();
-            Axiom_activeLegend.draw()
+
 
 
             $("#axiom_triplesTab").tabs();
@@ -35,6 +35,7 @@ var Axiom_editorUI = (function() {
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "New Axiom");
         $("#smallDialogDiv").load("modules/tools/axioms/html/newAxiomDialog.html", function() {
+            Axiom_activeLegend.drawLegend()
             Axiom_editor.getAllClasses(function(err, classes) {
 
                 common.fillSelectOptions("axiomsEditor_allClasses", classes, true, "label", "id");
@@ -82,7 +83,9 @@ var Axiom_editorUI = (function() {
         var html = "<span class='"+cssClass+"'><b>"+resourceNode.resourceType + " " + resourceNode.label + "  </b></span><span class='axiom_keyword'><b>" + Axiom_editor.axiomType+"</b></span>"
         $("#axiomsEditor_input_currentClassDiv").html(html);
         Axiom_editor.getAllClasses()
-        Axiom_activeLegend.hideForbiddenResources(null)
+        Axiom_activeLegend.drawNewAxiom(resourceNode)
+
+        Axiom_activeLegend.hideForbiddenResources("add_Class")
     };
 
 

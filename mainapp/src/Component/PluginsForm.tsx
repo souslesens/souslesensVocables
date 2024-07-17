@@ -6,7 +6,7 @@ import { RD, SRD, failure, loading, success } from "srd";
 
 import { useModel } from "../Admin";
 import { writeLog } from "../Log";
-import { PluginsDialogFormProps, PluginOption, PluginOptionType } from "../Plugins";
+import { PluginsDialogFormProps, PluginOption, PluginOptionType, writeConfig } from "../Plugins";
 import { Tool, getAllTools } from "../Tool";
 
 const PluginsDialogForm = (props: PluginsDialogFormProps) => {
@@ -87,6 +87,7 @@ const PluginsForm = () => {
     const [selectedPlugin, setSelectedPlugin] = React.useState<Tool>(undefined);
 
     const [snackOpen, setSnackOpen] = React.useState<bool>(false);
+    const [snackSeverity, setSnackSeverity] = React.useState<string>("success");
     const [snackMessage, setSnackMessage] = React.useState<string>("");
 
     const me = SRD.withDefault("", model.me);
@@ -120,6 +121,7 @@ const PluginsForm = () => {
         setSnackOpen(false);
         delete selectedPlugin.config[fieldName];
         setSnackOpen(true);
+        setSnackSeverity("success");
         setSnackMessage(`The option “${fieldName}” have been removed`);
     };
 
@@ -128,8 +130,20 @@ const PluginsForm = () => {
         handleCloseModal();
     };
 
-    const handleSavePlugins = () => {
+    const handleSavePlugins = async () => {
+        const plugins = allToolsRD.data.filter((tool: Tool) => tool.type === "plugin");
+        const response = await writeConfig(plugins);
+
+        setSnackOpen(false);
         writeLog(me, "ConfigEditor", "save", "plugins");
+        setSnackOpen(true);
+        if (response.status == 200) {
+            setSnackSeverity("warning");
+            setSnackMessage("The configuration have been saved. Reloading…");
+        } else {
+            setSnackSeverity("error");
+            setSnackMessage("A problem occurs on the server.");
+        }
     };
 
     return SRD.match(
@@ -152,7 +166,7 @@ const PluginsForm = () => {
                 return (
                     <Mui.Stack>
                         <Mui.Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
-                            <Mui.Alert onClose={handleSnackbarClose} severity="success" sx={{ width: "100%" }}>
+                            <Mui.Alert onClose={handleSnackbarClose} severity={snackSeverity} sx={{ width: "100%" }}>
                                 {snackMessage}
                             </Mui.Alert>
                         </Mui.Snackbar>

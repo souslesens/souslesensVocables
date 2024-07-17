@@ -1,5 +1,7 @@
 const fs = require("fs");
 const path = require("path");
+const { Lock } = require("async-await-mutex-lock");
+
 const { configPlugins } = require("./config");
 
 /**
@@ -23,6 +25,8 @@ const NATIVE_TOOLS = [
     { name: "UserManagement", controller: "UserManagement", useSource: false, multiSources: false, toTools: {} },
     { name: "OntoCreator", controller: "Lineage_createSLSVsource", useSource: false, multiSources: false, toTools: {} },
 ].map((tool) => ({ type: "tool", label: tool.label ?? tool.name, ...tool }));
+
+const lock = new Lock();
 
 class ToolModel {
     /**
@@ -62,6 +66,21 @@ class ToolModel {
     get allTools() {
         return [...this.nativeTools, ...this.plugins];
     }
+
+    /**
+     * @param {Tool[]} plugins
+     */
+    writeConfig = async (plugins) => {
+        await lock.acquire("PluginsThread");
+
+        try {
+            await fs.promises.writeFile(configPlugins, JSON.stringify(plugins, null, 2));
+        } catch (error) {
+            console.error(error);
+        } finally {
+            lock.release("PluginsThread");
+        }
+    };
 }
 
 const toolModel = new ToolModel(path.join(process.cwd(), "/plugins"));

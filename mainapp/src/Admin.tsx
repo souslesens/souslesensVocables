@@ -8,6 +8,7 @@ import { identity } from "./Utils";
 import { ProfilesTable } from "./Component/ProfilesTable";
 import { Profile } from "./Profile";
 import { ConfigForm } from "./Component/ConfigForm";
+import { PluginsForm } from "./Component/PluginsForm";
 import { SourcesTable } from "./Component/SourcesTable";
 import { UsersTable } from "./Component/UsersTable";
 import { LogsTable } from "./Component/LogsTable";
@@ -249,7 +250,7 @@ const Dispatcher = (props: { model: Model }) => {
         case "DatabaseManagement":
             return <DatabasesTable />;
         case "Plugins":
-            return <DatabasesTable />;
+            return <PluginsForm />;
         case "Logs":
             return <LogsTable />;
         default:

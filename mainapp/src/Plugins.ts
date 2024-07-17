@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+import { Tool } from "Tool";
+
+const endpoint = "/api/v1/admin/plugins";
+
 const PluginOption = z
     .object({
         key: z
@@ -20,4 +24,21 @@ type PluginsDialogFormProps = {
 
 type PluginOptionType = z.infer<typeof PluginOption>;
 
-export { PluginsDialogFormProps, PluginOption, PluginOptionType };
+async function writeConfig(plugins: Tool[]) {
+    try {
+        const body = { plugins: plugins };
+
+        const response = await fetch(endpoint, {
+            method: "put",
+            body: JSON.stringify(body, null, "\t"),
+            headers: { "Content-Type": "application/json" },
+        });
+        const { message, resources } = (await response.json()) as Response;
+
+        return response;
+    } catch (error) {
+        return { status: 500, message: error };
+    }
+}
+
+export { PluginsDialogFormProps, PluginOption, PluginOptionType, writeConfig };

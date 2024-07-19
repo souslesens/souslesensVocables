@@ -949,11 +949,10 @@ if (callback) return callback(err);
             str += ":" + array[5];
         }
         if (array.length > 6) {
-            str += ":" + array[6]+"Z";
+            str += ":" + array[6] + "Z";
         }
         return str;
     };
-
 
     return self;
 })();

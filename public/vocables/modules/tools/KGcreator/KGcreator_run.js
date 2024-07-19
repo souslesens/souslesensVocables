@@ -203,23 +203,19 @@ var KGcreator_run = (function () {
             return;
         }
 
-        Sparql_OWL.clearGraph(mappings.graphUri,function(err, result){
-           if(err){
-               if (callback) {
-                   return callback(err);
-               }
-               return alert(err);
-
-           }else{
-               if (callback) {
-                   return callback();
-               }
-               return MainController.UI.message("graph deleted " + mappings.graphUri);
-           }
-
-        })
-
-
+        Sparql_OWL.clearGraph(mappings.graphUri, function (err, result) {
+            if (err) {
+                if (callback) {
+                    return callback(err);
+                }
+                return alert(err);
+            } else {
+                if (callback) {
+                    return callback();
+                }
+                return MainController.UI.message("graph deleted " + mappings.graphUri);
+            }
+        });
     };
 
     self.deleteKGcreatorTriples = function (deleteAllKGcreatorTriples, callback) {

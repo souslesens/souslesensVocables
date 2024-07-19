@@ -56,24 +56,20 @@
     }
 </style>
 <div id="axiomsEditor_input_currentClassDiv"></div>
-<div style="display: flex;flex-direction: column">
-    <div style="display: flex; flex-direction: row; width: 100%; height: 330px; margin:5px;padding:5px">
+<div style="display: flex; flex-direction: column">
+    <div style="display: flex; flex-direction: row; width: 100%; height: 330px; margin: 5px; padding: 5px">
         <div id="axiomsEditor_textDiv">
             <input id="axiomsEditor_input" autocomplete="off" autofocus="autofocus" />
         </div>
 
-        <div style="display: flex;flex-direction: column; margin:5px;padding:5px">
-
+        <div style="display: flex; flex-direction: column; margin: 5px; padding: 5px">
             <button onclick="Axiom_editor.showAllResource()">+</button>
-            <select id="axiomsEditor_suggestionsSelect" onchange="Axiom_editor.onSelectSuggestion()"
-                    size="15"></select>
+            <select id="axiomsEditor_suggestionsSelect" onchange="Axiom_editor.onSelectSuggestion()" size="15"></select>
         </div>
 
-
-        <div style=" margin:5px;padding:5px">
-            <div style="margin:5px;padding:5px" id="Axioms_editor_messageDiv"></div>
-            <div style="display: flex;flex-direction: column;width:300px;    height: 250px;
-    justify-content: space-evenly;">
+        <div style="margin: 5px; padding: 5px">
+            <div style="margin: 5px; padding: 5px" id="Axioms_editor_messageDiv"></div>
+            <div style="display: flex; flex-direction: column; width: 300px; height: 250px; justify-content: space-evenly">
                 <button onclick="Axiom_editor.clear()">clear</button>
                 <button onclick="Axiom_editor.checkSyntax()">checkSyntax</button>
 
@@ -84,8 +80,6 @@
                 <button onclick="Axiom_editor.test()">Test</button>
             </div>
         </div>
-
-
     </div>
 
     <div id="axiom_triplesTab">
@@ -93,21 +87,14 @@
             <li class="nodeInfosWidget_tabDiv"><a href="#axiomGraphDiv">Graph</a></li>
             <li class="nodeInfosWidget_tabDiv"><a href="#Axioms_editor_triplesDataTableDiv">Triples</a></li>
         </ul>
-        <div style="display: flex;flex-direction: row">
-
-            <div style="width: 200px;height: 500px;">
+        <div style="display: flex; flex-direction: row">
+            <div style="width: 200px; height: 500px">
                 <select id="axioms_legend_input"></select>
-                <select id="axioms_legend_suggestionsSelect" size="20" style="width:250px;overflow: auto"></select>
+                <select id="axioms_legend_suggestionsSelect" size="20" style="width: 250px; overflow: auto"></select>
             </div>
-            <div id="axioms_legend_div" style="width: 100px; height: 500px;background-color:#ddd"></div>
-            <div id="axiomGraphDiv"
-                 style=" width: 95%; height: 500px;background-color: #ddd; margin:5px;padding:5px"></div>
-
+            <div id="axioms_legend_div" style="width: 100px; height: 500px; background-color: #ddd"></div>
+            <div id="axiomGraphDiv" style="width: 95%; height: 500px; background-color: #ddd; margin: 5px; padding: 5px"></div>
         </div>
-        <div id="Axioms_editor_triplesDataTableDiv" style="width: 100%; height: 500px; margin:5px;padding:5px"></div>
+        <div id="Axioms_editor_triplesDataTableDiv" style="width: 100%; height: 500px; margin: 5px; padding: 5px"></div>
     </div>
-
 </div>
-
-
-

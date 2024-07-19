@@ -1,4 +1,4 @@
-var JstreeWidget = (function() {
+var JstreeWidget = (function () {
     var self = {};
 
     self.types = {
@@ -34,78 +34,78 @@ var JstreeWidget = (function() {
         // Web semantic objects
         //Thesaurus
         Thesaurus: {
-            icon: "../icons/thesaurus.png"
+            icon: "../icons/thesaurus.png",
         },
         // Ontology
         Source: {
-            icon: "./icons/CommonIcons/SourceIcon.png"
+            icon: "./icons/CommonIcons/SourceIcon.png",
         },
 
         Class: {
             li_attr: { style: "color:black" },
-            icon: "./icons/JstreeIcons/Classes.png"
+            icon: "./icons/JstreeIcons/Classes.png",
         },
 
         Property: {
             li_attr: { style: "color:black" },
-            icon: "./icons/JstreeIcons/Property.png"
+            icon: "./icons/JstreeIcons/Property.png",
         },
         Container: {
-            icon: "./icons/JstreeIcons/Container.png"
+            icon: "./icons/JstreeIcons/Container.png",
         },
         Individual: {
-            icon: "./icons/JstreeIcons/Individual.png"
+            icon: "./icons/JstreeIcons/Individual.png",
         },
         /* KG creator */
         Table: {
-            icon: "./icons/JstreeIcons/Table.png"
+            icon: "./icons/JstreeIcons/Table.png",
         },
         Column: {
-            icon: "./icons/JstreeIcons/Columns.png"
+            icon: "./icons/JstreeIcons/Columns.png",
         },
         databaseSources: {
-            icon: "./icons/JstreeIcons/databaseSources.png"
+            icon: "./icons/JstreeIcons/databaseSources.png",
         },
         DataSource: {
-            icon: "./icons/JstreeIcons/DataSource.png"
+            icon: "./icons/JstreeIcons/DataSource.png",
         },
         CSV: {
-            icon: "./icons/JstreeIcons/FileCSV.png"
+            icon: "./icons/JstreeIcons/FileCSV.png",
         },
         CSVS: {
-            icon: "./icons/JstreeIcons/CSVS.png"
+            icon: "./icons/JstreeIcons/CSVS.png",
         },
 
         // Classic items
         default: {
-            icon: "./icons/JstreeIcons/Default.png"
+            icon: "./icons/JstreeIcons/Default.png",
         },
 
         Folder: {
-            icon: "./icons/JstreeIcons/Folder.png"
+            icon: "./icons/JstreeIcons/Folder.png",
         },
 
         /* To delete */
         //double
         class: {
-            icon: "./icons/JstreeIcons/Classes.png"
+            icon: "./icons/JstreeIcons/Classes.png",
         },
         //double
         "owl:ObjectProperty": {
-            icon: "./icons/JstreeIcons/Property.png"
+            icon: "./icons/JstreeIcons/Property.png",
         },
         // Triple
         "owl:Class": {
             li_attr: { style: "color:black" },
-            icon: "./icons/JstreeIcons/Classes.png"
+            icon: "./icons/JstreeIcons/Classes.png",
         },
         // double
         "http://www.w3.org/2002/07/owl#NamedIndividual": {
-            icon: "./icons/JstreeIcons/Individual.png"
-        }
+            icon: "./icons/JstreeIcons/Individual.png",
+        },
     };
 
-    self.loadJsTree = function(jstreeDiv, jstreeData, options, callback) {
+    self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
         if (!jstreeDiv) {
             self.jstreeDiv = "jstreeWidget_treeDiv";
             jstreeDiv = self.jstreeDiv;
@@ -113,7 +113,7 @@ var JstreeWidget = (function() {
 
             $("#smallDialogDiv").dialog("option", "title", "Select items");
             $("#smallDialogDiv").dialog("open");
-            $("#smallDialogDiv").load("modules/uiWidgets/jsTreeWidget.html", function() {
+            $("#smallDialogDiv").load("modules/uiWidgets/jsTreeWidget.html", function () {
                 self.loadJsTree("jstreeWidget_treeDiv", jstreeData, options, callback);
             });
             return;
@@ -122,7 +122,7 @@ var JstreeWidget = (function() {
         }
 
         var jstreeData2 = [];
-        jstreeData.forEach(function(item) {
+        jstreeData.forEach(function (item) {
             if (item.parent != item.id) {
                 jstreeData2.push(item);
             }
@@ -162,7 +162,7 @@ var JstreeWidget = (function() {
             plugins.push("types");
         }
 
-        var check_callbackFn = function(op, node, parent, position, more) {
+        var check_callbackFn = function (op, node, parent, position, more) {
             if (op == "move_node" && options.dropAllowedFn) {
                 return options.dropAllowedFn(op, node, parent, position, more);
             } else {
@@ -183,21 +183,21 @@ var JstreeWidget = (function() {
                     data: jstreeData,
                     check_callback: check_callbackFn,
                     themes: {
-                        icons: icons
-                    }
+                        icons: icons,
+                    },
                 },
                 dnd: options.dnd,
                 search: options.searchPlugin,
                 checkbox: {
                     tie_selection: options.tie_selection === true,
-                    whole_node: false
+                    whole_node: false,
                     //  cascade:false
                 },
                 types: JstreeWidget.types,
 
-                contextmenu: { items: options.contextMenu }
+                contextmenu: { items: options.contextMenu },
             })
-            .on("loaded.jstree", function() {
+            .on("loaded.jstree", function () {
                 //  setTimeout(function () {
                 if (options.openAll) {
                     $("#" + (jstreeDiv || self.jstreeDiv))
@@ -218,58 +218,58 @@ var JstreeWidget = (function() {
                 }
                 //   }, 500)
             })
-            .on("select_node.jstree", function(evt, obj) {
+            .on("select_node.jstree", function (evt, obj) {
                 if (options.selectTreeNodeFn) {
                     options.selectTreeNodeFn(evt, obj);
                 }
             })
-            .on("open_node.jstree", function(evt, obj) {
+            .on("open_node.jstree", function (evt, obj) {
                 self.setTreeAppearance();
                 if (options.onOpenNodeFn) {
                     options.onOpenNodeFn(evt, obj);
                 }
             })
-            .on(" after_open.jstree", function(evt, obj) {
+            .on(" after_open.jstree", function (evt, obj) {
                 self.setTreeAppearance();
                 if (options.onAfterOpenNodeFn) {
                     options.onAfterOpenNodeFn(evt, obj);
                 }
             })
 
-            .on("enable_checkbox.jstree", function(evt, obj) {
+            .on("enable_checkbox.jstree", function (evt, obj) {
                 if (options.onCheckNodeFn) {
                     options.onCheckNodeFn(evt, obj);
                 }
             })
-            .on("check_node.jstree", function(evt, obj) {
+            .on("check_node.jstree", function (evt, obj) {
                 if (options.onCheckNodeFn) {
                     options.onCheckNodeFn(evt, obj);
                 }
             })
-            .on("uncheck_node.jstree", function(evt, obj) {
+            .on("uncheck_node.jstree", function (evt, obj) {
                 if (options.onUncheckNodeFn) {
                     options.onUncheckNodeFn(evt, obj);
                 }
             })
-            .on("create_node.jstree", function(parent, node, position) {
+            .on("create_node.jstree", function (parent, node, position) {
                 if (options.onCreateNodeFn) {
                     options.onCreateNodeFn(parent, node, position);
                     self.setTreeAppearance();
                 }
             })
-            .on("delete_node.jstree", function(node, parent) {
+            .on("delete_node.jstree", function (node, parent) {
                 if (options.deleteNodeFn) {
                     options.deleteNodeFn(node, parent);
                     self.setTreeAppearance();
                 }
             })
-            .on("move_node.jstree", function(node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance) {
+            .on("move_node.jstree", function (node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance) {
                 if (options.onMoveNodeFn) {
                     options.onMoveNodeFn(node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance);
                     self.setTreeAppearance();
                 }
             })
-            .on("show_contextmenu", function(node, x, y) {
+            .on("show_contextmenu", function (node, x, y) {
                 if (options.onShowContextMenu) {
                     options.onShowContextMenu(node, x, y);
                 }
@@ -277,36 +277,36 @@ var JstreeWidget = (function() {
 
         if (options.dnd) {
             if (options.dnd.drag_start) {
-                $(document).on("dnd_start.vakata", function(data, element, helper, event) {
+                $(document).on("dnd_start.vakata", function (data, element, helper, event) {
                     options.dnd.drag_start(data, element, helper, event);
                 });
             }
             if (options.dnd.drag_move) {
-                $(document).on("dnd_move.vakata Event", function(data, element, helper, event) {
+                $(document).on("dnd_move.vakata Event", function (data, element, helper, event) {
                     options.dnd.drag_move(data, element, helper, event);
                 });
             }
             if (options.dnd.drag_stop) {
-                $(document).on("dnd_stop.vakata Event", function(data, element, helper, event) {
+                $(document).on("dnd_stop.vakata Event", function (data, element, helper, event) {
                     options.dnd.drag_stop(data, element, helper, event);
                 });
             }
         }
 
         if (options.onHoverNode) {
-            $("#" + (jstreeDiv || self.jstreeDiv)).on("hover_node.jstree", function(node) {
+            $("#" + (jstreeDiv || self.jstreeDiv)).on("hover_node.jstree", function (node) {
                 options.onHoverNode(node);
             });
         }
     };
 
-    self.clear = function(jstreeDiv) {
+    self.clear = function (jstreeDiv) {
         $("#" + (jstreeDiv || self.jstreeDiv))
             .jstree("destroy")
             .empty();
     };
 
-    self.addNodesToJstree = function(jstreeDiv, parentNodeId_, jstreeData, options, callback) {
+    self.addNodesToJstree = function (jstreeDiv, parentNodeId_, jstreeData, options, callback) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -314,15 +314,14 @@ var JstreeWidget = (function() {
             options = {};
         }
         if (!callback) {
-            callback = function() {
-            };
+            callback = function () {};
         }
         var position = "first";
         if (options.positionLast) {
             position = "last";
         }
         self.orderJstreeDataForCreation(jstreeDiv, jstreeData);
-        jstreeData.forEach(function(node) {
+        jstreeData.forEach(function (node) {
             var Jstree_id = $("#" + jstreeDiv)
                 .jstree(true)
                 .get_node(node.id);
@@ -350,7 +349,7 @@ var JstreeWidget = (function() {
                 //Create node
                 $("#" + (jstreeDiv || self.jstreeDiv))
                     .jstree(true)
-                    .create_node(parentNodeId, node, position, function() {
+                    .create_node(parentNodeId, node, position, function () {
                         self.setTreeAppearance();
                         $("#" + (jstreeDiv || self.jstreeDiv))
                             .jstree(true)
@@ -363,13 +362,13 @@ var JstreeWidget = (function() {
         }
     };
 
-    self.deleteNode = function(jstreeDiv, nodeId) {
+    self.deleteNode = function (jstreeDiv, nodeId) {
         $("#" + (jstreeDiv || self.jstreeDiv))
             .jstree(true)
             .delete_node(nodeId);
         self.setTreeAppearance();
     };
-    self.deleteBranch = function(jstreeDiv, nodeId, deleteNodeItself) {
+    self.deleteBranch = function (jstreeDiv, nodeId, deleteNodeItself) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -395,7 +394,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             console.error(e);
         }
     };
-    self.getjsTreeCheckedNodes = function(jstreeDiv) {
+    self.getjsTreeCheckedNodes = function (jstreeDiv) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -404,7 +403,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .get_checked(true);
     };
 
-    self.setjsTreeCheckedNodes = function(jstreeDiv, checkedNodes) {
+    self.setjsTreeCheckedNodes = function (jstreeDiv, checkedNodes) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -413,7 +412,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .check_node(checkedNodes);
     };
 
-    self.getjsTreeNodes = function(jstreeDiv, IdsOnly, parentNodeId) {
+    self.getjsTreeNodes = function (jstreeDiv, IdsOnly, parentNodeId) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -426,7 +425,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .get_json(parentNodeId, { flat: true });
 
         if (IdsOnly) {
-            jsonNodes.forEach(function(item) {
+            jsonNodes.forEach(function (item) {
                 idList.push(item.id);
             });
             return idList;
@@ -435,14 +434,14 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
 
-    self.setSelectedNodeStyle = function(style, id) {
+    self.setSelectedNodeStyle = function (style, id) {
         var node = $(".jstree-clicked");
         for (var key in style) {
             node.css(key, style[key]);
         }
     };
 
-    self.getjsTreeNodeObj = function(jstreeDiv, id) {
+    self.getjsTreeNodeObj = function (jstreeDiv, id) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -451,7 +450,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .get_node(id);
     };
     // get node from node.data field
-    self.getNodeByDataField = function(jstreeDiv, property, value) {
+    self.getNodeByDataField = function (jstreeDiv, property, value) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -462,7 +461,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .jstree(true)
             .get_json("#", { flat: true });
         var matchingNode = null;
-        jsonNodes.forEach(function(node) {
+        jsonNodes.forEach(function (node) {
             if (node.data && node.data[property] == value) {
                 return (matchingNode = node);
             }
@@ -470,14 +469,14 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         return matchingNode;
     };
 
-    self.getNodeDescendants = function(jstreeDiv, parentNodeId, depth, onlyIds) {
+    self.getNodeDescendants = function (jstreeDiv, parentNodeId, depth, onlyIds) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
         var nodes = [];
         var nodeIdsMap = {};
         var currentLevel = 0;
-        var recurse = function(nodeId) {
+        var recurse = function (nodeId) {
             if (depth && currentLevel++ > depth) {
                 return;
             }
@@ -487,7 +486,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                 .get_node(nodeId);
             if (!nodeIdsMap[nodeId]) {
                 nodeIdsMap[nodeId] = 1;
-                if ( nodeId != parentNodeId) {
+                if (nodeId != parentNodeId) {
                     if (onlyIds) {
                         nodes.push(node.id);
                     } else {
@@ -496,7 +495,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                 }
                 // Attempt to traverse if the node has children
                 if (node.children) {
-                    node.children.forEach(function(child) {
+                    node.children.forEach(function (child) {
                         recurse(child);
                     });
                 }
@@ -506,7 +505,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
 
         return nodes;
     };
-    self.openNodeDescendants = function(jstreeDiv, nodeId, depth) {
+    self.openNodeDescendants = function (jstreeDiv, nodeId, depth) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -519,7 +518,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .open_node(descendants);
     };
 
-    self.setTreeParentDivDimensions = function(jstreeDiv) {
+    self.setTreeParentDivDimensions = function (jstreeDiv) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -558,10 +557,10 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         parentDiv.css("margin-top", "5px");
     };
 
-    self.setTreeAppearance = function() {
+    self.setTreeAppearance = function () {
         return;
     };
-    self.onAllTreeCbxChange = function(allCBX, jstreeDiv) {
+    self.onAllTreeCbxChange = function (allCBX, jstreeDiv) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -576,7 +575,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                 .uncheck_all();
         }
     };
-    self.checkAll = function(jstreeDiv) {
+    self.checkAll = function (jstreeDiv) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -584,7 +583,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .jstree()
             .check_all();
     };
-    self.openNode = function(jstreeDiv, nodeId) {
+    self.openNode = function (jstreeDiv, nodeId) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -593,7 +592,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .open_node(nodeId);
     };
 
-    self.selectTypeForIconsJstree = function(types, callback) {
+    self.selectTypeForIconsJstree = function (types, callback) {
         var uri_class = "http://www.w3.org/2002/07/owl#Class";
         var uri_bag = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag";
         var uri_named = "http://www.w3.org/2002/07/owl#NamedIndividual";
@@ -606,7 +605,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             if (!Array.isArray(types)) {
                 types = [types];
             }
-            var types_without_basics = types.filter(function(item) {
+            var types_without_basics = types.filter(function (item) {
                 return item !== uri_class && item !== uri_bag && item !== uri_named && item !== uri_bag2;
             });
         }
@@ -636,7 +635,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             // last which have icon available for multitypes objects
             var types_available = self.types;
             type = "default";
-            types.forEach(function(item) {
+            types.forEach(function (item) {
                 if (types_available[item]) {
                     type = item;
                 }
@@ -645,7 +644,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         return type;
     };
 
-    self.getNodeByURI = function(jstreeDiv, id) {
+    self.getNodeByURI = function (jstreeDiv, id) {
         var data = $("#" + jstreeDiv).jstree()._model.data;
         var node_finded = false;
         for (var key in data) {
@@ -659,7 +658,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         return node_finded;
     };
 
-    self.orderJstreeDataForCreation = function(jstreeDiv, JstreeData) {
+    self.orderJstreeDataForCreation = function (jstreeDiv, JstreeData) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
         }
@@ -687,12 +686,12 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
 
-    self.checkinJstreeData = function(jstreeData, id) {
+    self.checkinJstreeData = function (jstreeData, id) {
         var node_finded = null;
         var i = 0;
         var index_finded = null;
 
-        jstreeData.forEach(function(node) {
+        jstreeData.forEach(function (node) {
             if (node.id == id) {
                 node_finded = node;
                 index_finded = i;
@@ -703,7 +702,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         return index_finded;
     };
 
-    self.validateSelfDialog = function() {
+    self.validateSelfDialog = function () {
         var selected = $("#jstreeWidget_treeDiv").jstree().get_checked(true);
         if (selected.length == 0) {
             var selected = $("#jstreeWidget_treeDiv").jstree().get_selected(true);
@@ -714,11 +713,11 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
 
-    self.closeDialog = function() {
+    self.closeDialog = function () {
         $("#smallDialogDiv").dialog("close");
     };
 
-    self.searchValue = function(value) {
+    self.searchValue = function (value) {
         if (event.keyCode != 13 && event.keyCode != 9) {
             return;
         }

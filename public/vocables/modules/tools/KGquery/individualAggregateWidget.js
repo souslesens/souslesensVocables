@@ -81,8 +81,8 @@ var IndividualAggregateWidget = (function () {
         }
 
         whereStr += getWhereClause(groupByObj);
-        selectStr += " ?" + groupByObj.label;// + " ?" + groupByObj.classLabel + "  ";
-        groupByStr += " ?" + groupByObj.label;//+ " ?" + groupByObj.classLabel + "  ";
+        selectStr += " ?" + groupByObj.label; // + " ?" + groupByObj.classLabel + "  ";
+        groupByStr += " ?" + groupByObj.label; //+ " ?" + groupByObj.classLabel + "  ";
         var groupByPredicates = {};
         groupByPredicates[groupByObj.label] = self.allProperties[groupByObj.label];
         groupFunctions.forEach(function (fn) {

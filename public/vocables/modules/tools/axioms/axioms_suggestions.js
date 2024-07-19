@@ -1,15 +1,13 @@
 import Axiom_editor from "./axiom_editor.js";
 
-var Axioms_suggestions = (function() {
+var Axioms_suggestions = (function () {
     var self = {};
 
-
-    self.getValidResourceTypes = function(selectedObject, allClasses, allObjectProperties, callback) {
+    self.getValidResourceTypes = function (selectedObject, allClasses, allObjectProperties, callback) {
         self.currentObject = selectedObject;
         var selectClasses = allClasses;
         var selectProperties = allObjectProperties;
         var keywordSuggestions = [];
-
 
         //call sever for Manchester suggestions
         var axiomText = Axiom_editor.getAxiomText() + " ";
@@ -23,17 +21,16 @@ var Axioms_suggestions = (function() {
         const params = new URLSearchParams({
             source: Axiom_editor.currentSource,
             lastToken: axiomText,
-            options: JSON.stringify(options)
+            options: JSON.stringify(options),
         });
-
 
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/axioms/suggestion?" + params.toString(),
             dataType: "json",
 
-            success: function(data, _textStatus, _jqXHR) {
-                data.forEach(function(item) {
+            success: function (data, _textStatus, _jqXHR) {
+                data.forEach(function (item) {
                     if (item.match(/^_$/g)) {
                         // remove _ and replace by Classes
                         selectClasses = true;
@@ -52,17 +49,16 @@ var Axioms_suggestions = (function() {
                 callback(null, {
                     selectClasses: selectClasses,
                     selectProperties: selectProperties,
-                    keywordSuggestions: keywordSuggestions
+                    keywordSuggestions: keywordSuggestions,
                 });
             },
             error(err) {
                 callback(err.responseText);
-            }
+            },
         });
     };
 
-
-    self.getManchesterParserSuggestions = function(selectedObject, allClasses, allObjectProperties, callback) {
+    self.getManchesterParserSuggestions = function (selectedObject, allClasses, allObjectProperties, callback) {
         self.currentObject = selectedObject;
         var allSuggestions = [];
         var keywordSuggestions = [];
@@ -70,9 +66,8 @@ var Axioms_suggestions = (function() {
         var selectProperties = allObjectProperties;
         async.series(
             [
-                function(callbackSeries) {
-
-                    self.getValidResourceTypes(selectedObject, allClasses, allObjectProperties, function(err, result) {
+                function (callbackSeries) {
+                    self.getValidResourceTypes(selectedObject, allClasses, allObjectProperties, function (err, result) {
                         if (err) {
                             return callbackSeries(err.responseText);
                         }
@@ -81,11 +76,10 @@ var Axioms_suggestions = (function() {
                         keywordSuggestions = result.keywordSuggestions;
 
                         callbackSeries();
-
                     });
                 },
 
-                function(callbackSeries) {
+                function (callbackSeries) {
                     //get  properties for current class (properties withe domain this class)
                     if (!selectProperties) {
                         return callbackSeries();
@@ -94,7 +88,7 @@ var Axioms_suggestions = (function() {
                     var classId = Axiom_editor.axiomContext.classes[index];
                     if (!classId || allObjectProperties) {
                         var props = [];
-                        Axiom_editor.getAllProperties().forEach(function(item) {
+                        Axiom_editor.getAllProperties().forEach(function (item) {
                             if (item.resourceType == "ObjectProperty") {
                                 props.push(item);
                             }
@@ -103,7 +97,7 @@ var Axioms_suggestions = (function() {
 
                         return callbackSeries();
                     }
-                    self.getValidPropertiesForClass(classId, function(err, result) {
+                    self.getValidPropertiesForClass(classId, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -112,7 +106,7 @@ var Axioms_suggestions = (function() {
                         callbackSeries();
                     });
                 },
-                function(callbackSeries) {
+                function (callbackSeries) {
                     ////get  classes for current property (classes wich are   range of the current property)
                     if (!selectClasses) {
                         return callbackSeries();
@@ -122,7 +116,7 @@ var Axioms_suggestions = (function() {
 
                     if (!propId || allClasses) {
                         var classes = [];
-                        Axiom_editor.getAllClasses().forEach(function(item) {
+                        Axiom_editor.getAllClasses().forEach(function (item) {
                             if (item.resourceType == "Class") {
                                 classes.push(item);
                             }
@@ -132,20 +126,19 @@ var Axioms_suggestions = (function() {
                         return callbackSeries();
                     }
 
-
-                    self.getValidClassesForProperty(propId, function(err, result) {
+                    self.getValidClassesForProperty(propId, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
                         allSuggestions = allSuggestions.concat(result);
                         callbackSeries();
                     });
-                }
+                },
             ],
-            function(err) {
+            function (err) {
                 allSuggestions = keywordSuggestions.concat(allSuggestions);
-                allSuggestions.selectClasses=selectClasses
-                allSuggestions.selectProperties=selectProperties
+                allSuggestions.selectClasses = selectClasses;
+                allSuggestions.selectProperties = selectProperties;
 
                 return callback(err, allSuggestions);
             }
@@ -157,11 +150,11 @@ var Axioms_suggestions = (function() {
      * @param propId
      * @param callback
      */
-    self.getValidClassesForProperty = function(propId, callback) {
+    self.getValidClassesForProperty = function (propId, callback) {
         if (!propId) {
             return callback(null, []);
         }
-        OntologyModels.getPropertyDomainsAndRanges(Axiom_editor.currentSource, propId, "range", function(err, result) {
+        OntologyModels.getPropertyDomainsAndRanges(Axiom_editor.currentSource, propId, "range", function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -178,17 +171,15 @@ var Axioms_suggestions = (function() {
         });
     };
 
-    self.getValidPropertiesForClass = function(classId, callback) {
+    self.getValidPropertiesForClass = function (classId, callback) {
         if (!classId) {
             return callback(null, []);
         }
 
-
-        OntologyModels.getAllowedPropertiesBetweenNodes(Axiom_editor.currentSource, classId, null, { keepSuperClasses: true }, function(err, result) {
+        OntologyModels.getAllowedPropertiesBetweenNodes(Axiom_editor.currentSource, classId, null, { keepSuperClasses: true }, function (err, result) {
             if (err) {
                 return callback(err);
             }
-
 
             var role = "domain";
             var data = [];
@@ -199,19 +190,17 @@ var Axioms_suggestions = (function() {
                         data.push({
                             id: prop,
                             label: result.constraints.both[prop].label,
-                            resourceType: "ObjectProperty"
+                            resourceType: "ObjectProperty",
                         });
                     }
                 }
                 if (role == "domain") {
-
                     for (var prop in result.constraints.domain) {
                         data.push({
                             id: prop,
                             label: result.constraints.domain[prop].label,
-                            resourceType: "ObjectProperty"
+                            resourceType: "ObjectProperty",
                         });
-
                     }
                 }
                 if (role == "range") {
@@ -219,7 +208,7 @@ var Axioms_suggestions = (function() {
                         data.push({
                             id: prop,
                             label: result.constraints.range[prop].label,
-                            resourceType: "ObjectProperty"
+                            resourceType: "ObjectProperty",
                         });
                     }
                 }
@@ -229,7 +218,6 @@ var Axioms_suggestions = (function() {
             return callback(null, data);
         });
     };
-
 
     return self;
 })();

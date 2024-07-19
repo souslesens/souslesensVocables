@@ -419,17 +419,11 @@ $("#sourceDivControlPanelDiv").html(html);*/
         }
         const payload = { graphUri: graphUri };
 
-        Sparql_OWL.clearGraph(graphUri,function(err,result){
-            if(err)
-                return alert(err);
+        Sparql_OWL.clearGraph(graphUri, function (err, result) {
+            if (err) return alert(err);
             return MainController.UI.message("graph source " + source + " cleared ", true);
-
-        })
-
-
+        });
     };
-
-
 
     return self;
 })();

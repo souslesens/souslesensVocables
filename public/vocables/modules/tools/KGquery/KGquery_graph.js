@@ -273,7 +273,6 @@ var KGquery_graph = (function () {
     };
 
     self.DrawImportsCommonGraph = function () {
-
         var source = KGquery.currentSource;
         var sources = [source];
         var imports = Config.sources[source].imports;
@@ -281,7 +280,7 @@ var KGquery_graph = (function () {
             sources = sources.concat(imports);
         }
 
-        self.saveVisjsModelGraph()
+        self.saveVisjsModelGraph();
         var visjsData = { nodes: [], edges: [] };
         var uniqueNodes = {};
         self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);

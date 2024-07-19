@@ -236,10 +236,6 @@ const apiDoc = {
                 allowedTools: {
                     type: "string",
                 },
-                forbiddenTools: {
-                    type: "array",
-                    items: {},
-                },
                 blender: {
                     $ref: "#/definitions/Blender",
                 },

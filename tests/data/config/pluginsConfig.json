@@ -1,1 +1,7 @@
-{}
+{
+    "Test": {
+        "string": "hello",
+        "number": 42,
+        "boolean": true
+    }
+}

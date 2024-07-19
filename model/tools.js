@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { Lock } = require("async-await-mutex-lock");
 
+const { convertType } = require("./utils");
 const { configPlugins } = require("./config");
 
 /**
@@ -68,13 +69,35 @@ class ToolModel {
     }
 
     /**
-     * @param {Tool[]} plugins
+     * Convert the plugin configuration options with the correct variable type
+     *
+     * @param {Tool[]} plugins – The plugins structure from pluginsConfig.json
+     * @returns {Tool[]} – The converted structure
+     */
+    convertPluginsConfig = async (plugins) => {
+        return Object.fromEntries(Object.entries(plugins).map(
+            ([key, config]) => {
+                const converted = Object.fromEntries(
+                    Object.entries(config).map(
+                        ([label, option]) => [label, convertType(option)]
+                    )
+                );
+                return [key, converted];
+            }
+        ));
+    };
+
+    /**
+     * Write the plugins structure in the pluginsConfig.json file
+     *
+     * @param {Tool[]} plugins – The plugins structure from pluginsConfig.json
      */
     writeConfig = async (plugins) => {
         await lock.acquire("PluginsThread");
 
         try {
-            await fs.promises.writeFile(configPlugins, JSON.stringify(plugins, null, 2));
+            const convertedPlugins = await this.convertPluginsConfig(plugins);
+            await fs.promises.writeFile(configPlugins, JSON.stringify(convertedPlugins, null, 2));
         } catch (error) {
             console.error(error);
         } finally {

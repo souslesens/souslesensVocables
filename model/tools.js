@@ -48,7 +48,7 @@ class ToolModel {
         const pluginsConfig = JSON.parse(fs.readFileSync(configPlugins).toString());
         try {
             const pluginsNames = fs.readdirSync(pluginsDirectory);
-            return pluginsNames.map((pluginName) => ({ type: "plugin", name: pluginName, config: pluginsConfig[pluginName] }));
+            return pluginsNames.map((pluginName) => ({ type: "plugin", name: pluginName, config: pluginsConfig[pluginName] || {} }));
         } catch {
             console.warn("No plugins directory");
             return [];

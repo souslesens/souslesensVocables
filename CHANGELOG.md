@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.79.0](https://github.com/souslesens/souslesensVocables/compare/1.78.2...1.79.0) (2024-07-19)
+
+
+### Features
+
+* **ConfigEditor:** add an API entry to save the plugins configuration ([b7100f1](https://github.com/souslesens/souslesensVocables/commit/b7100f1bd04353e3830e33e23ae02d36611cd4a6))
+* **configEditor:** add the plugin tab ([e3734c8](https://github.com/souslesens/souslesensVocables/commit/e3734c8fbc1ae3b6306f4433f003252d46009424))
+* **ConfigEditor:** implements the PluginsForm ([39cfc15](https://github.com/souslesens/souslesensVocables/commit/39cfc156650435eadece41dcc954823d72fe37fa))
+* **model/config:** add readMainConfig function and use it ([856b4b5](https://github.com/souslesens/souslesensVocables/commit/856b4b5a31f31df5c6fe974556662bb86ef3f804))
+* **model/tools:** convert the option during writeConfig ([b7e189f](https://github.com/souslesens/souslesensVocables/commit/b7e189f1c341dc65e4a1a0c6401d26b5dada2841))
+* **model/utils:** add convertType function to cast string in JS types ([ce3ccc9](https://github.com/souslesens/souslesensVocables/commit/ce3ccc90fa4df3eaa0f6a796294cb00ff4f56e0b))
+
+
+### Bug Fixes
+
+* **model/tools:** add the config property to all the plugins ([dd3047a](https://github.com/souslesens/souslesensVocables/commit/dd3047ab233093f2b527a16795a09c340e219a8e))
+* **tests:** configure jest to use CONFIG_PATH environment variable ([d8456aa](https://github.com/souslesens/souslesensVocables/commit/d8456aa14968c552d326fb5b5f6b8f27e39db4b2))
+
 ### [1.78.2](https://github.com/souslesens/souslesensVocables/compare/1.78.1...1.78.2) (2024-07-11)
 
 

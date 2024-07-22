@@ -94,7 +94,7 @@ export const LogsTable = () => {
                 const memoizedOptions = React.useMemo(() => getOptions(), [selectedLogs]);
 
                 return (
-                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         <Stack direction="row" spacing={{ xs: 2 }} useFlexGap>
                             <TextField
                                 select

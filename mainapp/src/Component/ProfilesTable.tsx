@@ -122,7 +122,7 @@ const ProfilesTable = () => {
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
                 return (
-                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         <Autocomplete
                             disablePortal
                             id="filter profiles"

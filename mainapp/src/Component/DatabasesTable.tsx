@@ -277,7 +277,7 @@ const DatabasesTable = () => {
                 });
 
                 return (
-                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         <Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
                             <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: "100%" }}>
                                 {snackMessage}

@@ -49,7 +49,17 @@ class ToolModel {
         const pluginsConfig = JSON.parse(fs.readFileSync(configPlugins).toString());
         try {
             const pluginsNames = fs.readdirSync(pluginsDirectory);
-            return pluginsNames.map((pluginName) => ({ type: "plugin", name: pluginName, config: pluginsConfig[pluginName] || {} }));
+            return pluginsNames
+                .map((pluginName) => ({ type: "plugin", name: pluginName, config: pluginsConfig[pluginName] || {} }))
+                .filter((plugin) => {
+                    const pluginPublicPath = path.join(pluginsDirectory, plugin.name, "public");
+                    if (!plugin.name.startsWith(".") && fs.existsSync(pluginPublicPath)) {
+                        const statsPath = fs.statSync(pluginPublicPath);
+                        if (statsPath.isDirectory()) {
+                            return plugin;
+                        }
+                    }
+                });
         } catch {
             console.warn("No plugins directory");
             return [];

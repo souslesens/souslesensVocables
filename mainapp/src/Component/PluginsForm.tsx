@@ -171,7 +171,7 @@ const PluginsForm = () => {
                             </Mui.Alert>
                         </Mui.Snackbar>
 
-                        <Mui.Stack direction="row" sx={{ mx: 12, my: 4, height: "400px" }}>
+                        <Mui.Stack direction="row" sx={{ m: 4, height: "400px" }}>
                             <Mui.Box sx={{ width: "100%", maxWidth: 300 }}>
                                 <nav>
                                     <Mui.List sx={{ maxHeight: 400, overflow: "auto" }} disablePadding>

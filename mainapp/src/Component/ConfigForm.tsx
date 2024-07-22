@@ -106,7 +106,7 @@ const ConfigForm = () => {
             return (
                 <form ref={zo.ref}>
                     {notifier.element}
-                    <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }} useFlexGap>
+                    <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         <Mui.Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
                             <Mui.FormControl>
                                 <Mui.InputLabel id={"default-groups-label"}>Default groups</Mui.InputLabel>

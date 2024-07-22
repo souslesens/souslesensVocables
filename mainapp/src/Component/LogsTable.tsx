@@ -1,33 +1,12 @@
-import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
+import * as Mui from "@mui/material";
+import * as MuiIcons from "@mui/icons-material";
+import * as React from "react";
 
-import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    FormControl,
-    InputAdornment,
-    InputLabel,
-    MenuItem,
-    Paper,
-    Select,
-    Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TableSortLabel,
-    TextField,
-} from "@mui/material";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import CsvDownloader from "react-csv-downloader";
+import { SRD } from "srd";
 
 import { useModel } from "../Admin";
-import * as React from "react";
-import { SRD } from "srd";
 import { Log, getLogs } from "../Log";
-import CsvDownloader from "react-csv-downloader";
 
 export const LogsTable = () => {
     const { model } = useModel();
@@ -59,14 +38,14 @@ export const LogsTable = () => {
         {
             notAsked: () => <p>Let&apos;s fetch some data!</p>,
             loading: () => (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <CircularProgress />
-                </Box>
+                <Mui.Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                    <Mui.CircularProgress />
+                </Mui.Box>
             ),
             failure: (msg: string) => (
-                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                <Mui.Alert variant="filled" severity="error" sx={{ m: 4 }}>
                     {`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}
-                </Alert>
+                </Mui.Alert>
             ),
             success: () => {
                 if (selectedPeriod === undefined) {
@@ -94,16 +73,16 @@ export const LogsTable = () => {
                 const memoizedOptions = React.useMemo(() => getOptions(), [selectedLogs]);
 
                 return (
-                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <Stack direction="row" spacing={{ xs: 2 }} useFlexGap>
-                            <TextField
+                    <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                        <Mui.Stack direction="row" spacing={{ xs: 2 }} useFlexGap>
+                            <Mui.TextField
                                 select
                                 id="select-period"
                                 InputProps={{
                                     startAdornment: (
-                                        <InputAdornment position="start">
-                                            <CalendarMonthIcon />
-                                        </InputAdornment>
+                                        <Mui.InputAdornment position="start">
+                                            <MuiIcons.CalendarMonth />
+                                        </Mui.InputAdornment>
                                     ),
                                 }}
                                 label="Select Period"
@@ -112,10 +91,10 @@ export const LogsTable = () => {
                                 value={selectedPeriod}
                             >
                                 {model.logfiles.data.map((file) => (
-                                    <MenuItem value={file.date}>{file.date}</MenuItem>
+                                    <Mui.MenuItem value={file.date}>{file.date}</Mui.MenuItem>
                                 ))}
-                            </TextField>
-                            <Autocomplete
+                            </Mui.TextField>
+                            <Mui.Autocomplete
                                 disablePortal
                                 id="search-logs"
                                 options={memoizedOptions}
@@ -128,66 +107,66 @@ export const LogsTable = () => {
                                         {option.user}
                                     </li>
                                 )}
-                                renderInput={(params) => <TextField {...params} label="Search logs by username" />}
+                                renderInput={(params) => <Mui.TextField {...params} label="Search logs by username" />}
                                 sx={{ flex: 1 }}
                             />
-                        </Stack>
-                        <TableContainer sx={{ height: "400px" }} component={Paper}>
-                            <Table stickyHeader>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            <TableSortLabel active={orderBy === "timestamp"} direction={order} onClick={() => handleRequestSort("timestamp")}>
+                        </Mui.Stack>
+                        <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
+                            <Mui.Table stickyHeader>
+                                <Mui.TableHead>
+                                    <Mui.TableRow>
+                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <Mui.TableSortLabel active={orderBy === "timestamp"} direction={order} onClick={() => handleRequestSort("timestamp")}>
                                                 at
-                                            </TableSortLabel>
-                                        </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            <TableSortLabel active={orderBy === "user"} direction={order} onClick={() => handleRequestSort("user")}>
+                                            </Mui.TableSortLabel>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <Mui.TableSortLabel active={orderBy === "user"} direction={order} onClick={() => handleRequestSort("user")}>
                                                 User
-                                            </TableSortLabel>
-                                        </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            <TableSortLabel active={orderBy === "tool"} direction={order} onClick={() => handleRequestSort("tool")}>
+                                            </Mui.TableSortLabel>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <Mui.TableSortLabel active={orderBy === "tool"} direction={order} onClick={() => handleRequestSort("tool")}>
                                                 Tool
-                                            </TableSortLabel>
-                                        </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            <TableSortLabel active={orderBy === "action"} direction={order} onClick={() => handleRequestSort("action")}>
+                                            </Mui.TableSortLabel>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <Mui.TableSortLabel active={orderBy === "action"} direction={order} onClick={() => handleRequestSort("action")}>
                                                 Action
-                                            </TableSortLabel>
-                                        </TableCell>
-                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                            <TableSortLabel active={orderBy === "source"} direction={order} onClick={() => handleRequestSort("source")}>
+                                            </Mui.TableSortLabel>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                            <Mui.TableSortLabel active={orderBy === "source"} direction={order} onClick={() => handleRequestSort("source")}>
                                                 Source
-                                            </TableSortLabel>
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                            </Mui.TableSortLabel>
+                                        </Mui.TableCell>
+                                    </Mui.TableRow>
+                                </Mui.TableHead>
+                                <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {memoizedLogs
                                         .filter((log) => log.user.includes(filteringChars))
                                         .map((log) => {
                                             return (
-                                                <TableRow key={log.key}>
-                                                    <TableCell align="center" style={{ whiteSpace: "nowrap" }}>
+                                                <Mui.TableRow key={log.key}>
+                                                    <Mui.TableCell align="center" style={{ whiteSpace: "nowrap" }}>
                                                         {log.timestamp}
-                                                    </TableCell>
-                                                    <TableCell align="center">{log.user}</TableCell>
-                                                    <TableCell align="center">{log.tool}</TableCell>
-                                                    <TableCell align="center">{log.action}</TableCell>
-                                                    <TableCell>{log.source}</TableCell>
-                                                </TableRow>
+                                                    </Mui.TableCell>
+                                                    <Mui.TableCell align="center">{log.user}</Mui.TableCell>
+                                                    <Mui.TableCell align="center">{log.tool}</Mui.TableCell>
+                                                    <Mui.TableCell align="center">{log.action}</Mui.TableCell>
+                                                    <Mui.TableCell>{log.source}</Mui.TableCell>
+                                                </Mui.TableRow>
                                             );
                                         })}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                </Mui.TableBody>
+                            </Mui.Table>
+                        </Mui.TableContainer>
+                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                             <CsvDownloader filename="logs.csv" datas={memoizedLogs}>
-                                <Button variant="outlined">Download CSV</Button>
+                                <Mui.Button variant="outlined">Download CSV</Mui.Button>
                             </CsvDownloader>
-                        </Stack>
-                    </Stack>
+                        </Mui.Stack>
+                    </Mui.Stack>
                 );
             },
         },

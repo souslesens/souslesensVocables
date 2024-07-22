@@ -1,30 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import {
-    Alert,
-    Box,
-    Button,
-    Chip,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    MenuItem,
-    Paper,
-    Snackbar,
-    Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TextField,
-} from "@mui/material";
-import Autocomplete from "@mui/material/Autocomplete";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import { Done } from "@mui/icons-material";
-
+import * as Mui from "@mui/material";
+import * as MuiIcons from "@mui/icons-material";
 import * as React from "react";
+
 import { SRD } from "srd";
 import { ulid } from "ulid";
 
@@ -132,13 +110,13 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
 
     return (
         <>
-            <Button variant="contained" color="primary" onClick={handleOpen}>
+            <Mui.Button variant="contained" color="primary" onClick={handleOpen}>
                 {create ? "Create Database" : "Edit"}
-            </Button>
-            <Dialog fullWidth={true} maxWidth="md" onClose={handleClose} open={open} PaperProps={{ component: "form" }}>
-                <DialogContent sx={{ marginTop: "1em" }}>
-                    <Stack spacing={4}>
-                        <TextField
+            </Mui.Button>
+            <Mui.Dialog fullWidth={true} maxWidth="md" onClose={handleClose} open={open} PaperProps={{ component: "form" }}>
+                <Mui.DialogContent sx={{ marginTop: "1em" }}>
+                    <Mui.Stack spacing={4}>
+                        <Mui.TextField
                             defaultValue={databaseModel.form.id}
                             error={currentErrors.name}
                             fullWidth
@@ -148,7 +126,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             onChange={handleFieldUpdate("name")}
                             value={databaseModel.form.name}
                         />
-                        <TextField
+                        <Mui.TextField
                             defaultValue={databaseModel.form.driver}
                             error={currentErrors.driver}
                             fullWidth
@@ -159,11 +137,11 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             required
                             select
                         >
-                            <MenuItem value="postgres">PostgreSQL</MenuItem>
-                            <MenuItem value="sqlserver">SQLServer</MenuItem>
-                        </TextField>
-                        <Stack direction="row" spacing={1}>
-                            <TextField
+                            <Mui.MenuItem value="postgres">PostgreSQL</Mui.MenuItem>
+                            <Mui.MenuItem value="sqlserver">SQLServer</Mui.MenuItem>
+                        </Mui.TextField>
+                        <Mui.Stack direction="row" spacing={1}>
+                            <Mui.TextField
                                 error={currentErrors.host}
                                 fullWidth
                                 helperText={currentErrors.host}
@@ -173,7 +151,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                                 required
                                 value={databaseModel.form.host}
                             />
-                            <TextField
+                            <Mui.TextField
                                 error={currentErrors.port}
                                 helperText={currentErrors.port}
                                 id="port"
@@ -183,8 +161,8 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                                 type="number"
                                 value={databaseModel.form.port}
                             />
-                        </Stack>
-                        <TextField
+                        </Mui.Stack>
+                        <Mui.TextField
                             error={currentErrors.database}
                             fullWidth
                             helperText={currentErrors.database}
@@ -194,7 +172,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             required
                             value={databaseModel.form.database}
                         />
-                        <TextField
+                        <Mui.TextField
                             error={currentErrors.user}
                             fullWidth
                             helperText={currentErrors.user}
@@ -205,14 +183,14 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             value={databaseModel.form.user}
                         />
                         <PasswordField error={currentErrors.password} id="password" label="Password" onChange={handleFieldUpdate("password")} value={databaseModel.form.password} />
-                    </Stack>
-                </DialogContent>
-                <DialogActions>
-                    <Button color="primary" component="label" onClick={handleValidation} startIcon={<Done />} type="submit" variant="contained">
+                    </Mui.Stack>
+                </Mui.DialogContent>
+                <Mui.DialogActions>
+                    <Mui.Button color="primary" component="label" onClick={handleValidation} startIcon={<MuiIcons.Done />} type="submit" variant="contained">
                         Submit
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    </Mui.Button>
+                </Mui.DialogActions>
+            </Mui.Dialog>
         </>
     );
 };
@@ -260,14 +238,14 @@ const DatabasesTable = () => {
             // eslint-disable-next-line react/no-unescaped-entities
             notAsked: () => <p>Let’s fetch some data!</p>,
             loading: () => (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <CircularProgress />
-                </Box>
+                <Mui.Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                    <Mui.CircularProgress />
+                </Mui.Box>
             ),
             failure: (msg: string) => (
-                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                <Mui.Alert variant="filled" severity="error" sx={{ m: 4 }}>
                     {`${msg}. Please, reload this page.`}
-                </Alert>
+                </Mui.Alert>
             ),
             success: (gotDatabases: Database[]) => {
                 const sortedDatabases: Database[] = gotDatabases.slice().sort((a: Database, b: Database) => {
@@ -277,80 +255,80 @@ const DatabasesTable = () => {
                 });
 
                 return (
-                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
-                            <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: "100%" }}>
+                    <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                        <Mui.Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
+                            <Mui.Alert onClose={handleSnackbarClose} severity="success" sx={{ width: "100%" }}>
                                 {snackMessage}
-                            </Alert>
-                        </Snackbar>
-                        <Autocomplete
+                            </Mui.Alert>
+                        </Mui.Snackbar>
+                        <Mui.Autocomplete
                             disablePortal
                             id="filter databases"
                             options={sortedDatabases.map((database: Database) => {
                                 return database.name;
                             })}
                             onInputChange={(event, newInputValue) => setFilteringChars(newInputValue)}
-                            renderInput={(params) => <TextField {...params} label="Search Databases by name" />}
+                            renderInput={(params) => <Mui.TextField {...params} label="Search Databases by name" />}
                         />
-                        <TableContainer sx={{ height: "400px" }} component={Paper}>
-                            <Table stickyHeader>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                            <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                        <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
+                            <Mui.Table stickyHeader>
+                                <Mui.TableHead>
+                                    <Mui.TableRow>
+                                        <Mui.TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                            <Mui.TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
                                                 Name
-                                            </TableSortLabel>
-                                        </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            <TableSortLabel active={orderBy === "id"} direction={order} onClick={() => handleRequestSort("id")}>
+                                            </Mui.TableSortLabel>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <Mui.TableSortLabel active={orderBy === "id"} direction={order} onClick={() => handleRequestSort("id")}>
                                                 Identifier
-                                            </TableSortLabel>
-                                        </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            <TableSortLabel active={orderBy === "driver"} direction={order} onClick={() => handleRequestSort("driver")}>
+                                            </Mui.TableSortLabel>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <Mui.TableSortLabel active={orderBy === "driver"} direction={order} onClick={() => handleRequestSort("driver")}>
                                                 Driver
-                                            </TableSortLabel>
-                                        </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            </Mui.TableSortLabel>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
                                             Test
-                                        </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
                                             Actions
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                        </Mui.TableCell>
+                                    </Mui.TableRow>
+                                </Mui.TableHead>
+                                <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedDatabases
                                         .filter((database: Database) => database.id.includes(filteringChars))
                                         .map((database: Database) => {
                                             return (
-                                                <TableRow key={database.name}>
-                                                    <TableCell>{database.name}</TableCell>
-                                                    <TableCell align="center">
-                                                        <Chip label={database.id} onClick={handleCopyIdentifier} size="small" />
-                                                    </TableCell>
-                                                    <TableCell align="center">
-                                                        <Chip label={database.driver} size="small" />
-                                                    </TableCell>
-                                                    <TableCell align="center">
+                                                <Mui.TableRow key={database.name}>
+                                                    <Mui.TableCell>{database.name}</Mui.TableCell>
+                                                    <Mui.TableCell align="center">
+                                                        <Mui.Chip label={database.id} onClick={handleCopyIdentifier} size="small" />
+                                                    </Mui.TableCell>
+                                                    <Mui.TableCell align="center">
+                                                        <Mui.Chip label={database.driver} size="small" />
+                                                    </Mui.TableCell>
+                                                    <Mui.TableCell align="center">
                                                         <TestingButton id={database.id} variant="contained" />
-                                                    </TableCell>
-                                                    <TableCell align="center">
-                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                    </Mui.TableCell>
+                                                    <Mui.TableCell align="center">
+                                                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             <DatabaseFormDialog database={database} me={me} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteDatabase(database, updateModel)} />
-                                                        </Stack>
-                                                    </TableCell>
-                                                </TableRow>
+                                                        </Mui.Stack>
+                                                    </Mui.TableCell>
+                                                </Mui.TableRow>
                                             );
                                         })}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                </Mui.TableBody>
+                            </Mui.Table>
+                        </Mui.TableContainer>
+                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                             <DatabaseFormDialog create={true} me={me} />
-                        </Stack>
-                    </Stack>
+                        </Mui.Stack>
+                    </Mui.Stack>
                 );
             },
         },

@@ -1,43 +1,16 @@
-import {
-    Alert,
-    Button,
-    Checkbox,
-    Chip,
-    FormControl,
-    FormControlLabel,
-    InputLabel,
-    MenuItem,
-    Modal,
-    Select,
-    TextField,
-    Box,
-    CircularProgress,
-    Table,
-    TableBody,
-    TableCell,
-    Paper,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Stack,
-    InputAdornment,
-    IconButton,
-    OutlinedInput,
-} from "@mui/material";
+import * as Mui from "@mui/material";
+import * as MuiIcons from "@mui/icons-material";
+import * as React from "react";
 
-import TableSortLabel from "@mui/material/TableSortLabel";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import CsvDownloader from "react-csv-downloader";
+import { SRD } from "srd";
+import { ulid } from "ulid";
 
 import { useModel } from "../Admin";
-import * as React from "react";
-import { SRD } from "srd";
 import { identity, style } from "../Utils";
 import { newUser, deleteUser, putUsersBis, User } from "../User";
-import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
-import Autocomplete from "@mui/material/Autocomplete";
-import CsvDownloader from "react-csv-downloader";
 import { writeLog } from "../Log";
 
 const UsersTable = () => {
@@ -64,14 +37,14 @@ const UsersTable = () => {
         {
             notAsked: () => <p>Let&apos;s fetch some data!</p>,
             loading: () => (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <CircularProgress />
-                </Box>
+                <Mui.Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                    <Mui.CircularProgress />
+                </Mui.Box>
             ),
             failure: (msg: string) => (
-                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                <Mui.Alert variant="filled" severity="error" sx={{ m: 4 }}>
                     {`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}
-                </Alert>
+                </Mui.Alert>
             ),
             success: (gotUsers: User[]) => {
                 const sortedUsers: User[] = gotUsers.slice().sort((a: User, b: User) => {
@@ -98,74 +71,74 @@ const UsersTable = () => {
                     return data;
                 });
                 return (
-                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <Autocomplete
+                    <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                        <Mui.Autocomplete
                             disablePortal
                             id="search-users"
                             options={gotUsers.map((user) => user.login)}
                             onInputChange={(event, newInputValue) => {
                                 setFilteringChars(newInputValue);
                             }}
-                            renderInput={(params) => <TextField {...params} label="Search Users by login" />}
+                            renderInput={(params) => <Mui.TextField {...params} label="Search Users by login" />}
                         />
-                        <TableContainer sx={{ height: "400px" }} component={Paper}>
-                            <Table stickyHeader>
-                                <TableHead>
-                                    <TableRow style={{ fontWeight: "bold" }}>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            <TableSortLabel active={orderBy === "source"} direction={order} onClick={() => handleRequestSort("source")}>
+                        <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
+                            <Mui.Table stickyHeader>
+                                <Mui.TableHead>
+                                    <Mui.TableRow style={{ fontWeight: "bold" }}>
+                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <Mui.TableSortLabel active={orderBy === "source"} direction={order} onClick={() => handleRequestSort("source")}>
                                                 Source
-                                            </TableSortLabel>
-                                        </TableCell>
-                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                            <TableSortLabel active={orderBy === "login"} direction={order} onClick={() => handleRequestSort("login")}>
+                                            </Mui.TableSortLabel>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                            <Mui.TableSortLabel active={orderBy === "login"} direction={order} onClick={() => handleRequestSort("login")}>
                                                 Name
-                                            </TableSortLabel>
-                                        </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            <TableSortLabel active={orderBy === "groups"} direction={order} onClick={() => handleRequestSort("groups")}>
+                                            </Mui.TableSortLabel>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <Mui.TableSortLabel active={orderBy === "groups"} direction={order} onClick={() => handleRequestSort("groups")}>
                                                 Profiles
-                                            </TableSortLabel>
-                                        </TableCell>
-                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            </Mui.TableSortLabel>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
                                             Actions
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                        </Mui.TableCell>
+                                    </Mui.TableRow>
+                                </Mui.TableHead>
+                                <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedUsers
                                         .filter((user) => user.login.includes(filteringChars))
                                         .map((user) => {
                                             return (
-                                                <TableRow key={user.id}>
-                                                    <TableCell align="center">{user.source}</TableCell>
-                                                    <TableCell>{user.login}</TableCell>
-                                                    <TableCell>
-                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                <Mui.TableRow key={user.id}>
+                                                    <Mui.TableCell align="center">{user.source}</Mui.TableCell>
+                                                    <Mui.TableCell>{user.login}</Mui.TableCell>
+                                                    <Mui.TableCell>
+                                                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             {user.groups.map((group) => (
-                                                                <Chip label={group} size="small" />
+                                                                <Mui.Chip label={group} size="small" />
                                                             ))}
-                                                        </Stack>
-                                                    </TableCell>
-                                                    <TableCell align="center">
-                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                        </Mui.Stack>
+                                                    </Mui.TableCell>
+                                                    <Mui.TableCell align="center">
+                                                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             <UserForm id={`edit-button-${user.id}`} maybeuser={user} me={me} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteUser(user, updateModel)} />
-                                                        </Stack>
-                                                    </TableCell>
-                                                </TableRow>
+                                                        </Mui.Stack>
+                                                    </Mui.TableCell>
+                                                </Mui.TableRow>
                                             );
                                         })}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                </Mui.TableBody>
+                            </Mui.Table>
+                        </Mui.TableContainer>
+                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                             <CsvDownloader separator="&#9;" filename="users" extension=".tsv" datas={datas as Datas}>
-                                <Button variant="outlined">Download CSV</Button>
+                                <Mui.Button variant="outlined">Download CSV</Mui.Button>
                             </CsvDownloader>
                             <UserForm id={`create-button`} create={true} me={me} />
-                        </Stack>
-                    </Stack>
+                        </Mui.Stack>
+                    </Mui.Stack>
                 );
             },
         },
@@ -259,22 +232,22 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
 
     const config = SRD.unwrap({ auth: "json", tools_available: [] }, identity, model.config);
     const createEditButton = (
-        <Button id={id} color="primary" variant="contained" onClick={handleOpen}>
+        <Mui.Button id={id} color="primary" variant="contained" onClick={handleOpen}>
             {create ? "Create User" : "Edit"}
-        </Button>
+        </Mui.Button>
     );
 
     return (
         <>
             {create ? (config.auth != "keycloak" ? createEditButton : null) : createEditButton}
-            <Modal onClose={handleClose} open={userModel.modal}>
-                <Box sx={style}>
-                    <Stack spacing={4}>
+            <Mui.Modal onClose={handleClose} open={userModel.modal}>
+                <Mui.Box sx={style}>
+                    <Mui.Stack spacing={4}>
                         <h2>{`Edit ${user.login}`}</h2>
-                        <FormControl>
-                            <InputLabel id="login-label">Login</InputLabel>
-                            <OutlinedInput fullWidth onChange={handleFieldUpdate("login")} value={userModel.userForm.login} id={`login`} label={"Login"} disabled={create ? false : true} />
-                        </FormControl>
+                        <Mui.FormControl>
+                            <Mui.InputLabel id="login-label">Login</Mui.InputLabel>
+                            <Mui.OutlinedInput fullWidth onChange={handleFieldUpdate("login")} value={userModel.userForm.login} id={`login`} label={"Login"} disabled={create ? false : true} />
+                        </Mui.FormControl>
 
                         <PasswordField
                             disabled={user.source != "keycloak" ? false : true}
@@ -284,9 +257,9 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
                             value={userModel.userForm.password}
                         />
 
-                        <FormControl>
-                            <InputLabel id="select-groups-label">Profiles</InputLabel>
-                            <Select
+                        <Mui.FormControl>
+                            <Mui.InputLabel id="select-groups-label">Profiles</Mui.InputLabel>
+                            <Mui.Select
                                 labelId="select-profiles-label"
                                 id="select-groups"
                                 multiple
@@ -297,25 +270,25 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
                                 onChange={handleFieldUpdate("groups")}
                             >
                                 {unwrappedProfiles.map((profile) => (
-                                    <MenuItem key={profile.name} value={profile.name}>
-                                        <Checkbox checked={userModel.userForm.groups.indexOf(profile.name) > -1} />
+                                    <Mui.MenuItem key={profile.name} value={profile.name}>
+                                        <Mui.Checkbox checked={userModel.userForm.groups.indexOf(profile.name) > -1} />
                                         {profile.name}
-                                    </MenuItem>
+                                    </Mui.MenuItem>
                                 ))}
-                            </Select>
-                        </FormControl>
+                            </Mui.Select>
+                        </Mui.FormControl>
 
-                        <FormControl>
-                            <FormControlLabel
+                        <Mui.FormControl>
+                            <Mui.FormControlLabel
                                 control={
-                                    <Checkbox value={userModel.userForm.allowSourceCreation} checked={userModel.userForm.allowSourceCreation} onChange={handleFieldUpdate("allowSourceCreation")} />
+                                    <Mui.Checkbox value={userModel.userForm.allowSourceCreation} checked={userModel.userForm.allowSourceCreation} onChange={handleFieldUpdate("allowSourceCreation")} />
                                 }
                                 label="Allow the user to create sources"
                             />
-                        </FormControl>
+                        </Mui.FormControl>
 
-                        <FormControl>
-                            <TextField
+                        <Mui.FormControl>
+                            <Mui.TextField
                                 id="max-allowed-sources"
                                 type="number"
                                 label="Limit the number of source the user can create"
@@ -326,14 +299,14 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
                                     shrink: true,
                                 }}
                             />
-                        </FormControl>
+                        </Mui.FormControl>
 
-                        <Button id="btn-save-user" color="primary" variant="contained" onClick={saveUser}>
+                        <Mui.Button id="btn-save-user" color="primary" variant="contained" onClick={saveUser}>
                             Save User
-                        </Button>
-                    </Stack>
-                </Box>
-            </Modal>
+                        </Mui.Button>
+                    </Mui.Stack>
+                </Mui.Box>
+            </Mui.Modal>
         </>
     );
 };

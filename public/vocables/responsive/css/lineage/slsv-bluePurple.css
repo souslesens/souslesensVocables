@@ -275,10 +275,10 @@
 }
 
 [role="dialog"]:not(.MuiPaper-root) {
-    width: unset !important;
+    width: 95% !important;
+    max-width: 1500px !important;
     height: unset !important;
     max-height: 99vh;
-    max-width: 95vw;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);

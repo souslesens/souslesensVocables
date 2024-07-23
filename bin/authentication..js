@@ -12,15 +12,14 @@
 
 const { userModel } = require("../model/users");
 
-const bcrypt = require("bcrypt");
-const mariadb = require("mariadb");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const KeyCloakStrategy = require("passport-keycloak-oauth2-oidc").Strategy;
 const ULID = require("ulid");
 
 // Get config
-const { config } = require("../model/config");
+const { readMainConfig } = require("../model/config");
+const config = readMainConfig();
 
 if (config.auth == "keycloak") {
     passport.use(
@@ -35,7 +34,7 @@ if (config.auth == "keycloak") {
                 authServerURL: config.keycloak.authServerURL,
                 callbackURL: "/login/callback",
             },
-            async function (accessToken, refreshToken, profile, done) {
+            async function (_accessToken, _refreshToken, profile, done) {
                 const userAccount = await userModel.findUserAccount(profile.username);
                 const userAccountToAdd = {
                     id: ULID.ulid(),

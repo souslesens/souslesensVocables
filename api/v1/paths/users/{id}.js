@@ -1,8 +1,6 @@
-const path = require("path");
 const fs = require("fs");
 const modelUsers = require("../../../../model/users");
-const { configPath, config } = require("../../../../model/config");
-const profilesJSON = path.resolve(configPath + "/users/users.json");
+const { configUsersPath } = require("../../../../model/config");
 const util = require("util");
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
@@ -28,23 +26,23 @@ module.exports = function () {
     }
     async function DELETE(req, res, next) {
         try {
-            const profiles = await readFile(profilesJSON).catch((err) => res.status(500).json(err));
-            const oldProfiles = JSON.parse(profiles);
-            const { [req.params.id]: idToDelete, ...remainingProfiles } = oldProfiles;
-            const successfullyDeleted = JSON.stringify(remainingProfiles) !== JSON.stringify(oldProfiles);
+            const users = await readFile(configUsersPath).catch((err) => res.status(500).json(err));
+            const oldUsers = JSON.parse(users);
+            const { [req.params.id]: idToDelete, ...remainingUsers } = oldUsers;
+            const successfullyDeleted = JSON.stringify(remainingUsers) !== JSON.stringify(oldUsers);
 
             if (req.params.id && successfullyDeleted) {
-                await writeFile(profilesJSON, JSON.stringify(remainingProfiles)).catch((err) =>
+                await writeFile(configUsersPath, JSON.stringify(remainingUsers)).catch((err) =>
                     res.status(500).json({
                         message: "I couldn't write users.json",
                         error: err,
                     })
                 );
 
-                const updatedProfiles = await readFile(profilesJSON).catch((_err) => res.status(500).json({ message: "Couldn't read users json" }));
+                const updatedUsers = await readFile(configUsersPath).catch((_err) => res.status(500).json({ message: "Couldn't read users json" }));
                 res.status(200).json({
                     message: `${req.params.id} successfully deleted`,
-                    resources: JSON.parse(updatedProfiles),
+                    resources: JSON.parse(updatedUsers),
                 });
             } else if (!req.params.id) {
                 res.status(500).json({ message: "I need a resource ID to perform this request" });
@@ -56,22 +54,22 @@ module.exports = function () {
         }
     }
     GET.apiDoc = {
-        summary: "Returns a specific profile",
+        summary: "Returns a specific user",
         security: [{ restrictAdmin: [] }],
-        operationId: "getOneProfile",
+        operationId: "getOneUser",
         parameters: [
             {
                 in: "path",
-                name: "profile's id",
+                name: "user's id",
                 type: "string",
                 required: true,
             },
         ],
         responses: {
             200: {
-                description: "Profiles",
+                description: "User",
                 schema: {
-                    $ref: "#/definitions/Profile",
+                    $ref: "#/definitions/User",
                 },
             },
         },

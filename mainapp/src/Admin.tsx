@@ -7,6 +7,8 @@ import Box from "@mui/material/Box";
 import { identity } from "./Utils";
 import { ProfilesTable } from "./Component/ProfilesTable";
 import { Profile } from "./Profile";
+import { ConfigForm } from "./Component/ConfigForm";
+import { PluginsForm } from "./Component/PluginsForm";
 import { SourcesTable } from "./Component/SourcesTable";
 import { UsersTable } from "./Component/UsersTable";
 import { LogsTable } from "./Component/LogsTable";
@@ -31,20 +33,24 @@ type Model = {
     currentEditionTab: EditionTab;
 };
 
-type EditionTab = "UsersEdition" | "ProfilesEdition" | "SourcesEdition" | "DatabaseManagement" | "Logs";
+type EditionTab = "ConfigEdition" | "UsersEdition" | "ProfilesEdition" | "SourcesEdition" | "DatabaseManagement" | "Plugins" | "Logs";
 
 const editionTabToNumber = (editionTab: EditionTab) => {
     switch (editionTab) {
-        case "UsersEdition":
+        case "ConfigEdition":
             return 0;
-        case "ProfilesEdition":
+        case "UsersEdition":
             return 1;
-        case "SourcesEdition":
+        case "ProfilesEdition":
             return 2;
-        case "DatabaseManagement":
+        case "SourcesEdition":
             return 3;
-        case "Logs":
+        case "DatabaseManagement":
             return 4;
+        case "Plugins":
+            return 5;
+        case "Logs":
+            return 6;
         default:
             0;
     }
@@ -53,14 +59,18 @@ const editionTabToNumber = (editionTab: EditionTab) => {
 const editionTabToString = (editionTab: number): EditionTab => {
     switch (editionTab) {
         case 0:
-            return "UsersEdition";
+            return "ConfigEdition";
         case 1:
-            return "ProfilesEdition";
+            return "UsersEdition";
         case 2:
-            return "SourcesEdition";
+            return "ProfilesEdition";
         case 3:
-            return "DatabaseManagement";
+            return "SourcesEdition";
         case 4:
+            return "DatabaseManagement";
+        case 5:
+            return "Plugins";
+        case 6:
             return "Logs";
         default:
             return "UsersEdition";
@@ -213,10 +223,12 @@ const Admin = () => {
                     value={editionTabToNumber(model.currentEditionTab)}
                     centered
                 >
+                    <Tab label="Settings" />
                     <Tab label="Users" />
                     <Tab label="Profiles" />
                     <Tab label="Sources" />
                     <Tab label="Databases" />
+                    <Tab label="Plugins" />
                     <Tab label="Logs" />
                 </Tabs>
             </Box>
@@ -227,6 +239,8 @@ const Admin = () => {
 
 const Dispatcher = (props: { model: Model }) => {
     switch (props.model.currentEditionTab) {
+        case "ConfigEdition":
+            return <ConfigForm />;
         case "UsersEdition":
             return <UsersTable />;
         case "ProfilesEdition":
@@ -235,6 +249,8 @@ const Dispatcher = (props: { model: Model }) => {
             return <SourcesTable />;
         case "DatabaseManagement":
             return <DatabasesTable />;
+        case "Plugins":
+            return <PluginsForm />;
         case "Logs":
             return <LogsTable />;
         default:

@@ -1,24 +1,25 @@
 const fs = require("fs");
 const { Lock } = require("async-await-mutex-lock");
-const { config, configSourcesPath, configProfilesPath } = require("./config");
-const { ProfileModel } = require("./profiles");
+const { config, configSourcesPath } = require("./config");
+const { profileModel } = require("./profiles");
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
  * @typedef {import("./SourceTypes").Source} Source
  * @typedef {import("./SourceTypes").SourceWithAccessControl} SourceWithAccessControl
+ * @typedef {import("./profiles").ProfileModel} ProfileModel
  */
 
 const lock = new Lock();
 
 class SourceModel {
     /**
+     * @param {ProfileModel} profileModel - path of the profiles.json file
      * @param {string} sourcesPath - path of the sources.json file
-     * @param {string} profilesPath - path of the profiles.json file
      */
-    constructor(sourcesPath, profilesPath) {
+    constructor(profileModel, sourcesPath) {
+        this.profileModel = profileModel;
         this.configSourcesPath = sourcesPath;
-        this.profileModel = new ProfileModel(profilesPath);
     }
 
     /**
@@ -88,7 +89,7 @@ class SourceModel {
             if (user.groups.includes(profileName)) {
                 return [profileName, profile];
             }
-            if(profileName==user.login) {
+            if (profileName == user.login) {
                 return [profileName, profile];
             }
         });
@@ -196,7 +197,7 @@ class SourceModel {
 
     /**
      * @param {UserAccount} user - a user account
-     * @returns {Promise<Record<string, sourcesAccessControl>>} a collection of sources owned by
+     * @returns {Promise<Record<string, SourceWithAccessControl>>} a collection of sources owned by
      * user
      */
     getOwnedSources = async (user) => {
@@ -294,6 +295,6 @@ class SourceModel {
     };
 }
 
-const sourceModel = new SourceModel(configSourcesPath, configProfilesPath);
+const sourceModel = new SourceModel(profileModel, configSourcesPath);
 
 module.exports = { SourceModel, sourceModel };

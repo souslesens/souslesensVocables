@@ -1,6 +1,6 @@
 const fs = require("fs");
 const bcrypt = require("bcrypt");
-const { config, configUsersPath } = require("./config");
+const { readMainConfig, configUsersPath } = require("./config");
 const { Lock } = require("async-await-mutex-lock");
 const mariadb = require("mariadb");
 const ULID = require("ulid");
@@ -405,6 +405,7 @@ class UserModelDatabase extends UserModel {
     };
 }
 
+const config = readMainConfig();
 const userModel = config.auth === "database" ? new UserModelDatabase(config.authenticationDatabase) : new UserModelJson(configUsersPath);
 
 module.exports = { UserModelJson, UserModelDatabase, userModel };

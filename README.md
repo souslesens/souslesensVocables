@@ -324,6 +324,8 @@ GitHub releases and docker images are created on tags with GitHub Actions.
 
 ### Plugins system
 
+#### Create a plugin
+
 In root create a plugins folder
 
 `mkdir plugins`
@@ -361,6 +363,8 @@ Once it done, don't forget to add the plugin's name to `mainConfig.tools_availab
 If you still don't see the plugin in the jsTree, check that your user's profile allows to see this plugin.
 The function onLoaded is loaded when you select the tool.
 
+#### Plugin configuration
+
 If a plugin requires configuration, it can be added to the `config/pluginsConfig.json` file:
 
 ```
@@ -372,6 +376,28 @@ If a plugin requires configuration, it can be added to the `config/pluginsConfig
 ```
 
 This configuration will be provided to the plugin by calling the `setConfig` method.
+
+#### Plugin communication with other tools
+
+Other tools can communicate with plugins. To configure a communication from a tool to a plugin,
+use a `getToolRelations` function that must return an object like:
+
+```javascript
+self.getToolRelations = function () {
+    return { KGquery: "queryToTagsCalendar" };
+};
+```
+
+This mean that the `KGquery` tool will be able to communicate with the plugin using the
+`queryToTagsCalendar` function (defined in souslesens).
+
+#### Use SousLesens modules on plugin
+
+SousLesens modules can be imported form plugins using `import`. For example:
+
+```js
+import common from "/vocables/modules/shared/common.js;
+```
 
 The following Github Repository contains all the plugins of SLS and give more informations about them :
 https://github.com/souslesens/slsv-plugins/

@@ -1,5 +1,5 @@
 const path = require("path");
-const { config } = require(path.resolve("model/config"));
+const { mainConfigModel } = require("../../../model/mainConfig");
 const logger = require(path.resolve("bin/logger..js"));
 const fs = require("fs");
 
@@ -10,14 +10,15 @@ module.exports = function () {
     };
 
     ///// GET api/v1/logs
-    function GET(req, res, _next) {
+    async function GET(req, res, _next) {
+        const config = await mainConfigModel.getConfig();
         const vocablesLog = path.join(config.logDir, "vocables.log");
-        if (! fs.existsSync(vocablesLog)) {
+        if (!fs.existsSync(vocablesLog)) {
             return res.status(500);
         }
 
         const vocablesLogStats = fs.lstatSync(vocablesLog);
-        if (! vocablesLogStats.isSymbolicLink()) {
+        if (!vocablesLogStats.isSymbolicLink()) {
             return res.status(500);
         }
 
@@ -26,7 +27,7 @@ module.exports = function () {
             .readdirSync(config.logDir)
             .filter((file) => file.startsWith("vocables.log."))
             .map((file) => {
-                date = path.extname(file).substring(1);
+                const date = path.extname(file).substring(1);
                 return { date: date, current: file == symlink };
             });
 

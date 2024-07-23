@@ -7,7 +7,6 @@ import SearchWidget from "../../modules/uiWidgets/searchWidget.js";
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
 import Lineage_createResource from "../../modules/tools/lineage/lineage_createResource.js";
 import PopupMenuWidget from "../../modules/uiWidgets/popupMenuWidget.js";
-import Lineage_containers from "../../modules/tools/lineage/lineage_containers.js";
 
 var Lineage_r = (function () {
     var self = {};
@@ -122,7 +121,7 @@ var Lineage_r = (function () {
     self.initContainersTab = function () {
         if ($("#tabs_containers").children().length == 0) {
             $("#tabs_containers").load("./responsive/lineage/html/containersPanel.html", function (s) {
-                Lineage_containers.search();
+                Containers_tree.search("lineage_containers_containersJstree");
             });
         }
     };
@@ -156,7 +155,7 @@ var Lineage_r = (function () {
             Lineage_properties.searchTermInSources();
         }
         if (currentTab == "Containers") {
-            Lineage_containers.search();
+            Containers_tree.search("lineage_containers_containersJstree");
         }
     };
     self.addNode = function () {

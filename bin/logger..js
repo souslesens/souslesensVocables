@@ -15,7 +15,9 @@ require("winston-daily-rotate-file");
 
 const { createLogger, format } = require("winston");
 const { combine, timestamp, json } = format;
-const { config } = require("../model/config");
+const { readMainConfig } = require("../model/config");
+
+const config = readMainConfig();
 
 const logDir = config.logDir ? config.logDir : "log/souslesens";
 

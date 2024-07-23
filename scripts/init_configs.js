@@ -2,6 +2,9 @@ const bcrypt = require("bcrypt");
 const fs = require("fs");
 const merge = require("lodash.merge");
 
+// create data/mapping dir if not exists
+fs.mkdirSync("data/mappings", { recursive: true });
+
 // Create configs dir if not exists
 fs.mkdirSync("config/users", { recursive: true });
 

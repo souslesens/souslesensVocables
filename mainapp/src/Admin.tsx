@@ -8,6 +8,7 @@ import { identity } from "./Utils";
 import { ProfilesTable } from "./Component/ProfilesTable";
 import { Profile } from "./Profile";
 import { ConfigForm } from "./Component/ConfigForm";
+import { PluginsForm } from "./Component/PluginsForm";
 import { SourcesTable } from "./Component/SourcesTable";
 import { UsersTable } from "./Component/UsersTable";
 import { LogsTable } from "./Component/LogsTable";
@@ -32,7 +33,7 @@ type Model = {
     currentEditionTab: EditionTab;
 };
 
-type EditionTab = "ConfigEdition" | "UsersEdition" | "ProfilesEdition" | "SourcesEdition" | "DatabaseManagement" | "Logs";
+type EditionTab = "ConfigEdition" | "UsersEdition" | "ProfilesEdition" | "SourcesEdition" | "DatabaseManagement" | "Plugins" | "Logs";
 
 const editionTabToNumber = (editionTab: EditionTab) => {
     switch (editionTab) {
@@ -46,8 +47,10 @@ const editionTabToNumber = (editionTab: EditionTab) => {
             return 3;
         case "DatabaseManagement":
             return 4;
-        case "Logs":
+        case "Plugins":
             return 5;
+        case "Logs":
+            return 6;
         default:
             0;
     }
@@ -66,6 +69,8 @@ const editionTabToString = (editionTab: number): EditionTab => {
         case 4:
             return "DatabaseManagement";
         case 5:
+            return "Plugins";
+        case 6:
             return "Logs";
         default:
             return "UsersEdition";
@@ -223,6 +228,7 @@ const Admin = () => {
                     <Tab label="Profiles" />
                     <Tab label="Sources" />
                     <Tab label="Databases" />
+                    <Tab label="Plugins" />
                     <Tab label="Logs" />
                 </Tabs>
             </Box>
@@ -243,6 +249,8 @@ const Dispatcher = (props: { model: Model }) => {
             return <SourcesTable />;
         case "DatabaseManagement":
             return <DatabasesTable />;
+        case "Plugins":
+            return <PluginsForm />;
         case "Logs":
             return <LogsTable />;
         default:

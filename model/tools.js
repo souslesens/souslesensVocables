@@ -1,5 +1,8 @@
 const fs = require("fs");
 const path = require("path");
+const { Lock } = require("async-await-mutex-lock");
+
+const { convertType } = require("./utils");
 const { configPlugins } = require("./config");
 
 /**
@@ -24,6 +27,8 @@ const NATIVE_TOOLS = [
     { name: "OntoCreator", controller: "Lineage_createSLSVsource", useSource: false, multiSources: false, toTools: {} },
 ].map((tool) => ({ type: "tool", label: tool.label ?? tool.name, ...tool }));
 
+const lock = new Lock();
+
 class ToolModel {
     /**
      * @param {string} pluginsDirectory - path of the profiles.json file
@@ -44,7 +49,17 @@ class ToolModel {
         const pluginsConfig = JSON.parse(fs.readFileSync(configPlugins).toString());
         try {
             const pluginsNames = fs.readdirSync(pluginsDirectory);
-            return pluginsNames.map((pluginName) => ({ type: "plugin", name: pluginName, config: pluginsConfig[pluginName] }));
+            return pluginsNames
+                .map((pluginName) => ({ type: "plugin", name: pluginName, config: pluginsConfig[pluginName] || {} }))
+                .filter((plugin) => {
+                    const pluginPublicPath = path.join(pluginsDirectory, plugin.name, "public");
+                    if (!plugin.name.startsWith(".") && fs.existsSync(pluginPublicPath)) {
+                        const statsPath = fs.statSync(pluginPublicPath);
+                        if (statsPath.isDirectory()) {
+                            return plugin;
+                        }
+                    }
+                });
         } catch {
             console.warn("No plugins directory");
             return [];
@@ -62,6 +77,43 @@ class ToolModel {
     get allTools() {
         return [...this.nativeTools, ...this.plugins];
     }
+
+    /**
+     * Convert the plugin configuration options with the correct variable type
+     *
+     * @param {Tool[]} plugins – The plugins structure from pluginsConfig.json
+     * @returns {Tool[]} – The converted structure
+     */
+    convertPluginsConfig = async (plugins) => {
+        return Object.fromEntries(Object.entries(plugins).map(
+            ([key, config]) => {
+                const converted = Object.fromEntries(
+                    Object.entries(config).map(
+                        ([label, option]) => [label, convertType(option)]
+                    )
+                );
+                return [key, converted];
+            }
+        ));
+    };
+
+    /**
+     * Write the plugins structure in the pluginsConfig.json file
+     *
+     * @param {Tool[]} plugins – The plugins structure from pluginsConfig.json
+     */
+    writeConfig = async (plugins) => {
+        await lock.acquire("PluginsThread");
+
+        try {
+            const convertedPlugins = await this.convertPluginsConfig(plugins);
+            await fs.promises.writeFile(configPlugins, JSON.stringify(convertedPlugins, null, 2));
+        } catch (error) {
+            console.error(error);
+        } finally {
+            lock.release("PluginsThread");
+        }
+    };
 }
 
 const toolModel = new ToolModel(path.join(process.cwd(), "/plugins"));

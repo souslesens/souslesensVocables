@@ -1,4 +1,4 @@
-const { config } = require("./config");
+const { readMainConfig } = require("./config");
 const { Client: Client7 } = require("es7");
 
 class IndexModel {
@@ -49,6 +49,7 @@ class IndexModel {
     };
 }
 
+const config = readMainConfig();
 const indexModel = new IndexModel(config.ElasticSearch.url, config.ElasticSearch.user, config.ElasticSearch.password, config.ElasticSearch.skipSslVerify);
 
 module.exports = { IndexModel, indexModel };

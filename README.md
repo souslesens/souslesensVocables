@@ -33,14 +33,8 @@ Please watch the videos at [videos sections](http://souslesens.org/index.php/vid
 
 ### Prerequisites
 
-In production, souslesensVocable is deployed using `docker` and `docker-compose`. Install docker
+In production, souslesensVocable is deployed using `docker` with `docker-compose-plugin`. Install docker
 following [this link](https://docs.docker.com/engine/install/).
-
-Then, install `docker-compose` with your package manager
-
-```bash
-sudo apt install docker-compose
-```
 
 ### Configure the deployment
 
@@ -111,7 +105,7 @@ documentation.
 We do not provide a docker image for SouslesensVocables. You have to build it yourself:
 
 ```bash
-docker-compose build vocables
+docker compose build vocables
 ```
 
 ### Create the data directories
@@ -126,7 +120,7 @@ bash scripts/init_directories.sh
 ### Launch the docker stack
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
@@ -154,13 +148,13 @@ Change the `TAG` number in the `.env` file
 Rebuild the image
 
 ```bash
-docker-compose build vocables
+docker compose build vocables
 ```
 
 Finally, restart the docker stack
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Install locally (development instance)
@@ -176,29 +170,10 @@ SouslesensVocables is deployed locally using `node` and `npm`.
 
 Install docker following [this link](https://docs.docker.com/engine/install/).
 
-Then, install `docker-compose` with your package manager
-
-```bash
-sudo apt install docker-compose
-```
-
 #### Node
 
 Install nodejs from the nodesource package repository (detailed instruction
 [here](https://github.com/nodesource/distributions/blob/master/README.md#manual-installation)).
-
-```bash
-# Add nodesource repository
-curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor > /usr/share/keyrings/nodesource.gpg
-echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x buster main" > /etc/apt/sources.list.d/nodesource.list
-echo "deb-src [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x buster main" >> /etc/apt/sources.list.d/nodesource.list
-apt update
-# Install node
-apt install -y nodejs
-# Check versions
-node --version
-npm --version
-```
 
 ### Configure
 
@@ -218,10 +193,10 @@ node scripts/config_from_docker_compose.js
 
 ### Start docker dependencies
 
-Start the servers with `docker-compose`
+Start the servers with `docker compose`
 
 ```bash
-docker-compose -f docker-compose.dev.yaml up -d
+docker compose -f docker-compose.dev.yaml up -d
 ```
 
 Load some data into virtuoso
@@ -296,7 +271,7 @@ We provide a `docker-compose.test.yaml` and a `tests/load_data.sh` script to bui
 environment.
 
 ```bash
-docker-compose -f docker-compose.test.yaml -d
+docker compose -f docker-compose.test.yaml -d
 bash tests/load_data.sh
 ```
 

@@ -920,7 +920,9 @@ if (callback) return callback(err);
     self.ISODateStrToRDFString = function (isoStringdate) {
         // isoString 2022-12-31T230000.000Z
         //  internal virtuoso date YYYY.MM.DD hh:mm.ss
-        var regex = /(\d{4})-(\d{2})-(\d{2})T(\d{2})(\d{2})(\d{2})/;
+     //   var regex = /(\d{4})-(\d{2})-(\d{2})T(\d{2})(\d{2})(\d{2})/;
+        var regex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/  //escape msec
+
         var array = isoStringdate.match(regex);
         if (!array) return null;
         var str = array[1] + "." + array[2] + "." + array[3];
@@ -935,6 +937,7 @@ if (callback) return callback(err);
         }
         return str;
     };
+
     self.RDFStringToISODateStr = function (RDFString) {
         // isoString 2022-12-31T230000.000Z
         //  internal virtuoso date YYYY.MM.DD hh:mm.ss

@@ -925,7 +925,7 @@ if (callback) return callback(err);
 
         var array = isoStringdate.match(regex);
         if (!array) return null;
-        var str = array[1] + "." + array[2] + "." + array[3];
+        var str = array[1] + "-" + array[2] + "-" + array[3];
         if (array.length > 4) {
             str += " " + array[4];
         }

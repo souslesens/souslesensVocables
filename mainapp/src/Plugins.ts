@@ -4,7 +4,7 @@ import { Tool } from "Tool";
 
 const endpoint = "/api/v1/admin/plugins";
 
-const PluginOption = z
+const PluginOptionSchema = z
     .object({
         key: z
             .string()
@@ -22,7 +22,7 @@ type PluginsDialogFormProps = {
     plugin: Tool;
 };
 
-type PluginOptionType = z.infer<typeof PluginOption>;
+type PluginOptionType = z.infer<typeof PluginOptionSchema>;
 
 async function writeConfig(plugins: Tool[]) {
     try {
@@ -41,4 +41,4 @@ async function writeConfig(plugins: Tool[]) {
     }
 }
 
-export { PluginsDialogFormProps, PluginOption, PluginOptionType, writeConfig };
+export { PluginOptionSchema, PluginOptionType, writeConfig };

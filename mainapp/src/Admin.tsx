@@ -217,7 +217,7 @@ const Admin = () => {
 
     return (
         <ModelContext.Provider value={{ model, updateModel }}>
-            <Box sx={{ bgcolor: "Background.paper" }}>
+            <Box sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}>
                 <Tabs
                     onChange={(event: React.SyntheticEvent, newValue: number) => updateModel({ type: "UserClickedNewTab", payload: newValue })}
                     value={editionTabToNumber(model.currentEditionTab)}

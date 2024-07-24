@@ -1,10 +1,10 @@
-const { toolModel } = require("../../../../model/tools");
-const { responseSchema } = require("../utils");
+const { toolModel } = require("../../../../../model/tools");
+const { responseSchema } = require("../../utils");
 
 module.exports = function () {
     let operations = { PUT };
 
-    // PUT /api/v1/admin/plugins
+    // PUT /api/v1/admin/plugins/config
     async function PUT(req, res, _next) {
         try {
             if (!req.body.plugins) {
@@ -22,7 +22,7 @@ module.exports = function () {
     }
 
     PUT.apiDoc = {
-        operationId: "plugins.put",
+        operationId: "plugins.config.put",
         responses: responseSchema("Tools", "PUT"),
         security: [{ restrictAdmin: [] }],
         summary: "Save the plugins configuration",

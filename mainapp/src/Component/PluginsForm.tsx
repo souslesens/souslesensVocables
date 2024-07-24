@@ -6,7 +6,7 @@ import { RD, SRD, failure, loading, success } from "srd";
 
 import { useModel } from "../Admin";
 import { writeLog } from "../Log";
-import { PluginsDialogFormProps, PluginOption, PluginOptionType, writeConfig } from "../Plugins";
+import { PluginOptionSchema, PluginOptionType, writeConfig } from "../Plugins";
 import { Tool, getAllTools } from "../Tool";
 
 const PluginsDialogForm = (props: PluginsDialogFormProps) => {
@@ -17,7 +17,7 @@ const PluginsDialogForm = (props: PluginsDialogFormProps) => {
     const optionsName = Object.keys(plugin.config);
 
     const handleValidation = (data) => {
-        const parsedForm = PluginOption.safeParse(data);
+        const parsedForm = PluginOptionSchema.safeParse(data);
 
         if (parsedForm.data !== undefined && optionsName.includes(parsedForm.data.key)) {
             setErrors("This label was already used by another option");

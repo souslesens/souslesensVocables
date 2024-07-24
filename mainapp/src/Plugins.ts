@@ -28,7 +28,7 @@ async function writeConfig(plugins: Tool[]) {
     try {
         const body = { plugins: plugins };
 
-        const response = await fetch(endpoint, {
+        const response = await fetch(`${endpoint}/config`, {
             method: "put",
             body: JSON.stringify(body, null, "\t"),
             headers: { "Content-Type": "application/json" },

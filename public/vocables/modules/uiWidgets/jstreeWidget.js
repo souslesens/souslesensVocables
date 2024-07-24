@@ -307,7 +307,9 @@ var JstreeWidget = (function () {
     };
 
     self.addNodesToJstree = function (jstreeDiv, parentNodeId_, jstreeData, options, callback) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         if (!options) {
             options = {};
         }
@@ -367,7 +369,9 @@ var JstreeWidget = (function () {
         self.setTreeAppearance();
     };
     self.deleteBranch = function (jstreeDiv, nodeId, deleteNodeItself) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         var descendants = self.getNodeDescendants(jstreeDiv, nodeId, null, true);
         if (deleteNodeItself) {
             if (descendants.indexOf(nodeId) < 0) {
@@ -391,21 +395,27 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
     self.getjsTreeCheckedNodes = function (jstreeDiv) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         return $("#" + jstreeDiv)
             .jstree()
             .get_checked(true);
     };
 
     self.setjsTreeCheckedNodes = function (jstreeDiv, checkedNodes) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         return $("#" + jstreeDiv)
             .jstree()
             .check_node(checkedNodes);
     };
 
     self.getjsTreeNodes = function (jstreeDiv, IdsOnly, parentNodeId) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         if (!parentNodeId) {
             parentNodeId = "#";
         }
@@ -432,14 +442,18 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     };
 
     self.getjsTreeNodeObj = function (jstreeDiv, id) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         return $("#" + jstreeDiv)
             .jstree(true)
             .get_node(id);
     };
     // get node from node.data field
     self.getNodeByDataField = function (jstreeDiv, property, value) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         if (!$("#" + jstreeDiv).jstree(true)) {
             return null;
         }
@@ -455,8 +469,10 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         return matchingNode;
     };
 
-    self.getNodeDescendants = function (jstreeDiv, nodeId, depth, onlyIds) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+    self.getNodeDescendants = function (jstreeDiv, parentNodeId, depth, onlyIds) {
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         var nodes = [];
         var nodeIdsMap = {};
         var currentLevel = 0;
@@ -470,12 +486,13 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                 .get_node(nodeId);
             if (!nodeIdsMap[nodeId]) {
                 nodeIdsMap[nodeId] = 1;
-                if (onlyIds) {
-                    nodes.push(node.id);
-                } else {
-                    nodes.push(node);
+                if (nodeId != parentNodeId) {
+                    if (onlyIds) {
+                        nodes.push(node.id);
+                    } else {
+                        nodes.push(node);
+                    }
                 }
-
                 // Attempt to traverse if the node has children
                 if (node.children) {
                     node.children.forEach(function (child) {
@@ -484,12 +501,17 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                 }
             }
         };
-        recurse(nodeId);
+        recurse(parentNodeId);
 
         return nodes;
     };
     self.openNodeDescendants = function (jstreeDiv, nodeId, depth) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
+        $("#" + (jstreeDiv || self.jstreeDiv))
+            .jstree()
+            .open_node(nodeId);
         var descendants = JstreeWidget.getNodeDescendants(jstreeDiv || self.jstreeDiv, nodeId, depth);
         $("#" + (jstreeDiv || self.jstreeDiv))
             .jstree()
@@ -497,7 +519,9 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     };
 
     self.setTreeParentDivDimensions = function (jstreeDiv) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         var parentDiv = $("#" + jstreeDiv).parent();
         if (!parentDiv) {
             // || parentDiv.width)
@@ -537,7 +561,9 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         return;
     };
     self.onAllTreeCbxChange = function (allCBX, jstreeDiv) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         var checked = $(allCBX).prop("checked");
         if (checked) {
             $("#" + jstreeDiv)
@@ -550,13 +576,17 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
     self.checkAll = function (jstreeDiv) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         $("#" + jstreeDiv)
             .jstree()
             .check_all();
     };
     self.openNode = function (jstreeDiv, nodeId) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         $("#" + jstreeDiv)
             .jstree()
             .open_node(nodeId);
@@ -629,7 +659,9 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     };
 
     self.orderJstreeDataForCreation = function (jstreeDiv, JstreeData) {
-        if (!jstreeDiv) jstreeDiv = self.jstreeDiv;
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
         var length = JstreeData.length;
         var n = 0;
         while (n < length) {

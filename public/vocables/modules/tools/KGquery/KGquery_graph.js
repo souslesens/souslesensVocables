@@ -279,6 +279,8 @@ var KGquery_graph = (function () {
         if (imports) {
             sources = sources.concat(imports);
         }
+
+        self.saveVisjsModelGraph();
         var visjsData = { nodes: [], edges: [] };
         var uniqueNodes = {};
         self.KGqueryGraph = new VisjsGraphClass("KGquery_graphDiv", { nodes: [], edges: [] }, self.visjsOptions);

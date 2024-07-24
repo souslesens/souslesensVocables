@@ -1,69 +1,105 @@
-import Axioms_editor from "./axioms_editor.js";
+import Axiom_editor from "./axiom_editor.js";
 
 var Axioms_suggestions = (function () {
     var self = {};
 
-    self.getManchesterParserSuggestions = function (selectedObject, callback) {
+    self.getValidResourceTypes = function (selectedObject, allClasses, allObjectProperties, callback) {
+        self.currentObject = selectedObject;
+        var selectClasses = allClasses;
+        var selectProperties = allObjectProperties;
+        var keywordSuggestions = [];
+
+        //call sever for Manchester suggestions
+        var axiomText = Axiom_editor.getAxiomText() + " ";
+        var selectedLabel = selectedObject.label;
+        if (selectedObject.resourceType == "Class") {
+            selectedLabel = "_" + selectedLabel;
+        }
+        axiomText += selectedLabel + " ";
+
+        var options = {};
+        const params = new URLSearchParams({
+            source: Axiom_editor.currentSource,
+            lastToken: axiomText,
+            options: JSON.stringify(options),
+        });
+
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/axioms/suggestion?" + params.toString(),
+            dataType: "json",
+
+            success: function (data, _textStatus, _jqXHR) {
+                data.forEach(function (item) {
+                    if (item.match(/^_$/g)) {
+                        // remove _ and replace by Classes
+                        selectClasses = true;
+                        return;
+                    } else if (item.match(/^[A-z]$/g)) {
+                        // remove alphabetic letters and replace by ObjectProperties
+                        if (selectedObject.id != "some" && selectedObject.id != "only") {
+                            selectProperties = true;
+                        }
+                        return;
+                    } else {
+                        keywordSuggestions.push({ id: item, label: item });
+                    }
+                });
+
+                callback(null, {
+                    selectClasses: selectClasses,
+                    selectProperties: selectProperties,
+                    keywordSuggestions: keywordSuggestions,
+                });
+            },
+            error(err) {
+                callback(err.responseText);
+            },
+        });
+    };
+
+    self.getManchesterParserSuggestions = function (selectedObject, allClasses, allObjectProperties, callback) {
+        self.currentObject = selectedObject;
         var allSuggestions = [];
         var keywordSuggestions = [];
-        var selectClasses = false;
-        var selectProperties = false;
+        var selectClasses = allClasses;
+        var selectProperties = allObjectProperties;
         async.series(
             [
                 function (callbackSeries) {
-                    //call sever for Manchester suggestions
-                    var axiomText = Axioms_editor.getAxiomText() + " ";
-                    var selectedLabel = selectedObject.label;
-                    if (selectedObject.resourceType == "Class") {
-                        selectedLabel = "_" + selectedLabel;
-                    }
-                    axiomText += selectedLabel + " ";
-                    console.log(axiomText);
+                    self.getValidResourceTypes(selectedObject, allClasses, allObjectProperties, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err.responseText);
+                        }
+                        selectClasses = result.selectClasses;
+                        selectProperties = result.selectProperties;
+                        keywordSuggestions = result.keywordSuggestions;
 
-                    var options = {};
-                    const params = new URLSearchParams({
-                        source: Axioms_editor.currentSource,
-                        lastToken: axiomText,
-                        options: JSON.stringify(options),
-                    });
-
-                    $.ajax({
-                        type: "GET",
-                        url: Config.apiUrl + "/axioms/suggestion?" + params.toString(),
-                        dataType: "json",
-
-                        success: function (data, _textStatus, _jqXHR) {
-                            data.forEach(function (item) {
-                                if (item.match(/^_$/g)) {
-                                    // remove _ and replace by Classes
-                                    selectClasses = true;
-                                    return;
-                                } else if (item.match(/^[A-z]$/g)) {
-                                    // remove alphabetic letters and replace by ObjectProperties
-                                    selectProperties = true;
-                                    return;
-                                } else {
-                                    keywordSuggestions.push({ id: item, label: item });
-                                }
-                            });
-
-                            callbackSeries();
-                        },
-                        error(err) {
-                            callbackSeries(err.responseText);
-                        },
+                        callbackSeries();
                     });
                 },
 
                 function (callbackSeries) {
                     //get  properties for current class (properties withe domain this class)
-                    if (!selectClasses) {
+                    if (!selectProperties) {
                         return callbackSeries();
                     }
-                    var classId = Axioms_editor.axiomContext.classes[Axioms_editor.axiomContext.currentClassIndex];
+                    var index = Math.max(Axiom_editor.axiomContext.currentClassIndex, 0);
+                    var classId = Axiom_editor.axiomContext.classes[index];
+                    if (!classId || allObjectProperties) {
+                        var props = [];
+                        Axiom_editor.getAllProperties().forEach(function (item) {
+                            if (item.resourceType == "ObjectProperty") {
+                                props.push(item);
+                            }
+                        });
+                        allSuggestions = allSuggestions.concat(props);
+
+                        return callbackSeries();
+                    }
                     self.getValidPropertiesForClass(classId, function (err, result) {
                         if (err) {
-                            return callback(err);
+                            return callbackSeries(err);
                         }
                         allSuggestions = allSuggestions.concat(result);
 
@@ -72,13 +108,27 @@ var Axioms_suggestions = (function () {
                 },
                 function (callbackSeries) {
                     ////get  classes for current property (classes wich are   range of the current property)
-                    if (!selectProperties) {
+                    if (!selectClasses) {
                         return callbackSeries();
                     }
-                    var propId = Axioms_editor.axiomContext.properties[Axioms_editor.axiomContext.currentPropertyIndex];
+                    var index = Math.max(Axiom_editor.axiomContext.currentPropertyIndex, 0);
+                    var propId = Axiom_editor.axiomContext.properties[index];
+
+                    if (!propId || allClasses) {
+                        var classes = [];
+                        Axiom_editor.getAllClasses().forEach(function (item) {
+                            if (item.resourceType == "Class") {
+                                classes.push(item);
+                            }
+                        });
+                        allSuggestions = allSuggestions.concat(classes);
+
+                        return callbackSeries();
+                    }
+
                     self.getValidClassesForProperty(propId, function (err, result) {
                         if (err) {
-                            return callback(err);
+                            return callbackSeries(err);
                         }
                         allSuggestions = allSuggestions.concat(result);
                         callbackSeries();
@@ -87,6 +137,9 @@ var Axioms_suggestions = (function () {
             ],
             function (err) {
                 allSuggestions = keywordSuggestions.concat(allSuggestions);
+                allSuggestions.selectClasses = selectClasses;
+                allSuggestions.selectProperties = selectProperties;
+
                 return callback(err, allSuggestions);
             }
         );
@@ -98,8 +151,10 @@ var Axioms_suggestions = (function () {
      * @param callback
      */
     self.getValidClassesForProperty = function (propId, callback) {
-        if (!propId) return callback(null, []);
-        OntologyModels.getPropertyDomainsAndRanges(Axioms_editor.currentSource, propId, "range", function (err, result) {
+        if (!propId) {
+            return callback(null, []);
+        }
+        OntologyModels.getPropertyDomainsAndRanges(Axiom_editor.currentSource, propId, "range", function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -117,13 +172,18 @@ var Axioms_suggestions = (function () {
     };
 
     self.getValidPropertiesForClass = function (classId, callback) {
-        if (!classId) return callback(null, []);
-        OntologyModels.getAllowedPropertiesBetweenNodes(Axioms_editor.currentSource, classId, null, { keepSuperClasses: 0 }, function (err, result) {
+        if (!classId) {
+            return callback(null, []);
+        }
+
+        OntologyModels.getAllowedPropertiesBetweenNodes(Axiom_editor.currentSource, classId, null, { keepSuperClasses: true }, function (err, result) {
             if (err) {
                 return callback(err);
             }
+
             var role = "domain";
             var data = [];
+
             for (var prop in result.constraints) {
                 if (role == "both") {
                     for (var prop in result.constraints.both) {
@@ -153,6 +213,7 @@ var Axioms_suggestions = (function () {
                     }
                 }
             }
+            data = common.array.distinctValues(data, "id");
             data = common.array.sort(data, "label");
             return callback(null, data);
         });

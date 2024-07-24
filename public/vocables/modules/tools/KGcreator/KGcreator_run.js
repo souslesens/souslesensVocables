@@ -202,24 +202,19 @@ var KGcreator_run = (function () {
             }
             return;
         }
-        const payload = { graphUri: mappings.graphUri };
-        $.ajax({
-            type: "POST",
-            url: `${Config.apiUrl}/kg/clearGraph`,
-            data: payload,
-            dataType: "json",
-            success: function (_result, _textStatus, _jqXHR) {
+
+        Sparql_OWL.clearGraph(mappings.graphUri, function (err, result) {
+            if (err) {
+                if (callback) {
+                    return callback(err);
+                }
+                return alert(err);
+            } else {
                 if (callback) {
                     return callback();
                 }
                 return MainController.UI.message("graph deleted " + mappings.graphUri);
-            },
-            error(err) {
-                if (callback) {
-                    return callback(err);
-                }
-                return MainController.UI.message(err);
-            },
+            }
         });
     };
 

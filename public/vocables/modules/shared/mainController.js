@@ -154,6 +154,9 @@ var MainController = (function () {
                         if (paramsMap.sourcesFile) {
                             Config.currentProfile.sourcesFile = paramsMap.sourcesFile;
                         }
+                        if (paramsMap.tool && paramsMap.source) {
+                            Config.userTools[paramsMap.tool].urlParam_source = paramsMap.source;
+                        }
                         callbackSeries();
                     },
 

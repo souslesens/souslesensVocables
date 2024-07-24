@@ -97,6 +97,7 @@ var KGquery_filter = (function () {
         };
         JstreeWidget.loadJsTree(null, jstreeData, jstreeOptions, function () {
             JstreeWidget.openNodeDescendants(null, "root");
+
             if (queryNonObjectProperties.length < KGquery.maxOptionalPredicatesInQuery) {
                 JstreeWidget.checkAll();
             } else {

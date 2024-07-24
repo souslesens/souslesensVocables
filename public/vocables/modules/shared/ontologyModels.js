@@ -725,7 +725,7 @@ var OntologyModels = (function () {
                         }
 
                         //merge constraints( range/domain) and restrictions
-                        var sourceConstraintsAndRestrictions = Config.ontologiesVocabularyModels[_source].restrictions;
+                        var sourceConstraintsAndRestrictions = {}; // Config.ontologiesVocabularyModels[_source].restrictions;
                         for (var prop in Config.ontologiesVocabularyModels[_source].constraints) {
                             var constraint = Config.ontologiesVocabularyModels[_source].constraints[prop];
                             if (!sourceConstraintsAndRestrictions[prop]) {
@@ -736,6 +736,9 @@ var OntologyModels = (function () {
                         }
 
                         for (var property in sourceConstraintsAndRestrictions) {
+                            if (property == "http://purl.obolibrary.org/obo/BFO_0000110") {
+                                var x = 3;
+                            }
                             sourceConstraintsAndRestrictions[property].forEach(function (constraint) {
                                 constraint.source = _source;
                                 var domainOK = false;
@@ -749,7 +752,9 @@ var OntologyModels = (function () {
                                             startNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class"
                                         ) {
                                             if (!constraint.range || constraint.range.indexOf("http") < 0 || endNodeIds.length == 0) {
-                                                if (propertiesMatchingStartNode.indexOf(property) < 0) propertiesMatchingStartNode.push(property);
+                                                if (propertiesMatchingStartNode.indexOf(property) < 0) {
+                                                    propertiesMatchingStartNode.push(property);
+                                                }
                                             } else {
                                                 domainOK = true;
                                             }
@@ -758,16 +763,22 @@ var OntologyModels = (function () {
                                     if (constraint.range && constraint.range.startsWith("http")) {
                                         if (endNodeAncestorIds.length == 0 || endNodeAncestorIds.indexOf(constraint.range) > -1 || endNodeAncestorIds[0] == "http://www.w3.org/2002/07/owl#Class") {
                                             if (domainOK) {
-                                                if (propertiesMatchingBoth.indexOf(property) < 0) propertiesMatchingBoth.push(property);
+                                                if (propertiesMatchingBoth.indexOf(property) < 0) {
+                                                    propertiesMatchingBoth.push(property);
+                                                }
                                             } else {
                                                 if (!constraint.domain || constraint.domain.indexOf("http") < 0) {
-                                                    if (propertiesMatchingEndNode.indexOf(property) < 0) propertiesMatchingEndNode.push(property);
+                                                    if (propertiesMatchingEndNode.indexOf(property) < 0) {
+                                                        propertiesMatchingEndNode.push(property);
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                     if (!constraint.domain && !constraint.range) {
-                                        if (noConstaintsArray.indexOf(property) < 0) noConstaintsArray.push(property);
+                                        if (noConstaintsArray.indexOf(property) < 0) {
+                                            noConstaintsArray.push(property);
+                                        }
                                     }
                                 }
                             });
@@ -777,21 +788,21 @@ var OntologyModels = (function () {
                     callbackSeries();
                 },
 
-                //remove matching superproperties if any in prop
+                //remove matching superproperties if any in prop if !keepSuperClasses
                 function (callbackSeries) {
                     var propsToRemove = [];
 
                     if (!options.keepSuperClasses) {
                         function recurse(propId) {
+                            if (propId == "http://purl.obolibrary.org/obo/BFO_0000110") {
+                                var x = 3;
+                            }
                             if (allConstraints[propId]) {
                                 var superProp = allConstraints[propId].superProp;
 
                                 if (superProp) {
-                                    if (propId == "http://purl.obolibrary.org/obo/BFO_0000111") var x = 4;
                                     if (allConstraints[propId]) {
                                         // if prop has constraints remove all valide superProps
-                                        if (superProp == "http://purl.obolibrary.org/obo/BFO_0000110") var x = 3;
-                                        if (superProp == "http://purl.obolibrary.org/obo/BFO_0000111") var x = 4;
                                         propsToRemove.push(superProp);
                                     } else {
                                         if (validProperties.indexOf(superProp) > -1) {
@@ -824,7 +835,9 @@ var OntologyModels = (function () {
                         }
                     });
                     propertiesMatchingStartNode.forEach(function (propId) {
-                        if (propId == "http://purl.obolibrary.org/obo/BFO_0000111") var x = 4;
+                        if (propId == "http://purl.obolibrary.org/obo/BFO_0000111") {
+                            var x = 4;
+                        }
                         if (propsToRemove.indexOf(propId) < 0) {
                             validConstraints["domain"][propId] = allConstraints[propId];
                         }

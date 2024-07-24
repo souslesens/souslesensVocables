@@ -67,7 +67,7 @@ var KGquery_nodeSelector = (function () {
     };
 
     self.onSelectNode = function (node) {
-        var targetNodes = KGquery_paths.getNodeLinkedNodes(node.id);
+        var targetNodes = KGquery_paths.getNodeLinkedNodes(node.id, 3);
         self.alowedNodes = targetNodes; //self.alowedNodes.concat(targetNodes)
         var allowedJstreeData = [];
         self.jstreeData.forEach(function (item) {

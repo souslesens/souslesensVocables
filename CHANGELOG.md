@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.80.0](https://github.com/souslesens/souslesensVocables/compare/1.79.0...1.80.0) (2024-07-24)
+
+
+### Bug Fixes
+
+* **model/databases:** use one connection when batchSelect ([4ebb4e4](https://github.com/souslesens/souslesensVocables/commit/4ebb4e4ea2133387fa16a79ad366b791f741b379))
+* **model/tools:** only retrieve plugins directory when using git repo ([ca629d9](https://github.com/souslesens/souslesensVocables/commit/ca629d90e99f260ca7f40c88e3cec9e424dba6ab))
+
 ## [1.79.0](https://github.com/souslesens/souslesensVocables/compare/1.78.2...1.79.0) (2024-07-19)
 
 

@@ -91,6 +91,15 @@ if (!fs.existsSync(sourcesPath)) {
     });
 }
 
+// config/pluginsConfig.json
+const pluginConfigsPath = "config/pluginsConfig.json";
+const pluginConfigsTemplatePath = "config_templates/pluginsConfig.json.default";
+if (!fs.existsSync(pluginConfigsPath)) {
+    fs.readFile(pluginConfigsTemplatePath, (_err, data) => {
+        fs.writeFileSync(pluginConfigsPath, JSON.stringify(JSON.parse(data), null, 2));
+    });
+}
+
 const convertDotPathToNestedObject = (path, value) => {
     const [last, ...paths] = path.split("__").reverse();
     return paths.reduce((acc, el) => ({ [el]: acc }), { [last]: value });

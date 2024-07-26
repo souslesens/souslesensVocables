@@ -656,12 +656,6 @@ const Axiom_editor = (function () {
         Export.showDataTable(divId, tableCols, tableData, null, { paging: true }, function (err, datatable) {});
     };
 
-
-
-
-
-
-
     return self;
 })();
 

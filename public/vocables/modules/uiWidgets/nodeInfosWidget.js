@@ -13,15 +13,16 @@ import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_cr
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
 import ResponsiveUI from "../../responsive/responsiveUI.js";
+import Axioms_manager from "../tools/axioms/axioms_manager.js";
 
-var NodeInfosWidget = (function () {
+var NodeInfosWidget = (function() {
     var self = {};
 
-    self.initDialog = function (sourceLabel, divId, options, callback) {
+    self.initDialog = function(sourceLabel, divId, options, callback) {
         ResponsiveUI.openDialogDiv(divId);
         $("#" + divId)
             .parent()
-            .show("fast", function () {
+            .show("fast", function() {
                 self.oldNodeInfosInit(sourceLabel, divId, options, callback);
                 $("#addPredicateButton").remove();
                 $("#deleteButton").remove();
@@ -29,30 +30,31 @@ var NodeInfosWidget = (function () {
 
         //$(".ui-dialog-title")
     };
-    self.oldNodeInfosInit = function (sourceLabel, divId, options, callback) {
+    self.oldNodeInfosInit = function(sourceLabel, divId, options, callback) {
         self.currentSource = sourceLabel;
         if (!options.noDialog) {
             $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
             $("#" + divId).dialog("open");
             $("#" + divId).dialog({
-                close: function (event, ui) {
+                close: function(event, ui) {
                     window.scrollTo(0, 0);
                     $("#addPredicateButton").remove();
                     $("#deleteButton").remove();
-                },
+                }
             });
             //$("#mainDialogDiv").parent().css("top", "20px");
             //$("#mainDialogDiv").parent().css("left", "20px");
         }
-        $("#" + divId).load("snippets/nodeInfosWidget.html", function () {
+        $("#" + divId).load("snippets/nodeInfosWidget.html", function() {
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
 
-                load: function (event, ui) {},
-                activate: function (event, ui) {
+                load: function(event, ui) {
+                },
+                activate: function(event, ui) {
                     $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
 
-                    setTimeout(function () {
+                    setTimeout(function() {
                         $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                         if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                             var source = self.currentSource;
@@ -60,19 +62,19 @@ var NodeInfosWidget = (function () {
                             Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
                         }
                     }, 100);
-                },
+                }
             });
             $("#axiomsDrawGraphDiv").dialog({
                 autoOpen: false,
                 height: 800,
                 width: 1000,
-                modal: false,
+                modal: false
             });
             $("#axioms_dialogDiv").dialog({
                 autoOpen: false,
                 height: 800,
                 width: 1000,
-                modal: false,
+                modal: false
             });
             $(".nodeInfosWidget_tabDiv").css("margin", "0px");
             $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
@@ -80,7 +82,7 @@ var NodeInfosWidget = (function () {
         });
     };
 
-    self.showNodeInfos = function (sourceLabel, node, divId, options, callback) {
+    self.showNodeInfos = function(sourceLabel, node, divId, options, callback) {
         self.currentNodeIdInfosSource = sourceLabel;
         self.currentNodeIdInfosDivId = divId;
 
@@ -144,9 +146,9 @@ var NodeInfosWidget = (function () {
             self.visitedNodes.currentIndex = index;
         }
 
-        self.initDialog(sourceLabel, divId, options, function () {
+        self.initDialog(sourceLabel, divId, options, function() {
             if (true || !options.showAxioms) {
-                self.drawAllInfos(sourceLabel, nodeId, options, function (err, result) {
+                self.drawAllInfos(sourceLabel, nodeId, options, function(err, result) {
                     if (callback) {
                         callback(err);
                     }
@@ -163,12 +165,12 @@ var NodeInfosWidget = (function () {
         });
     };
 
-    self.drawAllInfos = function (sourceLabel, nodeId, options, callback) {
+    self.drawAllInfos = function(sourceLabel, nodeId, options, callback) {
         var types;
         async.series(
             [
-                function (callbackSeries) {
-                    self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (err, result) {
+                function(callbackSeries) {
+                    self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function(err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -177,7 +179,7 @@ var NodeInfosWidget = (function () {
                     });
                 },
 
-                function (callbackSeries) {
+                function(callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
                         $("#nodeInfos_individualsDiv").hide();
                         return callbackSeries();
@@ -187,50 +189,57 @@ var NodeInfosWidget = (function () {
                     $("#nodeInfos_individualsDiv").html(html);
                     callbackSeries();
                 },
-                function (callbackSeries) {
+                function(callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
                         return callbackSeries();
                     }
-                    self.showClassRestrictions(self.currentNodeRealSource, [nodeId], options, function (err) {
+                    self.showClassRestrictions(self.currentNodeRealSource, [nodeId], options, function(err) {
                         callbackSeries(err);
                     });
                 },
 
-                function (callbackSeries) {
+                function(callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
                         return callbackSeries();
                     }
 
-                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfos_restrictionsDiv", function (_err, _result) {
+                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfos_restrictionsDiv", function(_err, _result) {
                         callbackSeries(_err);
                     });
                 },
-                function (callbackSeries) {
+                function(callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
                         return callbackSeries();
                     }
-                    self.showAssociatedProperties(self.currentNodeRealSource, nodeId, "nodeInfos_associatedPropertiesDiv", function (err) {
+                    self.showAssociatedProperties(self.currentNodeRealSource, nodeId, "nodeInfos_associatedPropertiesDiv", function(err) {
                         callbackSeries(err);
                     });
                 },
-                function (callbackSeries) {
+                function(callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
                         return callbackSeries();
                     }
-                    self.showClassesBreakDown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function (err) {
+                    self.showClassesBreakDown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function(err) {
                         callbackSeries(err);
                     });
                 },
-                function (callbackSeries) {
+                function(callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
                         return callbackSeries();
                     }
-                    self.showPropBreakdown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function (err) {
+                    self.showPropBreakdown(self.currentNodeRealSource, nodeId, "nodeInfos_classHierarchyDiv", function(err) {
                         callbackSeries(err);
                     });
                 },
+                function(callbackSeries) {
+                    self.showAxiomsList(self.currentNodeRealSource, nodeId,  function(err) {
+                        callbackSeries(err);
+                    });
+                }
+
+
             ],
-            function (err) {
+            function(err) {
                 if (callback) {
                     callback(err);
                 }
@@ -241,7 +250,7 @@ var NodeInfosWidget = (function () {
         );
     };
 
-    self.showNodeInfosToolbar = function (options) {
+    self.showNodeInfosToolbar = function(options) {
         if (!options) {
             options = {};
         }
@@ -274,21 +283,21 @@ var NodeInfosWidget = (function () {
         $("#" + self.currentNodeIdInfosDivId).prepend(str);
 
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
-            PredicatesSelectorWidget.load("sourceBrowser_addPropertyDiv", self.currentSource, {}, function () {
+            PredicatesSelectorWidget.load("sourceBrowser_addPropertyDiv", self.currentSource, {}, function() {
                 //$("#editPredicate_controlsDiv").css("display", "block");
                 $("#sourceBrowser_addPropertyDiv").css("display", "none");
             });
         }
     };
 
-    self.configureEditPredicateWidget = function () {
+    self.configureEditPredicateWidget = function() {
         $("#editPredicate_savePredicateButton").off("click");
-        $("#editPredicate_savePredicateButton").click(function () {
+        $("#editPredicate_savePredicateButton").click(function() {
             self.addPredicate();
         });
     };
 
-    self.drawCommonInfos = function (sourceLabel, nodeId, divId, _options, callback) {
+    self.drawCommonInfos = function(sourceLabel, nodeId, divId, _options, callback) {
         if (!_options) {
             _options = {};
         }
@@ -301,9 +310,9 @@ var NodeInfosWidget = (function () {
             nodeId,
             {
                 getValuesLabels: true,
-                selectGraph: true,
+                selectGraph: true
             },
-            function (err, data) {
+            function(err, data) {
                 if (err) {
                     MainController.UI.message(err.responseText);
                     if (callback) {
@@ -316,7 +325,7 @@ var NodeInfosWidget = (function () {
                     }
                 }
                 if (divId.indexOf("Dialog") > -1) {
-                    $("#" + divId).on("dialogbeforeclose", function (_event, _ui) {
+                    $("#" + divId).on("dialogbeforeclose", function(_event, _ui) {
                         self.indexObjectIfNew();
                     });
                 }
@@ -324,7 +333,7 @@ var NodeInfosWidget = (function () {
                 var types = [];
                 var graphUri = "";
                 var uniqueTriples = {};
-                data.forEach(function (item) {
+                data.forEach(function(item) {
                     var key;
                     if (item.objectValue) {
                         var value = item.objectValue.value.replace(/T[\d:]*Z/, "");
@@ -375,7 +384,7 @@ value = item.valueLabel.value;*/
                         self.propertiesMap.properties[propName] = {
                             name: propName,
                             propUri: item.prop.value,
-                            langValues: {},
+                            langValues: {}
                         };
                     }
                     var predicateId = common.getRandomHexaId(5);
@@ -408,7 +417,7 @@ value = item.valueLabel.value;*/
                     "http://www.w3.org/2004/02/skos/core#narrower",
                     "http://www.w3.org/2004/02/skos/core#related",
                     "http://www.w3.org/2004/02/skos/core#exactMatch",
-                    "http://www.w3.org/2004/02/skos/core#closeMatch",
+                    "http://www.w3.org/2004/02/skos/core#closeMatch"
                     //  "http://www.w3.org/2004/02/skos/core#sameAs"
                 ];
 
@@ -463,7 +472,7 @@ defaultLang = 'en';*/
                     return optionalStr;
                 }
 
-                defaultProps.forEach(function (key) {
+                defaultProps.forEach(function(key) {
                     if (!self.propertiesMap.properties[key]) {
                         return;
                     }
@@ -484,7 +493,7 @@ defaultLang = 'en';*/
                             "</td>";
                         var valuesStr = "";
 
-                        values.forEach(function (valueObj, index) {
+                        values.forEach(function(valueObj, index) {
                             var value = valueObj.value;
 
                             var predicateId = valueObj.predicateId;
@@ -519,7 +528,7 @@ defaultLang = 'en';*/
                             }
                             propNameSelect += "<option " + selected + ">" + lang + "</option> ";
                             var valuesStr = "";
-                            values.forEach(function (valueObject, index) {
+                            values.forEach(function(valueObject, index) {
                                 var optionalStr = getOptionalStr(key, valueObject.predicateId);
                                 var value = valueObject.value;
                                 if (value.indexOf("http") == 0) {
@@ -579,20 +588,20 @@ defaultLang = 'en';*/
         );
     };
 
-    self.showClassRestrictions = function (sourceLabel, nodeId, _options, callback) {
+    self.showClassRestrictions = function(sourceLabel, nodeId, _options, callback) {
         // blankNodes.
         var str = "";
         async.series(
             [
                 //direct restrictions
-                function (callbackSeries) {
-                    Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, { withoutBlankNodes: 1 }, function (err, result) {
+                function(callbackSeries) {
+                    Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, { withoutBlankNodes: 1 }, function(err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
                         str = "<b class='nodesInfos_titles'>Restrictions </b> <div style=''> <table style='display:table-caption'>";
 
-                        result.forEach(function (item) {
+                        result.forEach(function(item) {
                             var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
                             str += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(item.prop.value) + "' href='" + item.prop.value + "'>" + propStr + "</a>";
 
@@ -632,21 +641,21 @@ defaultLang = 'en';*/
                     });
                 },
                 //inverse restrictions
-                function (callbackSeries) {
+                function(callbackSeries) {
                     Sparql_OWL.getObjectRestrictions(
                         sourceLabel,
                         nodeId,
                         {
                             withoutBlankNodes: 1,
-                            inverseRestriction: 1,
+                            inverseRestriction: 1
                         },
-                        function (err, result) {
+                        function(err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
 
                             str += "<br><b class='nodesInfos_titles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table >";
-                            result.forEach(function (item) {
+                            result.forEach(function(item) {
                                 var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
                                 str += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(item.prop.value) + "' href='" + item.prop.value + "'>" + propStr + "</a>";
 
@@ -687,9 +696,9 @@ defaultLang = 'en';*/
                             callbackSeries();
                         }
                     );
-                },
+                }
             ],
-            function (err) {
+            function(err) {
                 if (!err) {
                     $("#nodeInfos_restrictionsDiv").html(str);
                 }
@@ -698,7 +707,7 @@ defaultLang = 'en';*/
         );
     };
 
-    self.showClassIndividuals = function (sourceLabel, nodeId, callback) {
+    self.showClassIndividuals = function(sourceLabel, nodeId, callback) {
         if (!sourceLabel) {
             sourceLabel = self.currentNodeRealSource;
         }
@@ -714,7 +723,7 @@ defaultLang = 'en';*/
         query += "  Optional {?value rdfs:label ?valueLabel}  ";
         query += "} order by ?valueLabel limit 1000 ";
         var url = sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
             if (err) {
                 return callback(err);
             }
@@ -730,7 +739,7 @@ defaultLang = 'en';*/
             } else {
                 var str = "<b>TypeOf </b><br><table>";
 
-                data.forEach(function (item) {
+                data.forEach(function(item) {
                     var label = item.valueLabel ? item.valueLabel.value : Sparql_common.getLabelFromURI(item.value.value);
                     var targetClassStr = "<span class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.value.value + "\")'>" + label + "</span>";
                     str += "<tr><td>" + targetClassStr + "</td></tr>";
@@ -744,15 +753,15 @@ defaultLang = 'en';*/
         });
     };
 
-    self.showPropertyRestrictions = function (sourceLabel, nodeId, divId, _callback) {
-        Sparql_OWL.getPropertiesRestrictionsDescription(sourceLabel, nodeId, {}, function (err, result) {
+    self.showPropertyRestrictions = function(sourceLabel, nodeId, divId, _callback) {
+        Sparql_OWL.getPropertiesRestrictionsDescription(sourceLabel, nodeId, {}, function(err, result) {
             if (err) {
                 //  alert(err.responseText);
                 return MainController.UI.message(err.responseText || err, true);
             }
 
             var str = "<b>Property restrictions</b><table>";
-            result.forEach(function (item) {
+            result.forEach(function(item) {
                 str += "<tr class='infos_table'>";
                 if (item.sourceClass) {
                     var sourceLabel = item.sourceClassLabel ? item.sourceClassLabel.value : Sparql_common.getLabelFromURI(item.sourceClass.value);
@@ -772,7 +781,7 @@ defaultLang = 'en';*/
         });
     };
 
-    self.showAssociatedProperties = function (sourceLabel, nodeId, divId, callback) {
+    self.showAssociatedProperties = function(sourceLabel, nodeId, divId, callback) {
         var ontologySourceModel = Config.ontologiesVocabularyModels[sourceLabel];
         if (ontologySourceModel) {
             var domainOfProperties = [];
@@ -790,7 +799,7 @@ defaultLang = 'en';*/
             var html = "";
             if (domainOfProperties.length > 0) {
                 html += "<b><div class='nodesInfos_titles'>Domain of</div></b>";
-                domainOfProperties.forEach(function (property) {
+                domainOfProperties.forEach(function(property) {
                     html += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a>";
                     if (property.rangeId) {
                         html += "&nbsp; <i><a style='color: #aaa' target='" + NodeInfosWidget.getUriTarget(property.rangeId) + "' href='" + property.rangeId + "'>" + property.rangeLabel + "</a></i>";
@@ -800,7 +809,7 @@ defaultLang = 'en';*/
             }
             if (rangeOfProperties.length > 0) {
                 html += "<b><div  class='nodesInfos_titles'>Range of</div></b>";
-                rangeOfProperties.forEach(function (property) {
+                rangeOfProperties.forEach(function(property) {
                     html += "  <div class='XdetailsCellValue'>";
                     if (property.domainId) {
                         html +=
@@ -819,13 +828,13 @@ defaultLang = 'en';*/
         }
     };
 
-    self.showClassesBreakDown = function (sourceLabel, nodeId, divId, callback) {
+    self.showClassesBreakDown = function(sourceLabel, nodeId, divId, callback) {
         var jstreeData = [];
         var ancestors = OntologyModels.getClassHierarchyTreeData(sourceLabel, nodeId, "ancestors");
 
         var uniqueIds = {};
         if (ancestors.length > 0) {
-            ancestors.forEach(function (item) {
+            ancestors.forEach(function(item) {
                 if (!uniqueIds[item.id]) {
                     var parent = item.superClass || "#";
                     uniqueIds[item.id] = 1;
@@ -836,12 +845,12 @@ defaultLang = 'en';*/
                         type: "Class",
                         data: {
                             id: item.id,
-                            source: sourceLabel,
-                        },
+                            source: sourceLabel
+                        }
                     });
                 }
             });
-            jstreeData.forEach(function (item) {
+            jstreeData.forEach(function(item) {
                 if (!uniqueIds[item.parent]) {
                     item.parent = "#";
                 }
@@ -854,13 +863,13 @@ defaultLang = 'en';*/
 
         var options = {
             openAll: true,
-            selectTreeNodeFn: function (event, obj) {
+            selectTreeNodeFn: function(event, obj) {
                 if (!obj.event.ctrlKey) {
                     var descendants = OntologyModels.getClassHierarchyTreeData(sourceLabel, obj.node.id, "descendants");
                     var jstreeData = [];
                     var uniqueIds = JstreeWidget.getNodeDescendants("classHierarchyTreeDiv", "#", null, true);
                     if (descendants.length > 0) {
-                        descendants.forEach(function (item) {
+                        descendants.forEach(function(item) {
                             if (!uniqueIds[item.id]) {
                                 uniqueIds[item.id] = 1;
                                 jstreeData.push({
@@ -870,12 +879,12 @@ defaultLang = 'en';*/
                                     type: "Class",
                                     data: {
                                         id: item.id,
-                                        source: sourceLabel,
-                                    },
+                                        source: sourceLabel
+                                    }
                                 });
                             }
                         });
-                        jstreeData.forEach(function (item) {
+                        jstreeData.forEach(function(item) {
                             if (!uniqueIds[item.parent]) {
                                 item.parent = "#";
                             }
@@ -885,19 +894,19 @@ defaultLang = 'en';*/
                 } else {
                     NodeInfosWidget.showNodeInfos(sourceLabel, obj.node, "mainDialogDiv");
                 }
-            },
+            }
         };
 
         JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
 
         callback();
     };
-    self.showPropBreakdown = function (sourceLabel, nodeId, divId, callback) {
+    self.showPropBreakdown = function(sourceLabel, nodeId, divId, callback) {
         var jstreeData = [];
         var ancestors = OntologyModels.getPropHierarchyTreeData(sourceLabel, nodeId, "ancestors");
         var uniqueIds = {};
         if (ancestors.length > 0) {
-            ancestors.forEach(function (item) {
+            ancestors.forEach(function(item) {
                 if (!uniqueIds[item.id]) {
                     var parent = item.superProp || "#";
                     uniqueIds[item.id] = 1;
@@ -908,12 +917,12 @@ defaultLang = 'en';*/
                         type: "Property",
                         data: {
                             id: item.id,
-                            source: sourceLabel,
-                        },
+                            source: sourceLabel
+                        }
                     });
                 }
             });
-            jstreeData.forEach(function (item) {
+            jstreeData.forEach(function(item) {
                 if (!uniqueIds[item.parent]) {
                     item.parent = "#";
                 }
@@ -925,13 +934,13 @@ defaultLang = 'en';*/
 
         var options = {
             openAll: true,
-            selectTreeNodeFn: function (event, obj) {
+            selectTreeNodeFn: function(event, obj) {
                 if (!obj.event.ctrlKey) {
                     var descendants = OntologyModels.getPropHierarchyTreeData(sourceLabel, obj.node.id, "descendants");
                     var jstreeData = [];
                     var uniqueIds = JstreeWidget.getNodeDescendants("classHierarchyTreeDiv", "#", null, true);
                     if (descendants.length > 0) {
-                        descendants.forEach(function (item) {
+                        descendants.forEach(function(item) {
                             if (!uniqueIds[item.id]) {
                                 uniqueIds[item.id] = 1;
                                 jstreeData.push({
@@ -941,12 +950,12 @@ defaultLang = 'en';*/
                                     type: "Property",
                                     data: {
                                         id: item.id,
-                                        source: sourceLabel,
-                                    },
+                                        source: sourceLabel
+                                    }
                                 });
                             }
                         });
-                        jstreeData.forEach(function (item) {
+                        jstreeData.forEach(function(item) {
                             if (!uniqueIds[item.parent]) {
                                 item.parent = "#";
                             }
@@ -957,7 +966,7 @@ defaultLang = 'en';*/
                 } else {
                     NodeInfosWidget.showNodeInfos(sourceLabel, obj.node, "mainDialogDiv");
                 }
-            },
+            }
         };
 
         JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
@@ -965,7 +974,42 @@ defaultLang = 'en';*/
         callback();
     };
 
-    self.onClickLink = function (nodeId) {
+    self.showAxiomsList = function(sourceLabel, nodeId, _callback) {
+        Axiom_manager.getClassAxioms(sourceLabel, nodeId, { getManchesterExpression: true, getTriples: true }, function(err, result) {
+
+
+        });
+
+        return;
+        Sparql_OWL.getPropertiesRestrictionsDescription(sourceLabel, nodeId, {}, function(err, result) {
+            if (err) {
+                //  alert(err.responseText);
+                return MainController.UI.message(err.responseText || err, true);
+            }
+
+            var str = "<b>Property restrictions</b><table>";
+            result.forEach(function(item) {
+                str += "<tr class='infos_table'>";
+                if (item.sourceClass) {
+                    var sourceLabel = item.sourceClassLabel ? item.sourceClassLabel.value : Sparql_common.getLabelFromURI(item.sourceClass.value);
+                    str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.sourceClass.value + "\")'>" + sourceLabel + "</td>";
+                }
+                str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.restriction.value + "\")'>" + item.restriction.value + "</td>";
+                if (item.targetClass) {
+                    var targetLabel = item.targetClassLabel ? item.targetClassLabel.value : Sparql_common.getLabelFromURI(item.targetClass.value);
+                    str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.targetClass.value + "\")'>" + targetLabel + "</td>";
+                }
+
+                str += "</tr>";
+            });
+            $("#" + divId).append(str);
+
+            return _callback();
+        });
+    };
+
+
+    self.onClickLink = function(nodeId) {
         /*  var filter=Sparql_common.setFilter("subject",[nodeId])
 Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(err, result){
 
@@ -973,14 +1017,14 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         var node = {
             data: {
                 id: nodeId,
-                source: self.currentNodeIdInfosSource,
-            },
+                source: self.currentNodeIdInfosSource
+            }
         };
 
         self.showNodeInfos(self.currentNodeIdInfosSource, node, self.currentNodeIdInfosDivId, { previousNode: true });
     };
 
-    self.showVisitedNode = function (direction) {
+    self.showVisitedNode = function(direction) {
         if (direction > 0 && self.visitedNodes.currentIndex < self.visitedNodes.length - 1) {
             self.visitedNodes.currentIndex += 1;
             self.showNodeInfos(self.currentNodeIdInfosSource, self.visitedNodes[self.visitedNodes.currentIndex], self.currentNodeIdInfosDivId);
@@ -989,7 +1033,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             self.showNodeInfos(self.currentNodeIdInfosSource, self.visitedNodes[self.visitedNodes.currentIndex], self.currentNodeIdInfosDivId);
         }
     };
-    self.addPredicate = function (property, value, source, createNewNode, callback) {
+    self.addPredicate = function(property, value, source, createNewNode, callback) {
         if (!property) {
             property = PredicatesSelectorWidget.getSelectedProperty();
         }
@@ -1014,24 +1058,25 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 triples.push({
                     subject: self.currentNodeId,
                     predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                    object: "http://www.w3.org/2002/07/owl#Class",
+                    object: "http://www.w3.org/2002/07/owl#Class"
                 });
             }
 
             triples.push({
                 subject: self.currentNodeId,
                 predicate: property,
-                object: value,
+                object: value
             });
 
-            Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, _result) {
+            Sparql_generic.insertTriples(self.currentSource, triples, {}, function(err, _result) {
                 if (err) {
                     return alert(err);
                 }
                 // store Annotator infos in source/userGraph
                 if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
                     var userGraphUri = Config.sources[self.currentSource].graphUri + authentication.currentUser.login;
-                    Sparql_generic.insertTriples(null, triples, { graphUri: userGraphUri }, function (err, _result) {});
+                    Sparql_generic.insertTriples(null, triples, { graphUri: userGraphUri }, function(err, _result) {
+                    });
                 }
 
                 self.isModified = true;
@@ -1041,7 +1086,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 self.newProperties[property] = value;
 
                 // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
-                self.drawAllInfos(self.currentSource, self.currentNode.data.id, {}, function (err, result) {
+                self.drawAllInfos(self.currentSource, self.currentNode.data.id, {}, function(err, result) {
                     //  self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.push({
@@ -1053,8 +1098,8 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                             data: {
                                 id: self.currentNodeId,
                                 label: value,
-                                source: self.currentSource,
-                            },
+                                source: self.currentSource
+                            }
                         });
                     }
                     if (callback) {
@@ -1068,7 +1113,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         }
     };
 
-    self.deletePredicate = function (predicateId) {
+    self.deletePredicate = function(predicateId) {
         var currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         var property = currentEditingItem.item.prop.value;
         if (confirm("delete predicate")) {
@@ -1076,14 +1121,14 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
             async.series(
                 [
-                    function (callbackSeries) {
+                    function(callbackSeries) {
                         var object = currentEditingItem.item.value.value;
                         if (currentEditingItem.item.value.type == "literal") {
                             object = { isString: true, value: currentEditingItem.item.value.value, lang: currentEditingItem.item.value["xml:lang"] };
                             /*   if(currentEditingItem.item.value["xml:lang"])
 object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         }
-                        Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, currentEditingItem.item.prop.value, object, function (err, _result) {
+                        Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, currentEditingItem.item.prop.value, object, function(err, _result) {
                             if (err) {
                                 return alert(err);
                             }
@@ -1093,10 +1138,10 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     },
 
                     // when date cannot set the correct value in the triple filter
-                    function (callbackSeries) {
+                    function(callbackSeries) {
                         if (result[0]["callret-0"].value.indexOf(" 0 triples -- nothing to do") > -1) {
                             if (confirm("delete all predicates having  this subject with property " + property + "?")) {
-                                Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, null, function (err, _result) {
+                                Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, null, function(err, _result) {
                                     return callbackSeries(err);
                                 });
                             } else {
@@ -1105,9 +1150,9 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         } else {
                             return callbackSeries();
                         }
-                    },
+                    }
                 ],
-                function (err) {
+                function(err) {
                     if (err) {
                         return alert(err);
                     }
@@ -1124,17 +1169,17 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
     };
 
-    self.deleteNode = function () {
+    self.deleteNode = function() {
         if (confirm("delete node " + self.currentNodeId)) {
             async.series(
                 [
                     // Update cache when it's a property
-                    function (callbackSeries) {
+                    function(callbackSeries) {
                         if (Config.ontologiesVocabularyModels[self.currentNode.data.source]["properties"][self.currentNodeId]) {
                             var data = {};
                             data["constraints"] = [self.currentNodeId];
                             data["properties"] = [self.currentNodeId];
-                            OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
+                            OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function(err, result2) {
                                 callbackSeries(err);
                             });
                         } else {
@@ -1142,26 +1187,26 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         }
                     },
                     //delete triples where id is subject
-                    function (callbackSeries) {
-                        Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function (err, _result) {
+                    function(callbackSeries) {
+                        Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function(err, _result) {
                             return callbackSeries(err);
                         });
                     },
                     //delete triples where id is object
-                    function (callbackSeries) {
-                        Sparql_generic.deleteTriples(self.currentSource, null, null, self.currentNodeId, function (err, _result) {
+                    function(callbackSeries) {
+                        Sparql_generic.deleteTriples(self.currentSource, null, null, self.currentNodeId, function(err, _result) {
                             return callbackSeries(err);
                         });
                     },
                     //delete index entry
-                    function (callbackSeries) {
-                        ElasticSearchProxy.deleteDocuments(self.currentNode.data.source, [self.currentNodeId], {}, function (err, result) {
+                    function(callbackSeries) {
+                        ElasticSearchProxy.deleteDocuments(self.currentNode.data.source, [self.currentNodeId], {}, function(err, result) {
                             return callbackSeries(err);
                         });
                     },
 
                     //update trees
-                    function (callbackSeries) {
+                    function(callbackSeries) {
                         if (self.currentNode.from || self.currentNode.data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") {
                             var jstreeNode = JstreeWidget.getNodeByDataField("Lineage_propertiesTree", "id", self.currentNodeId);
                             if (jstreeNode) {
@@ -1176,19 +1221,19 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         return callbackSeries();
                     },
                     //update graph
-                    function (callbackSeries) {
+                    function(callbackSeries) {
                         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                             Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(self.currentNodeId);
                         }
                         return callbackSeries();
                     },
                     //synchronize OntologyModels
-                    function (callbackSeries) {
+                    function(callbackSeries) {
                         //  OntologyModels.
                         return callbackSeries(); // TO DO
-                    },
+                    }
                 ],
-                function (err) {
+                function(err) {
                     if (err) {
                         return alert(err);
                     }
@@ -1199,7 +1244,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
     };
 
-    self.indexObjectIfNew = function () {
+    self.indexObjectIfNew = function() {
         if (self.newProperties && (self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"] || self.newProperties["rdfs:label"])) {
             if (self.currentNode && self.currentNode.from) {
                 var data = [];
@@ -1207,14 +1252,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     data.push({ id: id, label: self.newProperties[id], type: "property", owltype: "ObjectProperty" });
                 }
 
-                SearchUtil.addPropertiesToIndex(self.currentSource, data, function (err, _result) {
+                SearchUtil.addPropertiesToIndex(self.currentSource, data, function(err, _result) {
                     if (err) {
                         return alert(err);
                     }
                 });
             }
 
-            SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function (err, _result) {
+            SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function(err, _result) {
                 if (err) {
                     return alert(err);
                 }
@@ -1222,7 +1267,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
     };
 
-    self.getUriTarget = function (nodeId) {
+    self.getUriTarget = function(nodeId) {
         /* var target = "_blank";
         if (self.isSLSVvisibleUri(nodeId)) {
             target = "_slsvCallback";
@@ -1230,7 +1275,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         return "_slsvCallback";
     };
 
-    self.updatePredicateValue = function () {
+    self.updatePredicateValue = function() {
         if (!self.currentEditingItem) {
             return;
         }
@@ -1243,11 +1288,11 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         if (self.currentEditingItem.item.value.type == "literal") {
             oldValue = { isString: true, value: oldValue };
         }
-        Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, self.currentEditingItem.item.prop.value, oldValue, function (err, _result) {
+        Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, self.currentEditingItem.item.prop.value, oldValue, function(err, _result) {
             if (err) {
                 return alert(err);
             }
-            self.addPredicate(self.currentEditingItem.item.prop.value, newValue, self.currentSource, false, function (err, result) {
+            self.addPredicate(self.currentEditingItem.item.prop.value, newValue, self.currentSource, false, function(err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
@@ -1273,14 +1318,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             });
         });
     };
-    self.showModifyPredicateDialog = function (predicateId) {
+    self.showModifyPredicateDialog = function(predicateId) {
         PredicatesSelectorWidget.currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         if (!PredicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
-        PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
-            $("#editPredicate_savePredicateButton").click(function () {
-                self.addPredicate(null, null, null, null, function () {
+        PredicatesSelectorWidget.init(Lineage_sources.activeSource, function() {
+            $("#editPredicate_savePredicateButton").click(function() {
+                self.addPredicate(null, null, null, null, function() {
                     self.deletePredicate(predicateId);
                 });
             });
@@ -1294,17 +1339,17 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         $("#editPredicate_objectValue").focus();
     };
 
-    self.hideAddPredicateDiv = function () {
+    self.hideAddPredicateDiv = function() {
         $("#sourceBrowser_addPropertyDiv").css("display", "none");
     };
 
-    self.copyUri = function (text, caller) {
-        common.copyTextToClipboard(text, function () {
+    self.copyUri = function(text, caller) {
+        common.copyTextToClipboard(text, function() {
             caller.css("border-width", "3px");
         });
     };
 
-    self.onNodeDetailsLangChange = function (property, lang) {
+    self.onNodeDetailsLangChange = function(property, lang) {
         try {
             $(".detailsLangDiv_" + property).css("display", "none");
             if (!lang) {
@@ -1319,7 +1364,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
     };
 
-    self.showCreateEntityDialog = function () {
+    self.showCreateEntityDialog = function() {
         var divId = "smallDialogDiv";
         var sourceLabel = Lineage_sources.activeSource;
         $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
@@ -1327,7 +1372,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         self.getCreateEntityDialog(sourceLabel, divId);
     };
 
-    self.getCreateEntityDialog = function (source, divId) {
+    self.getCreateEntityDialog = function(source, divId) {
         self.currentSource = source;
         $("#" + divId).dialog("open");
         var html =
@@ -1336,17 +1381,17 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             "rdf:type <select id='nodeInfosWidget_entityTypeSelect'></select>" +
             "<button onclick='NodeInfosWidget.createSingleEntity(\"" +
             divId +
-            '","' +
+            "\",\"" +
             source +
-            '",' +
-            '$("#nodeInfosWidget_newEntityLabel").val(),$("#nodeInfosWidget_entityTypeSelect").val())\'>OK</button>';
+            "\"," +
+            "$(\"#nodeInfosWidget_newEntityLabel\").val(),$(\"#nodeInfosWidget_entityTypeSelect\").val())'>OK</button>";
 
         $("#" + divId).html(html);
         var declarations = Lineage_axioms_create.owl2Vocabulary.Declarations;
         common.fillSelectOptions("nodeInfosWidget_entityTypeSelect", declarations, true);
     };
 
-    self.createSingleEntity = function (divId, source, label, type) {
+    self.createSingleEntity = function(divId, source, label, type) {
         if (!type) {
             return alert(" rdf:type missing");
         }
@@ -1363,17 +1408,17 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         triples.push({
             subject: proposedUri,
             predicate: "rdf:type",
-            object: type,
+            object: type
         });
         if (label) {
             triples.push({
                 subject: proposedUri,
                 predicate: "rdfs:label",
-                object: label,
+                object: label
             });
         }
 
-        Sparql_generic.insertTriples(source, triples, {}, function (err, result) {
+        Sparql_generic.insertTriples(source, triples, {}, function(err, result) {
             if (err) {
                 alert(err.responseText);
             }
@@ -1385,14 +1430,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     id: proposedUri,
                     label: label,
                     type: type,
-                    source: source,
-                },
+                    source: source
+                }
             };
             NodeInfosWidget.showNodeInfos(source, node, "mainDialogDiv");
-            setTimeout(function () {
+            setTimeout(function() {
                 $("#nodeInfosWidget_tabsDiv").tabs("option", "active", 2), 500;
             });
-            SearchUtil.generateElasticIndex(source, { ids: [proposedUri] }, function (err, result) {
+            SearchUtil.generateElasticIndex(source, { ids: [proposedUri] }, function(err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }

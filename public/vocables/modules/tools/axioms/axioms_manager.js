@@ -362,6 +362,46 @@ var Axioms_manager = (function () {
         );
     };
 
+    self.getClassAxioms=function(sourceLabel, classUri,options,callback){
+
+        var graphUri=Config.sources[sourceLabel].graphUri
+        if(!graphUri)
+            return callback("no graphUri found")
+        var payload={
+            graphUri:graphUri,
+            classUri:classUri,
+        }
+        if(options.axiomType) {
+            payload.axiomType=1
+        }
+        if(options.getManchesterExpression) {
+            payload.getManchesterExpression=1
+        }
+        if(options.getTriples){
+            payload.getTriples=1
+        }
+
+        const params = new URLSearchParams(payload);
+        Axiom_editor.message("getting Class axioms");
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/jowl/classAxioms?" + params.toString(),
+            dataType: "json",
+
+            success: function (data, _textStatus, _jqXHR) {
+                if (data.result && data.result.indexOf("Error") > -1) {
+                    return callback(data.result);
+                }
+                callback(null,data);
+                //  callback(null, data);
+            },
+            error(err) {
+                callback(err.responseText);
+            },
+        });
+    }
+
+
     return self;
 })();
 

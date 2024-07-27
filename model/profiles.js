@@ -206,6 +206,7 @@ class ProfileModel {
      * @returns {string} the theme currently defined for this profile
      */
     getThemeFromProfile = async (profileName) => {
+
         const config = readMainConfig();
         try {
 

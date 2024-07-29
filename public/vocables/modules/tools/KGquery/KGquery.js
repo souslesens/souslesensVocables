@@ -476,8 +476,7 @@ var KGquery = (function () {
 
                         whereStr += predicateStr + "\n" + "" + "\n" + filterStr + "\n" + otherPredicatesStrs;
                         if (optionalPredicatesSparql) {
-                            if(!predicateStr)
-                                optionalPredicatesSparql=optionalPredicatesSparql.replace("OPTIONAL","")
+                            if (!predicateStr) optionalPredicatesSparql = optionalPredicatesSparql.replace("OPTIONAL", "");
 
                             whereStr += optionalPredicatesSparql;
                         }

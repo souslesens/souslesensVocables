@@ -567,7 +567,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                 <React.Fragment key={headerIdx}>
                                     <Mui.Grid container spacing={4}>
                                         <Mui.Grid item xs={6}>
-                                            <TextField
+                                            <Mui.TextField
                                                 fullWidth
                                                 onChange={updateHeaderKey(headerIdx)}
                                                 value={header.key}

@@ -50,7 +50,7 @@ const ProfilesTable = () => {
             notAsked: () => <p>Let’s fetch some data!</p>,
             loading: () => (
                 <Mui.Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <CircularProgress />
+                    <Mui.CircularProgress />
                 </Mui.Box>
             ),
             failure: (msg: string) => (

@@ -48,8 +48,17 @@ export const LogsTable = () => {
                 </Mui.Alert>
             ),
             success: () => {
+                if (model.logfiles.data.status === 500) {
+                    return (
+                        <Mui.Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                            {`${model.logfiles.data.message}, consult the administrator of this instance for more information.`}
+                        </Mui.Alert>
+                    );
+                }
+
+                const logFilesData = model.logfiles.data.message;
                 if (selectedPeriod === undefined) {
-                    setSelectedPeriod(model.logfiles.data.find((log) => log.current).date);
+                    setSelectedPeriod(logFilesData.find((log) => log.current).date);
                 }
 
                 const sortedLogs = () =>
@@ -90,7 +99,7 @@ export const LogsTable = () => {
                                 size="medium"
                                 value={selectedPeriod}
                             >
-                                {model.logfiles.data.map((file) => (
+                                {logFilesData.map((file) => (
                                     <Mui.MenuItem value={file.date}>{file.date}</Mui.MenuItem>
                                 ))}
                             </Mui.TextField>

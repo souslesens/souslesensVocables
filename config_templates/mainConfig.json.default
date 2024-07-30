@@ -28,6 +28,12 @@
         "UserManagement",
         "OntoCreator"
     ],
+    "auth0": {
+        "domain": "xxx",
+        "clientID": "xxx",
+        "clientSecret": "xxx",
+        "scope": "openid email profile",
+    },
     "keycloak": {
         "realm": "master",
         "publicClient": false,

@@ -14,12 +14,42 @@ const { userModel } = require("../model/users");
 
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
+const Auth0Strategy = require('passport-auth0');
 const KeyCloakStrategy = require("passport-keycloak-oauth2-oidc").Strategy;
 const ULID = require("ulid");
 
 // Get config
 const { readMainConfig } = require("../model/config");
 const config = readMainConfig();
+
+const getUserAccount = async (source, username) => {
+    let account = await userModel.findUserAccount(username);
+
+    // create a new account if the username was not found in the database
+    if (!account) {
+        account = {
+            _type: "user",
+            allowSourceCreation: false,
+            groups: config.defaultGroups ? config.defaultGroups : [],
+            id: ULID.ulid(),
+            login: username,
+            maxNumberCreatedSource: 5,
+            password: "",
+            source: source,
+        }
+        await userModel.addUserAccount(account);
+    }
+    // Replace the password with an empty one if the user was not related to
+    // the specified source
+    else if (account.source !== source) {
+        account = { ...account, password: "", source: source };
+        userModel.updateUserAccount(account);
+    }
+
+    // Do not disclose _type
+    const { _type, ...accountWithoutType } = account;
+    return accountWithoutType;
+};
 
 if (config.auth == "keycloak") {
     passport.use(
@@ -35,32 +65,27 @@ if (config.auth == "keycloak") {
                 callbackURL: "/login/callback",
             },
             async function (_accessToken, _refreshToken, profile, done) {
-                const userAccount = await userModel.findUserAccount(profile.username);
-                const userAccountToAdd = {
-                    id: ULID.ulid(),
-                    login: profile.username,
-                    password: "",
-                    source: "keycloak",
-                    _type: "user",
-                    groups: config.defaultGroups ? config.defaultGroups : [],
-                    allowSourceCreation: false,
-                    maxNumberCreatedSource: 5,
-                };
-                const user = userAccount ? userAccount : userAccountToAdd;
-
-                // if no local UserAccount, create one
-                if (!userAccount) {
-                    await userModel.addUserAccount(userAccountToAdd);
-                } else if (user.source != "keycloak") {
-                    // make sure source is keycloak and password is empty
-                    const userAccountWithPassword = { ...userAccount, password: "", source: "keycloak" };
-                    userModel.updateUserAccount(userAccountWithPassword);
-                }
-                // do not disclose _type
-                const { _type, ...userAccountWithoutType } = user;
-                done(null, userAccountWithoutType);
-                // });
+                const userAccount = await getUserAccount("keycloak", profile.username);
+                done(null, userAccount);
             }
+        )
+    );
+} else if (config.auth === "auth0") {
+    passport.use(
+        "auth0",
+        new Auth0Strategy(
+            {
+                callbackURL: "/login/callback",
+                clientID: config.auth0.clientID,
+                clientSecret: config.auth0.clientSecret,
+                domain: config.auth0.domain,
+                scope: config.auth0.scope,
+                sslRequired: "external",
+            },
+            async function(_idToken, _refreshToken, _response, profile, done) {
+                const userAccount = await getUserAccount("auth0", profile._json.nickname);
+                done(null, userAccount);
+            },
         )
     );
 } else if (config.auth === "local" || config.auth === "database") {

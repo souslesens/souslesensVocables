@@ -222,27 +222,25 @@ app.get("/", function (req, res, next) {
 });
 
 // Login routes
-if (config.auth !== "disabled") {
-    if (config.auth == "keycloak") {
-        app.get("/login", function (req, res, next) {
-            passport.authenticate("keycloak", { scope: ["openid", "email", "profile"] })(req, res, next);
-        });
-        app.get("/login/callback", function (req, res, next) {
-            passport.authenticate("keycloak", { successRedirect: "/vocables", failureRedirect: "/login" })(req, res, next);
-        });
-    } else {
-        app.get("/login", function (req, res, next) {
-            const redirect = formatRedirectPath(req.query.redirect);
-            res.render("login", { title: "souslesensVocables - Login", redirect: redirect });
-        });
-        app.post("/auth/login", function (req, res, next) {
-            const redirect = formatRedirectPath(req.query.redirect);
-            passport.authenticate("local", { successRedirect: redirect, failureRedirect: "/login", failureMessage: true })(req, res, next);
-        });
-    }
-} else {
+if (config.auth == "disabled") {
     app.get("/login", function (req, res, _next) {
         res.redirect("vocables");
+    });
+} else if (config.auth == "keycloak" || config.auth == "auth0") {
+    app.get("/login", function (req, res, next) {
+        passport.authenticate(config.auth, { scope: ["openid", "email", "profile"] })(req, res, next);
+    });
+    app.get("/login/callback", function (req, res, next) {
+        passport.authenticate(config.auth, { successRedirect: "/vocables", failureRedirect: "/login" })(req, res, next);
+    });
+} else {
+    app.get("/login", function (req, res, next) {
+        const redirect = formatRedirectPath(req.query.redirect);
+        res.render("login", { title: "souslesensVocables - Login", redirect: redirect });
+    });
+    app.post("/auth/login", function (req, res, next) {
+        const redirect = formatRedirectPath(req.query.redirect);
+        passport.authenticate("local", { successRedirect: redirect, failureRedirect: "/login", failureMessage: true })(req, res, next);
     });
 }
 // catch 404 and forward to error handler

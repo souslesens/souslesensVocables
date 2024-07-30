@@ -93,6 +93,7 @@
         "nodemon": "^2.0.22",
         "npm": "^9.9.3",
         "passport": "^0.7.0",
+        "passport-auth0": "^1.4.4",
         "passport-keycloak-oauth2-oidc": "^1.0.5",
         "passport-local": "^1.0.0",
         "path-to-regexp": "^6.2.1",

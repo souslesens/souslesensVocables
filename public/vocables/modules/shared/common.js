@@ -20,7 +20,7 @@ var common = (function () {
             return data;
         }
         data.forEach(function (item) {
-            data2.push({ id: item, label: item });
+            data2.push({id: item, label: item});
         });
         return data2;
     };
@@ -596,12 +596,12 @@ if (callback) return callback(err);
             return null;
         }
         if (array.length == 2) {
-            return { table: array[0], column: array[1] };
+            return {table: array[0], column: array[1]};
         } else if (array.length == 3) {
             if (!removeSchema) {
-                return { table: array[0] + "." + array[1], column: array[2] };
+                return {table: array[0] + "." + array[1], column: array[2]};
             } else {
-                return { table: array[1], column: array[2] };
+                return {table: array[1], column: array[2]};
             }
         } else {
             return null;
@@ -913,7 +913,9 @@ if (callback) return callback(err);
 
     self.countStringsInString = (string, char) => {
         const array = string.match(new RegExp(char, "g"));
-        if (!array) return 0;
+        if (!array) {
+            return 0;
+        }
         return array.length;
     };
 
@@ -924,7 +926,9 @@ if (callback) return callback(err);
         var regex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/; //escape msec
 
         var array = isoStringdate.match(regex);
-        if (!array) return null;
+        if (!array) {
+            return null;
+        }
         var str = array[1] + "-" + array[2] + "-" + array[3];
         if (array.length > 4) {
             str += " " + array[4];
@@ -942,7 +946,9 @@ if (callback) return callback(err);
         //  internal virtuoso date YYYY.MM.DD hh:mm.ss
         var regex = /(\d{4}).(\d{2}).(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         var array = RDFString.match(regex);
-        if (!array) return null;
+        if (!array) {
+            return null;
+        }
         var str = array[1] + "-" + array[2] + "-" + array[3];
         if (array.length > 4) {
             str += "T" + array[4];
@@ -955,6 +961,18 @@ if (callback) return callback(err);
         }
         return str;
     };
+
+
+    self.getSimpleDateStrFromDate = function (date) {
+        var day = date.getDate()
+        var month = date.getMonth() + 1
+        var year = date.getFullYear();
+        if (day<10)
+            day="0"+day
+        if (month<10)
+            month="0"+month
+        return year + "-" + month + "-" + day
+    }
     return self;
 })();
 

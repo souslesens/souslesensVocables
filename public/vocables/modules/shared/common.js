@@ -913,7 +913,9 @@ if (callback) return callback(err);
 
     self.countStringsInString = (string, char) => {
         const array = string.match(new RegExp(char, "g"));
-        if (!array) return 0;
+        if (!array) {
+            return 0;
+        }
         return array.length;
     };
 
@@ -924,7 +926,9 @@ if (callback) return callback(err);
         var regex = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/; //escape msec
 
         var array = isoStringdate.match(regex);
-        if (!array) return null;
+        if (!array) {
+            return null;
+        }
         var str = array[1] + "-" + array[2] + "-" + array[3];
         if (array.length > 4) {
             str += " " + array[4];
@@ -942,7 +946,9 @@ if (callback) return callback(err);
         //  internal virtuoso date YYYY.MM.DD hh:mm.ss
         var regex = /(\d{4}).(\d{2}).(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
         var array = RDFString.match(regex);
-        if (!array) return null;
+        if (!array) {
+            return null;
+        }
         var str = array[1] + "-" + array[2] + "-" + array[3];
         if (array.length > 4) {
             str += "T" + array[4];
@@ -954,6 +960,15 @@ if (callback) return callback(err);
             str += ":" + array[6] + "Z";
         }
         return str;
+    };
+
+    self.getSimpleDateStrFromDate = function (date) {
+        var day = date.getDate();
+        var month = date.getMonth() + 1;
+        var year = date.getFullYear();
+        if (day < 10) day = "0" + day;
+        if (month < 10) month = "0" + month;
+        return year + "-" + month + "-" + day;
     };
     return self;
 })();

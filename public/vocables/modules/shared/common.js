@@ -20,7 +20,7 @@ var common = (function () {
             return data;
         }
         data.forEach(function (item) {
-            data2.push({id: item, label: item});
+            data2.push({ id: item, label: item });
         });
         return data2;
     };
@@ -596,12 +596,12 @@ if (callback) return callback(err);
             return null;
         }
         if (array.length == 2) {
-            return {table: array[0], column: array[1]};
+            return { table: array[0], column: array[1] };
         } else if (array.length == 3) {
             if (!removeSchema) {
-                return {table: array[0] + "." + array[1], column: array[2]};
+                return { table: array[0] + "." + array[1], column: array[2] };
             } else {
-                return {table: array[1], column: array[2]};
+                return { table: array[1], column: array[2] };
             }
         } else {
             return null;
@@ -962,17 +962,14 @@ if (callback) return callback(err);
         return str;
     };
 
-
     self.getSimpleDateStrFromDate = function (date) {
-        var day = date.getDate()
-        var month = date.getMonth() + 1
+        var day = date.getDate();
+        var month = date.getMonth() + 1;
         var year = date.getFullYear();
-        if (day<10)
-            day="0"+day
-        if (month<10)
-            month="0"+month
-        return year + "-" + month + "-" + day
-    }
+        if (day < 10) day = "0" + day;
+        if (month < 10) month = "0" + month;
+        return year + "-" + month + "-" + day;
+    };
     return self;
 })();
 

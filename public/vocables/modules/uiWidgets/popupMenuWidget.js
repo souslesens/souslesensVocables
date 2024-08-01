@@ -10,8 +10,8 @@ var PopupMenuWidget = (function () {
         $("#" + popupDivId).html(html);
 
         var point = { x: e.pageX, y: e.pageY };
-        if(options.position && options.position=="Bottom"){
-            point.y+=200
+        if (options.position && options.position == "Bottom") {
+            point.y += 200;
         }
         //  var point={x:100,y:100}
         if (options.Button) {

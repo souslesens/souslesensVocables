@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.80.1](https://github.com/souslesens/souslesensVocables/compare/1.80.0...1.80.1) (2024-08-01)
+
+
+### Bug Fixes
+
+* **ConfigEditor:** Missing Mui module usage with the SourcesTable component ([cf66f00](https://github.com/souslesens/souslesensVocables/commit/cf66f00d3f3338c2d938d6be621575166d70ba1d))
+* **ConfigEditor:** Missins Mui module usage with CircularProgress ([7e15474](https://github.com/souslesens/souslesensVocables/commit/7e154742a9e6afe9980bb69f8bb3c48d24899aae))
+* **ConfigEditor:** the logs API will now return a message with 500 error ([44b5113](https://github.com/souslesens/souslesensVocables/commit/44b51134814536462631dd968db665155b7e2d12))
+* **model/profiles:** load the config before setting the theme ([ddc01df](https://github.com/souslesens/souslesensVocables/commit/ddc01df20a31d593f9bafb1e3e5f11f129d70a35))
+
 ## [1.80.0](https://github.com/souslesens/souslesensVocables/compare/1.79.0...1.80.0) (2024-07-24)
 
 

@@ -1,22 +1,23 @@
 import * as React from "react";
-import { Tabs, Tab } from "@mui/material";
+import * as Mui from "@mui/material";
+
 import { SRD, RD, loading, failure, success } from "srd";
-import { User, getUsers, newUser } from "./User";
-import { getProfiles } from "./Profile";
-import Box from "@mui/material/Box";
-import { identity } from "./Utils";
-import { ProfilesTable } from "./Component/ProfilesTable";
-import { Profile } from "./Profile";
-import { ConfigForm } from "./Component/ConfigForm";
-import { PluginsForm } from "./Component/PluginsForm";
-import { SourcesTable } from "./Component/SourcesTable";
-import { UsersTable } from "./Component/UsersTable";
-import { LogsTable } from "./Component/LogsTable";
-import { DatabasesTable } from "./Component/DatabasesTable";
-import { ServerSource, getSources, getIndices, getGraphs, getMe } from "./Source";
+
 import { Config, getConfig } from "./Config";
 import { Database, getDatabases } from "./Database";
 import { Log, getLogs, getLogFiles } from "./Log";
+import { Profile, getProfiles } from "./Profile";
+import { ServerSource, getSources, getIndices, getGraphs, getMe } from "./Source";
+import { User, getUsers, newUser } from "./User";
+import { identity } from "./Utils";
+
+import { ConfigForm } from "./Component/ConfigForm";
+import { DatabasesTable } from "./Component/DatabasesTable";
+import { LogsTable } from "./Component/LogsTable";
+import { PluginsForm } from "./Component/PluginsForm";
+import { ProfilesTable } from "./Component/ProfilesTable";
+import { SourcesTable } from "./Component/SourcesTable";
+import { UsersTable } from "./Component/UsersTable";
 
 type Model = {
     users: RD<string, User[]>;
@@ -217,21 +218,21 @@ const Admin = () => {
 
     return (
         <ModelContext.Provider value={{ model, updateModel }}>
-            <Box sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}>
-                <Tabs
+            <Mui.Box sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}>
+                <Mui.Tabs
                     onChange={(event: React.SyntheticEvent, newValue: number) => updateModel({ type: "UserClickedNewTab", payload: newValue })}
                     value={editionTabToNumber(model.currentEditionTab)}
                     centered
                 >
-                    <Tab label="Settings" />
-                    <Tab label="Users" />
-                    <Tab label="Profiles" />
-                    <Tab label="Sources" />
-                    <Tab label="Databases" />
-                    <Tab label="Plugins" />
-                    <Tab label="Logs" />
-                </Tabs>
-            </Box>
+                    <Mui.Tab label="Settings" />
+                    <Mui.Tab label="Users" />
+                    <Mui.Tab label="Profiles" />
+                    <Mui.Tab label="Sources" />
+                    <Mui.Tab label="Databases" />
+                    <Mui.Tab label="Plugins" />
+                    <Mui.Tab label="Logs" />
+                </Mui.Tabs>
+            </Mui.Box>
             <Dispatcher model={model} />
         </ModelContext.Provider>
     );

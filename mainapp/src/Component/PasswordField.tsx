@@ -44,6 +44,7 @@ export const PasswordField = (props) => {
                 }
                 id={id}
                 label={label}
+                name={id}
                 onChange={onChange}
                 required={required}
                 type={display ? "text" : "password"}

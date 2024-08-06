@@ -2,7 +2,24 @@ const { toolModel } = require("../../../../../model/tools");
 const { responseSchema } = require("../../utils");
 
 module.exports = function () {
-    let operations = { PUT };
+    const operations = { GET, PUT };
+
+    // GET /api/v1/admin/plugins/config
+    async function GET(_req, res, _next) {
+        try {
+            const fileContent = toolModel.readConfig();
+            res.status(200).json(fileContent);
+        } catch (error) {
+            res.status(500).json({ message: error.message, status: error.cause });
+        }
+    }
+
+    GET.apiDoc = {
+        operationId: "plugins.config.get",
+        responses: responseSchema("PluginConfig", "GET"),
+        security: [{ restrictAdmin: [] }],
+        summary: "Retrieve the plugins configuration",
+    };
 
     // PUT /api/v1/admin/plugins/config
     async function PUT(req, res, _next) {
@@ -12,8 +29,7 @@ module.exports = function () {
                     message: "The plugins object is missing from this request",
                 });
             } else {
-                const body = Object.fromEntries(req.body.plugins.map((tool) => [tool.name, tool.config]));
-                await toolModel.writeConfig(body);
+                await toolModel.writeConfig(req.body.plugins);
                 res.status(200).json({ message: "Saved successsfully" });
             }
         } catch (error) {

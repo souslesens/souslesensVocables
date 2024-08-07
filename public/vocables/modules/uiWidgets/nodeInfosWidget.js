@@ -57,8 +57,9 @@ var NodeInfosWidget = (function () {
                         $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                         if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                             var source = self.currentSource;
-                            source = Lineage_sources.mainSource;
-                            Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
+                           // source = Lineage_sources.mainSource;
+                            NodeInfosAxioms.init(source,self.currentNode)
+                           // Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
                         }
                     }, 100);
                 },
@@ -230,11 +231,7 @@ var NodeInfosWidget = (function () {
                         callbackSeries(err);
                     });
                 },
-                function (callbackSeries) {
-                    self.showAxiomsList(self.currentNodeRealSource, nodeId, function (err) {
-                        callbackSeries(err);
-                    });
-                },
+
             ],
             function (err) {
                 if (callback) {
@@ -971,36 +968,7 @@ defaultLang = 'en';*/
         callback();
     };
 
-    self.showAxiomsList = function (sourceLabel, nodeId, _callback) {
-        Axiom_manager.getClassAxioms(sourceLabel, nodeId, { getManchesterExpression: true, getTriples: true }, function (err, result) {});
 
-        return;
-        Sparql_OWL.getPropertiesRestrictionsDescription(sourceLabel, nodeId, {}, function (err, result) {
-            if (err) {
-                //  alert(err.responseText);
-                return MainController.UI.message(err.responseText || err, true);
-            }
-
-            var str = "<b>Property restrictions</b><table>";
-            result.forEach(function (item) {
-                str += "<tr class='infos_table'>";
-                if (item.sourceClass) {
-                    var sourceLabel = item.sourceClassLabel ? item.sourceClassLabel.value : Sparql_common.getLabelFromURI(item.sourceClass.value);
-                    str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.sourceClass.value + "\")'>" + sourceLabel + "</td>";
-                }
-                str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.restriction.value + "\")'>" + item.restriction.value + "</td>";
-                if (item.targetClass) {
-                    var targetLabel = item.targetClassLabel ? item.targetClassLabel.value : Sparql_common.getLabelFromURI(item.targetClass.value);
-                    str += "<td class='detailsCellValue' onclick=' NodeInfosWidget.onClickLink(\"" + item.targetClass.value + "\")'>" + targetLabel + "</td>";
-                }
-
-                str += "</tr>";
-            });
-            $("#" + divId).append(str);
-
-            return _callback();
-        });
-    };
 
     self.onClickLink = function (nodeId) {
         /*  var filter=Sparql_common.setFilter("subject",[nodeId])

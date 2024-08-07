@@ -71,7 +71,7 @@ const SourcesTable = () => {
                                 return [key, value.replace("\n", " ")];
                             }
                             return [key, value];
-                        })
+                        }),
                     );
 
                     return { ...dataWithoutCarriageReturns };
@@ -179,7 +179,7 @@ const SourcesTable = () => {
                 );
             },
         },
-        model.sources
+        model.sources,
     );
 
     return renderSources;
@@ -327,8 +327,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
         if (sourceModel.sourceForm.owner.length == 0 && me !== "") {
             update({ type: Type.UserUpdatedField, payload: { fieldname: "owner", newValue: me } });
         }
-    }, [sourceModel.sourceForm.owner]
-    )
+    }, [sourceModel.sourceForm.owner]);
 
     const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         update({
@@ -847,7 +846,10 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
             return (
                 <>
                     <Mui.Grid item xs={3}>
-                        <Mui.FormControlLabel control={<Mui.Checkbox checked={props.model.sourceForm.dataSource ? true : false} onChange={handleAddDataSource} />} label="Do you want to add a data source ?" />
+                        <Mui.FormControlLabel
+                            control={<Mui.Checkbox checked={props.model.sourceForm.dataSource ? true : false} onChange={handleAddDataSource} />}
+                            label="Do you want to add a data source ?"
+                        />
                     </Mui.Grid>
 
                     <Mui.Grid item xs={6}>

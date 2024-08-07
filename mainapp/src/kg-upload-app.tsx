@@ -2,18 +2,10 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { useState, useEffect } from "react";
 
-import {
-    Alert,
-    Button,
-    FormControl,
-    MenuItem,
-    Select,
-    Stack,
-} from "@mui/material";
+import { Alert, Button, FormControl, MenuItem, Select, Stack } from "@mui/material";
 import { Done, Folder } from "@mui/icons-material";
 
 import { VisuallyHiddenInput } from "./Utils";
-
 
 interface UploadFormData {
     displayForm: "database" | "file" | "";
@@ -41,7 +33,6 @@ export default function App(uploadFormData: UploadFormData) {
     // error management
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-
 
     useEffect(() => {
         void fetchDatabases();
@@ -92,13 +83,13 @@ export default function App(uploadFormData: UploadFormData) {
     const widget = (displayForm: string) => {
         if (displayForm === "database") {
             return (
-                <Select
-                    label="Select database"
-                    onChange={handleDatabaseChange}
-                    value={selectedDatabase}
-                >
-                    <MenuItem disabled value={"_default"}>Select database</MenuItem>
-                    {databases.map((database) => <MenuItem value={{id: database.id, name: database.name}}>{database.name}</MenuItem>)}
+                <Select label="Select database" onChange={handleDatabaseChange} value={selectedDatabase}>
+                    <MenuItem disabled value={"_default"}>
+                        Select database
+                    </MenuItem>
+                    {databases.map((database) => (
+                        <MenuItem value={{ id: database.id, name: database.name }}>{database.name}</MenuItem>
+                    ))}
                 </Select>
             );
         }
@@ -106,38 +97,19 @@ export default function App(uploadFormData: UploadFormData) {
         if (displayForm === "file") {
             return (
                 <Stack alignItems="flex-end" spacing={2} useFlexGap>
-                    <Button
-                        color="info"
-                        component="label"
-                        fullWidth
-                        role={undefined}
-                        startIcon={<Folder />}
-                        tabIndex={-1}
-                        variant="outlined"
-                    >
+                    <Button color="info" component="label" fullWidth role={undefined} startIcon={<Folder />} tabIndex={-1} variant="outlined">
                         {files.length === 1 ? files[0].name : "Select a file to upload…"}
-                        <VisuallyHiddenInput
-                            accept=".csv,.tsv"
-                            id="formUploadCSV"
-                            onChange={uploadFileHandler}
-                            type="file"
-                        />
+                        <VisuallyHiddenInput accept=".csv,.tsv" id="formUploadCSV" onChange={uploadFileHandler} type="file" />
                     </Button>
-                    <Button
-                        disabled={files.length === 0}
-                        onClick={fileSubmitHandler}
-                        startIcon={<Done />}
-                        size="small"
-                        variant="contained"
-                    >
+                    <Button disabled={files.length === 0} onClick={fileSubmitHandler} startIcon={<Done />} size="small" variant="contained">
                         Submit
                     </Button>
                 </Stack>
             );
         }
 
-        return <></>
-    }
+        return <></>;
+    };
 
     return (
         <Stack spacing={2} sx={{ width: 400 }} useFlexGap>

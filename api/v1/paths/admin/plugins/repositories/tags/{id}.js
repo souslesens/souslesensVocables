@@ -1,7 +1,7 @@
 const { toolModel } = require("../../../../../../../model/tools");
 const { responseSchema } = require("../../../../utils");
 
-module.exports = function() {
+module.exports = function () {
     const operations = { GET };
 
     // GET /api/v1/admin/plugins/repositories/tags/{id}
@@ -28,4 +28,4 @@ module.exports = function() {
     };
 
     return operations;
-}
+};

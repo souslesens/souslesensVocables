@@ -142,7 +142,7 @@ const UsersTable = () => {
                 );
             },
         },
-        model.users
+        model.users,
     );
 
     return renderUsers;

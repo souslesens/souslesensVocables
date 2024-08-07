@@ -332,7 +332,7 @@ const DatabasesTable = () => {
                 );
             },
         },
-        model.databases
+        model.databases,
     );
 
     return renderDatabases;

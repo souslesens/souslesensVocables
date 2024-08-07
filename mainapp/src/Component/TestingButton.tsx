@@ -1,10 +1,10 @@
-import CircularProgress from '@mui/material/CircularProgress';
+import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 
-import CheckIcon from '@mui/icons-material/Check';
-import ErrorIcon from '@mui/icons-material/Error';
-import LinkOffIcon from '@mui/icons-material/LinkOff';
-import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
+import CheckIcon from "@mui/icons-material/Check";
+import ErrorIcon from "@mui/icons-material/Error";
+import LinkOffIcon from "@mui/icons-material/LinkOff";
+import NetworkCheckIcon from "@mui/icons-material/NetworkCheck";
 
 import * as React from "react";
 
@@ -34,17 +34,12 @@ export const TestingButton = (props) => {
                 setColor("warning");
                 setIcon(<LinkOffIcon />);
                 setTitle("This database is not available");
-        };
+        }
     };
 
     return (
-        <IconButton
-            color={color}
-            onClick={handleClick}
-            title={title}
-            variant="contained"
-        >
+        <IconButton color={color} onClick={handleClick} title={title} variant="contained">
             {icon}
         </IconButton>
     );
-}
+};

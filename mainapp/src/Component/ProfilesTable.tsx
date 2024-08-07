@@ -74,7 +74,7 @@ const ProfilesTable = () => {
                                 return [key, value.replace("\n", " ")];
                             }
                             return [key, value];
-                        })
+                        }),
                     );
                     return { ...dataWithoutCarriageReturns };
                 });
@@ -158,7 +158,7 @@ const ProfilesTable = () => {
                 );
             },
         },
-        model.profiles
+        model.profiles,
     );
 
     return renderProfiles;
@@ -536,7 +536,10 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                             </Mui.FormControl>
                         </Mui.Box>
                         <Mui.FormGroup>
-                            <Mui.FormControlLabel control={<Mui.Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
+                            <Mui.FormControlLabel
+                                control={<Mui.Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />}
+                                label="Allow all tools"
+                            />
 
                             <Mui.FormControl style={{ display: profileModel.profileForm.allowedTools === "ALL" ? "none" : "" }} disabled={profileModel.profileForm.allowedTools === "ALL"}>
                                 <Mui.InputLabel id="allowedTools-label">Allowed tools</Mui.InputLabel>

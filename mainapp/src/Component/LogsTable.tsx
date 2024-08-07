@@ -179,6 +179,6 @@ export const LogsTable = () => {
                 );
             },
         },
-        model.logfiles
+        model.logfiles,
     );
 };

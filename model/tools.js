@@ -6,12 +6,7 @@ const { Lock } = require("async-await-mutex-lock");
 const { simpleGit } = require("simple-git");
 
 const { convertType } = require("./utils");
-const {
-    configPluginsConfig,
-    configPluginsRepository,
-    directoryPlugins,
-    directoryPluginsRepositories
-} = require("./config");
+const { configPluginsConfig, configPluginsRepository, directoryPlugins, directoryPluginsRepositories } = require("./config");
 
 /**
  * @typedef {import("./ToolTypes").Tool} Tool
@@ -34,7 +29,6 @@ const NATIVE_TOOLS = [
     { name: "GraphManagement", controller: "GraphManagement", useSource: false, multiSources: false, toTools: {} },
     { name: "UserManagement", controller: "UserManagement", useSource: false, multiSources: false, toTools: {} },
     { name: "OntoCreator", controller: "Lineage_createSLSVsource", useSource: false, multiSources: false, toTools: {} },
-
 ].map((tool) => ({ type: "tool", label: tool.label ?? tool.name, ...tool }));
 
 const lock = new Lock();
@@ -57,7 +51,7 @@ class ToolModel {
      * @returns {string}
      */
     _getTokenizeURL(url, token) {
-        return `https://token:${token}@${url.replace(/^https?:\/\//, "")}`
+        return `https://token:${token}@${url.replace(/^https?:\/\//, "")}`;
     }
 
     /**
@@ -107,16 +101,12 @@ class ToolModel {
      * @returns {Tool[]} – The converted structure
      */
     convertPluginsConfig = async (plugins) => {
-        return Object.fromEntries(Object.entries(plugins).map(
-            ([key, config]) => {
-                const converted = Object.fromEntries(
-                    Object.entries(config).map(
-                        ([label, option]) => [label, convertType(option)]
-                    )
-                );
+        return Object.fromEntries(
+            Object.entries(plugins).map(([key, config]) => {
+                const converted = Object.fromEntries(Object.entries(config).map(([label, option]) => [label, convertType(option)]));
                 return [key, converted];
-            }
-        ));
+            })
+        );
     };
 
     /**
@@ -127,11 +117,7 @@ class ToolModel {
     deleteRepository = async (repositoryId) => {
         const repositories = await this.readRepositories();
 
-        const filteredRepositories = Object.fromEntries(
-            Object.entries(repositories).filter(
-                ([identifier, data]) => identifier !== repositoryId
-            )
-        );
+        const filteredRepositories = Object.fromEntries(Object.entries(repositories).filter(([identifier, data]) => identifier !== repositoryId));
 
         await this.writeRepositories(filteredRepositories);
 
@@ -161,12 +147,9 @@ class ToolModel {
             const repositoryPath = path.join(directoryPluginsRepositories, repositoryId);
 
             if (!fs.existsSync(repositoryPath)) {
-                await simpleGit()
-                    .clone(url, repositoryPath);
+                await simpleGit().clone(url, repositoryPath);
             } else {
-                await simpleGit(repositoryPath)
-                    .remote(["set-url", "origin", url])
-                    .pull();
+                await simpleGit(repositoryPath).remote(["set-url", "origin", url]).pull();
             }
 
             if (repositoryInfo.hasOwnProperty("version")) {
@@ -197,24 +180,22 @@ class ToolModel {
                 return {
                     message: "Cannot found the identifier in the plugins directory",
                     status: "failure",
-                }
+                };
             }
 
-            const mainJSFile = "/public/js/main.js"
+            const mainJSFile = "/public/js/main.js";
             const directories = await fg([`${repositoryPath}/**${mainJSFile}`]);
 
             return {
-                message: directories.map(
-                    (directory) => path.basename(directory.replace(mainJSFile, ""))
-                ),
+                message: directories.map((directory) => path.basename(directory.replace(mainJSFile, ""))),
                 status: "success",
-            }
+            };
         } catch (error) {
             console.error(error);
             return {
                 message: "An error occurs on the server",
                 status: "failure",
-            }
+            };
         }
     };
 
@@ -233,20 +214,20 @@ class ToolModel {
                 return {
                     message: "Cannot found the identifier in the plugins directory",
                     status: "failure",
-                }
+                };
             }
 
             const tags = await simpleGit(repositoryPath).tags(["--sort=-refname"]);
             return {
                 message: tags.all.slice(0, limit),
                 status: "success",
-            }
+            };
         } catch (error) {
             console.error(error);
             return {
                 message: "An error occurs on the server",
                 status: "failure",
-            }
+            };
         }
     };
 
@@ -309,12 +290,14 @@ class ToolModel {
 
             const currentPlugins = this.plugins.map((plugin) => plugin.name);
 
-            const nextPlugins = Object.entries(repositories).map(([identifier, data]) => {
-                if (data.plugins === undefined) {
-                    return path.parse(data.url).name;
-                }
-                return data.plugins;
-            }).flat();
+            const nextPlugins = Object.entries(repositories)
+                .map(([identifier, data]) => {
+                    if (data.plugins === undefined) {
+                        return path.parse(data.url).name;
+                    }
+                    return data.plugins;
+                })
+                .flat();
 
             // Remove useless symlinks
             currentPlugins.forEach((plugin) => {

@@ -970,6 +970,9 @@ defaultLang = 'en';*/
 
 
 
+
+
+
     self.onClickLink = function (nodeId) {
         /*  var filter=Sparql_common.setFilter("subject",[nodeId])
 Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(err, result){

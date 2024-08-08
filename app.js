@@ -12,7 +12,7 @@ const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
 const querystring = require("querystring");
 require("./bin/authentication.");
-const { readMainConfig } = require("./model/config");
+const { checkMainConfig, readMainConfig } = require("./model/config");
 const util = require("./bin/util.");
 
 const app = express();
@@ -21,6 +21,7 @@ const { userModel } = require("./model/users");
 const { profileModel } = require("./model/profiles");
 
 const config = readMainConfig();
+const isValid = checkMainConfig(config);
 
 // sentry/glitchtip
 if (config.sentryDsnNode) {

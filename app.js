@@ -12,7 +12,7 @@ const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
 const querystring = require("querystring");
 require("./bin/authentication.");
-const { readMainConfig } = require("./model/config");
+const { checkMainConfig, readMainConfig } = require("./model/config");
 const util = require("./bin/util.");
 
 const app = express();
@@ -23,6 +23,11 @@ const { sourceModel } = require("./model/sources");
 const { rdfDataModel } = require("./model/rdfData");
 
 const config = readMainConfig();
+const isValid = checkMainConfig(config);
+
+if (!isValid) {
+    process.exit(1);
+}
 
 // sentry/glitchtip
 if (config.sentryDsnNode) {

@@ -134,7 +134,7 @@ var NodeInfosAxioms = (function() {
 
             var options = {
                 selectTreeNodeFn: NodeInfosAxioms.onAxiomJstreeSelectNode,
-                open_all: true,
+                openAll: true,
                 contextMenu: function(node) {
                     var items = {};
 
@@ -150,7 +150,7 @@ var NodeInfosAxioms = (function() {
     };
 
     self.getResourceAxioms = function(options, callback) {
-        Axiom_manager.getClassAxioms(self.currentSource, self.currentResource.id,
+        Axiom_manager.getClassAxioms(self.currentSource, self.currentResource.data.id,
             { getManchesterExpression: true, getTriples: true },
             function(err, result) {
 
@@ -167,7 +167,7 @@ var NodeInfosAxioms = (function() {
 
         $("#nodeInfosAxioms_axiomText").html(node.data.manchester);
 
-        Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentResource.id, node.data.triples, "nodeInfosAxioms_graphDiv", {}, function(err) {
+        Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentResource.data.id, node.data.triples, "nodeInfosAxioms_graphDiv", {}, function(err) {
         });
 
 

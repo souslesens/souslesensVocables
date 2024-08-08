@@ -93,14 +93,19 @@ var Axioms_graph = (function () {
                             nodesMap[s].owlType = "unionOf";
                             nodesMap[s].symbol = "⨆";
                         }
-                        if (p == "http://www.w3.org/2002/07/owl#intersectionOf") {
+                        else if (p == "http://www.w3.org/2002/07/owl#intersectionOf") {
                             nodesMap[s].owlType = "intersectionOf";
                             nodesMap[s].symbol = "⊓";
                         }
-                        if (p == "http://www.w3.org/2002/07/owl#complementOf") {
+                        else if (p == "http://www.w3.org/2002/07/owl#complementOf") {
                             nodesMap[s].owlType = "complementOf";
                             nodesMap[s].symbol = "┓";
                         }
+                        else if (p == "http://www.w3.org/2002/07/owl#inverseOf") {
+                            nodesMap[s].owlType = "inverseOf";
+                            nodesMap[s].symbol = "f-1";
+                        }
+
                     });
                     var x = nodesMap;
                     callbackSeries();

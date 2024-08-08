@@ -399,6 +399,37 @@ var Axioms_manager = (function () {
         });
     };
 
+    self.listClassesWithAxioms=function (sourceLabel,  callback) {
+        if(!sourceLabel)
+            sourceLabel=Lineage_sources.activeSource
+        var graphUri = Config.sources[sourceLabel].graphUri;
+        if (!graphUri) return callback("no graphUri found");
+        var payload = {
+            graphName: graphUri,
+
+        };
+
+
+        const params = new URLSearchParams(payload);
+        Axiom_editor.message("getting Class axioms");
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/jowl/listClassesWithAxioms?" + params.toString(),
+            dataType: "json",
+
+            success: function (data, _textStatus, _jqXHR) {
+                if (data.result && data.result.indexOf("Error") > -1) {
+                    return callback(data.result);
+                }
+                callback(null, data);
+                //  callback(null, data);
+            },
+            error(err) {
+                callback(err.responseText);
+            },
+        });
+    };
+
     return self;
 })();
 

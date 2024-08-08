@@ -13,6 +13,7 @@ import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_cr
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
 import ResponsiveUI from "../../responsive/responsiveUI.js";
+import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 import Axioms_manager from "../tools/axioms/axioms_manager.js";
 
 var NodeInfosWidget = (function () {

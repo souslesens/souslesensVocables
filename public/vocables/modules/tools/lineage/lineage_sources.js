@@ -243,10 +243,10 @@ var Lineage_sources = (function () {
     self.showHideLineageLeftPanels = function () {
         $("#lineage_allActions").css("visibility", "visible");
         if (!Config.currentTopLevelOntology) {
-            $("#lineage_legendWrapper").css("display", "block");
+            $("#lineage_legendWrapperSection").css("display", "block");
             return;
         } else {
-            $("#lineage_legendWrapper").css("display", "flex");
+            $("#lineage_legendWrapperSection").css("display", "flex");
         }
     };
 

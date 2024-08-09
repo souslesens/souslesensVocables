@@ -32,7 +32,7 @@ var Lineage_r = (function () {
         }
 
         ResponsiveUI.initMenuBar(self.loadSources);
-        $("#Lineage_graphEditionButtons").load("./responsive/lineage/html/AddNodeEdgeButtons.html");
+        $("#Lineage_graphEditionButtons").load("./modules/tools//lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
     };
@@ -46,7 +46,7 @@ var Lineage_r = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            $("#lateralPanelDiv").load("./responsive/lineage/html/index.html", function () {
+            $("#lateralPanelDiv").load("./modules/tools/lineage/html/lateralPanel.html", function () {
                 self.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
             });
@@ -65,8 +65,8 @@ var Lineage_r = (function () {
         });
     };
     self.initWhiteboardTab = function () {
-        if ($("#tabs_whiteboard").children().length == 0) {
-            $("#tabs_whiteboard").load("./responsive/lineage/html/whiteboadPanel.html", function (s) {
+        if ($("#whiteboardTab").children().length == 0) {
+            $("#whiteboardTab").load("./modules/tools//lineage/html/whiteboadTab.html", function (s) {
                 $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
                 $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
                 Lineage_r.showHideEditButtons(Lineage_sources.activeSource);
@@ -90,10 +90,10 @@ var Lineage_r = (function () {
     };
 
     self.initClassesTab = function () {
-        if ($("#tabs_classes").children().length == 0) {
-            $("#tabs_classes").load("./responsive/lineage/html/classesPanel.html", function (s) {
+        if ($("#classesTab").children().length == 0) {
+            $("#classesTab").load("./modules/tools//lineage/html/classesTab.html", function (s) {
                 SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
-                $("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
+                //$("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
                     SearchWidget.init();
                     $("#GenericTools_searchInAllSources").prop("checked", false);
                     $("#Lineage_MoreClassesOptions").hide();
@@ -106,21 +106,21 @@ var Lineage_r = (function () {
                             ResponsiveUI.resetWindowHeight();
                         },
                     });*/
-                });
+                //});
             });
         }
     };
     self.initPropertiesTab = function () {
-        if ($("#tabs_properties").children().length == 0) {
-            $("#tabs_properties").load("./responsive/lineage/html/propertiesPanel.html", function (s) {
+        if ($("#propertiesTab").children().length == 0) {
+            $("#propertiesTab").load("./modules/tools/lineage/html/propertiesTab.html", function (s) {
                 Lineage_r.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
                 Lineage_properties.searchTermInSources();
             });
         }
     };
     self.initContainersTab = function () {
-        if ($("#tabs_containers").children().length == 0) {
-            $("#tabs_containers").load("./responsive/lineage/html/containersPanel.html", function (s) {
+        if ($("#containersTab").children().length == 0) {
+            $("#containersTab").load("./modules/tools//lineage/html/containersTab.html", function (s) {
                 Containers_tree.search("lineage_containers_containersJstree");
             });
         }
@@ -222,11 +222,11 @@ var Lineage_r = (function () {
         if (!self.MoreActionsShow) {
             $("#Lineage_MoreActionsButtons").show();
             self.MoreActionsShow = true;
-            $("#Lineage_MoreActionsDiv").removeClass("TitleBoxLine");
+            $("#Lineage_MoreActionsSection").removeClass("TitleBoxLine");
         } else {
             $("#Lineage_MoreActionsButtons").hide();
             self.MoreActionsShow = false;
-            $("#Lineage_MoreActionsDiv").addClass("TitleBoxLine");
+            $("#Lineage_MoreActionsSection").addClass("TitleBoxLine");
         }
     };
     self.hideShowMoreOptions = function (hideShowParameter, divId) {

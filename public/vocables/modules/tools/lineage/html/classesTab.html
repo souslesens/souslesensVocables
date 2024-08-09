@@ -1,0 +1,83 @@
+<div id="Lineage_ClassesTab" style="margin-top: 40px; margin-left: 10px">
+    <div id="Lineage_classes_searchDiv" style="height: 50px; margin-bottom: 10px">
+        <div style="display: flex; flex-direction: column; height: 50px">
+            <div class="w3-container">
+                <div class="input-group mb-3" style="width: 100%">
+                    <div class="input-group-prepend">
+                        <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+                            <button class="search-icon slsv-invisible-button" onclick="SearchWidget.searchTermInSources()" style="margin-top: 4px; height: 20px; width: 20px"></button>
+                        </div>
+                    </div>
+                    <input id="searchWidget_searchTermInput" class="border-without-raduis-theme1" autocomplete="off" style="width: 35%; height: 33.5px" value="" />
+                    <div id="Lineage_classes_moreOptionsButtonOnSearchbar" class="input-group-append">
+                        <div class="SearchButtonIconRight border-without-raduis-theme1" onclick="Lineage_r.hideShowMoreOptions(null,'Lineage_MoreClassesOptions')" style="height: 33.5px">
+                            <button class="moreOptions-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-top: 5px; margin-right: 5px"></button>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="w3-button classesPannelButton size-of-button-small" style="margin-left: 10px" onclick="SearchWidget.showTopConcepts();">Reset</button>
+                        <button class="w3-button classesPannelButton size-of-button-small" style="margin-left: 1px" onclick="Export.exportTreeToDataTable(null,'#')">Export</button>
+                        <button class="w3-button classesPannelButton size-of-button-small" onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all">
+                            <img src="./icons/CommonIcons/ClearAllIcon.png" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="Lineage_MoreClassesOptions" class="w3-panel w3-border w3-round-small border-classic-color-theme3" style="width: 90%">
+        <div class="titleboxButtons font-button3-color" style="display: inline-flex">
+            Options
+            <div class="slsv-invisible-button">
+                <button
+                    class="moreOptions-icon slsv-invisible-button"
+                    onclick="Lineage_r.hideShowMoreOptions('hide','Lineage_MoreClassesOptions')"
+                    style="width: 20px; height: 20px; margin-left: 5px"
+                ></button>
+            </div>
+        </div>
+        <div id="Lineage_Classes_MoreOptionsButtons" class="font-button3-color" style="margin-top: 10px">
+            <span>Exact Match</span>
+            <input type="checkbox" id="GenericTools_allExactMatchSearchCBX" />
+            <span>All labels</span>
+            <input type="checkbox" checked="checked" id="GenericTools_searchAllLabelsCBX" />
+            <br />
+            <span>Scope </span>
+            <select id="GenericTools_searchScope" class="select-bar-theme3" onchange="Lineage_sources.initSourcesSearchSelect()">
+                <option value="currentSource">Current Source</option>
+                <option value="whiteboardSources">Current whiteboard sources</option>
+                <option value="all_Sources">All Sources</option>
+            </select>
+            <div>
+                <span>Classes</span>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="GenericTools_searchAllClassSelectPromptBtn" onclick="SearchWidget.onSearchClass()">?</button>
+                <select id="GenericTools_searchAllClassSelect" style="min-width: 100px" class="select-bar-theme3"></select>
+            </div>
+        </div>
+    </div>
+
+    <div class="Lineage_classes_jstreeContainer" style="width: 90%; margin-top: 50px; max-height: 63dvh">
+        <div id="LineageNodesJsTreeDiv"></div>
+    </div>
+
+    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="ResponsiveUI.hideShowLateralPannel(this)">
+        <img id="ArrowLateralPannel" src="./icons/CommonIcons/ArrowLateralPannel.png" />
+    </button>
+</div>
+
+<script>
+    $("#searchWidget_searchTermInput").keypress(function (e) {
+        if (e.which == 13) {
+            SearchWidget.searchTermInSources();
+        }
+    });
+    $("#searchWidget_searchTermInput").focus();
+    /*
+    $("#sourcesSelectionDialogdiv").dialog({
+        autoOpen: false,
+        height: 750,
+        width: 400,
+        modal: true,
+    });*/
+</script>

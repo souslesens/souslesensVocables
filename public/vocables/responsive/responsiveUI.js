@@ -49,7 +49,7 @@ var ResponsiveUI = (function () {
         $("#ChangeSourceButton").show();
         $("#index_topContolPanel").show();
         //Loading
-        $("#index_topContolPanel").load("./responsive/lineage/html/topMenu.html", function () {
+        $("#index_topContolPanel").load("./modules/tools/lineage/html/sourcesDiv.html", function () {
             if (self.currentTool != "lineage") {
                 $("#AddSourceButton").remove();
                 $("#AllSourceButton").remove();

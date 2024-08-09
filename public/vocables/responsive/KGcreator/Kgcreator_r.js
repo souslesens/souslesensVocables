@@ -42,7 +42,7 @@ var KGcreator_r = (function () {
                 return alert(err.responseText);
             }
             $("#graphDiv").load("./modules/tools/KGcreator/html/centralPanel.html", function () {
-                $("#lateralPanelDiv").load("./responsive/KGcreator/html/leftPanel.html", function () {
+                $("#lateralPanelDiv").load("./modules/tools/KGcreator/html/leftPanel.html", function () {
                     KGcreator.currentSlsvSource = ResponsiveUI.source;
                     ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initLinkTab, "#MapButton");
                     KGcreator.initSource();
@@ -78,8 +78,8 @@ var KGcreator_r = (function () {
     self.initRunTab = function () {
         if (self.currentTab != "Run") {
             self.currentTab = "Run";
-            $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/runTab.html", function () {
-                $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function () {
+            $("#KGcreator_centralPanelTabs").load("./modules/tools/KGcreator/html/runTab.html", function () {
+                $("#KGcreator_topButtons").load("./modules/tools/KGcreator/html/runButtons.html", function () {
                     /*$("#KGcreator_topButtons").css("padding", "4px");
                     $("#MenuBar").css("height", "");
                     $("#MenuBarFooter").css("display", "flex");
@@ -98,8 +98,8 @@ var KGcreator_r = (function () {
     self.initLinkTab = function () {
         if (self.currentTab != "Map") {
             self.currentTab = "Map";
-            $("#KGcreator_centralPanelTabs").load("./responsive/KGcreator/html/linkTab.html", function () {
-                $("#KGcreator_topButtons").load("./responsive/KGcreator/html/runButtons.html", function () {
+            $("#KGcreator_centralPanelTabs").load("./modules/tools/KGcreator/html/linkTab.html", function () {
+                $("#KGcreator_topButtons").load("./modules/tools/KGcreator/html/runButtons.html", function () {
                     ResponsiveUI.PopUpOnHoverButtons();
                     if (KGcreator.currentTreeNode != undefined) {
                         $(document.getElementById(KGcreator.currentTreeNode.id + "_anchor")).click();

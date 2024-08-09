@@ -167,7 +167,13 @@ var NodeInfosAxioms = (function() {
 
         $("#nodeInfosAxioms_axiomText").html(node.data.manchester);
 
-        Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentResource.data.id, node.data.triples, "nodeInfosAxioms_graphDiv", {}, function(err) {
+
+        self.onNodeGraphClick = function (node, point, nodeEvent) {
+            if (node && node.data) {
+                self.currentGraphNode = node;
+            }}
+
+        Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentResource.data.id, node.data.triples, "nodeInfosAxioms_graphDiv", {onNodeClick:NodeInfosAxioms.onNodeGraphClick}, function(err) {
         });
 
 

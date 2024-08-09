@@ -329,6 +329,9 @@ var NodeInfosWidget = (function () {
                 var graphUri = "";
                 var uniqueTriples = {};
                 data.forEach(function (item) {
+                    if(item.prop.value.indexOf("label")>-1){
+                        $("#ui-id-1").append (" "+item.value.value)
+                    }
                     var key;
                     if (item.objectValue) {
                         var value = item.objectValue.value.replace(/T[\d:]*Z/, "");

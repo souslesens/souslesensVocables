@@ -55,6 +55,8 @@ const Axiom_editor = (function() {
     };
 
     self.init = function(divId, nodeId, source) {
+        if(!source)
+            source=Lineage_sources.activeSource
         self.currentSource = source;
         self.clearAll();
         if (nodeId) {
@@ -104,6 +106,7 @@ const Axiom_editor = (function() {
             result.forEach(function(item) {
                 self.allResourcesMap[item.id] = item;
             });
+            if(callback)
             return callback(err, result);
         });
     };

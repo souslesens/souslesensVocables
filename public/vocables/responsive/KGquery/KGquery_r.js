@@ -106,7 +106,7 @@ var KGquery_r = (function () {
         if (targetDiv.indexOf("Dialog") > -1) {
             $("#" + targetDiv).dialog("open");
         }
-        $("#" + targetDiv).load("./responsive/widget/html/savedQueriesWidgetResponsive.html", function () {
+        $("#" + targetDiv).load("./modules/uiWidgets/html/savedQueriesWidget.html", function () {
             if (slsvSource) {
                 SavedQueriesWidget.list(CRUDsource, slsvSource, scope);
             }

@@ -35,7 +35,7 @@ var _botEngine = (function () {
             //$("#botPanel").parent().css("left", "30%");
         }
 
-        $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
+        $("#" + divId).load("./modules/uiWidgets/html/bot.html", function () {
             if (window.location.href.indexOf("localhost") < 0) {
                 $("#KGcreatorBot_exportToGraph").css("display", "none");
             }

@@ -113,7 +113,7 @@ var JstreeWidget = (function () {
 
             $("#smallDialogDiv").dialog("option", "title", "Select items");
             $("#smallDialogDiv").dialog("open");
-            $("#smallDialogDiv").load("modules/uiWidgets/jsTreeWidget.html", function () {
+            $("#smallDialogDiv").load("modules/uiWidgets/html/jsTreeWidget.html", function () {
                 self.loadJsTree("jstreeWidget_treeDiv", jstreeData, options, callback);
             });
             return;

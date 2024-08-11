@@ -14,6 +14,11 @@ var Axioms_graph = (function () {
         if (node.symbol) {
             shape = "circle";
             color = "#70ac47";
+            if (node.symbol == "^") {
+                shape = "ellipse";
+                font = { bold: true };
+                color = "#f5ef39";
+            }
         } else if (node.owlType && node.owlType.indexOf("Class") > -1) {
             color = "#00afef";
             shape = "dot";
@@ -48,6 +53,7 @@ var Axioms_graph = (function () {
     };
 
     self.drawNodeAxioms2 = function (sourceLabel, nodeId, manchesterTriples, divId, options, callback) {
+        if (!options) options = {};
         self.graphDivId = divId;
         var nodesMap = {};
         var visjsData = { nodes: [], edges: [] };
@@ -92,14 +98,15 @@ var Axioms_graph = (function () {
                         if (p == "http://www.w3.org/2002/07/owl#unionOf") {
                             nodesMap[s].owlType = "unionOf";
                             nodesMap[s].symbol = "⨆";
-                        }
-                        if (p == "http://www.w3.org/2002/07/owl#intersectionOf") {
+                        } else if (p == "http://www.w3.org/2002/07/owl#intersectionOf") {
                             nodesMap[s].owlType = "intersectionOf";
                             nodesMap[s].symbol = "⊓";
-                        }
-                        if (p == "http://www.w3.org/2002/07/owl#complementOf") {
+                        } else if (p == "http://www.w3.org/2002/07/owl#complementOf") {
                             nodesMap[s].owlType = "complementOf";
                             nodesMap[s].symbol = "┓";
+                        } else if (p == "http://www.w3.org/2002/07/owl#inverseOf") {
+                            nodesMap[s].owlType = "inverseOf";
+                            nodesMap[s].symbol = "^";
                         }
                     });
                     var x = nodesMap;
@@ -155,7 +162,7 @@ var Axioms_graph = (function () {
                                 if (!visjsNode) {
                                     return;
                                 }
-                                if (visjsNode.shape != "dot") {
+                                if (visjsNode.shape != "dot" && predicate.p != "http://www.w3.org/2002/07/owl#inverseOf") {
                                     arrows = {
                                         to: {
                                             enabled: true,
@@ -233,7 +240,7 @@ var Axioms_graph = (function () {
                         self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
                         self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
                     } else {
-                        self.drawGraph(visjsData, divId);
+                        self.drawGraph(visjsData, divId, options);
                         self.currentVisjsData = visjsData;
                     }
                     return callbackSeries();
@@ -248,12 +255,13 @@ var Axioms_graph = (function () {
         );
     };
 
-    self.drawGraph = function (visjsData, graphDiv) {
+    self.drawGraph = function (visjsData, graphDiv, options) {
         var xOffset = 80;
         var yOffset = 80;
         //    xOffset = parseInt($("#axiomsDraw_xOffset").val());
         //   yOffset = parseInt($("#axiomsDraw_yOffset").val());
-        var options = {
+
+        var graphOptions = {
             keepNodePositionOnDrag: true,
             /* physics: {
 enabled:true},*/
@@ -281,7 +289,7 @@ enabled:true},*/
                     },
                 },
             },
-            onclickFn: Axioms_graph.onNodeClick,
+            onclickFn: options.onNodeClick,
             onRightClickFn: Axioms_graph.showGraphPopupMenu,
         };
 
@@ -291,23 +299,10 @@ enabled:true},*/
                "<div id='axiomsGraphDiv3' style='width:800px;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
            );*/
 
-        self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
+        self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, graphOptions);
         self.axiomsVisjsGraph.draw(function () {});
     };
 
-    self.onNodeClick = function (node, point, nodeEvent) {
-        if (node && node.data) {
-            self.currentGraphNode = node;
-            Axiom_activeLegend.hideForbiddenResources("add_" + node.data.type);
-            if (nodeEvent.ctrlKey) {
-                if (node.data.type.indexOf("Class") > -1 || node.data.type.indexOf("ObjectProperty") > -1) {
-                    NodeInfosWidget.showNodeInfos(Axiom_editor.currentSource, node, "mainDialogDiv");
-                }
-            }
-        } else {
-            self.currentGraphNode = null;
-        }
-    };
     self.showGraphPopupMenu = function () {};
 
     self.clearGraph = function () {

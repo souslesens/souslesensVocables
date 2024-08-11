@@ -55,6 +55,7 @@ const Axiom_editor = (function () {
     };
 
     self.init = function (divId, nodeId, source) {
+        if (!source) source = Lineage_sources.activeSource;
         self.currentSource = source;
         self.clearAll();
         if (nodeId) {
@@ -82,19 +83,29 @@ const Axiom_editor = (function () {
         self.allProperties = null;
         self.currentSuggestions = [];
         self.previousTokenType = null;
-        self.getAllClasses(function () {
-            self.getAllProperties(function () {
-                self.allResourcesMap = {};
-                self.getAllClasses().forEach(function (item) {
-                    self.allResourcesMap[item.id] = item;
-                });
-                self.getAllProperties().forEach(function (item) {
-                    self.allResourcesMap[item.id] = item;
-                });
+        self.initResourcesMap();
+        //   $("#axiomsEditor_textDiv").html("");
+    };
+
+    self.initResourcesMap = function (source, callback) {
+        self.allResourcesMap = {};
+        self.getAllClasses(source, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            result.forEach(function (item) {
+                self.allResourcesMap[item.id] = item;
             });
         });
-
-        //   $("#axiomsEditor_textDiv").html("");
+        self.getAllProperties(source, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            result.forEach(function (item) {
+                self.allResourcesMap[item.id] = item;
+            });
+            if (callback) return callback(err, result);
+        });
     };
 
     self.setCurrentResource = function (resourceNode) {
@@ -310,8 +321,10 @@ const Axiom_editor = (function () {
         self.drawSuggestions(choices);
     };
 
-    self.getAllClasses = function (callback) {
-        var source = self.currentSource;
+    self.getAllClasses = function (source, callback) {
+        if (!source) {
+            source = self.currentSource;
+        }
         if (!self.allClasses) {
             CommonBotFunctions.listSourceAllClasses(source, null, false, [], function (err, result) {
                 if (err) {
@@ -364,8 +377,8 @@ const Axiom_editor = (function () {
         }, 200);
     };
 
-    self.getAllProperties = function (callback) {
-        var source = self.currentSource;
+    self.getAllProperties = function (source, callback) {
+        if (!source) source = self.currentSource;
 
         if (!self.allProperties) {
             CommonBotFunctions.listSourceAllObjectProperties(source, null, false, function (err, result) {

@@ -151,7 +151,6 @@ var NodeInfosAxioms = (function () {
                 }
             });
 
-
             Axioms_graph.drawNodeAxioms2(self.currentSource, self.currentResource.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, function (err) {});
         } else if (node && node.data) {
             self.currentGraphNode = node;

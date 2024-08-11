@@ -399,16 +399,13 @@ var Axioms_manager = (function () {
         });
     };
 
-    self.listClassesWithAxioms=function (sourceLabel,  callback) {
-        if(!sourceLabel)
-            sourceLabel=Lineage_sources.activeSource
+    self.listClassesWithAxioms = function (sourceLabel, callback) {
+        if (!sourceLabel) sourceLabel = Lineage_sources.activeSource;
         var graphUri = Config.sources[sourceLabel].graphUri;
         if (!graphUri) return callback("no graphUri found");
         var payload = {
             graphName: graphUri,
-
         };
-
 
         const params = new URLSearchParams(payload);
         Axiom_editor.message("getting Class axioms");

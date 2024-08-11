@@ -2173,7 +2173,7 @@ var Lineage_whiteboard = (function () {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
                         //Error on parameters for legend !!!!
-                       // Lineage_decoration.drawLegend("individuals");
+                        // Lineage_decoration.drawLegend("individuals");
                     } else {
                         Lineage_whiteboard.drawNewGraph(visjsData, null, { legendType: "individualClasses" });
                     }

@@ -14,6 +14,11 @@ var Axioms_graph = (function () {
         if (node.symbol) {
             shape = "circle";
             color = "#70ac47";
+            if (node.symbol == "^") {
+                shape = "ellipse";
+                font = { bold: true };
+                color = "#f5ef39";
+            }
         } else if (node.owlType && node.owlType.indexOf("Class") > -1) {
             color = "#00afef";
             shape = "dot";
@@ -48,8 +53,7 @@ var Axioms_graph = (function () {
     };
 
     self.drawNodeAxioms2 = function (sourceLabel, nodeId, manchesterTriples, divId, options, callback) {
-       if(!options)
-           options={}
+        if (!options) options = {};
         self.graphDivId = divId;
         var nodesMap = {};
         var visjsData = { nodes: [], edges: [] };
@@ -94,20 +98,16 @@ var Axioms_graph = (function () {
                         if (p == "http://www.w3.org/2002/07/owl#unionOf") {
                             nodesMap[s].owlType = "unionOf";
                             nodesMap[s].symbol = "⨆";
-                        }
-                        else if (p == "http://www.w3.org/2002/07/owl#intersectionOf") {
+                        } else if (p == "http://www.w3.org/2002/07/owl#intersectionOf") {
                             nodesMap[s].owlType = "intersectionOf";
                             nodesMap[s].symbol = "⊓";
-                        }
-                        else if (p == "http://www.w3.org/2002/07/owl#complementOf") {
+                        } else if (p == "http://www.w3.org/2002/07/owl#complementOf") {
                             nodesMap[s].owlType = "complementOf";
                             nodesMap[s].symbol = "┓";
-                        }
-                        else if (p == "http://www.w3.org/2002/07/owl#inverseOf") {
+                        } else if (p == "http://www.w3.org/2002/07/owl#inverseOf") {
                             nodesMap[s].owlType = "inverseOf";
-                            nodesMap[s].symbol = "f-1";
+                            nodesMap[s].symbol = "^";
                         }
-
                     });
                     var x = nodesMap;
                     callbackSeries();
@@ -162,7 +162,7 @@ var Axioms_graph = (function () {
                                 if (!visjsNode) {
                                     return;
                                 }
-                                if (visjsNode.shape != "dot") {
+                                if (visjsNode.shape != "dot" && predicate.p != "http://www.w3.org/2002/07/owl#inverseOf") {
                                     arrows = {
                                         to: {
                                             enabled: true,
@@ -240,7 +240,7 @@ var Axioms_graph = (function () {
                         self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
                         self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
                     } else {
-                        self.drawGraph(visjsData, divId,options);
+                        self.drawGraph(visjsData, divId, options);
                         self.currentVisjsData = visjsData;
                     }
                     return callbackSeries();
@@ -255,9 +255,7 @@ var Axioms_graph = (function () {
         );
     };
 
-
-
-    self.drawGraph = function (visjsData, graphDiv,options) {
+    self.drawGraph = function (visjsData, graphDiv, options) {
         var xOffset = 80;
         var yOffset = 80;
         //    xOffset = parseInt($("#axiomsDraw_xOffset").val());
@@ -304,7 +302,6 @@ enabled:true},*/
         self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, graphOptions);
         self.axiomsVisjsGraph.draw(function () {});
     };
-
 
     self.showGraphPopupMenu = function () {};
 

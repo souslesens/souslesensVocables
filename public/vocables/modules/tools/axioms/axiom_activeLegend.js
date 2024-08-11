@@ -53,12 +53,11 @@ var Axiom_activeLegend = (function () {
         var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
         visjsData.nodes.push(visjsNode);
         self.hierarchicalLevel = 0;
-        Axioms_graph.drawGraph(visjsData, "axiomGraphDiv",{onNodeClick:Axiom_activeLegend.onNodeGraphClick});
+        Axioms_graph.drawGraph(visjsData, "axiomGraphDiv", { onNodeClick: Axiom_activeLegend.onNodeGraphClick });
         Axioms_graph.currentGraphNode = visjsNode;
 
         self.hideForbiddenResources(selectedObject);
     };
-
 
     self.onNodeGraphClick = function (node, point, nodeEvent) {
         if (node && node.data) {
@@ -72,7 +71,7 @@ var Axiom_activeLegend = (function () {
             }
         } else {
             self.currentGraphNode = null;
-            Axioms_graph.currentGraphNode =null;
+            Axioms_graph.currentGraphNode = null;
         }
     };
 

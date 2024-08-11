@@ -58,9 +58,9 @@ var NodeInfosWidget = (function () {
                         $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                         if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                             var source = self.currentSource;
-                           // source = Lineage_sources.mainSource;
-                            NodeInfosAxioms.init(source,self.currentNode)
-                           // Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
+                            // source = Lineage_sources.mainSource;
+                            NodeInfosAxioms.init(source, self.currentNode);
+                            // Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
                         }
                     }, 100);
                 },
@@ -232,7 +232,6 @@ var NodeInfosWidget = (function () {
                         callbackSeries(err);
                     });
                 },
-
             ],
             function (err) {
                 if (callback) {
@@ -329,8 +328,8 @@ var NodeInfosWidget = (function () {
                 var graphUri = "";
                 var uniqueTriples = {};
                 data.forEach(function (item) {
-                    if(item.prop.value.indexOf("label")>-1){
-                        $("#ui-id-1").append (" "+item.value.value)
+                    if (item.prop.value.indexOf("label") > -1) {
+                        $("#ui-id-1").append(" " + item.value.value);
                     }
                     var key;
                     if (item.objectValue) {
@@ -971,11 +970,6 @@ defaultLang = 'en';*/
 
         callback();
     };
-
-
-
-
-
 
     self.onClickLink = function (nodeId) {
         /*  var filter=Sparql_common.setFilter("subject",[nodeId])

@@ -8,7 +8,7 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import common from "../shared/common.js";
 import Export from "../shared/export.js";
 import PromptedSelectWidget from "./promptedSelectWidget.js";
-import NodeRelations_bot from "../bots/nodeRelations_bot.js";
+import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 
 var SearchWidget = (function () {
     var self = {};
@@ -323,7 +323,7 @@ var SearchWidget = (function () {
             sourceLabel = Lineage_sources.activeSource;
         }
         if (!options) {
-            options = { withoutImports: false, selectGraph: true };
+            options = {withoutImports: false, selectGraph: true};
         }
 
         if (options.targetDiv) {
@@ -405,72 +405,91 @@ var SearchWidget = (function () {
                 },
             };
 
-            items.graphNamedIndividuals = {
-                label: "LinkedData",
-                action: function () {
-                    Lineage_linkedData.showLinkedDataPanel(self.currentTreeNode);
-                    // Lineage_whiteboard.drawNamedIndividuals(self.currentTreeNode.data.id);
-                },
-            };
-
-            items.relations = {
-                label: "Relations...",
+            items.axioms = {
+                label: "Node axioms",
                 action: function (e) {
-                    NodeRelations_bot.start();
-                    // Lineage_relations.showDrawRelationsDialog("Tree");
-                },
-            };
+                    $("#mainDialogDiv").dialog("open")
+                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label)
 
-            items.copyNode = {
-                label: "Copy Node",
+                    NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+
+                }
+            }
+
+            items.descendantsAxioms = {
+                label: "Descendants axioms",
                 action: function (e) {
-                    // pb avec source
-                    LineageClasses.copyNode(e);
+                    $("#mainDialogDiv").dialog("open")
+                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label)
+                    var descendants=JstreeWidget.getNodeDescendants("LineageNodesJsTreeDiv",self.currentTreeNode.id)
+                    descendants.push(self.currentTreeNode)
+                    NodeInfosAxioms.showResourceDescendantsAxioms(self.currentTreeNode.data.source,self.currentTreeNode, descendants, "mainDialogDiv");
 
-                    Lineage_common.copyNodeToClipboard(self.currentTreeNode);
-                },
-            };
-            /*  items.axioms = {
-          label: "graph axioms",
-          action: function (e) {
-
-              NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv",{showAxioms:1});
-
-          },
-      };*/
-
-            if (self.currentSource && Config.sources[self.currentSource].editable) {
-                items.pasteNode = {
-                    label: "paste Node",
-                    action: function (_e) {
-                        if (self.currentCopiedNode) {
-                            return Lineage_combine.showMergeNodesDialog(self.currentCopiedNode);
-                        }
-
-                        common.pasteTextFromClipboard(function (text) {
-                            if (!text) {
-                                return MainController.UI.message("no node copied");
-                            }
-                            try {
-                                var node = JSON.parse(text);
-                                Lineage_combine.showMergeNodesDialog(node, self.currentTreeNode);
-                            } catch (e) {
-                                console.log("wrong clipboard content");
-                            }
-                            return;
-                        });
-                    },
-                };
+                }
             }
         }
 
-        items.exportAllDescendants = {
-            label: "Export all descendants",
-            action: function (_e) {
-                // pb avec source
-                SearchWidget.exportAllDescendants();
+
+        /*
+        items.graphNamedIndividuals = {
+            label: "LinkedData",
+            action: function () {
+                Lineage_linkedData.showLinkedDataPanel(self.currentTreeNode);
+                // Lineage_whiteboard.drawNamedIndividuals(self.currentTreeNode.data.id);
             },
         };
+
+    items.relations = {
+        label: "Relations...",
+        action: function (e) {
+            NodeRelations_bot.start();
+            // Lineage_relations.showDrawRelationsDialog("Tree");
+        },
+    };
+
+    items.copyNode = {
+        label: "Copy Node",
+        action: function (e) {
+            // pb avec source
+            //   LineageClasses.copyNode(e);
+
+            Lineage_common.copyNodeToClipboard(self.currentTreeNode);
+        },
+    };
+
+
+    if (self.currentSource && Config.sources[self.currentSource].editable) {
+        items.pasteNode = {
+            label: "paste Node",
+            action: function (_e) {
+                if (self.currentCopiedNode) {
+                    return Lineage_combine.showMergeNodesDialog(self.currentCopiedNode);
+                }
+
+                common.pasteTextFromClipboard(function (text) {
+                    if (!text) {
+                        return MainController.UI.message("no node copied");
+                    }
+                    try {
+                        var node = JSON.parse(text);
+                        Lineage_combine.showMergeNodesDialog(node, self.currentTreeNode);
+                    } catch (e) {
+                        console.log("wrong clipboard content");
+                    }
+                    return;
+                });
+            },
+        };
+    }
+}
+
+items.exportAllDescendants = {
+    label: "Export all descendants",
+    action: function (_e) {
+        // pb avec source
+        SearchWidget.exportAllDescendants();
+    },
+};*/
 
         return items;
     };
@@ -496,7 +515,7 @@ var SearchWidget = (function () {
         if (options.depth) {
             descendantsDepth = options.depth;
         }
-        // options.filterCollections = Collection.currentCollectionFilter;
+// options.filterCollections = Collection.currentCollectionFilter;
         Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, descendantsDepth, options, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);

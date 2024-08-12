@@ -99,7 +99,7 @@ var NodeInfosAxioms = (function () {
                             });
                         }
                         if (index == 2) {
-                            var id = word;
+                            var id =common.getRandomHexaId(5);
                             /*  for (var key in Axiom_editor.allClassesMap) {
                                   if (self.allClassesMap[key].label.indexOf(word) > -1) {
                                       id = key;
@@ -111,7 +111,7 @@ var NodeInfosAxioms = (function () {
                                 text: item,
                                 parent: currentAxiomtype,
                                 data: {
-                                    id: id,
+                                    id: word,
                                     label: word,
                                     triples: triples[index0],
                                     manchester: item,

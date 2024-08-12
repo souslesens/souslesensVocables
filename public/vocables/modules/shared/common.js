@@ -272,6 +272,15 @@ var common = (function () {
             });
             return c;
         },
+        toMap:function(array,key){
+            var map={}
+            array.forEach(function(item){
+                if(item[key])
+                    map[item[key]]=item
+            })
+            return map
+        }
+
     };
 
     self.concatArraysWithoutDuplicate = function (array, addedArray, key) {

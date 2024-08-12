@@ -130,7 +130,7 @@ var Axioms_graph = (function () {
                 function (callbackSeries) {
                     var existingNodes = {};
 
-                    if(self.axiomsVisjsGraph){
+                    if(options.addToGraph && self.axiomsVisjsGraph ){
                         existingNodes= self.axiomsVisjsGraph.getExistingIdsMap()
                     }
                     var stop = false;
@@ -234,6 +234,19 @@ var Axioms_graph = (function () {
                     recurse(disjointClassesAxiomRoot ||nodeId, level);
 
                     return callbackSeries();
+                },
+    //optimize nodes levels
+                function (callbackSeries) {
+
+              var nodesMap=common.array.toMap(visjsData.nodes,"id")
+                    visjsData.edges.forEach(function (edge, nodeIndex) {
+                    ;//    if(nodesMap[edge.from].level<nodesMap[edge.to].level)
+                      ;//  if(edge)
+                    })
+
+                    return callbackSeries();
+
+
                 },
                 //draw graph
                 function (callbackSeries) {

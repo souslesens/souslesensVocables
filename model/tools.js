@@ -15,8 +15,8 @@ const { configPlugins } = require("./config");
 
 const NATIVE_TOOLS = [
     { name: "lineage", controller: "Lineage_r", useSource: true, multiSources: false, toTools: {} },
-    { name: "KGcreator", controller: "KGcreator_r", useSource: false, multiSources: false, toTools: {} },
-    { name: "KGquery", controller: "KGquery_r", useSource: true, multiSources: false, toTools: {} },
+    { name: "KGcreator", controller: "KGcreator", useSource: false, multiSources: false, toTools: {} },
+    { name: "KGquery", controller: "KGquery", useSource: true, multiSources: false, toTools: {} },
     { name: "Standardizer", controller: "Standardizer", useSource: true, multiSources: false, toTools: {} },
     { name: "TSF_Dictionary", controller: "Lineage_dictionary", useSource: false, multiSources: false, toTools: {} },
     { name: "SPARQL", label: "SPARQL endpoint", controller: "SPARQL_endpoint", useSource: true, multiSources: false, toTools: {} },

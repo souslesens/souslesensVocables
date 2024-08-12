@@ -32,7 +32,7 @@ var Lineage_r = (function () {
         }
 
         ResponsiveUI.initMenuBar(self.loadSources);
-        $("#Lineage_graphEditionButtons").load("./modules/tools//lineage/html/AddNodeEdgeButtons.html");
+        $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
     };
@@ -244,23 +244,8 @@ var Lineage_r = (function () {
             self.MoreOptionsShow = true;
         }
     };
-    self.changeIconForPropertiesGraphAction = function (div) {
-        var icon = $(div).children().attr("class");
-        if (icon == "allPropertyIcon slsv-invisible-button" || icon == "slsv-invisible-button allPropertyIcon") {
-            $(div).children().removeClass("allPropertyIcon");
-            $(div).children().addClass("currentPropertyIcon");
-        } else {
-            $(div).children().removeClass("currentPropertyIcon");
-            $(div).children().addClass("allPropertyIcon");
-        }
-    };
-    self.checkbox_Lineage_containers = function () {
-        if ($("#LineageProperties_searchInAllSources")[0].checked) {
-            $("#LineageProperties_searchInAllSources").val("current");
-        } else {
-            $("#LineageProperties_searchInAllSources").val("all");
-        }
-    };
+    
+  
 
     //less.modifyVars({'@button1-color': '#000'})
 

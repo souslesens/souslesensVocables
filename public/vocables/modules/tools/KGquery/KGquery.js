@@ -34,20 +34,32 @@ var KGquery = (function () {
     self.maxOptionalPredicatesInQuery = 10;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
+    self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
+    
     self.onLoaded = function () {
-        $("#actionDivContolPanelDiv").load("modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
-            KGquery_graph.init();
-            if (Config.clientCache.KGquery) {
-                self.clearAll();
-                KGquery_myQueries.load(null, Config.clientCache.KGquery);
-            }
-        });
-        $("#graphDiv").load("modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
-            self.currentSource = Lineage_sources.activeSource;
-            self.showSourcesDialog();
-        });
+        Lineage_sources.showHideEditButtons = ResponsiveUI.disableEditButtons;
+        
+       
+        ResponsiveUI.initMenuBar(KGquery.loadSource);
+        KGquery.clearAll();
+        if (Config.clientCache.KGquery) {
+            KGquery_myQueries.load(null, Config.clientCache.KGquery);
+        }
+        $("#messageDiv").attr("id", "KGquery_messageDiv");
+        $("#waitImg").attr("id", "KGquery_waitImg");
     };
+    self.unload = function () {
+        Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
+        self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
+        Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
+        //reapply changed DOM
 
+        $("#KGquery_messageDiv").attr("id", "messageDiv");
+        $("#KGquery_waitImg").attr("id", "waitImg");
+        $("#graphDiv").empty();
+        $("#lateralPanelDiv").empty();
+    };
+    
     self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
         SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
@@ -59,28 +71,43 @@ var KGquery = (function () {
             KGquery_outputTypeSelectNode.append(`<option>${toolName}</option>`);
         }
     };
-
-    self.showSourcesDialog = function (forceDialog) {
-        self.clearAll();
-        if (!forceDialog && Config.userTools["KGquery"].urlParam_source) {
-            self.currentSource = Config.userTools["KGquery"].urlParam_source;
-            self.init();
-            return;
-        }
-
-        var options = {
-            includeSourcesWithoutSearchIndex: true,
-            withCheckboxes: false,
-        };
-        var selectTreeNodeFn = function (event, obj) {
-            $("#mainDialogDiv").dialog("close");
-            self.currentSource = obj.node.id;
-            self.init();
-        };
-        MainController.UI.showHideRightPanel("hide");
-        $("#KGquery_SetsControlsDiv").hide();
-        SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
+    
+    self.loadSource = function () {
+        KGquery.currentSource = ResponsiveUI.source;
+        Lineage_sources.loadSources(MainController.currentSource, function (err) {
+            if (err) {
+                return alert(err.responseText);
+            }
+            $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
+                $("#lateralPanelDiv").load("./modules/tools/KGquery/html/lateralPanel.html", function () {
+                    KGquery_graph.drawVisjsModel("saved");
+                    ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery.initQuery, "#QueryTabButton");
+                    ResponsiveUI.resetWindowHeight();
+                    self.clearAll();
+                    if (Config.clientCache.KGquery) {
+                        setTimeout(function () {
+                            KGquery_myQueries.load(null, Config.clientCache.KGquery);
+                        }, 1000);
+                    }
+                    $("#KGquery_dataTableDialogDiv").dialog({
+                        autoOpen: false,
+                        close: function (event, ui) {
+                            window.scrollTo(0, 0);
+                        },
+                        drag: function (event, ui) {
+                            $("#KGquery_dataTableDialogDiv").parent().css("transform", "unset");
+                        },
+                        open(event, ui) {
+                            $("#KGquery_dataTableDialogDiv").parent().css("transform", "translate(-50%,-50%)");
+                            $("#KGquery_dataTableDialogDiv").parent().css("top", "50%");
+                            $("#KGquery_dataTableDialogDiv").parent().css("left", "50%");
+                        },
+                    });
+                });
+            });
+        });
     };
+   
 
     self.addQuerySet = function (booleanOperator) {
         var label = "";
@@ -774,7 +801,24 @@ var KGquery = (function () {
     self.addOutputType = function () {
         $("KGquery_outputTypeSelect");
     };
-
+    self.initMyQuery = function () {
+        SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "tabs_myQueries", KGquery.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
+    };
+    self.initQuery = function () {
+        if ($("#tabs_Query").children().length == 0) {
+            $("#tabs_Query").load("./modules/tools/KGquery/html/KGqueryQueryTab.html", function () {
+                //  KGquery.addQuerySet();
+            });
+        }
+    };
+    self.initGraph = function () {
+        if ($("#tabs_Graph").children().length == 0) {
+            $("#tabs_Graph").load("./modules/tools/KGquery/html/KGqueryGraphTab.html", function () {
+                KGquery_graph.init();
+                //  KGquery_graph.drawVisjsModel("saved");
+            });
+        }
+    };
     return self;
 })();
 

@@ -1116,7 +1116,16 @@ var Lineage_properties = (function () {
             }
         }
     };
-
+    self.changeIconForPropertiesGraphAction = function (div) {
+        var icon = $(div).children().attr("class");
+        if (icon == "allPropertyIcon slsv-invisible-button" || icon == "slsv-invisible-button allPropertyIcon") {
+            $(div).children().removeClass("allPropertyIcon");
+            $(div).children().addClass("currentPropertyIcon");
+        } else {
+            $(div).children().removeClass("currentPropertyIcon");
+            $(div).children().addClass("allPropertyIcon");
+        }
+    };
     return self;
 })();
 

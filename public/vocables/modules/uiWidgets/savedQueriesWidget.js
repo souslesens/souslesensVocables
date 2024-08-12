@@ -30,7 +30,7 @@ var SavedQueriesWidget = (function () {
         if (targetDiv.indexOf("Dialog") > -1) {
             $("#" + targetDiv).dialog("open");
         }
-        $("#" + targetDiv).load("snippets/savedQueriesWidget.html", function () {
+        $("#" + targetDiv).load("./modules/uiWidgets/html/savedQueriesWidget.html", function () {
             if (slsvSource) {
                 self.list(CRUDsource, slsvSource, scope);
             }

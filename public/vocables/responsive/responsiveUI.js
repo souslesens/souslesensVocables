@@ -6,7 +6,7 @@ import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
 import Lineage_r from "./lineage/lineage_r.js";
 
 import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
-import KGcreator_r from "./KGcreator/Kgcreator_r.js";
+
 import MainController from "../modules/shared/mainController.js";
 
 var ResponsiveUI = (function () {
@@ -34,7 +34,7 @@ var ResponsiveUI = (function () {
             function (event) {
                 self.resetWindowHeight();
                 if (self.currentTool == "KGcreator") {
-                    KGcreator_r.ResetRunMappingTabWidth();
+                    KGcreator.ResetRunMappingTabWidth();
                 }
             },
             true
@@ -472,7 +472,15 @@ var ResponsiveUI = (function () {
     self.homePage = function () {
         window.document.location.href = window.document.location.origin + "/vocables/";
     };
+    self.disableEditButtons = function (source, hide) {
+        $("#Lineage_graphEditionButtons").hide();
+        if (!Lineage_whiteboard.lineageVisjsGraph.network) {
+            return;
+        }
 
+        Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
+        $(".vis-edit-mode").css("display", "none");
+    };
     return self;
 })();
 export default ResponsiveUI;

@@ -13,7 +13,7 @@ var DateWidget = (function () {
             self.divId = divId;
             $("#smallDialogDiv").dialog("open");
         }
-        $("#" + divId).load("modules/uiWidgets/dateWidget.html", function () {
+        $("#" + divId).load("modules/uiWidgets/html/dateWidget.html", function () {
             DateWidget.setDatePickerOnInput("dateWidget_input", null, function (date) {});
         });
     };

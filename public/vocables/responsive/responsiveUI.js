@@ -469,9 +469,11 @@ var ResponsiveUI = (function () {
             ResponsiveUI.resetWindowHeight();
         }
     };
+    //keep
     self.homePage = function () {
         window.document.location.href = window.document.location.origin + "/vocables/";
     };
+    //keep
     self.disableEditButtons = function (source, hide) {
         $("#Lineage_graphEditionButtons").hide();
         if (!Lineage_whiteboard.lineageVisjsGraph.network) {

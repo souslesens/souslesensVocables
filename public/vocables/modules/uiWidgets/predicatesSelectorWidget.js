@@ -78,7 +78,7 @@ var PredicatesSelectorWidget = (function () {
         self.options = options || {};
         $("#" + divId).html("");
         $("#editPredicate_mainDiv").parent().empty();
-        $("#" + divId).load("snippets/predicatesSelectorWidgetDialog.html", function (a, b, c) {
+        $("#" + divId).load("./modules/uiWidgets/html/predicatesSelectorWidgetDialog.html", function (a, b, c) {
             var x = a + b + c;
             self.init(source, configureFn, function (err, result) {
                 if (callback) {

@@ -254,18 +254,21 @@ var Lineage_sources = (function () {
         if (!Lineage_whiteboard.lineageVisjsGraph.network) {
             return;
         }
-        if (hide) {
-            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
-            $(".vis-edit-mode").css("display", "none");
-        }
+
+        Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
+        $(".vis-edit-mode").css("display", "none");
+
         var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
         if (isNodeEditable) {
-            Lineage_whiteboard.lineageVisjsGraph.network.enableEditMode();
-            $(".vis-edit-mode").css("display", "block");
+            $("#Lineage_graphEditionButtons").css("display", "block");
+
+            $("#lineage_createResourceBtn").show();
         } else {
-            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
-            $(".vis-edit-mode").css("display", "none");
+            $("#Lineage_graphEditionButtons").css("display", "none");
+            $("#lineage_createResourceBtn").hide();
         }
+        $("#Title1").text($(".Lineage_selectedSourceDiv").text());
+        Lineage_whiteboard.resetCurrentTab();
     };
 
     self.whiteboard_setGraphOpacity = function (source) {

@@ -14,7 +14,7 @@ const { configPlugins } = require("./config");
  */
 
 const NATIVE_TOOLS = [
-    { name: "lineage", controller: "Lineage_r", useSource: true, multiSources: false, toTools: {} },
+    { name: "lineage", controller: "Lineage_whiteboard", useSource: true, multiSources: false, toTools: {} },
     { name: "KGcreator", controller: "KGcreator", useSource: false, multiSources: false, toTools: {} },
     { name: "KGquery", controller: "KGquery", useSource: true, multiSources: false, toTools: {} },
     { name: "Standardizer", controller: "Standardizer", useSource: true, multiSources: false, toTools: {} },

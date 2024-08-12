@@ -56,7 +56,7 @@ var KGcreator = (function () {
 
     self.onLoaded = function () {
         self.currentTab = "";
-        PredicatesSelectorWidget.load = Lineage_r.loadPredicateSelectorWidgetResponsive;
+        
         ResponsiveUI.initMenuBar(self.loadSource);
         //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
         $("#Lineage_graphEditionButtons").show();

@@ -10,6 +10,7 @@ var Lineage_createRelation = (function () {
     var self = {};
 
     self.showAddEdgeFromGraphDialog = function (edgeData, callback) {
+        //$("#smallDialogDiv").parent().show("fast", function () {
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
@@ -366,12 +367,13 @@ var Lineage_createRelation = (function () {
                     if (err) {
                         return callback(err);
                     }
-
+                    Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
                     if (edgeData.from === edgeData.to) {
                         return callback(null);
                     } else {
                         return callback(null);
                     }
+                    
                 }
             );
         });

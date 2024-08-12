@@ -34,7 +34,7 @@ var KGquery = (function () {
     self.maxOptionalPredicatesInQuery = 10;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
-    self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
+   
     
     self.onLoaded = function () {
         Lineage_sources.showHideEditButtons = ResponsiveUI.disableEditButtons;
@@ -49,8 +49,7 @@ var KGquery = (function () {
         $("#waitImg").attr("id", "KGquery_waitImg");
     };
     self.unload = function () {
-        Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
-        self.oldshowHideEditButtons = Lineage_sources.showHideEditButtons;
+      
         Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
         //reapply changed DOM
 

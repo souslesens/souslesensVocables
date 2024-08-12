@@ -3,7 +3,7 @@ import authentication from "../modules/shared/authentification.js";
 import Clipboard from "../modules/shared/clipboard.js";
 import Lineage_sources from "../modules/tools/lineage/lineage_sources.js";
 import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
-import Lineage_r from "./lineage/lineage_r.js";
+
 
 import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
 
@@ -210,7 +210,7 @@ var ResponsiveUI = (function () {
         MainController.currentSource = obj.node.data.id;
         $("#selectedSource").html(MainController.currentSource);
         $("#mainDialogDiv").parent().hide();
-        Lineage_r.loadSources();
+        Lineage_whiteboard.loadSources();
     };
     // What is the goal of this function? --> MainController?
     self.initTool = function (toolId, callback) {
@@ -456,14 +456,14 @@ var ResponsiveUI = (function () {
                 if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                     Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color = "white";
                     Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
-                    Lineage_r.showHideEditButtons(self.source);
+                    Lineage_sources.showHideEditButtons(self.source);
                 }
             } else {
                 Lineage_whiteboard.defaultNodeFontColor = "#343434";
                 if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                     Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color = "#343434";
                     Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
-                    Lineage_r.showHideEditButtons(self.source);
+                    Lineage_sources.showHideEditButtons(self.source);
                 }
             }
             ResponsiveUI.resetWindowHeight();

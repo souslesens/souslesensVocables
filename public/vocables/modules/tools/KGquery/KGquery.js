@@ -17,7 +17,7 @@ import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
 
-import ResponsiveUI from "../../../responsive/responsiveUI.js";
+import ResponsiveUI from "../../../modules/shared/responsiveUI.js";
 
 import KGquery_filter from "./KGquery_filter.js";
 
@@ -72,7 +72,7 @@ var KGquery = (function () {
     };
     
     self.loadSource = function () {
-        KGquery.currentSource = ResponsiveUI.source;
+        KGquery.currentSource = MainController.currentSource;
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
                 return alert(err.responseText);
@@ -590,7 +590,7 @@ var KGquery = (function () {
             });
         });
 
-        ResponsiveUI.onToolSelect("lineage", null, function () {
+        MainController.onToolSelect("lineage", null, function () {
             setTimeout(function () {
                 Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
             }, 2000);
@@ -606,7 +606,7 @@ var KGquery = (function () {
                 }
             }
         });
-        ResponsiveUI.onToolSelect("TagsGeometry", null, function () {
+        MainController.onToolSelect("TagsGeometry", null, function () {
             setTimeout(function () {
                 //   import TagsGeometry from "../../../../plugins/TagsGeometry/public/js/main.js";
                 TagsGeometry.draw(tagsMap);
@@ -619,7 +619,7 @@ var KGquery = (function () {
         if (data.length == 0) {
             return alert("no result");
         }
-        ResponsiveUI.onToolSelect("TagsCalendar", null, function () {
+        MainController.onToolSelect("TagsCalendar", null, function () {
             setTimeout(function () {
                 //   import TagsGeometry from "../../../../plugins/TagsGeometry/public/js/main.js";
                 TagsCalendar.drawSparqlResultTimeLine({ data: data });

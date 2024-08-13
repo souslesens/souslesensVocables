@@ -58,7 +58,7 @@ var KGcreator = (function () {
         self.currentTab = "";
         
         ResponsiveUI.initMenuBar(self.loadSource);
-        //ResponsiveUI.replaceFile(NodesInfosWidget, NodeInfosWidgetResponsive);
+        
         $("#Lineage_graphEditionButtons").show();
         $("#Lineage_graphEditionButtons").empty();
         $("#Lineage_graphEditionButtons").attr("id", "KGcreator_topButtons");
@@ -82,7 +82,7 @@ var KGcreator = (function () {
             }
             $("#graphDiv").load("./modules/tools/KGcreator/html/centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./modules/tools/KGcreator/html/leftPanel.html", function () {
-                    self.currentSlsvSource = ResponsiveUI.source;
+                    self.currentSlsvSource = MainController.currentSource;
                     ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initLinkTab, "#MapButton");
                     self.initSource();
                     ResponsiveUI.resetWindowHeight();

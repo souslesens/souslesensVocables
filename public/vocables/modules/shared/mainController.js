@@ -8,7 +8,7 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_SKOS from "../sparqlProxies/sparql_SKOS.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import GraphLoader from "./graphLoader.js";
-import ResponsiveUI from "../../responsive/responsiveUI.js";
+import ResponsiveUI from "../../modules/shared/responsiveUI.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -26,6 +26,7 @@ var MainController = (function () {
     self.currentTool = null;
     self.currentSchemaType = null;
     self.currentSource = null;
+    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
 
     self.initConfig = function (callback) {
         $.ajax({
@@ -207,7 +208,145 @@ var MainController = (function () {
                 }
             });
     };
+     //MainController.onSourceSelect
+     self.onSourceSelect = function (evt, obj) {
+        //  if (!MainController.currentTool) return self.alert("select a tool first");
+        var p = obj.node.parents.indexOf("PRIVATE");
+        if (p > 0) {
+            Config.sourceOwner = obj.node.parents[p - 1];
+        }
 
+        if (!obj.node.data || obj.node.data.type != "source") {
+            $(obj.event.currentTarget).siblings().click();
+            return;
+        }
+
+        var source = obj.node.data.id;
+        self.sourceSelect(source);
+    };
+    //To MainController too
+    self.sourceSelect = function (source) {
+        self.currentSource = source;
+        
+
+        $("#selectedSource").html(self.currentSource);
+
+        $("#mainDialogDiv").parent().hide();
+        const params = new URLSearchParams(document.location.search);
+        if (self.currentSource) {
+            params.set("source", self.currentSource);
+        }
+        window.history.replaceState(null, "", `?${params.toString()}`);
+        MainController.initTool(self.currentTool, function (err, result) {
+            if (err) {
+                return alert(err.responseText);
+            }
+            ResponsiveUI.resetWindowHeight();
+        });
+    };
+    // MainController or in Lineage_r ?
+    self.onSourceSelect_AddSource = function (evt, obj) {
+        //  if (!MainController.currentTool) return self.alert("select a tool first");
+        if (!obj.node.data || obj.node.data.type != "source") {
+            return alert("select a tool");
+        }
+
+        self.currentSource = obj.node.data.id;
+        $("#selectedSource").html(self.currentSource);
+        $("#mainDialogDiv").parent().hide();
+        Lineage_whiteboard.loadSources();
+    };
+  
+    //Giving a tool in parameter and the function launch it
+    self.initTool = function (toolId, callback) {
+        MainController.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource || "");
+        var toolObj = Config.userTools[toolId];
+        self.initControllers();
+        Clipboard.clear();
+        Lineage_sources.loadedSources = {};
+        if (Config.userTools[toolId].controller.onLoaded) {
+            Config.userTools[toolId].controller.onLoaded();
+        } else {
+            if (true) {
+                var url = window.location.href;
+                var p = url.indexOf("?");
+                if (p > -1) {
+                    url = url.substring(0, p);
+                }
+                url = url.replace("index_r.html", "");
+                url += "?tool=" + toolId;
+                window.location.href = url;
+            }
+        }
+    };
+    //  MainController --> onToolSelect.initTool   when click on a button of a tool
+     // Manage when we click on a tool with parameter event
+    // Or when we choose a tool with the url with toolId parameter
+    self.onToolSelect = function (toolId, event, callback) {
+        if (event) {
+            var clickedElement = event.target;
+            // if class
+            if (clickedElement.className == "Lineage_PopUpStyleDiv") {
+                var toolId = $(clickedElement).children()[1].innerHTML;
+            } else {
+                if (clickedElement.id == "toolsSelect") {
+                    return;
+                } else if (clickedElement.innerHTML) {
+                    var toolId = clickedElement.innerHTML;
+                } else {
+                    var toolId = clickedElement.nextSibling.innerHTML;
+                }
+            }
+        }
+
+        if (self.currentTool != null) {
+            if (Config.userTools[self.currentTool].controller.unload) {
+                try {
+                    Config.userTools[self.currentTool].controller.unload();
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+        }
+        self.currentTool = toolId;
+
+        if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
+            Lineage_sources.registerSource =  Lineage_sources.registerSourceWithoutDisplayingImports;
+        }
+        $("#currentToolTitle").html(toolId);
+        if (ResponsiveUI.currentTheme["@" + toolId + "-logo"]) {
+            $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
+        }
+        MainController.currentTool = toolId;
+        if (MainController.toolsNeedSource.includes(toolId)) {
+            if (self.currentSource == null) {
+                ResponsiveUI.showSourceDialog(true);
+            } else {
+                self.sourceSelect(self.currentSource);
+            }
+        } else {
+            self.initTool(toolId);
+            self.currentSource = null;
+        }
+
+        // set or replace tool in url params
+        const params = new URLSearchParams(document.location.search);
+        if (toolId != "ConfigEditor") {
+            params.delete("tab");
+        }
+        params.set("tool", toolId);
+        if (self.currentSource) {
+            params.set("source", self.currentSource);
+        } else {
+            params.delete("source");
+        }
+
+        window.history.replaceState(null, "", `?${params.toString()}`);
+
+        if (callback) {
+            callback();
+        }
+    };
     self.UI = {
         configureUI: function () {},
 
@@ -252,7 +391,7 @@ var MainController = (function () {
             if (true || toolId == "lineage" || toolId == "KGquery") {
                 Lineage_sources.setAllWhiteBoardSources(true);
                 $("#accordion").accordion("option", { active: 2 });
-                MainController.currentSource = null;
+                self.currentSource = null;
 
                 controller.onLoaded(function (err, result) {
                     if (callback) {
@@ -265,7 +404,7 @@ var MainController = (function () {
             self.UI.updateActionDivLabel();
             SearchWidget.targetDiv = "currentSourceTreeDiv";
             if (toolObj.noSource) {
-                MainController.currentSource = null;
+                self.currentSource = null;
                 MainController.UI.onSourceSelect();
             } else {
                 var options = {
@@ -434,9 +573,9 @@ var MainController = (function () {
 
                 // if tool available load it in responsive
                 if (source) {
-                    ResponsiveUI.source = source;
+                    self.currentSource = source;
                 }
-                ResponsiveUI.onToolSelect(tool);
+                MainController.onToolSelect(tool);
                 /*
                 if (window.history.pushState && url.indexOf("localhost") < 0) {
                     var url = url.substring(0, url.indexOf("?"));

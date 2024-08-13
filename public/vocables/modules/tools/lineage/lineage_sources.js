@@ -14,6 +14,7 @@ import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 import Authentification from "../../shared/authentification.js";
+import ResponsiveUI from "../../../modules/shared/responsiveUI.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -426,6 +427,54 @@ sourceDivId +
                 self.setCurrentSource(source);
             });
             return callback();
+        });
+    };
+    self.registerSourceWithoutDisplayingImports = function (sourceLabel, callback) {
+        if (!callback) {
+            callback = function () {};
+        }
+
+        if (Lineage_sources.loadedSources[sourceLabel]) {
+            return callback();
+        }
+
+        OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            if (sourceLabel == MainController.currentSource) {
+                var sourceDivId = "source_" + common.getRandomHexaId(5);
+                Lineage_sources.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
+                Lineage_sources.sourceDivsMap[sourceDivId] = sourceLabel;
+                var html =
+                    "<div  id='" +
+                    sourceDivId +
+                    "' style='color: " +
+                    Lineage_whiteboard.getSourceColor(sourceLabel) +
+                    ";display:inline-flex;align-items:end;'" +
+                    " class='Lineage_sourceLabelDiv'  " +
+                    ">" +
+                    sourceLabel +
+                    "&nbsp;" +
+                    /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+    sourceDivId +
+    "\")'>[-]</i>";*/
+                    "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+                    sourceDivId +
+                    "\")'/> </button></div>";
+                $("#lineage_drawnSources").append(html);
+                $("#lineage_drawnSources").find(".arrow-icon").hide();
+                /*
+                $("#" + sourceDivId).bind("click", function (e) {
+                    var sourceDivId = $(this).attr("id");
+                    var source = self.sourceDivsMap[sourceDivId];
+                    Lineage_sources.setCurrentSource(source);
+                });
+                */
+                return callback();
+            } else {
+                return callback();
+            }
         });
     };
     self.showSourceDivPopupMenu = function (sourceDivId) {

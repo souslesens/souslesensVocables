@@ -1,22 +1,22 @@
-import common from "../modules/shared/common.js";
-import authentication from "../modules/shared/authentification.js";
-import Clipboard from "../modules/shared/clipboard.js";
-import Lineage_sources from "../modules/tools/lineage/lineage_sources.js";
-import SourceSelectorWidget from "../modules/uiWidgets/sourceSelectorWidget.js";
+import common from "../../modules/shared/common.js";
+import authentication from "../../modules/shared/authentification.js";
+import Clipboard from "../../modules/shared/clipboard.js";
+import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
+import SourceSelectorWidget from "../../modules/uiWidgets/sourceSelectorWidget.js";
 
 
-import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
+import Lineage_whiteboard from "../../modules/tools/lineage/lineage_whiteboard.js";
 
-import MainController from "../modules/shared/mainController.js";
+import MainController from "../../modules/shared/mainController.js";
 
 var ResponsiveUI = (function () {
     var self = {};
-    self.source = null;
+   
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
-    self.currentTool = null;
-    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
     self.smartPhoneScreen = null;
+
+    
     //Etablish the resizing, load select bar tools --> Keep here
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
@@ -33,7 +33,7 @@ var ResponsiveUI = (function () {
             "resize",
             function (event) {
                 self.resetWindowHeight();
-                if (self.currentTool == "KGcreator") {
+                if (MainController.currentTool == "KGcreator") {
                     KGcreator.ResetRunMappingTabWidth();
                 }
             },
@@ -41,8 +41,26 @@ var ResponsiveUI = (function () {
         );
 
         self.themeList();
-        //self.replaceFile(BotEngine, BotEngineResponsive);
+       
         ResponsiveUI.resetWindowHeight();
+    };
+      // keep
+      self.showSourceDialog = function (resetAll) {
+        self.openDialogDiv("mainDialogDiv");
+        $("#" + "mainDialogDiv")
+            .parent()
+            .show();
+        $("#sourceSelector_searchInput").focus();
+        var onSourceSelect;
+        if (resetAll) {
+            Lineage_sources.loadedSources = {};
+            onSourceSelect = MainController.onSourceSelect;
+        } else {
+            onSourceSelect = MainController.onSourceSelect_AddSource;
+        }
+        SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
+            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
+        });
     };
     // keep here
     self.initMenuBar = function (fn) {
@@ -50,13 +68,14 @@ var ResponsiveUI = (function () {
         $("#index_topContolPanel").show();
         //Loading
         $("#index_topContolPanel").load("./modules/tools/lineage/html/sourcesDiv.html", function () {
-            if (self.currentTool != "lineage") {
+            if (MainController.currentTool != "lineage") {
                 $("#AddSourceButton").remove();
                 $("#AllSourceButton").remove();
             }
             fn();
         });
     };
+    
     // Keep Here
     self.resetWindowHeight = function () {
         var MenuBarHeight = $("#MenuBar").height();
@@ -90,158 +109,6 @@ var ResponsiveUI = (function () {
         //$("#graphDiv").css("height", $(window).height() - MenuBarHeight - 1);
         //Lineage_whiteboard.lineageVisjsGraph.network.startSimulation();
     };
-    // To suppress
-    self.replaceFile = function (file1, file2) {
-        Object.keys(file1).forEach((key) => {
-            if (file2[key]) {
-                file1[key] = file2[key];
-            }
-        });
-    };
-    //  MainController --> onToolSelect.initTool   when click on a button of a tool
-    self.onToolSelect = function (toolId, event, callback) {
-        if (event) {
-            var clickedElement = event.target;
-            // if class
-            if (clickedElement.className == "Lineage_PopUpStyleDiv") {
-                var toolId = $(clickedElement).children()[1].innerHTML;
-            } else {
-                if (clickedElement.id == "toolsSelect") {
-                    return;
-                } else if (clickedElement.innerHTML) {
-                    var toolId = clickedElement.innerHTML;
-                } else {
-                    var toolId = clickedElement.nextSibling.innerHTML;
-                }
-            }
-        }
-
-        if (self.currentTool != null) {
-            if (Config.userTools[self.currentTool].controller.unload) {
-                try {
-                    Config.userTools[self.currentTool].controller.unload();
-                } catch (e) {
-                    console.log(e);
-                }
-            }
-        }
-        self.currentTool = toolId;
-
-        if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
-            Lineage_sources.registerSource = self.registerSourceWithoutImports;
-        }
-        $("#currentToolTitle").html(toolId);
-        if (self.currentTheme["@" + toolId + "-logo"]) {
-            $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
-        }
-        MainController.currentTool = toolId;
-        if (self.toolsNeedSource.includes(toolId)) {
-            if (self.source == null) {
-                ResponsiveUI.showSourceDialog(true);
-            } else {
-                self.sourceSelect(self.source);
-            }
-        } else {
-            self.initTool(toolId);
-            self.source = null;
-        }
-
-        // set or replace tool in url params
-        const params = new URLSearchParams(document.location.search);
-        if (toolId != "ConfigEditor") {
-            params.delete("tab");
-        }
-        params.set("tool", toolId);
-        if (self.source) {
-            params.set("source", self.source);
-        } else {
-            params.delete("source");
-        }
-
-        window.history.replaceState(null, "", `?${params.toString()}`);
-
-        if (callback) {
-            callback();
-        }
-    };
-    //MainController.onSourceSelect
-    self.onSourceSelect = function (evt, obj) {
-        //  if (!MainController.currentTool) return self.alert("select a tool first");
-        var p = obj.node.parents.indexOf("PRIVATE");
-        if (p > 0) {
-            Config.sourceOwner = obj.node.parents[p - 1];
-        }
-
-        if (!obj.node.data || obj.node.data.type != "source") {
-            $(obj.event.currentTarget).siblings().click();
-            return;
-        }
-
-        var source = obj.node.data.id;
-        self.sourceSelect(source);
-    };
-    //To MainController too
-    self.sourceSelect = function (source) {
-        MainController.currentSource = source;
-        ResponsiveUI.source = source;
-
-        $("#selectedSource").html(MainController.currentSource);
-
-        $("#mainDialogDiv").parent().hide();
-        const params = new URLSearchParams(document.location.search);
-        if (self.source) {
-            params.set("source", self.source);
-        }
-        window.history.replaceState(null, "", `?${params.toString()}`);
-        self.initTool(MainController.currentTool, function (err, result) {
-            if (err) {
-                return self.alert(err.responseText);
-            }
-            self.resetWindowHeight();
-        });
-    };
-    // MainController or in Lineage_r ?
-    self.onSourceSelect_AddSource = function (evt, obj) {
-        //  if (!MainController.currentTool) return self.alert("select a tool first");
-        if (!obj.node.data || obj.node.data.type != "source") {
-            return self.alert("select a tool");
-        }
-
-        MainController.currentSource = obj.node.data.id;
-        $("#selectedSource").html(MainController.currentSource);
-        $("#mainDialogDiv").parent().hide();
-        Lineage_whiteboard.loadSources();
-    };
-    // What is the goal of this function? --> MainController?
-    self.initTool = function (toolId, callback) {
-        MainController.writeUserLog(authentication.currentUser, self.currentTool, self.source || "");
-        var toolObj = Config.userTools[toolId];
-        MainController.initControllers();
-        Clipboard.clear();
-        Lineage_sources.loadedSources = {};
-        if (Config.userTools[toolId].controller.onLoaded) {
-            Config.userTools[toolId].controller.onLoaded();
-        } else {
-            if (true) {
-                var url = window.location.href;
-                var p = url.indexOf("?");
-                if (p > -1) {
-                    url = url.substring(0, p);
-                }
-                url = url.replace("index_r.html", "");
-                url += "?tool=" + toolId;
-                window.location.href = url;
-            }
-        }
-    };
-    // To remove? --> unused
-    self.showDiv = function (modalDiv) {
-        $("#" + modalDiv).css("display", "block");
-    };
-    // To remove? unused
-    self.hideDiv = function (modalDiv) {
-        $("#" + modalDiv).css("display", "none");
-    };
     //Keep
     self.ApplySelectedTabCSS = function (buttonClicked, tabGroup) {
         var x = $("#" + tabGroup + "-buttons").children();
@@ -253,8 +120,8 @@ var ResponsiveUI = (function () {
         $(buttonClicked).addClass("slsv-tabButtonSelected");
         $(buttonClicked).parent().addClass("slsv-selectedTabDiv");
     };
-    //Keep
-    self.openTab = function (tabGroup, tabId, actionFn, buttonClicked) {
+     //Keep
+     self.openTab = function (tabGroup, tabId, actionFn, buttonClicked) {
         var i;
         var x = document.getElementsByClassName(tabGroup);
         for (i = 0; i < x.length; i++) {
@@ -267,24 +134,6 @@ var ResponsiveUI = (function () {
             actionFn();
         }
         self.ApplySelectedTabCSS(buttonClicked, tabGroup);
-    };
-    // Load Souirce selector with the rights options
-    self.showSourceDialog = function (resetAll) {
-        self.openDialogDiv("mainDialogDiv");
-        $("#" + "mainDialogDiv")
-            .parent()
-            .show();
-        $("#sourceSelector_searchInput").focus();
-        var onSourceSelect;
-        if (resetAll) {
-            Lineage_sources.loadedSources = {};
-            onSourceSelect = ResponsiveUI.onSourceSelect;
-        } else {
-            onSourceSelect = ResponsiveUI.onSourceSelect_AddSource;
-        }
-        SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
-            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
-        });
     };
     //keep
     self.openDialogDiv = function (div) {
@@ -378,55 +227,7 @@ var ResponsiveUI = (function () {
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };
-    //Lineage.sources?
-    self.registerSourceWithoutImports = function (sourceLabel, callback) {
-        if (!callback) {
-            callback = function () {};
-        }
-
-        if (Lineage_sources.loadedSources[sourceLabel]) {
-            return callback();
-        }
-
-        OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (sourceLabel == self.source) {
-                var sourceDivId = "source_" + common.getRandomHexaId(5);
-                Lineage_sources.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
-                Lineage_sources.sourceDivsMap[sourceDivId] = sourceLabel;
-                var html =
-                    "<div  id='" +
-                    sourceDivId +
-                    "' style='color: " +
-                    Lineage_whiteboard.getSourceColor(sourceLabel) +
-                    ";display:inline-flex;align-items:end;'" +
-                    " class='Lineage_sourceLabelDiv'  " +
-                    ">" +
-                    sourceLabel +
-                    "&nbsp;" +
-                    /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-    sourceDivId +
-    "\")'>[-]</i>";*/
-                    "<button class='arrow-icon slsv-invisible-button'  style=' width: 20px;height:20px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-                    sourceDivId +
-                    "\")'/> </button></div>";
-                $("#lineage_drawnSources").append(html);
-                $("#lineage_drawnSources").find(".arrow-icon").hide();
-                /*
-                $("#" + sourceDivId).bind("click", function (e) {
-                    var sourceDivId = $(this).attr("id");
-                    var source = self.sourceDivsMap[sourceDivId];
-                    Lineage_sources.setCurrentSource(source);
-                });
-                */
-                return callback();
-            } else {
-                return callback();
-            }
-        });
-    };
+    
     //keep
     self.PopUpOnHoverButtons = function () {
         $(".w3-button").off();
@@ -456,14 +257,14 @@ var ResponsiveUI = (function () {
                 if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                     Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color = "white";
                     Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
-                    Lineage_sources.showHideEditButtons(self.source);
+                    Lineage_sources.showHideEditButtons(MainController.currentSource);
                 }
             } else {
                 Lineage_whiteboard.defaultNodeFontColor = "#343434";
                 if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                     Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions.nodes.font.color = "#343434";
                     Lineage_whiteboard.lineageVisjsGraph.network.setOptions(Lineage_whiteboard.lineageVisjsGraph.options.visjsOptions);
-                    Lineage_sources.showHideEditButtons(self.source);
+                    Lineage_sources.showHideEditButtons(MainController.currentSource);
                 }
             }
             ResponsiveUI.resetWindowHeight();

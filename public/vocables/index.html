@@ -214,11 +214,11 @@
 
       
 
-        <link rel="stylesheet/less" type="text/css" href="./responsive/styles.less" />
-        <script src="./responsive/less.min.js"></script>
+        <link rel="stylesheet/less" type="text/css" href="./modules/shared/styles.less" />
+        <script src="./js/external/less.min.js"></script>
         <!--<script src="https://cdn.jsdelivr.net/npm/less" ></script>-->
-        <script type="module" src="./responsive/responsiveUI.js"></script>
-        <script type="module" src="./responsive/lineage/lineage_r.js"></script>
+        <script type="module" src="./modules/shared/responsiveUI.js"></script>
+        
 
         <!--<script type="module" src="./responsive/widget/botEngineResponsive.js"></script>-->
         
@@ -434,13 +434,13 @@
                                 <button id="selectedTool" class="slsv-invisible-button" style="padding: 0px; margin-left: 10px">Tool</button>
                                 <button class="arrow-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-left: 3px; margin-right: 10px"></button>
                                 <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                                    <!-- <select id="toolsSelect" style="min-width:150px" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.onToolSelect($(this).val())" style="overflow: auto"></select>-->
+                                    <!-- <select id="toolsSelect" style="min-width:150px" class="Lineage_PopUpStyle" size="8" onclick="MainController.onToolSelect($(this).val())" style="overflow: auto"></select>-->
                                     <div
                                         id="toolsSelect"
                                         style="min-width: 150px; display: flex; flex-direction: column; overflow: auto; max-height: 300px"
                                         class="Lineage_PopUpStyle"
                                         size="8"
-                                        onclick="ResponsiveUI.onToolSelect(null,event)"
+                                        onclick="MainController.onToolSelect(null,event)"
                                     ></div>
                                 </div>
                             </div>

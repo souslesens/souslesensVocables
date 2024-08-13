@@ -12,7 +12,7 @@ import Lineage_axioms_draw from "../../modules/tools/lineage/lineage_axioms_draw
 import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_create.js";
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
-import ResponsiveUI from "../../responsive/responsiveUI.js";
+import ResponsiveUI from "../../modules/shared/responsiveUI.js";
 import OntologyModels from "../shared/ontologyModels.js";
 
 var NodeInfosWidget = (function () {

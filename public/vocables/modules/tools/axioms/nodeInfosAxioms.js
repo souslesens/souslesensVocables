@@ -167,7 +167,7 @@ var NodeInfosAxioms = (function () {
                 self.currentResource.data.id,
                 node.data.triples,
                 "nodeInfosAxioms_graphDiv",
-                { onNodeClick: NodeInfosAxioms.onNodeGraphClick },
+                { onNodeClick: NodeInfosAxioms.onNodeGraphClick,axiomType:node.parent },
                 function (err) {}
             );
 
@@ -186,7 +186,7 @@ var NodeInfosAxioms = (function () {
             result.triples.forEach(function(item) {
                 allTriples = allTriples.concat(item);
             })
-            var options={addToGraph:true,startLevel:node.level}
+            var options={addToGraph:true,startLevel:node.level,axiomType:node.parent }
             Axioms_graph.drawNodeAxioms2(self.currentSource, node.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, function (err) {});
 
 

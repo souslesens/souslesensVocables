@@ -2,6 +2,28 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axiom_editor from "./axiom_editor.js";
 import Axiom_activeLegend from "./axiom_activeLegend.js";
 
+
+/*
+restriction	objectPropertyExpression some primary	ObjectSomeValuesFrom(T(objectPropertyExpression) T(primary))
+restriction	objectPropertyExpression only primary	ObjectAllValuesFrom(T(objectPropertyExpression) T(primary))
+restriction	objectPropertyExpression value individual	ObjectHasValue(T(objectPropertyExpression) individual)
+restriction	objectPropertyExpression min nni	ObjectMinCardinality(T(objectPropertyExpression) nni)
+restriction	objectPropertyExpression min nni primary	ObjectMinCardinality(T(objectPropertyExpression) nni T(primary))
+restriction	objectPropertyExpression exactly nni	ObjectExactCardinality(T(objectPropertyExpression) nni)
+restriction	objectPropertyExpression exactly nni primary	ObjectExactCardinality(T(objectPropertyExpression) nni T(primary))
+restriction	objectPropertyExpression max nni	ObjectMaxCardinality(T(objectPropertyExpression) nni)
+restriction	objectPropertyExpression max nni primary	ObjectMaxCardinality(T(objectPropertyExpression) nni T(primary))
+restriction	objectPropertyExpression Self	ObjectHasSelf(T(objectPropertyExpression))
+restriction	dataPropertyExpression some dataRange	DataSomeValuesFrom(T(dataPropertyExpression) T(dataRange))
+restriction	dataPropertyExpression only dataRange	DataAllValuesFrom(T(dataPropertyExpression) T(dataRange))
+restriction	dataPropertyExpression value literal	DataHasValue(T(dataPropertyExpression) T(literal))
+restriction	dataPropertyExpression min nni	DataMinCardinality(T(dataPropertyExpression) nni)
+restriction	dataPropertyExpression min nni dataRange	DataMinCardinality(T(dataPropertyExpression) nni T(dataRange))
+restriction	dataPropertyExpression exactly nni	DataExactCardinality(T(dataPropertyExpression) nni)
+restriction	dataPropertyExpression exactly nni dataRange	DataExactCardinality(T(dataPropertyExpression) nni T(dataRange))
+restriction	dataPropertyExpression max nni	DataMaxCardinality(T(dataPropertyExpression) nni)
+restriction	dataPropertyExpression max nni dataRange	DataMaxCardinality(T(dataPropertyExpression) nni T(dataRange))
+ */
 var Axioms_graph = (function () {
     var self = {};
 
@@ -16,17 +38,33 @@ var Axioms_graph = (function () {
             color = "#70ac47";
             if (node.symbol == "^") {
                 shape = "ellipse";
-                font = { bold: true };
+                font = {bold: true};
                 color = "#f5ef39";
             }
         } else if (node.owlType && node.owlType.indexOf("Class") > -1) {
             color = "#00afef";
             shape = "dot";
-            font = { bold: true, color: color };
+            font = {bold: true, color: color};
         } else if (node.owlType && node.owlType.indexOf("ObjectProperty") > -1) {
             color = "#f5ef39";
         } else if (node.owlType && node.owlType.indexOf("Restriction") > -1) {
+
             label = "some";
+            node.predicates.forEach(function (predicate) {
+                if (predicate.p.indexOf("someValuesFrom") > -1) {
+                    label = "some";
+                } else if (predicate.p.indexOf("allValuesFrom") > -1) {
+                    label = "only";
+                } else if (predicate.p.indexOf("hasValue") > -1) {
+                    label = "value";
+                } else {
+                    if (predicate.p.indexOf("http://www.w3.org/2002/07/owl#onProperty") > -1) {
+                    }
+                    label = predicate.p.replace("http://www.w3.org/2002/07/owl#", "")
+                }
+            })
+
+
             color = "#cb9801";
         } else {
             shape = "dot";
@@ -52,13 +90,15 @@ var Axioms_graph = (function () {
         return visjsNode;
     };
 
-    self.drawNodeAxioms2 = function (sourceLabel, nodeId, manchesterTriples, divId, options, callback) {
-        if (!options) options = {};
+    self.drawNodeAxioms2 = function (sourceLabel, rootNodeId, manchesterTriples, divId, options, callback) {
+        if (!options) {
+            options = {};
+        }
         self.graphDivId = divId;
         var nodesMap = {};
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         var edgesToRemove = {};
-        var disjointClassesAxiomRoot=null;
+        var disjointClassesAxiomRoot = null;
         async.series(
             [
                 //format mancheseter triples
@@ -77,7 +117,7 @@ var Axioms_graph = (function () {
                         }
 
                         if (!nodesMap[s]) {
-                            nodesMap[s] = { id: s };
+                            nodesMap[s] = {id: s};
                             if (s.indexOf("http") == 0) {
                                 var obj = Axiom_editor.allResourcesMap[s];
                                 nodesMap[s].label = obj ? obj.label.replace(/_/g, " ") : null;
@@ -93,7 +133,11 @@ var Axioms_graph = (function () {
                             }
 
                             var obj = Axiom_editor.allResourcesMap[p];
-                            nodesMap[s].predicates.push({ p: p, o: o, pLabel: obj ? obj.label.replace(/_/g, " ") : null });
+                            nodesMap[s].predicates.push({
+                                p: p,
+                                o: o,
+                                pLabel: obj ? obj.label.replace(/_/g, " ") : null
+                            });
                         }
 
                         if (p == "http://www.w3.org/2002/07/owl#unionOf") {
@@ -108,16 +152,14 @@ var Axioms_graph = (function () {
                         } else if (p == "http://www.w3.org/2002/07/owl#inverseOf") {
                             nodesMap[s].owlType = "inverseOf";
                             nodesMap[s].symbol = "^";
-                        }else if (p == "http://www.w3.org/2002/07/owl#members") {
+                        } else if (p == "http://www.w3.org/2002/07/owl#members") {
                             nodesMap[s].owlType = "AllDisjointClasses";
-                            nodesMap[s].symbol =  "⊑ ┓";
+                            nodesMap[s].symbol = "⊑ ┓";
                         }
 
 
-
-
-                        if(o== "http://www.w3.org/2002/07/owl#AllDisjointClasses"){
-                            disjointClassesAxiomRoot= s
+                        if (o == "http://www.w3.org/2002/07/owl#AllDisjointClasses") {
+                            disjointClassesAxiomRoot = s
                         }
 
 
@@ -130,8 +172,8 @@ var Axioms_graph = (function () {
                 function (callbackSeries) {
                     var existingNodes = {};
 
-                    if(options.addToGraph && self.axiomsVisjsGraph ){
-                        existingNodes= self.axiomsVisjsGraph.getExistingIdsMap()
+                    if (options.addToGraph && self.axiomsVisjsGraph) {
+                        existingNodes = self.axiomsVisjsGraph.getExistingIdsMap()
                     }
                     var stop = false;
 
@@ -166,11 +208,14 @@ var Axioms_graph = (function () {
                                 if (predicate.p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest") {
                                     skipNode = true;
                                 }
-
+                                var edgeLabel = null
                                 if (!existingNodes[childNode.id]) {
                                     existingNodes[childNode.id] = 1;
 
                                     var visjsNode = self.getVisjsNode(childNode, level + 1);
+                                    if (rootNodeId == node.id) {
+                                        edgeLabel = options.axiomType
+                                    }
                                     visjsData.nodes.push(visjsNode);
                                 }
 
@@ -178,9 +223,9 @@ var Axioms_graph = (function () {
 
                                 var arrows = null;
                                 if (!visjsNode) {
-                                    visjsNode={}   // return;
+                                    visjsNode = {}   // return;
                                 }
-                                if ( visjsNode.shape != "dot" && predicate.p != "http://www.w3.org/2002/07/owl#inverseOf") {
+                                if (visjsNode.shape != "dot" && predicate.p != "http://www.w3.org/2002/07/owl#inverseOf") {
                                     arrows = {
                                         to: {
                                             enabled: true,
@@ -190,12 +235,13 @@ var Axioms_graph = (function () {
                                     };
                                 }
                                 if (!existingNodes[edgeId]) {
+
                                     existingNodes[edgeId] = 1;
                                     visjsData.edges.push({
                                         id: edgeId,
                                         from: node.id,
                                         to: childNode.id,
-
+                                        label:edgeLabel,
                                         arrows: arrows,
                                         data: {
                                             id: edgeId,
@@ -226,23 +272,52 @@ var Axioms_graph = (function () {
                     }
 
                     var level = 1;
-                    if(options.startLevel){
-                        level=options.startLevel
+                    if (options.startLevel) {
+                        level = options.startLevel
                     }
 
-                  //  when disjointClassesAxiomRoot is not null tree starts from it
-                    recurse(disjointClassesAxiomRoot ||nodeId, level);
+                    //  when disjointClassesAxiomRoot is not null tree starts from it
+                    recurse(disjointClassesAxiomRoot || rootNodeId, level);
 
                     return callbackSeries();
                 },
-    //optimize nodes levels
-                function (callbackSeries) {
 
-              var nodesMap=common.array.toMap(visjsData.nodes,"id")
-                    visjsData.edges.forEach(function (edge, nodeIndex) {
-                    ;//    if(nodesMap[edge.from].level<nodesMap[edge.to].level)
-                      ;//  if(edge)
-                    })
+
+
+
+
+                //optimize nodes levels
+                function (callbackSeries) {
+                //    return callbackSeries();
+
+
+                    var nodesMap = common.array.toMap(visjsData.nodes, "id")
+                    var max = 20
+                    var iterations = 0
+                    var stop = true
+                    do {
+                        iterations += 1
+                        visjsData.edges.forEach(function (edge, nodeIndex) {
+                            if (nodesMap[edge.to].level < nodesMap[edge.from].level) {
+                                nodesMap[edge.to].level = nodesMap[edge.from].level + 1
+                                stop = false
+                            }
+
+                           if (rootNodeId ==edge.from) {
+                               nodesMap[edge.from].color = "#ffffff";
+                               nodesMap[edge.from].shape = "ellipse";
+                            }
+                         /*   if (rootNodeId ==edge.to) {
+                                nodesMap[edge.to].color = "#096eac";
+                            }*/
+
+                        })
+
+
+
+
+
+                    } while (stop == false && iterations <= max)
 
                     return callbackSeries();
 
@@ -280,7 +355,7 @@ var Axioms_graph = (function () {
         //    xOffset = parseInt($("#axiomsDraw_xOffset").val());
         //   yOffset = parseInt($("#axiomsDraw_yOffset").val());
 
-       self.graphOptions = {
+        self.graphOptions = {
             keepNodePositionOnDrag: true,
             /* physics: {
 enabled:true},*/
@@ -318,18 +393,18 @@ enabled:true},*/
                "<div id='axiomsGraphDiv3' style='width:800px;height:525px;' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>"
            );*/
 
-        self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData,  self.graphOptions);
+        self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
         self.axiomsVisjsGraph.draw(function () {
 
             self.graphOptions.visjsOptions.layout.hierarchical.enabled = false;
             self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
 
 
-
         });
     };
 
-    self.showGraphPopupMenu = function () {};
+    self.showGraphPopupMenu = function () {
+    };
 
     self.clearGraph = function () {
         $("#" + self.graphDivId).html("");

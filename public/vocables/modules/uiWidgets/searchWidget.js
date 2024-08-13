@@ -408,8 +408,10 @@ var SearchWidget = (function () {
             items.axioms = {
                 label: "Node axioms",
                 action: function (e) {
-                    $("#mainDialogDiv").dialog("open")
+
                     $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label)
+
+                    $("#mainDialogDiv").dialog("open")
 
                     NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
 

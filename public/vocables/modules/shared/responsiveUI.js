@@ -4,19 +4,17 @@ import Clipboard from "../../modules/shared/clipboard.js";
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import SourceSelectorWidget from "../../modules/uiWidgets/sourceSelectorWidget.js";
 
-
 import Lineage_whiteboard from "../../modules/tools/lineage/lineage_whiteboard.js";
 
 import MainController from "../../modules/shared/mainController.js";
 
 var ResponsiveUI = (function () {
     var self = {};
-   
+
     self.menuBarShowed = true;
     self.LateralPannelShowed = true;
     self.smartPhoneScreen = null;
 
-    
     //Etablish the resizing, load select bar tools --> Keep here
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
@@ -41,11 +39,11 @@ var ResponsiveUI = (function () {
         );
 
         self.themeList();
-       
+
         ResponsiveUI.resetWindowHeight();
     };
-      // keep
-      self.showSourceDialog = function (resetAll) {
+    // keep
+    self.showSourceDialog = function (resetAll) {
         self.openDialogDiv("mainDialogDiv");
         $("#" + "mainDialogDiv")
             .parent()
@@ -75,7 +73,7 @@ var ResponsiveUI = (function () {
             fn();
         });
     };
-    
+
     // Keep Here
     self.resetWindowHeight = function () {
         var MenuBarHeight = $("#MenuBar").height();
@@ -120,8 +118,8 @@ var ResponsiveUI = (function () {
         $(buttonClicked).addClass("slsv-tabButtonSelected");
         $(buttonClicked).parent().addClass("slsv-selectedTabDiv");
     };
-     //Keep
-     self.openTab = function (tabGroup, tabId, actionFn, buttonClicked) {
+    //Keep
+    self.openTab = function (tabGroup, tabId, actionFn, buttonClicked) {
         var i;
         var x = document.getElementsByClassName(tabGroup);
         for (i = 0; i < x.length; i++) {
@@ -227,7 +225,7 @@ var ResponsiveUI = (function () {
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };
-    
+
     //keep
     self.PopUpOnHoverButtons = function () {
         $(".w3-button").off();

@@ -94,12 +94,10 @@ var Lineage_whiteboard = (function () {
         if (self.firstLoad) {
             self.firstLoad = false;
             // Overcharge only one time at first lineage load
-            
+
             SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
-          
+
             //AddEdge overcharge
-            
-            
         }
 
         ResponsiveUI.initMenuBar(self.loadSources);
@@ -123,7 +121,6 @@ var Lineage_whiteboard = (function () {
             });
         });
     };
-    
 
     self.onSourceSelect = function (sourceLabel, /** @type {{ button: number; }} */ event) {};
 
@@ -3277,7 +3274,7 @@ attrs.color=self.getSourceColor(superClassValue)
             Export.exportGraphToDataTable(self.lineageVisjsGraph);
         },
     };
-   
+
     self.initWhiteboardTab = function () {
         if ($("#whiteboardTab").children().length == 0) {
             $("#whiteboardTab").load("./modules/tools//lineage/html/whiteboadTab.html", function (s) {
@@ -3308,11 +3305,11 @@ attrs.color=self.getSourceColor(superClassValue)
             $("#classesTab").load("./modules/tools//lineage/html/classesTab.html", function (s) {
                 SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
                 //$("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
-                    SearchWidget.init();
-                    $("#GenericTools_searchInAllSources").prop("checked", false);
-                    $("#Lineage_MoreClassesOptions").hide();
-                    SearchWidget.showTopConcepts();
-                    /*
+                SearchWidget.init();
+                $("#GenericTools_searchInAllSources").prop("checked", false);
+                $("#Lineage_MoreClassesOptions").hide();
+                SearchWidget.showTopConcepts();
+                /*
                     $("#lateralPanelDiv").resizable({
                         maxWidth: 435,
                         minWidth: 150,
@@ -3340,7 +3337,6 @@ attrs.color=self.getSourceColor(superClassValue)
         }
     };
 
-    
     self.resetCurrentTab = function () {
         var currentTab = $(".slsv-tabButtonSelected").html();
         if (currentTab == "Classes") {
@@ -3385,7 +3381,6 @@ attrs.color=self.getSourceColor(superClassValue)
             self.MoreOptionsShow = true;
         }
     };
-
 
     return self;
 })();

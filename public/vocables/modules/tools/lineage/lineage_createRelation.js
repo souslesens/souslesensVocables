@@ -373,7 +373,6 @@ var Lineage_createRelation = (function () {
                     } else {
                         return callback(null);
                     }
-                    
                 }
             );
         });

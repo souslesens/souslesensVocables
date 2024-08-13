@@ -56,9 +56,9 @@ var KGcreator = (function () {
 
     self.onLoaded = function () {
         self.currentTab = "";
-        
+
         ResponsiveUI.initMenuBar(self.loadSource);
-        
+
         $("#Lineage_graphEditionButtons").show();
         $("#Lineage_graphEditionButtons").empty();
         $("#Lineage_graphEditionButtons").attr("id", "KGcreator_topButtons");

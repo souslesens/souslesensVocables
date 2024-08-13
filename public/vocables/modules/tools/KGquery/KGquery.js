@@ -34,12 +34,9 @@ var KGquery = (function () {
     self.maxOptionalPredicatesInQuery = 10;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
-   
-    
     self.onLoaded = function () {
         Lineage_sources.showHideEditButtons = ResponsiveUI.disableEditButtons;
-        
-       
+
         ResponsiveUI.initMenuBar(KGquery.loadSource);
         KGquery.clearAll();
         if (Config.clientCache.KGquery) {
@@ -49,7 +46,6 @@ var KGquery = (function () {
         $("#waitImg").attr("id", "KGquery_waitImg");
     };
     self.unload = function () {
-      
         Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
         //reapply changed DOM
 
@@ -58,7 +54,7 @@ var KGquery = (function () {
         $("#graphDiv").empty();
         $("#lateralPanelDiv").empty();
     };
-    
+
     self.init = function () {
         KGquery_graph.drawVisjsModel("saved");
         SavedQueriesWidget.showDialog("STORED_KGQUERY_QUERIES", "KGquery_myQueriesDiv", self.currentSource, null, KGquery_myQueries.save, KGquery_myQueries.load);
@@ -70,7 +66,7 @@ var KGquery = (function () {
             KGquery_outputTypeSelectNode.append(`<option>${toolName}</option>`);
         }
     };
-    
+
     self.loadSource = function () {
         KGquery.currentSource = MainController.currentSource;
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
@@ -106,7 +102,6 @@ var KGquery = (function () {
             });
         });
     };
-   
 
     self.addQuerySet = function (booleanOperator) {
         var label = "";

@@ -208,8 +208,8 @@ var MainController = (function () {
                 }
             });
     };
-     //MainController.onSourceSelect
-     self.onSourceSelect = function (evt, obj) {
+    //MainController.onSourceSelect
+    self.onSourceSelect = function (evt, obj) {
         //  if (!MainController.currentTool) return self.alert("select a tool first");
         var p = obj.node.parents.indexOf("PRIVATE");
         if (p > 0) {
@@ -227,7 +227,6 @@ var MainController = (function () {
     //To MainController too
     self.sourceSelect = function (source) {
         self.currentSource = source;
-        
 
         $("#selectedSource").html(self.currentSource);
 
@@ -256,7 +255,7 @@ var MainController = (function () {
         $("#mainDialogDiv").parent().hide();
         Lineage_whiteboard.loadSources();
     };
-  
+
     //Giving a tool in parameter and the function launch it
     self.initTool = function (toolId, callback) {
         MainController.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource || "");
@@ -280,7 +279,7 @@ var MainController = (function () {
         }
     };
     //  MainController --> onToolSelect.initTool   when click on a button of a tool
-     // Manage when we click on a tool with parameter event
+    // Manage when we click on a tool with parameter event
     // Or when we choose a tool with the url with toolId parameter
     self.onToolSelect = function (toolId, event, callback) {
         if (event) {
@@ -311,7 +310,7 @@ var MainController = (function () {
         self.currentTool = toolId;
 
         if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
-            Lineage_sources.registerSource =  Lineage_sources.registerSourceWithoutDisplayingImports;
+            Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
         }
         $("#currentToolTitle").html(toolId);
         if (ResponsiveUI.currentTheme["@" + toolId + "-logo"]) {

@@ -15,6 +15,7 @@ const { configPlugins } = require("./config");
 
 const NATIVE_TOOLS = [
     { name: "lineage", controller: "Lineage_whiteboard", useSource: true, multiSources: false, toTools: {} },
+    { name: "AxiomEditor", controller: "Axiom_editor", useSource: false, multiSources: false, toTools: {} },
     { name: "KGcreator", controller: "KGcreator", useSource: false, multiSources: false, toTools: {} },
     { name: "KGquery", controller: "KGquery", useSource: true, multiSources: false, toTools: {} },
     { name: "Standardizer", controller: "Standardizer", useSource: true, multiSources: false, toTools: {} },
@@ -25,6 +26,7 @@ const NATIVE_TOOLS = [
     { name: "GraphManagement", controller: "GraphManagement", useSource: false, multiSources: false, toTools: {} },
     { name: "UserManagement", controller: "UserManagement", useSource: false, multiSources: false, toTools: {} },
     { name: "OntoCreator", controller: "Lineage_createSLSVsource", useSource: false, multiSources: false, toTools: {} },
+
 ].map((tool) => ({ type: "tool", label: tool.label ?? tool.name, ...tool }));
 
 const lock = new Lock();

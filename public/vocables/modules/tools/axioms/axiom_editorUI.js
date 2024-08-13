@@ -25,7 +25,7 @@ var Axiom_editorUI = (function () {
         $("#smallDialogDiv").dialog("option", "title", "New Axiom");
         $("#smallDialogDiv").load("modules/tools/axioms/html/newAxiomDialog.html", function () {
             Axiom_activeLegend.drawLegend();
-            Axiom_editor.getAllClasses(function (err, classes) {
+            Axiom_editor.getAllClasses(null, function (err, classes) {
                 common.fillSelectOptions("axiomsEditor_allClasses", classes, true, "label", "id");
             });
             Axiom_editor.getAllProperties(function (err, properties) {

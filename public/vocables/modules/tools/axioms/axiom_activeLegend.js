@@ -53,11 +53,28 @@ var Axiom_activeLegend = (function () {
         var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
         visjsData.nodes.push(visjsNode);
         self.hierarchicalLevel = 0;
-        Axioms_graph.drawGraph(visjsData, "axiomGraphDiv");
+        Axioms_graph.drawGraph(visjsData, "axiomGraphDiv", { onNodeClick: Axiom_activeLegend.onNodeGraphClick });
         Axioms_graph.currentGraphNode = visjsNode;
 
         self.hideForbiddenResources(selectedObject);
     };
+
+    self.onNodeGraphClick = function (node, point, nodeEvent) {
+        if (node && node.data) {
+            self.currentGraphNode = node;
+            Axioms_graph.currentGraphNode = node;
+            Axiom_activeLegend.hideForbiddenResources("add_" + node.data.type);
+            if (nodeEvent.ctrlKey) {
+                if (node.data.type.indexOf("Class") > -1 || node.data.type.indexOf("ObjectProperty") > -1) {
+                    NodeInfosWidget.showNodeInfos(Axiom_editor.currentSource, node, "mainDialogDiv");
+                }
+            }
+        } else {
+            self.currentGraphNode = null;
+            Axioms_graph.currentGraphNode = null;
+        }
+    };
+
     self.onSuggestionsSelect = function (selectedObject) {
         var resource;
         var currentNode;

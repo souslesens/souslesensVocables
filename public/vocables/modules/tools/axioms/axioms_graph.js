@@ -58,9 +58,10 @@ var Axioms_graph = (function () {
                 } else if (predicate.p.indexOf("hasValue") > -1) {
                     label = "value";
                 } else {
-                    if (predicate.p.indexOf("http://www.w3.org/2002/07/owl#onProperty") > -1) {
+                    if (predicate.p.indexOf("http://www.w3.org/2002/07/owl#onProperty") <0) {
+                        label = predicate.p.replace("http://www.w3.org/2002/07/owl#", "")
                     }
-                    label = predicate.p.replace("http://www.w3.org/2002/07/owl#", "")
+
                 }
             })
 
@@ -213,9 +214,17 @@ var Axioms_graph = (function () {
                                     existingNodes[childNode.id] = 1;
 
                                     var visjsNode = self.getVisjsNode(childNode, level + 1);
-                                    if (rootNodeId == node.id) {
-                                        edgeLabel = options.axiomType
+                                    if (rootNodeId == node.id && options.axiomType) {
+                                        if (options.axiomType.indexOf("SubClassOf") > -1) {
+                                            edgeLabel = "⊑"
+                                        } else if (options.axiomType.indexOf("Equivalent") > -1) {
+                                            edgeLabel = "≡"
+                                        } else if (options.axiomType.indexOf("Disjoint") > -1) {
+                                            edgeLabel = "⊑ ┓"
+                                        }
                                     }
+
+
                                     visjsData.nodes.push(visjsNode);
                                 }
 
@@ -225,7 +234,8 @@ var Axioms_graph = (function () {
                                 if (!visjsNode) {
                                     visjsNode = {}   // return;
                                 }
-                                if (visjsNode.shape != "dot" && predicate.p != "http://www.w3.org/2002/07/owl#inverseOf") {
+                                if (childNode.id.indexOf("http") == 0) {
+                                    //   if (visjsNode.shape != "dot" && predicate.p != "http://www.w3.org/2002/07/owl#inverseOf") {
                                     arrows = {
                                         to: {
                                             enabled: true,
@@ -241,7 +251,7 @@ var Axioms_graph = (function () {
                                         id: edgeId,
                                         from: node.id,
                                         to: childNode.id,
-                                        label:edgeLabel,
+                                        label: edgeLabel,
                                         arrows: arrows,
                                         data: {
                                             id: edgeId,
@@ -283,12 +293,9 @@ var Axioms_graph = (function () {
                 },
 
 
-
-
-
                 //optimize nodes levels
                 function (callbackSeries) {
-                //    return callbackSeries();
+                    //    return callbackSeries();
 
 
                     var nodesMap = common.array.toMap(visjsData.nodes, "id")
@@ -298,23 +305,27 @@ var Axioms_graph = (function () {
                     do {
                         iterations += 1
                         visjsData.edges.forEach(function (edge, nodeIndex) {
-                            if (nodesMap[edge.to].level < nodesMap[edge.from].level) {
+                            if (nodesMap[edge.from] && nodesMap[edge.to] && nodesMap[edge.to].level < nodesMap[edge.from].level) {
                                 nodesMap[edge.to].level = nodesMap[edge.from].level + 1
                                 stop = false
                             }
 
-                           if (rootNodeId ==edge.from) {
-                               nodesMap[edge.from].color = "#ffffff";
-                               nodesMap[edge.from].shape = "ellipse";
+                            if (nodesMap[edge.from] && rootNodeId == edge.from) {
+                                nodesMap[edge.from].color = "#90d6e4";
+                                nodesMap[edge.from].shape = "star";
+                                edge.arrows = {
+                                    to: {
+                                        enabled: true,
+                                        type: "solid",
+                                        scaleFactor: 0.5,
+                                    },
+                                };
                             }
-                         /*   if (rootNodeId ==edge.to) {
-                                nodesMap[edge.to].color = "#096eac";
-                            }*/
+                            /*   if (rootNodeId ==edge.to) {
+                                   nodesMap[edge.to].color = "#096eac";
+                               }*/
 
                         })
-
-
-
 
 
                     } while (stop == false && iterations <= max)
@@ -326,8 +337,9 @@ var Axioms_graph = (function () {
                 //draw graph
                 function (callbackSeries) {
                     if (options.addToGraph && self.axiomsVisjsGraph) {
-
-                        self.graphOptions.visjsOptions.layout.hierarchical.enabled = true;
+                        if (self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
+                            self.graphOptions.visjsOptions.layout.hierarchical.enabled = true;
+                        }
                         self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
 
 
@@ -360,18 +372,7 @@ var Axioms_graph = (function () {
             /* physics: {
 enabled:true},*/
 
-            layoutHierarchical: {
-                direction: "LR",
-                sortMethod: "hubsize",
-                levelSeparation: xOffset,
-                // parentCentralization: false,
-                shakeTowards: "roots",
-                blockShifting: true,
-                edgeMinimization: true,
-                parentCentralization: true,
 
-                nodeSpacing: yOffset,
-            },
             visjsOptions: {
                 edges: {
                     smooth: {
@@ -387,6 +388,21 @@ enabled:true},*/
             onRightClickFn: Axioms_graph.showGraphPopupMenu,
         };
 
+        if (!options.randomLayout) {
+            self.graphOptions.layoutHierarchical = {
+                direction: "LR",
+                sortMethod: "hubsize",
+                levelSeparation: xOffset,
+                // parentCentralization: false,
+                shakeTowards: "roots",
+                blockShifting: true,
+                edgeMinimization: true,
+                parentCentralization: true,
+
+                nodeSpacing: yOffset,
+            }
+        }
+
         /*   $("#" + self.graphDivContainer).html(
                "<span style='font-size: 16px;color: blue; font-weight: bold'> WORK IN PROGRESS</span>" +
                "  <button onclick=\"AxiomEditor.init()\">Edit Axiom</button>" +
@@ -395,8 +411,9 @@ enabled:true},*/
 
         self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
         self.axiomsVisjsGraph.draw(function () {
-
-            self.graphOptions.visjsOptions.layout.hierarchical.enabled = false;
+            if (self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
+                self.graphOptions.visjsOptions.layout.hierarchical.enabled = false;
+            }
             self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
 
 

@@ -7,6 +7,11 @@ var Axiom_activeLegend = (function () {
     var self = {};
     self.axiomsLegendVisjsGraph = null;
 
+    
+    self.init=function(graphLegendDiv,axiomGraphDiv){
+        self.graphLegendDiv =graphLegendDiv
+        self.axiomGraphDiv=axiomGraphDiv
+    }
     self.filterSuggestion = function (suggestions, resourceType) {
         var selection = [];
         suggestions.forEach(function (item) {
@@ -53,7 +58,7 @@ var Axiom_activeLegend = (function () {
         var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
         visjsData.nodes.push(visjsNode);
         self.hierarchicalLevel = 0;
-        Axioms_graph.drawGraph(visjsData, "axiomGraphDiv", { onNodeClick: Axiom_activeLegend.onNodeGraphClick });
+        Axioms_graph.drawGraph(visjsData, self.axiomGraphDiv, { onNodeClick: Axiom_activeLegend.onNodeGraphClick });
         Axioms_graph.currentGraphNode = visjsNode;
 
         self.hideForbiddenResources(selectedObject);
@@ -146,7 +151,7 @@ var Axiom_activeLegend = (function () {
             //
         } else {
             self.hierarchicalLevel = 0;
-            Axioms_graph.drawGraph(visjsData, "axiomGraphDiv");
+            Axioms_graph.drawGraph(visjsData, self.axiomGraphDiv);
         }
 
         $("#axioms_legend_suggestionsSelect").empty();
@@ -311,8 +316,8 @@ var Axiom_activeLegend = (function () {
             onRightClickFn: Axiom_activeLegend.showGraphPopupMenu,
         };
 
-        var graphLegendDiv = "axioms_legend_div";
-        self.axiomsLegendVisjsGraph = new VisjsGraphClass(graphLegendDiv, visjsData, options);
+      
+        self.axiomsLegendVisjsGraph = new VisjsGraphClass(self.graphLegendDiv, visjsData, options);
         self.axiomsLegendVisjsGraph.draw(function () {});
     };
 

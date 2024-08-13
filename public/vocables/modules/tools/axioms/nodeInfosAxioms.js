@@ -3,6 +3,9 @@ import Axiom_editor from "./axiom_editor.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Axioms_graph from "./axioms_graph.js";
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
+import axioms_graph from "./axioms_graph.js";
+import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
+import Axiom_activeLegend from "./axiom_activeLegend.js";
 
 var NodeInfosAxioms = (function () {
     var self = {};
@@ -175,6 +178,7 @@ var NodeInfosAxioms = (function () {
         }
     };
     self.onNodeGraphClick = function (node, point, nodeEvent) {
+        $("#nodeInfosAxioms_infosDiv").html("Loading Axioms for " + node.data.label);
         self.getResourceAxioms(node.data.id, {}, function (err, result) {
             $("#waitImg").css("display", "none");
             if (err) {
@@ -245,7 +249,56 @@ var NodeInfosAxioms = (function () {
         });
     };
 
-    return self;
+    self.actions={
+
+        setLayout:function(layout){
+            if(layout=='randomlayout'){
+               var visjsData={
+                  nodes: axioms_graph.axiomsVisjsGraph.data.nodes.get(),
+                   edges: axioms_graph.axiomsVisjsGraph.data.edges.get(),
+
+               }
+               axioms_graph.drawGraph(visjsData, "axiomGraphDiv",{randomLayout:true});
+            }
+
+
+        },
+        toSVG:function(){
+/*
+            var canvas=axioms_graph.axiomsVisjsGraph.network.canvas
+           var  ctx = canvas.getContext("2d");
+            var mySerializedSVG = ctx.getSerializedSvg();*/
+          axioms_graph.axiomsVisjsGraph.toSVG();
+        },
+        toGraphMl:function(){
+            axioms_graph.axiomsVisjsGraph.toGraphMl();
+        },
+
+
+
+    }
+
+    self.newAxiom=function(){
+        Axiom_activeLegend.init( "axioms_legend_div","nodeInfosAxioms_graphDiv")
+        Axiom_activeLegend.drawLegend();
+        SimpleListSelectorWidget.showDialog(
+            null,
+            function (callbackLoad) {
+                return callbackLoad(["subClassOf","equivalentClass","disjointWith","disjointUnionOf"])
+            },
+
+            function (selectedProperty) {
+                if (!selectedProperty) {
+                    return;
+                }
+                Axiom_editor.getAllClasses();
+                Axiom_activeLegend.drawNewAxiom(self.currentResource);
+                Axiom_activeLegend.hideForbiddenResources("add_Class");
+            })
+
+            }
+
+        return self;
 })();
 export default NodeInfosAxioms;
 window.NodeInfosAxioms = NodeInfosAxioms;

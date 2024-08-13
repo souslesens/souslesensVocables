@@ -66,6 +66,7 @@ var Axiom_editorUI = (function () {
             "<span class='" + cssClass + "'><b>" + resourceNode.resourceType + " " + resourceNode.label + "  </b></span><span class='axiom_keyword'><b>" + Axiom_editor.axiomType + "</b></span>";
         $("#axiomsEditor_input_currentClassDiv").html(html);
         Axiom_editor.getAllClasses();
+        Axiom_activeLegend.init( "axioms_legend_div","axiomGraphDiv")
         Axiom_activeLegend.drawNewAxiom(resourceNode);
 
         Axiom_activeLegend.hideForbiddenResources("add_Class");

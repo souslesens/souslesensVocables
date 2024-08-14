@@ -475,9 +475,9 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
         var nodes = [];
         var nodeIdsMap = {};
-        var currentLevel = 0;
-        var recurse = function (nodeId) {
-            if (depth && currentLevel++ > depth) {
+
+        var recurse = function (nodeId, level) {
+            if (depth && level > depth) {
                 return;
             }
 
@@ -496,12 +496,12 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                 // Attempt to traverse if the node has children
                 if (node.children) {
                     node.children.forEach(function (child) {
-                        recurse(child);
+                        recurse(child, level + 1);
                     });
                 }
             }
         };
-        recurse(parentNodeId);
+        recurse(parentNodeId, 0);
 
         return nodes;
     };

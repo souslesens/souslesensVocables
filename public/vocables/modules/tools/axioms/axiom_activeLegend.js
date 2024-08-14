@@ -1,12 +1,17 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axiom_editor from "./axiom_editor.js";
-import Axiom_editorUI from "./axiom_editorUI.js";
 import Axioms_graph from "./axioms_graph.js";
 
 var Axiom_activeLegend = (function () {
     var self = {};
     self.axiomsLegendVisjsGraph = null;
 
+    self.init = function (graphLegendDiv, axiomGraphDiv, source, resource) {
+        self.graphLegendDiv = graphLegendDiv;
+        self.axiomGraphDiv = axiomGraphDiv;
+        self.currentSource = source;
+        self.currentResource = resource;
+    };
     self.filterSuggestion = function (suggestions, resourceType) {
         var selection = [];
         suggestions.forEach(function (item) {
@@ -22,14 +27,12 @@ var Axiom_activeLegend = (function () {
             self.currentNodeType = node.data.type;
             self.hideForbiddenResources(node.data.type);
             if (node.data.type == "add_Class") {
-                Axioms_suggestions.getManchesterParserSuggestions(Axiom_editor.currentNode, false, false, function (err, result) {
-                    var suggestions = self.filterSuggestion(result, "Class");
-                    common.fillSelectOptions("axioms_legend_suggestionsSelect", suggestions, false, "label", "id");
-                });
+                var classes = Axiom_editor.getAllClasses();
+
+                common.fillSelectOptions("axioms_legend_suggestionsSelect", classes, false, "label", "id");
             } else if (node.data.type == "add_ObjectProperty") {
-                Axioms_suggestions.getManchesterParserSuggestions(Axiom_editor.currentNode, false, false, function (err, result) {
-                    var suggestions = self.filterSuggestion(result, "ObjectProperty");
-                    common.fillSelectOptions("axioms_legend_suggestionsSelect", suggestions, false, "label", "id");
+                Axioms_suggestions.getValidPropertiesForClass(self.currentClass.id, function (err, properties) {
+                    common.fillSelectOptions("axioms_legend_suggestionsSelect", properties, false, "label", "id");
                 });
             } else if (node.data.type == "add_Restriction") {
                 var suggestions = ["allValuesFrom", "someValuesFrom", "hasValue", "maxCardinality", "minCardinality", "cardinality"];
@@ -53,10 +56,10 @@ var Axiom_activeLegend = (function () {
         var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
         visjsData.nodes.push(visjsNode);
         self.hierarchicalLevel = 0;
-        Axioms_graph.drawGraph(visjsData, "axiomGraphDiv", { onNodeClick: Axiom_activeLegend.onNodeGraphClick });
+        Axioms_graph.drawGraph(visjsData, self.axiomGraphDiv, { onNodeClick: Axiom_activeLegend.onNodeGraphClick });
         Axioms_graph.currentGraphNode = visjsNode;
 
-        self.hideForbiddenResources(selectedObject);
+        //   self.hideForbiddenResources(selectedObject);
     };
 
     self.onNodeGraphClick = function (node, point, nodeEvent) {
@@ -146,7 +149,7 @@ var Axiom_activeLegend = (function () {
             //
         } else {
             self.hierarchicalLevel = 0;
-            Axioms_graph.drawGraph(visjsData, "axiomGraphDiv");
+            Axioms_graph.drawGraph(visjsData, self.axiomGraphDiv);
         }
 
         $("#axioms_legend_suggestionsSelect").empty();
@@ -311,8 +314,7 @@ var Axiom_activeLegend = (function () {
             onRightClickFn: Axiom_activeLegend.showGraphPopupMenu,
         };
 
-        var graphLegendDiv = "axioms_legend_div";
-        self.axiomsLegendVisjsGraph = new VisjsGraphClass(graphLegendDiv, visjsData, options);
+        self.axiomsLegendVisjsGraph = new VisjsGraphClass(self.graphLegendDiv, visjsData, options);
         self.axiomsLegendVisjsGraph.draw(function () {});
     };
 

@@ -17,7 +17,7 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
-import Lineage_createResource from "./lineage_createResource.js";
+import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -2581,6 +2581,7 @@ restrictionSource = Config.predicatesSource;
         } else {
             html =
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' +
+                ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showAxioms();"> Axioms</span>' +
                 '   <span  id=\'lineage_graphPopupMenuItem\' class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.expand();"> Expand</span>' +
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawParents();"> Parents</span>' +
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
@@ -2980,6 +2981,13 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
             } else if (self.currentGraphEdge) {
                 NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv");
+            }
+        },
+        showAxioms: function () {
+            if (self.currentGraphNode) {
+                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentGraphNode.data.label);
+                $("#mainDialogDiv").dialog("open");
+                NodeInfosAxioms.init(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
             }
         },
         showPropertyInfos: function (hideModifyButtons) {

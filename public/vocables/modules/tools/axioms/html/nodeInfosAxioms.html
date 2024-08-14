@@ -1,22 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Title</title>
-    </head>
-    <body>
-        <div style="display: flex; flex-direction: row">
-            <div style="width: 100%; height: 100px; overflow: auto">
-                <div id="nodeInfosAxioms_infosDiv"></div>
-                <div id="nodeInfosAxioms_axiomsJstreeDiv"></div>
-            </div>
-            <!--
-    <div style="display: flex  ;flex-direction: column;width:100%">
-        <div style="display: flex; flex-direction: row; width: 100%; height: 100px; margin: 5px; padding: 5px">
-            <div id="nodeInfosAxioms_axiomText"></div>
+<style></style>
+
+<div style="display: flex; flex-direction: column; min-height: 650px">
+    <div style="width: 100%; height: 25%; overflow: auto">
+        <div><div id="nodeInfosAxioms_infosDiv" style="color: #278ecc"></div></div>
+        <div id="nodeInfosAxioms_axiomsJstreeDiv"></div>
+    </div>
+    <!--
+<div style="display: flex  ;flex-direction: column;width:100%">
+<div style="display: flex; flex-direction: row; width: 100%; height: 100px; margin: 5px; padding: 5px">
+    <div id="nodeInfosAxioms_axiomText"></div>
+</div>
+</div>-->
+    <div style="display: flex; flex-direction: row; width: 100%" id="nodeInfosAxioms_graphPanelDiv">
+        <!--
+        <div style="display: flex  ;flex-direction: column;">
+
+
+            <button onclick="NodeInfosAxioms.actions.toGraphMl()">toGraphML</button>
+            <button onclick="NodeInfosAxioms.actions.toSVG('randomlayout')">toSVG</button>
+            <hr>
+            <button onclick="NodeInfosAxioms.newAxiom()">New axiom</button>
+
+
+
+
         </div>
-    </div>-->
-        </div>
-        <div id="nodeInfosAxioms_graphDiv" style="width: 95%; height: 400px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
-    </body>
-</html>
+
+        -->
+
+        <div id="nodeInfosAxioms_graphDiv" style="width: 95%; height: 500px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
+    </div>
+</div>

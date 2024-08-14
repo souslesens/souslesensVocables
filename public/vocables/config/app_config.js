@@ -296,6 +296,7 @@ var Config = (function () {
         DOLCE: {},
     };
 
+
     self.slsvColorThemes = {
         "bluish violet": {
             "@source-color": "#8757de",

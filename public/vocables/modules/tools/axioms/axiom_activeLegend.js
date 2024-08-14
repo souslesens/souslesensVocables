@@ -26,15 +26,16 @@ var Axiom_activeLegend = (function () {
         if (node && node.data) {
             self.currentNodeType = node.data.type;
             self.hideForbiddenResources(node.data.type);
-            if (node.data.type == "add_Class") {
+            self.currentLegendNodeType = node.data.type
+            if (node.data.type == "Class") {
                 var classes = Axiom_editor.getAllClasses();
 
                 common.fillSelectOptions("axioms_legend_suggestionsSelect", classes, false, "label", "id");
-            } else if (node.data.type == "add_ObjectProperty") {
+            } else if (node.data.type == "ObjectProperty") {
                 Axioms_suggestions.getValidPropertiesForClass(self.currentClass.id, function (err, properties) {
                     common.fillSelectOptions("axioms_legend_suggestionsSelect", properties, false, "label", "id");
                 });
-            } else if (node.data.type == "add_Restriction") {
+            } else if (node.data.type == "Restriction") {
                 var suggestions = ["allValuesFrom", "someValuesFrom", "hasValue", "maxCardinality", "minCardinality", "cardinality"];
 
                 common.fillSelectOptions("axioms_legend_suggestionsSelect", suggestions, false);
@@ -52,11 +53,11 @@ var Axiom_activeLegend = (function () {
         };
         self.currentNodeType = selectedObject.resourceType;
 
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
         visjsData.nodes.push(visjsNode);
         self.hierarchicalLevel = 0;
-        Axioms_graph.drawGraph(visjsData, self.axiomGraphDiv, { onNodeClick: Axiom_activeLegend.onNodeGraphClick });
+        Axioms_graph.drawGraph(visjsData, self.axiomGraphDiv, {onNodeClick: Axiom_activeLegend.onNodeGraphClick});
         Axioms_graph.currentGraphNode = visjsNode;
 
         //   self.hideForbiddenResources(selectedObject);
@@ -66,7 +67,7 @@ var Axiom_activeLegend = (function () {
         if (node && node.data) {
             self.currentGraphNode = node;
             Axioms_graph.currentGraphNode = node;
-            Axiom_activeLegend.hideForbiddenResources("add_" + node.data.type);
+            Axiom_activeLegend.hideForbiddenResources("" + node.data.type);
             if (nodeEvent.ctrlKey) {
                 if (node.data.type.indexOf("Class") > -1 || node.data.type.indexOf("ObjectProperty") > -1) {
                     NodeInfosWidget.showNodeInfos(Axiom_editor.currentSource, node, "mainDialogDiv");
@@ -78,70 +79,46 @@ var Axiom_activeLegend = (function () {
         }
     };
 
-    self.onSuggestionsSelect = function (selectedObject) {
+    self.onSuggestionsSelect = function (resourceUri) {
         var resource;
-        var currentNode;
 
-        if (!selectedObject) {
-            var selectedText = $("#axioms_legend_suggestionsSelect option:selected").text();
-            selectedText = selectedText.replace(/ /g, "_");
-            var selectedId = $("#axioms_legend_suggestionsSelect").val();
-            selectedObject = { id: selectedId, label: selectedText };
-            resource = Axiom_editor.allResourcesMap[selectedId];
+        var nodeType = self.currentLegendNodeType
+
+        if (nodeType == "Class" || nodeType == "ObjectProperty") {
+            resource = Axiom_editor.allResourcesMap[resourceUri];
         } else {
-            resource = Axiom_editor.allResourcesMap[selectedObject.id];
+            var label = $("#axioms_legend_suggestionsSelect option:selected").text();
+            resource = {
+                id: resourceUri,
+                label: label,
+                resourceType: nodeType,
+                data: {
+                    id: resourceUri,
+                    label: label,
+                    resourceType: nodeType
+                },
+                predicates:[]
+            }
+
+        }
+        if (!resource) {
+            return;
         }
 
-        if (resource) {
-            //class or Property
-            Axiom_editor.previousTokenType = resource.resourceType;
-            selectedObject.resourceType = resource.resourceType;
-        } else {
-            //keyword
-            /*   selectedObject = {
-                id: selectedObject,
-                label: selectedObject,
-                resourceType: selectedObject
-            };*/
-        }
-        currentNode = {
-            id: selectedObject.id,
-            label: selectedObject.label,
-            owlType: self.currentNodeType || selectedObject.resourceType,
-            symbol: null,
-        };
+        var visjsData = {nodes: [], edges: []};
+        var level = Axioms_graph.currentGraphNode.level + 1;
+        resource.owlType = resource.resourceType
 
-        if (selectedObject.resourceType == "Class") {
-            Axiom_editor.addSuggestion(selectedObject);
-        } else if (selectedObject.resourceType == "ObjectProperty") {
-            Axiom_editor.addSuggestion(selectedObject);
-        } else if (selectedObject.resourceType == "add_Intersection") {
-            currentNode.symbol = "⊓";
-            Axiom_editor.addSuggestion({ id: "and", label: "and" });
-        } else if (selectedObject.resourceType == "add_Union") {
-            currentNode.symbol = "⨆";
-            Axiom_editor.addSuggestion({ id: "or", label: "or" });
-        } else if (selectedObject.resourceType == "add_ComplementOf") {
-            currentNode.symbol = "┓";
-            Axiom_editor.addSuggestion({ id: "not", label: "not" });
-        } else {
-            currentNode.owlType = "Restriction";
-            Axiom_editor.addSuggestion(selectedObject);
-        }
-
-        var level = ++self.hierarchicalLevel;
-
-        var visjsData = { nodes: [], edges: [] };
-        visjsData.nodes.push(Axioms_graph.getVisjsNode(currentNode, level));
+        visjsData.nodes.push(Axioms_graph.getVisjsNode(resource, level));
 
         if (Axioms_graph.axiomsVisjsGraph) {
             Axioms_graph.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
             if (Axioms_graph.currentGraphNode) {
-                var edgeId = Axioms_graph.currentGraphNode.id + "_" + currentNode.id;
+                var edgeId = Axioms_graph.currentGraphNode.id + "_" + resource.id;
                 visjsData.edges.push({
                     id: edgeId,
                     from: Axioms_graph.currentGraphNode.id,
-                    to: currentNode.id,
+                    to: resource.id,
                 });
                 Axioms_graph.axiomsVisjsGraph.data.edges.add(visjsData.edges);
             }
@@ -152,33 +129,55 @@ var Axiom_activeLegend = (function () {
             Axioms_graph.drawGraph(visjsData, self.axiomGraphDiv);
         }
 
+
+        return;
+
+        if (selectedObject.resourceType == "Class") {
+            Axiom_editor.addSuggestion(selectedObject);
+        } else if (selectedObject.resourceType == "ObjectProperty") {
+            Axiom_editor.addSuggestion(selectedObject);
+        } else if (selectedObject.resourceType == "Intersection") {
+            currentNode.symbol = "⊓";
+            Axiom_editor.addSuggestion({id: "and", label: "and"});
+        } else if (selectedObject.resourceType == "Union") {
+            currentNode.symbol = "⨆";
+            Axiom_editor.addSuggestion({id: "or", label: "or"});
+        } else if (selectedObject.resourceType == "ComplementOf") {
+            currentNode.symbol = "┓";
+            Axiom_editor.addSuggestion({id: "not", label: "not"});
+        } else {
+            currentNode.owlType = "Restriction";
+            Axiom_editor.addSuggestion(selectedObject);
+        }
+
+        var level = ++self.hierarchicalLevel;
+
+
         $("#axioms_legend_suggestionsSelect").empty();
     };
 
     self.hideForbiddenResources = function (type) {
         var hiddenNodes = [];
-        if (type == "add_Class") {
-            hiddenNodes.push("add_Restriction");
-        } else if (type == "add_ObjectProperty") {
-            hiddenNodes.push("add_Class");
-            hiddenNodes.push("add_Intersection");
-            hiddenNodes.push("add_Union");
-            hiddenNodes.push("add_Intersection");
-        } else if (type == "add_Restriction") {
-            hiddenNodes.push("add_ObjectProperty");
-            hiddenNodes.push("add_Intersection");
-            hiddenNodes.push("add_Union");
-            hiddenNodes.push("add_Intersection");
-        } else if (type == "add_Intersection") {
-        } else if (type == "add_Union") {
-        } else if (type == "add_Complement") {
+        if (type == "Class") {
+            hiddenNodes.push("ObjectProperty");
+        } else if (type == "ObjectProperty") {
+            hiddenNodes.push("Class");
+            hiddenNodes.push("Intersection");
+            hiddenNodes.push("Union");
+            hiddenNodes.push("Intersection");
+        } else if (type == "Restriction") {
+            hiddenNodes.push("Restriction");
+
+        } else if (type == "Intersection") {
+        } else if (type == "Union") {
+        } else if (type == "Complement") {
         }
 
         var legendNodes = self.axiomsLegendVisjsGraph.data.nodes.getIds();
         var newNodes = [];
         legendNodes.forEach(function (nodeId) {
             var hidden = hiddenNodes.indexOf(nodeId) > -1;
-            newNodes.push({ id: nodeId, hidden: hidden });
+            newNodes.push({id: nodeId, hidden: hidden});
         });
         Axiom_activeLegend.axiomsLegendVisjsGraph.data.nodes.update(newNodes);
 
@@ -186,10 +185,10 @@ var Axiom_activeLegend = (function () {
     };
 
     self.drawLegend = function () {
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         visjsData.nodes.push(
             {
-                id: "add_Class",
+                id: "Class",
                 label: "Class",
                 shape: "box",
                 color: "#00afef",
@@ -199,18 +198,18 @@ var Axiom_activeLegend = (function () {
                     bold: true,
                 },
                 data: {
-                    id: "add_Class",
+                    id: "Class",
                     label: "Class Class",
-                    type: "add_Class",
+                    type: "Class",
                 },
                 x: 0,
                 y: -300,
 
-                fixed: { x: true, y: true },
+                fixed: {x: true, y: true},
             },
 
             {
-                id: "add_ObjectProperty",
+                id: "ObjectProperty",
                 label: "ObjectProperty",
                 shape: "box",
                 color: "#f5ef39",
@@ -218,17 +217,17 @@ var Axiom_activeLegend = (function () {
                 level: -1,
                 font: null,
                 data: {
-                    id: "add_ObjectProperty",
+                    id: "ObjectProperty",
                     label: "ObjectProperty",
-                    type: "add_ObjectProperty",
+                    type: "ObjectProperty",
                 },
                 x: 0,
                 y: -250,
 
-                fixed: { x: true, y: true },
+                fixed: {x: true, y: true},
             },
             {
-                id: "add_Restriction",
+                id: "Restriction",
                 label: "Restriction",
                 shape: "box",
                 color: "#cb9801",
@@ -236,18 +235,18 @@ var Axiom_activeLegend = (function () {
                 level: -1,
                 font: null,
                 data: {
-                    id: "add_Restriction",
+                    id: "Restriction",
                     label: "Restriction",
-                    type: "add_Restriction",
+                    type: "Restriction",
                 },
 
                 x: 0,
                 y: -200,
 
-                fixed: { x: true, y: true },
+                fixed: {x: true, y: true},
             },
             {
-                id: "add_Union",
+                id: "Union",
                 label: "⨆ union",
                 shape: "box",
                 color: "#70ac47",
@@ -255,18 +254,18 @@ var Axiom_activeLegend = (function () {
                 level: -1,
                 font: null,
                 data: {
-                    id: "add_Union",
+                    id: "Union",
                     label: "⨆ union",
-                    type: "add_Union",
+                    type: "Union",
                 },
 
                 x: 0,
                 y: -150,
 
-                fixed: { x: true, y: true },
+                fixed: {x: true, y: true},
             },
             {
-                id: "add_Intersection",
+                id: "Intersection",
                 label: "⊓ Intersection",
                 shape: "box",
                 color: "#70ac47",
@@ -274,18 +273,18 @@ var Axiom_activeLegend = (function () {
                 level: -1,
                 font: null,
                 data: {
-                    id: "add_Intersection",
+                    id: "Intersection",
                     label: "⊓ Intersection",
-                    type: "add_Intersection",
+                    type: "Intersection",
                 },
 
                 x: 0,
                 y: -100,
 
-                fixed: { x: true, y: true },
+                fixed: {x: true, y: true},
             },
             {
-                id: "add_Complement",
+                id: "Complement",
                 label: "┓ Complement",
                 shape: "box",
                 color: "#70ac47",
@@ -293,15 +292,15 @@ var Axiom_activeLegend = (function () {
                 level: -1,
                 font: null,
                 data: {
-                    id: "add_Complement",
+                    id: "Complement",
                     label: "┓ Complement",
-                    type: "add_Complement",
+                    type: "Complement",
                 },
 
                 x: 0,
                 y: -150,
 
-                fixed: { x: true, y: true },
+                fixed: {x: true, y: true},
             }
         );
         var options = {
@@ -315,13 +314,24 @@ var Axiom_activeLegend = (function () {
         };
 
         self.axiomsLegendVisjsGraph = new VisjsGraphClass(self.graphLegendDiv, visjsData, options);
-        self.axiomsLegendVisjsGraph.draw(function () {});
+        self.axiomsLegendVisjsGraph.draw(function () {
+        });
     };
 
     self.clearAxiom = function () {
         // self.axiomsLegendVisjsGraph.clearGraph();
         Axioms_graph.axiomsVisjsGraph.clearGraph();
+        NodeInfosAxioms.newAxiom()
+
     };
+
+    self.graphToManchesterSyntax = function () {
+
+    }
+    self.saveAxiom = function () {
+
+    }
+
     return self;
 })();
 

@@ -23,7 +23,7 @@
         <div class="input-group mb-3" style="width: 100%">
             <div class="input-group-prepend">
                 <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
-                    <button class="search-icon slsv-invisible-button" onclick="Lineage_whiteboard.graph.searchNode()" style="margin-top: 4px; height: 20px; width: 20px"></button>
+                    <button class="search-icon slsv-invisible-button"  onclick="Lineage_whiteboard.graph.searchNode()" style="margin-top: 4px; height: 20px; width: 20px"></button>
                 </div>
             </div>
             <input
@@ -33,7 +33,7 @@
                 onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_whiteboard.graph.searchNode()}"
             />
         </div>
-        <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
+        <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()"  popUpComment="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
         <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()" popUpComment="Clear Last">
             <img src="./icons/CommonIcons/ClearLastIcon.png" />
         </button>

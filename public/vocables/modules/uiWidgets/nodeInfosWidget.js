@@ -59,7 +59,7 @@ var NodeInfosWidget = (function () {
                         if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                             var source = self.currentSource;
                             // source = Lineage_sources.mainSource;
-                            NodeInfosAxioms.init(source, self.currentNode,"nodeInfosWidget_AxiomsTabDiv");
+                            NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
                             // Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
                         }
                     }, 100);

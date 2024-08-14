@@ -10,11 +10,11 @@ import Axiom_activeLegend from "./axiom_activeLegend.js";
 var NodeInfosAxioms = (function () {
     var self = {};
 
-    self.init = function (source, resource,divId) {
+    self.init = function (source, resource, divId) {
         self.currentSource = source;
         self.currentResource = resource;
         self.allClassesMap = {};
-        $("#"+divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
+        $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
             Axiom_editor.initResourcesMap(self.currentSource, function (err, result) {
                 // used do draw graph
                 self.initSourceClassesMap(self.currentSource, function (err, result) {
@@ -50,16 +50,14 @@ var NodeInfosAxioms = (function () {
     self.loadAxiomsJstree = function () {
         $("#nodeInfosAxioms_infosDiv").html("Loading Axioms");
         $("#waitImg").css("display", "block");
-        self.getResourceAxioms(self.currentResource.data.id,{}, function (err, result) {
+        self.getResourceAxioms(self.currentResource.data.id, {}, function (err, result) {
             $("#waitImg").css("display", "none");
             if (err) {
                 return alert(err.responseText);
             }
             if (result.manchester.length == 0) {
-             return   $("#nodeInfosAxioms_infosDiv").html("no axioms found");
+                return $("#nodeInfosAxioms_infosDiv").html("no axioms found");
             }
-
-
 
             /* var manchester = [
                  " DisjointClasses: EngineeredSystem, MaterialArtifact, Organization",
@@ -102,7 +100,7 @@ var NodeInfosAxioms = (function () {
                             });
                         }
                         if (index == 2) {
-                            var id =common.getRandomHexaId(5);
+                            var id = common.getRandomHexaId(5);
                             /*  for (var key in Axiom_editor.allClassesMap) {
                                   if (self.allClassesMap[key].label.indexOf(word) > -1) {
                                       id = key;
@@ -140,12 +138,19 @@ var NodeInfosAxioms = (function () {
         });
     };
 
-    self.getResourceAxioms = function (resourceId,options, callback) {
-        Axiom_manager.getClassAxioms(self.currentSource, resourceId, { getManchesterExpression: true, getTriples: true }, function (err, result) {
-            return callback(err, result);
-        });
+    self.getResourceAxioms = function (resourceId, options, callback) {
+        Axiom_manager.getClassAxioms(
+            self.currentSource,
+            resourceId,
+            {
+                getManchesterExpression: true,
+                getTriples: true,
+            },
+            function (err, result) {
+                return callback(err, result);
+            }
+        );
     };
-
 
     self.onAxiomJstreeSelectNode = function (evt, obj) {
         var node = obj.node;
@@ -170,7 +175,7 @@ var NodeInfosAxioms = (function () {
                 self.currentResource.data.id,
                 node.data.triples,
                 "nodeInfosAxioms_graphDiv",
-                { onNodeClick: NodeInfosAxioms.onNodeGraphClick,axiomType:node.parent },
+                { onNodeClick: NodeInfosAxioms.onNodeGraphClick, axiomType: node.parent },
                 function (err) {}
             );
 
@@ -185,31 +190,20 @@ var NodeInfosAxioms = (function () {
                 return alert(err.responseText);
             }
 
-
-            var allTriples = []
-            result.triples.forEach(function(item) {
+            var allTriples = [];
+            result.triples.forEach(function (item) {
                 allTriples = allTriples.concat(item);
-            })
-            var options={addToGraph:true,startLevel:node.level,axiomType:node.parent }
+            });
+            var options = { addToGraph: true, startLevel: node.level, axiomType: node.parent };
             Axioms_graph.drawNodeAxioms2(self.currentSource, node.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, function (err) {});
-
-
-        })
-
-
-
+        });
     };
 
-
-
-
-
-
-    self.showResourceDescendantsAxioms = function (source, resource,descendants,divId) {
+    self.showResourceDescendantsAxioms = function (source, resource, descendants, divId) {
         self.currentSource = source;
-        self.currentResource=resource;
+        self.currentResource = resource;
         self.allClassesMap = {};
-        $("#"+divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
+        $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
             Axiom_editor.initResourcesMap(self.currentSource, function (err, result) {
                 // used do draw graph
                 self.initSourceClassesMap(self.currentSource, function (err, result) {
@@ -218,87 +212,84 @@ var NodeInfosAxioms = (function () {
                         return alert(err);
                     }
 
-                var addToGraph=false;
-                    async.eachSeries(descendants, function (descendant, callbackEach) {
+                    var addToGraph = false;
+                    async.eachSeries(
+                        descendants,
+                        function (descendant, callbackEach) {
+                            self.getResourceAxioms(descendant.data.id, {}, function (err, result) {
+                                $("#waitImg").css("display", "none");
+                                if (err) {
+                                    return callbackEach(err.responseText);
+                                }
 
-                        self.getResourceAxioms(descendant.data.id, {}, function (err, result) {
-                            $("#waitImg").css("display", "none");
-                            if (err) {
-                                return callbackEach(err.responseText);
-                            }
+                                var allTriples = [];
+                                result.triples.forEach(function (item) {
+                                    allTriples = allTriples.concat(item);
+                                });
+                                var options = { addToGraph: addToGraph };
+                                Axioms_graph.drawNodeAxioms2(self.currentSource, descendant.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, function (err) {});
+                                addToGraph = true;
 
-
-                            var allTriples = []
-                            result.triples.forEach(function(item) {
-                                allTriples = allTriples.concat(item);
-                            })
-                            var options={addToGraph:addToGraph}
-                            Axioms_graph.drawNodeAxioms2(self.currentSource, descendant.data.id, allTriples, "nodeInfosAxioms_graphDiv", options, function (err) {});
-                            addToGraph=true
-
-                            callbackEach(null)
-                        })
-
-
-                    }, function (err) {
-
-
-                    });
-                })
-            })
+                                callbackEach(null);
+                            });
+                        },
+                        function (err) {}
+                    );
+                });
+            });
         });
     };
 
-    self.actions={
-
-        setLayout:function(layout){
-            if(layout=='randomlayout'){
-               var visjsData={
-                  nodes: axioms_graph.axiomsVisjsGraph.data.nodes.get(),
-                   edges: axioms_graph.axiomsVisjsGraph.data.edges.get(),
-
-               }
-               axioms_graph.drawGraph(visjsData, "axiomGraphDiv",{randomLayout:true});
+    self.actions = {
+        setLayout: function (layout) {
+            if (layout == "randomlayout") {
+                var visjsData = {
+                    nodes: axioms_graph.axiomsVisjsGraph.data.nodes.get(),
+                    edges: axioms_graph.axiomsVisjsGraph.data.edges.get(),
+                };
+                axioms_graph.drawGraph(visjsData, "axiomGraphDiv", { randomLayout: true });
             }
-
-
         },
-        toSVG:function(){
-/*
-            var canvas=axioms_graph.axiomsVisjsGraph.network.canvas
-           var  ctx = canvas.getContext("2d");
-            var mySerializedSVG = ctx.getSerializedSvg();*/
-          axioms_graph.axiomsVisjsGraph.toSVG();
+        toSVG: function () {
+            /*
+                        var canvas=axioms_graph.axiomsVisjsGraph.network.canvas
+                       var  ctx = canvas.getContext("2d");
+                        var mySerializedSVG = ctx.getSerializedSvg();*/
+            axioms_graph.axiomsVisjsGraph.toSVG();
         },
-        toGraphMl:function(){
+        toGraphMl: function () {
             axioms_graph.axiomsVisjsGraph.toGraphMl();
         },
+    };
 
+    self.newAxiom = function () {
+        $("#nodeInfosAxioms_graphPanelDiv").load("modules/tools/axioms/html/nodeInfosAxiomWrite.html", function (err) {
+            if (err) var x = err;
+            Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_writeGraphDiv", self.currentSource);
+            Axiom_activeLegend.drawLegend();
+            SimpleListSelectorWidget.showDialog(
+                null,
+                function (callbackLoad) {
+                    return callbackLoad(["subClassOf", "equivalentClass", "disjointWith", "disjointUnionOf"]);
+                },
 
+                function (selectedProperty) {
+                    if (!selectedProperty) {
+                        return;
+                    }
+                    Axiom_activeLegend.currentResource = self.currentResource;
+                    Axiom_editor.getAllClasses();
+                    // Axiom_editor.addSuggestion(self.currentResource)
+                    self.currentResource.resourceType = "Class";
+                    Axiom_activeLegend.drawNewAxiom(self.currentResource);
 
-    }
-
-    self.newAxiom=function(){
-        Axiom_activeLegend.init( "axioms_legend_div","nodeInfosAxioms_graphDiv")
-        Axiom_activeLegend.drawLegend();
-        SimpleListSelectorWidget.showDialog(
-            null,
-            function (callbackLoad) {
-                return callbackLoad(["subClassOf","equivalentClass","disjointWith","disjointUnionOf"])
-            },
-
-            function (selectedProperty) {
-                if (!selectedProperty) {
-                    return;
+                    // Axiom_activeLegend.hideForbiddenResources("add_Class");
                 }
-                Axiom_editor.getAllClasses();
-                Axiom_activeLegend.drawNewAxiom(self.currentResource);
-                Axiom_activeLegend.hideForbiddenResources("add_Class");
-            })
+            );
+        });
+    };
 
-            }
-
-        return self;
+    return self;
 })();
 export default NodeInfosAxioms;
 window.NodeInfosAxioms = NodeInfosAxioms;

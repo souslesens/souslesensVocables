@@ -323,7 +323,7 @@ var SearchWidget = (function () {
             sourceLabel = Lineage_sources.activeSource;
         }
         if (!options) {
-            options = {withoutImports: false, selectGraph: true};
+            options = { withoutImports: false, selectGraph: true };
         }
 
         if (options.targetDiv) {
@@ -408,29 +408,25 @@ var SearchWidget = (function () {
             items.axioms = {
                 label: "Node axioms",
                 action: function (e) {
+                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
 
-                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label)
-
-                    $("#mainDialogDiv").dialog("open")
+                    $("#mainDialogDiv").dialog("open");
 
                     NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
-
-                }
-            }
+                },
+            };
 
             items.descendantsAxioms = {
                 label: "Descendants axioms",
                 action: function (e) {
-                    $("#mainDialogDiv").dialog("open")
-                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label)
-                    var descendants=JstreeWidget.getNodeDescendants("LineageNodesJsTreeDiv",self.currentTreeNode.id)
-                    descendants.push(self.currentTreeNode)
-                    NodeInfosAxioms.showResourceDescendantsAxioms(self.currentTreeNode.data.source,self.currentTreeNode, descendants, "mainDialogDiv");
-
-                }
-            }
+                    $("#mainDialogDiv").dialog("open");
+                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+                    var descendants = JstreeWidget.getNodeDescendants("LineageNodesJsTreeDiv", self.currentTreeNode.id);
+                    descendants.push(self.currentTreeNode);
+                    NodeInfosAxioms.showResourceDescendantsAxioms(self.currentTreeNode.data.source, self.currentTreeNode, descendants, "mainDialogDiv");
+                },
+            };
         }
-
 
         /*
         items.graphNamedIndividuals = {
@@ -517,7 +513,7 @@ items.exportAllDescendants = {
         if (options.depth) {
             descendantsDepth = options.depth;
         }
-// options.filterCollections = Collection.currentCollectionFilter;
+        // options.filterCollections = Collection.currentCollectionFilter;
         Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, descendantsDepth, options, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);

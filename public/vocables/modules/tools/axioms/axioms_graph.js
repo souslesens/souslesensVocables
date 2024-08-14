@@ -2,7 +2,6 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axiom_editor from "./axiom_editor.js";
 import Axiom_activeLegend from "./axiom_activeLegend.js";
 
-
 /*
 restriction	objectPropertyExpression some primary	ObjectSomeValuesFrom(T(objectPropertyExpression) T(primary))
 restriction	objectPropertyExpression only primary	ObjectAllValuesFrom(T(objectPropertyExpression) T(primary))
@@ -38,17 +37,16 @@ var Axioms_graph = (function () {
             color = "#70ac47";
             if (node.symbol == "^") {
                 shape = "ellipse";
-                font = {bold: true};
+                font = { bold: true };
                 color = "#f5ef39";
             }
         } else if (node.owlType && node.owlType.indexOf("Class") > -1) {
             color = "#00afef";
             shape = "dot";
-            font = {bold: true, color: color};
+            font = { bold: true, color: color };
         } else if (node.owlType && node.owlType.indexOf("ObjectProperty") > -1) {
             color = "#f5ef39";
         } else if (node.owlType && node.owlType.indexOf("Restriction") > -1) {
-
             label = "some";
             node.predicates.forEach(function (predicate) {
                 if (predicate.p.indexOf("someValuesFrom") > -1) {
@@ -58,13 +56,11 @@ var Axioms_graph = (function () {
                 } else if (predicate.p.indexOf("hasValue") > -1) {
                     label = "value";
                 } else {
-                    if (predicate.p.indexOf("http://www.w3.org/2002/07/owl#onProperty") <0) {
-                        label = predicate.p.replace("http://www.w3.org/2002/07/owl#", "")
+                    if (predicate.p.indexOf("http://www.w3.org/2002/07/owl#onProperty") < 0) {
+                        label = predicate.p.replace("http://www.w3.org/2002/07/owl#", "");
                     }
-
                 }
-            })
-
+            });
 
             color = "#cb9801";
         } else {
@@ -97,7 +93,7 @@ var Axioms_graph = (function () {
         }
         self.graphDivId = divId;
         var nodesMap = {};
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
         var edgesToRemove = {};
         var disjointClassesAxiomRoot = null;
         async.series(
@@ -118,7 +114,7 @@ var Axioms_graph = (function () {
                         }
 
                         if (!nodesMap[s]) {
-                            nodesMap[s] = {id: s};
+                            nodesMap[s] = { id: s };
                             if (s.indexOf("http") == 0) {
                                 var obj = Axiom_editor.allResourcesMap[s];
                                 nodesMap[s].label = obj ? obj.label.replace(/_/g, " ") : null;
@@ -137,7 +133,7 @@ var Axioms_graph = (function () {
                             nodesMap[s].predicates.push({
                                 p: p,
                                 o: o,
-                                pLabel: obj ? obj.label.replace(/_/g, " ") : null
+                                pLabel: obj ? obj.label.replace(/_/g, " ") : null,
                             });
                         }
 
@@ -158,12 +154,9 @@ var Axioms_graph = (function () {
                             nodesMap[s].symbol = "⊑ ┓";
                         }
 
-
                         if (o == "http://www.w3.org/2002/07/owl#AllDisjointClasses") {
-                            disjointClassesAxiomRoot = s
+                            disjointClassesAxiomRoot = s;
                         }
-
-
                     });
                     var x = nodesMap;
                     callbackSeries();
@@ -174,12 +167,11 @@ var Axioms_graph = (function () {
                     var existingNodes = {};
 
                     if (options.addToGraph && self.axiomsVisjsGraph) {
-                        existingNodes = self.axiomsVisjsGraph.getExistingIdsMap()
+                        existingNodes = self.axiomsVisjsGraph.getExistingIdsMap();
                     }
                     var stop = false;
 
                     function recurse(nodeId, level) {
-
                         if (stop) {
                             return;
                         }
@@ -209,21 +201,20 @@ var Axioms_graph = (function () {
                                 if (predicate.p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest") {
                                     skipNode = true;
                                 }
-                                var edgeLabel = null
+                                var edgeLabel = null;
                                 if (!existingNodes[childNode.id]) {
                                     existingNodes[childNode.id] = 1;
 
                                     var visjsNode = self.getVisjsNode(childNode, level + 1);
                                     if (rootNodeId == node.id && options.axiomType) {
                                         if (options.axiomType.indexOf("SubClassOf") > -1) {
-                                            edgeLabel = "⊑"
+                                            edgeLabel = "⊑";
                                         } else if (options.axiomType.indexOf("Equivalent") > -1) {
-                                            edgeLabel = "≡"
+                                            edgeLabel = "≡";
                                         } else if (options.axiomType.indexOf("Disjoint") > -1) {
-                                            edgeLabel = "⊑ ┓"
+                                            edgeLabel = "⊑ ┓";
                                         }
                                     }
-
 
                                     visjsData.nodes.push(visjsNode);
                                 }
@@ -232,7 +223,7 @@ var Axioms_graph = (function () {
 
                                 var arrows = null;
                                 if (!visjsNode) {
-                                    visjsNode = {}   // return;
+                                    visjsNode = {}; // return;
                                 }
                                 if (childNode.id.indexOf("http") == 0) {
                                     //   if (visjsNode.shape != "dot" && predicate.p != "http://www.w3.org/2002/07/owl#inverseOf") {
@@ -245,7 +236,6 @@ var Axioms_graph = (function () {
                                     };
                                 }
                                 if (!existingNodes[edgeId]) {
-
                                     existingNodes[edgeId] = 1;
                                     visjsData.edges.push({
                                         id: edgeId,
@@ -283,7 +273,7 @@ var Axioms_graph = (function () {
 
                     var level = 1;
                     if (options.startLevel) {
-                        level = options.startLevel
+                        level = options.startLevel;
                     }
 
                     //  when disjointClassesAxiomRoot is not null tree starts from it
@@ -292,22 +282,20 @@ var Axioms_graph = (function () {
                     return callbackSeries();
                 },
 
-
                 //optimize nodes levels
                 function (callbackSeries) {
                     //    return callbackSeries();
 
-
-                    var nodesMap = common.array.toMap(visjsData.nodes, "id")
-                    var max = 20
-                    var iterations = 0
-                    var stop = true
+                    var nodesMap = common.array.toMap(visjsData.nodes, "id");
+                    var max = 20;
+                    var iterations = 0;
+                    var stop = true;
                     do {
-                        iterations += 1
+                        iterations += 1;
                         visjsData.edges.forEach(function (edge, nodeIndex) {
                             if (nodesMap[edge.from] && nodesMap[edge.to] && nodesMap[edge.to].level < nodesMap[edge.from].level) {
-                                nodesMap[edge.to].level = nodesMap[edge.from].level + 1
-                                stop = false
+                                nodesMap[edge.to].level = nodesMap[edge.from].level + 1;
+                                stop = false;
                             }
 
                             if (nodesMap[edge.from] && rootNodeId == edge.from) {
@@ -324,15 +312,10 @@ var Axioms_graph = (function () {
                             /*   if (rootNodeId ==edge.to) {
                                    nodesMap[edge.to].color = "#096eac";
                                }*/
-
-                        })
-
-
-                    } while (stop == false && iterations <= max)
+                        });
+                    } while (stop == false && iterations <= max);
 
                     return callbackSeries();
-
-
                 },
                 //draw graph
                 function (callbackSeries) {
@@ -341,7 +324,6 @@ var Axioms_graph = (function () {
                             self.graphOptions.visjsOptions.layout.hierarchical.enabled = true;
                         }
                         self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
-
 
                         self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
                         self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
@@ -372,7 +354,6 @@ var Axioms_graph = (function () {
             /* physics: {
 enabled:true},*/
 
-
             visjsOptions: {
                 edges: {
                     smooth: {
@@ -400,7 +381,7 @@ enabled:true},*/
                 parentCentralization: true,
 
                 nodeSpacing: yOffset,
-            }
+            };
         }
 
         /*   $("#" + self.graphDivContainer).html(
@@ -415,13 +396,10 @@ enabled:true},*/
                 self.graphOptions.visjsOptions.layout.hierarchical.enabled = false;
             }
             self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
-
-
         });
     };
 
-    self.showGraphPopupMenu = function () {
-    };
+    self.showGraphPopupMenu = function () {};
 
     self.clearGraph = function () {
         $("#" + self.graphDivId).html("");

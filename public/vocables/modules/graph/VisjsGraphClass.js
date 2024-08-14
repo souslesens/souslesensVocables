@@ -311,9 +311,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
     };
 
-    self.redraw=function(){
-        self.draw()
-    }
+    self.redraw = function () {
+        self.draw();
+    };
 
     self.exportGraph = function () {
         var nodes = self.data.nodes.get();

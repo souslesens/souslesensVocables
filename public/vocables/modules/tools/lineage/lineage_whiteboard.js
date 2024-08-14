@@ -2571,7 +2571,6 @@ restrictionSource = Config.predicatesSource;
         } else if (false && node.data && node.data.type == "NamedIndividual") {
             html =
                 '    <span  class="popupMenuItem" onclick="Lineage_linkedData.graphActions.showIndividualInfos();"> Node infos</span>' +
-
                 '<span  class="popupMenuItem" onclick="Lineage_linkedData.graphActions.expandIndividual();"> Expand individual</span>';
             // '<span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.expandIndividual();"> Expand individual</span>';
         } else if (node.data && node.data.context == Lineage_linkedData_mappings.context) {
@@ -2986,8 +2985,8 @@ self.zoomGraphOnNode(node.data[0].id, false);
         },
         showAxioms: function () {
             if (self.currentGraphNode) {
-                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentGraphNode.data.label)
-                $("#mainDialogDiv").dialog("open")
+                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentGraphNode.data.label);
+                $("#mainDialogDiv").dialog("open");
                 NodeInfosAxioms.init(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
             }
         },

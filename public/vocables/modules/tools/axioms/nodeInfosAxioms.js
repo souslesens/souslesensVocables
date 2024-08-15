@@ -277,13 +277,16 @@ var NodeInfosAxioms = (function () {
                     if (!selectedProperty) {
                         return;
                     }
+
                     Axiom_activeLegend.currentResource = self.currentResource;
-                    Axiom_editor.getAllClasses();
+
                     // Axiom_editor.addSuggestion(self.currentResource)
                     self.currentResource.resourceType = "Class";
-                    Axiom_activeLegend.drawNewAxiom(self.currentResource);
+                    Axiom_activeLegend.currentClass=self.currentResource
+                    Axiom_editor.init  (null, self.currentResource, self.currentSource)
 
-                    // Axiom_activeLegend.hideForbiddenResources("add_Class");
+                    Axiom_activeLegend.drawNewAxiom(self.currentResource);
+                   //  Axiom_activeLegend.hideForbiddenResources("Class");
                 }
             );
         });

@@ -320,7 +320,7 @@ var Axioms_graph = (function () {
                 //draw graph
                 function (callbackSeries) {
                     if (options.addToGraph && self.axiomsVisjsGraph) {
-                        if (self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
+                        if (options.randomLayout && self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
                             self.graphOptions.visjsOptions.layout.hierarchical.enabled = true;
                         }
                         self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
@@ -392,7 +392,7 @@ enabled:true},*/
 
         self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
         self.axiomsVisjsGraph.draw(function () {
-            if (self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
+            if (!options.keepHierarchyLayout  && self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
                 self.graphOptions.visjsOptions.layout.hierarchical.enabled = false;
             }
             self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);

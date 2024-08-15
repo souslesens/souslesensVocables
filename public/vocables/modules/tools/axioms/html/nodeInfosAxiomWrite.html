@@ -23,16 +23,17 @@
 
         <div id="nodeInfosAxioms_activeLegendDiv" style="width: 100px; height: 450px; background-color: #ddd"></div>
 
+
+    </div>
+    <div>
+    <select id="axioms_legend_suggestionsSelect" onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())"
+            size="20" style="width: 250px; overflow: auto"></select>
         <div>
             <button onclick="Axiom_activeLegend.clearAxiom()">clear</button>
             <button onclick="Axiom_activeLegend.graphToManchesterSyntax()">Manchester</button>
             <button onclick="Axiom_activeLegend.saveAxiom()">save</button>
 
         </div>
-    </div>
-    <div>
-    <select id="axioms_legend_suggestionsSelect" onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())"
-            size="20" style="width: 250px; overflow: auto"></select>
     </div>
 
     <div id="nodeInfosAxioms_writeGraphDiv"

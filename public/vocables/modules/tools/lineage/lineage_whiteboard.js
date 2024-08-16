@@ -3277,7 +3277,7 @@ attrs.color=self.getSourceColor(superClassValue)
 
     self.initWhiteboardTab = function () {
         if ($("#whiteboardTab").children().length == 0) {
-            $("#whiteboardTab").load("./modules/tools//lineage/html/whiteboadTab.html", function (s) {
+            $("#whiteboardTab").load("./modules/tools//lineage/html/whiteboardTab.html", function (s) {
                 $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
                 $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
                 Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);

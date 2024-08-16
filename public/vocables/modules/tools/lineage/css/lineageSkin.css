@@ -221,14 +221,14 @@
     border-bottom: 0px !important ;
 }
 
-.classesPannelButton {
+.classesPanelButton {
     .slsv-button-1;
     padding: 5% 10px;
     margin-bottom: 10px;
     margin-top: 0px;
     margin-right: 6px;
 }
-.classesPannelButton:hover {
+.classesPanelButton:hover {
     background: if((@isGradient=true), @gradient-color1, @button1-color) !important;
     .hover-button;
 }

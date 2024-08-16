@@ -12,7 +12,7 @@ var ResponsiveUI = (function () {
     var self = {};
 
     self.menuBarShowed = true;
-    self.LateralPannelShowed = true;
+    self.LateralPanelShowed = true;
     self.smartPhoneScreen = null;
 
     //Etablish the resizing, load select bar tools --> Keep here
@@ -77,7 +77,7 @@ var ResponsiveUI = (function () {
     // Keep Here
     self.resetWindowHeight = function () {
         var MenuBarHeight = $("#MenuBar").height();
-        var LateralPannelWidth = $("#lateralPanelDiv").width();
+        var LateralPanelWidth = $("#lateralPanelDiv").width();
         // Mobile format graph div reset
         if ($(window).width() <= 500) {
             $("#graphDiv").css("width", $(window).width());
@@ -85,12 +85,12 @@ var ResponsiveUI = (function () {
             self.smartPhoneScreen = true;
         } else {
             if (self.smartPhoneScreen) {
-                LateralPannelWidth = 435;
+                LateralPanelWidth = 435;
             }
             self.smartPhoneScreen = false;
 
-            $("#graphDiv").css("width", $(window).width() - LateralPannelWidth - 10);
-            $("#lateralPanelDiv").css("width", LateralPannelWidth);
+            $("#graphDiv").css("width", $(window).width() - LateralPanelWidth - 10);
+            $("#lateralPanelDiv").css("width", LateralPanelWidth);
         }
 
         $("#graphAndCommandScreen").css("height", $(window).height() - MenuBarHeight - 7);
@@ -195,33 +195,33 @@ var ResponsiveUI = (function () {
         }
     };
     //Keep
-    self.hideShowLateralPannel = function (button) {
+    self.hideShowLateralPanel = function (button) {
         if (self.smartPhoneScreen) {
             return;
         }
-        if (self.LateralPannelShowed) {
+        if (self.LateralPanelShowed) {
             $("#lineage-tab-buttons").hide();
             $(button).parent().hide();
             $("#lateralPanelDiv").css("width", "21px");
             $("#lateralPanelDiv").removeClass("ui-resizable");
             ResponsiveUI.resetWindowHeight();
-            self.LateralPannelShowed = false;
+            self.LateralPanelShowed = false;
             var buttonclone = button.cloneNode(true);
             $("#lateralPanelDiv").append(buttonclone);
-            $(buttonclone).find("#ArrowLateralPannel").attr("src", "./icons/CommonIcons/ArrowLateralPannelShow.png");
-            //$("#lateralPanelDiv").find("#ArrowLateralPannel");
+            $(buttonclone).find("#ArrowLateralPanel").attr("src", "./icons/CommonIcons/ArrowLateralPanelShow.png");
+            //$("#lateralPanelDiv").find("#ArrowLateralPanel");
         } else {
             $(button).remove();
             $("#lineage-tab-buttons").show();
             $("#WhiteboardContent").show();
             $("#lateralPanelDiv").css("width", "435px");
             ResponsiveUI.resetWindowHeight();
-            self.LateralPannelShowed = true;
+            self.LateralPanelShowed = true;
             var currentTabId = "#tabs_" + $(".slsv-selectedTabDiv").attr("popupcomment").toLowerCase();
             $(currentTabId).children().show();
 
             /*$(button).parent().show();
-            //$(button).parent().find("#ArrowLateralPannel").attr("src", "./icons/CommonIcons/ArrowLateralPannel.png");*/
+            //$(button).parent().find("#ArrowLateralPanel").attr("src", "./icons/CommonIcons/ArrowLateralPanel.png");*/
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };

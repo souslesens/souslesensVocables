@@ -1089,8 +1089,8 @@ var KGcreator = (function () {
         return t;
     };
     self.ResetRunMappingTabWidth = function () {
-        var LateralPannelWidth = $("#lateralPanelDiv").width();
-        var KGcreator_runmappingsTabWidth = $(window).width() - LateralPannelWidth;
+        var LateralPanelWidth = $("#lateralPanelDiv").width();
+        var KGcreator_runmappingsTabWidth = $(window).width() - LateralPanelWidth;
         var KGcreator_GraphEditorWidth = KGcreator_runmappingsTabWidth / 2 - 5;
 
         $("#KGcreator_run_mappingsGraphEditorContainer").css("width", KGcreator_GraphEditorWidth);

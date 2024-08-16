@@ -472,8 +472,8 @@ var MainController = (function () {
         },
 
         setCredits: function () {
-            var LateralPannelWidth = $("#lateralPanelDiv").width();
-            var gifStart = $(window).width() / 2 - LateralPannelWidth + 100;
+            var LateralPanelWidth = $("#lateralPanelDiv").width();
+            var gifStart = $(window).width() / 2 - LateralPanelWidth + 100;
             var html =
                 "<div style='position:absolute;left:" +
                 gifStart +

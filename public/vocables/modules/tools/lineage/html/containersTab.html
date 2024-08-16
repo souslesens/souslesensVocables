@@ -20,21 +20,21 @@
             <div style="margin-left: 10px">
                 <button class="w3-button slsv-invisible-button size-of-button-null" style="margin-bottom: 5px"></button>
             </div>
-            <div class="w3-button classesPannelButton size-of-button-small" onclick="Containers_widget.showParentContainersDialog()">Parent Containers</div>
+            <div class="w3-button classesPanelButton size-of-button-small" onclick="Containers_widget.showParentContainersDialog()">Parent Containers</div>
             <div>type<select id="containerSearchWidget_typesSelect" style="display: none" onchange="Containers_widget.execParentContainersSearch()"></select></div>
             <div>
                 <div
                     id="Lineage_addContainer_button"
-                    class="w3-button classesPannelButton size-of-button-small"
+                    class="w3-button classesPanelButton size-of-button-small"
                     style="padding: 3px 5px !important"
                     onclick="Containers_tree.menuActions.addContainer()"
                 >
                     <button class="slsv-invisible-button add-icon" style="height: 25px; width: 29px"></button>
                 </div>
-                <button class="w3-button classesPannelButton size-of-button-small" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all">
+                <button class="w3-button classesPanelButton size-of-button-small" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all">
                     <img src="./icons/CommonIcons/ClearAllIcon.png" />
                 </button>
-                <button class="w3-button classesPannelButton size-of-button-small" onclick="Export.exportTreeToDataTable('lineage_containers_containersJstree','#')">Export</button>
+                <button class="w3-button classesPanelButton size-of-button-small" onclick="Export.exportTreeToDataTable('lineage_containers_containersJstree','#')">Export</button>
             </div>
         </div>
     </div>
@@ -42,7 +42,7 @@
     <div style="max-height: 60dvh; overflow: auto">
         <div id="lineage_containers_containersJstree" style="margin-top: 20px"></div>
     </div>
-    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="ResponsiveUI.hideShowLateralPannel(this)">
-        <img id="ArrowLateralPannel" src="./icons/CommonIcons/ArrowLateralPannel.png" />
+    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="ResponsiveUI.hideShowLateralPanel(this)">
+        <img id="ArrowLateralPanel" src="./icons/CommonIcons/ArrowLateralPanel.png" />
     </button>
 </div>

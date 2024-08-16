@@ -22,7 +22,7 @@ var Lineage_styles = (function () {
         self.currentClientObjectData = objectData;
         self.init();
         $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").load("snippets/lineage/lineage_styles.html", function () {
+        $("#mainDialogDiv").load("modules/tools/lineage_styles.html", function () {
             self.listStyles();
 
             var colors = common.paletteIntense;

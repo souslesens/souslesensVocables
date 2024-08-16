@@ -2,7 +2,7 @@ import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
 import KGcreator from "../modules/tools/KGcreator.js";
 import Standardizer from "../modules/tools/Standardizer.js";
 import Lineage_dictionary from "../modules/tools/lineage/lineage_dictionary.js";
-import SPARQL_endpoint from "../modules/tools/SPARQL_endpoint.js";
+import SPARQL_endpoint from "../modules/tools/SPARQL/SPARQL_endpoint.js";
 import Admin from "../modules/tools/admin.js";
 import ConfigEditor from "../modules/tools/ConfigEditor.js";
 import GraphManagement from "../modules/tools/GraphManagement.js";

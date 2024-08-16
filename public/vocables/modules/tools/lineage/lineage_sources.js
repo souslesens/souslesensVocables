@@ -7,7 +7,7 @@ import SearchUtil from "../../search/searchUtil.js";
 import Lineage_combine from "./lineage_combine.js";
 import Lineage_selection from "./lineage_selection.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-import Lineage_3D from "./lineage_3d.js";
+
 import authentication from "../../shared/authentification.js";
 import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";

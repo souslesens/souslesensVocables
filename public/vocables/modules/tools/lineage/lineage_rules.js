@@ -13,7 +13,7 @@ var Lineage_rules = (function () {
 
     self.showRulesDialog = function () {
         $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").load("snippets/lineage/lineage_rulesDialog.html", function () {
+        $("#mainDialogDiv").load("modules/tools/lineage_rulesDialog.html", function () {
             $("#lineage_rules_searchClassInput").bind("keydown", null, Lineage_rules.onSearchClassKeyDown);
             $("#lineage_rules_searchPropertyInput").bind("keydown", null, Lineage_rules.onSearchPropertyKeyDown);
         });

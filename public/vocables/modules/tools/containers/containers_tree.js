@@ -1,5 +1,4 @@
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
-import Lineage_styles from "../lineage/lineage_styles.js";
 import common from "../../shared/common.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import Containers_query from "./containers_query.js";

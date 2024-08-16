@@ -1,4 +1,4 @@
-import Admin from "../tools/admin.js";
+import Admin from "../tools/admin/admin.js";
 import ElasticSearchProxy from "./elasticSearchProxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";

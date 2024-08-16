@@ -2,7 +2,7 @@ var GraphLoader = (function () {
     var self = {};
 
     self.showImportGraphFromUriDialog = function () {
-        $("#smallDialogDiv").load("snippets/graphLoaderDialog.html");
+        $("#smallDialogDiv").load("modules/tools/admin/graphLoaderDialog.html");
         $("#smallDialogDiv").dialog("open");
     };
 

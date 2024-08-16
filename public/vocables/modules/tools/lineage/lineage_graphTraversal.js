@@ -132,7 +132,7 @@ var Lineage_graphTraversal = (function () {
                 self.pathToUri = null;
                 $("#mainDialogDiv").dialog("open");
                 //$("#mainDialogDiv").parent().css("left", "10%");
-                $("#mainDialogDiv").load("snippets/lineage/lineage_shortestPathDialog.html", function () {
+                $("#mainDialogDiv").load("modules/tools/lineage_shortestPathDialog.html", function () {
                     $("#lineage_shorterstPath_searchInput").bind("keydown", null, Lineage_graphTraversal.onSearchKeyDown);
                     $("#lineage_DrawAllPaths").prop("disabled", true);
                     $("#Lineage_graphTraversal_numberOfPathes").prop("disabled", true);

@@ -29,7 +29,7 @@ var Lineage_dictionary = (function () {
             $("#mainDialogDiv").dialog("open");
         }
 
-        $("#" + targetDiv).load("snippets/lineage/lineageDictionary.html", function () {
+        $("#" + targetDiv).load("modules/tools/lineage/lineageDictionary.html", function () {
             $("#LineageDictionary_Tabs").tabs({
                 activate: function (event, ui) {
                     var divId = ui.newPanel.selector;

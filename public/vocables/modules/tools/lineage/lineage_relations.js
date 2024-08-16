@@ -27,7 +27,7 @@ var Lineage_relations = (function () {
 
                 $("#mainDialogDiv").dialog("open");
                 $("#mainDialogDiv").dialog("option", "title", "Query");
-                $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function () {
+                $("#mainDialogDiv").load("modules/tools/lineage/relationsDialog.html", function () {
                     //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
                     $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
                         if (e.which == 13 || e.which == 9) {

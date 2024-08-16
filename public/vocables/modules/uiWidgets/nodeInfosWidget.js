@@ -46,7 +46,7 @@ var NodeInfosWidget = (function () {
             //$("#mainDialogDiv").parent().css("top", "20px");
             //$("#mainDialogDiv").parent().css("left", "20px");
         }
-        $("#" + divId).load("snippets/nodeInfosWidget.html", function () {
+        $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
 

@@ -95,20 +95,7 @@ var KGpropertyFilter = (function () {
         //  MainController.UI.showHideRightPanel(true);
         $("#graphDiv").width(1000);
 
-        /*  $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function() {
-    $("#KGpropertyFilter_filteringResult").height($("#graphDiv").height() - 200);
-    $("#KGpropertyFilter_filteringResult").width($("#graphDiv").width());
-
-    $("#KGpropertyFilter_centralPanelTabs").tabs({
-      activate: function(e, ui) {
-        self.currentOwlType = "Class";
-        var divId = ui.newPanel.selector;
-        if (divId == "#LineageTypesTab") {
-          // pass
-        }
-      }
-    });
-    */
+       
 
         $("#rightPanelDiv").load("snippets/KGpropertyFilter/rightPanel.html", function () {
             $("#KGpropertyFilter_rightPanelTabs").tabs({

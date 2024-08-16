@@ -1,11 +1,11 @@
-import common from "../shared/common.js";
+import common from "../../shared/common.js";
 
 //eslint-disable-next-line @typescript-eslint/no-unused-vars
 var SQLquery = (function () {
     var self = {};
 
     self.onLoaded = function () {
-        $("#graphDiv").load("./snippets/SQLquery.html", function () {
+        $("#graphDiv").load("modules/tools/SQLquery/SQLquery.html", function () {
             self.initSources();
         });
     };

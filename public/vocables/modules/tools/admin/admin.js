@@ -1,21 +1,20 @@
-import Lineage_dictionary from "./lineage/lineage_dictionary.js";
-import SearchUtil from "../search/searchUtil.js";
-import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
-import Sparql_generic from "../sparqlProxies/sparql_generic.js";
-import MainController from "../shared/mainController.js";
-import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import Export from "../shared/export.js";
-import Sparql_common from "../sparqlProxies/sparql_common.js";
-import SparqlQueryUI from "./sparqlQueryUI.js";
-import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
-import GraphLoader from "../shared/graphLoader.js";
+import Lineage_dictionary from "../lineage/lineage_dictionary.js";
+import SearchUtil from "../../search/searchUtil.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
+import MainController from "../../shared/mainController.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import Export from "../../shared/export.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import SparqlQueryUI from "../sparqlQueryUI.js";
+import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {
     var self = {};
 
     self.onLoaded = function () {
-        $("#lateralPanelDiv").load("snippets/admin.html", function () {
+        $("#lateralPanelDiv").load("modules/tools/admin/admin.html", function () {
             var options = {
                 withCheckboxes: true,
             };

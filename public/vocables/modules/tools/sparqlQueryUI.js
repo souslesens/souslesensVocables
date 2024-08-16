@@ -6,7 +6,7 @@ var SparqlQueryUI = (function () {
 
     self.init = function (sources) {
         $("#graphDiv").html("");
-        $("#graphDiv").load("snippets/sparqlQuery.html", function () {
+        $("#graphDiv").load("modules/tools/admin/sparqlQuery.html", function () {
             $("#sparqlQuery_endPointInput").val(Config.sparql_server.url);
 
             var fromStr = "";

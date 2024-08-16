@@ -1,13 +1,13 @@
-import common from "../shared/common.js";
-import SearchUtil from "../search/searchUtil.js";
-import ElasticSearchProxy from "../search/elasticSearchProxy.js";
-import Sparql_common from "../sparqlProxies/sparql_common.js";
-import Lineage_dictionary from "./lineage/lineage_dictionary.js";
-import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import visjsGraph from "../graph/visjsGraph2.js";
-import Lineage_whiteboard from "./lineage/lineage_whiteboard.js";
-import Export from "../shared/export.js";
-import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
+import common from "../../shared/common.js";
+import SearchUtil from "../../search/searchUtil.js";
+import ElasticSearchProxy from "../../search/elasticSearchProxy.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import Lineage_dictionary from "../lineage/lineage_dictionary.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import visjsGraph from "../../graph/visjsGraph2.js";
+import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
+import Export from "../../shared/export.js";
+import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 
 var Standardizer = (function () {
     var self = {};
@@ -31,23 +31,17 @@ var Standardizer = (function () {
         $("#actionDiv").html("");
         $("#graphDiv").html("");
         SearchWidget.searchableSourcesTreeIsInitialized = false;
-        $("#graphDiv").load("snippets/standardizer/standardizer_central.html", function () {
+        $("#graphDiv").load("modules/tools/standardizer/standardizer_central.html", function () {
             $("#standardizerCentral_tabs").tabs({});
-            $("#standardizerRightPanel").load("snippets/standardizer/standardizer_right.html", function () {
+            $("#standardizerRightPanel").load("modules/tools/standardizer/standardizer_right.html", function () {
                 // pass
             });
         });
 
-        $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html", function () {
+        $("#actionDivContolPanelDiv").load("modules/tools/standardizer/standardizer_left.html", function () {
             $("#Lineage_classes_SearchSourceInput").bind("keydown", null, Standardizer.searchInSourcesTree);
             $("#Standardizer_leftTab").tabs({});
         });
-        //  MainController.UI.toogleRightPanel(true);
-
-        /*  $("#rightPanelDiv").html("");
-        $("#rightPanelDiv").load("snippets/standardizer/standardizer_right.html", function () {
-            // pass
-        });*/
 
         $("#graphDiv").html("");
 
@@ -79,14 +73,6 @@ var Standardizer = (function () {
             //   common.fillSelectOptions("Standardizer_sourcesSelect", sources, true);
         });
         setTimeout(function () {
-            /*  $("#graphDiv").html("")// sinon ne monte pas en dehors du timeout
-$("#graphDiv").load("snippets/standardizer/standardizer_central.html")
-setTimeout(function () {
-    $("#standardizerCentral_tabs").tabs({});
-    if(callback)
-        callback()
-}, 500)*/
-
             if (callback) callback();
         }, 500);
     };
@@ -137,9 +123,7 @@ setTimeout(function () {
 
     self.getSelectedIndexes = function (excludeCurrentSource) {
         var sources = SourceSelectorWidget.getCheckedSources();
-        // var sources = $("#Standardizer_sourcesTree").jstree(true).get_checked();
         var indexes = [];
-        //  var sourceIndex = $("#Standardizer_sourcesSelect").val();
         var sourceIndex = self.currentSource;
 
         sources.forEach(function (source) {
@@ -150,7 +134,6 @@ setTimeout(function () {
     };
 
     self.initMatrix = function (indexes) {
-        //titre des colonnes
         self.currentWordsCount = 0;
         var html = "<div class='matrix'>";
         html += "<div class='matrixRow'>";
@@ -1110,48 +1093,10 @@ setTimeout(function () {
                                     });
                                 }
                             } else {
-                                // var array = key.split("|");
-                                // var edgeId = array[0] + "_" + array[1];
-                                // if (!existingNodes[edgeId]) {
-                                //     existingNodes[edgeId] = 1;
-                                //     visjsData.edges.push({
-                                //         id: edgeId,
-                                //         from: array[0],
-                                //         to: array[1],
-                                //         label: "" + pairs[key],
-                                //         value: pairs[key],
-                                //     });
-                                // }
                             }
                         }
                     }
                     if (false) {
-                        // var html = "";
-                        // var row0 = "<td>&nbsp;</td>";
-                        // var nodesMap = {};
-                        // visjsData.nodes.forEach(function (node) {
-                        //     nodesMap[node.id] = node;
-                        // });
-                        // visjsData.edges.forEach(function (edgeH) {
-                        //     if (edgeH.value) {
-                        //         var row = "<tr><td>" + nodesMap[edgeH.from].data.ancestorsLabel + "</td>";
-                        //         row0 += "<td class='Standardizer_ancestorsCooccurenceColHeader'>" + nodesMap[edgeH.from].data.ancestorsLabel + "</td>";
-                        //         visjsData.edges.forEach(function (edgeV) {
-                        //             if (edgeV.value) {
-                        //                 var value = "";
-                        //                 if (edgeV.from != edgeH.from && edgeV.to != edgeH.to) {
-                        //                     if (edgeV.from == edgeH.to || edgeV.to == edgeH.from) value = edgeV.value;
-                        //                 }
-                        //                 row += "<td class='Standardizer_ancestorsCooccurenceCell'>" + value + "</td>";
-                        //             }
-                        //         });
-                        //         row += "</tr>";
-                        //         html += row;
-                        //     }
-                        // });
-                        // html = "<table>" + "<tr>" + row0 + "</tr>" + html;
-                        // html += "</table>";
-                        // $("#Standardizer_ancestorsDiv").html(html);
                     } else {
                         var options = {
                             edges: {

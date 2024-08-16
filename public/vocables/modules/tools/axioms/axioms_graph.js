@@ -47,7 +47,7 @@ var Axioms_graph = (function () {
         } else if (node.owlType && node.owlType.indexOf("ObjectProperty") > -1) {
             color = "#f5ef39";
         } else if (node.owlType && node.owlType.indexOf("Restriction") > -1) {
-            label = "some";
+            label =node.label;
             node.predicates.forEach(function (predicate) {
                 if (predicate.p.indexOf("someValuesFrom") > -1) {
                     label = "some";

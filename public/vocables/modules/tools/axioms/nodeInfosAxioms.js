@@ -273,16 +273,19 @@ var NodeInfosAxioms = (function () {
                     return callbackLoad(["subClassOf", "equivalentClass", "disjointWith", "disjointUnionOf"]);
                 },
 
-                function (selectedProperty) {
-                    if (!selectedProperty) {
+                function (axiomType) {
+                    if (!axiomType) {
                         return;
                     }
 
-                    Axiom_activeLegend.currentResource = self.currentResource;
+
 
                     // Axiom_editor.addSuggestion(self.currentResource)
-                    self.currentResource.resourceType = "Class";
+
                     Axiom_activeLegend.currentClass=self.currentResource
+                    Axiom_activeLegend.currentClass.resourceType = "Class";
+                    Axiom_activeLegend.currentAxiomType = axiomType;
+
                     Axiom_editor.init  (null, self.currentResource, self.currentSource)
 
                     Axiom_activeLegend.drawNewAxiom(self.currentResource);

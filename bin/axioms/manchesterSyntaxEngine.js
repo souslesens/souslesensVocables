@@ -19,7 +19,7 @@ import OWL2ManchesterLexer from "./manchesterSyntax/OWL2ManchesterLexer.js";
 const ManchesterSyntaxEngine = {
 
 
-    getSuggestion: function(source, axiomText, options, callback) {
+    getSuggestion: function(axiomText, options, callback) {
 
 
         const autosuggester = autosuggest.autosuggester(OWL2ManchesterLexer, OWL2ManchesterParser);

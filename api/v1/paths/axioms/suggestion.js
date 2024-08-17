@@ -27,7 +27,7 @@ module.exports = function() {
             options = JSON.parse(req.query.options);
         }
         if(true) {
-            ManchesterSyntaxEngine.getSuggestion(req.query.source, req.query.lastToken, options, callback);
+            ManchesterSyntaxEngine.getSuggestion( req.query.lastToken, options, callback);
             return;
         }
         var url="http://localhost:3000/getSuggestions"
@@ -49,13 +49,7 @@ module.exports = function() {
         description: "Return a suggestion to build an axiom",
         operationId: "Return a suggestion to build an axiom",
         parameters: [
-            {
-                name: "source",
-                description: "type",
-                in: "query",
-                type: "string",
-                required: true
-            },
+
             {
                 name: "lastToken",
                 description: "lastToken",

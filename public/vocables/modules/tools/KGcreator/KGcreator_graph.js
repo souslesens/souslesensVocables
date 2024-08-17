@@ -59,7 +59,7 @@ var KGcreator_graph = (function () {
             },
         };
         options.visjsOptions.manipulation = {
-            enabled: false,
+            enabled: true,
             initiallyActive: true,
             deleteNode: false,
             deleteEdge: false,
@@ -583,6 +583,9 @@ var KGcreator_graph = (function () {
                     if (id.endsWith("_$")) {
                         return "column";
                     }
+                    if (id.startsWith("@")) {
+                        return "column";
+                    }
                     var role = null;
                     columns.forEach(function (column) {
                         if (column == id) {
@@ -789,7 +792,7 @@ var KGcreator_graph = (function () {
             },
         };
 
-        return KGcreator_bot.start(node);
+     //   return KGcreator_bot.start(node);
 
         if (sourceNode.data && sourceNode.data.role == "column") {
             if (sourceNode.data.table != targetNode.data.table) {

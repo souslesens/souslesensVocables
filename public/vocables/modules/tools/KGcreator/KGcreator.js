@@ -410,6 +410,7 @@ var KGcreator = (function () {
                                 KGcreator.removeTableMappings(node);
                             },
                         };
+
                         return items;
                     }
 
@@ -882,6 +883,20 @@ var KGcreator = (function () {
 
         return columnTriples;
     };
+
+    self.getColumnClass=function(table,column){
+    var classId=null
+        self.currentConfig.currentMappings[table].tripleModels.forEach(function (triple) {
+
+            if(triple.s==column && triple.p=="rdf:type" && triple.o.indexOf("http")==0)
+                classId=triple.o
+        })
+        return classId;
+
+    }
+
+
+
 
     self.createDataBaseSourceMappings = function () {
         // hide uploadApp

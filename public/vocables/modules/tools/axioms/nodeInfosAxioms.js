@@ -186,6 +186,7 @@ var NodeInfosAxioms = (function () {
     };
     self.onNodeGraphClick = function (node, point, nodeEvent) {
         Axioms_graph.currentGraphNode = node
+        Axioms_graph.outlineNode(node.id)
     }
     self.expandGraphFromNode = function () {
         var node = Axioms_graph.currentGraphNode
@@ -315,6 +316,7 @@ var NodeInfosAxioms = (function () {
                     Axiom_activeLegend.currentClass = self.currentResource
                     Axiom_activeLegend.currentClass.resourceType = "Class";
                     Axiom_activeLegend.currentAxiomType = axiomType;
+                    Axiom_activeLegend.currentResource=self.currentResource;
 
                     Axiom_editor.init(null, self.currentResource, self.currentSource)
 

@@ -46,8 +46,9 @@ var Axiom_activeLegend = (function () {
             } else if (node.data.type == "Restriction") {
                 self.hideLegendItems()
                 var suggestions = [
-                    {label: "allValuesFrom",id:"only"},
+
                     {label: "someValuesFrom",id:"some"},
+                    {label: "allValuesFrom",id:"only"},
                     {label: "hasValue",id:"value"},
                     {label: "maxCardinality",id:"max"},
                     {label: "minCardinality",id:"min"},
@@ -89,6 +90,7 @@ var Axiom_activeLegend = (function () {
         if (node && node.data) {
             self.currentGraphNode = node;
             Axioms_graph.currentGraphNode = node;
+            Axioms_graph.outlineNode(Axioms_graph.currentGraphNode.id)
             Axiom_activeLegend.hideForbiddenResources("" + node.data.type);
             if (nodeEvent.ctrlKey) {
                 if (node.data.type.indexOf("Class") > -1 || node.data.type.indexOf("ObjectProperty") > -1) {
@@ -179,6 +181,7 @@ var Axiom_activeLegend = (function () {
                 });
                 if (newResource.resourceType != "ObjectProperty") {
                     Axioms_graph.currentGraphNode = visjsNode
+                    Axioms_graph.outlineNode(Axioms_graph.currentGraphNode.id)
                 }
                 Axioms_graph.axiomsVisjsGraph.data.edges.add(visjsData.edges);
             }
@@ -212,6 +215,7 @@ var Axiom_activeLegend = (function () {
             hiddenNodes.push("Intersection");
             hiddenNodes.push("Restriction");
             hiddenNodes.push("Complement");
+            hiddenNodes.push("DisjointWith");
         } else if (resourceType == "Restriction") {
             hiddenNodes.push("Restriction");
 
@@ -376,7 +380,7 @@ var Axiom_activeLegend = (function () {
                 triple.p = predicate;
                 triple.o = toNode.data.id;
                 triples.push(triple);
-                return
+                recurse( edgesFromMap[ toNode.id])
             } else {
 
                 var toNodeEdges = edgesFromMap[edge.to];
@@ -398,7 +402,7 @@ var Axiom_activeLegend = (function () {
             }
         }
 
-        edgesFromMap[self.currentClass.id].forEach(function(edge){
+        edgesFromMap[self.currentResource.id].forEach(function(edge){
             recurse(edge, self.currentAxiomType)
         })
 

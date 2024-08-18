@@ -434,6 +434,13 @@ enabled:true},*/
         $("#" + self.graphDivId).html("");
     };
 
+    self.outlineNode=function(nodeId){
+        var newNodes=[]
+        self.axiomsVisjsGraph.decorateNodes(null,{borderWidth:1})
+        self.axiomsVisjsGraph.decorateNodes(nodeId,{borderWidth:5})
+
+    }
+
 
     return self;
 })();

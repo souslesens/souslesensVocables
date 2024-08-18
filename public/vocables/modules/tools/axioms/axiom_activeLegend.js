@@ -47,16 +47,16 @@ var Axiom_activeLegend = (function () {
                 self.hideLegendItems()
                 var suggestions = [
 
-                    {label: "someValuesFrom",id:"some"},
-                    {label: "allValuesFrom",id:"only"},
-                    {label: "hasValue",id:"value"},
-                    {label: "maxCardinality",id:"max"},
-                    {label: "minCardinality",id:"min"},
-                    {label: "cardinality",id:"cardinality"},
+                    {label: "someValuesFrom", id: "some"},
+                    {label: "allValuesFrom", id: "only"},
+                    {label: "hasValue", id: "value"},
+                    {label: "maxCardinality", id: "max"},
+                    {label: "minCardinality", id: "min"},
+                    {label: "cardinality", id: "cardinality"},
 
-                   ]
+                ]
 
-                common.fillSelectOptions("axioms_legend_suggestionsSelect", suggestions, false,"label","id");
+                common.fillSelectOptions("axioms_legend_suggestionsSelect", suggestions, false, "label", "id");
             } else {
                 self.onSuggestionsSelect(null, node);
             }
@@ -81,7 +81,7 @@ var Axiom_activeLegend = (function () {
         }
         Axioms_graph.drawGraph(visjsData, self.axiomGraphDiv, options);
         Axioms_graph.currentGraphNode = visjsNode;
-        self.currentResource.visjsId=selectedObject.id
+        self.currentResource.visjsId = selectedObject.id
 
         //   self.hideForbiddenResources(selectedObject);
     };
@@ -133,15 +133,12 @@ var Axiom_activeLegend = (function () {
         } else {
 
 
-
-            var label =""
-            if(nodeType == "Restriction"){
-                label=$("#axioms_legend_suggestionsSelect").val();
-            }else{
-                label=$("#axioms_legend_suggestionsSelect option:selected").text();
+            var label = ""
+            if (nodeType == "Restriction") {
+                label = $("#axioms_legend_suggestionsSelect").val();
+            } else {
+                label = $("#axioms_legend_suggestionsSelect option:selected").text();
             }
-
-
 
 
             newResource = {
@@ -350,10 +347,14 @@ var Axiom_activeLegend = (function () {
     }
 
 
-    self.visjsGraphToTriples = function () {
+    self.visjsGraphToTriples = function (nodes, edges) {
 
-        var edges = Axioms_graph.axiomsVisjsGraph.data.edges.get();
-        var nodes = Axioms_graph.axiomsVisjsGraph.data.nodes.get();
+        if (!edges) {
+            edges = Axioms_graph.axiomsVisjsGraph.data.edges.get();
+        }
+        if (!nodes) {
+             nodes = Axioms_graph.axiomsVisjsGraph.data.nodes.get();
+        }
         var nodesMap = {}
         var edgesFromMap = {}
         nodes.forEach(function (node) {
@@ -362,59 +363,163 @@ var Axiom_activeLegend = (function () {
 
 
         edges.forEach(function (edge) {
-            if(!edgesFromMap[edge.from])
-            edgesFromMap[edge.from] = []
+            if (!edgesFromMap[edge.from]) {
+                edgesFromMap[edge.from] = []
+            }
             edgesFromMap[edge.from].push(edge)
         })
 
         var triples = []
 
-        function recurse(edge, predicate) {
+        function recurse(nodeId, predicate) {
             var triple = {}
-            var fromNode = nodesMap[edge.from]
-            var toNode = nodesMap[edge.to]
-
-
-            if (predicate) {
-                triple.s = fromNode.data.id;
-                triple.p = predicate;
-                triple.o = toNode.data.id;
-                triples.push(triple);
-                recurse( edgesFromMap[ toNode.id])
-            } else {
-
-                var toNodeEdges = edgesFromMap[edge.to];
-                if (!toNodeEdges)
-                    return
-
-                toNodeEdges.forEach(function (nextEdge) {
-                    var nextNode = nodesMap[nextEdge.to]
-
-                    triple.s = fromNode.data.id;
-                    triple.p = toNode.data.id;
-                    triple.o = nextNode.data.id;
-                    triples.push(triple);
-
-                    recurse(nextEdge)
-                })
-
-
+            var edges = edgesFromMap[nodeId]
+            if (!edges) {
+                return
             }
+
+            edges.forEach(function (edge) {
+                var fromNode=nodesMap[nodeId]
+                var toNode = nodesMap[edge.to]
+                if (predicate) {
+                    triple.s = fromNode.data.id;
+                    triple.p = predicate;
+                    triple.o = toNode.data.id;
+                    triples.push(triple);
+                    recurse(toNode.id)
+                } else {
+
+
+                    var nextEdges = edgesFromMap[edge.from]
+                    if (!nextEdges) {
+                        return
+                    }
+                    nextEdges.forEach(function (nextEdge) {
+                        var nextToNode = nodesMap[nextEdge.to]
+
+                        triple.s = fromNode.data.id;
+                        triple.p = toNode.data.id;
+                        triple.o = nextToNode.data.id;
+                        triples.push(triple);
+
+                        recurse(nextToNode.id)
+                    })
+                }
+            })
+
         }
 
-        edgesFromMap[self.currentResource.id].forEach(function(edge){
-            recurse(edge, self.currentAxiomType)
-        })
+       // edgesFromMap[self.currentResource.id].forEach(function (edge) {
+         //   recurse(self.currentResource.id, self.currentAxiomType)
+        recurse(nodes[0].id, "SubClassOf")
+       // })
 
-            var x=triples
-
-
+        var x = triples
 
 
     }
 
+
+
+
+self.testTriplesCreation = function () {
+    var visjsData = {
+        nodes: [
+            {
+                "id": "https://spec.industrialontologies.org/ontology/core/Core/MeasurementProcess",
+                "label": "MeasurementProcess",
+                "shape": "dot",
+                "color": "#00afef",
+                "size": 8,
+                "level": 0,
+                "font": {
+                    "bold": true,
+                    "color": "#00afef"
+                },
+                "data": {
+                    "id": "https://spec.industrialontologies.org/ontology/core/Core/MeasurementProcess",
+                    "label": "MeasurementProcess",
+                    "type": "Class"
+                },
+                "borderWidth": 1
+            },
+            {
+                "id": "bc224",
+                "label": "only",
+                "shape": "box",
+                "color": "#cb9801",
+                "size": 8,
+                "level": 1,
+                "font": null,
+                "data": {
+                    "id": "bc224",
+                    "label": "only",
+                    "type": "Restriction"
+                },
+                "borderWidth": 1
+            },
+            {
+                "id": "https://spec.industrialontologies.org/ontology/core/Core/designatedBy",
+                "label": "designated_by",
+                "shape": "box",
+                "color": "#f5ef39",
+                "size": 8,
+                "level": 2,
+                "font": null,
+                "data": {
+                    "id": "https://spec.industrialontologies.org/ontology/core/Core/designatedBy",
+                    "label": "designated_by",
+                    "type": "ObjectProperty"
+                },
+                "borderWidth": 1
+            },
+            {
+                "id": "https://spec.industrialontologies.org/ontology/core/Core/BusinessFunction",
+                "label": "business_function",
+                "shape": "dot",
+                "color": "#00afef",
+                "size": 8,
+                "level": 2,
+                "font": {
+                    "bold": true,
+                    "color": "#00afef"
+                },
+                "data": {
+                    "id": "https://spec.industrialontologies.org/ontology/core/Core/BusinessFunction",
+                    "label": "business_function",
+                    "type": "Class"
+                },
+                "borderWidth": 5
+            }
+        ],
+        edges: [
+            {
+                "id": "0aa54",
+                "from": "https://spec.industrialontologies.org/ontology/core/Core/MeasurementProcess",
+                "to": "bc224"
+            },
+            {
+                "id": "50c28",
+                "from": "bc224",
+                "to": "https://spec.industrialontologies.org/ontology/core/Core/designatedBy"
+            },
+            {
+                "id": "9d23e",
+                "from": "bc224",
+                "to": "https://spec.industrialontologies.org/ontology/core/Core/BusinessFunction"
+            }
+        ]
+    }
+
+    self.visjsGraphToTriples(visjsData.nodes, visjsData.edges);
+
+
+}
     return self;
 })();
+
+
+Axiom_activeLegend.testTriplesCreation()
 
 export default Axiom_activeLegend;
 window.Axiom_activeLegend = Axiom_activeLegend;

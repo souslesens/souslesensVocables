@@ -320,13 +320,14 @@ var Axioms_graph = (function () {
                 //draw graph
                 function (callbackSeries) {
                     if (options.addToGraph && self.axiomsVisjsGraph) {
-                        if (options.randomLayout && self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
-                            self.graphOptions.visjsOptions.layout.hierarchical.enabled = true;
+                        if ( true) {
+                            self.switchToHierarchicalLayout(true)
+
                         }
-                        self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
 
                         self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
                         self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
+                        self.switchToHierarchicalLayout(false)
                     } else {
                         self.drawGraph(visjsData, divId, options);
                         self.currentVisjsData = visjsData;
@@ -392,96 +393,48 @@ enabled:true},*/
 
         self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
         self.axiomsVisjsGraph.draw(function () {
-            if (!options.keepHierarchyLayout  && self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
-                self.graphOptions.visjsOptions.layout.hierarchical.enabled = false;
+            if (!options.keepHierarchyLayout  ) {
+                self.switchToHierarchicalLayout(false)
             }
-            self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
+
         });
     };
 
-    self.showGraphPopupMenu = function () {};
+
+    self.switchToHierarchicalLayout = function (booleanValue) {
+
+        if (self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
+            self.graphOptions.visjsOptions.layout.hierarchical.enabled = booleanValue;
+            self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
+
+        }
+    }
+
+    self.showGraphPopupMenu = function (node, point, event) {
+        if (!node) {
+            return;
+        }
+        self.currentGraphNode = node;
+        if (!node || !node.data) {
+            return;
+        }
+        var html = "";
+
+        html = '    <span class="popupMenuItem" onclick="NodeInfosAxioms.expandGraphFromNode();"> expand from Node</span>';
+        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.collapseGraphToNode();"> collapse to Node</span>';
+        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.startFromNode();"> start from Node</span>';
+        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.nodeInfos();"> NodeInfos</span>';
+        $("#popupMenuWidgetDiv").html(html);
+        point.x = event.x;
+        point.y = event.y;
+        PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+    };
 
     self.clearGraph = function () {
         $("#" + self.graphDivId).html("");
     };
 
-    self.sampleTriples = [
-        {
-            subject: "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
-            predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-            object: "_cf23908b-4568-4f73-9c09-fbf688aaa92f",
-        },
-        {
-            subject: "https://spec.industrialontologies.org/ontology/core/Core/CommercialServiceAgreement",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Class",
-        },
-        {
-            subject: "_cf23908b-4568-4f73-9c09-fbf688aaa92f",
-            predicate: "http://www.w3.org/2002/07/owl#onProperty",
-            object: "http://purl.obolibrary.org/obo/BFO_0000167",
-        },
-        {
-            subject: "http://purl.obolibrary.org/obo/BFO_0000167",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#ObjectProperty",
-        },
-        {
-            subject: "_c44c5bfa-6011-413e-8c2c-c4d08a7c24fa",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Ontology",
-        },
-        {
-            subject: "_2cba2cae-ed14-45ca-a705-193ae9d044b2",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            object: "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
-        },
-        {
-            subject: "_cf23908b-4568-4f73-9c09-fbf688aaa92f",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Restriction",
-        },
-        {
-            subject: "_81b2dbe0-c5aa-4dd6-8f30-d98590de9af7",
-            predicate: "http://www.w3.org/2002/07/owl#unionOf",
-            object: "_db33cc04-5921-48cd-8171-c4d286549abd",
-        },
-        {
-            subject: "_db33cc04-5921-48cd-8171-c4d286549abd",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            object: "_2cba2cae-ed14-45ca-a705-193ae9d044b2",
-        },
-        {
-            subject: "_81b2dbe0-c5aa-4dd6-8f30-d98590de9af7",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Class",
-        },
-        {
-            subject: "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Class",
-        },
-        {
-            subject: "https://spec.industrialontologies.org/ontology/core/Core/MaterialProduct",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Class",
-        },
-        {
-            subject: "_cf23908b-4568-4f73-9c09-fbf688aaa92f",
-            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-            object: "_81b2dbe0-c5aa-4dd6-8f30-d98590de9af7",
-        },
-        {
-            subject: "_2cba2cae-ed14-45ca-a705-193ae9d044b2",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            object: "https://spec.industrialontologies.org/ontology/core/Core/MaterialProduct",
-        },
-        {
-            subject: "_db33cc04-5921-48cd-8171-c4d286549abd",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            object: "https://spec.industrialontologies.org/ontology/core/Core/CommercialServiceAgreement",
-        },
-    ];
+
     return self;
 })();
 

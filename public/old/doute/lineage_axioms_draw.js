@@ -8,9 +8,7 @@ import Lineage_whiteboard from "./lineage_whiteboard.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
-import Lineage_axioms_create from "./lineage_axioms_create.js";
-import MainController from "../../shared/mainController.js";
+
 
 var Lineage_axioms_draw = (function () {
     var self = {};

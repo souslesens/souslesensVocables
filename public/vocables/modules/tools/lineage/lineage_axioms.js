@@ -45,8 +45,9 @@ var Lineage_axioms = (function () {
                    visjsData.nodes.push({
                        id:item.class,
                        label:item.label,
-                       shape: "dot",
+                       shape: Lineage_whiteboard.defaultShape,
                        color:"#ddd",
+                       size:Lineage_whiteboard.defaultShapeSize,
                        data:{
                            id:item.class,
                            label:item.label,

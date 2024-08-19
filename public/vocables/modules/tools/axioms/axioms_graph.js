@@ -77,7 +77,7 @@ var Axioms_graph = (function () {
             size: size,
             level: level,
             font: font,
-            data: {
+            data: node.data || {
                 id: node.id,
                 label: node.label || "",
                 type: node.owlType,

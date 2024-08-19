@@ -154,6 +154,7 @@ var NodeInfosAxioms = (function () {
 
     self.onAxiomJstreeSelectNode = function (evt, obj) {
         var node = obj.node;
+        self.currentJstreeNode=node;
 
         if (node.parent == "#") {
             // draw   all axioms of class
@@ -290,7 +291,22 @@ var NodeInfosAxioms = (function () {
         toGraphMl: function () {
             axioms_graph.axiomsVisjsGraph.toGraphMl();
         },
+        getTriples:function(){
+            if( !self.currentJstreeNode){
+                return alert("No axiom Selected")
+            }
+            var str="<ul>"
+            self.currentJstreeNode.data.triples.forEach(function(triple){
+                str+="<li>"+triple.subject+" <b>"+triple.predicate+"</b> "+triple.object+"</li>"
+            })
+            str+="</ul>"
+            $("#smallDialogDiv").dialog("open")
+            $("#smallDialogDiv").html(str)
+
+        }
     };
+
+
 
     self.newAxiom = function () {
         $("#nodeInfosAxioms_graphPanelDiv").load("modules/tools/axioms/html/nodeInfosAxiomWrite.html", function (err) {

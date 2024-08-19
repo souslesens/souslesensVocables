@@ -1,6 +1,7 @@
 import common from "../../shared/common.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
+
 self.lineageVisjsGraph;
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_sources from "./lineage_sources.js";
@@ -9,13 +10,16 @@ import sparql_common from "../../sparqlProxies/sparql_common.js";
 var Lineage_reasoner = (function () {
     var self = {};
     self.inferenceTriples = [];
+
+    // self.ontologyAccessType="internalGraphUri"
+    self.ontologyAccessType = "externalUrl"
     self.loaded = false;
     self.currentSource;
     self.showReasonerDialog = function () {
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Reasoner");
         self.currentSource = Lineage_sources.activeSource;
-        $("#smallDialogDiv").load("modules/tools/lineage/lineage_reasoner.html", function () {
+        $("#smallDialogDiv").load("modules/tools/lineage/html/lineage_reasoner.html", function () {
             if (!self.loaded) {
                 self.loaded = true;
                 $("#lineage_reasoner_outputDiv").css("display", "none");
@@ -43,7 +47,7 @@ var Lineage_reasoner = (function () {
         var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
         const params = new URLSearchParams({
             operation: "consistency",
-            type: "internalGraphUri",
+            type: self.ontologyAccessType,
             describeSparqlQuery: describeQuery,
         });
         $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
@@ -68,7 +72,7 @@ var Lineage_reasoner = (function () {
         var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
         const params = new URLSearchParams({
             operation: "unsatisfiable",
-            type: "internalGraphUri",
+            type: self.ontologyAccessType,
             describeSparqlQuery: describeQuery,
         });
         $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
@@ -128,7 +132,8 @@ var Lineage_reasoner = (function () {
 
         const params = new URLSearchParams({
             operation: "inference",
-            type: "internalGraphUri",
+            url: "http://51.178.39.209/ontologies/IOF-CORE-202401.nt",
+            type: self.ontologyAccessType,
             predicates: JSON.stringify(predicates),
             describeSparqlQuery: describeQuery,
         });
@@ -137,6 +142,7 @@ var Lineage_reasoner = (function () {
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
+
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {
@@ -145,7 +151,7 @@ var Lineage_reasoner = (function () {
                 }
                 var totalTriples = 0;
                 for (var key in data) {
-                    data[key] = self.FunctionalStyleSyntaxToJson(data[key]);
+                    data[key] = self.HermitFunctionalStyleSyntaxToJson(data[key]);
                     totalTriples += data[key].length;
                 }
                 if (totalTriples == 0) {
@@ -188,9 +194,11 @@ var Lineage_reasoner = (function () {
         }
     };
 
-    self.displayConsistency = function () {};
+    self.displayConsistency = function () {
+    };
 
-    self.displayUnsatisfiable = function () {};
+    self.displayUnsatisfiable = function () {
+    };
 
     self.listInferenceSubjects = function () {
         var uniqueSubjects = {};
@@ -239,7 +247,7 @@ var Lineage_reasoner = (function () {
                 }
             }
 
-            var visjsData = { nodes: [], edges: [] };
+            var visjsData = {nodes: [], edges: []};
             var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             var edgeColor = $("#lineage_reasoner_colorSelect").val();
             var nodes = {};
@@ -247,11 +255,11 @@ var Lineage_reasoner = (function () {
                 var label = item.subjectLabel || Sparql_common.getLabelFromURI(item.subject);
                 if (!existingNodes[item.subject]) {
                     existingNodes[item.subject] = 1;
-                    var node = VisjsUtil.getVisjsNode(self.currentSource, item.subject, label, item.predicate, { shape: "square" });
+                    var node = VisjsUtil.getVisjsNode(self.currentSource, item.subject, label, item.predicate, {shape: "square"});
                     nodes[item.subject] = node;
                 } else {
                     if (nodes[item.subject]) {
-                        nodes[item.subject] = VisjsUtil.setVisjsNodeAttributes(self.currentSource, nodes[item.subject], label, { shape: "square" });
+                        nodes[item.subject] = VisjsUtil.setVisjsNodeAttributes(self.currentSource, nodes[item.subject], label, {shape: "square"});
                     }
                 }
 
@@ -259,7 +267,7 @@ var Lineage_reasoner = (function () {
                 label2 = item.objectLabel || Sparql_common.getLabelFromURI(item.object);
                 if (!existingNodes[item.object]) {
                     existingNodes[item.object] = 1;
-                    var node = VisjsUtil.getVisjsNode(self.currentSource, item.object, label2, null, { shape: "square" });
+                    var node = VisjsUtil.getVisjsNode(self.currentSource, item.object, label2, null, {shape: "square"});
                     nodes[item.object] = node;
                 }
 
@@ -273,7 +281,7 @@ var Lineage_reasoner = (function () {
                             to: item.object,
                             label: item.predicate,
                             color: edgeColor || "red",
-                            font: { size: 10 },
+                            font: {size: 10},
                             arrows: {
                                 to: {
                                     enabled: true,
@@ -291,7 +299,9 @@ var Lineage_reasoner = (function () {
             }
 
             var predicates = $("#reasonerSubjectsDiv").jstree().get_checked();
-            if (predicates) visjsData = self.filterVisjsDataPath(predicates, visjsData);
+            if (predicates) {
+                visjsData = self.filterVisjsDataPath(predicates, visjsData);
+            }
 
             if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                 Lineage_whiteboard.drawNewGraph(visjsData);
@@ -306,7 +316,10 @@ var Lineage_reasoner = (function () {
     self.filterVisjsDataPath = function (nodeIds, visjsData) {
         var path = [];
         var visited = {};
-        if (nodeIds.length == 0) return visjsData;
+        if (nodeIds.length == 0) {
+            return visjsData;
+        }
+
         function recurse(nodeId) {
             if (!visited[nodeId]) {
                 visited[nodeId] = 1;
@@ -318,11 +331,12 @@ var Lineage_reasoner = (function () {
                 });
             }
         }
+
         nodeIds.forEach(function (nodeId) {
             recurse(nodeId);
         });
 
-        var visjsData2 = { nodes: [], edges: path };
+        var visjsData2 = {nodes: [], edges: path};
         var uniqueNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
         path.forEach(function (edge) {
             visjsData.nodes.forEach(function (node) {
@@ -337,6 +351,32 @@ var Lineage_reasoner = (function () {
 
         return visjsData2;
     };
+
+
+    self.HermitFunctionalStyleSyntaxToJson = function (functionalStyleStr) {
+
+        var regex = /SubClassOf\(<([^()]*)> <([^()]*)>\)/gm
+
+
+        var array = [];
+        var json = [];
+
+        var subClasses = []
+        while ((array =regex.exec(functionalStyleStr)) != null) {
+            var triple = {
+                subject: array[1],
+                predicate: "rdfs:subClassOf",
+                object: array[2]
+            }
+            subClasses.push(triple)
+
+        }
+
+        return subClasses;
+
+
+    }
+
 
     self.FunctionalStyleSyntaxToJson = function (functionalStyleStrArray) {
         function getUri(str) {
@@ -365,6 +405,9 @@ var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
         }
 
         self.subjects = [];
+        if (!Array.isArray(functionalStyleStrArray)) {
+            functionalStyleStrArray = [functionalStyleStrArray]
+        }
         functionalStyleStrArray.forEach(function (functionalStyleStr) {
             if ((array = regexNested.exec(functionalStyleStr)) != null) {
                 //nested expression
@@ -374,16 +417,16 @@ var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
                 var object2 = cleanJenaUris(array[5]);
 
                 var bNode = "_:" + common.getRandomHexaId(8);
-                json.push({ subject: subject, predicate: predicate, object: bNode });
-                json.push({ subject: bNode, predicate: "owl:first", object: object1 });
-                json.push({ subject: bNode, predicate: "owl:rest", object: object2 });
+                json.push({subject: subject, predicate: predicate, object: bNode});
+                json.push({subject: bNode, predicate: "owl:first", object: object1});
+                json.push({subject: bNode, predicate: "owl:rest", object: object2});
             } else if ((array = regex.exec(functionalStyleStr)) != null) {
                 var array2 = array[2].trim().split(" ");
                 if (array2.length == 2) {
                     var object = cleanJenaUris(getUri(array2[0]));
                     var subject = cleanJenaUris(getUri(array2[1]));
 
-                    json.push({ subject: subject, predicate: array[1], object: object });
+                    json.push({subject: subject, predicate: array[1], object: object});
                 }
             }
         });
@@ -405,7 +448,7 @@ var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
         }
         var filter = Sparql_common.setFilter("id", Object.keys(urisMap), null);
 
-        Sparql_OWL.getDictionary(source, { filter: filter }, null, function (err, result) {
+        Sparql_OWL.getDictionary(source, {filter: filter}, null, function (err, result) {
             if (err) {
                 return callback(err);
             }

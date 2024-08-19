@@ -447,8 +447,8 @@ tripleObj.objectIsSpecificUri = true;
                 return alert(err.responseText);
             }
 
-            var fromClass = columnFromData.classNode;
-            var toClass = columnToData.classNode;
+            var fromClass =KGcreator.getColumnClass( columnFromData.table,columnFromData.id);
+            var toClass = KGcreator.getColumnClass( columnToData.table,columnToData.id);;
             var constraints = OntologyModels.getClassesConstraints(KGcreator.currentSlsvSource, fromClass, toClass);
             var restrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, fromClass, toClass);
             var inverseRestrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, toClass, fromClass);
@@ -499,31 +499,32 @@ tripleObj.objectIsSpecificUri = true;
                         if (inverseRestrictions[selectedProperty] && inverseRestrictions[selectedProperty].inverse) {
                             if (confirm("link columns " + columnToData.label + " to" + columnFromData.label + " with property " + selectedProperty)) {
                                 var triple = {
-                                    s: targetColumnInTable,
+                                    s: columnToData.id,
                                     p: selectedProperty,
-                                    o: columnFromData.columnName,
+                                    o: columnFromData.id,
                                 };
                                 KGcreator.currentConfig.currentMappings[columnFromData.table].tripleModels.push(triple);
                                 KGcreator.saveDataSourceMappings(
                                     KGcreator.currentSlsvSource,
                                     KGcreator.currentConfig.currentDataSource.name,
                                     KGcreator.currentConfig.currentMappings,
-                                    function (err, result) {}
+                                    function (err, result) {KGcreator_mappings.showTableMappings( columnFromData.table);}
                                 );
                             }
                         } else {
                             if (confirm("link columns " + columnFromData.label + " to" + columnToData.label + " with property " + selectedProperty)) {
                                 var triple = {
-                                    s: columnFromData.columnName,
+                                    s: columnFromData.id,
                                     p: selectedProperty,
-                                    o: targetColumnInTable,
+                                    o: columnToData.id,
                                 };
                                 KGcreator.currentConfig.currentMappings[columnFromData.table].tripleModels.push(triple);
                                 KGcreator.saveDataSourceMappings(
                                     KGcreator.currentSlsvSource,
                                     KGcreator.currentConfig.currentDataSource.name,
                                     KGcreator.currentConfig.currentMappings,
-                                    function (err, result) {}
+                                    function (err, result) {  KGcreator_mappings.showTableMappings( columnFromData.table);
+                                    }
                                 );
                             }
                         }
@@ -638,6 +639,10 @@ tripleObj.objectIsSpecificUri = true;
     self.afterMappingsFn = function () {
         KGcreator_mappings.showTableMappings(node.id);
     };
+
+
+
+
 
     return self;
 })();

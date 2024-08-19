@@ -1,7 +1,6 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
-import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 //import fflate from "fflate";
 

@@ -9,8 +9,7 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
-import Lineage_axioms_draw from "./lineage_axioms_draw.js";
-import SearchUtil from "../../search/searchUtil.js";
+import Lineage_axioms_draw from "./lineage_axioms_draw.js";import SearchUtil from "../../search/searchUtil.js";
 
 var Lineage_axioms_create = (function () {
     var self = {};

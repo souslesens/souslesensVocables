@@ -8,8 +8,7 @@ import ElasticSearchProxy from "../../modules/search/elasticSearchProxy.js";
 import SearchUtil from "../../modules/search/searchUtil.js";
 import MainController from "../../modules/shared/mainController.js";
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
-import Lineage_axioms_draw from "../../modules/tools/lineage/lineage_axioms_draw.js";
-import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_create.js";
+
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
 import ResponsiveUI from "../../modules/shared/responsiveUI.js";
@@ -59,8 +58,8 @@ var NodeInfosWidget = (function () {
                         if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                             var source = self.currentSource;
                             // source = Lineage_sources.mainSource;
-                            NodeInfosAxioms.init(source, self.currentNode);
-                            // Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
+                            NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
+
                         }
                     }, 100);
                 },
@@ -97,7 +96,7 @@ var NodeInfosWidget = (function () {
         } else {
             self.currentSource = sourceLabel;
         }
-        Lineage_axioms_draw.currentSource = sourceLabel;
+
 
         if (typeof node == "object") {
             self.currentNode = node;
@@ -264,14 +263,7 @@ var NodeInfosWidget = (function () {
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
             str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
         }
-        /*
-        if (self.visitedNodes.length > 1) {
-            str +=
-                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(-1)'> previous </button>" +
-                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(+1)'>  next </button>";
-        }
-        str += '  <span class="popupMenuItem" onclick="Lineage_axioms_create.showAdAxiomDialog (\'axioms_dialogDiv\');"> <b>Add Axiom</b></span>';
-        */
+
         str += "</div>";
 
         $("#" + self.currentNodeIdInfosDivId).prepend(str);
@@ -1348,8 +1340,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             '$("#nodeInfosWidget_newEntityLabel").val(),$("#nodeInfosWidget_entityTypeSelect").val())\'>OK</button>';
 
         $("#" + divId).html(html);
-        var declarations = Lineage_axioms_create.owl2Vocabulary.Declarations;
-        common.fillSelectOptions("nodeInfosWidget_entityTypeSelect", declarations, true);
+
     };
 
     self.createSingleEntity = function (divId, source, label, type) {

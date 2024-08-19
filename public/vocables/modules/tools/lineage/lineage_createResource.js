@@ -5,7 +5,7 @@ import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import Lineage_axioms_draw from "./lineage_axioms_draw.js";
+
 
 var Lineage_createResource = (function () {
     var self = {};
@@ -283,8 +283,7 @@ var Lineage_createResource = (function () {
         $("#lineageCreateResource_predicateDiv").html("");
     };
     self.drawNodeAxioms = function () {
-        Lineage_axioms_draw.drawNodeAxioms(self.currentSource, self.currentResourceUri, divId, depth, options, function (err, result) {});
-    };
+          };
 
     return self;
 })();

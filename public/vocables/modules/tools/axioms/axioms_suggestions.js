@@ -19,7 +19,6 @@ var Axioms_suggestions = (function () {
 
         var options = {};
         const params = new URLSearchParams({
-            source: Axiom_editor.currentSource,
             lastToken: axiomText,
             options: JSON.stringify(options),
         });

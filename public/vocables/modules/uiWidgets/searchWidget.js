@@ -8,7 +8,7 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import common from "../shared/common.js";
 import Export from "../shared/export.js";
 import PromptedSelectWidget from "./promptedSelectWidget.js";
-import NodeRelations_bot from "../bots/nodeRelations_bot.js";
+import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 
 var SearchWidget = (function () {
     var self = {};
@@ -270,8 +270,8 @@ var SearchWidget = (function () {
                     return;
                     /*  if (_options.selectTreeNodeFn) {
                         return _options.selectTreeNodeFn(event, obj);
-                    } else if (Config.userTools[MainController.currentTool].controller.controller.selectTreeNodeFn) {
-                        return Config.userTools[MainController.currentTool].controller.controller.selectTreeNodeFn(event, obj);
+                    } else if (Config.userTools[MainController.currentTool].controller.selectTreeNodeFn) {
+                        return Config.userTools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
                     }
 
                     self.editThesaurusConceptInfos(obj.node.data.source, obj.node);*/
@@ -282,8 +282,8 @@ var SearchWidget = (function () {
                         return _options.contextMenu;
                     } else if (_options.contextMenuFn) {
                         return _options.contextMenuFn();
-                    } else if (Config.userTools[MainController.currentTool].controller.controller.contextMenuFn) {
-                        return Config.userTools[MainController.currentTool].controller.controller.contextMenuFn;
+                    } else if (Config.userTools[MainController.currentTool].controller.contextMenuFn) {
+                        return Config.userTools[MainController.currentTool].controller.contextMenuFn;
                     } else {
                         return self.getJstreeConceptsContextMenu();
                     }
@@ -364,7 +364,7 @@ var SearchWidget = (function () {
                 jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
             }
             if (!options.selectTreeNodeFn) {
-                jsTreeOptions.selectTreeNodeFn = Config.userTools[MainController.currentTool].controller.controller.selectTreeNodeFn;
+                jsTreeOptions.selectTreeNodeFn = Config.userTools[MainController.currentTool].controller.selectTreeNodeFn;
             }
 
             jsTreeOptions.source = sourceLabel;
@@ -405,72 +405,89 @@ var SearchWidget = (function () {
                 },
             };
 
-            items.graphNamedIndividuals = {
-                label: "LinkedData",
-                action: function () {
-                    Lineage_linkedData.showLinkedDataPanel(self.currentTreeNode);
-                    // Lineage_whiteboard.drawNamedIndividuals(self.currentTreeNode.data.id);
-                },
-            };
-
-            items.relations = {
-                label: "Relations...",
+            items.axioms = {
+                label: "Node axioms",
                 action: function (e) {
-                    NodeRelations_bot.start();
-                    // Lineage_relations.showDrawRelationsDialog("Tree");
+                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+
+                    $("#mainDialogDiv").dialog("open");
+
+                    NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
                 },
             };
 
-            items.copyNode = {
-                label: "Copy Node",
+            items.descendantsAxioms = {
+                label: "Descendants axioms",
                 action: function (e) {
-                    // pb avec source
-                    LineageClasses.copyNode(e);
-
-                    Lineage_common.copyNodeToClipboard(self.currentTreeNode);
+                    $("#mainDialogDiv").dialog("open");
+                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+                    var descendants = JstreeWidget.getNodeDescendants("LineageNodesJsTreeDiv", self.currentTreeNode.id);
+                    descendants.push(self.currentTreeNode);
+                    NodeInfosAxioms.showResourceDescendantsAxioms(self.currentTreeNode.data.source, self.currentTreeNode, descendants, "mainDialogDiv");
                 },
             };
-            /*  items.axioms = {
-          label: "graph axioms",
-          action: function (e) {
-
-              NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv",{showAxioms:1});
-
-          },
-      };*/
-
-            if (self.currentSource && Config.sources[self.currentSource].editable) {
-                items.pasteNode = {
-                    label: "paste Node",
-                    action: function (_e) {
-                        if (self.currentCopiedNode) {
-                            return Lineage_combine.showMergeNodesDialog(self.currentCopiedNode);
-                        }
-
-                        common.pasteTextFromClipboard(function (text) {
-                            if (!text) {
-                                return MainController.UI.message("no node copied");
-                            }
-                            try {
-                                var node = JSON.parse(text);
-                                Lineage_combine.showMergeNodesDialog(node, self.currentTreeNode);
-                            } catch (e) {
-                                console.log("wrong clipboard content");
-                            }
-                            return;
-                        });
-                    },
-                };
-            }
         }
 
-        items.exportAllDescendants = {
-            label: "Export all descendants",
-            action: function (_e) {
-                // pb avec source
-                SearchWidget.exportAllDescendants();
+        /*
+        items.graphNamedIndividuals = {
+            label: "LinkedData",
+            action: function () {
+                Lineage_linkedData.showLinkedDataPanel(self.currentTreeNode);
+                // Lineage_whiteboard.drawNamedIndividuals(self.currentTreeNode.data.id);
             },
         };
+
+    items.relations = {
+        label: "Relations...",
+        action: function (e) {
+            NodeRelations_bot.start();
+            // Lineage_relations.showDrawRelationsDialog("Tree");
+        },
+    };
+
+    items.copyNode = {
+        label: "Copy Node",
+        action: function (e) {
+            // pb avec source
+            //   LineageClasses.copyNode(e);
+
+            Lineage_common.copyNodeToClipboard(self.currentTreeNode);
+        },
+    };
+
+
+    if (self.currentSource && Config.sources[self.currentSource].editable) {
+        items.pasteNode = {
+            label: "paste Node",
+            action: function (_e) {
+                if (self.currentCopiedNode) {
+                    return Lineage_combine.showMergeNodesDialog(self.currentCopiedNode);
+                }
+
+                common.pasteTextFromClipboard(function (text) {
+                    if (!text) {
+                        return MainController.UI.message("no node copied");
+                    }
+                    try {
+                        var node = JSON.parse(text);
+                        Lineage_combine.showMergeNodesDialog(node, self.currentTreeNode);
+                    } catch (e) {
+                        console.log("wrong clipboard content");
+                    }
+                    return;
+                });
+            },
+        };
+    }
+}
+
+items.exportAllDescendants = {
+    label: "Export all descendants",
+    action: function (_e) {
+        // pb avec source
+        SearchWidget.exportAllDescendants();
+    },
+};*/
 
         return items;
     };

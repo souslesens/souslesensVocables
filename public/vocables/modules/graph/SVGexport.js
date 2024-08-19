@@ -6,6 +6,8 @@ var SVGexport = (function () {
     var self = {};
 
     self.toSVG = function (network) {
+        //var CanvasRenderingContext2D = network.canvas.getContext("2d");
+
         C2S.prototype.circle = CanvasRenderingContext2D.prototype.circle;
         C2S.prototype.square = CanvasRenderingContext2D.prototype.square;
         C2S.prototype.triangle = CanvasRenderingContext2D.prototype.triangle;

@@ -79,42 +79,56 @@ Cypress.Commands.add("waitForProfilesAndSources", () => {
 /*  Karim test */
 // Verify the state of The source selector and capacity to launch sources
 Cypress.Commands.add("enterLineageOnIDO",()=>{
-    cy.visit("http://localhost:3010/vocables/?tool=lineage");
-    cy.intercept('/vocables/responsive/css/KGcreator/KGcreatorSkin.css').as('getLessSkin');
-    cy.wait('@getLessSkin').then(
-        (interception)=>{
-            cy.wait(500);
-            cy.get('#sourceSelector_searchInput').type('IDO');
-            cy.get('#sourceSelector_searchInput').type('{enter}');
-            cy.get('#'+'IDO'+'_anchor').click();
-            //enter on lineage inerface in source IDO if is available
-            cy.get('.slsv-button-1').first().click();
-            cy.wait(500);
-            cy.window().then(window => {
-                const graphIsHere=window.Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty();
-                cy.log(graphIsHere);
-            });
-            
-        }
-    );
+    cy.visit("http://localhost:3010/vocables/?tool=lineage&source=IDO");
+  
     
 });
 
 Cypress.Commands.add("modelTestDisplay",()=>{
   
-    cy.wait('@getLessSkin').then(
-        (interception)=>{
-            cy.wait(500);
-            //enter click on graph
-            cy.get('.slsv-button-1').first().click();
-            cy.wait(500);
-            cy.window().then(window => {
+    //enter click on graph
+    cy.get('.slsv-button-1').first().click();
+    cy.wait(500);
+    cy.window().then(window => {
                 // Test graph display
                 const graphIsHere=window.Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty();
                 cy.log(graphIsHere);
-            });
+    });
             
-        }
-    );
-    
+});
+
+Cypress.Commands.add("modelTestDisplay",()=>{
+  
+    //enter click on graph
+    cy.get('.slsv-button-1').first().click();
+    cy.wait(500);
+    cy.window().then(window => {
+                // Test graph display
+                const graphIsHere=window.Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty();
+                cy.log(graphIsHere);
+    });
+            
+});
+
+
+
+Cypress.Commands.add("TopClassesAndExpand",()=>{
+  
+    //enter click on graph
+    cy.get('.slsv-button-1[popupcomment="TopClasses"]').click();
+    //4x expand
+    for (let i=0;i<=4;i++){
+        cy.get('.slsv-button-1[popupcomment="Expand"]').click();
+        cy.wait(500);
+    }// Verify the number of nodes
+    cy.window().then(window => {
+                // Test graph display
+                
+                const graphIsHere=window.Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length;
+                
+                cy.log(graphIsHere);
+    });
+    //Verify CSV button
+    // Verify ClearAll
+            
 });

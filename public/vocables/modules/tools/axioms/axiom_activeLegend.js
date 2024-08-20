@@ -86,17 +86,37 @@ var Axiom_activeLegend = (function () {
 
             var visjsData = {nodes: [], edges: []};
             var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
+            visjsNode.data.predicate=selectedObject.axiomType
             visjsData.nodes.push(visjsNode);
             self.hierarchicalLevel = 0;
             var options = {
                 keepHierarchyLayout: true,
-                onNodeClick: Axiom_activeLegend.onNodeGraphClick
+                onNodeClick: Axiom_activeLegend.onNodeGraphClick,
+                onRightClickFn: Axiom_activeLegend.showGraphPopupMenu
+
             }
             Axioms_graph.drawGraph(visjsData, self.axiomGraphDiv, options);
             Axioms_graph.currentGraphNode = visjsNode;
             self.currentResource.visjsId = selectedObject.id
 
             //   self.hideForbiddenResources(selectedObject);
+        };
+
+        self.showGraphPopupMenu = function (node, point, event) {
+            if (!node) {
+                return;
+            }
+            self.currentGraphNode = node;
+            if (!node || !node.data) {
+                return;
+            }
+            var html = "";
+            html = '    <span class="popupMenuItem" onclick="Axiom_activeLegend.removeNodeFromGraph();"> Remove Node</span>';
+
+            $("#popupMenuWidgetDiv").html(html);
+            point.x = event.x;
+            point.y = event.y;
+            PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
         };
 
         self.onNodeGraphClick = function (node, point, nodeEvent) {
@@ -115,6 +135,39 @@ var Axiom_activeLegend = (function () {
                 Axioms_graph.currentGraphNode = null;
             }
         };
+
+
+
+        self.removeNodeFromGraph = function (node) {
+            var edges = Axioms_graph.axiomsVisjsGraph.data.edges.get();
+
+            var edgesFromMap = {}
+            edges.forEach(function (edge) {
+                if (!edgesFromMap[edge.from]) {
+                    edgesFromMap[edge.from] = []
+                }
+                edgesFromMap[edge.from].push(edge)
+            })
+
+            var nodesToRemove = []
+            var edgesToRemove = []
+
+            function recurse(nodeId) {
+                var edges = edgesFromMap[nodeId]
+                if(edges) {
+                    edges.forEach(function (edge) {
+                        edgesToRemove.push(edge.id)
+                        nodesToRemove.push(edge.from)
+                        recurse(edge.to)
+                    })
+                }
+            }
+            recurse(node.id)
+            Axioms_graph.axiomsVisjsGraph.data.edges.remove(edgesToRemove)
+            Axioms_graph.axiomsVisjsGraph.data.nodes.remove(nodesToRemove)
+        }
+
+
 
         self.onSuggestionsSelect = function (resourceUri, legendNode) {
             var newResource;
@@ -161,14 +214,14 @@ var Axiom_activeLegend = (function () {
                     "Complement": "┓"
 
                 }
-
+                var id = "_:b" + common.getRandomHexaId(10)
                 newResource = {
-                    id: "_:b" + common.getRandomHexaId(10),
+                    id: id,
                     label: label,
                     resourceType: nodeType,
                     symbol: symbolsMap[label],
                     data: {
-                        id: resourceUri,
+                        id: id,
                         label: label,
                         type: nodeType,
                         subType: subType,
@@ -240,12 +293,11 @@ var Axiom_activeLegend = (function () {
                   hiddenNodes.push("Complement");*/
                 hiddenNodes.push("DisjointWith");
             } else if (resourceType == "Restriction") {
+                hiddenNodes.push("Restriction");
 
+            } else if (resourceType == "Connective") {
+                hiddenNodes.push("ObjectProperty");
             }
-            /*   } else if (resourceType == "Intersection") {
-               } else if (resourceType == "Union") {
-               } else if (resourceType == "Complement") {
-               }*/
 
 
             var edges = Axioms_graph.axiomsVisjsGraph.data.edges.get();
@@ -257,7 +309,7 @@ var Axiom_activeLegend = (function () {
             var numberOfEdgesFromCurrentGraphNode = 0
 
 
-            if (resourceType == "Intersection" || resourceType == "Union" || resourceType == "Complement") {
+            if (resourceType == "Connective") {
                 ;
             } else {
                 edges.forEach(function (edge) {
@@ -295,6 +347,7 @@ var Axiom_activeLegend = (function () {
             });
             Axiom_activeLegend.axiomsLegendVisjsGraph.data.nodes.update(newNodes);
         }
+
 
         self.drawLegend = function () {
             var visjsData = {nodes: [], edges: []};
@@ -370,7 +423,13 @@ var Axiom_activeLegend = (function () {
 
         }
         self.saveAxiom = function () {
-            self.visjsGraphToTriples()
+
+
+            if(confirm("Save Axiom")){
+                var triples= self.visjsGraphToTriples()
+                Sparql_generic.insertTriples(self.currentSource,triples)
+            }
+
         }
 
 
@@ -398,7 +457,7 @@ var Axiom_activeLegend = (function () {
 
             var triples = []
 
-            function recurse(nodeId, _predicate) {
+            function recurse(nodeId) {
 
                 var edges = edgesFromMap[nodeId]
                 if (!edges) {
@@ -412,32 +471,38 @@ var Axiom_activeLegend = (function () {
 
                     var object = toNode.data.id;
                     var predicate = null;
-                    if (_predicate) {
-                        predicate = _predicate;
-                    } else if (fromNode.data.type == "Restriction") {
+                    if (fromNode.data.predicate) {
+                        predicate = fromNode.data.predicate;
+                    }
+
+                    if (fromNode.data.type == "Restriction") {
                         if (toNode.data.type == "ObjectProperty") {
                             predicate = "owl:onProperty"
                         } else {
                             predicate = fromNode.data.subType
                         }
 
-                    } else if (fromNode.data.type == "Class") {
+                    } else if (fromNode.data.type == "Class" ) {
                         predicate = "rdfs:subClassOf"
                     } else if (fromNode.data.type == "ObjectProperty") {
                         ;
-                    }else if (fromNode.data.type == "Connective") {
-                                
+                    } else if (fromNode.data.type == "Connective") {
 
+                        if (fromNode.data.nCount == 0) {
+                            predicate = "rdf:first"
+                        } else if (fromNode.data.nCount == 1) {
+                            predicate = "rdf:last"
+                        } else {
 
-
-
-                    }  else {
+                        }
+                        fromNode.data.nCount += 1
                         ;
+                    } else {
                     }
 
 
                     if (predicate) {
-                        triple.s = fromNode.data.id;
+                        triple.s = fromNode.data.bNodeid || fromNode.data.id;
                         triple.p = predicate;
                         triple.o = object
                         triples.push(triple);
@@ -451,14 +516,20 @@ var Axiom_activeLegend = (function () {
                             o: "owl:Restriction"
 
                         });
-                    }else   if (toNode.data.type == "Connective") {
+                    } else if (toNode.data.type == "Connective") {
+
+                        toNode.data.nCount = 0
+                        toNode.data.bNodeid = "_:" + common.getRandomHexaId(10)
                         triples.push({
                             s: toNode.data.id,
-                            p: "rdf:type",
-                            o: "owl:Restriction"
+                            p: toNode.data.subType,
+                            o: toNode.data.bNodeid,
 
                         });
+
+
                     }
+
 
                     recurse(toNode.id)
 
@@ -466,12 +537,8 @@ var Axiom_activeLegend = (function () {
             }
 
 
-// edgesFromMap[self.currentResource.id].forEach(function (edge) {
-//   recurse(self.currentResource.id, self.currentAxiomType)
-            recurse(nodes[0].id, "SubClassOf")
-// })
-
-            var x = triples
+            recurse(nodes[0].id)
+        return triples
 
 
         }
@@ -479,7 +546,7 @@ var Axiom_activeLegend = (function () {
 
         self.testTriplesCreation = function () {
             var visjsData = {
-                nodes:[
+                nodes: [
                     {
                         "id": "https://spec.industrialontologies.org/ontology/core/Core/DesignativeInformationContentEntity",
                         "label": "designative information content entity",
@@ -507,7 +574,7 @@ var Axiom_activeLegend = (function () {
                         "level": 1,
                         "font": null,
                         "data": {
-                            "id": "owl:complementOf",
+                            "id": "_:b5b03383671",
                             "label": "Complement",
                             "type": "Connective",
                             "subType": "owl:complementOf"
@@ -545,7 +612,7 @@ var Axiom_activeLegend = (function () {
                         "level": 2,
                         "font": null,
                         "data": {
-                            "id": "owl:intersectionOf",
+                            "id": "_:b5b03383671",
                             "label": "Intersection",
                             "type": "Connective",
                             "subType": "owl:intersectionOf"
@@ -583,7 +650,7 @@ var Axiom_activeLegend = (function () {
                         "level": 3,
                         "font": null,
                         "data": {
-                            "id": "some",
+                            "id": "_:b5b03383671",
                             "label": "some",
                             "resourceType": "Restriction",
                             "subType": "owl:someValuesFrom"
@@ -678,7 +745,7 @@ var Axiom_activeLegend = (function () {
 ();
 
 
-Axiom_activeLegend.testTriplesCreation()
+//Axiom_activeLegend.testTriplesCreation()
 
 export default Axiom_activeLegend;
 window.Axiom_activeLegend = Axiom_activeLegend;

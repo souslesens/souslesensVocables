@@ -55,7 +55,9 @@ var NodeInfosAxioms = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            if (result.manchester.length == 0) {
+
+
+            if (!result.manchester || result.manchester.length == 0) {
                 return $("#nodeInfosAxioms_infosDiv").html("no axioms found");
             }
 
@@ -331,7 +333,8 @@ var NodeInfosAxioms = (function () {
 
                     Axiom_activeLegend.currentClass = self.currentResource
                     Axiom_activeLegend.currentClass.resourceType = "Class";
-                    Axiom_activeLegend.currentAxiomType = axiomType;
+                   // Axiom_activeLegend.currentAxiomType = axiomType;
+                    Axiom_activeLegend.predicate=axiomType
                     Axiom_activeLegend.currentResource=self.currentResource;
 
                     Axiom_editor.init(null, self.currentResource, self.currentSource)

@@ -10,7 +10,7 @@ module.exports = function() {
 
     async function POST(req, res, next) {
         try {
-            let query = req.body.query;
+            let query = req.body.query || req.body.update ;
             const headers = {};
             if (req.query.graphUri) {
                 query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");
@@ -33,7 +33,10 @@ module.exports = function() {
                                 return processResponse(res, err, userSources);
                             }
 
-                            UserRequestFiltering.filterSparqlRequest(req.body.query, userSources, user, function(parsingError, filteredQuery) {
+
+
+
+                            UserRequestFiltering.filterSparqlRequest(query, userSources, user, function(parsingError, filteredQuery) {
                                 if (parsingError) {
                                     return processResponse(res, parsingError, null);
                                 }

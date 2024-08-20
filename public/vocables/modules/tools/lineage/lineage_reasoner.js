@@ -1,6 +1,6 @@
 import common from "../../shared/common.js";
-import SearchUtil from "../../search/searchUtil.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import VisjsUtil from "../../graph/visjsUtil.js";
 
 self.lineageVisjsGraph;
 import Lineage_whiteboard from "./lineage_whiteboard.js";

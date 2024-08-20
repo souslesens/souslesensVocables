@@ -47,12 +47,12 @@ var Axiom_activeLegend = (function () {
                     self.hideLegendItems()
                     var suggestions = [
 
-                        {label: "owl:someValuesFrom", id: "some"},
-                        {label: "owl:allValuesFrom", id: "only"},
-                        {label: "owl:hasValue", id: "value"},
-                        {label: "owl:maxCardinality", id: "max"},
-                        {label: "owl:minCardinality", id: "min"},
-                        {label: "owl:cardinality", id: "cardinality"},
+                        {label: "http://www.w3.org/2002/07/owl#someValuesFrom", id: "some"},
+                        {label: "http://www.w3.org/2002/07/owl#allValuesFrom", id: "only"},
+                        {label: "http://www.w3.org/2002/07/owl#hasValue", id: "value"},
+                        {label: "http://www.w3.org/2002/07/owl#maxCardinality", id: "max"},
+                        {label: "http://www.w3.org/2002/07/owl#minCardinality", id: "min"},
+                        {label: "http://www.w3.org/2002/07/owl#cardinality", id: "cardinality"},
 
                     ]
 
@@ -61,10 +61,10 @@ var Axiom_activeLegend = (function () {
                     self.hideLegendItems()
                     var suggestions = [
 
-                        {label: "Union", id: "owl:unionOf"},
-                        {label: "Intersection", id: "owl:intersectionOf"},
-                        {label: "Complement", id: "owl:complementOf"},
-                        {label: "Enumeration", id: "owl:oneOf"},
+                        {label: "Union", id: "http://www.w3.org/2002/07/owl#unionOf"},
+                        {label: "Intersection", id: "http://www.w3.org/2002/07/owl#intersectionOf"},
+                        {label: "Complement", id: "http://www.w3.org/2002/07/owl#complementOf"},
+                        {label: "Enumeration", id: "http://www.w3.org/2002/07/owl#oneOf"},
 
 
                     ]
@@ -86,7 +86,7 @@ var Axiom_activeLegend = (function () {
 
             var visjsData = {nodes: [], edges: []};
             var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
-            visjsNode.data.predicate=selectedObject.axiomType
+            visjsNode.data.predicate = selectedObject.axiomType
             visjsData.nodes.push(visjsNode);
             self.hierarchicalLevel = 0;
             var options = {
@@ -137,8 +137,8 @@ var Axiom_activeLegend = (function () {
         };
 
 
-
-        self.removeNodeFromGraph = function (node) {
+        self.removeNodeFromGraph = function () {
+            var node = self.currentGraphNode
             var edges = Axioms_graph.axiomsVisjsGraph.data.edges.get();
 
             var edgesFromMap = {}
@@ -154,7 +154,7 @@ var Axiom_activeLegend = (function () {
 
             function recurse(nodeId) {
                 var edges = edgesFromMap[nodeId]
-                if(edges) {
+                if (edges) {
                     edges.forEach(function (edge) {
                         edgesToRemove.push(edge.id)
                         nodesToRemove.push(edge.from)
@@ -162,11 +162,11 @@ var Axiom_activeLegend = (function () {
                     })
                 }
             }
+
             recurse(node.id)
             Axioms_graph.axiomsVisjsGraph.data.edges.remove(edgesToRemove)
             Axioms_graph.axiomsVisjsGraph.data.nodes.remove(nodesToRemove)
         }
-
 
 
         self.onSuggestionsSelect = function (resourceUri, legendNode) {
@@ -419,17 +419,29 @@ var Axiom_activeLegend = (function () {
 
         };
 
-        self.graphToManchesterSyntax = function () {
 
-        }
         self.saveAxiom = function () {
 
 
-            if(confirm("Save Axiom")){
-                var triples= self.visjsGraphToTriples()
-                Sparql_generic.insertTriples(self.currentSource,triples)
+            if (confirm("Save Axiom")) {
+                var triples = self.visjsGraphToTriples()
+                Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
+
+                })
             }
 
+        }
+
+        self.axiomTriplesToManchester = function () {
+                var triples = self.visjsGraphToTriples()
+            Axiom_manager.getManchesterAxiomsFromTriples  (self.currentSource, triples, function(err, result) {
+                if(err)
+                    return alert(err)
+                var x=result;
+
+                $("#axiomsEditor_textDiv").html(result)
+
+            })
         }
 
 
@@ -477,21 +489,21 @@ var Axiom_activeLegend = (function () {
 
                     if (fromNode.data.type == "Restriction") {
                         if (toNode.data.type == "ObjectProperty") {
-                            predicate = "owl:onProperty"
+                            predicate = "http://www.w3.org/2002/07/owl#onProperty"
                         } else {
                             predicate = fromNode.data.subType
                         }
 
-                    } else if (fromNode.data.type == "Class" ) {
-                        predicate = "rdfs:subClassOf"
+                    } else if (fromNode.data.type == "Class") {
+                        predicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
                     } else if (fromNode.data.type == "ObjectProperty") {
                         ;
                     } else if (fromNode.data.type == "Connective") {
 
                         if (fromNode.data.nCount == 0) {
-                            predicate = "rdf:first"
+                            predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first"
                         } else if (fromNode.data.nCount == 1) {
-                            predicate = "rdf:last"
+                            predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#last"
                         } else {
 
                         }
@@ -502,33 +514,27 @@ var Axiom_activeLegend = (function () {
 
 
                     if (predicate) {
-                        triple.s = fromNode.data.bNodeid || fromNode.data.id;
-                        triple.p = predicate;
-                        triple.o = object
+                        triple.subject = fromNode.data.bNodeid || fromNode.data.id;
+                        triple.predicate = predicate;
+                        triple.object = object
                         triples.push(triple);
                     }
 
 
-                    if (toNode.data.type == "Restriction") {
-                        triples.push({
-                            s: toNode.data.id,
-                            p: "rdf:type",
-                            o: "owl:Restriction"
-
-                        });
-                    } else if (toNode.data.type == "Connective") {
+                   if (toNode.data.type == "Connective") {
 
                         toNode.data.nCount = 0
                         toNode.data.bNodeid = "_:" + common.getRandomHexaId(10)
                         triples.push({
-                            s: toNode.data.id,
-                            p: toNode.data.subType,
-                            o: toNode.data.bNodeid,
+                            subject: toNode.data.id,
+                            predicate: toNode.data.subType,
+                            object: toNode.data.bNodeid,
 
                         });
 
 
                     }
+
 
 
                     recurse(toNode.id)
@@ -538,7 +544,30 @@ var Axiom_activeLegend = (function () {
 
 
             recurse(nodes[0].id)
-        return triples
+
+
+           var  nodeTypes= {
+               ObjectProperty:"http://www.w3.org/2002/07/owl#ObjectProperty",
+               Class:"http://www.w3.org/2002/07/owl#Class",
+               Connective:"http://www.w3.org/2002/07/owl#Class",
+               Restriction:"http://www.w3.org/2002/07/owl#Restriction",
+           }
+
+            nodes.forEach(function(node) {
+                if(nodeTypes[node.data.type])
+                triples.push({
+                    subject: node.data.id,
+                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                    object:nodeTypes[node.data.type]
+
+                });
+
+            })
+
+
+
+
+            return triples
 
 
         }

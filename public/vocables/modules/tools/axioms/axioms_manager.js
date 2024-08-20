@@ -192,22 +192,24 @@ var Axioms_manager = (function () {
                     }
                     for (var uri in urisMap) {
                         var resource = urisMap[uri];
-                        var cssClass;
-                        if (resource.resourceType == "Class") {
-                            cssClass = "axiom_Class";
-                        } else {
-                            cssClass = "axiom_Property";
-                        }
-                        axiomText = axiomText.replace(
-                            uri,
-                            "<span class='" +
+                        if(resource) {
+                            var cssClass;
+                            if (resource.resourceType == "Class") {
+                                cssClass = "axiom_Class";
+                            } else {
+                                cssClass = "axiom_Property";
+                            }
+                            axiomText = axiomText.replace(
+                                uri,
+                                "<span class='" +
                                 cssClass +
                                 "' " +
                                 // "onclick=Axiom_editorUI.showNodeInfos('"+uri+"')" +
                                 ">" +
                                 resource.label +
                                 "</span>"
-                        );
+                            );
+                        }
                     }
 
                     axiomText = "<div class='axiom_keyword'>" + axiomText + "</div>";

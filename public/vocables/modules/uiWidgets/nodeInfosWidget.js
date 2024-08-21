@@ -1397,6 +1397,10 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             });
         });
     };
+    self.largerObjectTextArea=function(){
+        $('#editPredicate_objectValue').css('width','700px');
+        $('#editPredicate_objectValue').css('height','130px');
+    }
 
     return self;
 })();

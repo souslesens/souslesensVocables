@@ -15,7 +15,7 @@ var Lineage_reasoner = (function () {
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Reasoner");
         self.currentSource = Lineage_sources.activeSource;
-        $("#smallDialogDiv").load("modules/tools/lineage/lineage_reasoner.html", function () {
+        $("#smallDialogDiv").load("modules/tools/lineage/html/lineage_reasoner.html", function () {
             if (!self.loaded) {
                 self.loaded = true;
                 $("#lineage_reasoner_outputDiv").css("display", "none");

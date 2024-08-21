@@ -8,12 +8,7 @@ var Lineage_createSLSVsource = (function () {
         CreateSLSVsource_bot.start();
         return;
 
-        $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").load("modules/tools/lineage/html/createSource.html", function () {
-            var sources = Object.keys(Config.sources);
-            sources.sort();
-            common.fillSelectOptions("create_source_imports", sources, false);
-        });
+       
     };
 
     self.createSource = function (sourceName, graphUri, imports, callback) {

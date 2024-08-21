@@ -13,7 +13,7 @@ var Lineage_similars = (function () {
         $("#smallDialogDiv").dialog("open");
         //$("#smallDialogDiv").parent().css("left", "30%");
         $("#smallDialogDiv").dialog("option", "title", "Similars");
-        $("#smallDialogDiv").load("modules/tools/lineage/lineageSimilarsDialog.html", function () {
+        $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsDialog.html", function () {
             self.mode = "whiteboard";
         });
     };

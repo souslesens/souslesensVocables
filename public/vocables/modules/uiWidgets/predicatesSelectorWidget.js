@@ -127,8 +127,8 @@ var PredicatesSelectorWidget = (function () {
     self.setVocabulariesSelect = function (source, filter) {
         var vocabularies = [];
         if (!filter || filter == "_all") {
-            vocabularies = ["usual", source];
-            vocabularies = vocabularies.concat(Config.sources[source].imports);
+            vocabularies = ["usual"];
+            //vocabularies = vocabularies.concat(Config.sources[source].imports);
             vocabularies = vocabularies.concat(Object.keys(Config.ontologiesVocabularyModels));
         } else if (filter == "_loadedSources") {
             vocabularies = Lineage_sources.loadedSources;

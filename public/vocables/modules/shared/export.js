@@ -391,9 +391,7 @@ var Export = (function () {
             $("#" + div).dialog("open");
         } catch (e) {}
 
-        $("#" + div)
-            .parent()
-            .show("fast", function () {
+        //$("#" + div).parent().show("fast", function () {
                 $("#" + div).html("<table id='dataTableDivExport'></table>");
                 if (!buttons) {
                     buttons = "Bfrtip";
@@ -440,7 +438,7 @@ var Export = (function () {
                 if (callback) {
                     return callback(null, self.dataTable);
                 }
-            });
+            //});
     };
 
     return self;

@@ -235,6 +235,24 @@ var MainController = (function () {
         if (self.currentSource) {
             params.set("source", self.currentSource);
         }
+        var recentSources=JSON.parse(localStorage.getItem('recentSources'));
+        if(!recentSources){
+            recentSources=[];
+            recentSources.push(source);
+            localStorage.setItem('recentSources',JSON.stringify(recentSources));
+        }
+        if(recentSources && !recentSources.includes(source)){
+                if(recentSources.length>=5){
+                    recentSources.shift()
+                  
+                }
+                recentSources.push(source);
+                
+                 localStorage.setItem('recentSources',JSON.stringify(recentSources));
+        }
+        
+       
+
         window.history.replaceState(null, "", `?${params.toString()}`);
         MainController.initTool(self.currentTool, function (err, result) {
             if (err) {
@@ -242,6 +260,7 @@ var MainController = (function () {
             }
             ResponsiveUI.resetWindowHeight();
         });
+        
     };
     // MainController or in Lineage_r ?
     self.onSourceSelect_AddSource = function (evt, obj) {

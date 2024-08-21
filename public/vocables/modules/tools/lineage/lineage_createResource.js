@@ -6,7 +6,6 @@ import OntologyModels from "../../shared/ontologyModels.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
-
 var Lineage_createResource = (function () {
     var self = {};
 
@@ -282,8 +281,7 @@ var Lineage_createResource = (function () {
         $("#editPredicate_objectInput").val("");
         $("#lineageCreateResource_predicateDiv").html("");
     };
-    self.drawNodeAxioms = function () {
-          };
+    self.drawNodeAxioms = function () {};
 
     return self;
 })();

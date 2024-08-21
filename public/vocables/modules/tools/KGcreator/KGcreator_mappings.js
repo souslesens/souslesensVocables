@@ -447,8 +447,8 @@ tripleObj.objectIsSpecificUri = true;
                 return alert(err.responseText);
             }
 
-            var fromClass =KGcreator.getColumnClass( columnFromData.table,columnFromData.id);
-            var toClass = KGcreator.getColumnClass( columnToData.table,columnToData.id);;
+            var fromClass = KGcreator.getColumnClass(columnFromData.table, columnFromData.id);
+            var toClass = KGcreator.getColumnClass(columnToData.table, columnToData.id);
             var constraints = OntologyModels.getClassesConstraints(KGcreator.currentSlsvSource, fromClass, toClass);
             var restrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, fromClass, toClass);
             var inverseRestrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, toClass, fromClass);
@@ -508,7 +508,9 @@ tripleObj.objectIsSpecificUri = true;
                                     KGcreator.currentSlsvSource,
                                     KGcreator.currentConfig.currentDataSource.name,
                                     KGcreator.currentConfig.currentMappings,
-                                    function (err, result) {KGcreator_mappings.showTableMappings( columnFromData.table);}
+                                    function (err, result) {
+                                        KGcreator_mappings.showTableMappings(columnFromData.table);
+                                    }
                                 );
                             }
                         } else {
@@ -523,7 +525,8 @@ tripleObj.objectIsSpecificUri = true;
                                     KGcreator.currentSlsvSource,
                                     KGcreator.currentConfig.currentDataSource.name,
                                     KGcreator.currentConfig.currentMappings,
-                                    function (err, result) {  KGcreator_mappings.showTableMappings( columnFromData.table);
+                                    function (err, result) {
+                                        KGcreator_mappings.showTableMappings(columnFromData.table);
                                     }
                                 );
                             }
@@ -639,10 +642,6 @@ tripleObj.objectIsSpecificUri = true;
     self.afterMappingsFn = function () {
         KGcreator_mappings.showTableMappings(node.id);
     };
-
-
-
-
 
     return self;
 })();

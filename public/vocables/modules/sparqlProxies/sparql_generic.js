@@ -415,15 +415,9 @@ var Sparql_generic = (function () {
     };
 
     self.triplesObjectToString = function (item) {
-        if(!item.subject)
-            item.subject=item.s
-        if(!item.predicate)
-            item.predicate=item.p
-        if(!item.object)
-            item.object=item.o
-
-
-
+        if (!item.subject) item.subject = item.s;
+        if (!item.predicate) item.predicate = item.p;
+        if (!item.object) item.object = item.o;
 
         var allowedPrefixes = Object.keys(Config.defaultSparqlPrefixes);
 

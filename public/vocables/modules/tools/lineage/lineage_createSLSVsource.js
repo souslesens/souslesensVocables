@@ -7,8 +7,6 @@ var Lineage_createSLSVsource = (function () {
     self.onLoaded = function () {
         CreateSLSVsource_bot.start();
         return;
-
-       
     };
 
     self.createSource = function (sourceName, graphUri, imports, callback) {

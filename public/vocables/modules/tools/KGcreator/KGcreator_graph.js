@@ -792,7 +792,7 @@ var KGcreator_graph = (function () {
             },
         };
 
-     //   return KGcreator_bot.start(node);
+        //   return KGcreator_bot.start(node);
 
         if (sourceNode.data && sourceNode.data.role == "column") {
             if (sourceNode.data.table != targetNode.data.table) {

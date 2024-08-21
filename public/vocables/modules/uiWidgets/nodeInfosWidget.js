@@ -59,7 +59,6 @@ var NodeInfosWidget = (function () {
                             var source = self.currentSource;
                             // source = Lineage_sources.mainSource;
                             NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
-
                         }
                     }, 100);
                 },
@@ -96,7 +95,6 @@ var NodeInfosWidget = (function () {
         } else {
             self.currentSource = sourceLabel;
         }
-
 
         if (typeof node == "object") {
             self.currentNode = node;
@@ -1340,7 +1338,6 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             '$("#nodeInfosWidget_newEntityLabel").val(),$("#nodeInfosWidget_entityTypeSelect").val())\'>OK</button>';
 
         $("#" + divId).html(html);
-
     };
 
     self.createSingleEntity = function (divId, source, label, type) {
@@ -1397,10 +1394,10 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             });
         });
     };
-    self.largerObjectTextArea=function(){
-        $('#editPredicate_objectValue').css('width','700px');
-        $('#editPredicate_objectValue').css('height','130px');
-    }
+    self.largerObjectTextArea = function () {
+        $("#editPredicate_objectValue").css("width", "700px");
+        $("#editPredicate_objectValue").css("height", "130px");
+    };
 
     return self;
 })();

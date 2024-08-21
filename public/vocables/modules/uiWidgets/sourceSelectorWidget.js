@@ -171,14 +171,13 @@ var SourceSelectorWidget = (function () {
         }
 
         var treeData = self.getSourcesJstreeData();
-        var recentSources=JSON.parse(localStorage.getItem('recentSources'));
-        if(recentSources && recentSources.length>0){
-            treeData.unshift({id:'Recent',text:'Recent',type:'Folder',parent:'#'});
+        var recentSources = JSON.parse(localStorage.getItem("recentSources"));
+        if (recentSources && recentSources.length > 0) {
+            treeData.unshift({ id: "Recent", text: "Recent", type: "Folder", parent: "#" });
             for (let i = recentSources.length - 1; i >= 0; i--) {
-                var source=recentSources[i];
-                treeData.push({id:source,text:source,type:'Source',parent:'Recent',data:{type:'source',label:source,id:source}});
-            };
-            
+                var source = recentSources[i];
+                treeData.push({ id: source, text: source, type: "Source", parent: "Recent", data: { type: "source", label: source, id: source } });
+            }
         }
         if (!jstreeOptions.contextMenu) {
             jstreeOptions.contextMenu = MainController.UI.getJstreeConceptsContextMenu();
@@ -216,10 +215,10 @@ var SourceSelectorWidget = (function () {
             $("#" + treeDiv)
                 .jstree(true)
                 .open_node(openedTypes);
-            if(recentSources){
+            if (recentSources) {
                 $("#" + treeDiv)
-                .jstree(true)
-                .open_node('Recent');
+                    .jstree(true)
+                    .open_node("Recent");
             }
             if (callback) {
                 return callback();

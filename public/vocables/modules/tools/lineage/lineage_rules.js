@@ -327,7 +327,6 @@ var Lineage_rules = (function () {
         });
     };
 
-
     return self;
 })();
 export default Lineage_rules;

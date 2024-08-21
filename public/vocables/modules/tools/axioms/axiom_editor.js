@@ -11,11 +11,6 @@ const Axiom_editor = (function () {
     self.propertyColor = "#f5ef39";
     self.keywordColor = "#cb9801";
 
-
-
-
-
-
     self.onLoaded = function () {
         self.showSourcesDialog(function (err, source) {
             if (err) {
@@ -66,9 +61,7 @@ const Axiom_editor = (function () {
         if (nodeId) {
             self.currentNode = nodeId;
         }
-        if(divId)
-        Axiom_editorUI.initUI();
-
+        if (divId) Axiom_editorUI.initUI();
     };
 
     self.clearAll = function () {

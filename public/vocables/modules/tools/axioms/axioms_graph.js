@@ -47,7 +47,7 @@ var Axioms_graph = (function () {
         } else if (node.owlType && node.owlType.indexOf("ObjectProperty") > -1) {
             color = "#f5ef39";
         } else if (node.owlType && node.owlType.indexOf("Restriction") > -1) {
-            label =node.label;
+            label = node.label;
             node.predicates.forEach(function (predicate) {
                 if (predicate.p.indexOf("someValuesFrom") > -1) {
                     label = "some";
@@ -320,14 +320,13 @@ var Axioms_graph = (function () {
                 //draw graph
                 function (callbackSeries) {
                     if (options.addToGraph && self.axiomsVisjsGraph) {
-                        if ( true) {
-                            self.switchToHierarchicalLayout(true)
-
+                        if (true) {
+                            self.switchToHierarchicalLayout(true);
                         }
 
                         self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
                         self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
-                        self.switchToHierarchicalLayout(false)
+                        self.switchToHierarchicalLayout(false);
                     } else {
                         self.drawGraph(visjsData, divId, options);
                         self.currentVisjsData = visjsData;
@@ -367,7 +366,7 @@ enabled:true},*/
                 },
             },
             onclickFn: options.onNodeClick,
-            onRightClickFn:  options.onRightClickFn || Axioms_graph.showGraphPopupMenu,
+            onRightClickFn: options.onRightClickFn || Axioms_graph.showGraphPopupMenu,
         };
 
         if (!options.randomLayout) {
@@ -393,22 +392,18 @@ enabled:true},*/
 
         self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
         self.axiomsVisjsGraph.draw(function () {
-            if (!options.keepHierarchyLayout  ) {
-                self.switchToHierarchicalLayout(false)
+            if (!options.keepHierarchyLayout) {
+                self.switchToHierarchicalLayout(false);
             }
-
         });
     };
 
-
     self.switchToHierarchicalLayout = function (booleanValue) {
-
         if (self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
             self.graphOptions.visjsOptions.layout.hierarchical.enabled = booleanValue;
             self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
-
         }
-    }
+    };
 
     self.showGraphPopupMenu = function (node, point, event) {
         if (!node) {
@@ -433,13 +428,11 @@ enabled:true},*/
         $("#" + self.graphDivId).html("");
     };
 
-    self.outlineNode=function(nodeId){
-        var newNodes=[]
-        self.axiomsVisjsGraph.decorateNodes(null,{borderWidth:1})
-        self.axiomsVisjsGraph.decorateNodes(nodeId,{borderWidth:5})
-
-    }
-
+    self.outlineNode = function (nodeId) {
+        var newNodes = [];
+        self.axiomsVisjsGraph.decorateNodes(null, { borderWidth: 1 });
+        self.axiomsVisjsGraph.decorateNodes(nodeId, { borderWidth: 5 });
+    };
 
     return self;
 })();

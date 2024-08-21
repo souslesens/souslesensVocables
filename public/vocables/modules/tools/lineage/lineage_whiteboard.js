@@ -453,7 +453,6 @@ var Lineage_whiteboard = (function () {
                     }
 
                     if (!Lineage_whiteboard.isResultAcceptable(result)) {
-
                         return callbackEach(" ");
                     }
 

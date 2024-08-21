@@ -433,11 +433,12 @@ var Axiom_activeLegend = (function () {
         }
 
         self.axiomTriplesToManchester = function () {
-                var triples = self.visjsGraphToTriples()
-            Axiom_manager.getManchesterAxiomsFromTriples  (self.currentSource, triples, function(err, result) {
-                if(err)
+            var triples = self.visjsGraphToTriples()
+            Axiom_manager.getManchesterAxiomsFromTriples(self.currentSource, triples, function (err, result) {
+                if (err) {
                     return alert(err)
-                var x=result;
+                }
+                var x = result;
 
                 $("#axiomsEditor_textDiv").html(result)
 
@@ -503,7 +504,19 @@ var Axiom_activeLegend = (function () {
                         if (fromNode.data.nCount == 0) {
                             predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first"
                         } else if (fromNode.data.nCount == 1) {
-                            predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#last"
+                            var bNode2 = "_:" + common.getRandomHexaId(10)
+                            triples.push({
+                                subject: fromNode.data.bNodeid,
+                                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+                                object: bNode2
+                            })
+                            fromNode.data.bNodeid = bNode2
+                            triples.push({
+                                subject: bNode2,
+                                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+                                object: "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"
+                            })
+                            predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first"
                         } else {
 
                         }
@@ -521,7 +534,7 @@ var Axiom_activeLegend = (function () {
                     }
 
 
-                   if (toNode.data.type == "Connective") {
+                    if (toNode.data.type == "Connective") {
 
                         toNode.data.nCount = 0
                         toNode.data.bNodeid = "_:" + common.getRandomHexaId(10)
@@ -536,7 +549,6 @@ var Axiom_activeLegend = (function () {
                     }
 
 
-
                     recurse(toNode.id)
 
                 })
@@ -546,25 +558,24 @@ var Axiom_activeLegend = (function () {
             recurse(nodes[0].id)
 
 
-           var  nodeTypes= {
-               ObjectProperty:"http://www.w3.org/2002/07/owl#ObjectProperty",
-               Class:"http://www.w3.org/2002/07/owl#Class",
-               Connective:"http://www.w3.org/2002/07/owl#Class",
-               Restriction:"http://www.w3.org/2002/07/owl#Restriction",
-           }
+            var nodeTypes = {
+                ObjectProperty: "http://www.w3.org/2002/07/owl#ObjectProperty",
+                Class: "http://www.w3.org/2002/07/owl#Class",
+                Connective: "http://www.w3.org/2002/07/owl#Class",
+                Restriction: "http://www.w3.org/2002/07/owl#Restriction",
+            }
 
-            nodes.forEach(function(node) {
-                if(nodeTypes[node.data.type])
-                triples.push({
-                    subject: node.data.id,
-                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                    object:nodeTypes[node.data.type]
+            nodes.forEach(function (node) {
+                if (nodeTypes[node.data.type]) {
+                    triples.push({
+                        subject: node.data.id,
+                        predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                        object: nodeTypes[node.data.type]
 
-                });
+                    });
+                }
 
             })
-
-
 
 
             return triples

@@ -1,15 +1,13 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
-import KGquery from "../tools/KGquery/KGquery.js";
-import SparqlQuery_bot from "./sparqlQuery_bot.js";
 import _botEngine from "./_botEngine.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
-//import AxiomsEditor from "../tools/lineage/axiomsEditor.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../shared/ontologyModels.js";
+import Lineage_createResource from "../tools/lineage/lineage_createResource.js";
 
 var CreateResource_bot = (function () {
     var self = {};

@@ -77,7 +77,7 @@ var Axioms_graph = (function () {
             size: size,
             level: level,
             font: font,
-            data: {
+            data: node.data || {
                 id: node.id,
                 label: node.label || "",
                 type: node.owlType,
@@ -367,7 +367,7 @@ enabled:true},*/
                 },
             },
             onclickFn: options.onNodeClick,
-            onRightClickFn: Axioms_graph.showGraphPopupMenu,
+            onRightClickFn:  options.onRightClickFn || Axioms_graph.showGraphPopupMenu,
         };
 
         if (!options.randomLayout) {
@@ -419,7 +419,6 @@ enabled:true},*/
             return;
         }
         var html = "";
-
         html = '    <span class="popupMenuItem" onclick="NodeInfosAxioms.expandGraphFromNode();"> expand from Node</span>';
         html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.collapseGraphToNode();"> collapse to Node</span>';
         html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.startFromNode();"> start from Node</span>';

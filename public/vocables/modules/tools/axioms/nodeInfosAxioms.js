@@ -55,7 +55,9 @@ var NodeInfosAxioms = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            if (result.manchester.length == 0) {
+
+
+            if (!result.manchester || result.manchester.length == 0) {
                 return $("#nodeInfosAxioms_infosDiv").html("no axioms found");
             }
 
@@ -154,6 +156,7 @@ var NodeInfosAxioms = (function () {
 
     self.onAxiomJstreeSelectNode = function (evt, obj) {
         var node = obj.node;
+        self.currentJstreeNode=node;
 
         if (node.parent == "#") {
             // draw   all axioms of class
@@ -290,7 +293,22 @@ var NodeInfosAxioms = (function () {
         toGraphMl: function () {
             axioms_graph.axiomsVisjsGraph.toGraphMl();
         },
+        getTriples:function(){
+            if( !self.currentJstreeNode){
+                return alert("No axiom Selected")
+            }
+            var str="<ul>"
+            self.currentJstreeNode.data.triples.forEach(function(triple){
+                str+="<li>"+triple.subject+" <b>"+triple.predicate+"</b> "+triple.object+"</li>"
+            })
+            str+="</ul>"
+            $("#smallDialogDiv").dialog("open")
+            $("#smallDialogDiv").html(str)
+
+        }
     };
+
+
 
     self.newAxiom = function () {
         $("#nodeInfosAxioms_graphPanelDiv").load("modules/tools/axioms/html/nodeInfosAxiomWrite.html", function (err) {
@@ -315,7 +333,8 @@ var NodeInfosAxioms = (function () {
 
                     Axiom_activeLegend.currentClass = self.currentResource
                     Axiom_activeLegend.currentClass.resourceType = "Class";
-                    Axiom_activeLegend.currentAxiomType = axiomType;
+                   // Axiom_activeLegend.currentAxiomType = axiomType;
+                    Axiom_activeLegend.predicate=axiomType
                     Axiom_activeLegend.currentResource=self.currentResource;
 
                     Axiom_editor.init(null, self.currentResource, self.currentSource)

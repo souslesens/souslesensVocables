@@ -23,8 +23,11 @@ module.exports = function () {
         var jowlConfig = ConfigManager.config.jowlServer;
 
         if (req.query.type == "externalUrl") {
-            var url = jowlConfig.url + "reasoner/" + req.query.operation + "?filePath=" + req.query.url;
-            HttpProxy.post(jowlConfig.url, {}, function (err, result) {
+            var url = jowlConfig.url + "hermit/" + req.query.operation + "?url=" + req.query.url;
+
+            HttpProxy.get(url, {},function (err, result) {
+           // var url = jowlConfig.url + "reasoner/" + req.query.operation + "?filePath=" + req.query.url;
+        //    HttpProxy.post(jowlConfig.url, {}, function (err, result) {
                 if (err) {
                     next(err);
                 } else {
@@ -103,7 +106,7 @@ module.exports = function () {
                         headers: {
                             "content-type": "application/json",
                         },
-                        url: jowlConfig.url + "reasoner/" + req.query.operation,
+                        url: jowlConfig.url + "hermit/" + req.query.operation,
                     };
                     request(options, function (error, response, body) {
                         return processResponse(res, error, body);

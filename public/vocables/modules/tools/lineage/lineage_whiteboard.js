@@ -453,7 +453,8 @@ var Lineage_whiteboard = (function () {
                     }
 
                     if (!Lineage_whiteboard.isResultAcceptable(result)) {
-                        return callback();
+
+                        return callbackEach(" ");
                     }
 
                     var ids = [];

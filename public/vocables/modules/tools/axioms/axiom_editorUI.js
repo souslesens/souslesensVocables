@@ -159,7 +159,7 @@ var Axiom_editorUI = (function () {
         if (node.data && node.data.triples) {
             Axiom_editor.currentSource = node.data.source;
             Axiom_editor.currentNode = node.data.resource;
-            Axioms_manager.getManchesterAxiomsFromTriples(Axiom_editor.currentSource, node.data.triples, function (err, result) {
+            Axioms_manager.getHtmlManchesterAxiomsFromTriples(Axiom_editor.currentSource, node.data.triples, function (err, result) {
                 if (err) return alert(err);
                 $("#axiomsEditor_textDiv").html(result);
             });

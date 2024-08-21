@@ -438,12 +438,15 @@ var Axiom_activeLegend = (function () {
                 if (err) {
                     return alert(err)
                 }
-                var x = result;
 
+
+
+               var axiomsMap= Axiom_manager.getManchesterAxiomsMap(result)
                 $("#axiomsEditor_textDiv").html(result)
 
             })
         }
+
 
 
         self.visjsGraphToTriples = function (nodes, edges) {

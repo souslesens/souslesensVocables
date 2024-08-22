@@ -132,7 +132,7 @@ var Containers_graph = (function () {
                 function (callbackSeries) {
                     //  options.descendants = true;
                     // options.leaves = true;
-                    MainController.UI.message("searching...");
+                    UI.message("searching...");
                     Containers_query.getContainerDescendantsOld(source, containerData.id, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -143,7 +143,7 @@ var Containers_graph = (function () {
                         }
                         return callbackSeries();
                     });
-                    MainController.UI.message("drawing graph...");
+                    UI.message("drawing graph...");
                 },
 
                 //get containersStyles
@@ -332,7 +332,7 @@ var Containers_graph = (function () {
                 },
             ],
             function (err) {
-                MainController.UI.message("", true);
+                UI.message("", true);
                 if (err) {
                     return alert(err.responseText);
                     if (callback) {

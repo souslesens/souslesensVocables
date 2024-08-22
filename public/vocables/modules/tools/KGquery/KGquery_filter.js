@@ -138,7 +138,6 @@ var KGquery_filter = (function () {
             if (confirm("many properties have been selected. Query may take time or abort, Continue anyway?")) {
                 //  return callback(null, queryNonObjectProperties);
             } else {
-                $("#smallDialogDiv").dialog("open");
                 return callback("query aborted");
             }
         }

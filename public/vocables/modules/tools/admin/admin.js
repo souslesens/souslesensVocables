@@ -85,15 +85,15 @@ $("#sourceDivControlPanelDiv").html(html);*/
                 }
                 $("#waitImg").css("display", "block");
                 SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
-                    MainController.UI.message("DONE " + source, true);
+                    UI.message("DONE " + source, true);
                     callbackEach(err);
                 });
             },
             function (err) {
                 if (err) {
-                    return MainController.UI.message(err, true);
+                    return UI.message(err, true);
                 }
-                MainController.UI.message("ALL DONE", true);
+                UI.message("ALL DONE", true);
                 $("#sourcesTreeDiv").jstree(true).uncheck_all();
             }
         );
@@ -107,7 +107,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
         }
 
         $("#waitImg").css("display", "block");
-        MainController.UI.message(sources[0] + " processing...");
+        UI.message(sources[0] + " processing...");
         $.ajax({
             type: "GET",
             url: `${Config.apiUrl}/admin/ontology/${sources[0]}`,
@@ -118,7 +118,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
             error: function (err) {
                 // bizarre !!!
                 download(err.responseText, sources[0] + ".txt", "text/plain");
-                MainController.UI.message(sources[0] + " downloaded");
+                UI.message(sources[0] + " downloaded");
             },
         });
     };
@@ -130,7 +130,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
         }
 
         $("#waitImg").css("display", "block");
-        // MainController.UI.message(sources[0] + " processing...");
+        // UI.message(sources[0] + " processing...");
         Sparql_proxy.exportGraph(sources[0]);
     };
     self.getClassesLineage = function () {
@@ -231,7 +231,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                 if (err) {
                     return alert(err);
                 }
-                MainController.UI.message(result + " restrictions created");
+                UI.message(result + " restrictions created");
             });
         } else {
             alert("missing propId or inversePropId");
@@ -256,7 +256,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {
-                return MainController.UI.message("DONE");
+                return UI.message("DONE");
             },
             error: function (err) {
                 return alert(err);
@@ -280,7 +280,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                     var options = {};
                     Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
                         if (err) {
-                            return MainController.UI.message(err, true);
+                            return UI.message(err, true);
                         }
 
                         var labels = result.labels;
@@ -320,9 +320,9 @@ $("#sourceDivControlPanelDiv").html(html);*/
             ],
             function (err) {
                 if (err) {
-                    return MainController.UI.message(err, true);
+                    return UI.message(err, true);
                 }
-                return MainController.UI.message("DONE", true);
+                return UI.message("DONE", true);
             }
         );
     };
@@ -336,9 +336,9 @@ $("#sourceDivControlPanelDiv").html(html);*/
         var sourceLabel = sources[0];
         Sparql_generic.createDecapitalizedLabelTriples(sourceLabel, function (err, result) {
             if (err) {
-                return MainController.UI.message(err, true);
+                return UI.message(err, true);
             }
-            return MainController.UI.message(result + " skos:altLabels created", true);
+            return UI.message(result + " skos:altLabels created", true);
         });
     };
 
@@ -375,7 +375,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
             body: JSON.stringify(body),
             POST: true,
         };
-        MainController.UI.message("copying source " + source);
+        UI.message("copying source " + source);
         $.ajax({
             type: "POST",
             url: `${Config.apiUrl}/copygraph`,
@@ -383,7 +383,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
                 alert(data.result + "triples imported in sparqlEndpoint " + toEndPointUrl + "");
-                MainController.UI.message("source " + source + " copied", true);
+                UI.message("source " + source + " copied", true);
             },
             error: function (err) {
                 return alert(err.responseText);
@@ -420,7 +420,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
 
         Sparql_OWL.clearGraph(graphUri, function (err, result) {
             if (err) return alert(err);
-            return MainController.UI.message("graph source " + source + " cleared ", true);
+            return UI.message("graph source " + source + " cleared ", true);
         });
     };
 

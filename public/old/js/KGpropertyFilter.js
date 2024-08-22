@@ -92,7 +92,7 @@ var KGpropertyFilter = (function () {
             self.onChangeSourceSelect("IDCP");
         });
 
-        //  MainController.UI.showHideRightPanel(true);
+        //  UI.showHideRightPanel(true);
         $("#graphDiv").width(1000);
 
        
@@ -365,7 +365,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     return alert(err.responseText);
                 }
 
-                MainController.UI.message("child Created");
+                UI.message("child Created");
                 var newNode = {
                     id: newUri,
                     text: label,
@@ -408,7 +408,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 $("#" + self.currentTreeNode.treeDiv)
                     .jstree()
                     .delete_node(self.currentTreeNode.data.id);
-                return MainController.UI.message("node deleted");
+                return UI.message("node deleted");
             });
         },
 

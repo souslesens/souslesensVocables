@@ -274,7 +274,7 @@
     align-items: center;
 }
 
-[role="dialog"]:not(.MuiPaper-root) {
+/*[role="dialog"]:not(.MuiPaper-root) {
     width: 95% !important;
     max-width: 1500px !important;
     height: unset !important;
@@ -284,7 +284,7 @@
     transform: translate(-50%, -50%);
     .border-classic-color-theme4;
     border: @button1-color solid 5px !important;
-}
+}*/
 
 .ui-dialog-title {
     color: @source-color;

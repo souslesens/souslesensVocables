@@ -39,7 +39,7 @@ var Evaluate = (function () {
                         activate: self.onTabActivate,
                     });
                     $("#Evaluate_rightPanelTabs").tabs({});
-                    MainController.UI.showHideRightPanel();
+                    UI.showHideRightPanel();
 
                     common.fillSelectOptions("evaluate_sourceSelect", self.selectedSources, true);
                     self.initCorpusList();
@@ -239,7 +239,7 @@ var Evaluate = (function () {
         $("#messageDiv").html("");
         self.currentTreeNode = obj.node;
         self.getSubjectGraphData(obj.node, function (err, _result) {
-            if (err) return MainController.UI.message(err);
+            if (err) return UI.message(err);
             self.showMissingWords(self.currentTreeNode);
         });
     };
@@ -253,7 +253,7 @@ var Evaluate = (function () {
     };
 
     self.getSubjectGraphData = function (jstreeNode, callback) {
-        MainController.UI.message("processing data");
+        UI.message("processing data");
         var descendants = JstreeWidget.getNodeDescendants(self.categoriesTreeId, jstreeNode.id);
         var ancestorsDepth = 3;
 
@@ -406,10 +406,10 @@ var Evaluate = (function () {
                 );
             },
             function (_err) {
-                MainController.UI.message("Drawing graph (" + visjsData.nodes.length + " nodes)");
+                UI.message("Drawing graph (" + visjsData.nodes.length + " nodes)");
                 visjsGraph.draw("Evaluate_graphDiv", visjsData, { onclickFn: Evaluate.onGraphNodeClick }, function () {
                     $("#waitImg").css("display", "none");
-                    MainController.UI.message("");
+                    UI.message("");
                 });
 
                 if (callback) return callback(null);
@@ -507,7 +507,7 @@ var Evaluate = (function () {
     };
 
     self.showUnderlinedEntities = function (jstreeNode) {
-        MainController.UI.message("processing data");
+        UI.message("processing data");
         var descendants = JstreeWidget.getNodeDescendants(self.categoriesTreeId, jstreeNode.id);
 
         var selectedSources = $("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked();

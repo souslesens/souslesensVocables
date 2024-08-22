@@ -46,28 +46,28 @@
         padding: 5px;
     }
 </style>
+<div style="min-width: 60vw; max-height: 70vh; min-height: 50vh">
+    <div id="nodeInfosWidget_modifyDiv"></div>
 
-<div id="nodeInfosWidget_modifyDiv"></div>
-
-<div id="nodeInfosWidget_tabsDiv">
-    <ul>
-        <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_InfosTabDiv">Infos</a></li>
-        <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_AxiomsTabDiv">Axioms</a></li>
-    </ul>
-    <div id="nodeInfosWidget_InfosTabDiv"></div>
-    <div id="nodeInfosWidget_AxiomsTabDiv">
-        <div style="display: none">
+    <div id="nodeInfosWidget_tabsDiv">
+        <ul>
+            <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_InfosTabDiv">Infos</a></li>
+            <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_AxiomsTabDiv">Axioms</a></li>
+        </ul>
+        <div id="nodeInfosWidget_InfosTabDiv"></div>
+        <div id="nodeInfosWidget_AxiomsTabDiv">
+            <div style="display: none"></div>
+            <div id="axiomsGraphDivContainer" style="width: 95%; height: 560px"></div>
+            <div id="axiomsGraphLegendDiv" style=""></div>
         </div>
-        <div id="axiomsGraphDivContainer" style="width: 95%; height: 560px"></div>
-        <div id="axiomsGraphLegendDiv" style=""></div>
     </div>
-</div>
 
-<div id="axiomsDrawGraphDiv"></div>
-<div id="axioms_dialogDiv"></div>
-<div
-    id="axioms_popupMenuWidgetDiv"
-    onclick="  PopupMenuWidget.hidePopup('axioms_popupMenuWidgetDiv');"
-    style="display: none; background-color: #ddd; position: absolute; margin: 5px; padding: 5px"
-></div>
-<div id="nodeInfosWidget_HoverDiv"></div>
+    <div id="axiomsDrawGraphDiv"></div>
+    <div id="axioms_dialogDiv"></div>
+    <div
+        id="axioms_popupMenuWidgetDiv"
+        onclick="  PopupMenuWidget.hidePopup('axioms_popupMenuWidgetDiv');"
+        style="display: none; background-color: #ddd; position: absolute; margin: 5px; padding: 5px"
+    ></div>
+    <div id="nodeInfosWidget_HoverDiv"></div>
+</div>

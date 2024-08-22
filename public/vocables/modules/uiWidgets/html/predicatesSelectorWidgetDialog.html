@@ -48,10 +48,20 @@
                 <span>choose</span>
                 <select id="editPredicate_objectSelect" onchange="PredicatesSelectorWidget.onSelectCurrentVocabObject($(this).val())"></select>
                 <br />
-                <textarea id="editPredicate_objectValueTA" style="width: 95%; display: none"></textarea>
-                <input id="editPredicate_objectValue" class="edit-Predicate-value-chosen" />
+
+                <textarea id="editPredicate_objectValue" class="edit-Predicate-value-chosen" style="width: 95%; border-radius: 10px"></textarea>
+                <!--<input id="editPredicate_objectValue" class="edit-Predicate-value-chosen" />-->
 
                 <div id="editPredicate_customContentDiv"></div>
+                <button
+                    class="w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons"
+                    id="editPredicate_largerTextButton"
+                    onclick="NodeInfosWidget.setLargerObjectTextArea()"
+                    style="font-size: 10px"
+                >
+                    <b>Text</b>
+                </button>
+
                 <button class="w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons" id="editPredicate_savePredicateButton" style="font-size: 10px">
                     <b>Save</b>
                 </button>

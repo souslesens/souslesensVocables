@@ -6,21 +6,9 @@ var Lineage_createSLSVsource = (function () {
     var self = {};
     self.onLoaded = function () {
         CreateSLSVsource_bot.start();
-        return;
-
-        $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").load("modules/tools/lineage/html/createSource.html", function () {
-            var sources = Object.keys(Config.sources);
-            sources.sort();
-            common.fillSelectOptions("create_source_imports", sources, false);
-        });
     };
 
     self.createSource = function (sourceName, graphUri, imports, callback) {
-        /*  var sourceName = $("#create_source_name").val();
-        var graphUri = $("#create_source_graphUri").val();
-        var imports = $("#create_source_imports").val();*/
-
         var user = Authentification.currentUser.login;
         if (!sourceName) {
             return "enter source name";

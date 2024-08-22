@@ -8,7 +8,7 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 var OntologyModels = (function () {
     self.loadedSources = {};
     self.registerSourcesModel = function (sources, callback) {
-        MainController.UI.message("loading ontology models");
+        UI.message("loading ontology models");
         if (!Array.isArray(sources)) {
             sources = [sources];
         }
@@ -23,7 +23,7 @@ var OntologyModels = (function () {
                 var graphUri;
                 if (!Config.ontologiesVocabularyModels[source]) {
                     if (!Config.sources[source]) {
-                        MainController.UI.message("source " + source + " not allowed for user ");
+                        UI.message("source " + source + " not allowed for user ");
                         return callbackEach();
                     }
                     graphUri = Config.sources[source].graphUri;
@@ -438,7 +438,7 @@ var OntologyModels = (function () {
                 );
             },
             function (err) {
-                MainController.UI.message("", true);
+                UI.message("", true);
                 if (callback) {
                     return callback(err);
                 }
@@ -1128,7 +1128,7 @@ var OntologyModels = (function () {
             sources.push(vocab);
         }
         var nonObjectPropertiesmap = {};
-        MainController.UI.message("loading KG nonObjectProperties", false, true);
+        UI.message("loading KG nonObjectProperties", false, true);
         async.eachSeries(
             sources,
             function (source, callbackEach) {
@@ -1184,7 +1184,7 @@ var OntologyModels = (function () {
             },
             function (err) {
                 Config.ontologiesVocabularyModels[source].KGnonObjectProperties = nonObjectPropertiesmap;
-                MainController.UI.message("", true);
+                UI.message("", true);
                 return callback(null, nonObjectPropertiesmap);
             }
         );
@@ -1245,13 +1245,13 @@ var OntologyModels = (function () {
 
         let url = Config.sparql_server.url + "?format=json&query=";
 
-        MainController.UI.message("loading ", false, true);
+        UI.message("loading ", false, true);
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
             if (err) {
                 return callback(err);
             }
 
-            MainController.UI.message("", true);
+            UI.message("", true);
             return callback(null, result.results.bindings);
         });
     };

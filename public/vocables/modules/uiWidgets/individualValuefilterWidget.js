@@ -24,9 +24,9 @@ var IndividualValueFilterWidget = (function () {
         if (!divId) {
             divId = "smallDialogDiv";
             self.divId = divId;
-            $("#smallDialogDiv").dialog("open");
         }
         $("#" + divId).load("snippets/individualValueFilterWidget.html", function () {
+            $("#smallDialogDiv").dialog("open");
             if (datatype) {
                 if (datatype.indexOf("dateTime") > -1) {
                     DateWidget.setDatePickerOnInput("individualValueFilter_objectValue", null, function (date) {

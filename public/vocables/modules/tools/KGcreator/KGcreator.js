@@ -36,7 +36,7 @@ var KGcreator = (function () {
         if (!displayForm) {
             return;
         }
-        var html = ' <div id="mount-kg-upload-app-here"></div>';
+        var html = ' <div style="width:500px;height: 400px" id="mount-kg-upload-app-here"></div>';
         $("#smallDialogDiv").html(html);
         $("#smallDialogDiv").dialog({
             open: function (event, ui) {
@@ -57,7 +57,7 @@ var KGcreator = (function () {
     self.onLoaded = function () {
         self.currentTab = "";
 
-        ResponsiveUI.initMenuBar(self.loadSource);
+        UI.initMenuBar(self.loadSource);
 
         $("#Lineage_graphEditionButtons").show();
         $("#Lineage_graphEditionButtons").empty();
@@ -66,7 +66,7 @@ var KGcreator = (function () {
     };
     self.unload = function () {
         self.currentTab = "";
-        Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
+        Lineage_sources.registerSource = UI.oldRegisterSource;
         self.currentTab = "";
         $("#KGcreator_topButtons").css("flex-direction", "row");
         $("#KGcreator_topButtons").attr("id", "Lineage_graphEditionButtons");
@@ -83,12 +83,12 @@ var KGcreator = (function () {
             $("#graphDiv").load("./modules/tools/KGcreator/html/centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./modules/tools/KGcreator/html/leftPanel.html", function () {
                     self.currentSlsvSource = MainController.currentSource;
-                    ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initLinkTab, "#MapButton");
+                    UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initLinkTab, "#MapButton");
                     self.initSource();
-                    ResponsiveUI.resetWindowHeight();
+                    UI.resetWindowHeight();
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
-                        close: function (event, ui) {
+                        /*   close: function (event, ui) {
                             window.scrollTo(0, 0);
                         },
                         drag: function (event, ui) {
@@ -98,7 +98,7 @@ var KGcreator = (function () {
                             $("#KGcreator_dialogDiv").parent().css("transform", "translate(-50%,-50%)");
                             $("#KGcreator_dialogDiv").parent().css("top", "50%");
                             $("#KGcreator_dialogDiv").parent().css("left", "50%");
-                        },
+                        },*/
                     });
                 });
             });
@@ -217,7 +217,7 @@ var KGcreator = (function () {
 
                         KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, function (err, result) {
                             if (err) {
-                                alert(err.responseText);
+                                return alert("file not found");
                             }
                             KGcreator_mappings.showTableMappings(obj.node.id);
                         });
@@ -479,7 +479,7 @@ var KGcreator = (function () {
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-                MainController.UI.message(mappingsDir + "/" + source + "config saved");
+                UI.message(mappingsDir + "/" + source + "config saved");
                 callback();
             },
             error: function (err) {
@@ -520,7 +520,7 @@ var KGcreator = (function () {
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-                MainController.UI.message(mappingsDir + "/" + source + "config saved");
+                UI.message(mappingsDir + "/" + source + "config saved");
                 if (callback) {
                     return callback();
                 }
@@ -884,19 +884,13 @@ var KGcreator = (function () {
         return columnTriples;
     };
 
-    self.getColumnClass=function(table,column){
-    var classId=null
+    self.getColumnClass = function (table, column) {
+        var classId = null;
         self.currentConfig.currentMappings[table].tripleModels.forEach(function (triple) {
-
-            if(triple.s==column && triple.p=="rdf:type" && triple.o.indexOf("http")==0)
-                classId=triple.o
-        })
+            if (triple.s == column && triple.p == "rdf:type" && triple.o.indexOf("http") == 0) classId = triple.o;
+        });
         return classId;
-
-    }
-
-
-
+    };
 
     self.createDataBaseSourceMappings = function () {
         // hide uploadApp
@@ -997,36 +991,9 @@ var KGcreator = (function () {
                 });
                 lines.push(line);
             });
-            $("#smallDialogDiv").dialog("open");
-            //$("#smallDialogDiv").parent().css("left", "10%");
 
             Export.showDataTable("smallDialogDiv", tableCols, lines);
             return;
-            $("#KGcreator_infosDiv").val("");
-
-            var html = "<table border='1'><tr>";
-            var headers = [];
-            data.forEach(function (item) {
-                for (var key in item)
-                    if (headers.indexOf(key) < 0) {
-                        headers.push(key);
-                        html += "<td>" + key + "</td>";
-                    }
-            });
-            html += "</tr>";
-            data.forEach(function (item) {
-                html += "<tr>";
-                headers.forEach(function (column) {
-                    html += "<td>" + (item[column] || "") + "</td>";
-                });
-                html += "</tr>";
-            });
-            html += "</table>";
-
-            $("#smallDialogDiv").dialog("open");
-            //$("#smallDialogDiv").parent().css("left", "10%");
-            // $("#smallDialogDiv").html("<div style='overflow:auto;height:90%'>"+html+"</div>")
-            $("#smallDialogDiv").html(html);
         }
 
         if (self.currentConfig.currentDataSource.sampleData) {
@@ -1123,7 +1090,7 @@ var KGcreator = (function () {
                         //KGcreator_run.createTriples(true);
                         KGcreator_run.getTableAndShowMappings();
                     }
-                    ResponsiveUI.PopUpOnHoverButtons();
+                    UI.PopUpOnHoverButtons();
                     self.ResetRunMappingTabWidth();
                     $("#KGcreator_centralPanelTabs").redraw();
                 });
@@ -1135,7 +1102,7 @@ var KGcreator = (function () {
             self.currentTab = "Map";
             $("#KGcreator_centralPanelTabs").load("./modules/tools/KGcreator/html/linkTab.html", function () {
                 $("#KGcreator_topButtons").load("./modules/tools/KGcreator/html/runButtons.html", function () {
-                    ResponsiveUI.PopUpOnHoverButtons();
+                    UI.PopUpOnHoverButtons();
                     if (self.currentTreeNode != undefined) {
                         $(document.getElementById(self.currentTreeNode.id + "_anchor")).click();
                     }

@@ -12,23 +12,14 @@
 </div>
 </div>-->
     <div style="display: flex; flex-direction: row; width: 100%" id="nodeInfosAxioms_graphPanelDiv">
-
-        <div style="display: flex  ;flex-direction: column;">
-
-
-            <button  class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.toGraphMl()">toGraphML</button>
-            <button  class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.toSVG('randomlayout')">toSVG</button>
-            <button  class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.getTriples()">getTriples</button>
-            <hr>
-            <button  class="w3-button slsv-button-2" onclick="NodeInfosAxioms.newAxiom()">New axiom</button>
-
-
-
-
+        <div style="display: flex; flex-direction: column">
+            <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.toGraphMl()">toGraphML</button>
+            <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.toSVG('randomlayout')">toSVG</button>
+            <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.getTriples()">getTriples</button>
+            <hr />
+            <button class="w3-button slsv-button-2" onclick="NodeInfosAxioms.newAxiom()">New axiom</button>
         </div>
 
-
-
-        <div id="nodeInfosAxioms_graphDiv" style="width: 95%; height: 500px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
+        <div id="nodeInfosAxioms_graphDiv" style="width: 90vw; height: 80vh; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
     </div>
 </div>

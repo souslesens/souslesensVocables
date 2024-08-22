@@ -14,7 +14,7 @@ import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 import Authentification from "../../shared/authentification.js";
-import ResponsiveUI from "../../../modules/shared/responsiveUI.js";
+import UI from "../../../modules/shared/UI.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -92,14 +92,14 @@ var Lineage_sources = (function () {
             self.setCurrentSource(source);
             $("#sourcesSelectionDialogdiv").dialog("close");
             $("#lineage_allActions").css("visibility", "visible");
-            MainController.UI.showHideRightPanel("show");
+            UI.showHideRightPanel("show");
         };
 
         var validateButtonFn = function () {
             var sources = SourceSelectorWidget.getCheckedSources();
             self.loadSources(sources);
         };
-        MainController.UI.showHideRightPanel("hide");
+        UI.showHideRightPanel("hide");
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, validateButtonFn, options);
 
         return;
@@ -140,7 +140,7 @@ var Lineage_sources = (function () {
                 }
                 self.setCurrentSource(firstSource);
                 $("#sourcesSelectionDialogdiv").dialog("close");
-                MainController.UI.showHideRightPanel();
+                UI.showHideRightPanel();
                 $("#lineage_allActions").css("visibility", "visible");
 
                 if (callback) {
@@ -190,7 +190,7 @@ var Lineage_sources = (function () {
         if (!self.loadedSources[source]) {
             self.initSource(source, function (err, sourceDivId) {
                 if (err) {
-                    return MainController.UI.message(err);
+                    return UI.message(err);
                 }
 
                 highlightSourceDiv(source);
@@ -359,7 +359,7 @@ var Lineage_sources = (function () {
                 if (drawTopConcepts) {
                     Lineage_whiteboard.drawTopConcepts(source, {}, null, function (err) {
                         if (err) {
-                            return MainController.UI.message(err);
+                            return UI.message(err);
                         }
                     });
                 }
@@ -375,13 +375,13 @@ var Lineage_sources = (function () {
                 return alert(err.responseText);
             }
             if (indexedSources.indexOf(source) < 0) {
-                MainController.UI.message("indexing source " + source);
+                UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");
                 SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
                     if (err) {
-                        return MainController.UI.message(err, true);
+                        return UI.message(err, true);
                     }
-                    MainController.UI.message("ALL DONE", true);
+                    UI.message("ALL DONE", true);
                 });
             }
         });

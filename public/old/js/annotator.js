@@ -36,7 +36,7 @@ var Annotator = (function () {
     };
     self.annotate = function () {
         $("#waitImg").css("display", "block");
-        MainController.UI.message("querying Spacy library (can take time...)");
+        UI.message("querying Spacy library (can take time...)");
         var text = $("#Annotator_textArea").val();
         var sourcesLabels = self.selectedSources;
         var sources = [];
@@ -60,13 +60,13 @@ var Annotator = (function () {
                  },*/
 
             success: function (data, _textStatus, _jqXHR) {
-                MainController.UI.message("");
+                UI.message("");
                 $("#waitImg").css("display", "none");
                 self.showAnnotationResult(data);
             },
 
             error: function (err) {
-                MainController.UI.message(err);
+                UI.message(err);
                 $("#waitImg").css("display", "none");
             },
         });
@@ -136,7 +136,7 @@ var Annotator = (function () {
         id = array[2];
         NodeInfosWidget.showNodeInfos(source, id, "Annotator_EntityDetailsDiv");
         Sparql_generic.getSingleNodeAllGenealogy(source, e.target, function (err, result) {
-            if (err) return MainController.UI.message(err);
+            if (err) return UI.message(err);
 
             var html = "Genealogy : ";
             result.forEach(function (item) {

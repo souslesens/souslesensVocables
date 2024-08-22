@@ -354,7 +354,7 @@ var Lineage_linkedData_query = (function () {
             dbName: self.sqlContext.currentDataSource.dbName,
             sqlQuery: sqlQuery,
         });
-        MainController.UI.message("Running Query");
+        UI.message("Running Query");
         $("#waitImg").css("display", "block");
         $.ajax({
             type: "GET",

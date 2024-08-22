@@ -415,15 +415,9 @@ var Sparql_generic = (function () {
     };
 
     self.triplesObjectToString = function (item) {
-        if(!item.subject)
-            item.subject=item.s
-        if(!item.predicate)
-            item.predicate=item.p
-        if(!item.object)
-            item.object=item.o
-
-
-
+        if (!item.subject) item.subject = item.s;
+        if (!item.predicate) item.predicate = item.p;
+        if (!item.object) item.object = item.o;
 
         var allowedPrefixes = Object.keys(Config.defaultSparqlPrefixes);
 
@@ -960,7 +954,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                 rawData = rawData.concat(result);
                                 resultSize = result.length;
                                 totalCount += result.length;
-                                MainController.UI.message(sourceLabel + "retreived triples :" + totalCount);
+                                UI.message(sourceLabel + "retreived triples :" + totalCount);
                                 offset += resultSize;
                                 callbackWhilst();
                             });
@@ -1172,7 +1166,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                     allData = allData.concat(result);
                                     resultSize = result.length;
                                     totalCount += result.length;
-                                    //   MainController.UI.message(sourceLabel + "retreived triples :" + totalCount);
+                                    //   UI.message(sourceLabel + "retreived triples :" + totalCount);
                                     offset += limitSize;
                                     callbackWhilst();
                                 }

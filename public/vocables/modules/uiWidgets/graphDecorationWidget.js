@@ -9,9 +9,9 @@ var GraphDecorationWidget = (function () {
     var colorPalette = common.paletteIntense;
 
     self.showDecorateDialog = function (nodeSelectorFn) {
-        $("#smallDialogDiv").dialog("open");
         //$("#smallDialogDiv").parent().css("left", "30%");
-        $("#smallDialogDiv").load("modules/tools/lineage/lineage_decorateDialog.html", function () {
+        $("#smallDialogDiv").load("modules/tools/lineage/html/lineage_decorateDialog.html", function () {
+            $("#smallDialogDiv").dialog("open");
             self.currentNodeSelectorFn = null;
             if (nodeSelectorFn) {
                 self.currentNodeSelectorFn = nodeSelectorFn;

@@ -13,9 +13,9 @@ var IndividualAggregateWidget = (function () {
         if (!divId) {
             divId = "smallDialogDiv";
             self.divId = divId;
-            $("#smallDialogDiv").dialog("open");
         }
         $("#" + divId).load("modules/tools/KGquery/html/individualAggregateWidget.html", function () {
+            $("#" + divId).dialog("open");
             loadClassesFn(function (data) {
                 self.groupByClassesMap = {};
                 self.functionVarClassesMap = {};

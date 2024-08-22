@@ -27,10 +27,11 @@ var SavedQueriesWidget = (function () {
         self.saveQueryFn = saveQueryFn;
         self.loadQueryFn = loadQueryFn;
         self.slsvSource = slsvSource;
-        if (targetDiv.indexOf("Dialog") > -1) {
-            $("#" + targetDiv).dialog("open");
-        }
+
         $("#" + targetDiv).load("./modules/uiWidgets/html/savedQueriesWidget.html", function () {
+            if (targetDiv.indexOf("Dialog") > -1) {
+                $("#" + targetDiv).dialog("open");
+            }
             if (slsvSource) {
                 self.list(CRUDsource, slsvSource, scope);
             }

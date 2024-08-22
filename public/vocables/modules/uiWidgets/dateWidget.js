@@ -11,9 +11,9 @@ var DateWidget = (function () {
         if (!divId) {
             divId = "smallDialogDiv";
             self.divId = divId;
-            $("#smallDialogDiv").dialog("open");
         }
         $("#" + divId).load("modules/uiWidgets/html/dateWidget.html", function () {
+            $("#smallDialogDiv").dialog("open");
             DateWidget.setDatePickerOnInput("dateWidget_input", null, function (date) {});
         });
     };
@@ -71,11 +71,12 @@ var DateWidget = (function () {
 
     self.showDateRangePicker = function (divId, minDate, maxDate, onValidateRangPickerFn) {
         self.onValidateRangPickerFn = onValidateRangPickerFn;
-        $("#" + divId).dialog("open");
+
         if (!minDate) minDate = new Date(2020, 0, 1);
         if (!maxDate) maxDate = new Date(2035, 11, 31);
 
         $("#" + divId).load("/vocables/modules/uiWidgets/rangeWidget.html", function () {
+            $("#" + divId).dialog("open");
             $("#slider").dateRangeSlider({
                 wheelMode: "scroll",
                 wheelSpeed: 1,

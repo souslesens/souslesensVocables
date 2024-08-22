@@ -16,11 +16,11 @@ const { configPlugins } = require("./config");
 const NATIVE_TOOLS = [
     { name: "lineage", controller: "Lineage_whiteboard", useSource: true, multiSources: false, toTools: {} },
     { name: "AxiomEditor", controller: "Axiom_editor", useSource: false, multiSources: false, toTools: {} },
-    { name: "KGcreator", controller: "KGcreator", useSource: false, multiSources: false, toTools: {} },
+    { name: "KGcreator", controller: "KGcreator", useSource: true, multiSources: false, toTools: {} },
     { name: "KGquery", controller: "KGquery", useSource: true, multiSources: false, toTools: {} },
     { name: "Standardizer", controller: "Standardizer", useSource: true, multiSources: false, toTools: {} },
     { name: "TSF_Dictionary", controller: "Lineage_dictionary", useSource: false, multiSources: false, toTools: {} },
-    { name: "SPARQL", label: "SPARQL endpoint", controller: "SPARQL_endpoint", useSource: true, multiSources: false, toTools: {} },
+    { name: "SPARQL", label: "SPARQL endpoint", controller: "SPARQL_endpoint", useSource: false, multiSources: false, toTools: {} },
     { name: "admin", label: "Admin", controller: "Admin", useSource: true, multiSources: false, toTools: {} },
     { name: "ConfigEditor", controller: "ConfigEditor", useSource: false, multiSources: false, toTools: {} },
     { name: "GraphManagement", controller: "GraphManagement", useSource: false, multiSources: false, toTools: {} },

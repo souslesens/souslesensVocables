@@ -141,7 +141,7 @@ var Lineage_styles = (function () {
         triples = triples.concat(Lineage_createRelation.getCommonMetaDataTriples(subjectUri));
         Sparql_generic.insertTriples(self.stylesSourceLabel, triples, {}, function (err, result) {
             if (err) return alert(err);
-            MainController.UI.message("style saved", true);
+            UI.message("style saved", true);
         });
     };
     self.linkStyle = function () {
@@ -158,7 +158,7 @@ var Lineage_styles = (function () {
         Sparql_generic.insertTriples(self.currentClientObjectData.source, triples, {}, function (err, result) {
             if (err) return alert(err);
             $("#mainDialogDiv").dialog("close");
-            MainController.UI.message("style associated", true);
+            UI.message("style associated", true);
         });
     };
 

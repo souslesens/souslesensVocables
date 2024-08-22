@@ -48,7 +48,7 @@ var Lineage_combine = (function () {
                 });
             },
             function (err) {
-                if (err) return MainController.UI.message(err);
+                if (err) return UI.message(err);
                 if (self.currentSources.length > 0) {
                     $("#GenericTools_searchScope").val("whiteboardSources");
                     $("#Lineage_combine_actiosDiv").css("display", "block");
@@ -312,9 +312,9 @@ triples.push({})
                         function (err) {
                             if (err) return callbackEachNodeToMerge(err);
 
-                            MainController.UI.message(sourceMessage + " indexing data ...  ");
+                            UI.message(sourceMessage + " indexing data ...  ");
                             SearchUtil.generateElasticIndex(targetSource, { ids: nodesToCopy }, function (err, _result) {
-                                MainController.UI.message("DONE " + source, true);
+                                UI.message("DONE " + source, true);
                                 callbackEachNodeToMerge();
                             });
                         },
@@ -327,7 +327,7 @@ triples.push({})
                     if (callback) return callback(err, sourceMessage);
                     if (err) return alert(err.responseText);
                     alert(message);
-                    return MainController.UI.message("ALL DONE", true);
+                    return UI.message("ALL DONE", true);
                 }
             );
         });

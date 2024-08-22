@@ -18,123 +18,119 @@ var Lineage_relations = (function () {
     self.whiteboardSourcesFromStatus = false;
 
     self.showDrawRelationsDialog = function (caller) {
-        $("#mainDialogDiv")
-            .parent()
-            .show("fast", function () {
-                MainController.UI.showHideRightPanel("hide");
-                self.drawRelationCurrentCaller = caller;
-                self.currentQueryInfos = { predicate: "", filter: {} };
+        UI.showHideRightPanel("hide");
+        self.drawRelationCurrentCaller = caller;
+        self.currentQueryInfos = { predicate: "", filter: {} };
 
-                $("#mainDialogDiv").dialog("open");
-                $("#mainDialogDiv").dialog("option", "title", "Query");
-                $("#mainDialogDiv").load("modules/tools/lineage/relationsDialog.html", function () {
-                    //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
-                    $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
-                        if (e.which == 13 || e.which == 9) {
-                            $("#lineageRelations_propertiesJstreeDiv").jstree(true).uncheck_all();
-                            $("#lineageRelations_propertiesJstreeDiv").jstree(true).settings.checkbox.cascade = "";
-                            var term = $("#LineageRelations_searchJsTreeInput").val();
+        $("#mainDialogDiv").dialog("option", "title", "Query");
+        $("#mainDialogDiv").load("modules/tools/lineage/html/relationsDialog.html", function () {
+            $("#mainDialogDiv").dialog("open");
 
-                            $("#lineageRelations_propertiesJstreeDiv").jstree(true).search(term);
-                            $("#LineageRelations_searchJsTreeInput").val("");
-                        }
-                    });
+            $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
+                if (e.which == 13 || e.which == 9) {
+                    $("#lineageRelations_propertiesJstreeDiv").jstree(true).uncheck_all();
+                    $("#lineageRelations_propertiesJstreeDiv").jstree(true).settings.checkbox.cascade = "";
+                    var term = $("#LineageRelations_searchJsTreeInput").val();
 
-                    common.fillSelectWithColorPalette("lineageRelations_colorsSelect");
-
-                    var cbxValue;
-                    if (caller == "Graph" || caller == "Tree") {
-                        cbxValue = "selected";
-                    } else {
-                        if (
-                            !Lineage_whiteboard.lineageVisjsGraph.data ||
-                            !Lineage_whiteboard.lineageVisjsGraph.data.nodes ||
-                            !Lineage_whiteboard.lineageVisjsGraph.data.nodes.get ||
-                            Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length == 0
-                        ) {
-                            cbxValue = "all";
-                        } else {
-                            cbxValue = "visible";
-                        }
-                    }
-
-                    $("input[name='lineageRelations_selection'][value=" + cbxValue + "]").prop("checked", true);
-
-                    var jstreeData = [];
-                    var uniqueNodes = {};
-
-                    var vocabulariesPropertiesMap = {};
-                    async.series(
-                        [
-                            function (callbackSeries) {
-                                for (var vocabulary in vocabulariesPropertiesMap) {
-                                    var properties = vocabulariesPropertiesMap[vocabulary];
-                                    if (!properties) {
-                                        return callbackSeries();
-                                    }
-                                    jstreeData.push({
-                                        id: vocabulary,
-                                        text: vocabulary,
-                                        parent: "#",
-                                    });
-                                    properties.forEach(function (item) {
-                                        jstreeData.push({
-                                            id: vocabulary + "_" + item.id,
-                                            text: item.label,
-                                            parent: vocabulary,
-                                            data: {
-                                                id: item.id,
-                                                label: item.label,
-                                                source: vocabulary,
-                                            },
-                                        });
-                                    });
-                                }
-                                callbackSeries();
-                            },
-                            function (callbackSeries) {
-                                if (Config.UIprofile == "KG") {
-                                    Lineage_relations.getInferredProperties(Lineage_sources.activeSource, function (err, result) {
-                                        jstreeData = result;
-                                        return callbackSeries();
-                                    });
-                                }
-                            },
-
-                            function (callbackSeries) {
-                                jstreeData.sort(function (a, b) {
-                                    if (a.text > b.text) {
-                                        return 1;
-                                    } else if (b.text > a.text) {
-                                        return -1;
-                                    }
-                                    return 0;
-                                });
-                                var options = {
-                                    contextMenu: Lineage_relations.getPropertiesJstreeMenu(),
-                                    selectTreeNodeFn: Lineage_relations.onSelectPropertyTreeNode,
-                                    onCheckNodeFn: Lineage_relations.onCheckNodePropertyTreeNode,
-                                    withCheckboxes: true,
-                                    searchPlugin: {
-                                        case_insensitive: true,
-                                        fuzzy: false,
-                                        show_only_matches: true,
-                                    },
-                                };
-                                JstreeWidget.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function () {
-                                    //  $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(Lineage_sources.activeSource);
-                                    return callbackSeries();
-                                });
-                            },
-                        ],
-                        function (err) {
-                            if (err) {
-                                return alert(err.responseText);
-                            }
-                        }
-                    );
-                });
+                    $("#lineageRelations_propertiesJstreeDiv").jstree(true).search(term);
+                    $("#LineageRelations_searchJsTreeInput").val("");
+                }
             });
+
+            common.fillSelectWithColorPalette("lineageRelations_colorsSelect");
+
+            var cbxValue;
+            if (caller == "Graph" || caller == "Tree") {
+                cbxValue = "selected";
+            } else {
+                if (
+                    !Lineage_whiteboard.lineageVisjsGraph.data ||
+                    !Lineage_whiteboard.lineageVisjsGraph.data.nodes ||
+                    !Lineage_whiteboard.lineageVisjsGraph.data.nodes.get ||
+                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length == 0
+                ) {
+                    cbxValue = "all";
+                } else {
+                    cbxValue = "visible";
+                }
+            }
+
+            $("input[name='lineageRelations_selection'][value=" + cbxValue + "]").prop("checked", true);
+
+            var jstreeData = [];
+            var uniqueNodes = {};
+
+            var vocabulariesPropertiesMap = {};
+            async.series(
+                [
+                    function (callbackSeries) {
+                        for (var vocabulary in vocabulariesPropertiesMap) {
+                            var properties = vocabulariesPropertiesMap[vocabulary];
+                            if (!properties) {
+                                return callbackSeries();
+                            }
+                            jstreeData.push({
+                                id: vocabulary,
+                                text: vocabulary,
+                                parent: "#",
+                            });
+                            properties.forEach(function (item) {
+                                jstreeData.push({
+                                    id: vocabulary + "_" + item.id,
+                                    text: item.label,
+                                    parent: vocabulary,
+                                    data: {
+                                        id: item.id,
+                                        label: item.label,
+                                        source: vocabulary,
+                                    },
+                                });
+                            });
+                        }
+                        callbackSeries();
+                    },
+                    function (callbackSeries) {
+                        if (Config.UIprofile == "KG") {
+                            Lineage_relations.getInferredProperties(Lineage_sources.activeSource, function (err, result) {
+                                jstreeData = result;
+                                return callbackSeries();
+                            });
+                        }
+                    },
+
+                    function (callbackSeries) {
+                        jstreeData.sort(function (a, b) {
+                            if (a.text > b.text) {
+                                return 1;
+                            } else if (b.text > a.text) {
+                                return -1;
+                            }
+                            return 0;
+                        });
+                        var options = {
+                            contextMenu: Lineage_relations.getPropertiesJstreeMenu(),
+                            selectTreeNodeFn: Lineage_relations.onSelectPropertyTreeNode,
+                            onCheckNodeFn: Lineage_relations.onCheckNodePropertyTreeNode,
+                            withCheckboxes: true,
+                            searchPlugin: {
+                                case_insensitive: true,
+                                fuzzy: false,
+                                show_only_matches: true,
+                            },
+                        };
+                        JstreeWidget.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function () {
+                            //  $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(Lineage_sources.activeSource);
+                            return callbackSeries();
+                        });
+                    },
+                ],
+                function (err) {
+                    if (err) {
+                        return alert(err.responseText);
+                    }
+                }
+            );
+        });
     };
 
     self.getPropertiesJstreeMenu = function () {
@@ -143,7 +139,7 @@ var Lineage_relations = (function () {
         items.PropertyInfos = {
             label: "PropertyInfos",
             action: function (_e) {
-                $("#LineagePopup").dialog("open");
+                // $("#LineagePopup").dialog("open");
                 NodeInfosWidget.showNodeInfos(self.curentPropertiesJstreeNode.parent, self.curentPropertiesJstreeNode, "LineagePopup");
             },
         };
@@ -298,7 +294,7 @@ var Lineage_relations = (function () {
             var groups = {};
 
             if (result.length == 0) {
-                return MainController.UI.message("no data found", true);
+                return UI.message("no data found", true);
             }
 
             result.forEach(function (item) {
@@ -417,7 +413,7 @@ var Lineage_relations = (function () {
                     if (!direction || direction == "direct") {
                         options.inverse = false;
 
-                        MainController.UI.message("searching restrictions");
+                        UI.message("searching restrictions");
 
                         Lineage_whiteboard.drawRestrictions(source, data, null, null, options, function (err, result) {
                             if (err) {
@@ -440,7 +436,7 @@ var Lineage_relations = (function () {
                     }
                     if (!direction || direction == "inverse") {
                         options.inverse = true;
-                        MainController.UI.message("searching inverse restrictions");
+                        UI.message("searching inverse restrictions");
 
                         Lineage_whiteboard.drawRestrictions(source, data, null, null, options, function (err, result) {
                             if (err) {
@@ -474,7 +470,7 @@ var Lineage_relations = (function () {
                         filter: options.filter,
                     });
                     if (!direction || direction == "direct") {
-                        MainController.UI.message("searching predicates");
+                        UI.message("searching predicates");
 
                         Lineage_whiteboard.drawPredicatesGraph(source, data, null, options, function (err, result) {
                             if (err) {
@@ -507,7 +503,7 @@ var Lineage_relations = (function () {
                     }
                     if (!direction || direction == "inverse") {
                         options.inversePredicate = true;
-                        MainController.UI.message("searching inverse predicates");
+                        UI.message("searching inverse predicates");
 
                         Lineage_whiteboard.drawPredicatesGraph(source, data, null, options, function (err, result) {
                             if (err) {
@@ -525,10 +521,10 @@ var Lineage_relations = (function () {
             function (err) {
                 Lineage_sources.fromAllWhiteboardSources = self.whiteboardSourcesFromStatus;
                 if (allVisjsData.nodes.length == 0 && allVisjsData.edges.length == 0) {
-                    return MainController.UI.message("no data found", true);
+                    return UI.message("no data found", true);
                 }
                 if (!options.output || options.output == "graph") {
-                    MainController.UI.message("drawing " + allVisjsData.nodes.length + "nodes and " + allVisjsData.edges.length + " edges...", true);
+                    UI.message("drawing " + allVisjsData.nodes.length + "nodes and " + allVisjsData.edges.length + " edges...", true);
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(allVisjsData.nodes);
                         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(allVisjsData.edges);

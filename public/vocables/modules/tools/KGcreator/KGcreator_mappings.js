@@ -38,12 +38,13 @@ return alert("select a field (column)");
             return;
         }
         $("#smallDialogDiv").parent().css("z-index", 100);
-        $("#smallDialogDiv").dialog("open");
+
         $("#smallDialogDiv").dialog("option", "title", "Mapping " + columnNode.data.table + "." + columnNode.data.id);
         $("#smallDialogDiv").css("height", "700px");
         //$("#smallDialogDiv").parent().css("left", "10%");
         /*$("#smallDialogDiv").css('left','10%');*/
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
+            $("#smallDialogDiv").dialog("open");
             $("#LinkColumn_rightPanel").show();
             $("#LinkColumn_basicTypeSelect").show();
             $("#LinkColumn_basicTypeSelect").parent().find("span").show();
@@ -280,8 +281,9 @@ tripleObj.objectIsSpecificUri = true;
         $("#smallDialogDiv").dialog("close");
     };
     self.showFunctionDialog = function (_role) {
-        $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/functionDialog.html");
-        $("#KGcreator_dialogDiv").dialog("open");
+        $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/functionDialog.html", function () {
+            $("#KGcreator_dialogDiv").dialog("open");
+        });
     };
 
     self.createPrefixTransformFn = function () {
@@ -447,8 +449,8 @@ tripleObj.objectIsSpecificUri = true;
                 return alert(err.responseText);
             }
 
-            var fromClass =KGcreator.getColumnClass( columnFromData.table,columnFromData.id);
-            var toClass = KGcreator.getColumnClass( columnToData.table,columnToData.id);;
+            var fromClass = KGcreator.getColumnClass(columnFromData.table, columnFromData.id);
+            var toClass = KGcreator.getColumnClass(columnToData.table, columnToData.id);
             var constraints = OntologyModels.getClassesConstraints(KGcreator.currentSlsvSource, fromClass, toClass);
             var restrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, fromClass, toClass);
             var inverseRestrictions = OntologyModels.getClassesRestrictions(KGcreator.currentSlsvSource, toClass, fromClass);
@@ -508,7 +510,9 @@ tripleObj.objectIsSpecificUri = true;
                                     KGcreator.currentSlsvSource,
                                     KGcreator.currentConfig.currentDataSource.name,
                                     KGcreator.currentConfig.currentMappings,
-                                    function (err, result) {KGcreator_mappings.showTableMappings( columnFromData.table);}
+                                    function (err, result) {
+                                        KGcreator_mappings.showTableMappings(columnFromData.table);
+                                    }
                                 );
                             }
                         } else {
@@ -523,7 +527,8 @@ tripleObj.objectIsSpecificUri = true;
                                     KGcreator.currentSlsvSource,
                                     KGcreator.currentConfig.currentDataSource.name,
                                     KGcreator.currentConfig.currentMappings,
-                                    function (err, result) {  KGcreator_mappings.showTableMappings( columnFromData.table);
+                                    function (err, result) {
+                                        KGcreator_mappings.showTableMappings(columnFromData.table);
                                     }
                                 );
                             }
@@ -538,11 +543,12 @@ tripleObj.objectIsSpecificUri = true;
         PopupMenuWidget.hidePopup();
         self.currentSlsvSource = KGcreator.currentSlsvSource;
         var table = node.data.id;
-        $("#smallDialogDiv").dialog("open");
+
         //$("#smallDialogDiv").parent().css("left", "10%");
         $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/lookupDialog.html", function () {
+            $("#smallDialogDiv").dialog("open");
             $("#KGCreator_lookupName").val(table);
             $("#KGCreator_lookupTable").val(table);
 
@@ -560,19 +566,21 @@ tripleObj.objectIsSpecificUri = true;
         self.currentSlsvSource = KGcreator.currentSlsvSource;
         var table = node.data.id;
         self.currentTable = table;
-        $("#smallDialogDiv").dialog("open");
-        //$("#smallDialogDiv").parent().css("left", "10%");
+
         $("#smallDialogDiv").dialog("option", "title", "Lookups for " + table);
 
         $("#smallDialogDiv").load("./modules/tools/KGcreator/html/transformDialog.html", function () {
+            $("#smallDialogDiv").dialog("open");
             var columns = [];
             KGcreator.currentConfig.currentDataSource.tables[table].forEach(function (column) {
                 columns.push(column);
             });
 
-            var virtualColumns = KGcreator.currentConfig.currentMappings[table].virtualColumns;
-            if (virtualColumns) {
-                columns = virtualColumns.concat(columns);
+            if (KGcreator.currentConfig.currentMappings[table]) {
+                var virtualColumns = KGcreator.currentConfig.currentMappings[table].virtualColumns;
+                if (virtualColumns) {
+                    columns = virtualColumns.concat(columns);
+                }
             }
 
             common.fillSelectOptions("KGcreator_transformColumnSelect", columns, true);
@@ -639,10 +647,6 @@ tripleObj.objectIsSpecificUri = true;
     self.afterMappingsFn = function () {
         KGcreator_mappings.showTableMappings(node.id);
     };
-
-
-
-
 
     return self;
 })();

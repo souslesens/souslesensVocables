@@ -10,10 +10,10 @@ var Lineage_similars = (function () {
     var self = {};
 
     self.showDialog = function () {
-        $("#smallDialogDiv").dialog("open");
         //$("#smallDialogDiv").parent().css("left", "30%");
         $("#smallDialogDiv").dialog("option", "title", "Similars");
-        $("#smallDialogDiv").load("modules/tools/lineage/lineageSimilarsDialog.html", function () {
+        $("#smallDialogDiv").load("modules/tools/lineage/html/lineageSimilarsDialog.html", function () {
+            $("#smallDialogDiv").dialog("open");
             self.mode = "whiteboard";
         });
     };

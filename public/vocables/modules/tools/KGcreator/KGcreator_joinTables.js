@@ -6,8 +6,8 @@ var KGcreator_joinTables = (function () {
     self.showJoinTablesDialog = function (dataSourceConfig, fromTable, toTable, validateFn) {
         self.validateFn = validateFn;
 
-        $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").load("modules/tools/KGcreator/html/joinTablesDialog.html", function () {
+            $("#smallDialogDiv").dialog("open");
             $("#joinTablesWidgetDialog_databaseId").html(dataSourceConfig.dbName);
 
             $("#joinTablesWidgetDialog_fromTableId").html(fromTable);

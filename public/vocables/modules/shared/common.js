@@ -470,7 +470,7 @@ str = str.replace(/%2F/gm, "/");*/
                         return alert("graph copied in clipboard");
                     }
                 } catch (err) {
-                    MainController.UI.message("graph copy failed");
+                    UI.message("graph copy failed");
                     if (callback) {
                         return callback(err);
                     }
@@ -496,7 +496,7 @@ str = str.replace(/%2F/gm, "/");*/
                             return alert("graph copied in clipboard");
                         }
                     } else {
-                        MainController.UI.message("graph copy failed");
+                        UI.message("graph copy failed");
                         if (callback) {
                             return callback(err);
                         }
@@ -512,7 +512,7 @@ if (callback) {
 return callback(null, "graph copied in clipboard");
 } else return alert("graph copied in clipboard");
 } catch (err) {
-MainController.UI.message("graph copy failed");
+UI.message("graph copy failed");
 if (callback) return callback(err);
 }*/
         }

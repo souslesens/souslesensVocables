@@ -48,7 +48,7 @@ var Standardizer = (function () {
         $("#accordion").accordion("option", { active: 2 });
 
         SearchUtil.initSourcesIndexesList(null, function (err, sources) {
-            if (err) return MainController.UI.message(err);
+            if (err) return UI.message(err);
             sources.sort();
             var options = {
                 contextMenu: Standardizer.getSourcesJstreeContextMenu(),
@@ -302,8 +302,6 @@ var Standardizer = (function () {
         } else if (type == "compareSourceFilter") {
             if (!self.currentSource) return alert("select a source");
 
-            $("#Standardizer_filterClassesDialogDiv").dialog("open");
-
             var options = {
                 targetDiv: "Standardizer_filterClassesTree",
                 selectTreeNodeFn: function (evt, obj) {
@@ -312,6 +310,8 @@ var Standardizer = (function () {
                 },
                 selectGraph: true,
             };
+
+            $("#Standardizer_filterClassesDialogDiv").dialog("open");
             SearchWidget.showTopConcepts(self.currentSource, options);
         }
     };
@@ -375,7 +375,7 @@ var Standardizer = (function () {
                 self.currentWordsCount += words.length;
                 SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, {}, function (err, result) {
                     var html = self.processMatrixResult(words, result, indexes);
-                    MainController.UI.message(" processed items: " + totalProcessed);
+                    UI.message(" processed items: " + totalProcessed);
                     $("#KGmapping_matrixContainer").append(html);
                     totalProcessed += result.length;
                     searchResultArray = searchResultArray.concat(result);
@@ -385,7 +385,7 @@ var Standardizer = (function () {
             function (err) {
                 self.isWorking = null;
                 if (err) return alert(err);
-                MainController.UI.message("DONE, total processed items: " + totalProcessed, true);
+                UI.message("DONE, total processed items: " + totalProcessed, true);
                 setTimeout(function () {
                     $(".matrixCell").bind("click", Standardizer.onMatrixCellClick);
                     $(".matrixWordNoMatch").bind("click", Standardizer.onMatrixWordNoMatchClick);
@@ -474,7 +474,7 @@ var Standardizer = (function () {
                                 var html = self.processMatrixResult(objects, result, indexes);
                                 searchResultArray = searchResultArray.concat(result);
                                 totalProcessed += result.length;
-                                MainController.UI.message(" processed items: " + totalProcessed);
+                                UI.message(" processed items: " + totalProcessed);
                                 $("#KGmapping_matrixContainer").append(html);
 
                                 callbackWhilst();
@@ -486,7 +486,7 @@ var Standardizer = (function () {
             function (err) {
                 self.isWorking = null;
                 if (err) return alert(err);
-                MainController.UI.message("DONE, total processed items: " + totalProcessed++, true);
+                UI.message("DONE, total processed items: " + totalProcessed++, true);
 
                 setTimeout(function () {
                     $(".matrixCell").bind("click", Standardizer.onMatrixCellClick);
@@ -602,7 +602,7 @@ var Standardizer = (function () {
         }
         html += "</table>" + "<br></div>";
         $("#Standardizer_matrixCellDataDiv").html(html);
-        MainController.UI.message("", true);
+        UI.message("", true);
     };
 
     self.showDictionaryEntry = function (restrictionId) {
@@ -643,7 +643,7 @@ var Standardizer = (function () {
             }
 
             $("#KGadvancedMapping_dictionaryMappingContainerDiv").html(html);
-            MainController.UI.message("", true);
+            UI.message("", true);
         } else {
             KGadvancedMapping.searchEntities(columnValue);
         }
@@ -698,7 +698,7 @@ var Standardizer = (function () {
                 var ids = Object.keys(idsMap);
                 var ancestorsDepth = 4;
                 $("#waitImg").css("display", "block");
-                MainController.UI.message("searching, classes ancestors in source " + source);
+                UI.message("searching, classes ancestors in source " + source);
                 Sparql_OWL.getNodeParents(source, null, ids, ancestorsDepth, null, function (err, result) {
                     if (err) return callbackEachSource(err);
                     result.forEach(function (item2) {
@@ -720,7 +720,7 @@ var Standardizer = (function () {
                 });
             },
             function (_err) {
-                MainController.UI.message("building table");
+                UI.message("building table");
                 var keys = ["term", "status", "index", "classLabel", "classId", "score"];
                 if (exportAncestors) {
                     keys.push("superClassUris");
@@ -748,11 +748,10 @@ var Standardizer = (function () {
                     dataSet.push(line);
                 }
 
-                $("#mainDialogDiv").dialog("open");
-
                 $("#mainDialogDiv").html("<table id='dataTableDiv'></table>");
+                $("#mainDialogDiv").dialog("open");
                 setTimeout(function () {
-                    MainController.UI.message("", true);
+                    UI.message("", true);
                     $("#dataTableDiv").DataTable({
                         data: dataSet,
                         columns: cols,
@@ -816,7 +815,7 @@ var Standardizer = (function () {
     self.generateSourceDictionary = function (sourceLabel) {
         if (Config.sources[sourceLabel].schemaType == "OWL") {
             Sparql_OWL.getDictionary(sourceLabel, {}, null, function (err, _result) {
-                if (err) MainController.UI.message(err, true);
+                if (err) UI.message(err, true);
             });
         }
     };
@@ -1161,13 +1160,13 @@ var Standardizer = (function () {
                 },
                 function (callbackSeries) {
                     //get indexes matches class map
-                    MainController.UI.message("matching " + words.length + "words");
+                    UI.message("matching " + words.length + "words");
                     var size = 200;
 
                     SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, {}, function (err, result) {
                         if (err) return callbackSeries(err);
                         searchResultArray = result;
-                        MainController.UI.message("matches found :" + searchResultArray.length);
+                        UI.message("matches found :" + searchResultArray.length);
                         callbackSeries();
                     });
                 },
@@ -1531,7 +1530,7 @@ sortMethod: "hubsize",
     };
 
     self.searchFuzzyMatches = function (words, indexes, resultDiv) {
-        MainController.UI.message("", true);
+        UI.message("", true);
         if (!words || words == "") return alert(" no word Selected");
         var searchType = "fuzzyMatch";
 
@@ -1563,7 +1562,7 @@ sortMethod: "hubsize",
                 SearchUtil.getElasticSearchMatches(words, indexes, searchType, 0, 10000, {}, function (err, result) {
                     if (err) return alert(err);
                     var entities = [];
-                    if (!result.forEach || result.hits) return MainController.UI.message("no result");
+                    if (!result.forEach || result.hits) return UI.message("no result");
                     result.forEach(function (item) {
                         if (!item.hits || !item.hits.hits) return;
                         item.hits.hits.forEach(function (hit) {
@@ -1578,7 +1577,7 @@ sortMethod: "hubsize",
                             entities.push(entity);
                         });
                     });
-                    if (entities.length == 0) return MainController.UI.message("no result", true);
+                    if (entities.length == 0) return UI.message("no result", true);
                     if (Object.keys(self.currentSearchedResultsMap).length !== 0) {
                         cols.push({
                             title: "source",
@@ -1707,7 +1706,7 @@ sortMethod: "hubsize",
                     dataType: "json",
                     success: function (tokens, _textStatus, _jqXHR) {
                         var percent = Math.round(((++index * chunkSize) / textSize) * 100);
-                        MainController.UI.message("extracting nouns : " + percent + "%", true);
+                        UI.message("extracting nouns : " + percent + "%", true);
                         tokens.forEach(function (word) {
                             if (!allTokens[word]) allTokens[word] = 1;
                         });
@@ -1722,7 +1721,7 @@ sortMethod: "hubsize",
             function (err) {
                 if (err) return alert(err);
 
-                MainController.UI.message("extracted nouns : " + Object.keys(allTokens).length);
+                UI.message("extracted nouns : " + Object.keys(allTokens).length);
                 var str = "";
                 for (var word in allTokens) {
                     str += word + "\n";
@@ -1933,7 +1932,7 @@ sortMethod: "hubsize",
                 },
                 function (callbackSeries) {
                     var slices = common.array.slice(relations, sliceLength);
-                    MainController.UI.message(" Creating relations  in +" + dictionarySourceLabel + "...");
+                    UI.message(" Creating relations  in +" + dictionarySourceLabel + "...");
                     async.eachSeries(
                         slices,
                         function (slice, callbackEach) {
@@ -1946,7 +1945,7 @@ sortMethod: "hubsize",
                                 if (err) return callbackEach(err);
 
                                 totalCreated += sliceLength;
-                                MainController.UI.message(totalCreated + " relations created in " + dictionarySourceLabel);
+                                UI.message(totalCreated + " relations created in " + dictionarySourceLabel);
 
                                 return callbackEach();
                             });
@@ -1960,7 +1959,7 @@ sortMethod: "hubsize",
             function (err) {
                 if (err) return alert(err);
 
-                MainController.UI.message(totalCreated + " relations created in " + dictionarySourceLabel, true);
+                UI.message(totalCreated + " relations created in " + dictionarySourceLabel, true);
             }
         );
     };

@@ -9,14 +9,14 @@ import KGcreator_joinTables from "./KGcreator_joinTables.js";
 import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
 import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 import KGcreator_bot from "../../bots/KGcreator_bot.js";
-import ResponsiveUI from "../../../modules/shared/responsiveUI.js";
+import UI from "../../../modules/shared/UI.js";
 
 var KGcreator_graph = (function () {
     var self = {};
 
     self.drawOntologyModel = function (source) {
         $("#KGcreator_topButtons").load("./modules/tools/KGcreator/html/linkButtons.html", function () {
-            ResponsiveUI.PopUpOnHoverButtons();
+            UI.PopUpOnHoverButtons();
         });
 
         //return;
@@ -368,7 +368,7 @@ var KGcreator_graph = (function () {
                         return alert(err);
                     }
 
-                    MainController.UI.message("join saved");
+                    UI.message("join saved");
                 });
             });
         } else if (sourceNode.data && sourceNode.data.type == "column" && targetNode.data && targetNode.data.type == "column") {
@@ -728,11 +728,6 @@ var KGcreator_graph = (function () {
 
         visjsData = self.addInterTableJoinsToVisjsData(KGcreator.currentConfig.currentDataSource.name, visjsData);
 
-        /*  $("#KGcreator_dialogDiv").dialog("open");
-          $("#KGcreator_dialogDiv").dialog("option", "title", " Mappings");
-          $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/detailedMappings.html", function() {*/
-        //  $("#KGcreator_resourceslinkingTab").load("modules/tools/KGcreator/html/detailedMappings.html", function() {
-
         var options = {
             onclickFn: KGcreator_graph.onDetailedGraphNodeClick,
             visjsOptions: {
@@ -792,7 +787,7 @@ var KGcreator_graph = (function () {
             },
         };
 
-     //   return KGcreator_bot.start(node);
+        //   return KGcreator_bot.start(node);
 
         if (sourceNode.data && sourceNode.data.role == "column") {
             if (sourceNode.data.table != targetNode.data.table) {

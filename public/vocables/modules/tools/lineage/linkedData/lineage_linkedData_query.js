@@ -18,7 +18,7 @@ var Lineage_linkedData_query = (function () {
     self.showLinkedDataDialog = function () {
         $("#mainDialogDiv").dialog("open");
         if (self.isLoaded) return;
-        $("#mainDialogDiv").load("modules/tools/lineage/linkedData/lineage_linkedData_queryDialog.html", function () {
+        $("#mainDialogDiv").load("modules/tools/lineage/lineage/linkedData/lineage_linkedData_queryDialog.html", function () {
             self.isLoaded = true;
             Lineage_linkedData_mappings.getSourceJoinsMappings(Lineage_sources.activeSource, {}, function (err, joinsMap) {
                 if (err) {
@@ -354,7 +354,7 @@ var Lineage_linkedData_query = (function () {
             dbName: self.sqlContext.currentDataSource.dbName,
             sqlQuery: sqlQuery,
         });
-        MainController.UI.message("Running Query");
+        UI.message("Running Query");
         $("#waitImg").css("display", "block");
         $.ajax({
             type: "GET",

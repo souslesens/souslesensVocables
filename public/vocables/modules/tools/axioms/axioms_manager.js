@@ -33,7 +33,7 @@ var Axioms_manager = (function () {
         var axiomId = common.getRandomHexaId(5);
         var axiomGraphUri = sourceGraphUri + conceptStr + "/" + classIdentifier + "/" + axiomType + "/" + axiomId;
 
-        Sparql_generic.insertTriples(null, triples, {graphUri: axiomGraphUri}, function (err, result) {
+        Sparql_generic.insertTriples(null, triples, { graphUri: axiomGraphUri }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -79,7 +79,7 @@ var Axioms_manager = (function () {
                     async.eachSeries(
                         Object.keys(subGraphsMap),
                         function (subGraph, callbackEach) {
-                            Sparql_OWL.getTriples(null, {graphUri: subGraph}, function (err, result) {
+                            Sparql_OWL.getTriples(null, { graphUri: subGraph }, function (err, result) {
                                 result.forEach(function (item) {
                                     subGraphsMap[subGraph].push(item);
                                 });
@@ -116,7 +116,7 @@ var Axioms_manager = (function () {
                         sourceAxiomsMap[className][axiomType].push({
                             id: axiomId,
                             triples: triples,
-                            graphUri: subGraphUri
+                            graphUri: subGraphUri,
                         });
                     }
 
@@ -129,10 +129,8 @@ var Axioms_manager = (function () {
         );
     };
 
-
     self.getManchesterAxiomsFromTriples = function (source, triples, callback) {
         var rawManchesterStr = "";
-
 
         const params = new URLSearchParams({
             ontologyGraphUri: Config.sources[source].graphUri,
@@ -155,42 +153,34 @@ var Axioms_manager = (function () {
                 callback(err.responseText);
             },
         });
-
-    }
-    self.getManchesterAxiomsMap = function (manchesterRawStr) {
-
-        var axiomsArray = []
+    };
+    self.parseManchesterClassAxioms = function (classUri, manchesterRawStr) {
+        var axiomsArray = [];
         var lines = manchesterRawStr.split("\n");
         var recording = false;
-        var currentAxiom = ""
+        var currentAxiom = classUri;
+        var start = true;
         lines.forEach(function (line, index) {
             if (line.trim() == "") {
-                return
+                return;
             }
-            if (line.match(/^(\s*)/)[1].length > 0) {
-                currentAxiom += " " + line
+            if (line.indexOf("Prefix") > -1) {
+                return;
+            }
+            if (line.indexOf(classUri) > -1) start = 1;
+
+            if (start && line.match(/^(\s*)/)[1].length > 0) {
+                currentAxiom += " " + line;
             } else {
-                currentAxiom = line
-                axiomsArray.push(currentAxiom)
+                // currentAxiom = line
             }
+        });
+        currentAxiom = currentAxiom.replace(/\s\s/gm, " ");
 
-        })
+        currentAxiom = currentAxiom.replace(/[<>]/gm, " ");
 
-        var regex = /(.*):(.*)/gm
-        var array = [];
-        var axiomsMap = {}
-        axiomsArray.forEach(function (axiomStr) {
-
-            while ((array = regex.exec(axiomStr)) != null) {
-                axiomsMap[array[1]] = array[2]
-            }
-        })
-
-
-        return axiomsMap;
-
-    }
-
+        return currentAxiom;
+    };
 
     self.getHtmlManchesterAxiomsFromTriples = function (source, triples, callback) {
         var rawManchesterStr = "";
@@ -206,8 +196,6 @@ var Axioms_manager = (function () {
                         }
                         rawManchesterStr = data.result;
                         callbackSeries();
-
-
                     });
                 },
 
@@ -259,12 +247,12 @@ var Axioms_manager = (function () {
                             axiomText = axiomText.replace(
                                 uri,
                                 "<span class='" +
-                                cssClass +
-                                "' " +
-                                // "onclick=Axiom_editorUI.showNodeInfos('"+uri+"')" +
-                                ">" +
-                                resource.label +
-                                "</span>"
+                                    cssClass +
+                                    "' " +
+                                    // "onclick=Axiom_editorUI.showNodeInfos('"+uri+"')" +
+                                    ">" +
+                                    resource.label +
+                                    "</span>"
                             );
                         }
                     }
@@ -378,7 +366,7 @@ var Axioms_manager = (function () {
 
                     var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
 
-                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -419,8 +407,7 @@ var Axioms_manager = (function () {
                     });
                 },
             ],
-            function (err) {
-            }
+            function (err) {}
         );
     };
 
@@ -495,9 +482,9 @@ var Axioms_manager = (function () {
         });
     };
 
-
     self.test = function () {
-        var str = "[Prefix: owl: <http://www.w3.org/2002/07/owl#>\n" +
+        var str =
+            "[Prefix: owl: <http://www.w3.org/2002/07/owl#>\n" +
             "Prefix: rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "Prefix: rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
             "Prefix: xml: <http://www.w3.org/XML/1998/namespace>\n" +
@@ -528,13 +515,12 @@ var Axioms_manager = (function () {
             "    \n" +
             "    \n" +
             "]";
-        self.getManchesterAxiomsMap(str)
-    }
+        self.parseManchesterClassAxioms("https://spec.industrialontologies.org/ontology/core/Core/Organization", str);
+    };
 
     return self;
 })();
-Axioms_manager.test()
-
+Axioms_manager.test();
 
 export default Axioms_manager;
 window.Axiom_manager = Axioms_manager;

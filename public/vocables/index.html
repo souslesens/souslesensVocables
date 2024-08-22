@@ -32,6 +32,7 @@
         <script type="module" src="modules/shared/socketIoProxy.js" charset="utf-8"></script>
         <script type="module" src="modules/shared/common.js" charset="utf-8"></script>
         <script type="module" src="modules/graph/visjsGraph2.js"></script>
+        <script type="module" src="modules/graph/visjsUtil.js"></script>
         <script src="modules/graph/canvas2svg.js"></script>
         <script type="module" src="modules/graph/SVGexport.js"></script>
         <script type="module" src="modules/graph/graphMLexport.js"></script>
@@ -79,6 +80,7 @@
         <script type="module" src="modules/tools/lineage/lineage_relationIndividualsFilter.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_rules.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_createSLSVsource.js"></script>
+        <script type="module" src="modules/tools/lineage/Lineage_createResource.js"></script>
         <script type="module" src="modules/shared/ontologyModels.js"></script>
 
         <script type="module" src="modules/uiWidgets/predicatesSelectorWidget.js"></script>
@@ -208,7 +210,7 @@
         <link rel="stylesheet/less" type="text/css" href="./modules/shared/styles.less" />
         <script src="./js/external/less.min.js"></script>
         <!--<script src="https://cdn.jsdelivr.net/npm/less" ></script>-->
-        <script type="module" src="./modules/shared/responsiveUI.js"></script>
+        <script type="module" src="./modules/shared/UI.js"></script>
 
         <!--<script type="module" src="./responsive/widget/botEngineResponsive.js"></script>-->
 
@@ -258,7 +260,7 @@
                         },
 
                         function (callBackSeries) {
-                            ResponsiveUI.setSlsvCssClasses(function () {
+                            UI.setSlsvCssClasses(function () {
                                 callBackSeries();
                             });
                         },
@@ -291,10 +293,20 @@
 
                         $("#mainDialogDiv").dialog({
                             autoOpen: false,
+                            height: "auto",
+                            width: "auto",
                             //height: 800,
                             //width: $(document).width() * 0.85,
                             modal: false,
-                            close: function (event, ui) {
+                            position: { my: "center", at: "center", of: window },
+                            /*  open: function( event, ui ) {
+                                var w=$(".ui-dialog-content").width()
+                                var h=$(".ui-dialog-content").height()
+                                $(this).dialog("option","width",w)
+                                $(this).dialog("option","height",h)
+                            }*/
+
+                            /*   close: function (event, ui) {
                                 window.scrollTo(0, 0);
                             },
                             drag: function (event, ui) {
@@ -304,32 +316,18 @@
                                 $("#mainDialogDiv").parent().css("transform", "translate(-50%,-50%)");
                                 $("#mainDialogDiv").parent().css("top", "50%");
                                 $("#mainDialogDiv").parent().css("left", "50%");
-                            },
-                        });
-                        $("#mainDialogDiv2").dialog({
-                            autoOpen: false,
-                            //height: 800,
-                            //width: $(document).width() * 0.85,
-                            modal: false,
-                            close: function (event, ui) {
-                                window.scrollTo(0, 0);
-                            },
-                            drag: function (event, ui) {
-                                $("#mainDialogDiv2").parent().css("transform", "unset");
-                            },
-                            open(event, ui) {
-                                $("#mainDialogDiv2").parent().css("transform", "translate(-50%,-50%)");
-                                $("#mainDialogDiv2").parent().css("top", "50%");
-                                $("#mainDialogDiv2").parent().css("left", "50%");
-                            },
+                            },*/
                         });
 
                         $("#smallDialogDiv").dialog({
                             autoOpen: false,
                             //height: 600,
                             //width: 800,
+                            height: "auto",
+                            width: "auto",
                             modal: false,
-                            close: function (event, ui) {
+
+                            /*  close: function (event, ui) {
                                 window.scrollTo(0, 0);
                             },
                             drag: function (event, ui) {
@@ -339,12 +337,14 @@
                                 $("#smallDialogDiv").parent().css("transform", "translate(-50%,-50%)");
                                 $("#smallDialogDiv").parent().css("top", "50%");
                                 $("#smallDialogDiv").parent().css("left", "50%");
-                            },
+                            },*/
                         });
                         $("#botPanel").dialog({
                             autoOpen: false,
                             //height: 600,
                             //width: 800,
+                            height: "auto",
+                            width: "auto",
                             modal: false,
                             close: function (event, ui) {
                                 //$("#previousButtonBot").remove();
@@ -379,12 +379,12 @@
                             }
                         });
 
-                        MainController.UI.setCredits();
+                        UI.setCredits();
 
                         $("#ChangeSourceButton").hide();
                         $("#index_topContolPanel").hide();
                         $("#Lineage_graphEditionButtons").hide();
-                        ResponsiveUI.init();
+                        UI.init();
                     }
                 );
             });
@@ -403,7 +403,7 @@
                             </tr>
                         </table>
                     </div>
-                    <button class="w3-display-bottommiddle slsv-invisible-button" onclick="ResponsiveUI.hideShowMenuBar(this)">
+                    <button class="w3-display-bottommiddle slsv-invisible-button" onclick="UI.hideShowMenuBar(this)">
                         <img src="./icons/CommonIcons/ArrowMenuBar.png" />
                     </button>
 
@@ -416,7 +416,7 @@
                     <!-- <button onclick="TagsGeometry.showDialog()">tagsGeo</button>-->
                 </div>
                 <div id="MenuBarFooter">
-                    <button class="slsvLogo-icon slsv-invisible-button w3-left" style="height: 57px; width: 80px" onclick="ResponsiveUI.homePage()"></button>
+                    <button class="slsvLogo-icon slsv-invisible-button w3-left" style="height: 57px; width: 80px" onclick="UI.homePage()"></button>
                     <div id="toolSelectionSection" class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button" style="padding: 23px">
                         <div class="w3-sand w3-round-xlarge" style="display: flex; flex-direction: row; align-items: center; margin-left: 10px; margin-top: 0px; padding: 0px">
                             <div id="ToolBorder" class="toolSelectionBorder" style="margin: 3px; padding: 5px; display: flex; align-items: flex-start; margin-left: 5px">
@@ -467,12 +467,12 @@
                     </div>
 
                     <div class="w3-bar-item w3-right">
-                        <button class="w3-button slsv-right-top-bar-button" onclick="MainController.UI.copyCurrentQuery()">Copy Query</button>
+                        <button class="w3-button slsv-right-top-bar-button" onclick="UI.copyCurrentQuery()">Copy Query</button>
                     </div>
                     <div class="w3-bar-item w3-dropdown-hover slsv-bg-intense slsv-top-menu-Button w3-right">
                         <button style="display: none" id="theme-selector-btn" class="w3-button slsv-right-top-bar-button">Themes</button>
                         <div class="w3-dropdown-content Lineage_PopUpStyle PopUpBorder">
-                            <select id="themeSelect" class="Lineage_PopUpStyle" size="8" onclick="ResponsiveUI.changeTheme($(this).val())" style="overflow: auto"></select>
+                            <select id="themeSelect" class="Lineage_PopUpStyle" size="8" onclick="UI.changeTheme($(this).val())" style="overflow: auto"></select>
                         </div>
                     </div>
                 </div>

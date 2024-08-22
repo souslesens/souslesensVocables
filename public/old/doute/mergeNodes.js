@@ -314,7 +314,7 @@ var MergeNodes = (function () {
 
                                 //create newTriples
                                 function (callbackSeries) {
-                                    MainController.UI.message(sourceMessage + " indexing data ...  ");
+                                    UI.message(sourceMessage + " indexing data ...  ");
                                     SearchUtil.generateElasticIndex(targetSource, { ids: nodesToCopy }, function (err, _result) {
                                         return callbackSeries(err);
                                     });
@@ -342,7 +342,7 @@ var MergeNodes = (function () {
                             return alert(err.responseText);
                         }
                         alert(message);
-                        return MainController.UI.message("ALL DONE", true);
+                        return UI.message("ALL DONE", true);
                     }
                 );
             });

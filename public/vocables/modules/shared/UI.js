@@ -1,19 +1,88 @@
 import common from "../../modules/shared/common.js";
-import authentication from "../../modules/shared/authentification.js";
-import Clipboard from "../../modules/shared/clipboard.js";
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import SourceSelectorWidget from "../../modules/uiWidgets/sourceSelectorWidget.js";
-
 import Lineage_whiteboard from "../../modules/tools/lineage/lineage_whiteboard.js";
-
 import MainController from "../../modules/shared/mainController.js";
 
-var ResponsiveUI = (function () {
+var UI = (function () {
     var self = {};
 
     self.menuBarShowed = true;
     self.LateralPanelShowed = true;
     self.smartPhoneScreen = null;
+
+    self.message = function (message, stopWaitImg, startWaitImg) {
+        if (message.length > 200) {
+            alert(message);
+        } else {
+            $("#messageDiv").html(message);
+        }
+        if (stopWaitImg) {
+            $("#waitImg").css("display", "none");
+        }
+        if (startWaitImg) {
+            $("#waitImg").css("display", "block");
+        }
+    };
+
+    self.setCredits = function () {
+        var LateralPanelWidth = $("#lateralPanelDiv").width();
+        var gifStart = $(window).width() / 2 - LateralPanelWidth + 100;
+        var html =
+            "<div style='position:absolute;left:" +
+            gifStart +
+            "px'>" +
+            " " +
+            " <img  src=\"images/souslesensVocables.gif\" style='background:url('images/circulargraph.png');background-repeat: no-repeat;display: block; '>" +
+            "</div>";
+        $("#graphDiv").html(html);
+    };
+
+    /*
+
+        check if used ??
+         */
+    self.showHideRightPanel = function (showOrHide) {
+        var w = $(window).width();
+        var show = false;
+        if (!showOrHide) {
+            var displayed = $("#rightPanelDivInner").css("display");
+            if (displayed == "none") {
+                show = true;
+            } else {
+                show = false;
+            }
+        } else if (showOrHide == "show") {
+            show = true;
+        } else if (showOrHide == "hide") {
+            show = false;
+        }
+        if (show) {
+            var lw = $("#rightPanelDivInner").width();
+            if (false && lw < 100) {
+                return;
+            }
+            var newLeft = "" + (w - lw) + "px";
+            $("#rightPanelDiv").css("position", "absolute");
+            $("#rightPanelDivInner").css("display", "block");
+            $("#rightPanelDiv").css("left", newLeft);
+            $("#graphDiv").css("zIndex", 19);
+            // $("#rightPanelDiv_searchIconInput").css("display", "block");
+            $("#rightPanelDiv_searchIconInput").attr("src", "./icons/oldIcons/slideRight.png");
+        } else {
+            //hide panel
+            $("#rightPanelDiv").css("position", "absolute");
+            $("#rightPanelDivInner").css("display", "none");
+            var newLeft = "" + w + "px";
+            $("#rightPanelDiv").css("left", newLeft);
+            // $("#rightPanelDiv_searchIconInput").css("display", "none");
+            $("#rightPanelDiv_searchIconInput").attr("src", "./icons/oldIcons/search.png");
+        }
+    };
+
+    self.copyCurrentQuery = function () {
+        common.copyTextToClipboard(Sparql_proxy.currentQuery);
+    };
 
     //Etablish the resizing, load select bar tools --> Keep here
     self.init = function () {
@@ -40,26 +109,10 @@ var ResponsiveUI = (function () {
 
         self.themeList();
 
-        ResponsiveUI.resetWindowHeight();
+        UI.resetWindowHeight();
     };
     // keep
-    self.showSourceDialog = function (resetAll) {
-        self.openDialogDiv("mainDialogDiv");
-        $("#" + "mainDialogDiv")
-            .parent()
-            .show();
-        $("#sourceSelector_searchInput").focus();
-        var onSourceSelect;
-        if (resetAll) {
-            Lineage_sources.loadedSources = {};
-            onSourceSelect = MainController.onSourceSelect;
-        } else {
-            onSourceSelect = MainController.onSourceSelect_AddSource;
-        }
-        SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
-            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
-        });
-    };
+
     // keep here
     self.initMenuBar = function (fn) {
         $("#ChangeSourceButton").show();
@@ -100,7 +153,7 @@ var ResponsiveUI = (function () {
                 maxWidth: $(window).width() - 100,
                 minWidth: 150,
                 stop: function (event, ui) {
-                    ResponsiveUI.resetWindowHeight();
+                    UI.resetWindowHeight();
                 },
             });
         }
@@ -133,11 +186,7 @@ var ResponsiveUI = (function () {
         }
         self.ApplySelectedTabCSS(buttonClicked, tabGroup);
     };
-    //keep
-    self.openDialogDiv = function (div) {
-        $("#" + div).empty();
-        $("#" + div).dialog();
-    };
+
     //keep
     self.setSlsvCssClasses = function (callback) {
         less.pageLoadFinished.then(async function () {
@@ -145,12 +194,12 @@ var ResponsiveUI = (function () {
             // fetch theme from api
             const response = await fetch("/api/v1/users/theme");
             if (response.status == 400) {
-                ResponsiveUI.changeTheme(Config.theme.defaultTheme);
+                UI.changeTheme(Config.theme.defaultTheme);
                 return callback();
             }
 
             const data = await response.json();
-            ResponsiveUI.changeTheme(data.theme);
+            UI.changeTheme(data.theme);
 
             if (Config.theme.selector) {
                 $("#theme-selector-btn").show();
@@ -176,20 +225,20 @@ var ResponsiveUI = (function () {
             $("#externalLogoDiv").show();
         }
         less.modifyVars(themeSelected);
-        ResponsiveUI.darkThemeParams(themeSelected);
+        UI.darkThemeParams(themeSelected);
     };
     //Keep
     self.hideShowMenuBar = function (button) {
         if (self.menuBarShowed) {
             $("#MenuBarFooter").hide();
             $("#MenuBar").css("height", "21px");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.menuBarShowed = false;
             $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBarShow.png");
         } else {
             $("#MenuBarFooter").show();
             $("#MenuBar").css("height", "90px");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.menuBarShowed = true;
             $(button).children().attr("src", "./icons/CommonIcons/ArrowMenuBar.png");
         }
@@ -204,7 +253,7 @@ var ResponsiveUI = (function () {
             $(button).parent().hide();
             $("#lateralPanelDiv").css("width", "21px");
             $("#lateralPanelDiv").removeClass("ui-resizable");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.LateralPanelShowed = false;
             var buttonclone = button.cloneNode(true);
             $("#lateralPanelDiv").append(buttonclone);
@@ -215,7 +264,7 @@ var ResponsiveUI = (function () {
             $("#lineage-tab-buttons").show();
             $("#WhiteboardContent").show();
             $("#lateralPanelDiv").css("width", "435px");
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
             self.LateralPanelShowed = true;
             var currentTabId = "#tabs_" + $(".slsv-selectedTabDiv").attr("popupcomment").toLowerCase();
             $(currentTabId).children().show();
@@ -265,7 +314,7 @@ var ResponsiveUI = (function () {
                     Lineage_sources.showHideEditButtons(MainController.currentSource);
                 }
             }
-            ResponsiveUI.resetWindowHeight();
+            UI.resetWindowHeight();
         }
     };
     //keep
@@ -284,5 +333,5 @@ var ResponsiveUI = (function () {
     };
     return self;
 })();
-export default ResponsiveUI;
-window.ResponsiveUI = ResponsiveUI;
+export default UI;
+window.UI = UI;

@@ -49,7 +49,7 @@ var SourceMatcher = (function () {
         if (!fromSourceId) fromSourceId = MainController.currentSource;
 
         if (!toSourceId) toSourceId = $("#SourceMatcher_targetGraphUriSelect").val();
-        if (!fromSourceId) return MainController.UI.message("choose a target resource");
+        if (!fromSourceId) return UI.message("choose a target resource");
 
         if (!output) output = $("#SourceMatcher_outputTypeSelect").val();
 
@@ -131,7 +131,7 @@ var SourceMatcher = (function () {
 
                             return callbackSeries();
                         }
-                        MainController.UI.message(sourceConceptsCount + " found in " + fromSourceId);
+                        UI.message(sourceConceptsCount + " found in " + fromSourceId);
                         callbackSeries();
                     });
                 },
@@ -199,7 +199,7 @@ var SourceMatcher = (function () {
                                         commonConceptsMap[item.subjectLabel.value.toLowerCase()].target = targetObj;
                                     }
                                 });
-                                MainController.UI.message(targetConceptsCount + " processed" + sourceConceptsProcessed + "/" + sourceConceptsCount);
+                                UI.message(targetConceptsCount + " processed" + sourceConceptsProcessed + "/" + sourceConceptsCount);
                                 return callbackEach();
                             });
                         },
@@ -207,7 +207,7 @@ var SourceMatcher = (function () {
                             if (Object.keys(commonConceptsMap).length == 0) {
                                 //  alert(("no matching concepts"))
                             }
-                            MainController.UI.message("drawing" + targetConceptsCount + "/" + sourceConceptsCount + " concepts");
+                            UI.message("drawing" + targetConceptsCount + "/" + sourceConceptsCount + " concepts");
                             return callbackSeries(err);
                         }
                     );
@@ -528,9 +528,9 @@ var SourceMatcher = (function () {
             function (err) {
                 $("#waitImg").css("display", "none");
                 if (err) {
-                    MainController.UI.message(err);
+                    UI.message(err);
                 }
-                MainController.UI.message("");
+                UI.message("");
                 if (err) {
                     matchResult = { rdfType: rdfType, from: fromSourceId, to: toSourceId, error: err };
                 }

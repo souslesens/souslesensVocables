@@ -17,7 +17,7 @@ import SQLquery_filters from "./SQLquery_filters.js";
 import KGquery_controlPanel from "./KGquery_controlPanel.js";
 import KGquery_paths from "./KGquery_paths.js";
 
-import ResponsiveUI from "../../../modules/shared/responsiveUI.js";
+import UI from "../../../modules/shared/UI.js";
 
 import KGquery_filter from "./KGquery_filter.js";
 
@@ -35,9 +35,9 @@ var KGquery = (function () {
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
     self.onLoaded = function () {
-        Lineage_sources.showHideEditButtons = ResponsiveUI.disableEditButtons;
+        Lineage_sources.showHideEditButtons = UI.disableEditButtons;
 
-        ResponsiveUI.initMenuBar(KGquery.loadSource);
+        UI.initMenuBar(KGquery.loadSource);
         KGquery.clearAll();
         if (Config.clientCache.KGquery) {
             KGquery_myQueries.load(null, Config.clientCache.KGquery);
@@ -46,7 +46,7 @@ var KGquery = (function () {
         $("#waitImg").attr("id", "KGquery_waitImg");
     };
     self.unload = function () {
-        Lineage_sources.registerSource = ResponsiveUI.oldRegisterSource;
+        Lineage_sources.registerSource = UI.oldRegisterSource;
         //reapply changed DOM
 
         $("#KGquery_messageDiv").attr("id", "messageDiv");
@@ -74,30 +74,22 @@ var KGquery = (function () {
                 return alert(err.responseText);
             }
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
-                $("#lateralPanelDiv").load("./modules/tools/KGquery/html/lateralPanel.html", function () {
+                $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
                     KGquery_graph.drawVisjsModel("saved");
-                    ResponsiveUI.openTab("lineage-tab", "tabs_Query", KGquery.initQuery, "#QueryTabButton");
-                    ResponsiveUI.resetWindowHeight();
+                    UI.openTab("lineage-tab", "tabs_Query", KGquery.initQuery, "#QueryTabButton");
+                    UI.resetWindowHeight();
                     self.clearAll();
                     if (Config.clientCache.KGquery) {
                         setTimeout(function () {
                             KGquery_myQueries.load(null, Config.clientCache.KGquery);
                         }, 1000);
                     }
-                    $("#KGquery_dataTableDialogDiv").dialog({
-                        autoOpen: false,
-                        close: function (event, ui) {
-                            window.scrollTo(0, 0);
-                        },
-                        drag: function (event, ui) {
-                            $("#KGquery_dataTableDialogDiv").parent().css("transform", "unset");
-                        },
-                        open(event, ui) {
-                            $("#KGquery_dataTableDialogDiv").parent().css("transform", "translate(-50%,-50%)");
-                            $("#KGquery_dataTableDialogDiv").parent().css("top", "50%");
-                            $("#KGquery_dataTableDialogDiv").parent().css("left", "50%");
-                        },
-                    });
+                });
+                $("#KGquery_dataTableDialogDiv").dialog({
+                    autoOpen: false,
+                    height: $(document).height() * 0.9,
+                    width: "100vW",
+                    modal: false,
                 });
             });
         });
@@ -319,12 +311,8 @@ var KGquery = (function () {
         }
         options.output = output;
 
-        $("#KGquery_dataTableDiv").html("");
         self.message("searching...");
         $("#KGquery_waitImg").css("display", "block");
-
-        /*   $("#KGquery_graphDiv").css("display", "none");
-        $("#KGquery_dataTableDiv").css("display", "block");*/
 
         if (isVirtualSQLquery) {
             return SQLquery_filters.showFiltersDialog(self.querySets, self.currentSource);
@@ -373,7 +361,7 @@ var KGquery = (function () {
 
                     KGquery_filter.selectOptionalPredicates(self.querySets, options, function (err, result) {
                         if (err) {
-                            MainController.UI.message(err, true);
+                            UI.message(err, true);
                             callbackSeries(err);
                         }
                         optionalPredicatesSparql = result;
@@ -679,13 +667,12 @@ var KGquery = (function () {
             tableData.push(line);
         });
 
-        $("#KGquery_dataTableDialogDiv").dialog("open");
         $("#KGquery_dataTableDialogDiv").dialog("option", "title", "Query result size: " + tableData.length);
 
         $("#KGquery_dataTableDialogDiv").css("left", "10px");
-        $("#KGquery_dataTableDiv").width("90vW");
-        //  $("#mainDialogDiv").html("<div id='KGquery_dataTableDiv' style='width:100vW;heigth:100vH'></div>")
-        Export.showDataTable("KGquery_dataTableDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
+        $("#KGquery_dataTableDialogDiv").width("90vW");
+
+        Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {
                 var table = $("#dataTableDivExport").DataTable();
 
@@ -764,10 +751,8 @@ var KGquery = (function () {
         var isGraphDisplayed = $("#KGquery_graphDiv").css("display");
         if (!forceGraph && isGraphDisplayed == "block") {
             $("#KGquery_graphDiv").css("display", "none");
-            $("#KGquery_dataTableDiv").css("display", "block");
         } else {
             $("#KGquery_graphDiv").css("display", "block");
-            $("#KGquery_dataTableDiv").css("display", "none");
         }
     };
 

@@ -92,6 +92,11 @@ describe('WhiteBoard', () => {
   Then click on Add relation and choose 'hasRole' and check she is drawed
   Then right click on hasRole and delete
   Same with the two class created, right click--> node infos --> delete
+  ,
+  Test also that the button are not displayed :
+   -in a non editable source with admin acount 
+   -with a profil with read mode on a source
+
   `, () => {
 
   

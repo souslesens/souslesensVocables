@@ -3295,7 +3295,7 @@ attrs.color=self.getSourceColor(superClassValue)
                     $("#lineage_actionDiv_newAxiom").css("display", "none");
                 }
 
-                UI.PopUpOnHoverButtons();
+                //UI.PopUpOnHoverButtons();
 
                 $("#lateralPanelDiv").resizable({
                     maxWidth: $(window).width() - 100,

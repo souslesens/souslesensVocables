@@ -16,7 +16,7 @@ var KGcreator_graph = (function () {
 
     self.drawOntologyModel = function (source) {
         $("#KGcreator_topButtons").load("./modules/tools/KGcreator/html/linkButtons.html", function () {
-            UI.PopUpOnHoverButtons();
+            //UI.PopUpOnHoverButtons();
         });
 
         //return;

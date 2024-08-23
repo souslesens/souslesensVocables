@@ -4,16 +4,16 @@
     </button>
     <div id="sourcesActionsSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
         <div id="Title1" class="titleboxButtons font-button1-color"></div>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" popUpComment="Model"><img src="./icons/CommonIcons/ModelIcon.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()" popUpComment="TopClasses"><img src="./icons/CommonIcons/TopClassesIcon.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" popUpComment="Expand"><img src="./icons/CommonIcons/ExpandIcon.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" popUpComment="Parents"><img src="./icons/CommonIcons/ParentIcon.png" /></button>
-        <!-- <button class="w3-button slsv-button-1" onclick="Lineage_relations.showDrawRelationsDialog()" popUpComment="Query"><img src="./icons/CommonIcons/Query.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" popUpComment="QueryBot">QueryBot</button>-->
-        <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" popUpComment="Query"><img src="./icons/CommonIcons/Query.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" popUpComment="Query">A</button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" title="Model"><img src="./icons/CommonIcons/ModelIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()" title="TopClasses"><img src="./icons/CommonIcons/TopClassesIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Expand"><img src="./icons/CommonIcons/ExpandIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" title="Parents"><img src="./icons/CommonIcons/ParentIcon.png" /></button>
+        <!-- <button class="w3-button slsv-button-1" onclick="Lineage_relations.showDrawRelationsDialog()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="QueryBot">QueryBot</button>-->
+        <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Query">A</button>
 
-        <!-- <button class="w3-button slsv-button-1" id="lineage_createResourceBtn" style="font-weight: bold" onclick=" CreateResource_bot.start()" popUpComment="Create Resource">Create Resource</button>
+        <!-- <button class="w3-button slsv-button-1" id="lineage_createResourceBtn" style="font-weight: bold" onclick=" CreateResource_bot.start()" title="Create Resource">Create Resource</button>
            <button class="w3-button slsv-button" class="lineage_button" style="font-weight: bold" onclick="KGqueryWidget.showDialog()">Query KG</button>-->
 
         <!--  <button class="w3-button slsv-button" onclick="Lineage_sources.clearSource()">Clear</button>-->
@@ -34,17 +34,17 @@
                 onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_whiteboard.graph.searchNode()}"
             />
         </div>
-        <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" popUpComment="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
-        <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()" popUpComment="Clear Last">
+        <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()" title="Clear Last">
             <img src="./icons/CommonIcons/ClearLastIcon.png" />
         </button>
-        <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()" popUpComment="Only Last">
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()" title="Only Last">
             <img src="./icons/CommonIcons/OnlyLastIcon.png" />
         </button>
-        <button class="w3-button slsv-button-2" id="lineage_actionDiv_selectedNodesDialog" onclick="Lineage_selection.showSelectionDialog()" popUpComment="Selection">
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_selectedNodesDialog" onclick="Lineage_selection.showSelectionDialog()" title="Selection">
             <img src="./icons/CommonIcons/Query.png" />
         </button>
-        <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.graph.exportGraphToDataTable()" popUpComment="CSV"><img src="./icons/CommonIcons/CSVIcon.png" /></button>
+        <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.graph.exportGraphToDataTable()" title="CSV"><img src="./icons/CommonIcons/CSVIcon.png" /></button>
         <!--   <button onclick="AxiomEditor.init()">Edit Axiom</button>-->
         <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="Axiom_editor.init()" style="display: block">new Axiom</button>
         <!--  <button class="w3-button slsv-button-3" id="lineage_actionDiv_ClassesWithAxioms" onclick="Axiom_manager.listClassesWithAxioms()" style="display: block">show Axiom Classes</button>-->

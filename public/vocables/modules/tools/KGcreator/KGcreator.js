@@ -1091,7 +1091,7 @@ var KGcreator = (function () {
                         //KGcreator_run.createTriples(true);
                         KGcreator_run.getTableAndShowMappings();
                     }
-                    UI.PopUpOnHoverButtons();
+                    //UI.PopUpOnHoverButtons();
                     self.ResetRunMappingTabWidth();
                     $("#KGcreator_centralPanelTabs").redraw();
                 });
@@ -1103,7 +1103,7 @@ var KGcreator = (function () {
             self.currentTab = "Map";
             $("#KGcreator_centralPanelTabs").load("./modules/tools/KGcreator/html/linkTab.html", function () {
                 $("#KGcreator_topButtons").load("./modules/tools/KGcreator/html/runButtons.html", function () {
-                    UI.PopUpOnHoverButtons();
+                    //UI.PopUpOnHoverButtons();
                     if (self.currentTreeNode != undefined) {
                         $(document.getElementById(self.currentTreeNode.id + "_anchor")).click();
                     }

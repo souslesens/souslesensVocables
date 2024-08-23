@@ -59,7 +59,7 @@ var _botEngine = (function () {
                     self.firstLoad = true;
                 });
             }
-            UI.PopUpOnHoverButtons();
+            //UI.PopUpOnHoverButtons();
             if (callback) {
                 callback();
             }

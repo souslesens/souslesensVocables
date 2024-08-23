@@ -266,8 +266,8 @@ var UI = (function () {
             $("#lateralPanelDiv").css("width", "435px");
             UI.resetWindowHeight();
             self.LateralPanelShowed = true;
-            var currentTabId = "#tabs_" + $(".slsv-selectedTabDiv").attr("popupcomment").toLowerCase();
-            $(currentTabId).children().show();
+            var currentTabId =  $(".slsv-selectedTabDiv").attr("title").toLowerCase() + 'Tab';
+            $('#'+currentTabId).children().show();
 
             /*$(button).parent().show();
             //$(button).parent().find("#ArrowLateralPanel").attr("src", "./icons/CommonIcons/ArrowLateralPanel.png");*/
@@ -276,6 +276,7 @@ var UI = (function () {
     };
 
     //keep
+    /*
     self.PopUpOnHoverButtons = function () {
         $(".w3-button").off();
         $(".w3-bar-item").off();
@@ -294,7 +295,7 @@ var UI = (function () {
                 PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv", { Button: this });
             }
         });
-    };
+    };*/
     //keep
     self.darkThemeParams = function (theme) {
         if (theme) {

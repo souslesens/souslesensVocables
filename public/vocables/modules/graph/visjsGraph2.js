@@ -891,14 +891,15 @@ var visjsGraph = (function () {
     };
 
     self.showGraphConfig = function () {
-        $("#visjsConfigureDiv").dialog({
-            //   autoOpen: false,
-            height: 700,
-            width: 550,
-            modal: false,
-            title: "Graph parameters",
-            position: { my: "left top", at: "right top" },
-        });
+        $("#graphDisplay_theme").remove();
+        $("#visjsConfigureDiv").prepend(
+            "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
+                "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
+                "<option>white</option>" +
+                "<option>dark</option>" +
+                "</select></div>"
+        );
+       
 
         //    $('#graphConfigDiv').dialog("open")
 
@@ -917,14 +918,14 @@ var visjsGraph = (function () {
             visjsGraph.network.setOptions(options);
 
             setTimeout(function () {
-                $("#graphDisplay_theme").remove();
-                $("#visjsConfigureDiv").prepend(
-                    "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
-                        "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
-                        "<option>white</option>" +
-                        "<option>dark</option>" +
-                        "</select></div>"
-                );
+                $("#visjsConfigureDiv").dialog({
+                    //   autoOpen: false,
+                    height: 700,
+                    width: 550,
+                    modal: false,
+                    title: "Graph parameters",
+                    //position: { my: "left top", at: "right top" },
+                });
             }, 500);
         }, 500);
     };

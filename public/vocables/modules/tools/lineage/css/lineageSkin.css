@@ -274,17 +274,20 @@
     align-items: center;
 }
 
-/*[role="dialog"]:not(.MuiPaper-root) {
+[role="dialog"]:not(.MuiPaper-root) {
+    
+    
+    .border-classic-color-theme4;
+    border: @button1-color solid 5px !important;
+    /*
     width: 95% !important;
-    max-width: 1500px !important;
-    height: unset !important;
-    max-height: 99vh;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    .border-classic-color-theme4;
-    border: @button1-color solid 5px !important;
-}*/
+    height: unset !important;
+    max-width: 1500px !important;
+    max-height: 99vh;*/
+}
 
 .ui-dialog-title {
     color: @source-color;

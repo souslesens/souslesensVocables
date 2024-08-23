@@ -39,7 +39,6 @@ var _botEngine = (function () {
             }
 
             if (!self.firstLoad) {
-            
                 $("#BotUpperButtons").remove();
             }
             $("#botFilterProposalInput").on("keyup", self.filterList);

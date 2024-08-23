@@ -1055,7 +1055,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             modal: false,
             title: "Graph parameters",
             //position: { my: "left top", at: "right top" },
-        });/*
+        }); /*
         setTimeout(function () {
            
 

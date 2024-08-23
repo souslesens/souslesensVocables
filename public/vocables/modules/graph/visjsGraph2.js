@@ -899,28 +899,28 @@ var visjsGraph = (function () {
                 "<option>dark</option>" +
                 "</select></div>"
         );
-            // these are all options in full.
-            var options = {
-                configure: {
-                    enabled: true,
-                    filter: "physics,layout,manipulation,renderer",
+        // these are all options in full.
+        var options = {
+            configure: {
+                enabled: true,
+                filter: "physics,layout,manipulation,renderer",
 
-                    container: document.getElementById("visjsConfigureDiv"),
-                    showButton: true,
-                },
-            };
+                container: document.getElementById("visjsConfigureDiv"),
+                showButton: true,
+            },
+        };
 
-            visjsGraph.network.setOptions(options);
-            $("#visjsConfigureDiv").dialog({
-                //   autoOpen: false,
-                height: 700,
-                width: 550,
-                modal: false,
-                title: "Graph parameters",
-                //position: { my: "left top", at: "right top" },
-            });
+        visjsGraph.network.setOptions(options);
+        $("#visjsConfigureDiv").dialog({
+            //   autoOpen: false,
+            height: 700,
+            width: 550,
+            modal: false,
+            title: "Graph parameters",
+            //position: { my: "left top", at: "right top" },
+        });
         //    $('#graphConfigDiv').dialog("open")
-            /*
+        /*
         setTimeout(function () {
        
 

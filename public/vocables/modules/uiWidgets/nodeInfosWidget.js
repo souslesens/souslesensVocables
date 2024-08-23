@@ -30,8 +30,8 @@ var NodeInfosWidget = (function () {
                     window.scrollTo(0, 0);
                     $("#addPredicateButton").remove();
                     $("#deleteButton").remove();
-                }
-            })
+                },
+            });
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
 

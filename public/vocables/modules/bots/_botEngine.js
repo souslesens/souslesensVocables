@@ -27,7 +27,7 @@ var _botEngine = (function () {
             divId = "botDiv";
 
             $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
-                self.firstLoad = true;
+                self.firstLoad = false;
             });
             $("#botPanel").dialog("option", "title", self.currentBot.title);
         }
@@ -39,8 +39,6 @@ var _botEngine = (function () {
             }
 
             if (!self.firstLoad) {
-                //$("#resetButtonBot").remove();
-                //$("#previousButtonBot").remove();
                 $("#BotUpperButtons").remove();
             }
             $("#botFilterProposalInput").on("keyup", self.filterList);
@@ -61,7 +59,7 @@ var _botEngine = (function () {
                     self.firstLoad = true;
                 });
             }
-           
+            //UI.PopUpOnHoverButtons();
             if (callback) {
                 callback();
             }

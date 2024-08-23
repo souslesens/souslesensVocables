@@ -1028,41 +1028,43 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     };
 
     self.showGraphConfig = function () {
+        $("#graphDisplay_theme").remove();
+        //$("#visjsConfigureDiv").parent().css("left", "20%");
+        $("#visjsConfigureDiv").prepend(
+            "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
+                "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
+                "<option>white</option>" +
+                "<option>dark</option>" +
+                "</select></div>"
+        );
+        // these are all options in full.
+        var options = {
+            configure: {
+                enabled: true,
+                filter: "physics,layout,manipulation,renderer",
+
+                container: document.getElementById("visjsConfigureDiv"),
+                showButton: true,
+            },
+        };
+        self.network.setOptions(options);
         $("#visjsConfigureDiv").dialog({
             //   autoOpen: false,
             height: 700,
             width: 550,
             modal: false,
             title: "Graph parameters",
-            position: { my: "left top", at: "right top" },
-        });
-
+            //position: { my: "left top", at: "right top" },
+        }); /*
         setTimeout(function () {
-            // these are all options in full.
-            var options = {
-                configure: {
-                    enabled: true,
-                    filter: "physics,layout,manipulation,renderer",
+           
 
-                    container: document.getElementById("visjsConfigureDiv"),
-                    showButton: true,
-                },
-            };
-
-            self.network.setOptions(options);
+           
 
             setTimeout(function () {
-                $("#graphDisplay_theme").remove();
-                //$("#visjsConfigureDiv").parent().css("left", "20%");
-                $("#visjsConfigureDiv").prepend(
-                    "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
-                        "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
-                        "<option>white</option>" +
-                        "<option>dark</option>" +
-                        "</select></div>"
-                );
+               
             }, 500);
-        }, 500);
+        }, 500);*/
     };
 };
 export default VisjsGraphClass;

@@ -266,8 +266,8 @@ var UI = (function () {
             $("#lateralPanelDiv").css("width", "435px");
             UI.resetWindowHeight();
             self.LateralPanelShowed = true;
-            var currentTabId = "#tabs_" + $(".slsv-selectedTabDiv").attr("title").toLowerCase();
-            $(currentTabId).children().show();
+            var currentTabId =  $(".slsv-selectedTabDiv").attr("title").toLowerCase() + 'Tab';
+            $('#'+currentTabId).children().show();
 
             /*$(button).parent().show();
             //$(button).parent().find("#ArrowLateralPanel").attr("src", "./icons/CommonIcons/ArrowLateralPanel.png");*/

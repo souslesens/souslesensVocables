@@ -25,6 +25,13 @@ var NodeInfosWidget = (function () {
         }
         $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
             $("#" + divId).dialog("open");
+            $("#" + divId).dialog({
+                close: function (event, ui) {
+                    window.scrollTo(0, 0);
+                    $("#addPredicateButton").remove();
+                    $("#deleteButton").remove();
+                },
+            });
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
 

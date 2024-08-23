@@ -295,70 +295,23 @@
                             autoOpen: false,
                             height: "auto",
                             width: "auto",
-                            //height: 800,
-                            //width: $(document).width() * 0.85,
                             modal: false,
                             position: { my: "center", at: "center", of: window },
-                            /*  open: function( event, ui ) {
-                                var w=$(".ui-dialog-content").width()
-                                var h=$(".ui-dialog-content").height()
-                                $(this).dialog("option","width",w)
-                                $(this).dialog("option","height",h)
-                            }*/
-
-                            /*   close: function (event, ui) {
-                                window.scrollTo(0, 0);
-                            },
-                            drag: function (event, ui) {
-                                $("#mainDialogDiv").parent().css("transform", "unset");
-                            },
-                            open(event, ui) {
-                                $("#mainDialogDiv").parent().css("transform", "translate(-50%,-50%)");
-                                $("#mainDialogDiv").parent().css("top", "50%");
-                                $("#mainDialogDiv").parent().css("left", "50%");
-                            },*/
                         });
 
                         $("#smallDialogDiv").dialog({
                             autoOpen: false,
-                            //height: 600,
-                            //width: 800,
+
                             height: "auto",
                             width: "auto",
                             modal: false,
-
-                            /*  close: function (event, ui) {
-                                window.scrollTo(0, 0);
-                            },
-                            drag: function (event, ui) {
-                                $("#smallDialogDiv").parent().css("transform", "unset");
-                            },
-                            open(event, ui) {
-                                $("#smallDialogDiv").parent().css("transform", "translate(-50%,-50%)");
-                                $("#smallDialogDiv").parent().css("top", "50%");
-                                $("#smallDialogDiv").parent().css("left", "50%");
-                            },*/
                         });
                         $("#botPanel").dialog({
                             autoOpen: false,
-                            //height: 600,
-                            //width: 800,
+
                             height: "auto",
                             width: "auto",
                             modal: false,
-                            close: function (event, ui) {
-                                //$("#previousButtonBot").remove();
-                                //$("#resetButtonBot").remove();
-                                $("#BotUpperButtons").remove();
-                            },
-                            drag: function (event, ui) {
-                                $("#botPanel").parent().css("transform", "unset");
-                            },
-                            open(event, ui) {
-                                $("#botPanel").parent().css("transform", "translate(-50%,-50%)");
-                                $("#botPanel").parent().css("top", "50%");
-                                $("#botPanel").parent().css("left", "50%");
-                            },
                         });
                         $("#widgetGenericDialogDiv").dialog({
                             autoOpen: false,

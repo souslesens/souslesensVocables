@@ -22,14 +22,6 @@ var NodeInfosWidget = (function () {
         self.currentSource = sourceLabel;
         if (!options.noDialog) {
             $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
-
-            /*  $("#" + divId).dialog({
-                close: function (event, ui) {
-                    window.scrollTo(0, 0);
-                    $("#addPredicateButton").remove();
-                    $("#deleteButton").remove();
-                },
-            });*/
         }
         $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
             $("#" + divId).dialog("open");
@@ -50,18 +42,7 @@ var NodeInfosWidget = (function () {
                     }, 100);
                 },
             });
-            $("#axiomsDrawGraphDiv").dialog({
-                autoOpen: false,
-                height: 800,
-                width: 1000,
-                modal: false,
-            });
-            $("#axioms_dialogDiv").dialog({
-                autoOpen: false,
-                height: 800,
-                width: 1000,
-                modal: false,
-            });
+
             $(".nodeInfosWidget_tabDiv").css("margin", "0px");
             $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
             callback();

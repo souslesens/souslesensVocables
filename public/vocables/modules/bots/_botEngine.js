@@ -30,9 +30,6 @@ var _botEngine = (function () {
                 self.firstLoad = true;
             });
             $("#botPanel").dialog("option", "title", self.currentBot.title);
-
-            //$("#botPanel").parent().css("top", "13%");
-            //$("#botPanel").parent().css("left", "30%");
         }
 
         $("#" + divId).load("./modules/uiWidgets/html/bot.html", function () {
@@ -49,18 +46,14 @@ var _botEngine = (function () {
             $("#botFilterProposalInput").on("keyup", self.filterList);
             self.firstLoad = false;
             $("#BotUpperButtons").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
-            //$("#previousButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+
             if (divId != "botDiv") {
                 var dialogWindow = $("#" + divId)
                     .parents()
                     .filter('div[role="dialog"]')[0];
                 var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
                 var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
-                //$(idDialog).parent().css("top", "13%");
-                //$(idDialog).parent().css("left", "10%");
                 $("#BotUpperButtons").insertAfter(titleDialog);
-                //$("#resetButtonBot").insertAfter(titleDialog);
-                //$("#previousButtonBot").insertAfter(titleDialog);
                 $(dialogWindow).on("dialogclose", function (event) {
                     $("#" + self.divId).empty();
                     $(dialogWindow).find("#resetButtonBot").remove();

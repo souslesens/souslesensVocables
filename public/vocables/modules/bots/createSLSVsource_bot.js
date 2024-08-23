@@ -120,11 +120,9 @@ var CreateSLSVsource_bot = (function () {
             $("#smallDialogDiv").dialog("open");
             $("#smallDialogDiv").parent().css("z-index", 1);
             $("#smallDialogDiv").dialog("option", "title", "Upload");
-            $("#smallDialogDiv").dialog({
-                close: function (event, ui) {
-                    _botEngine.currentObj = self.workflowUpload;
-                    _botEngine.nextStep(self.workflowUpload);
-                },
+            $(".selector").on("dialogclose", function (event, ui) {
+                _botEngine.currentObj = self.workflowUpload;
+                _botEngine.nextStep(self.workflowUpload);
             });
         },
         uploadFromFileFnResonsive: function () {

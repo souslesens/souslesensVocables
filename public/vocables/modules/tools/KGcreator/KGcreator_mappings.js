@@ -59,8 +59,6 @@ return alert("select a field (column)");
                     $("#smallDialogDiv").find("#editPredicate_savePredicateButton").css("display", "none");
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
-                        //  height: 600,
-                        //  width: 800,
                         modal: false,
                     });
                     var html =

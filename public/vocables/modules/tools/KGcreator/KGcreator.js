@@ -38,6 +38,7 @@ var KGcreator = (function () {
         }
         var html = ' <div style="width:500px;height: 400px" id="mount-kg-upload-app-here"></div>';
         $("#smallDialogDiv").html(html);
+
         $("#smallDialogDiv").dialog({
             open: function (event, ui) {
                 if (self.createApp === null) {

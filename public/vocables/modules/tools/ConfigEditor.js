@@ -20,12 +20,6 @@ var ConfigEditor = (function () {
             self.umountKGUploadApp();
         });
 
-        /*     $("#mainDialogDiv").dialog({
-            close: function (event, ui) {
-                self.umountKGUploadApp();
-            },
-        });*/
-
         $("#mainDialogDiv").html("");
 
         $("#mainDialogDiv").html(`

@@ -34,20 +34,14 @@ var Lineage_sources = (function () {
                 self.menuActions.closeSource(source);
             }
         }
-        $("#LineagePopup").dialog({
+        /*  $("#LineagePopup").dialog({
             autoOpen: false,
             height: 800,
             width: 1000,
             modal: false,
-            //  position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
-        });
-        $("#QueryDialog").dialog({
-            autoOpen: false,
-            height: 800,
-            width: 700,
-            modal: false,
-            // position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
-        });
+
+        });*/
+
         self.activeSource = null;
         self.loadedSources = {};
         self.sourceDivsMap = {};

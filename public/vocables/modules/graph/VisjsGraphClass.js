@@ -1037,33 +1037,34 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 "<option>dark</option>" +
                 "</select></div>"
         );
-       
+        // these are all options in full.
+        var options = {
+            configure: {
+                enabled: true,
+                filter: "physics,layout,manipulation,renderer",
 
+                container: document.getElementById("visjsConfigureDiv"),
+                showButton: true,
+            },
+        };
+        self.network.setOptions(options);
+        $("#visjsConfigureDiv").dialog({
+            //   autoOpen: false,
+            height: 700,
+            width: 550,
+            modal: false,
+            title: "Graph parameters",
+            //position: { my: "left top", at: "right top" },
+        });/*
         setTimeout(function () {
-            // these are all options in full.
-            var options = {
-                configure: {
-                    enabled: true,
-                    filter: "physics,layout,manipulation,renderer",
+           
 
-                    container: document.getElementById("visjsConfigureDiv"),
-                    showButton: true,
-                },
-            };
-
-            self.network.setOptions(options);
+           
 
             setTimeout(function () {
-                $("#visjsConfigureDiv").dialog({
-                    //   autoOpen: false,
-                    height: 700,
-                    width: 550,
-                    modal: false,
-                    title: "Graph parameters",
-                    //position: { my: "left top", at: "right top" },
-                });
+               
             }, 500);
-        }, 500);
+        }, 500);*/
     };
 };
 export default VisjsGraphClass;

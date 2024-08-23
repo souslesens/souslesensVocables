@@ -899,11 +899,6 @@ var visjsGraph = (function () {
                 "<option>dark</option>" +
                 "</select></div>"
         );
-       
-
-        //    $('#graphConfigDiv').dialog("open")
-
-        setTimeout(function () {
             // these are all options in full.
             var options = {
                 configure: {
@@ -916,18 +911,23 @@ var visjsGraph = (function () {
             };
 
             visjsGraph.network.setOptions(options);
+            $("#visjsConfigureDiv").dialog({
+                //   autoOpen: false,
+                height: 700,
+                width: 550,
+                modal: false,
+                title: "Graph parameters",
+                //position: { my: "left top", at: "right top" },
+            });
+        //    $('#graphConfigDiv').dialog("open")
+            /*
+        setTimeout(function () {
+       
 
             setTimeout(function () {
-                $("#visjsConfigureDiv").dialog({
-                    //   autoOpen: false,
-                    height: 700,
-                    width: 550,
-                    modal: false,
-                    title: "Graph parameters",
-                    //position: { my: "left top", at: "right top" },
-                });
+               
             }, 500);
-        }, 500);
+        }, 500);*/
     };
 
     return self;

@@ -217,5 +217,5 @@ a:visited.ui-button,
 
 #nodeInfos_listsDiv {
     margin: 10px;
-    max-height: 90dvh;
+    /*max-height: 90dvh;*/
 }

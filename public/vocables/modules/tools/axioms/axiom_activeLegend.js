@@ -5,12 +5,23 @@ import Axioms_graph from "./axioms_graph.js";
 var Axiom_activeLegend = (function () {
     var self = {};
     self.axiomsLegendVisjsGraph = null;
+    self.isLegendActive=false
 
-    self.init = function (graphLegendDiv, axiomGraphDiv, source, resource) {
+    self.init = function (graphLegendDiv, axiomGraphDiv, source, resource,axiomType) {
         self.graphLegendDiv = graphLegendDiv;
         self.axiomGraphDiv = axiomGraphDiv;
         self.currentSource = source;
         self.currentResource = resource;
+        self.currentClass = self.currentResource;
+        self.currentClass.resourceType = "Class";
+        self.predicate = axiomType;
+
+        self.drawNewAxiom(self.currentResource);
+        self.isLegendActive=true
+
+
+
+
     };
     self.filterSuggestion = function (suggestions, resourceType) {
         var selection = [];
@@ -22,6 +33,8 @@ var Axiom_activeLegend = (function () {
         return selection;
     };
     self.onLegendNodeClick = function (node, point, nodeEvent) {
+        if(!self.isLegendActive)
+            return;
         self.currentNodeType = null;
         if (node && node.data) {
             self.currentNodeType = node.data.type;
@@ -33,7 +46,7 @@ var Axiom_activeLegend = (function () {
                 self.hideLegendItems();
             } else if (node.data.type == "ObjectProperty") {
                 self.hideLegendItems();
-                if (Axioms_graph.currentGraphNode.owlType == "Restriction") {
+                if (Axioms_graph.currentGraphNode.type == "Restriction") {
                     var properties = Axiom_editor.getAllProperties();
                     common.fillSelectOptions("axioms_legend_suggestionsSelect", properties, false, "label", "id");
                 } else {
@@ -73,7 +86,7 @@ var Axiom_activeLegend = (function () {
         var currentNode = {
             id: selectedObject.id,
             label: selectedObject.label,
-            owlType: selectedObject.resourceType,
+            type: selectedObject.resourceType,
             symbol: null,
         };
         self.currentNodeType = selectedObject.resourceType;
@@ -161,6 +174,13 @@ var Axiom_activeLegend = (function () {
     };
 
     self.onSuggestionsSelect = function (resourceUri, legendNode) {
+
+        if(! Axiom_activeLegend.isLegendActive){
+            Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv", NodeInfosAxioms.currentSource, NodeInfosAxioms.currentResource,resourceUri)
+            return $('#axioms_legend_suggestionsSelect').children().remove().end()
+        }
+
+
         var newResource;
 
         var nodeType = self.currentLegendNodeType;
@@ -220,7 +240,7 @@ var Axiom_activeLegend = (function () {
 
         var visjsData = { nodes: [], edges: [] };
         var level = Axioms_graph.currentGraphNode.level + 1;
-        newResource.owlType = newResource.resourceType;
+        newResource.type = newResource.resourceType;
         newResource.level = level;
 
         var visjsNode = Axioms_graph.getVisjsNode(newResource, level);
@@ -322,7 +342,7 @@ var Axiom_activeLegend = (function () {
         Axiom_activeLegend.axiomsLegendVisjsGraph.data.nodes.update(newNodes);
     };
 
-    self.drawLegend = function () {
+    self.drawLegend = function (graphLegendDiv) {
         var visjsData = { nodes: [], edges: [] };
 
         var legendItems = [
@@ -372,7 +392,7 @@ var Axiom_activeLegend = (function () {
             onRightClickFn: Axiom_activeLegend.showGraphPopupMenu,
         };
 
-        self.axiomsLegendVisjsGraph = new VisjsGraphClass(self.graphLegendDiv, visjsData, options);
+        self.axiomsLegendVisjsGraph = new VisjsGraphClass(graphLegendDiv || self.graphLegendDiv, visjsData, options);
         self.axiomsLegendVisjsGraph.draw(function () {});
     };
 

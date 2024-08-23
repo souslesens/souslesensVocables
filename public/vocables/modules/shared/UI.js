@@ -275,27 +275,7 @@ var UI = (function () {
         }
     };
 
-    //keep
-    self.PopUpOnHoverButtons = function () {
-        return
-        $(".w3-button").off();
-        $(".w3-bar-item").off();
-        $(".w3-button").on("mouseenter", function () {
-            var comment = $(this).attr("title");
-            if (comment) {
-                var html = "<div>" + comment + "</div>";
-                PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv", { Button: this });
-            }
-        });
 
-        $(".w3-bar-item").on("mouseenter", function () {
-            var comment = $(this).attr("title");
-            if (comment) {
-                var html = "<div>" + comment + "</div>";
-                PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv", { Button: this });
-            }
-        });
-    };
     //keep
     self.darkThemeParams = function (theme) {
         if (theme) {

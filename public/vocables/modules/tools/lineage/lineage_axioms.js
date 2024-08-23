@@ -1,3 +1,5 @@
+import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
+
 var Lineage_axioms = (function () {
     var self = {};
 
@@ -6,9 +8,11 @@ var Lineage_axioms = (function () {
             source = Lineage_sources.activeSource;
         }
         Axiom_manager.listClassesWithAxioms(source, function (err, result) {
-            if (err) return alert(err);
+            if (err) {
+                return alert(err);
+            }
             var axiomTypes = {};
-            var visjsData = { nodes: [], edges: [] };
+            var visjsData = {nodes: [], edges: []};
             result.forEach(function (item) {
                 item.axiomTypes.forEach(function (type) {
                     if (!axiomTypes[type]) {
@@ -48,6 +52,20 @@ var Lineage_axioms = (function () {
             Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
         });
     };
+
+    self.testAxioms = function () {
+        var node = {
+            id: "https://spec.industrialontologies.org/ontology/core/Core/AgentRole",
+            label: "AgentRole",
+            data: {
+                id: "https://spec.industrialontologies.org/ontology/core/Core/AgentRole",
+                label: "AgentRole"
+            }
+        }
+        NodeInfosAxioms.init("IOF-CORE-202401", node, "mainDialogDiv");
+    }
+
+
     return self;
 })();
 

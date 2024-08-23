@@ -40,13 +40,13 @@ var Axioms_graph = (function () {
                 font = { bold: true };
                 color = "#f5ef39";
             }
-        } else if (node.owlType && node.owlType.indexOf("Class") > -1) {
+        } else if (node.type && node.type.indexOf("Class") > -1) {
             color = "#00afef";
             shape = "dot";
             font = { bold: true, color: color };
-        } else if (node.owlType && node.owlType.indexOf("ObjectProperty") > -1) {
+        } else if (node.type && node.type.indexOf("ObjectProperty") > -1) {
             color = "#f5ef39";
-        } else if (node.owlType && node.owlType.indexOf("Restriction") > -1) {
+        } else if (node.type && node.type.indexOf("Restriction") > -1) {
             label = node.label;
             node.predicates.forEach(function (predicate) {
                 if (predicate.p.indexOf("someValuesFrom") > -1) {
@@ -80,7 +80,7 @@ var Axioms_graph = (function () {
             data: node.data || {
                 id: node.id,
                 label: node.label || "",
-                type: node.owlType,
+                type: node.type,
                 source: node.source,
             },
         };
@@ -120,8 +120,8 @@ var Axioms_graph = (function () {
                                 nodesMap[s].label = obj ? obj.label.replace(/_/g, " ") : null;
                             }
                         }
-                        if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && !nodesMap[s].owlType) {
-                            nodesMap[s].owlType = o;
+                        if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && !nodesMap[s].type) {
+                            nodesMap[s].type = o;
                         } else if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" && o == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil") {
                             return;
                         } else {
@@ -138,19 +138,19 @@ var Axioms_graph = (function () {
                         }
 
                         if (p == "http://www.w3.org/2002/07/owl#unionOf") {
-                            nodesMap[s].owlType = "unionOf";
+                            nodesMap[s].type = "unionOf";
                             nodesMap[s].symbol = "⨆";
                         } else if (p == "http://www.w3.org/2002/07/owl#intersectionOf") {
-                            nodesMap[s].owlType = "intersectionOf";
+                            nodesMap[s].type = "intersectionOf";
                             nodesMap[s].symbol = "⊓";
                         } else if (p == "http://www.w3.org/2002/07/owl#complementOf") {
-                            nodesMap[s].owlType = "complementOf";
+                            nodesMap[s].type = "complementOf";
                             nodesMap[s].symbol = "┓";
                         } else if (p == "http://www.w3.org/2002/07/owl#inverseOf") {
-                            nodesMap[s].owlType = "inverseOf";
+                            nodesMap[s].type = "inverseOf";
                             nodesMap[s].symbol = "^";
                         } else if (p == "http://www.w3.org/2002/07/owl#members") {
-                            nodesMap[s].owlType = "AllDisjointClasses";
+                            nodesMap[s].type = "AllDisjointClasses";
                             nodesMap[s].symbol = "⊑ ┓";
                         }
 

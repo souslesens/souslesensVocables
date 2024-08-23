@@ -17,6 +17,7 @@ var NodeInfosAxioms = (function () {
 
         $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
             $("#mainDialogDiv").dialog("open");
+            Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv");
             Axiom_editor.initResourcesMap(self.currentSource, function (err, result) {
                 // used do draw graph
                 self.initSourceClassesMap(self.currentSource, function (err, result) {
@@ -158,7 +159,8 @@ var NodeInfosAxioms = (function () {
     self.onAxiomJstreeSelectNode = function (evt, obj) {
         var node = obj.node;
         self.currentJstreeNode = node;
-
+        self.switchLeftPanelDisplay("show")
+        Axiom_activeLegend.isLegendActive=false
         if (node.parent == "#") {
             // draw   all axioms of class
             var options = { onNodeClick: NodeInfosAxioms.onNodeGraphClick };
@@ -303,12 +305,20 @@ var NodeInfosAxioms = (function () {
     };
 
     self.newAxiom = function () {
-        $("#nodeInfosAxioms_graphPanelDiv").load("modules/tools/axioms/html/nodeInfosAxiomWrite.html", function (err) {
-            if (err) {
-                var x = err;
-            }
-            Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_writeGraphDiv", self.currentSource);
-            Axiom_activeLegend.drawLegend();
+
+
+
+        self.switchLeftPanelDisplay("new")
+
+          //  Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv",self.currentSource,self.currentResource );
+
+        var options=["subClassOf", "equivalentClass", "disjointWith", "disjointUnionOf"]
+        common.fillSelectOptions("axioms_legend_suggestionsSelect", options,false)
+
+
+        /*
+
+
             SimpleListSelectorWidget.showDialog(
                 null,
                 function (callbackLoad) {
@@ -320,22 +330,29 @@ var NodeInfosAxioms = (function () {
                         return;
                     }
 
-                    // Axiom_editor.addSuggestion(self.currentResource)
 
-                    Axiom_activeLegend.currentClass = self.currentResource;
-                    Axiom_activeLegend.currentClass.resourceType = "Class";
-                    // Axiom_activeLegend.currentAxiomType = axiomType;
-                    Axiom_activeLegend.predicate = axiomType;
-                    Axiom_activeLegend.currentResource = self.currentResource;
 
-                    Axiom_editor.init(null, self.currentResource, self.currentSource);
 
-                    Axiom_activeLegend.drawNewAxiom(self.currentResource);
-                    //  Axiom_activeLegend.hideForbiddenResources("Class");
                 }
-            );
-        });
+            );*/
+
     };
+
+
+
+    self.switchLeftPanelDisplay=function(role){
+        if(role=="new"){
+            $("#nodeInfosAxioms_newAxiomPanel").css("display","flex")
+            $("#nodeInfosAxioms_graphPanelDiv").css("display","none")
+
+        }else if(role=="show"){
+            $("#nodeInfosAxioms_newAxiomPanel").css("display","none")
+            $("#nodeInfosAxioms_graphPanelDiv").css("display","flex")
+        }
+
+
+
+    }
 
     return self;
 })();

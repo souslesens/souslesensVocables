@@ -266,7 +266,7 @@ var UI = (function () {
             $("#lateralPanelDiv").css("width", "435px");
             UI.resetWindowHeight();
             self.LateralPanelShowed = true;
-            var currentTabId = "#tabs_" + $(".slsv-selectedTabDiv").attr("popupcomment").toLowerCase();
+            var currentTabId = "#tabs_" + $(".slsv-selectedTabDiv").attr("title").toLowerCase();
             $(currentTabId).children().show();
 
             /*$(button).parent().show();
@@ -277,10 +277,11 @@ var UI = (function () {
 
     //keep
     self.PopUpOnHoverButtons = function () {
+        return
         $(".w3-button").off();
         $(".w3-bar-item").off();
         $(".w3-button").on("mouseenter", function () {
-            var comment = $(this).attr("popupcomment");
+            var comment = $(this).attr("title");
             if (comment) {
                 var html = "<div>" + comment + "</div>";
                 PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv", { Button: this });
@@ -288,7 +289,7 @@ var UI = (function () {
         });
 
         $(".w3-bar-item").on("mouseenter", function () {
-            var comment = $(this).attr("popupcomment");
+            var comment = $(this).attr("title");
             if (comment) {
                 var html = "<div>" + comment + "</div>";
                 PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv", { Button: this });

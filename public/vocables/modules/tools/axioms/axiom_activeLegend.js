@@ -44,9 +44,10 @@ var Axiom_activeLegend = (function () {
 
             if (node.data.type == "Class") {
                 self.hideLegendItems();
-                if (self.currentObjectProperty) {
+                var siblingObjectPropertyUri=self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id,"ObjectProperty")
+                if (siblingObjectPropertyUri) {
 
-                    Axioms_suggestions.getValidClassesForProperty(self.currentObjectProperty.id, function (err, classes) {
+                    Axioms_suggestions.getValidClassesForProperty(siblingObjectPropertyUri, function (err, classes) {
                         self.setSuggestionsSelect(classes, true);
                     })
                 } else {
@@ -57,14 +58,16 @@ var Axiom_activeLegend = (function () {
 
             } else if (node.data.type == "ObjectProperty") {
                 self.hideLegendItems();
-                if (!self.currentClass.id) {
-                    var properties = Axiom_editor.getAllProperties();
-                    self.setSuggestionsSelect(properties, true);
-                } else {
-                    Axioms_suggestions.getValidPropertiesForClass(self.currentClass.id, function (err, properties) {
+                var siblingObjectClassUri=self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id,"Class")  || self.currentClass.data.id
+                if (siblingObjectClassUri) {
+                    Axioms_suggestions.getValidPropertiesForClass(siblingObjectClassUri, function (err, properties) {
                         self.setSuggestionsSelect(properties, true);
 
                     });
+
+                } else {
+                    var properties = Axiom_editor.getAllProperties();
+                    self.setSuggestionsSelect(properties, true);
                 }
             } else if (node.data.type == "Restriction") {
                 self.hideLegendItems();
@@ -92,6 +95,16 @@ var Axiom_activeLegend = (function () {
             }
         }
     };
+
+    self.getGraphSiblingUri=function(connectiveParent,type){
+        var siblingIds=Axioms_graph.axiomsVisjsGraph.network.getConnectedNodes(connectiveParent,"to")
+        if(!siblingIds || siblingIds.length==0)
+            return null;
+           var sibling= Axioms_graph.axiomsVisjsGraph.data.nodes.get(siblingIds)[0];
+        if(sibling.data.type==type)
+            return sibling.data.id
+        return null
+    }
     /*
     if unique, filters exiting nodes in graph before showing list
     *
@@ -108,7 +121,7 @@ var Axiom_activeLegend = (function () {
         } else {
             filteredItems = items;
         }
-        common.fillSelectOptions("axioms_legend_suggestionsSelect", items, false, "label", "id");
+        common.fillSelectOptions("axioms_legend_suggestionsSelect", filteredItems, false, "label", "id");
     }
 
 
@@ -468,6 +481,7 @@ var Axiom_activeLegend = (function () {
     self.saveAxiom = function () {
         if (confirm("Save Axiom")) {
             var triples = self.visjsGraphToTriples();
+         //   triples=self.testAxioms
             Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
             });
         }
@@ -600,199 +614,58 @@ var Axiom_activeLegend = (function () {
         return triples;
     };
 
-    self.testTriplesCreation = function () {
-        var visjsData = {
-            nodes: [
-                {
-                    id: "https://spec.industrialontologies.org/ontology/core/Core/DesignativeInformationContentEntity",
-                    label: "designative information content entity",
-                    shape: "dot",
-                    color: "#00afef",
-                    size: 8,
-                    level: 0,
-                    font: {
-                        bold: true,
-                        color: "#00afef",
-                    },
-                    data: {
-                        id: "https://spec.industrialontologies.org/ontology/core/Core/DesignativeInformationContentEntity",
-                        label: "designative information content entity",
-                        type: "Class",
-                    },
-                    borderWidth: 1,
-                },
-                {
-                    id: "_:b5b03383671",
-                    label: "┓",
-                    shape: "circle",
-                    color: "#70ac47",
-                    size: 8,
-                    level: 1,
-                    font: null,
-                    data: {
-                        id: "_:b5b03383671",
-                        label: "Complement",
-                        type: "Connective",
-                        subType: "owl:complementOf",
-                    },
-                    borderWidth: 1,
-                    _graphPosition: {
-                        x: 329,
-                        y: 214,
-                    },
-                },
-                {
-                    id: "https://spec.industrialontologies.org/ontology/core/Core/AssemblyProcess",
-                    label: "assembly_process",
-                    shape: "dot",
-                    color: "#00afef",
-                    size: 8,
-                    level: 2,
-                    font: {
-                        bold: true,
-                        color: "#00afef",
-                    },
-                    data: {
-                        id: "https://spec.industrialontologies.org/ontology/core/Core/AssemblyProcess",
-                        label: "assembly_process",
-                        type: "Class",
-                    },
-                    borderWidth: 1,
-                },
-                {
-                    id: "_:b5498d0f17c",
-                    label: "⊓",
-                    shape: "circle",
-                    color: "#70ac47",
-                    size: 8,
-                    level: 2,
-                    font: null,
-                    data: {
-                        id: "_:b5b03383671",
-                        label: "Intersection",
-                        type: "Connective",
-                        subType: "owl:intersectionOf",
-                    },
-                    borderWidth: 1,
-                    _graphPosition: {
-                        x: 359,
-                        y: 251,
-                    },
-                },
-                {
-                    id: "https://spec.industrialontologies.org/ontology/core/Core/Algorithm",
-                    label: "algorithm",
-                    shape: "dot",
-                    color: "#00afef",
-                    size: 8,
-                    level: 3,
-                    font: {
-                        bold: true,
-                        color: "#00afef",
-                    },
-                    data: {
-                        id: "https://spec.industrialontologies.org/ontology/core/Core/Algorithm",
-                        label: "algorithm",
-                        type: "Class",
-                    },
-                    borderWidth: 1,
-                },
-                {
-                    id: "_:be37acfeb78",
-                    label: "some",
-                    shape: "box",
-                    color: "#cb9801",
-                    size: 8,
-                    level: 3,
-                    font: null,
-                    data: {
-                        id: "_:b5b03383671",
-                        label: "some",
-                        resourceType: "Restriction",
-                        subType: "owl:someValuesFrom",
-                    },
-                    borderWidth: 1,
-                    _graphPosition: {
-                        x: 420,
-                        y: 271,
-                    },
-                },
-                {
-                    id: "http://purl.obolibrary.org/obo/BFO_0000084",
-                    label: "generically_depends_on_at_some_time",
-                    shape: "box",
-                    color: "#f5ef39",
-                    size: 8,
-                    level: 4,
-                    font: null,
-                    data: {
-                        id: "http://purl.obolibrary.org/obo/BFO_0000084",
-                        label: "generically_depends_on_at_some_time",
-                        type: "ObjectProperty",
-                    },
-                    fixed: false,
-                    borderWidth: 1,
-                },
-                {
-                    id: "https://spec.industrialontologies.org/ontology/core/Core/BusinessFunction",
-                    label: "business_function",
-                    shape: "dot",
-                    color: "#00afef",
-                    size: 8,
-                    level: 4,
-                    font: {
-                        bold: true,
-                        color: "#00afef",
-                    },
-                    data: {
-                        id: "https://spec.industrialontologies.org/ontology/core/Core/BusinessFunction",
-                        label: "business_function",
-                        type: "Class",
-                    },
-                    borderWidth: 5,
-                },
-            ],
-            edges: [
-                {
-                    id: "74732",
-                    from: "https://spec.industrialontologies.org/ontology/core/Core/DesignativeInformationContentEntity",
-                    to: "_:b5b03383671",
-                },
-                {
-                    id: "58559",
-                    from: "_:b5b03383671",
-                    to: "https://spec.industrialontologies.org/ontology/core/Core/AssemblyProcess",
-                },
-                {
-                    id: "10d1a",
-                    from: "_:b5b03383671",
-                    to: "_:b5498d0f17c",
-                },
-                {
-                    id: "06174",
-                    from: "_:b5498d0f17c",
-                    to: "https://spec.industrialontologies.org/ontology/core/Core/Algorithm",
-                },
-                {
-                    id: "fb596",
-                    from: "_:b5498d0f17c",
-                    to: "_:be37acfeb78",
-                },
-                {
-                    id: "7114c",
-                    from: "_:be37acfeb78",
-                    to: "http://purl.obolibrary.org/obo/BFO_0000084",
-                },
-                {
-                    id: "406d3",
-                    from: "_:be37acfeb78",
-                    to: "https://spec.industrialontologies.org/ontology/core/Core/BusinessFunction",
-                },
-            ],
-        };
 
-        self.visjsGraphToTriples(visjsData.nodes, visjsData.edges);
-    };
+
+    self.testAxioms=[
+        {
+            "predicate": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            "subject": "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
+            "object": "_766d7ff1-231a-458b-88f6-06a93394a27d"
+        },
+        {
+            "predicate": "http://www.w3.org/2002/07/owl#onProperty",
+            "subject": "_766d7ff1-231a-458b-88f6-06a93394a27d",
+            "object": "http://purl.obolibrary.org/obo/BFO_0000057"
+        },
+        {
+            "predicate": "http://www.w3.org/2002/07/owl#someValuesFrom",
+            "subject": "_766d7ff1-231a-458b-88f6-06a93394a27d",
+            "object": "https://spec.industrialontologies.org/ontology/core/Core/Buyer"
+        },
+        {
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "subject": "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
+            "object": "http://www.w3.org/2002/07/owl#Class"
+        },
+        {
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "subject": "http://purl.obolibrary.org/obo/BFO_0000057",
+            "object": "http://www.w3.org/2002/07/owl#ObjectProperty"
+        },
+        {
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "subject": "_766d7ff1-231a-458b-88f6-06a93394a27d",
+            "object": "http://www.w3.org/2002/07/owl#Restriction"
+        },
+        {
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "subject": "_0b680e14-f039-4a68-b600-012652eca77e",
+            "object": "http://www.w3.org/2002/07/owl#Ontology"
+        },
+        {
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "subject": "https://spec.industrialontologies.org/ontology/core/Core/Buyer",
+            "object": "http://www.w3.org/2002/07/owl#Class"
+        }
+    ]
+
+
+
+
+
+
+
+
     return self;
 })();
 

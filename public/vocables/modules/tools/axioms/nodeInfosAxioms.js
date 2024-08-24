@@ -289,7 +289,7 @@ var NodeInfosAxioms = (function () {
         toGraphMl: function () {
             axioms_graph.axiomsVisjsGraph.toGraphMl();
         },
-        getTriples: function () {
+        showTriples: function () {
             if (!self.currentJstreeNode) {
                 return alert("No axiom Selected");
             }
@@ -307,7 +307,7 @@ var NodeInfosAxioms = (function () {
     self.newAxiom = function () {
 
 
-
+        Axiom_activeLegend.isLegendActive = false
         self.switchLeftPanelDisplay("new")
 
           //  Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv",self.currentSource,self.currentResource );
@@ -344,10 +344,12 @@ var NodeInfosAxioms = (function () {
         if(role=="new"){
             $("#nodeInfosAxioms_newAxiomPanel").css("display","flex")
             $("#nodeInfosAxioms_graphPanelDiv").css("display","none")
+            $("#nodeInfosAxioms_graphDiv").width("50vw")
 
         }else if(role=="show"){
             $("#nodeInfosAxioms_newAxiomPanel").css("display","none")
             $("#nodeInfosAxioms_graphPanelDiv").css("display","flex")
+            $("#nodeInfosAxioms_graphDiv").width("70vw")
         }
 
 

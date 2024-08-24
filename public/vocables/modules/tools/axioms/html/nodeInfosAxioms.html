@@ -14,18 +14,19 @@
     </div>-->
         <div style="display: flex; flex-direction: row; width: 100%">
             <div>
-                <div style="display: flex; flex-direction: column" id="nodeInfosAxioms_graphPanelDiv">
+                <div style="display: flex; flex-direction: column;display:none" id="nodeInfosAxioms_graphPanelDiv" >
                     <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.toGraphMl()">toGraphML
                     </button>
                     <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.toSVG()">toSVG</button>
-                    <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.getTriples()">getTriples
+                    <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.showTriples()">show triples
                     </button>
                     <hr/>
-                    <button class="w3-button slsv-button-2" onclick="NodeInfosAxioms.newAxiom()">New axiom</button>
+
                 </div>
 
 
                 <div style="display: flex; flex-direction: column">
+                    <button class="w3-button slsv-button-2" onclick="NodeInfosAxioms.newAxiom()">New axiom</button>
                     <div id="nodeInfosAxioms_activeLegendDiv"
                          style="width: 100px; height: 200px; background-color: #ddd"></div>
                 </div>
@@ -40,11 +41,7 @@
                             style="width: 250px; overflow: auto"></select>
                     <div>
                         <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.clearAxiom()">clear</button>
-                        <!--  <button onclick="Axiom_activeLegend.graphToManchesterSyntax()">Manchester</button>-->
-                        <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.axiomTriplesToManchester()">
-                            toManchester
-                        </button>
-
+                        <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.showTriples()">triples</button>
                         <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.saveAxiom()">save</button>
                     </div>
                 </div>
@@ -58,7 +55,9 @@
     </div>
 
     <div>
-        <div id="axiomsEditor_textDiv" style="width: 100%; height: 50px; background-color: #ddd"></div>
+        <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.axiomTriplesToManchester()">
+            toManchester
+        </button> <span id="axiomsEditor_textDiv" style="width: 80%; height: 50px; background-color: #ddd"></span>
     </div>
 </div>
 

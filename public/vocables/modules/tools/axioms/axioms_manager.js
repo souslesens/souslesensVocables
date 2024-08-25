@@ -1,6 +1,7 @@
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import elasticSearchProxy from "../../search/elasticSearchProxy.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+import Axiom_editor  from "./axiom_editor.js";
 
 /**
  * one graph for each axiom , uri=[Source graphUri]/  »concepts »/[classUri.lastpart]/[axiomType]/[id]/
@@ -177,7 +178,14 @@ var Axioms_manager = (function () {
         });
         currentAxiom = currentAxiom.replace(/\s\s/gm, " ");
 
-        currentAxiom = currentAxiom.replace(/[<>]/gm, " ");
+
+        currentAxiom = currentAxiom.replace(/<([^>]+)>/gm, function(expr,value){
+            if(Axiom_editor.allResourcesMap[value])
+            return Axiom_editor.allResourcesMap[value].label;
+            return value
+        });
+
+     //   currentAxiom = currentAxiom.replace(/[<>]/gm, " ");
 
         return currentAxiom;
     };
@@ -520,7 +528,7 @@ var Axioms_manager = (function () {
 
     return self;
 })();
-Axioms_manager.test();
+//Axioms_manager.test();
 
 export default Axioms_manager;
 window.Axiom_manager = Axioms_manager;

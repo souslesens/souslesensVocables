@@ -343,13 +343,17 @@ var NodeInfosAxioms = (function () {
     self.switchLeftPanelDisplay=function(role){
         if(role=="new"){
             $("#nodeInfosAxioms_newAxiomPanel").css("display","flex")
+            $("#nodeInfosAxioms_manchesterDiv").css("display","flex")
             $("#nodeInfosAxioms_graphPanelDiv").css("display","none")
             $("#nodeInfosAxioms_graphDiv").width("50vw")
+            Axioms_graph.clearGraph()
 
         }else if(role=="show"){
             $("#nodeInfosAxioms_newAxiomPanel").css("display","none")
+            $("#nodeInfosAxioms_manchesterDiv").css("display","none")
             $("#nodeInfosAxioms_graphPanelDiv").css("display","flex")
             $("#nodeInfosAxioms_graphDiv").width("70vw")
+            Axioms_graph.clearGraph()
         }
 
 

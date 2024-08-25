@@ -156,7 +156,7 @@ var KGcreator_run = (function () {
 
         /*  $("#KGcreator_triplesDataTableDiv").html(str)
           return;*/
-        Export.showDataTable("KGcreator_triplesDataTableDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {});
+        Export.showDataTable("mainDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {});
     };
 
     self.indexGraph = function (callback) {

@@ -390,7 +390,7 @@ var Export = (function () {
             div = "mainDialogDiv";
         }
 
-        $("#" + div).html("<div style='width: 90vw;height: 90vh'> <table id='dataTableDivExport'></table></div>");
+        $("#" + div).html("<div style='width: 70vw;height: 80vh'> <table id='dataTableDivExport'></table></div>");
 
         $("#" + div).dialog("open");
         if (!buttons) {

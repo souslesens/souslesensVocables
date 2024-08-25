@@ -44,7 +44,7 @@ var Axiom_activeLegend = (function () {
 
             if (node.data.type == "Class") {
                 self.hideLegendItems();
-                var siblingObjectPropertyUri=self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id,"ObjectProperty")
+                var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty")
                 if (siblingObjectPropertyUri) {
 
                     Axioms_suggestions.getValidClassesForProperty(siblingObjectPropertyUri, function (err, classes) {
@@ -58,7 +58,7 @@ var Axiom_activeLegend = (function () {
 
             } else if (node.data.type == "ObjectProperty") {
                 self.hideLegendItems();
-                var siblingObjectClassUri=self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id,"Class")  || self.currentClass.data.id
+                var siblingObjectClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class")
                 if (siblingObjectClassUri) {
                     Axioms_suggestions.getValidPropertiesForClass(siblingObjectClassUri, function (err, properties) {
                         self.setSuggestionsSelect(properties, true);
@@ -80,7 +80,7 @@ var Axiom_activeLegend = (function () {
                     {id: "http://www.w3.org/2002/07/owl#cardinality", label: "cardinality"},
                 ];
                 self.setSuggestionsSelect(suggestions, false);
-            }else if (node.data.type == "Connective") {
+            } else if (node.data.type == "Connective") {
                 self.hideLegendItems();
                 var suggestions = [
                     {label: "Union", id: "http://www.w3.org/2002/07/owl#unionOf"},
@@ -91,18 +91,20 @@ var Axiom_activeLegend = (function () {
                 self.setSuggestionsSelect(suggestions, false);
 
             } else {
-               alert("XXXX")
+                alert("XXXX")
             }
         }
     };
 
-    self.getGraphSiblingUri=function(connectiveParent,type){
-        var siblingIds=Axioms_graph.axiomsVisjsGraph.network.getConnectedNodes(connectiveParent,"to")
-        if(!siblingIds || siblingIds.length==0)
+    self.getGraphSiblingUri = function (connectiveParent, type) {
+        var siblingIds = Axioms_graph.axiomsVisjsGraph.network.getConnectedNodes(connectiveParent, "to")
+        if (!siblingIds || siblingIds.length == 0) {
             return null;
-           var sibling= Axioms_graph.axiomsVisjsGraph.data.nodes.get(siblingIds)[0];
-        if(sibling.data.type==type)
+        }
+        var sibling = Axioms_graph.axiomsVisjsGraph.data.nodes.get(siblingIds)[0];
+        if (sibling.data.type == type) {
             return sibling.data.id
+        }
         return null
     }
     /*
@@ -346,7 +348,7 @@ var Axiom_activeLegend = (function () {
         }
         var html = "";
         html = '    <span class="popupMenuItem" onclick="Axiom_activeLegend.removeNodeFromGraph();"> Remove Node</span>';
-        html = '    <span class="popupMenuItem" onclick="NodeInfosAxioms.nodeInfos()">Node Infos</span>';
+        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.nodeInfos()">Node Infos</span>';
 
 
         $("#popupMenuWidgetDiv").html(html);
@@ -374,33 +376,24 @@ var Axiom_activeLegend = (function () {
 
     self.removeNodeFromGraph = function () {
         var node = self.currentGraphNode;
-        var edges = Axioms_graph.axiomsVisjsGraph.data.edges.get();
 
-        var edgesFromMap = {};
-        edges.forEach(function (edge) {
-            if (!edgesFromMap[edge.from]) {
-                edgesFromMap[edge.from] = [];
-            }
-            edgesFromMap[edge.from].push(edge);
-        });
+        if (Axioms_graph.axiomsVisjsGraph.network.getConnectedNodes(node.id, "to").length > 0) {
+            alert("cannot remove a parent node ")
+        } else {
+            var fromNodeId = Axioms_graph.axiomsVisjsGraph.network.getConnectedNodes(node.id, "from")[0]
+            var edges = Axioms_graph.axiomsVisjsGraph.network.getConnectedEdges(node.id)
+            Axioms_graph.axiomsVisjsGraph.data.nodes.remove([node]);
+            Axioms_graph.axiomsVisjsGraph.data.edges.remove(edges);
 
-        var nodesToRemove = [];
-        var edgesToRemove = [];
+            var fromNode = Axioms_graph.axiomsVisjsGraph.data.nodes.get(fromNodeId)
+            Axioms_graph.currentGraphNode = fromNode;
+            Axioms_graph.outlineNode(fromNode.id)
 
-        function recurse(nodeId) {
-            var edges = edgesFromMap[nodeId];
-            if (edges) {
-                edges.forEach(function (edge) {
-                    edgesToRemove.push(edge.id);
-                    nodesToRemove.push(edge.from);
-                    recurse(edge.to);
-                });
-            }
         }
 
-        recurse(node.id);
-        Axioms_graph.axiomsVisjsGraph.data.edges.remove(edgesToRemove);
-        Axioms_graph.axiomsVisjsGraph.data.nodes.remove(nodesToRemove);
+
+        return;
+
     };
 
 
@@ -481,7 +474,7 @@ var Axiom_activeLegend = (function () {
     self.saveAxiom = function () {
         if (confirm("Save Axiom")) {
             var triples = self.visjsGraphToTriples();
-         //   triples=self.testAxioms
+            //   triples=self.testAxioms
             Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
             });
         }
@@ -615,8 +608,7 @@ var Axiom_activeLegend = (function () {
     };
 
 
-
-    self.testAxioms=[
+    self.testAxioms = [
         {
             "predicate": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
             "subject": "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
@@ -658,12 +650,6 @@ var Axiom_activeLegend = (function () {
             "object": "http://www.w3.org/2002/07/owl#Class"
         }
     ]
-
-
-
-
-
-
 
 
     return self;

@@ -162,6 +162,65 @@ var Axioms_graph = (function () {
                     callbackSeries();
                 },
 
+
+
+                //reduce distance between successiveBlankNodes
+                function (callbackSeries) {
+return callbackSeries();
+
+                var itemsToRemove=[]
+
+
+
+                    function recurse(nodeId){
+
+                        var node=nodesMap[nodeId];
+                        if(!node)
+                            return
+                        if(! node.predicates)
+                            return
+                        node.predicates.forEach(function (predicate,index) {
+                           // if(nodeId.indexOf("http")<0 && predicate.o.indexOf("http")<0){
+                              if(predicate.p=="http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"){
+
+                                var predicateObject=nodesMap[predicate.o]
+                                if(!  predicateObject.predicates)
+                                    return
+
+                                predicateObject.predicates.forEach(function (nextPredicate) {
+                                    if(nextPredicate.p=="http://www.w3.org/1999/02/22-rdf-syntax-ns#first") {
+                                        node.predicates.splice(index,1)
+                                        node.predicates.push(nextPredicate)
+                                        recurse(nextPredicate.o)
+                                    }
+
+                                })
+                            }else{
+                                recurse(predicate.o)
+                            }
+
+
+                        })
+                    }
+
+
+
+
+
+
+                    itemsToRemove.forEach(function(nodeId){
+                     delete nodesMap[nodeId]
+                    })
+
+                    recurse(rootNodeId)
+
+
+
+
+                    callbackSeries()
+                },
+
+
                 //recurse nodes from nodeId
                 function (callbackSeries) {
                     var existingNodes = {};

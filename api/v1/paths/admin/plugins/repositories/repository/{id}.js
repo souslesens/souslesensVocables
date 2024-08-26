@@ -54,9 +54,7 @@ module.exports = function () {
                     status: 400,
                 });
             } else {
-                if (req.body.toFetch) {
-                    await toolModel.fetchRepository(repository, req.body.data);
-                }
+                await toolModel.fetchRepository(repository, req.body.data);
 
                 const response = await toolModel.getRepositoryPlugins(repository);
 

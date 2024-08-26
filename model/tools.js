@@ -149,7 +149,7 @@ class ToolModel {
             if (!fs.existsSync(repositoryPath)) {
                 await simpleGit().clone(url, repositoryPath);
             } else {
-                await simpleGit(repositoryPath).remote(["set-url", "origin", url]).pull();
+                await simpleGit(repositoryPath).remote(["set-url", "origin", url]).fetch();
             }
 
             if (repositoryInfo.hasOwnProperty("version")) {

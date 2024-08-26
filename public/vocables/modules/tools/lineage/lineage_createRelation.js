@@ -276,86 +276,7 @@ var Lineage_createRelation = (function () {
                     },
 
                     function (callbackSeries) {
-                        options.contextMenu = {
-                            refineProperty: {
-                                label: "Refine Property",
-                                action: function (_e) {
-                                    if (false && self.currentPropertiesTreeNode.data.source != Config.currentTopLevelOntology) {
-                                        return alert("only properties from " + Config.currentTopLevelOntology + " can be refined");
-                                    }
-                                    var subPropertyLabel = prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
-                                    if (!subPropertyLabel) {
-                                        return;
-                                    }
-                                    Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function (err, result) {
-                                        if (err) {
-                                            return alert(err);
-                                        }
-
-                                        if (!self.domainOntologyProperties) {
-                                            self.domainOntologyProperties = [];
-                                        }
-                                        var newProp = {
-                                            id: result.uri,
-                                            label: subPropertyLabel,
-                                            superProp: self.currentPropertiesTreeNode.data.id,
-                                        };
-                                        self.domainOntologyProperties.push(newProp);
-                                        var propId = newProp.id;
-
-                                        var superpropConstraints = JSON.parse(
-                                            JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]["constraints"][self.currentPropertiesTreeNode.data.id])
-                                        );
-                                        superpropConstraints.source = Lineage_sources.activeSource;
-                                        superpropConstraints.label = subPropertyLabel;
-                                        superpropConstraints.parent = self.currentPropertiesTreeNode.data.id;
-                                        superpropConstraints.superProp = self.currentPropertiesTreeNode.data.id;
-                                        var propertiesToAdd = {};
-                                        propertiesToAdd[propId] = newProp;
-                                        var constraintsToAdd = {};
-                                        constraintsToAdd[propId] = superpropConstraints;
-                                        OntologyModels.updateModel(
-                                            Lineage_sources.activeSource,
-                                            {
-                                                properties: propertiesToAdd,
-                                                constraints: constraintsToAdd,
-                                            },
-                                            null,
-                                            function (err, result2) {
-                                                if (err) {
-                                                    return alert(err.responsetext);
-                                                }
-
-                                                var jstreeData = [
-                                                    {
-                                                        id: result.uri,
-                                                        text: subPropertyLabel,
-                                                        parent: self.currentPropertiesTreeNode.data.id,
-                                                        data: {
-                                                            id: result.uri,
-                                                            label: subPropertyLabel,
-                                                            source: Lineage_sources.activeSource,
-                                                        },
-                                                    },
-                                                ];
-
-                                                JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
-                                            }
-                                        );
-                                    });
-                                },
-                            },
-                            nodeInfos: {
-                                label: "Node infos",
-                                action: function (_e) {
-                                    // pb avec source
-                                    NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
-                                        //  $("#mainDialogDiv").parent().css("z-index", 1);
-                                    });
-                                },
-                            },
-                        };
-
+                        options.contextMenu = self.getContextMenu()
                         options.doNotAdjustDimensions = 1;
                         JstreeWidget.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {});
                         callbackSeries();
@@ -376,6 +297,93 @@ var Lineage_createRelation = (function () {
             );
         });
     };
+
+    self.getContextMenu=function(){
+        var items={
+
+            refineProperty: {
+                label: "Refine Property",
+                    action: function (_e) {
+                    if (false && self.currentPropertiesTreeNode.data.source != Config.currentTopLevelOntology) {
+                        return alert("only properties from " + Config.currentTopLevelOntology + " can be refined");
+                    }
+                    var subPropertyLabel = prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
+                    if (!subPropertyLabel) {
+                        return;
+                    }
+                    Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function (err, result) {
+                        if (err) {
+                            return alert(err);
+                        }
+
+                        if (!self.domainOntologyProperties) {
+                            self.domainOntologyProperties = [];
+                        }
+                        var newProp = {
+                            id: result.uri,
+                            label: subPropertyLabel,
+                            superProp: self.currentPropertiesTreeNode.data.id,
+                        };
+                        self.domainOntologyProperties.push(newProp);
+                        var propId = newProp.id;
+
+                        var superpropConstraints = JSON.parse(
+                          //  JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]["constraints"][self.currentPropertiesTreeNode.data.id])
+                            JSON.stringify(Config.ontologiesVocabularyModels[Lineage_sources.activeSource]["constraints"][self.currentPropertiesTreeNode.data.id])
+
+                        );
+                        superpropConstraints.source = Lineage_sources.activeSource;
+                        superpropConstraints.label = subPropertyLabel;
+                        superpropConstraints.parent = self.currentPropertiesTreeNode.data.id;
+                        superpropConstraints.superProp = self.currentPropertiesTreeNode.data.id;
+                        var propertiesToAdd = {};
+                        propertiesToAdd[propId] = newProp;
+                        var constraintsToAdd = {};
+                        constraintsToAdd[propId] = superpropConstraints;
+                        OntologyModels.updateModel(
+                            Lineage_sources.activeSource,
+                            {
+                                properties: propertiesToAdd,
+                                constraints: constraintsToAdd,
+                            },
+                            null,
+                            function (err, result2) {
+                                if (err) {
+                                    return alert(err.responsetext);
+                                }
+
+                                var jstreeData = [
+                                    {
+                                        id: result.uri,
+                                        text: subPropertyLabel,
+                                        parent: self.currentPropertiesTreeNode.data.id,
+                                        data: {
+                                            id: result.uri,
+                                            label: subPropertyLabel,
+                                            source: Lineage_sources.activeSource,
+                                        },
+                                    },
+                                ];
+
+                                JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                            }
+                        );
+                    });
+                },
+            },
+            nodeInfos: {
+                label: "Node infos",
+                    action: function (_e) {
+                    // pb avec source
+                    NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
+                        //  $("#mainDialogDiv").parent().css("z-index", 1);
+                    });
+                },
+            },
+        };
+        return items;
+
+    }
 
     self.execAddEdgeFromGraph = function () {};
     self.addGenericPredicatesToPredicatesTree = function () {

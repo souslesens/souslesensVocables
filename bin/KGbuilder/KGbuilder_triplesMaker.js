@@ -177,7 +177,19 @@ var KGbuilder_triplesMaker = {
             }
             subjectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.s);
             return callback(null, subjectStr);
-        } else if (tableMappings.transform && tableMappings.transform[mapping.s]) {
+        }
+        
+        //encodedurl from string
+    else if (typeof mapping.s === "string" && mapping.s.endsWith("_£")) {
+        var key=mapping.s.replace("_£","")
+            if (line[key]) {
+                subjectStr = KGbuilder_triplesMaker.getStringHashCode(line[key]);
+            }
+            else
+                subjectStr=null
+
+        }
+        else if (tableMappings.transform && tableMappings.transform[mapping.s]) {
             try {
                 if (line[mapping.s]) {
 
@@ -252,7 +264,20 @@ var KGbuilder_triplesMaker = {
         } else if ((typeof mapping.o === "string" && mapping.o.endsWith("_$")) || mapping.isObjectBlankNode) {
             objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
             return callback(null, objectStr);
-        } else {
+        }
+        //encodedurl from string
+        else if (typeof mapping.o === "string" && mapping.o.endsWith("_£")) {
+            var key=mapping.s.replace("_£","")
+            if (line[key]) {
+                objectStr = KGbuilder_triplesMaker.getStringHashCode(line[key]);
+            }
+            else
+                objectStr=null
+
+        }
+        
+        
+        else {
             var isTransform = false;
             if (line[mapping.o] === 0) {
                 line[mapping.o] = "0";
@@ -543,6 +568,17 @@ var KGbuilder_triplesMaker = {
             return value;
         }
     },
+
+    getStringHashCode :function(str) {
+
+        var hashCode = s => s.split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0)
+
+        var code=hashCode(str)
+        code=code.toString(16);
+console.log(code+"    "+str+"   ")
+        return code
+    },
+    
     getLookupValue: function(lookupName, value, callback) {
         var lookupArray = lookupName.split("|");
         var target = null;

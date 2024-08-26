@@ -424,7 +424,7 @@ const PluginsRepositories = (props: DispatcherProps) => {
 
     const [filter, setFilter] = React.useState<string>("");
     const [order, setOrder] = React.useState<Order>("asc");
-    const [orderBy, setOrderBy] = React.useState<keyof Database>("id");
+    const [orderBy, setOrderBy] = React.useState<keyof Database>("url");
 
     const handleCloseModal = () => {
         updateModel({ type: "PluginRepositoriesDialogModal", payload: null });
@@ -455,10 +455,22 @@ const PluginsRepositories = (props: DispatcherProps) => {
             .catch((error) => snack(error, "error"));
     };
 
+    const handleSortedTable = (property: keyof RepositoryType) => {
+        const isAsc = orderBy === property && order === "asc";
+        setOrder(isAsc ? "desc" : "asc");
+        setOrderBy(property);
+    };
+
     const handleSubmit = (identifier: string | null, data: RepositoryType, toFetch: boolean) => {
         setOpenModal(false);
         onSubmitRepository(identifier, data, toFetch);
     };
+
+    const sortedRepositories = Object.entries(model.repositories.data).slice().sort((a, b) => {
+        const left: string = a[1][orderBy] as string;
+        const right: string = b[1][orderBy] as string;
+        return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+    });
 
     return (
         <Mui.Stack spacing={{ xs: 2 }} useFlexGap>
@@ -466,9 +478,9 @@ const PluginsRepositories = (props: DispatcherProps) => {
                 <Mui.Autocomplete
                     disablePortal
                     id="filter-repositories"
-                    options={Object.keys(model.repositories.data)}
+                    options={Object.values(model.repositories.data).map((data) => data.url)}
                     onInputChange={(event, value) => setFilter(value)}
-                    renderInput={(params) => <Mui.TextField {...params} label="Filter repositories by identifier" />}
+                    renderInput={(params) => <Mui.TextField {...params} label="Filter repositories by URL" />}
                 />
 
                 <Mui.TableContainer component={Mui.Paper} sx={{ flex: 1 }}>
@@ -476,7 +488,7 @@ const PluginsRepositories = (props: DispatcherProps) => {
                         <Mui.TableHead>
                             <Mui.TableRow>
                                 <Mui.TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                    <Mui.TableSortLabel active={orderBy === "url"} direction={order}>
+                                    <Mui.TableSortLabel active={orderBy === "url"} direction={order} onClick={() => handleSortedTable("url")}>
                                         URL
                                     </Mui.TableSortLabel>
                                 </Mui.TableCell>
@@ -493,7 +505,9 @@ const PluginsRepositories = (props: DispatcherProps) => {
                         </Mui.TableHead>
 
                         <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
-                            {Object.entries(model.repositories.data).map(([key, data]) => (
+                            {sortedRepositories
+                                .filter(([key, data]) => data.url.includes(filter))
+                                .map(([key, data]) => (
                                 <Mui.TableRow key={key}>
                                     <Mui.TableCell>
                                         <Mui.Stack alignItems="center" direction="row" spacing={{ xs: 1 }} useFlexGap>

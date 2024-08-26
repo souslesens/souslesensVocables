@@ -16,7 +16,7 @@ describe("ToolModel", () => {
 
     test("Check the tools lists", async () => {
         // Related to NATIVE_TOOLS content from model/tools.js
-        expect(toolModel.nativeTools.length).toStrictEqual(11);
+        expect(toolModel.nativeTools.length).toStrictEqual(12);
     });
 
     test("Check the plugins lists", async () => {

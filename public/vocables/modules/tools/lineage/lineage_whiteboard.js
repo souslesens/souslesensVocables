@@ -37,7 +37,7 @@ var Lineage_whiteboard = (function () {
     self.lineageVisjsGraph = new VisjsGraphClass("graphDiv", { nodes: [], edges: [] }, {});
 
     self.showLimit = 1000;
-
+    self.MoreOptionsShow = {};
     var graphContext = {};
 
     self.propertyColors = {};
@@ -3376,17 +3376,17 @@ attrs.color=self.getSourceColor(superClassValue)
     };
     self.hideShowMoreOptions = function (hideShowParameter, divId) {
         if (hideShowParameter == "hide") {
-            self.MoreOptionsShow = false;
+            self.MoreOptionsShow[divId] = false;
         }
         if (hideShowParameter == "show") {
-            self.MoreOptionsShow = true;
+            self.MoreOptionsShow[divId] = true;
         }
-        if (self.MoreOptionsShow) {
+        if (self.MoreOptionsShow[divId] || self.MoreOptionsShow[divId]==undefined) {
             $("#" + divId).show();
-            self.MoreOptionsShow = false;
+            self.MoreOptionsShow[divId] = false;
         } else {
             $("#" + divId).hide();
-            self.MoreOptionsShow = true;
+            self.MoreOptionsShow[divId] = true;
         }
     };
 

@@ -403,11 +403,6 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
                 </Mui.Stack>
             </Mui.DialogContent>
             <Mui.DialogActions>
-                {!edit && (
-                    <Mui.FormGroup sx={{ flex: 1, mx: 1 }}>
-                        <Mui.FormControlLabel control={<Mui.Checkbox defaultChecked />} id="fetch" label="Fetch the Repository after the Registration" name="fetch" />
-                    </Mui.FormGroup>
-                )}
                 <Mui.Button color="primary" startIcon={<MuiIcons.Done />} type="submit" variant="contained">
                     {"Submit"}
                 </Mui.Button>

@@ -248,8 +248,10 @@ var NodeInfosWidget = (function () {
     self.configureEditPredicateWidget = function () {
         $("#editPredicate_savePredicateButton").off("click");
         $("#editPredicate_savePredicateButton").click(function () {
-            self.storeRecentPredicates();
-            self.addPredicate();
+            PredicatesSelectorWidget.storeRecentPredicates();
+            self.addPredicate(null,null,null,null,function(){
+                PredicatesSelectorWidget.fillSelectRecentEditPredicate();
+            });
         });
     };
 
@@ -1246,13 +1248,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         });
     };
     self.showModifyPredicateDialog = function (predicateId) {
+        self.setLargerObjectTextArea();
         PredicatesSelectorWidget.currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         if (!PredicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
             $("#editPredicate_savePredicateButton").click(function () {
-                self.storeRecentPredicates();
+                //PredicatesSelectorWidget.storeRecentPredicates();
                 
                 self.deletePredicate(predicateId,function(){
                     self.addPredicate(null,null,null,null,function(){
@@ -1378,16 +1381,12 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     };
 
     self.setLargerObjectTextArea = function () {
+        $("#editPredicate_objectValue").show();
+        //$("#editPredicate_selectsDiv").hide();
         $("#editPredicate_objectValue").css("width", "700px");
         $("#editPredicate_objectValue").css("height", "130px");
     };
-    self.storeRecentPredicates=function(){
-        var recentEditPredicates={predicate:[$('#editPredicate_vocabularySelect').val(),$('#editPredicate_currentVocabPredicateSelect').val()],
-            object:[$('#editPredicate_vocabularySelect2').val(),$('#editPredicate_objectSelect').val()]};
-        var recentEditPredicatesStr=JSON.stringify(recentEditPredicates);
-        common.storeLocally(recentEditPredicatesStr,'recentEditPredicates');
-        
-    };
+    
     return self;
 })();
 

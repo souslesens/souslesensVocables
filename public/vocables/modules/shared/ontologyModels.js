@@ -126,8 +126,8 @@ var OntologyModels = (function () {
                                 queryP +
                                 " SELECT distinct ?prop ?propLabel ?propDomain ?propRange  from <" +
                                 graphUri +
-                                ">  WHERE {\n" +
-                                " ?prop rdf:type ?type. filter (?type in (rdf:Property,<http://www.w3.org/2002/07/owl#AnnotationProperty>,owl:DatatypeProperty))  " +
+                                "> from <http://www.w3.org/2002/07/owl#> WHERE {\n" +
+                                " ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#AnnotationProperty>,owl:DatatypeProperty))  " +
                                 Sparql_common.getVariableLangLabel("prop", true, true) +
                                 "OPTIONAL {?prop rdfs:domain ?propDomain} OPTIONAL {?prop rdfs:range ?propRange}" +
                                 "} limit 10000";

@@ -326,10 +326,12 @@ var Lineage_createRelation = (function () {
                         };
                         self.domainOntologyProperties.push(newProp);
                         var propId = newProp.id;
-
+                        var ontology=self.currentPropertiesTreeNode.parents[self.currentPropertiesTreeNode.parents.length-2]
+                        var x=Config.ontologiesVocabularyModels[ontology].constraints
                         var superpropConstraints = JSON.parse(
+
                           //  JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]["constraints"][self.currentPropertiesTreeNode.data.id])
-                            JSON.stringify(Config.ontologiesVocabularyModels[Lineage_sources.activeSource]["constraints"][self.currentPropertiesTreeNode.data.id])
+                            JSON.stringify(Config.ontologiesVocabularyModels[ontology]["constraints"][self.currentPropertiesTreeNode.data.id])
 
                         );
                         superpropConstraints.source = Lineage_sources.activeSource;

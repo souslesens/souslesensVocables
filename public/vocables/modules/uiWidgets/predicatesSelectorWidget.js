@@ -150,7 +150,7 @@ var PredicatesSelectorWidget = (function () {
         common.fillSelectOptions("editPredicate_vocabularySelect2", vocabularies, true);
     };
 
-    self.setCurrentVocabPropertiesSelect = function (vocabulary, selectId) {
+    self.setCurrentVocabPropertiesSelect = function (vocabulary, selectId,callback) {
         var properties = [];
 
         if (vocabulary == "usual") {
@@ -159,6 +159,10 @@ var PredicatesSelectorWidget = (function () {
             });
             properties.push({ label: "-------", id: "" });
             common.fillSelectOptions(selectId, properties, true, "label", "id");
+            if(callback){
+                callback();
+            }
+
         } else {
             OntologyModels.registerSourcesModel([vocabulary], function (err, result) {
                 properties = OntologyModels.getPropertiesArray(vocabulary);
@@ -167,6 +171,9 @@ var PredicatesSelectorWidget = (function () {
                 properties=common.array.unduplicateArray(properties,'id');
                 common.array.sort(properties, "label");
                 common.fillSelectOptions(selectId, properties, true, "label", "id");
+                if(callback){
+                    callback();
+                }
             });
         }
     };
@@ -247,7 +254,7 @@ var PredicatesSelectorWidget = (function () {
         }
     };
 
-    self.setCurrentVocabClassesSelect = function (vocabulary, selectId) {
+    self.setCurrentVocabClassesSelect = function (vocabulary, selectId,callback) {
         self.currentVocabulary = vocabulary;
         if (!selectId) {
             selectId = "editPredicate_objectSelect";
@@ -262,6 +269,9 @@ var PredicatesSelectorWidget = (function () {
                 });
             });
             common.fillSelectOptions(selectId, classes, true, "label", "id");
+            if(callback){
+                callback();
+            }
         } else {
             OntologyModels.registerSourcesModel([vocabulary], function (err, result) {
                 if (err) {
@@ -281,6 +291,9 @@ var PredicatesSelectorWidget = (function () {
                 } else {
                     //PromptedSelectWidget
                     return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", vocabulary);
+                }
+                if(callback){
+                    callback();
                 }
             });
         }
@@ -342,11 +355,20 @@ var PredicatesSelectorWidget = (function () {
         }
         var recentEditPredicates=JSON.parse(localStorage.getItem('recentEditPredicates'));
         var selectedEditPredicate=JSON.parse(recentEditPredicates[selectedIndex]);
-        $('#editPredicate_vocabularySelect').val(selectedEditPredicate.predicate[0])
-        $('#editPredicate_currentVocabPredicateSelect').val(selectedEditPredicate.predicate[1].id)
-        $('#editPredicate_vocabularySelect2').val(selectedEditPredicate.object[0])
-        $('#editPredicate_objectSelect').val(selectedEditPredicate.object[1].id)
-        PredicatesSelectorWidget.onSelectPredicateProperty($('#editPredicate_currentVocabPredicateSelect').val());
+        $('#editPredicate_vocabularySelect').val(selectedEditPredicate.predicate[0]);
+        PredicatesSelectorWidget.setCurrentVocabPropertiesSelect(selectedEditPredicate.predicate[0],'editPredicate_currentVocabPredicateSelect',function(){
+            $('#editPredicate_currentVocabPredicateSelect').val(selectedEditPredicate.predicate[1].id);
+            PredicatesSelectorWidget.onSelectPredicateProperty($('#editPredicate_currentVocabPredicateSelect').val());
+        });
+        
+        
+        $('#editPredicate_vocabularySelect2').val(selectedEditPredicate.object[0]);
+        PredicatesSelectorWidget.setCurrentVocabClassesSelect(selectedEditPredicate.object[0],'editPredicate_objectSelect',function(){
+            $('#editPredicate_objectSelect').val(selectedEditPredicate.object[1].id);
+            PredicatesSelectorWidget.onSelectCurrentVocabObject(selectedEditPredicate.object[1].label);
+        });
+       
+        
     }
     self.fillSelectRecentEditPredicate=function(){
         var recentEditPredicatesFill=[{id:'Recents',label:'Recents'}];

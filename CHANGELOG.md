@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.81.1](https://github.com/souslesens/souslesensVocables/compare/1.81.0...1.81.1) (2024-08-27)
+
+> [!IMPORTANT]
+> Updating to 1.81.1 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Bug Fixes
+
+* **Dockerfile:** install git ([83364fd](https://github.com/souslesens/souslesensVocables/commit/83364fdd5fc7acd7dccd2630e38ba4e8f978c745))
+* **migrations:** create missing plugins.json file if missing ([367c3e8](https://github.com/souslesens/souslesensVocables/commit/367c3e8059288b2d35cb66e8a783e4480995afe0))
+
 ## [1.81.0](https://github.com/souslesens/souslesensVocables/compare/1.80.1...1.81.0) (2024-08-26)
 
 

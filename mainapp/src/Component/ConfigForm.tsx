@@ -184,7 +184,7 @@ const ConfigForm = () => {
         },
         configRD,
         allProfilesRD,
-        allToolsRD
+        allToolsRD,
     );
 
     return SRD.match(
@@ -202,7 +202,7 @@ const ConfigForm = () => {
                 </Mui.Alert>
             ),
         },
-        renderRD
+        renderRD,
     );
 };
 

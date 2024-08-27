@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.81.1](https://github.com/souslesens/souslesensVocables/compare/1.81.0...1.81.1) (2024-08-27)
+
+> [!IMPORTANT]
+> Updating to 1.81.1 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Bug Fixes
+
+* **Dockerfile:** install git ([83364fd](https://github.com/souslesens/souslesensVocables/commit/83364fdd5fc7acd7dccd2630e38ba4e8f978c745))
+* **migrations:** create missing plugins.json file if missing ([367c3e8](https://github.com/souslesens/souslesensVocables/commit/367c3e8059288b2d35cb66e8a783e4480995afe0))
+
+## [1.81.0](https://github.com/souslesens/souslesensVocables/compare/1.80.1...1.81.0) (2024-08-26)
+
+
+### Features
+
+* **api:** add the routes to manage repositories of plugins ([cadde8d](https://github.com/souslesens/souslesensVocables/commit/cadde8d3c700cbfec9d4b83d17d02dbf111e4382))
+* **api:** rename the admin endpoint /plugins to /plugins/config ([9e08934](https://github.com/souslesens/souslesensVocables/commit/9e08934d772a96bc3b33c1b7a94bdf979b6a537c))
+* **mainapp:** allow to sort and filter the repositories table ([75c095b](https://github.com/souslesens/souslesensVocables/commit/75c095b32b860add26f7e7f660bff99809a8b2f5))
+* **mainapp:** implements the plugins repositories management interface ([f3a93f2](https://github.com/souslesens/souslesensVocables/commit/f3a93f2ba3623d6c2520457246f1ce7fe5c16966))
+* **mainapp:** implements the repositories API with Plugin module ([e575fd2](https://github.com/souslesens/souslesensVocables/commit/e575fd24e934116bba1bfda1ad6e7a5381c32a88))
+
+
+### Bug Fixes
+
+* **api:** always fetch repositories ([9416c8e](https://github.com/souslesens/souslesensVocables/commit/9416c8e0e261033b77f3faa1dea1f11ed50be4e2))
+* **api:** don't create symlink for multiple plugins repo ([88ed68d](https://github.com/souslesens/souslesensVocables/commit/88ed68dda3d9e7d7d79f58e339609d4db9610f70))
+* **mainapp:** add the name property on the PasswordField component ([cd212f6](https://github.com/souslesens/souslesensVocables/commit/cd212f6afa0a09b3483e9a00d41a0803d0a4dbe8))
+* **model:** fetch, not pull plugins repo ([97e296e](https://github.com/souslesens/souslesensVocables/commit/97e296e1a4c1199b36df7bcdf1ba9b98fe294895))
+* **test:** change tools number ([f2fefae](https://github.com/souslesens/souslesensVocables/commit/f2fefae8ff7e96d3af80a06b1d5bca84c38529a9))
+
 ### [1.80.1](https://github.com/souslesens/souslesensVocables/compare/1.80.0...1.80.1) (2024-08-01)
 
 

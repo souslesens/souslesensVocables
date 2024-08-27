@@ -124,7 +124,7 @@ th, td{
     max-height: 550px;
     min-width: 1380px;
 }
-[role="tablist"] {
+[role="tablist"]:not(.MuiTabs-flexContainer) {
     .button-font-title;
     padding: 0px !important;
     border-top-right-radius: 14px;

@@ -20,6 +20,7 @@ var Axiom_activeLegend = (function () {
         self.drawNewAxiom(self.currentResource);
         self.hideForbiddenResources("Class")
         self.isLegendActive = true
+        self.bNodeCounter=0
 
 
     };
@@ -140,13 +141,14 @@ var Axiom_activeLegend = (function () {
         var nodeType = self.currentLegendNodeType;
 
         if (legendNode) {
+            var id= self.getBlankNodeId()
             newResource = {
-                id: common.getRandomHexaId(5),
+                id:id,
                 label: legendNode.label,
                 resourceType: legendNode.label,
                 symbol: legendNode.data.symbol,
                 data: {
-                    id: common.getRandomHexaId(5),
+                    id: id,
                     label: legendNode.label,
                     resourceType: legendNode.label,
                 },
@@ -173,7 +175,7 @@ var Axiom_activeLegend = (function () {
                 Union: "⨆",
                 Complement: "┓",
             };
-            var id = "_:b" + common.getRandomHexaId(10);
+            var id =  self.getBlankNodeId()
             newResource = {
                 id: id,
                 label: label,
@@ -545,7 +547,7 @@ var Axiom_activeLegend = (function () {
                     if (fromNode.data.nCount == 0) {
                         predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
                     } else if (fromNode.data.nCount == 1) {
-                        var bNode2 = "_:" + common.getRandomHexaId(10);
+                        var bNode2 =  self.getBlankNodeId()
                         triples.push({
                             subject: fromNode.data.bNodeid,
                             predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
@@ -573,7 +575,7 @@ var Axiom_activeLegend = (function () {
 
                 if (toNode.data.type == "Connective") {
                     toNode.data.nCount = 0;
-                    toNode.data.bNodeid = "_:" + common.getRandomHexaId(10);
+                    toNode.data.bNodeid =  self.getBlankNodeId()
                     triples.push({
                         subject: toNode.data.id,
                         predicate: toNode.data.subType,
@@ -606,6 +608,17 @@ var Axiom_activeLegend = (function () {
 
         return triples;
     };
+
+
+    self.getBlankNodeId=function(){
+        if(!self.bNodeCounter)
+            self.bNodeCounter=0
+        return "_:b"+(self.bNodeCounter++)
+
+
+    }
+
+
 
 
     self.testAxioms = [

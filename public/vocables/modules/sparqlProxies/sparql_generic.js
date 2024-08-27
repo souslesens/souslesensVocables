@@ -426,16 +426,19 @@ var Sparql_generic = (function () {
             if ((p = elt.indexOf("@")) > 0) {
                 return '"' + elt.substring(0, p) + '"' + elt.substring(p);
             }
-            if (elt.indexOf("_:b") == 0) {
+            if(elt.match(/^_:b\d+$/)){
+                return elt;
+            }
+           else  if (elt.indexOf("_:b") == 0) {
                 return "<" + elt + ">";
             }
-            if (elt.indexOf("_:") == 0) {
+            else  if (elt.indexOf("_:") == 0) {
                 return "<" + elt + ">";
             }
-            if (elt.indexOf("http") == 0 || item.valueType == "uri") {
+            else  if (elt.indexOf("http") == 0 || item.valueType == "uri") {
                 return "<" + elt + ">";
             }
-            if (elt.indexOf("<") == 0) {
+            else  if (elt.indexOf("<") == 0) {
                 return elt;
             }
 
@@ -526,7 +529,8 @@ var Sparql_generic = (function () {
                 });
 
                 var query = self.getDefaultSparqlPrefixesStr();
-                query += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
+              //  query += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
+                query += " WITH GRAPH  <" + graphUri + ">  " + "INSERT " + "  {" + insertTriplesStr + "  }";
 
                 if (options.getSparqlOnly) {
                     return callback(null, query);

@@ -198,24 +198,25 @@ var KGcreator = (function () {
                     //  KGcreator_run.getTableAndShowMappings();
 
                     if (obj.node.data.type == "databaseSource") {
-                        self.currentConfig.currentDataSource = {
+                    /*    self.currentConfig.currentDataSource = {
                             name: obj.node.id,
                             tables: [],
                             type: "databaseSource",
                             sqlType: obj.node.data.sqlType,
                             currentTable: obj.node.data.table,
-                        };
+                        };*/
+                        self.initDataSource(obj.node.id,"databaseSource",obj.node.data.sqlType,obj.node.data.table);
 
                         KGcreator.loadDataBaseSource(self.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
                     } else if (obj.node.data.type == "csvSource") {
-                        self.currentConfig.currentDataSource = {
+                        /*  self.currentConfig.currentDataSource = {
                             name: obj.node.id,
-                            tables: [],
-                            type: "csvSource",
-                            sqlType: obj.node.data.sqlType,
-                            currentTable: obj.node.id,
-                        };
-
+                             tables: [],
+                             type: "csvSource",
+                             sqlType: obj.node.data.sqlType,
+                             currentTable: obj.node.id,
+                        };*/
+                        self.initDataSource(obj.node.id,"csvSource",obj.node.data.sqlType,obj.node.id);
                         KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, function (err, result) {
                             if (err) {
                                 return alert("file not found");
@@ -465,6 +466,16 @@ var KGcreator = (function () {
         });
     };
 
+    self.initDataSource=function(name,type,sqlType,table){
+        self.currentConfig.currentDataSource = {
+            name: name, //obj.node.id,
+            tables: [],
+            type: type,//"databaseSource",
+            sqlType:sqlType,// obj.node.data.sqlType,
+            currentTable:table// obj.node.data.table,
+        };
+
+    }
     self.saveSlsvSourceConfig = function (callback) {
         var data = KGcreator.rawConfig;
         var source = self.currentSlsvSource;
@@ -929,6 +940,7 @@ var KGcreator = (function () {
                 return alert(err);
             }
             self.addDataSourceToJstree("csvSource", datasourceName);
+            self.initDataSource(datasourceName,"csvSource","csv");
             self.loadCsvSource(self.currentSlsvSource, datasourceName, function (err, result) {
                 if (err) {
                     return alert(err.responseText);

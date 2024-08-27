@@ -36,35 +36,37 @@
 @border-color: @button1-color;
 
 /* defaults icons */
-
-@arrow-icon: "../../icons/KGATheme/caret-right-KGA.png";
-@search-icon: "../../icons/KGATheme/SearchIcon-KGA.png";
 @add-icon: "../../icons/CommonIcons/add-icon.png";
-@moreOptions-icon: "../../icons/KGATheme/MoreOptionsIcon-KGA.png";
-@lineage-logo: "../../icons/KGATheme/lineageLogo-KGA.png";
-@KGquery-logo: "../../icons/KGATheme/Kgquery-KGA.png";
-@KGcreator-logo: "../../icons/KGATheme/Kgcreator-KGA.png";
-@SPARQL-logo: "../../icons/KGATheme/SPARQL-KGA.png";
-@admin-logo: "../../icons/KGATheme/Admin-KGA.png";
-@ConfigEditor-logo: "../../icons/KGATheme/ConfigEditor-KGA.png";
-@GraphManagement-logo: "../../icons/KGATheme/GraphManagement-KGA.png";
-@OntoCreator-logo: "../../icons/KGATheme/OntoCreator-KGA.png";
-@TimeLine-logo: "../../icons/KGATheme/TimeLine-KGA.png";
-@logoInstance-icon: "../../icons/KGATheme/KGALogo.png";
-@slsvLogo-icon: "../../icons/CommonIcons/slsvLogo.png";
-@saveIcon: "../../icons/KGATheme/SaveIcon-KGA.png";
-@deleteIcon: "../../icons/KGATheme/DeleteIcon-KGA.png";
 @filterIcon: "../../icons/CommonIcons/Filtre.png";
+@slsvLogo-icon: "../../icons/CommonIcons/slsvLogo.png";
+@arrow-icon: "../../icons/KGA/caret-right-KGA.png";
+@search-icon: "../../icons/KGA/SearchIcon-KGA.png";
+
+@moreOptions-icon: "../../icons/KGA/MoreOptionsIcon-KGA.png";
+@lineage-logo: "../../icons/KGA/lineageLogo-KGA.png";
+@KGquery-logo: "../../icons/KGA/Kgquery-KGA.png";
+@KGcreator-logo: "../../icons/KGA/Kgcreator-KGA.png";
+@SPARQL-logo: "../../icons/KGA/SPARQL-KGA.png";
+@admin-logo: "../../icons/KGA/Admin-KGA.png";
+@ConfigEditor-logo: "../../icons/KGA/ConfigEditor-KGA.png";
+@GraphManagement-logo: "../../icons/KGA/GraphManagement-KGA.png";
+@OntoCreator-logo: "../../icons/KGA/OntoCreator-KGA.png";
+@TimeLine-logo: "../../icons/KGA/TimeLine-KGA.png";
+@logoInstance-icon: "../../icons/KGA/KGALogo.png";
+
+@saveIcon: "../../icons/KGA/SaveIcon-KGA.png";
+@deleteIcon: "../../icons/KGA/DeleteIcon-KGA.png";
+
 @allPropertyIcon: "../../icons/BluishVioletTheme/SelectionAllIcon-bluishViolet.png";
 @currentPropertyIcon: "../../icons/BluishVioletTheme/SelectionIcon-bluishViolet.png";
-@jqueryClose: "../../icons/KGATheme/CrossIcon-KGA.png";
-@resetIcon: "../../icons/KGATheme/ResetIcon-KGA.png";
-@previousIcon: "../../icons/KGATheme/PreviousIcon-KGA.png";
+@jqueryClose: "../../icons/KGA/CrossIcon-KGA.png";
+@resetIcon: "../../icons/KGA/ResetIcon-KGA.png";
+@previousIcon: "../../icons/KGA/PreviousIcon-KGA.png";
 @isDarkTheme: false;
-@whiteBoardIcon: "../../icons/CommonIcons/WhiteboardIcon.png";
-@propertiesIcon: "../../icons/CommonIcons/propertiesIcon.png";
-@containersIcon: "../../icons/CommonIcons/ContainerIcon.png";
-@classesIcon: "../../icons/CommonIcons/classesIcon.png";
+@whiteBoardIcon: "../../icons/KGA/WhiteboardIcon-KGA.png";
+@propertiesIcon: "../../icons/KGA/propertiesIcon-KGA.png";
+@containersIcon: "../../icons/KGA/ContainerIcon-KGA.png";
+@classesIcon: "../../icons/KGA/classesIcon-KGA.png";
 html {
     color: if((@isDarkTheme=true), white, black);
 }
@@ -271,4 +273,20 @@ path {
 }
 pre {
     overflow: unset;
+}
+
+// Common icons (not in icons.css to not change them on themeChange) 
+.add-icon {
+    background-image: url(@add-icon);
+    background-repeat: no-repeat;
+}
+.filterIcon {
+    background-image: url(@filterIcon);
+    background-repeat: no-repeat;
+    height: 20px;
+    width: 20px;
+}
+.slsvLogo-icon {
+    background-image: url(@slsvLogo-icon);
+    background-repeat: no-repeat;
 }

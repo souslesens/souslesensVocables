@@ -1,11 +1,10 @@
+
+/* Less variable definition of all icons Vars that evolve with Themes*/
 .arrow-icon {
     background-image: url(@arrow-icon);
     background-repeat: no-repeat;
 }
-.add-icon {
-    background-image: url(@add-icon);
-    background-repeat: no-repeat;
-}
+
 .moreOptions-icon {
     background-image: url(@moreOptions-icon);
     background-repeat: no-repeat;
@@ -76,12 +75,7 @@
     width: 20px;
 }
 
-.filterIcon {
-    background-image: url(@filterIcon);
-    background-repeat: no-repeat;
-    height: 20px;
-    width: 20px;
-}
+
 .allPropertyIcon {
     background-image: url(@allPropertyIcon);
     background-repeat: no-repeat;
@@ -115,10 +109,7 @@
     border: 0px !important;
     margin-right: 20px !important;
 }
-.slsvLogo-icon {
-    background-image: url(@slsvLogo-icon);
-    background-repeat: no-repeat;
-}
+
 
 .whiteBoardIcon {
     background-image: url(@whiteBoardIcon);

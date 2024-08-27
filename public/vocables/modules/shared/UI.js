@@ -217,7 +217,9 @@ var UI = (function () {
     //Keep
     self.changeTheme = function (themeName) {
         if (!themeName) return;
-        var themeSelected = Config.slsvColorThemes[themeName];
+        var colorVars = Config.slsvColorThemes[themeName];
+        var iconsPathsVars=self.getIconsVarsPaths(themeName);
+        var themeSelected={...colorVars, ...iconsPathsVars};
         self.currentTheme = themeSelected;
         if (themeSelected["@logoInstance-icon"] == undefined || themeSelected["@logoInstance-icon"] == "") {
             $("#externalLogoDiv").hide();
@@ -227,6 +229,17 @@ var UI = (function () {
         less.modifyVars(themeSelected);
         UI.darkThemeParams(themeSelected);
     };
+    self.getIconsVarsPaths=function(themeName){
+      
+        var iconsVarPaths={};
+        Object.keys(Config.lessIconsFileNames).forEach(function(iconVar){
+            var fileName=Config.lessIconsFileNames[iconVar];
+            var path=`../../icons/${themeName.replaceAll(' ','')}/${fileName}-${themeName.replaceAll(' ','')}.png`;
+            iconsVarPaths[iconVar]=path;
+        });
+        return iconsVarPaths;
+    }
+  
     //Keep
     self.hideShowMenuBar = function (button) {
         if (self.menuBarShowed) {

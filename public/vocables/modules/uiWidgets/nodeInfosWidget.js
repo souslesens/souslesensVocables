@@ -24,14 +24,9 @@ var NodeInfosWidget = (function () {
             $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
         }
         $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
+            $("#addPredicateButton").remove();
+            $("#deleteButton").remove()
             $("#" + divId).dialog("open");
-            $("#" + divId).dialog({
-                close: function (event, ui) {
-                    window.scrollTo(0, 0);
-                    $("#addPredicateButton").remove();
-                    $("#deleteButton").remove();
-                },
-            });
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
 
@@ -253,6 +248,7 @@ var NodeInfosWidget = (function () {
     self.configureEditPredicateWidget = function () {
         $("#editPredicate_savePredicateButton").off("click");
         $("#editPredicate_savePredicateButton").click(function () {
+            self.storeRecentPredicates();
             self.addPredicate();
         });
     };
@@ -969,7 +965,8 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             // value = $("#editPredicate_objectValue").val().trim();
             value = PredicatesSelectorWidget.getSelectedObjectValue();
         }
-
+     
+        
         if (!property || !value) {
             return alert("enter property and value");
         }
@@ -1040,7 +1037,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         }
     };
 
-    self.deletePredicate = function (predicateId) {
+    self.deletePredicate = function (predicateId,callback) {
         var currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         var property = currentEditingItem.item.prop.value;
         if (confirm("delete predicate")) {
@@ -1090,6 +1087,9 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     var value = currentEditingItem.item.value.value;
                     if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
                         Lineage_whiteboard.deleteEdge(self.currentNodeId, value, property);
+                    }
+                    if(callback){
+                        callback();
                     }
                 }
             );
@@ -1252,9 +1252,15 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
             $("#editPredicate_savePredicateButton").click(function () {
-                self.addPredicate(null, null, null, null, function () {
-                    self.deletePredicate(predicateId);
+                self.storeRecentPredicates();
+                
+                self.deletePredicate(predicateId,function(){
+                    self.addPredicate(null,null,null,null,function(){
+                        self.showNodeInfos(MainController.currentSource,self.currentNode,"mainDialogDiv", { resetVisited: 1 });
+                    });
                 });
+              
+               
             });
         });
 
@@ -1375,7 +1381,13 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         $("#editPredicate_objectValue").css("width", "700px");
         $("#editPredicate_objectValue").css("height", "130px");
     };
-
+    self.storeRecentPredicates=function(){
+        var recentEditPredicates={predicate:[$('#editPredicate_vocabularySelect').val(),$('#editPredicate_currentVocabPredicateSelect').val()],
+            object:[$('#editPredicate_vocabularySelect2').val(),$('#editPredicate_objectSelect').val()]};
+        var recentEditPredicatesStr=JSON.stringify(recentEditPredicates);
+        common.storeLocally(recentEditPredicatesStr,'recentEditPredicates');
+        
+    };
     return self;
 })();
 

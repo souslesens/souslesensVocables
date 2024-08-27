@@ -162,8 +162,8 @@ var PredicatesSelectorWidget = (function () {
                 properties = OntologyModels.getPropertiesArray(vocabulary);
                 var datatypeProperties = OntologyModels.getAnnotationProperties(vocabulary);
                 properties = properties.concat(datatypeProperties);
+                properties=common.array.unduplicateArray(properties,'label');
                 common.array.sort(properties, "label");
-
                 common.fillSelectOptions(selectId, properties, true, "label", "id");
             });
         }

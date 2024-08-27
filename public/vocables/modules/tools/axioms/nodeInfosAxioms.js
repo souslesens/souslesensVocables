@@ -119,7 +119,7 @@ var NodeInfosAxioms = (function () {
                                 });
                             }
                             if (index == 2) {
-                                var id = self.getBlankNodeId()
+                                var id = common.getRandomHexaId(10)
                                 /*  for (var key in Axiom_editor.allClassesMap) {
                                       if (self.allClassesMap[key].label.indexOf(word) > -1) {
                                           id = key;

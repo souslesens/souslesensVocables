@@ -160,7 +160,7 @@ var KGbuilder_main = {
                                 KGbuilder_triplesMaker.existingTriples = {};
 
                                 //sample only
-                                if (options.sampleSize) {
+                                if (options.sampleSize ) {
                                     options.customMetaData = { [KGbuilder_triplesMaker.mappingFilePredicate]: mappings.table };
 
                                     KGbuilder_triplesMaker.createTriples(mappings, data, options, function(err, result) {
@@ -330,7 +330,8 @@ var KGbuilder_main = {
                         var dataSourceMappingsPath = sourceMappingsDir + datasource + ".json";
                         var mappings;
                         if (options.mappingsFilter) {
-                            mappings = JSON.parse(options.mappingsFilter);
+                          //  mappings = JSON.parse(options.mappingsFilter);
+                            mappings = options.mappingsFilter;
                         } else {
                             mappings = JSON.parse("" + fs.readFileSync(dataSourceMappingsPath));
                         }

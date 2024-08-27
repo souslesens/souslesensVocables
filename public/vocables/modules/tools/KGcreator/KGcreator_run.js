@@ -9,7 +9,8 @@ var KGcreator_run = (function () {
     var self = {};
     self.currentTable = null;
 
-    self.testSelectedMappings = function () {
+
+    self.getSelectedMappingTriplesOption = function () {
         var table = KGcreator.currentConfig.currentDataSource.currentTable;
         if (!table) {
             return alert("select a node");
@@ -17,23 +18,34 @@ var KGcreator_run = (function () {
 
         var selectedText = KGcreator_mappings.currentMappingsSelection;
         if (!selectedText) {
-            return;
+            return null;
         }
         selectedText = selectedText.replace(/[\r\n]/g, "");
+        if (selectedText.endsWith(",")) {
+            selectedText = selectedText.substring(0, selectedText.length - 2);
+        }
         selectedText = '{"' + table + '":{"tripleModels":[' + selectedText + '],"transform":{}}}';
 
         try {
             var json = JSON.parse(selectedText);
+            return json
 
-            var options = { mappingsFilter: selectedText };
-            self.createTriples(true, false, options, function (err, result) {
-                if (err) {
-                    throw new Exception(err);
-                }
-            });
         } catch (e) {
             return alert(e);
         }
+
+
+    }
+
+    self.testSelectedMappings = function () {
+
+        var mappingFilter = self.getSelectedMappingTriplesOption()
+        if (!mappingFilter) {
+            return;
+        }
+        var options = {mappingsFilter: selectedText};
+        self.createTriples(false, false, options, function (err, result) {
+        })
         //  var triples=selectedText.split(",")
     };
 
@@ -61,6 +73,12 @@ var KGcreator_run = (function () {
         if (!options) {
             options = {};
         }
+
+
+
+
+
+
         UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initRunTab, "#RunButton");
         var table = self.getTableAndShowMappings(allmappings);
         if (!allmappings && !table) {
@@ -86,6 +104,11 @@ var KGcreator_run = (function () {
         if (allmappings) {
             options = {};
             table = null;
+        }
+
+        var mappingsFilterOption = self.getSelectedMappingTriplesOption()
+        if (mappingsFilterOption) {
+            options.mappingsFilter=mappingsFilterOption
         }
 
         var payload = {
@@ -140,7 +163,7 @@ var KGcreator_run = (function () {
         var tableCols = [];
         var hearders = ["subject", "predicate", "object"];
         hearders.forEach(function (item) {
-            tableCols.push({ title: item, defaultContent: "", width: "30%" });
+            tableCols.push({title: item, defaultContent: "", width: "30%"});
         });
 
         var tableData = [];
@@ -156,7 +179,8 @@ var KGcreator_run = (function () {
 
         /*  $("#KGcreator_triplesDataTableDiv").html(str)
           return;*/
-        Export.showDataTable("mainDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {});
+        Export.showDataTable("mainDialogDiv", tableCols, tableData, null, {paging: true}, function (err, datatable) {
+        });
     };
 
     self.indexGraph = function (callback) {

@@ -20,6 +20,7 @@ var KGbuilder_triplesMaker = {
      * @param {Function} callback - Node-style async Function called to proccess result or handle error
      **/
     createTriples: function(tableMappings, data, options, callback) {
+        KGbuilder_triplesMaker.bNodeIndex=0
         if (!tableMappings || tableMappings.length == 0) {
             KGbuilder_socket.message(options.clientSocketId, "No mappings  in table " + tableMappings.table);
             return callback();
@@ -248,7 +249,7 @@ var KGbuilder_triplesMaker = {
         if (mapping.o === "_rowIndex") {
             objectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
             return objectStr;
-        } else if (mapping.objectIsSpecificUri) {
+        } else if (mapping.objectIsSpecificUri || mapping.startsWith("'")) {
             objectStr = mapping.o;
         } else if (typeof mapping.o === "function") {
             try {
@@ -267,7 +268,7 @@ var KGbuilder_triplesMaker = {
         }
         //encodedurl from string
         else if (typeof mapping.o === "string" && mapping.o.endsWith("_£")) {
-            var key=mapping.s.replace("_£","")
+            var key=mapping.o.replace("_£","")
             if (line[key]) {
                 objectStr = KGbuilder_triplesMaker.getStringHashCode(line[key]);
             }
@@ -563,7 +564,10 @@ var KGbuilder_triplesMaker = {
         if (value) {
             return value;
         } else {
-            value = "<_:b" + util.getRandomHexaId(10) + ">";
+            if(!KGbuilder_triplesMaker.bNodeIndex)
+                KGbuilder_triplesMaker.bNodeIndex=0
+            value="_:b"+(KGbuilder_triplesMaker.bNodeIndex++)
+          //  value = "<_:b" + util.getRandomHexaId(10) + ">";
             KGbuilder_triplesMaker.blankNodesMap[key] = value;
             return value;
         }
@@ -575,7 +579,7 @@ var KGbuilder_triplesMaker = {
 
         var code=hashCode(str)
         code=code.toString(16);
-console.log(code+"    "+str+"   ")
+//console.log(code+"    "+str+"   ")
         return code
     },
     

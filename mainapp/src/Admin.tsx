@@ -39,49 +39,7 @@ type Model = {
     repositories: RD<string, RepositoryType[]>;
 };
 
-type EditionTab = "ConfigEdition" | "UsersEdition" | "ProfilesEdition" | "SourcesEdition" | "DatabaseManagement" | "Plugins" | "Logs";
-
-const editionTabToNumber = (editionTab: EditionTab) => {
-    switch (editionTab) {
-        case "ConfigEdition":
-            return 0;
-        case "UsersEdition":
-            return 1;
-        case "ProfilesEdition":
-            return 2;
-        case "SourcesEdition":
-            return 3;
-        case "DatabaseManagement":
-            return 4;
-        case "Plugins":
-            return 5;
-        case "Logs":
-            return 6;
-        default:
-            0;
-    }
-};
-
-const editionTabToString = (editionTab: number): EditionTab => {
-    switch (editionTab) {
-        case 0:
-            return "ConfigEdition";
-        case 1:
-            return "UsersEdition";
-        case 2:
-            return "ProfilesEdition";
-        case 3:
-            return "SourcesEdition";
-        case 4:
-            return "DatabaseManagement";
-        case 5:
-            return "Plugins";
-        case 6:
-            return "Logs";
-        default:
-            return "UsersEdition";
-    }
-};
+type EditionTab = "settings" | "users" | "profiles" | "sources" | "databases" | "plugins" | "logs";
 
 type UpadtedFieldPayload = { id: string; fieldName: string; newValue: string };
 
@@ -96,7 +54,7 @@ const initialModel: Model = {
     logs: loading(),
     config: loading(),
     isModalOpen: false,
-    currentEditionTab: "SourcesEdition",
+    currentEditionTab: "sources",
     dialog: null,
     pluginsConfig: loading(),
     pluginsEnabled: loading(),
@@ -197,7 +155,7 @@ function update(model: Model, msg: Msg): Model {
             // Insert or replace the tab key in the URL
             window.history.replaceState(null, "", `?${params.toString()}`);
 
-            return { ...model, currentEditionTab: editionTabToString(msg.payload) };
+            return { ...model, currentEditionTab: msg.payload };
 
         default:
             return model;
@@ -210,8 +168,7 @@ const Admin = () => {
     React.useEffect(() => {
         const params = new URLSearchParams(document.location.search);
         if (params.has("tab")) {
-            const tabIndex = parseInt(params.get("tab"));
-            model.currentEditionTab = editionTabToString(tabIndex);
+            model.currentEditionTab = params.get("tab");
         }
     }, []);
 
@@ -251,17 +208,17 @@ const Admin = () => {
         <ModelContext.Provider value={{ model, updateModel }}>
             <Mui.Box sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}>
                 <Mui.Tabs
-                    onChange={(event: React.SyntheticEvent, newValue: number) => updateModel({ type: "UserClickedNewTab", payload: newValue })}
-                    value={editionTabToNumber(model.currentEditionTab)}
+                    onChange={(event: React.SyntheticEvent, newValue: string) => updateModel({ type: "UserClickedNewTab", payload: newValue })}
+                    value={model.currentEditionTab}
                     centered
                 >
-                    <Mui.Tab label="Settings" />
-                    <Mui.Tab label="Users" />
-                    <Mui.Tab label="Profiles" />
-                    <Mui.Tab label="Sources" />
-                    <Mui.Tab label="Databases" />
-                    <Mui.Tab label="Plugins" />
-                    <Mui.Tab label="Logs" />
+                    <Mui.Tab label="Settings" value="settings" />
+                    <Mui.Tab label="Users" value="users" />
+                    <Mui.Tab label="Profiles" value="profiles" />
+                    <Mui.Tab label="Sources" value="sources" />
+                    <Mui.Tab label="Databases" value="databases" />
+                    <Mui.Tab label="Plugins" value="plugins" />
+                    <Mui.Tab label="Logs" value="logs" />
                 </Mui.Tabs>
             </Mui.Box>
             <Dispatcher model={model} />
@@ -271,19 +228,19 @@ const Admin = () => {
 
 const Dispatcher = (props: { model: Model }) => {
     switch (props.model.currentEditionTab) {
-        case "ConfigEdition":
+        case "settings":
             return <ConfigForm />;
-        case "UsersEdition":
+        case "users":
             return <UsersTable />;
-        case "ProfilesEdition":
+        case "profiles":
             return <ProfilesTable />;
-        case "SourcesEdition":
+        case "sources":
             return <SourcesTable />;
-        case "DatabaseManagement":
+        case "databases":
             return <DatabasesTable />;
-        case "Plugins":
+        case "plugins":
             return <PluginsForm />;
-        case "Logs":
+        case "logs":
             return <LogsTable />;
         default:
             return <div>Problem</div>;

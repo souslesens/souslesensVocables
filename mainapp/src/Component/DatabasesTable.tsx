@@ -12,7 +12,7 @@ import { PasswordField } from "./PasswordField";
 import { TestingButton } from "./TestingButton";
 import { addDatabase, Database, DatabaseSchema, defaultDatabase, deleteDatabase, editDatabase, SourceAccessControl } from "../Database";
 import { writeLog } from "../Log";
-import { cleanUpText, style } from "../Utils";
+import { cleanUpText, jsonToDownloadUrl, style } from "../Utils";
 
 const enum Type {
     ResetDatabase,
@@ -324,6 +324,16 @@ const DatabasesTable = () => {
                             </Mui.Table>
                         </Mui.TableContainer>
                         <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <Mui.Button
+                                variant="outlined"
+                                href={createDatabasesDownloadUrl(
+                                    // TODO fix typing
+                                    (model.databases as unknown as Record<string, Database[]>).data
+                                )}
+                                download={"databases.json"}
+                            >
+                                Download JSON
+                            </Mui.Button>
                             <DatabaseFormDialog create={true} me={me} />
                         </Mui.Stack>
                     </Mui.Stack>
@@ -335,5 +345,9 @@ const DatabasesTable = () => {
 
     return renderDatabases;
 };
+
+function createDatabasesDownloadUrl(databases: Database[]): string {
+    return jsonToDownloadUrl(databases);
+}
 
 export { DatabasesTable, Mode, Msg_, Type };

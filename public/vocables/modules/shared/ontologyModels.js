@@ -122,7 +122,17 @@ var OntologyModels = (function () {
                         },
                         //set AnnotationProperties and datatypeProperties
                         function (callbackSeries) {
-                            var query =
+                           
+                            
+                            var query = queryP +" SELECT distinct ?prop ?propLabel ?propDomain ?propRange  from <" +
+                                graphUri +">  WHERE {\n" +
+                                " ?prop rdf:type ?type. filter (?type in (rdf:Property,<http://www.w3.org/2002/07/owl#AnnotationProperty>,owl:DatatypeProperty))  " +
+                                Sparql_common.getVariableLangLabel("prop", true, true) +
+                                "OPTIONAL {?prop rdfs:domain ?propDomain} OPTIONAL {?prop rdfs:range ?propRange}" +
+                                "} limit 10000";
+                            
+                           // rdf:Property is common on nonObjectProperties and properties 
+                            /*var query =
                                 queryP +
                                 " SELECT distinct ?prop ?propLabel ?propDomain ?propRange  from <" +
                                 graphUri +
@@ -130,7 +140,7 @@ var OntologyModels = (function () {
                                 " ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#AnnotationProperty>,owl:DatatypeProperty))  " +
                                 Sparql_common.getVariableLangLabel("prop", true, true) +
                                 "OPTIONAL {?prop rdfs:domain ?propDomain} OPTIONAL {?prop rdfs:range ?propRange}" +
-                                "} limit 10000";
+                                "} limit 10000";*/
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);

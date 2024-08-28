@@ -3,13 +3,13 @@ import * as MuiIcons from "@mui/icons-material";
 import * as React from "react";
 
 import CsvDownloader from "react-csv-downloader";
-import { SRD } from "srd";
+import { failure, success, SRD } from "srd";
 
 import { useModel } from "../Admin";
-import { Log, getLogs } from "../Log";
+import { Log, getLogs, getLogFiles } from "../Log";
 
 export const LogsTable = () => {
-    const { model } = useModel();
+    const { model, updateModel } = useModel();
 
     const [filteringChars, setFilteringChars] = React.useState("");
     const [orderBy, setOrderBy] = React.useState<keyof Log>("timestamp");
@@ -29,6 +29,14 @@ export const LogsTable = () => {
     const handleLogSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedPeriod(event.target.value);
     };
+
+    React.useEffect(() => {
+        getLogFiles().then(
+            (files) => updateModel({ type: "logFiles", payload: success(files) })
+        ).catch(
+            (error) => updateModel({ type: "logFiles", payload: failure(error) })
+        );
+    }, []);
 
     React.useEffect(() => {
         getLogs(selectedPeriod).then((data) => setSelectedLogs(data));
@@ -61,25 +69,21 @@ export const LogsTable = () => {
                     setSelectedPeriod(logFilesData.find((log) => log.current).date);
                 }
 
-                const sortedLogs = () =>
-                    selectedLogs
-                        .map((item, index) => ({ ...item, key: index }))
-                        .slice()
-                        .sort((a: Log, b: Log) => {
-                            const left: string = a[orderBy];
-                            const right: string = b[orderBy];
-                            if (orderBy === "timestamp") {
-                                return order === "asc" ? Number(new Date(left).getTime() > new Date(right).getTime()) : Number(new Date(left) < new Date(right));
-                            }
-                            return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
-                        });
+                const sortedLogs = selectedLogs
+                    .map((item, index) => ({ ...item, key: index }))
+                    .slice()
+                    .sort((a: Log, b: Log) => {
+                        const left: string = a[orderBy];
+                        const right: string = b[orderBy];
+                        if (orderBy === "timestamp") {
+                            return order === "asc" ? Number(new Date(left).getTime() > new Date(right).getTime()) : Number(new Date(left) < new Date(right));
+                        }
+                        return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+                    });
 
-                const memoizedLogs = React.useMemo(() => sortedLogs(), [selectedLogs, orderBy, order]);
-                const getOptions = () =>
-                    memoizedLogs.filter(function (this: Set<string>, { user }) {
-                        return !this.has(user) && this.add(user);
-                    }, new Set());
-                const memoizedOptions = React.useMemo(() => getOptions(), [selectedLogs]);
+                const logUsers = sortedLogs.filter(function (this: Set<string>, { user }) {
+                    return !this.has(user) && this.add(user);
+                }, new Set());
 
                 return (
                     <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
@@ -100,22 +104,14 @@ export const LogsTable = () => {
                                 value={selectedPeriod}
                             >
                                 {logFilesData.map((file) => (
-                                    <Mui.MenuItem value={file.date}>{file.date}</Mui.MenuItem>
+                                    <Mui.MenuItem key={file.date} value={file.date}>{file.date}</Mui.MenuItem>
                                 ))}
                             </Mui.TextField>
                             <Mui.Autocomplete
                                 disablePortal
                                 id="search-logs"
-                                options={memoizedOptions}
-                                onInputChange={(event, newInputValue) => {
-                                    setFilteringChars(newInputValue);
-                                }}
-                                getOptionLabel={(option) => option.user}
-                                renderOption={(props, option) => (
-                                    <li {...props} key={option.key}>
-                                        {option.user}
-                                    </li>
-                                )}
+                                options={logUsers.map((log) => log.user)}
+                                onInputChange={(event, newInputValue) => setFilteringChars(newInputValue)}
                                 renderInput={(params) => <Mui.TextField {...params} label="Search logs by username" />}
                                 sx={{ flex: 1 }}
                             />
@@ -152,7 +148,7 @@ export const LogsTable = () => {
                                     </Mui.TableRow>
                                 </Mui.TableHead>
                                 <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                    {memoizedLogs
+                                    {sortedLogs
                                         .filter((log) => log.user.includes(filteringChars))
                                         .map((log) => {
                                             return (
@@ -171,7 +167,7 @@ export const LogsTable = () => {
                             </Mui.Table>
                         </Mui.TableContainer>
                         <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <CsvDownloader filename="logs.csv" datas={memoizedLogs}>
+                            <CsvDownloader filename="logs.csv" datas={sortedLogs}>
                                 <Mui.Button variant="outlined">Download CSV</Mui.Button>
                             </CsvDownloader>
                         </Mui.Stack>

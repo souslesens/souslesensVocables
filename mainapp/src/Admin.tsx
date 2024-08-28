@@ -114,8 +114,8 @@ const Admin = () => {
     }, []);
 
     React.useEffect(() => {
-        Promise.all([getMe(), getSources(), getIndices(), getGraphs(), getProfiles(), getUsers(), getConfig(), getDatabases(), getLogFiles(), readConfig(), getEnabledPlugins(), readRepositories()])
-            .then(([me, sources, indices, graphs, profiles, users, config, databases, logs, pluginsConfig, pluginsEnabled, repositories]) => {
+        Promise.all([getMe(), getSources(), getIndices(), getGraphs(), getProfiles(), getUsers(), getConfig(), getDatabases(), readConfig(), getEnabledPlugins(), readRepositories()])
+            .then(([me, sources, indices, graphs, profiles, users, config, databases, pluginsConfig, pluginsEnabled, repositories]) => {
                 updateModel({ type: "me", payload: success(me) });
                 updateModel({ type: "sources", payload: success(sources) });
                 updateModel({ type: "indices", payload: success(indices) });
@@ -124,7 +124,6 @@ const Admin = () => {
                 updateModel({ type: "users", payload: success(users) });
                 updateModel({ type: "config", payload: success(config) });
                 updateModel({ type: "databases", payload: success(databases) });
-                updateModel({ type: "logFiles", payload: success(logs) });
                 updateModel({ type: "pluginsConfig", payload: success(pluginsConfig) });
                 updateModel({ type: "pluginsEnabled", payload: success(pluginsEnabled) });
                 updateModel({ type: "repositories", payload: success(repositories) });
@@ -138,7 +137,6 @@ const Admin = () => {
                 updateModel({ type: "users", payload: failure(error.message) });
                 updateModel({ type: "config", payload: failure(error.message) });
                 updateModel({ type: "databases", payload: failure(error.message) });
-                updateModel({ type: "logFiles", payload: failure(error.message) });
                 updateModel({ type: "pluginsConfig", payload: failure(error.message) });
                 updateModel({ type: "pluginsEnabled", payload: failure(error.message) });
                 updateModel({ type: "repositories", payload: failure(error.message) });

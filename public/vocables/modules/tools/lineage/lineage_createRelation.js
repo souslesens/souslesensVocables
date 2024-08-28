@@ -276,7 +276,7 @@ var Lineage_createRelation = (function () {
                     },
 
                     function (callbackSeries) {
-                        options.contextMenu = self.getContextMenu()
+                        options.contextMenu = self.getContextMenu(options)
                         options.doNotAdjustDimensions = 1;
                         JstreeWidget.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {});
                         callbackSeries();
@@ -298,7 +298,7 @@ var Lineage_createRelation = (function () {
         });
     };
 
-    self.getContextMenu=function(){
+    self.getContextMenu=function(options){
         var items={
 
             refineProperty: {

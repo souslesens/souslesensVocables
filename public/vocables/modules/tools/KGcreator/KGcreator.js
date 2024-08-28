@@ -193,8 +193,9 @@ var KGcreator = (function () {
             var options = {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
+
                     self.currentTreeNode = obj.node;
-                    KGcreator.currentTreeNode = obj.node;
+                    
                     //  KGcreator_run.getTableAndShowMappings();
 
                     if (obj.node.data.type == "databaseSource") {
@@ -209,13 +210,7 @@ var KGcreator = (function () {
 
                         KGcreator.loadDataBaseSource(self.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
                     } else if (obj.node.data.type == "csvSource") {
-                        /*  self.currentConfig.currentDataSource = {
-                            name: obj.node.id,
-                             tables: [],
-                             type: "csvSource",
-                             sqlType: obj.node.data.sqlType,
-                             currentTable: obj.node.id,
-                        };*/
+                       
                         self.initDataSource(obj.node.id,"csvSource",obj.node.data.sqlType,obj.node.id);
                         KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, function (err, result) {
                             if (err) {
@@ -224,8 +219,6 @@ var KGcreator = (function () {
                             KGcreator_mappings.showTableMappings(obj.node.id);
                         });
                     } else if (obj.node.data.type == "table") {
-                        var mappingObj = self.currentConfig.currentMappings[obj.node.data.id];
-
                         var columns = self.currentConfig.currentDataSource.tables[obj.node.data.id];
                         var table = obj.node.data.id;
                         self.currentConfig.currentDataSource.currentTable = table;
@@ -467,6 +460,14 @@ var KGcreator = (function () {
     };
 
     self.initDataSource=function(name,type,sqlType,table){
+        //close Previous DataSource
+        var parent_node=$('#KGcreator_csvTreeDiv').jstree()._model.data[self.currentConfig?.currentDataSource?.name];
+        if(parent_node){
+            
+                $('#KGcreator_csvTreeDiv').jstree(true).delete_node(parent_node.children);
+                
+            
+        }
         self.currentConfig.currentDataSource = {
             name: name, //obj.node.id,
             tables: [],
@@ -546,7 +547,7 @@ var KGcreator = (function () {
         });
     };
 
-    self.loadDataBaseSource = function (slsvSource, dataSource, sqlType) {
+    self.loadDataBaseSource = function (slsvSource, dataSource, sqlType,callback) {
         fetch(`${Config.apiUrl}/databases/${dataSource}`).then((response) => {
             response.json().then((data) => {
                 async.series(
@@ -584,6 +585,9 @@ var KGcreator = (function () {
                     function (err) {
                         if (err) {
                             return alert(err);
+                        }
+                        if(callback){
+                            callback();
                         }
                     }
                 );
@@ -1090,15 +1094,12 @@ var KGcreator = (function () {
 
         $("#KGcreator_run_mappingsGraphEditorContainer").css("width", KGcreator_GraphEditorWidth);
     };
-    self.initRunTab = function () {
+    /*self.initRunTab = function () {
         if (self.currentTab != "Run") {
             self.currentTab = "Run";
             $("#KGcreator_centralPanelTabs").load("./modules/tools/KGcreator/html/runTab.html", function () {
                 $("#KGcreator_topButtons").load("./modules/tools/KGcreator/html/runButtons.html", function () {
-                    /*$("#KGcreator_topButtons").css("padding", "4px");
-                    $("#MenuBar").css("height", "");
-                    $("#MenuBarFooter").css("display", "flex");
-                    $("#KGcreator_topButtons").css("flex-direction", "column");*/
+                
                     if (self.currentTreeNode) {
                         //KGcreator_run.createTriples(true);
                         KGcreator_run.getTableAndShowMappings();
@@ -1109,7 +1110,7 @@ var KGcreator = (function () {
                 });
             });
         }
-    };
+    };*/
     self.initLinkTab = function () {
         if (self.currentTab != "Map") {
             self.currentTab = "Map";

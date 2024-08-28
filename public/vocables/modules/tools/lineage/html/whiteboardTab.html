@@ -37,21 +37,21 @@
             />
         </div>
         <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()"
-                popUpComment="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png"/></button>
+                title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png"/></button>
         <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast"
-                onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()" popUpComment="Clear Last">
+                onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()" title="Clear Last">
             <img src="./icons/CommonIcons/ClearLastIcon.png"/>
         </button>
         <button class="w3-button slsv-button-2" id="lineage_actionDiv_last"
-                onclick="Lineage_whiteboard.showLastAddedNodesOnly()" popUpComment="Only Last">
+                onclick="Lineage_whiteboard.showLastAddedNodesOnly()" title="Only Last">
             <img src="./icons/CommonIcons/OnlyLastIcon.png"/>
         </button>
         <button class="w3-button slsv-button-2" id="lineage_actionDiv_selectedNodesDialog"
-                onclick="Lineage_selection.showSelectionDialog()" popUpComment="Selection">
+                onclick="Lineage_selection.showSelectionDialog()" title="Selection">
             <img src="./icons/CommonIcons/Query.png"/>
         </button>
         <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.graph.exportGraphToDataTable()"
-                popUpComment="CSV"><img src="./icons/CommonIcons/CSVIcon.png"/></button>
+                title="CSV"><img src="./icons/CommonIcons/CSVIcon.png"/></button>
         <!--   <button onclick="AxiomEditor.init()">Edit Axiom</button>-->
         <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="Lineage_axioms.testAxioms()"
                 style="display: block">new Axiom

@@ -580,9 +580,6 @@ var KGbuilder_triplesMaker = {
         }
     },
 
-
-
-
     getStringHashCode :function(str) {
 
         var hashCode = s => s.split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0)
@@ -592,8 +589,6 @@ var KGbuilder_triplesMaker = {
 //console.log(code+"    "+str+"   ")
         return code
     },
-
-
     
     getLookupValue: function(lookupName, value, callback) {
         var lookupArray = lookupName.split("|");

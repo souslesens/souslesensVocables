@@ -1,4 +1,19 @@
 {
     "verbose": true,
-    "ignore": ["config/users", "config/profiles.json", "config/sources.json", "config/databases.json", "config_templates", "mainapp", "public", "scripts", "views", "docker-data", "data"]
+    "ignore": [
+        "config/databases.json",
+        "config/plugins.json",
+        "config/profiles.json",
+        "config/sources.json",
+        "config/users",
+        "config_templates",
+        "data",
+        "docker-data",
+        "mainapp",
+        "plugins",
+        "plugins.available",
+        "public",
+        "scripts",
+        "views"
+    ]
 }

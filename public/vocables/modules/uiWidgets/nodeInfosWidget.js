@@ -24,14 +24,9 @@ var NodeInfosWidget = (function () {
             $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
         }
         $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
+            $("#addPredicateButton").remove();
+            $("#deleteButton").remove()
             $("#" + divId).dialog("open");
-            $("#" + divId).dialog({
-                close: function (event, ui) {
-                    window.scrollTo(0, 0);
-                    $("#addPredicateButton").remove();
-                    $("#deleteButton").remove();
-                },
-            });
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
 
@@ -253,7 +248,10 @@ var NodeInfosWidget = (function () {
     self.configureEditPredicateWidget = function () {
         $("#editPredicate_savePredicateButton").off("click");
         $("#editPredicate_savePredicateButton").click(function () {
-            self.addPredicate();
+            PredicatesSelectorWidget.storeRecentPredicates();
+            self.addPredicate(null,null,null,null,function(){
+                PredicatesSelectorWidget.fillSelectRecentEditPredicate();
+            });
         });
     };
 
@@ -969,7 +967,8 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             // value = $("#editPredicate_objectValue").val().trim();
             value = PredicatesSelectorWidget.getSelectedObjectValue();
         }
-
+     
+        
         if (!property || !value) {
             return alert("enter property and value");
         }
@@ -1040,7 +1039,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         }
     };
 
-    self.deletePredicate = function (predicateId) {
+    self.deletePredicate = function (predicateId,callback) {
         var currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         var property = currentEditingItem.item.prop.value;
         if (confirm("delete predicate")) {
@@ -1090,6 +1089,9 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     var value = currentEditingItem.item.value.value;
                     if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
                         Lineage_whiteboard.deleteEdge(self.currentNodeId, value, property);
+                    }
+                    if(callback){
+                        callback();
                     }
                 }
             );
@@ -1246,15 +1248,22 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         });
     };
     self.showModifyPredicateDialog = function (predicateId) {
+        self.setLargerObjectTextArea();
         PredicatesSelectorWidget.currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         if (!PredicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
             $("#editPredicate_savePredicateButton").click(function () {
-                self.addPredicate(null, null, null, null, function () {
-                    self.deletePredicate(predicateId);
+                //PredicatesSelectorWidget.storeRecentPredicates();
+                
+                self.deletePredicate(predicateId,function(){
+                    self.addPredicate(null,null,null,null,function(){
+                        self.showNodeInfos(MainController.currentSource,self.currentNode,"mainDialogDiv", { resetVisited: 1 });
+                    });
                 });
+              
+               
             });
         });
 
@@ -1372,10 +1381,12 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     };
 
     self.setLargerObjectTextArea = function () {
+        $("#editPredicate_objectValue").show();
+        //$("#editPredicate_selectsDiv").hide();
         $("#editPredicate_objectValue").css("width", "700px");
         $("#editPredicate_objectValue").css("height", "130px");
     };
-
+    
     return self;
 })();
 

@@ -66,6 +66,9 @@ const apiDoc = {
                 $ref: "#/definitions/Tool",
             },
         },
+        PluginConfig: {
+            type: "object",
+        },
         BlenderSources: {
             type: "object",
             additionalProperties: { $ref: "#/definitions/BlenderSource" },

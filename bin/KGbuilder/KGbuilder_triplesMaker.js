@@ -249,7 +249,7 @@ var KGbuilder_triplesMaker = {
         if (mapping.o === "_rowIndex") {
             objectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
             return objectStr;
-        } else if (mapping.objectIsSpecificUri || mapping.startsWith("'")) {
+        } else if (mapping.objectIsSpecificUri ) {
             objectStr = mapping.o;
         } else if (typeof mapping.o === "function") {
             try {

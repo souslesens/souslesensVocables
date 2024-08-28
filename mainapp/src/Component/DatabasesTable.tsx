@@ -12,7 +12,7 @@ import { PasswordField } from "./PasswordField";
 import { TestingButton } from "./TestingButton";
 import { addDatabase, Database, DatabaseSchema, defaultDatabase, deleteDatabase, editDatabase, SourceAccessControl } from "../Database";
 import { writeLog } from "../Log";
-import { style } from "../Utils";
+import { cleanUpText, style } from "../Utils";
 
 const enum Type {
     ResetDatabase,
@@ -261,14 +261,12 @@ const DatabasesTable = () => {
                                 {snackMessage}
                             </Mui.Alert>
                         </Mui.Snackbar>
-                        <Mui.Autocomplete
-                            disablePortal
+                        <Mui.TextField
+                            label="Search Databases by name"
                             id="filter databases"
-                            options={sortedDatabases.map((database: Database) => {
-                                return database.name;
-                            })}
-                            onInputChange={(event, newInputValue) => setFilteringChars(newInputValue)}
-                            renderInput={(params) => <Mui.TextField {...params} label="Search Databases by name" />}
+                            onChange={(event) => {
+                                setFilteringChars(event.target.value);
+                            }}
                         />
                         <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
                             <Mui.Table stickyHeader>
@@ -299,7 +297,7 @@ const DatabasesTable = () => {
                                 </Mui.TableHead>
                                 <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedDatabases
-                                        .filter((database: Database) => database.id.includes(filteringChars))
+                                        .filter((database: Database) => cleanUpText(database.id).includes(cleanUpText(filteringChars)))
                                         .map((database: Database) => {
                                             return (
                                                 <Mui.TableRow key={database.name}>
@@ -332,7 +330,7 @@ const DatabasesTable = () => {
                 );
             },
         },
-        model.databases,
+        model.databases
     );
 
     return renderDatabases;

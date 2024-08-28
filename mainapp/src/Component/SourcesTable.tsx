@@ -14,7 +14,7 @@ import { ulid } from "ulid";
 import { useModel } from "../Admin";
 import { ServerSource, saveSource, defaultSource, deleteSource, sourceHelp, InputSourceSchema, InputSourceSchemaCreate, getGraphSize } from "../Source";
 import { writeLog } from "../Log";
-import { identity, style, joinWhenArray, humanizeSize } from "../Utils";
+import { identity, style, joinWhenArray, humanizeSize, cleanUpText } from "../Utils";
 import { HelpButton } from "./HelpModal";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
@@ -71,7 +71,7 @@ const SourcesTable = () => {
                                 return [key, value.replace("\n", " ")];
                             }
                             return [key, value];
-                        }),
+                        })
                     );
 
                     return { ...dataWithoutCarriageReturns };
@@ -90,14 +90,12 @@ const SourcesTable = () => {
 
                 return (
                     <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <Mui.Autocomplete
-                            disablePortal
+                        <Mui.TextField
+                            label="Search Sources by name"
                             id="search-sources"
-                            options={gotSources.map((source) => source.name)}
-                            onInputChange={(event, newInputValue) => {
-                                setFilteringChars(newInputValue);
+                            onChange={(event) => {
+                                setFilteringChars(event.target.value);
                             }}
-                            renderInput={(params) => <Mui.TextField {...params} label="Search Sources by name" />}
                         />
                         <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
                             <Mui.Table stickyHeader>
@@ -133,7 +131,7 @@ const SourcesTable = () => {
                                 </Mui.TableHead>
                                 <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedSources
-                                        .filter((source) => source.name.includes(filteringChars))
+                                        .filter((source) => cleanUpText(source.name).includes(cleanUpText(filteringChars)))
                                         .map((source) => {
                                             const haveIndices = indices ? indices.includes(source.name.toLowerCase()) : false;
                                             const graphInfo = graphs.find((g) => g.name === source.graphUri);
@@ -179,7 +177,7 @@ const SourcesTable = () => {
                 );
             },
         },
-        model.sources,
+        model.sources
     );
 
     return renderSources;

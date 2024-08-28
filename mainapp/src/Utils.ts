@@ -55,4 +55,16 @@ async function fetchMe() {
     return json;
 }
 
-export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput, humanizeSize };
+function cleanUpText(original: unknown): string {
+    if (typeof original !== "string") {
+        return "";
+    }
+
+    // Clean up accents
+    return original
+        .toLocaleLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "");
+}
+
+export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput, humanizeSize, cleanUpText };

@@ -3,7 +3,6 @@ import Axiom_editor from "./axiom_editor.js";
 import Axioms_graph from "./axioms_graph.js";
 
 
-
 var Axiom_activeLegend = (function () {
     var self = {};
     self.axiomsLegendVisjsGraph = null;
@@ -21,7 +20,7 @@ var Axiom_activeLegend = (function () {
         self.drawNewAxiom(self.currentResource);
         self.hideForbiddenResources("Class")
         self.isLegendActive = true
-        self.bNodeCounter=0
+        self.bNodeCounter = 0
 
 
     };
@@ -61,8 +60,8 @@ var Axiom_activeLegend = (function () {
             } else if (node.data.type == "ObjectProperty") {
                 self.hideLegendItems();
                 var domainClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class")
-                if(!domainClassUri){
-                    domainClassUri=self.getPropertyDomainAncestorClass(Axioms_graph.currentGraphNode.id)
+                if (!domainClassUri) {
+                    domainClassUri = self.getPropertyDomainAncestorClass(Axioms_graph.currentGraphNode.id)
                 }
 
                 if (domainClassUri) {
@@ -108,29 +107,32 @@ var Axiom_activeLegend = (function () {
      * @param restrictionUri
      * @returns classUri
      */
-    self.getPropertyDomainAncestorClass=function(restrictionUri){
-        var edges=Axioms_graph.axiomsVisjsGraph.data.edges.get()
-        var edgesToMap={}
-        edges.forEach(function(edge){
-            edgesToMap[edge.to]=edge
+    self.getPropertyDomainAncestorClass = function (restrictionUri) {
+        var edges = Axioms_graph.axiomsVisjsGraph.data.edges.get()
+        var edgesToMap = {}
+        edges.forEach(function (edge) {
+            edgesToMap[edge.to] = edge
         })
         var nodesMap = {};
-        var nodes=Axioms_graph.axiomsVisjsGraph.data.nodes.get()
+        var nodes = Axioms_graph.axiomsVisjsGraph.data.nodes.get()
         nodes.forEach(function (node) {
             nodesMap[node.id] = node;
         });
-        var firstClassNodeUri=null
-        function recurse(nodeId){
-           var node=nodesMap[nodeId]
-            if(node.data.type=="Class" && node.data.id.indexOf("http")==0)
-                firstClassNodeUri=node.data.id
-            else{
-                var edge=edgesToMap[node.id]
-                if(edge)
-                recurse(edge.from)
+        var firstClassNodeUri = null
+
+        function recurse(nodeId) {
+            var node = nodesMap[nodeId]
+            if (node.data.type == "Class" && node.data.id.indexOf("http") == 0) {
+                firstClassNodeUri = node.data.id
+            } else {
+                var edge = edgesToMap[node.id]
+                if (edge) {
+                    recurse(edge.from)
+                }
             }
 
         }
+
         recurse(restrictionUri)
         return firstClassNodeUri
     }
@@ -178,9 +180,9 @@ var Axiom_activeLegend = (function () {
         var nodeType = self.currentLegendNodeType;
 
         if (legendNode) {
-            var id= self.getBlankNodeId()
+            var id = self.getBlankNodeId()
             newResource = {
-                id:id,
+                id: id,
                 label: legendNode.label,
                 resourceType: legendNode.label,
                 symbol: legendNode.data.symbol,
@@ -212,7 +214,7 @@ var Axiom_activeLegend = (function () {
                 Union: "⨆",
                 Complement: "┓",
             };
-            var id =  self.getBlankNodeId()
+            var id = self.getBlankNodeId()
             newResource = {
                 id: id,
                 label: label,
@@ -305,13 +307,13 @@ var Axiom_activeLegend = (function () {
         } else if (resourceType == "Restriction") {
             hiddenNodes.push("Restriction");
 
-           /// begin with property to respect range and domains
-           var hasProperty= self.getGraphSiblingUri  (Axioms_graph.currentGraphNode.id,"ObjectProperty")
-            if(hasProperty)
+            /// begin with property to respect range and domains
+            var hasProperty = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty")
+            if (hasProperty) {
                 hiddenNodes.push("ObjectProperty");
-            else
+            } else {
                 hiddenNodes.push("Class");
-
+            }
 
 
         } else if (resourceType == "Connective") {
@@ -374,6 +376,7 @@ var Axiom_activeLegend = (function () {
         var visjsData = {nodes: [], edges: []};
         var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
         visjsNode.data.predicate = selectedObject.axiomType;
+        self.axiomType = selectedObject.axiomType;
         visjsData.nodes.push(visjsNode);
         self.hierarchicalLevel = 0;
         var options = {
@@ -524,20 +527,66 @@ var Axiom_activeLegend = (function () {
         NodeInfosAxioms.newAxiom();
     };
 
+
     self.saveAxiom = function () {
         if (confirm("Save Axiom")) {
-            var triples = self.visjsGraphToTriples();
-            //   triples=self.testAxioms
-            Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
-            });
+            //check manchester Syntax
+            self.axiomTriplesToManchester(function (err, manchesterStr) {
+                if (err) {
+                    return alert(err);
+                }
+
+
+                var triples = self.visjsGraphToTriples();
+                Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
+                    if (err) {
+                        return alert(err.responseText)
+                    }
+                    //add manchester to Axioms JSTree
+                    self.addAxiomToAxomsJstree(manchesterStr, triples)
+                });
+            })
         }
     };
+
+
+    self.addAxiomToAxomsJstree = function (manchesterStr, triples) {
+        var id = common.getRandomHexaId(10)
+        var jstreeData = [
+            {
+                id: id,
+                text: manchesterStr,
+                parent: "#",//self.axiomType,
+                data: {
+                    id: manchesterStr,
+                    label: manchesterStr,
+                    triples: triples,
+                    manchester: manchesterStr,
+                },
+            }]
+
+
+        JstreeWidget.addNodesToJstree("nodeInfosAxioms_axiomsJstreeDiv", "#",jstreeData )//self.axiomType);
+    }
+
+
     self.axiomTriplesToManchester = function (callback) {
         var triples = self.visjsGraphToTriples();
         Axiom_manager.getManchesterAxiomsFromTriples(self.currentSource, triples, function (err, result) {
             if (err) {
+                if (callback) {
+                    return callback(err);
+                }
                 return alert(err);
             }
+            if (!result) {
+                var message = "Error : cannot generate manchester form"
+                if (callback) {
+                    return callback(message);
+                }
+                return alert(message)
+            }
+
 
             var manchesterStr = Axiom_manager.parseManchesterClassAxioms(self.currentResource.data.id, result);
             $("#axiomsEditor_textDiv").html(manchesterStr);
@@ -598,7 +647,7 @@ var Axiom_activeLegend = (function () {
                     if (fromNode.data.nCount == 0) {
                         predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
                     } else if (fromNode.data.nCount == 1) {
-                        var bNode2 =  self.getBlankNodeId()
+                        var bNode2 = self.getBlankNodeId()
                         triples.push({
                             subject: fromNode.data.bNodeid,
                             predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
@@ -626,7 +675,7 @@ var Axiom_activeLegend = (function () {
 
                 if (toNode.data.type == "Connective") {
                     toNode.data.nCount = 0;
-                    toNode.data.bNodeid =  self.getBlankNodeId()
+                    toNode.data.bNodeid = self.getBlankNodeId()
                     triples.push({
                         subject: toNode.data.id,
                         predicate: toNode.data.subType,
@@ -661,15 +710,14 @@ var Axiom_activeLegend = (function () {
     };
 
 
-    self.getBlankNodeId=function(){
-        if(!self.bNodeCounter)
-            self.bNodeCounter=0
-        return "_:b"+(self.bNodeCounter++)
+    self.getBlankNodeId = function () {
+        if (!self.bNodeCounter) {
+            self.bNodeCounter = 0
+        }
+        return "_:b" + (self.bNodeCounter++)
 
 
     }
-
-
 
 
     self.testAxioms = [

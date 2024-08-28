@@ -3,6 +3,7 @@ import Axiom_editor from "./axiom_editor.js";
 import Axioms_graph from "./axioms_graph.js";
 
 
+
 var Axiom_activeLegend = (function () {
     var self = {};
     self.axiomsLegendVisjsGraph = null;
@@ -108,8 +109,30 @@ var Axiom_activeLegend = (function () {
      * @returns classUri
      */
     self.getPropertyDomainAncestorClass=function(restrictionUri){
-        var obj=Axioms_graph.axiomsVisjsGraph.data.nodes.get(restrictionUri)
-        return  obj.parent
+        var edges=Axioms_graph.axiomsVisjsGraph.data.edges.get()
+        var edgesToMap={}
+        edges.forEach(function(edge){
+            edgesToMap[edge.to]=edge
+        })
+        var nodesMap = {};
+        var nodes=Axioms_graph.axiomsVisjsGraph.data.nodes.get()
+        nodes.forEach(function (node) {
+            nodesMap[node.id] = node;
+        });
+        var firstClassNodeUri=null
+        function recurse(nodeId){
+           var node=nodesMap[nodeId]
+            if(node.data.type=="Class" && node.data.id.indexOf("http")==0)
+                firstClassNodeUri=node.data.id
+            else{
+                var edge=edgesToMap[node.id]
+                if(edge)
+                recurse(edge.from)
+            }
+
+        }
+        recurse(restrictionUri)
+        return firstClassNodeUri
     }
     self.getGraphSiblingUri = function (connectiveParent, type) {
         var siblingIds = Axioms_graph.axiomsVisjsGraph.network.getConnectedNodes(connectiveParent, "to")
@@ -144,7 +167,7 @@ var Axiom_activeLegend = (function () {
 
     self.onSuggestionsSelect = function (resourceUri, legendNode) {
 
-        if (!Axiom_activeLegend.isLegendActive) {
+        if (!Axiom_activeLegend.isLegendActive) {// create new Axiom
             Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv", NodeInfosAxioms.currentSource, NodeInfosAxioms.currentResource, resourceUri)
             return $('#axioms_legend_suggestionsSelect').children().remove().end()
         }
@@ -344,6 +367,7 @@ var Axiom_activeLegend = (function () {
             label: selectedObject.label,
             type: selectedObject.resourceType,
             symbol: null,
+
         };
         self.currentNodeType = selectedObject.resourceType;
 
@@ -368,7 +392,10 @@ var Axiom_activeLegend = (function () {
         if (!node) {
             return;
         }
-        self.currentGraphNode = node;
+
+        Axioms_graph.currentGraphNode = node;
+        Axioms_graph.outlineNode(node.id)
+
         if (!node || !node.data) {
             return;
         }
@@ -385,7 +412,7 @@ var Axiom_activeLegend = (function () {
 
     self.onNodeGraphClick = function (node, point, nodeEvent) {
         if (node && node.data) {
-            self.currentGraphNode = node;
+            Axioms_graph.currentGraphNode = node;
             Axioms_graph.currentGraphNode = node;
             Axioms_graph.outlineNode(Axioms_graph.currentGraphNode.id);
             Axiom_activeLegend.hideForbiddenResources("" + node.data.type);
@@ -395,13 +422,13 @@ var Axiom_activeLegend = (function () {
                 }
             }
         } else {
-            self.currentGraphNode = null;
+            Axioms_graph.currentGraphNode = null;
             Axioms_graph.currentGraphNode = null;
         }
     };
 
     self.removeNodeFromGraph = function () {
-        var node = self.currentGraphNode;
+        var node = Axioms_graph.currentGraphNode;
 
         if (Axioms_graph.axiomsVisjsGraph.network.getConnectedNodes(node.id, "to").length > 0) {
             alert("cannot remove a parent node ")

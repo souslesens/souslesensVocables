@@ -89,18 +89,18 @@ export async function saveSource(body: InputSource, mode: Mode, updateModel: Rea
         if (response.status === 200) {
             if (mode === Mode.Edition) {
                 const sources: ServerSource[] = await getSources();
-                updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(sources)) });
+                updateModel({ type: "sources", payload: success(mapSources(sources)) });
             } else {
-                updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(resources)) });
+                updateModel({ type: "sources", payload: success(mapSources(resources)) });
             }
             updateLocal({ type: Type.UserClickedModal, payload: false });
             updateLocal({ type: Type.ResetSource, payload: mode });
         } else {
-            updateModel({ type: "ServerRespondedWithSources", payload: failure(`${response.status}, ${message}`) });
+            updateModel({ type: "sources", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        updateModel({ type: "ServerRespondedWithSources", payload: failure(`Uncatched : ${e}`) });
+        updateModel({ type: "sources", payload: failure(`Uncatched : ${e}`) });
     }
 }
 
@@ -109,13 +109,13 @@ export async function deleteSource(source: InputSource, updateModel: React.Dispa
         const response = await fetch(`${endpoint}/${source.name}`, { method: "delete" });
         const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(resources)) });
+            updateModel({ type: "sources", payload: success(mapSources(resources)) });
         } else {
-            updateModel({ type: "ServerRespondedWithSources", payload: failure(`${response.status}, ${message}`) });
+            updateModel({ type: "sources", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        updateModel({ type: "ServerRespondedWithSources", payload: failure(`Unhandled Error : ${e}`) });
+        updateModel({ type: "sources", payload: failure(`Unhandled Error : ${e}`) });
     }
 }
 

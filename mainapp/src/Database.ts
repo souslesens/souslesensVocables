@@ -44,18 +44,18 @@ async function addDatabase(database: Database, updateModel: React.Dispatch<Msg>)
 
         if (response.status === 200) {
             updateModel({
-                type: "ServerRespondedWithDatabases",
+                type: "Databases",
                 payload: success(mapDatabases(resources)),
             });
         } else {
             updateModel({
-                type: "ServerRespondedWithDatabases",
+                type: "Databases",
                 payload: failure(`${response.status}, ${message}`),
             });
         }
     } catch (error) {
         updateModel({
-            type: "ServerRespondedWithDatabases",
+            type: "Databases",
             payload: failure(error),
         });
     }
@@ -68,18 +68,18 @@ async function deleteDatabase(database: Database, updateModel: React.Dispatch<Ms
 
         if (response.status === 200) {
             updateModel({
-                type: "ServerRespondedWithDatabases",
+                type: "Databases",
                 payload: success(mapDatabases(resources)),
             });
         } else {
             updateModel({
-                type: "ServerRespondedWithDatabases",
+                type: "Databases",
                 payload: failure(`${response.status}, ${message}`),
             });
         }
     } catch (error) {
         updateModel({
-            type: "ServerRespondedWithDatabases",
+            type: "Databases",
             payload: failure(`Unknown error have occured: ${error}`),
         });
     }
@@ -98,18 +98,18 @@ async function editDatabase(database: Database, updateModel: React.Dispatch<Msg>
 
         if (response.status === 200) {
             updateModel({
-                type: "ServerRespondedWithDatabases",
+                type: "Databases",
                 payload: success(mapDatabases(resources)),
             });
         } else {
             updateModel({
-                type: "ServerRespondedWithDatabases",
+                type: "Databases",
                 payload: failure(`${response.status}, ${message}`),
             });
         }
     } catch (error) {
         updateModel({
-            type: "ServerRespondedWithDatabases",
+            type: "Databases",
             payload: failure(error),
         });
     }

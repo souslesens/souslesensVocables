@@ -7,6 +7,7 @@ import { SRD } from "srd";
 
 import { useModel } from "../Admin";
 import { Log, getLogs } from "../Log";
+import { cleanUpText } from "../Utils";
 
 export const LogsTable = () => {
     const { model } = useModel();
@@ -103,21 +104,12 @@ export const LogsTable = () => {
                                     <Mui.MenuItem value={file.date}>{file.date}</Mui.MenuItem>
                                 ))}
                             </Mui.TextField>
-                            <Mui.Autocomplete
-                                disablePortal
+                            <Mui.TextField
+                                label="Search logs by username"
                                 id="search-logs"
-                                options={memoizedOptions}
-                                onInputChange={(event, newInputValue) => {
-                                    setFilteringChars(newInputValue);
+                                onChange={(event) => {
+                                    setFilteringChars(event.target.value);
                                 }}
-                                getOptionLabel={(option) => option.user}
-                                renderOption={(props, option) => (
-                                    <li {...props} key={option.key}>
-                                        {option.user}
-                                    </li>
-                                )}
-                                renderInput={(params) => <Mui.TextField {...params} label="Search logs by username" />}
-                                sx={{ flex: 1 }}
                             />
                         </Mui.Stack>
                         <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
@@ -153,7 +145,7 @@ export const LogsTable = () => {
                                 </Mui.TableHead>
                                 <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {memoizedLogs
-                                        .filter((log) => log.user.includes(filteringChars))
+                                        .filter((log) => cleanUpText(log.user).includes(cleanUpText(filteringChars)))
                                         .map((log) => {
                                             return (
                                                 <Mui.TableRow key={log.key}>
@@ -179,6 +171,6 @@ export const LogsTable = () => {
                 );
             },
         },
-        model.logfiles,
+        model.logfiles
     );
 };

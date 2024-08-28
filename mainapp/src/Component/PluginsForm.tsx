@@ -26,6 +26,7 @@ import { Tool } from "../Tool";
 
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
+import { cleanUpText } from "../Utils";
 
 type DispatcherProps = {
     me: string;
@@ -461,23 +462,24 @@ const PluginsRepositories = (props: DispatcherProps) => {
         onSubmitRepository(identifier, data, toFetch);
     };
 
-    const sortedRepositories = Object.entries(model.repositories.data).slice().sort((a, b) => {
-        const left: string = a[1][orderBy] as string;
-        const right: string = b[1][orderBy] as string;
-        return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
-    });
+    const sortedRepositories = Object.entries(model.repositories.data)
+        .slice()
+        .sort((a, b) => {
+            const left: string = a[1][orderBy] as string;
+            const right: string = b[1][orderBy] as string;
+            return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+        });
 
     return (
         <Mui.Stack spacing={{ xs: 2 }} useFlexGap>
             <Mui.Stack spacing={{ xs: 2 }} sx={{ height: 400 }} useFlexGap>
-                <Mui.Autocomplete
-                    disablePortal
+                <Mui.TextField
+                    label="Filter repositories by URL"
                     id="filter-repositories"
-                    options={Object.values(model.repositories.data).map((data) => data.url)}
-                    onInputChange={(event, value) => setFilter(value)}
-                    renderInput={(params) => <Mui.TextField {...params} label="Filter repositories by URL" />}
+                    onChange={(event) => {
+                        setFilter(event.target.value);
+                    }}
                 />
-
                 <Mui.TableContainer component={Mui.Paper} sx={{ flex: 1 }}>
                     <Mui.Table stickyHeader>
                         <Mui.TableHead>
@@ -501,35 +503,35 @@ const PluginsRepositories = (props: DispatcherProps) => {
 
                         <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
                             {sortedRepositories
-                                .filter(([key, data]) => data.url.includes(filter))
+                                .filter(([key, data]) => cleanUpText(data.url).includes(cleanUpText(filter)))
                                 .map(([key, data]) => (
-                                <Mui.TableRow key={key}>
-                                    <Mui.TableCell>
-                                        <Mui.Stack alignItems="center" direction="row" spacing={{ xs: 1 }} useFlexGap>
-                                            <Mui.Link href={data.url}>{data.url}</Mui.Link>
-                                            {data.plugins !== undefined && data.plugins.length > 0 && (
-                                                <Mui.Tooltip title={data.plugins.join(", ")}>
-                                                    <Mui.Chip color="info" label={data.plugins.length > 1 ? `${data.plugins.length} plugins` : "1 plugin"} size="small" variant="outlined" />
-                                                </Mui.Tooltip>
-                                            )}
-                                        </Mui.Stack>
-                                    </Mui.TableCell>
-                                    <Mui.TableCell align="center">{data.version && <Mui.Chip label={data.version} size="small" />}</Mui.TableCell>
-                                    <Mui.TableCell align="center">
-                                        <Mui.IconButton color="primary" onClick={() => handleFetchRepository(key)} title="Fetch Repository" variant="contained">
-                                            <MuiIcons.Download />
-                                        </Mui.IconButton>
-                                    </Mui.TableCell>
-                                    <Mui.TableCell align="center">
-                                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                            <Mui.Button onClick={() => handleOpenModal(true, key)} variant="contained">
-                                                Edit
-                                            </Mui.Button>
-                                            <ButtonWithConfirmation label="Delete" msg={() => onDeleteRepository(key)} />
-                                        </Mui.Stack>
-                                    </Mui.TableCell>
-                                </Mui.TableRow>
-                            ))}
+                                    <Mui.TableRow key={key}>
+                                        <Mui.TableCell>
+                                            <Mui.Stack alignItems="center" direction="row" spacing={{ xs: 1 }} useFlexGap>
+                                                <Mui.Link href={data.url}>{data.url}</Mui.Link>
+                                                {data.plugins !== undefined && data.plugins.length > 0 && (
+                                                    <Mui.Tooltip title={data.plugins.join(", ")}>
+                                                        <Mui.Chip color="info" label={data.plugins.length > 1 ? `${data.plugins.length} plugins` : "1 plugin"} size="small" variant="outlined" />
+                                                    </Mui.Tooltip>
+                                                )}
+                                            </Mui.Stack>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell align="center">{data.version && <Mui.Chip label={data.version} size="small" />}</Mui.TableCell>
+                                        <Mui.TableCell align="center">
+                                            <Mui.IconButton color="primary" onClick={() => handleFetchRepository(key)} title="Fetch Repository" variant="contained">
+                                                <MuiIcons.Download />
+                                            </Mui.IconButton>
+                                        </Mui.TableCell>
+                                        <Mui.TableCell align="center">
+                                            <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                <Mui.Button onClick={() => handleOpenModal(true, key)} variant="contained">
+                                                    Edit
+                                                </Mui.Button>
+                                                <ButtonWithConfirmation label="Delete" msg={() => onDeleteRepository(key)} />
+                                            </Mui.Stack>
+                                        </Mui.TableCell>
+                                    </Mui.TableRow>
+                                ))}
                         </Mui.TableBody>
                     </Mui.Table>
                 </Mui.TableContainer>
@@ -648,7 +650,7 @@ const PluginsForm = () => {
                 </Mui.Alert>
             ),
         },
-        model.repositories,
+        model.repositories
     );
 };
 

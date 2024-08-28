@@ -7,7 +7,7 @@ import { SRD } from "srd";
 import { ulid } from "ulid";
 
 import { useModel } from "../Admin";
-import { identity, style } from "../Utils";
+import { cleanUpText, identity, style } from "../Utils";
 import { newUser, deleteUser, putUsersBis, User } from "../User";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
@@ -72,14 +72,12 @@ const UsersTable = () => {
                 });
                 return (
                     <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <Mui.Autocomplete
-                            disablePortal
+                        <Mui.TextField
+                            label="Search Users by login"
                             id="search-users"
-                            options={gotUsers.map((user) => user.login)}
-                            onInputChange={(event, newInputValue) => {
-                                setFilteringChars(newInputValue);
+                            onChange={(event) => {
+                                setFilteringChars(event.target.value);
                             }}
-                            renderInput={(params) => <Mui.TextField {...params} label="Search Users by login" />}
                         />
                         <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
                             <Mui.Table stickyHeader>
@@ -107,7 +105,7 @@ const UsersTable = () => {
                                 </Mui.TableHead>
                                 <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedUsers
-                                        .filter((user) => user.login.includes(filteringChars))
+                                        .filter((user) => cleanUpText(user.login).includes(cleanUpText(filteringChars)))
                                         .map((user) => {
                                             return (
                                                 <Mui.TableRow key={user.id}>
@@ -142,7 +140,7 @@ const UsersTable = () => {
                 );
             },
         },
-        model.users,
+        model.users
     );
 
     return renderUsers;

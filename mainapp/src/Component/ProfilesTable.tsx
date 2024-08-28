@@ -18,7 +18,7 @@ import { SRD } from "srd";
 import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate } from "../Profile";
 import { ServerSource } from "../Source";
 import { writeLog } from "../Log";
-import { identity, style, joinWhenArray } from "../Utils";
+import { identity, style, joinWhenArray, cleanUpText } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
@@ -74,7 +74,7 @@ const ProfilesTable = () => {
                                 return [key, value.replace("\n", " ")];
                             }
                             return [key, value];
-                        }),
+                        })
                     );
                     return { ...dataWithoutCarriageReturns };
                 });
@@ -94,14 +94,12 @@ const ProfilesTable = () => {
                 });
                 return (
                     <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <Mui.Autocomplete
-                            disablePortal
+                        <Mui.TextField
+                            label="Search Profiles by name"
                             id="filter profiles"
-                            options={gotProfiles.map((profile) => profile.name)}
-                            onInputChange={(event, newInputValue) => {
-                                setFilteringChars(newInputValue);
+                            onChange={(event) => {
+                                setFilteringChars(event.target.value);
                             }}
-                            renderInput={(params) => <Mui.TextField {...params} label="Search Profiles by name" />}
                         />
                         <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
                             <Mui.Table stickyHeader>
@@ -124,7 +122,7 @@ const ProfilesTable = () => {
                                 </Mui.TableHead>
                                 <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedProfiles
-                                        .filter((profile) => profile.name.includes(filteringChars))
+                                        .filter((profile) => cleanUpText(profile.name).includes(cleanUpText(filteringChars)))
                                         .map((profile) => {
                                             return (
                                                 <Mui.TableRow key={profile.id}>
@@ -158,7 +156,7 @@ const ProfilesTable = () => {
                 );
             },
         },
-        model.profiles,
+        model.profiles
     );
 
     return renderProfiles;

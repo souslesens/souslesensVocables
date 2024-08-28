@@ -54,17 +54,17 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
         if (response.status === 200) {
             if (mode === Mode.Edition) {
                 const profiles = await getProfiles();
-                updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(profiles)) });
+                updateModel({ type: "profiles", payload: success(mapProfiles(profiles)) });
             } else {
-                updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(resources)) });
+                updateModel({ type: "profiles", payload: success(mapProfiles(resources)) });
             }
             updateLocal({ type: Type.UserClickedModal, payload: false });
         } else {
-            updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`${response.status}, ${message}`) });
+            updateModel({ type: "profiles", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`Uncatched : ${e}`) });
+        updateModel({ type: "profiles", payload: failure(`Uncatched : ${e}`) });
     }
 }
 async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>) {
@@ -72,13 +72,13 @@ async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>)
         const response = await fetch(`${endpoint}/${profile.name}`, { method: "delete" });
         const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(resources)) });
+            updateModel({ type: "profiles", payload: success(mapProfiles(resources)) });
         } else {
-            updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`${response.status}, ${message}`) });
+            updateModel({ type: "profiles", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`Uncatched Error : ${e}`) });
+        updateModel({ type: "profiles", payload: failure(`Uncatched Error : ${e}`) });
     }
 }
 

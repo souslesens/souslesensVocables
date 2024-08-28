@@ -423,13 +423,13 @@ const PluginsRepositories = (props: DispatcherProps) => {
     const [orderBy, setOrderBy] = React.useState<keyof Database>("url");
 
     const handleCloseModal = () => {
-        updateModel({ type: "PluginRepositoriesDialogModal", payload: null });
+        updateModel({ type: "dialog", payload: null });
         setOpenModal(false);
     };
 
     const handleOpenModal = (mode: boolean, repositoryId?: string | null = null) => {
         updateModel({
-            type: "PluginRepositoriesDialogModal",
+            type: "dialog",
             payload: success({
                 edit: mode,
                 repositories: model.repositories.data,
@@ -615,9 +615,9 @@ const PluginsForm = () => {
 
     const updateModelRepositories = async () => {
         let response = await readRepositories();
-        updateModel({ type: "ServerRespondedWithRepositories", payload: success(response) });
+        updateModel({ type: "repositories", payload: success(response) });
         response = await getEnabledPlugins();
-        updateModel({ type: "ServerRespondedWithPluginsEnabled", payload: success(response) });
+        updateModel({ type: "pluginsEnabled", payload: success(response) });
     };
 
     return SRD.match(

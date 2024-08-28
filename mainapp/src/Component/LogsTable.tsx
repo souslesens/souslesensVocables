@@ -49,15 +49,15 @@ export const LogsTable = () => {
                 </Mui.Alert>
             ),
             success: () => {
-                if (model.logfiles.data.status === 500) {
+                if (model.logFiles.data.status === 500) {
                     return (
                         <Mui.Alert variant="filled" severity="error" sx={{ m: 4 }}>
-                            {`${model.logfiles.data.message}, consult the administrator of this instance for more information.`}
+                            {`${model.logFiles.data.message}, consult the administrator of this instance for more information.`}
                         </Mui.Alert>
                     );
                 }
 
-                const logFilesData = model.logfiles.data.message;
+                const logFilesData = model.logFiles.data.message;
                 if (selectedPeriod === undefined) {
                     setSelectedPeriod(logFilesData.find((log) => log.current).date);
                 }
@@ -171,6 +171,6 @@ export const LogsTable = () => {
                 );
             },
         },
-        model.logfiles
+        model.logFiles
     );
 };

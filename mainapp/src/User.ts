@@ -44,14 +44,14 @@ async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<M
         });
         const { message, resources } = (await response.json()) as { message: string; resources: User[] };
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(resources)) });
+            updateModel({ type: "users", payload: success(mapUsers(resources)) });
             updateLocal({ type: Type.UserClickedModal, payload: false });
             updateLocal({ type: Type.ResetUser, payload: mode });
         } else {
-            updateModel({ type: "ServerRespondedWithUsers", payload: failure(`${response.status}, ${message}`) });
+            updateModel({ type: "users", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
-        updateModel({ type: "ServerRespondedWithUsers", payload: failure(e) });
+        updateModel({ type: "users", payload: failure(e) });
     }
 }
 
@@ -60,21 +60,21 @@ async function deleteUser(user: User, updateModel: React.Dispatch<Msg>) {
         const response = await fetch(`${endpoint}/${user.login}`, { method: "delete" });
         const { message, resources } = (await response.json()) as { message: string; resources: User[] };
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(resources)) });
+            updateModel({ type: "users", payload: success(mapUsers(resources)) });
         } else {
-            updateModel({ type: "ServerRespondedWithUsers", payload: failure(`${response.status}, ${message}`) });
+            updateModel({ type: "users", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
-        updateModel({ type: "ServerRespondedWithUsers", payload: failure(e) });
+        updateModel({ type: "users", payload: failure(e) });
     }
 }
 
 function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>>) {
     return () => {
         getUsers()
-            .then((person) => updateModel({ type: "ServerRespondedWithUsers", payload: success(person) }))
+            .then((person) => updateModel({ type: "users", payload: success(person) }))
             .then(() => setModal(false))
-            .catch((err: { msg: string }) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err.msg) }));
+            .catch((err: { msg: string }) => updateModel({ type: "users", payload: failure(err.msg) }));
     };
 }
 

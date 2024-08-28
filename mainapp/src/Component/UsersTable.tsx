@@ -13,16 +13,45 @@ import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
 import { writeLog } from "../Log";
 
+const enum Type {
+    UserClickedModal,
+    UserUpdatedField,
+    ResetUser,
+}
+const enum Mode {
+    Creation,
+    Edition,
+}
+
+type Msg_ =
+    | { type: Type.UserClickedModal; payload: boolean }
+    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
+    | { type: Type.ResetUser; payload: Mode };
+
+type Order = "asc" | "desc";
+
+type UserEditionState = {
+    modal: boolean;
+    userForm: User;
+};
+
+type UserFormProps = {
+    me: string;
+    maybeuser?: User;
+    create?: boolean;
+    id: string;
+};
+
 const UsersTable = () => {
     const { model, updateModel } = useModel();
+
     const [filteringChars, setFilteringChars] = React.useState("");
     const [orderBy, setOrderBy] = React.useState<keyof User>("login");
     const [order, setOrder] = React.useState<Order>("asc");
-    type Order = "asc" | "desc";
 
     const me = SRD.withDefault("", model.me);
 
-    function handleRequestSort(property: keyof User) {
+    const handleRequestSort = (property: keyof User) => {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
@@ -61,24 +90,19 @@ const UsersTable = () => {
 
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
+
                 const datas = gotUsers.map((user) => {
                     const { groups, _type, password, ...restOfProperties } = user;
-                    const data = {
-                        ...restOfProperties,
-                        profiles: groups.join(";"),
-                    };
-
-                    return data;
+                    return { ...restOfProperties, profiles: groups.join(";") };
                 });
+
                 return (
                     <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         <Mui.Autocomplete
                             disablePortal
                             id="search-users"
                             options={gotUsers.map((user) => user.login)}
-                            onInputChange={(event, newInputValue) => {
-                                setFilteringChars(newInputValue);
-                            }}
+                            onInputChange={(event, newInputValue) => setFilteringChars(newInputValue)}
                             renderInput={(params) => <Mui.TextField {...params} label="Search Users by login" />}
                         />
                         <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
@@ -116,7 +140,7 @@ const UsersTable = () => {
                                                     <Mui.TableCell>
                                                         <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             {user.groups.map((group) => (
-                                                                <Mui.Chip label={group} size="small" />
+                                                                <Mui.Chip key={`${user.id}-${group}`} label={group} size="small" />
                                                             ))}
                                                         </Mui.Stack>
                                                     </Mui.TableCell>
@@ -136,7 +160,7 @@ const UsersTable = () => {
                             <CsvDownloader separator="&#9;" filename="users" extension=".tsv" datas={datas as Datas}>
                                 <Mui.Button variant="outlined">Download CSV</Mui.Button>
                             </CsvDownloader>
-                            <UserForm id={`create-button`} create={true} me={me} />
+                            <UserForm id="create-button" create={true} me={me} />
                         </Mui.Stack>
                     </Mui.Stack>
                 );
@@ -147,20 +171,6 @@ const UsersTable = () => {
 
     return renderUsers;
 };
-
-type UserEditionState = { modal: boolean; userForm: User };
-
-const enum Type {
-    UserClickedModal,
-    UserUpdatedField,
-    ResetUser,
-}
-const enum Mode {
-    Creation,
-    Edition,
-}
-
-type Msg_ = { type: Type.UserClickedModal; payload: boolean } | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } } | { type: Type.ResetUser; payload: Mode };
 
 const updateUser = (userEditionState: UserEditionState, msg: Msg_): UserEditionState => {
     //console.log(Type[msg.type], msg.payload)
@@ -184,13 +194,6 @@ const updateUser = (userEditionState: UserEditionState, msg: Msg_): UserEditionS
                     return { ...userEditionState, userForm: msg.payload ? userEditionState.userForm : resetSourceForm };
             }
     }
-};
-
-type UserFormProps = {
-    me: string;
-    maybeuser?: User;
-    create?: boolean;
-    id: string;
 };
 
 const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFormProps) => {

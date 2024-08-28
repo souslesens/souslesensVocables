@@ -14,7 +14,7 @@ import { ulid } from "ulid";
 import { useModel } from "../Admin";
 import { ServerSource, saveSource, defaultSource, deleteSource, sourceHelp, InputSourceSchema, InputSourceSchemaCreate, getGraphSize } from "../Source";
 import { writeLog } from "../Log";
-import { identity, style, joinWhenArray, humanizeSize, cleanUpText } from "../Utils";
+import { identity, style, joinWhenArray, humanizeSize, cleanUpText, jsonToDownloadUrl } from "../Utils";
 import { HelpButton } from "./HelpModal";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
@@ -168,6 +168,16 @@ const SourcesTable = () => {
                             </Mui.Table>
                         </Mui.TableContainer>
                         <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <Mui.Button
+                                variant="outlined"
+                                href={createSourcesDownloadUrl(
+                                    // TODO fix typing
+                                    (model.sources as unknown as Record<string, ServerSource[]>)["data"]
+                                )}
+                                download={"sources.json"}
+                            >
+                                Download JSON
+                            </Mui.Button>
                             <CsvDownloader separator="&#9;" filename="sources" extension=".tsv" datas={datas as Datas}>
                                 <Mui.Button variant="outlined">Download CSV</Mui.Button>
                             </CsvDownloader>
@@ -182,6 +192,14 @@ const SourcesTable = () => {
 
     return renderSources;
 };
+
+function createSourcesDownloadUrl(sources: ServerSource[]): string {
+    const sourcesObject: Record<string, ServerSource> = {};
+    for (const s of sources) {
+        sourcesObject[s.name] = s;
+    }
+    return jsonToDownloadUrl(sourcesObject);
+}
 
 type SparqlServerHeadersFormData = { key: string; value: string }[];
 type SourceFormData = Omit<ServerSource, "sparql_server"> & { sparql_server: Omit<ServerSource["sparql_server"], "headers"> & { headers: SparqlServerHeadersFormData } };

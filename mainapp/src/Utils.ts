@@ -67,4 +67,10 @@ function cleanUpText(original: unknown): string {
         .replace(/\p{Diacritic}/gu, "");
 }
 
-export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput, humanizeSize, cleanUpText };
+function jsonToDownloadUrl(json: unknown): string {
+    const content = JSON.stringify(json);
+    const file = new Blob([content], { type: "application/json" });
+    return URL.createObjectURL(file);
+}
+
+export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput, humanizeSize, cleanUpText, jsonToDownloadUrl };

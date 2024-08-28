@@ -17,7 +17,7 @@ var KGcreator_run = (function () {
         }
 
         var selectedText = KGcreator_mappings.currentMappingsSelection;
-        if (!selectedText) {
+        if (!selectedText || selectedText.length<10) {
             return null;
         }
         selectedText = selectedText.replace(/[\r\n]/g, "");
@@ -138,8 +138,10 @@ var KGcreator_run = (function () {
                         $("#KGcreator_infosDiv").val(result.result);
                         UI.message(result.result, true);
                     } else {
-                        $("#KGcreator_infosDiv").val(result.result + " triples created in graph " + KGcreator.currentConfig.graphUri);
-                        UI.message("triples created", true);
+                        var message=result.result + " triples created in graph " + KGcreator.currentConfig.graphUri
+                        alert(message)
+                      //  $("#KGcreator_infosDiv").val(result.result + " triples created in graph " + KGcreator.currentConfig.graphUri);
+                        UI.message(message, true);
                     }
                 }
                 if (callback) {

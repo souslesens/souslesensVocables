@@ -373,6 +373,8 @@ var PredicatesSelectorWidget = (function () {
     self.fillSelectRecentEditPredicate=function(){
         var recentEditPredicatesFill=[{id:'Recents',label:'Recents'}];
         var recentEditPredicates=JSON.parse(localStorage.getItem('recentEditPredicates'));
+        if(!recentEditPredicates)
+            return;
         recentEditPredicates.forEach(function(editPredicateStr,index){
             var editPredicate=JSON.parse(editPredicateStr);
             var name=`${editPredicate.predicate[0]=='usual' ? '' : editPredicate.predicate[0]+':'}${ editPredicate.predicate[1].label} 

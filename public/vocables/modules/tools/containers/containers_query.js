@@ -192,12 +192,12 @@ var Containers_query = (function () {
                  WHERE {?searchValue ^rdfs:member* ?member.
                     ?member ^rdfs:member ?parent.
                     ?member rdf:type ?memberType.
-                    ?member rdfs:label ?memberLabel.
-                    ?parent rdfs:label ?parentLabel.
+                    OPTIONAL {?member rdfs:label ?memberLabel.}
+                    OPTIONAL {?parent rdfs:label ?parentLabel.}
                     
                     {select ?searchValue where{
                         ?parent0  rdfs:member${pathOperator} ?searchValue.
-                        ?searchValue rdfs:label ?searchValueLabel.
+                        OPTIONAL { ?searchValue rdfs:label ?searchValueLabel.}
                         ${filterContainer0Str}
                         ${filter}
                         }

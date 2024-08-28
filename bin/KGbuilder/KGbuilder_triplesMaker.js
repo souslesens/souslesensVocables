@@ -580,6 +580,13 @@ var KGbuilder_triplesMaker = {
         }
     },
 
+   zipString: function(str) {
+    const ascii = encodeURIComponent(str)
+    const array = new TextEncoder().encode(ascii)
+    const zip = fflate.deflateSync(array, {level: 9})
+    return window.btoa(String.fromCharCode(...zip))
+},
+
     getStringHashCode :function(str) {
 
         var hashCode = s => s.split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0)

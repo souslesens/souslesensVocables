@@ -385,6 +385,9 @@ var Containers_tree = (function () {
         if (obj.event.button != 2) {
             self.listContainerResources(self.currentContainer);
         }
+        if(obj.event.ctrlKey){
+            NodeInfosWidget.showNodeInfos(self.currentContainer.data.source,self.currentContainer.data.source,"mainDialogDiv")
+        }
     };
 
     self.menuActions = {};
@@ -396,6 +399,10 @@ var Containers_tree = (function () {
                 return alert(err.responsetext);
             }
 
+
+            if( result.length==0){
+           return  UI.message("no result", true)
+            }
             var jstreeData = [];
 
             var existingNodes = {};
@@ -445,6 +452,9 @@ var Containers_tree = (function () {
                 return callback(err);
             }
 
+            if( result.length==0){
+                return  UI.message("no result", true)
+            }
             //identify top Node
             var childrenMap = {};
             result.forEach(function (item) {

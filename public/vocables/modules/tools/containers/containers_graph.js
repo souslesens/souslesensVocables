@@ -188,10 +188,12 @@ var Containers_graph = (function () {
                     data.forEach(function (item) {
                         if (!existingNodes[item.parent.value]) {
                             var type = "container";
+
+                            var label=item.parentLabel?item.parentLabel.value:Sparql_common.getLabelFromURI(item.parent)
                             existingNodes[item.parent.value] = 1;
                             visjsData.nodes.push({
                                 id: item.parent.value,
-                                label: item.parentLabel.value,
+                                label: label,
                                 shadow: self.nodeShadow,
                                 shape: type == "container" ? Containers_graph.containerStyle.shape : shape,
                                 size: size,
@@ -201,7 +203,7 @@ var Containers_graph = (function () {
                                     type: type,
                                     source: source,
                                     id: item.parent.value,
-                                    label: item.parentLabel.value,
+                                    label: label,
                                 },
                             });
                         }
@@ -222,10 +224,11 @@ var Containers_graph = (function () {
                                 }
                             }
 
+                            var label=item.memberLabel?item.memberLabel.value:Sparql_common.getLabelFromURI(item.member)
                             existingNodes[item.member.value] = 1;
                             visjsData.nodes.push({
                                 id: item.member.value,
-                                label: item.memberLabel.value,
+                                label: label,
                                 shadow: self.nodeShadow,
                                 shape: shape,
                                 size: size,
@@ -236,7 +239,8 @@ var Containers_graph = (function () {
                                     type: type,
                                     source: source,
                                     id: item.member.value,
-                                    label: item.memberLabel.value,
+                                   // label: item.memberLabel.value,
+                                    label: label,
                                 },
                             });
                         }

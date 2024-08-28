@@ -87,6 +87,7 @@ var NodeInfosWidget = (function () {
                 }
             } else {
                 if (node.id) {
+                    self.currentNode={data:{id:node}}
                     self.currentNodeId = node;
                 }
             }
@@ -1011,8 +1012,10 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 }
                 self.newProperties[property] = value;
 
-                // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
-                self.drawAllInfos(self.currentSource, self.currentNode.data.id, {}, function (err, result) {
+
+
+
+                self.drawAllInfos(self.currentSource,currentNodeId || self.currentNode.data.id, {}, function (err, result) {
                     //  self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.push({

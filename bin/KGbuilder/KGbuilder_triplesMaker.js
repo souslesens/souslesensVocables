@@ -249,9 +249,16 @@ var KGbuilder_triplesMaker = {
         if (mapping.o === "_rowIndex") {
             objectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
             return objectStr;
-        } else if (mapping.objectIsSpecificUri || mapping.startsWith("'")) {
+        } else if (mapping.objectIsSpecificUri  ) {
             objectStr = mapping.o;
-        } else if (typeof mapping.o === "function") {
+        }
+
+
+        if(mapping.o.endsWith("_!")) {
+            objectStr=mapping.o.replace("_!","")
+            mapping.isString=true
+        }
+            else if (typeof mapping.o === "function") {
             try {
                 objectStr = mapping.o(line, mapping);
                 objectStr = util.formatStringForTriple(objectStr, false);
@@ -573,6 +580,9 @@ var KGbuilder_triplesMaker = {
         }
     },
 
+
+
+
     getStringHashCode :function(str) {
 
         var hashCode = s => s.split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0)
@@ -582,6 +592,8 @@ var KGbuilder_triplesMaker = {
 //console.log(code+"    "+str+"   ")
         return code
     },
+
+
     
     getLookupValue: function(lookupName, value, callback) {
         var lookupArray = lookupName.split("|");

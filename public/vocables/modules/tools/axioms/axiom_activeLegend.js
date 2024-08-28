@@ -59,9 +59,13 @@ var Axiom_activeLegend = (function () {
 
             } else if (node.data.type == "ObjectProperty") {
                 self.hideLegendItems();
-                var siblingObjectClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class")
-                if (siblingObjectClassUri) {
-                    Axioms_suggestions.getValidPropertiesForClass(siblingObjectClassUri, function (err, properties) {
+                var domainClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class")
+                if(!domainClassUri){
+                    domainClassUri=self.getPropertyDomainAncestorClass(Axioms_graph.currentGraphNode.id)
+                }
+
+                if (domainClassUri) {
+                    Axioms_suggestions.getValidPropertiesForClass(domainClassUri, function (err, properties) {
                         self.setSuggestionsSelect(properties, true);
 
                     });
@@ -97,6 +101,16 @@ var Axiom_activeLegend = (function () {
         }
     };
 
+    /**
+     *
+     * get the first ancestor that is a Class
+     * @param restrictionUri
+     * @returns classUri
+     */
+    self.getPropertyDomainAncestorClass=function(restrictionUri){
+        var obj=Axioms_graph.axiomsVisjsGraph.data.nodes.get(restrictionUri)
+        return  obj.parent
+    }
     self.getGraphSiblingUri = function (connectiveParent, type) {
         var siblingIds = Axioms_graph.axiomsVisjsGraph.network.getConnectedNodes(connectiveParent, "to")
         if (!siblingIds || siblingIds.length == 0) {
@@ -107,7 +121,7 @@ var Axiom_activeLegend = (function () {
             return sibling.data.id
         }
         return null
-    }
+    };
     /*
     if unique, filters exiting nodes in graph before showing list
     *
@@ -267,6 +281,16 @@ var Axiom_activeLegend = (function () {
             hiddenNodes.push("DisjointWith");
         } else if (resourceType == "Restriction") {
             hiddenNodes.push("Restriction");
+
+           /// begin with property to respect range and domains
+           var hasProperty= self.getGraphSiblingUri  (Axioms_graph.currentGraphNode.id,"ObjectProperty")
+            if(hasProperty)
+                hiddenNodes.push("ObjectProperty");
+            else
+                hiddenNodes.push("Class");
+
+
+
         } else if (resourceType == "Connective") {
             hiddenNodes.push("ObjectProperty");
         }

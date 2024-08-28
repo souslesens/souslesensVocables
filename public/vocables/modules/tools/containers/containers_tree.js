@@ -582,7 +582,8 @@ var Containers_tree = (function () {
                 // pb avec source
                 Lineage_whiteboard.copyNode(e);
                 var selectedNodes = $("#lineage_containers_containersJstree").jstree().get_selected(true);
-                Containers_tree.menuActions.copyNodeToClipboard(selectedNodes);
+               // Containers_tree.menuActions.copyNodeToClipboard(selectedNodes);
+                Lineage_common.copyNodeToClipboard(selectedNodes);
             },
         };
         items["AddGraphNode"] = {
@@ -703,10 +704,12 @@ var Containers_tree = (function () {
      * @param drawMembershipEdge add the edge (and the node) on the vizGraph
      */
     self.menuActions.addResourcesToContainer = function (source, container, nodesData, drawMembershipEdge, callback) {
-        if (!(container.data.type.includes("http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") || container.data.type == "container")) {
+
+        // can also copy nodes coming from copy container
+        if (false &&!(container.data.type.includes("http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") || container.data.type == "container")) {
             return alert("can only add resources to containers");
         }
-        // self.currentContainer=null;
+
         if (!Array.isArray(nodesData)) {
             nodesData = [nodesData];
         }
@@ -811,7 +814,7 @@ var Containers_tree = (function () {
                     }
                 });
 
-                self.addResourcesToContainer(source, container, nodesData);
+                self.menuActions.addResourcesToContainer(source, container, nodesData);
             } catch (e) {
                 console.log("wrong clipboard content");
             }

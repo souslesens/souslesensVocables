@@ -17,6 +17,7 @@ var KGcreator_run = (function () {
         }
 
         var selectedText = KGcreator_mappings.currentMappingsSelection;
+
         if (!selectedText) {
             return null;
         }
@@ -28,6 +29,7 @@ var KGcreator_run = (function () {
 
         try {
             var json = JSON.parse(selectedText);
+            KGcreator_mappings.currentMappingsSelection=null;
             return json
 
         } catch (e) {
@@ -79,7 +81,7 @@ var KGcreator_run = (function () {
 
 
 
-        UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initRunTab, "#RunButton");
+       UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initRunTab, "#RunButton");
         var table = self.getTableAndShowMappings(allmappings);
         if (!allmappings && !table) {
             return alert("select a node");

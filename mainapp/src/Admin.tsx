@@ -92,12 +92,11 @@ function useModel() {
 function update(model: Model, msg: Msg): Model {
     const unwrappedUsers: User[] = SRD.unwrap([], identity, model.users);
 
-    switch (msg.type) {
-        case "currentEditionTab":
-            const params = new URLSearchParams(document.location.search);
-            params.set("tab", msg.payload);
-            // Insert or replace the tab key in the URL
-            window.history.replaceState(null, "", `?${params.toString()}`);
+    if (msg.type === "currentEditionTab") {
+        const params = new URLSearchParams(document.location.search);
+        params.set("tab", msg.payload);
+        // Insert or replace the tab key in the URL
+        window.history.replaceState(null, "", `?${params.toString()}`);
     }
 
     return { ...model, [msg.type]: msg.payload };

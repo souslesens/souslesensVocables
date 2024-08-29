@@ -26,7 +26,7 @@ declare global {
 }
 
 export default function App(uploadFormData: UploadFormData) {
-    const [databases, setDatabases] = useState<{ string: string }[]>([]);
+    const [databases, setDatabases] = useState<Record<string, string>[]>([]);
     const [files, setFiles] = useState<File[]>([]);
     const [selectedDatabase, setSelectedDatabase] = useState("_default");
 
@@ -88,7 +88,9 @@ export default function App(uploadFormData: UploadFormData) {
                         Select database
                     </MenuItem>
                     {databases.map((database) => (
-                        <MenuItem value={{ id: database.id, name: database.name }}>{database.name}</MenuItem>
+                        <MenuItem key={database.id} value={{ id: database.id, name: database.name }}>
+                            {database.name}
+                        </MenuItem>
                     ))}
                 </Select>
             );

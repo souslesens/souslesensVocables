@@ -218,7 +218,7 @@ export const InputSourceSchema = {
         .string()
         .nonempty({ message: "Required" })
         .min(3, { message: "3 chars min" })
-        .refine((val) => val.match(/^[^\/]/), { message: "Cannot start with /" }),
+        .refine((val) => val.match(/^[^/]/), { message: "Cannot start with /" }),
     owner: z.string().default(""),
     published: z.boolean().default(false),
     imports: z.array(z.string()).default([]),

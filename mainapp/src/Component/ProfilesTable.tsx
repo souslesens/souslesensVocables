@@ -130,7 +130,7 @@ const ProfilesTable = () => {
                                                     <Mui.TableCell align="center">
                                                         <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             {profile.allowedSourceSchemas.map((source) => (
-                                                                <Mui.Chip label={source} size="small" />
+                                                                <Mui.Chip key={source} label={source} size="small" />
                                                             ))}
                                                         </Mui.Stack>
                                                     </Mui.TableCell>
@@ -587,7 +587,9 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                             select
                         >
                             {getAvailableThemes().map((theme) => (
-                                <Mui.MenuItem value={theme}>{theme}</Mui.MenuItem>
+                                <Mui.MenuItem key={theme} value={theme}>
+                                    {theme}
+                                </Mui.MenuItem>
                             ))}
                         </Mui.TextField>
                         <Mui.Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} type="submit" variant="contained" color="primary">

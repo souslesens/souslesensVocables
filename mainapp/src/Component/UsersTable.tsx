@@ -114,7 +114,7 @@ const UsersTable = () => {
                                                     <Mui.TableCell>
                                                         <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             {user.groups.map((group) => (
-                                                                <Mui.Chip label={group} size="small" />
+                                                                <Mui.Chip key={group} label={group} size="small" />
                                                             ))}
                                                         </Mui.Stack>
                                                     </Mui.TableCell>

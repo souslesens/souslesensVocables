@@ -12,7 +12,7 @@ async function getLogs(file): Promise<Log[]> {
     return json;
 }
 
-async function writeLog(user: string, tool: string, action: string, source: string): number {
+async function writeLog(user: string, tool: string, action: string, source: string): Promise<number> {
     const body = { infos: `${user},${tool},${source},${action}` };
 
     const response = await fetch(endpoint, {

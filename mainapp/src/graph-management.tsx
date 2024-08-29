@@ -531,7 +531,7 @@ export default function GraphManagement() {
                                 .filter(([_sourceName, source]) => source.name.includes(filteringChars))
                                 .map(([sourceName, source]) => {
                                     return (
-                                        <TableRow>
+                                        <TableRow key={sourceName}>
                                             <TableCell>{sourceName}</TableCell>
                                             <TableCell>
                                                 <Link href={source.graphUri}>{source.graphUri}</Link>

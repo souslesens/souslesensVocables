@@ -955,7 +955,14 @@ var OntologyModels = (function () {
                             if (Object.keys(allRanges).length == 0) {
                                 anyRange = true;
                             }
-                            Sparql_OWL.getAllDescendants(source, Object.keys(allRanges), "rdfs:subClassOf", {}, function (err, result) {
+
+                            var ranges= Object.keys(allRanges)
+
+                                if(ranges.length==0)
+                                {
+                                    return callbackSeries()
+                                }
+                            Sparql_OWL.getAllDescendants(source,ranges, "rdfs:subClassOf", {}, function (err, result) {
                                 if (err) {
                                     return callback(err);
                                 }

@@ -13,6 +13,7 @@ var Axiom_activeLegend = (function () {
         self.axiomGraphDiv = axiomGraphDiv;
         self.currentSource = source;
         self.currentResource = resource;
+        self.axiomType = axiomType;
         self.currentClass = self.currentResource;
         self.currentClass.resourceType = "Class";
         self.predicate = axiomType;
@@ -376,7 +377,7 @@ var Axiom_activeLegend = (function () {
         var visjsData = {nodes: [], edges: []};
         var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
         visjsNode.data.predicate = selectedObject.axiomType;
-        self.axiomType = selectedObject.axiomType;
+
         visjsData.nodes.push(visjsNode);
         self.hierarchicalLevel = 0;
         var options = {
@@ -552,11 +553,21 @@ var Axiom_activeLegend = (function () {
 
     self.addAxiomToAxomsJstree = function (manchesterStr, triples) {
         var id = common.getRandomHexaId(10)
-        var jstreeData = [
-            {
+        var jstreeData =[]
+
+        var axiomTypeNode=$("#nodeInfosAxioms_axiomsJstreeDiv").jstree().get_node(self.axiomType)
+        if(!axiomTypeNode){
+            jstreeData.push({
+                id: self.axiomType,
+                text: self.axiomType,
+                parent: "rootNode",
+            })
+        }
+        JstreeWidget.addNodesToJstree("nodeInfosAxioms_axiomsJstreeDiv", "rootNode",jstreeData )
+        jstreeData=[{
                 id: id,
                 text: manchesterStr,
-                parent: "#",//self.axiomType,
+                parent: self.axiomType,
                 data: {
                     id: manchesterStr,
                     label: manchesterStr,
@@ -564,9 +575,7 @@ var Axiom_activeLegend = (function () {
                     manchester: manchesterStr,
                 },
             }]
-
-
-        JstreeWidget.addNodesToJstree("nodeInfosAxioms_axiomsJstreeDiv", "#",jstreeData )//self.axiomType);
+        JstreeWidget.addNodesToJstree("nodeInfosAxioms_axiomsJstreeDiv",  self.axiomType,jstreeData )
     }
 
 

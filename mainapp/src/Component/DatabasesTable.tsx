@@ -55,7 +55,7 @@ const updateDatabase = (databaseEditionState: DatabaseEditionState, msg: Msg_): 
 const validateForm = (form: DatabaseFormProps) => {
     const validation = DatabaseSchema.safeParse(form);
 
-    let errors = {};
+    const errors = {};
     if (!validation.success) {
         validation.error.issues.map((item) => item.path.map((path) => (errors[path] = item.message)));
     }

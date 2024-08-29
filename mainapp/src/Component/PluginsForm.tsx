@@ -573,7 +573,7 @@ const PluginsForm = () => {
 
     const handleSelectedTab = (event: React.SyntheticEvent, newValue: string) => setSelectedTab(newValue);
 
-    const handleSnackbar = (message: string, severity: string = "success") => {
+    const handleSnackbar = (message: string, severity = "success") => {
         setSnackSeverity(severity);
         setSnackMessage(message);
         setSnackOpen(true);
@@ -597,7 +597,7 @@ const PluginsForm = () => {
         })();
     };
 
-    const handleSubmitRepository = (identifier: string | null, data: RepositoryType, toFetch: boolean = true) => {
+    const handleSubmitRepository = (identifier: string | null, data: RepositoryType, toFetch = true) => {
         if (identifier === null) {
             identifier = ulid();
         }

@@ -174,7 +174,7 @@ const PluginsConfiguration = (props: DispatcherProps) => {
                     <nav>
                         <Mui.List sx={{ height: 400, overflow: "auto" }} disablePadding>
                             {model.pluginsEnabled.data.map((plugin) => (
-                                <Mui.ListItemButton selected={plugin.name === selectedPlugin} onClick={() => setSelectedPlugin(plugin.name)}>
+                                <Mui.ListItemButton key={plugin.name} selected={plugin.name === selectedPlugin} onClick={() => setSelectedPlugin(plugin.name)}>
                                     <Mui.ListItemIcon>
                                         <MuiIcons.Extension />
                                     </Mui.ListItemIcon>
@@ -187,28 +187,32 @@ const PluginsConfiguration = (props: DispatcherProps) => {
 
                 {selectedPlugin !== undefined && (
                     <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ padding: 4, width: "100%", height: 400, overflow: "auto" }} useFlexGap>
-                        {model.pluginsConfig.data.hasOwnProperty(selectedPlugin) && (
-                            <Mui.Stack spacing={{ xs: 2 }} useFlexGap>
-                                {Object.entries(model.pluginsConfig.data[selectedPlugin]).map(([key, value]) => (
-                                    <Mui.TextField
-                                        defaultValue=""
-                                        id={`field-${selectedPlugin.name}-${key}`}
-                                        label={key}
-                                        onChange={(event) => handleUpdateOption(key, event.target.value)}
-                                        value={value}
-                                        InputProps={{
-                                            endAdornment: (
-                                                <Mui.InputAdornment position="start">
-                                                    <Mui.IconButton color="warning" edge="end" onClick={handleRemoveOption(key)}>
-                                                        <MuiIcons.DeleteForever />
-                                                    </Mui.IconButton>
-                                                </Mui.InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                ))}
-                            </Mui.Stack>
-                        )}
+                        {
+                            // eslint-disable-next-line no-prototype-builtins
+                            model.pluginsConfig.data.hasOwnProperty(selectedPlugin) && (
+                                <Mui.Stack spacing={{ xs: 2 }} useFlexGap>
+                                    {Object.entries(model.pluginsConfig.data[selectedPlugin]).map(([key, value]) => (
+                                        <Mui.TextField
+                                            key={key}
+                                            defaultValue=""
+                                            id={`field-${selectedPlugin.name}-${key}`}
+                                            label={key}
+                                            onChange={(event) => handleUpdateOption(key, event.target.value)}
+                                            value={value}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <Mui.InputAdornment position="start">
+                                                        <Mui.IconButton color="warning" edge="end" onClick={handleRemoveOption(key)}>
+                                                            <MuiIcons.DeleteForever />
+                                                        </Mui.IconButton>
+                                                    </Mui.InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    ))}
+                                </Mui.Stack>
+                            )
+                        }
 
                         <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                             <Mui.Button color="success" onClick={handleOpenModal} startIcon={<MuiIcons.AddCircle />} variant="outlined">

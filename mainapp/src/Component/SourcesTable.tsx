@@ -884,9 +884,9 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
                                 onChange={handleDataSourceUpdate("type")}
                             >
                                 {["sql.sqlserver"].map((type) => (
-                                    <MenuItem key={type} value={type}>
+                                    <Mui.MenuItem key={type} value={type}>
                                         {type}
-                                    </MenuItem>
+                                    </Mui.MenuItem>
                                 ))}
                             </Mui.Select>
                         </Mui.FormControl>

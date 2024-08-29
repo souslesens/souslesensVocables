@@ -100,8 +100,10 @@ export const LogsTable = () => {
                                 size="medium"
                                 value={selectedPeriod}
                             >
-                                {logFilesData.map((file) => (
-                                    <Mui.MenuItem value={file.date}>{file.date}</Mui.MenuItem>
+                                {logFilesData.map((file, i) => (
+                                    <Mui.MenuItem key={i} value={file.date}>
+                                        {file.date}
+                                    </Mui.MenuItem>
                                 ))}
                             </Mui.TextField>
                             <Mui.TextField

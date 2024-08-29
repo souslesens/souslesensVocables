@@ -5,7 +5,7 @@ module.exports = {
             version: "detect",
         },
     },
-    extends: ["plugin:prettier/recommended", "plugin:cypress/recommended", "eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react/recommended"],
+    extends: ["plugin:cypress/recommended", "eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react/recommended", "plugin:prettier/recommended"],
 
     rules: {
         "no-console": ["error", { allow: ["error", "warn"] }],
@@ -192,11 +192,11 @@ module.exports = {
             files: ["mainapp/src/**/*.ts", "mainapp/src/**/*.tsx"],
 
             extends: [
-                "plugin:prettier/recommended",
                 "eslint:recommended",
                 "plugin:@typescript-eslint/recommended-requiring-type-checking",
                 "plugin:@typescript-eslint/recommended",
                 "plugin:react/recommended",
+                "plugin:prettier/recommended",
             ],
             parserOptions: {
                 ecmaVersion: 2018,

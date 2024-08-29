@@ -10,7 +10,7 @@
         "build:watch": "vite build --watch",
         "dev": "vite",
         "cypress:open": "cypress open",
-        "ncu": "ncu"
+        "ncu": "npx npm-check-updates"
     },
     "author": "Logilab",
     "license": "LGPL-3.0-or-later",
@@ -26,7 +26,6 @@
         "eslint-plugin-prettier": "^4.2.1",
         "eslint-plugin-react": "^7.34.1",
         "eslint-plugin-react-hooks": "^4.6.0",
-        "npm-check-updates": "^17.1.0",
         "prettier": "^2.8.8",
         "typescript": "^5.4.4",
         "vite": "^4.5.3"

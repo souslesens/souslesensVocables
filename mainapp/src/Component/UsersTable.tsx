@@ -48,8 +48,8 @@ const UsersTable = () => {
             ),
             success: (gotUsers: User[]) => {
                 const sortedUsers: User[] = gotUsers.slice().sort((a: User, b: User) => {
-                    let left: string = "";
-                    let right: string = "";
+                    let left = "";
+                    let right = "";
 
                     if (a[orderBy] instanceof Array) {
                         left = a[orderBy].toString();

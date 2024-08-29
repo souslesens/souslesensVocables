@@ -137,7 +137,7 @@ export default function GraphManagement() {
         return await response.text();
     };
 
-    const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format: string = "nt", identifier: string = "", skipNamedIndividuals: boolean = false) => {
+    const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format = "nt", identifier = "", skipNamedIndividuals = false) => {
         const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${skipNamedIndividuals}`, {
             headers: { Authorization: `Bearer ${currentUserToken}` },
         });

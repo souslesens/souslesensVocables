@@ -148,11 +148,7 @@ const Admin = () => {
     return (
         <ModelContext.Provider value={{ model, updateModel }}>
             <Mui.Box sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}>
-                <Mui.Tabs
-                    onChange={(event: React.SyntheticEvent, newValue: string) => updateModel({ type: "currentEditionTab", payload: newValue })}
-                    value={model.currentEditionTab}
-                    centered
-                >
+                <Mui.Tabs onChange={(event: React.SyntheticEvent, newValue: string) => updateModel({ type: "currentEditionTab", payload: newValue })} value={model.currentEditionTab} centered>
                     <Mui.Tab label="Settings" value="settings" />
                     <Mui.Tab label="Users" value="users" />
                     <Mui.Tab label="Profiles" value="profiles" />

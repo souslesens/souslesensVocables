@@ -169,6 +169,7 @@ var NodeInfosWidget = (function () {
 
                 function (callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
+                        $('#nodeInfos_restrictionsDiv').hide()
                         return callbackSeries();
                     }
 
@@ -178,6 +179,7 @@ var NodeInfosWidget = (function () {
                 },
                 function (callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
+                        $('#nodeInfos_associatedPropertiesDiv').hide()
                         return callbackSeries();
                     }
                     self.showAssociatedProperties(self.currentNodeRealSource, nodeId, "nodeInfos_associatedPropertiesDiv", function (err) {
@@ -472,7 +474,7 @@ defaultLang = 'en';*/
                             }
                             valuesStr += value + optionalStr;
                         });
-                        str += "<td class='detailsCellValue'>" + valuesStr + "</td>";
+                        str += "<td class='detailsCellValue'><div class='detailsCellValueContent'>" +valuesStr + "</div></td>";
                         str += "</tr>";
                     } else {
                         // manage lang
@@ -552,6 +554,7 @@ defaultLang = 'en';*/
     self.showClassRestrictions = function (sourceLabel, nodeId, _options, callback) {
         // blankNodes.
         var str = "";
+        var isResult=false;
         async.series(
             [
                 //direct restrictions
@@ -559,6 +562,9 @@ defaultLang = 'en';*/
                     Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, { withoutBlankNodes: 1 }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
+                        }
+                        if(result.length>0){
+                            isResult=true;
                         }
                         str = "<b class='nodesInfos_titles'>Restrictions </b> <div style=''> <table style='display:table-caption'>";
 
@@ -614,6 +620,9 @@ defaultLang = 'en';*/
                             if (err) {
                                 return callbackSeries(err);
                             }
+                            if(result.length>0){
+                                isResult=true;
+                            }
 
                             str += "<br><b class='nodesInfos_titles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table >";
                             result.forEach(function (item) {
@@ -661,7 +670,14 @@ defaultLang = 'en';*/
             ],
             function (err) {
                 if (!err) {
-                    $("#nodeInfos_restrictionsDiv").html(str);
+                    if(isResult){
+                        $("#nodeInfos_restrictionsDiv").show();
+                        $("#nodeInfos_restrictionsDiv").html(str);
+                    }
+                    else{
+                        $("#nodeInfos_restrictionsDiv").hide();
+                    }
+                    
                 }
                 return callback(err);
             }
@@ -736,7 +752,13 @@ defaultLang = 'en';*/
 
                 str += "</tr>";
             });
-            $("#" + divId).append(str);
+            if(result.length==0){
+                $("#" + divId).show();
+                $("#" + divId).append(str);
+            }
+            else{
+                $("#" + divId).hide();
+            }
 
             return _callback();
         });
@@ -780,8 +802,11 @@ defaultLang = 'en';*/
                 });
             }
             if (html) {
+                $('#'+divId).show();
                 $("#" + divId).append(html);
                 $("#" + divId).css("display", "table-caption");
+            }else{
+                $('#'+divId).hide();
             }
         }
         if (callback) {
@@ -857,7 +882,13 @@ defaultLang = 'en';*/
                 }
             },
         };
-
+        if(jstreeData.length==0){
+            $('#nodeInfos_classHierarchyDiv').hide();
+            return;
+        }else{
+            $('#classHierarchyTreeDiv').show();
+        }
+        
         JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
 
         callback();
@@ -929,7 +960,13 @@ defaultLang = 'en';*/
                 }
             },
         };
-
+        if(jstreeData.length==0){
+            $('#nodeInfos_classHierarchyDiv').hide();
+            return;
+        }else{
+            $('#classHierarchyTreeDiv').show();
+        }
+        
         JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
 
         callback();
@@ -1248,15 +1285,21 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         });
     };
     self.showModifyPredicateDialog = function (predicateId) {
-        self.setLargerObjectTextArea();
+        
+        $('#editPredicate_propertyDiv').hide();
+        $('#editPredicate_recentSelect').hide();
+        editPredicate_recentSelect
         PredicatesSelectorWidget.currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         if (!PredicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
+            //if is nonObjectProperty predicate only
+            self.setLargerObjectTextArea();
             $("#editPredicate_savePredicateButton").click(function () {
                 //PredicatesSelectorWidget.storeRecentPredicates();
-                
+                /*$('#editPredicatePanel').show();
+                $('#editPredicate_recentSelect').show();*/
                 self.deletePredicate(predicateId,function(){
                     self.addPredicate(null,null,null,null,function(){
                         self.showNodeInfos(MainController.currentSource,self.currentNode,"mainDialogDiv", { resetVisited: 1 });

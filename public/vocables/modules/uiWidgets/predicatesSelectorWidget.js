@@ -95,6 +95,7 @@ var PredicatesSelectorWidget = (function () {
         if (self.options["flex-direction"]) {
             $("#editPredicate_mainDiv").css("flex-direction", self.options["flex-direction"]);
         }
+      
 
         $("#editPredicate_currentVocabPredicateSelect").prop("disabled", false);
         $("#editPredicate_vocabularySelect").prop("disabled", false);
@@ -198,11 +199,13 @@ var PredicatesSelectorWidget = (function () {
             if(vocabulary=='usual'){
                 if(!(value.indexOf("xsd:") > -1)){
                     vocabulary=$('#editPredicate_currentVocabPredicateSelect').val().split(':')[0];
-                    Object.values(Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties).forEach(function(nonObjectProp){
-                        if(nonObjectProp.label==$('#editPredicate_currentVocabPredicateSelect').val().split(':')[1]){
-                            NodeInfosWidget.setLargerObjectTextArea();
-                        }
-                    });
+                    if(Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties){
+                        Object.values(Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties).forEach(function(nonObjectProp){
+                            if(nonObjectProp.label==$('#editPredicate_currentVocabPredicateSelect').val().split(':')[1]){
+                                NodeInfosWidget.setLargerObjectTextArea();
+                            }
+                        });
+                    }
                 }
             }
             // is Datatype or anotation property
@@ -373,6 +376,8 @@ var PredicatesSelectorWidget = (function () {
     self.fillSelectRecentEditPredicate=function(){
         var recentEditPredicatesFill=[{id:'Recents',label:'Recents'}];
         var recentEditPredicates=JSON.parse(localStorage.getItem('recentEditPredicates'));
+        if(!recentEditPredicates){return;}
+        
         recentEditPredicates.forEach(function(editPredicateStr,index){
             var editPredicate=JSON.parse(editPredicateStr);
             var name=`${editPredicate.predicate[0]=='usual' ? '' : editPredicate.predicate[0]+':'}${ editPredicate.predicate[1].label} 

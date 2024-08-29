@@ -218,8 +218,8 @@ var UI = (function () {
     self.changeTheme = function (themeName) {
         if (!themeName) return;
         var colorVars = Config.slsvColorThemes[themeName];
-        var iconsPathsVars=self.getIconsVarsPaths(themeName);
-        var themeSelected={...colorVars, ...iconsPathsVars};
+        var iconsPathsVars = self.getIconsVarsPaths(themeName);
+        var themeSelected = { ...colorVars, ...iconsPathsVars };
         self.currentTheme = themeSelected;
         if (themeSelected["@logoInstance-icon"] == undefined || themeSelected["@logoInstance-icon"] == "") {
             $("#externalLogoDiv").hide();
@@ -229,17 +229,16 @@ var UI = (function () {
         less.modifyVars(themeSelected);
         UI.darkThemeParams(themeSelected);
     };
-    self.getIconsVarsPaths=function(themeName){
-      
-        var iconsVarPaths={};
-        Object.keys(Config.lessIconsFileNames).forEach(function(iconVar){
-            var fileName=Config.lessIconsFileNames[iconVar];
-            var path=`../../icons/${themeName.replaceAll(' ','')}/${fileName}-${themeName.replaceAll(' ','')}.png`;
-            iconsVarPaths[iconVar]=path;
+    self.getIconsVarsPaths = function (themeName) {
+        var iconsVarPaths = {};
+        Object.keys(Config.lessIconsFileNames).forEach(function (iconVar) {
+            var fileName = Config.lessIconsFileNames[iconVar];
+            var path = `../../icons/${themeName.replaceAll(" ", "")}/${fileName}-${themeName.replaceAll(" ", "")}.png`;
+            iconsVarPaths[iconVar] = path;
         });
         return iconsVarPaths;
-    }
-  
+    };
+
     //Keep
     self.hideShowMenuBar = function (button) {
         if (self.menuBarShowed) {
@@ -279,15 +278,16 @@ var UI = (function () {
             $("#lateralPanelDiv").css("width", "435px");
             UI.resetWindowHeight();
             self.LateralPanelShowed = true;
-            var currentTabId =  $(".slsv-selectedTabDiv").attr("title").toLowerCase() + 'Tab';
-            $('#'+currentTabId).children().show();
+            var currentTabId = $(".slsv-selectedTabDiv").attr("title").toLowerCase() + "Tab";
+            $("#" + currentTabId)
+                .children()
+                .show();
 
             /*$(button).parent().show();
             //$(button).parent().find("#ArrowLateralPanel").attr("src", "./icons/CommonIcons/ArrowLateralPanel.png");*/
             $("#lateralPanelDiv").addClass("ui-resizable");
         }
     };
-
 
     //keep
     self.darkThemeParams = function (theme) {

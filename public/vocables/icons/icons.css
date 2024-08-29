@@ -1,4 +1,3 @@
-
 /* Less variable definition of all icons Vars that evolve with Themes*/
 .arrow-icon {
     background-image: url(@arrow-icon);
@@ -75,7 +74,6 @@
     width: 20px;
 }
 
-
 .allPropertyIcon {
     background-image: url(@allPropertyIcon);
     background-repeat: no-repeat;
@@ -109,7 +107,6 @@
     border: 0px !important;
     margin-right: 20px !important;
 }
-
 
 .whiteBoardIcon {
     background-image: url(@whiteBoardIcon);

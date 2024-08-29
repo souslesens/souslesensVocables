@@ -14,31 +14,25 @@
     </div>-->
         <div style="display: flex; flex-direction: row; width: 100%">
             <div>
-                <div style="display: flex; flex-direction: column;display:none" id="nodeInfosAxioms_graphPanelDiv" >
-                <!--    <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.toGraphMl()">toGraphML
+                <div style="display: flex; flex-direction: column; display: none" id="nodeInfosAxioms_graphPanelDiv">
+                    <!--    <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.toGraphMl()">toGraphML
                     </button>
                     <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.toSVG()">toSVG</button>-->
-                    <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.showTriples()">show triples
-                    </button>
-                    <hr/>
-
+                    <button class="w3-button slsv-button-3" onclick="NodeInfosAxioms.actions.showTriples()">show triples</button>
+                    <hr />
                 </div>
-
 
                 <div style="display: flex; flex-direction: column">
-                 <!--   <button class="w3-button slsv-button-2" onclick="NodeInfosAxioms.newAxiom()">New axiom</button>-->
-                    <div id="nodeInfosAxioms_activeLegendDiv"
-                         style="width: 100px; height: 200px; background-color: #ddd"></div>
+                    <!--   <button class="w3-button slsv-button-2" onclick="NodeInfosAxioms.newAxiom()">New axiom</button>-->
+                    <div id="nodeInfosAxioms_activeLegendDiv" style="width: 100px; height: 200px; background-color: #ddd"></div>
                 </div>
             </div>
-            <div style="display: flex; flex-direction: row;display: none" id="nodeInfosAxioms_newAxiomPanel">
+            <div style="display: flex; flex-direction: row; display: none" id="nodeInfosAxioms_newAxiomPanel">
                 <!--  <button onclick="NodeInfosAxioms.actions.setLayout('randomlayout')">Random Layout</button>-->
 
                 <div>
-                    New Axiom<br>
-                    <select id="axioms_legend_suggestionsSelect"
-                            onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())" size="20"
-                            style="width: 250px; overflow: auto"></select>
+                    New Axiom<br />
+                    <select id="axioms_legend_suggestionsSelect" onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())" size="20" style="width: 250px; overflow: auto"></select>
                     <div>
                         <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.clearAxiom()">clear</button>
                         <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.showTriples()">triples</button>
@@ -47,17 +41,12 @@
                 </div>
             </div>
 
-
-            <div id="nodeInfosAxioms_graphDiv"
-                 style="width: 70vw; height: 450px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
-
+            <div id="nodeInfosAxioms_graphDiv" style="width: 70vw; height: 450px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
         </div>
     </div>
 
     <div id="nodeInfosAxioms_manchesterDiv" style="display: none">
-        <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.axiomTriplesToManchester()">
-            toManchester
-        </button> <span id="axiomsEditor_textDiv" style="width: 80%; height: 50px; background-color: #ddd"></span>
+        <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.axiomTriplesToManchester()">toManchester</button>
+        <span id="axiomsEditor_textDiv" style="width: 80%; height: 50px; background-color: #ddd"></span>
     </div>
 </div>
-

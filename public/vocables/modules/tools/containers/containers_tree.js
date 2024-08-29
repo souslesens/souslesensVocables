@@ -385,8 +385,8 @@ var Containers_tree = (function () {
         if (obj.event.button != 2) {
             self.listContainerResources(self.currentContainer);
         }
-        if(obj.event.ctrlKey){
-            NodeInfosWidget.showNodeInfos(self.currentContainer.data.source,self.currentContainer.data.source,"mainDialogDiv")
+        if (obj.event.ctrlKey) {
+            NodeInfosWidget.showNodeInfos(self.currentContainer.data.source, self.currentContainer.data.source, "mainDialogDiv");
         }
     };
 
@@ -399,9 +399,8 @@ var Containers_tree = (function () {
                 return alert(err.responsetext);
             }
 
-
-            if( result.length==0){
-           return  UI.message("no result", true)
+            if (result.length == 0) {
+                return UI.message("no result", true);
             }
             var jstreeData = [];
 
@@ -452,8 +451,8 @@ var Containers_tree = (function () {
                 return callback(err);
             }
 
-            if( result.length==0){
-                return  UI.message("no result", true)
+            if (result.length == 0) {
+                return UI.message("no result", true);
             }
             //identify top Node
             var childrenMap = {};
@@ -592,7 +591,7 @@ var Containers_tree = (function () {
                 // pb avec source
                 Lineage_whiteboard.copyNode(e);
                 var selectedNodes = $("#lineage_containers_containersJstree").jstree().get_selected(true);
-               // Containers_tree.menuActions.copyNodeToClipboard(selectedNodes);
+                // Containers_tree.menuActions.copyNodeToClipboard(selectedNodes);
                 Lineage_common.copyNodeToClipboard(selectedNodes);
             },
         };
@@ -714,9 +713,8 @@ var Containers_tree = (function () {
      * @param drawMembershipEdge add the edge (and the node) on the vizGraph
      */
     self.menuActions.addResourcesToContainer = function (source, container, nodesData, drawMembershipEdge, callback) {
-
         // can also copy nodes coming from copy container
-        if (false &&!(container.data.type.includes("http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") || container.data.type == "container")) {
+        if (false && !(container.data.type.includes("http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") || container.data.type == "container")) {
             return alert("can only add resources to containers");
         }
 

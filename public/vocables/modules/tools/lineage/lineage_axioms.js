@@ -12,7 +12,7 @@ var Lineage_axioms = (function () {
                 return alert(err);
             }
             var axiomTypes = {};
-            var visjsData = {nodes: [], edges: []};
+            var visjsData = { nodes: [], edges: [] };
             result.forEach(function (item) {
                 item.axiomTypes.forEach(function (type) {
                     if (!axiomTypes[type]) {
@@ -59,12 +59,11 @@ var Lineage_axioms = (function () {
             label: "AgentRole",
             data: {
                 id: "https://spec.industrialontologies.org/ontology/core/Core/AgentRole",
-                label: "AgentRole"
-            }
-        }
+                label: "AgentRole",
+            },
+        };
         NodeInfosAxioms.init("IOF-CORE-202401", node, "mainDialogDiv");
-    }
-
+    };
 
     return self;
 })();

@@ -605,8 +605,8 @@ var KGcreator_graph = (function () {
                         if (str.indexOf("http") > -1) {
                             return { type: "Class", color: "#70ac47", shape: "box", size: 30 };
                         } else if (str.indexOf(":") > -1) {
-                            drawRelation = false;//rdf Bag
-                            return null
+                            drawRelation = false; //rdf Bag
+                            return null;
                             return { type: "OwlType", color: "#aaa", shape: "ellipse" };
                         } else if (str.endsWith("_$")) {
                             return { type: "blankNode", color: "#00afef", shape: "square" };
@@ -672,8 +672,7 @@ var KGcreator_graph = (function () {
                             var label = Sparql_common.getLabelFromURI(item.o);
 
                             var attrs = getNodeAttrs(item.o);
-                            if(!attrs)
-                                return;
+                            if (!attrs) return;
                             visjsData.nodes.push({
                                 id: oId,
                                 label: label,
@@ -694,9 +693,9 @@ var KGcreator_graph = (function () {
 
                         var edgeId = sId + item.p + oId;
                         var label = Sparql_common.getLabelFromURI(item.p);
-                        if(label.endsWith("member")){
-                            var color = "#07b611"
-                            var dashes = true
+                        if (label.endsWith("member")) {
+                            var color = "#07b611";
+                            var dashes = true;
                         }
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1;
@@ -705,9 +704,9 @@ var KGcreator_graph = (function () {
                                 from: sId,
                                 to: oId,
                                 label: label,
-                                color:color,
-                                dashes:dashes,
-                                font: { size: 12, ital: true, color:color || "brown" },
+                                color: color,
+                                dashes: dashes,
+                                font: { size: 12, ital: true, color: color || "brown" },
                                 // color: getNodeAttrs(item.o),
                                 arrows: {
                                     to: {
@@ -717,9 +716,7 @@ var KGcreator_graph = (function () {
                                     },
                                 },
                             });
-                        }else{
-
-
+                        } else {
                         }
                     }
                     if (index == 0) {

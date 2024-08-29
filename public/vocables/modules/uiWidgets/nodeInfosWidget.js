@@ -25,7 +25,7 @@ var NodeInfosWidget = (function () {
         }
         $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
             $("#addPredicateButton").remove();
-            $("#deleteButton").remove()
+            $("#deleteButton").remove();
             $("#" + divId).dialog("open");
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
@@ -87,7 +87,7 @@ var NodeInfosWidget = (function () {
                 }
             } else {
                 if (node.id) {
-                    self.currentNode={data:{id:node}}
+                    self.currentNode = { data: { id: node } };
                     self.currentNodeId = node;
                 }
             }
@@ -250,7 +250,7 @@ var NodeInfosWidget = (function () {
         $("#editPredicate_savePredicateButton").off("click");
         $("#editPredicate_savePredicateButton").click(function () {
             PredicatesSelectorWidget.storeRecentPredicates();
-            self.addPredicate(null,null,null,null,function(){
+            self.addPredicate(null, null, null, null, function () {
                 PredicatesSelectorWidget.fillSelectRecentEditPredicate();
             });
         });
@@ -968,8 +968,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             // value = $("#editPredicate_objectValue").val().trim();
             value = PredicatesSelectorWidget.getSelectedObjectValue();
         }
-     
-        
+
         if (!property || !value) {
             return alert("enter property and value");
         }
@@ -1012,10 +1011,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 }
                 self.newProperties[property] = value;
 
-
-
-
-                self.drawAllInfos(self.currentSource,currentNodeId || self.currentNode.data.id, {}, function (err, result) {
+                self.drawAllInfos(self.currentSource, currentNodeId || self.currentNode.data.id, {}, function (err, result) {
                     //  self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.push({
@@ -1042,7 +1038,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         }
     };
 
-    self.deletePredicate = function (predicateId,callback) {
+    self.deletePredicate = function (predicateId, callback) {
         var currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         var property = currentEditingItem.item.prop.value;
         if (confirm("delete predicate")) {
@@ -1093,7 +1089,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
                         Lineage_whiteboard.deleteEdge(self.currentNodeId, value, property);
                     }
-                    if(callback){
+                    if (callback) {
                         callback();
                     }
                 }
@@ -1259,14 +1255,12 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
             $("#editPredicate_savePredicateButton").click(function () {
                 //PredicatesSelectorWidget.storeRecentPredicates();
-                
-                self.deletePredicate(predicateId,function(){
-                    self.addPredicate(null,null,null,null,function(){
-                        self.showNodeInfos(MainController.currentSource,self.currentNode,"mainDialogDiv", { resetVisited: 1 });
+
+                self.deletePredicate(predicateId, function () {
+                    self.addPredicate(null, null, null, null, function () {
+                        self.showNodeInfos(MainController.currentSource, self.currentNode, "mainDialogDiv", { resetVisited: 1 });
                     });
                 });
-              
-               
             });
         });
 
@@ -1389,7 +1383,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         $("#editPredicate_objectValue").css("width", "700px");
         $("#editPredicate_objectValue").css("height", "130px");
     };
-    
+
     return self;
 })();
 

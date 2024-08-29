@@ -189,7 +189,7 @@ var Containers_graph = (function () {
                         if (!existingNodes[item.parent.value]) {
                             var type = "container";
 
-                            var label=item.parentLabel?item.parentLabel.value:Sparql_common.getLabelFromURI(item.parent)
+                            var label = item.parentLabel ? item.parentLabel.value : Sparql_common.getLabelFromURI(item.parent);
                             existingNodes[item.parent.value] = 1;
                             visjsData.nodes.push({
                                 id: item.parent.value,
@@ -224,7 +224,7 @@ var Containers_graph = (function () {
                                 }
                             }
 
-                            var label=item.memberLabel?item.memberLabel.value:Sparql_common.getLabelFromURI(item.member)
+                            var label = item.memberLabel ? item.memberLabel.value : Sparql_common.getLabelFromURI(item.member);
                             existingNodes[item.member.value] = 1;
                             visjsData.nodes.push({
                                 id: item.member.value,
@@ -239,7 +239,7 @@ var Containers_graph = (function () {
                                     type: type,
                                     source: source,
                                     id: item.member.value,
-                                   // label: item.memberLabel.value,
+                                    // label: item.memberLabel.value,
                                     label: label,
                                 },
                             });

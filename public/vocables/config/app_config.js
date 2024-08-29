@@ -295,30 +295,32 @@ var Config = (function () {
         },
         DOLCE: {},
     };
-    self.lessIconsFileNames=  {"@arrow-icon": "caret-right",
-    "@moreOptions-icon": "MoreOptionsIcon",
-    "@search-icon": "SearchIcon",
-    "@lineage-logo": "lineageLogo",
-    "@KGquery-logo": "Kgquery",
-    "@KGcreator-logo": "Kgcreator",
-    "@SPARQL-logo": "SPARQL",
-    "@admin-logo": "Admin",
-    "@ConfigEditor-logo": "ConfigEditor",
-    "@GraphManagement-logo": "Graphmanagement",
-    "@OntoCreator-logo": "Ontocreator",
-    "@TimeLine-logo": "Timeline",
-    "@saveIcon": "SaveIcon",
-    "@deleteIcon": "DeleteIcon",
-    "@jqueryClose": "CrossIcon",
-    "@resetIcon": "ResetIcon",
-    "@previousIcon": "PreviousIcon",
-    "@allPropertyIcon": "SelectionAllIcon",
-    "@currentPropertyIcon": "SelectionIcon",
-    "@whiteBoardIcon": "WhiteboardIcon",
-    "@propertiesIcon": "PropertiesIcon",
-    "@containersIcon": "ContainerIcon",
-    "@classesIcon": "ClassesIcon"}
-      
+    self.lessIconsFileNames = {
+        "@arrow-icon": "caret-right",
+        "@moreOptions-icon": "MoreOptionsIcon",
+        "@search-icon": "SearchIcon",
+        "@lineage-logo": "lineageLogo",
+        "@KGquery-logo": "Kgquery",
+        "@KGcreator-logo": "Kgcreator",
+        "@SPARQL-logo": "SPARQL",
+        "@admin-logo": "Admin",
+        "@ConfigEditor-logo": "ConfigEditor",
+        "@GraphManagement-logo": "Graphmanagement",
+        "@OntoCreator-logo": "Ontocreator",
+        "@TimeLine-logo": "Timeline",
+        "@saveIcon": "SaveIcon",
+        "@deleteIcon": "DeleteIcon",
+        "@jqueryClose": "CrossIcon",
+        "@resetIcon": "ResetIcon",
+        "@previousIcon": "PreviousIcon",
+        "@allPropertyIcon": "SelectionAllIcon",
+        "@currentPropertyIcon": "SelectionIcon",
+        "@whiteBoardIcon": "WhiteboardIcon",
+        "@propertiesIcon": "PropertiesIcon",
+        "@containersIcon": "ContainerIcon",
+        "@classesIcon": "ClassesIcon",
+    };
+
     self.slsvColorThemes = {
         "Bluish Violet": {
             "@source-color": "#8757de",
@@ -412,7 +414,6 @@ var Config = (function () {
             "@legend-color": "#62656B",
             "@background-color": "#EEE4F7",
             "@dark-background-color": "#C8C2E1",
-            
         },
         CFIHOS: {
             "@source-color": "#DD8736",
@@ -421,7 +422,7 @@ var Config = (function () {
             "@button3-color": "#781E77",
             "@legend-color": "#62656B",
             "@background-color": "#F2F2F2",
-            "@dark-background-color": "#C8C2E1"
+            "@dark-background-color": "#C8C2E1",
         },
         DeepOffShore: {
             "@source-color": "#1D82FF",
@@ -437,7 +438,6 @@ var Config = (function () {
             "@gradient-color3": "linear-gradient(to right,#A7E700, #4ED441)",
             "@gradient-color-source": "linear-gradient(to right,#1D82FF,#483FFF)",
             "@border-color": "#483FFF",
-           
         },
     };
 

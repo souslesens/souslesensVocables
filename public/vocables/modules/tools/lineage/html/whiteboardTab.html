@@ -1,117 +1,77 @@
 <div id="WhiteboardContent">
-    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px"
-            onclick="UI.hideShowLateralPanel(this)">
-        <img id="ArrowLateralPanel" src="./icons/CommonIcons/ArrowLateralPanel.png"/>
+    <button class="w3-display-right slsv-invisible-button" style="padding-right: 0px" onclick="UI.hideShowLateralPanel(this)">
+        <img id="ArrowLateralPanel" src="./icons/CommonIcons/ArrowLateralPanel.png" />
     </button>
     <div id="sourcesActionsSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
         <div id="Title1" class="titleboxButtons font-button1-color"></div>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" title="Model"><img
-                src="./icons/CommonIcons/ModelIcon.png"/></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()" title="TopClasses"><img
-                src="./icons/CommonIcons/TopClassesIcon.png"/></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Expand"><img
-                src="./icons/CommonIcons/ExpandIcon.png"/></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()"
-                title="Parents"><img src="./icons/CommonIcons/ParentIcon.png"/></button>
-        <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img
-                src="./icons/CommonIcons/Query.png"/></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A
-        </button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" title="Model"><img src="./icons/CommonIcons/ModelIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()" title="TopClasses"><img src="./icons/CommonIcons/TopClassesIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Expand"><img src="./icons/CommonIcons/ExpandIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" title="Parents"><img src="./icons/CommonIcons/ParentIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
     </div>
 
     <div id="whiteboard_Section" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
         <div class="titleboxButtons font-button2-color">Whiteboard</div>
         <div class="input-group mb-3" style="width: 100%">
             <div class="input-group-prepend">
-                <div class="SearchButtonIconLeft border-without-raduis-theme1"
-                     style="height: 33.5px; padding-left: 7px; padding-right: 5px">
-                    <button class="search-icon slsv-invisible-button" onclick="Lineage_whiteboard.graph.searchNode()"
-                            style="margin-top: 4px; height: 20px; width: 20px"></button>
+                <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+                    <button class="search-icon slsv-invisible-button" onclick="Lineage_whiteboard.graph.searchNode()" style="margin-top: 4px; height: 20px; width: 20px"></button>
                 </div>
             </div>
             <input
-                    id="visjsGraph_searchInput"
-                    style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px"
-                    value=""
-                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_whiteboard.graph.searchNode()}"
+                id="visjsGraph_searchInput"
+                style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px"
+                value=""
+                onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_whiteboard.graph.searchNode()}"
             />
         </div>
-        <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()"
-                title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png"/></button>
-        <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast"
-                onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()" title="Clear Last">
-            <img src="./icons/CommonIcons/ClearLastIcon.png"/>
+        <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()" title="Clear Last">
+            <img src="./icons/CommonIcons/ClearLastIcon.png" />
         </button>
-        <button class="w3-button slsv-button-2" id="lineage_actionDiv_last"
-                onclick="Lineage_whiteboard.showLastAddedNodesOnly()" title="Only Last">
-            <img src="./icons/CommonIcons/OnlyLastIcon.png"/>
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_last" onclick="Lineage_whiteboard.showLastAddedNodesOnly()" title="Only Last">
+            <img src="./icons/CommonIcons/OnlyLastIcon.png" />
         </button>
-        <button class="w3-button slsv-button-2" id="lineage_actionDiv_selectedNodesDialog"
-                onclick="Lineage_selection.showSelectionDialog()" title="Selection">
-            <img src="./icons/CommonIcons/Query.png"/>
+        <button class="w3-button slsv-button-2" id="lineage_actionDiv_selectedNodesDialog" onclick="Lineage_selection.showSelectionDialog()" title="Selection">
+            <img src="./icons/CommonIcons/Query.png" />
         </button>
-        <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.graph.exportGraphToDataTable()"
-                title="CSV"><img src="./icons/CommonIcons/CSVIcon.png"/></button>
+        <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.graph.exportGraphToDataTable()" title="CSV"><img src="./icons/CommonIcons/CSVIcon.png" /></button>
         <!--   <button onclick="AxiomEditor.init()">Edit Axiom</button>-->
-        <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="Lineage_axioms.testAxioms()"
-                style="display: block">new Axiom
-        </button>
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="Lineage_axioms.testAxioms()" style="display: block">new Axiom</button>
     </div>
 
     <div id="Lineage_MoreActionsSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
         <div class="titleboxButtons font-button3-color" style="display: inline-flex">
             More Actions
             <div class="slsv-invisible-button">
-                <button class="moreOptions-icon slsv-invisible-button"
-                        onclick="Lineage_whiteboard.hideShowMoreActions()"
-                        style="width: 20px; height: 20px; margin-left: 5px"></button>
+                <button class="moreOptions-icon slsv-invisible-button" onclick="Lineage_whiteboard.hideShowMoreActions()" style="width: 20px; height: 20px; margin-left: 5px"></button>
             </div>
         </div>
 
         <div id="Lineage_MoreActionsButtons">
-            <button class="w3-button slsv-button-3" id="lineage_actionDiv_inferredModel"
-                    onclick="Lineage_whiteboard.drawInferredClassesModel()">Inferred Model
-            </button>
-            <button class="w3-button slsv-button-3" id="lineage_actionDiv_similars"
-                    onclick="Lineage_similars.showDialog();">Similars
-            </button>
-            <button class="w3-button slsv-button-3" id="lineage_actionDiv_pathes"
-                    onclick="Lineage_graphTraversal.showShortestPathDialog()">Paths
-            </button>
+            <button class="w3-button slsv-button-3" id="lineage_actionDiv_inferredModel" onclick="Lineage_whiteboard.drawInferredClassesModel()">Inferred Model</button>
+            <button class="w3-button slsv-button-3" id="lineage_actionDiv_similars" onclick="Lineage_similars.showDialog();">Similars</button>
+            <button class="w3-button slsv-button-3" id="lineage_actionDiv_pathes" onclick="Lineage_graphTraversal.showShortestPathDialog()">Paths</button>
             <!--WhiteBoard Display Buttons -->
-            <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.showGraphConfig()">Display
-            </button>
+            <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.showGraphConfig()">Display</button>
             <span id="visjsConfigureDiv">&nbsp;</span>
 
             <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.toSVG()">SVG</button>
-            <button class="w3-button slsv-button-3" onclick="GraphDecorationWidget.showDecorateDialog()">decorate
-                nodes
-            </button>
-            <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.showHideIndividuals()">Show/Hide
-                Individuals
-            </button>
+            <button class="w3-button slsv-button-3" onclick="GraphDecorationWidget.showDecorateDialog()">decorate nodes</button>
+            <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.showHideIndividuals()">Show/Hide Individuals</button>
 
             <!--Inactives Buttons -->
-            <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass"
-                    onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class
-            </button>
-            <button class="w3-button slsv-button-3" id="lineage_actionDiv_linkedData"
-                    onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">Linked Data
-            </button>
-            <button class="w3-button slsv-button-3" id="lineage_actionDiv_reasoner"
-                    onclick="Lineage_reasoner.showReasonerDialog()">Reasoner
-            </button>
-            <button class="w3-button slsv-button-3" id="lineage_actionDiv_rules"
-                    onclick="Lineage_rules.showRulesDialog()" disabled="">Rules
-            </button>
+            <button class="w3-button slsv-button-3" id="lineage_actionDiv_equivClass" onclick="Lineage_relations.drawRelations(null,'dictionary')" disabled="">Equiv Class</button>
+            <button class="w3-button slsv-button-3" id="lineage_actionDiv_linkedData" onclick="Lineage_linkedData_query.showLinkedDataDialog()" disabled="">Linked Data</button>
+            <button class="w3-button slsv-button-3" id="lineage_actionDiv_reasoner" onclick="Lineage_reasoner.showReasonerDialog()">Reasoner</button>
+            <button class="w3-button slsv-button-3" id="lineage_actionDiv_rules" onclick="Lineage_rules.showRulesDialog()" disabled="">Rules</button>
         </div>
     </div>
 
-    <div id="lineage_legendWrapperSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width"
-         style="max-height: 26dvh">
+    <div id="lineage_legendWrapperSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width" style="max-height: 26dvh">
         <div class="titleboxButtons font-lengend-color">Query Legend</div>
-        <div id="Lineage_classes_graphDecoration_legendDiv" style="flex-wrap: nowrap; height: auto"
-             class="lineage_actionDiv"></div>
+        <div id="Lineage_classes_graphDecoration_legendDiv" style="flex-wrap: nowrap; height: auto" class="lineage_actionDiv"></div>
     </div>
 </div>
-

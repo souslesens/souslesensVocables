@@ -3295,8 +3295,6 @@ attrs.color=self.getSourceColor(superClassValue)
                     $("#lineage_actionDiv_newAxiom").css("display", "none");
                 }
 
-               
-
                 $("#lateralPanelDiv").resizable({
                     maxWidth: $(window).width() - 100,
                     minWidth: 150,
@@ -3381,7 +3379,7 @@ attrs.color=self.getSourceColor(superClassValue)
         if (hideShowParameter == "show") {
             self.MoreOptionsShow[divId] = true;
         }
-        if (self.MoreOptionsShow[divId] || self.MoreOptionsShow[divId]==undefined) {
+        if (self.MoreOptionsShow[divId] || self.MoreOptionsShow[divId] == undefined) {
             $("#" + divId).show();
             self.MoreOptionsShow[divId] = false;
         } else {

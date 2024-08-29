@@ -193,25 +193,23 @@ var KGcreator = (function () {
             var options = {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
-
                     self.currentTreeNode = obj.node;
-                    
+
                     //  KGcreator_run.getTableAndShowMappings();
 
                     if (obj.node.data.type == "databaseSource") {
-                    /*    self.currentConfig.currentDataSource = {
+                        /*    self.currentConfig.currentDataSource = {
                             name: obj.node.id,
                             tables: [],
                             type: "databaseSource",
                             sqlType: obj.node.data.sqlType,
                             currentTable: obj.node.data.table,
                         };*/
-                        self.initDataSource(obj.node.id,"databaseSource",obj.node.data.sqlType,obj.node.data.table);
+                        self.initDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
 
                         KGcreator.loadDataBaseSource(self.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
                     } else if (obj.node.data.type == "csvSource") {
-                       
-                        self.initDataSource(obj.node.id,"csvSource",obj.node.data.sqlType,obj.node.id);
+                        self.initDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
                         KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, function (err, result) {
                             if (err) {
                                 return alert("file not found");
@@ -459,24 +457,20 @@ var KGcreator = (function () {
         });
     };
 
-    self.initDataSource=function(name,type,sqlType,table){
+    self.initDataSource = function (name, type, sqlType, table) {
         //close Previous DataSource
-        var parent_node=$('#KGcreator_csvTreeDiv').jstree()._model.data[self.currentConfig?.currentDataSource?.name];
-        if(parent_node){
-            
-                $('#KGcreator_csvTreeDiv').jstree(true).delete_node(parent_node.children);
-                
-            
+        var parent_node = $("#KGcreator_csvTreeDiv").jstree()._model.data[self.currentConfig?.currentDataSource?.name];
+        if (parent_node) {
+            $("#KGcreator_csvTreeDiv").jstree(true).delete_node(parent_node.children);
         }
         self.currentConfig.currentDataSource = {
             name: name, //obj.node.id,
             tables: [],
-            type: type,//"databaseSource",
-            sqlType:sqlType,// obj.node.data.sqlType,
-            currentTable:table// obj.node.data.table,
+            type: type, //"databaseSource",
+            sqlType: sqlType, // obj.node.data.sqlType,
+            currentTable: table, // obj.node.data.table,
         };
-
-    }
+    };
     self.saveSlsvSourceConfig = function (callback) {
         var data = KGcreator.rawConfig;
         var source = self.currentSlsvSource;
@@ -547,7 +541,7 @@ var KGcreator = (function () {
         });
     };
 
-    self.loadDataBaseSource = function (slsvSource, dataSource, sqlType,callback) {
+    self.loadDataBaseSource = function (slsvSource, dataSource, sqlType, callback) {
         fetch(`${Config.apiUrl}/databases/${dataSource}`).then((response) => {
             response.json().then((data) => {
                 async.series(
@@ -586,7 +580,7 @@ var KGcreator = (function () {
                         if (err) {
                             return alert(err);
                         }
-                        if(callback){
+                        if (callback) {
                             callback();
                         }
                     }
@@ -944,7 +938,7 @@ var KGcreator = (function () {
                 return alert(err);
             }
             self.addDataSourceToJstree("csvSource", datasourceName);
-            self.initDataSource(datasourceName,"csvSource","csv");
+            self.initDataSource(datasourceName, "csvSource", "csv");
             self.loadCsvSource(self.currentSlsvSource, datasourceName, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
@@ -1116,7 +1110,6 @@ var KGcreator = (function () {
             self.currentTab = "Map";
             $("#KGcreator_centralPanelTabs").load("./modules/tools/KGcreator/html/linkTab.html", function () {
                 $("#KGcreator_topButtons").load("./modules/tools/KGcreator/html/runButtons.html", function () {
-                   
                     if (self.currentTreeNode != undefined) {
                         $(document.getElementById(self.currentTreeNode.id + "_anchor")).click();
                     }

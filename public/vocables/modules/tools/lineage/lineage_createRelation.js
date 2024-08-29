@@ -276,7 +276,7 @@ var Lineage_createRelation = (function () {
                     },
 
                     function (callbackSeries) {
-                        options.contextMenu = self.getContextMenu(options)
+                        options.contextMenu = self.getContextMenu(options);
                         options.doNotAdjustDimensions = 1;
                         JstreeWidget.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {});
                         callbackSeries();
@@ -298,12 +298,11 @@ var Lineage_createRelation = (function () {
         });
     };
 
-    self.getContextMenu=function(options){
-        var items={
-
+    self.getContextMenu = function (options) {
+        var items = {
             refineProperty: {
                 label: "Refine Property",
-                    action: function (_e) {
+                action: function (_e) {
                     if (false && self.currentPropertiesTreeNode.data.source != Config.currentTopLevelOntology) {
                         return alert("only properties from " + Config.currentTopLevelOntology + " can be refined");
                     }
@@ -326,13 +325,11 @@ var Lineage_createRelation = (function () {
                         };
                         self.domainOntologyProperties.push(newProp);
                         var propId = newProp.id;
-                        var ontology=self.currentPropertiesTreeNode.parents[self.currentPropertiesTreeNode.parents.length-2]
-                        var x=Config.ontologiesVocabularyModels[ontology].constraints
+                        var ontology = self.currentPropertiesTreeNode.parents[self.currentPropertiesTreeNode.parents.length - 2];
+                        var x = Config.ontologiesVocabularyModels[ontology].constraints;
                         var superpropConstraints = JSON.parse(
-
-                          //  JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]["constraints"][self.currentPropertiesTreeNode.data.id])
+                            //  JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]["constraints"][self.currentPropertiesTreeNode.data.id])
                             JSON.stringify(Config.ontologiesVocabularyModels[ontology]["constraints"][self.currentPropertiesTreeNode.data.id])
-
                         );
                         superpropConstraints.source = Lineage_sources.activeSource;
                         superpropConstraints.label = subPropertyLabel;
@@ -375,7 +372,7 @@ var Lineage_createRelation = (function () {
             },
             nodeInfos: {
                 label: "Node infos",
-                    action: function (_e) {
+                action: function (_e) {
                     // pb avec source
                     NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
                         //  $("#mainDialogDiv").parent().css("z-index", 1);
@@ -384,8 +381,7 @@ var Lineage_createRelation = (function () {
             },
         };
         return items;
-
-    }
+    };
 
     self.execAddEdgeFromGraph = function () {};
     self.addGenericPredicatesToPredicatesTree = function () {

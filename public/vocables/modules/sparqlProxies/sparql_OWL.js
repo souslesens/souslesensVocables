@@ -737,14 +737,13 @@ var Sparql_OWL = (function () {
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
         }
 
-
         if (options.filter) {
             query += options.filter;
         }
 
         query += filterStr;
 
-     //   query+="filter(!isBlank(?superClassSubClass))"
+        //   query+="filter(!isBlank(?superClassSubClass))"
 
         query += "}}} LIMIT 1000";
 
@@ -770,7 +769,8 @@ var Sparql_OWL = (function () {
                     hierarchies[id] = [];
 
                     result.results.bindings.forEach(function (item) {
-                        if(item.superClass.type=="bnode")// if superClass is bnode  it causes problem !!
+                        if (item.superClass.type == "bnode")
+                            // if superClass is bnode  it causes problem !!
                             return;
                         if (!options.descendants && item.subject.value == id) {
                             hierarchies[id].push(item);

@@ -326,7 +326,7 @@ var NodeInfosAxioms = (function () {
 
         //  Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv",self.currentSource,self.currentResource );
 
-        var options = ["subClassOf", "equivalentClass", "disjointWith", "disjointUnionOf"];
+        var options = ["SubClassOf", "EquivalentClass", "DisjointWith", "DisjointUnionOf"];
         common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);
 
         /*

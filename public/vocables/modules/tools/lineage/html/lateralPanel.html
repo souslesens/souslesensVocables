@@ -1,0 +1,34 @@
+<div id="lineage-tab-buttons" class="w3-barslsv-bg-pale w3-bar" style="border-bottom: 0px">
+    <div class="w3-bar-item lineage-tabDiv" title="Whiteboard">
+        <button id="WhiteboardTabButton" class="w3-button slsv-tabButton whiteBoardIcon" onclick="UI.openTab('lineage-tab','whiteboardTab', Lineage_whiteboard.initWhiteboardTab,this)">
+            <!--<img src="./icons/CommonIcons/WhiteboardIcon.png" />-->
+        </button>
+    </div>
+    <!--<div class="slsvTabSeparation"> </div>-->
+
+    <div class="w3-bar-item lineage-tabDiv" title="Classes">
+        <button class="w3-button slsv-tabButton classesIcon" onclick="UI.openTab('lineage-tab','classesTab',Lineage_whiteboard.initClassesTab,this)">
+            <!--<img src="./icons/CommonIcons/ClassesIcon.png" />-->
+        </button>
+    </div>
+    <!--<div class="slsvTabSeparation"> </div>-->
+    <div class="w3-bar-item lineage-tabDiv" title="Properties">
+        <button class="w3-button slsv-tabButton propertiesIcon" onclick="UI.openTab('lineage-tab','propertiesTab',Lineage_whiteboard.initPropertiesTab,this)">
+            <!--<img src="./icons/CommonIcons/propertiesIcon.png" />-->
+        </button>
+    </div>
+    <!--<div class="slsvTabSeparation"> </div>-->
+    <div class="w3-bar-item lineage-tabDiv" style="border-right: 0px !important" title="Containers">
+        <button class="w3-button slsv-tabButton containersIcon" onclick="UI.openTab('lineage-tab','containersTab',Lineage_whiteboard.initContainersTab,this)">
+            <!--<img src="./icons/CommonIcons/ContainerIcon.png" />-->
+        </button>
+    </div>
+</div>
+
+<div id="whiteboardTab" class="w3-container lineage-tab slsv-bg-pale"></div>
+
+<div id="classesTab" class="w3-container lineage-tab slsv-bg-pale"></div>
+
+<div id="propertiesTab" class="w3-container lineage-tab slsv-bg-pale"></div>
+
+<div id="containersTab" class="w3-container lineage-tab slsv-bg-pale"></div>

@@ -21,9 +21,9 @@ var Axiom_editorUI = (function () {
         });
     };
     self.onNewAxiomClick = function () {
-        $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "New Axiom");
         $("#smallDialogDiv").load("modules/tools/axioms/html/newAxiomDialog.html", function () {
+            $("#smallDialogDiv").dialog("open");
             Axiom_activeLegend.drawLegend();
             Axiom_editor.getAllClasses(null, function (err, classes) {
                 common.fillSelectOptions("axiomsEditor_allClasses", classes, true, "label", "id");
@@ -159,7 +159,7 @@ var Axiom_editorUI = (function () {
         if (node.data && node.data.triples) {
             Axiom_editor.currentSource = node.data.source;
             Axiom_editor.currentNode = node.data.resource;
-            Axioms_manager.getManchesterAxiomsFromTriples(Axiom_editor.currentSource, node.data.triples, function (err, result) {
+            Axioms_manager.getHtmlManchesterAxiomsFromTriples(Axiom_editor.currentSource, node.data.triples, function (err, result) {
                 if (err) return alert(err);
                 $("#axiomsEditor_textDiv").html(result);
             });

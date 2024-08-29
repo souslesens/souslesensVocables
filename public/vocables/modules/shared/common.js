@@ -470,7 +470,7 @@ str = str.replace(/%2F/gm, "/");*/
                         return alert("graph copied in clipboard");
                     }
                 } catch (err) {
-                    MainController.UI.message("graph copy failed");
+                    UI.message("graph copy failed");
                     if (callback) {
                         return callback(err);
                     }
@@ -496,7 +496,7 @@ str = str.replace(/%2F/gm, "/");*/
                             return alert("graph copied in clipboard");
                         }
                     } else {
-                        MainController.UI.message("graph copy failed");
+                        UI.message("graph copy failed");
                         if (callback) {
                             return callback(err);
                         }
@@ -512,7 +512,7 @@ if (callback) {
 return callback(null, "graph copied in clipboard");
 } else return alert("graph copied in clipboard");
 } catch (err) {
-MainController.UI.message("graph copy failed");
+UI.message("graph copy failed");
 if (callback) return callback(err);
 }*/
         }
@@ -976,6 +976,22 @@ if (callback) return callback(err);
         if (day < 10) day = "0" + day;
         if (month < 10) month = "0" + month;
         return year + "-" + month + "-" + day;
+    };
+    self.storeLocally = function (stringToStore, localStorageVar) {
+        var Varcontent = JSON.parse(localStorage.getItem(localStorageVar));
+        if (!Varcontent) {
+            Varcontent = [];
+            Varcontent.push(stringToStore);
+            localStorage.setItem(localStorageVar, JSON.stringify(Varcontent));
+        }
+        if (Varcontent && !Varcontent.includes(stringToStore)) {
+            if (Varcontent.length >= 5) {
+                Varcontent.shift();
+            }
+            Varcontent.push(stringToStore);
+
+            localStorage.setItem(localStorageVar, JSON.stringify(Varcontent));
+        }
     };
     return self;
 })();

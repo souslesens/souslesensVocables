@@ -167,7 +167,7 @@ var Ontocommons = (function () {
             if (err) {
                 return callback(err);
             }
-            slsv.MainController.UI.initTool("lineage", function (err, result) {
+            slsv.UI.initTool("lineage", function (err, result) {
                 if (err) {
                     return callback(err);
                 }

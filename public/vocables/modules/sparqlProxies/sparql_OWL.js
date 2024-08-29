@@ -743,6 +743,8 @@ var Sparql_OWL = (function () {
 
         query += filterStr;
 
+        //   query+="filter(!isBlank(?superClassSubClass))"
+
         query += "}}} LIMIT 1000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
@@ -767,6 +769,9 @@ var Sparql_OWL = (function () {
                     hierarchies[id] = [];
 
                     result.results.bindings.forEach(function (item) {
+                        if (item.superClass.type == "bnode")
+                            // if superClass is bnode  it causes problem !!
+                            return;
                         if (!options.descendants && item.subject.value == id) {
                             hierarchies[id].push(item);
                         }
@@ -2038,7 +2043,7 @@ var Sparql_OWL = (function () {
                         if (err) {
                             return callbackEach(err);
                         }
-                        MainController.UI.message((totalItems += slice.length) + " done ");
+                        UI.message((totalItems += slice.length) + " done ");
                         callbackEach();
                     });
                 },
@@ -2604,7 +2609,7 @@ var Sparql_OWL = (function () {
             data: payload,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
-                MainController.UI.message("graph deleted " + Config.labelsGraphUri);
+                UI.message("graph deleted " + Config.labelsGraphUri);
                 callback();
             },
             error(err) {

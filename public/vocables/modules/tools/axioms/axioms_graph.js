@@ -40,14 +40,14 @@ var Axioms_graph = (function () {
                 font = { bold: true };
                 color = "#f5ef39";
             }
-        } else if (node.owlType && node.owlType.indexOf("Class") > -1) {
+        } else if (node.type && node.type.indexOf("Class") > -1) {
             color = "#00afef";
             shape = "dot";
             font = { bold: true, color: color };
-        } else if (node.owlType && node.owlType.indexOf("ObjectProperty") > -1) {
+        } else if (node.type && node.type.indexOf("ObjectProperty") > -1) {
             color = "#f5ef39";
-        } else if (node.owlType && node.owlType.indexOf("Restriction") > -1) {
-            label = "some";
+        } else if (node.type && node.type.indexOf("Restriction") > -1) {
+            label = node.label;
             node.predicates.forEach(function (predicate) {
                 if (predicate.p.indexOf("someValuesFrom") > -1) {
                     label = "some";
@@ -77,10 +77,10 @@ var Axioms_graph = (function () {
             size: size,
             level: level,
             font: font,
-            data: {
+            data: node.data || {
                 id: node.id,
                 label: node.label || "",
-                type: node.owlType,
+                type: node.type,
                 source: node.source,
             },
         };
@@ -120,8 +120,8 @@ var Axioms_graph = (function () {
                                 nodesMap[s].label = obj ? obj.label.replace(/_/g, " ") : null;
                             }
                         }
-                        if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && !nodesMap[s].owlType) {
-                            nodesMap[s].owlType = o;
+                        if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && !nodesMap[s].type) {
+                            nodesMap[s].type = o;
                         } else if (p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest" && o == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil") {
                             return;
                         } else {
@@ -138,19 +138,19 @@ var Axioms_graph = (function () {
                         }
 
                         if (p == "http://www.w3.org/2002/07/owl#unionOf") {
-                            nodesMap[s].owlType = "unionOf";
+                            nodesMap[s].type = "unionOf";
                             nodesMap[s].symbol = "⨆";
                         } else if (p == "http://www.w3.org/2002/07/owl#intersectionOf") {
-                            nodesMap[s].owlType = "intersectionOf";
+                            nodesMap[s].type = "intersectionOf";
                             nodesMap[s].symbol = "⊓";
                         } else if (p == "http://www.w3.org/2002/07/owl#complementOf") {
-                            nodesMap[s].owlType = "complementOf";
+                            nodesMap[s].type = "complementOf";
                             nodesMap[s].symbol = "┓";
                         } else if (p == "http://www.w3.org/2002/07/owl#inverseOf") {
-                            nodesMap[s].owlType = "inverseOf";
+                            nodesMap[s].type = "inverseOf";
                             nodesMap[s].symbol = "^";
                         } else if (p == "http://www.w3.org/2002/07/owl#members") {
-                            nodesMap[s].owlType = "AllDisjointClasses";
+                            nodesMap[s].type = "AllDisjointClasses";
                             nodesMap[s].symbol = "⊑ ┓";
                         }
 
@@ -159,6 +159,44 @@ var Axioms_graph = (function () {
                         }
                     });
                     var x = nodesMap;
+                    callbackSeries();
+                },
+
+                //reduce distance between successiveBlankNodes
+                function (callbackSeries) {
+                    return callbackSeries();
+
+                    var itemsToRemove = [];
+
+                    function recurse(nodeId) {
+                        var node = nodesMap[nodeId];
+                        if (!node) return;
+                        if (!node.predicates) return;
+                        node.predicates.forEach(function (predicate, index) {
+                            // if(nodeId.indexOf("http")<0 && predicate.o.indexOf("http")<0){
+                            if (predicate.p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest") {
+                                var predicateObject = nodesMap[predicate.o];
+                                if (!predicateObject.predicates) return;
+
+                                predicateObject.predicates.forEach(function (nextPredicate) {
+                                    if (nextPredicate.p == "http://www.w3.org/1999/02/22-rdf-syntax-ns#first") {
+                                        node.predicates.splice(index, 1);
+                                        node.predicates.push(nextPredicate);
+                                        recurse(nextPredicate.o);
+                                    }
+                                });
+                            } else {
+                                recurse(predicate.o);
+                            }
+                        });
+                    }
+
+                    itemsToRemove.forEach(function (nodeId) {
+                        delete nodesMap[nodeId];
+                    });
+
+                    recurse(rootNodeId);
+
                     callbackSeries();
                 },
 
@@ -320,13 +358,13 @@ var Axioms_graph = (function () {
                 //draw graph
                 function (callbackSeries) {
                     if (options.addToGraph && self.axiomsVisjsGraph) {
-                        if (self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
-                            self.graphOptions.visjsOptions.layout.hierarchical.enabled = true;
+                        if (true) {
+                            self.switchToHierarchicalLayout(true);
                         }
-                        self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
 
                         self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
                         self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
+                        self.switchToHierarchicalLayout(false);
                     } else {
                         self.drawGraph(visjsData, divId, options);
                         self.currentVisjsData = visjsData;
@@ -366,7 +404,7 @@ enabled:true},*/
                 },
             },
             onclickFn: options.onNodeClick,
-            onRightClickFn: Axioms_graph.showGraphPopupMenu,
+            onRightClickFn: options.onRightClickFn || Axioms_graph.showGraphPopupMenu,
         };
 
         if (!options.randomLayout) {
@@ -392,96 +430,48 @@ enabled:true},*/
 
         self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
         self.axiomsVisjsGraph.draw(function () {
-            if (self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
-                self.graphOptions.visjsOptions.layout.hierarchical.enabled = false;
+            if (!options.keepHierarchyLayout) {
+                self.switchToHierarchicalLayout(false);
             }
-            self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
         });
     };
 
-    self.showGraphPopupMenu = function () {};
+    self.switchToHierarchicalLayout = function (booleanValue) {
+        if (self.graphOptions.visjsOptions.layout && self.graphOptions.visjsOptions.layout.hierarchical) {
+            self.graphOptions.visjsOptions.layout.hierarchical.enabled = booleanValue;
+            self.axiomsVisjsGraph.network.setOptions(self.graphOptions.visjsOptions);
+        }
+    };
+
+    self.showGraphPopupMenu = function (node, point, event) {
+        if (!node) {
+            return;
+        }
+        self.currentGraphNode = node;
+        if (!node || !node.data) {
+            return;
+        }
+        var html = "";
+        html = '    <span class="popupMenuItem" onclick="NodeInfosAxioms.expandGraphFromNode();"> expand from Node</span>';
+        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.collapseGraphToNode();"> collapse to Node</span>';
+        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.startFromNode();"> start from Node</span>';
+        html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.nodeInfos();"> NodeInfos</span>';
+        $("#popupMenuWidgetDiv").html(html);
+        point.x = event.x;
+        point.y = event.y;
+        PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+    };
 
     self.clearGraph = function () {
         $("#" + self.graphDivId).html("");
     };
 
-    self.sampleTriples = [
-        {
-            subject: "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
-            predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-            object: "_cf23908b-4568-4f73-9c09-fbf688aaa92f",
-        },
-        {
-            subject: "https://spec.industrialontologies.org/ontology/core/Core/CommercialServiceAgreement",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Class",
-        },
-        {
-            subject: "_cf23908b-4568-4f73-9c09-fbf688aaa92f",
-            predicate: "http://www.w3.org/2002/07/owl#onProperty",
-            object: "http://purl.obolibrary.org/obo/BFO_0000167",
-        },
-        {
-            subject: "http://purl.obolibrary.org/obo/BFO_0000167",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#ObjectProperty",
-        },
-        {
-            subject: "_c44c5bfa-6011-413e-8c2c-c4d08a7c24fa",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Ontology",
-        },
-        {
-            subject: "_2cba2cae-ed14-45ca-a705-193ae9d044b2",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            object: "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil",
-        },
-        {
-            subject: "_cf23908b-4568-4f73-9c09-fbf688aaa92f",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Restriction",
-        },
-        {
-            subject: "_81b2dbe0-c5aa-4dd6-8f30-d98590de9af7",
-            predicate: "http://www.w3.org/2002/07/owl#unionOf",
-            object: "_db33cc04-5921-48cd-8171-c4d286549abd",
-        },
-        {
-            subject: "_db33cc04-5921-48cd-8171-c4d286549abd",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-            object: "_2cba2cae-ed14-45ca-a705-193ae9d044b2",
-        },
-        {
-            subject: "_81b2dbe0-c5aa-4dd6-8f30-d98590de9af7",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Class",
-        },
-        {
-            subject: "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Class",
-        },
-        {
-            subject: "https://spec.industrialontologies.org/ontology/core/Core/MaterialProduct",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Class",
-        },
-        {
-            subject: "_cf23908b-4568-4f73-9c09-fbf688aaa92f",
-            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-            object: "_81b2dbe0-c5aa-4dd6-8f30-d98590de9af7",
-        },
-        {
-            subject: "_2cba2cae-ed14-45ca-a705-193ae9d044b2",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            object: "https://spec.industrialontologies.org/ontology/core/Core/MaterialProduct",
-        },
-        {
-            subject: "_db33cc04-5921-48cd-8171-c4d286549abd",
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
-            object: "https://spec.industrialontologies.org/ontology/core/Core/CommercialServiceAgreement",
-        },
-    ];
+    self.outlineNode = function (nodeId) {
+        var newNodes = [];
+        self.axiomsVisjsGraph.decorateNodes(null, { borderWidth: 1 });
+        self.axiomsVisjsGraph.decorateNodes(nodeId, { borderWidth: 5 });
+    };
+
     return self;
 })();
 

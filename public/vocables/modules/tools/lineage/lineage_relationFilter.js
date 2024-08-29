@@ -36,9 +36,6 @@ var Lineage_relationFilter = (function () {
 
         $("#lineageRelations_filterDiv").css("display", "flex");
 
-        /* $("#mainDialogDiv").dialog("open");
-$("#mainDialogDiv").load("snippets/lineage/relationsDialogFilter.html", function() {*/
-
         self.domainValue = "";
         self.rangeValue = "";
         self.domain = null;

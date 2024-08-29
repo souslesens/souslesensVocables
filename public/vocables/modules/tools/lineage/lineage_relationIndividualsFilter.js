@@ -14,8 +14,9 @@ var Lineage_relationIndividualsFilter = (function () {
     self.init = function () {
         self.filter = "";
         var currentPropertyNode = Lineage_relations.currentPropertyTreeNode;
-        $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").load("snippets/lineage/relationPropDomainRangeDialog.html", function () {
+
+        $("#smallDialogDiv").load("modules/tools/lineage/html/relationPropDomainRangeDialog.html", function () {
+            $("#smallDialogDiv").dialog("open");
             if (currentPropertyNode && currentPropertyNode.data.constraints) {
                 var roles = [currentPropertyNode.data.constraints.domain, currentPropertyNode.data.constraints.range];
                 $(".lineage_relationIndividuals_filterTypeDiv").css("display", "none");

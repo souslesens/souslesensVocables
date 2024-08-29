@@ -24,9 +24,9 @@ var SearchWidget = (function () {
                 });
             }
             common.fillSelectOptions("GenericTools_searchAllClassSelect", classes, true, "label", "id");
-            $("#GenericTools_searchAllClassSelectPromptBtn").css("display", "none");
         }
     };
+
     /**
      *
      * show in jstree hierarchy of terms found in elastic search  from research UI or options if any
@@ -270,8 +270,8 @@ var SearchWidget = (function () {
                     return;
                     /*  if (_options.selectTreeNodeFn) {
                         return _options.selectTreeNodeFn(event, obj);
-                    } else if (Config.userTools[MainController.currentTool].controller.controller.selectTreeNodeFn) {
-                        return Config.userTools[MainController.currentTool].controller.controller.selectTreeNodeFn(event, obj);
+                    } else if (Config.userTools[MainController.currentTool].controller.selectTreeNodeFn) {
+                        return Config.userTools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
                     }
 
                     self.editThesaurusConceptInfos(obj.node.data.source, obj.node);*/
@@ -282,8 +282,8 @@ var SearchWidget = (function () {
                         return _options.contextMenu;
                     } else if (_options.contextMenuFn) {
                         return _options.contextMenuFn();
-                    } else if (Config.userTools[MainController.currentTool].controller.controller.contextMenuFn) {
-                        return Config.userTools[MainController.currentTool].controller.controller.contextMenuFn;
+                    } else if (Config.userTools[MainController.currentTool].controller.contextMenuFn) {
+                        return Config.userTools[MainController.currentTool].controller.contextMenuFn;
                     } else {
                         return self.getJstreeConceptsContextMenu();
                     }
@@ -292,8 +292,7 @@ var SearchWidget = (function () {
 
             JstreeWidget.loadJsTree(targetDiv, jstreeData, jstreeOptions);
             setTimeout(function () {
-                //  MainController.UI.updateActionDivLabel("Multi source search :" + term)
-                MainController.UI.message("");
+                UI.message("");
                 $("#waitImg").css("display", "none");
                 $("#" + targetDiv)
                     .jstree(true)
@@ -339,7 +338,7 @@ var SearchWidget = (function () {
 
         Sparql_generic.getTopConcepts(sourceLabel, options, function (err, result) {
             if (err) {
-                return MainController.UI.message(err);
+                return UI.message(err);
             }
 
             if (result.length == 0) {
@@ -349,14 +348,14 @@ var SearchWidget = (function () {
                 var html = "<div id='" + self.currentTargetDiv + "'>no data found</div>";
                 $("#" + self.currentTargetDiv).html(html);
 
-                return MainController.UI.message("");
+                return UI.message("");
             }
 
             if (!options) {
                 options = {};
             }
             if (err) {
-                return MainController.UI.message(err);
+                return UI.message(err);
             }
 
             var jsTreeOptions = options;
@@ -364,7 +363,7 @@ var SearchWidget = (function () {
                 jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
             }
             if (!options.selectTreeNodeFn) {
-                jsTreeOptions.selectTreeNodeFn = Config.userTools[MainController.currentTool].controller.controller.selectTreeNodeFn;
+                jsTreeOptions.selectTreeNodeFn = Config.userTools[MainController.currentTool].controller.selectTreeNodeFn;
             }
 
             jsTreeOptions.source = sourceLabel;
@@ -410,13 +409,11 @@ var SearchWidget = (function () {
                 action: function (e) {
                     $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
 
-                    $("#mainDialogDiv").dialog("open");
-
                     NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
                 },
             };
 
-            items.descendantsAxioms = {
+            /*  items.descendantsAxioms = {
                 label: "Descendants axioms",
                 action: function (e) {
                     $("#mainDialogDiv").dialog("open");
@@ -425,69 +422,8 @@ var SearchWidget = (function () {
                     descendants.push(self.currentTreeNode);
                     NodeInfosAxioms.showResourceDescendantsAxioms(self.currentTreeNode.data.source, self.currentTreeNode, descendants, "mainDialogDiv");
                 },
-            };
+            };*/
         }
-
-        /*
-        items.graphNamedIndividuals = {
-            label: "LinkedData",
-            action: function () {
-                Lineage_linkedData.showLinkedDataPanel(self.currentTreeNode);
-                // Lineage_whiteboard.drawNamedIndividuals(self.currentTreeNode.data.id);
-            },
-        };
-
-    items.relations = {
-        label: "Relations...",
-        action: function (e) {
-            NodeRelations_bot.start();
-            // Lineage_relations.showDrawRelationsDialog("Tree");
-        },
-    };
-
-    items.copyNode = {
-        label: "Copy Node",
-        action: function (e) {
-            // pb avec source
-            //   LineageClasses.copyNode(e);
-
-            Lineage_common.copyNodeToClipboard(self.currentTreeNode);
-        },
-    };
-
-
-    if (self.currentSource && Config.sources[self.currentSource].editable) {
-        items.pasteNode = {
-            label: "paste Node",
-            action: function (_e) {
-                if (self.currentCopiedNode) {
-                    return Lineage_combine.showMergeNodesDialog(self.currentCopiedNode);
-                }
-
-                common.pasteTextFromClipboard(function (text) {
-                    if (!text) {
-                        return MainController.UI.message("no node copied");
-                    }
-                    try {
-                        var node = JSON.parse(text);
-                        Lineage_combine.showMergeNodesDialog(node, self.currentTreeNode);
-                    } catch (e) {
-                        console.log("wrong clipboard content");
-                    }
-                    return;
-                });
-            },
-        };
-    }
-}
-
-items.exportAllDescendants = {
-    label: "Export all descendants",
-    action: function (_e) {
-        // pb avec source
-        SearchWidget.exportAllDescendants();
-    },
-};*/
 
         return items;
     };
@@ -516,7 +452,7 @@ items.exportAllDescendants = {
         // options.filterCollections = Collection.currentCollectionFilter;
         Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, descendantsDepth, options, function (err, result) {
             if (err) {
-                return MainController.UI.message(err);
+                return UI.message(err);
             }
             if (options.beforeDrawingFn) {
                 options.beforeDrawingFn(result);

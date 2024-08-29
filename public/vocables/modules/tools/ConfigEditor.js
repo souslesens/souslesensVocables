@@ -15,22 +15,19 @@ var ConfigEditor = (function () {
     self.onLoaded = function () {
         $("#accordion").accordion("option", { active: 2 });
 
-        $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").parent().show();
         $("#mainDialogDiv").dialog("option", "title", "Config Editor");
-        //$("#mainDialogDiv").parent().css("left", "100px");
-        $("#mainDialogDiv").dialog({
-            close: function (event, ui) {
-                self.umountKGUploadApp();
-            },
+        $("#mainDialogDiv").on("dialogclose", function (event, ui) {
+            self.umountKGUploadApp();
         });
+
         $("#mainDialogDiv").html("");
 
         $("#mainDialogDiv").html(`
-                    <div id="mount-app-here"></div>
+                    <div style="width:90vw;height: 90vh"><div id="mount-app-here"></div></div>
             `);
 
         self.umountKGUploadApp = self.createApp();
+        $("#mainDialogDiv").dialog("open");
     };
 
     return self;

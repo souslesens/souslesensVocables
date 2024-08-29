@@ -26,10 +26,10 @@ var Lineage_dictionary = (function () {
             targetDiv = "LineageDictionary_mainDiv";
         } else {
             targetDiv = "mainDialogDiv";
-            $("#mainDialogDiv").dialog("open");
         }
 
-        $("#" + targetDiv).load("snippets/lineage/lineageDictionary.html", function () {
+        $("#" + targetDiv).load("modules/tools/lineage/html/lineageDictionary.html", function () {
+            $("#mainDialogDiv").dialog("open");
             $("#LineageDictionary_Tabs").tabs({
                 activate: function (event, ui) {
                     var divId = ui.newPanel.selector;
@@ -69,7 +69,7 @@ var Lineage_dictionary = (function () {
                     //get domain and range sources
                     function (callbackSeries) {
                         self.getDictionarySources(self.currentDictionary, self.currentDomainSource, null, function (err, result) {
-                            if (err) MainController.UI.message(err.responseText);
+                            if (err) UI.message(err.responseText);
                             var rangeSourceLabel = [];
                             result.forEach(function (item) {
                                 if (!self.domainAndRangeSourcesmap[item.domainSourceLabel.value]) self.domainAndRangeSourcesmap[item.domainSourceLabel.value] = [];
@@ -287,7 +287,7 @@ var Lineage_dictionary = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    MainController.UI.message("Drawing table...");
+                    UI.message("Drawing table...");
                     var dataset = [];
                     var cols = [];
 
@@ -340,8 +340,6 @@ var Lineage_dictionary = (function () {
                         dataset.push(line);
                     });
 
-                    //  $("#mainDialogDiv").dialog("open");
-                    //  $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
                     $("#LineageDictionary_dataTab").html("<table id='dataTableDivExport'></table>");
 
                     setTimeout(function () {
@@ -450,7 +448,7 @@ targets: [0]
         query += "} limit 10000";
         var sparql_url = Config.sources[dictionarySource].sparql_server.url;
         var url = sparql_url + "?format=json&query=";
-        MainController.UI.message("Searching ...");
+        UI.message("Searching ...");
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: dictionarySource }, function (err, result) {
             if (err) {
                 return callback(err);
@@ -598,7 +596,7 @@ query += " where { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] +
                         return alert("err");
                         // Lineage_dictionary.showTSFdictionaryDialog("Lineage_dictionary");
                     }
-                    MainController.UI.message(operation + " " + data.length + " dictionary entries DONE", true);
+                    UI.message(operation + " " + data.length + " dictionary entries DONE", true);
                     callback(null);
                 }
             );

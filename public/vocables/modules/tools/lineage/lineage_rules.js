@@ -13,7 +13,7 @@ var Lineage_rules = (function () {
 
     self.showRulesDialog = function () {
         $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").load("snippets/lineage/lineage_rulesDialog.html", function () {
+        $("#mainDialogDiv").load("modules/tools/lineage/html/lineage_rulesDialog.html", function () {
             $("#lineage_rules_searchClassInput").bind("keydown", null, Lineage_rules.onSearchClassKeyDown);
             $("#lineage_rules_searchPropertyInput").bind("keydown", null, Lineage_rules.onSearchPropertyKeyDown);
         });
@@ -326,82 +326,6 @@ var Lineage_rules = (function () {
             },
         });
     };
-
-    /*
-
-  self.addNodeToGraph=function(){
-
-
-
-    //draw graph
-    if (options.addToGraph && self.axiomsVisjsGraph) {
-        self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
-        self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
-    } else {
-        self.drawGraph(visjsData);
-    }
-
-};
-
-self.drawGraph = function (visjsData) {
-  var xOffset = 60;
-  var yOffset = 130;
-  xOffset = parseInt($("#axiomsDraw_xOffset").val());
-  yOffset = parseInt($("#axiomsDraw_yOffset").val());
-  var options = {
-      keepNodePositionOnDrag: true,
-
-      layoutHierarchical: {
-          direction: "LR",
-          sortMethod: "hubsize",
-          //  sortMethod:"directed",
-          //    shakeTowards:"roots",
-          //  sortMethod:"directed",
-          levelSeparation: xOffset,
-          parentCentralization: true,
-          shakeTowards: true,
-          blockShifting: true,
-
-          nodeSpacing: yOffset,
-      },
-      edges: {
-          smooth: {
-              // type: "cubicBezier",
-              type: "diagonalCross",
-              forceDirection: "horizontal",
-
-              roundness: 0.4,
-          },
-      },
-      onclickFn: Lineage_axioms_draw.onNodeClick,
-      onRightClickFn: Lineage_axioms_draw.showGraphPopupMenu,
-      onHoverNodeFn: Lineage_axioms_draw.selectNodesOnHover,
-  };
-
-  var graphDivContainer = "axiomsGraphDivContainer";
-  $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:100%;height:100%' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>");
-  self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv", visjsData, options);
-  self.axiomsVisjsGraph.draw(function () {});
-};
-
-self.onNodeClick = function (node, point, nodeEvent) {
-
-  self.currentGraphNode = node;
-  if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
-      var options = { addToGraph: 1, level: self.currentGraphNode.level };
-      return self.drawNodeAxioms(self.context.sourceLabel, self.currentGraphNode.data.id, self.context.divId, 2, options);
-  }
-
-  if (!node) {
-      return $("#nodeInfosWidget_HoverDiv").css("display", "none");
-  } else {
-      self.currentGraphNode = node;
-  }
-
-  self.showNodeInfos(node, point, options);
-};
-
-*/
 
     return self;
 })();

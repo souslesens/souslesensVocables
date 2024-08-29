@@ -61,7 +61,7 @@ const Axiom_editor = (function () {
         if (nodeId) {
             self.currentNode = nodeId;
         }
-        Axiom_editorUI.initUI();
+        if (divId) Axiom_editorUI.initUI();
     };
 
     self.clearAll = function () {

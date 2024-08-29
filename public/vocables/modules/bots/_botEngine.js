@@ -25,41 +25,33 @@ var _botEngine = (function () {
             self.divId = options.divId;
         } else {
             divId = "botDiv";
-            $("#botPanel").dialog("open");
+
             $($("#botPanel").parent()[0]).on("dialogclose", function (event) {
-                self.firstLoad = true;
+                self.firstLoad = false;
             });
             $("#botPanel").dialog("option", "title", self.currentBot.title);
-
-            //$("#botPanel").parent().css("top", "13%");
-            //$("#botPanel").parent().css("left", "30%");
         }
 
-        $("#" + divId).load("responsive/widget/html/botResponsive.html", function () {
+        $("#" + divId).load("./modules/uiWidgets/html/bot.html", function () {
+            if (!options.divId) $("#botPanel").dialog("open");
             if (window.location.href.indexOf("localhost") < 0) {
                 $("#KGcreatorBot_exportToGraph").css("display", "none");
             }
 
             if (!self.firstLoad) {
-                //$("#resetButtonBot").remove();
-                //$("#previousButtonBot").remove();
                 $("#BotUpperButtons").remove();
             }
             $("#botFilterProposalInput").on("keyup", self.filterList);
             self.firstLoad = false;
             $("#BotUpperButtons").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
-            //$("#previousButtonBot").insertAfter($("#botPanel").parent().find(".ui-dialog-titlebar-close"));
+
             if (divId != "botDiv") {
                 var dialogWindow = $("#" + divId)
                     .parents()
                     .filter('div[role="dialog"]')[0];
                 var titleDialog = $(dialogWindow).find(".ui-dialog-titlebar-close");
                 var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
-                //$(idDialog).parent().css("top", "13%");
-                //$(idDialog).parent().css("left", "10%");
                 $("#BotUpperButtons").insertAfter(titleDialog);
-                //$("#resetButtonBot").insertAfter(titleDialog);
-                //$("#previousButtonBot").insertAfter(titleDialog);
                 $(dialogWindow).on("dialogclose", function (event) {
                     $("#" + self.divId).empty();
                     $(dialogWindow).find("#resetButtonBot").remove();
@@ -67,7 +59,7 @@ var _botEngine = (function () {
                     self.firstLoad = true;
                 });
             }
-            ResponsiveUI.PopUpOnHoverButtons();
+            //UI.PopUpOnHoverButtons();
             if (callback) {
                 callback();
             }
@@ -483,11 +475,11 @@ var _botEngine = (function () {
         recurse(workflow, title, 1);
         var x = visjsData;
 
-        $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").html(
             "" + "<div><button onclick='  Lineage_whiteboard.lineageVisjsGraph.toSVG();'>toSVG</button> </div>" + "<div id='botGraphDiv' style='width:1200px;height:800px'></div>"
         );
-        $("#mainDialogDiv").parent().css("z-index", 1);
+        $("#mainDialogDiv").dialog("open");
+        //  $("#mainDialogDiv").parent().css("z-index", 1);
         Lineage_whiteboard.drawNewGraph(visjsData, "botGraphDiv", {
             layoutHierarchical: { vertical: true, levelSeparation: 150, nodeSpacing: 50, direction: "LR" },
             physics: { enabled: true },

@@ -190,7 +190,7 @@ var Lineage_decoration = (function () {
 
     self.decorateByUpperOntologyByClass = function (visjsNodes) {
         if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
-            return $("#lineage_legendWrapper").css("display", "none");
+            return $("#lineage_legendWrapperSection").css("display", "none");
         }
 
         var nonTopLevelOntologynodeIds = [];
@@ -435,10 +435,10 @@ var Lineage_decoration = (function () {
 
     self.drawLegend = function (jstreeData) {
         if (!Config.currentTopLevelOntology) {
-            $("#lineage_legendWrapper").css("display", "none");
+            $("#lineage_legendWrapperSection").css("display", "none");
             return;
         } else {
-            $("#lineage_legendWrapper").css("display", "block");
+            $("#lineage_legendWrapperSection").css("display", "block");
         }
 
         var str = "<div  class='Lineage_legendTypeTopLevelOntologyDiv' style='display: flex;>";

@@ -18,14 +18,14 @@ var Lineage_relations = (function () {
     self.whiteboardSourcesFromStatus = false;
 
     self.showDrawRelationsDialog = function (caller) {
-        MainController.UI.showHideRightPanel("hide");
+        UI.showHideRightPanel("hide");
         self.drawRelationCurrentCaller = caller;
         self.currentQueryInfos = { predicate: "", filter: {} };
 
-        $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").dialog("option", "title", "Query");
-        $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function () {
-            //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
+        $("#mainDialogDiv").load("modules/tools/lineage/html/relationsDialog.html", function () {
+            $("#mainDialogDiv").dialog("open");
+
             $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
                 if (e.which == 13 || e.which == 9) {
                     $("#lineageRelations_propertiesJstreeDiv").jstree(true).uncheck_all();
@@ -139,7 +139,7 @@ var Lineage_relations = (function () {
         items.PropertyInfos = {
             label: "PropertyInfos",
             action: function (_e) {
-                $("#LineagePopup").dialog("open");
+                // $("#LineagePopup").dialog("open");
                 NodeInfosWidget.showNodeInfos(self.curentPropertiesJstreeNode.parent, self.curentPropertiesJstreeNode, "LineagePopup");
             },
         };
@@ -294,7 +294,7 @@ var Lineage_relations = (function () {
             var groups = {};
 
             if (result.length == 0) {
-                return MainController.UI.message("no data found", true);
+                return UI.message("no data found", true);
             }
 
             result.forEach(function (item) {
@@ -413,7 +413,7 @@ var Lineage_relations = (function () {
                     if (!direction || direction == "direct") {
                         options.inverse = false;
 
-                        MainController.UI.message("searching restrictions");
+                        UI.message("searching restrictions");
 
                         Lineage_whiteboard.drawRestrictions(source, data, null, null, options, function (err, result) {
                             if (err) {
@@ -436,7 +436,7 @@ var Lineage_relations = (function () {
                     }
                     if (!direction || direction == "inverse") {
                         options.inverse = true;
-                        MainController.UI.message("searching inverse restrictions");
+                        UI.message("searching inverse restrictions");
 
                         Lineage_whiteboard.drawRestrictions(source, data, null, null, options, function (err, result) {
                             if (err) {
@@ -470,7 +470,7 @@ var Lineage_relations = (function () {
                         filter: options.filter,
                     });
                     if (!direction || direction == "direct") {
-                        MainController.UI.message("searching predicates");
+                        UI.message("searching predicates");
 
                         Lineage_whiteboard.drawPredicatesGraph(source, data, null, options, function (err, result) {
                             if (err) {
@@ -503,7 +503,7 @@ var Lineage_relations = (function () {
                     }
                     if (!direction || direction == "inverse") {
                         options.inversePredicate = true;
-                        MainController.UI.message("searching inverse predicates");
+                        UI.message("searching inverse predicates");
 
                         Lineage_whiteboard.drawPredicatesGraph(source, data, null, options, function (err, result) {
                             if (err) {
@@ -521,10 +521,10 @@ var Lineage_relations = (function () {
             function (err) {
                 Lineage_sources.fromAllWhiteboardSources = self.whiteboardSourcesFromStatus;
                 if (allVisjsData.nodes.length == 0 && allVisjsData.edges.length == 0) {
-                    return MainController.UI.message("no data found", true);
+                    return UI.message("no data found", true);
                 }
                 if (!options.output || options.output == "graph") {
-                    MainController.UI.message("drawing " + allVisjsData.nodes.length + "nodes and " + allVisjsData.edges.length + " edges...", true);
+                    UI.message("drawing " + allVisjsData.nodes.length + "nodes and " + allVisjsData.edges.length + " edges...", true);
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(allVisjsData.nodes);
                         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(allVisjsData.edges);

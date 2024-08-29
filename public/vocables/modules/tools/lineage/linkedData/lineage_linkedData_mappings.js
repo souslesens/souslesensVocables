@@ -86,13 +86,13 @@ self.graphTable(KGcreator.currentTreeNode);
         }
         KGcreator.showSampleData(node, allColumns, 100, function (err, result) {
             if (err) return alert(err.responseText);
-            if (targetDiv == "mainDailogDiv") $("#mainDialogDiv").dialog("open");
 
             result = result.replace(/\n/g, "</td><tr><td>");
             result = result.replace(/\t/g, "</td><td>");
             var html = "<table><tr><td>" + result + "</tr></table>";
-            //   $("#" + targetDiv).dialog("open");
+
             $("#" + targetDiv).html(html);
+            if (targetDiv == "mainDailogDiv") $("#mainDialogDiv").dialog("open");
         });
     };
 
@@ -216,8 +216,10 @@ self.graphTable(KGcreator.currentTreeNode);
 
                 if (relation.fromColumn.database != relation.toColumn.database) return alert("linked column are not in the same database");
                 var str = "where " + relation.fromColumn.table + ".XXX=" + relation.toColumn.table + ".YYY";
-                $("#mainDialogDiv").dialog("open");
-                $("#mainDialogDiv").load("snippets/lineage/linkedData/lineage_linkedData_joinTablesDialog.html", function () {
+
+                $("#mainDialogDiv").load("modules/tools/lineage/html/linkedData/lineage_linkedData_joinTablesDialog.html", function () {
+                    $("#mainDialogDiv").dialog("open");
+
                     $("#lineage_linkedData_join_databaseId").html(relation.fromColumn.database);
                     $("#lineage_linkedData_join_fromClassId").html(relation.fromColumn.subjectLabel);
                     $("#lineage_linkedData_join_toClassId").html(relation.toColumn.subjectLabel);

@@ -101,34 +101,31 @@ var CreateSLSVsource_bot = (function () {
             });
         },
         uploadFromFileFn: function () {
+            var html =
+                '<form id="myForm" enctype="multipart/form-data" method="POST">\n' +
+                //  "  <input type=\"file\" id=\"file\" name=\"data\">\n" +
+                '  <input type="file" id="file" name="importRDF">\n' +
+                '  <button type="submit">Submit</button>\n' +
+                "</form>\n" +
+                "</body>\n" +
+                "<script>\n" +
+                '  const form = document.querySelector("#myForm");\n' +
+                '  form.addEventListener("submit", (e) => {\n' +
+                "    e.preventDefault();\n" +
+                "    CreateSLSVsource_bot.uploadGraphFromFile();\n" +
+                "  });\n" +
+                "</script>";
+
+            $("#smallDialogDiv").html(html);
             $("#smallDialogDiv").dialog("open");
             $("#smallDialogDiv").parent().css("z-index", 1);
             $("#smallDialogDiv").dialog("option", "title", "Upload");
-            $("#smallDialogDiv").dialog({
-                close: function (event, ui) {
-                    _botEngine.currentObj = self.workflowUpload;
-                    _botEngine.nextStep(self.workflowUpload);
-                },
+            $(".selector").on("dialogclose", function (event, ui) {
+                _botEngine.currentObj = self.workflowUpload;
+                _botEngine.nextStep(self.workflowUpload);
             });
-            var html =
-                '<form id="myForm" enctype="multipart/form-data" method="POST">\n' +
-                //  "  <input type=\"file\" id=\"file\" name=\"data\">\n" +
-                '  <input type="file" id="file" name="importRDF">\n' +
-                '  <button type="submit">Submit</button>\n' +
-                "</form>\n" +
-                "</body>\n" +
-                "<script>\n" +
-                '  const form = document.querySelector("#myForm");\n' +
-                '  form.addEventListener("submit", (e) => {\n' +
-                "    e.preventDefault();\n" +
-                "    CreateSLSVsource_bot.uploadGraphFromFile();\n" +
-                "  });\n" +
-                "</script>";
-
-            $("#smallDialogDiv").html(html);
         },
         uploadFromFileFnResonsive: function () {
-            $("#smallDialogDiv").dialog("open");
             var html =
                 '<form id="myForm" enctype="multipart/form-data" method="POST">\n' +
                 //  "  <input type=\"file\" id=\"file\" name=\"data\">\n" +
@@ -145,6 +142,7 @@ var CreateSLSVsource_bot = (function () {
                 "</script>";
 
             $("#smallDialogDiv").html(html);
+            $("#smallDialogDiv").dialog("open");
         },
 
         saveFn: function () {
@@ -224,7 +222,7 @@ var CreateSLSVsource_bot = (function () {
     };
 
     self.upload = function (body, callback) {
-        MainController.UI.message("Importing graph...");
+        UI.message("Importing graph...");
         $("#waitImg").css("display", "block");
 
         fetch(`${Config.apiUrl}/jowl/uploadGraph`, {
@@ -236,11 +234,11 @@ var CreateSLSVsource_bot = (function () {
                 $("#smallDialogDiv").dialog("close");
 
                 if (data.result == -1) {
-                    MainController.UI.message("", true);
+                    UI.message("", true);
                     alert("graph already exist ");
                     return _botEngine.reset();
                 } else {
-                    MainController.UI.message("imported triples :" + data.result, true);
+                    UI.message("imported triples :" + data.result, true);
                     botEngine.nextStep();
                 }
                 callback();
@@ -252,7 +250,7 @@ var CreateSLSVsource_bot = (function () {
 
     // using api/rdf from Logilab
     self.uploadXXX = function (formData) {
-        MainController.UI.message("Importing graph...");
+        UI.message("Importing graph...");
         $("#waitImg").css("display", "block");
         var currentUserToken = authentication.currentUser.currentUserToken;
         fetch("/api/v1/rdf/graph", {
@@ -264,11 +262,11 @@ var CreateSLSVsource_bot = (function () {
             .then((data) => {
                 $("#smallDialogDiv").dialog("close");
                 if (data.result == -1) {
-                    MainController.UI.message("", true);
+                    UI.message("", true);
                     alert("graph already exist ");
                     return _botEngine.reset();
                 } else {
-                    MainController.UI.message("imported triples :" + data.result, true);
+                    UI.message("imported triples :" + data.result, true);
                     botEngine.nextStep();
                 }
             })

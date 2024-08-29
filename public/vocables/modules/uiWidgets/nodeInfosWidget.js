@@ -8,11 +8,10 @@ import ElasticSearchProxy from "../../modules/search/elasticSearchProxy.js";
 import SearchUtil from "../../modules/search/searchUtil.js";
 import MainController from "../../modules/shared/mainController.js";
 import PredicatesSelectorWidget from "../../modules/uiWidgets/predicatesSelectorWidget.js";
-import Lineage_axioms_draw from "../../modules/tools/lineage/lineage_axioms_draw.js";
-import Lineage_axioms_create from "../../modules/tools/lineage/lineage_axioms_create.js";
+
 import Lineage_sources from "../../modules/tools/lineage/lineage_sources.js";
 import authentication from "../../modules/shared/authentification.js";
-import ResponsiveUI from "../../responsive/responsiveUI.js";
+import UI from "../../modules/shared/UI.js";
 import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 import Axioms_manager from "../tools/axioms/axioms_manager.js";
 
@@ -20,33 +19,14 @@ var NodeInfosWidget = (function () {
     var self = {};
 
     self.initDialog = function (sourceLabel, divId, options, callback) {
-        ResponsiveUI.openDialogDiv(divId);
-        $("#" + divId)
-            .parent()
-            .show("fast", function () {
-                self.oldNodeInfosInit(sourceLabel, divId, options, callback);
-                $("#addPredicateButton").remove();
-                $("#deleteButton").remove();
-            });
-
-        //$(".ui-dialog-title")
-    };
-    self.oldNodeInfosInit = function (sourceLabel, divId, options, callback) {
         self.currentSource = sourceLabel;
         if (!options.noDialog) {
             $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
-            $("#" + divId).dialog("open");
-            $("#" + divId).dialog({
-                close: function (event, ui) {
-                    window.scrollTo(0, 0);
-                    $("#addPredicateButton").remove();
-                    $("#deleteButton").remove();
-                },
-            });
-            //$("#mainDialogDiv").parent().css("top", "20px");
-            //$("#mainDialogDiv").parent().css("left", "20px");
         }
-        $("#" + divId).load("snippets/nodeInfosWidget.html", function () {
+        $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
+            $("#addPredicateButton").remove();
+            $("#deleteButton").remove();
+            $("#" + divId).dialog("open");
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
 
@@ -60,23 +40,11 @@ var NodeInfosWidget = (function () {
                             var source = self.currentSource;
                             // source = Lineage_sources.mainSource;
                             NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
-                            // Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
                         }
                     }, 100);
                 },
             });
-            $("#axiomsDrawGraphDiv").dialog({
-                autoOpen: false,
-                height: 800,
-                width: 1000,
-                modal: false,
-            });
-            $("#axioms_dialogDiv").dialog({
-                autoOpen: false,
-                height: 800,
-                width: 1000,
-                modal: false,
-            });
+
             $(".nodeInfosWidget_tabDiv").css("margin", "0px");
             $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
             callback();
@@ -97,7 +65,6 @@ var NodeInfosWidget = (function () {
         } else {
             self.currentSource = sourceLabel;
         }
-        Lineage_axioms_draw.currentSource = sourceLabel;
 
         if (typeof node == "object") {
             self.currentNode = node;
@@ -120,6 +87,7 @@ var NodeInfosWidget = (function () {
                 }
             } else {
                 if (node.id) {
+                    self.currentNode = { data: { id: node } };
                     self.currentNodeId = node;
                 }
             }
@@ -148,13 +116,14 @@ var NodeInfosWidget = (function () {
         }
 
         self.initDialog(sourceLabel, divId, options, function () {
+            //  self.initDialog(sourceLabel, divId, options, function () {
             if (true || !options.showAxioms) {
                 self.drawAllInfos(sourceLabel, nodeId, options, function (err, result) {
                     if (callback) {
                         callback(err);
                     }
                     if (err) {
-                        MainController.UI.message(err, true);
+                        UI.message(err, true);
                     }
                     self.showNodeInfosToolbar(options);
 
@@ -238,7 +207,7 @@ var NodeInfosWidget = (function () {
                     callback(err);
                 }
                 if (err) {
-                    return MainController.UI.message(err.responseText || err, true);
+                    return UI.message(err.responseText || err, true);
                 }
             }
         );
@@ -264,14 +233,7 @@ var NodeInfosWidget = (function () {
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
             str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
         }
-        /*
-        if (self.visitedNodes.length > 1) {
-            str +=
-                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(-1)'> previous </button>" +
-                "<button class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.showVisitedNode(+1)'>  next </button>";
-        }
-        str += '  <span class="popupMenuItem" onclick="Lineage_axioms_create.showAdAxiomDialog (\'axioms_dialogDiv\');"> <b>Add Axiom</b></span>';
-        */
+
         str += "</div>";
 
         $("#" + self.currentNodeIdInfosDivId).prepend(str);
@@ -287,7 +249,10 @@ var NodeInfosWidget = (function () {
     self.configureEditPredicateWidget = function () {
         $("#editPredicate_savePredicateButton").off("click");
         $("#editPredicate_savePredicateButton").click(function () {
-            self.addPredicate();
+            PredicatesSelectorWidget.storeRecentPredicates();
+            self.addPredicate(null, null, null, null, function () {
+                PredicatesSelectorWidget.fillSelectRecentEditPredicate();
+            });
         });
     };
 
@@ -308,7 +273,7 @@ var NodeInfosWidget = (function () {
             },
             function (err, data) {
                 if (err) {
-                    MainController.UI.message(err.responseText);
+                    UI.message(err.responseText);
                     if (callback) {
                         return callback(err);
                     }
@@ -754,7 +719,7 @@ defaultLang = 'en';*/
         Sparql_OWL.getPropertiesRestrictionsDescription(sourceLabel, nodeId, {}, function (err, result) {
             if (err) {
                 //  alert(err.responseText);
-                return MainController.UI.message(err.responseText || err, true);
+                return UI.message(err.responseText || err, true);
             }
 
             var str = "<b>Property restrictions</b><table>";
@@ -1046,8 +1011,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 }
                 self.newProperties[property] = value;
 
-                // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
-                self.drawAllInfos(self.currentSource, self.currentNode.data.id, {}, function (err, result) {
+                self.drawAllInfos(self.currentSource, currentNodeId || self.currentNode.data.id, {}, function (err, result) {
                     //  self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.push({
@@ -1074,7 +1038,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         }
     };
 
-    self.deletePredicate = function (predicateId) {
+    self.deletePredicate = function (predicateId, callback) {
         var currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         var property = currentEditingItem.item.prop.value;
         if (confirm("delete predicate")) {
@@ -1124,6 +1088,9 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     var value = currentEditingItem.item.value.value;
                     if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
                         Lineage_whiteboard.deleteEdge(self.currentNodeId, value, property);
+                    }
+                    if (callback) {
+                        callback();
                     }
                 }
             );
@@ -1199,7 +1166,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         return alert(err);
                     }
                     $("#" + self.divId).dialog("close");
-                    MainController.UI.message("node deleted");
+                    UI.message("node deleted");
                 }
             );
         }
@@ -1280,14 +1247,19 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         });
     };
     self.showModifyPredicateDialog = function (predicateId) {
+        self.setLargerObjectTextArea();
         PredicatesSelectorWidget.currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         if (!PredicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
             $("#editPredicate_savePredicateButton").click(function () {
-                self.addPredicate(null, null, null, null, function () {
-                    self.deletePredicate(predicateId);
+                //PredicatesSelectorWidget.storeRecentPredicates();
+
+                self.deletePredicate(predicateId, function () {
+                    self.addPredicate(null, null, null, null, function () {
+                        self.showNodeInfos(MainController.currentSource, self.currentNode, "mainDialogDiv", { resetVisited: 1 });
+                    });
                 });
             });
         });
@@ -1348,8 +1320,6 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             '$("#nodeInfosWidget_newEntityLabel").val(),$("#nodeInfosWidget_entityTypeSelect").val())\'>OK</button>';
 
         $("#" + divId).html(html);
-        var declarations = Lineage_axioms_create.owl2Vocabulary.Declarations;
-        common.fillSelectOptions("nodeInfosWidget_entityTypeSelect", declarations, true);
     };
 
     self.createSingleEntity = function (divId, source, label, type) {
@@ -1402,9 +1372,16 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 if (err) {
                     return alert(err.responseText);
                 }
-                MainController.UI.message("node Created and Indexed");
+                UI.message("node Created and Indexed");
             });
         });
+    };
+
+    self.setLargerObjectTextArea = function () {
+        $("#editPredicate_objectValue").show();
+        //$("#editPredicate_selectsDiv").hide();
+        $("#editPredicate_objectValue").css("width", "700px");
+        $("#editPredicate_objectValue").css("height", "130px");
     };
 
     return self;

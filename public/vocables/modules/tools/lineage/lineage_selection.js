@@ -227,7 +227,7 @@ var Lineage_selection = (function () {
                                     data: payload,
                                     dataType: "json",
                                     success: function (_result, _textStatus, _jqXHR) {
-                                        MainController.UI.message("icon uploaded");
+                                        UI.message("icon uploaded");
                                         callbackSeries();
                                     },
                                     error(err) {
@@ -301,7 +301,7 @@ var Lineage_selection = (function () {
                             data: payload,
                             dataType: "json",
                             success: function (_result, _textStatus, _jqXHR) {
-                                MainController.UI.message("Decoration saved");
+                                UI.message("Decoration saved");
                                 callbackSeries();
                             },
                             error(err) {
@@ -348,7 +348,7 @@ var Lineage_selection = (function () {
                         data: payload,
                         dataType: "json",
                         success: function (_result, _textStatus, _jqXHR) {
-                            MainController.UI.message("Decoration deleted");
+                            UI.message("Decoration deleted");
                         },
                         error(err) {
                             return alert(err);
@@ -416,7 +416,7 @@ var Lineage_selection = (function () {
                 if (err) {
                     return alert(err.responseText);
                 }
-                MainController.UI.message("predicate added to container " + containerName);
+                UI.message("predicate added to container " + containerName);
             });
         },
         deletePredicate: function () {
@@ -435,7 +435,7 @@ var Lineage_selection = (function () {
 
             Sparql_generic.deleteTriples(Lineage_sources.activeSource, nodeIds, property, object, function (err, result) {
                 return alert(err.responseText);
-                MainController.UI.message(nodeIds.length + " nodes deleted  ");
+                UI.message(nodeIds.length + " nodes deleted  ");
             });
         },
 
@@ -455,7 +455,7 @@ var Lineage_selection = (function () {
                     if (err) {
                         return alert(err.responseText);
                     }
-                    MainController.UI.message(nodeIds.length + " nodes deleted  ");
+                    UI.message(nodeIds.length + " nodes deleted  ");
                 });
             });
         },

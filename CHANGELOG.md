@@ -156,7 +156,7 @@ npm run migrate
 * **ConfigEditor:** move all the promises in the same block ([fe46d7e](https://github.com/souslesens/souslesensVocables/commit/fe46d7e90c278e9cdc954376c08bc88127d25e9c))
 * **ConfigEditor:** store the tab index in the URL for futher usage ([db9b8c4](https://github.com/souslesens/souslesensVocables/commit/db9b8c441e43fdcd83650046f81d29054efa9ff6))
 * **graphManagement:** set chunk size to 10Mo ([1dac8f8](https://github.com/souslesens/souslesensVocables/commit/1dac8f88e92030c3fb4652855c233e06be44f519))
-* **responsiveUI:** set or replace tool params when a tool is selected ([45154b9](https://github.com/souslesens/souslesensVocables/commit/45154b98df0f1b6ba80cd659bf53e82db8829da0))
+* **UI:** set or replace tool params when a tool is selected ([45154b9](https://github.com/souslesens/souslesensVocables/commit/45154b98df0f1b6ba80cd659bf53e82db8829da0))
 
 
 ### Bug Fixes

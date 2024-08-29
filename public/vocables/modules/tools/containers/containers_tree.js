@@ -1,5 +1,4 @@
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
-import Lineage_styles from "../lineage/lineage_styles.js";
 import common from "../../shared/common.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import Containers_query from "./containers_query.js";
@@ -138,7 +137,7 @@ var Containers_tree = (function () {
                 function (callbackSeries) {
                     //  options.descendants = true;
                     // options.leaves = true;
-                    MainController.UI.message("searching...");
+                    UI.message("searching...");
                     Containers_query.getContainerDescendants(source, containerData.id, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -149,7 +148,7 @@ var Containers_tree = (function () {
                         }
                         return callbackSeries();
                     });
-                    MainController.UI.message("drawing graph...");
+                    UI.message("drawing graph...");
                 },
 
                 //get containersStyles
@@ -365,7 +364,7 @@ var Containers_tree = (function () {
                 },
             ],
             function (err) {
-                MainController.UI.message("", true);
+                UI.message("", true);
                 if (err) {
                     return alert(err.responseText);
                     if (callback) {
@@ -386,6 +385,9 @@ var Containers_tree = (function () {
         if (obj.event.button != 2) {
             self.listContainerResources(self.currentContainer);
         }
+        if (obj.event.ctrlKey) {
+            NodeInfosWidget.showNodeInfos(self.currentContainer.data.source, self.currentContainer.data.source, "mainDialogDiv");
+        }
     };
 
     self.menuActions = {};
@@ -397,6 +399,9 @@ var Containers_tree = (function () {
                 return alert(err.responsetext);
             }
 
+            if (result.length == 0) {
+                return UI.message("no result", true);
+            }
             var jstreeData = [];
 
             var existingNodes = {};
@@ -446,6 +451,9 @@ var Containers_tree = (function () {
                 return callback(err);
             }
 
+            if (result.length == 0) {
+                return UI.message("no result", true);
+            }
             //identify top Node
             var childrenMap = {};
             result.forEach(function (item) {
@@ -583,7 +591,8 @@ var Containers_tree = (function () {
                 // pb avec source
                 Lineage_whiteboard.copyNode(e);
                 var selectedNodes = $("#lineage_containers_containersJstree").jstree().get_selected(true);
-                Containers_tree.menuActions.copyNodeToClipboard(selectedNodes);
+                // Containers_tree.menuActions.copyNodeToClipboard(selectedNodes);
+                Lineage_common.copyNodeToClipboard(selectedNodes);
             },
         };
         items["AddGraphNode"] = {
@@ -704,10 +713,11 @@ var Containers_tree = (function () {
      * @param drawMembershipEdge add the edge (and the node) on the vizGraph
      */
     self.menuActions.addResourcesToContainer = function (source, container, nodesData, drawMembershipEdge, callback) {
-        if (!(container.data.type.includes("http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") || container.data.type == "container")) {
+        // can also copy nodes coming from copy container
+        if (false && !(container.data.type.includes("http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") || container.data.type == "container")) {
             return alert("can only add resources to containers");
         }
-        // self.currentContainer=null;
+
         if (!Array.isArray(nodesData)) {
             nodesData = [nodesData];
         }
@@ -740,7 +750,7 @@ var Containers_tree = (function () {
                 }
                 return alert(err.responseText);
             }
-            MainController.UI.message("nodes added to container " + container.label);
+            UI.message("nodes added to container " + container.label);
             var jstreeData = [];
             nodesData.forEach(function (nodeData) {
                 jstreeData.push({
@@ -801,7 +811,7 @@ var Containers_tree = (function () {
         common.pasteTextFromClipboard(function (text) {
             // debugger
             if (!text) {
-                return MainController.UI.message("no node copied");
+                return UI.message("no node copied");
             }
             try {
                 var nodes = JSON.parse(text);
@@ -812,7 +822,7 @@ var Containers_tree = (function () {
                     }
                 });
 
-                self.addResourcesToContainer(source, container, nodesData);
+                self.menuActions.addResourcesToContainer(source, container, nodesData);
             } catch (e) {
                 console.log("wrong clipboard content");
             }

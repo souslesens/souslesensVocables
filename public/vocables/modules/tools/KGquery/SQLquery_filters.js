@@ -46,8 +46,8 @@ var SQLquery_filters = (function () {
                 },
             ],
             function (err) {
-                $("#mainDialogDiv").dialog("open");
                 $("#mainDialogDiv").load("modules/tools/KGquery/html/SQLqueryFilterDialog.html", function () {
+                    $("#mainDialogDiv").dialog("open");
                     var options = {};
                     JstreeWidget.loadJsTree("SQLqueryFilter_jstree", jstreeData, options);
                 });

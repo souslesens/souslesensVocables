@@ -1,10 +1,25 @@
 import MainController from "../shared/mainController.js";
-import SearchUtil from "../search/searchUtil.js";
 import common from "../shared/common.js";
+import Lineage_sources from "../tools/lineage/lineage_sources.js";
+import UI from "../shared/UI.js";
 
 var SourceSelectorWidget = (function () {
     var self = {};
     self.currentTreeDiv = null;
+
+    self.showSourceDialog = function (resetAll) {
+        $("#sourceSelector_searchInput").focus();
+        var onSourceSelect;
+        if (resetAll) {
+            Lineage_sources.loadedSources = {};
+            onSourceSelect = SourceSelectorWidget.onSourceSelect;
+        } else {
+            onSourceSelect = SourceSelectorWidget.onSourceSelect_AddSource;
+        }
+        SourceSelectorWidget.initWidget(null, "mainDialogDiv", true, onSourceSelect, null, null, function () {
+            $("#" + $("#mainDialogDiv").parent().attr("aria-labelledby")).html("Source Selector");
+        });
+    };
 
     self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options, callback) {
         if (self.currentTreeDiv != null) {
@@ -23,9 +38,12 @@ var SourceSelectorWidget = (function () {
         }
         var jsTreeOptions = options;
         jsTreeOptions.selectTreeNodeFn = selectTreeNodeFn;
-        MainController.UI.showHideRightPanel("hide");
+        UI.showHideRightPanel("hide");
 
-        $("#" + targetDivId).load("./responsive/widget/html/sourceSelector.html", function (err) {
+        $("#" + targetDivId).load("./modules/uiWidgets/html/sourceSelector.html", function (err) {
+            try {
+                $("#" + targetDivId).dialog("open");
+            } catch (e) {}
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
             $("#sourceSelector_searchInput").focus();
             //  $("#sourceSelector_SearchSourceInput");
@@ -155,6 +173,18 @@ var SourceSelectorWidget = (function () {
 
         return treeData;
     };
+
+    self.addRecentSources = function (treeData) {
+        self.recentSources = JSON.parse(localStorage.getItem("recentSources"));
+        if (self.recentSources && self.recentSources.length > 0) {
+            treeData.unshift({ id: "Recent", text: "Recent", type: "Folder", parent: "#" });
+            for (let i = self.recentSources.length - 1; i >= 0; i--) {
+                var source = self.recentSources[i];
+                treeData.push({ id: source, text: source, type: "Source", parent: "Recent", data: { type: "source", label: source, id: source } });
+            }
+        }
+        return treeData;
+    };
     /**
      *
      * @param divId
@@ -167,13 +197,14 @@ var SourceSelectorWidget = (function () {
      */
     self.loadSourcesTreeDiv = function (treeDiv, jstreeOptions, callback) {
         if (!jstreeOptions) {
-            optiojstreeOptionsns = {};
+            jstreeOptions = {};
         }
 
         var treeData = self.getSourcesJstreeData();
+        treeData = self.addRecentSources(treeData);
 
         if (!jstreeOptions.contextMenu) {
-            jstreeOptions.contextMenu = MainController.UI.getJstreeConceptsContextMenu();
+            jstreeOptions.contextMenu = SourceSelectorWidget.getJstreeConceptsContextMenu();
         }
 
         if (!jstreeOptions.withCheckboxes && !jstreeOptions.selectTreeNodeFn) {
@@ -208,6 +239,10 @@ var SourceSelectorWidget = (function () {
             $("#" + treeDiv)
                 .jstree(true)
                 .open_node(openedTypes);
+            if (self.recentSources)
+                $("#" + treeDiv)
+                    .jstree(true)
+                    .open_node("Recent");
             if (callback) {
                 return callback();
             }
@@ -236,7 +271,7 @@ var SourceSelectorWidget = (function () {
             }
         } else {
             self.currentSource = obj.node.id;
-            MainController.UI.onSourceSelect(obj.event);
+            SourceSelectorWidget.onSourceSelect(obj.event);
         }
     };
 
@@ -268,6 +303,53 @@ var SourceSelectorWidget = (function () {
             if (Config.sources[item]) sources.push(item);
         });
         return sources;
+    };
+
+    self.onSourceSelect = function (event, obj) {
+        $("#" + self.currentTreeDiv).dialog("close");
+        self.initSource(obj.node.data.id);
+    };
+
+    self.initSource = function (source) {
+        MainController.currentSource = source;
+        $("#selectedSource").html(source);
+
+        const params = new URLSearchParams(document.location.search);
+        if (source) {
+            params.set("source", source);
+        }
+        common.storeLocally(source, "recentSources");
+        window.history.replaceState(null, "", `?${params.toString()}`);
+        MainController.initTool(MainController.currentTool, function (err, result) {
+            if (err) {
+                return alert(err.responseText);
+            }
+            UI.resetWindowHeight();
+        });
+    };
+
+    // MainController or in Lineage_r ?
+    self.onSourceSelect_AddSource = function (evt, obj) {
+        $("#" + self.currentTreeDiv).dialog("close");
+        //  if (!MainController.currentTool) return self.alert("select a tool first");
+        if (!obj.node.data || obj.node.data.type != "source") {
+            return alert("select a tool");
+        }
+
+        MainController.currentSource = obj.node.data.id;
+        $("#selectedSource").html(MainController.currentSource);
+        //  $("#mainDialogDiv").parent().hide();
+        Lineage_whiteboard.loadSources();
+    };
+
+    self.getJstreeConceptsContextMenu = function () {
+        if (!MainController.currentTool || !Config.userTools[MainController.currentTool]) {
+            return;
+        }
+        var controller = Config.userTools[MainController.currentTool].controller;
+        if (controller.jstreeContextMenu) {
+            return controller.jstreeContextMenu();
+        }
     };
 
     return self;

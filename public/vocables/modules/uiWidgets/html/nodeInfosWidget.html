@@ -1,0 +1,71 @@
+<style>
+    #nodeInfosWidget_HoverDiv {
+        width: 547px;
+        height: 230px;
+        overflow: auto;
+        display: none;
+        z-index: 100;
+        position: absolute;
+        background-color: #f5efdd;
+        border: #6c757d;
+        border-radius: 10px;
+        padding: 5px;
+    }
+
+    #axiomsGraphLegendDiv {
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .detailsCellName {
+        padding: 2px;
+        max-width: 400px;
+        text-align: right;
+        width: 250px;
+    }
+
+    .detailsCellValue {
+        padding: 2px;
+        border-radius: 3px;
+        border: 1px solid black;
+        background-color: white;
+        max-width: 400px;
+        line-height: 1.8;
+    }
+
+    .infosTable {
+        background-color: #d9d9d9;
+        padding: 5px;
+    }
+
+    .nodeInfos_rigthDiv {
+        min-width: 350px;
+        background-color: #ddd;
+        padding: 5px;
+    }
+</style>
+<div style="min-width: 60vw; max-height: 70vh; min-height: 50vh">
+    <div id="nodeInfosWidget_modifyDiv"></div>
+
+    <div id="nodeInfosWidget_tabsDiv">
+        <ul>
+            <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_InfosTabDiv">Infos</a></li>
+            <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_AxiomsTabDiv">Axioms</a></li>
+        </ul>
+        <div id="nodeInfosWidget_InfosTabDiv"></div>
+        <div id="nodeInfosWidget_AxiomsTabDiv">
+            <div style="display: none"></div>
+            <div id="axiomsGraphDivContainer" style="width: 95%; height: 560px"></div>
+            <div id="axiomsGraphLegendDiv" style=""></div>
+        </div>
+    </div>
+
+    <div
+        id="axioms_popupMenuWidgetDiv"
+        onclick="  PopupMenuWidget.hidePopup('axioms_popupMenuWidgetDiv');"
+        style="display: none; background-color: #ddd; position: absolute; margin: 5px; padding: 5px"
+    ></div>
+    <div id="nodeInfosWidget_HoverDiv"></div>
+</div>

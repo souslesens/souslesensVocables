@@ -20,6 +20,7 @@ var KGbuilder_triplesMaker = {
      * @param {Function} callback - Node-style async Function called to proccess result or handle error
      **/
     createTriples: function(tableMappings, data, options, callback) {
+        KGbuilder_triplesMaker.bNodeIndex=0
         if (!tableMappings || tableMappings.length == 0) {
             KGbuilder_socket.message(options.clientSocketId, "No mappings  in table " + tableMappings.table);
             return callback();
@@ -177,7 +178,19 @@ var KGbuilder_triplesMaker = {
             }
             subjectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.s);
             return callback(null, subjectStr);
-        } else if (tableMappings.transform && tableMappings.transform[mapping.s]) {
+        }
+        
+        //encodedurl from string
+    else if (typeof mapping.s === "string" && mapping.s.endsWith("_£")) {
+        var key=mapping.s.replace("_£","")
+            if (line[key]) {
+                subjectStr = KGbuilder_triplesMaker.getStringHashCode(line[key]);
+            }
+            else
+                subjectStr=null
+
+        }
+        else if (tableMappings.transform && tableMappings.transform[mapping.s]) {
             try {
                 if (line[mapping.s]) {
 
@@ -236,9 +249,16 @@ var KGbuilder_triplesMaker = {
         if (mapping.o === "_rowIndex") {
             objectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
             return objectStr;
-        } else if (mapping.objectIsSpecificUri) {
+        } else if (mapping.objectIsSpecificUri  ) {
             objectStr = mapping.o;
-        } else if (typeof mapping.o === "function") {
+        }
+
+
+        if(mapping.o.endsWith("_!")) {
+            objectStr=mapping.o.replace("_!","")
+            mapping.isString=true
+        }
+            else if (typeof mapping.o === "function") {
             try {
                 objectStr = mapping.o(line, mapping);
                 objectStr = util.formatStringForTriple(objectStr, false);
@@ -252,7 +272,20 @@ var KGbuilder_triplesMaker = {
         } else if ((typeof mapping.o === "string" && mapping.o.endsWith("_$")) || mapping.isObjectBlankNode) {
             objectStr = KGbuilder_triplesMaker.getBlankNodeId(mapping.o);
             return callback(null, objectStr);
-        } else {
+        }
+        //encodedurl from string
+        else if (typeof mapping.o === "string" && mapping.o.endsWith("_£")) {
+            var key=mapping.o.replace("_£","")
+            if (line[key]) {
+                objectStr = KGbuilder_triplesMaker.getStringHashCode(line[key]);
+            }
+            else
+                objectStr=null
+
+        }
+        
+        
+        else {
             var isTransform = false;
             if (line[mapping.o] === 0) {
                 line[mapping.o] = "0";
@@ -538,11 +571,32 @@ var KGbuilder_triplesMaker = {
         if (value) {
             return value;
         } else {
-            value = "<_:b" + util.getRandomHexaId(10) + ">";
+            if(!KGbuilder_triplesMaker.bNodeIndex)
+                KGbuilder_triplesMaker.bNodeIndex=0
+            value="_:b"+(KGbuilder_triplesMaker.bNodeIndex++)
+          //  value = "<_:b" + util.getRandomHexaId(10) + ">";
             KGbuilder_triplesMaker.blankNodesMap[key] = value;
             return value;
         }
     },
+
+   zipString: function(str) {
+    const ascii = encodeURIComponent(str)
+    const array = new TextEncoder().encode(ascii)
+    const zip = fflate.deflateSync(array, {level: 9})
+    return window.btoa(String.fromCharCode(...zip))
+},
+
+    getStringHashCode :function(str) {
+
+        var hashCode = s => s.split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0)
+
+        var code=hashCode(str)
+        code=code.toString(16);
+//console.log(code+"    "+str+"   ")
+        return code
+    },
+    
     getLookupValue: function(lookupName, value, callback) {
         var lookupArray = lookupName.split("|");
         var target = null;

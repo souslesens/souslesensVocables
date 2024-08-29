@@ -10,10 +10,10 @@ var Lineage_createRelation = (function () {
     var self = {};
 
     self.showAddEdgeFromGraphDialog = function (edgeData, callback) {
-        $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
+            $("#smallDialogDiv").dialog("open");
             self.sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
             self.targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
@@ -276,86 +276,7 @@ var Lineage_createRelation = (function () {
                     },
 
                     function (callbackSeries) {
-                        options.contextMenu = {
-                            refineProperty: {
-                                label: "Refine Property",
-                                action: function (_e) {
-                                    if (false && self.currentPropertiesTreeNode.data.source != Config.currentTopLevelOntology) {
-                                        return alert("only properties from " + Config.currentTopLevelOntology + " can be refined");
-                                    }
-                                    var subPropertyLabel = prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
-                                    if (!subPropertyLabel) {
-                                        return;
-                                    }
-                                    Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function (err, result) {
-                                        if (err) {
-                                            return alert(err);
-                                        }
-
-                                        if (!self.domainOntologyProperties) {
-                                            self.domainOntologyProperties = [];
-                                        }
-                                        var newProp = {
-                                            id: result.uri,
-                                            label: subPropertyLabel,
-                                            superProp: self.currentPropertiesTreeNode.data.id,
-                                        };
-                                        self.domainOntologyProperties.push(newProp);
-                                        var propId = newProp.id;
-
-                                        var superpropConstraints = JSON.parse(
-                                            JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]["constraints"][self.currentPropertiesTreeNode.data.id])
-                                        );
-                                        superpropConstraints.source = Lineage_sources.activeSource;
-                                        superpropConstraints.label = subPropertyLabel;
-                                        superpropConstraints.parent = self.currentPropertiesTreeNode.data.id;
-                                        superpropConstraints.superProp = self.currentPropertiesTreeNode.data.id;
-                                        var propertiesToAdd = {};
-                                        propertiesToAdd[propId] = newProp;
-                                        var constraintsToAdd = {};
-                                        constraintsToAdd[propId] = superpropConstraints;
-                                        OntologyModels.updateModel(
-                                            Lineage_sources.activeSource,
-                                            {
-                                                properties: propertiesToAdd,
-                                                constraints: constraintsToAdd,
-                                            },
-                                            null,
-                                            function (err, result2) {
-                                                if (err) {
-                                                    return alert(err.responsetext);
-                                                }
-
-                                                var jstreeData = [
-                                                    {
-                                                        id: result.uri,
-                                                        text: subPropertyLabel,
-                                                        parent: self.currentPropertiesTreeNode.data.id,
-                                                        data: {
-                                                            id: result.uri,
-                                                            label: subPropertyLabel,
-                                                            source: Lineage_sources.activeSource,
-                                                        },
-                                                    },
-                                                ];
-
-                                                JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
-                                            }
-                                        );
-                                    });
-                                },
-                            },
-                            nodeInfos: {
-                                label: "Node infos",
-                                action: function (_e) {
-                                    // pb avec source
-                                    NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
-                                        $("#mainDialogDiv").parent().css("z-index", 1);
-                                    });
-                                },
-                            },
-                        };
-
+                        options.contextMenu = self.getContextMenu(options);
                         options.doNotAdjustDimensions = 1;
                         JstreeWidget.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {});
                         callbackSeries();
@@ -366,7 +287,7 @@ var Lineage_createRelation = (function () {
                     if (err) {
                         return callback(err);
                     }
-
+                    Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
                     if (edgeData.from === edgeData.to) {
                         return callback(null);
                     } else {
@@ -375,6 +296,91 @@ var Lineage_createRelation = (function () {
                 }
             );
         });
+    };
+
+    self.getContextMenu = function (options) {
+        var items = {
+            refineProperty: {
+                label: "Refine Property",
+                action: function (_e) {
+                    if (false && self.currentPropertiesTreeNode.data.source != Config.currentTopLevelOntology) {
+                        return alert("only properties from " + Config.currentTopLevelOntology + " can be refined");
+                    }
+                    var subPropertyLabel = prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
+                    if (!subPropertyLabel) {
+                        return;
+                    }
+                    Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function (err, result) {
+                        if (err) {
+                            return alert(err);
+                        }
+
+                        if (!self.domainOntologyProperties) {
+                            self.domainOntologyProperties = [];
+                        }
+                        var newProp = {
+                            id: result.uri,
+                            label: subPropertyLabel,
+                            superProp: self.currentPropertiesTreeNode.data.id,
+                        };
+                        self.domainOntologyProperties.push(newProp);
+                        var propId = newProp.id;
+                        var ontology = self.currentPropertiesTreeNode.parents[self.currentPropertiesTreeNode.parents.length - 2];
+                        var x = Config.ontologiesVocabularyModels[ontology].constraints;
+                        var superpropConstraints = JSON.parse(
+                            //  JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]["constraints"][self.currentPropertiesTreeNode.data.id])
+                            JSON.stringify(Config.ontologiesVocabularyModels[ontology]["constraints"][self.currentPropertiesTreeNode.data.id])
+                        );
+                        superpropConstraints.source = Lineage_sources.activeSource;
+                        superpropConstraints.label = subPropertyLabel;
+                        superpropConstraints.parent = self.currentPropertiesTreeNode.data.id;
+                        superpropConstraints.superProp = self.currentPropertiesTreeNode.data.id;
+                        var propertiesToAdd = {};
+                        propertiesToAdd[propId] = newProp;
+                        var constraintsToAdd = {};
+                        constraintsToAdd[propId] = superpropConstraints;
+                        OntologyModels.updateModel(
+                            Lineage_sources.activeSource,
+                            {
+                                properties: propertiesToAdd,
+                                constraints: constraintsToAdd,
+                            },
+                            null,
+                            function (err, result2) {
+                                if (err) {
+                                    return alert(err.responsetext);
+                                }
+
+                                var jstreeData = [
+                                    {
+                                        id: result.uri,
+                                        text: subPropertyLabel,
+                                        parent: self.currentPropertiesTreeNode.data.id,
+                                        data: {
+                                            id: result.uri,
+                                            label: subPropertyLabel,
+                                            source: Lineage_sources.activeSource,
+                                        },
+                                    },
+                                ];
+
+                                JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                            }
+                        );
+                    });
+                },
+            },
+            nodeInfos: {
+                label: "Node infos",
+                action: function (_e) {
+                    // pb avec source
+                    NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv", null, function () {
+                        //  $("#mainDialogDiv").parent().css("z-index", 1);
+                    });
+                },
+            },
+        };
+        return items;
     };
 
     self.execAddEdgeFromGraph = function () {};
@@ -439,7 +445,7 @@ var Lineage_createRelation = (function () {
             self.createDataTypeProperty(Lineage_sources.activeSource, propLabel, null, xsdType, function (err, result) {
                 if (err) return alert(err.responseText);
                 $("#smallDialogDiv").dialog("close");
-                return MainController.UI.message("annotation property created", true);
+                return UI.message("annotation property created", true);
             });
             return;
         } */
@@ -495,7 +501,7 @@ var Lineage_createRelation = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        MainController.UI.message("relation added", true);
+                        UI.message("relation added", true);
 
                         if (oldRelations.length > 0) {
                             if (confirm("delete previous relation " + oldRelations[0].data.propertyLabel)) {
@@ -770,7 +776,7 @@ var Lineage_createRelation = (function () {
                 function (_err) {
                     Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(restrictionNode.id);
                     Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(inverseRestriction);
-                    MainController.UI.message("restriction removed", true);
+                    UI.message("restriction removed", true);
                     if (callback) {
                         return callback(_err);
                     }

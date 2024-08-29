@@ -8,7 +8,7 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_SKOS from "../sparqlProxies/sparql_SKOS.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import GraphLoader from "./graphLoader.js";
-import ResponsiveUI from "../../responsive/responsiveUI.js";
+import UI from "../../modules/shared/UI.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -26,6 +26,7 @@ var MainController = (function () {
     self.currentTool = null;
     self.currentSchemaType = null;
     self.currentSource = null;
+    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
 
     self.initConfig = function (callback) {
         $.ajax({
@@ -107,7 +108,6 @@ var MainController = (function () {
             },
         });
     };
-
     self.writeUserLog = function (user, tool, source, action = "") {
         var payload = {
             infos: `${user.identifiant},${tool},${source},${action}`,
@@ -127,11 +127,9 @@ var MainController = (function () {
             },
         });
     };
-
     function groupWithinCurrentProfile(valueCheckedAgainst) {
         return Object.entries(Config.profiles).filter(([_key, val]) => val.name === valueCheckedAgainst);
     }
-
     self.onAfterLogin = function (callback) {
         if (!authentication.currentUser) {
             return alert(" no user identified");
@@ -178,24 +176,18 @@ var MainController = (function () {
                             callbackSeries(err);
                         });
                     },
-                    function (callbackSeries) {
-                        MainController.UI.showToolsList("toolsTreeDiv");
-                        callbackSeries();
-                    },
+
                     function (callbackSeries) {
                         MainController.parseUrlParam(function () {
                             callbackSeries();
                         });
                     },
                 ],
-                function (_err) {
-                    MainController.UI.configureUI();
-                }
+                function (_err) {}
             );
             callback(_err);
         });
     };
-
     self.initControllers = function () {
         Object.keys(Config.sources)
             .sort()
@@ -207,219 +199,95 @@ var MainController = (function () {
                 }
             });
     };
-
-    self.UI = {
-        configureUI: function () {},
-
-        showToolsList: function (treeDiv) {
-            $(".max-height").height($(window).height() - 300);
-            var treeData = [];
-            for (var key in Config.userTools) {
-                if (Config.userTools[key]) {
-                    treeData.push({
-                        id: key,
-                        text: Config.userTools[key].label,
-                        type: "tool",
-                        parent: "#",
-                        data: Config.userTools[key],
-                    });
+    self.initTool = function (toolId, callback) {
+        MainController.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource || "");
+        var toolObj = Config.userTools[toolId];
+        self.initControllers();
+        Clipboard.clear();
+        Lineage_sources.loadedSources = {};
+        if (Config.userTools[toolId].controller.onLoaded) {
+            Config.userTools[toolId].controller.onLoaded();
+        } else {
+            if (true) {
+                var url = window.location.href;
+                var p = url.indexOf("?");
+                if (p > -1) {
+                    url = url.substring(0, p);
                 }
+                url = url.replace("index_r.html", "");
+                url += "?tool=" + toolId;
+                window.location.href = url;
             }
-            //})
-            JstreeWidget.loadJsTree(treeDiv, treeData, {
-                selectTreeNodeFn: function (evt, obj) {
-                    self.UI.initTool(obj.node.id);
-                },
-            });
-        },
-
-        initTool: function (toolId, callback) {
-            self.currentTool = toolId;
-            var toolObj = Config.userTools[toolId];
-            self.currentSource = null;
-            // MainController.initControllers();
-            MainController.writeUserLog(authentication.currentUser, self.currentTool, "");
-            Clipboard.clear();
-            $("#accordion").accordion("option", { active: 1 });
-            $("#mainDialogDiv").dialog("close");
-            MainController.initControllers();
-            var controller = Config.userTools[self.currentTool].controller;
-            $("#currentSourceTreeDiv").html("");
-            $("#sourceDivControlPanelDiv").html("");
-            $("#actionDivContolPanelDiv").html("");
-            $("#rightPanelDivInner").html("");
-
-            if (true || toolId == "lineage" || toolId == "KGquery") {
-                Lineage_sources.setAllWhiteBoardSources(true);
-                $("#accordion").accordion("option", { active: 2 });
-                MainController.currentSource = null;
-
-                controller.onLoaded(function (err, result) {
-                    if (callback) {
-                        callback(err, result);
-                    }
-                });
-                return;
-            }
-
-            self.UI.updateActionDivLabel();
-            SearchWidget.targetDiv = "currentSourceTreeDiv";
-            if (toolObj.noSource) {
-                MainController.currentSource = null;
-                MainController.UI.onSourceSelect();
-            } else {
-                var options = {
-                    withCheckboxes: toolObj.multiSources,
-                };
-                SourceSelectorWidget.initWidget(null, "sourcesTreeDiv", false, null, null, options);
-
-                if (Config.userTools[self.currentTool].multiSources) {
-                    self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources");
-                    if (controller.onSourceSelect) {
-                        controller.onSourceSelect(self.currentSource);
-                    }
-                }
-            }
-            if (Config.userTools[self.currentTool].toolDescriptionImg) {
-                $("#graphDiv").html("<img src='" + Config.userTools[self.currentTool].toolDescriptionImg + "' width='600px' style='toolDescriptionImg'>");
-            } else {
-                $("#graphDiv").html(self.currentTool);
-            }
-
-            if (controller.onLoaded) {
-                controller.onLoaded(function (err, result) {
-                    if (callback) {
-                        callback(err, result);
-                    }
-                });
-            }
-        },
-
-        getJstreeConceptsContextMenu: function () {
-            if (!self.currentTool || !Config.userTools[self.currentTool]) {
-                return;
-            }
-            var controller = Config.userTools[self.currentTool].controller;
-            if (controller.jstreeContextMenu) {
-                return controller.jstreeContextMenu();
-            }
-        },
-
-        onSourceSelect: function (event) {
-            if (Config.userTools[self.currentTool].multiSources) {
-                return;
-            }
-            //  OwlSchema.currentSourceSchema = null;
-            //   Collection.currentCollectionFilter = null;
-            self.UI.updateActionDivLabel();
-            self.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource);
-            var controller = Config.userTools[self.currentTool].controller;
-            if (controller.onSourceSelect) {
-                controller.onSourceSelect(self.currentSource, event);
-            }
-        },
-
-        message: function (message, stopWaitImg, startWaitImg) {
-            if (message.length > 200) {
-                alert(message);
-            } else {
-                $("#messageDiv").html(message);
-            }
-            if (stopWaitImg) {
-                $("#waitImg").css("display", "none");
-            }
-            if (startWaitImg) {
-                $("#waitImg").css("display", "block");
-            }
-        },
-
-        setCredits: function () {
-            var LateralPannelWidth = $("#lateralPanelDiv").width();
-            var gifStart = $(window).width() / 2 - LateralPannelWidth + 100;
-            var html =
-                "<div style='position:absolute;left:" +
-                gifStart +
-                "px'>" +
-                " " +
-                " <img  src=\"images/souslesensVocables.gif\" style='background:url(images/circulargraph.png);background-repeat: no-repeat;display: block; '>" +
-                "</div>";
-            $("#graphDiv").html(html);
-        },
-
-        updateActionDivLabel: function (html) {
-            if (html) {
-                $("#toolPanelLabel").html(html);
-            }
-            if (self.currentSource) {
-                $("#toolPanelLabel").html(Config.userTools[self.currentTool].label + " : " + self.currentSource);
-            } else {
-                $("#toolPanelLabel").html(Config.userTools[self.currentTool].label);
-            }
-        },
-
-        onAccordionChangePanel: function (panelLabel) {
-            if (self.previousPanelLabel && self.previousPanelLabel == "toolPanelDiv") {
-                // Pass
-            } else {
-                //  $("#graphDiv").html("...");
-            }
-            self.previousPanelLabel = panelLabel;
-        },
-
-        showHideRightPanel: function (showOrHide) {
-            var w = $(window).width();
-            var show = false;
-            if (!showOrHide) {
-                var displayed = $("#rightPanelDivInner").css("display");
-                if (displayed == "none") {
-                    show = true;
-                } else {
-                    show = false;
-                }
-            } else if (showOrHide == "show") {
-                show = true;
-            } else if (showOrHide == "hide") {
-                show = false;
-            }
-            if (show) {
-                var lw = $("#rightPanelDivInner").width();
-                if (false && lw < 100) {
-                    return;
-                }
-                var newLeft = "" + (w - lw) + "px";
-                $("#rightPanelDiv").css("position", "absolute");
-                $("#rightPanelDivInner").css("display", "block");
-                $("#rightPanelDiv").css("left", newLeft);
-                $("#graphDiv").css("zIndex", 19);
-                // $("#rightPanelDiv_searchIconInput").css("display", "block");
-                $("#rightPanelDiv_searchIconInput").attr("src", "./icons/oldIcons/slideRight.png");
-            } else {
-                //hide panel
-                $("#rightPanelDiv").css("position", "absolute");
-                $("#rightPanelDivInner").css("display", "none");
-                var newLeft = "" + w + "px";
-                $("#rightPanelDiv").css("left", newLeft);
-                // $("#rightPanelDiv_searchIconInput").css("display", "none");
-                $("#rightPanelDiv_searchIconInput").attr("src", "./icons/oldIcons/search.png");
-            }
-        },
-        showCurrentQuery: function () {
-            $("#mainDialogDiv").html("<textarea style='width: 100%;height: 400px'>" + Sparql_proxy.currentQuery + "</textarea>");
-            $("#mainDialogDiv").dialog("open");
-        },
-        copyCurrentQuery: function () {
-            common.copyTextToClipboard(Sparql_proxy.currentQuery);
-        },
-        logout: function () {
-            // eslint-disable-next-line no-console
-            console.log("logout");
-        },
+        }
     };
+    self.onToolSelect = function (toolId, event, callback) {
+        if (event) {
+            var clickedElement = event.target;
+            // if class
+            if (clickedElement.className == "Lineage_PopUpStyleDiv") {
+                var toolId = $(clickedElement).children()[1].innerHTML;
+            } else {
+                if (clickedElement.id == "toolsSelect") {
+                    return;
+                } else if (clickedElement.innerHTML) {
+                    var toolId = clickedElement.innerHTML;
+                } else {
+                    var toolId = clickedElement.nextSibling.innerHTML;
+                }
+            }
+        }
 
+        if (self.currentTool != null) {
+            if (Config.userTools[self.currentTool].controller.unload) {
+                try {
+                    Config.userTools[self.currentTool].controller.unload();
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+        }
+        self.currentTool = toolId;
+
+        if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
+            Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
+        }
+        $("#currentToolTitle").html(toolId);
+        if (UI.currentTheme["@" + toolId + "-logo"]) {
+            $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
+        }
+        MainController.currentTool = toolId;
+        if (MainController.toolsNeedSource.includes(toolId)) {
+            if (self.currentSource == null) {
+                SourceSelectorWidget.showSourceDialog(true);
+            } else {
+                SourceSelectorWidget.initSource(self.currentSource);
+            }
+        } else {
+            self.initTool(toolId);
+            self.currentSource = null;
+        }
+
+        // set or replace tool in url params
+        const params = new URLSearchParams(document.location.search);
+        if (toolId != "ConfigEditor") {
+            params.delete("tab");
+        }
+        params.set("tool", toolId);
+        if (self.currentSource) {
+            params.set("source", self.currentSource);
+        } else {
+            params.delete("source");
+        }
+
+        window.history.replaceState(null, "", `?${params.toString()}`);
+
+        if (callback) {
+            callback();
+        }
+    };
     self.test = function () {
         //   bc.postMessage("bc")
     };
-
     self.parseUrlParam = function (callback) {
         var paramsMap = common.getUrlParamsMap();
 
@@ -434,9 +302,9 @@ var MainController = (function () {
 
                 // if tool available load it in responsive
                 if (source) {
-                    ResponsiveUI.source = source;
+                    self.currentSource = source;
                 }
-                ResponsiveUI.onToolSelect(tool);
+                MainController.onToolSelect(tool);
                 /*
                 if (window.history.pushState && url.indexOf("localhost") < 0) {
                     var url = url.substring(0, url.indexOf("?"));

@@ -28,9 +28,9 @@ var SimpleListSelectorWidget = (function () {
 
         var divId = "smallDialogDiv";
         self.divId = divId;
-        $("#" + divId).dialog("open");
 
         $("#" + divId).html(html);
+        $("#" + divId).dialog("open");
 
         if (options.title) {
             $("#" + divId).dialog("option", "title", options.title);

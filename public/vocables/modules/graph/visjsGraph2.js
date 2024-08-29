@@ -444,8 +444,8 @@ var visjsGraph = (function () {
     self.graphCsvToClipBoard = function () {
         var csv = visjsGraph.toCsv();
         common.copyTextToClipboard(csv, function (/** @type {any} */ err, /** @type {any} */ _result) {
-            if (err) MainController.UI.message(err);
-            MainController.UI.message("csv copied in system clipboard");
+            if (err) UI.message(err);
+            UI.message("csv copied in system clipboard");
         });
     };
 
@@ -779,7 +779,7 @@ var visjsGraph = (function () {
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
                 $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
-                MainController.UI.message("graph saved");
+                UI.message("graph saved");
             },
             error(err) {
                 return alert(err);
@@ -891,42 +891,43 @@ var visjsGraph = (function () {
     };
 
     self.showGraphConfig = function () {
+        $("#graphDisplay_theme").remove();
+        $("#visjsConfigureDiv").prepend(
+            "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
+                "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
+                "<option>white</option>" +
+                "<option>dark</option>" +
+                "</select></div>"
+        );
+        // these are all options in full.
+        var options = {
+            configure: {
+                enabled: true,
+                filter: "physics,layout,manipulation,renderer",
+
+                container: document.getElementById("visjsConfigureDiv"),
+                showButton: true,
+            },
+        };
+
+        visjsGraph.network.setOptions(options);
         $("#visjsConfigureDiv").dialog({
             //   autoOpen: false,
             height: 700,
             width: 550,
             modal: false,
             title: "Graph parameters",
-            position: { my: "left top", at: "right top" },
+            //position: { my: "left top", at: "right top" },
         });
-
         //    $('#graphConfigDiv').dialog("open")
-
+        /*
         setTimeout(function () {
-            // these are all options in full.
-            var options = {
-                configure: {
-                    enabled: true,
-                    filter: "physics,layout,manipulation,renderer",
-
-                    container: document.getElementById("visjsConfigureDiv"),
-                    showButton: true,
-                },
-            };
-
-            visjsGraph.network.setOptions(options);
+       
 
             setTimeout(function () {
-                $("#graphDisplay_theme").remove();
-                $("#visjsConfigureDiv").prepend(
-                    "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
-                        "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
-                        "<option>white</option>" +
-                        "<option>dark</option>" +
-                        "</select></div>"
-                );
+               
             }, 500);
-        }, 500);
+        }, 500);*/
     };
 
     return self;

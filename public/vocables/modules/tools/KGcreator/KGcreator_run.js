@@ -9,31 +9,38 @@ var KGcreator_run = (function () {
     var self = {};
     self.currentTable = null;
 
-    self.testSelectedMappings = function () {
+    self.getSelectedMappingTriplesOption = function () {
         var table = KGcreator.currentConfig.currentDataSource.currentTable;
         if (!table) {
             return alert("select a node");
         }
 
         var selectedText = KGcreator_mappings.currentMappingsSelection;
-        if (!selectedText) {
-            return;
+        if (!selectedText || selectedText.length < 10) {
+            return null;
         }
         selectedText = selectedText.replace(/[\r\n]/g, "");
+        if (selectedText.endsWith(",")) {
+            selectedText = selectedText.substring(0, selectedText.length - 2);
+        }
         selectedText = '{"' + table + '":{"tripleModels":[' + selectedText + '],"transform":{}}}';
 
         try {
             var json = JSON.parse(selectedText);
-
-            var options = { mappingsFilter: selectedText };
-            self.createTriples(true, false, options, function (err, result) {
-                if (err) {
-                    throw new Exception(err);
-                }
-            });
+            KGcreator_mappings.currentMappingsSelection = null;
+            return json;
         } catch (e) {
             return alert(e);
         }
+    };
+
+    self.testSelectedMappings = function () {
+        var mappingFilter = self.getSelectedMappingTriplesOption();
+        if (!mappingFilter) {
+            return;
+        }
+        var options = { mappingsFilter: selectedText };
+        self.createTriples(false, false, options, function (err, result) {});
         //  var triples=selectedText.split(",")
     };
 
@@ -61,7 +68,8 @@ var KGcreator_run = (function () {
         if (!options) {
             options = {};
         }
-        ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initRunTab, "#RunButton");
+
+        //UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initRunTab, "#RunButton");
         var table = self.getTableAndShowMappings(allmappings);
         if (!allmappings && !table) {
             return alert("select a node");
@@ -88,6 +96,11 @@ var KGcreator_run = (function () {
             table = null;
         }
 
+        var mappingsFilterOption = self.getSelectedMappingTriplesOption();
+        if (mappingsFilterOption) {
+            options.mappingsFilter = mappingsFilterOption;
+        }
+
         var payload = {
             source: KGcreator.currentSlsvSource,
             datasource: KGcreator.currentConfig.currentDataSource.name,
@@ -95,7 +108,7 @@ var KGcreator_run = (function () {
             options: JSON.stringify(options),
         };
 
-        MainController.UI.message("creating triples...");
+        UI.message("creating triples...");
         $.ajax({
             type: "POST",
             url: `${Config.apiUrl}/kg/triples`,
@@ -108,14 +121,16 @@ var KGcreator_run = (function () {
                     //   $("#KGcreator_infosDiv").val(str);
                     self.showTriplesInDataTable(result);
 
-                    MainController.UI.message("", true);
+                    UI.message("", true);
                 } else {
                     if (options.deleteTriples) {
                         $("#KGcreator_infosDiv").val(result.result);
-                        MainController.UI.message(result.result, true);
+                        UI.message(result.result, true);
                     } else {
-                        $("#KGcreator_infosDiv").val(result.result + " triples created in graph " + KGcreator.currentConfig.graphUri);
-                        MainController.UI.message("triples created", true);
+                        var message = result.result + " triples created in graph " + KGcreator.currentConfig.graphUri;
+                        alert(message);
+                        //  $("#KGcreator_infosDiv").val(result.result + " triples created in graph " + KGcreator.currentConfig.graphUri);
+                        UI.message(message, true);
                     }
                 }
                 if (callback) {
@@ -156,7 +171,7 @@ var KGcreator_run = (function () {
 
         /*  $("#KGcreator_triplesDataTableDiv").html(str)
           return;*/
-        Export.showDataTable("KGcreator_triplesDataTableDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {});
+        Export.showDataTable("mainDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {});
     };
 
     self.indexGraph = function (callback) {
@@ -169,7 +184,7 @@ var KGcreator_run = (function () {
         }
 
         if (callback || confirm("index source " + graphSource)) {
-            ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initRunTab, "#RunButton");
+            //UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initRunTab, "#RunButton");
             SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
                 if (err) {
                     if (callback) {
@@ -213,7 +228,7 @@ var KGcreator_run = (function () {
                 if (callback) {
                     return callback();
                 }
-                return MainController.UI.message("graph deleted " + mappings.graphUri);
+                return UI.message("graph deleted " + mappings.graphUri);
             }
         });
     };
@@ -237,7 +252,7 @@ var KGcreator_run = (function () {
             source: KGcreator.currentSlsvSource,
             tables: JSON.stringify(tables),
         };
-        MainController.UI.message("deleting KGcreator  triples...");
+        UI.message("deleting KGcreator  triples...");
         $.ajax({
             type: "DELETE",
             url: `${Config.apiUrl}/kg/triples`,
@@ -247,26 +262,26 @@ var KGcreator_run = (function () {
                 if (callback) {
                     return callback();
                 }
-                MainController.UI.message(result.result);
+                UI.message(result.result);
             },
             error: function (err) {
                 if (callback) {
                     return callback(err);
                 }
-                MainController.UI.message(err.responseText);
+                UI.message(err.responseText);
             },
         });
     };
 
     self.socketMessage = function (message) {
         //  console.log(message)
-        MainController.UI.message(message);
+        UI.message(message);
         //  $("#KGcreator_infosDiv").append(message+"\n")
     };
 
     self.stopCreateTriples = function () {
         socket.emit("KGCreator", "stopCreateTriples");
-        MainController.UI.message("import interrupted by user", true);
+        UI.message("import interrupted by user", true);
     };
 
     self.createAllMappingsTriples = function () {
@@ -278,7 +293,7 @@ var KGcreator_run = (function () {
         if (!confirm("generate KGcreator triples of datasource " + KGcreator.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
             return;
         }
-        ResponsiveUI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator_r.initRunTab, "#RunButton");
+        //UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initRunTab, "#RunButton");
         $("#KGcreator_infosDiv").val("generating KGcreator triples form all mappings ");
         async.series(
             [

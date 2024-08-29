@@ -5,7 +5,6 @@ import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import Lineage_axioms_draw from "./lineage_axioms_draw.js";
 
 var Lineage_createResource = (function () {
     var self = {};
@@ -15,10 +14,11 @@ var Lineage_createResource = (function () {
         self.currentResourceUri = null;
         self.selectedNode = Lineage_whiteboard.currentGraphNode;
         self.currentSource = Lineage_sources.activeSource;
-        $("#LineagePopup").dialog("open");
+
         $("#LineagePopup").dialog("option", "title", "Create resource in source " + self.currentSource);
 
         $("#LineagePopup").load("modules/tools/lineage/html/createResourceDialog.html", function () {
+            $("#LineagePopup").dialog("open");
             $("#editPredicate_mainDiv").remove();
             //AxiomEditor.init(Lineage_sources.activeSource)
             // $("#lineageCreateResource_labelInput").focus();
@@ -199,7 +199,7 @@ var Lineage_createResource = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            MainController.UI.message("resource Created");
+            UI.message("resource Created");
             var nodeData = {
                 id: self.currentResourceUri,
                 data: {
@@ -238,7 +238,7 @@ var Lineage_createResource = (function () {
                     if (err) {
                         return callback(err);
                     }
-                    MainController.UI.message("node Created and Indexed");
+                    UI.message("node Created and Indexed");
                 });
 
                 var modelData = {};
@@ -282,9 +282,7 @@ var Lineage_createResource = (function () {
         $("#editPredicate_objectInput").val("");
         $("#lineageCreateResource_predicateDiv").html("");
     };
-    self.drawNodeAxioms = function () {
-        Lineage_axioms_draw.drawNodeAxioms(self.currentSource, self.currentResourceUri, divId, depth, options, function (err, result) {});
-    };
+    self.drawNodeAxioms = function () {};
 
     return self;
 })();

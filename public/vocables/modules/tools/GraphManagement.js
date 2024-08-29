@@ -11,20 +11,19 @@ const GraphManagement = (function () {
         $("#accordion").accordion("option", { active: 2 });
 
         setTimeout(function () {
-            $("#mainDialogDiv").dialog("open");
-
             $("#mainDialogDiv").dialog("option", "title", "Graph Management");
-            $("#mainDialogDiv").dialog({
-                close: function (event, ui) {
-                    self.umountKGUploadApp();
-                },
+
+            $("#mainDialogDiv").on("dialogclose", function (event, ui) {
+                self.umountKGUploadApp();
             });
+
             //$("#mainDialogDiv").parent().css("left", "100px");
 
             $("#mainDialogDiv").html("");
             $("#mainDialogDiv").html(`
-                    <div id="mount-graph-management-here"></div>
+                    <div style="width:90vw;height: 90vh"><div id="mount-graph-management-here"></div></div>
             `);
+            $("#mainDialogDiv").dialog("open");
             self.umountKGUploadApp = self.createApp();
         }, 200);
     };

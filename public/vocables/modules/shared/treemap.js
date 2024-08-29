@@ -1846,11 +1846,10 @@ var TreeMap = (function () {
     };
 
     self.draw = function (data) {
-        $("#mainDialogDiv").dialog("open");
-
         $("#mainDialogDiv").load(
             "snippets/treemap.html",
             function () {
+                $("#mainDialogDiv").dialog("open");
                 var divId = d3.selectAll("#treeMapDiv")[0];
                 divId = d3.selectAll("#treeMapDiv")[0];
                 divId = "treeMapDiv";

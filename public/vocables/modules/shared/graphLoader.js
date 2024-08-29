@@ -2,7 +2,7 @@ var GraphLoader = (function () {
     var self = {};
 
     self.showImportGraphFromUriDialog = function () {
-        $("#smallDialogDiv").load("snippets/graphLoaderDialog.html");
+        $("#smallDialogDiv").load("modules/tools/admin/graphLoaderDialog.html");
         $("#smallDialogDiv").dialog("open");
     };
 
@@ -16,13 +16,13 @@ var GraphLoader = (function () {
         $("#smallDialogDiv").dialog("close");
         var options = {};
         $("#waitImg").css("display", "block");
-        MainController.UI.message("loading ontology ...");
+        UI.message("loading ontology ...");
         GraphLoader.loadGraphFromUrl(source, rdfUrl, graphUri, reload, editable, group, options, function (err, result) {
             if (err) {
                 alert(err);
                 callback(err);
             }
-            MainController.UI.message("Graph loaded", true);
+            UI.message("Graph loaded", true);
         });
     };
 
@@ -52,7 +52,7 @@ var GraphLoader = (function () {
         };
 
         $("#waitImg").css("display", "block");
-        MainController.UI.message("loading ontology and imports...");
+        UI.message("loading ontology and imports...");
 
         $.ajax({
             type: "POST",
@@ -64,11 +64,11 @@ var GraphLoader = (function () {
                 if (data.result > -1) {
                     message = "imported " + data.result + " triples";
                     MainController.loadSources(null, function (_err, _result) {
-                        MainController.UI.message(message, true);
+                        UI.message(message, true);
                         callback(null, message);
                     });
                 }
-                MainController.UI.message(message, true);
+                UI.message(message, true);
                 callback(null, message);
             },
             error(err) {

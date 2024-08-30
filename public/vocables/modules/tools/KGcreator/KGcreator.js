@@ -89,7 +89,6 @@ var KGcreator = (function () {
                     UI.resetWindowHeight();
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
-
                     });
                 });
             });
@@ -423,53 +422,51 @@ var KGcreator = (function () {
                 },
             });
             // Get SQL types when there is with api route
-            async.eachSeries(Object.entries(self.currentConfig.databaseSources),function(item,callbackEach){
-                var key=item[0];
-                var datasource=item[1];
-                $.ajax({
-                    type: "GET",
-                    url: Config.apiUrl + '/databases/'+key,
-                    dataType: "json",
-                    success: function (result, _textStatus, _jqXHR) {
-                        
-                        jstreeData.push({
-                            id: key,
-                            text: datasource.name || key,
-                            parent: "databaseSources",
-                            data: { id: datasource.name, type: "databaseSource",sqlType:result.driver },
-                        });
-                        return callbackEach();
-                        
-                    },
-                    error: function (err) {
-                        
-                        jstreeData.push({
-                            id: key,
-                            text: datasource.name || key,
-                            parent: "databaseSources",
-                            data: { id: datasource.name, type: "databaseSource" },
-                        });
-                        return callbackEach();
-                    },
-                });
-            },
-            function(err){
-                
-                for (var datasource in self.currentConfig.csvSources) {
-                    jstreeData.push({
-                        id: datasource,
-                        text: datasource,
-                        parent: "csvSources",
-                        type: "CSV",
-                        data: { id: datasource, type: "csvSource" },
+            async.eachSeries(
+                Object.entries(self.currentConfig.databaseSources),
+                function (item, callbackEach) {
+                    var key = item[0];
+                    var datasource = item[1];
+                    $.ajax({
+                        type: "GET",
+                        url: Config.apiUrl + "/databases/" + key,
+                        dataType: "json",
+                        success: function (result, _textStatus, _jqXHR) {
+                            jstreeData.push({
+                                id: key,
+                                text: datasource.name || key,
+                                parent: "databaseSources",
+                                data: { id: datasource.name, type: "databaseSource", sqlType: result.driver },
+                            });
+                            return callbackEach();
+                        },
+                        error: function (err) {
+                            jstreeData.push({
+                                id: key,
+                                text: datasource.name || key,
+                                parent: "databaseSources",
+                                data: { id: datasource.name, type: "databaseSource" },
+                            });
+                            return callbackEach();
+                        },
                     });
+                },
+                function (err) {
+                    for (var datasource in self.currentConfig.csvSources) {
+                        jstreeData.push({
+                            id: datasource,
+                            text: datasource,
+                            parent: "csvSources",
+                            type: "CSV",
+                            data: { id: datasource, type: "csvSource" },
+                        });
+                    }
+                    JstreeWidget.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
+                    if (callback) {
+                        return callback(err);
+                    }
                 }
-                JstreeWidget.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
-                if (callback) {
-                    return callback(err);
-                }
-                
-            }) ;
+            );
             /*Object.entries(self.currentConfig.databaseSources).forEach(([key, datasource]) => {
                 jstreeData.push({
                     id: key,
@@ -1049,8 +1046,8 @@ var KGcreator = (function () {
         } else if (self.currentConfig.currentDataSource.type == "databaseSource") {
             var size = 200;
             var sqlQuery = "select top  " + size + "* from " + node.data.id;
-            if(self.currentConfig.currentDataSource.sqlType=='postgres'){
-                sqlQuery="select   " + "* from public." + node.data.id +" LIMIT " + size ;
+            if (self.currentConfig.currentDataSource.sqlType == "postgres") {
+                sqlQuery = "select   " + "* from public." + node.data.id + " LIMIT " + size;
             }
             const params = new URLSearchParams({
                 type: self.currentConfig.currentDataSource.sqlType,

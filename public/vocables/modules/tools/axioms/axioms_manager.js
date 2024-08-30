@@ -1,11 +1,8 @@
-
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
-
 
 var Axioms_manager = (function () {
     var self = {};
     const conceptStr = "concept";
-
 
     self.initResourcesMap = function (source, callback) {
         self.allResourcesMap = {};
@@ -110,11 +107,11 @@ var Axioms_manager = (function () {
                     return callback(data.result);
                 }
                 rawManchesterStr = data.result;
-                UI.message("",true);
+                UI.message("", true);
                 callback(null, data.result);
             },
             error(err) {
-                UI.message("",true);
+                UI.message("", true);
                 callback(err.responseText);
             },
         });

@@ -407,7 +407,6 @@ const Axiom_editor = (function () {
         self.drawSuggestions(choices);
     };
 
-
     self.checkSyntax = function (callback) {
         var axiomText = self.getAxiomText();
         var options = {};

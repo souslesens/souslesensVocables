@@ -1,7 +1,7 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axiom_editor from "./axiom_editor.js";
 import Axioms_graph from "./axioms_graph.js";
-import Axioms_suggestions  from "./axioms_suggestions.js";
+import Axioms_suggestions from "./axioms_suggestions.js";
 
 var Axiom_activeLegend = (function () {
     var self = {};

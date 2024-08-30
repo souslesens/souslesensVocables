@@ -37,21 +37,21 @@
     <div class="editPredicatePanel" id="editPredicate_objectDiv">
         <div>
             <div class="editPredicatePanel_groupDiv">
-                     <div>
-                        <b style="font-size: 15px">Object</b>
-                    </div>
-                    <div id="editPredicate_controlsDiv" style="display: none"><b style="font-size: 15px">Object</b> &nbsp;</div>
-                    <div id="editPredicate_objectSelectDiv">
-                        <span>vocabulary</span>
-                        <select id="editPredicate_vocabularySelect2" onchange="PredicatesSelectorWidget.setCurrentVocabClassesSelect($(this).val(),'editPredicate_objectSelect')"></select>
-                        <br />
+                <div>
+                    <b style="font-size: 15px">Object</b>
+                </div>
+                <div id="editPredicate_controlsDiv" style="display: none"><b style="font-size: 15px">Object</b> &nbsp;</div>
+                <div id="editPredicate_objectSelectDiv">
+                    <span>vocabulary</span>
+                    <select id="editPredicate_vocabularySelect2" onchange="PredicatesSelectorWidget.setCurrentVocabClassesSelect($(this).val(),'editPredicate_objectSelect')"></select>
+                    <br />
 
-                        <span>choose</span>
-                        <select id="editPredicate_objectSelect" onchange="PredicatesSelectorWidget.onSelectCurrentVocabObject($(this).val())"></select>
-                        <br />
-                    </div>
-                <textarea id="editPredicate_objectValue" class="edit-Predicate-value-chosen" style="width: 95%; border-radius: 10px;display: none;"></textarea>
-               
+                    <span>choose</span>
+                    <select id="editPredicate_objectSelect" onchange="PredicatesSelectorWidget.onSelectCurrentVocabObject($(this).val())"></select>
+                    <br />
+                </div>
+                <textarea id="editPredicate_objectValue" class="edit-Predicate-value-chosen" style="width: 95%; border-radius: 10px; display: none"></textarea>
+
                 <div id="editPredicate_customContentDiv"></div>
                 <select
                     class="w3-button slsv-right-top-bar-button nodesInfos-jquerybuttons"

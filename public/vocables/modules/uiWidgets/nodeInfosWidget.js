@@ -25,7 +25,7 @@ var NodeInfosWidget = (function () {
         }
         $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
             $("#addPredicateButton").remove();
-            $("#deleteButton").remove()
+            $("#deleteButton").remove();
             $("#" + divId).dialog("open");
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
@@ -169,7 +169,7 @@ var NodeInfosWidget = (function () {
 
                 function (callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
-                        $('#nodeInfos_restrictionsDiv').hide()
+                        $("#nodeInfos_restrictionsDiv").hide();
                         return callbackSeries();
                     }
 
@@ -179,7 +179,7 @@ var NodeInfosWidget = (function () {
                 },
                 function (callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
-                        $('#nodeInfos_associatedPropertiesDiv').hide()
+                        $("#nodeInfos_associatedPropertiesDiv").hide();
                         return callbackSeries();
                     }
                     self.showAssociatedProperties(self.currentNodeRealSource, nodeId, "nodeInfos_associatedPropertiesDiv", function (err) {
@@ -251,7 +251,7 @@ var NodeInfosWidget = (function () {
         $("#editPredicate_savePredicateButton").off("click");
         $("#editPredicate_savePredicateButton").click(function () {
             PredicatesSelectorWidget.storeRecentPredicates();
-            self.addPredicate(null,null,null,null,function(){
+            self.addPredicate(null, null, null, null, function () {
                 PredicatesSelectorWidget.fillSelectRecentEditPredicate();
             });
         });
@@ -474,7 +474,7 @@ defaultLang = 'en';*/
                             }
                             valuesStr += value + optionalStr;
                         });
-                        str += "<td class='detailsCellValue'><div class='detailsCellValueContent'>" +valuesStr + "</div></td>";
+                        str += "<td class='detailsCellValue'><div class='detailsCellValueContent'>" + valuesStr + "</div></td>";
                         str += "</tr>";
                     } else {
                         // manage lang
@@ -554,7 +554,7 @@ defaultLang = 'en';*/
     self.showClassRestrictions = function (sourceLabel, nodeId, _options, callback) {
         // blankNodes.
         var str = "";
-        var isResult=false;
+        var isResult = false;
         async.series(
             [
                 //direct restrictions
@@ -563,8 +563,8 @@ defaultLang = 'en';*/
                         if (err) {
                             return callbackSeries(err);
                         }
-                        if(result.length>0){
-                            isResult=true;
+                        if (result.length > 0) {
+                            isResult = true;
                         }
                         str = "<b class='nodesInfos_titles'>Restrictions </b> <div style=''> <table style='display:table-caption'>";
 
@@ -620,8 +620,8 @@ defaultLang = 'en';*/
                             if (err) {
                                 return callbackSeries(err);
                             }
-                            if(result.length>0){
-                                isResult=true;
+                            if (result.length > 0) {
+                                isResult = true;
                             }
 
                             str += "<br><b class='nodesInfos_titles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table >";
@@ -670,14 +670,12 @@ defaultLang = 'en';*/
             ],
             function (err) {
                 if (!err) {
-                    if(isResult){
+                    if (isResult) {
                         $("#nodeInfos_restrictionsDiv").show();
                         $("#nodeInfos_restrictionsDiv").html(str);
-                    }
-                    else{
+                    } else {
                         $("#nodeInfos_restrictionsDiv").hide();
                     }
-                    
                 }
                 return callback(err);
             }
@@ -752,11 +750,10 @@ defaultLang = 'en';*/
 
                 str += "</tr>";
             });
-            if(result.length==0){
+            if (result.length == 0) {
                 $("#" + divId).show();
                 $("#" + divId).append(str);
-            }
-            else{
+            } else {
                 $("#" + divId).hide();
             }
 
@@ -802,11 +799,11 @@ defaultLang = 'en';*/
                 });
             }
             if (html) {
-                $('#'+divId).show();
+                $("#" + divId).show();
                 $("#" + divId).append(html);
                 $("#" + divId).css("display", "table-caption");
-            }else{
-                $('#'+divId).hide();
+            } else {
+                $("#" + divId).hide();
             }
         }
         if (callback) {
@@ -882,13 +879,13 @@ defaultLang = 'en';*/
                 }
             },
         };
-        if(jstreeData.length==0){
-            $('#nodeInfos_classHierarchyDiv').hide();
+        if (jstreeData.length == 0) {
+            $("#nodeInfos_classHierarchyDiv").hide();
             return;
-        }else{
-            $('#classHierarchyTreeDiv').show();
+        } else {
+            $("#classHierarchyTreeDiv").show();
         }
-        
+
         JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
 
         callback();
@@ -960,13 +957,13 @@ defaultLang = 'en';*/
                 }
             },
         };
-        if(jstreeData.length==0){
-            $('#nodeInfos_classHierarchyDiv').hide();
+        if (jstreeData.length == 0) {
+            $("#nodeInfos_classHierarchyDiv").hide();
             return;
-        }else{
-            $('#classHierarchyTreeDiv').show();
+        } else {
+            $("#classHierarchyTreeDiv").show();
         }
-        
+
         JstreeWidget.loadJsTree("classHierarchyTreeDiv", jstreeData, options);
 
         callback();
@@ -1004,8 +1001,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             // value = $("#editPredicate_objectValue").val().trim();
             value = PredicatesSelectorWidget.getSelectedObjectValue();
         }
-     
-        
+
         if (!property || !value) {
             return alert("enter property and value");
         }
@@ -1076,7 +1072,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         }
     };
 
-    self.deletePredicate = function (predicateId,callback) {
+    self.deletePredicate = function (predicateId, callback) {
         var currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         var property = currentEditingItem.item.prop.value;
         if (confirm("delete predicate")) {
@@ -1127,7 +1123,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
                         Lineage_whiteboard.deleteEdge(self.currentNodeId, value, property);
                     }
-                    if(callback){
+                    if (callback) {
                         callback();
                     }
                 }
@@ -1285,61 +1281,54 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         });
     };
     self.showModifyPredicateDialog = function (predicateId) {
-        
-        $('#editPredicate_propertyDiv').hide();
-        $('#editPredicate_recentSelect').hide();
-        editPredicate_recentSelect
+        $("#editPredicate_propertyDiv").hide();
+        $("#editPredicate_recentSelect").hide();
+        editPredicate_recentSelect;
         PredicatesSelectorWidget.currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         if (!PredicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
-       
+
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
-            
-            if(PredicatesSelectorWidget.currentEditingItem.item.value.type!='uri'){
+            if (PredicatesSelectorWidget.currentEditingItem.item.value.type != "uri") {
                 //hide both
                 self.setLargerObjectTextArea();
-                $('#editPredicate_objectSelectDiv').hide();
-                $('#editPredicate_largerTextButton').hide();
-            }else{
-                $('#editPredicate_objectSelectDiv').show();
-                $('#editPredicate_largerTextButton').show();
-                $('#editPredicate_objectValue').hide();
-               var vocab= common.getVocabularyFromURI(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-               if(vocab){
-                    $('#editPredicate_vocabularySelect').val(vocab[0])
-                    PredicatesSelectorWidget.setCurrentVocabPropertiesSelect(vocab[0],'editPredicate_currentVocabPredicateSelect',function(){
-                        $('#editPredicate_currentVocabPredicateSelect').val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
-                        $('#editPredicate_propertyValue').val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
+                $("#editPredicate_objectSelectDiv").hide();
+                $("#editPredicate_largerTextButton").hide();
+            } else {
+                $("#editPredicate_objectSelectDiv").show();
+                $("#editPredicate_largerTextButton").show();
+                $("#editPredicate_objectValue").hide();
+                var vocab = common.getVocabularyFromURI(PredicatesSelectorWidget.currentEditingItem.item.value.value);
+                if (vocab) {
+                    $("#editPredicate_vocabularySelect").val(vocab[0]);
+                    PredicatesSelectorWidget.setCurrentVocabPropertiesSelect(vocab[0], "editPredicate_currentVocabPredicateSelect", function () {
+                        $("#editPredicate_currentVocabPredicateSelect").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
+                        $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
                         //PredicatesSelectorWidget.onSelectPredicateProperty($('#editPredicate_currentVocabPredicateSelect').val());
                     });
-                
-                    $('#editPredicate_vocabularySelect2').val(vocab[0])
-                    PredicatesSelectorWidget.setCurrentVocabClassesSelect(vocab[0],'editPredicate_objectSelect',function(){
-                        $('#editPredicate_objectSelect').val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-                        PredicatesSelectorWidget.onSelectCurrentVocabObject(PredicatesSelectorWidget.currentEditingItem.item.value.value); 
+
+                    $("#editPredicate_vocabularySelect2").val(vocab[0]);
+                    PredicatesSelectorWidget.setCurrentVocabClassesSelect(vocab[0], "editPredicate_objectSelect", function () {
+                        $("#editPredicate_objectSelect").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
+                        PredicatesSelectorWidget.onSelectCurrentVocabObject(PredicatesSelectorWidget.currentEditingItem.item.value.value);
                     });
-                    
-               }
+                }
             }
-   
+
             $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-            $('#editPredicate_propertyValue').val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
+            $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
             $("#editPredicate_objectValue").focus();
             $("#editPredicate_savePredicateButton").click(function () {
                 PredicatesSelectorWidget.storeRecentPredicates();
-                
-                self.deletePredicate(predicateId,function(){
-                    self.addPredicate(null,null,null,null,function(){
-                        self.showNodeInfos(MainController.currentSource,self.currentNode,"mainDialogDiv", { resetVisited: 1 });
+
+                self.deletePredicate(predicateId, function () {
+                    self.addPredicate(null, null, null, null, function () {
+                        self.showNodeInfos(MainController.currentSource, self.currentNode, "mainDialogDiv", { resetVisited: 1 });
                     });
                 });
-              
-               
             });
         });
-
-        
     };
 
     self.hideAddPredicateDiv = function () {
@@ -1449,11 +1438,12 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
     self.setLargerObjectTextArea = function () {
         $("#editPredicate_objectValue").show();
-        //$("#editPredicate_selectsDiv").hide();
+        $("#editPredicate_largerTextButton").hide();
+        //  $("#editPredicate_objectValue").hide();
         $("#editPredicate_objectValue").css("width", "700px");
         $("#editPredicate_objectValue").css("height", "130px");
     };
-    
+
     return self;
 })();
 

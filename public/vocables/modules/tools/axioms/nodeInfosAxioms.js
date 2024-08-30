@@ -5,7 +5,6 @@ import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 import axioms_graph from "./axioms_graph.js";
 import Axiom_activeLegend from "./axiom_activeLegend.js";
 
-
 var NodeInfosAxioms = (function () {
     var self = {};
 
@@ -15,7 +14,7 @@ var NodeInfosAxioms = (function () {
         self.allClassesMap = {};
 
         $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
-            $("#"+divId).dialog("open");
+            $("#" + divId).dialog("open");
             Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv");
             Axioms_manager.initResourcesMap(self.currentSource, function (err, result) {
                 // used do draw graph

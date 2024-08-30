@@ -28,18 +28,14 @@ th, td{
     background-color: @dark-background-color !important;
     border-radius: 14px;
     /*max-height: 90vh;*/
-   
 }
 .detailsCellValue {
     .font-table;
     padding: 2px;
     border-radius: 3px;
     background-color: white;
-    
-    
 }
-.detailsCellValueContent{
-    
+.detailsCellValueContent {
     line-height: 1.8;
     max-height: 100px;
     overflow: auto;
@@ -51,8 +47,7 @@ th, td{
     .font-table;
     background-color: @background-color !important;
     width: fit-content;
-    padding:3px 3px;
-    
+    padding: 3px 3px;
 }
 
 .NodesInfos_CardId {
@@ -217,7 +212,7 @@ a:visited.ui-button,
 }
 
 .edit-Predicate-value-chosen {
-    font:unset;
+    font: unset;
     .small-font;
     font-weight: normal;
     width: 95%;

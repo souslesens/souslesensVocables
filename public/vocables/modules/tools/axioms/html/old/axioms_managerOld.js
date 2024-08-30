@@ -13,7 +13,6 @@ var Axioms_manager = (function () {
     var self = {};
     const conceptStr = "concept";
 
-
     self.initResourcesMap = function (source, callback) {
         self.allResourcesMap = {};
         self.getAllClasses(source, function (err, result) {
@@ -98,9 +97,6 @@ var Axioms_manager = (function () {
             return self.allProperties;
         }
     };
-
-
-
 
     self.saveAxiom = function (source, axiomType, nodeUri, triples, callback) {
         var sourceGraphUri = Config.sources[source].graphUri;
@@ -237,11 +233,11 @@ var Axioms_manager = (function () {
                     return callback(data.result);
                 }
                 rawManchesterStr = data.result;
-                UI.message("",true);
+                UI.message("", true);
                 callback(null, data.result);
             },
             error(err) {
-                UI.message("",true);
+                UI.message("", true);
                 callback(err.responseText);
             },
         });
@@ -341,16 +337,7 @@ var Axioms_manager = (function () {
                             } else {
                                 cssClass = "axiom_Property";
                             }
-                            axiomText = axiomText.replace(
-                                uri,
-                                "<span class='" +
-                                    cssClass +
-                                    "' " +
-
-                                    ">" +
-                                    resource.label +
-                                    "</span>"
-                            );
+                            axiomText = axiomText.replace(uri, "<span class='" + cssClass + "' " + ">" + resource.label + "</span>");
                         }
                     }
 

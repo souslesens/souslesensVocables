@@ -1,11 +1,10 @@
 import Axioms_manager from "./axioms_manager.js";
-import Axiom_editor from "./axiom_editor.js";
-import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+
 import Axioms_graph from "./axioms_graph.js";
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 import axioms_graph from "./axioms_graph.js";
-import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 import Axiom_activeLegend from "./axiom_activeLegend.js";
+
 
 var NodeInfosAxioms = (function () {
     var self = {};
@@ -16,9 +15,9 @@ var NodeInfosAxioms = (function () {
         self.allClassesMap = {};
 
         $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
-            $("#mainDialogDiv").dialog("open");
+            $("#"+divId).dialog("open");
             Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv");
-            Axiom_editor.initResourcesMap(self.currentSource, function (err, result) {
+            Axioms_manager.initResourcesMap(self.currentSource, function (err, result) {
                 // used do draw graph
                 self.initSourceClassesMap(self.currentSource, function (err, result) {
                     //used to parse manchester
@@ -249,7 +248,7 @@ var NodeInfosAxioms = (function () {
         self.currentResource = resource;
         self.allClassesMap = {};
         $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
-            Axiom_editor.initResourcesMap(self.currentSource, function (err, result) {
+            Axiom_manager.initResourcesMap(self.currentSource, function (err, result) {
                 // used do draw graph
                 self.initSourceClassesMap(self.currentSource, function (err, result) {
                     //used to parse manchester

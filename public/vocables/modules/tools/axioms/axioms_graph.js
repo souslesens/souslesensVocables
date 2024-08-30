@@ -1,6 +1,6 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axiom_editor from "./axiom_editor.js";
-import Axiom_activeLegend from "./axiom_activeLegend.js";
+
 
 /*
 restriction	objectPropertyExpression some primary	ObjectSomeValuesFrom(T(objectPropertyExpression) T(primary))

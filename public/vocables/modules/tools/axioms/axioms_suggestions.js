@@ -1,4 +1,5 @@
 import Axiom_editor from "./axiom_editor.js";
+import Axioms_manager from "./axioms_manager.js";
 
 var Axioms_suggestions = (function () {
     var self = {};
@@ -87,7 +88,7 @@ var Axioms_suggestions = (function () {
                     var classId = Axiom_editor.axiomContext.classes[index];
                     if (!classId || allObjectProperties) {
                         var props = [];
-                        Axiom_editor.getAllProperties().forEach(function (item) {
+                        Axioms_manager.getAllProperties().forEach(function (item) {
                             if (item.resourceType == "ObjectProperty") {
                                 props.push(item);
                             }
@@ -115,7 +116,7 @@ var Axioms_suggestions = (function () {
 
                     if (!propId || allClasses) {
                         var classes = [];
-                        Axiom_editor.getAllClasses().forEach(function (item) {
+                        Axioms_manager.getAllClasses().forEach(function (item) {
                             if (item.resourceType == "Class") {
                                 classes.push(item);
                             }

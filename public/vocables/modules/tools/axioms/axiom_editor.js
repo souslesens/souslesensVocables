@@ -107,7 +107,93 @@ const Axiom_editor = (function () {
             if (callback) return callback(err, result);
         });
     };
+    self.getAllClasses = function (source, callback) {
+        if (!source) {
+            source = self.currentSource;
+        }
+        if (!self.allClasses) {
+            CommonBotFunctions.listSourceAllClasses(source, null, false, [], function (err, result) {
+                if (err) {
+                    return callback(err.responseText);
+                }
+                self.allClasses = [];
+                var uniqueIds = {};
+                result.forEach(function (item) {
+                    if (!uniqueIds[item.id]) {
+                        uniqueIds[item.id] = 1;
+                        item.label = item.label.replace(/ /g, "_");
+                        item.resourceType = "Class";
+                        self.allClasses.push(item);
+                    }
+                });
+                common.array.sort(self.allClasses, "label");
+                if (callback) {
+                    return callback(null, self.allClasses);
+                }
+                return self.allClasses;
+            });
+        } else {
+            if (callback) {
+                return callback(null, self.allClasses);
+            }
+            return self.allClasses;
+        }
+    };
+    self.getAllProperties = function (source, callback) {
+        if (!source) source = self.currentSource;
 
+        if (!self.allProperties) {
+            CommonBotFunctions.listSourceAllObjectProperties(source, null, false, function (err, result) {
+                if (err) {
+                    return callback(err.responseText);
+                }
+                self.allProperties = [];
+                var uniqueIds = {};
+                result.forEach(function (item) {
+                    if (!uniqueIds[item.id]) {
+                        uniqueIds[item.id] = 1;
+
+                        item.label = item.label.replace(/ /g, "_");
+                        item.resourceType = "ObjectProperty";
+                        self.allProperties.push(item);
+                    }
+                });
+                common.array.sort(self.allProperties, "label");
+                if (callback) {
+                    return callback(null, self.allProperties);
+                }
+                return self.allProperties;
+            });
+        } else {
+            if (callback) {
+                return callback(null, self.allProperties);
+            }
+            return self.allProperties;
+        }
+    };
+
+    self.drawSuggestions = function (data) {
+        common.fillSelectOptions("axiomsEditor_suggestionsSelect", data, false, "label", "id");
+
+        $("#axiomsEditor_suggestionsSelect  option").each(function () {
+            var id = $(this).val();
+            var color = "";
+
+            var resource = self.allResourcesMap[id];
+            if (resource && resource.resourceType == "Class") {
+                color = Axiom_editor.classColor;
+            } else if (resource && resource.resourceType == "ObjectProperty") {
+                color = Axiom_editor.propertyColor;
+            } else {
+                color = Axiom_editor.keywordColor;
+            }
+
+            $(this).css("color", color);
+        });
+        setTimeout(function () {
+            $("#axiomsEditor_suggestionsSelect option:first").focus();
+        }, 200);
+    };
     self.setCurrentResource = function (resourceNode) {
         self.currentNode = resourceNode;
         self.clearAll();
@@ -321,94 +407,6 @@ const Axiom_editor = (function () {
         self.drawSuggestions(choices);
     };
 
-    self.getAllClasses = function (source, callback) {
-        if (!source) {
-            source = self.currentSource;
-        }
-        if (!self.allClasses) {
-            CommonBotFunctions.listSourceAllClasses(source, null, false, [], function (err, result) {
-                if (err) {
-                    return callback(err.responseText);
-                }
-                self.allClasses = [];
-                var uniqueIds = {};
-                result.forEach(function (item) {
-                    if (!uniqueIds[item.id]) {
-                        uniqueIds[item.id] = 1;
-                        item.label = item.label.replace(/ /g, "_");
-                        item.resourceType = "Class";
-                        self.allClasses.push(item);
-                    }
-                });
-                common.array.sort(self.allClasses, "label");
-                if (callback) {
-                    return callback(null, self.allClasses);
-                }
-                return self.allClasses;
-            });
-        } else {
-            if (callback) {
-                return callback(null, self.allClasses);
-            }
-            return self.allClasses;
-        }
-    };
-
-    self.drawSuggestions = function (data) {
-        common.fillSelectOptions("axiomsEditor_suggestionsSelect", data, false, "label", "id");
-
-        $("#axiomsEditor_suggestionsSelect  option").each(function () {
-            var id = $(this).val();
-            var color = "";
-
-            var resource = self.allResourcesMap[id];
-            if (resource && resource.resourceType == "Class") {
-                color = Axiom_editor.classColor;
-            } else if (resource && resource.resourceType == "ObjectProperty") {
-                color = Axiom_editor.propertyColor;
-            } else {
-                color = Axiom_editor.keywordColor;
-            }
-
-            $(this).css("color", color);
-        });
-        setTimeout(function () {
-            $("#axiomsEditor_suggestionsSelect option:first").focus();
-        }, 200);
-    };
-
-    self.getAllProperties = function (source, callback) {
-        if (!source) source = self.currentSource;
-
-        if (!self.allProperties) {
-            CommonBotFunctions.listSourceAllObjectProperties(source, null, false, function (err, result) {
-                if (err) {
-                    return callback(err.responseText);
-                }
-                self.allProperties = [];
-                var uniqueIds = {};
-                result.forEach(function (item) {
-                    if (!uniqueIds[item.id]) {
-                        uniqueIds[item.id] = 1;
-
-                        item.label = item.label.replace(/ /g, "_");
-                        item.resourceType = "ObjectProperty";
-                        self.allProperties.push(item);
-                    }
-                });
-                common.array.sort(self.allProperties, "label");
-                if (callback) {
-                    return callback(null, self.allProperties);
-                }
-                return self.allProperties;
-            });
-        } else {
-            if (callback) {
-                return callback(null, self.allProperties);
-            }
-            return self.allProperties;
-        }
-    };
 
     self.checkSyntax = function (callback) {
         var axiomText = self.getAxiomText();

@@ -1,6 +1,7 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axiom_editor from "./axiom_editor.js";
 import Axioms_graph from "./axioms_graph.js";
+import Axioms_suggestions  from "./axioms_suggestions.js";
 
 var Axiom_activeLegend = (function () {
     var self = {};
@@ -48,7 +49,7 @@ var Axiom_activeLegend = (function () {
                         self.setSuggestionsSelect(classes, true);
                     });
                 } else {
-                    var classes = Axiom_editor.getAllClasses();
+                    var classes = Axiom_manager.getAllClasses();
                     self.setSuggestionsSelect(classes, true);
                 }
             } else if (node.data.type == "ObjectProperty") {
@@ -63,7 +64,7 @@ var Axiom_activeLegend = (function () {
                         self.setSuggestionsSelect(properties, true);
                     });
                 } else {
-                    var properties = Axiom_editor.getAllProperties();
+                    var properties = Axiom_manager.getAllProperties();
                     self.setSuggestionsSelect(properties, true);
                 }
             } else if (node.data.type == "Restriction") {
@@ -182,10 +183,10 @@ var Axiom_activeLegend = (function () {
                 predicates: [],
             };
         } else if (nodeType == "Class") {
-            newResource = Axiom_editor.allResourcesMap[resourceUri];
+            newResource = Axiom_manager.allResourcesMap[resourceUri];
             self.currentClass = newResource;
         } else if (nodeType == "ObjectProperty") {
-            newResource = Axiom_editor.allResourcesMap[resourceUri];
+            newResource = Axiom_manager.allResourcesMap[resourceUri];
             self.currentObjectProperty = newResource;
         } else {
             var subType = null;
@@ -400,7 +401,7 @@ var Axiom_activeLegend = (function () {
             Axiom_activeLegend.hideForbiddenResources("" + node.data.type);
             if (nodeEvent.ctrlKey) {
                 if (node.data.type.indexOf("Class") > -1 || node.data.type.indexOf("ObjectProperty") > -1) {
-                    NodeInfosWidget.showNodeInfos(Axiom_editor.currentSource, node, "mainDialogDiv");
+                    NodeInfosWidget.showNodeInfos(NodeInfosAxioms.currentSource, node, "mainDialogDiv");
                 }
             }
         } else {

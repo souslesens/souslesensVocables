@@ -201,14 +201,18 @@ var PredicatesSelectorWidget = (function () {
                     vocabulary=$('#editPredicate_currentVocabPredicateSelect').val().split(':')[0];
                     if(Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties){
                         Object.values(Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties).forEach(function(nonObjectProp){
-                            if(nonObjectProp.label==$('#editPredicate_currentVocabPredicateSelect').val().split(':')[1]){
-                                NodeInfosWidget.setLargerObjectTextArea();
-                            }
+                           //if(!Config.ontologiesVocabularyModels[vocabulary]?.properties[nonObjectProp.id]){
+                                if(nonObjectProp.label==$('#editPredicate_currentVocabPredicateSelect').val().split(':')[1]){
+                                    NodeInfosWidget.setLargerObjectTextArea();
+                                }
+                           //}
+                            
                         });
                     }
                 }
             }
             // is Datatype or anotation property
+            //if(Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties[value] && !Config.ontologiesVocabularyModels[vocabulary]?.properties[value]){
             if(Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties[value]){
                 NodeInfosWidget.setLargerObjectTextArea();
             }

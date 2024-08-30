@@ -1293,13 +1293,42 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         if (!PredicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
+       
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
-            //if is nonObjectProperty predicate only
-            self.setLargerObjectTextArea();
+            
+            if(PredicatesSelectorWidget.currentEditingItem.item.value.type!='uri'){
+                //hide both
+                self.setLargerObjectTextArea();
+                $('#editPredicate_objectSelectDiv').hide();
+                $('#editPredicate_largerTextButton').hide();
+            }else{
+                $('#editPredicate_objectSelectDiv').show();
+                $('#editPredicate_largerTextButton').show();
+                $('#editPredicate_objectValue').hide();
+               var vocab= common.getVocabularyFromURI(PredicatesSelectorWidget.currentEditingItem.item.value.value);
+               if(vocab){
+                    $('#editPredicate_vocabularySelect').val(vocab[0])
+                    PredicatesSelectorWidget.setCurrentVocabPropertiesSelect(vocab[0],'editPredicate_currentVocabPredicateSelect',function(){
+                        $('#editPredicate_currentVocabPredicateSelect').val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
+                        $('#editPredicate_propertyValue').val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
+                        //PredicatesSelectorWidget.onSelectPredicateProperty($('#editPredicate_currentVocabPredicateSelect').val());
+                    });
+                
+                    $('#editPredicate_vocabularySelect2').val(vocab[0])
+                    PredicatesSelectorWidget.setCurrentVocabClassesSelect(vocab[0],'editPredicate_objectSelect',function(){
+                        $('#editPredicate_objectSelect').val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
+                        PredicatesSelectorWidget.onSelectCurrentVocabObject(PredicatesSelectorWidget.currentEditingItem.item.value.value); 
+                    });
+                    
+               }
+            }
+   
+            $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
+            $('#editPredicate_propertyValue').val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
+            $("#editPredicate_objectValue").focus();
             $("#editPredicate_savePredicateButton").click(function () {
-                //PredicatesSelectorWidget.storeRecentPredicates();
-                /*$('#editPredicatePanel').show();
-                $('#editPredicate_recentSelect').show();*/
+                PredicatesSelectorWidget.storeRecentPredicates();
+                
                 self.deletePredicate(predicateId,function(){
                     self.addPredicate(null,null,null,null,function(){
                         self.showNodeInfos(MainController.currentSource,self.currentNode,"mainDialogDiv", { resetVisited: 1 });
@@ -1310,12 +1339,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             });
         });
 
-        $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
-        $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
-        var h = Math.max((PredicatesSelectorWidget.currentEditingItem.item.value.value.length / 80) * 30, 50);
-        $("#editPredicate_objectValue").css("height", h + "px");
-
-        $("#editPredicate_objectValue").focus();
+        
     };
 
     self.hideAddPredicateDiv = function () {

@@ -11,6 +11,7 @@
  */
 
 const { userModel } = require("../model/users");
+const { profileModel } = require("../model/profiles");
 
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -51,6 +52,42 @@ const getUserAccount = async (source, username) => {
     return accountWithoutType;
 };
 
+const fetchAccessTokenFromAPI = async (domain, clientID, clientSecret) => {
+    const response = await fetch(
+        `https://${domain}/oauth/token`, {
+            body: new URLSearchParams({
+                grant_type: "client_credentials",
+                client_id: clientID,
+                client_secret: clientSecret,
+                audience: `https://${domain}/api/v2/`,
+            }),
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            method: "POST",
+            redirect: "follow",
+        }
+    );
+
+    const data = await response.json();
+    return data.access_token || undefined;
+};
+
+const fetchUserRolesFromAPI = async (domain, userID, accessToken) => {
+    const response = await fetch(
+        `https://${domain}/api/v2/users/${userID}/roles`, {
+            headers: {
+                "Accept": "application/json",
+                "Authorization": `Bearer ${accessToken}`,
+            },
+            method: "GET",
+        }
+    );
+
+    const data = await response.json();
+    return data;
+};
+
 if (config.auth == "keycloak") {
     passport.use(
         "keycloak",
@@ -82,8 +119,29 @@ if (config.auth == "keycloak") {
                 scope: config.auth0.scope,
                 sslRequired: "external",
             },
-            async function(_idToken, _refreshToken, _response, profile, done) {
+            async function(_accessToken, _refreshToken, response, profile, done) {
+                const accessToken = await fetchAccessTokenFromAPI(
+                    config.auth0.domain,
+                    config.auth0.api.clientID || config.auth0.clientID,
+                    config.auth0.api.clientSecret || config.auth0.clientSecret,
+                )
+
+                const roles = await fetchUserRolesFromAPI(
+                    config.auth0.domain,
+                    profile.user_id,
+                    accessToken,
+                );
+
+                const available_groups = Object.keys(await profileModel.getAllProfiles());
+
+                const groups = roles
+                    .filter((role) => available_groups.includes(role.name))
+                    .map((role) => role.name);
+
                 const userAccount = await getUserAccount("auth0", profile._json.nickname);
+                userAccount.groups = groups;
+                userModel.updateUserAccount(userAccount);
+
                 done(null, userAccount);
             },
         )

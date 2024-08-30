@@ -68,7 +68,7 @@ function cleanUpText(original: unknown): string {
 }
 
 function jsonToDownloadUrl(json: unknown): string {
-    const content = JSON.stringify(json);
+    const content = JSON.stringify(json, undefined, 2);
     const file = new Blob([content], { type: "application/json" });
     return URL.createObjectURL(file);
 }

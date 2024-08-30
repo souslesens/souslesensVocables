@@ -33,6 +33,10 @@
         "clientID": "xxx",
         "clientSecret": "xxx",
         "scope": "openid email profile",
+        "api": {
+            "clientID": "",
+            "clientSecret": ""
+        }
     },
     "keycloak": {
         "realm": "master",

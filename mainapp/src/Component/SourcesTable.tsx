@@ -1,8 +1,36 @@
-import * as Mui from "@mui/material";
-import * as MuiColors from "@mui/material/colors";
-import * as MuiIcons from "@mui/icons-material";
-import * as React from "react";
-import * as z from "zod";
+import { Fragment, useState, useMemo, useReducer, ChangeEvent, useEffect, Dispatch } from "react";
+import {
+    Autocomplete,
+    Box,
+    Button,
+    Checkbox,
+    Chip,
+    CircularProgress,
+    FormControl,
+    FormControlLabel,
+    Grid,
+    IconButton,
+    InputAdornment,
+    InputLabel,
+    Link,
+    MenuItem,
+    Modal,
+    Paper,
+    Select,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TableSortLabel,
+    TextField,
+    Tooltip,
+} from "@mui/material";
+import { green, pink, grey } from "@mui/material/colors";
+import { Add, Circle, Remove } from "@mui/icons-material";
+import { z } from "zod";
 
 import CsvDownloader from "react-csv-downloader";
 import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
@@ -21,9 +49,9 @@ import { errorMessage } from "./errorMessage";
 
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
-    const [filteringChars, setFilteringChars] = React.useState("");
-    const [orderBy, setOrderBy] = React.useState<keyof ServerSource>("name");
-    const [order, setOrder] = React.useState<Order>("asc");
+    const [filteringChars, setFilteringChars] = useState("");
+    const [orderBy, setOrderBy] = useState<keyof ServerSource>("name");
+    const [order, setOrder] = useState<Order>("asc");
     type Order = "asc" | "desc";
     function handleRequestSort(property: keyof ServerSource) {
         const isAsc = orderBy === property && order === "asc";
@@ -44,14 +72,14 @@ const SourcesTable = () => {
         {
             notAsked: () => <p>Let&apos;s fetch some data!</p>,
             loading: () => (
-                <Mui.Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <Mui.CircularProgress />
-                </Mui.Box>
+                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                    <CircularProgress />
+                </Box>
             ),
             failure: (msg: string) => (
-                <Mui.Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
-                </Mui.Box>
+                </Box>
             ),
             success: (gotSources: ServerSource[]) => {
                 const datas = gotSources.map((source) => {
@@ -89,47 +117,47 @@ const SourcesTable = () => {
                 });
 
                 return (
-                    <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <Mui.TextField
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                        <TextField
                             label="Search Sources by name"
                             id="search-sources"
                             onChange={(event) => {
                                 setFilteringChars(event.target.value);
                             }}
                         />
-                        <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
-                            <Mui.Table stickyHeader>
-                                <Mui.TableHead>
-                                    <Mui.TableRow>
-                                        <Mui.TableCell style={{ fontWeight: "bold" }}>
-                                            <Mui.TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                        <TableContainer sx={{ height: "400px" }} component={Paper}>
+                            <Table stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
                                                 Name
-                                            </Mui.TableSortLabel>
-                                        </Mui.TableCell>
-                                        <Mui.TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                            <Mui.TableSortLabel active={orderBy === "graphUri"} direction={order} onClick={() => handleRequestSort("graphUri")}>
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                            <TableSortLabel active={orderBy === "graphUri"} direction={order} onClick={() => handleRequestSort("graphUri")}>
                                                 Graph URI
-                                            </Mui.TableSortLabel>
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
-                                            <Mui.TableSortLabel active={orderBy === "graphSize"} direction={order} onClick={() => handleRequestSort("graphSize")}>
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                            <TableSortLabel active={orderBy === "graphSize"} direction={order} onClick={() => handleRequestSort("graphSize")}>
                                                 Graph size
-                                            </Mui.TableSortLabel>
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            <Mui.TableSortLabel active={orderBy === "group"} direction={order} onClick={() => handleRequestSort("group")}>
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "group"} direction={order} onClick={() => handleRequestSort("group")}>
                                                 Group
-                                            </Mui.TableSortLabel>
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
                                             Data
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
                                             Actions
-                                        </Mui.TableCell>
-                                    </Mui.TableRow>
-                                </Mui.TableHead>
-                                <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                        </TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedSources
                                         .filter((source) => cleanUpText(source.name).includes(cleanUpText(filteringChars)))
                                         .map((source) => {
@@ -138,37 +166,37 @@ const SourcesTable = () => {
                                             const haveGraphs = graphInfo !== undefined;
 
                                             return (
-                                                <Mui.TableRow key={source.name}>
-                                                    <Mui.TableCell>{source.name}</Mui.TableCell>
-                                                    <Mui.TableCell>
-                                                        <Mui.Link href={source.graphUri}>{source.graphUri}</Mui.Link>
-                                                    </Mui.TableCell>
-                                                    <Mui.TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</Mui.TableCell>
-                                                    <Mui.TableCell align="center">{source.group ? <Mui.Chip label={source.group} size="small" /> : ""}</Mui.TableCell>
-                                                    <Mui.TableCell align="center">
-                                                        <Mui.Stack direction="row" justifyContent="center" useFlexGap>
-                                                            <Mui.Tooltip title="RDF Graph">
-                                                                <MuiIcons.Circle sx={{ color: graphs !== null ? (haveGraphs ? MuiColors.green[500] : MuiColors.pink[500]) : MuiColors.grey[500] }} />
-                                                            </Mui.Tooltip>
-                                                            <Mui.Tooltip title="ElasticSearch indices">
-                                                                <MuiIcons.Circle sx={{ color: indices !== null ? (haveIndices ? MuiColors.green[500] : MuiColors.pink[500]) : MuiColors.grey[500] }} />
-                                                            </Mui.Tooltip>
-                                                        </Mui.Stack>
-                                                    </Mui.TableCell>
-                                                    <Mui.TableCell align="center">
-                                                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                <TableRow key={source.name}>
+                                                    <TableCell>{source.name}</TableCell>
+                                                    <TableCell>
+                                                        <Link href={source.graphUri}>{source.graphUri}</Link>
+                                                    </TableCell>
+                                                    <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
+                                                    <TableCell align="center">{source.group ? <Chip label={source.group} size="small" /> : ""}</TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" useFlexGap>
+                                                            <Tooltip title="RDF Graph">
+                                                                <Circle sx={{ color: graphs !== null ? (haveGraphs ? green[500] : pink[500]) : grey[500] }} />
+                                                            </Tooltip>
+                                                            <Tooltip title="ElasticSearch indices">
+                                                                <Circle sx={{ color: indices !== null ? (haveIndices ? green[500] : pink[500]) : grey[500] }} />
+                                                            </Tooltip>
+                                                        </Stack>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             <SourceForm source={source} me={me} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteSource(source, updateModel)} />
-                                                        </Mui.Stack>
-                                                    </Mui.TableCell>
-                                                </Mui.TableRow>
+                                                        </Stack>
+                                                    </TableCell>
+                                                </TableRow>
                                             );
                                         })}
-                                </Mui.TableBody>
-                            </Mui.Table>
-                        </Mui.TableContainer>
-                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <Mui.Button
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <Button
                                 variant="outlined"
                                 href={createSourcesDownloadUrl(
                                     // TODO fix typing
@@ -177,13 +205,13 @@ const SourcesTable = () => {
                                 download={"sources.json"}
                             >
                                 Download JSON
-                            </Mui.Button>
+                            </Button>
                             <CsvDownloader separator="&#9;" filename="sources" extension=".tsv" datas={datas as Datas}>
-                                <Mui.Button variant="outlined">Download CSV</Mui.Button>
+                                <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
                             <SourceForm create={true} me={me} />
-                        </Mui.Stack>
-                    </Mui.Stack>
+                        </Stack>
+                    </Stack>
                 );
             },
         },
@@ -314,19 +342,19 @@ type SourceFormProps = {
 const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }: SourceFormProps) => {
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
-    const sources = React.useMemo(() => unwrappedSources, [unwrappedSources]);
+    const sources = useMemo(() => unwrappedSources, [unwrappedSources]);
 
-    const [sourceModel, update] = React.useReducer(updateSource, { modal: false, sourceForm: toFormData(source) });
-    const [issues, setIssues] = React.useState<ZodCustomIssueWithMessage[]>([]);
+    const [sourceModel, update] = useReducer(updateSource, { modal: false, sourceForm: toFormData(source) });
+    const [issues, setIssues] = useState<ZodCustomIssueWithMessage[]>([]);
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
 
     const inputSourceSchema = create ? InputSourceSchemaCreate : InputSourceSchema;
     const zo = useZorm("source-form", z.object(inputSourceSchema), { setupListeners: false, customIssues: issues });
 
-    const [isAfterSubmission, setIsAfterSubmission] = React.useState<boolean>(false);
+    const [isAfterSubmission, setIsAfterSubmission] = useState<boolean>(false);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
-    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLInputElement>) => {
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
     };
     const handleGroupUpdate = (value: string) => {
@@ -337,15 +365,15 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
         update({ type: Type.UserUpdatedField, payload: { fieldname: "taxonomyPredicates", newValue: value } });
     };
 
-    const _handleFieldUpdate = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value });
+    const _handleFieldUpdate = (event: ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value });
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (sourceModel.sourceForm.owner.length == 0 && me !== "") {
             update({ type: Type.UserUpdatedField, payload: { fieldname: "owner", newValue: me } });
         }
     }, [sourceModel.sourceForm.owner]);
 
-    const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleSparql_serverUpdate = (fieldName: string) => (event: ChangeEvent<HTMLTextAreaElement>) => {
         update({
             type: Type.UserUpdatedsparql_server,
             payload: { ...sourceModel.sourceForm.sparql_server, [fieldName]: fieldName === "headers" ? [] : event.target.value },
@@ -371,21 +399,21 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
         });
     };
 
-    const updateHeaderKey = (idx: number) => (event: React.ChangeEvent<HTMLInputElement>) =>
+    const updateHeaderKey = (idx: number) => (event: ChangeEvent<HTMLInputElement>) =>
         handleSparql_serverHeadersUpdate((prevHeaders) => {
             const newHeaders = [...prevHeaders];
             newHeaders[idx] = { ...prevHeaders[idx], key: event.currentTarget.value };
             return newHeaders;
         });
 
-    const updateHeaderValue = (idx: number) => (event: React.ChangeEvent<HTMLInputElement>) =>
+    const updateHeaderValue = (idx: number) => (event: ChangeEvent<HTMLInputElement>) =>
         handleSparql_serverHeadersUpdate((prevHeaders) => {
             const newHeaders = [...prevHeaders];
             newHeaders[idx] = { ...prevHeaders[idx], value: event.currentTarget.value };
             return newHeaders;
         });
 
-    const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
+    const handleCheckbox = (checkboxName: string) => (event: ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
 
     const knownGroup = [...new Set(sources.flatMap((source) => source.group))].filter((group) => group.length > 0);
@@ -425,11 +453,11 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
     };
     return (
         <>
-            <Mui.Button color="primary" variant="contained" onClick={handleOpen}>
+            <Button color="primary" variant="contained" onClick={handleOpen}>
                 {create ? "Create Source" : "Edit"}
-            </Mui.Button>
-            <Mui.Modal onClose={handleClose} open={sourceModel.modal}>
-                <Mui.Box
+            </Button>
+            <Modal onClose={handleClose} open={sourceModel.modal}>
+                <Box
                     component="form"
                     ref={zo.ref}
                     onSubmit={(e) => {
@@ -446,60 +474,60 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                     }}
                     sx={style}
                 >
-                    <Mui.Grid container spacing={4}>
-                        <Mui.Grid item>
-                            <Mui.Grid alignItems="center" container wrap="nowrap">
-                                <Mui.Grid item flex={1}>
-                                    <Mui.FormControlLabel control={<Mui.Checkbox checked={sourceModel.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Editable?" />
-                                </Mui.Grid>
-                                <Mui.Grid item>
+                    <Grid container spacing={4}>
+                        <Grid item>
+                            <Grid alignItems="center" container wrap="nowrap">
+                                <Grid item flex={1}>
+                                    <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Editable?" />
+                                </Grid>
+                                <Grid item>
                                     <HelpButton title="Editable" message={sourceHelp.editable} />
-                                </Mui.Grid>
-                            </Mui.Grid>
-                        </Mui.Grid>
-                        <Mui.Grid item>
-                            <Mui.Grid alignItems="center" container wrap="nowrap">
-                                <Mui.Grid item flex={1}>
-                                    <Mui.FormControlLabel control={<Mui.Checkbox checked={sourceModel.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Draft?" />
-                                </Mui.Grid>
-                                <Mui.Grid item>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item>
+                            <Grid alignItems="center" container wrap="nowrap">
+                                <Grid item flex={1}>
+                                    <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Draft?" />
+                                </Grid>
+                                <Grid item>
                                     <HelpButton title="isDraft" message={sourceHelp.isDraft} />
-                                </Mui.Grid>
-                            </Mui.Grid>
-                        </Mui.Grid>
-                        <Mui.Grid item>
-                            <Mui.Grid alignItems="center" container wrap="nowrap">
-                                <Mui.Grid item flex={1}>
-                                    <Mui.FormControlLabel
-                                        control={<Mui.Checkbox checked={sourceModel.sourceForm.allowIndividuals} onChange={handleCheckbox("allowIndividuals")} />}
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item>
+                            <Grid alignItems="center" container wrap="nowrap">
+                                <Grid item flex={1}>
+                                    <FormControlLabel
+                                        control={<Checkbox checked={sourceModel.sourceForm.allowIndividuals} onChange={handleCheckbox("allowIndividuals")} />}
                                         label="Allow individuals?"
                                     />
-                                </Mui.Grid>
-                                <Mui.Grid item>
+                                </Grid>
+                                <Grid item>
                                     <HelpButton title="allowIndividuals" message={sourceHelp.allowIndividuals} />
-                                </Mui.Grid>
-                            </Mui.Grid>
-                        </Mui.Grid>
-                        <Mui.Grid item>
-                            <Mui.Grid alignItems="center" container wrap="nowrap">
-                                <Mui.Grid item flex={1}>
-                                    <Mui.FormControlLabel
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item>
+                            <Grid alignItems="center" container wrap="nowrap">
+                                <Grid item flex={1}>
+                                    <FormControlLabel
                                         onBlur={() => {
                                             const res = validateSourceGroup(sourceModel.sourceForm);
                                             createIssues(res.issues);
                                             validateAfterSubmission();
                                         }}
-                                        control={<Mui.Checkbox checked={sourceModel.sourceForm.published} onChange={handleCheckbox("published")} />}
+                                        control={<Checkbox checked={sourceModel.sourceForm.published} onChange={handleCheckbox("published")} />}
                                         label="Published?"
                                     />
-                                </Mui.Grid>
-                                <Mui.Grid item>
+                                </Grid>
+                                <Grid item>
                                     <HelpButton title="published" message={sourceHelp.published} />
-                                </Mui.Grid>
-                            </Mui.Grid>
-                        </Mui.Grid>
-                        <Mui.Grid item xs={6}>
-                            <Mui.TextField
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
                                 name={zo.fields.name()}
                                 helperText={errorMessage(zo.errors.name)}
                                 onBlur={() => {
@@ -516,15 +544,15 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                 disabled={!create}
                                 InputProps={{
                                     endAdornment: (
-                                        <Mui.InputAdornment position="end">
+                                        <InputAdornment position="end">
                                             <HelpButton title="Name" message={sourceHelp.name} />
-                                        </Mui.InputAdornment>
+                                        </InputAdornment>
                                     ),
                                 }}
                             />
-                        </Mui.Grid>
-                        <Mui.Grid item xs={6}>
-                            <Mui.TextField
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
                                 fullWidth
                                 helperText={errorMessage(zo.errors.graphUri)}
                                 name={zo.fields.graphUri()}
@@ -536,15 +564,15 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                 variant="standard"
                                 InputProps={{
                                     endAdornment: (
-                                        <Mui.InputAdornment position="end">
+                                        <InputAdornment position="end">
                                             <HelpButton title="Graph' Uris" message={sourceHelp.graphUri} />
-                                        </Mui.InputAdornment>
+                                        </InputAdornment>
                                     ),
                                 }}
                             />
-                        </Mui.Grid>
-                        <Mui.Grid item xs={6}>
-                            <Mui.TextField
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
                                 fullWidth
                                 onChange={handleSparql_serverUpdate("method")}
                                 value={sourceModel.sourceForm.sparql_server.method}
@@ -553,15 +581,15 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                 variant="standard"
                                 InputProps={{
                                     endAdornment: (
-                                        <Mui.InputAdornment position="end">
+                                        <InputAdornment position="end">
                                             <HelpButton title="Sparql server method" message={sourceHelp.sparql_server.method} />
-                                        </Mui.InputAdornment>
+                                        </InputAdornment>
                                     ),
                                 }}
                             />
-                        </Mui.Grid>
-                        <Mui.Grid item xs={6}>
-                            <Mui.TextField
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
                                 fullWidth
                                 onChange={handleSparql_serverUpdate("url")}
                                 value={sourceModel.sourceForm.sparql_server.url}
@@ -570,19 +598,19 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                 variant="standard"
                                 InputProps={{
                                     endAdornment: (
-                                        <Mui.InputAdornment position="end">
+                                        <InputAdornment position="end">
                                             <HelpButton title="Sparql server url" message={sourceHelp.sparql_server.url} />
-                                        </Mui.InputAdornment>
+                                        </InputAdornment>
                                     ),
                                 }}
                             />
-                        </Mui.Grid>
-                        <Mui.Grid container item xs={6}>
+                        </Grid>
+                        <Grid container item xs={6}>
                             {sourceModel.sourceForm.sparql_server.headers.map((header, headerIdx) => (
-                                <React.Fragment key={headerIdx}>
-                                    <Mui.Grid container spacing={4}>
-                                        <Mui.Grid item xs={6}>
-                                            <Mui.TextField
+                                <Fragment key={headerIdx}>
+                                    <Grid container spacing={4}>
+                                        <Grid item xs={6}>
+                                            <TextField
                                                 fullWidth
                                                 onChange={updateHeaderKey(headerIdx)}
                                                 value={header.key}
@@ -591,15 +619,15 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                                 variant="standard"
                                                 InputProps={{
                                                     endAdornment: (
-                                                        <Mui.InputAdornment position="end">
+                                                        <InputAdornment position="end">
                                                             <HelpButton title="Header key" message={sourceHelp.sparql_server.headers.key} />
-                                                        </Mui.InputAdornment>
+                                                        </InputAdornment>
                                                     ),
                                                 }}
                                             />
-                                        </Mui.Grid>
-                                        <Mui.Grid item xs={6}>
-                                            <Mui.TextField
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <TextField
                                                 fullWidth
                                                 onChange={updateHeaderValue(headerIdx)}
                                                 value={header.value}
@@ -609,28 +637,28 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                                 InputProps={{
                                                     endAdornment: (
                                                         <>
-                                                            <Mui.InputAdornment position="end">
+                                                            <InputAdornment position="end">
                                                                 <HelpButton title="Header value" message={sourceHelp.sparql_server.headers.value} />
-                                                            </Mui.InputAdornment>
-                                                            <Mui.InputAdornment position="end">
-                                                                <Mui.IconButton color="secondary" onClick={() => removeHeader(headerIdx)}>
-                                                                    <MuiIcons.Remove />
-                                                                </Mui.IconButton>
-                                                            </Mui.InputAdornment>
+                                                            </InputAdornment>
+                                                            <InputAdornment position="end">
+                                                                <IconButton color="secondary" onClick={() => removeHeader(headerIdx)}>
+                                                                    <Remove />
+                                                                </IconButton>
+                                                            </InputAdornment>
                                                         </>
                                                     ),
                                                 }}
                                             />
-                                        </Mui.Grid>
-                                    </Mui.Grid>
-                                </React.Fragment>
+                                        </Grid>
+                                    </Grid>
+                                </Fragment>
                             ))}
-                            <Mui.Button onClick={addHeader} startIcon={<MuiIcons.Add />}>
+                            <Button onClick={addHeader} startIcon={<Add />}>
                                 Add header
-                            </Mui.Button>
-                        </Mui.Grid>
-                        <Mui.Grid item xs={6}>
-                            <Mui.TextField
+                            </Button>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
                                 fullWidth
                                 multiline
                                 rows={4}
@@ -641,18 +669,18 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                 variant="standard"
                                 InputProps={{
                                     endAdornment: (
-                                        <Mui.InputAdornment position="end">
+                                        <InputAdornment position="end">
                                             <HelpButton title="Top Class filter" message={sourceHelp.topClassFilter} />
-                                        </Mui.InputAdornment>
+                                        </InputAdornment>
                                     ),
                                 }}
                             />
-                        </Mui.Grid>
+                        </Grid>
 
-                        <Mui.Grid item xs={6}>
-                            <Mui.FormControl>
-                                <Mui.InputLabel id="controller">Controller</Mui.InputLabel>
-                                <Mui.Select
+                        <Grid item xs={6}>
+                            <FormControl>
+                                <InputLabel id="controller">Controller</InputLabel>
+                                <Select
                                     labelId="controller"
                                     id="controller-select"
                                     value={sourceModel.sourceForm.controller}
@@ -662,23 +690,23 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                     renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                     onChange={handleFieldUpdate("controller")}
                                     endAdornment={
-                                        <Mui.InputAdornment position="end">
+                                        <InputAdornment position="end">
                                             <HelpButton title="Controller" message={sourceHelp.controller} />
-                                        </Mui.InputAdornment>
+                                        </InputAdornment>
                                     }
                                 >
                                     {["Sparql_OWL", "Sparql_SKOS", "Sparql_INDIVIDUALS"].map((schemaType) => (
-                                        <Mui.MenuItem key={schemaType} value={schemaType}>
+                                        <MenuItem key={schemaType} value={schemaType}>
                                             {schemaType}
-                                        </Mui.MenuItem>
+                                        </MenuItem>
                                     ))}
-                                </Mui.Select>
-                            </Mui.FormControl>
-                        </Mui.Grid>
-                        <Mui.Grid item xs={6}>
-                            <Mui.FormControl>
-                                <Mui.InputLabel id="owner">owner</Mui.InputLabel>
-                                <Mui.Select
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <FormControl>
+                                <InputLabel id="owner">owner</InputLabel>
+                                <Select
                                     labelId="owner"
                                     id="owner-select"
                                     value={sourceModel.sourceForm.owner}
@@ -688,21 +716,21 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                     renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                     onChange={handleFieldUpdate("owner")}
                                     endAdornment={
-                                        <Mui.InputAdornment position="end">
+                                        <InputAdornment position="end">
                                             <HelpButton title="owner" message={sourceHelp.owner} />
-                                        </Mui.InputAdornment>
+                                        </InputAdornment>
                                     }
                                 >
                                     {model.users.data.map((user) => (
-                                        <Mui.MenuItem key={user.id} value={user.login}>
+                                        <MenuItem key={user.id} value={user.login}>
                                             {user.login}
-                                        </Mui.MenuItem>
+                                        </MenuItem>
                                     ))}
-                                </Mui.Select>
-                            </Mui.FormControl>
-                        </Mui.Grid>
-                        <Mui.Grid item xs={6}>
-                            <Mui.Autocomplete
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Autocomplete
                                 freeSolo
                                 disableClearable
                                 options={knownGroup}
@@ -716,7 +744,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                 inputValue={sourceModel.sourceForm.group}
                                 id="group"
                                 renderInput={(params) => (
-                                    <Mui.TextField
+                                    <TextField
                                         {...params}
                                         helperText={errorMessage(zo.errors.group)}
                                         label="Group"
@@ -728,12 +756,12 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                     />
                                 )}
                             />
-                        </Mui.Grid>
+                        </Grid>
 
-                        <Mui.Grid item xs={6}>
-                            <Mui.FormControl>
-                                <Mui.InputLabel id="imports-label">Imports</Mui.InputLabel>
-                                <Mui.Select
+                        <Grid item xs={6}>
+                            <FormControl>
+                                <InputLabel id="imports-label">Imports</InputLabel>
+                                <Select
                                     labelId="imports-label"
                                     id="imports"
                                     value={sourceModel.sourceForm.imports}
@@ -744,23 +772,23 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                     renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                     onChange={handleFieldUpdate("imports")}
                                     endAdornment={
-                                        <Mui.InputAdornment position="end">
+                                        <InputAdornment position="end">
                                             <HelpButton title="Imports" message={sourceHelp.imports} />
-                                        </Mui.InputAdornment>
+                                        </InputAdornment>
                                     }
                                 >
                                     {sources.map((source) => (
-                                        <Mui.MenuItem key={source.name} value={source.name}>
-                                            <Mui.Checkbox checked={sourceModel.sourceForm.imports.indexOf(source.name) > -1} />
+                                        <MenuItem key={source.name} value={source.name}>
+                                            <Checkbox checked={sourceModel.sourceForm.imports.indexOf(source.name) > -1} />
                                             {source.name}
-                                        </Mui.MenuItem>
+                                        </MenuItem>
                                     ))}
-                                </Mui.Select>
-                            </Mui.FormControl>
-                        </Mui.Grid>
-                        <Mui.Grid item xs={6}>
-                            <Mui.FormControl>
-                                <Mui.Autocomplete
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <FormControl>
+                                <Autocomplete
                                     multiple
                                     limitTags={2}
                                     id="taxonomy-predicates"
@@ -772,22 +800,22 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                     renderInput={(params) => {
                                         if (sourceModel.sourceForm.taxonomyPredicates.length === 0) {
                                             const endAdornment = (
-                                                <Mui.InputAdornment position="end">
+                                                <InputAdornment position="end">
                                                     <HelpButton title="Taxonomy predicates" message={sourceHelp.taxonomyPredicates} />
-                                                </Mui.InputAdornment>
+                                                </InputAdornment>
                                             );
                                             const newInputProps = { ...params.InputProps, endAdornment: endAdornment };
                                             params.InputProps = newInputProps;
                                         }
-                                        return <Mui.TextField {...params} variant="filled" label="Taxonomy Predicates" />;
+                                        return <TextField {...params} variant="filled" label="Taxonomy Predicates" />;
                                     }}
                                 />
-                            </Mui.FormControl>
-                        </Mui.Grid>
-                        <Mui.Grid item xs={6}>
-                            <Mui.FormControl>
-                                <Mui.InputLabel id="schemaType-label">Schema type</Mui.InputLabel>
-                                <Mui.Select
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <FormControl>
+                                <InputLabel id="schemaType-label">Schema type</InputLabel>
+                                <Select
                                     labelId="schemaType-label"
                                     id="schemaType"
                                     value={sourceModel.sourceForm.schemaType}
@@ -797,38 +825,38 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                     renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                     onChange={handleFieldUpdate("schemaType")}
                                     endAdornment={
-                                        <Mui.InputAdornment position="end">
+                                        <InputAdornment position="end">
                                             <HelpButton title="Schema type" message={sourceHelp.schemaType} />
-                                        </Mui.InputAdornment>
+                                        </InputAdornment>
                                     }
                                 >
                                     {schemaTypes.map((schemaType) => (
-                                        <Mui.MenuItem key={schemaType} value={schemaType}>
-                                            <Mui.Checkbox checked={sourceModel.sourceForm.schemaType.indexOf(schemaType) > -1} />
+                                        <MenuItem key={schemaType} value={schemaType}>
+                                            <Checkbox checked={sourceModel.sourceForm.schemaType.indexOf(schemaType) > -1} />
                                             {schemaType}
-                                        </Mui.MenuItem>
+                                        </MenuItem>
                                     ))}
-                                </Mui.Select>
-                            </Mui.FormControl>
-                        </Mui.Grid>
+                                </Select>
+                            </FormControl>
+                        </Grid>
                         <FormGivenSchemaType update={update} model={sourceModel} />
 
-                        <Mui.Grid item xs={12} style={{ textAlign: "center" }}>
-                            <Mui.Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} color="primary" type="submit" variant="contained">
+                        <Grid item xs={12} style={{ textAlign: "center" }}>
+                            <Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} color="primary" type="submit" variant="contained">
                                 Save Source
-                            </Mui.Button>
-                        </Mui.Grid>
-                    </Mui.Grid>
-                </Mui.Box>
-            </Mui.Modal>
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Box>
+            </Modal>
         </>
     );
 };
 
-const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.Dispatch<Msg_> }) => {
-    const handlePredicateUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) =>
+const FormGivenSchemaType = (props: { model: SourceEditionState; update: Dispatch<Msg_> }) => {
+    const handlePredicateUpdate = (fieldName: string) => (event: ChangeEvent<HTMLTextAreaElement>) =>
         props.update({ type: Type.UserUpdatedPredicates, payload: { ...props.model.sourceForm.predicates, [fieldName]: event.target.value } });
-    const handleDataSourceUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
+    const handleDataSourceUpdate = (fieldName: string) => (event: ChangeEvent<HTMLInputElement>) =>
         props.update({
             type: Type.UserUpdatedDataSource,
             payload: props.model.sourceForm.dataSource
@@ -836,15 +864,15 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
                 : { type: "", table_schema: "string", connection: "string", dbName: "string", local_dictionary: { table: "string", labelColumn: "string", idColumn: "string" } },
         });
 
-    const handleAddDataSource = (event: React.ChangeEvent<HTMLInputElement>) => props.update({ type: Type.UserClickedAddDataSource, payload: event.target.checked });
+    const handleAddDataSource = (event: ChangeEvent<HTMLInputElement>) => props.update({ type: Type.UserClickedAddDataSource, payload: event.target.checked });
     const dataSource = props.model.sourceForm.dataSource;
 
     switch (props.model.sourceForm.schemaType) {
         case "SKOS":
             return (
                 <>
-                    <Mui.Grid item xs={6}>
-                        <Mui.TextField
+                    <Grid item xs={6}>
+                        <TextField
                             fullWidth
                             onChange={handlePredicateUpdate("broaderPredicate")}
                             value={props.model.sourceForm.predicates.broaderPredicate}
@@ -852,26 +880,23 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
                             label={"Broader Predicate"}
                             variant="standard"
                         />
-                    </Mui.Grid>
-                    <Mui.Grid item xs={6}>
-                        <Mui.TextField fullWidth onChange={handlePredicateUpdate("lang")} value={props.model.sourceForm.predicates.lang} id={`predicateLang`} label={"Language"} variant="standard" />
-                    </Mui.Grid>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <TextField fullWidth onChange={handlePredicateUpdate("lang")} value={props.model.sourceForm.predicates.lang} id={`predicateLang`} label={"Language"} variant="standard" />
+                    </Grid>
                 </>
             );
         case "KNOWLEDGE_GRAPH":
             return (
                 <>
-                    <Mui.Grid item xs={3}>
-                        <Mui.FormControlLabel
-                            control={<Mui.Checkbox checked={props.model.sourceForm.dataSource ? true : false} onChange={handleAddDataSource} />}
-                            label="Do you want to add a data source ?"
-                        />
-                    </Mui.Grid>
+                    <Grid item xs={3}>
+                        <FormControlLabel control={<Checkbox checked={props.model.sourceForm.dataSource ? true : false} onChange={handleAddDataSource} />} label="Do you want to add a data source ?" />
+                    </Grid>
 
-                    <Mui.Grid item xs={6}>
-                        <Mui.FormControl>
-                            <Mui.InputLabel id="dataSource-type">DataSource&apos;s type</Mui.InputLabel>
-                            <Mui.Select
+                    <Grid item xs={6}>
+                        <FormControl>
+                            <InputLabel id="dataSource-type">DataSource&apos;s type</InputLabel>
+                            <Select
                                 labelId="dataSource-type"
                                 id="dataSource"
                                 value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.type : ""}
@@ -884,15 +909,15 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
                                 onChange={handleDataSourceUpdate("type")}
                             >
                                 {["sql.sqlserver"].map((type) => (
-                                    <Mui.MenuItem key={type} value={type}>
+                                    <MenuItem key={type} value={type}>
                                         {type}
-                                    </Mui.MenuItem>
+                                    </MenuItem>
                                 ))}
-                            </Mui.Select>
-                        </Mui.FormControl>
-                    </Mui.Grid>
-                    <Mui.Grid item xs={6}>
-                        <Mui.TextField
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <TextField
                             fullWidth
                             onChange={handleDataSourceUpdate("connection")}
                             value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.connection : ""}
@@ -901,9 +926,9 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
                             variant="standard"
                             style={{ display: !dataSource ? "none" : "" }}
                         />
-                    </Mui.Grid>
-                    <Mui.Grid item xs={6}>
-                        <Mui.TextField
+                    </Grid>
+                    <Grid item xs={6}>
+                        <TextField
                             fullWidth
                             onChange={handleDataSourceUpdate("dbName")}
                             value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.dbName : ""}
@@ -912,9 +937,9 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
                             variant="standard"
                             style={{ display: !dataSource ? "none" : "" }}
                         />
-                    </Mui.Grid>
-                    <Mui.Grid item xs={6}>
-                        <Mui.TextField
+                    </Grid>
+                    <Grid item xs={6}>
+                        <TextField
                             fullWidth
                             onChange={handleDataSourceUpdate("table_schema")}
                             value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.table_schema : ""}
@@ -923,7 +948,7 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
                             style={{ display: !dataSource ? "none" : "" }}
                             variant="standard"
                         />
-                    </Mui.Grid>
+                    </Grid>
                 </>
             );
         default:

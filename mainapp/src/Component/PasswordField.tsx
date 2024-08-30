@@ -1,13 +1,12 @@
+import { useState } from "react";
 import { FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput } from "@mui/material";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-import * as React from "react";
-
 export const PasswordField = (props) => {
     const { disabled, error, id, label, onChange, required, value } = props;
 
-    const [display, setDisplay] = React.useState(false);
+    const [display, setDisplay] = useState(false);
 
     const handleClick = () => setDisplay(!display);
     const handleMouseDown = (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault();

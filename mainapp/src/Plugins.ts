@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { Tool } from "Tool";
-
 const endpoint = "/api/v1/admin/plugins";
 
 const PluginOptionSchema = z

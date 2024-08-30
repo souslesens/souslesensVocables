@@ -1,15 +1,15 @@
-import * as React from "react";
-import * as Mui from "@mui/material";
+import { createContext, Dispatch, useContext, useReducer, useEffect, SyntheticEvent } from "react";
+import { Box, Tabs, Tab } from "@mui/material";
 
 import { SRD, RD, loading, failure, success } from "srd";
 
 import { Config, getConfig } from "./Config";
 import { Database, getDatabases } from "./Database";
-import { Log, getLogs, getLogFiles } from "./Log";
+import { Log, getLogFiles } from "./Log";
 import { getEnabledPlugins, PluginOptionType, readConfig, readRepositories, RepositoryType } from "./Plugins";
 import { Profile, getProfiles } from "./Profile";
 import { ServerSource, getSources, getIndices, getGraphs, getMe } from "./Source";
-import { User, getUsers, newUser } from "./User";
+import { User, getUsers } from "./User";
 import { identity } from "./Utils";
 
 import { ConfigForm } from "./Component/ConfigForm";
@@ -79,10 +79,10 @@ const initialModel: Model = {
     repositories: loading(),
 };
 
-const ModelContext = React.createContext<{ model: Model; updateModel: React.Dispatch<Msg> } | null>(null);
+const ModelContext = createContext<{ model: Model; updateModel: Dispatch<Msg> } | null>(null);
 
 function useModel() {
-    const modelContext = React.useContext(ModelContext);
+    const modelContext = useContext(ModelContext);
     if (modelContext === null) {
         throw new Error("I can't initialize model and updateModel for some reason");
     }
@@ -103,16 +103,16 @@ function update(model: Model, msg: Msg): Model {
 }
 
 const Admin = () => {
-    const [model, updateModel] = React.useReducer(update, initialModel);
+    const [model, updateModel] = useReducer(update, initialModel);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const params = new URLSearchParams(document.location.search);
         if (params.has("tab")) {
             model.currentEditionTab = params.get("tab");
         }
     }, []);
 
-    React.useEffect(() => {
+    useEffect(() => {
         Promise.all([getMe(), getSources(), getIndices(), getGraphs(), getProfiles(), getUsers(), getConfig(), getDatabases(), getLogFiles(), readConfig(), getEnabledPlugins(), readRepositories()])
             .then(([me, sources, indices, graphs, profiles, users, config, databases, logs, pluginsConfig, pluginsEnabled, repositories]) => {
                 updateModel({ type: "me", payload: success(me) });
@@ -146,17 +146,17 @@ const Admin = () => {
 
     return (
         <ModelContext.Provider value={{ model, updateModel }}>
-            <Mui.Box sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}>
-                <Mui.Tabs onChange={(event: React.SyntheticEvent, newValue: string) => updateModel({ type: "currentEditionTab", payload: newValue })} value={model.currentEditionTab} centered>
-                    <Mui.Tab label="Settings" value="settings" />
-                    <Mui.Tab label="Users" value="users" />
-                    <Mui.Tab label="Profiles" value="profiles" />
-                    <Mui.Tab label="Sources" value="sources" />
-                    <Mui.Tab label="Databases" value="databases" />
-                    <Mui.Tab label="Plugins" value="plugins" />
-                    <Mui.Tab label="Logs" value="logs" />
-                </Mui.Tabs>
-            </Mui.Box>
+            <Box sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}>
+                <Tabs onChange={(event: SyntheticEvent, newValue: string) => updateModel({ type: "currentEditionTab", payload: newValue })} value={model.currentEditionTab} centered>
+                    <Tab label="Settings" value="settings" />
+                    <Tab label="Users" value="users" />
+                    <Tab label="Profiles" value="profiles" />
+                    <Tab label="Sources" value="sources" />
+                    <Tab label="Databases" value="databases" />
+                    <Tab label="Plugins" value="plugins" />
+                    <Tab label="Logs" value="logs" />
+                </Tabs>
+            </Box>
             <Dispatcher model={model} />
         </ModelContext.Provider>
     );

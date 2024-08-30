@@ -95,7 +95,7 @@ var Config = (function () {
         DOLCE: { uriPattern: "dul", prefix: "dul", prefixtarget: "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#" },
         LML: { uriPattern: "lml", prefix: "lml", prefixtarget: "http://souslesens.org/ontology/lml/" },
     };
-
+    // delete s from basicVocabularies rdf,rdfs,owl
     self.basicVocabularies = {
         rdf: { graphUri: "https://www.w3.org/1999/02/22-rdf-syntax-ns" },
         rdfs: { graphUri: "https://www.w3.org/2000/01/rdf-schema" },

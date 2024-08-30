@@ -1,6 +1,5 @@
-import * as React from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { useState, useEffect, useRef } from "react";
 
 import {
     Alert,
@@ -78,8 +77,8 @@ export default function GraphManagement() {
 
     // sorting
     type Order = "asc" | "desc";
-    const [orderBy, setOrderBy] = React.useState<keyof ServerSource>("name");
-    const [order, setOrder] = React.useState<Order>("asc");
+    const [orderBy, setOrderBy] = useState<keyof ServerSource>("name");
+    const [order, setOrder] = useState<Order>("asc");
     function handleRequestSort(property: keyof ServerSource) {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
@@ -87,7 +86,7 @@ export default function GraphManagement() {
     }
 
     // search
-    const [filteringChars, setFilteringChars] = React.useState("");
+    const [filteringChars, setFilteringChars] = useState("");
 
     useEffect(() => {
         void fetchSources();
@@ -144,25 +143,25 @@ export default function GraphManagement() {
         return await response.json();
     };
 
-    const handleUploadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleUploadSource = async (event: MouseEvent<HTMLButtonElement>) => {
         setCurrentSource(event.currentTarget.value);
         setCurrentOperation(null);
         setDisplayModal("upload");
     };
 
-    const handleSetFormat = async (event: React.MouseEvent<HTMLElement>) => {
+    const handleSetFormat = async (event: MouseEvent<HTMLElement>) => {
         setCurrentDownloadFormat(event.target.value);
     };
 
-    const handleSetSkipNamedIndividuals = async (event: React.ChangeEvent<HTMLElement>) => {
+    const handleSetSkipNamedIndividuals = async (event: ChangeEvent<HTMLElement>) => {
         setSkipNamedIndividuals(event.currentTarget.checked);
     };
 
-    const handleReplaceGraphCheckbox = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleReplaceGraphCheckbox = async (event: ChangeEvent<HTMLInputElement>) => {
         setReplaceGraph(event.currentTarget.checked);
     };
 
-    const handleDownloadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleDownloadSource = async (event: MouseEvent<HTMLButtonElement>) => {
         setCurrentSource(event.currentTarget.value);
         setCurrentOperation(null);
         setDisplayModal("download");
@@ -280,7 +279,7 @@ export default function GraphManagement() {
         setAnimatedProgressBar(false);
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.currentTarget.files === null) {
             return;
         }

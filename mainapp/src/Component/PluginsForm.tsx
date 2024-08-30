@@ -1,8 +1,47 @@
-import * as Mui from "@mui/material";
-import * as MuiIcons from "@mui/icons-material";
-import * as React from "react";
+import { useState, FormEvent, useEffect, SyntheticEvent } from "react";
+import {
+    Dialog,
+    DialogContent,
+    Stack,
+    TextField,
+    DialogActions,
+    Button,
+    Alert,
+    Paper,
+    Box,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    InputAdornment,
+    IconButton,
+    DialogTitle,
+    MenuItem,
+    FormGroup,
+    Divider,
+    Chip,
+    FormControl,
+    InputLabel,
+    Select,
+    OutlinedInput,
+    Checkbox,
+    TableContainer,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableSortLabel,
+    TableBody,
+    Tooltip,
+    Snackbar,
+    Tabs,
+    CircularProgress,
+    Link,
+    List,
+    Tab,
+} from "@mui/material";
+import { Add, Extension, DeleteForever, AddCircle, Done, Download } from "@mui/icons-material";
 
-import { RD, SRD, failure, loading, success } from "srd";
+import { SRD, success } from "srd";
 import { ulid } from "ulid";
 
 import { useModel } from "../Admin";
@@ -17,7 +56,6 @@ import {
     getEnabledPlugins,
     getRepositoryPlugins,
     getRepositoryTags,
-    readConfig,
     readRepositories,
     writeConfig,
     writeRepository,
@@ -27,6 +65,7 @@ import { Tool } from "../Tool";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
 import { cleanUpText } from "../Utils";
+import { Database } from "../Database";
 
 type DispatcherProps = {
     me: string;
@@ -52,7 +91,7 @@ type PluginsRepositoryDialogProps = {
 const PluginsDialogForm = (props: PluginsDialogFormProps) => {
     const { onClose, onSubmit, open, plugin } = props;
 
-    const [errors, setErrors] = React.useState("");
+    const [errors, setErrors] = useState("");
 
     const optionsName = Object.keys(plugin || {});
 
@@ -71,14 +110,14 @@ const PluginsDialogForm = (props: PluginsDialogFormProps) => {
     };
 
     return (
-        <Mui.Dialog
+        <Dialog
             fullWidth
             maxWidth="md"
             onClose={onClose}
             open={open}
             PaperProps={{
                 component: "form",
-                onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+                onSubmit: (event: FormEvent<HTMLFormElement>) => {
                     event.preventDefault();
 
                     const formData = new FormData(event.currentTarget);
@@ -91,9 +130,9 @@ const PluginsDialogForm = (props: PluginsDialogFormProps) => {
                 },
             }}
         >
-            <Mui.DialogContent>
-                <Mui.Stack spacing={2}>
-                    <Mui.TextField
+            <DialogContent>
+                <Stack spacing={2}>
+                    <TextField
                         autofocus
                         defaultValue=""
                         error={errors.length > 0}
@@ -102,20 +141,20 @@ const PluginsDialogForm = (props: PluginsDialogFormProps) => {
                         id="key"
                         label="Label"
                         name="key"
-                        onChange={(event: React.FormEvent<HTMLFormElement>) => {
+                        onChange={(event: FormEvent<HTMLFormElement>) => {
                             handleValidation({ key: event.target.value });
                         }}
                         required
                     />
-                    <Mui.TextField defaultValue="" fullWidth id="option" label="Value" name="option" />
-                </Mui.Stack>
-            </Mui.DialogContent>
-            <Mui.DialogActions>
-                <Mui.Button color="primary" startIcon={<MuiIcons.Add />} type="submit" variant="contained">
+                    <TextField defaultValue="" fullWidth id="option" label="Value" name="option" />
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <Button color="primary" startIcon={<Add />} type="submit" variant="contained">
                     {"Add"}
-                </Mui.Button>
-            </Mui.DialogActions>
-        </Mui.Dialog>
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 
@@ -123,8 +162,8 @@ const PluginsConfiguration = (props: DispatcherProps) => {
     const { me, snack } = props;
     const { model, updateModel } = useModel();
 
-    const [openModal, setOpenModal] = React.useState<boolean>(false);
-    const [selectedPlugin, setSelectedPlugin] = React.useState<Tool>(undefined);
+    const [openModal, setOpenModal] = useState<boolean>(false);
+    const [selectedPlugin, setSelectedPlugin] = useState<Tool>(undefined);
 
     const handleCloseModal = () => setOpenModal(false);
     const handleOpenModal = () => setOpenModal(true);
@@ -157,42 +196,42 @@ const PluginsConfiguration = (props: DispatcherProps) => {
 
     if (model.pluginsEnabled.data.length == 0) {
         return (
-            <Mui.Stack direction="column" justifyContent="center">
-                <Mui.Alert variant="filled" severity="info">
+            <Stack direction="column" justifyContent="center">
+                <Alert variant="filled" severity="info">
                     {"No plugin have been activated for this instance"}
-                </Mui.Alert>
-            </Mui.Stack>
+                </Alert>
+            </Stack>
         );
     } else if (selectedPlugin === undefined) {
         setSelectedPlugin(model.pluginsEnabled.data[0].name);
     }
 
     return (
-        <Mui.Stack spacing={{ xs: 2 }} useFlexGap>
-            <Mui.Stack component={Mui.Paper} direction="row" useFlexGap>
-                <Mui.Box sx={{ borderRight: "thin solid rgba(0, 0, 0, 0.12)", width: "100%", maxWidth: 250 }}>
+        <Stack spacing={{ xs: 2 }} useFlexGap>
+            <Stack component={Paper} direction="row" useFlexGap>
+                <Box sx={{ borderRight: "thin solid rgba(0, 0, 0, 0.12)", width: "100%", maxWidth: 250 }}>
                     <nav>
-                        <Mui.List sx={{ height: 400, overflow: "auto" }} disablePadding>
+                        <List sx={{ height: 400, overflow: "auto" }} disablePadding>
                             {model.pluginsEnabled.data.map((plugin) => (
-                                <Mui.ListItemButton key={plugin.name} selected={plugin.name === selectedPlugin} onClick={() => setSelectedPlugin(plugin.name)}>
-                                    <Mui.ListItemIcon>
-                                        <MuiIcons.Extension />
-                                    </Mui.ListItemIcon>
-                                    <Mui.ListItemText primary={plugin.name} />
-                                </Mui.ListItemButton>
+                                <ListItemButton key={plugin.name} selected={plugin.name === selectedPlugin} onClick={() => setSelectedPlugin(plugin.name)}>
+                                    <ListItemIcon>
+                                        <Extension />
+                                    </ListItemIcon>
+                                    <ListItemText primary={plugin.name} />
+                                </ListItemButton>
                             ))}
-                        </Mui.List>
+                        </List>
                     </nav>
-                </Mui.Box>
+                </Box>
 
                 {selectedPlugin !== undefined && (
-                    <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ padding: 4, width: "100%", height: 400, overflow: "auto" }} useFlexGap>
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ padding: 4, width: "100%", height: 400, overflow: "auto" }} useFlexGap>
                         {
                             // eslint-disable-next-line no-prototype-builtins
                             model.pluginsConfig.data.hasOwnProperty(selectedPlugin) && (
-                                <Mui.Stack spacing={{ xs: 2 }} useFlexGap>
+                                <Stack spacing={{ xs: 2 }} useFlexGap>
                                     {Object.entries(model.pluginsConfig.data[selectedPlugin]).map(([key, value]) => (
-                                        <Mui.TextField
+                                        <TextField
                                             key={key}
                                             defaultValue=""
                                             id={`field-${selectedPlugin.name}-${key}`}
@@ -201,36 +240,36 @@ const PluginsConfiguration = (props: DispatcherProps) => {
                                             value={value}
                                             InputProps={{
                                                 endAdornment: (
-                                                    <Mui.InputAdornment position="start">
-                                                        <Mui.IconButton color="warning" edge="end" onClick={handleRemoveOption(key)}>
-                                                            <MuiIcons.DeleteForever />
-                                                        </Mui.IconButton>
-                                                    </Mui.InputAdornment>
+                                                    <InputAdornment position="start">
+                                                        <IconButton color="warning" edge="end" onClick={handleRemoveOption(key)}>
+                                                            <DeleteForever />
+                                                        </IconButton>
+                                                    </InputAdornment>
                                                 ),
                                             }}
                                         />
                                     ))}
-                                </Mui.Stack>
+                                </Stack>
                             )
                         }
 
-                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <Mui.Button color="success" onClick={handleOpenModal} startIcon={<MuiIcons.AddCircle />} variant="outlined">
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <Button color="success" onClick={handleOpenModal} startIcon={<AddCircle />} variant="outlined">
                                 {"Add a new option"}
-                            </Mui.Button>
-                        </Mui.Stack>
-                    </Mui.Stack>
+                            </Button>
+                        </Stack>
+                    </Stack>
                 )}
-            </Mui.Stack>
+            </Stack>
 
-            <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                <Mui.Button onClick={handleSavePlugins} type="submit" variant="contained">
+            <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                <Button onClick={handleSavePlugins} type="submit" variant="contained">
                     Save Plugins
-                </Mui.Button>
-            </Mui.Stack>
+                </Button>
+            </Stack>
 
             <PluginsDialogForm onClose={handleCloseModal} onSubmit={handleSubmitNewOption} open={openModal} plugin={model.pluginsConfig.data[selectedPlugin]} />
-        </Mui.Stack>
+        </Stack>
     );
 };
 
@@ -247,12 +286,12 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
     const { onClose, onSubmit, open } = props;
     const { model, updateModel } = useModel();
 
-    const [edit, setEdit] = React.useState<boolean>(false);
-    const [errors, setErrors] = React.useState({});
-    const [pluginsAvailable, setPluginsAvailable] = React.useState([]);
-    const [pluginsEnabled, setPluginsEnabled] = React.useState([]);
-    const [repository, setRepository] = React.useState(emptyRepository);
-    const [tags, setTags] = React.useState([]);
+    const [edit, setEdit] = useState<boolean>(false);
+    const [errors, setErrors] = useState({});
+    const [pluginsAvailable, setPluginsAvailable] = useState([]);
+    const [pluginsEnabled, setPluginsEnabled] = useState([]);
+    const [repository, setRepository] = useState(emptyRepository);
+    const [tags, setTags] = useState([]);
 
     const handleFieldUpdate = (key: string, value: string | [string]) => {
         if (key == "plugins") {
@@ -262,7 +301,7 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
         }
     };
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
@@ -296,7 +335,7 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
         return parsedForm;
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         setErrors({});
         setPluginsAvailable([]);
         setPluginsEnabled([]);
@@ -326,11 +365,11 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
     }, [model.dialog]);
 
     return (
-        <Mui.Dialog fullWidth maxWidth="md" onClose={onClose} open={open} PaperProps={{ component: "form", onSubmit: handleSubmit }}>
-            <Mui.DialogTitle>{edit ? "Edit the Plugin Repository" : "Register a Plugin Repository"}</Mui.DialogTitle>
-            <Mui.DialogContent>
-                <Mui.Stack spacing={2} sx={{ pt: 1 }}>
-                    <Mui.TextField
+        <Dialog fullWidth maxWidth="md" onClose={onClose} open={open} PaperProps={{ component: "form", onSubmit: handleSubmit }}>
+            <DialogTitle>{edit ? "Edit the Plugin Repository" : "Register a Plugin Repository"}</DialogTitle>
+            <DialogContent>
+                <Stack spacing={2} sx={{ pt: 1 }}>
+                    <TextField
                         autofocus
                         error={errors.url !== undefined}
                         fullWidth
@@ -338,12 +377,12 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
                         id="url"
                         label="Repository Git URL"
                         name="url"
-                        onChange={(event: React.SyntheticEvent | Event) => handleFieldUpdate("url", event.target.value)}
+                        onChange={(event: SyntheticEvent | Event) => handleFieldUpdate("url", event.target.value)}
                         required
                         value={repository.data.url}
                     />
                     {edit && (
-                        <Mui.TextField
+                        <TextField
                             disabled={tags.length === 0}
                             error={errors.version !== undefined}
                             fullWidth
@@ -351,68 +390,68 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
                             id="version"
                             label="Repository Version Tag"
                             name="version"
-                            onChange={(event: React.SyntheticEvent | Event) => handleFieldUpdate("version", event.target.value)}
+                            onChange={(event: SyntheticEvent | Event) => handleFieldUpdate("version", event.target.value)}
                             select
                             value={repository.data.version}
                         >
                             {tags.length > 0 &&
                                 tags.map((tag) => (
-                                    <Mui.MenuItem key={tag} value={tag}>
+                                    <MenuItem key={tag} value={tag}>
                                         {tag}
-                                    </Mui.MenuItem>
+                                    </MenuItem>
                                 ))}
-                        </Mui.TextField>
+                        </TextField>
                     )}
                     <PasswordField
                         error={errors.token !== undefined}
                         helperText={errors.token}
                         id="token"
                         label="Authentication Token"
-                        onChange={(event: React.SyntheticEvent | Event) => handleFieldUpdate("token", event.target.value)}
+                        onChange={(event: SyntheticEvent | Event) => handleFieldUpdate("token", event.target.value)}
                         value={repository.data.token}
                     />
                     {(pluginsAvailable.length > 1 || (pluginsAvailable.length === 1 && pluginsAvailable[0] !== repository.identifier)) && (
-                        <Mui.FormGroup sx={{ gap: 2 }}>
-                            <Mui.Divider>
-                                <Mui.Chip color="info" label="Multi-Plugins Repository" size="small" />
-                            </Mui.Divider>
-                            <Mui.FormControl>
-                                <Mui.InputLabel id="plugins-label">{"Plugins to activate in this Repository"}</Mui.InputLabel>
-                                <Mui.Select
+                        <FormGroup sx={{ gap: 2 }}>
+                            <Divider>
+                                <Chip color="info" label="Multi-Plugins Repository" size="small" />
+                            </Divider>
+                            <FormControl>
+                                <InputLabel id="plugins-label">{"Plugins to activate in this Repository"}</InputLabel>
+                                <Select
                                     fullWidth
                                     id="plugins"
-                                    input={<Mui.OutlinedInput label="Plugins to activate in this Repository" />}
+                                    input={<OutlinedInput label="Plugins to activate in this Repository" />}
                                     labelId="plugins-label"
                                     multiple
                                     name="plugins"
-                                    onChange={(event: React.SyntheticEvent | Event) => handleFieldUpdate("plugins", event.target.value)}
+                                    onChange={(event: SyntheticEvent | Event) => handleFieldUpdate("plugins", event.target.value)}
                                     renderValue={(selected) => (
-                                        <Mui.Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                                             {selected.sort().map((value) => (
-                                                <Mui.Chip key={value} label={value} />
+                                                <Chip key={value} label={value} />
                                             ))}
-                                        </Mui.Box>
+                                        </Box>
                                     )}
                                     value={pluginsEnabled}
                                 >
                                     {pluginsAvailable.map((plugin) => (
-                                        <Mui.MenuItem key={plugin} value={plugin}>
-                                            <Mui.Checkbox checked={pluginsEnabled.indexOf(plugin) > -1} />
-                                            <Mui.ListItemText primary={plugin} />
-                                        </Mui.MenuItem>
+                                        <MenuItem key={plugin} value={plugin}>
+                                            <Checkbox checked={pluginsEnabled.indexOf(plugin) > -1} />
+                                            <ListItemText primary={plugin} />
+                                        </MenuItem>
                                     ))}
-                                </Mui.Select>
-                            </Mui.FormControl>
-                        </Mui.FormGroup>
+                                </Select>
+                            </FormControl>
+                        </FormGroup>
                     )}
-                </Mui.Stack>
-            </Mui.DialogContent>
-            <Mui.DialogActions>
-                <Mui.Button color="primary" startIcon={<MuiIcons.Done />} type="submit" variant="contained">
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <Button color="primary" startIcon={<Done />} type="submit" variant="contained">
                     {"Submit"}
-                </Mui.Button>
-            </Mui.DialogActions>
-        </Mui.Dialog>
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 
@@ -420,11 +459,11 @@ const PluginsRepositories = (props: DispatcherProps) => {
     const { me, onDeleteRepository, onSubmitRepository, snack } = props;
     const { model, updateModel } = useModel();
 
-    const [openModal, setOpenModal] = React.useState<boolean>(false);
+    const [openModal, setOpenModal] = useState<boolean>(false);
 
-    const [filter, setFilter] = React.useState<string>("");
-    const [order, setOrder] = React.useState<Order>("asc");
-    const [orderBy, setOrderBy] = React.useState<keyof Database>("url");
+    const [filter, setFilter] = useState<string>("");
+    const [order, setOrder] = useState<Order>("asc");
+    const [orderBy, setOrderBy] = useState<keyof Database>("url");
 
     const handleCloseModal = () => {
         updateModel({ type: "dialog", payload: null });
@@ -475,80 +514,80 @@ const PluginsRepositories = (props: DispatcherProps) => {
         });
 
     return (
-        <Mui.Stack spacing={{ xs: 2 }} useFlexGap>
-            <Mui.Stack spacing={{ xs: 2 }} sx={{ height: 400 }} useFlexGap>
-                <Mui.TextField
+        <Stack spacing={{ xs: 2 }} useFlexGap>
+            <Stack spacing={{ xs: 2 }} sx={{ height: 400 }} useFlexGap>
+                <TextField
                     label="Filter repositories by URL"
                     id="filter-repositories"
                     onChange={(event) => {
                         setFilter(event.target.value);
                     }}
                 />
-                <Mui.TableContainer component={Mui.Paper} sx={{ flex: 1 }}>
-                    <Mui.Table stickyHeader>
-                        <Mui.TableHead>
-                            <Mui.TableRow>
-                                <Mui.TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                    <Mui.TableSortLabel active={orderBy === "url"} direction={order} onClick={() => handleSortedTable("url")}>
+                <TableContainer component={Paper} sx={{ flex: 1 }}>
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                    <TableSortLabel active={orderBy === "url"} direction={order} onClick={() => handleSortedTable("url")}>
                                         URL
-                                    </Mui.TableSortLabel>
-                                </Mui.TableCell>
-                                <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell align="center" style={{ fontWeight: "bold" }}>
                                     Tag
-                                </Mui.TableCell>
-                                <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                </TableCell>
+                                <TableCell align="center" style={{ fontWeight: "bold" }}>
                                     Fetch
-                                </Mui.TableCell>
-                                <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                </TableCell>
+                                <TableCell align="center" style={{ fontWeight: "bold" }}>
                                     Actions
-                                </Mui.TableCell>
-                            </Mui.TableRow>
-                        </Mui.TableHead>
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
 
-                        <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
+                        <TableBody sx={{ width: "100%", overflow: "visible" }}>
                             {sortedRepositories
                                 .filter(([key, data]) => cleanUpText(data.url).includes(cleanUpText(filter)))
                                 .map(([key, data]) => (
-                                    <Mui.TableRow key={key}>
-                                        <Mui.TableCell>
-                                            <Mui.Stack alignItems="center" direction="row" spacing={{ xs: 1 }} useFlexGap>
-                                                <Mui.Link href={data.url}>{data.url}</Mui.Link>
+                                    <TableRow key={key}>
+                                        <TableCell>
+                                            <Stack alignItems="center" direction="row" spacing={{ xs: 1 }} useFlexGap>
+                                                <Link href={data.url}>{data.url}</Link>
                                                 {data.plugins !== undefined && data.plugins.length > 0 && (
-                                                    <Mui.Tooltip title={data.plugins.join(", ")}>
-                                                        <Mui.Chip color="info" label={data.plugins.length > 1 ? `${data.plugins.length} plugins` : "1 plugin"} size="small" variant="outlined" />
-                                                    </Mui.Tooltip>
+                                                    <Tooltip title={data.plugins.join(", ")}>
+                                                        <Chip color="info" label={data.plugins.length > 1 ? `${data.plugins.length} plugins` : "1 plugin"} size="small" variant="outlined" />
+                                                    </Tooltip>
                                                 )}
-                                            </Mui.Stack>
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center">{data.version && <Mui.Chip label={data.version} size="small" />}</Mui.TableCell>
-                                        <Mui.TableCell align="center">
-                                            <Mui.IconButton color="primary" onClick={() => handleFetchRepository(key)} title="Fetch Repository" variant="contained">
-                                                <MuiIcons.Download />
-                                            </Mui.IconButton>
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center">
-                                            <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                <Mui.Button onClick={() => handleOpenModal(true, key)} variant="contained">
+                                            </Stack>
+                                        </TableCell>
+                                        <TableCell align="center">{data.version && <Chip label={data.version} size="small" />}</TableCell>
+                                        <TableCell align="center">
+                                            <IconButton color="primary" onClick={() => handleFetchRepository(key)} title="Fetch Repository" variant="contained">
+                                                <Download />
+                                            </IconButton>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                <Button onClick={() => handleOpenModal(true, key)} variant="contained">
                                                     Edit
-                                                </Mui.Button>
+                                                </Button>
                                                 <ButtonWithConfirmation label="Delete" msg={() => onDeleteRepository(key)} />
-                                            </Mui.Stack>
-                                        </Mui.TableCell>
-                                    </Mui.TableRow>
+                                            </Stack>
+                                        </TableCell>
+                                    </TableRow>
                                 ))}
-                        </Mui.TableBody>
-                    </Mui.Table>
-                </Mui.TableContainer>
-            </Mui.Stack>
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Stack>
 
-            <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                <Mui.Button onClick={() => handleOpenModal(false)} variant="contained">
+            <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                <Button onClick={() => handleOpenModal(false)} variant="contained">
                     Add Repository
-                </Mui.Button>
-            </Mui.Stack>
+                </Button>
+            </Stack>
 
             <PluginsRepositoryDialog onClose={handleCloseModal} onSubmit={handleSubmit} open={openModal} />
-        </Mui.Stack>
+        </Stack>
     );
 };
 
@@ -564,18 +603,18 @@ const Dispatcher = (props: DispatcherProps) => {
 const PluginsForm = () => {
     const { model, updateModel } = useModel();
 
-    const [selectedTab, setSelectedTab] = React.useState<string>("repositories");
+    const [selectedTab, setSelectedTab] = useState<string>("repositories");
 
-    const [snackOpen, setSnackOpen] = React.useState<bool>(false);
-    const [snackSeverity, setSnackSeverity] = React.useState<string>("success");
-    const [snackMessage, setSnackMessage] = React.useState<string>("");
+    const [snackOpen, setSnackOpen] = useState<boolean>(false);
+    const [snackSeverity, setSnackSeverity] = useState<string>("success");
+    const [snackMessage, setSnackMessage] = useState<string>("");
 
     const me = SRD.withDefault("", model.me);
     const config = SRD.withDefault({}, model.pluginsConfig);
     const plugins = SRD.withDefault([], model.pluginsEnabled);
     const repositories = SRD.withDefault({}, model.repositories);
 
-    const handleSelectedTab = (event: React.SyntheticEvent, newValue: string) => setSelectedTab(newValue);
+    const handleSelectedTab = (event: SyntheticEvent, newValue: string) => setSelectedTab(newValue);
 
     const handleSnackbar = (message: string, severity = "success") => {
         setSnackSeverity(severity);
@@ -583,7 +622,7 @@ const PluginsForm = () => {
         setSnackOpen(true);
     };
 
-    const handleSnackbarClose = async (event: React.SyntheticEvent | Event, reason?: string) => {
+    const handleSnackbarClose = async (event: SyntheticEvent | Event, reason?: string) => {
         if (reason !== "clickaway") {
             setSnackOpen(false);
         }
@@ -627,31 +666,31 @@ const PluginsForm = () => {
     return SRD.match(
         {
             success: (content) => (
-                <Mui.Stack sx={{ m: 2 }}>
-                    <Mui.Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
-                        <Mui.Alert onClose={handleSnackbarClose} severity={snackSeverity} sx={{ width: "100%" }}>
+                <Stack sx={{ m: 2 }}>
+                    <Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
+                        <Alert onClose={handleSnackbarClose} severity={snackSeverity} sx={{ width: "100%" }}>
                             {snackMessage}
-                        </Mui.Alert>
-                    </Mui.Snackbar>
+                        </Alert>
+                    </Snackbar>
 
-                    <Mui.Tabs centered onChange={handleSelectedTab} sx={{ marginBottom: 2 }} value={selectedTab}>
-                        <Mui.Tab label="Repositories" value="repositories" />
-                        <Mui.Tab label="Configuration" value="configuration" />
-                    </Mui.Tabs>
+                    <Tabs centered onChange={handleSelectedTab} sx={{ marginBottom: 2 }} value={selectedTab}>
+                        <Tab label="Repositories" value="repositories" />
+                        <Tab label="Configuration" value="configuration" />
+                    </Tabs>
 
                     <Dispatcher me={me} onDeleteRepository={handleDeleteRepository} onSubmitRepository={handleSubmitRepository} selectedTab={selectedTab} snack={handleSnackbar} />
-                </Mui.Stack>
+                </Stack>
             ),
             notAsked: () => <p>{"Let’s fetch some data!"}</p>,
             loading: () => (
-                <Mui.Stack justifyContent="center" sx={{ m: 4 }}>
-                    <Mui.CircularProgress />
-                </Mui.Stack>
+                <Stack justifyContent="center" sx={{ m: 4 }}>
+                    <CircularProgress />
+                </Stack>
             ),
             failure: (msg: string) => (
-                <Mui.Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
                     {`${msg}. Please, reload this page.`}
-                </Mui.Alert>
+                </Alert>
             ),
         },
         model.repositories

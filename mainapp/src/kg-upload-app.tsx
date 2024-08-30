@@ -1,8 +1,7 @@
-import * as React from "react";
 import { createRoot } from "react-dom/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 
-import { Alert, Button, FormControl, MenuItem, Select, Stack } from "@mui/material";
+import { Alert, Button, MenuItem, Select, Stack } from "@mui/material";
 import { Done, Folder } from "@mui/icons-material";
 
 import { VisuallyHiddenInput } from "./Utils";
@@ -38,7 +37,7 @@ export default function App(uploadFormData: UploadFormData) {
         void fetchDatabases();
     }, []);
 
-    const uploadFileHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadFileHandler = (event: ChangeEvent<HTMLInputElement>) => {
         setError(false);
         if (event.currentTarget.files === null) {
             return;
@@ -47,7 +46,7 @@ export default function App(uploadFormData: UploadFormData) {
         setFiles(filesList);
     };
 
-    const fileSubmitHandler = async (event: React.FormEvent) => {
+    const fileSubmitHandler = async (event: FormEvent) => {
         event.preventDefault();
         const formData = new FormData();
         formData.append("path", uploadFormData.currentSource);
@@ -73,7 +72,7 @@ export default function App(uploadFormData: UploadFormData) {
         setDatabases(json.resources);
     };
 
-    const handleDatabaseChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleDatabaseChange = (event: ChangeEvent<HTMLSelectElement>) => {
         const value = event.target.value;
         setSelectedDatabase(value.id);
         window.KGcreator.uploadFormData.selectedDatabase = value;

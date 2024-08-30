@@ -1,8 +1,8 @@
-import React from "react";
 import { ulid } from "ulid";
 import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import { Msg_, Type, Mode } from "../src/Component/UsersTable";
+import { Dispatch } from "react";
 const endpoint = "/api/v1/users";
 
 async function getUsers(): Promise<User[]> {
@@ -35,7 +35,7 @@ async function putUsers(body: User[]): Promise<User[]> {
     return mapUsers(json.resources);
 }
 
-async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
+async function saveUserBis(body: User, mode: Mode, updateModel: Dispatch<Msg>, updateLocal: Dispatch<Msg_>) {
     try {
         const response = await fetch(endpoint, {
             method: mode === Mode.Edition ? "put" : "post",
@@ -55,7 +55,7 @@ async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<M
     }
 }
 
-async function deleteUser(user: User, updateModel: React.Dispatch<Msg>) {
+async function deleteUser(user: User, updateModel: Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${user.login}`, { method: "delete" });
         const { message, resources } = (await response.json()) as { message: string; resources: User[] };
@@ -69,7 +69,7 @@ async function deleteUser(user: User, updateModel: React.Dispatch<Msg>) {
     }
 }
 
-function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>>) {
+function restoreUsers(updateModel: Dispatch<Msg>, setModal: Dispatch<SetStateAction<boolean>>) {
     return () => {
         getUsers()
             .then((person) => updateModel({ type: "users", payload: success(person) }))

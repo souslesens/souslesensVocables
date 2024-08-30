@@ -1,6 +1,5 @@
-import * as React from "react";
 import { createRoot } from "react-dom/client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, MouseEvent } from "react";
 
 import { Button, IconButton, InputAdornment, OutlinedInput, FormControl, Stack, Typography } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -25,7 +24,7 @@ export default function UserManagenent() {
         return json.token;
     };
 
-    const handleUpdateToken = async (_event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleUpdateToken = async (_event: MouseEvent<HTMLButtonElement>) => {
         setCurrentUserToken(await postToken());
     };
 

@@ -1,12 +1,35 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-import * as Mui from "@mui/material";
-import * as MuiColors from "@mui/material/colors";
-import * as MuiIcons from "@mui/icons-material";
-import * as MuiStyles from "@mui/material/styles";
-import * as React from "react";
-import * as z from "zod";
+import { useState, useMemo, useReducer, useEffect, ChangeEvent, forwardRef, Ref } from "react";
+import {
+    Box,
+    CircularProgress,
+    Stack,
+    TextField,
+    TableContainer,
+    Paper,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableSortLabel,
+    TableBody,
+    Chip,
+    Button,
+    Grid,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Modal,
+    Checkbox,
+    FormLabel,
+    FormGroup,
+    FormControlLabel,
+    Typography,
+    styled,
+} from "@mui/material";
+import { ExpandMore, ChevronRight } from "@mui/icons-material";
 
-import { TreeView, TreeItem, TreeItemProps, treeItemClasses, TreeItemContentProps, useTreeItem } from "@mui/x-tree-view";
+import { TreeView, TreeItem, TreeItemProps, TreeItemContentProps, useTreeItem } from "@mui/x-tree-view";
 
 import clsx from "clsx";
 import CsvDownloader from "react-csv-downloader";
@@ -22,12 +45,13 @@ import { identity, style, joinWhenArray, cleanUpText } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
+import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
 
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
-    const [filteringChars, setFilteringChars] = React.useState("");
-    const [orderBy, setOrderBy] = React.useState<keyof Profile>("name");
-    const [order, setOrder] = React.useState<Order>("asc");
+    const [filteringChars, setFilteringChars] = useState("");
+    const [orderBy, setOrderBy] = useState<keyof Profile>("name");
+    const [order, setOrder] = useState<Order>("asc");
 
     const me = SRD.withDefault("", model.me);
 
@@ -49,14 +73,14 @@ const ProfilesTable = () => {
             // eslint-disable-next-line react/no-unescaped-entities
             notAsked: () => <p>Let’s fetch some data!</p>,
             loading: () => (
-                <Mui.Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <Mui.CircularProgress />
-                </Mui.Box>
+                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                    <CircularProgress />
+                </Box>
             ),
             failure: (msg: string) => (
-                <Mui.Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
-                </Mui.Box>
+                </Box>
             ),
             success: (gotProfiles: Profile[]) => {
                 const datas = gotProfiles.map((profile) => {
@@ -93,66 +117,66 @@ const ProfilesTable = () => {
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
                 return (
-                    <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <Mui.TextField
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                        <TextField
                             label="Search Profiles by name"
                             id="filter profiles"
                             onChange={(event) => {
                                 setFilteringChars(event.target.value);
                             }}
                         />
-                        <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
-                            <Mui.Table stickyHeader>
-                                <Mui.TableHead>
-                                    <Mui.TableRow>
-                                        <Mui.TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                            <Mui.TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                        <TableContainer sx={{ height: "400px" }} component={Paper}>
+                            <Table stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                            <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
                                                 Name
-                                            </Mui.TableSortLabel>
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
-                                            <Mui.TableSortLabel active={orderBy === "allowedSourceSchemas"} direction={order} onClick={() => handleRequestSort("allowedSourceSchemas")}>
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                            <TableSortLabel active={orderBy === "allowedSourceSchemas"} direction={order} onClick={() => handleRequestSort("allowedSourceSchemas")}>
                                                 Allowed Sources
-                                            </Mui.TableSortLabel>
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
                                             Actions
-                                        </Mui.TableCell>
-                                    </Mui.TableRow>
-                                </Mui.TableHead>
-                                <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                        </TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedProfiles
                                         .filter((profile) => cleanUpText(profile.name).includes(cleanUpText(filteringChars)))
                                         .map((profile) => {
                                             return (
-                                                <Mui.TableRow key={profile.id}>
-                                                    <Mui.TableCell>{profile.name}</Mui.TableCell>
-                                                    <Mui.TableCell align="center">
-                                                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                <TableRow key={profile.id}>
+                                                    <TableCell>{profile.name}</TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             {profile.allowedSourceSchemas.map((source) => (
-                                                                <Mui.Chip key={source} label={source} size="small" />
+                                                                <Chip key={source} label={source} size="small" />
                                                             ))}
-                                                        </Mui.Stack>
-                                                    </Mui.TableCell>
-                                                    <Mui.TableCell align="center">
-                                                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                        </Stack>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             <ProfileForm profile={profile} me={me} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteProfile(profile, updateModel)} />
-                                                        </Mui.Stack>
-                                                    </Mui.TableCell>
-                                                </Mui.TableRow>
+                                                        </Stack>
+                                                    </TableCell>
+                                                </TableRow>
                                             );
                                         })}
-                                </Mui.TableBody>
-                            </Mui.Table>
-                        </Mui.TableContainer>
-                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                             <CsvDownloader separator="&#9;" filename="profiles" extension=".tsv" datas={datas as Datas}>
-                                <Mui.Button variant="outlined">Download CSV</Mui.Button>
+                                <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
                             <ProfileForm create={true} me={me} />
-                        </Mui.Stack>
-                    </Mui.Stack>
+                        </Stack>
+                    </Stack>
                 );
             },
         },
@@ -231,26 +255,26 @@ type ProfileFormProps = {
 };
 
 const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = "" }: ProfileFormProps) => {
-    const [nodesClicked, setNodeToExpand] = React.useState<Array<string>>([]);
+    const [nodesClicked, setNodeToExpand] = useState<Array<string>>([]);
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
-    const [issues, setIssues] = React.useState<ZodIssue[]>([]);
-    const sources = React.useMemo(() => {
+    const [issues, setIssues] = useState<ZodIssue[]>([]);
+    const sources = useMemo(() => {
         return unwrappedSources;
     }, [unwrappedSources]);
 
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
 
     const config = SRD.withDefault({ auth: "", tools_available: [] }, model.config);
-    const [profileModel, update] = React.useReducer(updateProfile, { modal: false, profileForm: profile });
+    const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
 
     // tools is all available tools (described in mainconfig.json) + tools that are found in forbiddenTools + ALL
     const tools: string[] = ["ALL", ...profileModel.profileForm.forbiddenTools, ...config.tools_available].filter((val, idx, array) => {
         return array.indexOf(val) === idx;
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         update({ type: Type.ResetProfile, payload: profile });
     }, [profileModel.modal]);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
@@ -258,12 +282,11 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         setNodeToExpand([]);
         update({ type: Type.UserClickedModal, payload: false });
     };
-    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
-        update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
+    const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLInputElement>) => update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
     const profilesSchema = create ? ProfileSchemaCreate : ProfileSchema;
     const zo = useZorm("form", profilesSchema, { setupListeners: false, customIssues: issues });
-    const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: ChangeEvent<HTMLInputElement>) => {
         const treeStr = src.treeStr;
 
         // Get the parent treeStr
@@ -316,7 +339,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         });
     };
 
-    const handleCheckedAll = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
+    const handleCheckedAll = (fieldname: string) => (event: ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } });
 
     function validateProfileName(profileName: string) {
@@ -417,27 +440,27 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                     nodeId={source.treeStr}
                     key={source.index.toString()}
                     label={
-                        <Mui.Grid container alignItems="center" spacing={2}>
-                            <Mui.Grid item xs>
+                        <Grid container alignItems="center" spacing={2}>
+                            <Grid item xs>
                                 <p style={{ margin: 0 }}>{source.name}</p>
-                            </Mui.Grid>
-                            <Mui.Grid item xs="auto">
-                                <Mui.FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                                    <Mui.InputLabel id="select-sources-access-control">Access Control</Mui.InputLabel>
-                                    <Mui.Select
+                            </Grid>
+                            <Grid item xs="auto">
+                                <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                                    <InputLabel id="select-sources-access-control">Access Control</InputLabel>
+                                    <Select
                                         labelId="select-sources-access-control"
                                         id="select-sources-access-control-select"
                                         value={value}
                                         label="AccessControl"
                                         onChange={handleSourceAccessControlUpdate(source)}
                                     >
-                                        <Mui.MenuItem value="forbidden">Forbidden</Mui.MenuItem>
-                                        <Mui.MenuItem value="read">Read</Mui.MenuItem>
-                                        <Mui.MenuItem value="readwrite">Read & Write</Mui.MenuItem>
-                                    </Mui.Select>
-                                </Mui.FormControl>
-                            </Mui.Grid>
-                        </Mui.Grid>
+                                        <MenuItem value="forbidden">Forbidden</MenuItem>
+                                        <MenuItem value="read">Read</MenuItem>
+                                        <MenuItem value="readwrite">Read & Write</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                        </Grid>
                     }
                 >
                     {displayFormTree(source.children)}
@@ -456,8 +479,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                 onNodeToggle={(_event, nodeIds) => {
                     setNodeToExpand(nodeIds);
                 }}
-                defaultCollapseIcon={<MuiIcons.ExpandMore sx={{ width: 30, height: 30 }} />}
-                defaultExpandIcon={<MuiIcons.ChevronRight sx={{ width: 30, height: 30 }} />}
+                defaultCollapseIcon={<ExpandMore sx={{ width: 30, height: 30 }} />}
+                defaultExpandIcon={<ChevronRight sx={{ width: 30, height: 30 }} />}
             >
                 {treeviewSources}
             </TreeView>
@@ -466,11 +489,11 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
 
     return (
         <>
-            <Mui.Button variant="contained" color="primary" onClick={handleOpen}>
+            <Button variant="contained" color="primary" onClick={handleOpen}>
                 {create ? "Create Profile" : "Edit"}
-            </Mui.Button>
-            <Mui.Modal onClose={handleClose} open={profileModel.modal}>
-                <Mui.Box
+            </Button>
+            <Modal onClose={handleClose} open={profileModel.modal}>
+                <Box
                     component="form"
                     ref={zo.ref}
                     onSubmit={(e) => {
@@ -486,8 +509,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                     sx={style}
                     style={{ maxHeight: "100%", overflow: "auto" }}
                 >
-                    <Mui.Stack spacing={4}>
-                        <Mui.TextField
+                    <Stack spacing={4}>
+                        <TextField
                             name={zo.fields.name()}
                             helperText={errorMessage(zo.errors.name)}
                             fullWidth
@@ -503,9 +526,9 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                             variant="standard"
                             disabled={!create}
                         />
-                        <Mui.FormControl>
-                            <Mui.InputLabel id="allowedSourceSchemas-label">Allowed Source Schemas</Mui.InputLabel>
-                            <Mui.Select
+                        <FormControl>
+                            <InputLabel id="allowedSourceSchemas-label">Allowed Source Schemas</InputLabel>
+                            <Select
                                 labelId="allowedSourceSchemas-label"
                                 id="allowedSourceSchemas"
                                 multiple
@@ -516,32 +539,29 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 onChange={handleFieldUpdate("allowedSourceSchemas")}
                             >
                                 {schemaTypes.map((schemaType, i) => (
-                                    <Mui.MenuItem key={schemaType} value={schemaType}>
-                                        <Mui.Checkbox
+                                    <MenuItem key={schemaType} value={schemaType}>
+                                        <Checkbox
                                             id={zo.fields.allowedSourceSchemas(i)("id")}
                                             name={zo.fields.allowedSourceSchemas(i)("name")}
                                             checked={profileModel.profileForm.allowedSourceSchemas.indexOf(schemaType) > -1}
                                         />
                                         {schemaType}
-                                    </Mui.MenuItem>
+                                    </MenuItem>
                                 ))}
-                            </Mui.Select>
-                        </Mui.FormControl>
-                        <Mui.Box style={{ maxHeight: "300px", overflow: "auto" }}>
-                            <Mui.FormControl>
-                                <Mui.FormLabel id="default-source-access-control-label">Default source access control</Mui.FormLabel>
+                            </Select>
+                        </FormControl>
+                        <Box style={{ maxHeight: "300px", overflow: "auto" }}>
+                            <FormControl>
+                                <FormLabel id="default-source-access-control-label">Default source access control</FormLabel>
                                 <SourcesTreeView />
-                            </Mui.FormControl>
-                        </Mui.Box>
-                        <Mui.FormGroup>
-                            <Mui.FormControlLabel
-                                control={<Mui.Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />}
-                                label="Allow all tools"
-                            />
+                            </FormControl>
+                        </Box>
+                        <FormGroup>
+                            <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
 
-                            <Mui.FormControl style={{ display: profileModel.profileForm.allowedTools === "ALL" ? "none" : "" }} disabled={profileModel.profileForm.allowedTools === "ALL"}>
-                                <Mui.InputLabel id="allowedTools-label">Allowed tools</Mui.InputLabel>
-                                <Mui.Select
+                            <FormControl style={{ display: profileModel.profileForm.allowedTools === "ALL" ? "none" : "" }} disabled={profileModel.profileForm.allowedTools === "ALL"}>
+                                <InputLabel id="allowedTools-label">Allowed tools</InputLabel>
+                                <Select
                                     labelId="allowedTools-label"
                                     id="allowedTools"
                                     multiple
@@ -551,16 +571,16 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                     onChange={handleFieldUpdate("allowedTools")}
                                 >
                                     {tools.map((tool) => (
-                                        <Mui.MenuItem key={tool} value={tool}>
+                                        <MenuItem key={tool} value={tool}>
                                             {tool}
-                                        </Mui.MenuItem>
+                                        </MenuItem>
                                     ))}
-                                </Mui.Select>
-                            </Mui.FormControl>
-                        </Mui.FormGroup>
-                        <Mui.FormControl>
-                            <Mui.InputLabel id="forbiddenTools-label">Forbidden tools</Mui.InputLabel>
-                            <Mui.Select
+                                </Select>
+                            </FormControl>
+                        </FormGroup>
+                        <FormControl>
+                            <InputLabel id="forbiddenTools-label">Forbidden tools</InputLabel>
+                            <Select
                                 labelId="forbiddenTools-label"
                                 id="forbiddenTools"
                                 multiple
@@ -571,14 +591,14 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 onChange={handleFieldUpdate("forbiddenTools")}
                             >
                                 {tools.map((tool) => (
-                                    <Mui.MenuItem key={tool} value={tool}>
-                                        <Mui.Checkbox checked={profileModel.profileForm.forbiddenTools.indexOf(tool) > -1} />
+                                    <MenuItem key={tool} value={tool}>
+                                        <Checkbox checked={profileModel.profileForm.forbiddenTools.indexOf(tool) > -1} />
                                         {tool}
-                                    </Mui.MenuItem>
+                                    </MenuItem>
                                 ))}
-                            </Mui.Select>
-                        </Mui.FormControl>
-                        <Mui.TextField
+                            </Select>
+                        </FormControl>
+                        <TextField
                             defaultValue={profileModel.profileForm.theme ?? model.config.data.theme.defaultTheme}
                             fullWidth
                             id="theme"
@@ -587,37 +607,37 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                             select
                         >
                             {getAvailableThemes().map((theme) => (
-                                <Mui.MenuItem key={theme} value={theme}>
+                                <MenuItem key={theme} value={theme}>
                                     {theme}
-                                </Mui.MenuItem>
+                                </MenuItem>
                             ))}
-                        </Mui.TextField>
-                        <Mui.Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} type="submit" variant="contained" color="primary">
+                        </TextField>
+                        <Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} type="submit" variant="contained" color="primary">
                             Save Profile
-                        </Mui.Button>
-                    </Mui.Stack>
-                </Mui.Box>
-            </Mui.Modal>
+                        </Button>
+                    </Stack>
+                </Box>
+            </Modal>
         </>
     );
 };
 
-const CustomContent = React.forwardRef(function CustomContent(props: TreeItemContentProps, ref) {
+const CustomContent = forwardRef(function CustomContent(props: TreeItemContentProps, ref) {
     const { classes, className, label, nodeId, icon: iconProp, expansionIcon, displayIcon } = props;
 
     const { disabled, expanded, selected, focused, handleExpansion, handleSelection, preventSelection } = useTreeItem(nodeId);
 
     const icon = iconProp || expansionIcon || displayIcon;
 
-    const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handleMouseDown = (event: MouseEvent<HTMLDivElement, MouseEvent>) => {
         preventSelection(event);
     };
 
-    const handleExpansionClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handleExpansionClick = (event: MouseEvent<HTMLDivElement, MouseEvent>) => {
         handleExpansion(event);
     };
 
-    const handleSelectionClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handleSelectionClick = (event: MouseEvent<HTMLDivElement, MouseEvent>) => {
         handleSelection(event);
     };
 
@@ -630,14 +650,14 @@ const CustomContent = React.forwardRef(function CustomContent(props: TreeItemCon
                 [classes.disabled]: disabled,
             })}
             onMouseDown={handleMouseDown}
-            ref={ref as React.Ref<HTMLDivElement>}
+            ref={ref as Ref<HTMLDivElement>}
         >
             <CustomExpansionArrow onClick={handleExpansionClick} className={classes.iconContainer}>
                 {icon}
             </CustomExpansionArrow>
-            <Mui.Typography onClick={handleSelectionClick} component="div" className={classes.label}>
+            <Typography onClick={handleSelectionClick} component="div" className={classes.label}>
                 {label}
-            </Mui.Typography>
+            </Typography>
         </div>
     );
 });
@@ -647,7 +667,7 @@ const expansionArrowStyles = {
     padding: "1em",
 };
 
-const CustomExpansionArrow = MuiStyles.styled("div")(expansionArrowStyles);
+const CustomExpansionArrow = styled("div")(expansionArrowStyles);
 function CustomTreeItem(props: TreeItemProps) {
     return <TreeItem ContentComponent={CustomContent} {...props} />;
 }

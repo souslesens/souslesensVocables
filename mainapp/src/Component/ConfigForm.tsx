@@ -1,5 +1,22 @@
-import * as Mui from "@mui/material";
-import * as React from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+    Alert,
+    AlertProps,
+    Autocomplete,
+    Box,
+    Button,
+    Checkbox,
+    CircularProgress,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
+    InputLabel,
+    MenuItem,
+    Select,
+    Snackbar,
+    Stack,
+    TextField,
+} from "@mui/material";
 import { z } from "zod";
 
 import { RD, SRD, failure, loading, success } from "srd";
@@ -38,20 +55,20 @@ function ZormStringArrayInputs({ arrayField, values }: { arrayField: FieldChain;
 
 interface Notification {
     message: string;
-    severity?: Mui.AlertProps["severity"];
+    severity?: AlertProps["severity"];
 }
 
 function useNotifier(): { notify: (state: Notification) => void; element: JSX.Element } {
-    const [notification, setNotification] = React.useState<Notification | null>(null);
+    const [notification, setNotification] = useState<Notification | null>(null);
 
     const element = (
-        <Mui.Snackbar autoHideDuration={2000} open={notification !== null} onClose={() => setNotification(null)}>
+        <Snackbar autoHideDuration={2000} open={notification !== null} onClose={() => setNotification(null)}>
             {notification !== null ? (
-                <Mui.Alert onClose={() => setNotification(null)} severity={notification.severity} sx={{ width: "100%" }}>
+                <Alert onClose={() => setNotification(null)} severity={notification.severity} sx={{ width: "100%" }}>
                     {notification.message}
-                </Mui.Alert>
+                </Alert>
             ) : undefined}
-        </Mui.Snackbar>
+        </Snackbar>
     );
     return {
         element,
@@ -62,16 +79,16 @@ function useNotifier(): { notify: (state: Notification) => void; element: JSX.El
 }
 
 const ConfigForm = () => {
-    const [allProfilesRD, setAllProfilesRD] = React.useState<RD<string, Profile[]>>(loading());
-    const [allToolsRD, setAllToolsRD] = React.useState<RD<string, Tool[]>>(loading());
-    const [configRD, setConfigRD] = React.useState<RD<string, Config>>(loading());
-    const [availableTools, setAvailableTools] = React.useState<string[]>([]);
-    const [defaultGroups, setDefaultGroups] = React.useState<string[]>([]);
-    const allThemes = React.useMemo(() => getAvailableThemes(), []);
+    const [allProfilesRD, setAllProfilesRD] = useState<RD<string, Profile[]>>(loading());
+    const [allToolsRD, setAllToolsRD] = useState<RD<string, Tool[]>>(loading());
+    const [configRD, setConfigRD] = useState<RD<string, Config>>(loading());
+    const [availableTools, setAvailableTools] = useState<string[]>([]);
+    const [defaultGroups, setDefaultGroups] = useState<string[]>([]);
+    const allThemes = useMemo(() => getAvailableThemes(), []);
 
     const notifier = useNotifier();
 
-    const loadConfig = React.useCallback(() => {
+    const loadConfig = useCallback(() => {
         getConfig()
             .then((config) => {
                 setDefaultGroups(config.defaultGroups);
@@ -81,7 +98,7 @@ const ConfigForm = () => {
             .catch(() => setConfigRD(failure("Couldn't load configuration")));
     }, [setConfigRD]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         getAllTools()
             .then((tools) => setAllToolsRD(success(tools)))
             .catch(() => setAllToolsRD(failure("Couln't load tools")));
@@ -106,11 +123,11 @@ const ConfigForm = () => {
             return (
                 <form ref={zo.ref}>
                     {notifier.element}
-                    <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <Mui.Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
-                            <Mui.FormControl>
-                                <Mui.InputLabel id={"default-groups-label"}>Default groups</Mui.InputLabel>
-                                <Mui.Select<string[]>
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                        <Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
+                            <FormControl>
+                                <InputLabel id={"default-groups-label"}>Default groups</InputLabel>
+                                <Select<string[]>
                                     id="default-groups"
                                     label="Default groups"
                                     labelId="default-groups-label"
@@ -120,21 +137,21 @@ const ConfigForm = () => {
                                     multiple
                                 >
                                     {allProfiles.map((profile) => (
-                                        <Mui.MenuItem key={profile.id} value={profile.id}>
-                                            <Mui.Checkbox checked={defaultGroups.includes(profile.id)} />
+                                        <MenuItem key={profile.id} value={profile.id}>
+                                            <Checkbox checked={defaultGroups.includes(profile.id)} />
                                             {profile.id}
-                                        </Mui.MenuItem>
+                                        </MenuItem>
                                     ))}
-                                </Mui.Select>
+                                </Select>
                                 <ZormStringArrayInputs arrayField={zo.fields.defaultGroups} values={defaultGroups} />
                                 {errorMessage(zo.errors.defaultGroups)}
-                            </Mui.FormControl>
-                        </Mui.Stack>
+                            </FormControl>
+                        </Stack>
 
-                        <Mui.Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
-                            <Mui.FormControl>
-                                <Mui.InputLabel id={"available-tools-label"}>Available tools</Mui.InputLabel>
-                                <Mui.Select<string[]>
+                        <Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
+                            <FormControl>
+                                <InputLabel id={"available-tools-label"}>Available tools</InputLabel>
+                                <Select<string[]>
                                     id={"available-tools"}
                                     labelId={"available-tools-label"}
                                     value={availableTools}
@@ -144,41 +161,41 @@ const ConfigForm = () => {
                                     multiple
                                 >
                                     {allTools.map((tool) => (
-                                        <Mui.MenuItem key={tool.name} value={tool.name} disabled={tool.name === "ConfigEditor"}>
-                                            <Mui.Checkbox checked={availableTools.includes(tool.name)} />
+                                        <MenuItem key={tool.name} value={tool.name} disabled={tool.name === "ConfigEditor"}>
+                                            <Checkbox checked={availableTools.includes(tool.name)} />
                                             {tool.name}&nbsp;<i style={{ opacity: 0.5 }}>({tool.type})</i>
-                                        </Mui.MenuItem>
+                                        </MenuItem>
                                     ))}
-                                </Mui.Select>
+                                </Select>
                                 <ZormStringArrayInputs arrayField={zo.fields.tools_available} values={availableTools} />
                                 {errorMessage(zo.errors.tools_available)}
-                            </Mui.FormControl>
-                        </Mui.Stack>
+                            </FormControl>
+                        </Stack>
 
-                        <Mui.Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
-                            <Mui.Autocomplete
+                        <Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
+                            <Autocomplete
                                 disablePortal
                                 options={allThemes}
                                 defaultValue={config.theme.defaultTheme}
-                                renderInput={(params) => <Mui.TextField {...params} name={zo.fields.theme.defaultTheme()} label="Default instance theme" />}
+                                renderInput={(params) => <TextField {...params} name={zo.fields.theme.defaultTheme()} label="Default instance theme" />}
                             />
                             {errorMessage(zo.errors.theme.defaultTheme)}
 
-                            <Mui.FormGroup>
-                                <Mui.FormControlLabel
-                                    control={<Mui.Checkbox name={zo.fields.theme.selector()} defaultChecked={config.theme.selector} />}
+                            <FormGroup>
+                                <FormControlLabel
+                                    control={<Checkbox name={zo.fields.theme.selector()} defaultChecked={config.theme.selector} />}
                                     label="Display the theme selector in the navigation bar"
                                 />
-                            </Mui.FormGroup>
+                            </FormGroup>
                             {errorMessage(zo.errors.theme.selector)}
-                        </Mui.Stack>
+                        </Stack>
 
-                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <Mui.Button type="submit" variant="contained">
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <Button type="submit" variant="contained">
                                 Save Settings
-                            </Mui.Button>
-                        </Mui.Stack>
-                    </Mui.Stack>
+                            </Button>
+                        </Stack>
+                    </Stack>
                 </form>
             );
         },
@@ -192,14 +209,14 @@ const ConfigForm = () => {
             success: (content) => content,
             notAsked: () => <p>Let’s fetch some data!</p>,
             loading: () => (
-                <Mui.Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <Mui.CircularProgress />
-                </Mui.Box>
+                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                    <CircularProgress />
+                </Box>
             ),
             failure: (msg: string) => (
-                <Mui.Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
                     {`${msg}. Please, reload this page.`}
-                </Mui.Alert>
+                </Alert>
             ),
         },
         renderRD

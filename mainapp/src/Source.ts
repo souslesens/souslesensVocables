@@ -3,7 +3,7 @@ import { Mode, Type, Msg_ } from "./Component/SourcesTable";
 import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import React from "react";
-import * as z from "zod";
+import { z } from "zod";
 
 const endpoint = "/api/v1/sources";
 const indicesEndpoint = "/api/v1/elasticsearch/indices";

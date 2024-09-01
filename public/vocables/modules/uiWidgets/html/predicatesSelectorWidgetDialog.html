@@ -6,10 +6,15 @@
         border-radius: 3px;
         background-color: #eee;
     }
+
+
+
+
     */
     input[type="checkbox"] {
         width: 30px;
     }
+
 </style>
 <div id="editPredicate_mainDiv" style="display: flex; flex-direction: row">
     <div class="editPredicatePanel" id="editPredicate_propertyDiv">
@@ -50,7 +55,7 @@
                     <select id="editPredicate_objectSelect" onchange="PredicatesSelectorWidget.onSelectCurrentVocabObject($(this).val())"></select>
                     <br />
                 </div>
-                <textarea id="editPredicate_objectValue" class="edit-Predicate-value-chosen" style="width: 95%; border-radius: 10px; display: none"></textarea>
+                <textarea id="editPredicate_objectValue" class="edit-Predicate-value-chosen" style="width: 95%; border-radius: 4px;  background-color: #eee !important; display: none"></textarea>
 
                 <div id="editPredicate_customContentDiv"></div>
                 <select

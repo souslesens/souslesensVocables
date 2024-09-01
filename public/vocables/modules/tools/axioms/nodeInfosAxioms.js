@@ -14,6 +14,7 @@ var NodeInfosAxioms = (function () {
         self.allClassesMap = {};
 
         $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
+            if( divId && divId.indexOf("Dialog")>-1)
             $("#" + divId).dialog("open");
             Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv");
             Axioms_manager.initResourcesMap(self.currentSource, function (err, result) {

@@ -38,7 +38,7 @@ var Axioms_manager = (function () {
                 result.forEach(function (item) {
                     if (!uniqueIds[item.id]) {
                         uniqueIds[item.id] = 1;
-                        item.label = item.label.replace(/ /g, "_");
+                        item.label = item.label;//.replace(/ /g, "_");
                         item.resourceType = "Class";
                         self.allClasses.push(item);
                     }
@@ -70,7 +70,7 @@ var Axioms_manager = (function () {
                     if (!uniqueIds[item.id]) {
                         uniqueIds[item.id] = 1;
 
-                        item.label = item.label.replace(/ /g, "_");
+                        item.label = item.label;//,.replace(/ /g, "_");
                         item.resourceType = "ObjectProperty";
                         self.allProperties.push(item);
                     }

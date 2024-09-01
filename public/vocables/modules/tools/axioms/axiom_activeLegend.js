@@ -44,47 +44,51 @@ var Axiom_activeLegend = (function () {
             if (node.data.type == "Class") {
                 self.hideLegendItems();
                 var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
+
+                var newObject = {id: "createClass", label: "_Create new Class_"}
                 if (siblingObjectPropertyUri) {
                     Axioms_suggestions.getValidClassesForProperty(siblingObjectPropertyUri, function (err, classes) {
-                        self.setSuggestionsSelect(classes, true);
+                        self.setSuggestionsSelect(classes, true, newObject);
                     });
                 } else {
                     var classes = Axiom_manager.getAllClasses();
-                    self.setSuggestionsSelect(classes, true);
+                    self.setSuggestionsSelect(classes, true, newObject);
                 }
             } else if (node.data.type == "ObjectProperty") {
                 self.hideLegendItems();
+
                 var domainClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
                 if (!domainClassUri) {
                     domainClassUri = self.getPropertyDomainAncestorClass(Axioms_graph.currentGraphNode.id);
                 }
 
+                var newObject = {id: "createObjectProperty", label: "_Create new ObjectProperty_"}
                 if (domainClassUri) {
                     Axioms_suggestions.getValidPropertiesForClass(domainClassUri, function (err, properties) {
-                        self.setSuggestionsSelect(properties, true);
+                        self.setSuggestionsSelect(properties, true, newObject);
                     });
                 } else {
                     var properties = Axiom_manager.getAllProperties();
-                    self.setSuggestionsSelect(properties, true);
+                    self.setSuggestionsSelect(properties, true, newObject);
                 }
             } else if (node.data.type == "Restriction") {
                 self.hideLegendItems();
                 var suggestions = [
-                    { id: "http://www.w3.org/2002/07/owl#someValuesFrom", label: "some" },
-                    { id: "http://www.w3.org/2002/07/owl#allValuesFrom", label: "only" },
-                    { id: "http://www.w3.org/2002/07/owl#hasValue", label: "value" },
-                    { id: "http://www.w3.org/2002/07/owl#maxCardinality", label: "max" },
-                    { id: "http://www.w3.org/2002/07/owl#minCardinality", label: "min" },
-                    { id: "http://www.w3.org/2002/07/owl#cardinality", label: "cardinality" },
+                    {id: "http://www.w3.org/2002/07/owl#someValuesFrom", label: "some"},
+                    {id: "http://www.w3.org/2002/07/owl#allValuesFrom", label: "only"},
+                    {id: "http://www.w3.org/2002/07/owl#hasValue", label: "value"},
+                    {id: "http://www.w3.org/2002/07/owl#maxCardinality", label: "max"},
+                    {id: "http://www.w3.org/2002/07/owl#minCardinality", label: "min"},
+                    {id: "http://www.w3.org/2002/07/owl#cardinality", label: "cardinality"},
                 ];
                 self.setSuggestionsSelect(suggestions, false);
             } else if (node.data.type == "Connective") {
                 self.hideLegendItems();
                 var suggestions = [
-                    { label: "Union", id: "http://www.w3.org/2002/07/owl#unionOf" },
-                    { label: "Intersection", id: "http://www.w3.org/2002/07/owl#intersectionOf" },
-                    { label: "Complement", id: "http://www.w3.org/2002/07/owl#complementOf" },
-                    { label: "Enumeration", id: "http://www.w3.org/2002/07/owl#oneOf" },
+                    {label: "Union", id: "http://www.w3.org/2002/07/owl#unionOf"},
+                    {label: "Intersection", id: "http://www.w3.org/2002/07/owl#intersectionOf"},
+                    {label: "Complement", id: "http://www.w3.org/2002/07/owl#complementOf"},
+                    {label: "Enumeration", id: "http://www.w3.org/2002/07/owl#oneOf"},
                 ];
                 self.setSuggestionsSelect(suggestions, false);
             } else {
@@ -142,7 +146,7 @@ var Axiom_activeLegend = (function () {
     if unique, filters exiting nodes in graph before showing list
     *
      */
-    self.setSuggestionsSelect = function (items, unique) {
+    self.setSuggestionsSelect = function (items, unique, newOption) {
         if (unique) {
             var existingNodeIds = Axioms_graph.axiomsVisjsGraph.data.nodes.getIds();
             var filteredItems = [];
@@ -154,18 +158,58 @@ var Axiom_activeLegend = (function () {
         } else {
             filteredItems = items;
         }
+        if (newOption) {
+            filteredItems.splice(0, 0, newOption);
+        }
         common.fillSelectOptions("axioms_legend_suggestionsSelect", filteredItems, false, "label", "id");
     };
 
+
     self.onSuggestionsSelect = function (resourceUri, legendNode) {
+
+
+        // new Axiom
         if (!Axiom_activeLegend.isLegendActive) {
             // create new Axiom
             Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv", NodeInfosAxioms.currentSource, NodeInfosAxioms.currentResource, resourceUri);
             return $("#axioms_legend_suggestionsSelect").children().remove().end();
         }
+        // new Class
+        if (resourceUri == "createClass") {
+
+            var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
+            if (Axioms_graph.currentGraphNode.data.type == "Restriction" && siblingObjectPropertyUri) {
+                Axioms_suggestions.getValidClassesForProperty(siblingObjectPropertyUri, function (err, classes) {
+                    if (err) {
+                        return alert(err)
+                    }
+                    self.showCreateResourceBot("Class", classes)
+                });
+            } else {
+                self.showCreateResourceBot("Class", null)
+            }
+            return;
+        }
+        // new ObjectProperty
+        if (resourceUri == "createObjectProperty") {
+            var domainClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
+            if (!domainClassUri) {
+                domainClassUri = self.getPropertyDomainAncestorClass(Axioms_graph.currentGraphNode.id);
+            }
+            if (Axioms_graph.currentGraphNode.data.type == "Restriction" && domainClassUri) {
+                Axioms_suggestions.getValidPropertiesForClass(domainClassUri, function (err, properties) {
+                    if (err) {
+                        return alert(err)
+                    }
+                    self.showCreateResourceBot("ObjectProperty", properties)
+                });
+            } else {
+                self.showCreateResourceBot("ObjectProperty", null)
+                return;
+            }
+        }
 
         var newResource;
-
         var nodeType = self.currentLegendNodeType;
 
         if (legendNode) {
@@ -222,7 +266,7 @@ var Axiom_activeLegend = (function () {
             return;
         }
 
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         var level = Axioms_graph.currentGraphNode.level + 1;
         newResource.type = newResource.resourceType;
         newResource.level = level;
@@ -259,7 +303,9 @@ var Axiom_activeLegend = (function () {
 
         self.hideForbiddenResources(Axioms_graph.currentGraphNode.data.type);
         $("#axioms_legend_suggestionsSelect").empty();
-    };
+    }
+    ;
+
 
     self.updateCurrentGraphNode = function (newVisjsNode) {
         var stay = false;
@@ -340,7 +386,7 @@ var Axiom_activeLegend = (function () {
         var newNodes = [];
         legendNodes.forEach(function (nodeId) {
             var hidden = !hiddenNodes || hiddenNodes.indexOf(nodeId) > -1;
-            newNodes.push({ id: nodeId, hidden: hidden });
+            newNodes.push({id: nodeId, hidden: hidden});
         });
         Axiom_activeLegend.axiomsLegendVisjsGraph.data.nodes.update(newNodes);
     };
@@ -354,7 +400,7 @@ var Axiom_activeLegend = (function () {
         };
         self.currentNodeType = selectedObject.resourceType;
 
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
         var visjsNode = Axioms_graph.getVisjsNode(currentNode, 0);
         visjsNode.data.predicate = selectedObject.axiomType;
 
@@ -441,19 +487,24 @@ var Axiom_activeLegend = (function () {
         $("#smallDialogDiv").dialog("open");
     };
 
-    self.drawLegend = function (graphLegendDiv) {
-        var visjsData = { nodes: [], edges: [] };
+    self.drawLegend = function (graphLegendDiv, legendItems,options) {
+        if(!options){
+            options={}
+        }
+        var visjsData = {nodes: [], edges: []};
 
-        var legendItems = [
-            { label: "Class", color: "#00afef" },
-            { label: "ObjectProperty", color: "#f5ef39" },
-            { label: "Restriction", color: "#cb9801" },
-            { label: "Connective", color: "#70ac47" },
-            /*  {label: "Union", color: "#70ac47", symbol: "⨆"},
-                  {label: "Intersection", color: "#70ac47", symbol: "⊓"},
-                  {label: "Complement", color: "#70ac47", symbol: "┓"},
-                  {label: "DisjointWith", color: "#70ac47", symbol: "⊑ ┓"},*/
-        ];
+        if (!legendItems) {
+            legendItems = [
+                {label: "Class", color: "#00afef"},
+                {label: "ObjectProperty", color: "#f5ef39"},
+                {label: "Restriction", color: "#cb9801"},
+                {label: "Connective", color: "#70ac47"},
+                /*  {label: "Union", color: "#70ac47", symbol: "⨆"},
+                      {label: "Intersection", color: "#70ac47", symbol: "⊓"},
+                      {label: "Complement", color: "#70ac47", symbol: "┓"},
+                      {label: "DisjointWith", color: "#70ac47", symbol: "⊑ ┓"},*/
+            ];
+        }
 
         var yOffset = -450;
         legendItems.forEach(function (item) {
@@ -476,7 +527,7 @@ var Axiom_activeLegend = (function () {
                 x: 0,
                 y: yOffset,
 
-                fixed: { x: true, y: true },
+                fixed: {x: true, y: true},
             });
             yOffset += 50;
         });
@@ -487,12 +538,13 @@ var Axiom_activeLegend = (function () {
             },
 
             visjsOptions: {},
-            onclickFn: Axiom_activeLegend.onLegendNodeClick,
-            onRightClickFn: Axiom_activeLegend.showGraphPopupMenu,
+            onclickFn: options.onLegendNodeClick || Axiom_activeLegend.onLegendNodeClick,
+            onRightClickFn:  options.showLegendGraphPopupMenu || Axiom_activeLegend.showGraphPopupMenu,
         };
 
         self.axiomsLegendVisjsGraph = new VisjsGraphClass(graphLegendDiv || self.graphLegendDiv, visjsData, options);
-        self.axiomsLegendVisjsGraph.draw(function () {});
+        self.axiomsLegendVisjsGraph.draw(function () {
+        });
     };
 
     self.clearAxiom = function () {
@@ -695,51 +747,42 @@ var Axiom_activeLegend = (function () {
         return "_:b" + self.bNodeCounter++;
     };
 
-    self.testAxioms = [
-        {
-            predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-            subject: "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
-            object: "_766d7ff1-231a-458b-88f6-06a93394a27d",
-        },
-        {
-            predicate: "http://www.w3.org/2002/07/owl#onProperty",
-            subject: "_766d7ff1-231a-458b-88f6-06a93394a27d",
-            object: "http://purl.obolibrary.org/obo/BFO_0000057",
-        },
-        {
-            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-            subject: "_766d7ff1-231a-458b-88f6-06a93394a27d",
-            object: "https://spec.industrialontologies.org/ontology/core/Core/Buyer",
-        },
-        {
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            subject: "https://spec.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess",
-            object: "http://www.w3.org/2002/07/owl#Class",
-        },
-        {
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            subject: "http://purl.obolibrary.org/obo/BFO_0000057",
-            object: "http://www.w3.org/2002/07/owl#ObjectProperty",
-        },
-        {
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            subject: "_766d7ff1-231a-458b-88f6-06a93394a27d",
-            object: "http://www.w3.org/2002/07/owl#Restriction",
-        },
-        {
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            subject: "_0b680e14-f039-4a68-b600-012652eca77e",
-            object: "http://www.w3.org/2002/07/owl#Ontology",
-        },
-        {
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            subject: "https://spec.industrialontologies.org/ontology/core/Core/Buyer",
-            object: "http://www.w3.org/2002/07/owl#Class",
-        },
-    ];
+    self.showCreateResourceBot = function (resourceType, filteredUris) {
+        var botWorkFlow
+        if (resourceType == "Class") {
+            botWorkFlow = CreateAxiomResource_bot.workflowNewClass
+            // Axiom_manager.allClasses=null;
+
+
+        } else if (resourceType == "ObjectProperty") {
+            botWorkFlow = CreateAxiomResource_bot.workflowNewObjectProperty
+            //  Axiom_manager.allProperties=null;
+        } else {
+            return alert("no valid resourceType")
+        }
+        return CreateAxiomResource_bot.start(botWorkFlow, {filteredUris: filteredUris}, function (err, result) {
+            if (err) {
+                return alert(err)
+            }
+            // update Axiom_manager
+            if (resourceType == "Class") {
+                Axiom_manager.allClasses.push(CreateAxiomResource_bot.params.newObject)
+            } else if (resourceType == "ObjectProperty") {
+                Axiom_manager.allProperties.push(CreateAxiomResource_bot.params.newObject)
+            }
+            Axiom_manager.allResourcesMap[CreateAxiomResource_bot.params.newObject.id] = CreateAxiomResource_bot.params.newObject;
+
+
+            $("#axioms_legend_suggestionsSelect option").eq(0).before($("<option></option>").val(CreateAxiomResource_bot.params.newObject.id).text(CreateAxiomResource_bot.params.newObject.label));
+            //   self.onLegendNodeClick({data:{id:"Class"}})
+
+        })
+    }
+
 
     return self;
-})();
+})
+();
 
 //Axiom_activeLegend.testTriplesCreation()
 

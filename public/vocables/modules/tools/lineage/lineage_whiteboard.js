@@ -3084,7 +3084,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 if (!subPropertyLabel) {
                     return;
                 }
-                Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, edge.data.propertyId, subPropertyLabel, function (err, result) {
+                Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, edge.data.propertyId, subPropertyLabel, true,function (err, result) {
                     if (err) {
                         return alert(err);
                     }

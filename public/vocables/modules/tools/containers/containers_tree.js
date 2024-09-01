@@ -43,6 +43,7 @@ var Containers_tree = (function () {
         }
     };
 
+
     self.drawTree = function (jstreeDiv, source, rootNode, data, options, callback) {
         var jstreeData = [];
         self.idsMap = {};
@@ -52,13 +53,20 @@ var Containers_tree = (function () {
         data.forEach(function (item) {
             var id = item.member.value;
             var label = item.memberLabel ? item.memberLabel.value : Sparql_common.getLabelFromURI(item.member.value);
-            var jstreeId = "_" + common.getRandomHexaId(5);
+            var jstreeId = "_" + common.getRandomHexaId(8);
 
             var parent;
             if (rootNode) {
                 parent = rootNode;
             } else {
-                parent = item.parent.value;
+                if( self.idsMap[item.parent.value])
+               parent= self.idsMap[item.parent.value]
+                else{
+                    parent= "_" + common.getRandomHexaId(8);
+                    self.idsMap[item.parent.value]=parent
+
+                }
+               // parent = item.parent.value;
             }
             if (!self.idsMap[id]) {
                 self.idsMap[id] = jstreeId;
@@ -754,7 +762,7 @@ var Containers_tree = (function () {
             var jstreeData = [];
             nodesData.forEach(function (nodeData) {
                 jstreeData.push({
-                    id: nodeData.id + "_" + common.getRandomHexaId(5),
+                    id: nodeData.id + "_" + common.getRandomHexaId(8),
                     text: nodeData.label,
                     parent: container.id,
                     type: "class",

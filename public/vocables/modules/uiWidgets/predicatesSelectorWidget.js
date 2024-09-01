@@ -106,6 +106,8 @@ var PredicatesSelectorWidget = (function () {
 
         // var properties = Config.Lineage.basicObjectProperties;
 
+
+
         self.configure(configureFn, function (err, result) {
             if (callback) {
                 return callback();

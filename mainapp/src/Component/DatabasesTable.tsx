@@ -1,4 +1,4 @@
-import { useReducer, useState, ChangeEvent, SyntheticEvent } from "react";
+import { useReducer, useState, ChangeEvent, SyntheticEvent, MouseEventHandler, Dispatch } from "react";
 import {
     Button,
     Dialog,
@@ -27,7 +27,7 @@ import { Done, Download, Edit } from "@mui/icons-material";
 import { SRD } from "srd";
 import { ulid } from "ulid";
 
-import { useModel } from "../Admin";
+import { Msg, useModel } from "../Admin";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
 import { TestingButton } from "./TestingButton";
@@ -56,7 +56,13 @@ type DatabaseFormProps = {
     create?: boolean;
 };
 
-type Msg_ = { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } };
+type Msg_ =
+    | { type: Type.ResetDatabase; payload: Database }
+    | { type: Type.ServerRespondedWithDatabases; payload: { id: string; value: string } }
+    | {
+          type: Type.UserUpdatedField;
+          payload: { id: string; value: string | number };
+      };
 
 const updateDatabase = (databaseEditionState: DatabaseEditionState, msg: Msg_): DatabaseEditionState => {
     switch (msg.type) {
@@ -73,10 +79,10 @@ const updateDatabase = (databaseEditionState: DatabaseEditionState, msg: Msg_): 
     }
 };
 
-const validateForm = (form: DatabaseFormProps) => {
+const validateForm = (form: Database) => {
     const validation = DatabaseSchema.safeParse(form);
 
-    const errors = {};
+    const errors: Record<string, string> = {};
     if (!validation.success) {
         validation.error.issues.map((item) => item.path.map((path) => (errors[path] = item.message)));
     }
@@ -87,7 +93,7 @@ const validateForm = (form: DatabaseFormProps) => {
 const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false, me = "" }: DatabaseFormProps) => {
     const { updateModel } = useModel();
     const [databaseModel, update] = useReducer(updateDatabase, { form: database });
-    const [currentErrors, setErrors] = useState({});
+    const [currentErrors, setErrors] = useState<Record<string, string>>({});
     const [open, setOpen] = useState(false);
 
     const handleOpen = () => {
@@ -97,7 +103,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
     };
     const handleClose = () => setOpen(false);
 
-    const handleValidation = (event: ChangeEvent<HTMLInputElement>) => {
+    const handleValidation: MouseEventHandler = (event) => {
         const errors = validateForm(databaseModel.form);
         setErrors(errors);
 
@@ -110,12 +116,12 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                 void editDatabase(databaseModel.form, updateModel);
             }
             const mode = create ? "create" : "edit";
-            writeLog(me, "ConfigEditor", mode, databaseModel.form.name);
+            void writeLog(me, "ConfigEditor", mode, databaseModel.form.name ?? "");
         }
     };
 
     const handleFieldUpdate = (fieldName: string) => (event: ChangeEvent<HTMLInputElement>) => {
-        let fieldValue = event.target.value;
+        let fieldValue: string | number = event.target.value;
 
         switch (fieldName) {
             case "port":
@@ -144,7 +150,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                     <Stack spacing={4}>
                         <TextField
                             defaultValue={databaseModel.form.id}
-                            error={currentErrors.name}
+                            error={currentErrors.name !== undefined}
                             fullWidth
                             helperText={currentErrors.name}
                             id="name"
@@ -154,7 +160,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                         />
                         <TextField
                             defaultValue={databaseModel.form.driver}
-                            error={currentErrors.driver}
+                            error={currentErrors.driver !== undefined}
                             fullWidth
                             helperText={currentErrors.driver}
                             id="driver"
@@ -168,7 +174,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                         </TextField>
                         <Stack direction="row" spacing={1}>
                             <TextField
-                                error={currentErrors.host}
+                                error={currentErrors.host !== undefined}
                                 fullWidth
                                 helperText={currentErrors.host}
                                 id="host"
@@ -178,7 +184,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                                 value={databaseModel.form.host}
                             />
                             <TextField
-                                error={currentErrors.port}
+                                error={currentErrors.port !== undefined}
                                 helperText={currentErrors.port}
                                 id="port"
                                 label="Port"
@@ -189,7 +195,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             />
                         </Stack>
                         <TextField
-                            error={currentErrors.database}
+                            error={currentErrors.database !== undefined}
                             fullWidth
                             helperText={currentErrors.database}
                             id="database"
@@ -199,7 +205,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             value={databaseModel.form.database}
                         />
                         <TextField
-                            error={currentErrors.user}
+                            error={currentErrors.user !== undefined}
                             fullWidth
                             helperText={currentErrors.user}
                             id="username"
@@ -212,7 +218,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button color="primary" component="label" onClick={handleValidation} startIcon={<Done />} type="submit" variant="contained">
+                    <Button color="primary" onClick={handleValidation} startIcon={<Done />} type="submit" variant="contained">
                         Submit
                     </Button>
                 </DialogActions>
@@ -227,16 +233,16 @@ const DatabasesTable = () => {
     const [orderBy, setOrderBy] = useState<keyof Database>("id");
     const [order, setOrder] = useState<Order>("asc");
 
-    const [snackOpen, setSnackOpen] = useState<bool>(false);
-    const [snackMessage, setSnackMessage] = useState<string>("");
+    const [snackOpen, setSnackOpen] = useState(false);
+    const [snackMessage, setSnackMessage] = useState("");
 
     const me = SRD.withDefault("", model.me);
 
     type Order = "asc" | "desc";
 
-    const handleCopyIdentifier = async (event: ChangeEvent<HTMLInputElement>) => {
+    const handleCopyIdentifier = (id: string) => {
         setSnackOpen(false);
-        navigator.clipboard.writeText(event.target.innerText);
+        void navigator.clipboard.writeText(id);
         setSnackOpen(true);
         setSnackMessage("The identifier has been copied in the clipboard.");
     };
@@ -247,16 +253,16 @@ const DatabasesTable = () => {
         setOrderBy(property);
     }
 
-    const handleSnackbarClose = async (event: SyntheticEvent | Event, reason?: string) => {
+    const handleSnackbarClose = (_event: SyntheticEvent | Event, reason?: string) => {
         if (reason === "clickaway") {
             return;
         }
         setSnackOpen(false);
     };
 
-    const handleDeleteDatabase = async (database: Database, updateModel) => {
-        deleteDatabase(database, updateModel);
-        writeLog(me, "ConfigEditor", "delete", database.name);
+    const handleDeleteDatabase = (database: Database, updateModel: Dispatch<Msg>) => {
+        void deleteDatabase(database, updateModel);
+        void writeLog(me, "ConfigEditor", "delete", database.name ?? "");
     };
 
     const renderDatabases = SRD.match(
@@ -329,7 +335,7 @@ const DatabasesTable = () => {
                                                 <TableRow key={database.name}>
                                                     <TableCell>{database.name}</TableCell>
                                                     <TableCell align="center">
-                                                        <Chip label={database.id} onClick={handleCopyIdentifier} size="small" />
+                                                        <Chip label={database.id} onClick={() => handleCopyIdentifier(database.id)} size="small" />
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Chip label={database.driver} size="small" />
@@ -405,4 +411,4 @@ function createSingleDatabaseDownloadUrl(databases: Database[], databaseId: stri
     }
 }
 
-export { DatabasesTable, Mode, Msg_, Type };
+export { DatabasesTable, Mode, Type };

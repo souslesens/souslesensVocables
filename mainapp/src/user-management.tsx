@@ -7,7 +7,15 @@ import CheckIcon from "@mui/icons-material/Check";
 
 import { fetchMe } from "./Utils";
 
-export default function UserManagenent() {
+declare global {
+    interface Window {
+        UserManagement: {
+            createApp: () => void;
+        };
+    }
+};
+
+export default function UserManagement() {
     const [currentUserToken, setCurrentUserToken] = useState<string>("");
     const [copied, setCopied] = useState<boolean>(false);
 
@@ -62,7 +70,10 @@ export default function UserManagenent() {
     );
 }
 
-const container = document.getElementById("mount-user-management-here");
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const root = createRoot(container!);
-root.render(<UserManagenent />);
+window.UserManagement.createApp = function createApp() {
+    const container = document.getElementById("mount-user-management-here");
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const root = createRoot(container!);
+    root.render(<UserManagement />);
+    return root.unmount.bind(root);
+};

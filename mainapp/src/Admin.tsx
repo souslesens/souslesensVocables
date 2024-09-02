@@ -5,7 +5,7 @@ import { RD, loading, failure, success } from "srd";
 
 import { ConfigType, getConfig } from "./Config";
 import { Database, getDatabases } from "./Database";
-import { Log, getLogFiles } from "./Log";
+import { Log, LogFiles, getLogFiles } from "./Log";
 import { getEnabledPlugins, PluginOptionType, readConfig, readRepositories, RepositoryType } from "./Plugins";
 import { Profile, getProfiles } from "./Profile";
 import { ServerSource, getSources, getIndices, getGraphs, getMe, GraphInfo } from "./Source";
@@ -27,7 +27,7 @@ type Model = {
     graphs: RD<string, string[]>;
     me: RD<string, string>;
     databases: RD<string, Database[]>;
-    logFiles: RD<string, Log[]>;
+    logFiles: RD<string, LogFiles>;
     logs: RD<string, Log[]>;
     config: RD<string, ConfigType>;
     isModalOpen: boolean;
@@ -45,7 +45,7 @@ export type Msg =
     | { type: "dialog"; payload: {} }
     | { type: "graphs"; payload: RD<string, GraphInfo[]> }
     | { type: "indices"; payload: RD<string, string[]> }
-    | { type: "logFiles"; payload: RD<string, Log[]> }
+    | { type: "logFiles"; payload: RD<string, LogFiles> }
     | { type: "logs"; payload: RD<string, Log[]> }
     | { type: "me"; payload: RD<string, string> }
     | { type: "pluginsConfig"; payload: RD<string, PluginOptionType[]> }

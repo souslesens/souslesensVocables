@@ -33,7 +33,7 @@ export const LogsTable = () => {
     const [orderBy, setOrderBy] = useState<keyof Log>("timestamp");
     const [order, setOrder] = useState<Order>("desc");
 
-    const [selectedPeriod, setSelectedPeriod] = useState<string>(undefined);
+    const [selectedPeriod, setSelectedPeriod] = useState<string | undefined>(undefined);
     const [selectedLogs, setSelectedLogs] = useState<Log[]>([]);
 
     type Order = "asc" | "desc";
@@ -49,7 +49,14 @@ export const LogsTable = () => {
     };
 
     useEffect(() => {
-        getLogs(selectedPeriod).then((data) => setSelectedLogs(data));
+        if (selectedPeriod !== undefined) {
+            getLogs(selectedPeriod)
+                .then((data) => setSelectedLogs(data))
+                .catch(() => {
+                    console.error("Error getting logs");
+                    setSelectedLogs([]);
+                });
+        }
     }, [selectedPeriod]);
 
     return SRD.match(
@@ -65,23 +72,23 @@ export const LogsTable = () => {
                     {`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}
                 </Alert>
             ),
-            success: () => {
-                if (model.logFiles.data.status === 500) {
+            success: (logFiles) => {
+                if (logFiles.status === 500) {
                     return (
                         <Alert variant="filled" severity="error" sx={{ m: 4 }}>
-                            {`${model.logFiles.data.message}, consult the administrator of this instance for more information.`}
+                            {`${logFiles.message.toString()}, consult the administrator of this instance for more information.`}
                         </Alert>
                     );
                 }
 
-                const logFilesData = model.logFiles.data.message;
+                const logFilesData = logFiles.message;
                 if (selectedPeriod === undefined) {
-                    setSelectedPeriod(logFilesData.find((log) => log.current).date);
+                    setSelectedPeriod(logFilesData.find((log) => log.current)?.date);
                 }
 
                 const sortedLogs = () =>
                     selectedLogs
-                        .map((item, index) => ({ ...item, key: index }))
+                        .map((item, index) => ({ ...item, key: index.toString() }))
                         .slice()
                         .sort((a: Log, b: Log) => {
                             const left: string = a[orderBy];
@@ -93,11 +100,6 @@ export const LogsTable = () => {
                         });
 
                 const memoizedLogs = useMemo(() => sortedLogs(), [selectedLogs, orderBy, order]);
-                const getOptions = () =>
-                    memoizedLogs.filter(function (this: Set<string>, { user }) {
-                        return !this.has(user) && this.add(user);
-                    }, new Set());
-                const memoizedOptions = useMemo(() => getOptions(), [selectedLogs]);
 
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>

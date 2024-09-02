@@ -105,13 +105,14 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
     };
 };
 
-type Profile = z.infer<typeof ProfileSchema>;
+export type Profile = z.infer<typeof ProfileSchema>;
 
 const SourceAccessControlSchema = z.union([z.literal("forbidden"), z.literal("read"), z.literal("readwrite")]);
 
 const ProfileSchema = z.object({
+    name: z.string(),
     _type: z.string().optional(),
-    id: z.string().default(ulid()),
+    theme: z.string().optional(),
     allowedSourceSchemas: z
         .array(z.string().nullish())
         .nullish()
@@ -119,6 +120,7 @@ const ProfileSchema = z.object({
     sourcesAccessControl: z.record(SourceAccessControlSchema).default({}),
     allowedTools: z.union([z.string(), z.array(z.string())]).default("ALL"),
     forbiddenTools: z.array(z.string()).default([]),
+    id: z.string().default(ulid()),
 });
 
 export const ProfileSchemaCreate = ProfileSchema.merge(
@@ -130,7 +132,7 @@ export const ProfileSchemaCreate = ProfileSchema.merge(
     })
 );
 
-type SourceAccessControl = z.infer<typeof SourceAccessControlSchema>;
+export type SourceAccessControl = z.infer<typeof SourceAccessControlSchema>;
 
 export const defaultProfile = (uuid: string): Profile => {
     return {
@@ -143,4 +145,4 @@ export const defaultProfile = (uuid: string): Profile => {
         forbiddenTools: [],
     };
 };
-export { getProfiles, deleteProfile, Profile, SourceAccessControl, ProfileSchema };
+export { getProfiles, deleteProfile, ProfileSchema };

@@ -1,13 +1,7 @@
-import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
-import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
-import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
-import Lineage_sources from "../lineage/lineage_sources.js";
-import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
+import Lineage_sources from "../lineage/lineage_sources.js";
 import KGcreator_graph from "./KGcreator_graph.js";
 import KGcreator_mappings from "./KGcreator_mappings.js";
-import KGcreator_run from "./KGcreator_run.js";
-import KGcreator_joinTables from "./KGcreator_joinTables.js";
 import KGcreator_bot from "../../bots/KGcreator_bot.js";
 
 // imports React app
@@ -178,7 +172,7 @@ var KGcreator = (function () {
             self.currentConfig = result;
             self.rawConfig = JSON.parse(JSON.stringify(result));
 
-            var jstreeData = [];
+
             var options = {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
@@ -403,93 +397,78 @@ var KGcreator = (function () {
                 //  withCheckboxes: true,
             };
 
-            jstreeData.push({
-                id: "databaseSources",
-                text: "databaseSources",
-                parent: "#",
-                type: "databaseSources",
-                data: {
-                    type: "sourceType",
-                },
-            });
-            jstreeData.push({
-                id: "csvSources",
-                text: "csvSources",
-                parent: "#",
-                type: "CSVS",
-                data: {
-                    type: "sourceType",
-                },
-            });
-            // Get SQL types when there is with api route
-            async.eachSeries(
-                Object.entries(self.currentConfig.databaseSources),
-                function (item, callbackEach) {
-                    var key = item[0];
-                    var datasource = item[1];
-                    $.ajax({
-                        type: "GET",
-                        url: Config.apiUrl + "/databases/" + key,
-                        dataType: "json",
-                        success: function (result, _textStatus, _jqXHR) {
-                            jstreeData.push({
-                                id: key,
-                                text: datasource.name || key,
-                                parent: "databaseSources",
-                                data: { id: datasource.name, type: "databaseSource", sqlType: result.driver },
-                            });
-                            return callbackEach();
-                        },
-                        error: function (err) {
-                            jstreeData.push({
-                                id: key,
-                                text: datasource.name || key,
-                                parent: "databaseSources",
-                                data: { id: datasource.name, type: "databaseSource" },
-                            });
-                            return callbackEach();
-                        },
-                    });
-                },
-                function (err) {
-                    for (var datasource in self.currentConfig.csvSources) {
-                        jstreeData.push({
-                            id: datasource,
-                            text: datasource,
-                            parent: "csvSources",
-                            type: "CSV",
-                            data: { id: datasource, type: "csvSource" },
-                        });
-                    }
-                    JstreeWidget.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
-                    if (callback) {
-                        return callback(err);
-                    }
-                }
-            );
-            /*Object.entries(self.currentConfig.databaseSources).forEach(([key, datasource]) => {
-                jstreeData.push({
-                    id: key,
-                    text: datasource.name || key,
-                    parent: "databaseSources",
-                    data: { id: datasource.name, type: "databaseSource" },
-                });
-            });
-            for (var datasource in self.currentConfig.csvSources) {
-                jstreeData.push({
-                    id: datasource,
-                    text: datasource,
-                    parent: "csvSources",
-                    type: "CSV",
-                    data: { id: datasource, type: "csvSource" },
-                });
-            }
-            JstreeWidget.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
-            if (callback) {
-                return callback();
-            }*/
+            self.loadDataSourcesJstree( "KGcreator_csvTreeDiv",options,callback)
+
         });
     };
+
+    self.loadDataSourcesJstree=function(jstreeDivId,options,callback){
+        var jstreeData = [];
+        jstreeData.push({
+            id: "databaseSources",
+            text: "databaseSources",
+            parent: "#",
+            type: "databaseSources",
+            data: {
+                type: "sourceType",
+            },
+        });
+        jstreeData.push({
+            id: "csvSources",
+            text: "csvSources",
+            parent: "#",
+            type: "CSVS",
+            data: {
+                type: "sourceType",
+            },
+        });
+        // Get SQL types when there is with api route
+        async.eachSeries(
+            Object.entries(self.currentConfig.databaseSources),
+            function (item, callbackEach) {
+                var key = item[0];
+                var datasource = item[1];
+                $.ajax({
+                    type: "GET",
+                    url: Config.apiUrl + "/databases/" + key,
+                    dataType: "json",
+                    success: function (result, _textStatus, _jqXHR) {
+                        jstreeData.push({
+                            id: key,
+                            text: datasource.name || key,
+                            parent: "databaseSources",
+                            data: { id: datasource.name, type: "databaseSource", sqlType: result.driver },
+                        });
+                        return callbackEach();
+                    },
+                    error: function (err) {
+                        jstreeData.push({
+                            id: key,
+                            text: datasource.name || key,
+                            parent: "databaseSources",
+                            data: { id: datasource.name, type: "databaseSource" },
+                        });
+                        return callbackEach();
+                    },
+                });
+            },
+            function (err) {
+                for (var datasource in self.currentConfig.csvSources) {
+                    jstreeData.push({
+                        id: datasource,
+                        text: datasource,
+                        parent: "csvSources",
+                        type: "CSV",
+                        data: { id: datasource, type: "csvSource" },
+                    });
+                }
+                JstreeWidget.loadJsTree(jstreeDivId, jstreeData, options);
+                if (callback) {
+                    return callback(err);
+                }
+            }
+        );
+    }
 
     self.initDataSource = function (name, type, sqlType, table) {
         //close Previous DataSource

@@ -214,7 +214,14 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             required
                             value={databaseModel.form.user}
                         />
-                        <PasswordField error={currentErrors.password} id="password" label="Password" onChange={handleFieldUpdate("password")} value={databaseModel.form.password} />
+                        <PasswordField
+                            error={currentErrors.password !== undefined}
+                            helperText={currentErrors.password}
+                            id="password"
+                            label="Password"
+                            onChange={handleFieldUpdate("password")}
+                            value={databaseModel.form.password}
+                        />
                     </Stack>
                 </DialogContent>
                 <DialogActions>

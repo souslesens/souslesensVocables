@@ -28,7 +28,7 @@ async function getIndices(): Promise<string[]> {
     return json;
 }
 
-interface GraphInfo {
+export interface GraphInfo {
     count: string;
     name: string;
 }

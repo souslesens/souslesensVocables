@@ -1,16 +1,15 @@
-import { createContext, Dispatch, useContext, useReducer, useEffect, SyntheticEvent } from "react";
+import { createContext, Dispatch, useContext, useReducer, useEffect } from "react";
 import { Box, Tabs, Tab } from "@mui/material";
 
-import { SRD, RD, loading, failure, success } from "srd";
+import { RD, loading, failure, success } from "srd";
 
 import { ConfigType, getConfig } from "./Config";
 import { Database, getDatabases } from "./Database";
 import { Log, getLogFiles } from "./Log";
 import { getEnabledPlugins, PluginOptionType, readConfig, readRepositories, RepositoryType } from "./Plugins";
 import { Profile, getProfiles } from "./Profile";
-import { ServerSource, getSources, getIndices, getGraphs, getMe } from "./Source";
+import { ServerSource, getSources, getIndices, getGraphs, getMe, GraphInfo } from "./Source";
 import { User, getUsers } from "./User";
-import { identity } from "./Utils";
 
 import { ConfigForm } from "./Component/ConfigForm";
 import { DatabasesTable } from "./Component/DatabasesTable";
@@ -26,39 +25,37 @@ type Model = {
     sources: RD<string, ServerSource[]>;
     indices: RD<string, string[]>;
     graphs: RD<string, string[]>;
-    me: RD<string>;
-    databases: RD<Database[]>;
-    logFiles: RD<string, string | boolean>[];
+    me: RD<string, string>;
+    databases: RD<string, Database[]>;
+    logFiles: RD<string, Log[]>;
     logs: RD<string, Log[]>;
     config: RD<string, ConfigType>;
     isModalOpen: boolean;
     currentEditionTab: EditionTab;
     dialog: object | null;
     pluginsConfig: RD<string, PluginOptionType[]>;
-    pluginsEnabled: RD<string[]>;
+    pluginsEnabled: RD<string, string[]>;
     repositories: RD<string, RepositoryType[]>;
 };
 
-type Msg =
+export type Msg =
     | { type: "config"; payload: RD<string, ConfigType> }
-    | { type: "currentEditionTab"; payload: number }
-    | { type: "databases"; payload: RD<Database[]> }
+    | { type: "currentEditionTab"; payload: EditionTab }
+    | { type: "databases"; payload: RD<string, Database[]> }
     | { type: "dialog"; payload: {} }
-    | { type: "graphs"; payload: RD<string, string[]> }
+    | { type: "graphs"; payload: RD<string, GraphInfo[]> }
     | { type: "indices"; payload: RD<string, string[]> }
-    | { type: "logFiles"; payload: RD<string, string | boolean>[] }
+    | { type: "logFiles"; payload: RD<string, Log[]> }
     | { type: "logs"; payload: RD<string, Log[]> }
-    | { type: "me"; payload: RD<string> }
+    | { type: "me"; payload: RD<string, string> }
     | { type: "pluginsConfig"; payload: RD<string, PluginOptionType[]> }
-    | { type: "pluginsEnabled"; payload: RD<string[]> }
+    | { type: "pluginsEnabled"; payload: RD<string, string[]> }
     | { type: "profiles"; payload: RD<string, Profile[]> }
     | { type: "repositories"; payload: RD<string, RepositoryType[]> }
     | { type: "sources"; payload: RD<string, ServerSource[]> }
     | { type: "users"; payload: RD<string, User[]> };
 
 type EditionTab = "settings" | "users" | "profiles" | "sources" | "databases" | "plugins" | "logs";
-
-type UpadtedFieldPayload = { id: string; fieldName: string; newValue: string };
 
 const initialModel: Model = {
     users: loading(),
@@ -81,7 +78,7 @@ const initialModel: Model = {
 
 const ModelContext = createContext<{ model: Model; updateModel: Dispatch<Msg> } | null>(null);
 
-function useModel() {
+export function useModel() {
     const modelContext = useContext(ModelContext);
     if (modelContext === null) {
         throw new Error("I can't initialize model and updateModel for some reason");
@@ -90,11 +87,9 @@ function useModel() {
 }
 
 function update(model: Model, msg: Msg): Model {
-    const unwrappedUsers: User[] = SRD.unwrap([], identity, model.users);
-
     if (msg.type === "currentEditionTab") {
         const params = new URLSearchParams(document.location.search);
-        params.set("tab", msg.payload);
+        params.set("tab", msg.payload.toString());
         // Insert or replace the tab key in the URL
         window.history.replaceState(null, "", `?${params.toString()}`);
     }
@@ -108,7 +103,8 @@ const Admin = () => {
     useEffect(() => {
         const params = new URLSearchParams(document.location.search);
         if (params.has("tab")) {
-            model.currentEditionTab = params.get("tab");
+            const p = params.get("tab") as EditionTab | null;
+            model.currentEditionTab = p ?? "settings";
         }
     }, []);
 
@@ -128,7 +124,7 @@ const Admin = () => {
                 updateModel({ type: "pluginsEnabled", payload: success(pluginsEnabled) });
                 updateModel({ type: "repositories", payload: success(repositories) });
             })
-            .catch((error) => {
+            .catch((error: { message: string }) => {
                 updateModel({ type: "me", payload: failure(error.message) });
                 updateModel({ type: "sources", payload: failure(error.message) });
                 updateModel({ type: "indices", payload: failure(error.message) });
@@ -147,7 +143,7 @@ const Admin = () => {
     return (
         <ModelContext.Provider value={{ model, updateModel }}>
             <Box sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}>
-                <Tabs onChange={(event: SyntheticEvent, newValue: string) => updateModel({ type: "currentEditionTab", payload: newValue })} value={model.currentEditionTab} centered>
+                <Tabs onChange={(_event, newValue: string) => updateModel({ type: "currentEditionTab", payload: newValue as EditionTab })} value={model.currentEditionTab} centered>
                     <Tab label="Settings" value="settings" />
                     <Tab label="Users" value="users" />
                     <Tab label="Profiles" value="profiles" />
@@ -184,5 +180,3 @@ const Dispatcher = (props: { model: Model }) => {
 };
 
 export default Admin;
-
-export { Msg, useModel };

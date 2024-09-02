@@ -1,4 +1,4 @@
-import { useState, useMemo, useReducer, useEffect, ChangeEvent, forwardRef, Ref } from "react";
+import { useState, useMemo, useReducer, useEffect, ChangeEvent, forwardRef, Ref, Dispatch, MouseEventHandler } from "react";
 import {
     Box,
     CircularProgress,
@@ -26,6 +26,7 @@ import {
     FormControlLabel,
     Typography,
     styled,
+    SelectChangeEvent,
 } from "@mui/material";
 import { ExpandMore, ChevronRight } from "@mui/icons-material";
 
@@ -36,7 +37,7 @@ import CsvDownloader from "react-csv-downloader";
 import { useZorm, createCustomIssues } from "react-zorm";
 import { ZodIssue } from "zod";
 
-import { useModel } from "../Admin";
+import { Msg, useModel } from "../Admin";
 import { SRD } from "srd";
 import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate } from "../Profile";
 import { ServerSource } from "../Source";
@@ -63,9 +64,9 @@ const ProfilesTable = () => {
         setOrderBy(property);
     }
 
-    const handleDeleteProfile = async (profile: Profile, updateModel) => {
-        deleteProfile(profile, updateModel);
-        writeLog(me, "ConfigEditor", "delete", profile.name);
+    const handleDeleteProfile = (profile: Profile, updateModel: Dispatch<Msg>) => {
+        void deleteProfile(profile, updateModel);
+        void writeLog(me, "ConfigEditor", "delete", profile.name);
     };
 
     const renderProfiles = SRD.match(
@@ -107,8 +108,8 @@ const ProfilesTable = () => {
                     let right = "";
 
                     if (a[orderBy] instanceof Array) {
-                        left = a[orderBy].toString();
-                        right = b[orderBy].toString();
+                        left = a[orderBy]?.toString() ?? "";
+                        right = b[orderBy]?.toString() ?? "";
                     } else {
                         left = a[orderBy] as string;
                         right = b[orderBy] as string;
@@ -201,15 +202,16 @@ const enum Mode {
     Edition,
 }
 
-type Msg_ =
+export type Msg_ =
     | { type: Type.UserClickedModal; payload: boolean }
-    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
+    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string | string[] } }
     | { type: Type.UserUpdatedSourceAccessControl; payload: { treeStr: string; newValue: SourceAccessControl | null } }
     | { type: Type.ResetProfile; payload: Profile }
     | { type: Type.UserClickedCheckAll; payload: { fieldname: string; value: boolean } };
 
 const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): ProfileEditionState => {
-    const fieldToUpdate: any = msg.type === Type.UserClickedCheckAll || msg.type === Type.UserUpdatedField ? msg.payload.fieldname : null;
+    const fieldToUpdate = msg.type === Type.UserClickedCheckAll || msg.type === Type.UserUpdatedField ? msg.payload.fieldname : "";
+
     switch (msg.type) {
         case Type.UserClickedModal:
             return { ...profileEditionState, modal: msg.payload };
@@ -266,7 +268,18 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
 
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
 
-    const config = SRD.withDefault({ auth: "", tools_available: [] }, model.config);
+    const config = SRD.withDefault(
+        {
+            auth: "",
+            tools_available: [],
+            defaultGroups: [],
+            theme: {
+                defaultTheme: "",
+                selector: false,
+            },
+        },
+        model.config
+    );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
 
     // tools is all available tools (described in mainconfig.json) + tools that are found in forbiddenTools + ALL
@@ -282,11 +295,12 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
         setNodeToExpand([]);
         update({ type: Type.UserClickedModal, payload: false });
     };
-    const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLInputElement>) => update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
+    const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement> | SelectChangeEvent<string[]>) =>
+        update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
     const profilesSchema = create ? ProfileSchemaCreate : ProfileSchema;
     const zo = useZorm("form", profilesSchema, { setupListeners: false, customIssues: issues });
-    const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: ChangeEvent<HTMLInputElement>) => {
+    const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: SelectChangeEvent) => {
         const treeStr = src.treeStr;
 
         // Get the parent treeStr
@@ -356,7 +370,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     const saveProfiles = () => {
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";
-        writeLog(me, "ConfigEditor", mode, profileModel.profileForm.name);
+        void writeLog(me, "ConfigEditor", mode, profileModel.profileForm.name);
     };
 
     const getAvailableThemes = () => {
@@ -598,14 +612,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 ))}
                             </Select>
                         </FormControl>
-                        <TextField
-                            defaultValue={profileModel.profileForm.theme ?? model.config.data.theme.defaultTheme}
-                            fullWidth
-                            id="theme"
-                            label="Theme"
-                            onChange={handleFieldUpdate("theme")}
-                            select
-                        >
+                        <TextField defaultValue={profileModel.profileForm.theme ?? config.theme.defaultTheme} fullWidth id="theme" label="Theme" onChange={handleFieldUpdate("theme")} select>
                             {getAvailableThemes().map((theme) => (
                                 <MenuItem key={theme} value={theme}>
                                     {theme}
@@ -629,15 +636,15 @@ const CustomContent = forwardRef(function CustomContent(props: TreeItemContentPr
 
     const icon = iconProp || expansionIcon || displayIcon;
 
-    const handleMouseDown = (event: MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handleMouseDown: MouseEventHandler<HTMLDivElement> = (event) => {
         preventSelection(event);
     };
 
-    const handleExpansionClick = (event: MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handleExpansionClick: MouseEventHandler<HTMLDivElement> = (event) => {
         handleExpansion(event);
     };
 
-    const handleSelectionClick = (event: MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handleSelectionClick: MouseEventHandler<HTMLDivElement> = (event) => {
         handleSelection(event);
     };
 
@@ -680,4 +687,4 @@ interface SourceTreeNode {
     treeStr: string;
 }
 
-export { ProfilesTable, Mode, Msg_, Type };
+export { ProfilesTable, Mode, Type };

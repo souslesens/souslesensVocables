@@ -360,7 +360,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     };
 
     const getAvailableThemes = () => {
-        return Object.keys(Config.slsvColorThemes).sort((a, b) => a.localeCompare(b));
+        return Object.keys(window.Config.slsvColorThemes).sort((a, b) => a.localeCompare(b));
     };
 
     const fieldsFromSource = (source: ServerSource) => {

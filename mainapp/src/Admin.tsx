@@ -3,7 +3,7 @@ import { Box, Tabs, Tab } from "@mui/material";
 
 import { SRD, RD, loading, failure, success } from "srd";
 
-import { Config, getConfig } from "./Config";
+import { ConfigType, getConfig } from "./Config";
 import { Database, getDatabases } from "./Database";
 import { Log, getLogFiles } from "./Log";
 import { getEnabledPlugins, PluginOptionType, readConfig, readRepositories, RepositoryType } from "./Plugins";
@@ -30,7 +30,7 @@ type Model = {
     databases: RD<Database[]>;
     logFiles: RD<string, string | boolean>[];
     logs: RD<string, Log[]>;
-    config: RD<string, Config>;
+    config: RD<string, ConfigType>;
     isModalOpen: boolean;
     currentEditionTab: EditionTab;
     dialog: object | null;
@@ -40,7 +40,7 @@ type Model = {
 };
 
 type Msg =
-    | { type: "config"; payload: RD<string, Config> }
+    | { type: "config"; payload: RD<string, ConfigType> }
     | { type: "currentEditionTab"; payload: number }
     | { type: "databases"; payload: RD<Database[]> }
     | { type: "dialog"; payload: {} }

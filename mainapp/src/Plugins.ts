@@ -13,7 +13,7 @@ const PluginOptionSchema = z
     })
     .partial();
 
-type PluginOptionType = z.infer<typeof PluginOptionSchema>;
+export type PluginOptionType = z.infer<typeof PluginOptionSchema>;
 
 const RepositorySchema = z
     .object({
@@ -24,84 +24,72 @@ const RepositorySchema = z
     })
     .partial();
 
-type RepositoryType = z.infer<typeof RepositorySchema>;
+export type RepositoryType = z.infer<typeof RepositorySchema>;
 
-async function deleteRepository(repositoryId) {
+type Response<T = unknown> =
+    | {
+          status: number;
+          message: T;
+      }
+    | {
+          status: 500;
+          message: unknown;
+      };
+
+async function deleteRepository(repositoryId: string) {
     try {
         const response = await fetch(`${endpoint}/repositories/repository/${repositoryId}`, {
             method: "delete",
         });
-        return response.json();
+        return response;
     } catch (error) {
         return { status: 500, message: error };
     }
 }
 
-async function fetchRepository(repositoryId) {
+async function fetchRepository(repositoryId: string) {
     try {
         const response = await fetch(`${endpoint}/repositories/fetch/${repositoryId}`);
-        return response.json();
+        return response;
     } catch (error) {
         return { status: 500, message: error };
     }
 }
 
-async function getEnabledPlugins() {
-    try {
-        const response = await fetch(endpoint);
-        return response.json();
-    } catch (error) {
-        return { status: 500, message: error };
-    }
+async function getEnabledPlugins(): Promise<Array<{ name: string }>> {
+    const response = await fetch(endpoint);
+    return response.json() as Promise<Array<{ name: string }>>;
 }
 
-async function getRepositoryPlugins(repositoryId) {
-    try {
-        const response = await fetch(`${endpoint}/repositories/plugins/${repositoryId}`);
-        return response.json();
-    } catch (error) {
-        return { status: 500, message: error };
-    }
+async function getRepositoryPlugins(repositoryId: string): Promise<Response<string[]>> {
+    const response = await fetch(`${endpoint}/repositories/plugins/${repositoryId}`);
+    return response.json() as Promise<Response<string[]>>;
 }
 
-async function getRepositoryTags(repositoryId) {
-    try {
-        const response = await fetch(`${endpoint}/repositories/tags/${repositoryId}`);
-        return response.json();
-    } catch (error) {
-        return { status: 500, message: error };
-    }
+async function getRepositoryTags(repositoryId: string): Promise<Response<string[]>> {
+    const response = await fetch(`${endpoint}/repositories/tags/${repositoryId}`);
+    return response.json() as Promise<Response<string[]>>;
 }
 
-async function readConfig() {
-    try {
-        const response = await fetch(`${endpoint}/config`);
-        return response.json();
-    } catch (error) {
-        return { status: 500, message: error };
-    }
+async function readConfig(): Promise<Record<string, PluginOptionType>> {
+    const response = await fetch(`${endpoint}/config`);
+    return response.json() as Promise<Record<string, PluginOptionType>>;
 }
 
-async function readRepositories() {
-    try {
-        const response = await fetch(`${endpoint}/repositories`);
-        return response.json();
-    } catch (error) {
-        return { status: 500, message: error };
-    }
+async function readRepositories(): Promise<Record<string, RepositoryType>> {
+    const response = await fetch(`${endpoint}/repositories`);
+    return response.json() as Promise<Record<string, RepositoryType>>;
 }
 
-async function writeConfig(plugins) {
+async function writeConfig(pluginsConfig: Record<string, PluginOptionType>) {
     try {
-        const body = { plugins: plugins };
+        const body = { plugins: pluginsConfig };
 
         const response = await fetch(`${endpoint}/config`, {
             method: "put",
             body: JSON.stringify(body, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
-        const { message, resources } = (await response.json()) as Response;
-
         return response;
     } catch (error) {
         return { status: 500, message: error };
@@ -117,7 +105,6 @@ async function writeRepository(identifier: string, data: object, toFetch: boolea
             body: JSON.stringify(body, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
-        const { message, resources } = (await response.json()) as Response;
 
         return response;
     } catch (error) {
@@ -127,9 +114,7 @@ async function writeRepository(identifier: string, data: object, toFetch: boolea
 
 export {
     PluginOptionSchema,
-    PluginOptionType,
     RepositorySchema,
-    RepositoryType,
     deleteRepository,
     fetchRepository,
     getEnabledPlugins,

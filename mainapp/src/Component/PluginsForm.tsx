@@ -38,6 +38,7 @@ import {
     Link,
     List,
     Tab,
+    AlertColor,
 } from "@mui/material";
 import { Add, Extension, DeleteForever, AddCircle, Done, Download } from "@mui/icons-material";
 
@@ -60,48 +61,47 @@ import {
     writeConfig,
     writeRepository,
 } from "../Plugins";
-import { Tool } from "../Tool";
 
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
 import { cleanUpText } from "../Utils";
-import { Database } from "../Database";
 
 type DispatcherProps = {
     me: string;
     onDeleteRepository: (repositoryId: string) => void;
     onSubmitRepository: (identifier: string | null, data: RepositoryType, toFetch: boolean) => void;
     selectedTab: string;
-    snack: (message: string, severity: string) => void;
+    snack: (message: string, severity?: AlertColor) => void;
 };
 
 type PluginsDialogFormProps = {
     onClose: (e: Event) => void;
-    onSubmit: (e: Event) => void;
+    onSubmit: (data: PluginOptionType) => void;
     open: boolean;
-    plugin: Tool;
+    plugin?: PluginOptionType;
 };
 
 type PluginsRepositoryDialogProps = {
-    onClose: (e: Event) => void;
-    onSubmit: (e: Event) => void;
+    onClose: () => void;
+    onSubmit: (identifier: string | null, data: RepositoryType, toFetch: boolean) => void;
     open: boolean;
+    edit?: boolean;
+    selectedRepository?: string | null;
+    repositories: Record<string, RepositoryType>;
 };
 
-const PluginsDialogForm = (props: PluginsDialogFormProps) => {
-    const { onClose, onSubmit, open, plugin } = props;
-
+const PluginsDialogForm = ({ onClose, onSubmit, open, plugin }: PluginsDialogFormProps) => {
     const [errors, setErrors] = useState("");
 
     const optionsName = Object.keys(plugin || {});
 
-    const handleValidation = (data) => {
+    const handleValidation = (data: PluginOptionType) => {
         const parsedForm = PluginOptionSchema.safeParse(data);
 
-        if (parsedForm.data !== undefined && optionsName.includes(parsedForm.data.key)) {
-            setErrors("This label was already used by another option");
-        } else if (parsedForm.error !== undefined) {
+        if (!parsedForm.success) {
             parsedForm.error.issues.forEach((issue) => setErrors(issue.message));
+        } else if (parsedForm.data?.key !== undefined && optionsName.includes(parsedForm.data.key)) {
+            setErrors("This label was already used by another option");
         } else {
             setErrors("");
         }
@@ -121,10 +121,10 @@ const PluginsDialogForm = (props: PluginsDialogFormProps) => {
                     event.preventDefault();
 
                     const formData = new FormData(event.currentTarget);
-                    const formJSON = Object.fromEntries((formData as any).entries());
+                    const formJSON = Object.fromEntries(formData.entries());
 
                     const parsedForm = handleValidation(formJSON);
-                    if (errors.length === 0) {
+                    if (parsedForm.success) {
                         onSubmit(parsedForm.data);
                     }
                 },
@@ -133,7 +133,7 @@ const PluginsDialogForm = (props: PluginsDialogFormProps) => {
             <DialogContent>
                 <Stack spacing={2}>
                     <TextField
-                        autofocus
+                        autoFocus
                         defaultValue=""
                         error={errors.length > 0}
                         fullWidth
@@ -141,7 +141,7 @@ const PluginsDialogForm = (props: PluginsDialogFormProps) => {
                         id="key"
                         label="Label"
                         name="key"
-                        onChange={(event: FormEvent<HTMLFormElement>) => {
+                        onChange={(event) => {
                             handleValidation({ key: event.target.value });
                         }}
                         required
@@ -158,119 +158,144 @@ const PluginsDialogForm = (props: PluginsDialogFormProps) => {
     );
 };
 
-const PluginsConfiguration = (props: DispatcherProps) => {
-    const { me, snack } = props;
-    const { model, updateModel } = useModel();
+const PluginsConfiguration = ({ me, snack }: DispatcherProps) => {
+    const { model } = useModel();
 
     const [openModal, setOpenModal] = useState<boolean>(false);
-    const [selectedPlugin, setSelectedPlugin] = useState<Tool>(undefined);
+    const [selectedPlugin, setSelectedPlugin] = useState<string | undefined>(undefined);
 
     const handleCloseModal = () => setOpenModal(false);
     const handleOpenModal = () => setOpenModal(true);
 
-    const handleUpdateOption = async (key: string, value: string) => {
-        model.pluginsConfig.data[selectedPlugin][key] = value;
-        setSelectedPlugin(selectedPlugin);
-    };
+    const pluginsConfig = SRD.unwrap({}, (a) => a, model.pluginsConfig);
 
-    const handleRemoveOption = (fieldName: string) => () => {
-        delete model.pluginsConfig.data[selectedPlugin][fieldName];
-        snack(`The option “${fieldName}” have been removed`);
-    };
-
-    const handleSubmitNewOption = (data: PluginOptionType) => {
-        model.pluginsConfig.data[selectedPlugin] = { ...model.pluginsConfig.data[selectedPlugin], [data.key]: data.option };
-        handleCloseModal();
-    };
-
-    const handleSavePlugins = async () => {
-        const response = await writeConfig(model.pluginsConfig.data);
-
-        writeLog(me, "ConfigEditor", "save", "plugins");
-        if (response.status == 200) {
-            snack("The configuration have been saved. Reloading…", "warning");
-        } else {
-            snack("A problem occurs on the server.", "error");
-        }
-    };
-
-    if (model.pluginsEnabled.data.length == 0) {
-        return (
-            <Stack direction="column" justifyContent="center">
-                <Alert variant="filled" severity="info">
-                    {"No plugin have been activated for this instance"}
-                </Alert>
-            </Stack>
-        );
-    } else if (selectedPlugin === undefined) {
-        setSelectedPlugin(model.pluginsEnabled.data[0].name);
-    }
-
-    return (
-        <Stack spacing={{ xs: 2 }} useFlexGap>
-            <Stack component={Paper} direction="row" useFlexGap>
-                <Box sx={{ borderRight: "thin solid rgba(0, 0, 0, 0.12)", width: "100%", maxWidth: 250 }}>
-                    <nav>
-                        <List sx={{ height: 400, overflow: "auto" }} disablePadding>
-                            {model.pluginsEnabled.data.map((plugin) => (
-                                <ListItemButton key={plugin.name} selected={plugin.name === selectedPlugin} onClick={() => setSelectedPlugin(plugin.name)}>
-                                    <ListItemIcon>
-                                        <Extension />
-                                    </ListItemIcon>
-                                    <ListItemText primary={plugin.name} />
-                                </ListItemButton>
-                            ))}
-                        </List>
-                    </nav>
+    const renderPlugins = SRD.match(
+        {
+            notAsked: () => <p>Let’s fetch some data!</p>,
+            loading: () => (
+                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                    <CircularProgress />
                 </Box>
+            ),
+            failure: (msg: string) => (
+                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                    {`${msg}. Please, reload this page.`}
+                </Alert>
+            ),
+            success: (pluginsEnabled) => {
+                const handleUpdateOption = (key: keyof PluginOptionType, value: string) => {
+                    if (selectedPlugin) {
+                        pluginsConfig[selectedPlugin][key] = value;
+                    }
+                };
 
-                {selectedPlugin !== undefined && (
-                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ padding: 4, width: "100%", height: 400, overflow: "auto" }} useFlexGap>
-                        {
-                            // eslint-disable-next-line no-prototype-builtins
-                            model.pluginsConfig.data.hasOwnProperty(selectedPlugin) && (
-                                <Stack spacing={{ xs: 2 }} useFlexGap>
-                                    {Object.entries(model.pluginsConfig.data[selectedPlugin]).map(([key, value]) => (
-                                        <TextField
-                                            key={key}
-                                            defaultValue=""
-                                            id={`field-${selectedPlugin.name}-${key}`}
-                                            label={key}
-                                            onChange={(event) => handleUpdateOption(key, event.target.value)}
-                                            value={value}
-                                            InputProps={{
-                                                endAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <IconButton color="warning" edge="end" onClick={handleRemoveOption(key)}>
-                                                            <DeleteForever />
-                                                        </IconButton>
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                        />
-                                    ))}
+                const handleRemoveOption = (fieldName: keyof PluginOptionType) => () => {
+                    if (selectedPlugin) {
+                        delete pluginsConfig[selectedPlugin][fieldName];
+                        snack(`The option “${fieldName}” have been removed`);
+                    }
+                };
+
+                const handleSubmitNewOption = (data: PluginOptionType) => {
+                    if (selectedPlugin && data.key) {
+                        pluginsConfig[selectedPlugin] = { ...pluginsConfig[selectedPlugin], [data.key]: data.option };
+                        handleCloseModal();
+                    }
+                };
+
+                const handleSavePlugins = async () => {
+                    const response = await writeConfig(pluginsConfig);
+
+                    void writeLog(me, "ConfigEditor", "save", "plugins");
+                    if (response.status == 200) {
+                        snack("The configuration have been saved. Reloading…", "warning");
+                    } else {
+                        snack("A problem occurs on the server.", "error");
+                    }
+                };
+
+                if (pluginsEnabled.length == 0) {
+                    return (
+                        <Stack direction="column" justifyContent="center">
+                            <Alert variant="filled" severity="info">
+                                {"No plugin have been activated for this instance"}
+                            </Alert>
+                        </Stack>
+                    );
+                } else if (selectedPlugin === undefined) {
+                    setSelectedPlugin(pluginsEnabled[0].name);
+                }
+                return (
+                    <Stack spacing={{ xs: 2 }} useFlexGap>
+                        <Stack component={Paper} direction="row" useFlexGap>
+                            <Box sx={{ borderRight: "thin solid rgba(0, 0, 0, 0.12)", width: "100%", maxWidth: 250 }}>
+                                <nav>
+                                    <List sx={{ height: 400, overflow: "auto" }} disablePadding>
+                                        {pluginsEnabled.map((plugin) => (
+                                            <ListItemButton key={plugin.name} selected={plugin.name === selectedPlugin} onClick={() => setSelectedPlugin(plugin.name)}>
+                                                <ListItemIcon>
+                                                    <Extension />
+                                                </ListItemIcon>
+                                                <ListItemText primary={plugin.name} />
+                                            </ListItemButton>
+                                        ))}
+                                    </List>
+                                </nav>
+                            </Box>
+
+                            {selectedPlugin !== undefined && (
+                                <Stack direction="column" spacing={{ xs: 2 }} sx={{ padding: 4, width: "100%", height: 400, overflow: "auto" }} useFlexGap>
+                                    {
+                                        // eslint-disable-next-line no-prototype-builtins
+                                        pluginsConfig.hasOwnProperty(selectedPlugin) && (
+                                            <Stack spacing={{ xs: 2 }} useFlexGap>
+                                                {Object.entries(pluginsConfig[selectedPlugin]).map(([key, value]) => (
+                                                    <TextField
+                                                        key={key}
+                                                        defaultValue=""
+                                                        id={`field-${selectedPlugin}-${key}`}
+                                                        label={key}
+                                                        onChange={(event) => handleUpdateOption(key as keyof PluginOptionType, event.target.value)}
+                                                        value={value}
+                                                        InputProps={{
+                                                            endAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <IconButton color="warning" edge="end" onClick={handleRemoveOption(key as keyof PluginOptionType)}>
+                                                                        <DeleteForever />
+                                                                    </IconButton>
+                                                                </InputAdornment>
+                                                            ),
+                                                        }}
+                                                    />
+                                                ))}
+                                            </Stack>
+                                        )
+                                    }
+
+                                    <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                        <Button color="success" onClick={handleOpenModal} startIcon={<AddCircle />} variant="outlined">
+                                            {"Add a new option"}
+                                        </Button>
+                                    </Stack>
                                 </Stack>
-                            )
-                        }
+                            )}
+                        </Stack>
 
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <Button color="success" onClick={handleOpenModal} startIcon={<AddCircle />} variant="outlined">
-                                {"Add a new option"}
+                            <Button onClick={handleSavePlugins} type="submit" variant="contained">
+                                Save Plugins
                             </Button>
                         </Stack>
+
+                        <PluginsDialogForm onClose={handleCloseModal} onSubmit={handleSubmitNewOption} open={openModal} plugin={selectedPlugin ? pluginsConfig[selectedPlugin] : undefined} />
                     </Stack>
-                )}
-            </Stack>
-
-            <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                <Button onClick={handleSavePlugins} type="submit" variant="contained">
-                    Save Plugins
-                </Button>
-            </Stack>
-
-            <PluginsDialogForm onClose={handleCloseModal} onSubmit={handleSubmitNewOption} open={openModal} plugin={model.pluginsConfig.data[selectedPlugin]} />
-        </Stack>
+                );
+            },
+        },
+        model.pluginsEnabled
     );
+
+    return renderPlugins;
 };
 
 const emptyRepository = {
@@ -282,21 +307,26 @@ const emptyRepository = {
     },
 };
 
-const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
-    const { onClose, onSubmit, open } = props;
-    const { model, updateModel } = useModel();
+interface RepositoryFormType {
+    identifier: null | string;
+    data: {
+        url?: string;
+        version?: string;
+        token?: string;
+    };
+}
 
-    const [edit, setEdit] = useState<boolean>(false);
-    const [errors, setErrors] = useState({});
-    const [pluginsAvailable, setPluginsAvailable] = useState([]);
-    const [pluginsEnabled, setPluginsEnabled] = useState([]);
-    const [repository, setRepository] = useState(emptyRepository);
-    const [tags, setTags] = useState([]);
+const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedRepository, repositories }: PluginsRepositoryDialogProps) => {
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [pluginsAvailable, setPluginsAvailable] = useState<string[]>([]);
+    const [pluginsEnabled, setPluginsEnabled] = useState<string[]>([]);
+    const [repository, setRepository] = useState<RepositoryFormType>(emptyRepository);
+    const [tags, setTags] = useState<string[]>([]);
 
-    const handleFieldUpdate = (key: string, value: string | [string]) => {
-        if (key == "plugins") {
+    const handleFieldUpdate = (key: string, value: string | string[]) => {
+        if (key === "plugins" && Array.isArray(value)) {
             setPluginsEnabled(value);
-        } else {
+        } else if (key !== "plugins") {
             setRepository({ identifier: repository.identifier, data: { ...repository.data, [key]: value } });
         }
     };
@@ -305,23 +335,23 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
         event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
-        const formJSON = Object.fromEntries((formData as any).entries());
+        const formJSON = Object.fromEntries(formData.entries()) as Record<string, string | string[]>;
 
         if (pluginsAvailable.length > 1) {
             formJSON.plugins = pluginsEnabled;
         }
 
         const parsedForm = handleValidation(formJSON);
-        if (Object.keys(errors).length === 0) {
+        if (parsedForm.success) {
             onSubmit(repository.identifier, parsedForm.data, formJSON.fetch === "on");
         }
     };
 
-    const handleValidation = (data) => {
+    const handleValidation = (data: Record<string, string | string[]>) => {
         const parsedForm = RepositorySchema.safeParse(data);
 
-        if (parsedForm.error !== undefined) {
-            const currentErrors = {};
+        if (!parsedForm.success) {
+            const currentErrors: Record<string, string> = {};
             parsedForm.error.issues.forEach((issue) => {
                 issue.path.forEach((path) => {
                     currentErrors[path] = issue.message;
@@ -341,28 +371,29 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
         setPluginsEnabled([]);
         setTags([]);
 
-        if (model.dialog !== null && model.dialog.data.selectedRepository !== null) {
-            setEdit(model.dialog.data.edit);
-
-            const selectedRepository = model.dialog.data.selectedRepository;
-            const data = model.dialog.data.repositories[selectedRepository];
+        if (selectedRepository !== null && selectedRepository !== undefined) {
+            // FIXME
+            const data = repositories[selectedRepository];
             setRepository({ identifier: selectedRepository, data: data });
             setPluginsEnabled(data.plugins || []);
-            getRepositoryTags(selectedRepository).then((response) => {
-                if (response.status === 200) {
-                    setTags(response.message);
-                }
-            });
-            getRepositoryPlugins(selectedRepository).then((response) => {
-                if (response.status === 200) {
-                    setPluginsAvailable(response.message);
-                }
-            });
+            getRepositoryTags(selectedRepository)
+                .then((response) => {
+                    if (response.status === 200) {
+                        setTags(response.message);
+                    }
+                })
+                .catch(() => console.error("Could not get repository tags"));
+            getRepositoryPlugins(selectedRepository)
+                .then((response) => {
+                    if (response.status === 200) {
+                        setPluginsAvailable(response.message);
+                    }
+                })
+                .catch(() => console.error("Could not get repository plugins"));
         } else {
-            setEdit(false);
             setRepository(emptyRepository);
         }
-    }, [model.dialog]);
+    }, [selectedRepository]);
 
     return (
         <Dialog fullWidth maxWidth="md" onClose={onClose} open={open} PaperProps={{ component: "form", onSubmit: handleSubmit }}>
@@ -370,14 +401,14 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
             <DialogContent>
                 <Stack spacing={2} sx={{ pt: 1 }}>
                     <TextField
-                        autofocus
+                        autoFocus
                         error={errors.url !== undefined}
                         fullWidth
                         helperText={errors.url}
                         id="url"
                         label="Repository Git URL"
                         name="url"
-                        onChange={(event: SyntheticEvent | Event) => handleFieldUpdate("url", event.target.value)}
+                        onChange={(event) => handleFieldUpdate("url", event.target.value)}
                         required
                         value={repository.data.url}
                     />
@@ -390,7 +421,7 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
                             id="version"
                             label="Repository Version Tag"
                             name="version"
-                            onChange={(event: SyntheticEvent | Event) => handleFieldUpdate("version", event.target.value)}
+                            onChange={(event) => handleFieldUpdate("version", event.target.value)}
                             select
                             value={repository.data.version}
                         >
@@ -407,7 +438,7 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
                         helperText={errors.token}
                         id="token"
                         label="Authentication Token"
-                        onChange={(event: SyntheticEvent | Event) => handleFieldUpdate("token", event.target.value)}
+                        onChange={(event) => handleFieldUpdate("token", event.target.value)}
                         value={repository.data.token}
                     />
                     {(pluginsAvailable.length > 1 || (pluginsAvailable.length === 1 && pluginsAvailable[0] !== repository.identifier)) && (
@@ -424,7 +455,7 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
                                     labelId="plugins-label"
                                     multiple
                                     name="plugins"
-                                    onChange={(event: SyntheticEvent | Event) => handleFieldUpdate("plugins", event.target.value)}
+                                    onChange={(event) => handleFieldUpdate("plugins", event.target.value)}
                                     renderValue={(selected) => (
                                         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                                             {selected.sort().map((value) => (
@@ -448,147 +479,177 @@ const PluginsRepositoryDialog = (props: PluginsRepositoryDialogProps) => {
             </DialogContent>
             <DialogActions>
                 <Button color="primary" startIcon={<Done />} type="submit" variant="contained">
-                    {"Submit"}
+                    Submit
                 </Button>
             </DialogActions>
         </Dialog>
     );
 };
 
-const PluginsRepositories = (props: DispatcherProps) => {
-    const { me, onDeleteRepository, onSubmitRepository, snack } = props;
-    const { model, updateModel } = useModel();
+type Order = "asc" | "desc";
 
-    const [openModal, setOpenModal] = useState<boolean>(false);
+const PluginsRepositories = (props: DispatcherProps) => {
+    const { onDeleteRepository, onSubmitRepository, snack } = props;
+    const { model } = useModel();
+
+    const [modal, setModal] = useState<{
+        open: boolean;
+        edit?: boolean;
+        selectedRepository?: string | null;
+    }>({
+        open: false,
+    });
 
     const [filter, setFilter] = useState<string>("");
     const [order, setOrder] = useState<Order>("asc");
-    const [orderBy, setOrderBy] = useState<keyof Database>("url");
+    const [orderBy, setOrderBy] = useState<keyof RepositoryType>("url");
 
     const handleCloseModal = () => {
-        updateModel({ type: "dialog", payload: null });
-        setOpenModal(false);
+        setModal({ ...modal, open: false });
     };
 
-    const handleOpenModal = (mode: boolean, repositoryId?: string | null = null) => {
-        updateModel({
-            type: "dialog",
-            payload: success({
-                edit: mode,
-                repositories: model.repositories.data,
-                selectedRepository: repositoryId,
-            }),
-        });
-        setOpenModal(true);
-    };
+    const renderRepositories = SRD.match(
+        {
+            notAsked: () => <p>Let’s fetch some data!</p>,
+            loading: () => (
+                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                    <CircularProgress />
+                </Box>
+            ),
+            failure: (msg: string) => (
+                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                    {`${msg}. Please, reload this page.`}
+                </Alert>
+            ),
+            success: (repositories) => {
+                const handleOpenModal = (edit: boolean, repositoryId: string | null = null) => {
+                    setModal({ open: true, edit, selectedRepository: repositoryId });
+                };
 
-    const handleFetchRepository = (repositoryId: string) => {
-        fetchRepository(repositoryId)
-            .then((response) => {
-                if (response.status == 200) {
-                    snack("The repository have been successfully updated", "success");
-                } else {
-                    snack("An error occurs during the repository fetching", "error");
-                }
-            })
-            .catch((error) => snack(error, "error"));
-    };
+                const handleFetchRepository = (repositoryId: string) => {
+                    fetchRepository(repositoryId)
+                        .then((response) => {
+                            if (response.status == 200) {
+                                snack("The repository have been successfully updated", "success");
+                            } else {
+                                snack("An error occurs during the repository fetching", "error");
+                            }
+                        })
+                        .catch((error) => snack(error as string, "error"));
+                };
 
-    const handleSortedTable = (property: keyof RepositoryType) => {
-        const isAsc = orderBy === property && order === "asc";
-        setOrder(isAsc ? "desc" : "asc");
-        setOrderBy(property);
-    };
+                const handleSortedTable = (property: keyof RepositoryType) => {
+                    const isAsc = orderBy === property && order === "asc";
+                    setOrder(isAsc ? "desc" : "asc");
+                    setOrderBy(property);
+                };
 
-    const handleSubmit = (identifier: string | null, data: RepositoryType, toFetch: boolean) => {
-        setOpenModal(false);
-        onSubmitRepository(identifier, data, toFetch);
-    };
+                const handleSubmit = (identifier: string | null, data: RepositoryType, toFetch: boolean) => {
+                    handleCloseModal();
+                    onSubmitRepository(identifier, data, toFetch);
+                };
 
-    const sortedRepositories = Object.entries(model.repositories.data)
-        .slice()
-        .sort((a, b) => {
-            const left: string = a[1][orderBy] as string;
-            const right: string = b[1][orderBy] as string;
-            return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
-        });
+                const sortedRepositories = Object.entries(repositories)
+                    .slice()
+                    .sort((a, b) => {
+                        const left: string = a[1][orderBy] as string;
+                        const right: string = b[1][orderBy] as string;
+                        return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+                    });
+                return (
+                    <Stack spacing={{ xs: 2 }} useFlexGap>
+                        <Stack spacing={{ xs: 2 }} sx={{ height: 400 }} useFlexGap>
+                            <TextField
+                                label="Filter repositories by URL"
+                                id="filter-repositories"
+                                onChange={(event) => {
+                                    setFilter(event.target.value);
+                                }}
+                            />
+                            <TableContainer component={Paper} sx={{ flex: 1 }}>
+                                <Table stickyHeader>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                                <TableSortLabel active={orderBy === "url"} direction={order} onClick={() => handleSortedTable("url")}>
+                                                    URL
+                                                </TableSortLabel>
+                                            </TableCell>
+                                            <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                                Tag
+                                            </TableCell>
+                                            <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                                Fetch
+                                            </TableCell>
+                                            <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                                Actions
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableHead>
 
-    return (
-        <Stack spacing={{ xs: 2 }} useFlexGap>
-            <Stack spacing={{ xs: 2 }} sx={{ height: 400 }} useFlexGap>
-                <TextField
-                    label="Filter repositories by URL"
-                    id="filter-repositories"
-                    onChange={(event) => {
-                        setFilter(event.target.value);
-                    }}
-                />
-                <TableContainer component={Paper} sx={{ flex: 1 }}>
-                    <Table stickyHeader>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                    <TableSortLabel active={orderBy === "url"} direction={order} onClick={() => handleSortedTable("url")}>
-                                        URL
-                                    </TableSortLabel>
-                                </TableCell>
-                                <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                    Tag
-                                </TableCell>
-                                <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                    Fetch
-                                </TableCell>
-                                <TableCell align="center" style={{ fontWeight: "bold" }}>
-                                    Actions
-                                </TableCell>
-                            </TableRow>
-                        </TableHead>
+                                    <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                        {sortedRepositories
+                                            .filter(([_key, data]) => cleanUpText(data.url).includes(cleanUpText(filter)))
+                                            .map(([key, data]) => (
+                                                <TableRow key={key}>
+                                                    <TableCell>
+                                                        <Stack alignItems="center" direction="row" spacing={{ xs: 1 }} useFlexGap>
+                                                            <Link href={data.url}>{data.url}</Link>
+                                                            {data.plugins !== undefined && data.plugins.length > 0 && (
+                                                                <Tooltip title={data.plugins.join(", ")}>
+                                                                    <Chip
+                                                                        color="info"
+                                                                        label={data.plugins.length > 1 ? `${data.plugins.length} plugins` : "1 plugin"}
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                    />
+                                                                </Tooltip>
+                                                            )}
+                                                        </Stack>
+                                                    </TableCell>
+                                                    <TableCell align="center">{data.version && <Chip label={data.version} size="small" />}</TableCell>
+                                                    <TableCell align="center">
+                                                        <IconButton color="primary" onClick={() => handleFetchRepository(key)} title="Fetch Repository">
+                                                            <Download />
+                                                        </IconButton>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            <Button onClick={() => handleOpenModal(true, key)} variant="contained">
+                                                                Edit
+                                                            </Button>
+                                                            <ButtonWithConfirmation label="Delete" msg={() => onDeleteRepository(key)} />
+                                                        </Stack>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </Stack>
 
-                        <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                            {sortedRepositories
-                                .filter(([key, data]) => cleanUpText(data.url).includes(cleanUpText(filter)))
-                                .map(([key, data]) => (
-                                    <TableRow key={key}>
-                                        <TableCell>
-                                            <Stack alignItems="center" direction="row" spacing={{ xs: 1 }} useFlexGap>
-                                                <Link href={data.url}>{data.url}</Link>
-                                                {data.plugins !== undefined && data.plugins.length > 0 && (
-                                                    <Tooltip title={data.plugins.join(", ")}>
-                                                        <Chip color="info" label={data.plugins.length > 1 ? `${data.plugins.length} plugins` : "1 plugin"} size="small" variant="outlined" />
-                                                    </Tooltip>
-                                                )}
-                                            </Stack>
-                                        </TableCell>
-                                        <TableCell align="center">{data.version && <Chip label={data.version} size="small" />}</TableCell>
-                                        <TableCell align="center">
-                                            <IconButton color="primary" onClick={() => handleFetchRepository(key)} title="Fetch Repository" variant="contained">
-                                                <Download />
-                                            </IconButton>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                <Button onClick={() => handleOpenModal(true, key)} variant="contained">
-                                                    Edit
-                                                </Button>
-                                                <ButtonWithConfirmation label="Delete" msg={() => onDeleteRepository(key)} />
-                                            </Stack>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Stack>
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <Button onClick={() => handleOpenModal(false)} variant="contained">
+                                Add Repository
+                            </Button>
+                        </Stack>
 
-            <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                <Button onClick={() => handleOpenModal(false)} variant="contained">
-                    Add Repository
-                </Button>
-            </Stack>
-
-            <PluginsRepositoryDialog onClose={handleCloseModal} onSubmit={handleSubmit} open={openModal} />
-        </Stack>
+                        <PluginsRepositoryDialog
+                            onClose={handleCloseModal}
+                            onSubmit={handleSubmit}
+                            open={modal.open}
+                            edit={modal.edit}
+                            repositories={repositories}
+                            selectedRepository={modal.selectedRepository}
+                        />
+                    </Stack>
+                );
+            },
+        },
+        model.repositories
     );
+
+    return renderRepositories;
 };
 
 const Dispatcher = (props: DispatcherProps) => {
@@ -606,66 +667,66 @@ const PluginsForm = () => {
     const [selectedTab, setSelectedTab] = useState<string>("repositories");
 
     const [snackOpen, setSnackOpen] = useState<boolean>(false);
-    const [snackSeverity, setSnackSeverity] = useState<string>("success");
+    const [snackSeverity, setSnackSeverity] = useState<AlertColor>("success");
     const [snackMessage, setSnackMessage] = useState<string>("");
 
     const me = SRD.withDefault("", model.me);
-    const config = SRD.withDefault({}, model.pluginsConfig);
-    const plugins = SRD.withDefault([], model.pluginsEnabled);
-    const repositories = SRD.withDefault({}, model.repositories);
 
-    const handleSelectedTab = (event: SyntheticEvent, newValue: string) => setSelectedTab(newValue);
+    const handleSelectedTab = (_event: SyntheticEvent, newValue: string) => setSelectedTab(newValue);
 
-    const handleSnackbar = (message: string, severity = "success") => {
+    const handleSnackbar = (message: string, severity: AlertColor = "success") => {
         setSnackSeverity(severity);
         setSnackMessage(message);
         setSnackOpen(true);
     };
 
-    const handleSnackbarClose = async (event: SyntheticEvent | Event, reason?: string) => {
+    const handleSnackbarClose = (_event: SyntheticEvent | Event, reason?: string) => {
         if (reason !== "clickaway") {
             setSnackOpen(false);
         }
     };
 
-    const handleDeleteRepository = (repositoryId: string) => {
-        (async () => {
-            const response = await deleteRepository(repositoryId);
-            if (response.status == 200) {
-                await updateModelRepositories();
-                handleSnackbar("The repository have been removed successfully", "success");
-            } else {
-                handleSnackbar("An error occurs during the repository deleting", "error");
-            }
-        })();
+    const handleDeleteRepository = async (repositoryId: string) => {
+        const response = await deleteRepository(repositoryId);
+        if (response.status == 200) {
+            await updateModelRepositories();
+            handleSnackbar("The repository have been removed successfully", "success");
+        } else {
+            handleSnackbar("An error occurs during the repository deleting", "error");
+        }
     };
 
-    const handleSubmitRepository = (identifier: string | null, data: RepositoryType, toFetch = true) => {
+    const handleSubmitRepository = async (identifier: string | null, data: RepositoryType, toFetch = true) => {
         if (identifier === null) {
             identifier = ulid();
         }
-
-        (async () => {
-            const response = await writeRepository(identifier, data, toFetch);
-            if (response.status == 200) {
-                await updateModelRepositories();
-                handleSnackbar("The repository have been successfully updated", "success");
-            } else {
-                handleSnackbar("An error occurs during the repository updating", "error");
-            }
-        })();
+        const response = await writeRepository(identifier, data, toFetch);
+        if (response.status == 200) {
+            await updateModelRepositories();
+            handleSnackbar("The repository have been successfully updated", "success");
+        } else {
+            handleSnackbar("An error occurs during the repository updating", "error");
+        }
     };
 
     const updateModelRepositories = async () => {
-        let response = await readRepositories();
-        updateModel({ type: "repositories", payload: success(response) });
-        response = await getEnabledPlugins();
-        updateModel({ type: "pluginsEnabled", payload: success(response) });
+        try {
+            const response1 = await readRepositories();
+            updateModel({ type: "repositories", payload: success(response1) });
+        } catch (e) {
+            console.error("Error reading repositories.");
+        }
+        try {
+            const response2 = await getEnabledPlugins();
+            updateModel({ type: "pluginsEnabled", payload: success(response2) });
+        } catch (e) {
+            console.error("Error getting enabled plugins.");
+        }
     };
 
     return SRD.match(
         {
-            success: (content) => (
+            success: () => (
                 <Stack sx={{ m: 2 }}>
                     <Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
                         <Alert onClose={handleSnackbarClose} severity={snackSeverity} sx={{ width: "100%" }}>

@@ -32,26 +32,24 @@ type Model = {
     config: RD<string, ConfigType>;
     isModalOpen: boolean;
     currentEditionTab: EditionTab;
-    dialog: object | null;
-    pluginsConfig: RD<string, PluginOptionType[]>;
-    pluginsEnabled: RD<string, string[]>;
-    repositories: RD<string, RepositoryType[]>;
+    pluginsConfig: RD<string, Record<string, PluginOptionType>>;
+    pluginsEnabled: RD<string, Array<{ name: string }>>;
+    repositories: RD<string, Record<string, RepositoryType>>;
 };
 
 export type Msg =
     | { type: "config"; payload: RD<string, ConfigType> }
     | { type: "currentEditionTab"; payload: EditionTab }
     | { type: "databases"; payload: RD<string, Database[]> }
-    | { type: "dialog"; payload: {} }
     | { type: "graphs"; payload: RD<string, GraphInfo[]> }
     | { type: "indices"; payload: RD<string, string[]> }
     | { type: "logFiles"; payload: RD<string, LogFiles> }
     | { type: "logs"; payload: RD<string, Log[]> }
     | { type: "me"; payload: RD<string, string> }
-    | { type: "pluginsConfig"; payload: RD<string, PluginOptionType[]> }
-    | { type: "pluginsEnabled"; payload: RD<string, string[]> }
+    | { type: "pluginsConfig"; payload: RD<string, Record<string, PluginOptionType>> }
+    | { type: "pluginsEnabled"; payload: RD<string, Array<{ name: string }>> }
     | { type: "profiles"; payload: RD<string, Profile[]> }
-    | { type: "repositories"; payload: RD<string, RepositoryType[]> }
+    | { type: "repositories"; payload: RD<string, Record<string, RepositoryType>> }
     | { type: "sources"; payload: RD<string, ServerSource[]> }
     | { type: "users"; payload: RD<string, User[]> };
 
@@ -70,7 +68,6 @@ const initialModel: Model = {
     config: loading(),
     isModalOpen: false,
     currentEditionTab: "sources",
-    dialog: null,
     pluginsConfig: loading(),
     pluginsEnabled: loading(),
     repositories: loading(),

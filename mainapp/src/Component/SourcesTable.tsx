@@ -29,7 +29,7 @@ import {
     Tooltip,
 } from "@mui/material";
 import { green, pink, grey } from "@mui/material/colors";
-import { Add, Circle, Remove } from "@mui/icons-material";
+import { Add, Circle, Download, Edit, Remove } from "@mui/icons-material";
 import { z } from "zod";
 
 import CsvDownloader from "react-csv-downloader";
@@ -185,6 +185,22 @@ const SourcesTable = () => {
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            <IconButton
+                                                                color="primary"
+                                                                sx={{
+                                                                    // FIXME Need to override the jquery css
+                                                                    color: "rgb(25, 118, 210) !important",
+                                                                }}
+                                                                title={"Download JSON"}
+                                                                href={createSingleSourceDownloadUrl(
+                                                                    // TODO fix typing
+                                                                    (model.sources as unknown as Record<string, ServerSource[]>)["data"],
+                                                                    source.name
+                                                                )}
+                                                                download={`source${source.name}.json`}
+                                                            >
+                                                                <Download />
+                                                            </IconButton>
                                                             <SourceForm source={source} me={me} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteSource(source, updateModel)} />
                                                         </Stack>
@@ -198,6 +214,10 @@ const SourcesTable = () => {
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                             <Button
                                 variant="outlined"
+                                sx={{
+                                    // FIXME Need to override the jquery css
+                                    color: "rgb(25, 118, 210) !important",
+                                }}
                                 href={createSourcesDownloadUrl(
                                     // TODO fix typing
                                     (model.sources as unknown as Record<string, ServerSource[]>)["data"]
@@ -227,6 +247,15 @@ function createSourcesDownloadUrl(sources: ServerSource[]): string {
         sourcesObject[s.name] = s;
     }
     return jsonToDownloadUrl(sourcesObject);
+}
+
+function createSingleSourceDownloadUrl(sources: ServerSource[], sourceName: string): string {
+    const source = sources.find((s) => s.name === sourceName);
+    if (source) {
+        return jsonToDownloadUrl(source);
+    } else {
+        return "";
+    }
 }
 
 type SparqlServerHeadersFormData = { key: string; value: string }[];
@@ -453,9 +482,15 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
     };
     return (
         <>
-            <Button color="primary" variant="contained" onClick={handleOpen}>
-                {create ? "Create Source" : "Edit"}
-            </Button>
+            {create ? (
+                <Button variant="contained" color="primary" onClick={handleOpen}>
+                    Create Source
+                </Button>
+            ) : (
+                <IconButton color="primary" onClick={handleOpen} title={"Edit"}>
+                    <Edit />
+                </IconButton>
+            )}
             <Modal onClose={handleClose} open={sourceModel.modal}>
                 <Box
                     component="form"

@@ -2,27 +2,22 @@ import Axiom_activeLegend from "../axioms/axiom_activeLegend.js";
 import KGcreator from "./KGcreator.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 
-
 var MappingModeler = (function () {
     var self = {};
     self.currentSource = null;
     self.currentDataSource = null;
     self.init = function (source, resource, divId) {
         async.series([
-
             //init source
             function (callbackSeries) {
                 SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, function (source) {
+                    var source = SourceSelectorWidget.getSelectedSource()[0];
+                    $("#mainDialogDiv").dialog("close");
 
-                            var source = SourceSelectorWidget.getSelectedSource()[0];
-                           // $("#KGcreator_dialogDiv").dialog("close");
-
-
-                    self.currentSource = source
-                    return callbackSeries()
-                })
+                    self.currentSource = source;
+                    return callbackSeries();
+                });
             },
-
             //bot
             function (callbackSeries) {
                 /*  var params = {
@@ -33,48 +28,55 @@ var MappingModeler = (function () {
                       self.currentDataSource = result;
                       return callbackSeries()
                   })*/
-                KGcreator.currentSlsvSource=self.currentSource
+                KGcreator.currentSlsvSource = self.currentSource;
                 KGcreator.getSlsvSourceConfig(self.currentSource, function (err, result) {
                     if (err) {
                         return callbackSeries(err);
                     }
 
                     KGcreator.currentConfig = result;
-                    return callbackSeries()
-                })
+                    return callbackSeries();
+                });
             },
+
             function (callbackSeries) {
-                self.initActiveLegend(divId)
+                $("#mainDialogDiv").load("./modules/tools/KGcreator/html/mappingModeler.html", function (err) {
+                    $("#mainDialogDiv").dialog("open");
+                    return callbackSeries();
+                })
 
-                return callbackSeries()
+            },
 
+
+            function (callbackSeries) {
+
+                if (!divId) {
+                    divId = "nodeInfosAxioms_activeLegendDiv";
+                }
+                self.initActiveLegend(divId);
+
+                return callbackSeries();
             },
 
             // load jstree
             function (callbackSeries) {
 
-               var options = {
+                var options = {
                     openAll: true,
-                    selectTreeNodeFn: self.onDataSourcesJstreeSelect
-                }
+                    selectTreeNodeFn: self.onDataSourcesJstreeSelect,
+                };
                 KGcreator.loadDataSourcesJstree("mappingModeler_axiomsJstreeDiv", options, function (err, result) {
-                    return callbackSeries(err)
-
-                })
-
+                    return callbackSeries(err);
+                });
             },
             //initDataSource
             function (callbackSeries) {
-                return callbackSeries()
+                return callbackSeries();
             },
+        ]);
+    };
 
-
-        ])
-
-    }
-
-    self.onDataSourcesJstreeSelect = function (obj, node) {
-
+    self.onDataSourcesJstreeSelect = function (event, obj) {
         self.currentTreeNode = obj.node;
 
         //  KGcreator_run.getTableAndShowMappings();
@@ -82,58 +84,101 @@ var MappingModeler = (function () {
         if (obj.node.data.type == "databaseSource") {
             KGcreator.initDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
 
-            KGcreator.loadDataBaseSource(self.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
+            KGcreator.loadDataBaseSource(KGcreator.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
         } else if (obj.node.data.type == "csvSource") {
-            self.initDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
-            KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, function (err, result) {
+            KGcreator.initDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
+            KGcreator.loadCsvSource(KGcreator.currentSlsvSource, obj.node.id, false, function (err, jstreeData) {
                 if (err) {
                     return alert("file not found");
                 }
-
+                var columns = []
+                jstreeData.forEach(function (item) {
+                    columns.push(item.data.id);
+                })
+                self.hideForbiddenResources("Table")
+                self.currentResourceType = "Column"
+                common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false)
             });
         } else if (obj.node.data.type == "table") {
-            var columns = self.currentConfig.currentDataSource.tables[obj.node.data.id];
+            self.currentTable = {
+                name: obj.node.data.label,
+                columns: KGcreator.currentConfig.currentDataSource.tables[obj.node.data.id]
+            };
             var table = obj.node.data.id;
-            self.currentConfig.currentDataSource.currentTable = table;
+            KGcreator.currentConfig.currentDataSource.currentTable = table;
+
+            self.hideForbiddenResources("Table")
+            self.currentResourceType = "Column"
+            common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false)
+
 
         }
-
-    }
+    };
 
     self.initActiveLegend = function (divId) {
-        if (!divId) {
-            divId = "mainDialogDiv"
 
-            $("#" + divId).load("modules/tools/KGcreator/html/mappingModeler.html", function () {
-                if (divId && divId.indexOf("Dialog") > -1) {
-                    $("#" + divId).dialog("open");
-                }
+        var legendItems = [
+            {label: "Class", color: "#00afef"},
+            {label: "ObjectProperty", color: "#f5ef39"},
+            {label: "Column", color: "#cb9801"},
+            {label: "Connective", color: "#70ac47"},
+        ];
+        var options = {
+            onLegendNodeClick: self.onLegendNodeClick,
+            showLegendGraphPopupMenu: self.showLegendGraphPopupMenu,
+        };
+        Axiom_activeLegend.isLegendActive = true;
+        Axiom_activeLegend.axiomGraphDiv="nodeInfosAxioms_graphDiv"
+        Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", legendItems, options);
 
-                var legendItems = [
-                    {label: "Class", color: "#00afef"},
-                    {label: "ObjectProperty", color: "#f5ef39"},
-                    {label: "Column", color: "#cb9801"},
-                    {label: "Connective", color: "#70ac47"}
-                ]
+    };
 
-                var options = {
-                    onLegendNodeClick: self.onLegendNodeClick,
-                    showLegendGraphPopupMenu: self.showLegendGraphPopupMenu
-                }
-                Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", legendItems, options);
-            });
+    self.hideForbiddenResources = function (resourceType) {
+        var hiddenNodes = [];
+        if (resourceType == "Table") {
+            hiddenNodes.push("ObjectProperty");
+            hiddenNodes.push("Class");
+            hiddenNodes.push("Connective");
         }
+        Axiom_activeLegend.hideLegendItems(hiddenNodes);
+    }
+    self.onSuggestionsSelect = function (resourceUri) {
+        var newResource = null
+
+        if (self.currentResourceType == "Column") {
+
+            newResource = {
+                id: resourceUri,
+                label: resourceUri,
+                resourceType: "Column",
+                symbol: null,
+                level:0,
+                data: {
+                    id: resourceUri,
+                    label: resourceUri,
+                    type: "Column",
+
+                },
+                predicates: [],
+            }
+        }
+        Axioms_graph.currentGraphNode=newResource
+
+        Axiom_activeLegend.onSuggestionsSelect(resourceUri, self.currentResourceType, newResource);
+
+
     }
 
+    self.onLegendNodeClick = function (node, event) {
+        self.currentResourceType = node.id
 
-    self.onLegendNodeClick = function () {
+        Axiom_activeLegend.onLegendNodeClick(node)
 
 
     }
 
     self.showLegendGraphPopupMenu = function () {
-
-    }
+    };
     return self;
 })();
 

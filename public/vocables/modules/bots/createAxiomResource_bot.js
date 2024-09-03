@@ -36,7 +36,7 @@ var CreateAxiomResource_bot = (function () {
         }
         _botEngine.init(CreateAxiomResource_bot, workflow, null, function () {
             self.source = Lineage_sources.activeSource;
-            self.params = {source: self.source, resourceType: "", resourceLabel: "", currentVocab: ""};
+            self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
             if (_params) {
                 for (var key in _params) {
                     self.params[key] = _params[key];
@@ -46,20 +46,17 @@ var CreateAxiomResource_bot = (function () {
         });
     };
 
-
     self.workflowNewClass = {
-        promptClassLabelFn: {listVocabsFn: {listSuperClassesFn: {workflow_saveNewClassFn: {}}}},
+        promptClassLabelFn: { listVocabsFn: { listSuperClassesFn: { workflow_saveNewClassFn: {} } } },
     };
 
     self.workflowNewObjectProperty = {
-        promptObjectPropertyLabelFn: {listVocabsFn: {listSuperObjectPropertiesFn: {workflow_saveObjectPropertyFn: {}}}},
+        promptObjectPropertyLabelFn: { listVocabsFn: { listSuperObjectPropertiesFn: { workflow_saveObjectPropertyFn: {} } } },
     };
-
 
     self.functionTitles = {
         _OR: "Select an option",
         listResourceTypesFn: "Choose a resource type",
-
 
         promptClassLabelFn: " Enter owlClass label (rdfs:label)",
         promptObjectPropertyLabelFn: "enter owl:ObjectProperty label",
@@ -67,32 +64,26 @@ var CreateAxiomResource_bot = (function () {
         listVocabsFn: "Choose a reference ontology for super ClassOr resource",
         listSuperClassesFn: "Choose a  class as superClass ",
         listSuperObjectPropertiesFn: "Choose a  property as superProperty ",
-
     };
 
     self.functions = {
-
         listVocabsFn: function () {
-            if (self.params.filteredUris  && self.params.filteredUris.length>0) {
+            if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 _botEngine.nextStep();
             } else {
                 CommonBotFunctions.listVocabsFn(self.source, "currentVocab");
             }
         },
 
-
         promptClassLabelFn: function () {
             _botEngine.promptValue("Class label ", "resourceLabel");
-
         },
         promptObjectPropertyLabelFn: function () {
-
             _botEngine.promptValue("ObjectProperty label ", "resourceLabel");
-
         },
 
         listSuperClassesFn: function () {
-            if (self.params.filteredUris  && self.params.filteredUris.length>0) {
+            if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 _botEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
                 CommonBotFunctions.listVocabClasses(self.params.currentVocab, "superResourceId", true);
@@ -100,13 +91,12 @@ var CreateAxiomResource_bot = (function () {
         },
 
         listSuperObjectPropertiesFn: function () {
-            if (self.params.filteredUris && self.params.filteredUris.length>0) {
+            if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 _botEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
                 CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "superResourceId");
             }
         },
-
 
         workflow_saveNewClassFn: function () {
             var label = Sparql_common.formatString(self.params.resourceLabel);
@@ -117,9 +107,7 @@ var CreateAxiomResource_bot = (function () {
                     subject: resourceId,
                     predicate: "rdfs:subClassOf",
                     object: self.params.superResourceId,
-
-
-                })
+                });
             }
             Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
                 if (err) {
@@ -135,16 +123,12 @@ var CreateAxiomResource_bot = (function () {
                         type: "Class",
                         subType: null,
                     },
-
-
                 };
                 _botEngine.nextStep();
             });
-
         },
 
         workflow_saveObjectPropertyFn: function () {
-
             var propLabel = self.params.resourceLabel;
             var domain = self.params.domain;
             var range = self.params.range;
@@ -165,15 +149,12 @@ var CreateAxiomResource_bot = (function () {
                         type: "ObjectProperty",
                         subType: null,
                         domain: domain,
-                        range: range
+                        range: range,
                     },
                 };
 
-
                 _botEngine.nextStep();
-            })
-
-
+            });
         },
     };
 

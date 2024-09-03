@@ -310,7 +310,7 @@ var Lineage_createRelation = (function () {
                     if (!subPropertyLabel) {
                         return;
                     }
-                    Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, true,function (err, result) {
+                    Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, true, function (err, result) {
                         if (err) {
                             return alert(err);
                         }
@@ -597,7 +597,7 @@ var Lineage_createRelation = (function () {
         );
     };
 
-    self.createSubProperty = function (source, superPropId, subPropertyLabel,writeSuperPropRangeAndDomain, callback) {
+    self.createSubProperty = function (source, superPropId, subPropertyLabel, writeSuperPropRangeAndDomain, callback) {
         var subPropId = common.getURI(subPropertyLabel, source, "fromLabel");
         //  var subPropId = Config.sources[source].graphUri + common.getRandomHexaId(10);
         var triples = [
@@ -611,48 +611,46 @@ var Lineage_createRelation = (function () {
                 predicate: "rdfs:label",
                 object: subPropertyLabel,
             },
-
         ];
-        if(subPropId){
+        if (subPropId) {
             triples.push({
                 subject: subPropId,
-                    predicate: "rdfs:subPropertyOf",
+                predicate: "rdfs:subPropertyOf",
                 object: superPropId,
-            })
-            if(writeSuperPropRangeAndDomain){
-                var sources=[source]
+            });
+            if (writeSuperPropRangeAndDomain) {
+                var sources = [source];
             }
-                var imports=Config.sources[source].imports
-            if(imports){
-                sources=sources.concat(imports)
+            var imports = Config.sources[source].imports;
+            if (imports) {
+                sources = sources.concat(imports);
             }
-            var domain="";
-            var range="";
-            var domainLabel=""
-            var rangeLabel=""
-            sources.forEach(function(source) {
+            var domain = "";
+            var range = "";
+            var domainLabel = "";
+            var rangeLabel = "";
+            sources.forEach(function (source) {
                 var constraints = Config.ontologiesVocabularyModels[source].constraints;
                 if (constraints && constraints[superPropId]) {
-                    domain = domain || constraints[superPropId].domain
-                    domainLabel=domainLabel || constraints[superPropId].domainLabel
-                    range = range || constraints[superPropId].range
-                    rangeLabel=rangeLabel || constraints[superPropId].rangeLabel
-
+                    domain = domain || constraints[superPropId].domain;
+                    domainLabel = domainLabel || constraints[superPropId].domainLabel;
+                    range = range || constraints[superPropId].range;
+                    rangeLabel = rangeLabel || constraints[superPropId].rangeLabel;
                 }
-            })
-            if(domain){
+            });
+            if (domain) {
                 triples.push({
-                subject: subPropId,
-                predicate: "rdfs:domain",
-                object: domain,
-            })
+                    subject: subPropId,
+                    predicate: "rdfs:domain",
+                    object: domain,
+                });
             }
-            if(range){
+            if (range) {
                 triples.push({
                     subject: subPropId,
                     predicate: "rdfs:range",
                     object: range,
-                })
+                });
             }
         }
 
@@ -666,15 +664,15 @@ var Lineage_createRelation = (function () {
                         superProp: superPropId,
                     },
                 },
-                constraints:{
+                constraints: {
                     [subPropId]: {
-                "domain": domain,
-                "range":range,
-                "domainLabel": domainLabel,
-                "rangeLabel":rangeLabel,
-                "source": source
-            }
-                }
+                        domain: domain,
+                        range: range,
+                        domainLabel: domainLabel,
+                        rangeLabel: rangeLabel,
+                        source: source,
+                    },
+                },
             };
             OntologyModels.updateModel(source, modelData, {}, function (err, result) {
                 console.log(err || "ontologyModelCache updated");

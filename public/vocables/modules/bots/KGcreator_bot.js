@@ -343,7 +343,7 @@ var KGcreator_bot = (function () {
 
         createSubPropertyFn: function () {
             _botEngine.promptValue("enter subProperty label", "subPropLabel", null, {}, function (subPropLabel) {
-                Lineage_createRelation.createSubProperty(self.params.source, self.params.propertyId, subPropLabel, true,function (err, subPropertyObj) {
+                Lineage_createRelation.createSubProperty(self.params.source, self.params.propertyId, subPropLabel, true, function (err, subPropertyObj) {
                     if (err) {
                         return _botEngine.abort(err.responseText);
                     }

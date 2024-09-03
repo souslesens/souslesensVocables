@@ -1,38 +1,25 @@
 <style></style>
 
-<div style="display: flex; flex-direction: column; min-height: 650px">
-    <div style="width: 100%; height: 150px; overflow: auto">
-        <div>
-        <!--    <div id="mappingModeler_infosDiv" style="color: #278ecc"></div>-->
-            <div id="mappingModeler_axiomsJstreeDiv"></div>
-        </div>
-        <!--
-    <div style="display: flex  ;flex-direction: column;width:100%">
-    <div style="display: flex; flex-direction: row; width: 100%; height: 100px; margin: 5px; padding: 5px">
-        <div id="mappingModeler_axiomText"></div>
-    </div>
-    </div>-->
+<div style="display: flex; flex-direction: column; height: 80vw">
+    <div style="width: 100%; height: 90vW; overflow: auto">
+
         <div style="display: flex; flex-direction: row; width: 100%">
+            <div id="mappingModeler_axiomsJstreeDiv"></div>
             <div>
-                <div style="display: flex; flex-direction: column; display: none" id="mappingModeler_graphPanelDiv">
-                    <!--    <button class="w3-button slsv-button-3" onclick="mappingModeler.actions.toGraphMl()">toGraphML
-                    </button>
-                    <button class="w3-button slsv-button-3" onclick="mappingModeler.actions.toSVG()">toSVG</button>-->
+                <div style="display: flex; flex-direction: column; " id="mappingModeler_graphPanelDiv">
                     <button class="w3-button slsv-button-3" onclick="mappingModeler.actions.showTriples()">show triples</button>
-                    <hr />
                 </div>
 
                 <div style="display: flex; flex-direction: column">
                     <!--   <button class="w3-button slsv-button-2" onclick="mappingModeler.newAxiom()">New axiom</button>-->
-                    <div id="nodeInfosAxioms_activeLegendDiv" style="width: 100px; height: 200px; background-color: #ddd"></div>
+                    <div id="nodeInfosAxioms_activeLegendDiv" style="width: 100px; height: 90%; background-color: #ddd"></div>
                 </div>
             </div>
-            <div style="display: flex; flex-direction: row; display: none" id="mappingModeler_newAxiomPanel">
+            <div style="display: flex; flex-direction: row; " id="mappingModeler_newAxiomPanel">
                 <!--  <button onclick="mappingModeler.actions.setLayout('randomlayout')">Random Layout</button>-->
 
                 <div>
-                    New Axiom<br />
-                    <select id="axioms_legend_suggestionsSelect" onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())" size="20" style="width: 250px; overflow: auto"></select>
+                    <select id="axioms_legend_suggestionsSelect" onclick="MappingModeler.onSuggestionsSelect($(this).val())" size="20" style="width: 250px; overflow: auto"></select>
                     <div>
                         <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.clearAxiom()">clear</button>
                         <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.showTriples()">triples</button>
@@ -41,7 +28,7 @@
                 </div>
             </div>
 
-            <div id="nodeInfosAxioms_graphDiv" style="width: 70vw; height: 450px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
+            <div id="nodeInfosAxioms_graphDiv" style="width: 60vw; height: 700px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
         </div>
     </div>
 

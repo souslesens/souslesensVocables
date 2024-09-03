@@ -4,8 +4,6 @@ import CommonBotFunctions from "./_commonBotFunctions.js";
 import common from "../shared/common.js";
 import KGcreator from "../tools/KGcreator/KGcreator.js";
 
-
-
 var MappingModeler_bot = (function () {
     var self = {};
     self.title = "Create Resource";
@@ -32,9 +30,8 @@ var MappingModeler_bot = (function () {
             workflow = self.workflow;
         }
         _botEngine.init(CreateAxiomResource_bot, workflow, null, function () {
-            self.params={}
+            self.params = {};
             if (_params) {
-
                 for (var key in _params) {
                     self.params[key] = _params[key];
                 }
@@ -43,59 +40,49 @@ var MappingModeler_bot = (function () {
         });
     };
 
-
-
-    self.workflow={
-        initDataSources:{
-        listListDataSourceTypeFn:{
-            _OR: {
-                "Database": { listDatabaseSourcesFn: { listTablesFn: { }} ,
-                  "CSV": { listCSVsourcesFn: { listTablesFn: { }},
-                            }}}}}}
-
+    self.workflow = {
+        initDataSources: {
+            listListDataSourceTypeFn: {
+                _OR: {
+                    Database: { listDatabaseSourcesFn: { listTablesFn: {} }, CSV: { listCSVsourcesFn: { listTablesFn: {} } } },
+                },
+            },
+        },
+    };
 
     self.functionTitles = {
         _OR: "Select an option",
         listVocabsFn: "Choose a source",
         listResourceTypesFn: "Choose a resource type",
-        listListDataSourceType:" Choose a data source type",
-        listDatabaseSourcesFn:"choose a database source",
-        listCSVsourcesFn:"choose a CSV source"
-
-
+        listListDataSourceType: " Choose a data source type",
+        listDatabaseSourcesFn: "choose a database source",
+        listCSVsourcesFn: "choose a CSV source",
     };
 
     self.functions = {
-
-
-
-        initDataSources: function(){
+        initDataSources: function () {
             KGcreator.getSlsvSourceConfig(self.params.source, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
                 self.currentConfig = result;
                 self.rawConfig = JSON.parse(JSON.stringify(result));
-            })
+            });
         },
-        listListDataSourceTypeFn:function(){
-            var choices=["Database","CSV"]
-            _botEngine.showList(choices,dataSourceType)
+        listListDataSourceTypeFn: function () {
+            var choices = ["Database", "CSV"];
+            _botEngine.showList(choices, dataSourceType);
         },
-
 
         listDatabaseSourcesFn: function () {
-           KGcreator.initSlsvSourceConfig()
-
+            KGcreator.initSlsvSourceConfig();
         },
         promptObjectPropertyLabelFn: function () {
-
             _botEngine.promptValue("ObjectProperty label ", "resourceLabel");
-
         },
 
         listSuperClassesFn: function () {
-            if (self.params.filteredUris  && self.params.filteredUris.length>0) {
+            if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 _botEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
                 CommonBotFunctions.listVocabClasses(self.params.currentVocab, "superResourceId", true);
@@ -103,13 +90,12 @@ var MappingModeler_bot = (function () {
         },
 
         listSuperObjectPropertiesFn: function () {
-            if (self.params.filteredUris && self.params.filteredUris.length>0) {
+            if (self.params.filteredUris && self.params.filteredUris.length > 0) {
                 _botEngine.showList(self.params.filteredUris, "superResourceId");
             } else {
                 CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "superResourceId");
             }
         },
-
 
         workflow_saveNewClassFn: function () {
             var label = Sparql_common.formatString(self.params.resourceLabel);
@@ -120,9 +106,7 @@ var MappingModeler_bot = (function () {
                     subject: resourceId,
                     predicate: "rdfs:subClassOf",
                     object: self.params.superResourceId,
-
-
-                })
+                });
             }
             Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
                 if (err) {
@@ -138,16 +122,12 @@ var MappingModeler_bot = (function () {
                         type: "Class",
                         subType: null,
                     },
-
-
                 };
                 _botEngine.nextStep();
             });
-
         },
 
         workflow_saveObjectPropertyFn: function () {
-
             var propLabel = self.params.resourceLabel;
             var domain = self.params.domain;
             var range = self.params.range;
@@ -168,15 +148,12 @@ var MappingModeler_bot = (function () {
                         type: "ObjectProperty",
                         subType: null,
                         domain: domain,
-                        range: range
+                        range: range,
                     },
                 };
 
-
                 _botEngine.nextStep();
-            })
-
-
+            });
         },
     };
 

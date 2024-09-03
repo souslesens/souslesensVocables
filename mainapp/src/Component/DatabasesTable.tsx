@@ -348,7 +348,7 @@ const DatabasesTable = () => {
                                                         <Chip label={database.driver} size="small" />
                                                     </TableCell>
                                                     <TableCell align="center">
-                                                        <TestingButton id={database.id} variant="contained" />
+                                                        <TestingButton id={database.id} />
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>

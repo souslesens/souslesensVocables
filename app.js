@@ -100,7 +100,7 @@ app.use("/upload/rdf", express.static(path.join(__dirname, "data/uploaded_rdf_da
 app.use("/vocables/classIcons",express.static(path.join(__dirname, "data/classIcons")));
 
 async function loggedIn(req, _res, next) {
-    if (req.isAuthenticated || config.auth === "disabled") {
+    if (req.isAuthenticated() || config.auth === "disabled") {
         // TODO: check allowedTools and forbiddenTools
         next();
     } else {

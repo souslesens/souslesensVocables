@@ -11,13 +11,13 @@ function sanitizeValue(value: string | string[]): string[] {
     return typeof value === "string" ? value.split(",") : value;
 }
 
-const humanizeSize = (size: string) => {
+const humanizeSize = (size: number): string => {
     return humanNumber(size, (n: string | number) => {
         if (Number.isInteger(n)) {
             return n;
         }
         return Number.parseFloat(n).toFixed(1);
-    });
+    }) as string;
 };
 
 function exhaustiveCheck(): never {

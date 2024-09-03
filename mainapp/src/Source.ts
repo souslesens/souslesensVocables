@@ -17,8 +17,8 @@ async function getSources(): Promise<ServerSource[]> {
     return mapSources(json.resources);
 }
 
-const getGraphSize = (source: ServerSource, graphs: GraphInfo[]) => {
-    const graphInfo = graphs.find((g) => g.name == source.graphUri);
+const getGraphSize = (source: ServerSource, graphs: GraphInfo[] | null) => {
+    const graphInfo = graphs?.find((g) => g.name == source.graphUri);
     return graphInfo === undefined ? 0 : Number.parseInt(graphInfo.count);
 };
 
@@ -123,16 +123,6 @@ const decodeSource = (key: string, source: ServerSource): ServerSource => {
     return ServerSourceSchema.parse({ ...source, name: source.name ?? key });
 };
 
-function controllerDefault(schemaType: string | undefined): string {
-    if (schemaType === "OWL") {
-        return "Sparql_OWL";
-    } else if (schemaType === "SKOS") {
-        return "Sparql_SKOS";
-    } else {
-        return "default controller";
-    }
-}
-
 export type ServerSource = z.infer<typeof ServerSourceSchema>;
 export type InputSource = z.infer<typeof InputSourceSchema>;
 
@@ -199,7 +189,7 @@ export const ServerSourceSchema = z.object({
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 });
 
-export const InputSourceSchema = {
+const InputSourceSchemaBase = {
     id: z.string().default(ulid()),
     _type: z.string().optional(),
     graphUri: z.string().optional(),
@@ -225,8 +215,10 @@ export const InputSourceSchema = {
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 };
 
-export const InputSourceSchemaCreate = {
-    ...InputSourceSchema,
+export const InputSourceSchema = z.object(InputSourceSchemaBase);
+
+export const InputSourceSchemaCreate = z.object({
+    ...InputSourceSchemaBase,
     name: z
         .string()
         .nonempty({ message: "Required" })
@@ -234,7 +226,7 @@ export const InputSourceSchemaCreate = {
         .refine((val) => val.match(/.{2,254}/i), { message: "Name can only contain between 2 and 255 chars" })
         .refine((val) => val.match(/^[a-z0-9]/i), { message: "Name have to start with alphanum char" })
         .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
-};
+});
 
 export const sourceHelp = {
     name: "The source name can only contain alphanum and - or _ chars and must be unique",

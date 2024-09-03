@@ -185,10 +185,10 @@ var Axioms_suggestions = (function () {
             if(domainClassId && rangeClassId )
                 role=null
             else if(domainClassId){
-                role="domain"
+                role="range"
             }
             else if(rangeClassId){
-                role="range"
+                role="domain"
             }
             OntologyModels.getPropertyDomainsAndRanges(source, propId, role, function (err, result) {
                 if(err)
@@ -196,23 +196,27 @@ var Axioms_suggestions = (function () {
 
                var data=[]
 
-                if(role=="range" || role=="rangeAndDomain") {
+                if(role=="range" || role==null) {
                     var ranges = result.ranges;
                     for (var key in result.ranges) {
-                        if(!rangeClassId==key || role=="rangeAndDomain") {
+
                             result.ranges[key].resourceType = "Class";
                             data.push(result.ranges[key]);
-                        }
+
                     }
                 }
-                if(role=="domain" || role=="rangeAndDomain") {
+                if(role=="domain" || role==null) {
                     var ranges = result.domains;
                     for (var key in result.domains) {
-                        if(!domainClassId==key || role=="rangeAndDomain") {
+
                             result.domains[key].resourceType = "Class";
                             data.push(result.domains[key]);
-                        }
+
                     }
+                }
+                if(data.length==0){
+                    var allClasses=Axioms_manager.getAllClasses(NodeInfosAxioms.currentSource)
+                   return callback(null,allClasses)
                 }
                 data = common.array.sort(data, "label");
                 return callback(null, data);

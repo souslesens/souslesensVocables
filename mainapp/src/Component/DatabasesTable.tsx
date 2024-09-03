@@ -20,8 +20,9 @@ import {
     TableSortLabel,
     TableBody,
     Chip,
+    IconButton,
 } from "@mui/material";
-import { Done } from "@mui/icons-material";
+import { Done, Download, Edit } from "@mui/icons-material";
 
 import { SRD } from "srd";
 import { ulid } from "ulid";
@@ -129,9 +130,15 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
 
     return (
         <>
-            <Button variant="contained" color="primary" onClick={handleOpen}>
-                {create ? "Create Database" : "Edit"}
-            </Button>
+            {create ? (
+                <Button variant="contained" color="primary" onClick={handleOpen}>
+                    Create Database
+                </Button>
+            ) : (
+                <IconButton color="primary" onClick={handleOpen} title={"Edit"}>
+                    <Edit />
+                </IconButton>
+            )}
             <Dialog fullWidth={true} maxWidth="md" onClose={handleClose} open={open} PaperProps={{ component: "form" }}>
                 <DialogContent sx={{ marginTop: "1em" }}>
                     <Stack spacing={4}>
@@ -332,6 +339,22 @@ const DatabasesTable = () => {
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            <IconButton
+                                                                color="primary"
+                                                                sx={{
+                                                                    // FIXME Need to override the jquery css
+                                                                    color: "rgb(25, 118, 210) !important",
+                                                                }}
+                                                                title={"Download JSON"}
+                                                                href={createSingleDatabaseDownloadUrl(
+                                                                    // TODO fix typing
+                                                                    (model.databases as unknown as Record<string, Database[]>).data,
+                                                                    database.id
+                                                                )}
+                                                                download={`database-${database.id}.json`}
+                                                            >
+                                                                <Download />
+                                                            </IconButton>
                                                             <DatabaseFormDialog database={database} me={me} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteDatabase(database, updateModel)} />
                                                         </Stack>
@@ -345,6 +368,10 @@ const DatabasesTable = () => {
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                             <Button
                                 variant="outlined"
+                                sx={{
+                                    // FIXME Need to override the jquery css
+                                    color: "rgb(25, 118, 210) !important",
+                                }}
                                 href={createDatabasesDownloadUrl(
                                     // TODO fix typing
                                     (model.databases as unknown as Record<string, Database[]>).data
@@ -367,6 +394,15 @@ const DatabasesTable = () => {
 
 function createDatabasesDownloadUrl(databases: Database[]): string {
     return jsonToDownloadUrl(databases);
+}
+
+function createSingleDatabaseDownloadUrl(databases: Database[], databaseId: string): string {
+    const database = databases.find((d) => d.id === databaseId);
+    if (database) {
+        return jsonToDownloadUrl(database);
+    } else {
+        return "";
+    }
 }
 
 export { DatabasesTable, Mode, Msg_, Type };

@@ -1,4 +1,4 @@
-import { useState, useReducer, ChangeEvent } from "react";
+import { useState, useReducer, ChangeEvent, Dispatch } from "react";
 import {
     Box,
     CircularProgress,
@@ -23,19 +23,19 @@ import {
     MenuItem,
     Checkbox,
     FormControlLabel,
+    SelectChangeEvent,
 } from "@mui/material";
 
 import CsvDownloader from "react-csv-downloader";
 import { SRD } from "srd";
 import { ulid } from "ulid";
 
-import { useModel } from "../Admin";
+import { Msg, useModel } from "../Admin";
 import { cleanUpText, identity, style } from "../Utils";
 import { newUser, deleteUser, putUsersBis, User } from "../User";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
 import { writeLog } from "../Log";
-import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
 
 const UsersTable = () => {
     const { model, updateModel } = useModel();
@@ -52,9 +52,9 @@ const UsersTable = () => {
         setOrderBy(property);
     }
 
-    const handleDeleteUser = async (user: User, updateModel) => {
-        deleteUser(user, updateModel);
-        writeLog(me, "ConfigEditor", "delete", user.login);
+    const handleDeleteUser = (user: User, updateModel: Dispatch<Msg>) => {
+        void deleteUser(user, updateModel);
+        void writeLog(me, "ConfigEditor", "delete", user.login);
     };
 
     const renderUsers = SRD.match(
@@ -85,10 +85,12 @@ const UsersTable = () => {
 
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
-                const datas = gotUsers.map((user) => {
+                const csvData = gotUsers.map((user) => {
                     const { groups, _type, password, ...restOfProperties } = user;
                     const data = {
                         ...restOfProperties,
+                        maxNumberCreatedSource: restOfProperties.maxNumberCreatedSource.toString(),
+                        allowSourceCreation: restOfProperties.allowSourceCreation ? "1" : "0",
                         profiles: groups.join(";"),
                     };
 
@@ -155,7 +157,7 @@ const UsersTable = () => {
                             </Table>
                         </TableContainer>
                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                            <CsvDownloader separator="&#9;" filename="users" extension=".tsv" datas={datas as Datas}>
+                            <CsvDownloader separator="&#9;" filename="users" extension=".tsv" datas={csvData}>
                                 <Button variant="outlined">Download CSV</Button>
                             </CsvDownloader>
                             <UserForm id={`create-button`} create={true} me={me} />
@@ -182,7 +184,10 @@ const enum Mode {
     Edition,
 }
 
-type Msg_ = { type: Type.UserClickedModal; payload: boolean } | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } } | { type: Type.ResetUser; payload: Mode };
+export type Msg_ =
+    | { type: Type.UserClickedModal; payload: boolean }
+    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string | string[] | boolean | number } }
+    | { type: Type.ResetUser; payload: Mode };
 
 const updateUser = (userEditionState: UserEditionState, msg: Msg_): UserEditionState => {
     //console.log(Type[msg.type], msg.payload)
@@ -190,7 +195,7 @@ const updateUser = (userEditionState: UserEditionState, msg: Msg_): UserEditionS
     const unwrappedUsers = SRD.unwrap([], identity, model.users);
     const getUnmodifiedUsers = unwrappedUsers.reduce((acc, value) => (userEditionState.userForm.id === value.id ? value : acc), newUser(ulid()));
     const resetSourceForm = msg.payload ? userEditionState.userForm : getUnmodifiedUsers;
-    const fieldToUpdate: any = msg.type === Type.UserUpdatedField ? msg.payload.fieldname : null;
+    const fieldToUpdate = msg.type === Type.UserUpdatedField ? msg.payload.fieldname : "";
     switch (msg.type) {
         case Type.UserClickedModal:
             return { ...userEditionState, modal: msg.payload };
@@ -221,24 +226,15 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
 
     const [userModel, update] = useReducer(updateUser, { modal: false, userForm: user });
-    const [displayPassword, setDisplayPassword] = useState(false);
-
-    const handleClickShowPassword = () => {
-        setDisplayPassword(!displayPassword);
-    };
-
-    const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-    };
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
-    const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLInputElement>) => {
-        let value = event.target.value;
+    const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string | string[]>) => {
+        let value: string | string[] | boolean | number = event.target.value;
         if (fieldname === "allowSourceCreation") {
             value = event.target.value === "true" ? false : true;
         }
-        if (fieldname === "maxNumberCreatedSource") {
+        if (fieldname === "maxNumberCreatedSource" && !Array.isArray(event.target.value)) {
             value = parseInt(event.target.value);
             if (value < 0 || isNaN(value)) {
                 value = 0;
@@ -249,10 +245,22 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
     const saveUser = () => {
         void putUsersBis(userModel.userForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";
-        writeLog(me, "ConfigEditor", mode, userModel.userForm.login);
+        void writeLog(me, "ConfigEditor", mode, userModel.userForm.login);
     };
 
-    const config = SRD.unwrap({ auth: "json", tools_available: [] }, identity, model.config);
+    const config = SRD.unwrap(
+        {
+            auth: "json",
+            tools_available: [],
+            defaultGroups: [],
+            theme: {
+                defaultTheme: "",
+                selector: false,
+            },
+        },
+        identity,
+        model.config
+    );
     const createEditButton = (
         <Button id={id} color="primary" variant="contained" onClick={handleOpen}>
             {create ? "Create User" : "Edit"}
@@ -333,4 +341,4 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
     );
 };
 
-export { UsersTable, Msg_, Type, Mode };
+export { UsersTable, Type, Mode };

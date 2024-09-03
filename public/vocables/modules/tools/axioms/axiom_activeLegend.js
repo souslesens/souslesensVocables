@@ -43,34 +43,40 @@ var Axiom_activeLegend = (function () {
 
             if (node.data.type == "Class") {
                 self.hideLegendItems();
+                var newObject = {id: "createClass", label: "_Create new Class_"};
                 var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
 
-                var newObject = {id: "createClass", label: "_Create new Class_"};
-                if (siblingObjectPropertyUri) {
-                    Axioms_suggestions.getValidClassesForProperty(siblingObjectPropertyUri, function (err, classes) {
+
+                if (Axioms_graph.currentGraphNode.data.type=="Restriction" && siblingObjectPropertyUri) {
+                    var domainClassUri=self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id)
+                    Axioms_suggestions.getClassMatchingPropertiesRangeAndDomain(self.currentSource,siblingObjectPropertyUri,domainClassUri,null,function (err, classes){
+                    if(err)
+                        return alert(err)
+                   // Axioms_suggestions.getValidClassesForProperty(siblingObjectPropertyUri, function (err, classes) {
                         self.setSuggestionsSelect(classes, true, newObject);
                     });
                 } else {
+
                     var classes = Axiom_manager.getAllClasses();
                     self.setSuggestionsSelect(classes, true, newObject);
+
                 }
             } else if (node.data.type == "ObjectProperty") {
+                var newObject = {id: "createObjectProperty", label: "_Create new ObjectProperty_"};
                 self.hideLegendItems();
 
-                var domainClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
-                if (!domainClassUri) {
-                    domainClassUri = self.getPropertyDomainAncestorClass(Axioms_graph.currentGraphNode.id);
-                }
 
-                var newObject = {id: "createObjectProperty", label: "_Create new ObjectProperty_"};
-                if (domainClassUri) {
-                    Axioms_suggestions.getValidPropertiesForClass(domainClassUri, function (err, properties) {
-                        self.setSuggestionsSelect(properties, true, newObject);
-                    });
-                } else {
-                    var properties = Axiom_manager.getAllProperties();
-                    self.setSuggestionsSelect(properties, true, newObject);
+                if (Axioms_graph.currentGraphNode.data.type != "Restriction") {
+                    return alert(" ObjectProperty can only be added to a Restriction")
                 }
+                var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
+                var rangeClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
+                Axioms_suggestions.getValidPropertiesForClasses(self.currentSource,domainClassUri, rangeClassUri, function (err, properties) {
+
+                    self.setSuggestionsSelect(properties, true, newObject);
+                })
+
+
             } else if (node.data.type == "Restriction") {
                 self.hideLegendItems();
                 var suggestions = [
@@ -97,13 +103,14 @@ var Axiom_activeLegend = (function () {
         }
     };
 
+
     /**
      *
      * get the first ancestor that is a Class
      * @param restrictionUri
      * @returns classUri
      */
-    self.getPropertyDomainAncestorClass = function (restrictionUri) {
+    self.getRestrictionAncestorClass = function (restrictionUri) {
         var edges = Axioms_graph.axiomsVisjsGraph.data.edges.get();
         var edgesToMap = {};
         edges.forEach(function (edge) {
@@ -146,7 +153,7 @@ var Axiom_activeLegend = (function () {
     if unique, filters exiting nodes in graph before showing list
     *
      */
-    self.setSuggestionsSelect = function (items, unique, newOption,drawGraphFn) {
+    self.setSuggestionsSelect = function (items, unique, newOption, drawGraphFn) {
         if (unique) {
             var existingNodeIds = Axioms_graph.axiomsVisjsGraph.data.nodes.getIds();
             var filteredItems = [];
@@ -175,10 +182,11 @@ var Axiom_activeLegend = (function () {
         if (resourceUri == "createClass") {
             var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
             if (Axioms_graph.currentGraphNode.data.type == "Restriction" && siblingObjectPropertyUri) {
-                Axioms_suggestions.getValidClassesForProperty(siblingObjectPropertyUri, function (err, classes) {
-                    if (err) {
-                        return alert(err);
-                    }
+                var domainClassUri=self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id)
+                Axioms_suggestions.getClassMatchingPropertiesRangeAndDomain(self.currentSource,siblingObjectPropertyUri,domainClassUri,null,function (err, classes){
+                    if(err)
+                        return alert(err)
+
                     self.showCreateResourceBot("Class", classes);
                 });
             } else {
@@ -188,12 +196,11 @@ var Axiom_activeLegend = (function () {
         }
         // new ObjectProperty
         if (resourceUri == "createObjectProperty") {
-            var domainClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
-            if (!domainClassUri) {
-                domainClassUri = self.getPropertyDomainAncestorClass(Axioms_graph.currentGraphNode.id);
-            }
+            var rangeClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
+            var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
+
             if (Axioms_graph.currentGraphNode.data.type == "Restriction" && domainClassUri) {
-                Axioms_suggestions.getValidPropertiesForClass(domainClassUri, function (err, properties) {
+                Axioms_suggestions.getValidPropertiesForClasses(self.currentSource,domainClassUri, rangeClassUri, function (err, properties) {
                     if (err) {
                         return alert(err);
                     }
@@ -264,7 +271,7 @@ var Axiom_activeLegend = (function () {
         }
 
         var visjsData = {nodes: [], edges: []};
-        var level = Axioms_graph.currentGraphNode?(Axioms_graph.currentGraphNode.level + 1):0;
+        var level = Axioms_graph.currentGraphNode ? (Axioms_graph.currentGraphNode.level + 1) : 0;
         newResource.type = newResource.resourceType;
         newResource.level = level;
 
@@ -273,11 +280,9 @@ var Axiom_activeLegend = (function () {
         visjsData.nodes.push(visjsNode);
 
 
-
-
-       /* if(drawGraphFn){
-            return drawGraphFn(visjsData)
-        }*/
+        /* if(drawGraphFn){
+             return drawGraphFn(visjsData)
+         }*/
 
         if (Axioms_graph.axiomsVisjsGraph) {
             Axioms_graph.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
@@ -344,7 +349,9 @@ var Axiom_activeLegend = (function () {
             var hasProperty = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
             if (hasProperty) {
                 hiddenNodes.push("ObjectProperty");
-            } else {
+            }
+            var hasClass = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
+            if (hasClass) {
                 hiddenNodes.push("Class");
             }
         } else if (resourceType == "Connective") {

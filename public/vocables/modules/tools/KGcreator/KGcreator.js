@@ -191,7 +191,7 @@ var KGcreator = (function () {
                         KGcreator.loadDataBaseSource(self.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
                     } else if (obj.node.data.type == "csvSource") {
                         self.initDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
-                        KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, true,function (err, result) {
+                        KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, true, function (err, result) {
                             if (err) {
                                 return alert("file not found");
                             }
@@ -400,7 +400,7 @@ var KGcreator = (function () {
     };
 
     self.loadDataSourcesJstree = function (jstreeDivId, options, callback) {
-        self.dataSourcejstreeDivId=jstreeDivId
+        self.dataSourcejstreeDivId = jstreeDivId;
         var jstreeData = [];
         jstreeData.push({
             id: "databaseSources",
@@ -470,9 +470,11 @@ var KGcreator = (function () {
 
     self.initDataSource = function (name, type, sqlType, table) {
         //close Previous DataSource
-        var parent_node = $("#"+self.dataSourcejstreeDivId).jstree()._model.data[self.currentConfig?.currentDataSource?.name];
+        var parent_node = $("#" + self.dataSourcejstreeDivId).jstree()._model.data[self.currentConfig?.currentDataSource?.name];
         if (parent_node) {
-            $("#"+self.dataSourcejstreeDivId).jstree(true).delete_node(parent_node.children);
+            $("#" + self.dataSourcejstreeDivId)
+                .jstree(true)
+                .delete_node(parent_node.children);
         }
         self.currentConfig.currentDataSource = {
             name: name, //obj.node.id,
@@ -600,7 +602,7 @@ var KGcreator = (function () {
         });
     };
 
-    self.loadCsvSource = function (slsvSource, fileName,loadJstree, callback) {
+    self.loadCsvSource = function (slsvSource, fileName, loadJstree, callback) {
         var columns = [];
         var jstreeData = [];
         async.series(
@@ -640,8 +642,6 @@ var KGcreator = (function () {
                     });
                 },
                 function (callbackSeries) {
-
-
                     columns.forEach(function (column) {
                         var label = column;
 
@@ -672,7 +672,7 @@ var KGcreator = (function () {
                             });
                         });
                     }
-                    if(loadJstree) {
+                    if (loadJstree) {
                         JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, fileName, jstreeData);
                         KGcreator_graph.graphColumnToClassPredicates([fileName]);
                     }
@@ -680,7 +680,7 @@ var KGcreator = (function () {
                 },
 
                 function (callbackSeries) {
-                    if(loadJstree) {
+                    if (loadJstree) {
                         self.showTableVirtualColumnsTree(fileName);
                     }
                     callbackSeries();
@@ -697,7 +697,7 @@ var KGcreator = (function () {
                     return alert(err);
                 }
                 if (callback) {
-                    return callback(null,jstreeData);
+                    return callback(null, jstreeData);
                 }
             }
         );
@@ -954,7 +954,7 @@ var KGcreator = (function () {
             }
             self.addDataSourceToJstree("csvSource", datasourceName);
             self.initDataSource(datasourceName, "csvSource", "csv");
-            self.loadCsvSource(self.currentSlsvSource, datasourceName,true, function (err, result) {
+            self.loadCsvSource(self.currentSlsvSource, datasourceName, true, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }

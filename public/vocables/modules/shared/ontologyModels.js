@@ -923,13 +923,9 @@ var OntologyModels = (function () {
                             }
                             constraint = constraint.concat(constraints2);
 
-
-
                             constraint.forEach(function (item) {
                                 if (item.range) {
                                     if (!objectType || objectType == "range") {
-
-
                                         if (!allRanges[item.range]) {
                                             allRanges[item.range] = { id: item.range, label: item.rangeLabel };
                                         }
@@ -972,7 +968,6 @@ var OntologyModels = (function () {
                             });
                         },
                         function (callbackSeries) {
-
                             if (objectType && objectType == "range") {
                                 return callbackSeries();
                             }
@@ -984,9 +979,8 @@ var OntologyModels = (function () {
                                     return callback(err);
                                 }
                                 result.forEach(function (item) {
-
-                                        if (!allDomains[item.descendant.value]) {
-                                            if (!objectType || objectType == "domain") {
+                                    if (!allDomains[item.descendant.value]) {
+                                        if (!objectType || objectType == "domain") {
                                             allDomains[item.descendant.value] = {
                                                 id: item.descendant.value,
                                                 label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value),
@@ -998,7 +992,6 @@ var OntologyModels = (function () {
                                 callbackSeries();
                             });
                         },
-
                     ],
                     function (err) {
                         callbackEach(err);

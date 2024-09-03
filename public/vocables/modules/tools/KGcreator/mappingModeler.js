@@ -43,13 +43,10 @@ var MappingModeler = (function () {
                 $("#mainDialogDiv").load("./modules/tools/KGcreator/html/mappingModeler.html", function (err) {
                     $("#mainDialogDiv").dialog("open");
                     return callbackSeries();
-                })
-
+                });
             },
 
-
             function (callbackSeries) {
-
                 if (!divId) {
                     divId = "nodeInfosAxioms_activeLegendDiv";
                 }
@@ -60,7 +57,6 @@ var MappingModeler = (function () {
 
             // load jstree
             function (callbackSeries) {
-
                 var options = {
                     openAll: true,
                     selectTreeNodeFn: self.onDataSourcesJstreeSelect,
@@ -91,46 +87,42 @@ var MappingModeler = (function () {
                 if (err) {
                     return alert("file not found");
                 }
-                var columns = []
+                var columns = [];
                 jstreeData.forEach(function (item) {
                     columns.push(item.data.id);
-                })
-                self.hideForbiddenResources("Table")
-                self.currentResourceType = "Column"
-                common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false)
+                });
+                self.hideForbiddenResources("Table");
+                self.currentResourceType = "Column";
+                common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false);
             });
         } else if (obj.node.data.type == "table") {
             self.currentTable = {
                 name: obj.node.data.label,
-                columns: KGcreator.currentConfig.currentDataSource.tables[obj.node.data.id]
+                columns: KGcreator.currentConfig.currentDataSource.tables[obj.node.data.id],
             };
             var table = obj.node.data.id;
             KGcreator.currentConfig.currentDataSource.currentTable = table;
 
-            self.hideForbiddenResources("Table")
-            self.currentResourceType = "Column"
-            common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false)
-
-
+            self.hideForbiddenResources("Table");
+            self.currentResourceType = "Column";
+            common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         }
     };
 
     self.initActiveLegend = function (divId) {
-
         var legendItems = [
-            {label: "Class", color: "#00afef"},
-            {label: "ObjectProperty", color: "#f5ef39"},
-            {label: "Column", color: "#cb9801"},
-            {label: "Connective", color: "#70ac47"},
+            { label: "Class", color: "#00afef" },
+            { label: "ObjectProperty", color: "#f5ef39" },
+            { label: "Column", color: "#cb9801" },
+            { label: "Connective", color: "#70ac47" },
         ];
         var options = {
             onLegendNodeClick: self.onLegendNodeClick,
             showLegendGraphPopupMenu: self.showLegendGraphPopupMenu,
         };
         Axiom_activeLegend.isLegendActive = true;
-        Axiom_activeLegend.axiomGraphDiv="nodeInfosAxioms_graphDiv"
+        Axiom_activeLegend.axiomGraphDiv = "nodeInfosAxioms_graphDiv";
         Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", legendItems, options);
-
     };
 
     self.hideForbiddenResources = function (resourceType) {
@@ -141,44 +133,37 @@ var MappingModeler = (function () {
             hiddenNodes.push("Connective");
         }
         Axiom_activeLegend.hideLegendItems(hiddenNodes);
-    }
+    };
     self.onSuggestionsSelect = function (resourceUri) {
-        var newResource = null
+        var newResource = null;
 
         if (self.currentResourceType == "Column") {
-
             newResource = {
                 id: resourceUri,
                 label: resourceUri,
                 resourceType: "Column",
                 symbol: null,
-                level:0,
+                level: 0,
                 data: {
                     id: resourceUri,
                     label: resourceUri,
                     type: "Column",
-
                 },
                 predicates: [],
-            }
+            };
         }
-        Axioms_graph.currentGraphNode=newResource
+        Axioms_graph.currentGraphNode = newResource;
 
         Axiom_activeLegend.onSuggestionsSelect(resourceUri, self.currentResourceType, newResource);
-
-
-    }
+    };
 
     self.onLegendNodeClick = function (node, event) {
-        self.currentResourceType = node.id
+        self.currentResourceType = node.id;
 
-        Axiom_activeLegend.onLegendNodeClick(node)
-
-
-    }
-
-    self.showLegendGraphPopupMenu = function () {
+        Axiom_activeLegend.onLegendNodeClick(node);
     };
+
+    self.showLegendGraphPopupMenu = function () {};
     return self;
 })();
 

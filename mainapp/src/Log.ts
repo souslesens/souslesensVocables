@@ -9,9 +9,9 @@ export type LogFiles = {
 };
 
 const endpoint = "/api/v1/logs";
-export async function getLogFiles(): Promise<LogFiles[]> {
+export async function getLogFiles(): Promise<LogFiles> {
     const response = await fetch(endpoint);
-    const json = (await response.json()) as LogFiles[];
+    const json = (await response.json()) as Promise<LogFiles>;
     return json;
 }
 

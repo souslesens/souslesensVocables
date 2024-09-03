@@ -111,35 +111,36 @@ async function loggedIn(req, _res, next) {
     }
 }
 
-function isPluginAllowed(tool) {
-    return async (req, res, next) => {
-        try {
-            const userInfo = await userManager.getUser(req.user);
-            const userTools = await profileModel.getUserTools(userInfo.user);
+async function isPluginAllowed(tool, req, _res, next) {
+    const userInfo = await userManager.getUser(req.user);
+    const userTools = await profileModel.getUserTools(userInfo.user);
 
-            if (userTools.map((i) => i.name).includes(tool)) {
-                next();
-            } else {
-                throw {
-                    status: 401,
-                    message: "You must authenticate to access this resource.",
-                };
-            }
-        } catch (error) {
-            console.log(error);
+    if (userTools.map((i) => i.name).includes(tool)) {
+        next();
+    } else {
+        throw {
+            status: 401,
+            message: "You must authenticate to access this resource.",
+        };
+    }
+}
+
+app.get("/plugins/:plugin/*", async (req, res) => {
+    try {
+        await loggedIn(req, res, () => {});
+        const plugin = req.params.plugin;
+        await isPluginAllowed(plugin, req, res, () => {});
+        const file = req.params["0"];
+        const filePath = path.join(__dirname, `plugins/${plugin}/public`, file);
+        if (!fs.existsSync(filePath)) {
+            res.status(404).send("Not found");
+        } else {
+            res.sendFile(file, { root: path.join(__dirname, `plugins/${plugin}/public`) });
         }
-    };
-}
-
-const pluginDir = path.join(__dirname, "plugins");
-try {
-    const dirs = fs.readdirSync(pluginDir);
-    dirs.forEach((plugin) => {
-        app.use(`/plugins/${plugin}`, loggedIn, isPluginAllowed(plugin), express.static(path.join(__dirname, `plugins/${plugin}/public`)));
-    });
-} catch {
-    console.warn("No plugins directory available");
-}
+    } catch (error) {
+        res.status(error.status).send(error.message);
+    }
+});
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));

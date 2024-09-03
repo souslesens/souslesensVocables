@@ -24,7 +24,7 @@ type Model = {
     profiles: RD<string, Profile[]>;
     sources: RD<string, ServerSource[]>;
     indices: RD<string, string[]>;
-    graphs: RD<string, string[]>;
+    graphs: RD<string, GraphInfo[]>;
     me: RD<string, string>;
     databases: RD<string, Database[]>;
     logFiles: RD<string, LogFiles>;

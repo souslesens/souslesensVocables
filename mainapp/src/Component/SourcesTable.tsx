@@ -17,6 +17,7 @@ import {
     Modal,
     Paper,
     Select,
+    SelectChangeEvent,
     Stack,
     Table,
     TableBody,
@@ -30,16 +31,14 @@ import {
 } from "@mui/material";
 import { green, pink, grey } from "@mui/material/colors";
 import { Add, Circle, Download, Edit, Remove } from "@mui/icons-material";
-import { z } from "zod";
 
 import CsvDownloader from "react-csv-downloader";
 import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
-import { useZorm, createCustomIssues } from "react-zorm";
-import { ZodCustomIssueWithMessage } from "react-zorm/dist/types";
+import { useZorm, createCustomIssues, ZodCustomIssueWithMessage } from "react-zorm";
 import { SRD } from "srd";
 import { ulid } from "ulid";
 
-import { useModel } from "../Admin";
+import { Msg, useModel } from "../Admin";
 import { ServerSource, saveSource, defaultSource, deleteSource, sourceHelp, InputSourceSchema, InputSourceSchemaCreate, getGraphSize } from "../Source";
 import { writeLog } from "../Log";
 import { identity, style, joinWhenArray, humanizeSize, cleanUpText, jsonToDownloadUrl } from "../Utils";
@@ -47,13 +46,15 @@ import { HelpButton } from "./HelpModal";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { errorMessage } from "./errorMessage";
 
+type OrderBy = "name" | "graphUri" | "graphSize" | "group";
+
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
     const [filteringChars, setFilteringChars] = useState("");
-    const [orderBy, setOrderBy] = useState<keyof ServerSource>("name");
+    const [orderBy, setOrderBy] = useState<OrderBy>("name");
     const [order, setOrder] = useState<Order>("asc");
     type Order = "asc" | "desc";
-    function handleRequestSort(property: keyof ServerSource) {
+    function handleRequestSort(property: OrderBy) {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
@@ -63,9 +64,9 @@ const SourcesTable = () => {
     const indices = SRD.withDefault(null, model.indices);
     const graphs = SRD.withDefault(null, model.graphs);
 
-    const handleDeleteSource = async (source: ServerSource, updateModel) => {
-        deleteSource(source, updateModel);
-        writeLog(me, "ConfigEditor", "delete", source.name);
+    const handleDeleteSource = (source: ServerSource, updateModel: Dispatch<Msg>) => {
+        void deleteSource(source, updateModel);
+        void writeLog(me, "ConfigEditor", "delete", source.name);
     };
 
     const renderSources = SRD.match(
@@ -104,11 +105,11 @@ const SourcesTable = () => {
 
                     return { ...dataWithoutCarriageReturns };
                 });
-                const sortedSources: ServerSource[] = gotSources.slice().sort((a: ServerSource, b: ServerSource) => {
+                const sortedSources: ServerSource[] = gotSources.slice().sort((a, b) => {
                     if (orderBy == "graphSize") {
                         const left_n: number = getGraphSize(a, graphs);
                         const right_n: number = getGraphSize(b, graphs);
-                        return order === "asc" ? right_n > left_n : left_n > right_n;
+                        return order === "asc" ? left_n - right_n : right_n - left_n;
                     } else {
                         const left: string = a[orderBy] || ("" as string);
                         const right: string = b[orderBy] || ("" as string);
@@ -162,7 +163,7 @@ const SourcesTable = () => {
                                         .filter((source) => cleanUpText(source.name).includes(cleanUpText(filteringChars)))
                                         .map((source) => {
                                             const haveIndices = indices ? indices.includes(source.name.toLowerCase()) : false;
-                                            const graphInfo = graphs.find((g) => g.name === source.graphUri);
+                                            const graphInfo = graphs?.find((g) => g.name === source.graphUri);
                                             const haveGraphs = graphInfo !== undefined;
 
                                             return (
@@ -300,7 +301,7 @@ const enum Mode {
     Edition,
 }
 
-type Msg_ =
+export type Msg_ =
     | { type: Type.UserClickedModal; payload: boolean }
     | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string | string[] } }
     | { type: Type.ResetSource; payload: Mode }
@@ -319,7 +320,7 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
     const getUnmodifiedSources: SourceFormData = unwrappedSources.reduce((acc, value) => (sourceEditionState.sourceForm.id === value.id ? toFormData(value) : acc), toFormData(defaultSource(ulid())));
     const resetSourceForm = msg.payload ? sourceEditionState.sourceForm : getUnmodifiedSources;
-    const fieldToUpdate: any = msg.type === Type.UserUpdatedField ? msg.payload.fieldname : null;
+    const fieldToUpdate = msg.type === Type.UserUpdatedField ? msg.payload.fieldname : "";
     switch (msg.type) {
         case Type.UserClickedModal:
             return { ...sourceEditionState, modal: msg.payload };
@@ -378,12 +379,12 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
 
     const inputSourceSchema = create ? InputSourceSchemaCreate : InputSourceSchema;
-    const zo = useZorm("source-form", z.object(inputSourceSchema), { setupListeners: false, customIssues: issues });
+    const zo = useZorm("source-form", inputSourceSchema, { setupListeners: false, customIssues: issues });
 
     const [isAfterSubmission, setIsAfterSubmission] = useState<boolean>(false);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
-    const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLInputElement>) => {
+    const handleFieldUpdate = (fieldname: string) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string | string[]>) => {
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
     };
     const handleGroupUpdate = (value: string) => {
@@ -448,8 +449,8 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
     const knownGroup = [...new Set(sources.flatMap((source) => source.group))].filter((group) => group.length > 0);
     const knownTaxonomyPredicates = [...new Set(sources.flatMap((source) => source.taxonomyPredicates))];
 
-    function validateSourceGroup(source: ServerSource) {
-        const issues = createCustomIssues(InputSourceSchema);
+    function validateSourceGroup(source: SourceFormData) {
+        const issues = createCustomIssues(InputSourceSchemaCreate);
         if (source.group.startsWith("PRIVATE/") && source.published) {
             issues.group("Published source can't be in PRIVATE group");
         }
@@ -459,7 +460,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
     }
 
     function validateSourceName(sourceName: string) {
-        const issues = createCustomIssues(InputSourceSchema);
+        const issues = createCustomIssues(InputSourceSchemaCreate);
 
         if (sources.reduce((acc, s) => (acc ||= s.id === sourceName), false)) {
             issues.name(`Source's name ${sourceName} is already in use`);
@@ -472,7 +473,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
     const saveSources = () => {
         void saveSource(fromFormData(sourceModel.sourceForm), create ? Mode.Creation : Mode.Edition, updateModel, update);
         const mode = create ? "create" : "edit";
-        writeLog(me, "ConfigEditor", mode, sourceModel.sourceForm.name);
+        void writeLog(me, "ConfigEditor", mode, sourceModel.sourceForm.name);
     };
     const createIssues = (issue: ZodCustomIssueWithMessage[]) => setIssues(issue);
     const validateAfterSubmission = () => {
@@ -480,6 +481,9 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
             zo.validate();
         }
     };
+
+    const users = SRD.unwrap([], (a) => a, model.users);
+
     return (
         <>
             {create ? (
@@ -563,7 +567,11 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
-                                name={zo.fields.name()}
+                                name={
+                                    // @ts-expect-error FIXME
+                                    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+                                    zo.fields.name()
+                                }
                                 helperText={errorMessage(zo.errors.name)}
                                 onBlur={() => {
                                     const isUniq = validateSourceName(sourceModel.sourceForm.name);
@@ -756,7 +764,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                         </InputAdornment>
                                     }
                                 >
-                                    {model.users.data.map((user) => (
+                                    {users.map((user) => (
                                         <MenuItem key={user.id} value={user.login}>
                                             {user.login}
                                         </MenuItem>
@@ -769,7 +777,6 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                 freeSolo
                                 disableClearable
                                 options={knownGroup}
-                                label={"Group"}
                                 onInputChange={(_e, newValue) => handleGroupUpdate(newValue)}
                                 onBlur={() => {
                                     const res = validateSourceGroup(sourceModel.sourceForm);
@@ -830,7 +837,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                     options={knownTaxonomyPredicates}
                                     value={sourceModel.sourceForm.taxonomyPredicates}
                                     freeSolo
-                                    onChange={(e, value) => handleTaxonomyPredicatesUpdate(value)}
+                                    onChange={(_, value) => handleTaxonomyPredicatesUpdate(value)}
                                     style={{ width: "400px" }}
                                     renderInput={(params) => {
                                         if (sourceModel.sourceForm.taxonomyPredicates.length === 0) {
@@ -891,7 +898,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
 const FormGivenSchemaType = (props: { model: SourceEditionState; update: Dispatch<Msg_> }) => {
     const handlePredicateUpdate = (fieldName: string) => (event: ChangeEvent<HTMLTextAreaElement>) =>
         props.update({ type: Type.UserUpdatedPredicates, payload: { ...props.model.sourceForm.predicates, [fieldName]: event.target.value } });
-    const handleDataSourceUpdate = (fieldName: string) => (event: ChangeEvent<HTMLInputElement>) =>
+    const handleDataSourceUpdate = (fieldName: string) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string | string[]>) =>
         props.update({
             type: Type.UserUpdatedDataSource,
             payload: props.model.sourceForm.dataSource
@@ -990,4 +997,4 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: Dispatc
             return <div></div>;
     }
 };
-export { SourcesTable, Msg_, Type, Mode };
+export { SourcesTable, Type, Mode };

@@ -1,12 +1,14 @@
 import { failure, success } from "srd";
 import { ulid } from "ulid";
 import { z } from "zod";
+import { Msg } from "./Admin";
+import { Dispatch } from "react";
 
 const endpoint = "/api/v1/admin/databases";
 
 async function getDatabases(): Promise<Database[]> {
     const response = await fetch(endpoint);
-    const json = (await response.json()) as Response;
+    const json = (await response.json()) as { resources: DatabaseJson[] };
     return mapDatabases(json.resources);
 }
 
@@ -17,8 +19,12 @@ function mapDatabases(resources: DatabaseJson[]) {
             return decodeDatabase(key, val);
         })
         .sort((database1: Database, database2: Database) => {
-            const name1 = database1.name.toUpperCase();
-            const name2 = database2.name.toUpperCase();
+            const name1 = database1.name?.toUpperCase();
+            const name2 = database2.name?.toUpperCase();
+
+            if (name1 === undefined || name2 === undefined) {
+                return 0;
+            }
             if (name1 < name2) {
                 return -1;
             }
@@ -31,7 +37,7 @@ function mapDatabases(resources: DatabaseJson[]) {
     return mapped_databases;
 }
 
-async function addDatabase(database: Database, updateModel: React.Dispatch<Msg>) {
+async function addDatabase(database: Database, updateModel: Dispatch<Msg>) {
     try {
         const body = { database: database };
 
@@ -40,23 +46,23 @@ async function addDatabase(database: Database, updateModel: React.Dispatch<Msg>)
             body: JSON.stringify(body, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
-        const { message, resources } = (await response.json()) as Response;
+        const { message, resources } = (await response.json()) as { message: string; resources: DatabaseJson[] };
 
         if (response.status === 200) {
             updateModel({
-                type: "Databases",
+                type: "databases",
                 payload: success(mapDatabases(resources)),
             });
         } else {
             updateModel({
-                type: "Databases",
+                type: "databases",
                 payload: failure(`${response.status}, ${message}`),
             });
         }
     } catch (error) {
         updateModel({
-            type: "Databases",
-            payload: failure(error),
+            type: "databases",
+            payload: failure(error as string),
         });
     }
 }
@@ -64,23 +70,23 @@ async function addDatabase(database: Database, updateModel: React.Dispatch<Msg>)
 async function deleteDatabase(database: Database, updateModel: React.Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${database.id}`, { method: "delete" });
-        const { message, resources } = (await response.json()) as Response;
+        const { message, resources } = (await response.json()) as { message: string; resources: DatabaseJson[] };
 
         if (response.status === 200) {
             updateModel({
-                type: "Databases",
+                type: "databases",
                 payload: success(mapDatabases(resources)),
             });
         } else {
             updateModel({
-                type: "Databases",
+                type: "databases",
                 payload: failure(`${response.status}, ${message}`),
             });
         }
     } catch (error) {
         updateModel({
-            type: "Databases",
-            payload: failure(`Unknown error have occured: ${error}`),
+            type: "databases",
+            payload: failure(`Unknown error have occured: ${error as string}`),
         });
     }
 }
@@ -94,23 +100,23 @@ async function editDatabase(database: Database, updateModel: React.Dispatch<Msg>
             body: JSON.stringify(body, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
-        const { message, resources } = (await response.json()) as Response;
+        const { message, resources } = (await response.json()) as { message: string; resources: DatabaseJson[] };
 
         if (response.status === 200) {
             updateModel({
-                type: "Databases",
+                type: "databases",
                 payload: success(mapDatabases(resources)),
             });
         } else {
             updateModel({
-                type: "Databases",
+                type: "databases",
                 payload: failure(`${response.status}, ${message}`),
             });
         }
     } catch (error) {
         updateModel({
-            type: "Databases",
-            payload: failure(error),
+            type: "databases",
+            payload: failure(error as string),
         });
     }
 }
@@ -118,15 +124,15 @@ async function editDatabase(database: Database, updateModel: React.Dispatch<Msg>
 type DatabaseJson = {
     id: string;
     name?: string;
-    driver: string;
+    driver: "postgres" | "sqlserver";
     host: string;
-    port: int;
+    port: number;
     database: string;
     user: string;
     password: string;
 };
 
-const decodeDatabase = (key: string, database: DatabaseJson): Database => {
+const decodeDatabase = (_key: string, database: DatabaseJson): Database => {
     return {
         id: database.id ? database.id : ulid(),
         name: database.name ? database.name : database.id,
@@ -144,12 +150,13 @@ const DatabaseSchema = z.object({
     name: z.string().optional(),
     driver: z.enum(["postgres", "sqlserver"]),
     host: z.string().min(1),
-    port: z.number().int().positive(0, { message: "Invalid port" }).lte(65535, { message: "Out of range" }),
+    port: z.number().int().positive({ message: "Invalid port" }).lte(65535, { message: "Out of range" }),
     database: z.string().min(1),
     user: z.string().min(1),
     password: z.string().optional(),
 });
-type Database = z.infer<typeof DatabaseSchema>;
+
+export type Database = z.infer<typeof DatabaseSchema>;
 
 export const defaultDatabase = (uuid: string): Database => {
     return {
@@ -163,4 +170,4 @@ export const defaultDatabase = (uuid: string): Database => {
         password: "",
     };
 };
-export { addDatabase, Database, DatabaseSchema, deleteDatabase, editDatabase, getDatabases };
+export { addDatabase, DatabaseSchema, deleteDatabase, editDatabase, getDatabases };

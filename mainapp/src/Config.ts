@@ -10,18 +10,18 @@ const ConfigSchema = z.object({
     }),
 });
 
-export type Config = z.infer<typeof ConfigSchema>;
+export type ConfigType = z.infer<typeof ConfigSchema>;
 
 const UpdateConfigCommandSchema = ConfigSchema.omit({ auth: true });
 export type UpdateConfigCommand = z.infer<typeof UpdateConfigCommandSchema>;
 
-async function getConfig(): Promise<Config> {
+async function getConfig(): Promise<ConfigType> {
     const response = await fetch("/api/v1/config");
     const json: unknown = await response.json();
     return ConfigSchema.parse(json);
 }
 
-async function updateConfig(dto: UpdateConfigCommand): Promise<Config> {
+async function updateConfig(dto: UpdateConfigCommand): Promise<ConfigType> {
     await fetch("/api/v1/config", { method: "PUT", body: JSON.stringify(dto), headers: { "Content-Type": "application/json" } });
     return await getConfig();
 }

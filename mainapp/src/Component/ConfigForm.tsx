@@ -21,15 +21,14 @@ import { z } from "zod";
 
 import { RD, SRD, failure, loading, success } from "srd";
 
-import type { Config } from "../Config";
-import { getConfig, updateConfig } from "../Config";
+import { ConfigType, getConfig, updateConfig } from "../Config";
 import { useZorm, fieldChain } from "react-zorm";
 import { errorMessage } from "./errorMessage";
 import { Profile, getProfiles } from "../Profile";
 import { Tool, getAllTools } from "../Tool";
 
 const getAvailableThemes = () => {
-    return Object.keys(Config.slsvColorThemes).sort((a, b) => a.localeCompare(b));
+    return Object.keys(window.Config.slsvColorThemes).sort((a, b) => a.localeCompare(b));
 };
 
 const ConfigFormSchema = z.object({
@@ -81,7 +80,7 @@ function useNotifier(): { notify: (state: Notification) => void; element: JSX.El
 const ConfigForm = () => {
     const [allProfilesRD, setAllProfilesRD] = useState<RD<string, Profile[]>>(loading());
     const [allToolsRD, setAllToolsRD] = useState<RD<string, Tool[]>>(loading());
-    const [configRD, setConfigRD] = useState<RD<string, Config>>(loading());
+    const [configRD, setConfigRD] = useState<RD<string, ConfigType>>(loading());
     const [availableTools, setAvailableTools] = useState<string[]>([]);
     const [defaultGroups, setDefaultGroups] = useState<string[]>([]);
     const allThemes = useMemo(() => getAvailableThemes(), []);

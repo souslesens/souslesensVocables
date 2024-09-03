@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.82.1](https://github.com/souslesens/souslesensVocables/compare/1.82.0...1.82.1) (2024-09-03)
+
+
+### Bug Fixes
+
+* plugins route are create dynamically ([740003e](https://github.com/souslesens/souslesensVocables/commit/740003ee108f0bb6d0612233ca0a01032c4bb3b1))
+* req.isAuthenticated is a function and it must be called ([df46ed2](https://github.com/souslesens/souslesensVocables/commit/df46ed255ad9e57a4288240c19519f518371f71d))
+
 ## [1.82.0](https://github.com/souslesens/souslesensVocables/compare/1.81.1...1.82.0) (2024-09-03)
 
 

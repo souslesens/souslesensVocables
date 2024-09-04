@@ -4,6 +4,7 @@ type Source = {
     id: string;
     type: string;
     graphUri: string;
+    graphDownloadUrl?: string;
     sparql_server: {
         url: string;
         method: string;

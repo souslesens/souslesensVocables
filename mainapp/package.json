@@ -4,7 +4,7 @@
     "description": "Webapp for the Souslesens application",
     "source": "index.html",
     "scripts": {
-        "format": "prettier ./src/**/*.{jsx,tsx,ts,js,css}",
+        "format": "eslint --fix",
         "lint": "eslint src && tsc --noEmit",
         "build": "vite build",
         "build:watch": "vite build --watch",

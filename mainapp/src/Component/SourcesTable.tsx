@@ -572,7 +572,10 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false, me = "" }:
                                     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
                                     zo.fields.name()
                                 }
-                                helperText={errorMessage(zo.errors.name)}
+                                helperText={
+                                    // @ts-expect-error FIXME
+                                    errorMessage(zo.errors.name)
+                                }
                                 onBlur={() => {
                                     const isUniq = validateSourceName(sourceModel.sourceForm.name);
                                     createIssues(isUniq.issues);

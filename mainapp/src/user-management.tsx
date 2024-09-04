@@ -12,15 +12,16 @@ export default function UserManagenent() {
     const [copied, setCopied] = useState<boolean>(false);
 
     useEffect(() => {
-        (async () => {
+        const fetchUser = async () => {
             const response = await fetchMe();
             setCurrentUserToken(response.user.token);
-        })();
+        };
+        void fetchUser();
     }, []);
 
     const postToken = async () => {
         const response = await fetch("/api/v1/users/token", { method: "post" });
-        const json = await response.json();
+        const json = (await response.json()) as { token: string };
         return json.token;
     };
 
@@ -30,7 +31,7 @@ export default function UserManagenent() {
 
     const handleCopyToken = async () => {
         setCopied(true);
-        navigator.clipboard.writeText(currentUserToken);
+        void navigator.clipboard.writeText(currentUserToken);
         await new Promise((r) => setTimeout(r, 2000));
         setCopied(false);
     };
@@ -62,5 +63,6 @@ export default function UserManagenent() {
 }
 
 const container = document.getElementById("mount-user-management-here");
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const root = createRoot(container!);
 root.render(<UserManagenent />);

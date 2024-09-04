@@ -15,6 +15,7 @@
     "author": "Logilab",
     "license": "LGPL-3.0-or-later",
     "devDependencies": {
+        "@types/human-number": "^1.0.2",
         "@types/react": "^18.3.4",
         "@types/react-dom": "^18.3.0",
         "@typescript-eslint/eslint-plugin": "^5.62.0",

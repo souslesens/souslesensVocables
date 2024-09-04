@@ -24,7 +24,7 @@ const getGraphSize = (source: ServerSource, graphs: GraphInfo[] | null) => {
 
 async function getIndices(): Promise<string[]> {
     const response = await fetch(indicesEndpoint);
-    const json = await response.json();
+    const json = (await response.json()) as string[];
     return json;
 }
 
@@ -34,13 +34,13 @@ export interface GraphInfo {
 }
 async function getGraphs(): Promise<GraphInfo[]> {
     const response = await fetch(graphsEndpoint);
-    const json = await response.json();
+    const json = (await response.json()) as GraphInfo[];
     return json;
 }
 
 async function getMe(): Promise<string> {
     const response = await fetch("/api/v1/auth/whoami");
-    const json = await response.json();
+    const json = (await response.json()) as { user: { login: string } };
     return json.user.login;
 }
 
@@ -69,7 +69,7 @@ function mapSources(resources: ServerSource[]) {
     return mapped_sources;
 }
 
-export async function saveSource(body: InputSource, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
+export async function saveSource(body: ServerSource, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
     try {
         let response = null;
         if (mode === Mode.Edition) {
@@ -104,7 +104,7 @@ export async function saveSource(body: InputSource, mode: Mode, updateModel: Rea
     }
 }
 
-export async function deleteSource(source: InputSource, updateModel: React.Dispatch<Msg>) {
+export async function deleteSource(source: ServerSource, updateModel: React.Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${source.name}`, { method: "delete" });
         const { message, resources } = (await response.json()) as Response;

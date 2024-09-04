@@ -19,6 +19,8 @@ const app = express();
 const Sentry = require("@sentry/node");
 const { userModel } = require("./model/users");
 const { profileModel } = require("./model/profiles");
+const { sourceModel } = require("./model/sources");
+const { rdfDataModel } = require("./model/rdfData");
 
 const config = readMainConfig();
 
@@ -29,14 +31,11 @@ if (config.sentryDsnNode) {
 }
 
 // body parsers
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
 
 //app.use(express.urlencoded({ extended: true }));
 //ajout CF
 app.use(express.urlencoded({ extended: true, limit: "20mb", parameterLimit: 10000 }));
-
-
-
 
 /*
 const bodyParser = require('body-parser');
@@ -88,7 +87,6 @@ if (config.auth !== "disabled") {
     app.use(passport.authenticate("session"));
 }
 
-
 /**
  * Routes
  */
@@ -97,7 +95,7 @@ if (config.auth !== "disabled") {
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "mainapp/static")));
 app.use("/upload/rdf", express.static(path.join(__dirname, "data/uploaded_rdf_data")));
-app.use("/vocables/classIcons",express.static(path.join(__dirname, "data/classIcons")));
+app.use("/vocables/classIcons", express.static(path.join(__dirname, "data/classIcons")));
 
 async function loggedIn(req, _res, next) {
     if (config.auth === "disabled" || req.isAuthenticated()) {
@@ -180,10 +178,9 @@ openapi.initialize({
         restrictAdmin: async function (req, _scopes, _definition) {
             const currentUser = await userManager.getUser(req.user);
 
-            if (req.url.indexOf("/sources")>0 && currentUser.allowSourceCreation) {
+            if (req.url.indexOf("/sources") > 0 && currentUser.allowSourceCreation) {
                 return Promise.resolve(true);
             }
-
 
             if (!currentUser.logged) {
                 throw {
@@ -291,5 +288,30 @@ function formatRedirectPath(path) {
     }
     return path;
 }
+
+// Load default graph available in the "ttlUrl" key
+// if no graph is already available in the Virtuoso
+async function loadDefaultGraphs() {
+    const sources = await sourceModel.getAllSources();
+    try {
+        const graphs = await rdfDataModel.getGraphs();
+        Object.entries(sources).forEach(async ([_, source]) => {
+            const graphDownloadUrl = source.graphDownloadUrl;
+            if (graphDownloadUrl) {
+                const graphURI = source.graphUri;
+                const matchingGraph = graphs.find((g) => g.name === graphURI);
+                const hasGraph = matchingGraph !== undefined ?? matchingGraph.count > 0;
+
+                if (!hasGraph) {
+                    await rdfDataModel.loadGraph(source.graphUri, graphDownloadUrl);
+                }
+            }
+        });
+    } catch (e) {
+        console.error("Could not load default graphs: " + e);
+    }
+}
+
+void loadDefaultGraphs();
 
 module.exports = app;

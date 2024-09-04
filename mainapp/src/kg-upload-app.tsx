@@ -68,26 +68,28 @@ export default function App(uploadFormData: UploadFormData) {
 
     const fetchDatabases = async () => {
         const response = await fetch("/api/v1/databases");
-        const json = await response.json();
+        const json = (await response.json()) as { resources: Record<string, string>[] };
         setDatabases(json.resources);
-    };
-
-    const handleDatabaseChange = (event: ChangeEvent<HTMLSelectElement>) => {
-        const value = event.target.value;
-        setSelectedDatabase(value.id);
-        window.KGcreator.uploadFormData.selectedDatabase = value;
-        window.KGcreator.createDataBaseSourceMappings();
     };
 
     const widget = (displayForm: string) => {
         if (displayForm === "database") {
             return (
-                <Select label="Select database" onChange={handleDatabaseChange} value={selectedDatabase}>
+                <Select
+                    label="Select database"
+                    onChange={(event) => {
+                        const value = event.target.value;
+                        setSelectedDatabase(value);
+                        window.KGcreator.uploadFormData.selectedDatabase = value;
+                        window.KGcreator.createDataBaseSourceMappings();
+                    }}
+                    value={selectedDatabase}
+                >
                     <MenuItem disabled value={"_default"}>
                         Select database
                     </MenuItem>
                     {databases.map((database) => (
-                        <MenuItem key={database.id} value={{ id: database.id, name: database.name }}>
+                        <MenuItem key={database.id} value={database.id}>
                             {database.name}
                         </MenuItem>
                     ))}
@@ -126,6 +128,7 @@ export default function App(uploadFormData: UploadFormData) {
 
 window.KGcreator.createApp = function createApp(uploadFormData: UploadFormData) {
     const container = document.getElementById("mount-kg-upload-app-here");
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const root = createRoot(container!);
     root.render(<App {...uploadFormData} />);
     return root.unmount.bind(root);

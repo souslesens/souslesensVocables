@@ -2,7 +2,7 @@ import { ulid } from "ulid";
 import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import { Msg_, Type, Mode } from "../src/Component/UsersTable";
-import { Dispatch } from "react";
+import { Dispatch, SetStateAction } from "react";
 const endpoint = "/api/v1/users";
 
 async function getUsers(): Promise<User[]> {
@@ -51,7 +51,7 @@ async function saveUserBis(body: User, mode: Mode, updateModel: Dispatch<Msg>, u
             updateModel({ type: "users", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
-        updateModel({ type: "users", payload: failure(e) });
+        updateModel({ type: "users", payload: failure(e as string) });
     }
 }
 
@@ -65,7 +65,7 @@ async function deleteUser(user: User, updateModel: Dispatch<Msg>) {
             updateModel({ type: "users", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
-        updateModel({ type: "users", payload: failure(e) });
+        updateModel({ type: "users", payload: failure(e as string) });
     }
 }
 
@@ -96,10 +96,10 @@ const decodeUser = (user: UserJSON): User => {
 
 type UserJSON = { id?: string; login: string; password: string; groups: string[]; source?: string; allowSourceCreation: boolean; maxNumberCreatedSource: number };
 
-type User = { id: string; _type: string; login: string; password: string; groups: string[]; source: string; allowSourceCreation: boolean; maxNumberCreatedSource: number };
+export type User = { id: string; _type: string; login: string; password: string; groups: string[]; source: string; allowSourceCreation: boolean; maxNumberCreatedSource: number };
 
 const newUser = (key: string): User => {
     return { id: key, _type: "user", login: "", password: "", groups: [], source: "json", allowSourceCreation: false, maxNumberCreatedSource: 5 };
 };
 
-export { getUsers, newUser, saveUserBis as putUsersBis, restoreUsers, deleteUser, putUsers, User };
+export { getUsers, newUser, saveUserBis as putUsersBis, restoreUsers, deleteUser, putUsers };

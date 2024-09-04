@@ -5,7 +5,7 @@
     "source": "index.html",
     "scripts": {
         "format": "prettier ./src/**/*.{jsx,tsx,ts,js,css}",
-        "lint": "eslint src",
+        "lint": "eslint src && tsc --noEmit",
         "build": "vite build",
         "build:watch": "vite build --watch",
         "dev": "vite",

@@ -49,9 +49,13 @@ const VisuallyHiddenInput = styled("input")({
     width: 1,
 });
 
-async function fetchMe() {
+interface User {
+    user: { login: string; token: string };
+}
+
+async function fetchMe(): Promise<User> {
     const response = await fetch("/api/v1/auth/whoami");
-    const json = await response.json();
+    const json = (await response.json()) as User;
     return json;
 }
 

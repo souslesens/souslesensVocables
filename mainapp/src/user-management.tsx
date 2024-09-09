@@ -1,11 +1,10 @@
 import { createRoot } from "react-dom/client";
-import { useState, useEffect, MouseEvent } from "react";
+import { useEffect, useState } from "react";
 
-import { Button, IconButton, InputAdornment, OutlinedInput, FormControl, Stack, Typography } from "@mui/material";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import CheckIcon from "@mui/icons-material/Check";
+import { Alert, Snackbar, Stack, Tab, Tabs } from "@mui/material";
 
-import { fetchMe } from "./Utils";
+import { UserProfile } from "./Component/UserProfile";
+import { UserSources } from "./Component/UserSources";
 
 declare global {
     interface Window {
@@ -13,59 +12,73 @@ declare global {
             createApp: () => void;
         };
     }
+}
+
+enum Sections {
+    Profile = "profile",
+    Sources = "sources",
+}
+
+type Severity = "error" | "info" | "success" | "warning";
+
+type SnackInfo = {
+    isOpen: boolean;
+    message: string;
+    severity: Severity;
 };
 
+const Dispatcher = (props: { handleSnackbar: void; selectedTab: string }) => {
+    switch (props.selectedTab) {
+        case Sections.Profile:
+            return <UserProfile handleSnackbar={props.handleSnackbar} />;
+        case Sections.Sources:
+            return <UserSources handleSnackbar={props.handleSnackbar} />;
+    }
+};
+
+const initialSnackInfo = { isOpen: false, message: "", severity: "success" };
+
 export default function UserManagement() {
-    const [currentUserToken, setCurrentUserToken] = useState<string>("");
-    const [copied, setCopied] = useState<boolean>(false);
+    const [selectedTab, setSelectedTab] = useState<Sections>(Sections.Sources);
+    const [snackInfo, setSnackInfo] = useState<SnackInfo>(initialSnackInfo);
 
     useEffect(() => {
-        const fetchUser = async () => {
-            const response = await fetchMe();
-            setCurrentUserToken(response.user.token);
-        };
-        void fetchUser();
+        const params = new URLSearchParams(document.location.search);
+        if (params.has("tab")) {
+            setSelectedTab(params.get("tab"));
+        }
     }, []);
 
-    const postToken = async () => {
-        const response = await fetch("/api/v1/users/token", { method: "post" });
-        const json = (await response.json()) as { token: string };
-        return json.token;
+    const handleSnackbar = (message: string, severity: Severity = "success") => {
+        setSnackInfo({ isOpen: true, message: message, severity: severity });
     };
 
-    const handleUpdateToken = async (_event: MouseEvent<HTMLButtonElement>) => {
-        setCurrentUserToken(await postToken());
+    const onChangeTab = (event: SyntheticEvent, newValue: string) => {
+        setSelectedTab(newValue);
+
+        const params = new URLSearchParams(document.location.search);
+        params.set("tab", newValue);
+        window.history.replaceState(null, "", `?${params.toString()}`);
     };
 
-    const handleCopyToken = async () => {
-        setCopied(true);
-        void navigator.clipboard.writeText(currentUserToken);
-        await new Promise((r) => setTimeout(r, 2000));
-        setCopied(false);
+    const onSnackbarClose = (event: SyntheticEvent | Event, reason?: string) => {
+        if (reason !== "clickaway") {
+            setSnackInfo({ ...snackInfo, isOpen: false });
+        }
     };
 
     return (
-        <Stack spacing={{ xs: 2 }} sx={{ mx: 12, my: 4 }}>
-            <Typography variant="h4">Manage API key</Typography>
-            <Stack direction="row" spacing={{ xs: 1 }} sx={{ m: 4 }} useFlexGap>
-                <FormControl variant="outlined">
-                    <OutlinedInput
-                        id="outlined-adornment-token"
-                        endAdornment={
-                            <InputAdornment position="end">
-                                <IconButton aria-label="Copy token in the clipboard" edge="end" onClick={handleCopyToken} sx={{ p: 2 }}>
-                                    {copied ? <CheckIcon /> : <ContentCopyIcon />}
-                                </IconButton>
-                            </InputAdornment>
-                        }
-                        sx={{ width: 600 }}
-                        value={currentUserToken}
-                    />
-                </FormControl>
-                <Button aria-label="Renew" onClick={handleUpdateToken} sx={{ p: 2 }} variant="contained">
-                    Renew
-                </Button>
-            </Stack>
+        <Stack>
+            <Snackbar autoHideDuration={2000} open={snackInfo.isOpen} onClose={onSnackbarClose}>
+                <Alert onClose={onSnackbarClose} severity={snackInfo.severity} sx={{ width: "100%" }}>
+                    {snackInfo.message}
+                </Alert>
+            </Snackbar>
+            <Tabs centered onChange={onChangeTab} sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }} value={selectedTab}>
+                <Tab label="Profile" value={Sections.Profile} />
+                <Tab label="Sources" value={Sections.Sources} />
+            </Tabs>
+            <Dispatcher handleSnackbar={handleSnackbar} selectedTab={selectedTab} />
         </Stack>
     );
 }

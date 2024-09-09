@@ -24,19 +24,20 @@ const UserProfile = (props: { handleSnackbar: void }) => {
         })();
     }, []);
 
-    const postToken = async () => {
+    const handleUpdateToken = async (_event: MouseEvent<HTMLButtonElement>) => {
         const response = await fetch("/api/v1/users/token", {
             body: JSON.stringify({ login: currentUser.login }),
             headers: { "Content-Type": "application/json" },
             method: "post",
         });
         const json = await response.json();
-        return json.token;
-    };
 
-    const handleUpdateToken = async (_event: MouseEvent<HTMLButtonElement>) => {
-        const token = await postToken();
-        setCurrentUser({ ...currentUser, token: token });
+        if (response.status === 200) {
+            setCurrentUser({ ...currentUser, token: json.token });
+            handleSnackbar("The token have been renewed successfully");
+        } else {
+            handleSnackbar("An error occurs during renewal", "error");
+        }
     };
 
     const handleCopyToken = async () => {

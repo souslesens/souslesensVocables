@@ -771,6 +771,8 @@ var Axiom_activeLegend = (function () {
         });
     };
 
+
+
     return self;
 })();
 

@@ -2,6 +2,9 @@ import Axiom_activeLegend from "../axioms/axiom_activeLegend.js";
 import KGcreator from "./KGcreator.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
+import Axioms_graph from "../axioms/axioms_graph.js";
+import Axioms_suggestions from "../axioms/axioms_suggestions.js";
+import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 
 var MappingModeler = (function() {
     var self = {};
@@ -15,10 +18,16 @@ var MappingModeler = (function() {
                     var source = SourceSelectorWidget.getSelectedSource()[0];
                     $("#mainDialogDiv").dialog("close");
 
-                    self.currentSource = source;
+                    self.currentSource = source
+
                     return callbackSeries();
                 });
             },
+            function(callbackSeries) {
+                self.initResourcesMap( self.currentSource )
+                return callbackSeries();
+            },
+
             //bot
             function(callbackSeries) {
                 /*  var params = {
@@ -164,48 +173,28 @@ var MappingModeler = (function() {
                 predicates: []
             };
         }
-        self.currentGraphNode = newResource;
+        if (self.currentResourceType == "Class") {
+           var resource= self.allResourcesMap[resourceUri]
+            newResource = {
+                id: resourceUri,
+                label: resource.label,
+                resourceType: "Class",
+                symbol: null,
+                level: 0,
+                data: {
+                    id: resourceUri,
+                    label: resource.label,
+                    type: "Class"
+                },
+                predicates: []
+            };
+        }
+
+
         self.drawResource(newResource)
 
     }
-    self.onLegendNodeClick = function(node, event) {
-        self.currentResourceType = node.id;
 
-
-        if (node && node.data) {
-            self.currentNodeType = node.data.type;
-            self.currentLegendNodeType = node.data.type;
-
-
-            if (node.data.type == "Column") {
-                common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
-
-            } else if (node.data.type == "Class") {
-
-            }
-        }
-
-
-    };
-
-    self.showLegendGraphPopupMenu = function() {
-    };
-
-
-    self.switchDataSourcePanel = function(target) {
-
-        if (target == "show") {
-            $("#mappingModeler_jstreeDiv").css("display", "block");
-            $("#mappingModeler_mainDiv").css("display", "none");
-            $("#mappingModeler_graphPanelDiv").css("display", "none");
-        } else {
-            $("#mappingModeler_jstreeDiv").css("display", "none");
-            $("#mappingModeler_mainDiv").css("display", "block");
-            $("#mappingModeler_graphPanelDiv").css("display", "block");
-        }
-
-
-    };
 
 
     self.drawResource = function(newResource) {
@@ -216,7 +205,7 @@ var MappingModeler = (function() {
 
         if (self.visjsGraph) {
             self.visjsGraph.data.nodes.add(visjsData.nodes);
-            if (self.currentGraphNode) {
+            if (false && self.currentGraphNode) {
                 //  var edgeId = self.currentGraphNode.id + "_" + newResource.id;
                 var edgeId = common.getRandomHexaId(5);
                 visjsData.edges.push({
@@ -240,7 +229,7 @@ var MappingModeler = (function() {
             self.drawGraphCanvas(self.graphDiv, visjsData,options);
         }
 
-        self.hideForbiddenResources(self.currentGraphNode.data.type);
+         self.hideForbiddenResources(newResource.data.type);
         $("#axioms_legend_suggestionsSelect").empty();
 
 
@@ -275,10 +264,180 @@ enabled:true},*/
 
         });
     };
+    self.onLegendNodeClick = function(node, event) {
+        self.currentResourceType = node.id;
 
-    self.clearGraph = function () {
-        $("#" + self.graphDivId).html("");
+
+        if (node && node.data) {
+            self.currentNodeType = node.data.type;
+            self.currentLegendNodeType = node.data.type;
+
+
+            if (node.data.type == "Column") {
+                common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
+
+            } else if (node.data.type == "Class") {
+
+                self.hideLegendItems();
+                var newObject = { id: "createClass", label: "_Create new Class_" };
+                var classes = self.getAllClasses(self.currentSource,function(err,classes){
+                    if(err)
+                        return alert(err)
+                    self.setSuggestionsSelect(classes, true, newObject);
+                });
+
+            }
+
+        }
+
+
+
     };
+
+    self.showLegendGraphPopupMenu = function() {
+    };
+
+
+    self.switchDataSourcePanel = function(target) {
+
+        if (target == "show") {
+            $("#mappingModeler_jstreeDiv").css("display", "block");
+            $("#mappingModeler_mainDiv").css("display", "none");
+            $("#mappingModeler_graphPanelDiv").css("display", "none");
+        } else {
+            $("#mappingModeler_jstreeDiv").css("display", "none");
+            $("#mappingModeler_mainDiv").css("display", "block");
+            $("#mappingModeler_graphPanelDiv").css("display", "block");
+        }
+
+
+    };
+self.getAllClasses = function (source, callback) {
+    if (!source) {
+        source = self.currentSource;
+    }
+    if (!self.allClasses) {
+        CommonBotFunctions.listSourceAllClasses(source, null, false, [], function (err, result) {
+            if (err) {
+                return callback(err.responseText);
+            }
+            self.allClasses = [];
+            var uniqueIds = {};
+            result.forEach(function (item) {
+                if (!uniqueIds[item.id]) {
+                    uniqueIds[item.id] = 1;
+                    item.label = item.label; //.replace(/ /g, "_");
+                    item.resourceType = "Class";
+                    self.allClasses.push(item);
+                }
+            });
+            common.array.sort(self.allClasses, "label");
+            if (callback) {
+                return callback(null, self.allClasses);
+            }
+            return self.allClasses;
+        });
+    } else {
+        if (callback) {
+            return callback(null, self.allClasses);
+        }
+        return self.allClasses;
+    }
+};
+self.getAllProperties = function (source, callback) {
+    if (!source) source = self.currentSource;
+
+    if (!self.allProperties) {
+        CommonBotFunctions.listSourceAllObjectProperties(source, null, false, function (err, result) {
+            if (err) {
+                return callback(err.responseText);
+            }
+            self.allProperties = [];
+            var uniqueIds = {};
+            result.forEach(function (item) {
+                if (!uniqueIds[item.id]) {
+                    uniqueIds[item.id] = 1;
+
+                    item.label = item.label; //,.replace(/ /g, "_");
+                    item.resourceType = "ObjectProperty";
+                    self.allProperties.push(item);
+                }
+            });
+            common.array.sort(self.allProperties, "label");
+            if (callback) {
+                return callback(null, self.allProperties);
+            }
+            return self.allProperties;
+        });
+    } else {
+        if (callback) {
+            return callback(null, self.allProperties);
+        }
+        return self.allProperties;
+    }
+};
+    self.hideLegendItems = function (hiddenNodes) {
+        var legendNodes = self.visjsGraph.data.nodes.getIds();
+        var newNodes = [];
+        legendNodes.forEach(function (nodeId) {
+            var hidden = !hiddenNodes || hiddenNodes.indexOf(nodeId) > -1;
+            newNodes.push({ id: nodeId, hidden: hidden });
+        });
+        self.visjsGraph.data.nodes.update(newNodes);
+    };
+
+    /*
+   if unique, filters exiting nodes in graph before showing list
+   *
+    */
+    self.setSuggestionsSelect = function (items, unique, newOption, drawGraphFn) {
+        if (unique) {
+            var existingNodeIds = self.visjsGraph.data.nodes.getIds();
+            var filteredItems = [];
+            items.forEach(function (item) {
+                if (existingNodeIds.indexOf(item.id) < 0) {
+                    filteredItems.push(item);
+                }
+            });
+        } else {
+            filteredItems = items;
+        }
+        if (newOption) {
+            filteredItems.splice(0, 0, newOption);
+        }
+        common.fillSelectOptions("axioms_legend_suggestionsSelect", filteredItems, false, "label", "id");
+    };
+
+    self.initResourcesMap = function (source, callback) {
+        self.allResourcesMap = {};
+        self.getAllClasses(source, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            result.forEach(function (item) {
+                self.allResourcesMap[item.id] = item;
+            });
+        });
+        self.getAllProperties(source, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            result.forEach(function (item) {
+                self.allResourcesMap[item.id] = item;
+            });
+            if (callback) return callback(err, result);
+        });
+    };
+
+    self.clearMappings = function () {
+        self.visjsGraph.clearGraph()
+        $("#" + self.graphDivId).html("");
+        self.visjsGraph=null;
+
+    };
+    self.saveMappings = function () {
+        $("#" + self.graphDivId).html("");
+    }
     return self;
 })();
 

@@ -521,7 +521,7 @@ var Axiom_activeLegend = (function () {
                     type: item.label,
                     symbol: item.symbol,
                 },
-                x: 0,
+                x: options.xOffset|| 0,
                 y: yOffset,
 
                 fixed: { x: true, y: true },

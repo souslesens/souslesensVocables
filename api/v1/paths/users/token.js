@@ -6,12 +6,13 @@ module.exports = function () {
         POST,
     };
 
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         try {
-            const token = await userModel.generateUserToken(req.user.login);
+            const token = await userModel.generateUserToken(req.body.login);
             res.status(200).json({ token: token });
         } catch (error) {
-            next(error);
+            console.error(error);
+            res.status(500).json({ message: "An error occurs on the server" });
         }
     }
 

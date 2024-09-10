@@ -217,7 +217,7 @@ var Axioms_suggestions = (function () {
     };
 
     self.getValidPropertiesForClasses = function (source, domainClassId, rangeClassId, callback) {
-        OntologyModels.getAllowedPropertiesBetweenNodes(Axiom_editor.currentSource, domainClassId, rangeClassId, { keepSuperClasses: true }, function (err, result) {
+        OntologyModels.getAllowedPropertiesBetweenNodes(source, domainClassId, rangeClassId, { keepSuperClasses: true }, function (err, result) {
             if (err) {
                 return callback(err);
             }

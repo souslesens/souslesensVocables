@@ -10,6 +10,22 @@ var MappingModeler = (function() {
     var self = {};
     self.currentSource = null;
     self.currentDataSource = null;
+
+    self.legendItemsArray = [
+        { label: "Column", color: "#cb9801",shape:"ellipse", },
+        { label: "RowIndex", color: "#cb9801",shape:"triangle"},
+        { label: "VirtualColumn", color: "#cb9801",shape:"square" },
+       // { label: "Type", color: "#f5ef39" },
+        { label: "Class", color: "#00afef",shape:"box" },
+        //  { label: "ObjectProperty", color: "#f5ef39" }
+    ];
+
+
+    self.iriTypes=["fromLabel",
+        "blankNode",
+        "hashcode"]
+
+
     self.init = function(source, resource, divId) {
         async.series([
             //init source
@@ -129,25 +145,19 @@ var MappingModeler = (function() {
     };
 
     self.initActiveLegend = function(divId) {
-        var legendItems = [
-            { label: "Column", color: "#cb9801" },
-            { label: "Row", color: "#cb9801" },
-            { label: "VirtualColumn", color: "#cb9801" },
-            { label: "Type", color: "#f5ef39" },
-            { label: "Class", color: "#00afef" },
 
-            { label: "ObjectProperty", color: "#f5ef39" },
-
-            { label: "Connective", color: "#70ac47" }
-        ];
         var options = {
             onLegendNodeClick: self.onLegendNodeClick,
             showLegendGraphPopupMenu: self.showLegendGraphPopupMenu,
             xOffset: 300
         };
         Axiom_activeLegend.isLegendActive = true;
+        self.legendItems={}
+        self.legendItemsArray.forEach(function(item){
+            self.legendItems[item.label]=item
+        })
 
-        Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", legendItems, options);
+        Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", self.legendItemsArray, options);
         self.graphDiv = "mappingModeler_graphDiv";
     };
 
@@ -160,80 +170,150 @@ var MappingModeler = (function() {
         }
         Axiom_activeLegend.hideLegendItems(hiddenNodes);
     };
+
+
+
+
+
     self.onSuggestionsSelect = function(resourceUri) {
         var newResource = null;
 
-        if (self.currentResourceType == "Column") {
+        if (resourceUri == "createClass") {
+               return self.showCreateResourceBot("Class", null);
+        }
+        else if (resourceUri == "createObjectProperty") {
+               return self.showCreateResourceBot("ObjectProperty", null);
+        }
+
+       else if (self.currentResourceType == "Column") {
             newResource = {
                 id: resourceUri,
                 label: resourceUri,
-                resourceType: "Column",
-                shape: "ellipse",
+                shape:self.legendItems[self.currentResourceType].shape,
+                color:self.legendItems[self.currentResourceType].color,
                 level: 0,
                 data: {
                     id: resourceUri,
                     label: resourceUri,
-                    type: "Column"
+                    type: self.currentResourceType
                 },
-                predicates: []
-            };
 
+            };
             self.drawResource(newResource);
             setTimeout(function(){ self.onLegendNodeClick({ id: "Class" });
             },500)
 
         }
-        if (self.currentResourceType == "Class") {
+       else if (self.currentResourceType == "Class") {
             var resource = self.allResourcesMap[resourceUri];
             newResource = {
                 id: resourceUri,
                 label: resource.label,
-                resourceType: "Class",
-                shape: "box",
-                level: 0,
+                shape:self.legendItems[self.currentResourceType].shape,
+                color:self.legendItems[self.currentResourceType].color,
                 data: {
                     id: resourceUri,
                     label: resource.label,
                     type: "Class"
                 },
-                predicates: []
-            };
 
+            };
 
             self.drawResource(newResource);
         }
+        else if (self.currentResourceType == "RowIndex") {
+            var id=common.getRandomHexaId(5)
+            newResource = {
+                id: id,
+                label: "#",
+                shape:self.legendItems[self.currentResourceType].shape,
+                color:self.legendItems[self.currentResourceType].color,
+                size:12,
+                data: {
+                    id: id,
+                    label: "#",
 
+                    type: self.currentResourceType
+                },
 
+            };
+            self.drawResource(newResource);
+            setTimeout(function(){ self.onLegendNodeClick({ id: "Class" });
+            },500)
+        }
+        else if (self.currentResourceType == "VirtualColumn") {
+
+            newResource = {
+                id: resourceUri,
+                label: resourceUri,
+                shape:self.legendItems[self.currentResourceType].shape,
+                color:self.legendItems[self.currentResourceType].color,
+                size:12,
+
+                data: {
+                    id: resourceUri,
+                    label: resourceUri,
+                    type: self.currentResourceType
+                },
+
+            };
+            self.drawResource(newResource);
+            setTimeout(function(){ self.onLegendNodeClick({ id: "Class" });
+            },500)
+        }
         else if (self.currentResourceType == "ObjectProperty") {
 
-            if (self.currentRelation) {
+            if (self.currentRelation ) {
                 self.currentRelation.data = { type: "Objectproperty", propId: resourceUri };
                 self.currentRelation.label=self.allResourcesMap[resourceUri].label
                 var edge = self.currentRelation;
+                edge.arrows = {
+                    to: {
+                        enabled: true,
+                            type: "diamond"
+                    }
+                };
+                edge.color="#1244e8"
                 self.visjsGraph.data.edges.add([edge]);
                 self.currentRelation = null;
                 $("#axioms_legend_suggestionsSelect").empty();
             }
         }
+
+        else if(resourceUri=="IRIType"){
+
+            common.fillSelectOptions("axioms_legend_suggestionsSelect", self.iriTypes, false);
+
+        }
+
+
+        //add node info to visjsGraphNode
+        else if(self.iriTypes.indexOf(resourceUri)>-1){
+            self.currentGraphNode.data.iriType=resourceUri
+
+            self.visjsGraph.data.nodes.update({id:self.currentGraphNode.id,data:self.currentGraphNode.data})
+        }
     };
 
 
     self.drawResource = function(newResource) {
-        var edgeType = null;
+        var arrows = {
+            to: {
+                enabled: true,
+                type: "arrow"
+            }
+        };
+        var edgeColor="#ccc"
         if (!self.currentOffest) {
             self.currentOffest = { x: 0, y: 0 };
         }
         if (self.currentGraphNode && newResource.data.type == "Class") {
-            edgeType = {
-                to: {
-                    enabled: true,
-                    type: "arrow"
-                }
-            };
+
             newResource.x = self.currentGraphNode.x;
             newResource.y = self.currentGraphNode.y - 100;
         } else {
-            newResource.x = (self.currentOffest.x += 150);
+
+            newResource.x = (self.currentOffest.x += 200);
             if (self.currentOffest.x > 450) {
                 self.currentOffest.y += 200;
             }
@@ -248,14 +328,17 @@ var MappingModeler = (function() {
 
         if (self.visjsGraph) {
             self.visjsGraph.data.nodes.add(visjsData.nodes);
-            if (edgeType && self.currentGraphNode) {
+            if (newResource.data.type == "Class" && self.currentGraphNode) {
                 //  var edgeId = self.currentGraphNode.id + "_" + newResource.id;
                 var edgeId = common.getRandomHexaId(5);
                 visjsData.edges.push({
                     id: edgeId,
                     from: self.currentGraphNode.id,
+                    label:"a",
                     to: newResource.id,
-                    arrows: edgeType
+
+                    arrows: arrows,
+                    color:edgeColor
                 });
 
                 //  self.updateCurrentGraphNode(visjsNode);
@@ -317,6 +400,12 @@ enabled:true},*/
                 self.currentRelation.to = node.id;
                 self.onLegendNodeClick({ id: "ObjectProperty" });
             }
+        }else  if (options.shiftKey) {
+        var choices=["IRIType" ,
+        "rdfs:label","owl:DatatypeProperty","owl:AnnotationProperty"];
+            common.fillSelectOptions("axioms_legend_suggestionsSelect", choices, false);
+            self.currentResourceType=null;
+
         }
     };
     self.onLegendNodeClick = function(node, event) {
@@ -345,16 +434,27 @@ enabled:true},*/
 
             //   self.hideLegendItems();
             var newObject = { id: "createObjectProperty", label: "_Create new ObjectProperty_" };
-            self.getAllProperties(self.currentSource, function(err, objectProperties) {
+            Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from, self.currentRelation.to, function (err, properties) {
+                self.setSuggestionsSelect(properties, true, newObject);
+            });
+          /*  self.getAllProperties(self.currentSource, function(err, objectProperties) {
                 if (err) {
                     return alert(err);
                 }
 
                 self.setSuggestionsSelect(objectProperties, true, newObject);
-            });
+            });*/
 
         }
+    else if (self.currentResourceType == "RowIndex") {
+            self.onSuggestionsSelect({id:"RowIndex"})
+        }
+        else if (self.currentResourceType == "VirtualColumn") {
+            var columnName=prompt("Virtual column name")
+            if(columnName)
+            self.onSuggestionsSelect(columnName)
 
+        }
 
     };
 
@@ -506,6 +606,43 @@ enabled:true},*/
     self.saveMappings = function() {
         $("#" + self.graphDivId).html("");
     };
+
+
+    self.showCreateResourceBot = function (resourceType, filteredUris) {
+        var botWorkFlow;
+        if (resourceType == "Class") {
+            botWorkFlow = CreateAxiomResource_bot.workflowNewClass;
+            // Axiom_manager.allClasses=null;
+        } else if (resourceType == "ObjectProperty") {
+            botWorkFlow = CreateAxiomResource_bot.workflowNewObjectProperty;
+            //  Axiom_manager.allProperties=null;
+        } else {
+            return alert("no valid resourceType");
+        }
+        return CreateAxiomResource_bot.start(botWorkFlow, { filteredUris: filteredUris }, function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            // update Axiom_manager
+            if (resourceType == "Class") {
+                self.allClasses.push(CreateAxiomResource_bot.params.newObject);
+            } else if (resourceType == "ObjectProperty") {
+                self.allProperties.push(CreateAxiomResource_bot.params.newObject);
+            }
+            self.allResourcesMap[CreateAxiomResource_bot.params.newObject.id] = CreateAxiomResource_bot.params.newObject;
+
+            $("#axioms_legend_suggestionsSelect option").eq(0).before($("<option></option>").val(CreateAxiomResource_bot.params.newObject.id).text(CreateAxiomResource_bot.params.newObject.label));
+            //   self.onLegendNodeClick({data:{id:"Class"}})
+        });
+    };
+
+
+
+
+
+
+
+
     return self;
 })();
 

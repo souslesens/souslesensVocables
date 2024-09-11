@@ -41,6 +41,7 @@ var NodeInfosWidget = (function () {
                             // source = Lineage_sources.mainSource;
                             NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
                         }
+                        0
                     }, 100);
                 },
             });
@@ -435,17 +436,19 @@ defaultLang = 'en';*/
                     }
                     return optionalStr;
                 }
-
+                var metaDataStr=str;
+                var metaDataProps=Object.values(Config.dictionaryMetaDataPropertiesMap)
                 defaultProps.forEach(function (key) {
+                    var strGeneratedByProp=''
                     if (!self.propertiesMap.properties[key]) {
                         return;
                     }
-
-                    str += "<tr class='infos_table'>";
+                    
+                    strGeneratedByProp += "<tr class='infos_table'>";
 
                     if (self.propertiesMap.properties[key].value) {
                         var values = self.propertiesMap.properties[key].value;
-                        str +=
+                        strGeneratedByProp +=
                             "<td class='detailsCellName'>" +
                             "<a target='" +
                             self.getUriTarget(self.propertiesMap.properties[key].propUri) +
@@ -475,8 +478,8 @@ defaultLang = 'en';*/
                             }
                             valuesStr += value + optionalStr;
                         });
-                        str += "<td class='detailsCellValue'><div class='detailsCellValueContent'>" + valuesStr + "</div></td>";
-                        str += "</tr>";
+                        strGeneratedByProp += "<td class='detailsCellValue'><div class='detailsCellValueContent'>" + valuesStr + "</div></td>";
+                        strGeneratedByProp += "</tr>";
                     } else {
                         // manage lang
                         var keyName = self.propertiesMap.properties[key].name;
@@ -515,7 +518,7 @@ defaultLang = 'en';*/
 
                         propNameSelect += "</select>";
 
-                        str +=
+                        strGeneratedByProp +=
                             "<td class='detailsCellName'>" +
                             "<a target ='" +
                             self.getUriTarget(self.propertiesMap.properties[key].propUri) +
@@ -526,17 +529,22 @@ defaultLang = 'en';*/
                             "</a> " +
                             propNameSelect +
                             "</td>";
-                        str += "<td class='detailsCellValue'>" + langDivs + "</td>";
+                        strGeneratedByProp += "<td class='detailsCellValue'>" + langDivs + "</td>";
 
                         if (self.propertiesMap.properties[key].langValues[defaultLang]) {
-                            str += "<script>NodeInfosWidget.onNodeDetailsLangChange('" + keyName + "','" + defaultLang + "') </script>";
+                            strGeneratedByProp += "<script>NodeInfosWidget.onNodeDetailsLangChange('" + keyName + "','" + defaultLang + "') </script>";
                         }
 
-                        str += "</tr>";
+                        strGeneratedByProp += "</tr>";
+                    }
+                    if(metaDataProps.includes(self.propertiesMap.properties[key].propUri )){
+                        metaDataStr+=strGeneratedByProp
+                    }else{
+                        str+=strGeneratedByProp;
                     }
                 });
                 str += "</table></div>";
-
+                metaDataStr+="</table></div>";
                 str +=
                     " <div id='nodeInfos_listsDiv' >" +
                     "<div id='nodeInfos_classHierarchyDiv' class='nodeInfos_rigthDiv' ></div><br>" +
@@ -545,6 +553,7 @@ defaultLang = 'en';*/
                     "<div id='nodeInfos_individualsDiv' class='nodeInfos_rigthDiv' style=' display:flex;flex-direction: ></div></div>";
 
                 $("#" + divId).html(str);
+                $('#nodeInfosWidget_metaDataTabDiv').html(metaDataStr);
                 if (callback) {
                     return callback(null, { types: types, blankNodes: blankNodes });
                 }

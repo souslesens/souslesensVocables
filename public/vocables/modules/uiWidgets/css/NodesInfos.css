@@ -62,14 +62,14 @@ th, td{
 .infos_table {
     font-size: 12px;
 }
-#nodeInfosWidget_InfosTabDiv {
+.nodeInfosWidget_InfosTab {
     .font-table;
     border: 0px !important;
-    background-color: @background-color;
+    background-color: @background-color !important;
     border-radius: 14px;
     border-top-left-radius: 0px;
     overflow: unset;
-    display: flex;
+    display: flex ;
 }
 .nodesInfosAdditionalInfos {
     background-color: @background-color !important;

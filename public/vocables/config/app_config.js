@@ -126,15 +126,16 @@ var Config = (function () {
         dcterms: "<http://purl.org/dc/terms/>",
     };
     self.dictionaryMetaDataPropertiesMap = {
-        prop: "http://www.w3.org/2002/07/owl#onProperty",
-        range: "http://www.w3.org/2002/07/owl#someValuesFrom",
-        domain: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+        //prop: "http://www.w3.org/2002/07/owl#onProperty",
+        //range: "http://www.w3.org/2002/07/owl#someValuesFrom",
+        //domain: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
         status: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
-        domainSourceLabel: "http://data.souslesens.org/property#domainSourceLabel",
-        rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
+        //domainSourceLabel: "http://data.souslesens.org/property#domainSourceLabel",
+        //rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
         author: "http://purl.org/dc/terms/creator",
         provenance: "http://purl.org/dc/terms/source",
         creationDate: "http://purl.org/dc/terms/created",
+        mappingFile : "http://souslesens.org/KGcreator#mappingFile",
     };
     self.dictionaryStatusMap = {
         promote: "OK",

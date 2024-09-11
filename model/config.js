@@ -76,10 +76,6 @@ const MainConfigObject = z.object({
     slsApi: z.object({
         url: z.string().url(),
     }),
-    logger: z.object({
-        errorsLogPath: z.string(),
-        usersLogPath: z.string(),
-    }),
     authenticationDatabase: z.object({
         user: z.string(),
         password: z.string(),

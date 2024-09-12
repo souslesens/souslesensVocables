@@ -1,17 +1,17 @@
 {
     "name": "souslesensvocables",
-    "version": "1.81.1",
+    "version": "1.82.1",
     "private": true,
     "workspaces": [
         "mainapp"
     ],
     "scripts": {
         "start": "node ./bin/www",
-        "dev:server": "nodemon ./bin/www",
+        "dev:server": "NODE_ENV=development nodemon ./bin/www",
         "dev:fullstack": "concurrently --names 'NODE,REACT' -c 'green.bold,blue.bold' 'npm run dev:server' 'npm run mainapp:watch'",
         "mainapp:build": "vite build mainapp",
-        "mainapp:watch": "vite build mainapp --watch --minify false --mode development",
-        "mainapp:dev": "vite mainapp",
+        "mainapp:watch": "NODE_ENV=development vite build mainapp --watch --minify false --mode development",
+        "mainapp:dev": "NODE_ENV=development vite mainapp",
         "migrate": "sh scripts/run-migrations.sh",
         "prettier:check": "prettier --check ./public/vocables",
         "prettier:write": "prettier -w ./public/vocables",
@@ -93,6 +93,7 @@
         "nodemon": "^2.0.22",
         "npm": "^9.9.3",
         "passport": "^0.7.0",
+        "passport-auth0": "^1.4.4",
         "passport-keycloak-oauth2-oidc": "^1.0.5",
         "passport-local": "^1.0.0",
         "path-to-regexp": "^6.2.1",

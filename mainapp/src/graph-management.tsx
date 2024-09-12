@@ -1,6 +1,5 @@
-import * as React from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { useState, useEffect, useRef } from "react";
 
 import {
     Alert,
@@ -35,7 +34,7 @@ import { Cancel, Close, Done, Folder } from "@mui/icons-material";
 import { fetchMe, VisuallyHiddenInput, humanizeSize } from "./Utils";
 
 import { writeLog } from "./Log";
-import { getGraphSize, ServerSource } from "./Source";
+import { getGraphSize, GraphInfo, ServerSource } from "./Source";
 
 declare global {
     interface Window {
@@ -44,24 +43,26 @@ declare global {
         };
     }
 }
+
+type OrderBy = "name" | "graphUri" | "graphSize";
+
 export default function GraphManagement() {
     // sources fetched from server
-    const [sources, setSources] = useState<Record<string, any>>({});
-    const [slsApiBaseUrl, setSlsApiBaseUrl] = useState<Record<string, any>>({});
+    const [sources, setSources] = useState<Record<string, ServerSource>>({});
+    const [slsApiBaseUrl, setSlsApiBaseUrl] = useState<string>("");
 
     // user info
     const [currentUserToken, setCurrentUserToken] = useState<string | null>(null);
     const [currentUserName, setCurrentUserName] = useState<string>("");
 
     // graph info
-    const [graphs, setGraphs] = useState([]);
+    const [graphs, setGraphs] = useState<GraphInfo[]>([]);
 
     // status of download/upload
     const [currentSource, setCurrentSource] = useState<string | null>(null);
     const [transferPercent, setTransferPercent] = useState(0);
     const [currentOperation, setCurrentOperation] = useState<string | null>(null);
     const cancelCurrentOperation = useRef(false);
-    const [animatedProgressBar, setAnimatedProgressBar] = useState(false);
     const [currentDownloadFormat, setCurrentDownloadFormat] = useState<string>("nt");
     const [skipNamedIndividuals, setSkipNamedIndividuals] = useState<boolean>(false);
 
@@ -78,31 +79,33 @@ export default function GraphManagement() {
 
     // sorting
     type Order = "asc" | "desc";
-    const [orderBy, setOrderBy] = React.useState<keyof ServerSource>("name");
-    const [order, setOrder] = React.useState<Order>("asc");
-    function handleRequestSort(property: keyof ServerSource) {
+    const [orderBy, setOrderBy] = useState<OrderBy>("name");
+    const [order, setOrder] = useState<Order>("asc");
+    function handleRequestSort(property: OrderBy) {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
     }
 
     // search
-    const [filteringChars, setFilteringChars] = React.useState("");
+    const [filteringChars, setFilteringChars] = useState("");
 
     useEffect(() => {
         void fetchSources();
         void fetchConfig();
         void fetchGraphsInfo();
-        (async () => {
+        const fetchAll = async () => {
             const response = await fetchMe();
             setCurrentUserName(response.user.login);
             setCurrentUserToken(response.user.token);
-        })();
+        };
+
+        void fetchAll();
     }, []);
 
     const fetchConfig = async () => {
         const response = await fetch("/api/v1/config");
-        const json = (await response.json()) as { resources: Record<string, any> };
+        const json = (await response.json()) as { slsApi: { url: string } };
         const slsApi = json.slsApi;
         if (slsApi !== undefined) {
             if (slsApi.url) {
@@ -116,19 +119,19 @@ export default function GraphManagement() {
 
     const fetchSources = async () => {
         const response = await fetch("/api/v1/sources");
-        const json = (await response.json()) as { resources: Record<string, any> };
+        const json = (await response.json()) as { resources: Record<string, ServerSource> };
         setSources(json.resources);
     };
 
     const fetchGraphsInfo = async () => {
         const response = await fetch("/api/v1/sparql/graphs");
-        const json = await response.json();
+        const json = (await response.json()) as GraphInfo[];
         setGraphs(json);
     };
 
     const fetchSourceInfo = async (sourceName: string) => {
         const response = await fetch(`/api/v1/rdf/graph/info?source=${sourceName}`);
-        const json = await response.json();
+        const json = (await response.json()) as { graphSize: number; pageSize: number };
         return json;
     };
 
@@ -137,35 +140,14 @@ export default function GraphManagement() {
         return await response.text();
     };
 
-    const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format: string = "nt", identifier: string = "", skipNamedIndividuals: boolean = false) => {
-        const response = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${skipNamedIndividuals}`, {
-            headers: { Authorization: `Bearer ${currentUserToken}` },
-        });
-        return await response.json();
-    };
-
-    const handleUploadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        setCurrentSource(event.currentTarget.value);
-        setCurrentOperation(null);
-        setDisplayModal("upload");
-    };
-
-    const handleSetFormat = async (event: React.MouseEvent<HTMLElement>) => {
-        setCurrentDownloadFormat(event.target.value);
-    };
-
-    const handleSetSkipNamedIndividuals = async (event: React.ChangeEvent<HTMLElement>) => {
-        setSkipNamedIndividuals(event.currentTarget.checked);
-    };
-
-    const handleReplaceGraphCheckbox = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        setReplaceGraph(event.currentTarget.checked);
-    };
-
-    const handleDownloadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        setCurrentSource(event.currentTarget.value);
-        setCurrentOperation(null);
-        setDisplayModal("download");
+    const fetchGraphPartUsingPythonApi = async (sourceName: string, offset: number, format = "nt", identifier = "", skipNamedIndividuals = false) => {
+        const response = await fetch(
+            `${slsApiBaseUrl}api/v1/rdf/graph?source=${sourceName}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${String(skipNamedIndividuals)}`,
+            {
+                headers: { Authorization: `Bearer ${currentUserToken ?? ""}` },
+            }
+        );
+        return (await response.json()) as { filesize: number; data: BlobPart; next_offset: number; identifier: string };
     };
 
     const handleHideModal = () => {
@@ -181,7 +163,6 @@ export default function GraphManagement() {
         setUploadFile([]);
         setError(false);
         setErrorMessage("");
-        setAnimatedProgressBar(false);
         if (currentOperation) {
             cancelCurrentOperation.current = true;
         }
@@ -191,6 +172,13 @@ export default function GraphManagement() {
     };
 
     const uploadSource = async () => {
+        if (!currentSource) {
+            console.error("No current source");
+            setErrorMessage("No current source");
+            setError(true);
+            return;
+        }
+
         await writeLog(currentUserName, "GraphManagement", "upload", currentSource);
 
         try {
@@ -221,9 +209,6 @@ export default function GraphManagement() {
 
                 // last ?
                 const lastChunk = start + chunkSize >= fileSize ? true : false;
-                if (lastChunk) {
-                    setAnimatedProgressBar(true);
-                }
 
                 // build formData
                 const formData = new FormData();
@@ -235,32 +220,31 @@ export default function GraphManagement() {
                     replace: replaceGraph,
                     data: chunk,
                 }).forEach(([key, value]) => {
-                    formData.append(key, value);
+                    formData.append(key, typeof value === "boolean" ? String(value) : value);
                 });
                 // if cancel button is pressed, remove uploaded file and return
                 if (cancelCurrentOperation.current) {
-                    formData.set("clean", true);
-                    await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken}` }, body: formData });
+                    formData.set("clean", String(true));
+                    await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken ?? ""}` }, body: formData });
                     return;
                 }
 
                 // POST data
-                const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken}` }, body: formData });
+                const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUserToken ?? ""}` }, body: formData });
                 if (res.status != 200) {
                     setError(true);
-                    const message = await res.json();
+                    const message = (await res.json()) as { error: string };
                     console.error(message.error);
                     setErrorMessage(message.error);
                     return;
                 } else {
-                    const json = await res.json();
+                    const json = (await res.json()) as { identifier: string };
 
                     // Set values for next iteration
                     chunkId = json.identifier;
                 }
             }
             setTransferPercent(100);
-            setAnimatedProgressBar(false);
         } catch (error) {
             console.error(error);
             setErrorMessage((error as Error).message);
@@ -277,10 +261,9 @@ export default function GraphManagement() {
         setUploadFile([]);
         setError(false);
         setErrorMessage("");
-        setAnimatedProgressBar(false);
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.currentTarget.files === null) {
             return;
         }
@@ -291,9 +274,8 @@ export default function GraphManagement() {
     const downloadSourceUsingPythonApi = async (sourceName: string) => {
         let offset = 0;
         let identifier = "";
-        const blobParts = [];
+        const blobParts: BlobPart[] = [];
         setTransferPercent(1);
-        setAnimatedProgressBar(false);
         while (offset !== null) {
             if (cancelCurrentOperation.current) {
                 cancelCurrentOperation.current = false;
@@ -303,7 +285,6 @@ export default function GraphManagement() {
             // percent
             const percent = Math.min(100, (offset * 100) / data.filesize);
             setTransferPercent(percent);
-            setAnimatedProgressBar(false);
 
             blobParts.push(data.data);
             offset = data.next_offset;
@@ -313,7 +294,7 @@ export default function GraphManagement() {
         return blobParts;
     };
 
-    const recursDownloadSource = async (sourceName: string, offset: number, graphSize: number, pageSize: number, blobParts: any[]) => {
+    const recursDownloadSource = async (sourceName: string, offset: number, graphSize: number, pageSize: number, blobParts: BlobPart[]) => {
         // percent
         const percent = Math.min(Math.round((offset * 100) / graphSize), 100);
         setTransferPercent(percent);
@@ -332,6 +313,13 @@ export default function GraphManagement() {
     };
 
     const downloadSource = async () => {
+        if (!currentSource) {
+            console.error("No current source");
+            setErrorMessage("No current source");
+            setError(true);
+            return;
+        }
+
         try {
             await writeLog(currentUserName, "GraphManagement", "download", currentSource);
 
@@ -339,7 +327,7 @@ export default function GraphManagement() {
             setCurrentOperation("download");
             cancelCurrentOperation.current = false;
 
-            let blobParts;
+            let blobParts: BlobPart[];
             if (slsApiBaseUrl === "/") {
                 const graphInfo = await fetchSourceInfo(currentSource);
                 const graphSize = graphInfo.graphSize;
@@ -376,10 +364,10 @@ export default function GraphManagement() {
                 <InputLabel id="select-format-label">File format</InputLabel>
                 <Select
                     disabled={currentOperation !== null}
-                    id={`select-format-${currentSource}`}
+                    id={`select-format-${currentSource ?? ""}`}
                     label="File format"
                     labelId="select-format-label"
-                    onChange={handleSetFormat}
+                    onChange={(event) => setCurrentDownloadFormat(event.target.value)}
                     value={currentDownloadFormat}
                 >
                     <MenuItem disabled={currentOperation !== null} value={"nt"}>
@@ -395,8 +383,16 @@ export default function GraphManagement() {
             </FormControl>
             <FormControl fullWidth>
                 <FormControlLabel
-                    id={`download-switch-${currentSource}`}
-                    control={<Checkbox checked={skipNamedIndividuals} disabled={currentOperation !== null || slsApiBaseUrl === "/"} onChange={handleSetSkipNamedIndividuals} />}
+                    id={`download-switch-${currentSource ?? ""}`}
+                    control={
+                        <Checkbox
+                            checked={skipNamedIndividuals}
+                            disabled={currentOperation !== null || slsApiBaseUrl === "/"}
+                            onChange={(event) => {
+                                setSkipNamedIndividuals(event.currentTarget.checked);
+                            }}
+                        />
+                    }
                     label="Ignore the namedIndividuals in this download"
                 />
             </FormControl>
@@ -413,8 +409,16 @@ export default function GraphManagement() {
             </Stack>
             <FormControl fullWidth>
                 <FormControlLabel
-                    id={`upload-switch-${currentSource}`}
-                    control={<Checkbox checked={replaceGraph} disabled={currentOperation !== null} onChange={handleReplaceGraphCheckbox} />}
+                    id={`upload-switch-${currentSource ?? ""}`}
+                    control={
+                        <Checkbox
+                            checked={replaceGraph}
+                            disabled={currentOperation !== null}
+                            onChange={(event) => {
+                                setReplaceGraph(event.currentTarget.checked);
+                            }}
+                        />
+                    }
                     label="Delete before upload"
                 />
             </FormControl>
@@ -422,7 +426,7 @@ export default function GraphManagement() {
     );
 
     const dialogModal = (
-        <Dialog fullWidth={true} maxWidth="md" onClose={handleHideModal} open={displayModal} PaperProps={{ component: "form" }}>
+        <Dialog fullWidth={true} maxWidth="md" onClose={handleHideModal} open={displayModal !== null} PaperProps={{ component: "form" }}>
             <DialogTitle id="contained-modal-title-vcenter">
                 {displayModal == "upload" ? "Uploading" : "Downloading"} {currentSource}
             </DialogTitle>
@@ -436,23 +440,22 @@ export default function GraphManagement() {
                     {displayModal == "upload" ? uploadModalContent : downloadModalContent}
                     {currentOperation !== null && !error ? (
                         <Stack alignItems="center" direction="row" spacing={2} useFlexGap>
-                            <LinearProgress id={`progress-${currentSource}`} sx={{ flex: 1 }} value={transferPercent} variant="determinate" />
+                            <LinearProgress id={`progress-${currentSource ?? ""}`} sx={{ flex: 1 }} value={transferPercent} variant="determinate" />
                             <Typography variant="body2">{transferPercent === 100 ? (!error ? "Completed" : "") : `${transferPercent}%`}</Typography>
                         </Stack>
                     ) : null}
                 </Stack>
             </DialogContent>
             <DialogActions>
-                <Stack direction="horizontal" gap={1}>
+                <Stack direction="row" gap={1}>
                     <Alert sx={{ padding: "0px 16px" }} severity="info">
                         {`${displayModal === "upload" ? "Upload" : "Download"} can take a long time and remain blocked at ${displayModal === "upload" ? "95" : "1"}% for several minutes`}
                     </Alert>
                 </Stack>
-                <Stack direction="horizontal" gap={1}>
+                <Stack direction="row" gap={1}>
                     {!currentOperation ? (
                         <Button
                             color="primary"
-                            component="label"
                             disabled={displayModal === "upload" ? uploadfile.length < 1 : currentDownloadFormat === null}
                             onClick={displayModal === "upload" ? uploadSource : downloadSource}
                             startIcon={<Done />}
@@ -521,7 +524,7 @@ export default function GraphManagement() {
                                     if (orderBy == "graphSize") {
                                         const left_n: number = getGraphSize(a, graphs);
                                         const right_n: number = getGraphSize(b, graphs);
-                                        return order === "asc" ? right_n > left_n : left_n > right_n;
+                                        return order === "asc" ? left_n - right_n : right_n - left_n;
                                     } else {
                                         const left: string = a[orderBy] || ("" as string);
                                         const right: string = b[orderBy] || ("" as string);
@@ -531,7 +534,7 @@ export default function GraphManagement() {
                                 .filter(([_sourceName, source]) => source.name.includes(filteringChars))
                                 .map(([sourceName, source]) => {
                                     return (
-                                        <TableRow>
+                                        <TableRow key={sourceName}>
                                             <TableCell>{sourceName}</TableCell>
                                             <TableCell>
                                                 <Link href={source.graphUri}>{source.graphUri}</Link>
@@ -539,10 +542,32 @@ export default function GraphManagement() {
                                             <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
                                             <TableCell align="center">
                                                 <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                    <Button variant="contained" disabled={source.accessControl != "readwrite"} color="secondary" value={source.name} onClick={handleUploadSource}>
+                                                    <Button
+                                                        variant="contained"
+                                                        disabled={
+                                                            // @ts-expect-error FIXME
+                                                            source.accessControl != "readwrite"
+                                                        }
+                                                        color="secondary"
+                                                        value={source.name}
+                                                        onClick={(event) => {
+                                                            setCurrentSource(event.currentTarget.value);
+                                                            setCurrentOperation(null);
+                                                            setDisplayModal("upload");
+                                                        }}
+                                                    >
                                                         Upload
                                                     </Button>
-                                                    <Button variant="contained" color="primary" value={source.name} onClick={handleDownloadSource}>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        value={source.name}
+                                                        onClick={(event) => {
+                                                            setCurrentSource(event.currentTarget.value);
+                                                            setCurrentOperation(null);
+                                                            setDisplayModal("download");
+                                                        }}
+                                                    >
                                                         Download
                                                     </Button>
                                                 </Stack>
@@ -560,6 +585,7 @@ export default function GraphManagement() {
 
 window.GraphManagement.createApp = function createApp() {
     const container = document.getElementById("mount-graph-management-here");
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const root = createRoot(container!);
     root.render(<GraphManagement />);
     return root.unmount.bind(root);

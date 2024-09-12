@@ -1,18 +1,39 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-import * as Mui from "@mui/material";
-import * as MuiIcons from "@mui/icons-material";
-import * as React from "react";
+import { useReducer, useState, ChangeEvent, SyntheticEvent, MouseEventHandler, Dispatch } from "react";
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    Stack,
+    TextField,
+    MenuItem,
+    DialogActions,
+    Box,
+    CircularProgress,
+    Alert,
+    Snackbar,
+    TableContainer,
+    Paper,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableSortLabel,
+    TableBody,
+    Chip,
+    IconButton,
+} from "@mui/material";
+import { Done, Download, Edit } from "@mui/icons-material";
 
 import { SRD } from "srd";
 import { ulid } from "ulid";
 
-import { useModel } from "../Admin";
+import { Msg, useModel } from "../Admin";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { PasswordField } from "./PasswordField";
 import { TestingButton } from "./TestingButton";
-import { addDatabase, Database, DatabaseSchema, defaultDatabase, deleteDatabase, editDatabase, SourceAccessControl } from "../Database";
+import { addDatabase, Database, DatabaseSchema, defaultDatabase, deleteDatabase, editDatabase } from "../Database";
 import { writeLog } from "../Log";
-import { style } from "../Utils";
+import { cleanUpText, jsonToDownloadUrl } from "../Utils";
 
 const enum Type {
     ResetDatabase,
@@ -35,7 +56,13 @@ type DatabaseFormProps = {
     create?: boolean;
 };
 
-type Msg_ = { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } };
+type Msg_ =
+    | { type: Type.ResetDatabase; payload: Database }
+    | { type: Type.ServerRespondedWithDatabases; payload: { id: string; value: string } }
+    | {
+          type: Type.UserUpdatedField;
+          payload: { id: string; value: string | number };
+      };
 
 const updateDatabase = (databaseEditionState: DatabaseEditionState, msg: Msg_): DatabaseEditionState => {
     switch (msg.type) {
@@ -52,10 +79,10 @@ const updateDatabase = (databaseEditionState: DatabaseEditionState, msg: Msg_): 
     }
 };
 
-const validateForm = (form: DatabaseFormProps) => {
+const validateForm = (form: Database) => {
     const validation = DatabaseSchema.safeParse(form);
 
-    let errors = {};
+    const errors: Record<string, string> = {};
     if (!validation.success) {
         validation.error.issues.map((item) => item.path.map((path) => (errors[path] = item.message)));
     }
@@ -65,10 +92,9 @@ const validateForm = (form: DatabaseFormProps) => {
 
 const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false, me = "" }: DatabaseFormProps) => {
     const { updateModel } = useModel();
-    const [databaseModel, update] = React.useReducer(updateDatabase, { form: database });
-    const [displayPassword, setDisplayPassword] = React.useState(false);
-    const [currentErrors, setErrors] = React.useState({});
-    const [open, setOpen] = React.useState(false);
+    const [databaseModel, update] = useReducer(updateDatabase, { form: database });
+    const [currentErrors, setErrors] = useState<Record<string, string>>({});
+    const [open, setOpen] = useState(false);
 
     const handleOpen = () => {
         update({ type: Type.ResetDatabase, payload: database });
@@ -77,7 +103,7 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
     };
     const handleClose = () => setOpen(false);
 
-    const handleValidation = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleValidation: MouseEventHandler = (event) => {
         const errors = validateForm(databaseModel.form);
         setErrors(errors);
 
@@ -90,12 +116,12 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                 void editDatabase(databaseModel.form, updateModel);
             }
             const mode = create ? "create" : "edit";
-            writeLog(me, "ConfigEditor", mode, databaseModel.form.name);
+            void writeLog(me, "ConfigEditor", mode, databaseModel.form.name ?? "");
         }
     };
 
-    const handleFieldUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        let fieldValue = event.target.value;
+    const handleFieldUpdate = (fieldName: string) => (event: ChangeEvent<HTMLInputElement>) => {
+        let fieldValue: string | number = event.target.value;
 
         switch (fieldName) {
             case "port":
@@ -110,15 +136,21 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
 
     return (
         <>
-            <Mui.Button variant="contained" color="primary" onClick={handleOpen}>
-                {create ? "Create Database" : "Edit"}
-            </Mui.Button>
-            <Mui.Dialog fullWidth={true} maxWidth="md" onClose={handleClose} open={open} PaperProps={{ component: "form" }}>
-                <Mui.DialogContent sx={{ marginTop: "1em" }}>
-                    <Mui.Stack spacing={4}>
-                        <Mui.TextField
+            {create ? (
+                <Button variant="contained" color="primary" onClick={handleOpen}>
+                    Create Database
+                </Button>
+            ) : (
+                <IconButton color="primary" onClick={handleOpen} title={"Edit"}>
+                    <Edit />
+                </IconButton>
+            )}
+            <Dialog fullWidth={true} maxWidth="md" onClose={handleClose} open={open} PaperProps={{ component: "form" }}>
+                <DialogContent sx={{ marginTop: "1em" }}>
+                    <Stack spacing={4}>
+                        <TextField
                             defaultValue={databaseModel.form.id}
-                            error={currentErrors.name}
+                            error={currentErrors.name !== undefined}
                             fullWidth
                             helperText={currentErrors.name}
                             id="name"
@@ -126,9 +158,9 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             onChange={handleFieldUpdate("name")}
                             value={databaseModel.form.name}
                         />
-                        <Mui.TextField
+                        <TextField
                             defaultValue={databaseModel.form.driver}
-                            error={currentErrors.driver}
+                            error={currentErrors.driver !== undefined}
                             fullWidth
                             helperText={currentErrors.driver}
                             id="driver"
@@ -137,12 +169,12 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             required
                             select
                         >
-                            <Mui.MenuItem value="postgres">PostgreSQL</Mui.MenuItem>
-                            <Mui.MenuItem value="sqlserver">SQLServer</Mui.MenuItem>
-                        </Mui.TextField>
-                        <Mui.Stack direction="row" spacing={1}>
-                            <Mui.TextField
-                                error={currentErrors.host}
+                            <MenuItem value="postgres">PostgreSQL</MenuItem>
+                            <MenuItem value="sqlserver">SQLServer</MenuItem>
+                        </TextField>
+                        <Stack direction="row" spacing={1}>
+                            <TextField
+                                error={currentErrors.host !== undefined}
                                 fullWidth
                                 helperText={currentErrors.host}
                                 id="host"
@@ -151,8 +183,8 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                                 required
                                 value={databaseModel.form.host}
                             />
-                            <Mui.TextField
-                                error={currentErrors.port}
+                            <TextField
+                                error={currentErrors.port !== undefined}
                                 helperText={currentErrors.port}
                                 id="port"
                                 label="Port"
@@ -161,9 +193,9 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                                 type="number"
                                 value={databaseModel.form.port}
                             />
-                        </Mui.Stack>
-                        <Mui.TextField
-                            error={currentErrors.database}
+                        </Stack>
+                        <TextField
+                            error={currentErrors.database !== undefined}
                             fullWidth
                             helperText={currentErrors.database}
                             id="database"
@@ -172,8 +204,8 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             required
                             value={databaseModel.form.database}
                         />
-                        <Mui.TextField
-                            error={currentErrors.user}
+                        <TextField
+                            error={currentErrors.user !== undefined}
                             fullWidth
                             helperText={currentErrors.user}
                             id="username"
@@ -182,35 +214,42 @@ const DatabaseFormDialog = ({ database = defaultDatabase(ulid()), create = false
                             required
                             value={databaseModel.form.user}
                         />
-                        <PasswordField error={currentErrors.password} id="password" label="Password" onChange={handleFieldUpdate("password")} value={databaseModel.form.password} />
-                    </Mui.Stack>
-                </Mui.DialogContent>
-                <Mui.DialogActions>
-                    <Mui.Button color="primary" component="label" onClick={handleValidation} startIcon={<MuiIcons.Done />} type="submit" variant="contained">
+                        <PasswordField
+                            error={currentErrors.password !== undefined}
+                            helperText={currentErrors.password}
+                            id="password"
+                            label="Password"
+                            onChange={handleFieldUpdate("password")}
+                            value={databaseModel.form.password}
+                        />
+                    </Stack>
+                </DialogContent>
+                <DialogActions>
+                    <Button color="primary" onClick={handleValidation} startIcon={<Done />} type="submit" variant="contained">
                         Submit
-                    </Mui.Button>
-                </Mui.DialogActions>
-            </Mui.Dialog>
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 };
 
 const DatabasesTable = () => {
     const { model, updateModel } = useModel();
-    const [filteringChars, setFilteringChars] = React.useState("");
-    const [orderBy, setOrderBy] = React.useState<keyof Database>("id");
-    const [order, setOrder] = React.useState<Order>("asc");
+    const [filteringChars, setFilteringChars] = useState("");
+    const [orderBy, setOrderBy] = useState<keyof Database>("id");
+    const [order, setOrder] = useState<Order>("asc");
 
-    const [snackOpen, setSnackOpen] = React.useState<bool>(false);
-    const [snackMessage, setSnackMessage] = React.useState<string>("");
+    const [snackOpen, setSnackOpen] = useState(false);
+    const [snackMessage, setSnackMessage] = useState("");
 
     const me = SRD.withDefault("", model.me);
 
     type Order = "asc" | "desc";
 
-    const handleCopyIdentifier = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCopyIdentifier = (id: string) => {
         setSnackOpen(false);
-        navigator.clipboard.writeText(event.target.innerText);
+        void navigator.clipboard.writeText(id);
         setSnackOpen(true);
         setSnackMessage("The identifier has been copied in the clipboard.");
     };
@@ -221,16 +260,16 @@ const DatabasesTable = () => {
         setOrderBy(property);
     }
 
-    const handleSnackbarClose = async (event: React.SyntheticEvent | Event, reason?: string) => {
+    const handleSnackbarClose = (_event: SyntheticEvent | Event, reason?: string) => {
         if (reason === "clickaway") {
             return;
         }
         setSnackOpen(false);
     };
 
-    const handleDeleteDatabase = async (database: Database, updateModel) => {
-        deleteDatabase(database, updateModel);
-        writeLog(me, "ConfigEditor", "delete", database.name);
+    const handleDeleteDatabase = (database: Database, updateModel: Dispatch<Msg>) => {
+        void deleteDatabase(database, updateModel);
+        void writeLog(me, "ConfigEditor", "delete", database.name ?? "");
     };
 
     const renderDatabases = SRD.match(
@@ -238,14 +277,14 @@ const DatabasesTable = () => {
             // eslint-disable-next-line react/no-unescaped-entities
             notAsked: () => <p>Let’s fetch some data!</p>,
             loading: () => (
-                <Mui.Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <Mui.CircularProgress />
-                </Mui.Box>
+                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                    <CircularProgress />
+                </Box>
             ),
             failure: (msg: string) => (
-                <Mui.Alert variant="filled" severity="error" sx={{ m: 4 }}>
+                <Alert variant="filled" severity="error" sx={{ m: 4 }}>
                     {`${msg}. Please, reload this page.`}
-                </Mui.Alert>
+                </Alert>
             ),
             success: (gotDatabases: Database[]) => {
                 const sortedDatabases: Database[] = gotDatabases.slice().sort((a: Database, b: Database) => {
@@ -255,87 +294,128 @@ const DatabasesTable = () => {
                 });
 
                 return (
-                    <Mui.Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        <Mui.Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
-                            <Mui.Alert onClose={handleSnackbarClose} severity="success" sx={{ width: "100%" }}>
+                    <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                        <Snackbar autoHideDuration={2000} open={snackOpen} onClose={handleSnackbarClose}>
+                            <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: "100%" }}>
                                 {snackMessage}
-                            </Mui.Alert>
-                        </Mui.Snackbar>
-                        <Mui.Autocomplete
-                            disablePortal
+                            </Alert>
+                        </Snackbar>
+                        <TextField
+                            label="Search Databases by name"
                             id="filter databases"
-                            options={sortedDatabases.map((database: Database) => {
-                                return database.name;
-                            })}
-                            onInputChange={(event, newInputValue) => setFilteringChars(newInputValue)}
-                            renderInput={(params) => <Mui.TextField {...params} label="Search Databases by name" />}
+                            onChange={(event) => {
+                                setFilteringChars(event.target.value);
+                            }}
                         />
-                        <Mui.TableContainer sx={{ height: "400px" }} component={Mui.Paper}>
-                            <Mui.Table stickyHeader>
-                                <Mui.TableHead>
-                                    <Mui.TableRow>
-                                        <Mui.TableCell style={{ fontWeight: "bold", width: "100%" }}>
-                                            <Mui.TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                        <TableContainer sx={{ height: "400px" }} component={Paper}>
+                            <Table stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell style={{ fontWeight: "bold", width: "100%" }}>
+                                            <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
                                                 Name
-                                            </Mui.TableSortLabel>
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            <Mui.TableSortLabel active={orderBy === "id"} direction={order} onClick={() => handleRequestSort("id")}>
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "id"} direction={order} onClick={() => handleRequestSort("id")}>
                                                 Identifier
-                                            </Mui.TableSortLabel>
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
-                                            <Mui.TableSortLabel active={orderBy === "driver"} direction={order} onClick={() => handleRequestSort("driver")}>
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            <TableSortLabel active={orderBy === "driver"} direction={order} onClick={() => handleRequestSort("driver")}>
                                                 Driver
-                                            </Mui.TableSortLabel>
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
                                             Test
-                                        </Mui.TableCell>
-                                        <Mui.TableCell align="center" style={{ fontWeight: "bold" }}>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold" }}>
                                             Actions
-                                        </Mui.TableCell>
-                                    </Mui.TableRow>
-                                </Mui.TableHead>
-                                <Mui.TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                        </TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody sx={{ width: "100%", overflow: "visible" }}>
                                     {sortedDatabases
-                                        .filter((database: Database) => database.id.includes(filteringChars))
+                                        .filter((database: Database) => cleanUpText(database.id).includes(cleanUpText(filteringChars)))
                                         .map((database: Database) => {
                                             return (
-                                                <Mui.TableRow key={database.name}>
-                                                    <Mui.TableCell>{database.name}</Mui.TableCell>
-                                                    <Mui.TableCell align="center">
-                                                        <Mui.Chip label={database.id} onClick={handleCopyIdentifier} size="small" />
-                                                    </Mui.TableCell>
-                                                    <Mui.TableCell align="center">
-                                                        <Mui.Chip label={database.driver} size="small" />
-                                                    </Mui.TableCell>
-                                                    <Mui.TableCell align="center">
-                                                        <TestingButton id={database.id} variant="contained" />
-                                                    </Mui.TableCell>
-                                                    <Mui.TableCell align="center">
-                                                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                <TableRow key={database.name}>
+                                                    <TableCell>{database.name}</TableCell>
+                                                    <TableCell align="center">
+                                                        <Chip label={database.id} onClick={() => handleCopyIdentifier(database.id)} size="small" />
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Chip label={database.driver} size="small" />
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <TestingButton id={database.id} />
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            <IconButton
+                                                                color="primary"
+                                                                sx={{
+                                                                    // FIXME Need to override the jquery css
+                                                                    color: "rgb(25, 118, 210) !important",
+                                                                }}
+                                                                title={"Download JSON"}
+                                                                href={createSingleDatabaseDownloadUrl(
+                                                                    // TODO fix typing
+                                                                    (model.databases as unknown as Record<string, Database[]>).data,
+                                                                    database.id
+                                                                )}
+                                                                download={`database-${database.id}.json`}
+                                                            >
+                                                                <Download />
+                                                            </IconButton>
                                                             <DatabaseFormDialog database={database} me={me} />
                                                             <ButtonWithConfirmation label="Delete" msg={() => handleDeleteDatabase(database, updateModel)} />
-                                                        </Mui.Stack>
-                                                    </Mui.TableCell>
-                                                </Mui.TableRow>
+                                                        </Stack>
+                                                    </TableCell>
+                                                </TableRow>
                                             );
                                         })}
-                                </Mui.TableBody>
-                            </Mui.Table>
-                        </Mui.TableContainer>
-                        <Mui.Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                            <Button
+                                variant="outlined"
+                                sx={{
+                                    // FIXME Need to override the jquery css
+                                    color: "rgb(25, 118, 210) !important",
+                                }}
+                                href={createDatabasesDownloadUrl(
+                                    // TODO fix typing
+                                    (model.databases as unknown as Record<string, Database[]>).data
+                                )}
+                                download={"databases.json"}
+                            >
+                                Download JSON
+                            </Button>
                             <DatabaseFormDialog create={true} me={me} />
-                        </Mui.Stack>
-                    </Mui.Stack>
+                        </Stack>
+                    </Stack>
                 );
             },
         },
-        model.databases,
+        model.databases
     );
 
     return renderDatabases;
 };
 
-export { DatabasesTable, Mode, Msg_, Type };
+function createDatabasesDownloadUrl(databases: Database[]): string {
+    return jsonToDownloadUrl(databases);
+}
+
+function createSingleDatabaseDownloadUrl(databases: Database[], databaseId: string): string {
+    const database = databases.find((d) => d.id === databaseId);
+    if (database) {
+        return jsonToDownloadUrl(database);
+    } else {
+        return "";
+    }
+}
+
+export { DatabasesTable, Mode, Type };

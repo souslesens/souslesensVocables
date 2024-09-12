@@ -11,13 +11,8 @@ function sanitizeValue(value: string | string[]): string[] {
     return typeof value === "string" ? value.split(",") : value;
 }
 
-const humanizeSize = (size: string) => {
-    return humanNumber(size, (n: string | number) => {
-        if (Number.isInteger(n)) {
-            return n;
-        }
-        return Number.parseFloat(n).toFixed(1);
-    });
+const humanizeSize = (size: number): string => {
+    return humanNumber(size);
 };
 
 function exhaustiveCheck(): never {
@@ -49,10 +44,32 @@ const VisuallyHiddenInput = styled("input")({
     width: 1,
 });
 
-async function fetchMe() {
+interface User {
+    user: { login: string; token: string };
+}
+
+async function fetchMe(): Promise<User> {
     const response = await fetch("/api/v1/auth/whoami");
-    const json = await response.json();
+    const json = (await response.json()) as User;
     return json;
 }
 
-export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput, humanizeSize };
+function cleanUpText(original: unknown): string {
+    if (typeof original !== "string") {
+        return "";
+    }
+
+    // Clean up accents
+    return original
+        .toLocaleLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "");
+}
+
+function jsonToDownloadUrl(json: unknown): string {
+    const content = JSON.stringify(json, undefined, 2);
+    const file = new Blob([content], { type: "application/json" });
+    return URL.createObjectURL(file);
+}
+
+export { fetchMe, identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style, VisuallyHiddenInput, humanizeSize, cleanUpText, jsonToDownloadUrl };

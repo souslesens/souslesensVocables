@@ -91,6 +91,33 @@ if (!fs.existsSync(sourcesPath)) {
     });
 }
 
+// config/databases.json
+const databasesPath = "config/databases.json";
+const databasesTemplatePath = "config_templates/databases.json.default";
+if (!fs.existsSync(databasesPath)) {
+    fs.readFile(databasesTemplatePath, (_err, data) => {
+        fs.writeFileSync(databasesPath, JSON.stringify(JSON.parse(data), null, 2));
+    });
+}
+
+// config/plugins.json
+const pluginsPath = "config/plugins.json";
+const pluginsTemplatePath = "config_templates/plugins.json.default";
+if (!fs.existsSync(pluginsPath)) {
+    fs.readFile(pluginsTemplatePath, (_err, data) => {
+        fs.writeFileSync(pluginsPath, JSON.stringify(JSON.parse(data), null, 2));
+    });
+}
+
+// config/pluginsConfig.json
+const pluginsConfigPath = "config/pluginsConfig.json";
+const pluginsConfigTemplatePath = "config_templates/pluginsConfig.json.default";
+if (!fs.existsSync(pluginsConfigPath)) {
+    fs.readFile(pluginsConfigTemplatePath, (_err, data) => {
+        fs.writeFileSync(pluginsConfigPath, JSON.stringify(JSON.parse(data), null, 2));
+    });
+}
+
 const convertDotPathToNestedObject = (path, value) => {
     const [last, ...paths] = path.split("__").reverse();
     return paths.reduce((acc, el) => ({ [el]: acc }), { [last]: value });

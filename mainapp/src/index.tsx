@@ -1,4 +1,3 @@
-import * as React from "react";
 import Admin from "./Admin";
 import { createRoot } from "react-dom/client";
 
@@ -7,10 +6,15 @@ declare global {
         ConfigEditor: {
             createApp: () => void;
         };
+        Config: {
+            slsvColorThemes: Array<Record<string, string>>;
+            // There are more config properties but we only use this one in mainapp
+        };
     }
 }
 window.ConfigEditor.createApp = function createApp() {
     const container = document.getElementById("mount-app-here");
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const root = createRoot(container!);
     root.render(<Admin />);
     return root.unmount.bind(root);

@@ -1,8 +1,7 @@
-import * as React from "react";
 import { createRoot } from "react-dom/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 
-import { Alert, Button, FormControl, MenuItem, Select, Stack } from "@mui/material";
+import { Alert, Button, MenuItem, Select, Stack } from "@mui/material";
 import { Done, Folder } from "@mui/icons-material";
 
 import { VisuallyHiddenInput } from "./Utils";
@@ -26,7 +25,7 @@ declare global {
 }
 
 export default function App(uploadFormData: UploadFormData) {
-    const [databases, setDatabases] = useState<{ string: string }[]>([]);
+    const [databases, setDatabases] = useState<Record<string, string>[]>([]);
     const [files, setFiles] = useState<File[]>([]);
     const [selectedDatabase, setSelectedDatabase] = useState("_default");
 
@@ -38,7 +37,7 @@ export default function App(uploadFormData: UploadFormData) {
         void fetchDatabases();
     }, []);
 
-    const uploadFileHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadFileHandler = (event: ChangeEvent<HTMLInputElement>) => {
         setError(false);
         if (event.currentTarget.files === null) {
             return;
@@ -47,7 +46,7 @@ export default function App(uploadFormData: UploadFormData) {
         setFiles(filesList);
     };
 
-    const fileSubmitHandler = async (event: React.FormEvent) => {
+    const fileSubmitHandler = async (event: FormEvent) => {
         event.preventDefault();
         const formData = new FormData();
         formData.append("path", uploadFormData.currentSource);
@@ -69,26 +68,30 @@ export default function App(uploadFormData: UploadFormData) {
 
     const fetchDatabases = async () => {
         const response = await fetch("/api/v1/databases");
-        const json = await response.json();
+        const json = (await response.json()) as { resources: Record<string, string>[] };
         setDatabases(json.resources);
-    };
-
-    const handleDatabaseChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = event.target.value;
-        setSelectedDatabase(value.id);
-        window.KGcreator.uploadFormData.selectedDatabase = value;
-        window.KGcreator.createDataBaseSourceMappings();
     };
 
     const widget = (displayForm: string) => {
         if (displayForm === "database") {
             return (
-                <Select label="Select database" onChange={handleDatabaseChange} value={selectedDatabase}>
+                <Select
+                    label="Select database"
+                    onChange={(event) => {
+                        const value = event.target.value;
+                        setSelectedDatabase(value);
+                        window.KGcreator.uploadFormData.selectedDatabase = value;
+                        window.KGcreator.createDataBaseSourceMappings();
+                    }}
+                    value={selectedDatabase}
+                >
                     <MenuItem disabled value={"_default"}>
                         Select database
                     </MenuItem>
                     {databases.map((database) => (
-                        <MenuItem value={{ id: database.id, name: database.name }}>{database.name}</MenuItem>
+                        <MenuItem key={database.id} value={database.id}>
+                            {database.name}
+                        </MenuItem>
                     ))}
                 </Select>
             );
@@ -125,6 +128,7 @@ export default function App(uploadFormData: UploadFormData) {
 
 window.KGcreator.createApp = function createApp(uploadFormData: UploadFormData) {
     const container = document.getElementById("mount-kg-upload-app-here");
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const root = createRoot(container!);
     root.render(<App {...uploadFormData} />);
     return root.unmount.bind(root);

@@ -162,7 +162,7 @@ docker compose up -d
 ### Prerequisites
 
 In development, souslesensVocable needs a Virtuoso instance, an ElasticSearch instance and
-a Sql and a Spacy server. We provide a `docker-compose.test.yaml` to deploy this dependencies.
+a Sql and a Spacy server. We provide a `docker-compose.dev.yaml` to deploy this dependencies.
 
 SouslesensVocables is deployed locally using `node` and `npm`.
 
@@ -175,20 +175,18 @@ Install docker following [this link](https://docs.docker.com/engine/install/).
 Install nodejs from the nodesource package repository (detailed instruction
 [here](https://github.com/nodesource/distributions/blob/master/README.md#manual-installation)).
 
+### Install npm dependencies
+
+```bash
+npm ci
+```
+
 ### Configure
 
 Run the config script to create a default configuration:
 
 ```bash
 node scripts/init_configs.js
-```
-
-Then, edit the `config/*.json` to your needs or run the following
-script to copy the values from the docker-compose configuration
-into the `config/*.json` files.
-
-```bash
-node scripts/config_from_docker_compose.js
 ```
 
 ### Start docker dependencies
@@ -205,35 +203,11 @@ Load some data into virtuoso
 bash tests/load_data.sh dev
 ```
 
-Create a user account in MariaDB (for database authentication)
+Optionnaly create a user account in MariaDB (for database authentication)
 
 ```bash
 bash scripts/create_user_in_db.sh dev <login> <password>
 ```
-
-### Install souslesens
-
-souslesensVocable is composed of a backend in node/express and a frontend in pure javascript
-and typescript/react.
-
-```bash
-# Install the server
-npm ci
-# Build mainapp with vitejs
-npm run mainapp:build
-# Run Express server
-npm start
-```
-
-### Run souslesens server (dev mode)
-
-The following command will build and watch the react app and run and watch the node app.
-
-```bash
-npm run dev:fullstack
-```
-
-SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
 
 ### Run migration scripts
 
@@ -253,6 +227,16 @@ Under Windows need to use git bash to run this script
 cd project-root
 npm run migrate
 ```
+
+### Run souslesens server (dev mode)
+
+The following command will build and watch the react app and run and watch the node app.
+
+```bash
+npm run dev:fullstack
+```
+
+SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
 
 ## Contribute to souslesensVocable
 

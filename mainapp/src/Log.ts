@@ -1,18 +1,27 @@
-type Log = { user: string; tool: string; source: string; action: string; timestamp: string };
+export type Log = { user: string; tool: string; source: string; action: string; timestamp: string };
+
+export type LogFiles = {
+    status: number;
+    message: Array<{
+        date: string;
+        current: boolean;
+    }>;
+};
 
 const endpoint = "/api/v1/logs";
-async function getLogFiles(): Promise<Log[]> {
+export async function getLogFiles(): Promise<LogFiles> {
     const response = await fetch(endpoint);
-    const json = (await response.json()) as Log[];
+    const json = (await response.json()) as Promise<LogFiles>;
     return json;
 }
-async function getLogs(file): Promise<Log[]> {
+
+export async function getLogs(file: string): Promise<Log[]> {
     const response = await fetch(endpoint + "/" + file);
     const json = (await response.json()) as Log[];
     return json;
 }
 
-async function writeLog(user: string, tool: string, action: string, source: string): number {
+export async function writeLog(user: string, tool: string, action: string, source: string): Promise<number> {
     const body = { infos: `${user},${tool},${source},${action}` };
 
     const response = await fetch(endpoint, {
@@ -24,5 +33,3 @@ async function writeLog(user: string, tool: string, action: string, source: stri
 
     return response.status;
 }
-
-export { Log, getLogFiles, getLogs, writeLog };

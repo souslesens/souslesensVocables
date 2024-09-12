@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.82.1](https://github.com/souslesens/souslesensVocables/compare/1.82.0...1.82.1) (2024-09-03)
+
+
+### Bug Fixes
+
+* plugins route are create dynamically ([740003e](https://github.com/souslesens/souslesensVocables/commit/740003ee108f0bb6d0612233ca0a01032c4bb3b1))
+* req.isAuthenticated is a function and it must be called ([df46ed2](https://github.com/souslesens/souslesensVocables/commit/df46ed255ad9e57a4288240c19519f518371f71d))
+
+## [1.82.0](https://github.com/souslesens/souslesensVocables/compare/1.81.1...1.82.0) (2024-09-03)
+
+
+### Features
+
+* **auth:** implements Auth0 authentication strategy with passport ([98005e7](https://github.com/souslesens/souslesensVocables/commit/98005e70e79fa327c31e34b09ce1dfb72f0ab885))
+* **auth:** implements auth0 roles retrieving from API ([cfb1770](https://github.com/souslesens/souslesensVocables/commit/cfb1770aa53354178034bac078e422ab80a98445))
+* **mainapp:** add json download for sources and databases ([9f9ec2c](https://github.com/souslesens/souslesensVocables/commit/9f9ec2c1561a8efbc620af2f0afcfc7b67845f11))
+* **mainapp:** replace filter autocomplete by input ([e6596a4](https://github.com/souslesens/souslesensVocables/commit/e6596a4289ac72775b6536f944a5131c8f8193b5))
+* **packages:** install the module passport-auth0 ([a76ee05](https://github.com/souslesens/souslesensVocables/commit/a76ee05dc64f849388ba891310f09f69b2f84722))
+
 ### [1.81.1](https://github.com/souslesens/souslesensVocables/compare/1.81.0...1.81.1) (2024-08-27)
 
 > [!IMPORTANT]

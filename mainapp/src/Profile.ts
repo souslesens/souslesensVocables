@@ -54,17 +54,17 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
         if (response.status === 200) {
             if (mode === Mode.Edition) {
                 const profiles = await getProfiles();
-                updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(profiles)) });
+                updateModel({ type: "profiles", payload: success(mapProfiles(profiles)) });
             } else {
-                updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(resources)) });
+                updateModel({ type: "profiles", payload: success(mapProfiles(resources)) });
             }
             updateLocal({ type: Type.UserClickedModal, payload: false });
         } else {
-            updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`${response.status}, ${message}`) });
+            updateModel({ type: "profiles", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`Uncatched : ${e}`) });
+        updateModel({ type: "profiles", payload: failure(`Uncatched : ${e}`) });
     }
 }
 async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>) {
@@ -72,13 +72,13 @@ async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>)
         const response = await fetch(`${endpoint}/${profile.name}`, { method: "delete" });
         const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(resources)) });
+            updateModel({ type: "profiles", payload: success(mapProfiles(resources)) });
         } else {
-            updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`${response.status}, ${message}`) });
+            updateModel({ type: "profiles", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`Uncatched Error : ${e}`) });
+        updateModel({ type: "profiles", payload: failure(`Uncatched Error : ${e}`) });
     }
 }
 
@@ -105,13 +105,14 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
     };
 };
 
-type Profile = z.infer<typeof ProfileSchema>;
+export type Profile = z.infer<typeof ProfileSchema>;
 
 const SourceAccessControlSchema = z.union([z.literal("forbidden"), z.literal("read"), z.literal("readwrite")]);
 
 const ProfileSchema = z.object({
+    name: z.string(),
     _type: z.string().optional(),
-    id: z.string().default(ulid()),
+    theme: z.string().optional(),
     allowedSourceSchemas: z
         .array(z.string().nullish())
         .nullish()
@@ -119,6 +120,7 @@ const ProfileSchema = z.object({
     sourcesAccessControl: z.record(SourceAccessControlSchema).default({}),
     allowedTools: z.union([z.string(), z.array(z.string())]).default("ALL"),
     forbiddenTools: z.array(z.string()).default([]),
+    id: z.string().default(ulid()),
 });
 
 export const ProfileSchemaCreate = ProfileSchema.merge(
@@ -127,10 +129,10 @@ export const ProfileSchemaCreate = ProfileSchema.merge(
             .string()
             .refine((val) => val !== "admin", { message: "Name can't be admin" })
             .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
-    }),
+    })
 );
 
-type SourceAccessControl = z.infer<typeof SourceAccessControlSchema>;
+export type SourceAccessControl = z.infer<typeof SourceAccessControlSchema>;
 
 export const defaultProfile = (uuid: string): Profile => {
     return {
@@ -143,4 +145,4 @@ export const defaultProfile = (uuid: string): Profile => {
         forbiddenTools: [],
     };
 };
-export { getProfiles, deleteProfile, Profile, SourceAccessControl, ProfileSchema };
+export { getProfiles, deleteProfile, ProfileSchema };

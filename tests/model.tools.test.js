@@ -16,7 +16,15 @@ describe("ToolModel", () => {
 
     test("Check the tools lists", async () => {
         // Related to NATIVE_TOOLS content from model/tools.js
-        expect(toolModel.nativeTools.length).toStrictEqual(12);
+        for (const tool of toolModel.nativeTools) {
+            expect(tool).toHaveProperty("type");
+            expect(tool).toHaveProperty("label");
+            expect(tool).toHaveProperty("name");
+            expect(tool).toHaveProperty("controller");
+            expect(tool).toHaveProperty("useSource");
+            expect(tool).toHaveProperty("multiSources");
+            expect(tool).toHaveProperty("toTools");
+        }
     });
 
     test("Check the plugins lists", async () => {
@@ -27,9 +35,9 @@ describe("ToolModel", () => {
         const plugin = toolModel.plugins[0];
         expect(plugin).toStrictEqual({
             config: {
-                "boolean": true,
-                "number": 42,
-                "string": "hello",
+                boolean: true,
+                number: 42,
+                string: "hello",
             },
             name: "Test",
             type: "plugin",
@@ -38,20 +46,20 @@ describe("ToolModel", () => {
 
     test("Convert the configuration", async () => {
         const plugins = {
-            "Test": {
-                "boolean": " false",
-                "number": " 1337 ",
-                "string": " HELLO WORLD! ",
-            }
+            Test: {
+                boolean: " false",
+                number: " 1337 ",
+                string: " HELLO WORLD! ",
+            },
         };
 
         const results = await toolModel.convertPluginsConfig(plugins);
         expect(results).toStrictEqual({
-            "Test": {
-                "boolean": false,
-                "number": 1337,
-                "string": "HELLO WORLD!",
-            }
+            Test: {
+                boolean: false,
+                number: 1337,
+                string: "HELLO WORLD!",
+            },
         });
     });
 });

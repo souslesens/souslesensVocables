@@ -1,16 +1,15 @@
-import * as React from "react";
-import * as Mui from "@mui/material";
+import { createContext, Dispatch, useContext, useReducer, useEffect } from "react";
+import { Box, Tabs, Tab } from "@mui/material";
 
-import { SRD, RD, loading, failure, success } from "srd";
+import { RD, loading, failure, success } from "srd";
 
-import { Config, getConfig } from "./Config";
+import { ConfigType, getConfig } from "./Config";
 import { Database, getDatabases } from "./Database";
-import { Log, getLogs, getLogFiles } from "./Log";
+import { Log, LogFiles, getLogFiles } from "./Log";
 import { getEnabledPlugins, PluginOptionType, readConfig, readRepositories, RepositoryType } from "./Plugins";
 import { Profile, getProfiles } from "./Profile";
-import { ServerSource, getSources, getIndices, getGraphs, getMe } from "./Source";
-import { User, getUsers, newUser } from "./User";
-import { identity } from "./Utils";
+import { ServerSource, getSources, getIndices, getGraphs, getMe, GraphInfo } from "./Source";
+import { User, getUsers } from "./User";
 
 import { ConfigForm } from "./Component/ConfigForm";
 import { DatabasesTable } from "./Component/DatabasesTable";
@@ -25,65 +24,36 @@ type Model = {
     profiles: RD<string, Profile[]>;
     sources: RD<string, ServerSource[]>;
     indices: RD<string, string[]>;
-    graphs: RD<string, string[]>;
-    me: RD<string>;
-    databases: RD<Database[]>;
-    logfiles: RD<string, string | boolean>[];
+    graphs: RD<string, GraphInfo[]>;
+    me: RD<string, string>;
+    databases: RD<string, Database[]>;
+    logFiles: RD<string, LogFiles>;
     logs: RD<string, Log[]>;
-    config: RD<string, Config>;
+    config: RD<string, ConfigType>;
     isModalOpen: boolean;
     currentEditionTab: EditionTab;
-    dialog: object | null;
-    pluginsConfig: RD<string, PluginOptionType[]>;
-    pluginsenabled: RD<string[]>;
-    repositories: RD<string, RepositoryType[]>;
+    pluginsConfig: RD<string, Record<string, PluginOptionType>>;
+    pluginsEnabled: RD<string, Array<{ name: string }>>;
+    repositories: RD<string, Record<string, RepositoryType>>;
 };
 
-type EditionTab = "ConfigEdition" | "UsersEdition" | "ProfilesEdition" | "SourcesEdition" | "DatabaseManagement" | "Plugins" | "Logs";
+export type Msg =
+    | { type: "config"; payload: RD<string, ConfigType> }
+    | { type: "currentEditionTab"; payload: EditionTab }
+    | { type: "databases"; payload: RD<string, Database[]> }
+    | { type: "graphs"; payload: RD<string, GraphInfo[]> }
+    | { type: "indices"; payload: RD<string, string[]> }
+    | { type: "logFiles"; payload: RD<string, LogFiles> }
+    | { type: "logs"; payload: RD<string, Log[]> }
+    | { type: "me"; payload: RD<string, string> }
+    | { type: "pluginsConfig"; payload: RD<string, Record<string, PluginOptionType>> }
+    | { type: "pluginsEnabled"; payload: RD<string, Array<{ name: string }>> }
+    | { type: "profiles"; payload: RD<string, Profile[]> }
+    | { type: "repositories"; payload: RD<string, Record<string, RepositoryType>> }
+    | { type: "sources"; payload: RD<string, ServerSource[]> }
+    | { type: "users"; payload: RD<string, User[]> };
 
-const editionTabToNumber = (editionTab: EditionTab) => {
-    switch (editionTab) {
-        case "ConfigEdition":
-            return 0;
-        case "UsersEdition":
-            return 1;
-        case "ProfilesEdition":
-            return 2;
-        case "SourcesEdition":
-            return 3;
-        case "DatabaseManagement":
-            return 4;
-        case "Plugins":
-            return 5;
-        case "Logs":
-            return 6;
-        default:
-            0;
-    }
-};
-
-const editionTabToString = (editionTab: number): EditionTab => {
-    switch (editionTab) {
-        case 0:
-            return "ConfigEdition";
-        case 1:
-            return "UsersEdition";
-        case 2:
-            return "ProfilesEdition";
-        case 3:
-            return "SourcesEdition";
-        case 4:
-            return "DatabaseManagement";
-        case 5:
-            return "Plugins";
-        case 6:
-            return "Logs";
-        default:
-            return "UsersEdition";
-    }
-};
-
-type UpadtedFieldPayload = { id: string; fieldName: string; newValue: string };
+type EditionTab = "settings" | "users" | "profiles" | "sources" | "databases" | "plugins" | "logs";
 
 const initialModel: Model = {
     users: loading(),
@@ -94,176 +64,92 @@ const initialModel: Model = {
     me: loading(),
     databases: loading(),
     logs: loading(),
+    logFiles: loading(),
     config: loading(),
     isModalOpen: false,
-    currentEditionTab: "SourcesEdition",
-    dialog: null,
+    currentEditionTab: "sources",
     pluginsConfig: loading(),
     pluginsEnabled: loading(),
     repositories: loading(),
 };
 
-const ModelContext = React.createContext<{ model: Model; updateModel: React.Dispatch<Msg> } | null>(null);
+const ModelContext = createContext<{ model: Model; updateModel: Dispatch<Msg> } | null>(null);
 
-function useModel() {
-    const modelContext = React.useContext(ModelContext);
+export function useModel() {
+    const modelContext = useContext(ModelContext);
     if (modelContext === null) {
         throw new Error("I can't initialize model and updateModel for some reason");
     }
     return modelContext;
 }
 
-type Msg =
-    | { type: "PluginRepositoriesDialogModal"; payload: {} }
-    | { type: "ServerRespondedWithUsers"; payload: RD<string, User[]> }
-    | { type: "ServerRespondedWithProfiles"; payload: RD<string, Profile[]> }
-    | { type: "ServerRespondedWithSources"; payload: RD<string, ServerSource[]> }
-    | { type: "ServerRespondedWithIndices"; payload: RD<string, string[]> }
-    | { type: "ServerRespondedWithGraphs"; payload: RD<string, string[]> }
-    | { type: "ServerRespondedWithMe"; payload: RD<string> }
-    | { type: "ServerRespondedWithConfig"; payload: RD<string, Config> }
-    | { type: "ServerRespondedWithDatabases"; payload: RD<Database[]> }
-    | { type: "ServerRespondedWithLogs"; payload: RD<string, Log[]> }
-    | { type: "ServerRespondedWithLogFiles"; payload: RD<string, string | boolean>[] }
-    | { type: "ServerRespondedWithPluginsConfig"; payload: RD<string, PluginOptionType[]> }
-    | { type: "ServerRespondedWithPluginsEnabled"; payload: RD<string[]> }
-    | { type: "ServerRespondedWithRepositories"; payload: RD<string, RepositoryType[]> }
-    | { type: "UserUpdatedField"; payload: UpadtedFieldPayload }
-    | { type: "UserClickedSaveChanges"; payload: {} }
-    | { type: "UserChangedModalState"; payload: boolean }
-    | { type: "UserClickedAddUser"; payload: string }
-    | { type: "UserClickedNewTab"; payload: number };
-
 function update(model: Model, msg: Msg): Model {
-    const unwrappedUsers: User[] = SRD.unwrap([], identity, model.users);
-    switch (msg.type) {
-        case "PluginRepositoriesDialogModal":
-            return { ...model, dialog: msg.payload };
-
-        case "ServerRespondedWithUsers":
-            return { ...model, users: msg.payload };
-
-        case "ServerRespondedWithProfiles":
-            return { ...model, profiles: msg.payload };
-
-        case "ServerRespondedWithIndices":
-            return { ...model, indices: msg.payload };
-
-        case "ServerRespondedWithGraphs":
-            return { ...model, graphs: msg.payload };
-
-        case "ServerRespondedWithMe":
-            return { ...model, me: msg.payload };
-
-        case "ServerRespondedWithSources":
-            return { ...model, sources: msg.payload };
-
-        case "ServerRespondedWithConfig":
-            return { ...model, config: msg.payload };
-
-        case "ServerRespondedWithDatabases":
-            return { ...model, databases: msg.payload };
-
-        case "ServerRespondedWithLogs":
-            return { ...model, logs: msg.payload };
-
-        case "ServerRespondedWithLogFiles":
-            return { ...model, logfiles: msg.payload };
-
-        case "ServerRespondedWithPluginsConfig":
-            return { ...model, pluginsConfig: msg.payload };
-
-        case "ServerRespondedWithPluginsEnabled":
-            return { ...model, pluginsEnabled: msg.payload };
-
-        case "ServerRespondedWithRepositories":
-            return { ...model, repositories: msg.payload };
-
-        case "UserClickedSaveChanges":
-            return { ...model, isModalOpen: false };
-
-        case "UserClickedAddUser":
-            return { ...model, users: SRD.of([...unwrappedUsers, newUser(msg.payload)]) };
-
-        case "UserUpdatedField": {
-            const fieldToUpdate = msg.payload.fieldName;
-            const updatedUsers = unwrappedUsers.map((u) => (u.id === msg.payload.id ? { ...u, [fieldToUpdate]: msg.payload.newValue } : u));
-            return { ...model, users: SRD.of(updatedUsers) };
-        }
-
-        case "UserClickedNewTab":
-            const params = new URLSearchParams(document.location.search);
-            params.set("tab", msg.payload);
-            // Insert or replace the tab key in the URL
-            window.history.replaceState(null, "", `?${params.toString()}`);
-
-            return { ...model, currentEditionTab: editionTabToString(msg.payload) };
-
-        default:
-            return model;
+    if (msg.type === "currentEditionTab") {
+        const params = new URLSearchParams(document.location.search);
+        params.set("tab", msg.payload.toString());
+        // Insert or replace the tab key in the URL
+        window.history.replaceState(null, "", `?${params.toString()}`);
     }
+
+    return { ...model, [msg.type]: msg.payload };
 }
 
 const Admin = () => {
-    const [model, updateModel] = React.useReducer(update, initialModel);
+    const [model, updateModel] = useReducer(update, initialModel);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const params = new URLSearchParams(document.location.search);
         if (params.has("tab")) {
-            const tabIndex = parseInt(params.get("tab"));
-            model.currentEditionTab = editionTabToString(tabIndex);
+            const p = params.get("tab") as EditionTab | null;
+            model.currentEditionTab = p ?? "settings";
         }
     }, []);
 
-    React.useEffect(() => {
+    useEffect(() => {
         Promise.all([getMe(), getSources(), getIndices(), getGraphs(), getProfiles(), getUsers(), getConfig(), getDatabases(), getLogFiles(), readConfig(), getEnabledPlugins(), readRepositories()])
             .then(([me, sources, indices, graphs, profiles, users, config, databases, logs, pluginsConfig, pluginsEnabled, repositories]) => {
-                updateModel({ type: "ServerRespondedWithMe", payload: success(me) });
-                updateModel({ type: "ServerRespondedWithSources", payload: success(sources) });
-                updateModel({ type: "ServerRespondedWithIndices", payload: success(indices) });
-                updateModel({ type: "ServerRespondedWithGraphs", payload: success(graphs) });
-                updateModel({ type: "ServerRespondedWithProfiles", payload: success(profiles) });
-                updateModel({ type: "ServerRespondedWithUsers", payload: success(users) });
-                updateModel({ type: "ServerRespondedWithConfig", payload: success(config) });
-                updateModel({ type: "ServerRespondedWithDatabases", payload: success(databases) });
-                updateModel({ type: "ServerRespondedWithLogFiles", payload: success(logs) });
-                updateModel({ type: "ServerRespondedWithPluginsConfig", payload: success(pluginsConfig) });
-                updateModel({ type: "ServerRespondedWithPluginsEnabled", payload: success(pluginsEnabled) });
-                updateModel({ type: "ServerRespondedWithRepositories", payload: success(repositories) });
+                updateModel({ type: "me", payload: success(me) });
+                updateModel({ type: "sources", payload: success(sources) });
+                updateModel({ type: "indices", payload: success(indices) });
+                updateModel({ type: "graphs", payload: success(graphs) });
+                updateModel({ type: "profiles", payload: success(profiles) });
+                updateModel({ type: "users", payload: success(users) });
+                updateModel({ type: "config", payload: success(config) });
+                updateModel({ type: "databases", payload: success(databases) });
+                updateModel({ type: "logFiles", payload: success(logs) });
+                updateModel({ type: "pluginsConfig", payload: success(pluginsConfig) });
+                updateModel({ type: "pluginsEnabled", payload: success(pluginsEnabled) });
+                updateModel({ type: "repositories", payload: success(repositories) });
             })
-            .catch((error) => {
-                updateModel({ type: "ServerRespondedWithMe", payload: failure(error.message) });
-                updateModel({ type: "ServerRespondedWithSources", payload: failure(error.message) });
-                updateModel({ type: "ServerRespondedWithIndices", payload: failure(error.message) });
-                updateModel({ type: "ServerRespondedWithGraphs", payload: failure(error.message) });
-                updateModel({ type: "ServerRespondedWithProfiles", payload: failure(error.message) });
-                updateModel({ type: "ServerRespondedWithUsers", payload: failure(error.message) });
-                updateModel({ type: "ServerRespondedWithConfig", payload: failure(error.message) });
-                updateModel({ type: "ServerRespondedWithDatabases", payload: failure(error.message) });
-                updateModel({ type: "ServerRespondedWithLogFiles", payload: failure(error.message) });
-                updateModel({ type: "ServerRespondedWithPluginsConfig", payload: failure(error.message) });
-                updateModel({ type: "ServerRespondedWithPluginsEnabled", payload: failure(error.message) });
-                updateModel({ type: "ServerRespondedWithRepositories", payload: failure(error.message) });
+            .catch((error: { message: string }) => {
+                updateModel({ type: "me", payload: failure(error.message) });
+                updateModel({ type: "sources", payload: failure(error.message) });
+                updateModel({ type: "indices", payload: failure(error.message) });
+                updateModel({ type: "graphs", payload: failure(error.message) });
+                updateModel({ type: "profiles", payload: failure(error.message) });
+                updateModel({ type: "users", payload: failure(error.message) });
+                updateModel({ type: "config", payload: failure(error.message) });
+                updateModel({ type: "databases", payload: failure(error.message) });
+                updateModel({ type: "logFiles", payload: failure(error.message) });
+                updateModel({ type: "pluginsConfig", payload: failure(error.message) });
+                updateModel({ type: "pluginsEnabled", payload: failure(error.message) });
+                updateModel({ type: "repositories", payload: failure(error.message) });
             });
     }, []);
 
     return (
         <ModelContext.Provider value={{ model, updateModel }}>
-            <Mui.Box sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}>
-                <Mui.Tabs
-                    onChange={(event: React.SyntheticEvent, newValue: number) => updateModel({ type: "UserClickedNewTab", payload: newValue })}
-                    value={editionTabToNumber(model.currentEditionTab)}
-                    centered
-                >
-                    <Mui.Tab label="Settings" />
-                    <Mui.Tab label="Users" />
-                    <Mui.Tab label="Profiles" />
-                    <Mui.Tab label="Sources" />
-                    <Mui.Tab label="Databases" />
-                    <Mui.Tab label="Plugins" />
-                    <Mui.Tab label="Logs" />
-                </Mui.Tabs>
-            </Mui.Box>
+            <Box sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}>
+                <Tabs onChange={(_event, newValue: string) => updateModel({ type: "currentEditionTab", payload: newValue as EditionTab })} value={model.currentEditionTab} centered>
+                    <Tab label="Settings" value="settings" />
+                    <Tab label="Users" value="users" />
+                    <Tab label="Profiles" value="profiles" />
+                    <Tab label="Sources" value="sources" />
+                    <Tab label="Databases" value="databases" />
+                    <Tab label="Plugins" value="plugins" />
+                    <Tab label="Logs" value="logs" />
+                </Tabs>
+            </Box>
             <Dispatcher model={model} />
         </ModelContext.Provider>
     );
@@ -271,19 +157,19 @@ const Admin = () => {
 
 const Dispatcher = (props: { model: Model }) => {
     switch (props.model.currentEditionTab) {
-        case "ConfigEdition":
+        case "settings":
             return <ConfigForm />;
-        case "UsersEdition":
+        case "users":
             return <UsersTable />;
-        case "ProfilesEdition":
+        case "profiles":
             return <ProfilesTable />;
-        case "SourcesEdition":
+        case "sources":
             return <SourcesTable />;
-        case "DatabaseManagement":
+        case "databases":
             return <DatabasesTable />;
-        case "Plugins":
+        case "plugins":
             return <PluginsForm />;
-        case "Logs":
+        case "logs":
             return <LogsTable />;
         default:
             return <div>Problem</div>;
@@ -291,5 +177,3 @@ const Dispatcher = (props: { model: Model }) => {
 };
 
 export default Admin;
-
-export { Msg, useModel };

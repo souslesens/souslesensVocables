@@ -1,8 +1,8 @@
-import React from "react";
 import { ulid } from "ulid";
 import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import { Msg_, Type, Mode } from "../src/Component/UsersTable";
+import { Dispatch, SetStateAction } from "react";
 const endpoint = "/api/v1/users";
 
 async function getUsers(): Promise<User[]> {
@@ -35,7 +35,7 @@ async function putUsers(body: User[]): Promise<User[]> {
     return mapUsers(json.resources);
 }
 
-async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
+async function saveUserBis(body: User, mode: Mode, updateModel: Dispatch<Msg>, updateLocal: Dispatch<Msg_>) {
     try {
         const response = await fetch(endpoint, {
             method: mode === Mode.Edition ? "put" : "post",
@@ -44,37 +44,37 @@ async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<M
         });
         const { message, resources } = (await response.json()) as { message: string; resources: User[] };
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(resources)) });
+            updateModel({ type: "users", payload: success(mapUsers(resources)) });
             updateLocal({ type: Type.UserClickedModal, payload: false });
             updateLocal({ type: Type.ResetUser, payload: mode });
         } else {
-            updateModel({ type: "ServerRespondedWithUsers", payload: failure(`${response.status}, ${message}`) });
+            updateModel({ type: "users", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
-        updateModel({ type: "ServerRespondedWithUsers", payload: failure(e) });
+        updateModel({ type: "users", payload: failure(e as string) });
     }
 }
 
-async function deleteUser(user: User, updateModel: React.Dispatch<Msg>) {
+async function deleteUser(user: User, updateModel: Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${user.login}`, { method: "delete" });
         const { message, resources } = (await response.json()) as { message: string; resources: User[] };
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(resources)) });
+            updateModel({ type: "users", payload: success(mapUsers(resources)) });
         } else {
-            updateModel({ type: "ServerRespondedWithUsers", payload: failure(`${response.status}, ${message}`) });
+            updateModel({ type: "users", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
-        updateModel({ type: "ServerRespondedWithUsers", payload: failure(e) });
+        updateModel({ type: "users", payload: failure(e as string) });
     }
 }
 
-function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>>) {
+function restoreUsers(updateModel: Dispatch<Msg>, setModal: Dispatch<SetStateAction<boolean>>) {
     return () => {
         getUsers()
-            .then((person) => updateModel({ type: "ServerRespondedWithUsers", payload: success(person) }))
+            .then((person) => updateModel({ type: "users", payload: success(person) }))
             .then(() => setModal(false))
-            .catch((err: { msg: string }) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err.msg) }));
+            .catch((err: { msg: string }) => updateModel({ type: "users", payload: failure(err.msg) }));
     };
 }
 
@@ -96,10 +96,10 @@ const decodeUser = (user: UserJSON): User => {
 
 type UserJSON = { id?: string; login: string; password: string; groups: string[]; source?: string; allowSourceCreation: boolean; maxNumberCreatedSource: number };
 
-type User = { id: string; _type: string; login: string; password: string; groups: string[]; source: string; allowSourceCreation: boolean; maxNumberCreatedSource: number };
+export type User = { id: string; _type: string; login: string; password: string; groups: string[]; source: string; allowSourceCreation: boolean; maxNumberCreatedSource: number };
 
 const newUser = (key: string): User => {
     return { id: key, _type: "user", login: "", password: "", groups: [], source: "json", allowSourceCreation: false, maxNumberCreatedSource: 5 };
 };
 
-export { getUsers, newUser, saveUserBis as putUsersBis, restoreUsers, deleteUser, putUsers, User };
+export { getUsers, newUser, saveUserBis as putUsersBis, restoreUsers, deleteUser, putUsers };

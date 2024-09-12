@@ -991,13 +991,17 @@ var OntologyModels = (function () {
 
                             constraint.forEach(function (item) {
                                 if (item.range) {
-                                    if (!allRanges[item.range]) {
-                                        allRanges[item.range] = { id: item.range, label: item.rangeLabel };
+                                    if (!objectType || objectType == "range") {
+                                        if (!allRanges[item.range]) {
+                                            allRanges[item.range] = { id: item.range, label: item.rangeLabel };
+                                        }
                                     }
                                 }
                                 if (item.domain) {
-                                    if (!allDomains[item.domain]) {
-                                        allDomains[item.domain] = { id: item.domain, label: item.domainLabel };
+                                    if (!objectType || objectType == "domain") {
+                                        if (!allDomains[item.domain]) {
+                                            allDomains[item.domain] = { id: item.domain, label: item.domainLabel };
+                                        }
                                     }
                                 }
                             });
@@ -1018,10 +1022,12 @@ var OntologyModels = (function () {
 
                                 result.forEach(function (item) {
                                     if (!allRanges[item.descendant.value]) {
-                                        allRanges[item.descendant.value] = {
-                                            id: item.descendant.value,
-                                            label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value),
-                                        };
+                                        if (!objectType || objectType == "range") {
+                                            allRanges[item.descendant.value] = {
+                                                id: item.descendant.value,
+                                                label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value),
+                                            };
+                                        }
                                     }
                                 });
                                 callbackSeries();
@@ -1040,10 +1046,12 @@ var OntologyModels = (function () {
                                 }
                                 result.forEach(function (item) {
                                     if (!allDomains[item.descendant.value]) {
-                                        allDomains[item.descendant.value] = {
-                                            id: item.descendant.value,
-                                            label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value),
-                                        };
+                                        if (!objectType || objectType == "domain") {
+                                            allDomains[item.descendant.value] = {
+                                                id: item.descendant.value,
+                                                label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value),
+                                            };
+                                        }
                                     }
                                 });
 

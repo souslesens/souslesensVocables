@@ -1,4 +1,3 @@
-
 import Lineage_sources from "../lineage/lineage_sources.js";
 import KGcreator_graph from "./KGcreator_graph.js";
 import KGcreator_mappings from "./KGcreator_mappings.js";
@@ -172,7 +171,6 @@ var KGcreator = (function () {
             self.currentConfig = result;
             self.rawConfig = JSON.parse(JSON.stringify(result));
 
-
             var options = {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
@@ -193,7 +191,7 @@ var KGcreator = (function () {
                         KGcreator.loadDataBaseSource(self.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
                     } else if (obj.node.data.type == "csvSource") {
                         self.initDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
-                        KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, function (err, result) {
+                        KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, true, function (err, result) {
                             if (err) {
                                 return alert("file not found");
                             }
@@ -397,12 +395,12 @@ var KGcreator = (function () {
                 //  withCheckboxes: true,
             };
 
-            self.loadDataSourcesJstree( "KGcreator_csvTreeDiv",options,callback)
-
+            self.loadDataSourcesJstree("KGcreator_csvTreeDiv", options, callback);
         });
     };
 
-    self.loadDataSourcesJstree=function(jstreeDivId,options,callback){
+    self.loadDataSourcesJstree = function (jstreeDivId, options, callback) {
+        self.dataSourcejstreeDivId = jstreeDivId;
         var jstreeData = [];
         jstreeData.push({
             id: "databaseSources",
@@ -468,13 +466,15 @@ var KGcreator = (function () {
                 }
             }
         );
-    }
+    };
 
     self.initDataSource = function (name, type, sqlType, table) {
         //close Previous DataSource
-        var parent_node = $("#KGcreator_csvTreeDiv").jstree()._model.data[self.currentConfig?.currentDataSource?.name];
+        var parent_node = $("#" + self.dataSourcejstreeDivId).jstree()._model.data[self.currentConfig?.currentDataSource?.name];
         if (parent_node) {
-            $("#KGcreator_csvTreeDiv").jstree(true).delete_node(parent_node.children);
+            $("#" + self.dataSourcejstreeDivId)
+                .jstree(true)
+                .delete_node(parent_node.children);
         }
         self.currentConfig.currentDataSource = {
             name: name, //obj.node.id,
@@ -602,8 +602,9 @@ var KGcreator = (function () {
         });
     };
 
-    self.loadCsvSource = function (slsvSource, fileName, callback) {
+    self.loadCsvSource = function (slsvSource, fileName, loadJstree, callback) {
         var columns = [];
+        var jstreeData = [];
         async.series(
             [
                 function (callbackSeries) {
@@ -641,8 +642,6 @@ var KGcreator = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    var jstreeData = [];
-
                     columns.forEach(function (column) {
                         var label = column;
 
@@ -673,14 +672,17 @@ var KGcreator = (function () {
                             });
                         });
                     }
-
-                    JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", fileName, jstreeData);
-                    KGcreator_graph.graphColumnToClassPredicates([fileName]);
+                    if (loadJstree) {
+                        JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, fileName, jstreeData);
+                        KGcreator_graph.graphColumnToClassPredicates([fileName]);
+                    }
                     callbackSeries();
                 },
 
                 function (callbackSeries) {
-                    self.showTableVirtualColumnsTree(fileName);
+                    if (loadJstree) {
+                        self.showTableVirtualColumnsTree(fileName);
+                    }
                     callbackSeries();
                 },
                 function (callbackSeries) {
@@ -695,7 +697,7 @@ var KGcreator = (function () {
                     return alert(err);
                 }
                 if (callback) {
-                    return callback(null);
+                    return callback(null, jstreeData);
                 }
             }
         );
@@ -721,7 +723,7 @@ var KGcreator = (function () {
                 },
             });
         }
-        JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", datasourceConfig.name, jstreeData);
+        JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, datasourceConfig.name, jstreeData);
     };
 
     self.showTablesColumnTree = function (table, tableColumns) {
@@ -744,7 +746,7 @@ var KGcreator = (function () {
             });
         });
 
-        JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", table, jstreeData);
+        JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, table, jstreeData);
         KGcreator_graph.graphColumnToClassPredicates([table]);
     };
 
@@ -766,7 +768,7 @@ var KGcreator = (function () {
                 data: { id: virtualColumn, table: table, label: virtualColumn, type: "tableColumn" },
             });
         });
-        JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", table, jstreeData);
+        JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, table, jstreeData);
         KGcreator_graph.graphColumnToClassPredicates([table]);
     };
 
@@ -952,7 +954,7 @@ var KGcreator = (function () {
             }
             self.addDataSourceToJstree("csvSource", datasourceName);
             self.initDataSource(datasourceName, "csvSource", "csv");
-            self.loadCsvSource(self.currentSlsvSource, datasourceName, function (err, result) {
+            self.loadCsvSource(self.currentSlsvSource, datasourceName, true, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
@@ -970,7 +972,7 @@ var KGcreator = (function () {
             },
         ];
 
-        JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", type + "s", jstreeData);
+        JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, type + "s", jstreeData);
     };
 
     self.listDatabaseTables = function (databaseSource, type, callback) {

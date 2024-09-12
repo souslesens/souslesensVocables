@@ -21,7 +21,7 @@ var NodeInfosWidget = (function () {
     self.initDialog = function (sourceLabel, divId, options, callback) {
         self.currentSource = sourceLabel;
         if (!options.noDialog) {
-            $("#" + divId).dialog("option", "title", " Node infos :");// source " + sourceLabel);
+            $("#" + divId).dialog("option", "title", " Node infos :"); // source " + sourceLabel);
         }
         $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
             $("#addPredicateButton").remove();
@@ -249,7 +249,7 @@ var NodeInfosWidget = (function () {
     };
 
     self.configureEditPredicateWidget = function () {
-        self.showHidePropertiesDiv("show")
+        self.showHidePropertiesDiv("show");
         $("#editPredicate_savePredicateButton").off("click");
         $("#editPredicate_savePredicateButton").click(function () {
             PredicatesSelectorWidget.storeRecentPredicates();
@@ -1082,7 +1082,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         }
     };
 
-    self.deletePredicate = function (predicateId,prompt, callback) {
+    self.deletePredicate = function (predicateId, prompt, callback) {
         var currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         var property = currentEditingItem.item.prop.value;
         if (!prompt || confirm("delete predicate")) {
@@ -1291,28 +1291,23 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         });
     };
 
-    self.showHidePropertiesDiv=function(hide) {
-        if(hide=="hide") {
+    self.showHidePropertiesDiv = function (hide) {
+        if (hide == "hide") {
             $("#editPredicate_propertyDiv").hide();
             $("#editPredicate_recentSelect").hide();
-        }
-        else{
+        } else {
             $("#editPredicate_propertyDiv").show();
             $("#editPredicate_recentSelect").show();
         }
-
-    }
+    };
     self.showModifyPredicateDialog = function (predicateId) {
-
-
         PredicatesSelectorWidget.currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         if (!PredicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
 
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
-
-            self.showHidePropertiesDiv("hide")
+            self.showHidePropertiesDiv("hide");
 
             if (PredicatesSelectorWidget.currentEditingItem.item.value.type != "uri") {
                 //hide both
@@ -1346,7 +1341,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             $("#editPredicate_savePredicateButton").click(function () {
                 PredicatesSelectorWidget.storeRecentPredicates();
 
-                self.deletePredicate(predicateId, false,function () {
+                self.deletePredicate(predicateId, false, function () {
                     self.addPredicate(null, null, null, null, function () {
                         self.showNodeInfos(MainController.currentSource, self.currentNode, "mainDialogDiv", { resetVisited: 1 });
                     });
@@ -1383,7 +1378,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     self.showCreateEntityDialog = function () {
         var divId = "smallDialogDiv";
         var sourceLabel = Lineage_sources.activeSource;
-        $("#" + divId).dialog("option", "title", " Node infos :");// source " + sourceLabel);
+        $("#" + divId).dialog("option", "title", " Node infos :"); // source " + sourceLabel);
         $("#" + divId).dialog("open");
         self.getCreateEntityDialog(sourceLabel, divId);
     };

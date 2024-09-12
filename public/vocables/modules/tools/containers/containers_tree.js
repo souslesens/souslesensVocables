@@ -43,7 +43,6 @@ var Containers_tree = (function () {
         }
     };
 
-
     self.drawTree = function (jstreeDiv, source, rootNode, data, options, callback) {
         var jstreeData = [];
         self.idsMap = {};
@@ -59,14 +58,12 @@ var Containers_tree = (function () {
             if (rootNode) {
                 parent = rootNode;
             } else {
-                if( self.idsMap[item.parent.value])
-               parent= self.idsMap[item.parent.value]
-                else{
-                    parent= "_" + common.getRandomHexaId(8);
-                    self.idsMap[item.parent.value]=parent
-
+                if (self.idsMap[item.parent.value]) parent = self.idsMap[item.parent.value];
+                else {
+                    parent = "_" + common.getRandomHexaId(8);
+                    self.idsMap[item.parent.value] = parent;
                 }
-               // parent = item.parent.value;
+                // parent = item.parent.value;
             }
             if (!self.idsMap[id]) {
                 self.idsMap[id] = jstreeId;

@@ -637,6 +637,37 @@ enabled:true},*/
     };
 
 
+    self.generateBasicMappings=function(){
+
+        var edges = self.visjsGraph.data.edges.get();
+        var edgesFromMap = {};
+        edges.forEach(function (edge) {
+            edgesFromMap[edge.from] = edge;
+        });
+        var nodesMap = {};
+        var nodes = self.visjsGraph.data.nodes.get();
+
+        async.eachSeries(nodes,function(node,callbackEach){
+            if(node.data.type!="Class")
+                return callbackEach()
+             var params = { columns: self.currentTable.columns }
+
+                             MappingModeler_bot.start(MappingModeler_bot.workflowMappingDetail, params, function (err, result) {
+                                 self.currentDataSource = result;
+                                 return callbackEach()
+                             })
+
+            return callbackEach()
+
+
+
+        },function(err){
+
+        })
+
+    }
+
+
 
 
 

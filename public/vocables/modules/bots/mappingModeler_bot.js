@@ -29,7 +29,7 @@ var MappingModeler_bot = (function () {
         if (!workflow) {
             workflow = self.workflow;
         }
-        _botEngine.init(CreateAxiomResource_bot, workflow, null, function () {
+        _botEngine.init(MappingModeler_bot, workflow, null, function () {
             self.params = {};
             if (_params) {
                 for (var key in _params) {
@@ -39,6 +39,17 @@ var MappingModeler_bot = (function () {
             _botEngine.nextStep();
         });
     };
+
+
+    self.workflowMappingDetail={
+        URItypeFn:{
+            labelFn:{
+                otherFn:{}
+            }
+        }
+    }
+
+
 
     self.workflow = {
         initDataSources: {
@@ -52,6 +63,16 @@ var MappingModeler_bot = (function () {
 
     self.functionTitles = {
         _OR: "Select an option",
+
+        URItypeFn:"select UriType for Node",
+        labelFn: "select a column for node label",
+        otherFn:"choose next operation",
+
+
+
+
+
+
         listVocabsFn: "Choose a source",
         listResourceTypesFn: "Choose a resource type",
         listListDataSourceType: " Choose a data source type",
@@ -60,6 +81,21 @@ var MappingModeler_bot = (function () {
     };
 
     self.functions = {
+
+        URItypeFn: function() {
+        var choices = ["fromLabel", "blankNode", "randomIdentifier"];
+        _botEngine.showList(choices, "URItype");
+    },
+
+        labelFn: function() {
+            var choices =self.params.columns;
+            _botEngine.showList(choices, "rdfsLabel");
+        },
+
+        otherFn: function() {
+            var choices = ["end", ];
+            _botEngine.showList(choices, "otherFn");
+        },
         initDataSources: function () {
             KGcreator.getSlsvSourceConfig(self.params.source, function (err, result) {
                 if (err) {

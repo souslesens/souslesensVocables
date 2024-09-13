@@ -308,7 +308,9 @@ var Axiom_activeLegend = (function () {
         var stay = false;
         var type = Axioms_graph.currentGraphNode.data.type;
         if (type == "Restriction" || type == "Connective") {
+
             if (Axioms_graph.axiomsVisjsGraph.network.getConnectedEdges(Axioms_graph.currentGraphNode.id).length < 2) {
+                if(newVisjsNode.data.type!="Restriction")
                 stay = true;
             }
         }

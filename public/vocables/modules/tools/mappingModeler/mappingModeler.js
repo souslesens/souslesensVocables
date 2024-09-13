@@ -1,10 +1,11 @@
 import Axiom_activeLegend from "../axioms/axiom_activeLegend.js";
-import KGcreator from "./KGcreator.js";
+import KGcreator from "../KGcreator/KGcreator.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axioms_graph from "../axioms/axioms_graph.js";
 import Axioms_suggestions from "../axioms/axioms_suggestions.js";
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
+import MainController from "../../shared/mainController.js";
 
 var MappingModeler = (function() {
     var self = {};
@@ -26,10 +27,10 @@ var MappingModeler = (function() {
         "hashcode"]
 
 
-    self.init = function(source, resource, divId) {
+    self.onLoaded = function() {
         async.series([
             //init source
-            function(callbackSeries) {
+            /*function(callbackSeries) {
                 SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, function(source) {
                     var source = SourceSelectorWidget.getSelectedSource()[0];
                     $("#mainDialogDiv").dialog("close");
@@ -38,8 +39,9 @@ var MappingModeler = (function() {
 
                     return callbackSeries();
                 });
-            },
+            },*/
             function(callbackSeries) {
+                self.currentSource=MainController.currentSource;
                 self.initResourcesMap(self.currentSource);
                 return callbackSeries();
             },
@@ -66,16 +68,19 @@ var MappingModeler = (function() {
             },
 
             function(callbackSeries) {
-                $("#mainDialogDiv").load("./modules/tools/KGcreator/html/mappingModeler.html", function(err) {
-                    $("#mainDialogDiv").dialog("open");
-                    return callbackSeries();
+                
+                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPannel.html", function(err) {
+                    $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function(err) {
+                        //$("#mainDialogDiv").dialog("open");
+                        return callbackSeries();
+                    });
                 });
             },
 
             function(callbackSeries) {
-                if (!divId) {
-                    divId = "nodeInfosAxioms_activeLegendDiv";
-                }
+                
+                //var divId = "nodeInfosAxioms_activeLegendDiv";
+                
                 //    self.initActiveLegend(divId);
 
                 return callbackSeries();
@@ -125,6 +130,7 @@ var MappingModeler = (function() {
                 };
                 common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false);
             });
+            self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
         } else if (obj.node.data.type == "table") {
             self.currentTable = {
                 name: obj.node.data.label,
@@ -133,17 +139,18 @@ var MappingModeler = (function() {
             var table = obj.node.data.id;
             KGcreator.currentConfig.currentDataSource.currentTable = table;
 
-
+            self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
             self.hideForbiddenResources("Table");
             self.currentResourceType = "Column";
             common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
-
+            
         }
-        MappingModeler.switchDataSourcePanel("hide");
-        var divId = "nodeInfosAxioms_activeLegendDiv";
-        self.initActiveLegend(divId);
+       
     };
-
+    self.hideDataSources = function(divId){
+        MappingModeler.switchDataSourcePanel("hide");
+        self.initActiveLegend(divId);
+    }
     self.initActiveLegend = function(divId) {
 
         var options = {
@@ -666,13 +673,122 @@ enabled:true},*/
         })
 
     }
+    self.classDialogData={};
+    
+    self.classesDialog=function(divId){
+        if(!divId){
+            divId='mainDialogDiv';
+        }
+        $('#mainDialogDiv').load('./modules/tools/mappingModeler/html/classesDialog.html',function(){
+            $("#mainDialogDiv").dialog("open");
+            
+            //self.addRowClass();
+            self.calculateColumnMappingsFromGraph();
+            Object.keys(self.classDialogData).forEach(function(column){
+                self.addRowClass(column);
 
+            });
 
+        });
+    }
+    self.calculateColumnMappingsFromGraph=function(){
+        var graphNodes=MappingModeler.visjsGraph.data.nodes.get();
+        var edges=MappingModeler.visjsGraph.data.edges.get();
+        var notClassNodes=graphNodes.filter(function(item){return item.data.type!='Class'});
+        notClassNodes.forEach(function(item){
+            var Column=item.data.label;
+            if(item.data.type=="RowIndex"){
+                Column=item.data.id;
+            }
+            var type=edges.filter(function(edge){return edge.from==Column && edge.label=='a'})[0].to;
+            var properties=edges.filter(function(edge){return edge.from==Column && edge.label!='a'});
+           
+            if(item.data.type=="RowIndex"){
+                Column='rowIndex';
+            }
+            if(! self.classDialogData[Column]){
+                self.classDialogData[Column]={};
+            }
+            self.classDialogData[Column].type=type;
+            self.classDialogData[Column].properties=properties;
+            if(item.data.type=='VirtualColumn'){
+                self.classDialogData[Column].isVirtualColumn='true';
+            }
+        });
+    }
+    self.addRowClass=function(column){
+        /*var classIndexes=Object.keys(self.classDialogData);
+        
+        if(classIndexes.length>0){
+            
+            var rowIndex=parseInt(classIndexes[classIndexes.length-1])+1;
+        }
+        else{
+            var rowIndex=0;
+        }*/
+        //self.classDialogData[rowIndex]={Column:'',Type:'',Label:'',DatatypeProperties:{},Transform:{}};
+        
+        $('#classDefineColumn').append(`<span id='class-column-${column}'> ${column} </span> `);
+        $('#classDefineType').append(`<span id='class-type-${column}' >${self.allResourcesMap[self.classDialogData[column].type].label} </span>  `);
+        $('#classDefineLabel').append(`<select id='class-label-${column}' style='padding:2px 2px'> <select> `);
+        $('#classDefineDatatypeProperty').append(`<button class='slsv-button-1' id='class-datatype-${column}' style='padding:2px 2px'> Datatype </button>   `);
+        $('#classDefineSample').append(`<button class='slsv-button-1' id='class-sample-${column}' style='padding:2px 2px'> Sample</button> `);
+        $('#classDefineTransform').append(`<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px'> Fn</button>  `);
+        $('#classDefineClose').append(`<button class='slsv-button-1' id='class-close-${column}' style='padding:2px 2px'> X</button>  `)
+        var columns=JSON.parse(JSON.stringify(self.currentTable.columns));
+        let index = columns.indexOf(column);
+        if(index>-1){
+            columns.splice(index, 1);
+            columns.unshift(column);
+        }
+        
+        // sort by similarity
+        //common.fillSelectOptions(`class-column-${rowIndex}`,columns, false);
+        common.fillSelectOptions(`class-label-${column}`,columns, false);
 
+            
+    }
 
+    self.onColumnClassSelect=function(rowIndex){
+        var choosenColumn=$('#class-column-'+rowIndex).val();
+        if(choosenColumn=='VirtualColumn'){
+            //to treat
+        }
+        // Verify if the column is already choosen
+        self.getAllClasses(self.currentSource,function(err,result){
+            
+            common.fillSelectOptions(`class-type-${rowIndex}`,result, false,'label','id');
+            common.fillSelectOptions(`class-label-${rowIndex}`,self.currentTable.columns, false);
+            $('#class-type-'+rowIndex).show();
+            $('#class-label-'+rowIndex).show();
+            $('#class-datatype-'+rowIndex).show();
+            $('#class-sample-'+rowIndex).show();
+            $('#class-transform-'+rowIndex).show();
+            $('#class-close-'+rowIndex).show();
+        });
+    }
 
+    self.saveDefineClass=function(){
+        // Step 1 : Enregistrer le dictionnaire 
+        Object.keys(self.classDialogData).forEach(function(rowIndex){
+            self.classDialogData[rowIndex].Column=$('#class-column-'+rowIndex).val();
+            self.classDialogData[rowIndex].Type=$('#class-type-'+rowIndex).val();
+            self.classDialogData[rowIndex].Label=$('#class-label-'+rowIndex).val();
+            
 
-
+        });
+        self.updateModelFromDict();
+        //self.classDialogData[rowIndex]={Column:'',Type:'',Label:'',DatatypeProperties:{},Transform:{}};
+        // Step 2 : Dessiner le mapping à partir du dictionnaire
+    }
+    self.updateModelFromDict=function(){
+        Object.keys(self.classDialogData).forEach(function(rowIndex){
+            // traiter le cas d'un noeud préexistant à modifier non traité ici
+            self.onSuggestionsSelect(self.classDialogData[rowIndex].Column);
+            self.onSuggestionsSelect(self.classDialogData[rowIndex].Type);
+            //traiter le label
+        });
+    }
 
     return self;
 })();

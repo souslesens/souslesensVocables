@@ -42,9 +42,11 @@ var MappingModeler_bot = (function () {
 
 
     self.workflowMappingDetail={
-        URItypeFn:{
-            labelFn:{
-                otherFn:{}
+        startFn: {
+            URItypeFn: {
+                labelFn: {
+                    otherFn: {}
+                }
             }
         }
     }
@@ -81,7 +83,7 @@ var MappingModeler_bot = (function () {
     };
 
     self.functions = {
-
+        startFn:function(){_botEngine.nextStep()},
         URItypeFn: function() {
         var choices = ["fromLabel", "blankNode", "randomIdentifier"];
         _botEngine.showList(choices, "URItype");

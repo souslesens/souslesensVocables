@@ -6,6 +6,9 @@ var Axioms_manager = (function () {
 
     self.initResourcesMap = function (source, callback) {
         self.allResourcesMap = {};
+        self.allClasses=null;
+        self.allProperties=null
+
         self.getAllClasses(source, function (err, result) {
             if (err) {
                 return callback(err);
@@ -191,7 +194,7 @@ var Axioms_manager = (function () {
         var axiomsArray = [];
         var lines = manchesterRawStr.split("\n");
         var recording = false;
-        var currentAxiom = classUri;
+        var currentAxiom = "<"+classUri+">";
         var start = true;
         lines.forEach(function (line, index) {
             if (line.trim() == "") {

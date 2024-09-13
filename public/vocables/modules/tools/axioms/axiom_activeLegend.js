@@ -42,6 +42,7 @@ var Axiom_activeLegend = (function () {
             self.currentLegendNodeType = node.data.type;
 
             if (node.data.type == "Class") {
+
                 self.hideLegendItems();
                 var newObject = { id: "createClass", label: "_Create new Class_" };
                 var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
@@ -220,6 +221,7 @@ var Axiom_activeLegend = (function () {
                 predicates: [],
             };
         } else if (nodeType == "Class") {
+
             newResource = Axiom_manager.allResourcesMap[resourceUri];
             self.currentClass = newResource;
         } else if (nodeType == "ObjectProperty") {

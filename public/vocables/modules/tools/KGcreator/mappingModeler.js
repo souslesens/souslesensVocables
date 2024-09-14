@@ -6,12 +6,13 @@ import Axioms_graph from "../axioms/axioms_graph.js";
 import Axioms_suggestions from "../axioms/axioms_suggestions.js";
 import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 import common from "../../shared/common.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 var MappingModeler = (function () {
     var self = {};
     self.currentSource = null;
     self.currentDataSource = null;
-
+    self.graphDiv = "mappingModeler_graphDiv";
     self.legendItemsArray = [
         {label: "Column", color: "#cb9801", shape: "ellipse",},
         {label: "RowIndex", color: "#cb9801", shape: "triangle"},
@@ -40,16 +41,9 @@ var MappingModeler = (function () {
                 return callbackSeries();
             },
 
-            //bot
-            function (callbackSeries) {
-                /*  var params = {
-                      source: self.currentSource
-                  }
 
-                  MappingModeler_bot.start(MappingModeler_bot.workflow, params, function (err, result) {
-                      self.currentDataSource = result;
-                      return callbackSeries()
-                  })*/
+            function (callbackSeries) {
+
                 KGcreator.currentSlsvSource = self.currentSource;
                 KGcreator.getSlsvSourceConfig(self.currentSource, function (err, result) {
                     if (err) {
@@ -89,6 +83,14 @@ var MappingModeler = (function () {
             //initDataSource
             function (callbackSeries) {
                 return callbackSeries();
+            },
+
+            //init visjsGraph
+            function (callbackSeries) {
+                var visjsData = {nodes: [], edges: []}
+                self.drawGraphCanvas(self.graphDiv, visjsData, function () {
+                    callbackSeries()
+                });
             }
         ]);
     };
@@ -134,6 +136,7 @@ var MappingModeler = (function () {
             common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
 
         }
+        self.currentDataSource = KGcreator.currentConfig.currentDataSource.name
         MappingModeler.switchDataSourcePanel("hide");
         var divId = "nodeInfosAxioms_activeLegendDiv";
         self.initActiveLegend(divId);
@@ -154,7 +157,7 @@ var MappingModeler = (function () {
         })
 
         Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", self.legendItemsArray, options);
-        self.graphDiv = "mappingModeler_graphDiv";
+
     };
 
     self.hideForbiddenResources = function (resourceType) {
@@ -341,11 +344,8 @@ var MappingModeler = (function () {
 
             //
         } else {
-            self.hierarchicalLevel = 0;
-            var options = {
-                onNodeClick: MappingModeler.onVisjsGraphClick
-            };
-            self.drawGraphCanvas(self.graphDiv, visjsData, options);
+
+            self.drawGraphCanvas(self.graphDiv, visjsData);
         }
 
         self.hideForbiddenResources(newResource.data.type);
@@ -356,7 +356,7 @@ var MappingModeler = (function () {
     };
 
 
-    self.drawGraphCanvas = function (graphDiv, visjsData, options) {
+    self.drawGraphCanvas = function (graphDiv, visjsData, callback) {
         self.graphOptions = {
             keepNodePositionOnDrag: true,
             /* physics: {
@@ -374,14 +374,16 @@ enabled:true},*/
             },
 
 
-            onclickFn: options.onNodeClick,
-            onRightClickFn: options.onRightClickFn || self.showGraphPopupMenu
+            onclickFn: MappingModeler.onVisjsGraphClick,
+            onRightClickFn: MappingModeler.showGraphPopupMenu
         };
 
 
         self.visjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
         self.visjsGraph.draw(function () {
-
+            if (callback) {
+                return callback();
+            }
         });
     };
 
@@ -402,6 +404,81 @@ enabled:true},*/
 
         }
     };
+
+    self.showGraphPopupMenu = function (node, point, event) {
+        if (!node) {
+            return;
+        }
+
+        self.currentGraphNode = node;
+        self.graphActions.outlineNode(node.id);
+
+        if (!node || !node.data) {
+            return;
+        }
+        var html = "";
+        html = '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.removeNodeFromGraph();"> Remove Node</span>';
+        html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.showNodeInfos()">Node Infos</span>';
+        if (node.data.type == "Class") {
+            html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.addSuperClassToGraph()">draw superClass</span>';
+        }
+
+        $("#popupMenuWidgetDiv").html(html);
+        point.x = event.x;
+        point.y = event.y;
+        PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+    };
+
+    self.graphActions = {
+        outlineNode: function (nodeId) {
+            self.visjsGraph.decorateNodes(null, {borderWidth: 1});
+            self.visjsGraph.decorateNodes(nodeId, {borderWidth: 5});
+        },
+        removeNodeFromGraph: function () {
+            if (confirm("delete node")) {
+                var edges = self.visjsGraph.network.getConnectedEdges(self.currentGraphNode.id)
+                self.visjsGraph.data.edges.remove(edges)
+                self.visjsGraph.data.nodes.remove(self.currentGraphNode.id)
+            }
+
+
+        },
+        addSuperClassToGraph: function () {
+            var options={
+                filter:" ?object rdf:type owl:Class",
+                withImports:true}
+            Sparql_OWL.getFilteredTriples(self.currentSource, self.currentGraphNode.data.id, "http://www.w3.org/2000/01/rdf-schema#subClassOf", null, options, function (err, result) {
+               if(err)
+                   return alert(err)
+                if(result.length==0)
+                    return alert( "no superClass")
+             var item=result[0]
+
+
+                var newResource = {
+                    id: item.object.value,
+                    label: item.objectLabel.value,
+                    shape: self.legendItems[self.currentResourceType].shape,
+                    color: self.legendItems[self.currentResourceType].color,
+                    data: {
+                        id: item.object.value,
+                        label: item.objectLabel.value,
+                        type: "Class"
+                    },
+
+                }
+
+                self.drawResource(newResource)
+            })
+        },
+
+
+       showNodeInfos : function () {
+            NodeInfosWidget.showNodeInfos(self.currentGraphNode, self.currentGraphNode, "smallDialogDiv",);
+        }
+    };
+
+
     self.onLegendNodeClick = function (node, event) {
         if (!node) {
             return;
@@ -673,7 +750,8 @@ enabled:true},*/
             }
 
             var params = {columns: self.currentTable.columns}
-            if( node.data.uriType){
+            if (node.data.uriType) {
+                columnsMap[node.id] = node
                 return callbackEach()
             }
             MappingModeler_bot.start(MappingModeler_bot.workflowMappingDetail, params, function (err, result) {
@@ -682,6 +760,7 @@ enabled:true},*/
                 node.data.rdfType = params.rdfType;
                 node.data.rdfsLabel = params.rdfsLabel
                 columnsMap[node.id] = node
+                self.visjsGraph.data.nodes.update({id: node.id, data: node.data})
                 return callbackEach()
             })
 
@@ -689,8 +768,8 @@ enabled:true},*/
         }, function (err) {
 
             var x = columnsMap
-          var json=  self.mappingsToKGcreatorJson (columnsMap)
-           $("#mappingModeler_infosTA").val(JSON.stringify(json,null,2))
+            var json = self.mappingsToKGcreatorJson(columnsMap)
+            $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2))
         })
 
     }
@@ -751,12 +830,12 @@ enabled:true},*/
     }
 
 
-    self.saveVisjsGraph=function(){
-        self.visjsGraph.saveGraph("mappings_"+self.currentSource+"_"+self.currentDataSource+"_"+self.currentTable.name,true)
+    self.saveVisjsGraph = function () {
+        self.visjsGraph.saveGraph("mappings_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name, true)
     }
 
-    self.loadVisjsGraph=function(){
-        self.visjsGraph.loadGraph("mappings_"+self.currentSource+"_"+self.currentDataSource+"_"+self.currentTable.name+".json",)
+    self.loadVisjsGraph = function () {
+        self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name + ".json",)
     }
     return self;
 })();

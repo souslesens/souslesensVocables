@@ -961,11 +961,12 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     if (context.callback) {
                         callback = context.callback;
                     }
-                    if (self.isGraphNotEmpty()) {
+                    if ( self.data.nodes ||  self.isGraphNotEmpty()) {
                         self.data.edges.add(visjsData.edges);
                         self.data.nodes.add(visjsData.nodes);
                     } else {
-                        self.draw(context.divId, visjsData, context.options, callback);
+                       // self.draw(context.divId, visjsData, context.options, callback);
+                        self.draw( callback);
                     }
                     self.message("");
                 }

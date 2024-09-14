@@ -140,6 +140,11 @@ var MappingModeler = (function () {
         MappingModeler.switchDataSourcePanel("hide");
         var divId = "nodeInfosAxioms_activeLegendDiv";
         self.initActiveLegend(divId);
+        try {
+            self.loadVisjsGraph()
+        } catch (e) {
+
+        }
 
     };
 
@@ -213,6 +218,7 @@ var MappingModeler = (function () {
 
             };
 
+
             self.drawResource(newResource);
         } else if (self.currentResourceType == "RowIndex") {
 
@@ -255,25 +261,35 @@ var MappingModeler = (function () {
                 self.onLegendNodeClick({id: "Class"});
             }, 500)
         } else if (self.currentResourceType == "ObjectProperty") {
-
+            var smooth = null;
             if (self.currentRelation) {
                 self.currentRelation.data = {type: "Objectproperty", propId: resourceUri};
+
+                var color = "#1244e8"
+                // ObjectProperty
                 if (self.allResourcesMap[resourceUri]) {
                     self.currentRelation.label = self.allResourcesMap[resourceUri].label
                 } else {
-                    self.currentRelation.label = resourceUri
+                    //other
+                    smooth = {type: "curvedCW"}
+                    self.currentRelation.label = resourceUri;
+                    color = "#375521"
                 }
-                var edge = self.currentRelation;
-                edge.arrows = {
-                    to: {
-                        enabled: true,
-                        type: "diamond"
-                    }
-                };
-                edge.data = {
-                    type: resourceUri
+                var edge = {
+                    from: self.currentRelation.from.id,
+                    to: self.currentRelation.to.id,
+                    label: self.currentRelation.label,
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            type: "diamond"
+                        }
+                    },
+                    smooth: smooth,
+                    data: {
+                        type: resourceUri
+                    }, color: color
                 }
-                edge.color = "#1244e8"
                 self.visjsGraph.data.edges.add([edge]);
                 self.currentRelation = null;
                 $("#axioms_legend_suggestionsSelect").empty();
@@ -389,19 +405,36 @@ enabled:true},*/
 
     self.onVisjsGraphClick = function (node, event, options) {
         self.currentGraphNode = node;
+
+
+        //add relation between columns
         if (options.ctrlKey) {
+            function getColumnClass(node) {
+                var classId = null
+                node.data.predicates.forEach(function (predicate) {
+                    if (predicate["rdf:type"]) {
+                        classId = predicate["rdf:type"]
+                    }
+                })
+                return classId
+            }
+
+
             if (!self.currentRelation) {
-                self.currentRelation = {from: node.id, to: null};
+                self.currentRelation = {from: {id: node.id, classId: getColumnClass(node)}, to: null};
             } else {
-                self.currentRelation.to = node.id;
+                self.currentRelation.to = {id: node.id, classId: getColumnClass(node)};
                 self.onLegendNodeClick({id: "ObjectProperty"});
             }
-        } else if (options.shiftKey) {
+        } /*else if (options.shiftKey) {
             var choices = ["IRIType",
                 "rdfs:label", "owl:DatatypeProperty", "owl:AnnotationProperty"];
             common.fillSelectOptions("axioms_legend_suggestionsSelect", choices, false);
             self.currentResourceType = null;
 
+        }*/
+        else {
+            self.currentRelation = null;
         }
     };
 
@@ -444,15 +477,18 @@ enabled:true},*/
 
         },
         addSuperClassToGraph: function () {
-            var options={
-                filter:" ?object rdf:type owl:Class",
-                withImports:true}
+            var options = {
+                filter: " ?object rdf:type owl:Class",
+                withImports: true
+            }
             Sparql_OWL.getFilteredTriples(self.currentSource, self.currentGraphNode.data.id, "http://www.w3.org/2000/01/rdf-schema#subClassOf", null, options, function (err, result) {
-               if(err)
-                   return alert(err)
-                if(result.length==0)
-                    return alert( "no superClass")
-             var item=result[0]
+                if (err) {
+                    return alert(err)
+                }
+                if (result.length == 0) {
+                    return alert("no superClass")
+                }
+                var item = result[0]
 
 
                 var newResource = {
@@ -473,10 +509,33 @@ enabled:true},*/
         },
 
 
-       showNodeInfos : function () {
-            NodeInfosWidget.showNodeInfos(self.currentGraphNode, self.currentGraphNode, "smallDialogDiv",);
+        showNodeInfos: function () {
+            if(self.currentGraphNode.data.type=="Column"){
+               return $("#smallDialogDiv").load("./modules/tools/KGcreator/html/mappingColumnInfos.html", function(){
+                   $("#smallDialogDiv").dialog("open")
+                   self.mappingColumnInfo.loadInEditor()
+                    })
+            }else {
+                NodeInfosWidget.showNodeInfos(self.currentGraphNode, self.currentGraphNode, "smallDialogDiv",);
+            }
         }
     };
+    self.mappingColumnInfo={
+        loadInEditor:function(){
+            var json=self.currentGraphNode.data
+            self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", json);
+
+
+
+        },
+        save:function(){
+           var data= self.mappingColumnEditor.get();
+            self.currentGraphNode.data=data
+            self.visjsGraph.data.nodes.update({id:self.currentGraphNode.id,data:data})
+            $("#smallDialogDiv").dialog("close")
+            self.saveVisjsGraph()
+        }
+    }
 
 
     self.onLegendNodeClick = function (node, event) {
@@ -507,7 +566,7 @@ enabled:true},*/
             var newObjects =
                 [{id: "createObjectProperty", label: "_Create new ObjectProperty_"},
                     {id: "rdfs:member", label: "_rdfs:member_"}];
-            Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from, self.currentRelation.to, function (err, properties) {
+            Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, function (err, properties) {
 
                 self.setSuggestionsSelect(properties, true, newObjects);
             });
@@ -682,6 +741,10 @@ enabled:true},*/
         self.visjsGraph.clearGraph();
         $("#" + self.graphDivId).html("");
         self.visjsGraph = null;
+        var visjsData = {nodes: [], edges: []}
+        self.drawGraphCanvas(self.graphDiv, visjsData, function () {
+
+        });
 
     };
     self.saveMappings = function () {
@@ -745,6 +808,7 @@ enabled:true},*/
                 edgesFromMap[node.id].forEach(function (edge) {
                     var predicate = edge.data.type;
                     var object = nodesMap[edge.to].data.id
+
                     node.data.predicates.push({[predicate]: object})
                 })
             }
@@ -769,7 +833,11 @@ enabled:true},*/
 
             var x = columnsMap
             var json = self.mappingsToKGcreatorJson(columnsMap)
+
+            $("#smallDialogDiv").html("  <textarea id=\"mappingModeler_infosTA\" style=\"display: block;width:400px;height: 500px;overflow: auto;\"> </textarea>")
+            $("#smallDialogDiv").dialog("open")
             $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2))
+
         })
 
     }
@@ -835,8 +903,14 @@ enabled:true},*/
     }
 
     self.loadVisjsGraph = function () {
-        self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name + ".json",)
+        self.clearMappings()
+        setTimeout(function () {
+            self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name + ".json")
+            setTimeout(function () {  self.visjsGraph.network.fit()},500)
+
+        }, 500)
     }
+
     return self;
 })();
 

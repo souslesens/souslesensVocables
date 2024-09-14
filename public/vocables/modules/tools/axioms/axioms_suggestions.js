@@ -261,7 +261,7 @@ var Axioms_suggestions = (function () {
                         }
                     }
                 }
-                if (domainClassId || rangeClassId) {
+                if (!domainClassId && !rangeClassId) {
                     for (var prop in result.constraints.noConstraints) {
                         data.push({
                             id: prop,

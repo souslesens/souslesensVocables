@@ -602,12 +602,28 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         var sourceNodeEdges = self.network.getConnectedEdges(sourceNodeId);
         sourceNodeEdges.forEach(function (edgeId) {
             var edge = self.data.edges.get(edgeId);
-            if (edge.to == targetNodeId || edge.from == targetNodeId) {
+            if (!targetNodeId|| edge.to == targetNodeId ) {
                 connectedEdges.push(edge);
             }
+
         });
         return connectedEdges;
     };
+
+
+    self.getFromNodeEdgesAndToNodes = function (sourceNodeId, direction) {
+        var connectedEdges = [];
+        var sourceNodeEdges = self.network.getConnectedEdges(sourceNodeId);
+        sourceNodeEdges.forEach(function (edgeId) {
+            var edge = self.data.edges.get(edgeId);
+            var fromNode = self.data.nodes.get(edge.from);
+            var toNode = self.data.nodes.get(edge.to);
+                connectedEdges.push({edge:edge,fromNode:fromNode,toNode:toNode});
+        });
+        return connectedEdges;
+    };
+
+
 
     self.processClicks = function (
         /** @type {{ edges: string | any[]; nodes: string | any[]; event: { srcEvent: { ctrlKey: any; altKey: any; shiftKey: any; }; }; pointer: { DOM: any; }; }} */ params,

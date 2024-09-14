@@ -300,6 +300,7 @@ var MappingModeler = (function () {
 
 
     self.drawResource = function (newResource) {
+        var graphDivWidth = $("#mappingModeler_graphDiv").width()
         var arrows = {
             to: {
                 enabled: true,
@@ -308,7 +309,7 @@ var MappingModeler = (function () {
         };
         var edgeColor = "#ccc"
         if (!self.currentOffest) {
-            self.currentOffest = {x: 0, y: 0};
+            self.currentOffest = {x: -graphDivWidth / 2, y: 0};
         }
         if (self.currentGraphNode && newResource.data.type == "Class") {
 
@@ -317,8 +318,8 @@ var MappingModeler = (function () {
         } else {
 
             newResource.x = (self.currentOffest.x += 200);
-            if (self.currentOffest.x > 450) {
-                self.currentOffest.y += 200;
+            if (self.currentOffest.x > graphDivWidth) {
+                self.currentOffest.y += 150;
             }
             newResource.y = (self.currentOffest.y);
         }
@@ -410,10 +411,13 @@ enabled:true},*/
         //add relation between columns
         if (options.ctrlKey) {
             function getColumnClass(node) {
+                var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id)
+
+
                 var classId = null
-                node.data.predicates.forEach(function (predicate) {
-                    if (predicate["rdf:type"]) {
-                        classId = predicate["rdf:type"]
+                connections.forEach(function (connection) {
+                    if (connection.edge.data.type = "rdf:type") {
+                        classId = connection.toNode.data.id
                     }
                 })
                 return classId
@@ -510,28 +514,43 @@ enabled:true},*/
 
 
         showNodeInfos: function () {
-            if(self.currentGraphNode.data.type=="Column"){
-               return $("#smallDialogDiv").load("./modules/tools/KGcreator/html/mappingColumnInfos.html", function(){
-                   $("#smallDialogDiv").dialog("open")
-                   self.mappingColumnInfo.loadInEditor()
-                    })
-            }else {
+            if (self.currentGraphNode.data.type == "Column") {
+                return $("#smallDialogDiv").load("./modules/tools/KGcreator/html/mappingColumnInfos.html", function () {
+                    $("#smallDialogDiv").dialog("open")
+                    self.mappingColumnInfo.editColumnInfos()
+                })
+            } else {
                 NodeInfosWidget.showNodeInfos(self.currentGraphNode, self.currentGraphNode, "smallDialogDiv",);
             }
         }
     };
-    self.mappingColumnInfo={
-        loadInEditor:function(){
-            var json=self.currentGraphNode.data
-            self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", json);
+    self.mappingColumnInfo = {
 
+        editColumnInfos: function () {
+            var data = self.currentGraphNode.data
+
+            if (!data.uriType) {// showBot
+                var params = {columns: self.currentTable.columns}
+
+                MappingModeler_bot.start(MappingModeler_bot.workflowMappingDetail, params, function (err, result) {
+                    var params = MappingModeler_bot.params
+                    data.uriType = params.URItype;
+                    data.rdfType = params.rdfType;
+                    data.rdfsLabel = params.rdfsLabel
+                    self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data})
+                    self.mappingColumnInfo.editColumnInfos()
+                })
+            }
+
+
+            self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", data);
 
 
         },
-        save:function(){
-           var data= self.mappingColumnEditor.get();
-            self.currentGraphNode.data=data
-            self.visjsGraph.data.nodes.update({id:self.currentGraphNode.id,data:data})
+        save: function () {
+            var data = self.mappingColumnEditor.get();
+            self.currentGraphNode.data = data
+            self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data})
             $("#smallDialogDiv").dialog("close")
             self.saveVisjsGraph()
         }
@@ -800,19 +819,22 @@ enabled:true},*/
 
         var columnsMap = {};
         async.eachSeries(nodes, function (node, callbackEach) {
+
+
             if (node.data.type == "Class") {
                 return callbackEach()
             }
-            node.data.predicates = []
-            if (edgesFromMap[node.id]) {
-                edgesFromMap[node.id].forEach(function (edge) {
-                    var predicate = edge.data.type;
-                    var object = nodesMap[edge.to].data.id
+            /*  node.data.predicates = []
+              if (edgesFromMap[node.id]) {
+                  edgesFromMap[node.id].forEach(function (edge) {
+                      var predicate = edge.data.type;
+                      var object = nodesMap[edge.to].data.id
 
-                    node.data.predicates.push({[predicate]: object})
-                })
-            }
+                      node.data.predicates.push({[predicate]: object})
+                  })
+              }*/
 
+            /*
             var params = {columns: self.currentTable.columns}
             if (node.data.uriType) {
                 columnsMap[node.id] = node
@@ -826,8 +848,9 @@ enabled:true},*/
                 columnsMap[node.id] = node
                 self.visjsGraph.data.nodes.update({id: node.id, data: node.data})
                 return callbackEach()
-            })
-
+            })*/
+            columnsMap[node.id] = node
+            return callbackEach()
 
         }, function (err) {
 
@@ -845,8 +868,8 @@ enabled:true},*/
 
 
         var tripleModels = []
-        for (var key in columnsMap) {
-            var data = columnsMap[key].data;
+        for (var nodeId in columnsMap) {
+            var data = columnsMap[nodeId].data;
             var subject
             if (data.uriType == "blankNode" || !data.rdfsLabel) {
                 subject = data.rdfsLabel + "_$"
@@ -874,12 +897,15 @@ enabled:true},*/
                 })
             }
 
-            data.predicates.forEach(function (predicate) {
-                var property = Object.keys(predicate)[0]
+            var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId)
+
+            connections.forEach(function (connection) {
+                var property = connection.edge.data.type
+                var object = connection.toNode.data.id
                 tripleModels.push({
                     s: subject,
                     p: property,
-                    o: predicate[property]
+                    o: object
                 })
             })
 
@@ -906,7 +932,9 @@ enabled:true},*/
         self.clearMappings()
         setTimeout(function () {
             self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name + ".json")
-            setTimeout(function () {  self.visjsGraph.network.fit()},500)
+            setTimeout(function () {
+                self.visjsGraph.network.fit()
+            }, 500)
 
         }, 500)
     }

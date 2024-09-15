@@ -611,14 +611,16 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     };
 
 
-    self.getFromNodeEdgesAndToNodes = function (sourceNodeId, direction) {
+    self.getFromNodeEdgesAndToNodes = function (sourceNodeId, bothDirections) {
         var connectedEdges = [];
         var sourceNodeEdges = self.network.getConnectedEdges(sourceNodeId);
         sourceNodeEdges.forEach(function (edgeId) {
             var edge = self.data.edges.get(edgeId);
             var fromNode = self.data.nodes.get(edge.from);
-            var toNode = self.data.nodes.get(edge.to);
-                connectedEdges.push({edge:edge,fromNode:fromNode,toNode:toNode});
+            if(bothDirections  ||  edge.from==sourceNodeId) {
+                var toNode = self.data.nodes.get(edge.to);
+                connectedEdges.push({edge: edge, fromNode: fromNode, toNode: toNode});
+            }
         });
         return connectedEdges;
     };

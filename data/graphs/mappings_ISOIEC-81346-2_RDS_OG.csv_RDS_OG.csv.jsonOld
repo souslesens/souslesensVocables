@@ -1,0 +1,176 @@
+{
+  "nodes": [
+    {
+      "id": "5fdabcee",
+      "label": "aspect",
+      "shape": "ellipse",
+      "color": "#cb9801",
+      "level": 0,
+      "data": {
+        "id": "aspect",
+        "label": "aspect",
+        "type": "Column",
+        "uriType": "fromLabel",
+        "rdfType": "rdf:Bag",
+        "rdfsLabel": "aspect"
+      },
+      "x": -148.5,
+      "y": 0,
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "_graphPosition": {
+        "x": 384.625,
+        "y": 397
+      },
+      "borderWidth": 1
+    },
+    {
+      "id": "0975cbec",
+      "label": "System",
+      "shape": "box",
+      "color": "#00afef",
+      "data": {
+        "id": "http://rds.posccaesar.org/ontology/lis14/rdl/System",
+        "label": "System",
+        "type": "Class"
+      },
+      "x": -148.5,
+      "y": -100,
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "borderWidth": 1
+    },
+    {
+      "id": "5f9851b9",
+      "label": "system",
+      "shape": "ellipse",
+      "color": "#cb9801",
+      "level": 0,
+      "data": {
+        "id": "system",
+        "label": "system",
+        "type": "Column",
+        "uriType": "fromLabel",
+        "rdfType": "rdf:Bag",
+        "rdfsLabel": "system"
+      },
+      "x": 51.5,
+      "y": 0,
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "_graphPosition": {
+        "x": 595.625,
+        "y": 396
+      },
+      "borderWidth": 5
+    },
+    {
+      "id": "203e13eb",
+      "label": "System",
+      "shape": "box",
+      "color": "#00afef",
+      "data": {
+        "id": "http://rds.posccaesar.org/ontology/lis14/rdl/System",
+        "label": "System",
+        "type": "Class"
+      },
+      "x": 51.5,
+      "y": -100,
+      "fixed": {
+        "x": true,
+        "y": true
+      },
+      "borderWidth": 1
+    }
+  ],
+  "edges": [
+    {
+      "id": "8a221",
+      "from": "5fdabcee",
+      "label": "a",
+      "to": "0975cbec",
+      "data": {
+        "type": "rdf:type"
+      },
+      "arrows": {
+        "to": {
+          "enabled": true,
+          "type": "arrow"
+        }
+      },
+      "color": "#ccc"
+    },
+    {
+      "id": "134b2",
+      "from": "5f9851b9",
+      "label": "a",
+      "to": "203e13eb",
+      "data": {
+        "type": "rdf:type"
+      },
+      "arrows": {
+        "to": {
+          "enabled": true,
+          "type": "arrow"
+        }
+      },
+      "color": "#ccc"
+    },
+    {
+      "from": "5fdabcee",
+      "to": "5f9851b9",
+      "label": "hasFunctionalPart",
+      "arrows": {
+        "to": {
+          "enabled": true,
+          "type": "diamond"
+        }
+      },
+      "smooth": null,
+      "data": {
+        "type": "http://rds.posccaesar.org/ontology/lis14/rdl/hasFunctionalPart"
+      },
+      "color": "#1244e8",
+      "id": "584da720-5a64-4a44-82fd-64075bbf5771"
+    }
+  ],
+  "context": {
+    "divId": "mappingModeler_graphDiv",
+    "options": {
+      "keepNodePositionOnDrag": true,
+      "visjsOptions": {
+        "edges": {
+          "smooth": {
+            "type": "cubicBezier",
+            "forceDirection": "horizontal",
+            "roundness": 0.4
+          }
+        }
+      }
+    }
+  },
+  "positions": {
+    "5fdabcee": {
+      "x": -148,
+      "y": 0
+    },
+    "0975cbec": {
+      "x": -148,
+      "y": -100
+    },
+    "5f9851b9": {
+      "x": 51,
+      "y": 0
+    },
+    "203e13eb": {
+      "x": 51,
+      "y": -100
+    }
+  }
+}

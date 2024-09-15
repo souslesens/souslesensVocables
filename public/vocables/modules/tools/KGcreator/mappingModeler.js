@@ -948,6 +948,7 @@ var MappingModeler = (function () {
             }
 
 
+
             var json = {
                 [self.currentTable.name]: {
                     tripleModels: tripleModels,

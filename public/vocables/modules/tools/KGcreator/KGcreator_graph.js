@@ -514,7 +514,7 @@ var KGcreator_graph = (function () {
     };
 
     self.addInterTableJoinsToVisjsData = function (dataSource, visjsData) {
-        if (!KGcreator.rawConfig.databaseSources[dataSource] || !KGcreator.rawConfig.databaseSources[dataSource].tableJoins) {
+        if (!KGcreator.rawConfig || !KGcreator.rawConfig.databaseSources[dataSource] || !KGcreator.rawConfig.databaseSources[dataSource].tableJoins) {
             return visjsData;
         }
         var edges = [];

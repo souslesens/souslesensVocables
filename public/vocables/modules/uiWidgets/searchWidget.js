@@ -96,7 +96,7 @@ var SearchWidget = (function () {
             searchAllSources = $("#GenericTools_searchInAllSources").prop("checked");
         }
 
-        var searchAllLabels = $("#GenericTools_searchAllLabelsCBX").prop("checked");
+        var searchAllLabels = true;
 
         var searchedSources = [];
         term = term.toLowerCase();

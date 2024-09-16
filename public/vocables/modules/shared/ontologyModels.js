@@ -971,16 +971,16 @@ var OntologyModels = (function () {
         var anyDomain = false;
         async.eachSeries(
             allSources,
-            function (source, callbackEach) {
+            function (source2, callbackEach) {
                 async.series(
                     [
                         function (callbackSeries) {
-                            if (!Config.ontologiesVocabularyModels[source]) {
+                            if (!Config.ontologiesVocabularyModels[source2]) {
                                 return callbackSeries();
                             }
 
-                            var constraint = Config.ontologiesVocabularyModels[source].restrictions[propId] || [];
-                            var constraints2 = Config.ontologiesVocabularyModels[source].constraints[propId] || [];
+                            var constraint = Config.ontologiesVocabularyModels[source2].restrictions[propId] || [];
+                            var constraints2 = Config.ontologiesVocabularyModels[source2].constraints[propId] || [];
 
                             if (!Array.isArray(constraints2)) {
                                 constraints2 = [constraints2];
@@ -1015,7 +1015,10 @@ var OntologyModels = (function () {
                             if (Object.keys(allRanges).length == 0) {
                                 anyRange = true;
                             }
-                            Sparql_OWL.getAllDescendants(source, Object.keys(allRanges), "rdfs:subClassOf", {}, function (err, result) {
+                            var allRangesArray=Object.keys(allRanges)
+                            if(allRangesArray.length==0)
+                                return callbackSeries();
+                            Sparql_OWL.getAllDescendants(source, allRangesArray, "rdfs:subClassOf", {}, function (err, result) {
                                 if (err) {
                                     return callback(err);
                                 }
@@ -1040,7 +1043,10 @@ var OntologyModels = (function () {
                             if (Object.keys(allDomains).length == 0) {
                                 anyDomain = true;
                             }
-                            Sparql_OWL.getAllDescendants(source, Object.keys(allDomains), "rdfs:subClassOf", {}, function (err, result) {
+                            var allDomainsArray=Object.keys(allDomains)
+                            if(allDomainsArray.length==0)
+                                return callbackSeries();
+                            Sparql_OWL.getAllDescendants(source, allDomainsArray, "rdfs:subClassOf", {}, function (err, result) {
                                 if (err) {
                                     return callback(err);
                                 }

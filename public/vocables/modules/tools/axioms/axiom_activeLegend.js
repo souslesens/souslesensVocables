@@ -42,6 +42,7 @@ var Axiom_activeLegend = (function () {
             self.currentLegendNodeType = node.data.type;
 
             if (node.data.type == "Class") {
+
                 self.hideLegendItems();
                 var newObject = { id: "createClass", label: "_Create new Class_" };
                 var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
@@ -220,6 +221,7 @@ var Axiom_activeLegend = (function () {
                 predicates: [],
             };
         } else if (nodeType == "Class") {
+
             newResource = Axiom_manager.allResourcesMap[resourceUri];
             self.currentClass = newResource;
         } else if (nodeType == "ObjectProperty") {
@@ -306,7 +308,9 @@ var Axiom_activeLegend = (function () {
         var stay = false;
         var type = Axioms_graph.currentGraphNode.data.type;
         if (type == "Restriction" || type == "Connective") {
+
             if (Axioms_graph.axiomsVisjsGraph.network.getConnectedEdges(Axioms_graph.currentGraphNode.id).length < 2) {
+                if(newVisjsNode.data.type!="Restriction")
                 stay = true;
             }
         }

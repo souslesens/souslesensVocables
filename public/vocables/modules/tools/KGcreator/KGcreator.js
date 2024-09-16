@@ -996,9 +996,23 @@ var KGcreator = (function () {
         });
     };
 
-    self.showSampleData = function (node, column, callback) {
+    self.showSampleData = function (node, columns, callback) {
         // alert("coming soon");
-
+        if(!columns){
+            var hasColumn=false;
+        }else{
+            if(Array.isArray(columns) && columns.length>0){
+                
+                var hasColumn=true;
+            }
+            else{
+                if(columns!=''){
+                    var hasColumn=true;
+                    columns=[columns];
+                }
+            }
+            
+        }
         function showTable(data) {
             var headers = [];
             var tableCols = [];
@@ -1009,11 +1023,23 @@ var KGcreator = (function () {
                         tableCols.push({ title: key, defaultContent: "", width: "15%" });
                     }
             });
+            if(hasColumn){
+                tableCols=tableCols.filter(function(col){return columns.includes(col.title)});
+            }
+            
             var lines = [];
             data.forEach(function (item) {
                 var line = [];
                 headers.forEach(function (column) {
-                    line.push(item[column] || "");
+                    if(!hasColumn){
+                        line.push(item[column] || "");
+                    }else{
+                        if(columns.includes(column)){
+                            line.push(item[column] || "");
+                        }
+                    }
+
+                    
                 });
                 lines.push(line);
             });

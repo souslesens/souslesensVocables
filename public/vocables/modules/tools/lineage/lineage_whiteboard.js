@@ -3315,6 +3315,7 @@ attrs.color=self.getSourceColor(superClassValue)
                 $("#GenericTools_searchInAllSources").prop("checked", false);
                 $("#Lineage_MoreClassesOptions").hide();
                 SearchWidget.showTopConcepts();
+                self.hideShowMoreOptions('show','Lineage_MoreClassesOptions');
                 /*
                     $("#lateralPanelDiv").resizable({
                         maxWidth: 435,
@@ -3332,6 +3333,7 @@ attrs.color=self.getSourceColor(superClassValue)
             $("#propertiesTab").load("./modules/tools/lineage/html/propertiesTab.html", function (s) {
                 Lineage_whiteboard.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
                 Lineage_properties.searchTermInSources();
+                self.hideShowMoreOptions('show','Lineage_MorePropertiesOptions');
             });
         }
     };

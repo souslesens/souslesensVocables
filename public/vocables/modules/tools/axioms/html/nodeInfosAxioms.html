@@ -23,7 +23,8 @@
                 </div>
 
                 <div style="display: flex; flex-direction: column">
-                    <!--   <button class="w3-button slsv-button-2" onclick="NodeInfosAxioms.newAxiom()">New axiom</button>-->
+
+                    <a style="color:#096eac;margin: 3px;font-weight: bold;    text-decoration: underline;" onclick="NodeInfosAxioms.newAxiom()">New axiom</a>
                     <div id="nodeInfosAxioms_activeLegendDiv" style="width: 100px; height: 200px; background-color: #ddd"></div>
                 </div>
             </div>
@@ -32,7 +33,7 @@
 
                 <div>
                     New Axiom<br />
-                    <select id="axioms_legend_suggestionsSelect" onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())" size="20" style="width: 250px; overflow: auto"></select>
+                    <select id="axioms_legend_suggestionsSelect" size="20" style="width: 250px; overflow: auto"></select>
                     <div>
                         <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.clearAxiom()">clear</button>
                         <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.showTriples()">triples</button>
@@ -41,7 +42,7 @@
                 </div>
             </div>
 
-            <div id="nodeInfosAxioms_graphDiv" style="width: 70vw; height: 450px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
+            <div id="nodeInfosAxioms_graphDiv"   onclick="PopupMenuWidget.hidePopup();" style="width: 70vw; height: 450px; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
         </div>
     </div>
 

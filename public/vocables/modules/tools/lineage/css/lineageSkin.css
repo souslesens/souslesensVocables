@@ -237,15 +237,16 @@
 }
 .SearchButtonIconRight {
     .SearchButtonIcon;
-    border-top-right-radius: 14px;
-    border-bottom-right-radius: 14px;
-    border-left: 0px !important;
-    background-color: white;
+    border-top-right-radius: 14px !important;
+    border-bottom-right-radius: 14px !important;
+    
 }
 .SearchButtonIconLeft {
     .SearchButtonIcon;
     border-top-left-radius: 14px;
     border-bottom-left-radius: 14px;
+    border-right: 0px !important;
+    background-color: white;
 }
 .input {
     display: flex;

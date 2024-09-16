@@ -42,9 +42,12 @@ var MappingModeler_bot = (function () {
 
 
     self.workflowMappingDetail={
-        URItypeFn:{
-            labelFn:{
-                otherFn:{}
+        startFn: {rdfTypeFn: {
+                URItypeFn: {
+                    labelFn: {
+                        otherFn: {}
+                    }
+                }
             }
         }
     }
@@ -81,14 +84,19 @@ var MappingModeler_bot = (function () {
     };
 
     self.functions = {
-
+        startFn:function(){_botEngine.nextStep()},
         URItypeFn: function() {
         var choices = ["fromLabel", "blankNode", "randomIdentifier"];
         _botEngine.showList(choices, "URItype");
     },
+        rdfTypeFn: function() {
+            var choices = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
+            _botEngine.showList(choices, "rdfType");
+        },
 
         labelFn: function() {
             var choices =self.params.columns;
+            choices.splice(0,0,"")
             _botEngine.showList(choices, "rdfsLabel");
         },
 

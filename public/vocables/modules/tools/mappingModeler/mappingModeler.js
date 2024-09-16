@@ -1054,8 +1054,8 @@ var MappingModeler = (function () {
             columns.unshift(column);
         }
 
-        var rdfObjectsType=["fromLabel", "blankNode", "randomIdentifier"];
-        var URITType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
+        var URITType=["fromLabel", "blankNode", "randomIdentifier"];
+        var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
         // to comment and to sort by similarity for others than rowIndex
         
 

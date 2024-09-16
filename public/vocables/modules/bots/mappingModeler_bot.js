@@ -6,9 +6,10 @@ import KGcreator from "../tools/KGcreator/KGcreator.js";
 
 var MappingModeler_bot = (function () {
     var self = {};
-    self.title = "Create Resource";
+
 
     self.start = function (workflow, _params, callbackFn) {
+        self.title = _params.title || "Create Resource";
         _botEngine.startParams = [];
         if (workflow) {
             _botEngine.startParams.push(JSON.parse(JSON.stringify(workflow)));

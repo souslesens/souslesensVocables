@@ -540,7 +540,10 @@ var MappingModeler = (function () {
                 var data = self.currentGraphNode.data
 
                 if (!data.uriType) {// showBot
-                    var params = {columns: self.currentTable.columns}
+                    var params = {
+                        title:""+data.label,
+                        columns: self.currentTable.columns
+                    }
 
                     MappingModeler_bot.start(MappingModeler_bot.workflowMappingDetail, params, function (err, result) {
                         var params = MappingModeler_bot.params
@@ -569,6 +572,7 @@ var MappingModeler = (function () {
                 var params = {
                     source: self.currentSource,
                     columns: self.currentTable.columns,
+                    title:""+self.currentTable.name,
 
                 }
 
@@ -840,14 +844,7 @@ var MappingModeler = (function () {
 
         self.generateBasicMappings = function () {
 
-            var edges = self.visjsGraph.data.edges.get();
-            var edgesFromMap = {};
-            edges.forEach(function (edge) {
-                if (!edgesFromMap[edge.from]) {
-                    edgesFromMap[edge.from] = []
-                }
-                edgesFromMap[edge.from].push(edge);
-            });
+
             var nodesMap = {};
             var nodes = self.visjsGraph.data.nodes.get();
 

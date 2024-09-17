@@ -28,6 +28,22 @@ import { CheckBox, CheckBoxOutlineBlank, Delete, Edit } from "@mui/icons-materia
 
 import { getSources, ServerSource, ServerSourceSchema } from "../Source";
 import { cleanUpText, fetchMe } from "../Utils";
+import { Severity } from "../user-management";
+
+interface DeleteSourceDialogProps {
+    onClose: () => void;
+    onDelete: () => void;
+    open: boolean;
+    sourceName: string;
+}
+
+interface SubmitSourceDialogProps {
+    onClose: () => void;
+    onSubmit: (source: ServerSource) => void;
+    open: boolean;
+    sources: ServerSource[];
+    sourceName: string;
+}
 
 type DialogType = "delete" | "edit";
 type Order = "asc" | "desc";
@@ -40,9 +56,7 @@ type User = {
 const initialDialog = { delete: false, edit: false };
 const initialUser = { login: "", allowSourceCreation: false, maxNumberCreatedSource: 0 };
 
-const DeleteSourceDialog = (props: { onClose: void; onDelete: void; open: boolean; sourceName: string }) => {
-    const { onClose, onDelete, open, sourceName } = props;
-
+const DeleteSourceDialog = ({ onClose, onDelete, open, sourceName }: DeleteSourceDialogProps) => {
     return (
         <Dialog aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description" open={open} onClose={onClose}>
             <DialogTitle id="delete-dialog-title">{`Delete ${sourceName}`}</DialogTitle>
@@ -61,12 +75,10 @@ const DeleteSourceDialog = (props: { onClose: void; onDelete: void; open: boolea
     );
 };
 
-const SubmitSourceDialog = (props: { onClose: void; onSubmit: void; open: boolean; sources: ServerSource[]; sourceName?: string }) => {
-    const { onClose, onSubmit, open, sources, sourceName } = props;
-
+const SubmitSourceDialog = ({ onClose, onSubmit, open, sources, sourceName }: SubmitSourceDialogProps) => {
     const [predicates, setPredicates] = useState<string[]>([]);
     const [sourceNames, setSourceNames] = useState<string[]>([]);
-    const [source, setSource] = useState<ServerSource>({});
+    const [source, setSource] = useState<ServerSource | undefined>();
 
     useEffect(() => {
         const filteredSources = sources.filter((source) => source.name === sourceName);
@@ -75,8 +87,10 @@ const SubmitSourceDialog = (props: { onClose: void; onSubmit: void; open: boolea
         setSource(filteredSources[0]);
     }, [sources, sourceName]);
 
-    const handleField = (fieldName: string, value: string | boolean) => {
-        setSource({ ...source, [fieldName]: value });
+    const handleField = (fieldName: string, value: string | boolean | string[]) => {
+        if (source) {
+            setSource({ ...source, [fieldName]: value });
+        }
     };
 
     const icon = <CheckBoxOutlineBlank fontSize="small" />;
@@ -94,7 +108,7 @@ const SubmitSourceDialog = (props: { onClose: void; onSubmit: void; open: boolea
                 onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
                     event.preventDefault();
                     const parsedForm = ServerSourceSchema.safeParse(source);
-                    if (parsedForm.error === undefined) {
+                    if (parsedForm.success && source) {
                         onSubmit(source);
                     }
                 },
@@ -108,15 +122,14 @@ const SubmitSourceDialog = (props: { onClose: void; onSubmit: void; open: boolea
                         id="taxonomyPredicates"
                         limitTags={2}
                         multiple
-                        onChange={(e, value) => handleField("taxonomyPredicates", value)}
+                        onChange={(_e, value) => handleField("taxonomyPredicates", value)}
                         options={predicates}
                         renderInput={(params) => <TextField {...params} label="Taxonomy Predicates" />}
                         renderOption={(props, option, { selected }) => {
-                            const { key, ...optionProps } = props;
                             return (
-                                <li key={key} {...optionProps}>
+                                <li key={option} {...props}>
                                     <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 2 }} checked={selected} />
-                                    {key}
+                                    {option}
                                 </li>
                             );
                         }}
@@ -140,15 +153,14 @@ const SubmitSourceDialog = (props: { onClose: void; onSubmit: void; open: boolea
                         disableCloseOnSelect
                         id="imports"
                         multiple
-                        onChange={(e, value) => handleField("imports", value)}
+                        onChange={(_e, value) => handleField("imports", value)}
                         options={sourceNames}
                         renderInput={(params) => <TextField {...params} label="Imports" />}
                         renderOption={(props, option, { selected }) => {
-                            const { key, ...optionProps } = props;
                             return (
-                                <li key={key} {...optionProps}>
+                                <li key={option} {...props}>
                                     <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 2 }} checked={selected} />
-                                    {key}
+                                    {option}
                                 </li>
                             );
                         }}
@@ -178,19 +190,23 @@ const SubmitSourceDialog = (props: { onClose: void; onSubmit: void; open: boolea
     );
 };
 
-const UserSources = (props: { handleSnackbar: void }) => {
-    const { handleSnackbar } = props;
+interface UserSourcesProps {
+    handleSnackbar: (msg: string, severity?: Severity) => void;
+}
 
+type OrderByType = "name" | "graphUri" | "group";
+
+const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
     const [filtering, setFiltering] = useState("");
-    const [isOpen, setIsOpen] = useState<DialogTitle, boolean>(initialDialog);
+    const [isOpen, setIsOpen] = useState<{ edit: boolean; delete: boolean }>(initialDialog);
     const [order, setOrder] = useState<Order>("asc");
-    const [orderBy, setOrderBy] = useState<keyof ServerSource>("name");
+    const [orderBy, setOrderBy] = useState<OrderByType>("name");
     const [selectedSource, setSelectedSource] = useState("");
     const [sources, setSources] = useState<ServerSource[]>([]);
-    const [user, setUser] = useState<User>(initialUser);
+    const [_user, setUser] = useState<User>(initialUser);
 
     useEffect(() => {
-        (async () => {
+        async function fetchSources() {
             setSources(await getSources());
 
             const me = await fetchMe();
@@ -199,7 +215,8 @@ const UserSources = (props: { handleSnackbar: void }) => {
                 allowSourceCreation: me.user.allowSourceCreation,
                 maxNumberCreatedSource: me.user.maxNumberCreatedSource,
             });
-        })();
+        }
+        void fetchSources();
     }, []);
 
     const handleCloseDialog = (dialogType: DialogType) => {
@@ -210,7 +227,7 @@ const UserSources = (props: { handleSnackbar: void }) => {
         try {
             const response = await fetch(`/api/v1/sources/${selectedSource}`, { method: "delete" });
 
-            const data = await response.json();
+            const data = (await response.json()) as { resources: Record<string, ServerSource>; message: string };
             if (response.status == 200) {
                 setSources(Object.values(data.resources));
                 handleSnackbar(`The source '${selectedSource}' have been deleted`);
@@ -220,7 +237,7 @@ const UserSources = (props: { handleSnackbar: void }) => {
             }
         } catch (error) {
             console.error(error);
-            handleSnackbar(`An error occurs during deletion: ${error}`, "error");
+            handleSnackbar(`An error occurs during deletion: ${error as string}`, "error");
         }
         setIsOpen({ ...isOpen, delete: false });
     };
@@ -233,7 +250,7 @@ const UserSources = (props: { handleSnackbar: void }) => {
                 method: "put",
             });
 
-            const data = await response.json();
+            const data = (await response.json()) as { resources: Record<string, ServerSource>; message: string };
             if (response.status == 200) {
                 setSources(Object.values(data.resources));
                 handleSnackbar(`The source '${selectedSource}' have been updated`);
@@ -243,25 +260,25 @@ const UserSources = (props: { handleSnackbar: void }) => {
             }
         } catch (error) {
             console.error(error);
-            handleSnackbar(`An error occurs during updating: ${error}`, "error");
+            handleSnackbar(`An error occurs during updating: ${error as string}`, "error");
         }
         setIsOpen({ ...isOpen, edit: false });
     };
 
     const onOpenDialog = (dialogType: DialogType, sourceName?: string) => {
-        setSelectedSource(sourceName);
+        setSelectedSource(sourceName ?? "");
         setIsOpen({ ...isOpen, [dialogType]: true });
     };
 
-    const onSortTable = (property: keyof ServerSource) => {
+    const onSortTable = (property: OrderByType) => {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
     };
 
     const sortedSources: ServerSource[] = sources.slice().sort((a: ServerSource, b: ServerSource) => {
-        const left: string = a[orderBy] || ("" as string);
-        const right: string = b[orderBy] || ("" as string);
+        const left = a[orderBy] || "";
+        const right = b[orderBy] || "";
         return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
     });
 
@@ -317,7 +334,7 @@ const UserSources = (props: { handleSnackbar: void }) => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <DeleteSourceDialog handleSnackbar={handleSnackbar} onClose={() => handleCloseDialog("delete")} onDelete={handleDeleteSource} open={isOpen["delete"]} sourceName={selectedSource} />
+            <DeleteSourceDialog onClose={() => handleCloseDialog("delete")} onDelete={handleDeleteSource} open={isOpen["delete"]} sourceName={selectedSource} />
             <SubmitSourceDialog onClose={() => handleCloseDialog("edit")} onSubmit={handleSubmitSource} open={isOpen["edit"]} sources={sources} sourceName={selectedSource} />
         </Stack>
     );

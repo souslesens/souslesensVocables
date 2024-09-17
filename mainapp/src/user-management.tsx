@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, SyntheticEvent } from "react";
 
 import { Alert, Snackbar, Stack, Tab, Tabs } from "@mui/material";
 
@@ -19,7 +19,7 @@ enum Sections {
     Sources = "sources",
 }
 
-type Severity = "error" | "info" | "success" | "warning";
+export type Severity = "error" | "info" | "success" | "warning";
 
 type SnackInfo = {
     isOpen: boolean;
@@ -27,16 +27,21 @@ type SnackInfo = {
     severity: Severity;
 };
 
-const Dispatcher = (props: { handleSnackbar: void; selectedTab: string }) => {
-    switch (props.selectedTab) {
+interface DispatcherProps {
+    handleSnackbar: (msg: string, severity?: Severity) => void;
+    selectedTab: string;
+}
+
+const Dispatcher = ({ handleSnackbar, selectedTab }: DispatcherProps) => {
+    switch (selectedTab) {
         case Sections.Profile:
-            return <UserProfile handleSnackbar={props.handleSnackbar} />;
+            return <UserProfile handleSnackbar={handleSnackbar} />;
         case Sections.Sources:
-            return <UserSources handleSnackbar={props.handleSnackbar} />;
+            return <UserSources handleSnackbar={handleSnackbar} />;
     }
 };
 
-const initialSnackInfo = { isOpen: false, message: "", severity: "success" };
+const initialSnackInfo: SnackInfo = { isOpen: false, message: "", severity: "success" };
 
 export default function UserManagement() {
     const [selectedTab, setSelectedTab] = useState<Sections>(Sections.Sources);
@@ -44,8 +49,9 @@ export default function UserManagement() {
 
     useEffect(() => {
         const params = new URLSearchParams(document.location.search);
-        if (params.has("tab")) {
-            setSelectedTab(params.get("tab"));
+        const tab = params.get("tab") as Sections;
+        if (tab) {
+            setSelectedTab(tab);
         }
     }, []);
 
@@ -53,15 +59,7 @@ export default function UserManagement() {
         setSnackInfo({ isOpen: true, message: message, severity: severity });
     };
 
-    const onChangeTab = (event: SyntheticEvent, newValue: string) => {
-        setSelectedTab(newValue);
-
-        const params = new URLSearchParams(document.location.search);
-        params.set("tab", newValue);
-        window.history.replaceState(null, "", `?${params.toString()}`);
-    };
-
-    const onSnackbarClose = (event: SyntheticEvent | Event, reason?: string) => {
+    const onSnackbarClose = (_event: SyntheticEvent | Event, reason?: string) => {
         if (reason !== "clickaway") {
             setSnackInfo({ ...snackInfo, isOpen: false });
         }
@@ -74,7 +72,17 @@ export default function UserManagement() {
                     {snackInfo.message}
                 </Alert>
             </Snackbar>
-            <Tabs centered onChange={onChangeTab} sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }} value={selectedTab}>
+            <Tabs
+                centered
+                onChange={(_event, newValue: Sections) => {
+                    setSelectedTab(newValue);
+                    const params = new URLSearchParams(document.location.search);
+                    params.set("tab", newValue);
+                    window.history.replaceState(null, "", `?${params.toString()}`);
+                }}
+                sx={{ bgcolor: "Background.paper", borderBottom: 1, borderColor: "divider" }}
+                value={selectedTab}
+            >
                 <Tab label="Profile" value={Sections.Profile} />
                 <Tab label="Sources" value={Sections.Sources} />
             </Tabs>

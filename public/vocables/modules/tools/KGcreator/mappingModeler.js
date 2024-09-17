@@ -844,7 +844,6 @@ var MappingModeler = (function () {
 
         self.generateBasicMappings = function () {
 
-
             var nodesMap = {};
             var nodes = self.visjsGraph.data.nodes.get();
 

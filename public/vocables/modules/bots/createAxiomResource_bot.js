@@ -14,22 +14,8 @@ var CreateAxiomResource_bot = (function () {
     self.title = "Create Resource";
 
     self.start = function (workflow, _params, callbackFn) {
-        _botEngine.startParams = [];
-        if (workflow) {
-            _botEngine.startParams.push(JSON.parse(JSON.stringify(workflow)));
-        } else {
-            _botEngine.startParams.push(undefined);
-        }
-        if (_params) {
-            _botEngine.startParams.push(JSON.parse(JSON.stringify(_params)));
-        } else {
-            _botEngine.startParams.push(undefined);
-        }
-        if (callbackFn) {
-            _botEngine.startParams.push(callbackFn);
-        } else {
-            _botEngine.startParams.push(undefined);
-        }
+        _botEngine.startParams =  _botEngine.fillStartParams(arguments);
+        
         self.callbackFn = callbackFn;
         if (!workflow) {
             workflow = self.workflow;

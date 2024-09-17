@@ -487,7 +487,9 @@ var KGquery = (function () {
                         if (optionalPredicatesSparql) {
                             if (!predicateStr) {
                                 // if only optional predicate make first predicate not optional (when only one class ...)
+                                optionalPredicatesSparql = `?${querySet.elements[0].fromNode.label} rdf:type <${querySet.elements[0].fromNode.id}>.` + optionalPredicatesSparql; 
                                 optionalPredicatesSparql = optionalPredicatesSparql.replace("OPTIONAL", "");
+
                             }
 
                             whereStr += optionalPredicatesSparql;

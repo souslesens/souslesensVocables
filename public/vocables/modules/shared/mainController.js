@@ -256,6 +256,7 @@ var MainController = (function () {
             $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
         }
         MainController.currentTool = toolId;
+       
         if (!Config.userTools[toolId].noSource) {
             if (self.currentSource == null) {
                 SourceSelectorWidget.showSourceDialog(true);
@@ -263,28 +264,34 @@ var MainController = (function () {
                 SourceSelectorWidget.initSource(self.currentSource);
             }
         } else {
+            UI.cleanPage();
             self.initTool(toolId);
+
+            
+           
+            //Config.userTools[self.currentTool].controller.unload=UI.homePage;
             self.currentSource = null;
         }
 
-        // set or replace tool in url params
-        const params = new URLSearchParams(document.location.search);
-        if (toolId != "ConfigEditor") {
-            params.delete("tab");
-        }
-        params.set("tool", toolId);
-        if (self.currentSource) {
-            params.set("source", self.currentSource);
-        } else {
-            params.delete("source");
-        }
-
-        window.history.replaceState(null, "", `?${params.toString()}`);
+         // set or replace tool in url params
+         const params = new URLSearchParams(document.location.search);
+         if (toolId != "ConfigEditor") {
+             params.delete("tab");
+         }
+         params.set("tool", toolId);
+         if (self.currentSource) {
+             params.set("source", self.currentSource);
+         } else {
+             params.delete("source");
+         }
+ 
+         window.history.replaceState(null, "", `?${params.toString()}`);
 
         if (callback) {
             callback();
         }
     };
+    
     self.test = function () {
         //   bc.postMessage("bc")
     };

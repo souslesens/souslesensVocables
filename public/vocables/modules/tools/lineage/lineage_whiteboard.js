@@ -3346,7 +3346,7 @@ attrs.color=self.getSourceColor(superClassValue)
     };
 
     self.resetCurrentTab = function () {
-        var currentTab = $(".slsv-tabButtonSelected").html();
+        var currentTab = $(".slsv-tabButtonSelected").parent().attr('title');
         if (currentTab == "Classes") {
             SearchWidget.showTopConcepts();
         }

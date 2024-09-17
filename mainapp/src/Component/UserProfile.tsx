@@ -18,10 +18,9 @@ const UserProfile = (props: { handleSnackbar: void }) => {
     const [copied, setCopied] = useState<boolean>(false);
 
     useEffect(() => {
-        (async () => {
-            const response = await fetchMe();
-            setCurrentUser({ login: response.user.login, token: response.user.token });
-        })();
+        fetchMe()
+            .then((response) => setCurrentUser({ login: response.user.login, token: response.user.token }))
+            .catch((error) => console.error(error));
     }, []);
 
     const handleUpdateToken = async (_event: MouseEvent<HTMLButtonElement>) => {
@@ -30,7 +29,7 @@ const UserProfile = (props: { handleSnackbar: void }) => {
             headers: { "Content-Type": "application/json" },
             method: "post",
         });
-        const json = await response.json();
+        const json = (await response.json()) as { status: number; token: string };
 
         if (response.status === 200) {
             setCurrentUser({ ...currentUser, token: json.token });
@@ -42,7 +41,7 @@ const UserProfile = (props: { handleSnackbar: void }) => {
 
     const handleCopyToken = async () => {
         setCopied(true);
-        navigator.clipboard.writeText(currentUser.token);
+        await navigator.clipboard.writeText(currentUser.token);
         handleSnackbar("The token have been copied in the clipboard");
         await new Promise((r) => setTimeout(r, 2000));
         setCopied(false);

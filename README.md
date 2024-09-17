@@ -322,6 +322,28 @@ Once it done, don't forget to add the plugin's name to `mainConfig.tools_availab
 If you still don't see the plugin in the jsTree, check that your user's profile allows to see this plugin.
 The function onLoaded is loaded when you select the tool.
 
+#### Plugin repositories
+
+Plugins can be stored in an external Git repository and used by SLS, to allow versionning and simpler management.
+
+The remote repository must contains, at least, one plugin in a dedicated directory:
+
+```
+external-plugins
+└── .git
+└── MyPluginName
+    └── public
+        └── js
+            └── main.js
+        └──html
+```
+
+To use external repositories, the best way is to add this repository from the ConfigEditor tool, in the “Plugins” section. The `admin` profile is mandatory to use this tool.
+
+After the registration of the repository in SLS, this one can be edited to select which plugins must be activated by the instance.
+
+The external repositories will be stored in the `plugins.available` directory.
+
 #### Plugin configuration
 
 If a plugin requires configuration, it can be added to the `config/pluginsConfig.json` file:
@@ -335,6 +357,8 @@ If a plugin requires configuration, it can be added to the `config/pluginsConfig
 ```
 
 This configuration will be provided to the plugin by calling the `setConfig` method.
+
+Its possible to edit this configuration from the “Plugins” section in the ConfigEditor. The `admin` profile is mandatory to use this tool.
 
 #### Plugin communication with other tools
 

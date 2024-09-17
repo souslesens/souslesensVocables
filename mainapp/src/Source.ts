@@ -292,4 +292,4 @@ export type SkosSource = CommonSource & SkosSpecificSource;
 
 export type _Source = Knowledge_GraphSource | SkosSource;
 
-export { getSources, getIndices, getGraphs, getMe, GraphInfo, defaultDataSource, getGraphSize };
+export { getSources, getIndices, getGraphs, getMe, defaultDataSource, getGraphSize };

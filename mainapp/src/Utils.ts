@@ -45,7 +45,7 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 interface User {
-    user: { login: string; token: string };
+    user: { login: string; token: string; allowSourceCreation: boolean; maxNumberCreatedSource: number };
 }
 
 async function fetchMe(): Promise<User> {

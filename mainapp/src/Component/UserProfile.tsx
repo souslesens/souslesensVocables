@@ -3,7 +3,7 @@ import { useState, useEffect, MouseEvent } from "react";
 import { Button, IconButton, InputAdornment, InputLabel, OutlinedInput, FormControl, Stack } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
-
+import { Severity } from "../user-management";
 import { fetchMe } from "../Utils";
 
 type User = {
@@ -11,9 +11,11 @@ type User = {
     token: string;
 };
 
-const UserProfile = (props: { handleSnackbar: void }) => {
-    const { handleSnackbar } = props;
+interface UserProfileProps {
+    handleSnackbar: (msg: string, severity?: Severity) => void;
+}
 
+const UserProfile = ({ handleSnackbar }: UserProfileProps) => {
     const [currentUser, setCurrentUser] = useState<User>({ login: "", token: "" });
     const [copied, setCopied] = useState<boolean>(false);
 

@@ -558,8 +558,9 @@ var MappingModeler = (function () {
                         data.uriType = params.URItype;
                         data.rdfType = params.rdfType;
                         data.rdfsLabel = params.rdfsLabel
-                        self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data})
-                        self.mappingColumnInfo.editColumnInfos()
+                        self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data});
+                        self.mappingColumnInfo.editColumnInfos();
+                        self.showDatatypeGraph(self.currentGraphNode.label);
                     })
                 }
 
@@ -601,6 +602,7 @@ var MappingModeler = (function () {
                             self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data})
                             //  self.mappingColumnInfo.editColumnInfos()
                             self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", data);
+                            self.showDatatypeGraph(self.currentGraphNode.label);
                         }
                     }
                 )
@@ -1133,20 +1135,239 @@ var MappingModeler = (function () {
         //datatypeMappingGraph
         var mappings=(self.generateBasicContentMappingContent())[self.currentTreeNode.id].tripleModels;
         
-        var filterdMapping=mappings.filter(function(mapping){
+        var filteredMapping=mappings.filter(function(mapping){
             return mapping.s==column||mapping.o==column
         });
 
 
-        KGcreator.currentConfig.currentMappings={}
-        KGcreator.currentConfig.currentMappings[self.currentTreeNode.id]={tripleModels:filterdMapping};
-        KGcreator_graph.drawDetailedMappings(self.currentTreeNode.id,"technicalMappingColumnGraphDiv");
+        self.currentMappings={}
+        self.currentMappings[self.currentTreeNode.id]=filteredMapping;
+        self.drawDatatypeGraphFromMappings(self.currentMappings,"technicalMappingColumnGraphDiv");
+        //KGcreator_graph.drawDetailedMappings(self.currentTreeNode.id,"technicalMappingColumnGraphDiv");
         
 
         
         //KGcreator_graph.graphColumnToClassPredicates([table]);
     };
+    self.drawDatatypeGraphFromMappings=function(mappings,divId){
+        /*if (tablesToDraw && !Array.isArray(tablesToDraw)) {
+            tablesToDraw = [tablesToDraw];
+        }*/
+        if(!divId){
+            divId="technicalMappingColumnGraphDiv"
+        }
+        var sourceMappings = mappings;
+        var visjsData = { nodes: [], edges: [] };
 
+        var existingNodes = {};
+        var json = {};
+        var shape = "box";
+        for (var table in sourceMappings) {
+            
+                if (!existingNodes[table]) {
+                    existingNodes[table] = 1;
+                    /*visjsData.nodes.push({
+                        id: table,
+                        label: table,
+                        shape: "ellipse",
+                        size: Lineage_whiteboard.defaultShapeSize,
+                        color: "#ddd",
+                        data: {
+                            id: table,
+                            label: table,
+                            fileName: table,
+                            type: "table",
+                        },
+                    });*/
+                }
+
+                //var mappings = sourceMappings[table];
+                var columns = MappingModeler.currentTable.columns;
+                if (columns == undefined) {
+                    //There is a mapping for this column but the Table is not on db anymore
+                    continue;
+                }
+
+                function getTripleLabelRole(id) {
+                    if (id.endsWith("_$")) {
+                        return "column";
+                    }
+                    if (id.startsWith("@")) {
+                        return "column";
+                    }
+                    var role = null;
+                    columns.forEach(function (column) {
+                        if (column == id) {
+                            role = "column";
+                        }
+                    });
+                    return role;
+                }
+
+                json[table] = mappings[table];
+                mappings[table].forEach(function (item, index) {
+                    if (!item.s || !item.p || !item.o) {
+                        return alert("tripleModel is malformed " + JSON.stringify(item));
+                    }
+
+                    function getNodeAttrs(str) {
+                        if (str.indexOf("http") > -1) {
+                            return { type: "Class", color: "#70ac47", shape: "box", size: 30 };
+                        } else if (str.indexOf(":") > -1) {
+                            drawRelation = false; //rdf Bag
+                            return null;
+                            return { type: "OwlType", color: "#aaa", shape: "ellipse" };
+                        } else if (str.endsWith("_$")) {
+                            return { type: "blankNode", color: "#00afef", shape: "square" };
+                        } else if (str.indexOf("_rowIndex") > -1) {
+                            return { type: "rowIndex", color: "#f90edd", shape: "star" };
+                        } else {
+                            drawRelation = false;
+                            return { type: "OwlType", color: "#00afef", shape: "hexagon" };
+                        }
+                    }
+
+                    var sId = table + "_" + item.s;
+                    var oId = table + "_" + item.o;
+
+                    if (!existingNodes[sId]) {
+                        if (!sId) {
+                            return;
+                        }
+                        existingNodes[sId] = 1;
+                        var label = Sparql_common.getLabelFromURI(item.s);
+
+                        var attrs = getNodeAttrs(item.s);
+                        var drawRelation = true;
+                        if (item.o == "owl:NamedIndividual") {
+                            // attrs.shape = "triangle";
+                            drawRelation = false;
+                        }
+                        if (item.o == "owl:Class") {
+                            // attrs.shape = "triangle";
+                            drawRelation = false;
+                        }
+                        if (item.o == "rdf:Bag") {
+                            //   attrs.shape = "box";
+                            drawRelation = false;
+                        } else if (item.s.startsWith("@")) {
+                            attrs.color = "#8200fd";
+                        }
+                        /*  if (item.isString) {
+                attrs.shape = "text";
+
+            }*/
+
+                        visjsData.nodes.push({
+                            id: sId,
+                            label: label,
+                            shape: attrs.shape,
+                            color: attrs.color,
+                            font: { color: attrs.color },
+                            size: Lineage_whiteboard.defaultShapeSize,
+                            data: {
+                                id: item.s,
+                                label: label,
+                                fileName: table,
+                                type: attrs.type,
+                                role: getTripleLabelRole(item.s),
+                                table: table,
+                            },
+                        });
+                    }
+                    if (item.o != "owl:NamedIndividual" && item.o != "owl:Class") {
+                        if (!existingNodes[oId]) {
+                            existingNodes[oId] = 1;
+                            var label = Sparql_common.getLabelFromURI(item.o);
+
+                            var attrs = getNodeAttrs(item.o);
+                            if (!attrs) return;
+                            visjsData.nodes.push({
+                                id: oId,
+                                label: label,
+                                shape: attrs.shape,
+                                color: attrs.color,
+                                font: attrs.shape == "box" ? { color: "white" } : { color: attrs.color },
+                                size: Lineage_whiteboard.defaultShapeSize,
+                                data: {
+                                    id: item.o,
+                                    label: label,
+                                    fileName: table,
+                                    type: attrs.type,
+                                    role: getTripleLabelRole(item.o),
+                                    table: table,
+                                },
+                            });
+                        }
+
+                        var edgeId = sId + item.p + oId;
+                        var label = Sparql_common.getLabelFromURI(item.p);
+                        if (label.endsWith("member")) {
+                            var color = "#07b611";
+                            var dashes = true;
+                        }
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1;
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: sId,
+                                to: oId,
+                                label: label,
+                                color: color,
+                                dashes: dashes,
+                                font: { size: 12, ital: true, color: color || "brown" },
+                                // color: getNodeAttrs(item.o),
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: Lineage_whiteboard.defaultEdgeArrowType,
+                                        scaleFactor: 0.5,
+                                    },
+                                },
+                            });
+                        } else {
+                        }
+                    }
+                    if (index == 0) {
+                        var edgeId = table + "_" + sId;
+                        var label = Sparql_common.getLabelFromURI(item.p);
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1;
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: table,
+                                to: sId,
+                                //  label: label
+                            });
+                        }
+                    }
+                });
+            
+        }
+
+        //visjsData = self.addInterTableJoinsToVisjsData(KGcreator.currentConfig.currentDataSource.name, visjsData);
+
+        var options = {
+            onclickFn: KGcreator_graph.onDetailedGraphNodeClick,
+            visjsOptions: {
+                manipulation: {
+                    
+                    
+                    enabled: false,
+                    
+                },
+            },
+        };
+
+        self.datatypeVisjsGraph = new VisjsGraphClass(divId, visjsData, options);
+        self.datatypeVisjsGraph.draw();
+       
+        /*   $('#KGcreatorVisjsLegendCanvas').css('right','55%');
+        var menuBarPosition=-($(window).height()-$('#MenuBar').height()+30);
+        $('#KGcreatorVisjsLegendCanvas').css('top',0);*/
+        $("#KGcreatorVisjsLegendCanvas").css("top", 0);
+        $("#KGcreatorVisjsLegendCanvas").css("right", 200);
+    }
 
 
     return self;

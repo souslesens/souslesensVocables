@@ -11,6 +11,10 @@ var MappingModeler_bot = (function () {
     self.start = function (workflow, _params, callbackFn) {
         self.title = _params.title || "Create Resource";
         _botEngine.startParams = _botEngine.fillStartParams(arguments);
+        self.callbackFn = callbackFn;
+        if (!workflow) {
+            workflow = self.workflow;
+        }
         _botEngine.init(MappingModeler_bot, workflow, null, function () {
             self.params = {};
             if (_params) {
@@ -44,8 +48,19 @@ var MappingModeler_bot = (function () {
 
         },
     };
-
     self.workflowMappingDetail={
+        startFn: {rdfTypeFn: {
+                URItypeFn: {
+                    labelFn: {}
+                    
+                        
+                    
+                }
+            }
+        }
+    }
+
+   /* self.workflowMappingDetail={
         startFn: {rdfTypeFn: {
                 URItypeFn: {
                     labelFn: self.workflowColumnmMappingOther
@@ -55,7 +70,7 @@ var MappingModeler_bot = (function () {
                 }
             }
         }
-    }
+    }*/
 
     
 

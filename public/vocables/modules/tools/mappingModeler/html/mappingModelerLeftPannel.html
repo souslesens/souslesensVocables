@@ -4,7 +4,7 @@
         <div id="mappingModeler_mainDiv" style="display:none">
             <div style="display: flex; flex-direction: column" id="mappingModeler_graphPanelDiv">
                 <button class="w3-button slsv-button-3" onclick="MappingModeler.switchDataSourcePanel('show')">DataSource</button>
-                <button class="w3-button slsv-button-3" onclick="MappingModeler.classesDialog()">Define classes</button>
+                
                 <!--   <button class="w3-button slsv-button-2" onclick="mappingModeler.newAxiom()">New axiom</button>-->
                 <div id="nodeInfosAxioms_activeLegendDiv" style="width: 100px; height:300px; background-color: #ddd"></div>
             </div>
@@ -17,9 +17,12 @@
                 <div>
                     <button class="w3-button slsv-button-3" onclick="MappingModeler.clearMappings()">clear</button>
                   <!--  <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.showTriples()">triples</button>-->
+                  <button class="w3-button slsv-button-3" onclick="MappingModeler.classesDialog()">mappingsTechnicalView </button>
                     <button class="w3-button slsv-button-3" onclick="MappingModeler.generateBasicMappings()">generateMappings</button>
+
                     <button class="w3-button slsv-button-3" onclick="MappingModeler.saveVisjsGraph()">save graph</button>
                     <button class="w3-button slsv-button-3" onclick="MappingModeler.loadVisjsGraph()">load graph</button>
+
 
                 </div>
             </div>

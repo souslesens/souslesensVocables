@@ -24,6 +24,7 @@ var KGcreator_run = (function () {
             selectedText = selectedText.substring(0, selectedText.length - 2);
         }
         selectedText = '{"' + table + '":{"tripleModels":[' + selectedText + '],"transform":{}}}';
+        
 
         try {
             var json = JSON.parse(selectedText);

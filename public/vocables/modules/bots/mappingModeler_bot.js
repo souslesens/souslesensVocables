@@ -113,7 +113,7 @@ var MappingModeler_bot = (function () {
         URItypeFn: function() {
         var choices = ["fromColumnTitle", "blankNode", "randomIdentifier"];
         _botEngine.showList(choices, "URItype");
-    },
+        },
         rdfTypeFn: function() {
             var choices = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
             _botEngine.showList(choices, "rdfType");

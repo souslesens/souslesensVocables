@@ -758,7 +758,8 @@ var Axiom_activeLegend = (function () {
         } else {
             return alert("no valid resourceType");
         }
-        return CreateAxiomResource_bot.start(botWorkFlow, { filteredUris: filteredUris }, function (err, result) {
+        var params={ source:self.currentSource,filteredUris: filteredUris }
+        return CreateAxiomResource_bot.start(botWorkFlow , function (err, result) {
             if (err) {
                 return alert(err);
             }

@@ -18,12 +18,13 @@ var CreateResource_bot = (function () {
         self.callback = callback;
         if (!workflow) workflow = self.workflow;
         _botEngine.init(CreateResource_bot, workflow, null, function () {
-            self.source = Lineage_sources.activeSource;
+
             self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
             if (_params)
                 for (var key in _params) {
                     self.params[key] = _params[key];
                 }
+            self.source = self.params.source || Lineage_sources.activeSource;
             _botEngine.nextStep();
         });
     };

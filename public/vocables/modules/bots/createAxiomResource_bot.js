@@ -21,13 +21,15 @@ var CreateAxiomResource_bot = (function () {
             workflow = self.workflow;
         }
         _botEngine.init(CreateAxiomResource_bot, workflow, null, function () {
-            self.source = Lineage_sources.activeSource;
-            self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
+
+            self.params ={};// { source:self._params.source, resourceType: "", resourceLabel: "", currentVocab: "" };
             if (_params) {
                 for (var key in _params) {
                     self.params[key] = _params[key];
                 }
             }
+            self.source = self.params.source;
+
             _botEngine.nextStep();
         });
     };
@@ -86,8 +88,8 @@ var CreateAxiomResource_bot = (function () {
 
         workflow_saveNewClassFn: function () {
             var label = Sparql_common.formatString(self.params.resourceLabel);
-            var resourceId = common.getURI(label, self.params.source, "fromLabel");
-            var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, resourceId);
+            var resourceId = common.getURI(label, self.source, "fromLabel");
+            var triples = Lineage_createResource.getResourceTriples(self.source, self.params.resourceType, null, self.params.resourceLabel, resourceId);
             if (self.params.superResourceId) {
                 triples.push({
                     subject: resourceId,
@@ -95,7 +97,12 @@ var CreateAxiomResource_bot = (function () {
                     object: self.params.superResourceId,
                 });
             }
-            Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
+            triples.push({
+                subject: resourceId,
+                predicate: "rdf:type",
+                object: "owl:Class",
+            });
+            Lineage_createResource.writeResource(self.source, triples, function (err, resourceId) {
                 if (err) {
                     _botEngine.abort(err.responseText);
                 }

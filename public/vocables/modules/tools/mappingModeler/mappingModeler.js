@@ -121,7 +121,7 @@ var MappingModeler = (function () {
                     jstreeData.forEach(function (item) {
                         columns.push(item.data.id);
                     });
-                    self.hideForbiddenResources("Table");
+                    //self.hideForbiddenResources("Table");
                     self.currentResourceType = "Column";
                     self.currentTable = {
                         name: obj.node.id,
@@ -297,6 +297,7 @@ var MappingModeler = (function () {
                         },
                         smooth: smooth,
                         data: {
+                            id: resourceUri,
                             type: resourceUri,
                             source: property.source
                         }, color: color
@@ -367,6 +368,7 @@ var MappingModeler = (function () {
                         from: self.currentGraphNode.id,
                         label: label,
                         to: newResource.id,
+                        width: 2,
                         data: {type: type},
                         arrows: arrows,
                         color: edgeColor
@@ -452,10 +454,19 @@ var MappingModeler = (function () {
 
 
                 if (!self.currentRelation) {
-                    self.currentRelation = {from: {id: node.id, classId: getColumnClass(node)}, to: null};
+                    self.currentRelation = {
+                        from: {id: node.id, classId: getColumnClass(node)},
+                        to: null,
+                        type: node.data.type
+                    };
                 } else {
                     self.currentRelation.to = {id: node.id, classId: getColumnClass(node)};
-                    self.onLegendNodeClick({id: "ObjectProperty"});
+                    if (self.currentRelation.from.type != "Class" && node.data.type == "Class") {
+                        self.graphActions.drawColumnToClassEdge(self.currentRelation);
+                    } else if (self.currentRelation.from.type != "Class" && node.data.type != "Class") {
+                        self.onLegendNodeClick({id: "ObjectProperty"});
+                    }
+
                 }
             } else {
                 self.currentRelation = null;
@@ -470,7 +481,7 @@ var MappingModeler = (function () {
             self.currentGraphNode = node;
             self.graphActions.outlineNode(node.id);
 
-            if (!node || !node.data) {
+            if (!node) {
                 return;
             }
             var html = "";
@@ -479,10 +490,11 @@ var MappingModeler = (function () {
             } else {
                 html = '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.removeNodeFromGraph();"> Remove Node</span>';
             }
-
-            html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.showNodeInfos()">Node Infos</span>';
-            if (node.data.type == "Class") {
-                html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.addSuperClassToGraph()">draw superClass</span>';
+            if (node.data) {
+                html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.showNodeInfos()">Node Infos</span>';
+                if (node.data.type == "Class") {
+                    html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.addSuperClassToGraph()">draw superClass</span>';
+                }
             }
 
             $("#popupMenuWidgetDiv").html(html);
@@ -541,6 +553,31 @@ var MappingModeler = (function () {
                 })
             },
 
+            drawColumnToClassEdge: function () {
+                if (!self.currentRelation) {
+                    return;
+                }
+                var edges = [{
+                    from: self.currentRelation.from.id,
+                    to: self.currentRelation.to.id,
+                    label: "a",
+                    color: "ddd",
+                    width: 2,
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            type: "arrow"
+                        },
+
+
+                    },
+                    data: {type: "rdf:type"},
+                }]
+
+                self.visjsGraph.data.edges.add(edges);
+                self.currentRelation = null;
+            },
+
 
             showNodeInfos: function () {
                 if (["Column", "RowIndex", "VirtualColumn"].indexOf(self.currentGraphNode.data.type) > -1) {
@@ -574,7 +611,7 @@ var MappingModeler = (function () {
                         data.rdfType = params.rdfType;
                         data.rdfsLabel = params.rdfsLabel,
 
-                        self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data});
+                            self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data});
                         self.mappingColumnInfo.editColumnInfos();
                         self.showDatatypeGraph(self.currentGraphNode.label);
                     })
@@ -599,7 +636,7 @@ var MappingModeler = (function () {
                     source: self.currentSource,
                     columns: self.currentTable.columns,
                     title: "" + self.currentTable.name,
-                    columnClass:self.mappingColumnInfo.columnClass
+                    columnClass: self.mappingColumnInfo.columnClass
 
                 }
 
@@ -666,13 +703,7 @@ var MappingModeler = (function () {
                     properties = common.array.sort(properties, "label")
                     self.setSuggestionsSelect(properties, false, newObjects);
                 });
-                /*  self.getAllProperties(self.currentSource, function(err, objectProperties) {
-                      if (err) {
-                          return alert(err);
-                      }
 
-                      self.setSuggestionsSelect(objectProperties, true, newObject);
-                  });*/
 
             } else if (self.currentResourceType == "RowIndex") {
                 self.onSuggestionsSelect({id: "RowIndex"})
@@ -868,6 +899,7 @@ var MappingModeler = (function () {
                 if (err) {
                     return alert(err);
                 }
+                CreateAxiomResource_bot.params.newObject.label = self.currentSource.substring(0, 3) + ":" + CreateAxiomResource_bot.params.newObject.label
                 // update Axiom_manager
                 if (resourceType == "Class") {
                     self.allClasses.push(CreateAxiomResource_bot.params.newObject);
@@ -891,7 +923,7 @@ var MappingModeler = (function () {
             var columnsMap = {};
             nodes.forEach(function (node, callbackEach) {
                 if (node.data.type == "Class") {
-
+                    return;
                 }
 
                 columnsMap[node.id] = node
@@ -928,20 +960,30 @@ var MappingModeler = (function () {
 
 
         }
+        self.nodeToKGcreatorColumnName = function (data) {
+            var colname;
+            if (data.uriType == "blankNode" || !data.rdfsLabel) {
+                colname = data.id + "_$"
+            } else if (data.uriType == "randomIdentifier") {
+                colname = data.id + "_£"
+            } else if (data.uriType == "fromColumnTitle") {
+                colname = data.id
+            }
+
+            if (data.type == "VirtualColumn") {
+                colname = "@" + colname
+            }
+            return colname;
+        }
         self.mappingsToKGcreatorJson = function (columnsMap) {
 
-
+            var columnsMapLabels = Object.values(columnsMap).map(function (column) {
+                return column.label
+            });
             var tripleModels = []
             for (var nodeId in columnsMap) {
                 var data = columnsMap[nodeId].data;
-                var subject
-                if (data.uriType == "blankNode" || !data.rdfsLabel) {
-                    subject = data.id + "_$"
-                } else if (data.uriType == "randomIdentifier") {
-                    subject = data.id + "_£"
-                } else if (data.uriType == "fromColumnTitle") {
-                    subject = data.id
-                }
+                var subject = self.nodeToKGcreatorColumnName(data)
 
                 if (data.rdfType) {
                     tripleModels.push({
@@ -966,6 +1008,108 @@ var MappingModeler = (function () {
                 connections.forEach(function (connection) {
                     var property = connection.edge.data.type
                     var object = connection.toNode.data.id
+                    if (columnsMapLabels.includes(object)) {
+                        object = self.nodeToKGcreatorColumnName(Object.values(columnsMap).filter(function (node) {
+                            return object == node.label
+                        })[0].data);
+                    }
+                    tripleModels.push({
+                        s: subject,
+                        p: property,
+                        o: object
+                    })
+                })
+                if (data.otherPredicates) {
+                    data.otherPredicates.forEach(function (predicate) {
+
+                        var triple = {
+                            s: subject,
+                            p: predicate.property,
+                            o: predicate.object
+                        };
+
+                        if (predicate.range) {
+                            if (predicate.range.indexOf("Resource") > -1) {
+                                triple.isString = true;
+                            } else {
+                                triple.dataType = predicate.range;
+                            }
+                        } else {
+                            triple.isString = true;
+                        }
+                        if (predicate.dateFormat) {
+                            triple.dateFormat = predicate.dateFormat;
+                        }
+
+                        tripleModels.push(triple)
+                    })
+                }
+
+            }
+
+
+            var json = {
+                [self.currentTable.name]: {
+                    tripleModels: tripleModels,
+                },
+                transform: {}
+            }
+
+            return json;
+        }
+        self.nodeToKGcreatorColumnName = function (data) {
+            var colname;
+            if (data.uriType == "blankNode" || !data.rdfsLabel) {
+                colname = data.id + "_$"
+            } else if (data.uriType == "randomIdentifier") {
+                colname = data.id + "_£"
+            } else if (data.uriType == "fromColumnTitle") {
+                colname = data.id
+            }
+
+            if (data.type == "VirtualColumn") {
+                colname = "@" + colname
+            }
+            return colname;
+        }
+        self.mappingsToKGcreatorJson = function (columnsMap) {
+
+            var columnsMapLabels = Object.values(columnsMap).map(function (column) {
+                return column.label
+            });
+            var tripleModels = []
+            for (var nodeId in columnsMap) {
+                var data = columnsMap[nodeId].data;
+                var subject = self.nodeToKGcreatorColumnName(data)
+
+                if (data.rdfType) {
+                    tripleModels.push({
+                        s: subject,
+                        p: "rdf:type",
+                        o: data.rdfType
+                    })
+                }
+
+                if (data.rdfsLabel) {
+                    tripleModels.push({
+                        s: subject,
+                        p: "rdfs:label",
+                        o: data.rdfsLabel,
+                        "isString": true
+
+                    })
+                }
+
+                var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId)
+
+                connections.forEach(function (connection) {
+                    var property = connection.edge.data.type
+                    var object = connection.toNode.data.id
+                    if (columnsMapLabels.includes(object)) {
+                        object = self.nodeToKGcreatorColumnName(Object.values(columnsMap).filter(function (node) {
+                            return object == node.label
+                        })[0].data);
+                    }
                     tripleModels.push({
                         s: subject,
                         p: property,

@@ -254,6 +254,8 @@ var GraphDisplayLegend = (function () {
         }
     };
     self.drawLegend = function (type, legendCanvas, expand) {
+
+return;
         //  type="KGcreator_classes"
         if (!legendCanvas) {
             legendCanvas = "visjsLegendCanvas";

@@ -133,7 +133,8 @@ var Lineage_reasoner = (function () {
         const params = new URLSearchParams({
             operation: "inference",
             // url: "http://51.178.39.209/ontologies/IOF-CORE-202401.nt",
-            url: "http://51.178.39.209/ontologies/EMMO.nt",
+          //  url: "http://51.178.39.209/ontologies/EMMO.nt",
+            url: "http://51.178.39.209/ontologies/pizza.rdf",
             //  url: "http://51.178.39.209/ontologies/IDO-3.nt",
             type: self.ontologyAccessType,
             predicates: JSON.stringify(predicates),

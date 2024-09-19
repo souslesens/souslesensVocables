@@ -3,6 +3,7 @@ import _botEngine from "./_botEngine.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import common from "../shared/common.js";
 import KGcreator from "../tools/KGcreator/KGcreator.js";
+import CreateResource_bot from "./createResource_bot.js";
 
 var MappingModeler_bot = (function () {
     var self = {};
@@ -166,108 +167,19 @@ var MappingModeler_bot = (function () {
         listTableColumnsFn: function () {
             var choices =self.params.columns;
             _botEngine.showList(choices, "predicateObjectColumn");
-        }
-
-
-
-
-
-
-     /*   initDataSources: function () {
-            KGcreator.getSlsvSourceConfig(self.params.source, function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                self.currentConfig = result;
-                self.rawConfig = JSON.parse(JSON.stringify(result));
-            });
-        },
-        listListDataSourceTypeFn: function () {
-            var choices = ["Database", "CSV"];
-            _botEngine.showList(choices, dataSourceType);
         },
 
-        listDatabaseSourcesFn: function () {
-            KGcreator.initSlsvSourceConfig();
-        },
-        promptObjectPropertyLabelFn: function () {
-            _botEngine.promptValue("ObjectProperty label ", "resourceLabel");
-        },
 
-        listSuperClassesFn: function () {
-            if (self.params.filteredUris && self.params.filteredUris.length > 0) {
-                _botEngine.showList(self.params.filteredUris, "superResourceId");
-            } else {
-                CommonBotFunctions.listVocabClasses(self.params.currentVocab, "superResourceId", true);
-            }
+        createDatatypePropertyFn: function () {
+            var classId = self.params.columnClass
+            CreateResource_bot.start(CreateResource_bot.workFlowDatatypeProperty, {source:self.params.source, datatypePropertyDomain: classId }, function (err, result) {
+                MappingModeler.mappingColumnInfo.startOtherPredicatesBot()
+            })
         },
 
-        listSuperObjectPropertiesFn: function () {
-            if (self.params.filteredUris && self.params.filteredUris.length > 0) {
-                _botEngine.showList(self.params.filteredUris, "superResourceId");
-            } else {
-                CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "superResourceId");
-            }
-        },
 
-        workflow_saveNewClassFn: function () {
-            var label = Sparql_common.formatString(self.params.resourceLabel);
-            var resourceId = common.getURI(label, self.params.source, "fromLabel");
-            var triples = Lineage_createResource.getResourceTriples(self.params.source, self.params.resourceType, null, self.params.resourceLabel, resourceId);
-            if (self.params.superResourceId) {
-                triples.push({
-                    subject: resourceId,
-                    predicate: "rdfs:subClassOf",
-                    object: self.params.superResourceId,
-                });
-            }
-            Lineage_createResource.writeResource(self.params.source, triples, function (err, resourceId) {
-                if (err) {
-                    _botEngine.abort(err.responseText);
-                }
-                self.params.newObject = {
-                    id: resourceId,
-                    label: self.params.resourceLabel,
-                    resourceType: "Class",
-                    data: {
-                        id: resourceId,
-                        label: self.params.resourceLabel,
-                        type: "Class",
-                        subType: null,
-                    },
-                };
-                _botEngine.nextStep();
-            });
-        },
 
-        workflow_saveObjectPropertyFn: function () {
-            var propLabel = self.params.resourceLabel;
-            var domain = self.params.domain;
-            var range = self.params.range;
 
-            propLabel = Sparql_common.formatString(propLabel);
-
-            Lineage_createRelation.createSubProperty(self.params.source, self.params.superResourceId, propLabel, true, function (err, result) {
-                if (err) {
-                    _botEngine.abort(err.responseText);
-                }
-                self.params.newObject = {
-                    id: result.uri,
-                    label: propLabel,
-                    resourceType: "ObjectProperty",
-                    data: {
-                        id: result.uri,
-                        label: self.params.resourceLabel,
-                        type: "ObjectProperty",
-                        subType: null,
-                        domain: domain,
-                        range: range,
-                    },
-                };
-
-                _botEngine.nextStep();
-            });
-        },*/
     };
 
     return self;

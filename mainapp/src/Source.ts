@@ -5,7 +5,7 @@ import { Msg } from "./Admin";
 import React from "react";
 import { z } from "zod";
 
-const endpoint = "/api/v1/sources";
+const endpoint = "/api/v1/admin/sources";
 const indicesEndpoint = "/api/v1/elasticsearch/indices";
 const graphsEndpoint = "/api/v1/sparql/graphs";
 

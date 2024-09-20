@@ -1,10 +1,10 @@
 const path = require("path");
 
-const { sourceModel } = require("../../../model/sources");
-const { userModel } = require("../../../model/users");
-const { responseSchema } = require("./utils");
+const { sourceModel } = require("../../../../model/sources");
+const { userModel } = require("../../../../model/users");
+const { responseSchema } = require("./../utils");
 const userManager = require(path.resolve("bin/user."));
-const { successfullyFetched, successfullyCreated, fixBooleanInObject } = require("./utils.js");
+const { successfullyFetched, successfullyCreated, fixBooleanInObject } = require("./../utils.js");
 module.exports = function () {
     let operations = {
         GET,
@@ -25,7 +25,7 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: "Returns all sources",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: "getSources",
         responses: responseSchema("Sources", "GET"),
         parameters: [
@@ -78,7 +78,7 @@ module.exports = function () {
     }
     POST.apiDoc = {
         summary: "Update Sources",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: "updateSources",
         parameters: [],
         responses: responseSchema("Sources", "POST"),

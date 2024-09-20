@@ -8,7 +8,6 @@ import CreateResource_bot from "./createResource_bot.js";
 var MappingModeler_bot = (function () {
     var self = {};
 
-
     self.start = function (workflow, _params, callbackFn) {
         self.title = _params.title || "Create Resource";
         _botEngine.startParams = _botEngine.fillStartParams(arguments);
@@ -29,8 +28,6 @@ var MappingModeler_bot = (function () {
     self.workflowColumnmMappingOther = {
         startFn: {
             _OR: {
-
-
                 "set other predicate": {
                     listNonObjectPropertiesVocabsFn: {
                         listNonObjectPropertiesFn: {
@@ -46,22 +43,19 @@ var MappingModeler_bot = (function () {
 
                 end: {},
             },
-
         },
     };
-    self.workflowMappingDetail={
-        startFn: {rdfTypeFn: {
+    self.workflowMappingDetail = {
+        startFn: {
+            rdfTypeFn: {
                 URItypeFn: {
-                    labelFn: {}
-                    
-                        
-                    
-                }
-            }
-        }
-    }
+                    labelFn: {},
+                },
+            },
+        },
+    };
 
-   /* self.workflowMappingDetail={
+    /* self.workflowMappingDetail={
         startFn: {rdfTypeFn: {
                 URItypeFn: {
                     labelFn: self.workflowColumnmMappingOther
@@ -73,9 +67,7 @@ var MappingModeler_bot = (function () {
         }
     }*/
 
-    
-
-  /*  self.workflow = {
+    /*  self.workflow = {
         initDataSources: {
             listListDataSourceTypeFn: {
                 _OR: {
@@ -88,9 +80,9 @@ var MappingModeler_bot = (function () {
     self.functionTitles = {
         _OR: "Select an option",
 
-        URItypeFn:"select UriType for Node",
+        URItypeFn: "select UriType for Node",
         labelFn: "select a column for node label",
-        otherFn:"choose next operation",
+        otherFn: "choose next operation",
 
         listNonObjectPropertiesVocabsFn: " Choose annnotation property vocabulary",
         listNonObjectPropertiesFn: " Choose annnotation property ",
@@ -100,9 +92,7 @@ var MappingModeler_bot = (function () {
         createSubPropertyFn: "Enter subProperty label",
         listTableColumnsFn: "Choose a  a column for predicate object ",
 
-
-
-      /*  listVocabsFn: "Choose a source",
+        /*  listVocabsFn: "Choose a source",
         listResourceTypesFn: "Choose a resource type",
         listListDataSourceType: " Choose a data source type",
         listDatabaseSourcesFn: "choose a database source",
@@ -110,22 +100,23 @@ var MappingModeler_bot = (function () {
     };
 
     self.functions = {
-        startFn:function(){_botEngine.nextStep()},
-        URItypeFn: function() {
-        var choices = ["fromColumnTitle", "blankNode", "randomIdentifier"];
-        _botEngine.showList(choices, "URItype");
+        startFn: function () {
+            _botEngine.nextStep();
         },
-        rdfTypeFn: function() {
+        URItypeFn: function () {
+            var choices = ["fromColumnTitle", "blankNode", "randomIdentifier"];
+            _botEngine.showList(choices, "URItype");
+        },
+        rdfTypeFn: function () {
             var choices = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
             _botEngine.showList(choices, "rdfType");
         },
 
-        labelFn: function() {
-            var choices =self.params.columns;
-            choices.splice(0,0,"")
+        labelFn: function () {
+            var choices = self.params.columns;
+            choices.splice(0, 0, "");
             _botEngine.showList(choices, "rdfsLabel");
         },
-
 
         listNonObjectPropertiesVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(self.params.source, "nonObjectPropertyVocab", true);
@@ -133,7 +124,7 @@ var MappingModeler_bot = (function () {
 
         listNonObjectPropertiesFn: function () {
             // filter properties compatible with
-            var columnRdfType = null;//self.getColumnClass(self.params.tripleModels, self.params.column);
+            var columnRdfType = null; //self.getColumnClass(self.params.tripleModels, self.params.column);
 
             CommonBotFunctions.listNonObjectPropertiesFn(self.params.nonObjectPropertyVocab, "nonObjectPropertyId", columnRdfType);
         },
@@ -165,21 +156,16 @@ var MappingModeler_bot = (function () {
         },
 
         listTableColumnsFn: function () {
-            var choices =self.params.columns;
+            var choices = self.params.columns;
             _botEngine.showList(choices, "predicateObjectColumn");
         },
 
-
         createDatatypePropertyFn: function () {
-            var classId = self.params.columnClass
-            CreateResource_bot.start(CreateResource_bot.workFlowDatatypeProperty, {source:self.params.source, datatypePropertyDomain: classId }, function (err, result) {
-                MappingModeler.mappingColumnInfo.startOtherPredicatesBot()
-            })
+            var classId = self.params.columnClass;
+            CreateResource_bot.start(CreateResource_bot.workFlowDatatypeProperty, { source: self.params.source, datatypePropertyDomain: classId }, function (err, result) {
+                MappingModeler.mappingColumnInfo.startOtherPredicatesBot();
+            });
         },
-
-
-
-
     };
 
     return self;

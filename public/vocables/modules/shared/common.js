@@ -279,13 +279,13 @@ var common = (function () {
             });
             return map;
         },
-        insertFirstArray: function(array,first){
+        insertFirstArray: function (array, first) {
             let index = array.indexOf(first);
-            if(index>-1){
+            if (index > -1) {
                 array.splice(index, 1);
                 array.unshift(first);
             }
-        }
+        },
     };
 
     self.concatArraysWithoutDuplicate = function (array, addedArray, key) {

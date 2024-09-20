@@ -617,7 +617,7 @@ var KGquery_graph = (function () {
     self.message = function (message, stopWaitImage) {
         $("#KGquery_graph_messageDiv").html(message);
     };
-    self.genereateCommonDecoration=function(){
+    self.genereateCommonDecoration = function () {
         var source = KGquery.currentSource;
         var sources = [];
         var imports = Config.sources[source].imports;
@@ -626,9 +626,9 @@ var KGquery_graph = (function () {
         }
 
         //self.saveVisjsModelGraph();
-        
+
         var commonDecoration = {};
-       
+
         async.eachSeries(
             sources,
             function (source, callbackEach) {
@@ -645,8 +645,8 @@ var KGquery_graph = (function () {
                     dataType: "json",
                     success: function (result, _textStatus, _jqXHR) {
                         var data = JSON.parse(result);
-                        commonDecoration={...commonDecoration,...data};
-                        
+                        commonDecoration = { ...commonDecoration, ...data };
+
                         // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
                         // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
                         callbackEach();
@@ -679,10 +679,9 @@ var KGquery_graph = (function () {
                         return callbackSeries(err);
                     },
                 });
-
-              
-            });
-    }
+            }
+        );
+    };
     return self;
 })();
 

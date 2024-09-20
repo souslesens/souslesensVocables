@@ -28,7 +28,6 @@ var PopupMenuWidget = (function () {
     };
 
     self.showPopup = function (point, popupDiv, options) {
-
         if (!options) {
             options = {};
         }

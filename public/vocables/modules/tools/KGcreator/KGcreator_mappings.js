@@ -422,12 +422,12 @@ tripleObj.objectIsSpecificUri = true;
             KGcreator.currentConfig.currentMappings[tableId] = { tripleModels: [], transform: {} };
         }
         KGcreator.currentConfig.currentMappings[tableId].tripleModels = tripleModels;
-        var transform  =  tableMappings[tableId].transform;
-       
-        if (transform ) {
+        var transform = tableMappings[tableId].transform;
+
+        if (transform) {
             KGcreator.currentConfig.currentMappings[self.currentEditingTable].transform = transform;
         }
-        var virtualColumns  =  tableMappings[tableId].virtualColumns;
+        var virtualColumns = tableMappings[tableId].virtualColumns;
         if (virtualColumns) {
             KGcreator.currentConfig.currentMappings[self.currentEditingTable].virtualColumns = virtualColumns;
         }

@@ -41,7 +41,7 @@ var NodeInfosWidget = (function () {
                             // source = Lineage_sources.mainSource;
                             NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
                         }
-                        0
+                        0;
                     }, 100);
                 },
             });
@@ -436,14 +436,14 @@ defaultLang = 'en';*/
                     }
                     return optionalStr;
                 }
-                var metaDataStr=str;
-                var metaDataProps=Object.values(Config.dictionaryMetaDataPropertiesMap)
+                var metaDataStr = str;
+                var metaDataProps = Object.values(Config.dictionaryMetaDataPropertiesMap);
                 defaultProps.forEach(function (key) {
-                    var strGeneratedByProp=''
+                    var strGeneratedByProp = "";
                     if (!self.propertiesMap.properties[key]) {
                         return;
                     }
-                    
+
                     strGeneratedByProp += "<tr class='infos_table'>";
 
                     if (self.propertiesMap.properties[key].value) {
@@ -537,14 +537,14 @@ defaultLang = 'en';*/
 
                         strGeneratedByProp += "</tr>";
                     }
-                    if(metaDataProps.includes(self.propertiesMap.properties[key].propUri )){
-                        metaDataStr+=strGeneratedByProp
-                    }else{
-                        str+=strGeneratedByProp;
+                    if (metaDataProps.includes(self.propertiesMap.properties[key].propUri)) {
+                        metaDataStr += strGeneratedByProp;
+                    } else {
+                        str += strGeneratedByProp;
                     }
                 });
                 str += "</table></div>";
-                metaDataStr+="</table></div>";
+                metaDataStr += "</table></div>";
                 str +=
                     " <div id='nodeInfos_listsDiv' >" +
                     "<div id='nodeInfos_classHierarchyDiv' class='nodeInfos_rigthDiv' ></div><br>" +
@@ -553,7 +553,7 @@ defaultLang = 'en';*/
                     "<div id='nodeInfos_individualsDiv' class='nodeInfos_rigthDiv' style=' display:flex;flex-direction: ></div></div>";
 
                 $("#" + divId).html(str);
-                $('#nodeInfosWidget_metaDataTabDiv').html(metaDataStr);
+                $("#nodeInfosWidget_metaDataTabDiv").html(metaDataStr);
                 if (callback) {
                     return callback(null, { types: types, blankNodes: blankNodes });
                 }

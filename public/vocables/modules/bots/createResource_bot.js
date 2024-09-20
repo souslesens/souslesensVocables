@@ -18,7 +18,6 @@ var CreateResource_bot = (function () {
         self.callback = callback;
         if (!workflow) workflow = self.workflow;
         _botEngine.init(CreateResource_bot, workflow, null, function () {
-
             self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
             if (_params)
                 for (var key in _params) {

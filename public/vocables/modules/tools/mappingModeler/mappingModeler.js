@@ -1420,6 +1420,9 @@ var MappingModeler = (function () {
 
     self.transformDialog= function(column){
         // return if  virtuals and rowIndex
+        if(!column){
+            column=MappingModeler.currentGraphNode.label;
+        }
         $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function(err) {
             $("#smallDialogDiv").dialog('open');
             $("#smallDialogDiv").dialog("option", "title", "Transform for " +column);

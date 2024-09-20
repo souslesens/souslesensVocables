@@ -1,13 +1,6 @@
-import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
-import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
-import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 import Lineage_sources from "../lineage/lineage_sources.js";
-import Sparql_common from "../../sparqlProxies/sparql_common.js";
-
 import KGcreator_graph from "./KGcreator_graph.js";
 import KGcreator_mappings from "./KGcreator_mappings.js";
-import KGcreator_run from "./KGcreator_run.js";
-import KGcreator_joinTables from "./KGcreator_joinTables.js";
 import KGcreator_bot from "../../bots/KGcreator_bot.js";
 
 // imports React app
@@ -89,17 +82,6 @@ var KGcreator = (function () {
                     UI.resetWindowHeight();
                     $("#KGcreator_dialogDiv").dialog({
                         autoOpen: false,
-                        /*   close: function (event, ui) {
-                            window.scrollTo(0, 0);
-                        },
-                        drag: function (event, ui) {
-                            $("#KGcreator_dialogDiv").parent().css("transform", "unset");
-                        },
-                        open(event, ui) {
-                            $("#KGcreator_dialogDiv").parent().css("transform", "translate(-50%,-50%)");
-                            $("#KGcreator_dialogDiv").parent().css("top", "50%");
-                            $("#KGcreator_dialogDiv").parent().css("left", "50%");
-                        },*/
                     });
                 });
             });
@@ -189,7 +171,6 @@ var KGcreator = (function () {
             self.currentConfig = result;
             self.rawConfig = JSON.parse(JSON.stringify(result));
 
-            var jstreeData = [];
             var options = {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
@@ -210,7 +191,7 @@ var KGcreator = (function () {
                         KGcreator.loadDataBaseSource(self.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
                     } else if (obj.node.data.type == "csvSource") {
                         self.initDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
-                        KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, function (err, result) {
+                        KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id, true, function (err, result) {
                             if (err) {
                                 return alert("file not found");
                             }
@@ -414,54 +395,86 @@ var KGcreator = (function () {
                 //  withCheckboxes: true,
             };
 
-            jstreeData.push({
-                id: "databaseSources",
-                text: "databaseSources",
-                parent: "#",
-                type: "databaseSources",
-                data: {
-                    type: "sourceType",
-                },
-            });
-            jstreeData.push({
-                id: "csvSources",
-                text: "csvSources",
-                parent: "#",
-                type: "CSVS",
-                data: {
-                    type: "sourceType",
-                },
-            });
-
-            Object.entries(self.currentConfig.databaseSources).forEach(([key, datasource]) => {
-                jstreeData.push({
-                    id: key,
-                    text: datasource.name || key,
-                    parent: "databaseSources",
-                    data: { id: datasource.name, type: "databaseSource" },
-                });
-            });
-            for (var datasource in self.currentConfig.csvSources) {
-                jstreeData.push({
-                    id: datasource,
-                    text: datasource,
-                    parent: "csvSources",
-                    type: "CSV",
-                    data: { id: datasource, type: "csvSource" },
-                });
-            }
-            JstreeWidget.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
-            if (callback) {
-                return callback();
-            }
+            self.loadDataSourcesJstree("KGcreator_csvTreeDiv", options, callback);
         });
+    };
+
+    self.loadDataSourcesJstree = function (jstreeDivId, options, callback) {
+        self.dataSourcejstreeDivId = jstreeDivId;
+        var jstreeData = [];
+        jstreeData.push({
+            id: "databaseSources",
+            text: "databaseSources",
+            parent: "#",
+            type: "databaseSources",
+            data: {
+                type: "sourceType",
+            },
+        });
+        jstreeData.push({
+            id: "csvSources",
+            text: "csvSources",
+            parent: "#",
+            type: "CSVS",
+            data: {
+                type: "sourceType",
+            },
+        });
+        // Get SQL types when there is with api route
+        async.eachSeries(
+            Object.entries(self.currentConfig.databaseSources),
+            function (item, callbackEach) {
+                var key = item[0];
+                var datasource = item[1];
+                $.ajax({
+                    type: "GET",
+                    url: Config.apiUrl + "/databases/" + key,
+                    dataType: "json",
+                    success: function (result, _textStatus, _jqXHR) {
+                        jstreeData.push({
+                            id: key,
+                            text: datasource.name || key,
+                            parent: "databaseSources",
+                            data: { id: datasource.name, type: "databaseSource", sqlType: result.driver },
+                        });
+                        return callbackEach();
+                    },
+                    error: function (err) {
+                        jstreeData.push({
+                            id: key,
+                            text: datasource.name || key,
+                            parent: "databaseSources",
+                            data: { id: datasource.name, type: "databaseSource" },
+                        });
+                        return callbackEach();
+                    },
+                });
+            },
+            function (err) {
+                for (var datasource in self.currentConfig.csvSources) {
+                    jstreeData.push({
+                        id: datasource,
+                        text: datasource,
+                        parent: "csvSources",
+                        type: "CSV",
+                        data: { id: datasource, type: "csvSource" },
+                    });
+                }
+                JstreeWidget.loadJsTree(jstreeDivId, jstreeData, options);
+                if (callback) {
+                    return callback(err);
+                }
+            }
+        );
     };
 
     self.initDataSource = function (name, type, sqlType, table) {
         //close Previous DataSource
-        var parent_node = $("#KGcreator_csvTreeDiv").jstree()._model.data[self.currentConfig?.currentDataSource?.name];
+        var parent_node = $("#" + self.dataSourcejstreeDivId).jstree()._model.data[self.currentConfig?.currentDataSource?.name];
         if (parent_node) {
-            $("#KGcreator_csvTreeDiv").jstree(true).delete_node(parent_node.children);
+            $("#" + self.dataSourcejstreeDivId)
+                .jstree(true)
+                .delete_node(parent_node.children);
         }
         self.currentConfig.currentDataSource = {
             name: name, //obj.node.id,
@@ -589,8 +602,9 @@ var KGcreator = (function () {
         });
     };
 
-    self.loadCsvSource = function (slsvSource, fileName, callback) {
+    self.loadCsvSource = function (slsvSource, fileName, loadJstree, callback) {
         var columns = [];
+        var jstreeData = [];
         async.series(
             [
                 function (callbackSeries) {
@@ -628,8 +642,6 @@ var KGcreator = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    var jstreeData = [];
-
                     columns.forEach(function (column) {
                         var label = column;
 
@@ -660,14 +672,17 @@ var KGcreator = (function () {
                             });
                         });
                     }
-
-                    JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", fileName, jstreeData);
-                    KGcreator_graph.graphColumnToClassPredicates([fileName]);
+                    if (loadJstree) {
+                        JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, fileName, jstreeData);
+                        KGcreator_graph.graphColumnToClassPredicates([fileName]);
+                    }
                     callbackSeries();
                 },
 
                 function (callbackSeries) {
-                    self.showTableVirtualColumnsTree(fileName);
+                    if (loadJstree) {
+                        self.showTableVirtualColumnsTree(fileName);
+                    }
                     callbackSeries();
                 },
                 function (callbackSeries) {
@@ -682,7 +697,7 @@ var KGcreator = (function () {
                     return alert(err);
                 }
                 if (callback) {
-                    return callback(null);
+                    return callback(null, jstreeData);
                 }
             }
         );
@@ -708,7 +723,7 @@ var KGcreator = (function () {
                 },
             });
         }
-        JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", datasourceConfig.name, jstreeData);
+        JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, datasourceConfig.name, jstreeData);
     };
 
     self.showTablesColumnTree = function (table, tableColumns) {
@@ -731,7 +746,7 @@ var KGcreator = (function () {
             });
         });
 
-        JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", table, jstreeData);
+        JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, table, jstreeData);
         KGcreator_graph.graphColumnToClassPredicates([table]);
     };
 
@@ -753,7 +768,7 @@ var KGcreator = (function () {
                 data: { id: virtualColumn, table: table, label: virtualColumn, type: "tableColumn" },
             });
         });
-        JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", table, jstreeData);
+        JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, table, jstreeData);
         KGcreator_graph.graphColumnToClassPredicates([table]);
     };
 
@@ -939,7 +954,7 @@ var KGcreator = (function () {
             }
             self.addDataSourceToJstree("csvSource", datasourceName);
             self.initDataSource(datasourceName, "csvSource", "csv");
-            self.loadCsvSource(self.currentSlsvSource, datasourceName, function (err, result) {
+            self.loadCsvSource(self.currentSlsvSource, datasourceName, true, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
@@ -957,7 +972,7 @@ var KGcreator = (function () {
             },
         ];
 
-        JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", type + "s", jstreeData);
+        JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, type + "s", jstreeData);
     };
 
     self.listDatabaseTables = function (databaseSource, type, callback) {
@@ -981,9 +996,20 @@ var KGcreator = (function () {
         });
     };
 
-    self.showSampleData = function (node, column, callback) {
+    self.showSampleData = function (node, columns, callback) {
         // alert("coming soon");
-
+        if (!columns) {
+            var hasColumn = false;
+        } else {
+            if (Array.isArray(columns) && columns.length > 0) {
+                var hasColumn = true;
+            } else {
+                if (columns != "") {
+                    var hasColumn = true;
+                    columns = [columns];
+                }
+            }
+        }
         function showTable(data) {
             var headers = [];
             var tableCols = [];
@@ -994,11 +1020,23 @@ var KGcreator = (function () {
                         tableCols.push({ title: key, defaultContent: "", width: "15%" });
                     }
             });
+            if (hasColumn) {
+                tableCols = tableCols.filter(function (col) {
+                    return columns.includes(col.title);
+                });
+            }
+
             var lines = [];
             data.forEach(function (item) {
                 var line = [];
                 headers.forEach(function (column) {
-                    line.push(item[column] || "");
+                    if (!hasColumn) {
+                        line.push(item[column] || "");
+                    } else {
+                        if (columns.includes(column)) {
+                            line.push(item[column] || "");
+                        }
+                    }
                 });
                 lines.push(line);
             });
@@ -1012,6 +1050,9 @@ var KGcreator = (function () {
         } else if (self.currentConfig.currentDataSource.type == "databaseSource") {
             var size = 200;
             var sqlQuery = "select top  " + size + "* from " + node.data.id;
+            if (self.currentConfig.currentDataSource.sqlType == "postgres") {
+                sqlQuery = "select   " + "* from public." + node.data.id + " LIMIT " + size;
+            }
             const params = new URLSearchParams({
                 type: self.currentConfig.currentDataSource.sqlType,
                 dbName: self.currentConfig.currentDataSource.name,
@@ -1024,7 +1065,7 @@ var KGcreator = (function () {
                 dataType: "json",
 
                 success: function (data, _textStatus, _jqXHR) {
-                    showTable(data);
+                    showTable(data.rows);
                 },
                 error(err) {
                     return alert(err.responseText);

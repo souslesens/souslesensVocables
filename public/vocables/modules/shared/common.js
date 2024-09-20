@@ -279,6 +279,13 @@ var common = (function () {
             });
             return map;
         },
+        insertFirstArray: function (array, first) {
+            let index = array.indexOf(first);
+            if (index > -1) {
+                array.splice(index, 1);
+                array.unshift(first);
+            }
+        },
     };
 
     self.concatArraysWithoutDuplicate = function (array, addedArray, key) {
@@ -992,6 +999,19 @@ if (callback) return callback(err);
 
             localStorage.setItem(localStorageVar, JSON.stringify(Varcontent));
         }
+    };
+    self.getVocabularyFromURI = function (uri) {
+        var result = null;
+        uri = uri.replace("https:", "http:");
+        Object.keys(Config.ontologiesVocabularyModels).forEach(function (vocabulary) {
+            var graphURI = Config.ontologiesVocabularyModels[vocabulary].graphUri.replace("https:", "http:");
+
+            var spliting = uri.split(graphURI);
+            if (spliting.length > 1) {
+                result = [vocabulary, spliting[1].replace(/^\W/, "")];
+            }
+        });
+        return result;
     };
     return self;
 })();

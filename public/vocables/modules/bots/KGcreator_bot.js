@@ -17,17 +17,7 @@ var KGcreator_bot = (function () {
     self.title = "Create mappings";
     self.lastObj = null;
     self.start = function (node, callbackFn) {
-        _botEngine.startParams = [];
-        if (node) {
-            _botEngine.startParams.push(JSON.parse(JSON.stringify(node)));
-        } else {
-            _botEngine.startParams.push(undefined);
-        }
-        if (callbackFn) {
-            _botEngine.startParams.push(callbackFn);
-        } else {
-            _botEngine.startParams.push(undefined);
-        }
+        _botEngine.startParams = _botEngine.fillStartParams(arguments);
 
         self.currentUri = null;
 
@@ -232,7 +222,7 @@ var KGcreator_bot = (function () {
 
         createDatatypePropertyFn: function () {
             var classId = self.getColumnClass(self.params.tripleModels, self.params.column);
-            CreateResource_bot.start(CreateResource_bot.workFlowDatatypeProperty, { datatypePropertyDomain: classId }, function (err, result) {
+            CreateResource_bot.start(CreateResource_bot.workFlowDatatypeProperty, { source: self.params.source, datatypePropertyDomain: classId }, function (err, result) {
                 KGcreator_bot.start(KGcreator_bot.lastObj);
             });
         },
@@ -343,7 +333,7 @@ var KGcreator_bot = (function () {
 
         createSubPropertyFn: function () {
             _botEngine.promptValue("enter subProperty label", "subPropLabel", null, {}, function (subPropLabel) {
-                Lineage_createRelation.createSubProperty(self.params.source, self.params.propertyId, subPropLabel, function (err, subPropertyObj) {
+                Lineage_createRelation.createSubProperty(self.params.source, self.params.propertyId, subPropLabel, true, function (err, subPropertyObj) {
                     if (err) {
                         return _botEngine.abort(err.responseText);
                     }

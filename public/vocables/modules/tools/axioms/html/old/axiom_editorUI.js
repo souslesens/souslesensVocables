@@ -1,8 +1,8 @@
-import Axiom_editor from "./axiom_editor.js";
-import Axioms_manager from "./axioms_manager.js";
-import Axioms_graph from "./axioms_graph.js";
-import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-import Axiom_activeLegend from "./axiom_activeLegend.js";
+import Axiom_editor from "../../axiom_editor.js";
+import Axioms_manager from "../../axioms_manager.js";
+import Axioms_graph from "../../axioms_graph.js";
+import Sparql_OWL from "../../../../sparqlProxies/sparql_OWL.js";
+import Axiom_activeLegend from "../../axiom_activeLegend.js";
 
 var Axiom_editorUI = (function () {
     var self = {};

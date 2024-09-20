@@ -514,7 +514,7 @@ var KGcreator_graph = (function () {
     };
 
     self.addInterTableJoinsToVisjsData = function (dataSource, visjsData) {
-        if (!KGcreator.rawConfig.databaseSources[dataSource] || !KGcreator.rawConfig.databaseSources[dataSource].tableJoins) {
+        if (!KGcreator.rawConfig || !KGcreator.rawConfig.databaseSources[dataSource] || !KGcreator.rawConfig.databaseSources[dataSource].tableJoins) {
             return visjsData;
         }
         var edges = [];
@@ -542,11 +542,13 @@ var KGcreator_graph = (function () {
 
     /////////////////////////////////////////Detailed Mappings//////////////////////////////////////////////////////
 
-    self.drawDetailedMappings = function (tablesToDraw) {
+    self.drawDetailedMappings = function (tablesToDraw, divId) {
         if (tablesToDraw && !Array.isArray(tablesToDraw)) {
             tablesToDraw = [tablesToDraw];
         }
-
+        if (!divId) {
+            divId = "KGcreator_mappingsGraphDiv";
+        }
         var sourceMappings = KGcreator.currentConfig.currentMappings;
         var visjsData = { nodes: [], edges: [] };
 
@@ -756,7 +758,7 @@ var KGcreator_graph = (function () {
             },
         };
 
-        self.mappingVisjsGraph = new VisjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, options);
+        self.mappingVisjsGraph = new VisjsGraphClass(divId, visjsData, options);
         self.mappingVisjsGraph.draw();
         GraphDisplayLegend.drawLegend("KGcreatorMappings", "KGcreatorVisjsLegendCanvas", false);
         /*   $('#KGcreatorVisjsLegendCanvas').css('right','55%');

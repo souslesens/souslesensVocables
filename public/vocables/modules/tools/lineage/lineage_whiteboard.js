@@ -3084,7 +3084,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 if (!subPropertyLabel) {
                     return;
                 }
-                Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, edge.data.propertyId, subPropertyLabel, function (err, result) {
+                Lineage_createRelation.createSubProperty(Lineage_sources.activeSource, edge.data.propertyId, subPropertyLabel, true, function (err, result) {
                     if (err) {
                         return alert(err);
                     }
@@ -3315,6 +3315,7 @@ attrs.color=self.getSourceColor(superClassValue)
                 $("#GenericTools_searchInAllSources").prop("checked", false);
                 $("#Lineage_MoreClassesOptions").hide();
                 SearchWidget.showTopConcepts();
+                self.hideShowMoreOptions("show", "Lineage_MoreClassesOptions");
                 /*
                     $("#lateralPanelDiv").resizable({
                         maxWidth: 435,
@@ -3332,6 +3333,7 @@ attrs.color=self.getSourceColor(superClassValue)
             $("#propertiesTab").load("./modules/tools/lineage/html/propertiesTab.html", function (s) {
                 Lineage_whiteboard.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
                 Lineage_properties.searchTermInSources();
+                self.hideShowMoreOptions("show", "Lineage_MorePropertiesOptions");
             });
         }
     };
@@ -3344,7 +3346,7 @@ attrs.color=self.getSourceColor(superClassValue)
     };
 
     self.resetCurrentTab = function () {
-        var currentTab = $(".slsv-tabButtonSelected").html();
+        var currentTab = $(".slsv-tabButtonSelected").parent().attr("title");
         if (currentTab == "Classes") {
             SearchWidget.showTopConcepts();
         }

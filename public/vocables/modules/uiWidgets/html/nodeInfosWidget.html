@@ -18,7 +18,7 @@
         flex-direction: row;
         justify-content: center;
     }
-
+    /*
     .detailsCellName {
         padding: 2px;
         max-width: 400px;
@@ -34,7 +34,7 @@
         max-width: 400px;
         line-height: 1.8;
     }
-
+    */
     .infosTable {
         background-color: #d9d9d9;
         padding: 5px;
@@ -53,13 +53,15 @@
         <ul>
             <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_InfosTabDiv">Infos</a></li>
             <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_AxiomsTabDiv">Axioms</a></li>
+            <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_metaDataTabDiv">MetaData</a></li>
         </ul>
-        <div id="nodeInfosWidget_InfosTabDiv"></div>
+        <div id="nodeInfosWidget_InfosTabDiv" class="nodeInfosWidget_InfosTab" style="display: flex"></div>
         <div id="nodeInfosWidget_AxiomsTabDiv">
             <div style="display: none"></div>
             <div id="axiomsGraphDivContainer" style="width: 95%; height: 560px"></div>
             <div id="axiomsGraphLegendDiv" style=""></div>
         </div>
+        <div id="nodeInfosWidget_metaDataTabDiv" class="nodeInfosWidget_InfosTab" style="display: flex"></div>
     </div>
 
     <div

@@ -485,6 +485,23 @@ var _botEngine = (function () {
             physics: { enabled: true },
         });
     };
+    self.fillStartParams = function (params) {
+        var startParams = [];
+        var param;
+        for (let i = 0; i < params.length; i++) {
+            param = params[i];
+            if (param) {
+                try {
+                    // Essayer de convertir en JSON
+                    var str = JSON.stringify(param);
+                    param = JSON.parse(str);
+                } catch (e) {}
+            }
+
+            startParams.push(param);
+        }
+        return startParams;
+    };
 
     return self;
 })();

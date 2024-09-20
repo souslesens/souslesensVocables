@@ -26,7 +26,7 @@ var MainController = (function () {
     self.currentTool = null;
     self.currentSchemaType = null;
     self.currentSource = null;
-    self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
+    //self.toolsNeedSource = ["lineage", "KGquery", "KGcreator", "TimeLine"];
 
     self.initConfig = function (callback) {
         $.ajax({
@@ -248,7 +248,7 @@ var MainController = (function () {
         }
         self.currentTool = toolId;
 
-        if (toolId != "lineage" && self.toolsNeedSource.includes(toolId)) {
+        if (toolId != "lineage" && !Config.userTools[toolId].noSource) {
             Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
         }
         $("#currentToolTitle").html(toolId);
@@ -256,14 +256,18 @@ var MainController = (function () {
             $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
         }
         MainController.currentTool = toolId;
-        if (MainController.toolsNeedSource.includes(toolId)) {
+
+        if (!Config.userTools[toolId].noSource) {
             if (self.currentSource == null) {
                 SourceSelectorWidget.showSourceDialog(true);
             } else {
                 SourceSelectorWidget.initSource(self.currentSource);
             }
         } else {
+            UI.cleanPage();
             self.initTool(toolId);
+
+            //Config.userTools[self.currentTool].controller.unload=UI.homePage;
             self.currentSource = null;
         }
 
@@ -285,6 +289,7 @@ var MainController = (function () {
             callback();
         }
     };
+
     self.test = function () {
         //   bc.postMessage("bc")
     };

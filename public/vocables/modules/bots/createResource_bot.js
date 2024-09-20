@@ -14,31 +14,16 @@ var CreateResource_bot = (function () {
     self.title = "Create Resource";
 
     self.start = function (workflow, _params, callback) {
-        _botEngine.startParams = [];
-        if (workflow) {
-            _botEngine.startParams.push(JSON.parse(JSON.stringify(workflow)));
-        } else {
-            _botEngine.startParams.push(undefined);
-        }
-        if (_params) {
-            _botEngine.startParams.push(JSON.parse(JSON.stringify(_params)));
-        } else {
-            _botEngine.startParams.push(undefined);
-        }
-        if (callback) {
-            _botEngine.startParams.push(callback);
-        } else {
-            _botEngine.startParams.push(undefined);
-        }
+        _botEngine.startParams = _botEngine.fillStartParams(arguments);
         self.callback = callback;
         if (!workflow) workflow = self.workflow;
         _botEngine.init(CreateResource_bot, workflow, null, function () {
-            self.source = Lineage_sources.activeSource;
             self.params = { source: self.source, resourceType: "", resourceLabel: "", currentVocab: "" };
             if (_params)
                 for (var key in _params) {
                     self.params[key] = _params[key];
                 }
+            self.source = self.params.source || Lineage_sources.activeSource;
             _botEngine.nextStep();
         });
     };

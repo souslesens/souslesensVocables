@@ -1,4 +1,5 @@
 import Axiom_editor from "./axiom_editor.js";
+import Axioms_manager from "./axioms_manager.js";
 
 var Axioms_suggestions = (function () {
     var self = {};
@@ -87,7 +88,7 @@ var Axioms_suggestions = (function () {
                     var classId = Axiom_editor.axiomContext.classes[index];
                     if (!classId || allObjectProperties) {
                         var props = [];
-                        Axiom_editor.getAllProperties().forEach(function (item) {
+                        Axioms_manager.getAllProperties().forEach(function (item) {
                             if (item.resourceType == "ObjectProperty") {
                                 props.push(item);
                             }
@@ -96,7 +97,7 @@ var Axioms_suggestions = (function () {
 
                         return callbackSeries();
                     }
-                    self.getValidPropertiesForClass(classId, function (err, result) {
+                    self.getValidPropertiesForClass(Axiom_editor.currentSource, classId, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -115,7 +116,7 @@ var Axioms_suggestions = (function () {
 
                     if (!propId || allClasses) {
                         var classes = [];
-                        Axiom_editor.getAllClasses().forEach(function (item) {
+                        Axioms_manager.getAllClasses().forEach(function (item) {
                             if (item.resourceType == "Class") {
                                 classes.push(item);
                             }
@@ -125,7 +126,7 @@ var Axioms_suggestions = (function () {
                         return callbackSeries();
                     }
 
-                    self.getValidClassesForProperty(propId, function (err, result) {
+                    self.getValidClassesForProperty(Axiom_editor.currentSource, propId, "domain", function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -149,19 +150,29 @@ var Axioms_suggestions = (function () {
      * @param propId
      * @param callback
      */
-    self.getValidClassesForProperty = function (propId, callback) {
+    self.getValidClassesForProperty = function (source, propId, role, callback) {
         if (!propId) {
             return callback(null, []);
         }
-        OntologyModels.getPropertyDomainsAndRanges(Axiom_editor.currentSource, propId, "range", function (err, result) {
+        OntologyModels.getPropertyDomainsAndRanges(source, propId, role, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            var ranges = result.ranges;
             var data = [];
-            for (var key in result.ranges) {
-                result.ranges[key].resourceType = "Class";
-                data.push(result.ranges[key]);
+            if (role == "range" || role == "rangeAndDomain") {
+                var ranges = result.ranges;
+
+                for (var key in result.ranges) {
+                    result.ranges[key].resourceType = "Class";
+                    data.push(result.ranges[key]);
+                }
+            }
+            if (role == "domain" || role == "rangeAndDomain") {
+                var domains = result.domains;
+                for (var key in result.domains) {
+                    result.domains[key].resourceType = "Class";
+                    data.push(result.ranges[key]);
+                }
             }
 
             data = common.array.sort(data, "label");
@@ -169,49 +180,103 @@ var Axioms_suggestions = (function () {
             return callback(null, data);
         });
     };
-
-    self.getValidPropertiesForClass = function (classId, callback) {
-        if (!classId) {
-            return callback(null, []);
+    self.getClassMatchingPropertiesRangeAndDomain = function (source, propId, domainClassId, rangeClassId, callback) {
+        var role = "";
+        if (domainClassId && rangeClassId) role = null;
+        else if (domainClassId) {
+            role = "range";
+        } else if (rangeClassId) {
+            role = "domain";
         }
+        OntologyModels.getPropertyDomainsAndRanges(source, propId, role, function (err, result) {
+            if (err) return callback(err.responseText);
 
-        OntologyModels.getAllowedPropertiesBetweenNodes(Axiom_editor.currentSource, classId, null, { keepSuperClasses: true }, function (err, result) {
+            var data = [];
+
+            if (role == "range" || role == null) {
+                var ranges = result.ranges;
+                for (var key in result.ranges) {
+                    result.ranges[key].resourceType = "Class";
+                    data.push(result.ranges[key]);
+                }
+            }
+            if (role == "domain" || role == null) {
+                var ranges = result.domains;
+                for (var key in result.domains) {
+                    result.domains[key].resourceType = "Class";
+                    data.push(result.domains[key]);
+                }
+            }
+            if (data.length == 0) {
+                var allClasses = Axioms_manager.getAllClasses(NodeInfosAxioms.currentSource);
+                return callback(null, allClasses);
+            }
+            data = common.array.sort(data, "label");
+            return callback(null, data);
+        });
+    };
+
+    self.getValidPropertiesForClasses = function (source, domainClassId, rangeClassId, callback) {
+        OntologyModels.getAllowedPropertiesBetweenNodes(source, domainClassId, rangeClassId, { keepSuperClasses: true }, function (err, result) {
             if (err) {
                 return callback(err);
             }
 
-            var role = "domain";
             var data = [];
 
             for (var prop in result.constraints) {
-                if (role == "both") {
+                if (domainClassId && rangeClassId) {
                     for (var prop in result.constraints.both) {
                         data.push({
                             id: prop,
                             label: result.constraints.both[prop].label,
+                            source: result.constraints.both[prop].source,
                             resourceType: "ObjectProperty",
                         });
                     }
-                }
-                if (role == "domain") {
+                } else if (domainClassId) {
                     for (var prop in result.constraints.domain) {
                         data.push({
                             id: prop,
                             label: result.constraints.domain[prop].label,
+                            source: result.constraints.both[prop].source,
                             resourceType: "ObjectProperty",
                         });
                     }
                 }
-                if (role == "range") {
+                if (rangeClassId) {
                     for (var prop in result.constraints.range) {
                         data.push({
                             id: prop,
                             label: result.constraints.range[prop].label,
+                            source: result.constraints.both[prop].source,
+                            resourceType: "ObjectProperty",
+                        });
+                    }
+                } else {
+                    for (var type in result.constraints) {
+                        for (var prop in result.constraints[type]) {
+                            data.push({
+                                id: prop,
+                                label: result.constraints[type][prop].label,
+                                source: result.constraints.both[prop].source,
+                                resourceType: "ObjectProperty",
+                            });
+                        }
+                    }
+                }
+                if (!domainClassId && !rangeClassId) {
+                    for (var prop in result.constraints.noConstraints) {
+                        data.push({
+                            id: prop,
+                            label: result.constraints.noConstraints[prop].label,
+                            source: result.constraints.both[prop].source,
                             resourceType: "ObjectProperty",
                         });
                     }
                 }
             }
+
             data = common.array.distinctValues(data, "id");
             data = common.array.sort(data, "label");
             return callback(null, data);

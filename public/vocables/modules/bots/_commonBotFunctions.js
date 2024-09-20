@@ -72,7 +72,7 @@ var CommonBotFunctions = (function () {
 
             for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
                 var classId = Config.ontologiesVocabularyModels[vocab].classes[key];
-                classes.push({ id: classId.id, label: classId.label });
+                classes.push({ id: classId.id, label: classId.label, source: vocab });
             }
 
             self.sortList(classes);
@@ -93,7 +93,7 @@ var CommonBotFunctions = (function () {
             }
             for (var key in Config.ontologiesVocabularyModels[vocab].properties) {
                 var prop = Config.ontologiesVocabularyModels[vocab].properties[key];
-                props.push({ id: prop.id, label: prop.label });
+                props.push({ id: prop.id, label: prop.label, source: vocab });
             }
             if (props.length == 0) {
                 if (callback) {
@@ -126,7 +126,7 @@ var CommonBotFunctions = (function () {
                     for (var key in props2) {
                         var prop = props2[key];
                         if (!domain || !prop.domain || domain == prop.domain || prop.domain == "http://www.w3.org/2000/01/rdf-schema#Resource") {
-                            props.push({ id: prop.id, label: vocab + ":" + prop.label, domain: prop.domain, range: prop.range });
+                            props.push({ id: prop.id, label: vocab + ":" + prop.label, domain: prop.domain, range: prop.range, source: vocab });
                         }
                     }
                     callbackEach();

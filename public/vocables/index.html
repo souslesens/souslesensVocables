@@ -111,6 +111,7 @@
         <script type="module" src="modules/tools/KGcreator/KGcreator_mappings.js"></script>
         <script type="module" src="modules/tools/KGcreator/KGcreator_graph.js"></script>
         <script type="module" src="modules/tools/KGcreator/KGcreator_run.js"></script>
+        <script type="module" src="modules/tools/mappingModeler/mappingModeler.js"></script>
         <script type="module" src="modules/tools/KGcreator/KGcreator_joinTables.js"></script>
 
         <!--   <script type="module" src="modules/tools/KGcreatorGraph.js"></script>-->
@@ -121,7 +122,7 @@
 
         <script type="module" src="modules/shared/authentification.js"></script>
 
-        <script type="module" src="modules/tools/axioms/axiom_editorUI.js"></script>
+        <script type="module" src="modules/tools/axioms/html/old/axiom_editorUI.js"></script>
         <script type="module" src="modules/tools/axioms/axiom_editor.js"></script>
         <script type="module" src="modules/tools/axioms/axioms_graph.js"></script>
         <script type="module" src="modules/tools/axioms/axioms_manager.js"></script>
@@ -135,6 +136,8 @@
         <script type="module" src="modules/sparqlProxies/sparql_OWL.js"></script>
 
         <script type="module" src="modules/bots/nodeRelations_bot.js"></script>
+        <script type="module" src="modules/bots/createAxiomResource_bot.js"></script>
+        <script type="module" src="modules/bots/mappingModeler_bot.js"></script>
         <!--   <script type="module" src="modules/sparqlProxies/sparql_INDIVIDUALS.js"></script>-->
 
         <script type="module" src="modules/sparqlProxies/sparql_common.js"></script>
@@ -323,7 +326,11 @@
                             if (target == "_slsvCallback") {
                                 var id = $(this).attr("href");
                                 event.preventDefault();
-                                NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv", null, function (err, result) {
+                                var divId = "mainDialogDiv";
+                                if (MainController.currentTool == "KGquery") {
+                                    divId = "smallDialogDiv";
+                                }
+                                NodeInfosWidget.showNodeInfos(null, id, divId, null, function (err, result) {
                                     if (err) {
                                         $("#mainDialogDiv").dialog("close");
                                         window.open(id, "_blank");

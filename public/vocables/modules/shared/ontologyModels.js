@@ -124,24 +124,13 @@ var OntologyModels = (function () {
                         function (callbackSeries) {
                             var query =
                                 queryP +
-                                " SELECT distinct ?prop ?propLabel ?propDomain ?propRange  from <" +
+                                " SELECT distinct ?prop ?propLabel ?propDomain ?propRange   from <" +
                                 graphUri +
                                 ">  WHERE {\n" +
                                 " ?prop rdf:type ?type. filter (?type in (rdf:Property,<http://www.w3.org/2002/07/owl#AnnotationProperty>,owl:DatatypeProperty))  " +
                                 Sparql_common.getVariableLangLabel("prop", true, true) +
                                 "OPTIONAL {?prop rdfs:domain ?propDomain} OPTIONAL {?prop rdfs:range ?propRange}" +
                                 "} limit 10000";
-
-                            // rdf:Property is common on nonObjectProperties and properties
-                            /*var query =
-                                queryP +
-                                " SELECT distinct ?prop ?propLabel ?propDomain ?propRange  from <" +
-                                graphUri +
-                                "> from <http://www.w3.org/2002/07/owl#> WHERE {\n" +
-                                " ?prop rdf:type ?type. filter (?type in (<http://www.w3.org/2002/07/owl#AnnotationProperty>,owl:DatatypeProperty))  " +
-                                Sparql_common.getVariableLangLabel("prop", true, true) +
-                                "OPTIONAL {?prop rdfs:domain ?propDomain} OPTIONAL {?prop rdfs:range ?propRange}" +
-                                "} limit 10000";*/
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -162,6 +151,72 @@ var OntologyModels = (function () {
                                 callbackSeries();
                             });
                         },
+                        //set AnnotationProperties and datatypeProperties
+                        // We need to add Types for properties added to distinguish annotations,datatypes and rdf:Property
+                        // which can be either datatype and object properties depending the ontology
+                        // Problem is that some of this information types are classified on the wrong source (like rdfs:label type annotation
+                        //is stored in owl)
+                        // Resolution add others basic ontology to have all the data required for the properties and add in other vocab
+                        // if the vocabulary detected from uri is different from current source
+                        //Problem with this method is first apparition of the property
+                        /*
+                        function (callbackSeries) {
+    
+                            var addedSource= (source=='rdf'||source=='rdfs') ? " from <http://www.w3.org/2002/07/owl#>" : '';
+                            addedSource = (source=='dc') ?  " from <http://purl.org/dc/terms/>" : addedSource;
+
+                            var query = queryP +" SELECT distinct ?prop ?propLabel ?propDomain ?propRange ?type from <" +
+                                graphUri +">"+addedSource+" WHERE {\n" +
+                                " ?prop rdf:type ?type. filter (?type in (rdf:Property,<http://www.w3.org/2002/07/owl#AnnotationProperty>,owl:DatatypeProperty))  " +
+                                Sparql_common.getVariableLangLabel("prop", true, true) +
+                                "OPTIONAL {?prop rdfs:domain ?propDomain} OPTIONAL {?prop rdfs:range ?propRange}" +
+                                "} limit 10000";
+                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+                                
+                                result.results.bindings.forEach(function (item) {
+                                    //if (true || !uniqueProperties[item.prop.value]) {
+                                    var vocabulary=common.getVocabularyFromURI(item.prop.value);
+                                    if(vocabulary){
+                                        vocabulary=vocabulary[0];
+                                        
+                                    }else{
+                                        vocabulary=source;
+                                    }
+                                    
+                                    
+                                    
+                                    if(!uniqueAnnotationsProperties[item.prop.value] ){
+                                        uniqueProperties[item.prop.value] = 1;
+                                        uniqueAnnotationsProperties[item.prop.value]=1;
+                                        
+                                        if()
+                                        Config.ontologiesVocabularyModels[vocabulary].nonObjectProperties[item.prop.value] = {
+                                            id: item.prop.value,
+                                            label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                                            domain: item.propDomain ? item.propDomain.value : null,
+                                            range: item.propRange ? item.propRange.value : null,
+                                            types:[item.type.value]
+                                        };
+                                    }else{
+                                    
+                                        Config.ontologiesVocabularyModels[vocabulary].nonObjectProperties[item.prop.value].types.push(item.type.value);
+                                    
+                                    }
+                                });
+
+                                callbackSeries();
+                            });
+                        },*/
+                        // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)
+                        // problem with current method
+                        // Some properties or information overload about a property are stored in other source like iof-av or owl who store
+                        //information about rdf/owl properties
+                        //The rdf:Property type are object properties that cause trouble in nodeInfos addPredicate which are based on
+                        // this section and should be stored on properties
+                        // Needed to separate both datatype and object properties
 
                         // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)
                         function (callbackSeries) {
@@ -916,16 +971,16 @@ var OntologyModels = (function () {
         var anyDomain = false;
         async.eachSeries(
             allSources,
-            function (source, callbackEach) {
+            function (source2, callbackEach) {
                 async.series(
                     [
                         function (callbackSeries) {
-                            if (!Config.ontologiesVocabularyModels[source]) {
+                            if (!Config.ontologiesVocabularyModels[source2]) {
                                 return callbackSeries();
                             }
 
-                            var constraint = Config.ontologiesVocabularyModels[source].restrictions[propId] || [];
-                            var constraints2 = Config.ontologiesVocabularyModels[source].constraints[propId] || [];
+                            var constraint = Config.ontologiesVocabularyModels[source2].restrictions[propId] || [];
+                            var constraints2 = Config.ontologiesVocabularyModels[source2].constraints[propId] || [];
 
                             if (!Array.isArray(constraints2)) {
                                 constraints2 = [constraints2];
@@ -936,14 +991,17 @@ var OntologyModels = (function () {
 
                             constraint.forEach(function (item) {
                                 if (item.range) {
-                                    if (!allRanges[item.range]) {
-                                        allRanges[item.range] = { id: item.range, label: item.rangeLabel };
+                                    if (!objectType || objectType == "range") {
+                                        if (!allRanges[item.range]) {
+                                            allRanges[item.range] = { id: item.range, label: item.rangeLabel };
+                                        }
                                     }
                                 }
-
                                 if (item.domain) {
-                                    if (!allDomains[item.domain]) {
-                                        allDomains[item.domain] = { id: item.domain, label: item.domainLabel };
+                                    if (!objectType || objectType == "domain") {
+                                        if (!allDomains[item.domain]) {
+                                            allDomains[item.domain] = { id: item.domain, label: item.domainLabel };
+                                        }
                                     }
                                 }
                             });
@@ -957,23 +1015,21 @@ var OntologyModels = (function () {
                             if (Object.keys(allRanges).length == 0) {
                                 anyRange = true;
                             }
-
-                            var ranges = Object.keys(allRanges);
-
-                            if (ranges.length == 0) {
-                                return callbackSeries();
-                            }
-                            Sparql_OWL.getAllDescendants(source, ranges, "rdfs:subClassOf", {}, function (err, result) {
+                            var allRangesArray = Object.keys(allRanges);
+                            if (allRangesArray.length == 0) return callbackSeries();
+                            Sparql_OWL.getAllDescendants(source, allRangesArray, "rdfs:subClassOf", {}, function (err, result) {
                                 if (err) {
                                     return callback(err);
                                 }
 
                                 result.forEach(function (item) {
                                     if (!allRanges[item.descendant.value]) {
-                                        allRanges[item.descendant.value] = {
-                                            id: item.descendant.value,
-                                            label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value),
-                                        };
+                                        if (!objectType || objectType == "range") {
+                                            allRanges[item.descendant.value] = {
+                                                id: item.descendant.value,
+                                                label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value),
+                                            };
+                                        }
                                     }
                                 });
                                 callbackSeries();
@@ -986,16 +1042,20 @@ var OntologyModels = (function () {
                             if (Object.keys(allDomains).length == 0) {
                                 anyDomain = true;
                             }
-                            Sparql_OWL.getAllDescendants(source, Object.keys(allDomains), "rdfs:subClassOf", {}, function (err, result) {
+                            var allDomainsArray = Object.keys(allDomains);
+                            if (allDomainsArray.length == 0) return callbackSeries();
+                            Sparql_OWL.getAllDescendants(source, allDomainsArray, "rdfs:subClassOf", {}, function (err, result) {
                                 if (err) {
                                     return callback(err);
                                 }
                                 result.forEach(function (item) {
                                     if (!allDomains[item.descendant.value]) {
-                                        allDomains[item.descendant.value] = {
-                                            id: item.descendant.value,
-                                            label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value),
-                                        };
+                                        if (!objectType || objectType == "domain") {
+                                            allDomains[item.descendant.value] = {
+                                                id: item.descendant.value,
+                                                label: item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value),
+                                            };
+                                        }
                                     }
                                 });
 

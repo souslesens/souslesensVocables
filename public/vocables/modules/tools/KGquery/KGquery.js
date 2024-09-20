@@ -487,6 +487,7 @@ var KGquery = (function () {
                         if (optionalPredicatesSparql) {
                             if (!predicateStr) {
                                 // if only optional predicate make first predicate not optional (when only one class ...)
+                                optionalPredicatesSparql = `?${querySet.elements[0].fromNode.label} rdf:type <${querySet.elements[0].fromNode.id}>.` + optionalPredicatesSparql;
                                 optionalPredicatesSparql = optionalPredicatesSparql.replace("OPTIONAL", "");
                             }
 
@@ -669,8 +670,8 @@ var KGquery = (function () {
 
         $("#KGquery_dataTableDialogDiv").dialog("option", "title", "Query result size: " + tableData.length);
 
-        $("#KGquery_dataTableDialogDiv").css("left", "10px");
-        $("#KGquery_dataTableDialogDiv").width("90vW");
+        //$("#KGquery_dataTableDialogDiv").css("left", "10px");
+        //$("#KGquery_dataTableDialogDiv").width("90vW");
 
         Export.showDataTable("KGquery_dataTableDialogDiv", tableCols, tableData, null, { paging: true }, function (err, datatable) {
             $("#dataTableDivExport").on("click", "td", function () {

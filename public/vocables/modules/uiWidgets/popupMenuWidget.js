@@ -28,39 +28,6 @@ var PopupMenuWidget = (function () {
     };
 
     self.showPopup = function (point, popupDiv, options) {
-        /*
-        $("#" + popupDiv).addClass("popupMenuWidgetDiv");
-        $("#" + popupDiv).css("display", "flex");
-        var popupH = Math.min(300, $("#" + popupDiv).height());
-        var popupW = Math.min(200, $("#" + popupDiv).width());
-        var divHeight = $("#graphDiv").height();
-        var divMaxWidth = $("#graphDiv").width();
-        var popupBottom = point.y + popupH;
-        var popupRight = point.x + popupW;
-        var popupTop = point.y + popupH;
-        var popupLeft = point.x + popupW;
-
-        var horOverlap = 0;
-        if (popupRight > divMaxWidth) {
-            horOverlap = popupRight - divMaxWidth;
-        } else if (popupLeft < 0) {
-            horOverlap = -popupLeft;
-        }
-
-        var vertOverlap = 0;
-        if (popupBottom > divHeight) {
-            vertOverlap = divHeight - popupBottom;
-        } else if (popupTop < 0) {
-            vertOverlap = -popupTop;
-        }
-
-        if (!popupDiv) {
-            popupDiv = "popupDiv";
-        }
-        
-        $("#" + popupDiv).css("left", point.x + (absolutePosition ? 0 : leftPanelWidth) + horOverlap);
-        $("#" + popupDiv).css("top", point.y + vertOverlap);
-        */
         if (!options) {
             options = {};
         }

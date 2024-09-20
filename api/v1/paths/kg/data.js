@@ -10,7 +10,7 @@ module.exports = function () {
 
     async function GET(req, res, _next) {
         try {
-            const database = await databaseModel.getDatabase(req.query.name);
+            const database = await databaseModel.getDatabase(req.query.dbName);
             const driver = await databaseModel.getClientDriver(database.driver);
 
             const connection = dbConnector.getConnection(database, driver);

@@ -27,11 +27,19 @@ th, td{
     padding: 24px;
     background-color: @dark-background-color !important;
     border-radius: 14px;
-    max-height: 90vh;
-    overflow: auto;
+    /*max-height: 90vh;*/
 }
 .detailsCellValue {
     .font-table;
+    padding: 2px;
+    border-radius: 3px;
+    background-color: white;
+}
+.detailsCellValueContent {
+    line-height: 1.8;
+    max-height: 100px;
+    overflow: auto;
+    max-width: 500px;
 }
 
 .detailsCellName {
@@ -39,6 +47,7 @@ th, td{
     .font-table;
     background-color: @background-color !important;
     width: fit-content;
+    padding: 3px 3px;
 }
 
 .NodesInfos_CardId {
@@ -53,10 +62,10 @@ th, td{
 .infos_table {
     font-size: 12px;
 }
-#nodeInfosWidget_InfosTabDiv {
+.nodeInfosWidget_InfosTab {
     .font-table;
     border: 0px !important;
-    background-color: @background-color;
+    background-color: @background-color !important;
     border-radius: 14px;
     border-top-left-radius: 0px;
     overflow: unset;
@@ -203,6 +212,9 @@ a:visited.ui-button,
 }
 
 .edit-Predicate-value-chosen {
+    font: unset;
+    .small-font;
+    font-weight: normal;
     width: 95%;
     background-color: @dark-background-color !important;
 }

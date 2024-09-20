@@ -195,14 +195,19 @@ var PredicatesSelectorWidget = (function () {
             if (vocabulary == "usual") {
                 if (!(value.indexOf("xsd:") > -1)) {
                     vocabulary = $("#editPredicate_currentVocabPredicateSelect").val().split(":")[0];
-                    Object.values(Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties).forEach(function (nonObjectProp) {
-                        if (nonObjectProp.label == $("#editPredicate_currentVocabPredicateSelect").val().split(":")[1]) {
-                            NodeInfosWidget.setLargerObjectTextArea();
-                        }
-                    });
+                    if (Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties) {
+                        Object.values(Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties).forEach(function (nonObjectProp) {
+                            //if(!Config.ontologiesVocabularyModels[vocabulary]?.properties[nonObjectProp.id]){
+                            if (nonObjectProp.label == $("#editPredicate_currentVocabPredicateSelect").val().split(":")[1]) {
+                                NodeInfosWidget.setLargerObjectTextArea();
+                            }
+                            //}
+                        });
+                    }
                 }
             }
             // is Datatype or anotation property
+            //if(Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties[value] && !Config.ontologiesVocabularyModels[vocabulary]?.properties[value]){
             if (Config.ontologiesVocabularyModels[vocabulary]?.nonObjectProperties[value]) {
                 NodeInfosWidget.setLargerObjectTextArea();
             }
@@ -366,7 +371,10 @@ var PredicatesSelectorWidget = (function () {
     self.fillSelectRecentEditPredicate = function () {
         var recentEditPredicatesFill = [{ id: "Recents", label: "Recents" }];
         var recentEditPredicates = JSON.parse(localStorage.getItem("recentEditPredicates"));
-        if (!recentEditPredicates) return;
+        if (!recentEditPredicates) {
+            return;
+        }
+
         recentEditPredicates.forEach(function (editPredicateStr, index) {
             var editPredicate = JSON.parse(editPredicateStr);
             var name = `${editPredicate.predicate[0] == "usual" ? "" : editPredicate.predicate[0] + ":"}${editPredicate.predicate[1].label} 

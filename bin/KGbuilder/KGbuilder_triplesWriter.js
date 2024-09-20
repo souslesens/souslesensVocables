@@ -49,7 +49,7 @@ const KGbuilder_triplesWriter = {
             var queryGraph = KGbuilder_triplesWriter.getSparqlPrefixesStr();
 
           //  queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
-// insert data does not work with bNodes
+            // insert data does not work with bNodes
             queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT " + "  {" + insertTriplesStr + "  }";
 
             var params = { query: queryGraph };

@@ -14,18 +14,19 @@
 
     <div id="whiteboard_Section" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
         <div class="titleboxButtons font-button2-color">Whiteboard</div>
-        <div class="input-group mb-3" style="width: 100%">
+        <div class="input-group mb-3">
             <div class="input-group-prepend">
-                <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
-                    <button class="search-icon slsv-invisible-button" onclick="Lineage_whiteboard.graph.searchNode()" style="margin-top: 4px; height: 20px; width: 20px"></button>
-                </div>
+                <input
+                    id="visjsGraph_searchInput"
+                    style="height: 33.5px; border-bottom-left-radius: 14px; border-top-left-radius: 14px; width: 150px"
+                    value=""
+                    class="input-group-append"
+                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_whiteboard.graph.searchNode()}"
+                />
             </div>
-            <input
-                id="visjsGraph_searchInput"
-                style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px"
-                value=""
-                onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_whiteboard.graph.searchNode()}"
-            />
+            <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+                <button class="search-icon slsv-invisible-button" onclick="Lineage_whiteboard.graph.searchNode()" style="margin-top: 4px; height: 20px; width: 20px"></button>
+            </div>
         </div>
         <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
         <button class="w3-button slsv-button-2" id="lineage_actionDiv_clearLast" onclick="Lineage_whiteboard.clearLastAddedNodesAndEdges()" title="Clear Last">
@@ -39,7 +40,7 @@
         </button>
         <button class="w3-button slsv-button-2" onclick="Lineage_whiteboard.graph.exportGraphToDataTable()" title="CSV"><img src="./icons/CommonIcons/CSVIcon.png" /></button>
         <!--   <button onclick="AxiomEditor.init()">Edit Axiom</button>-->
-        <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="Lineage_axioms.testAxioms()" style="display: block">new Axiom</button>
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_newAxiom" onclick="MappingModeler.init()" style="display: block">test</button>
     </div>
 
     <div id="Lineage_MoreActionsSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width">

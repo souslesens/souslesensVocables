@@ -289,8 +289,6 @@ var SourceSelectorWidget = (function () {
         }
     };
 
-    self.showDialog = function (types, options, validateFn, okButtonValidateFn) {};
-
     self.getSelectedSource = function () {
         return $("#sourceSelector_jstreeDiv").jstree().get_selected();
     };

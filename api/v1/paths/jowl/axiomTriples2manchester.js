@@ -2,6 +2,7 @@
 const { processResponse } = require("../utils");
 const request = require("request");
 const async = require("async");
+const ConfigManager = require("../../../../bin/configManager.");
 
 //https://jena.apache.org/documentation/inference/
 
@@ -12,7 +13,12 @@ module.exports = function () {
 
     function GET(req, res, next) {
 
-        var jowlConfigUrl="https://sls.kg-alliance.org/jowl/manchester/triples2manchester"
+
+
+       var jowlConfigUrl=ConfigManager.config.jowlServer.url
+        if(!jowlConfigUrl.endsWith("/"))
+            jowlConfigUrl+="/"
+        jowlConfigUrl+="manchester/triples2manchester";
 
         var payload={
             "graphName": req.query.ontologyGraphUri,

@@ -602,8 +602,22 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         var sourceNodeEdges = self.network.getConnectedEdges(sourceNodeId);
         sourceNodeEdges.forEach(function (edgeId) {
             var edge = self.data.edges.get(edgeId);
-            if (edge.to == targetNodeId || edge.from == targetNodeId) {
+            if (!targetNodeId || edge.to == targetNodeId) {
                 connectedEdges.push(edge);
+            }
+        });
+        return connectedEdges;
+    };
+
+    self.getFromNodeEdgesAndToNodes = function (sourceNodeId, bothDirections) {
+        var connectedEdges = [];
+        var sourceNodeEdges = self.network.getConnectedEdges(sourceNodeId);
+        sourceNodeEdges.forEach(function (edgeId) {
+            var edge = self.data.edges.get(edgeId);
+            var fromNode = self.data.nodes.get(edge.from);
+            if (bothDirections || edge.from == sourceNodeId) {
+                var toNode = self.data.nodes.get(edge.to);
+                connectedEdges.push({ edge: edge, fromNode: fromNode, toNode: toNode });
             }
         });
         return connectedEdges;
@@ -961,11 +975,12 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     if (context.callback) {
                         callback = context.callback;
                     }
-                    if (self.isGraphNotEmpty()) {
+                    if (self.data.nodes || self.isGraphNotEmpty()) {
                         self.data.edges.add(visjsData.edges);
                         self.data.nodes.add(visjsData.nodes);
                     } else {
-                        self.draw(context.divId, visjsData, context.options, callback);
+                        // self.draw(context.divId, visjsData, context.options, callback);
+                        self.draw(callback);
                     }
                     self.message("");
                 }

@@ -1,6 +1,5 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
-import Axiom_editor from "./axiom_editor.js";
-import Axiom_activeLegend from "./axiom_activeLegend.js";
+//import Axiom_editor from "./axiom_editor.js";
 
 /*
 restriction	objectPropertyExpression some primary	ObjectSomeValuesFrom(T(objectPropertyExpression) T(primary))
@@ -116,7 +115,7 @@ var Axioms_graph = (function () {
                         if (!nodesMap[s]) {
                             nodesMap[s] = { id: s };
                             if (s.indexOf("http") == 0) {
-                                var obj = Axiom_editor.allResourcesMap[s];
+                                var obj = Axiom_manager.allResourcesMap[s];
                                 nodesMap[s].label = obj ? obj.label.replace(/_/g, " ") : null;
                             }
                         }
@@ -129,7 +128,7 @@ var Axioms_graph = (function () {
                                 nodesMap[s].predicates = [];
                             }
 
-                            var obj = Axiom_editor.allResourcesMap[p];
+                            var obj = Axiom_manager.allResourcesMap[p];
                             nodesMap[s].predicates.push({
                                 p: p,
                                 o: o,

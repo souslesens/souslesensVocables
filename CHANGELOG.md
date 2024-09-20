@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.84.0](https://github.com/souslesens/souslesensVocables/compare/1.83.0...1.84.0) (2024-09-20)
+
+
+### Bug Fixes
+
+* **mainapp:** do not raise a require error when editing a profile ([4b9ebe4](https://github.com/souslesens/souslesensVocables/commit/4b9ebe4c298254eec2501bdd642db26ad022bef5)), closes [#885](https://github.com/souslesens/souslesensVocables/issues/885)
+
 ## [1.83.0](https://github.com/souslesens/souslesensVocables/compare/1.82.1...1.83.0) (2024-09-17)
 
 

@@ -617,7 +617,72 @@ var KGquery_graph = (function () {
     self.message = function (message, stopWaitImage) {
         $("#KGquery_graph_messageDiv").html(message);
     };
+    self.genereateCommonDecoration=function(){
+        var source = KGquery.currentSource;
+        var sources = [];
+        var imports = Config.sources[source].imports;
+        if (imports) {
+            sources = sources.concat(imports);
+        }
 
+        //self.saveVisjsModelGraph();
+        
+        var commonDecoration = {};
+       
+        async.eachSeries(
+            sources,
+            function (source, callbackEach) {
+                var visjsGraphFileName = source + "_decoration.json";
+                var payload = {
+                    dir: "graphs/",
+                    fileName: visjsGraphFileName,
+                };
+                //get decoration file
+                $.ajax({
+                    type: "GET",
+                    url: `${Config.apiUrl}/data/file`,
+                    data: payload,
+                    dataType: "json",
+                    success: function (result, _textStatus, _jqXHR) {
+                        var data = JSON.parse(result);
+                        commonDecoration={...commonDecoration,...data};
+                        
+                        // J'ajoute mes différentes décorations aux classes visés dans le visjsdata
+                        // Si j'ai des icones je  met dans un répertoire côté client les icones nécessaires à ce graph
+                        callbackEach();
+                    },
+                    error(err) {
+                        return callbackEach();
+                    },
+                });
+            },
+            function (err) {
+                if (err) {
+                    return alert(err);
+                }
+                var fileName = MainController.currentSource + "_decoration.json";
+                var payload = {
+                    dir: "graphs/",
+                    fileName: fileName,
+                    data: JSON.stringify(commonDecoration),
+                };
+                $.ajax({
+                    type: "POST",
+                    url: `${Config.apiUrl}/data/file`,
+                    data: payload,
+                    dataType: "json",
+                    success: function (_result, _textStatus, _jqXHR) {
+                        MainController.UI.message("Decoration saved");
+                        callbackSeries();
+                    },
+                    error(err) {
+                        return callbackSeries(err);
+                    },
+                });
+
+              
+            });
+    }
     return self;
 })();
 

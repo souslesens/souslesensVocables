@@ -110,7 +110,7 @@ export type Profile = z.infer<typeof ProfileSchema>;
 const SourceAccessControlSchema = z.union([z.literal("forbidden"), z.literal("read"), z.literal("readwrite")]);
 
 const ProfileSchema = z.object({
-    name: z.string(),
+    name: z.string().default(""),
     _type: z.string().optional(),
     theme: z.string().optional(),
     allowedSourceSchemas: z

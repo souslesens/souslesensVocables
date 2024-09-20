@@ -388,11 +388,13 @@ var Export = (function () {
         }
         if (!div) {
             div = "mainDialogDiv";
+            $("#" + div).dialog("open");
         }
 
         $("#" + div).html("<div style='width: 97vw;height: 75vh'> <table id='dataTableDivExport'></table></div>");
 
-        $("#" + div).dialog("open");
+
+
         if (!buttons) {
             buttons = "Bfrtip";
         }

@@ -589,8 +589,8 @@ var KGbuilder_triplesMaker = {
             if (!KGbuilder_triplesMaker.bNodeIndex) {
                 KGbuilder_triplesMaker.bNodeIndex = 0
             }
-            value = "_:b" + (KGbuilder_triplesMaker.bNodeIndex++)
-            //  value = "<_:b" + util.getRandomHexaId(10) + ">";
+          //  value = "_:b" + (KGbuilder_triplesMaker.bNodeIndex++)
+            value = "<_:b" + util.getRandomHexaId(10) + ">";
             KGbuilder_triplesMaker.blankNodesMap[key] = value;
             return value;
         }

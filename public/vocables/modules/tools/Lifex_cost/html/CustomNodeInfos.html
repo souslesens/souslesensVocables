@@ -1,0 +1,84 @@
+<style>
+    #nodeInfosWidget_HoverDiv {
+        width: 547px;
+        height: 230px;
+        overflow: auto;
+        display: none;
+        z-index: 100;
+        position: absolute;
+        background-color: #f5efdd;
+        border: #6c757d;
+        border-radius: 10px;
+        padding: 5px;
+    }
+
+    #axiomsGraphLegendDiv {
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .detailsCellName {
+        padding: 2px;
+        max-width: 400px;
+        text-align: right;
+        width: 250px;
+        max-height: 25px; 
+        overflow-y: auto; 
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+    .detailsCellValue {
+        padding: 2px;
+        border-radius: 3px;
+        border: 1px solid black;
+        background-color: white;
+        max-width: 400px;
+        line-height: 1.8;
+        max-height: 25px; 
+        overflow: auto; 
+        
+    }
+
+    .infosTable {
+        background-color: #d9d9d9;
+        padding: 5px;
+    }
+
+    .nodeInfos_rigthDiv {
+        min-width: 350px;
+        background-color: #ddd;
+        padding: 5px;
+    }
+    .content{
+        max-height: 100px; /* Définissez la hauteur maximale que vous souhaitez */
+        overflow-y: auto;
+    }
+    
+</style>
+
+
+<div >
+   
+    <div id="nodeInfosWidget_InfosTabDiv" style="border-top-left-radius: 14px!important;">
+        <div id="nodeInfosWidget_ObjectTabDiv" class="nodesInfosAdditionalInfos" style="border:none!important;border-radius: 14px!important; max-width: none;overflow: auto;">
+            <ul>
+                <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_ObjectDiv">Tags</a></li>
+                <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_ObjectDiv">Tasks</a></li>
+                <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_ObjectDiv">Equipement</a></li>
+                <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_ObjectDiv">Document</a></li>
+                <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_ObjectDiv">Manning</a></li>
+                <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_ObjectDiv">Task Ressources</a></li>
+            </ul>   
+            <div id="nodeInfosWidget_ObjectDiv" style="max-width: none;"> </div>
+        </div>
+    </div>
+        
+        
+        
+    </div>
+   
+</div>

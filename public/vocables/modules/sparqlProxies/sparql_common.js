@@ -65,6 +65,8 @@ var Sparql_common = (function () {
             }
             return self.formatStringForTriple(str);
         }
+        var labelSuffix=options.labelSuffix || "Label"
+
 
         if (!options) {
             options = {};
@@ -114,9 +116,9 @@ var Sparql_common = (function () {
                         }
                     });
                     if (options.exactMatch) {
-                        filters.push(" FILTER(?" + varName + "Label  in(" + conceptWordStr + "))");
+                        filters.push(" FILTER(?" + varName +labelSuffix+ "  in(" + conceptWordStr + "))");
                     } else {
-                        filters.push(" FILTER(regex(?" + varName + 'Label , "' + conceptWordStr + '","i")) ');
+                        filters.push(" FILTER(regex(?" + varName +labelSuffix+ ' , "' + conceptWordStr + '","i")) ');
                     }
                 } else {
                     if (words == null) {
@@ -124,10 +126,10 @@ var Sparql_common = (function () {
                     }
 
                     if (options.exactMatch) {
-                        filters.push(" FILTER(?" + varName + "Label = '" + words + "')");
+                        filters.push(" FILTER(?" + varName+labelSuffix + " = '" + words + "')");
                         //filters.push(" regex(?" + varName + 'Label, "^' + words + '$", "i")');
                     } else {
-                        filters.push(" FILTER(regex(?" + varName + 'Label, "' + words + '", "i"))');
+                        filters.push(" FILTER(regex(?" + varName+labelSuffix + ', "' + words + '", "i"))');
                     }
                 }
             } else if (ids) {

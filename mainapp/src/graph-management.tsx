@@ -119,7 +119,7 @@ export default function GraphManagement() {
     };
 
     const fetchSources = async () => {
-        const response = await fetch("/api/v1/admin/sources");
+        const response = await fetch("/api/v1/sources");
         const json = (await response.json()) as { resources: Record<string, ServerSource> };
         setSources(json.resources);
     };

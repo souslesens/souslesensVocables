@@ -8,17 +8,10 @@ module.exports = function () {
         PUT,
     };
 
-    async function GET(req, res, _next) {
+    async function GET(_req, res, _next) {
         const config = await mainConfigModel.getConfig();
-        const user = (await userManager.getUser(req.user)).user;
-        const isAdmin = user && (await userModel.isAdmin(user.login));
-        if (isAdmin) {
-            // Don't filter configuration
-            res.status(200).json(config);
-            return;
-        }
 
-        const { user: _user, password, ...sparql_server } = config.sparql_server;
+        const { user, password, ...sparql_server } = config.sparql_server;
         const result = {
             auth: config.auth,
             defaultGroups: config.defaultGroups,

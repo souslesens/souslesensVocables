@@ -50,7 +50,7 @@ var Export = (function () {
                     if (index < 3) {
                         width = "200";
                     }
-                    cols.push({ title: colName, defaultContent: "" });
+                    cols.push({title: colName, defaultContent: ""});
                 });
 
             nodesFromArray.forEach(function (nodeFromId, index) {
@@ -74,8 +74,8 @@ var Export = (function () {
             });
 
             UI.message("", true);
-            var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
-            Export.showDataTable(divId, cols, dataset, null, { fixedColumns: 1, columnDefs: columnDefs });
+            var columnDefs = [{width: 200, targets: [0, 1, 2]}];
+            Export.showDataTable(divId, cols, dataset, null, {fixedColumns: 1, columnDefs: columnDefs});
         } else {
             var str = header;
             nodesFromArray.forEach(function (nodeFromId, index) {
@@ -212,7 +212,7 @@ var Export = (function () {
         });
         var cols = [];
         for (var i = 1; i <= colsCount; i++) {
-            cols.push({ title: "Label_" + i, defaultContent: "" });
+            cols.push({title: "Label_" + i, defaultContent: ""});
         }
         /*   for (var i = 1; i <= colsCount; i++) {
        cols.push({title: "Uri_" + i, defaultContent: ""})
@@ -234,11 +234,11 @@ var Export = (function () {
 
         var tree = $("#" + jstreeDiv)
             .jstree(true)
-            .get_json(nodeId, { flat: false });
+            .get_json(nodeId, {flat: false});
         var nodesMap = {};
         var nodes = $("#" + jstreeDiv)
             .jstree(true)
-            .get_json(nodeId, { flat: true });
+            .get_json(nodeId, {flat: true});
         nodes.forEach(function (node) {
             nodesMap[node.id] = node;
         });
@@ -316,7 +316,7 @@ var Export = (function () {
             });
             var cols = [];
             for (var i = 0; i <= maxParentsLength; i++) {
-                cols.push({ title: "Label_level_" + i, defaultContent: "" });
+                cols.push({title: "Label_level_" + i, defaultContent: ""});
             }
 
             matrixLabels.forEach(function (line, lineIndex) {
@@ -325,12 +325,12 @@ var Export = (function () {
                 }
                 matrixLabels[lineIndex] = matrixLabels[lineIndex].concat(matrixIds[lineIndex]);
             });
-            cols.push({ title: "-----", defaultContent: "" });
+            cols.push({title: "-----", defaultContent: ""});
             // cols = cols.concat(cols);
             for (var i = 0; i <= maxParentsLength; i++) {
-                cols.push({ title: "ID_level_" + i, defaultContent: "" });
+                cols.push({title: "ID_level_" + i, defaultContent: ""});
             }
-            cols.push({ title: "-----", defaultContent: "" });
+            cols.push({title: "-----", defaultContent: ""});
 
             UI.message("", true);
             Export.showDataTable(null, cols, matrixLabels);
@@ -362,12 +362,12 @@ var Export = (function () {
         });
 
         for (var i = 1; i <= colsMax; i++) {
-            cols.push({ title: "Label_" + i, defaultContent: "", width: "20%" });
+            cols.push({title: "Label_" + i, defaultContent: "", width: "20%"});
         }
         for (let i = 1; i <= colsMax; i++) {
-            cols.push({ title: "Uri_" + i, defaultContent: "" });
+            cols.push({title: "Uri_" + i, defaultContent: ""});
         }
-        return { cols: cols, dataSet: dataSet };
+        return {cols: cols, dataSet: dataSet};
     };
 
     self.showDataTable = function (div, cols, dataSet, buttons, options, callback) {
@@ -386,13 +386,14 @@ var Export = (function () {
             self.dataTable.destroy();
             $("#dataTableDiv").html("");
         }
-        if (!div) {
+        if (options.divId) {
+            div = options.divId
+        } else {
             div = "mainDialogDiv";
             $("#" + div).dialog("open");
         }
 
         $("#" + div).html("<div style='width: 97vw;height: 75vh'> <table id='dataTableDivExport'></table></div>");
-
 
 
         if (!buttons) {

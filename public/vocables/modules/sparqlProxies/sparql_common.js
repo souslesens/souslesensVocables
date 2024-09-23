@@ -165,9 +165,14 @@ var Sparql_common = (function () {
                     }
 
                     id = "" + id;
-                    if (id.match(/<.*>/)) {
+
+
+                    if (id.match(/^.{1,5}:.{3,}$/)) {// prefix
                         conceptIdsStr += id;
-                    } else {
+                    } else if (id.match(/<.*>/)) {
+                        conceptIdsStr += id;
+                    }
+                    else {
                         conceptIdsStr += "<" + id + ">";
                     }
                 });

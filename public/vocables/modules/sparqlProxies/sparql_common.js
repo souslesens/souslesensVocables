@@ -48,6 +48,9 @@ var Sparql_common = (function () {
     };
 
     self.setFilter = function (varName, ids, words, options) {
+        if(!options){
+            options={}
+        }
         if (!ids && !words) {
             return "";
         }
@@ -533,8 +536,14 @@ var Sparql_common = (function () {
         if (!date) {
             date = new Date();
         }
-        var str = JSON.stringify(date);
-        return str + "^^xsd:dateTime";
+
+       var str="\""+common.dateToRDFString(date)+"\"^^xsd:dateTime";
+        return str
+        //   return  "\"" + date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate() + "\"^^xsd:date"
+
+        //error in JSON.stringify(date) wrong day !!!!!!!!!!!!!!!
+     /*   var str = JSON.stringify(date);
+        return str + "^^xsd:dateTime";*/
     };
 
     self.getSourceFromUriInDefaultServer = function (uri, callback) {

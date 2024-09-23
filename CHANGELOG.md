@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.85.0](https://github.com/souslesens/souslesensVocables/compare/1.84.0...1.85.0) (2024-09-23)
+
+
+### Features
+
+* **api:** add api/sources for user ([7b9d068](https://github.com/souslesens/souslesensVocables/commit/7b9d068818e3c6451b2d8352f89b0e78ffd2d06a))
+* **mainapp:** allow downloading graph management as csv ([060b2d0](https://github.com/souslesens/souslesensVocables/commit/060b2d0118d65523ba2f7e42e2a57b3319e069a6))
+
+
+### Bug Fixes
+
+* **api/config:** don't get all config even if user is admin ([95af912](https://github.com/souslesens/souslesensVocables/commit/95af9123fd9c024f6f5d0f3b4f63a2028a36fc12))
+* **userManagement:** use user routes for fetching sources ([cba02fd](https://github.com/souslesens/souslesensVocables/commit/cba02fd59f2c73b2996bf3e80f67634e119b0110))
+
 ## [1.84.0](https://github.com/souslesens/souslesensVocables/compare/1.83.0...1.84.0) (2024-09-20)
 
 

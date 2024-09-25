@@ -17,7 +17,7 @@ module.exports = function () {
        var jowlConfigUrl=ConfigManager.config.jowlServer.url
         if(!jowlConfigUrl.endsWith("/"))
             jowlConfigUrl+="/"
-        jowlConfigUrl+="manchester/getClassAxioms";
+        jowlConfigUrl+="axioms/getClassAxioms";
 
         var payload={
             "graphName": req.query.graphUri,

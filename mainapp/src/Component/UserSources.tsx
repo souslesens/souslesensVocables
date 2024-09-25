@@ -7,7 +7,6 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogTitle,
     FormControlLabel,
     FormGroup,
@@ -26,16 +25,10 @@ import {
 } from "@mui/material";
 import { CheckBox, CheckBoxOutlineBlank, Delete, Edit } from "@mui/icons-material";
 
+import { DeleteDialog } from "./DeleteDialog";
 import { getSourcesForUser, ServerSource, ServerSourceSchema } from "../Source";
 import { cleanUpText, fetchMe } from "../Utils";
 import { Severity } from "../user-management";
-
-interface DeleteSourceDialogProps {
-    onClose: () => void;
-    onDelete: () => void;
-    open: boolean;
-    sourceName: string;
-}
 
 interface SubmitSourceDialogProps {
     onClose: () => void;
@@ -55,25 +48,6 @@ type User = {
 
 const initialDialog = { delete: false, edit: false };
 const initialUser = { login: "", allowSourceCreation: false, maxNumberCreatedSource: 0 };
-
-const DeleteSourceDialog = ({ onClose, onDelete, open, sourceName }: DeleteSourceDialogProps) => {
-    return (
-        <Dialog aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description" open={open} onClose={onClose}>
-            <DialogTitle id="delete-dialog-title">{`Delete ${sourceName}`}</DialogTitle>
-            <DialogContent>
-                <DialogContentText id="delete-dialog-description">{"The source will be erased from this instance. Are you sure?"}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <Button autoFocus onClick={onClose}>
-                    Cancel
-                </Button>
-                <Button color="error" onClick={onDelete}>
-                    Delete
-                </Button>
-            </DialogActions>
-        </Dialog>
-    );
-};
 
 const SubmitSourceDialog = ({ onClose, onSubmit, open, sources, sourceName }: SubmitSourceDialogProps) => {
     const [predicates, setPredicates] = useState<string[]>([]);
@@ -335,7 +309,13 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <DeleteSourceDialog onClose={() => handleCloseDialog("delete")} onDelete={handleDeleteSource} open={isOpen["delete"]} sourceName={selectedSource} />
+            <DeleteDialog
+                description={"The source will be erased from this instance. Are you sure?"}
+                onClose={() => handleCloseDialog("delete")}
+                onDelete={handleDeleteSource}
+                isOpen={isOpen["delete"]}
+                title={`Delete ${selectedSource}`}
+            />
             <SubmitSourceDialog onClose={() => handleCloseDialog("edit")} onSubmit={handleSubmitSource} open={isOpen["edit"]} sources={sources} sourceName={selectedSource} />
         </Stack>
     );

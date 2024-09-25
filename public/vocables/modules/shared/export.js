@@ -319,6 +319,7 @@ var Export = (function () {
                 cols.push({title: "Label_level_" + i, defaultContent: ""});
             }
 
+
             matrixLabels.forEach(function (line, lineIndex) {
                 for (var i = line.length; i <= maxParentsLength + 1; i++) {
                     matrixLabels[lineIndex].push("");

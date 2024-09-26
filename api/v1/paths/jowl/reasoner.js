@@ -24,7 +24,7 @@ module.exports = function () {
         var jowlConfig = ConfigManager.config.jowlServer;
 
         if (req.query.graphName ) {
-            var url = jowlConfig.url + "hermit/" + req.query.operation + "?graphName=" + encodeURIComponent(req.query.graphName);
+            var url = jowlConfig.url + "reasoner/" + req.query.operation + "?graphName=" + encodeURIComponent(req.query.graphName);
             console.log(url)
             req.query.url
             HttpProxy.get(url, {}, function (err, result) {

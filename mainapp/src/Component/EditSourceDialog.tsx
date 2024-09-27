@@ -1,24 +1,34 @@
 import { useEffect, useState } from "react";
 import { CheckBoxOutlineBlank, CheckBox } from "@mui/icons-material";
-import { Dialog, DialogTitle, DialogContent, Stack, Autocomplete, TextField, Checkbox, Chip, FormGroup, FormControlLabel, DialogActions, Button, Typography, useTheme } from "@mui/material";
-import { ServerSource, ServerSourceSchema } from "../Source";
+import { Dialog, DialogTitle, DialogContent, Stack, Autocomplete, TextField, Checkbox, Chip, FormGroup, FormControlLabel, DialogActions, Button, Alert } from "@mui/material";
+import { ServerSource, ServerSourceSchema, getSourcesForUser } from "../Source";
 import { LoadingButton } from "@mui/lab";
+import { createRoot } from "react-dom/client";
 
 interface EditSourceDialogProps {
     onClose: () => void;
-    onEditSuccess: (sources: ServerSource[]) => void;
+    onEditSuccess?: (sources: ServerSource[]) => void;
     open: boolean;
-    sources: ServerSource[];
+    sources?: ServerSource[];
     sourceName: string;
 }
 
-export const EditSourceDialog = ({ onClose, onEditSuccess, open, sources, sourceName }: EditSourceDialogProps) => {
+export const EditSourceDialog = ({ onClose, onEditSuccess, open, sources: sourcesProp, sourceName }: EditSourceDialogProps) => {
     const [predicates, setPredicates] = useState<string[]>([]);
     const [sourceNames, setSourceNames] = useState<string[]>([]);
     const [source, setSource] = useState<ServerSource | undefined>();
     const [error, setError] = useState<string | undefined>();
     const [loading, setLoading] = useState(false);
-    const theme = useTheme();
+    const [sources, setSources] = useState<ServerSource[] | undefined>(sourcesProp);
+
+    useEffect(() => {
+        async function fetchSources() {
+            setSources(await getSourcesForUser());
+            setLoading(false);
+        }
+        setLoading(true);
+        void fetchSources();
+    }, []);
 
     const handleSubmitSource = async (source: ServerSource) => {
         setLoading(true);
@@ -33,7 +43,9 @@ export const EditSourceDialog = ({ onClose, onEditSuccess, open, sources, source
 
             if (response.status == 200) {
                 setError(undefined);
-                onEditSuccess(Object.values(data.resources));
+                if (onEditSuccess) {
+                    onEditSuccess(Object.values(data.resources));
+                }
                 onClose();
             } else {
                 console.error(data.message);
@@ -47,10 +59,12 @@ export const EditSourceDialog = ({ onClose, onEditSuccess, open, sources, source
     };
 
     useEffect(() => {
-        const filteredSources = sources.filter((source) => source.name === sourceName);
-        setPredicates([...new Set(sources.flatMap((s) => s.taxonomyPredicates))]);
-        setSourceNames(sources.flatMap((s) => s.name));
-        setSource(filteredSources[0]);
+        if (sources) {
+            const filteredSources = sources.filter((source) => source.name === sourceName);
+            setPredicates([...new Set(sources.flatMap((s) => s.taxonomyPredicates))]);
+            setSourceNames(sources.flatMap((s) => s.name));
+            setSource(filteredSources[0]);
+        }
     }, [sources, sourceName]);
 
     const handleField = (fieldName: string, value: string | boolean | string[]) => {
@@ -147,7 +161,7 @@ export const EditSourceDialog = ({ onClose, onEditSuccess, open, sources, source
                             label="Allow Individuals?"
                         />
                     </FormGroup>
-                    {error ? <Typography color={theme.palette.error.main}>{error}</Typography> : null}
+                    {error ? <Alert severity="error">{error}</Alert> : null}
                 </Stack>
             </DialogContent>
             <DialogActions>
@@ -160,4 +174,22 @@ export const EditSourceDialog = ({ onClose, onEditSuccess, open, sources, source
             </DialogActions>
         </Dialog>
     );
+};
+
+declare global {
+    interface Window {
+        EditSourceDialog: {
+            createApp: (props: Omit<EditSourceDialogProps, "open" | "sources">) => void;
+        };
+    }
+}
+
+window.EditSourceDialog = {
+    createApp: (props: Omit<EditSourceDialogProps, "open" | "sources">) => {
+        const container = document.getElementById("mount-edit-source-dialog-here");
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const root = createRoot(container!);
+        root.render(<EditSourceDialog open={true} {...props} />);
+        return root;
+    },
 };

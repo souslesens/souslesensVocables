@@ -473,17 +473,18 @@ sourceDivId +
     };
     self.showSourceDivPopupMenu = function (sourceDivId) {
         event.stopPropagation();
-        var source = Lineage_sources.sourceDivsMap[sourceDivId];
+        let source = Lineage_sources.sourceDivsMap[sourceDivId];
         Lineage_sources.setCurrentSource(source);
-        var html =
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.setSourceOpacity();"> Opacity</span>' +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.closeSource();"> Close</span>' +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.hideSource();"> Hide </span>' +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.showSource();"> Show </span>' +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource();"> Group </span>' +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();"> ungroup </span>' +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.exportOWL();"> export OWL </span>';
-
+        let html =
+            '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.setSourceOpacity();">Opacity</span>' +
+            '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.closeSource();">Close</span>' +
+            '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.hideSource();">Hide</span>' +
+            '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.showSource();">Show</span>' +
+            '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource();">Group</span>' +
+            '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();">Ungroup</span>';
+        if (source !== "_defaultSource") {
+            html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.editSource();">Edit</span>';
+        }
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
     };
 
@@ -722,35 +723,8 @@ sourceDivId +
             }
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(source);
         },
-        exportOWL: function (source) {
-            if (!source) {
-                source = Lineage_sources.activeSource;
-            }
-            Sparql_OWL.generateOWL(source, {}, function (err, result) {
-                if (err) {
-                    return console.log(err);
-                }
-
-                common.copyTextToClipboard(result);
-            });
-
-            return;
-
-            var payload = {
-                graphUri: Config.sources[source].graphUri,
-            };
-            $.ajax({
-                type: "GET",
-                url: Config.apiUrl + "/graphStore/graph",
-                data: payload,
-                dataType: "json",
-                success: function (data, _textStatus, _jqXHR) {
-                    common.copyTextToClipboard(data);
-                },
-                error: function (err) {
-                    alert(err.responseText);
-                },
-            });
+        editSource: () => {
+            window.EditSourceDialog.open(Lineage_sources.activeSource);
         },
     };
 

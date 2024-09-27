@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.86.0](https://github.com/souslesens/souslesensVocables/compare/1.85.0...1.86.0) (2024-09-27)
+
+> [!IMPORTANT]
+> Updating to 1.86.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Features
+
+* **ConfigEditor:** add AllowedTools in profiles table ([3c8ea46](https://github.com/souslesens/souslesensVocables/commit/3c8ea463c50994c8ab9f27414bb3f7969c80d5ce))
+
 ## [1.85.0](https://github.com/souslesens/souslesensVocables/compare/1.84.0...1.85.0) (2024-09-23)
 
 

@@ -48,6 +48,9 @@ var Sparql_common = (function () {
     };
 
     self.setFilter = function (varName, ids, words, options) {
+        if(!options){
+            options={}
+        }
         if (!ids && !words) {
             return "";
         }
@@ -65,6 +68,8 @@ var Sparql_common = (function () {
             }
             return self.formatStringForTriple(str);
         }
+        var labelSuffix=options.labelSuffix || "Label"
+
 
         if (!options) {
             options = {};
@@ -114,9 +119,9 @@ var Sparql_common = (function () {
                         }
                     });
                     if (options.exactMatch) {
-                        filters.push(" FILTER(?" + varName + "Label  in(" + conceptWordStr + "))");
+                        filters.push(" FILTER(?" + varName +labelSuffix+ "  in(" + conceptWordStr + "))");
                     } else {
-                        filters.push(" FILTER(regex(?" + varName + 'Label , "' + conceptWordStr + '","i")) ');
+                        filters.push(" FILTER(regex(?" + varName +labelSuffix+ ' , "' + conceptWordStr + '","i")) ');
                     }
                 } else {
                     if (words == null) {
@@ -124,10 +129,10 @@ var Sparql_common = (function () {
                     }
 
                     if (options.exactMatch) {
-                        filters.push(" FILTER(?" + varName + "Label = '" + words + "')");
+                        filters.push(" FILTER(?" + varName+labelSuffix + " = '" + words + "')");
                         //filters.push(" regex(?" + varName + 'Label, "^' + words + '$", "i")');
                     } else {
-                        filters.push(" FILTER(regex(?" + varName + 'Label, "' + words + '", "i"))');
+                        filters.push(" FILTER(regex(?" + varName+labelSuffix + ', "' + words + '", "i"))');
                     }
                 }
             } else if (ids) {
@@ -160,9 +165,14 @@ var Sparql_common = (function () {
                     }
 
                     id = "" + id;
-                    if (id.match(/<.*>/)) {
+
+
+                    if (!id.startsWith("http") && id.match(/^.{1,5}:.{3,}$/)) {// prefix
                         conceptIdsStr += id;
-                    } else {
+                    } else if (id.match(/<.*>/)) {
+                        conceptIdsStr += id;
+                    }
+                    else {
                         conceptIdsStr += "<" + id + ">";
                     }
                 });
@@ -531,8 +541,14 @@ var Sparql_common = (function () {
         if (!date) {
             date = new Date();
         }
-        var str = JSON.stringify(date);
-        return str + "^^xsd:dateTime";
+
+       var str="\""+common.dateToRDFString(date)+"\"^^xsd:dateTime";
+        return str
+        //   return  "\"" + date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate() + "\"^^xsd:date"
+
+        //error in JSON.stringify(date) wrong day !!!!!!!!!!!!!!!
+     /*   var str = JSON.stringify(date);
+        return str + "^^xsd:dateTime";*/
     };
 
     self.getSourceFromUriInDefaultServer = function (uri, callback) {

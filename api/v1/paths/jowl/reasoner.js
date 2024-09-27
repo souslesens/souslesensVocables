@@ -7,6 +7,7 @@ const { processResponse } = require("../utils");
 const request = require("request");
 const async = require("async");
 
+
 //https://jena.apache.org/documentation/inference/
 
 module.exports = function () {
@@ -22,9 +23,30 @@ module.exports = function () {
 
         var jowlConfig = ConfigManager.config.jowlServer;
 
-        if (req.query.type == "externalUrl") {
-            var url = jowlConfig.url + "hermit/" + req.query.operation + "?url=" + req.query.url;
+        if (req.query.graphName ) {
+            var url = jowlConfig.url + "reasoner/" + req.query.operation + "?graphName=" + encodeURIComponent(req.query.graphName);
+            console.log(url)
+            req.query.url
+            HttpProxy.get(url, {}, function (err, result) {
+                // var url = jowlConfig.url + "reasoner/" + req.query.operation + "?filePath=" + req.query.url;
+                //    HttpProxy.post(jowlConfig.url, {}, function (err, result) {
+                if (err) {
+                    next(err);
+                } else {
+                    return processResponse(res, err, JSON.parse(result));
+                }
+            });
+        }
 
+
+
+
+
+
+
+      else  if (req.query.type == "externalUrl") {
+            var url = jowlConfig.url + "hermit/" + req.query.operation + "?url=" + req.query.url;
+            req.query.url
             HttpProxy.get(url, {},function (err, result) {
            // var url = jowlConfig.url + "reasoner/" + req.query.operation + "?filePath=" + req.query.url;
         //    HttpProxy.post(jowlConfig.url, {}, function (err, result) {
@@ -130,22 +152,15 @@ module.exports = function () {
                 required: true,
             },
             {
-                name: "type",
-                description: "externalUrl/ internalGraphUri",
-                in: "query",
-                type: "string",
-                required: true,
-            },
-            {
-                name: "url",
-                description: "source graphUri or url",
+                name: "graphName",
+                description: "graphName",
                 in: "query",
                 type: "string",
                 required: false,
             },
             {
-                name: "describeSparqlQuery",
-                description: "describeSparqlQuery",
+                name: "url",
+                description: "source graphUri or url",
                 in: "query",
                 type: "string",
                 required: false,

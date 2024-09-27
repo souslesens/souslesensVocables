@@ -113,8 +113,8 @@ var Sparql_proxy = (function () {
         var headers = {};
         if (options.source) {
             sourceParams = Config.sources[options.source];
-        } else {
-            sourceParams = Config.sources[MainController.currentSource];
+        } else if(MainController.currentSource){
+            sourceParams = Config.sources[MainController.currentSource || Config._defaultSource] ;
         }
 
         /*    if(!sourceParams.graphUri){// cas des sources sans graphe

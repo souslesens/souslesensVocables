@@ -54,8 +54,7 @@ class ProfileModel {
             allowedSourceSchemas: ["OWL", "SKOS"],
             defaultSourceAccessControl: "readwrite",
             sourcesAccessControl: {},
-            allowedTools: "ALL",
-            forbiddenTools: [],
+            allowedTools: config.tools_available,
             theme: config.theme.defaultTheme,
         };
 
@@ -101,11 +100,8 @@ class ProfileModel {
             }
             const userProfiles = await this.getUserProfiles(user);
             const allowedToolsOrAll = new Set(Object.values(userProfiles).flatMap((v) => v.allowedTools));
-            const forbiddenTools = new Set(Object.values(userProfiles).flatMap((v) => v.forbiddenTools));
             const allowedTools = allowedToolsOrAll.has("ALL") ? availableToolsNames : allowedToolsOrAll;
-            const userTools = new Set([...allowedTools].filter((x) => !forbiddenTools.has(x)));
-
-            return this._toolModel.allTools.filter((tool) => userTools.has(tool.name));
+            return this._toolModel.allTools.filter((tool) => allowedTools.has(tool.name));
         } catch (error) {
             console.log(error);
         }

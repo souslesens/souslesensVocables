@@ -602,14 +602,12 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         var sourceNodeEdges = self.network.getConnectedEdges(sourceNodeId);
         sourceNodeEdges.forEach(function (edgeId) {
             var edge = self.data.edges.get(edgeId);
-            if (!targetNodeId|| edge.to == targetNodeId ) {
+            if (!targetNodeId || edge.to == targetNodeId) {
                 connectedEdges.push(edge);
             }
-
         });
         return connectedEdges;
     };
-
 
     self.getFromNodeEdgesAndToNodes = function (sourceNodeId, bothDirections) {
         var connectedEdges = [];
@@ -617,15 +615,13 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         sourceNodeEdges.forEach(function (edgeId) {
             var edge = self.data.edges.get(edgeId);
             var fromNode = self.data.nodes.get(edge.from);
-            if(bothDirections  ||  edge.from==sourceNodeId) {
+            if (bothDirections || edge.from == sourceNodeId) {
                 var toNode = self.data.nodes.get(edge.to);
-                connectedEdges.push({edge: edge, fromNode: fromNode, toNode: toNode});
+                connectedEdges.push({ edge: edge, fromNode: fromNode, toNode: toNode });
             }
         });
         return connectedEdges;
     };
-
-
 
     self.processClicks = function (
         /** @type {{ edges: string | any[]; nodes: string | any[]; event: { srcEvent: { ctrlKey: any; altKey: any; shiftKey: any; }; }; pointer: { DOM: any; }; }} */ params,
@@ -979,12 +975,12 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     if (context.callback) {
                         callback = context.callback;
                     }
-                    if ( self.data.nodes ||  self.isGraphNotEmpty()) {
+                    if (self.data.nodes || self.isGraphNotEmpty()) {
                         self.data.edges.add(visjsData.edges);
                         self.data.nodes.add(visjsData.nodes);
                     } else {
-                       // self.draw(context.divId, visjsData, context.options, callback);
-                        self.draw( callback);
+                        // self.draw(context.divId, visjsData, context.options, callback);
+                        self.draw(callback);
                     }
                     self.message("");
                 }

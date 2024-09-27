@@ -1,10 +1,10 @@
 const path = require("path");
 
-const { sourceModel } = require("../../../model/sources");
-const { userModel } = require("../../../model/users");
-const { responseSchema, successfullyFetched, successfullyCreated, fixBooleanInObject } = require("./utils.js");
+const { sourceModel } = require("../../../../model/sources");
+const { userModel } = require("../../../../model/users");
+const { responseSchema } = require("./../utils");
 const userManager = require(path.resolve("bin/user."));
-
+const { successfullyFetched, successfullyCreated, fixBooleanInObject } = require("./../utils.js");
 module.exports = function () {
     let operations = {
         GET,
@@ -17,21 +17,15 @@ module.exports = function () {
             const userInfo = await userManager.getUser(req.user);
             let localSourceModel = sourceModel;
 
-            let userSources;
-            if (req.query.ownedOnly) {
-                userSources = await localSourceModel.getOwnedSources(userInfo.user);
-            } else {
-                userSources = await localSourceModel.getUserSources(userInfo.user);
-            }
-
+            const userSources = await localSourceModel.getUserSources(userInfo.user);
             res.status(200).json(successfullyFetched(userSources));
         } catch (err) {
-            res.status(500).json({ message: err });
+            next(err);
         }
     }
     GET.apiDoc = {
         summary: "Returns all sources",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: "getSources",
         responses: responseSchema("Sources", "GET"),
         parameters: [
@@ -44,6 +38,7 @@ module.exports = function () {
             },
         ],
     };
+
     ///// POST api/v1/sources
     async function POST(req, res, next) {
         try {
@@ -83,7 +78,7 @@ module.exports = function () {
     }
     POST.apiDoc = {
         summary: "Update Sources",
-        security: [{ restrictLoggedUser: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: "updateSources",
         parameters: [],
         responses: responseSchema("Sources", "POST"),

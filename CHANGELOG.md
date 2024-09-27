@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.86.0](https://github.com/souslesens/souslesensVocables/compare/1.85.0...1.86.0) (2024-09-27)
+
+> [!IMPORTANT]
+> Updating to 1.86.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Features
+
+* **ConfigEditor:** add AllowedTools in profiles table ([3c8ea46](https://github.com/souslesens/souslesensVocables/commit/3c8ea463c50994c8ab9f27414bb3f7969c80d5ce))
+
+## [1.85.0](https://github.com/souslesens/souslesensVocables/compare/1.84.0...1.85.0) (2024-09-23)
+
+
+### Features
+
+* **api:** add api/sources for user ([7b9d068](https://github.com/souslesens/souslesensVocables/commit/7b9d068818e3c6451b2d8352f89b0e78ffd2d06a))
+* **mainapp:** allow downloading graph management as csv ([060b2d0](https://github.com/souslesens/souslesensVocables/commit/060b2d0118d65523ba2f7e42e2a57b3319e069a6))
+
+
+### Bug Fixes
+
+* **api/config:** don't get all config even if user is admin ([95af912](https://github.com/souslesens/souslesensVocables/commit/95af9123fd9c024f6f5d0f3b4f63a2028a36fc12))
+* **userManagement:** use user routes for fetching sources ([cba02fd](https://github.com/souslesens/souslesensVocables/commit/cba02fd59f2c73b2996bf3e80f67634e119b0110))
+
+## [1.84.0](https://github.com/souslesens/souslesensVocables/compare/1.83.0...1.84.0) (2024-09-20)
+
+
+### Bug Fixes
+
+* **mainapp:** do not raise a require error when editing a profile ([4b9ebe4](https://github.com/souslesens/souslesensVocables/commit/4b9ebe4c298254eec2501bdd642db26ad022bef5)), closes [#885](https://github.com/souslesens/souslesensVocables/issues/885)
+
 ## [1.83.0](https://github.com/souslesens/souslesensVocables/compare/1.82.1...1.83.0) (2024-09-17)
 
 

@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 
 import {
@@ -30,6 +30,7 @@ import {
     Typography,
 } from "@mui/material";
 import { Cancel, Close, Done, Folder } from "@mui/icons-material";
+import CsvDownloader from "react-csv-downloader";
 
 import { fetchMe, VisuallyHiddenInput, humanizeSize } from "./Utils";
 
@@ -480,10 +481,26 @@ export default function GraphManagement() {
         </Dialog>
     );
 
+    const memoizedSources = useMemo(
+        () =>
+            Object.values(sources).sort((a, b) => {
+                if (orderBy == "graphSize") {
+                    const left_n: number = getGraphSize(a, graphs);
+                    const right_n: number = getGraphSize(b, graphs);
+                    return order === "asc" ? left_n - right_n : right_n - left_n;
+                } else {
+                    const left: string = a[orderBy] || ("" as string);
+                    const right: string = b[orderBy] || ("" as string);
+                    return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+                }
+            }),
+        [sources, orderBy, order]
+    );
+
     return (
         <>
             {dialogModal}
-            <Stack direction="column" spacing={{ xs: 2 }} useFlexGap>
+            <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                 <Autocomplete
                     disablePortal
                     id="search-graph"
@@ -494,7 +511,7 @@ export default function GraphManagement() {
                     renderInput={(params) => <TextField {...params} label="Search Sources by name" />}
                 />
 
-                <TableContainer sx={{ height: "80vh" }} component={Paper}>
+                <TableContainer sx={{ height: "400px" }} component={Paper}>
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
@@ -519,23 +536,12 @@ export default function GraphManagement() {
                             </TableRow>
                         </TableHead>
                         <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                            {Object.entries(sources)
-                                .sort(([_aName, a], [_bName, b]) => {
-                                    if (orderBy == "graphSize") {
-                                        const left_n: number = getGraphSize(a, graphs);
-                                        const right_n: number = getGraphSize(b, graphs);
-                                        return order === "asc" ? left_n - right_n : right_n - left_n;
-                                    } else {
-                                        const left: string = a[orderBy] || ("" as string);
-                                        const right: string = b[orderBy] || ("" as string);
-                                        return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
-                                    }
-                                })
-                                .filter(([_sourceName, source]) => source.name.includes(filteringChars))
-                                .map(([sourceName, source]) => {
+                            {memoizedSources
+                                .filter((source) => source.name.includes(filteringChars))
+                                .map((source) => {
                                     return (
-                                        <TableRow key={sourceName}>
-                                            <TableCell>{sourceName}</TableCell>
+                                        <TableRow key={source.name}>
+                                            <TableCell>{source.name}</TableCell>
                                             <TableCell>
                                                 <Link href={source.graphUri}>{source.graphUri}</Link>
                                             </TableCell>
@@ -578,6 +584,20 @@ export default function GraphManagement() {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                    <CsvDownloader
+                        filename="graph-management.csv"
+                        datas={memoizedSources.map((s) => {
+                            return {
+                                name: s.name,
+                                graphUri: s.graphUri ?? "",
+                                graphSize: getGraphSize(s, graphs).toString(),
+                            };
+                        })}
+                    >
+                        <Button variant="outlined">Download CSV</Button>
+                    </CsvDownloader>
+                </Stack>
             </Stack>
         </>
     );

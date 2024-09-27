@@ -135,7 +135,7 @@ var Config = (function () {
         author: "http://purl.org/dc/terms/creator",
         provenance: "http://purl.org/dc/terms/source",
         creationDate: "http://purl.org/dc/terms/created",
-        mappingFile : "http://souslesens.org/KGcreator#mappingFile",
+        mappingFile: "http://souslesens.org/KGcreator#mappingFile",
     };
     self.dictionaryStatusMap = {
         promote: "OK",

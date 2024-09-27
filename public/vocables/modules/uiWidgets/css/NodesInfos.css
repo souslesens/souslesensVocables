@@ -69,7 +69,7 @@ th, td{
     border-radius: 14px;
     border-top-left-radius: 0px;
     overflow: unset;
-    display: flex ;
+    display: flex;
 }
 .nodesInfosAdditionalInfos {
     background-color: @background-color !important;

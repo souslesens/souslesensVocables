@@ -151,15 +151,15 @@ var OntologyModels = (function () {
                                 callbackSeries();
                             });
                         },
-                         //set AnnotationProperties and datatypeProperties
-                        // We need to add Types for properties added to distinguish annotations,datatypes and rdf:Property 
+                        //set AnnotationProperties and datatypeProperties
+                        // We need to add Types for properties added to distinguish annotations,datatypes and rdf:Property
                         // which can be either datatype and object properties depending the ontology
                         // Problem is that some of this information types are classified on the wrong source (like rdfs:label type annotation
                         //is stored in owl)
                         // Resolution add others basic ontology to have all the data required for the properties and add in other vocab
                         // if the vocabulary detected from uri is different from current source
                         //Problem with this method is first apparition of the property
-                         /*
+                        /*
                         function (callbackSeries) {
     
                             var addedSource= (source=='rdf'||source=='rdfs') ? " from <http://www.w3.org/2002/07/owl#>" : '';
@@ -211,8 +211,8 @@ var OntologyModels = (function () {
                             });
                         },*/
                         // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)
-                        // problem with current method 
-                        // Some properties or information overload about a property are stored in other source like iof-av or owl who store 
+                        // problem with current method
+                        // Some properties or information overload about a property are stored in other source like iof-av or owl who store
                         //information about rdf/owl properties
                         //The rdf:Property type are object properties that cause trouble in nodeInfos addPredicate which are based on
                         // this section and should be stored on properties
@@ -1015,9 +1015,8 @@ var OntologyModels = (function () {
                             if (Object.keys(allRanges).length == 0) {
                                 anyRange = true;
                             }
-                            var allRangesArray=Object.keys(allRanges)
-                            if(allRangesArray.length==0)
-                                return callbackSeries();
+                            var allRangesArray = Object.keys(allRanges);
+                            if (allRangesArray.length == 0) return callbackSeries();
                             Sparql_OWL.getAllDescendants(source, allRangesArray, "rdfs:subClassOf", {}, function (err, result) {
                                 if (err) {
                                     return callback(err);
@@ -1043,9 +1042,8 @@ var OntologyModels = (function () {
                             if (Object.keys(allDomains).length == 0) {
                                 anyDomain = true;
                             }
-                            var allDomainsArray=Object.keys(allDomains)
-                            if(allDomainsArray.length==0)
-                                return callbackSeries();
+                            var allDomainsArray = Object.keys(allDomains);
+                            if (allDomainsArray.length == 0) return callbackSeries();
                             Sparql_OWL.getAllDescendants(source, allDomainsArray, "rdfs:subClassOf", {}, function (err, result) {
                                 if (err) {
                                     return callback(err);

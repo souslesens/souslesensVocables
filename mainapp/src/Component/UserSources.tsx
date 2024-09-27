@@ -26,7 +26,7 @@ import {
 } from "@mui/material";
 import { CheckBox, CheckBoxOutlineBlank, Delete, Edit } from "@mui/icons-material";
 
-import { getSources, ServerSource, ServerSourceSchema } from "../Source";
+import { getSourcesForUser, ServerSource, ServerSourceSchema } from "../Source";
 import { cleanUpText, fetchMe } from "../Utils";
 import { Severity } from "../user-management";
 
@@ -203,11 +203,11 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
     const [orderBy, setOrderBy] = useState<OrderByType>("name");
     const [selectedSource, setSelectedSource] = useState("");
     const [sources, setSources] = useState<ServerSource[]>([]);
-    const [_user, setUser] = useState<User>(initialUser);
+    const [user, setUser] = useState<User>(initialUser);
 
     useEffect(() => {
         async function fetchSources() {
-            setSources(await getSources());
+            setSources(await getSourcesForUser());
 
             const me = await fetchMe();
             setUser({
@@ -309,6 +309,7 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
                     </TableHead>
                     <TableBody sx={{ width: "100%", overflow: "visible" }}>
                         {sortedSources
+                            .filter((source) => source.owner == user.login)
                             .filter((source) => cleanUpText(source.name).includes(cleanUpText(filtering)))
                             .map((source) => {
                                 return (

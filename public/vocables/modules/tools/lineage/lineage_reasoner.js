@@ -48,13 +48,13 @@ var Lineage_reasoner = (function () {
             operation: "consistency",
             type: self.ontologyAccessType,
             describeSparqlQuery: describeQuery,
-            graphName:Config.sources[Lineage_sources.activeSource].graphUri,
+            graphName: Config.sources[Lineage_sources.activeSource].graphUri,
         });
         $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
 
         $.ajax({
             type: "GET",
-         url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
+            url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
 
             dataType: "json",
 
@@ -75,13 +75,13 @@ var Lineage_reasoner = (function () {
             operation: "unsatisfiable",
             type: self.ontologyAccessType,
             describeSparqlQuery: describeQuery,
-            graphName:Config.sources[Lineage_sources.activeSource].graphUri,
+            graphName: Config.sources[Lineage_sources.activeSource].graphUri,
         });
         $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
 
         $.ajax({
             type: "GET",
-           url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
+            url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
 
             dataType: "json",
 
@@ -99,7 +99,7 @@ var Lineage_reasoner = (function () {
 
         $.ajax({
             type: "GET",
-          url: Config.apiUrl + "/jowl/reasonerListInferenceParams",
+            url: Config.apiUrl + "/jowl/reasonerListInferenceParams",
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {
@@ -137,9 +137,9 @@ var Lineage_reasoner = (function () {
         const params = new URLSearchParams({
             operation: "inference",
             graphName: Config.sources[Lineage_sources.activeSource].graphUri,
-          //  type: self.ontologyAccessType,
+            //  type: self.ontologyAccessType,
             predicates: JSON.stringify(predicates),
-          //  describeSparqlQuery: describeQuery,
+            //  describeSparqlQuery: describeQuery,
         });
         $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
 

@@ -94,7 +94,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                     return UI.message(err, true);
                 }
                 UI.message("ALL DONE", true);
-                $("#sourcesTreeDiv").jstree(true).uncheck_all();
+                $("#sourceSelector_jstreeDiv").jstree(true).uncheck_all();
             }
         );
     };

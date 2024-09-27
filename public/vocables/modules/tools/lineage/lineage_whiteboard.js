@@ -55,7 +55,7 @@ var Lineage_whiteboard = (function () {
     self.defaultNodeFontColor = "#343434";
     self.defaultEdgeFontColor = "#343434";
     self.defaultLowOpacity = 0.35;
-
+    self.decorationData={};
     self.arrowTypes = {
         subClassOf: {
             to: {
@@ -303,7 +303,7 @@ var Lineage_whiteboard = (function () {
                             return alert(err.response);
                         }
                         var options = { output: "graph" };
-                        if (!Lineage_whiteboard.lineageVisjsGraph.data.nodes.get) {
+                        if (!Lineage_whiteboard.lineageVisjsGraph.data?.nodes?.get) {
                             nodes = [];
                         } else {
                             var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
@@ -552,7 +552,7 @@ var Lineage_whiteboard = (function () {
         if (!_options) {
             _options = {};
         }
-
+        
         graphContext = {};
         var options = {};
         if (_options.visjsOptions) {
@@ -676,19 +676,58 @@ var Lineage_whiteboard = (function () {
         if (!graphDiv) {
             graphDiv = "graphDiv";
         }
+        var visjsGraphFileName = Lineage_sources.activeSource + "_decoration.json";
+        var payload = {
+            dir: "graphs/",
+            fileName: visjsGraphFileName,
+        };
+        //get decoration file
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var data = JSON.parse(result);
+                if(Object.keys(data).length>0){
+                    self.decorationData[Lineage_sources.activeSource]=data;
+                }
+                visjsData.nodes.forEach(function(node){
+                    if(data[node.id] && data[node.id].image){
+                        node.image=data[node.id].image;
+                        node.shape='circularImage'
+                    }   
+                });
+                
+                self.lineageVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
+                self.lineageVisjsGraph.draw(function () {
+                    UI.message("", true);
 
-        self.lineageVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
-        self.lineageVisjsGraph.draw(function () {
-            UI.message("", true);
+                    //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
 
-            //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
+                    if (self.lineageVisjsGraph.isGraphNotEmpty() && !_options.noDecorations) {
+                        Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
+                        //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
+                    }
+                });
+                Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
+            },
+            error(err) {
+                self.lineageVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
+                self.lineageVisjsGraph.draw(function () {
+                    UI.message("", true);
 
-            if (self.lineageVisjsGraph.isGraphNotEmpty() && !_options.noDecorations) {
-                Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
-                //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
-            }
+                    //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
+
+                    if (self.lineageVisjsGraph.isGraphNotEmpty() && !_options.noDecorations) {
+                        Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
+                        //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
+                    }
+                });
+                Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
+            },
         });
-        Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
+        
 
         return;
     };

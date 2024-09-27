@@ -18,7 +18,7 @@ module.exports = function () {
        var jowlConfigUrl=ConfigManager.config.jowlServer.url
         if(!jowlConfigUrl.endsWith("/"))
             jowlConfigUrl+="/"
-        jowlConfigUrl+="manchester/triples2manchester";
+        jowlConfigUrl+="axioms/triples2manchester";
 
         var payload={
             "graphName": req.query.ontologyGraphUri,

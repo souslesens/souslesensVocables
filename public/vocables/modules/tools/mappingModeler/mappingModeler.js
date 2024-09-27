@@ -9,7 +9,6 @@ import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Clipboard from "../../shared/clipboard.js";
 import KGcreator_graph from "../KGcreator/KGcreator_graph.js";
-import KGcreator_run from "../KGcreator/KGcreator_run.js";
 
 var MappingModeler = (function () {
     var self = {};
@@ -58,7 +57,6 @@ var MappingModeler = (function () {
             function (callbackSeries) {
                 $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPannel.html", function (err) {
                     $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
-                        $("#mappingModeler_newAxiomPanel").hide();
                         //$("#mainDialogDiv").dialog("open");
                         return callbackSeries();
                     });
@@ -117,7 +115,7 @@ var MappingModeler = (function () {
                 jstreeData.forEach(function (item) {
                     columns.push(item.data.id);
                 });
-                self.hideForbiddenResources("Table");
+                //self.hideForbiddenResources("Table");
                 self.currentResourceType = "Column";
                 self.currentTable = {
                     name: obj.node.id,
@@ -142,7 +140,6 @@ var MappingModeler = (function () {
         self.currentDataSource = KGcreator.currentConfig.currentDataSource.name;
     };
     self.hideDataSources = function (divId) {
-        $("#mappingModeler_newAxiomPanel").show();
         MappingModeler.switchDataSourcePanel("hide");
         self.initActiveLegend(divId);
         try {
@@ -278,6 +275,7 @@ var MappingModeler = (function () {
                     },
                     smooth: smooth,
                     data: {
+                        id: resourceUri,
                         type: resourceUri,
                         source: property.source,
                     },
@@ -343,6 +341,7 @@ var MappingModeler = (function () {
                     from: self.currentGraphNode.id,
                     label: label,
                     to: newResource.id,
+                    width: 2,
                     data: { type: type },
                     arrows: arrows,
                     color: edgeColor,
@@ -421,10 +420,18 @@ var MappingModeler = (function () {
             }
 
             if (!self.currentRelation) {
-                self.currentRelation = { from: { id: node.id, classId: getColumnClass(node) }, to: null };
+                self.currentRelation = {
+                    from: { id: node.id, classId: getColumnClass(node) },
+                    to: null,
+                    type: node.data.type,
+                };
             } else {
                 self.currentRelation.to = { id: node.id, classId: getColumnClass(node) };
-                self.onLegendNodeClick({ id: "ObjectProperty" });
+                if (self.currentRelation.from.type != "Class" && node.data.type == "Class") {
+                    self.graphActions.drawColumnToClassEdge(self.currentRelation);
+                } else if (self.currentRelation.from.type != "Class" && node.data.type != "Class") {
+                    self.onLegendNodeClick({ id: "ObjectProperty" });
+                }
             }
         } else {
             self.currentRelation = null;
@@ -439,7 +446,7 @@ var MappingModeler = (function () {
         self.currentGraphNode = node;
         self.graphActions.outlineNode(node.id);
 
-        if (!node || !node.data) {
+        if (!node) {
             return;
         }
         var html = "";
@@ -449,10 +456,11 @@ var MappingModeler = (function () {
         } else {
             html = '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.removeNodeFromGraph();"> Remove Node</span>';
         }
-
-        html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.showNodeInfos()">Node Infos</span>';
-        if (node.data.type == "Class") {
-            html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.addSuperClassToGraph()">draw superClass</span>';
+        if (node.data) {
+            html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.showNodeInfos()">Node Infos</span>';
+            if (node.data.type == "Class") {
+                html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.addSuperClassToGraph()">draw superClass</span>';
+            }
         }
 
         $("#popupMenuWidgetDiv").html(html);
@@ -507,6 +515,31 @@ var MappingModeler = (function () {
 
                 self.drawResource(newResource);
             });
+        },
+
+        drawColumnToClassEdge: function () {
+            if (!self.currentRelation) {
+                return;
+            }
+            var edges = [
+                {
+                    from: self.currentRelation.from.id,
+                    to: self.currentRelation.to.id,
+                    label: "a",
+                    color: "ddd",
+                    width: 2,
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            type: "arrow",
+                        },
+                    },
+                    data: { type: "rdf:type" },
+                },
+            ];
+
+            self.visjsGraph.data.edges.add(edges);
+            self.currentRelation = null;
         },
 
         showNodeInfos: function () {
@@ -618,13 +651,6 @@ var MappingModeler = (function () {
                 properties = common.array.sort(properties, "label");
                 self.setSuggestionsSelect(properties, false, newObjects);
             });
-            /*  self.getAllProperties(self.currentSource, function(err, objectProperties) {
-                      if (err) {
-                          return alert(err);
-                      }
-
-                      self.setSuggestionsSelect(objectProperties, true, newObject);
-                  });*/
         } else if (self.currentResourceType == "RowIndex") {
             self.onSuggestionsSelect({ id: "RowIndex" });
         } else if (self.currentResourceType == "VirtualColumn") {
@@ -808,6 +834,7 @@ var MappingModeler = (function () {
             if (err) {
                 return alert(err);
             }
+            CreateAxiomResource_bot.params.newObject.label = self.currentSource.substring(0, 3) + ":" + CreateAxiomResource_bot.params.newObject.label;
             // update Axiom_manager
             if (resourceType == "Class") {
                 self.allClasses.push(CreateAxiomResource_bot.params.newObject);
@@ -831,6 +858,7 @@ var MappingModeler = (function () {
         var columnsMap = {};
         nodes.forEach(function (node, callbackEach) {
             if (node.data.type == "Class") {
+                return;
             }
 
             columnsMap[node.id] = node;
@@ -877,7 +905,6 @@ var MappingModeler = (function () {
         return colname;
     };
     self.mappingsToKGcreatorJson = function (columnsMap) {
-        var transforms = {};
         var columnsMapLabels = Object.values(columnsMap).map(function (column) {
             return column.label;
         });
@@ -901,9 +928,6 @@ var MappingModeler = (function () {
                     o: data.rdfsLabel,
                     isString: true,
                 });
-            }
-            if (data.transform) {
-                transforms[columnsMap[nodeId].label] = data.transform;
             }
 
             var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
@@ -954,8 +978,103 @@ var MappingModeler = (function () {
             [self.currentTable.name]: {
                 tripleModels: tripleModels,
             },
+            transform: {},
         };
-        json.transform = transforms;
+
+        return json;
+    };
+    self.nodeToKGcreatorColumnName = function (data) {
+        var colname;
+        if (data.uriType == "blankNode" || !data.rdfsLabel) {
+            colname = data.id + "_$";
+        } else if (data.uriType == "randomIdentifier") {
+            colname = data.id + "_£";
+        } else if (data.uriType == "fromColumnTitle") {
+            colname = data.id;
+        }
+
+        if (data.type == "VirtualColumn") {
+            colname = "@" + colname;
+        }
+        return colname;
+    };
+    self.mappingsToKGcreatorJson = function (columnsMap) {
+        var columnsMapLabels = Object.values(columnsMap).map(function (column) {
+            return column.label;
+        });
+        var tripleModels = [];
+        for (var nodeId in columnsMap) {
+            var data = columnsMap[nodeId].data;
+            var subject = self.nodeToKGcreatorColumnName(data);
+
+            if (data.rdfType) {
+                tripleModels.push({
+                    s: subject,
+                    p: "rdf:type",
+                    o: data.rdfType,
+                });
+            }
+
+            if (data.rdfsLabel) {
+                tripleModels.push({
+                    s: subject,
+                    p: "rdfs:label",
+                    o: data.rdfsLabel,
+                    isString: true,
+                });
+            }
+
+            var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
+
+            connections.forEach(function (connection) {
+                var property = connection.edge.data.type;
+                var object = connection.toNode.data.id;
+                if (columnsMapLabels.includes(object)) {
+                    object = self.nodeToKGcreatorColumnName(
+                        Object.values(columnsMap).filter(function (node) {
+                            return object == node.label;
+                        })[0].data
+                    );
+                }
+                tripleModels.push({
+                    s: subject,
+                    p: property,
+                    o: object,
+                });
+            });
+            if (data.otherPredicates) {
+                data.otherPredicates.forEach(function (predicate) {
+                    var triple = {
+                        s: subject,
+                        p: predicate.property,
+                        o: predicate.object,
+                    };
+
+                    if (predicate.range) {
+                        if (predicate.range.indexOf("Resource") > -1) {
+                            triple.isString = true;
+                        } else {
+                            triple.dataType = predicate.range;
+                        }
+                    } else {
+                        triple.isString = true;
+                    }
+                    if (predicate.dateFormat) {
+                        triple.dateFormat = predicate.dateFormat;
+                    }
+
+                    tripleModels.push(triple);
+                });
+            }
+        }
+
+        var json = {
+            [self.currentTable.name]: {
+                tripleModels: tripleModels,
+            },
+            transform: {},
+        };
+
         return json;
     };
 
@@ -996,7 +1115,6 @@ var MappingModeler = (function () {
         });
     };
     self.calculateColumnMappingsFromGraph = function () {
-        self.classDialogData = {};
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
         var edges = MappingModeler.visjsGraph.data.edges.get();
         var notClassNodes = graphNodes.filter(function (item) {
@@ -1029,14 +1147,14 @@ var MappingModeler = (function () {
     };
     self.addRowClass = function (column) {
         /*var classIndexes=Object.keys(self.classDialogData);
-        
-        if(classIndexes.length>0){
-            
-            var rowIndex=parseInt(classIndexes[classIndexes.length-1])+1;
-        }
-        else{
-            var rowIndex=0;
-        }*/
+
+            if(classIndexes.length>0){
+
+                var rowIndex=parseInt(classIndexes[classIndexes.length-1])+1;
+            }
+            else{
+                var rowIndex=0;
+            }*/
         //self.classDialogData[rowIndex]={Column:'',Type:'',Label:'',DatatypeProperties:{},Transform:{}};
 
         $("#classDefineColumn").append(`<span id='class-column-${column}'> ${column} </span> `);
@@ -1050,36 +1168,24 @@ var MappingModeler = (function () {
         $("#classDefineSample").append(
             `<button class='slsv-button-1' id='class-sample-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.sampleData("${column}")'> Sample</button> `
         );
-        $("#classDefineTransform").append(
-            `<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button>  `
-        );
+        $("#classDefineTransform").append(`<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px;margin:0px;'> Fn</button>  `);
         //$('#classDefineClose').append(`<button class='slsv-button-1' id='class-close-${column}' style='padding:2px 2px;margin:0px;'> X</button>  `)
         var columns = JSON.parse(JSON.stringify(self.currentTable.columns));
-        common.array.insertFirstArray(columns, column);
 
-        var URITType = ["fromColumnTitle", "blankNode", "randomIdentifier"];
+        let index = columns.indexOf(column);
+        if (index > -1) {
+            columns.splice(index, 1);
+            columns.unshift(column);
+        }
+
+        var URITType = ["fromLabel", "blankNode", "randomIdentifier"];
         var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
-        //  sort by similarity for others than rowIndex
-
-        var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
-        var currentGraphNode = graphNodes.filter(function (node) {
-            return node.data.label == column;
-        })[0];
-        if (currentGraphNode.data.rdfType) {
-            common.array.insertFirstArray(rdfObjectsType, currentGraphNode.data.rdfType);
-        }
-        if (currentGraphNode.data.uriType) {
-            common.array.insertFirstArray(URITType, currentGraphNode.data.uriType);
-        }
-        if (currentGraphNode.data.rdfsLabel) {
-            common.array.insertFirstArray(columns, currentGraphNode.data.rdfsLabel);
-        }
+        // to comment and to sort by similarity for others than rowIndex
 
         common.fillSelectOptions(`class-label-${column}`, columns, false);
         common.fillSelectOptions(`class-RDFType-${column}`, rdfObjectsType, false);
         common.fillSelectOptions(`class-URITType-${column}`, URITType, false);
     };
-
     self.datatypePropertiesDefine = function (column) {
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
         self.currentGraphNode = graphNodes.filter(function (node) {
@@ -1094,20 +1200,44 @@ var MappingModeler = (function () {
         //rajouter toutes les colonnes en lien avec celle la et mettre celle qui nous intéresse en premier
         KGcreator.showSampleData(self.currentTreeNode, column);
     };
+    /*
+        self.onColumnClassSelect=function(rowIndex){
+            var choosenColumn=$('#class-column-'+rowIndex).val();
+            if(choosenColumn=='VirtualColumn'){
+                //to treat
+            }
+            // Verify if the column is already choosen
+            self.getAllClasses(self.currentSource,function(err,result){
 
-    self.saveTechnicalView = function () {
-        var nodes = MappingModeler.visjsGraph.data.nodes.get();
+                common.fillSelectOptions(`class-type-${rowIndex}`,result, false,'label','id');
+                common.fillSelectOptions(`class-label-${rowIndex}`,self.currentTable.columns, false);
+                $('#class-type-'+rowIndex).show();
+                $('#class-label-'+rowIndex).show();
+                $('#class-datatype-'+rowIndex).show();
+                $('#class-sample-'+rowIndex).show();
+                $('#class-transform-'+rowIndex).show();
+                $('#class-close-'+rowIndex).show();
+            });
+        }*/
+
+    self.saveDefineClass = function () {
+        // Step 1 : Enregistrer le dictionnaire
         Object.keys(self.classDialogData).forEach(function (rowIndex) {
-            var currentNode = nodes.filter(function (node) {
-                return node.label == rowIndex;
-            })[0];
-
-            currentNode.data.uriType = $("#class-URITType-" + rowIndex).val();
-            currentNode.data.rdfsLabel = $("#class-label-" + rowIndex).val();
-            currentNode.data.rdfType = $("#class-RDFType-" + rowIndex).val();
-            self.visjsGraph.data.nodes.update(currentNode);
+            self.classDialogData[rowIndex].Column = $("#class-column-" + rowIndex).val();
+            self.classDialogData[rowIndex].Type = $("#class-type-" + rowIndex).val();
+            self.classDialogData[rowIndex].Label = $("#class-label-" + rowIndex).val();
         });
-        MappingModeler.saveVisjsGraph();
+        self.updateModelFromDict();
+        //self.classDialogData[rowIndex]={Column:'',Type:'',Label:'',DatatypeProperties:{},Transform:{}};
+        // Step 2 : Dessiner le mapping à partir du dictionnaire
+    };
+    self.updateModelFromDict = function () {
+        Object.keys(self.classDialogData).forEach(function (rowIndex) {
+            // traiter le cas d'un noeud préexistant à modifier non traité ici
+            self.onSuggestionsSelect(self.classDialogData[rowIndex].Column);
+            self.onSuggestionsSelect(self.classDialogData[rowIndex].Type);
+            //traiter le label
+        });
     };
 
     self.showDatatypeGraph = function (column) {
@@ -1115,7 +1245,7 @@ var MappingModeler = (function () {
         var mappings = self.generateBasicContentMappingContent()[self.currentTreeNode.id].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {
-            return mapping.s.replace("@", "").replace("_$", "").replace("_£", "") == column || mapping.o.replace("@", "").replace("_$", "").replace("_£", "") == column;
+            return mapping.s == column || mapping.o == column;
         });
 
         self.currentMappings = {};
@@ -1342,118 +1472,6 @@ var MappingModeler = (function () {
         $("#KGcreatorVisjsLegendCanvas").css("right", 200);
     };
 
-    self.transformDialog = function (column) {
-        // return if  virtuals and rowIndex
-        if (!column) {
-            column = MappingModeler.currentGraphNode.label;
-        }
-        $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function (err) {
-            $("#smallDialogDiv").dialog("open");
-            $("#smallDialogDiv").dialog("option", "title", "Transform for " + column);
-            self.transformColumn = column;
-        });
-    };
-    self.createPrefixTransformFn = function () {
-        if (!self.currentTreeNode) {
-            var column_selected = $("#KGcreator_transformColumnSelect").val();
-        } else {
-            var column_selected = self.currentTreeNode.data.id;
-        }
-        var prefix = prompt("Enter Prefix", column_selected);
-        if (!prefix) {
-            return;
-        }
-        var str = "if((mapping.isString||mapping.dataType) && role=='o') return value; else return '" + prefix + "-'+value;";
-        $("#KGcreator_fnBody").val(str);
-    };
-
-    self.testTransform = function () {
-        //  display view sample triples with added transform for column mapping
-        var transformFnStr = $("#KGcreator_fnBody").val();
-
-        transformFnStr = transformFnStr.replace(/"/g, "'");
-
-        try {
-            new Function("row", "mapping", transformFnStr);
-        } catch (err) {
-            return alert("error in function code " + err.message);
-        }
-        var transformFn = "function{" + transformFnStr + "}";
-        var mappings = self.generateBasicContentMappingContent()[self.currentTreeNode.id].tripleModels;
-
-        var filteredMapping = mappings.filter(function (mapping) {
-            return mapping.s.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn || mapping.o.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn;
-        });
-
-        var mappingWithTransform = {};
-        mappingWithTransform[MappingModeler.currentTable.name] = { tripleModels: filteredMapping, transform: {} };
-        mappingWithTransform[MappingModeler.currentTable.name].transform[self.transformColumn] = transformFn;
-
-        // get transform and add to filtered mapping
-        // change select view sample triple then use it
-        self.viewSampleTriples(mappingWithTransform);
-    };
-
-    self.viewSampleTriples = function (mappings) {
-        var options = {};
-        if (Config.clientSocketId) {
-            options.clientSocketId = Config.clientSocketId;
-        }
-        options.deleteOldGraph = false;
-        options.sampleSize = 500;
-        options.mappingsFilter = mappings;
-        UI.message("creating triples...");
-        var payload = {
-            source: MappingModeler.currentSource,
-            datasource: MappingModeler.currentDataSource,
-            table: MappingModeler.currentTable.name,
-            options: JSON.stringify(options),
-        };
-        $.ajax({
-            type: "POST",
-            url: `${Config.apiUrl}/kg/triples`,
-            data: payload,
-            dataType: "json",
-            success: function (result, _textStatus, _jqXHR) {
-                // var str = JSON.stringify(result, null, 2);
-
-                //   $("#KGcreator_infosDiv").val(str);
-                KGcreator_run.showTriplesInDataTable(result);
-                $("#mainDialogDiv").parent().css("z-index", 1);
-                $("#mainDialogDiv").dialog({
-                    close: function (event, ui) {
-                        $("#mainDialogDiv").parent().css("z-index", "unset");
-                    },
-                });
-                UI.message("", true);
-            },
-            error(err) {
-                if (callback) {
-                    return callback(err.responseText);
-                }
-                return alert(err.responseText);
-            },
-        });
-    };
-    self.saveTransform = function () {
-        var transformFnStr = $("#KGcreator_fnBody").val();
-
-        transformFnStr = transformFnStr.replace(/"/g, "'");
-
-        try {
-            new Function("row", "mapping", transformFnStr);
-        } catch (err) {
-            return alert("error in function code " + err.message);
-        }
-        var transformFn = "function{" + transformFnStr + "}";
-        var nodes = MappingModeler.visjsGraph.data.nodes.get();
-        var currentNode = nodes.filter(function (node) {
-            return node.label == self.transformColumn;
-        })[0];
-        currentNode.data.transform = transformFn;
-        self.visjsGraph.data.nodes.update(currentNode);
-        MappingModeler.saveVisjsGraph();
-    };
     return self;
 })();
 

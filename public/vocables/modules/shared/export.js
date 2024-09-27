@@ -386,13 +386,15 @@ var Export = (function () {
             self.dataTable.destroy();
             $("#dataTableDiv").html("");
         }
-        if (!div) {
+        if (options.divId) {
+            div = options.divId;
+        } else {
             div = "mainDialogDiv";
+            $("#" + div).dialog("open");
         }
 
-        $("#" + div).html("<div style='width: 97vw;height: 75vh'> <table id='dataTableDivExport'></table></div>");
+        $("#" + div).html("<div style='width: 97%;height: 75vh'> <table id='dataTableDivExport'></table></div>");
 
-        $("#" + div).dialog("open");
         if (!buttons) {
             buttons = "Bfrtip";
         }

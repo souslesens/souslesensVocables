@@ -2,7 +2,6 @@ import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import VisjsUtil from "../../graph/visjsUtil.js";
 
-self.lineageVisjsGraph;
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_sources from "./lineage_sources.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
@@ -49,12 +48,14 @@ var Lineage_reasoner = (function () {
             operation: "consistency",
             type: self.ontologyAccessType,
             describeSparqlQuery: describeQuery,
+            graphName: Config.sources[Lineage_sources.activeSource].graphUri,
         });
         $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
 
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
+
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {
@@ -74,12 +75,14 @@ var Lineage_reasoner = (function () {
             operation: "unsatisfiable",
             type: self.ontologyAccessType,
             describeSparqlQuery: describeQuery,
+            graphName: Config.sources[Lineage_sources.activeSource].graphUri,
         });
         $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
 
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
+
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {
@@ -93,6 +96,7 @@ var Lineage_reasoner = (function () {
 
     self.showInferencePredicates = function () {
         $("#lineage_reasoner_infosDiv").html("getting ListInferenceParams ...");
+
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/jowl/reasonerListInferenceParams",
@@ -132,13 +136,10 @@ var Lineage_reasoner = (function () {
 
         const params = new URLSearchParams({
             operation: "inference",
-            // url: "http://51.178.39.209/ontologies/IOF-CORE-202401.nt",
-            //  url: "http://51.178.39.209/ontologies/EMMO.nt",
-            url: "http://51.178.39.209/ontologies/pizza.rdf",
-            //  url: "http://51.178.39.209/ontologies/IDO-3.nt",
-            type: self.ontologyAccessType,
+            graphName: Config.sources[Lineage_sources.activeSource].graphUri,
+            //  type: self.ontologyAccessType,
             predicates: JSON.stringify(predicates),
-            describeSparqlQuery: describeQuery,
+            //  describeSparqlQuery: describeQuery,
         });
         $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
 

@@ -1,0 +1,185 @@
+<style>
+    .vis-item {
+        border-color: orange;
+        background-color: #ececd2;
+        font-size: 8px;
+        width: 2px;
+    / / height: 2 px;
+
+    }
+
+    .vis-item-JC {
+        border-color: #117de8;
+        background-color: #778dd7;
+        font-size: 8px;
+        width: 2px;
+
+    }
+
+    .calendar-period-default {
+
+    }
+
+    .calendar-period-slim {
+        height: 2px;
+        font-size: 8px;
+    }
+
+    .chartTitle_filterType {
+        color: blue;
+    }
+
+    .chartTitle_filterItem {
+        color: #778dd7;
+    }
+
+    .lifex_cost_lefPanel {
+        width: 100%;
+        min-height: 300px;
+        max-height: 500px;
+        overflow: auto
+    }
+
+
+    #tagNeigborhoodSliderHandle {
+        width: 3em;
+        height: 1.6em;
+        top: 50%;
+        margin-top: -.8em;
+        text-align: center;
+        line-height: 1.6em;
+    }
+
+    #tagNeigborhoodSlider {
+        width: 300px;
+
+    }
+
+    #Lifex_cost_WBSlistDiv{
+        font-size: 12px;
+        overflow: auto;
+        height: 400px;
+    }
+    .rowColor {
+        background-color: #cbdadd;
+    }
+    .rowColorSimulated {
+        background-color: #90d6e4;
+    }
+
+        #Lifex_cost_WBSlistDiv td{
+        border-right: solid 1px #aaa;
+    }
+</style>
+<div style="display: flex; flex-direction: column; align-items: center">
+    <div id="Lifex_cost_left_tabs">
+        <ul>
+            <li class="nodeInfosWidget_tabDiv"><a href="#Lifex_cost_Querytab">Query</a></li>
+            <li class="nodeInfosWidget_tabDiv"><a href="#Lifex_cost_WBStab">WBStasks</a></li>
+            <li class="nodeInfosWidget_tabDiv"><a href="#Lifex_cost_Datestab">Dates</a></li>
+            <li class="nodeInfosWidget_tabDiv"><a href="#Lifex_cost_Tagtab">Tags</a></li>
+            <li class="nodeInfosWidget_tabDiv"><a href="#Lifex_cost_Cumultab">Cumul</a></li>
+        </ul>
+        <div id="Lifex_cost_Querytab" style="width: 450px; display: flex; flex-direction: column; align-items: center">
+            <div class="lifex_cost_lefPanel">
+                Filters
+                <div id="Lifex_cost_jstreeFilterDiv"></div>
+            </div>
+
+            <div class="SearchButtonIcon" style="margin: 5px; padding: 5px; border-radius: 5px">
+                Y axis
+                <select class="select-bar-theme1" id="Lifex_cost_quantityVarSelect">
+                    <option>Count JC</option>
+                    <option>Total Budgeted Units</option>
+                    <option>Resources Budgeted Units</option>
+                    <option>Daily Hours</option>
+                </select>
+
+                <br />
+                &nbsp; split by
+                <select class="select-bar-theme1" id="Lifex_cost_SplitBySelect" style="width: 100px"></select>
+
+                <button class="slsv-button-1" onclick="FiltersWidget.draw2dChart()" style="width: 100px">∑/day</button>
+                <button class="slsv-button-1" onclick="FiltersWidget.drawGanttChart()" style="width: 100px">Gantt</button>
+            </div>
+        </div>
+
+        <div id="Lifex_cost_WBStab" style="width: 450px; display: flex; flex-direction: column; align-items: center; padding: unset">
+            <div class="input-group mb-3" style="width: 100%; padding: 10px 20px">
+                <div class="input-group-prepend">
+                    <div class="SearchButtonIconLeft border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+                        <button class="search-icon slsv-invisible-button" onclick="DataManager.searchJC()" style="margin-top: 4px; height: 20px; width: 20px"></button>
+                    </div>
+                </div>
+                <input
+                    id="Lifex_cost_searchJC"
+                    style="width: 35%; height: 33.5px; border-bottom-right-radius: 14px; border-top-right-radius: 14px"
+                    value=""
+                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9){DataManager.searchJC()}"
+                />
+                &nbsp;&nbsp;
+                <div style="margin-left: 10px">
+                    <button class="slsv-button-1" onclick="DataManager.exportWBSlist();" style="width: 100px; margin-top: 0px">Export</button>
+                </div>
+            </div>
+
+            <br />
+            <!--     <select id="tagsCalendarItemsSelect" size="20" class="Kgquery_queriesSelect"
+                    style="margin-top: 0px;"> </select>-->
+            <div id="Lifex_cost_WBSlistDiv"></div>
+        </div>
+
+        <div id="Lifex_cost_Datestab">
+            <div>
+                <!--   <button id="Lifex_cost_DatePickerButton" onclick="FiltersWidget.getTasksAtDate()">getTasksAtDate</button>-->
+                <button onclick="Simulator.getTasksOveriddingLimit()">getTasksOveriddingLimit</button>
+                <div style="width: 350px; height: 400px; overflow: auto">
+                    <div id="simulator_jstreeDiv"></div>
+                </div>
+            </div>
+        </div>
+        <div id="Lifex_cost_Tagtab" style="width: 450px; display: flex; flex-direction: column; align-items: center">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; width: 600px">
+                <div id="TimeLineAnimationButtons" style="display: flex; flex-direction: row; align-items: center; justify-content: space-evenly; width: 100px">
+                    <button class="w3-button slsv-invisible-button resetIcon" style="margin-top: 15px" onclick="TimelineAnimation.startAnimateTimeLine()"></button>
+                    <img onclick="TimelineAnimation.continueAnimateTimeLine()" width="25px" height="25px" src="/plugins/Lifex_cost/icons/playBtn.png" />
+
+                    <img onclick="TimelineAnimation.pauseAnimateTimeLine()" width="25px" height="25px" src="/plugins/Lifex_cost/icons/pauseBtn.png" />
+                </div>
+                <!--button class="slsv-button-1" style="margin-top: 2px;font-size: 12px;margin:3px" onclick="TimelineAnimation.continueAnimateTimeLine()"> Play</button>-->
+                <!--   <button onclick="DataManager.test()">test</button>
+                   <div id="tagsGeometryDecksDiv"></div>-->
+                <!-- <div id="slider" style=" width: 800px; position: relative;"></div>-->
+
+                <div id="TimeLineNeighborood">
+                    <b>neighborhood </b> radius (m)
+
+                    <div id="tagNeigborhoodSlider">
+                        <div id="tagNeigborhoodSliderHandle" class="ui-slider-handle"></div>
+                    </div>
+                    <div style="background-color: #ddd; display: flex; flex-direction: row; align-items: center; justify-content: space-evenly; width: 350px">
+                        <button class="w3-button slsv-button-3" onclick="DataManager.listSelectedTags()">List</button>
+                        <button class="w3-button slsv-button-3" onclick="TagsGeometry.showTagsAroundTimeLine()">Gantt</button>
+                    </div>
+                </div>
+                <!-- <button onclick="TagsGeometry.clearLocalCache()">X</button>-->
+            </div>
+            <div class="lifex_cost_lefPanel">
+                <div id="tagsGeometryInfosDiv2" style="width: 350px; max-height: 500px; overflow: auto"></div>
+            </div>
+        </div>
+
+        <div id="Lifex_cost_Cumultab" style="width: 450px; display: flex; flex-direction: column; align-items: center"></div>
+        <!--
+            <div id="tagsCalendarInfosPanelTab">
+
+                <div id="tagsCalendarInfosDiv" style="width: 350px; height: 500px"></div>
+            </div>
+           -->
+    </div>
+    <div style="margin-top: 30px; border-radius: 10px">
+        <img src="/plugins/Lifex_cost/html/daliaPhotoSmall.jpg" />
+    </div>
+</div>
+
+<!--<script type="module" src="plugins/TagsCalendar/js/tagsCalendar_storedQueries.js"></script>-->

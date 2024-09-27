@@ -1,0 +1,221 @@
+<!--<script src="
+https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js
+"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
+
+<!--
+<script src="https://cdn.jsdelivr.net/npm/chart.js@^3"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>-->
+<style>
+    .vis-graph-group0 {
+        fill: #4f81bd;
+        background-color: #4f81bd;
+        color: white;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #4f81bd;
+    }
+
+    .vis-graph-group1 {
+        fill: #f79646;
+        background-color: #f79646;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #f79646;
+    }
+
+    .vis-graph-group2 {
+        fill: #8c51cf;
+        background-color: #8c51cf;
+        color: white;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #8c51cf;
+    }
+
+    .vis-graph-group3 {
+        fill: #75c841;
+        background-color: #75c841;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #75c841;
+    }
+
+    .vis-graph-group4 {
+        fill: #ff0100;
+        background-color: #ff0100;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #ff0100;
+    }
+
+    .vis-graph-group5 {
+        fill: #37d8e6;
+        background-color: #37d8e6;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #37d8e6;
+    }
+
+    .vis-graph-group6 {
+        fill: #042662;
+        color: white;
+        background-color: #042662;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #042662;
+    }
+
+    .vis-graph-group7 {
+        fill: #00ff26;
+        background-color: #00ff26;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #00ff26;
+    }
+
+    .vis-graph-group8 {
+        fill: #f0f;
+        background-color: #f0f;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #f0f;
+    }
+
+    .vis-graph-group9 {
+        fill: #8f3938;
+        color: white;
+        background-color: #8f3938;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #8f3938;
+    }
+
+    .vis-graph-group10 {
+        fill: #9d9101;
+        color: white;
+        background-color: #9d9101;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #9d9101;
+    }
+
+    .vis-graph-group11 {
+        fill: #fb8f3f;
+        color: white;
+        background-color: #fb8f3f;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #fb8f3f;
+    }
+
+    .vis-graph-group12 {
+        fill: #6c6960;
+        color: white;
+        background-color: #6c6960;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #6c6960;
+    }
+
+    .vis-graph-group13 {
+        fill: #ea9999;
+        color: white;
+        background-color: #ea9999;
+        opacity: 0.9;
+        fill-opacity: 0;
+        stroke-width: 2px;
+        stroke: #ea9999;
+    }
+
+    .timeLine_value_5 {
+        background-color: #ee6868;
+    }
+
+    .timeLine_value_4 {
+        background-color: #f3b189;
+    }
+
+    .timeLine_value_3 {
+        background-color: #f1de92;
+    }
+
+    .timeLine_value_2 {
+        background-color: #8be89e;
+    }
+
+    .timeLine_value_1 {
+        background-color: #b0d6ee;
+    }
+</style>
+
+<style>
+    #chartTitle {
+        font-size: 18px;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+
+    .JCTime {
+        background-color: #7c8f7c;
+        color: #0b620b;
+        mmargin: 1px;
+    }
+</style>
+<script src="js/external/jQRangeSlider-5.8.2/jQDateRangeSlider-min.js"></script>
+<script src="js/external/jQRangeSlider-5.8.2/mousewheel.min.js"></script>
+<link rel="stylesheet" href="js/external/jQRangeSlider-5.8.2/css/iThing.css" type="text/css" />
+
+<div style="margin-left: 15px">
+    <div><span id="tagsCalendarMessageDiv"></span> <span id="chartTitle"></span></div>
+    <div id="myChart" style="width: 100%"></div>
+
+    <div id="LifexPlanning_right_tabs">
+        <ul>
+            <li class="nodeInfosWidget_tabDiv"><a href="#LifexPlanningTab_geometryTab">Geometry</a></li>
+            <li class="nodeInfosWidget_tabDiv"><a href="#LifexPlanningTab_ganttTab">Gantt</a></li>
+            <li class="nodeInfosWidget_tabDiv"><a href="#LifexPlanningTab_simulatorTab">Simulator</a></li>
+        </ul>
+
+        <div id="LifexPlanningTab_geometryTab" style="padding: 2px">
+            <div style="overflow: auto; height: 650px; width: 100%; border: 0px solid black; background-color: #ddd">
+                <canvas id="canvasPlan" width="1500px" height="1500px"></canvas>
+            </div>
+        </div>
+        <div id="LifexPlanningTab_ganttTab" style="padding: 1px">
+            <!--  Filter By<select class="select-bar-theme1" id="GantFilterBy">-->
+
+            <div id="ganttSimulationActionsDiv" style="width: 100%">
+                Simulation <button class="SearchButtonIconLeft border-without-raduis-theme1" onclick="GanttSimulation.startSimulation()" style="border-radius: 14px !important">start</button>
+                <button class="SearchButtonIconLeft border-without-raduis-theme1" onclick="GanttSimulation.stopSimulation()" style="border-radius: 14px !important">stop</button>
+                <button class="SearchButtonIconLeft border-without-raduis-theme1" onclick="GanttSimulation.showSimulationTable()" style="border-radius: 14px !important">table</button>
+                <span style="color: #0000ff" id="GanttSimulation_infosDiv"></span>
+            </div>
+
+            <div id="LifexPlanningTab_detailedTimeLine">
+                <div id="JCtimeLineDiv" style="width: 100%"></div>
+            </div>
+        </div>
+
+        <div id="LifexPlanningTab_simulatorTab" style="padding: 1px">
+            <div style="display: flex; flex-direction: row">
+                <div id="simulator_rigthDiv" style="width: 100%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div></div>

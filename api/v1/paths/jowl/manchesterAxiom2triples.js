@@ -17,7 +17,7 @@ module.exports = function () {
       var  jowlConfigUrl=ConfigManager.config.jowlServer.url
         if(!jowlConfigUrl.endsWith("/"))
             jowlConfigUrl+="/"
-        jowlConfigUrl+="manchester/manchester2triples";
+        jowlConfigUrl+="axioms/manchester2triples";
 
 
 

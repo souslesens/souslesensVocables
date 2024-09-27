@@ -14,15 +14,14 @@ var CreateAxiomResource_bot = (function () {
     self.title = "Create Resource";
 
     self.start = function (workflow, _params, callbackFn) {
-        _botEngine.startParams =  _botEngine.fillStartParams(arguments);
-        
+        _botEngine.startParams = _botEngine.fillStartParams(arguments);
+
         self.callbackFn = callbackFn;
         if (!workflow) {
             workflow = self.workflow;
         }
         _botEngine.init(CreateAxiomResource_bot, workflow, null, function () {
-
-            self.params ={};// { source:self._params.source, resourceType: "", resourceLabel: "", currentVocab: "" };
+            self.params = {}; // { source:self._params.source, resourceType: "", resourceLabel: "", currentVocab: "" };
             if (_params) {
                 for (var key in _params) {
                     self.params[key] = _params[key];

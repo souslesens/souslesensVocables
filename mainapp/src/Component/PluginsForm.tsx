@@ -69,7 +69,7 @@ import { cleanUpText } from "../Utils";
 type DispatcherProps = {
     me: string;
     onDeleteRepository: (repositoryId: string) => void;
-    onSubmitRepository: (identifier: string | null, data: RepositoryType, toFetch: boolean) => void;
+    onSubmitRepository: (identifier: string | null, data: RepositoryType) => void;
     selectedTab: string;
     snack: (message: string, severity?: AlertColor) => void;
 };
@@ -83,7 +83,7 @@ type PluginsDialogFormProps = {
 
 type PluginsRepositoryDialogProps = {
     onClose: () => void;
-    onSubmit: (identifier: string | null, data: RepositoryType, toFetch: boolean) => void;
+    onSubmit: (identifier: string | null, data: RepositoryType) => void;
     open: boolean;
     edit?: boolean;
     selectedRepository?: string | null;
@@ -326,28 +326,20 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
     const handleFieldUpdate = (key: string, value: string | string[]) => {
         if (key === "plugins" && Array.isArray(value)) {
             setPluginsEnabled(value);
-        } else if (key !== "plugins") {
-            setRepository({ identifier: repository.identifier, data: { ...repository.data, [key]: value } });
         }
+        setRepository({ identifier: repository.identifier, data: { ...repository.data, [key]: value } });
     };
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        const formData = new FormData(event.currentTarget);
-        const formJSON = Object.fromEntries(formData.entries()) as Record<string, string | string[]>;
-
-        if (pluginsAvailable.length > 1) {
-            formJSON.plugins = pluginsEnabled;
-        }
-
-        const parsedForm = handleValidation(formJSON);
+        const parsedForm = handleValidation(repository);
         if (parsedForm.success) {
-            onSubmit(repository.identifier, parsedForm.data, formJSON.fetch === "on");
+            onSubmit(repository.identifier, repository.data);
         }
     };
 
-    const handleValidation = (data: Record<string, string | string[]>) => {
+    const handleValidation = (data: RepositoryFormType) => {
         const parsedForm = RepositorySchema.safeParse(data);
 
         if (!parsedForm.success) {
@@ -372,7 +364,6 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
         setTags([]);
 
         if (selectedRepository !== null && selectedRepository !== undefined) {
-            // FIXME
             const data = repositories[selectedRepository];
             setRepository({ identifier: selectedRepository, data: data });
             setPluginsEnabled(data.plugins || []);
@@ -449,6 +440,7 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
                             <FormControl>
                                 <InputLabel id="plugins-label">{"Plugins to activate in this Repository"}</InputLabel>
                                 <Select
+                                    error={errors.plugins !== undefined}
                                     fullWidth
                                     id="plugins"
                                     input={<OutlinedInput label="Plugins to activate in this Repository" />}
@@ -544,9 +536,9 @@ const PluginsRepositories = (props: DispatcherProps) => {
                     setOrderBy(property);
                 };
 
-                const handleSubmit = (identifier: string | null, data: RepositoryType, toFetch: boolean) => {
+                const handleSubmit = (identifier: string | null, data: RepositoryType) => {
                     handleCloseModal();
-                    onSubmitRepository(identifier, data, toFetch);
+                    onSubmitRepository(identifier, data);
                 };
 
                 const sortedRepositories = Object.entries(repositories)
@@ -696,11 +688,12 @@ const PluginsForm = () => {
         }
     };
 
-    const handleSubmitRepository = async (identifier: string | null, data: RepositoryType, toFetch = true) => {
+    const handleSubmitRepository = async (identifier: string | null, data: RepositoryType) => {
         if (identifier === null) {
             identifier = ulid();
         }
-        const response = await writeRepository(identifier, data, toFetch);
+        handleSnackbar("Updating in progress…", "warning");
+        const response = await writeRepository(identifier, data, true);
         if (response.status == 200) {
             await updateModelRepositories();
             handleSnackbar("The repository have been successfully updated", "success");

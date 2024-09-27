@@ -5,7 +5,7 @@ import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
 var Containers_query = (function () {
     var self = {};
-    self.descendantsLimit=300
+    self.descendantsLimit = 300;
     self.getTopContainer = function (source, options, callback) {
         if (!options) {
             options = {};
@@ -75,7 +75,8 @@ var Containers_query = (function () {
             "  ?descendant rdf:type ?descendantType." +
             filter +
             "}order by ?descendantLabel " +
-            "   LIMIT   "+self.descendantsLimit;
+            "   LIMIT   " +
+            self.descendantsLimit;
 
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
@@ -83,8 +84,8 @@ var Containers_query = (function () {
             if (err) {
                 return callback(err);
             }
-            if(result.results.bindings.length>=self.descendantsLimit){
-                alert ("cannot show all nodes  :only: "+self.descendantsLimit+"")
+            if (result.results.bindings.length >= self.descendantsLimit) {
+                alert("cannot show all nodes  :only: " + self.descendantsLimit + "");
             }
             return callback(null, result);
         });

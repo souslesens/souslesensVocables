@@ -37,14 +37,13 @@ var UI = (function () {
             "</div>";
         $("#graphDiv").html(html);
     };
-    self.cleanPage=function(){
-        $('#graphDiv').empty();
+    self.cleanPage = function () {
+        $("#graphDiv").empty();
         $("#Lineage_graphEditionButtons").hide();
-        $('#lateralPanelDiv').empty();
-        $('#index_topContolPanel').hide();
+        $("#lateralPanelDiv").empty();
+        $("#index_topContolPanel").hide();
         self.setCredits();
-        
-    }
+    };
     /*
 
         check if used ??
@@ -134,7 +133,7 @@ var UI = (function () {
             fn();
         });
     };
-    
+
     // Keep Here
     self.resetWindowHeight = function () {
         var MenuBarHeight = $("#MenuBar").height();

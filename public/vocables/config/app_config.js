@@ -135,7 +135,7 @@ var Config = (function () {
         author: "http://purl.org/dc/terms/creator",
         provenance: "http://purl.org/dc/terms/source",
         creationDate: "http://purl.org/dc/terms/created",
-        mappingFile : "http://souslesens.org/KGcreator#mappingFile",
+        mappingFile: "http://souslesens.org/KGcreator#mappingFile",
     };
     self.dictionaryStatusMap = {
         promote: "OK",
@@ -331,7 +331,7 @@ var Config = (function () {
             "@legend-color": "#4CAD8C",
             "@background-color": "#e9f0ff",
             "@dark-background-color": "#BFD4F5",
-            "@isDark": false,
+            "@isDarkTheme": false,
         },
         KGA: {
             "@source-color": "#0767b7",
@@ -341,7 +341,8 @@ var Config = (function () {
             "@legend-color": "#7da6de",
             "@background-color": "#F4F4F4",
             "@dark-background-color": "#E4E4E4",
-            "@isDark": false,
+            "@logoInstance-icon": "../../icons/KGA/KGALogo.png",
+            "@isDarkTheme": false,
         },
         "Total Energies": {
             "@source-color": "#374649",
@@ -351,8 +352,14 @@ var Config = (function () {
             "@legend-color": "#FFB301",
             "@background-color": "#F8F8F8",
             "@dark-background-color": "#E9EEEF",
+            "@gradient-color1": "linear-gradient(to right,#009CEA,#4139FD)",
+            "@gradient-color2": "linear-gradient(to right,#82D442,#0BC9A5)",
+            "@gradient-color3": "linear-gradient(to right,#3CA704, #018849)",
+            "@gradient-color-source": "linear-gradient(to right,#FFBC6D,#ED2C2B)",
+            "@border-color": "#374649",
             "@isGradient": true,
-            "@isDark": false,
+            "@isDarkTheme": false,
+            "@logoInstance-icon": "../../icons/TotalEnergies/TotalEnergiesLogo.png",
         },
 
         "Sea Breeze": {
@@ -363,7 +370,7 @@ var Config = (function () {
             "@legend-color": "#8A8C7D",
             "@background-color": "#F2EEE9",
             "@dark-background-color": "#DBCFBD",
-            "@isDark": false,
+            "@isDarkTheme": false,
         },
 
         "Fig colors ": {
@@ -374,7 +381,7 @@ var Config = (function () {
             "@legend-color": "#9E8E75",
             "@background-color": "#E9E5E7",
             "@dark-background-color": "#C9C8C9",
-            "@isDark": false,
+            "@isDarkTheme": false,
         },
         Ocean: {
             "@source-color": "#0099B7",
@@ -384,7 +391,7 @@ var Config = (function () {
             "@legend-color": "#CBCB41",
             "@background-color": "#002B36",
             "@dark-background-color": "#00212B",
-            "@isDark": false,
+            "@isDarkTheme": false,
         },
         Dark: {
             "@source-color": "#F7606B",
@@ -394,7 +401,7 @@ var Config = (function () {
             "@legend-color": "#EECBAB",
             "@background-color": "#2D2D2D",
             "@dark-background-color": "#1E1E1E",
-            "@isDark": true,
+            "@isDarkTheme": true,
         },
 
         Spatial: {
@@ -405,7 +412,7 @@ var Config = (function () {
             "@legend-color": "#FCADCC",
             "@background-color": "#180725",
             "@dark-background-color": "#080112",
-            "@isDark": true,
+            "@isDarkTheme": true,
         },
         IOGP: {
             "@source-color": "#781E77",
@@ -415,6 +422,8 @@ var Config = (function () {
             "@legend-color": "#62656B",
             "@background-color": "#EEE4F7",
             "@dark-background-color": "#C8C2E1",
+            "@logoInstance-icon": "../../icons/IOGP/IOGPLogo.png",
+            "@isDarkTheme": false,
         },
         CFIHOS: {
             "@source-color": "#DD8736",
@@ -424,6 +433,8 @@ var Config = (function () {
             "@legend-color": "#62656B",
             "@background-color": "#F2F2F2",
             "@dark-background-color": "#C8C2E1",
+            "@logoInstance-icon": "../../icons/CFIHOS/Logo-CFIHOS.png",
+            "@isDarkTheme": false,
         },
         DeepOffShore: {
             "@source-color": "#1D82FF",
@@ -439,6 +450,8 @@ var Config = (function () {
             "@gradient-color3": "linear-gradient(to right,#A7E700, #4ED441)",
             "@gradient-color-source": "linear-gradient(to right,#1D82FF,#483FFF)",
             "@border-color": "#483FFF",
+            "@isDarkTheme": false,
+            "@logoInstance-icon": "../../icons/DeepOffShore/Logo-DeepOffShore.png",
         },
     };
 

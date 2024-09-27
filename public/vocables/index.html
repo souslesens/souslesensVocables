@@ -326,7 +326,11 @@
                             if (target == "_slsvCallback") {
                                 var id = $(this).attr("href");
                                 event.preventDefault();
-                                NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv", null, function (err, result) {
+                                var divId = "mainDialogDiv";
+                                if (MainController.currentTool == "KGquery") {
+                                    divId = "smallDialogDiv";
+                                }
+                                NodeInfosWidget.showNodeInfos(null, id, divId, null, function (err, result) {
                                     if (err) {
                                         $("#mainDialogDiv").dialog("close");
                                         window.open(id, "_blank");

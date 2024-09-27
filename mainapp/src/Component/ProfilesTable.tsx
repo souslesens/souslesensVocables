@@ -1,32 +1,31 @@
 import { useState, useMemo, useReducer, useEffect, ChangeEvent, forwardRef, Ref, Dispatch, MouseEventHandler } from "react";
 import {
     Box,
-    CircularProgress,
-    Stack,
-    TextField,
-    TableContainer,
-    Paper,
-    Table,
-    TableHead,
-    TableRow,
-    TableCell,
-    TableSortLabel,
-    TableBody,
-    Chip,
     Button,
-    Grid,
+    Checkbox,
+    Chip,
+    CircularProgress,
     FormControl,
+    FormLabel,
+    Grid,
     InputLabel,
-    Select,
     MenuItem,
     Modal,
-    Checkbox,
-    FormLabel,
-    FormGroup,
-    FormControlLabel,
+    Paper,
+    Select,
+    SelectChangeEvent,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TableSortLabel,
+    TextField,
+    Tooltip,
     Typography,
     styled,
-    SelectChangeEvent,
 } from "@mui/material";
 import { ExpandMore, ChevronRight } from "@mui/icons-material";
 
@@ -85,10 +84,9 @@ const ProfilesTable = () => {
             ),
             success: (gotProfiles: Profile[]) => {
                 const datas = gotProfiles.map((profile) => {
-                    const { allowedSourceSchemas, forbiddenTools, allowedTools, sourcesAccessControl, ...restOfProperties } = profile;
+                    const { allowedSourceSchemas, allowedTools, sourcesAccessControl, ...restOfProperties } = profile;
                     const processedData = {
                         ...restOfProperties,
-                        forbiddenTools: joinWhenArray(forbiddenTools),
                         allowedTools: joinWhenArray(allowedTools),
                         allowedSourceSchemas: allowedSourceSchemas.join(";"),
                         sourcesAccessControl: JSON.stringify(sourcesAccessControl),
@@ -136,6 +134,11 @@ const ProfilesTable = () => {
                                             </TableSortLabel>
                                         </TableCell>
                                         <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                            <TableSortLabel active={orderBy === "allowedTools"} direction={order} onClick={() => handleRequestSort("allowedTools")}>
+                                                Allowed Tools
+                                            </TableSortLabel>
+                                        </TableCell>
+                                        <TableCell align="center" style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
                                             <TableSortLabel active={orderBy === "allowedSourceSchemas"} direction={order} onClick={() => handleRequestSort("allowedSourceSchemas")}>
                                                 Allowed Sources
                                             </TableSortLabel>
@@ -152,6 +155,18 @@ const ProfilesTable = () => {
                                             return (
                                                 <TableRow key={profile.id}>
                                                     <TableCell>{profile.name}</TableCell>
+                                                    <TableCell align="center">
+                                                        <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                            {profile.allowedTools.slice(0, 3).map((tool) => (
+                                                                <Chip key={tool} label={tool} size="small" />
+                                                            ))}
+                                                            {profile.allowedTools.slice(3).length > 0 ? (
+                                                                <Tooltip title={profile.allowedTools.slice(3).join(", ")}>
+                                                                    <Chip label={`+ ${profile.allowedTools.slice(3).length}`} size="small" color="info" variant="outlined" />
+                                                                </Tooltip>
+                                                            ) : null}
+                                                        </Stack>
+                                                    </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                             {profile.allowedSourceSchemas.map((source) => (
@@ -282,11 +297,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
     );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
 
-    // tools is all available tools (described in mainconfig.json) + tools that are found in forbiddenTools + ALL
-    const tools: string[] = ["ALL", ...profileModel.profileForm.forbiddenTools, ...config.tools_available].filter((val, idx, array) => {
-        return array.indexOf(val) === idx;
-    });
-
     useEffect(() => {
         update({ type: Type.ResetProfile, payload: profile });
     }, [profileModel.modal]);
@@ -352,9 +362,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
             update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: srcNode.treeStr, newValue: null as SourceAccessControl | null } });
         });
     };
-
-    const handleCheckedAll = (fieldname: string) => (event: ChangeEvent<HTMLInputElement>) =>
-        update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } });
 
     function validateProfileName(profileName: string) {
         const issues = createCustomIssues(ProfileSchema);
@@ -570,43 +577,20 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                                 <SourcesTreeView />
                             </FormControl>
                         </Box>
-                        <FormGroup>
-                            <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
-
-                            <FormControl style={{ display: profileModel.profileForm.allowedTools === "ALL" ? "none" : "" }} disabled={profileModel.profileForm.allowedTools === "ALL"}>
-                                <InputLabel id="allowedTools-label">Allowed tools</InputLabel>
-                                <Select
-                                    labelId="allowedTools-label"
-                                    id="allowedTools"
-                                    multiple
-                                    value={!Array.isArray(profileModel.profileForm.allowedTools) ? [] : profileModel.profileForm.allowedTools}
-                                    label="select-allowedTools-label"
-                                    renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
-                                    onChange={handleFieldUpdate("allowedTools")}
-                                >
-                                    {tools.map((tool) => (
-                                        <MenuItem key={tool} value={tool}>
-                                            {tool}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </FormGroup>
                         <FormControl>
-                            <InputLabel id="forbiddenTools-label">Forbidden tools</InputLabel>
+                            <InputLabel id="allowedTools-label">Allowed tools</InputLabel>
                             <Select
-                                labelId="forbiddenTools-label"
-                                id="forbiddenTools"
+                                labelId="allowedTools-label"
+                                id="allowedTools"
                                 multiple
-                                value={!Array.isArray(profileModel.profileForm.forbiddenTools) ? [] : profileModel.profileForm.forbiddenTools}
-                                label="select-forbiddenTools-label"
-                                fullWidth
+                                value={profileModel.profileForm.allowedTools}
+                                label="select-allowedTools-label"
                                 renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
-                                onChange={handleFieldUpdate("forbiddenTools")}
+                                onChange={handleFieldUpdate("allowedTools")}
                             >
-                                {tools.map((tool) => (
+                                {config.tools_available.map((tool) => (
                                     <MenuItem key={tool} value={tool}>
-                                        <Checkbox checked={profileModel.profileForm.forbiddenTools.indexOf(tool) > -1} />
+                                        <Checkbox checked={profileModel.profileForm.allowedTools.includes(tool)} />
                                         {tool}
                                     </MenuItem>
                                 ))}

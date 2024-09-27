@@ -222,7 +222,7 @@ var KGcreator_bot = (function () {
 
         createDatatypePropertyFn: function () {
             var classId = self.getColumnClass(self.params.tripleModels, self.params.column);
-            CreateResource_bot.start(CreateResource_bot.workFlowDatatypeProperty, {source:self.params.source, datatypePropertyDomain: classId }, function (err, result) {
+            CreateResource_bot.start(CreateResource_bot.workFlowDatatypeProperty, { source: self.params.source, datatypePropertyDomain: classId }, function (err, result) {
                 KGcreator_bot.start(KGcreator_bot.lastObj);
             });
         },

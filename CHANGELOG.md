@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.85.0](https://github.com/souslesens/souslesensVocables/compare/1.84.0...1.85.0) (2024-09-23)
+
+
+### Features
+
+* **api:** add api/sources for user ([7b9d068](https://github.com/souslesens/souslesensVocables/commit/7b9d068818e3c6451b2d8352f89b0e78ffd2d06a))
+* **mainapp:** allow downloading graph management as csv ([060b2d0](https://github.com/souslesens/souslesensVocables/commit/060b2d0118d65523ba2f7e42e2a57b3319e069a6))
+
+
+### Bug Fixes
+
+* **api/config:** don't get all config even if user is admin ([95af912](https://github.com/souslesens/souslesensVocables/commit/95af9123fd9c024f6f5d0f3b4f63a2028a36fc12))
+* **userManagement:** use user routes for fetching sources ([cba02fd](https://github.com/souslesens/souslesensVocables/commit/cba02fd59f2c73b2996bf3e80f67634e119b0110))
+
+## [1.84.0](https://github.com/souslesens/souslesensVocables/compare/1.83.0...1.84.0) (2024-09-20)
+
+
+### Bug Fixes
+
+* **mainapp:** do not raise a require error when editing a profile ([4b9ebe4](https://github.com/souslesens/souslesensVocables/commit/4b9ebe4c298254eec2501bdd642db26ad022bef5)), closes [#885](https://github.com/souslesens/souslesensVocables/issues/885)
+
+## [1.83.0](https://github.com/souslesens/souslesensVocables/compare/1.82.1...1.83.0) (2024-09-17)
+
+
+### Features
+
+* **mainapp:** add snackbar messages with the token renewal in UserManagement ([7c63fa2](https://github.com/souslesens/souslesensVocables/commit/7c63fa2656f062e77b4f1468165ef39653b0fc0a))
+* **mainapp:** allow downloading individual db/source ([4e0fdd6](https://github.com/souslesens/souslesensVocables/commit/4e0fdd6e68dc0380d461a3f2060039d7ae4481de))
+* **mainapp:** make json downloads prettier ([73ef151](https://github.com/souslesens/souslesensVocables/commit/73ef151bcce60863d96b8e34b4035d3ed227983f))
+* **mainapp:** move UserManagement in the main dialog ([c336b18](https://github.com/souslesens/souslesensVocables/commit/c336b187eb2d3f2a6e200e7323ffd7e3714a2b15))
+* **mainapp:** revamp the UserManagement to allow sources edition ([1162940](https://github.com/souslesens/souslesensVocables/commit/1162940a41ef8506095430dac7a202695863369b))
+* **model:** load default graph on start ([7f0c947](https://github.com/souslesens/souslesensVocables/commit/7f0c947822fa1e9f773e635338fa2e9cc5e715c0))
+
+
+### Bug Fixes
+
+* **api:** the token renewal needs to fetch the login identifier from the body ([c3d00a1](https://github.com/souslesens/souslesensVocables/commit/c3d00a1e2e75652a4e519dff5daccd88d8de5f0d))
+* **app:** check config.auth before isAuthenticated ([345eab6](https://github.com/souslesens/souslesensVocables/commit/345eab6bb987e70883014f4c5e9e05aba8090cf3))
+* **mainapp:** use the repository object when updating Plugin Repository ([a9a8721](https://github.com/souslesens/souslesensVocables/commit/a9a8721fdbc166b2d69270a27a21efb11530976c))
+
 ### [1.82.1](https://github.com/souslesens/souslesensVocables/compare/1.82.0...1.82.1) (2024-09-03)
 
 

@@ -12,20 +12,20 @@ var NodeInfosAxioms = (function () {
         self.currentSource = source;
         self.currentResource = resource;
         self.allClassesMap = {};
-        Axioms_manager.allResourcesMap={}
+        Axioms_manager.allResourcesMap = {};
 
         $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
             if (divId && divId.indexOf("Dialog") > -1) $("#" + divId).dialog("open");
             Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv");
-           // onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())"
-           $("#axioms_legend_suggestionsSelect").on("click",function(event){
-               if(event.ctrlKey){
-                  var node={data:{id:$(this).val()}}
-                   NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv");
-               }else{
-                   Axiom_activeLegend.onSuggestionsSelect($(this).val())
-               }
-           })
+            // onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())"
+            $("#axioms_legend_suggestionsSelect").on("click", function (event) {
+                if (event.ctrlKey) {
+                    var node = { data: { id: $(this).val() } };
+                    NodeInfosWidget.showNodeInfos(self.currentSource, node, "smallDialogDiv");
+                } else {
+                    Axiom_activeLegend.onSuggestionsSelect($(this).val());
+                }
+            });
             Axioms_manager.initResourcesMap(self.currentSource, function (err, result) {
                 // used do draw graph
                 self.initSourceClassesMap(self.currentSource, function (err, result) {
@@ -90,7 +90,7 @@ var NodeInfosAxioms = (function () {
                 parent: "#",
             });
 
-         /*   jstreeData.push({
+            /*   jstreeData.push({
                 id: "newAxiom",
                 text: "<span style='color:#278ecc'>new Axiom</span>",
                 parent: "rootNode",

@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { ProfileModel } = require("../model/profiles");
 const { ToolModel } = require("../model/tools");
+const { config } = require("../model/config");
 
 const TOOL_MODEL = new ToolModel(path.join(__dirname, "data/plugins"));
 
@@ -38,9 +39,8 @@ describe("ProfileModel", () => {
                 allowedSourceSchemas: ["OWL", "SKOS"],
                 defaultSourceAccessControl: "readwrite",
                 sourcesAccessControl: {},
-                allowedTools: "ALL",
-                forbiddenTools: [],
-                theme: "Sea Breeze",
+                allowedTools: config.tools_available,
+                theme: config.theme.defaultTheme,
             },
         };
         expect(profiles).toStrictEqual(expectedResult);

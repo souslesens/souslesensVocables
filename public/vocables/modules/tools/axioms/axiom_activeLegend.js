@@ -164,7 +164,7 @@ var Axiom_activeLegend = (function () {
 
     self.onSuggestionsSelect = function (resourceUri, legendNode, newResource) {
         // new Axiom
-        if (!Axiom_activeLegend.isLegendActive) {
+        if ( !Axiom_activeLegend.isLegendActive) {
             // create new Axiom
             Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv", NodeInfosAxioms.currentSource, NodeInfosAxioms.currentResource, resourceUri);
             return $("#axioms_legend_suggestionsSelect").children().remove().end();
@@ -755,7 +755,7 @@ var Axiom_activeLegend = (function () {
             return alert("no valid resourceType");
         }
         var params = { source: self.currentSource, filteredUris: filteredUris };
-        return CreateAxiomResource_bot.start(botWorkFlow, function (err, result) {
+        return CreateAxiomResource_bot.start(botWorkFlow, params,function (err, result) {
             if (err) {
                 return alert(err);
             }

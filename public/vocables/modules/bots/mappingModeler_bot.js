@@ -37,6 +37,9 @@ var MappingModeler_bot = (function () {
                         },
                     },
                 },
+                "set column as datatypeProperty": {
+                    listTableColumnsFn: {listDatatypePropertyRangeFn:{labelFn:{}}},
+                },
                 "create  datatypeProperty": {
                     createDatatypePropertyFn: {},
                 },
@@ -128,7 +131,7 @@ var MappingModeler_bot = (function () {
 
             CommonBotFunctions.listNonObjectPropertiesFn(self.params.nonObjectPropertyVocab, "nonObjectPropertyId", columnRdfType);
         },
-        listLitteralFormatFn: function () {
+        v: function () {
             var range = Config.ontologiesVocabularyModels[self.params.nonObjectPropertyVocab].nonObjectProperties[self.params.nonObjectPropertyId].range;
             if (!range) {
                 return _botEngine.nextStep();
@@ -165,6 +168,10 @@ var MappingModeler_bot = (function () {
             CreateResource_bot.start(CreateResource_bot.workFlowDatatypeProperty, { source: self.params.source, datatypePropertyDomain: classId }, function (err, result) {
                 MappingModeler.mappingColumnInfo.startOtherPredicatesBot();
             });
+        },
+        listDatatypePropertyRangeFn: function () {
+            var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
+            _botEngine.showList(choices, "datatypePropertyRange");
         },
     };
 

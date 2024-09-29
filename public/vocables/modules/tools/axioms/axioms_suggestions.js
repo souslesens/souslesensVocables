@@ -239,7 +239,7 @@ var Axioms_suggestions = (function () {
                         data.push({
                             id: prop,
                             label: result.constraints.domain[prop].label,
-                            source: result.constraints.both[prop].source,
+                            source: result.constraints.domain[prop].source,
                             resourceType: "ObjectProperty",
                         });
                     }
@@ -249,7 +249,7 @@ var Axioms_suggestions = (function () {
                         data.push({
                             id: prop,
                             label: result.constraints.range[prop].label,
-                            source: result.constraints.both[prop].source,
+                            source: result.constraints.range[prop].source,
                             resourceType: "ObjectProperty",
                         });
                     }
@@ -259,7 +259,7 @@ var Axioms_suggestions = (function () {
                             data.push({
                                 id: prop,
                                 label: result.constraints[type][prop].label,
-                                source: result.constraints.both[prop].source,
+                                source: result.constraints[type][prop].source,
                                 resourceType: "ObjectProperty",
                             });
                         }

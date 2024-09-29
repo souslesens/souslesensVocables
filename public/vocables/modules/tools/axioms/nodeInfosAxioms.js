@@ -337,25 +337,9 @@ var NodeInfosAxioms = (function () {
         var options = ["SubClassOf", "EquivalentClass", "DisjointWith", "DisjointUnionOf"];
         common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);
 
-        /*
-
-
-            SimpleListSelectorWidget.showDialog(
-                null,
-                function (callbackLoad) {
-                    return callbackLoad(["subClassOf", "equivalentClass", "disjointWith", "disjointUnionOf"]);
-                },
-
-                function (axiomType) {
-                    if (!axiomType) {
-                        return;
-                    }
 
 
 
-
-                }
-            );*/
     };
 
     self.switchLeftPanelDisplay = function (role) {

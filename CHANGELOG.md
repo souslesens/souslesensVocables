@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.86.1](https://github.com/souslesens/souslesensVocables/compare/1.86.0...1.86.1) (2024-09-30)
+
+
+### Bug Fixes
+
+* **graphManagement:** preventDefault when submit upload/download form ([76e0e06](https://github.com/souslesens/souslesensVocables/commit/76e0e06b158bf66cdbb729922d649d2d7901eb1c))
+
 ## [1.86.0](https://github.com/souslesens/souslesensVocables/compare/1.85.0...1.86.0) (2024-09-27)
 
 > [!IMPORTANT]

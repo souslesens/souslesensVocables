@@ -7,6 +7,7 @@ var Axiom_activeLegend = (function () {
     var self = {};
     self.axiomsLegendVisjsGraph = null;
     self.isLegendActive = false;
+    self.axiomtypes=["SubClassOf", "EquivalentClass", "DisjointWith", "DisjointUnionOf"]
 
     self.init = function (graphLegendDiv, axiomGraphDiv, source, resource, axiomType) {
         self.graphLegendDiv = graphLegendDiv;
@@ -83,9 +84,9 @@ var Axiom_activeLegend = (function () {
             } else if (node.data.type == "Connective") {
                 self.hideLegendItems();
                 var suggestions = [
-                    { label: "Union", id: "http://www.w3.org/2002/07/owl#unionOf" },
-                    { label: "Intersection", id: "http://www.w3.org/2002/07/owl#intersectionOf" },
-                    { label: "Complement", id: "http://www.w3.org/2002/07/owl#complementOf" },
+                    { label: "UnionOf", id: "http://www.w3.org/2002/07/owl#unionOf" },
+                    { label: "IntersectionOf", id: "http://www.w3.org/2002/07/owl#intersectionOf" },
+                    { label: "ComplementOf", id: "http://www.w3.org/2002/07/owl#complementOf" },
                     { label: "Enumeration", id: "http://www.w3.org/2002/07/owl#oneOf" },
                 ];
                 self.setSuggestionsSelect(suggestions, false);
@@ -169,6 +170,12 @@ var Axiom_activeLegend = (function () {
             Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv", NodeInfosAxioms.currentSource, NodeInfosAxioms.currentResource, resourceUri);
             return $("#axioms_legend_suggestionsSelect").children().remove().end();
         }
+
+        if(self.axiomtypes.indexOf(resourceUri)>-1){
+            return $("#axioms_legend_suggestionsSelect").children().remove().end();
+           return self.axiomType=resourceUri
+        }
+
         // new Class
         if (resourceUri == "createClass") {
             var siblingObjectPropertyUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
@@ -236,9 +243,9 @@ var Axiom_activeLegend = (function () {
                 subType = $("#axioms_legend_suggestionsSelect").val();
             }
             var symbolsMap = {
-                Intersection: "⊓",
-                Union: "⨆",
-                Complement: "┓",
+                IntersectionOf: "⊓",
+                UnionOf: "⨆",
+                ComplementOf: "┓",
             };
             var id = self.getBlankNodeId();
             newResource = {
@@ -546,7 +553,7 @@ var Axiom_activeLegend = (function () {
     self.clearAxiom = function () {
         // self.axiomsLegendVisjsGraph.clearGraph();
         Axioms_graph.axiomsVisjsGraph.clearGraph();
-        NodeInfosAxioms.newAxiom();
+        NodeInfosAxioms.newAxiom(true);
     };
 
     self.saveAxiom = function () {
@@ -660,17 +667,19 @@ var Axiom_activeLegend = (function () {
                 if (fromNode.data.predicate) {
                     predicate = fromNode.data.predicate;
                 }
+                if(!fromNode.data.type)
+                    return;
 
-                if (fromNode.data.type == "Restriction") {
-                    if (toNode.data.type == "ObjectProperty") {
+                if (fromNode.data.type.endsWith( "Restriction")) {
+                    if (toNode.data.type.endsWith("ObjectProperty")) {
                         predicate = "http://www.w3.org/2002/07/owl#onProperty";
                     } else {
                         predicate = fromNode.data.subType;
                     }
-                } else if (fromNode.data.type == "Class") {
+                } else if (fromNode.data.type .endsWith( "Class")) {
                     predicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
-                } else if (fromNode.data.type == "ObjectProperty") {
-                } else if (fromNode.data.type == "Connective") {
+                } else if (fromNode.data.type.endsWith("ObjectProperty")) {
+                } else if (["Connective","IntersectionOf","UnionOf","ComplementOf","Enumeration"].indexOf(fromNode.data.type)>-1) {
                     if (fromNode.data.nCount == 0) {
                         predicate = "http://www.w3.org/1999/02/22-rdf-syntax-ns#first";
                     } else if (fromNode.data.nCount == 1) {
@@ -771,6 +780,17 @@ var Axiom_activeLegend = (function () {
             //   self.onLegendNodeClick({data:{id:"Class"}})
         });
     };
+
+    self.createAxiomFromGraph=function(){
+        var node=Axioms_graph.currentGraphNode;
+       return  NodeInfosAxioms.newAxiom()
+
+
+        var options = self.axiomTypes
+        common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);
+
+
+    }
 
     return self;
 })();

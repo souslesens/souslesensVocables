@@ -1,4 +1,5 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
+import Axiom_activeLegend from "./axiom_activeLegend.js";
 //import Axiom_editor from "./axiom_editor.js";
 
 /*
@@ -429,7 +430,7 @@ enabled:true},*/
 
         self.axiomsVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, self.graphOptions);
         self.axiomsVisjsGraph.draw(function () {
-            if (!options.keepHierarchyLayout) {
+            if (false && !options.keepHierarchyLayout) {
                 self.switchToHierarchicalLayout(false);
             }
         });
@@ -455,6 +456,11 @@ enabled:true},*/
         html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.collapseGraphToNode();"> collapse to Node</span>';
         html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.startFromNode();"> start from Node</span>';
         html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.nodeInfos();"> NodeInfos</span>';
+
+        if( Lineage_sources.isSourceEditableForUser(NodeInfosAxioms.currentSource)){
+            html += '    <span class="popupMenuItem" onclick="Axioms_graph.removeNodeFromGraph();"> Remove node</span>';
+            html += '    <span class="popupMenuItem" onclick="Axiom_activeLegend.createAxiomFromGraph();"> create Axiom</span>';
+        }
         $("#popupMenuWidgetDiv").html(html);
         point.x = event.x;
         point.y = event.y;
@@ -470,6 +476,13 @@ enabled:true},*/
         self.axiomsVisjsGraph.decorateNodes(null, { borderWidth: 1 });
         self.axiomsVisjsGraph.decorateNodes(nodeId, { borderWidth: 5 });
     };
+    self.removeNodeFromGraph= function () {
+        if (confirm("delete node")) {
+            var edges = self.axiomsVisjsGraph.network.getConnectedEdges(self.currentGraphNode.id);
+            self.axiomsVisjsGraph.data.edges.remove(edges);
+            self.axiomsVisjsGraph.data.nodes.remove(self.currentGraphNode.id);
+        }
+    }
 
     return self;
 })();

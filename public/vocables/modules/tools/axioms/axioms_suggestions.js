@@ -270,7 +270,7 @@ var Axioms_suggestions = (function () {
                         data.push({
                             id: prop,
                             label: result.constraints.noConstraints[prop].label,
-                            source: result.constraints.both[prop].source,
+                            source: result.constraints.noConstraints[prop].source,
                             resourceType: "ObjectProperty",
                         });
                     }

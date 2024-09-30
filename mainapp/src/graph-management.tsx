@@ -172,7 +172,8 @@ export default function GraphManagement() {
         setCurrentDownloadFormat("nt");
     };
 
-    const uploadSource = async () => {
+    const uploadSource = async (event: React.FormEvent<HTMLButtonElement>) => {
+        event.preventDefault();
         if (!currentSource) {
             console.error("No current source");
             setErrorMessage("No current source");
@@ -313,7 +314,8 @@ export default function GraphManagement() {
         return blobParts;
     };
 
-    const downloadSource = async () => {
+    const downloadSource = async (event: React.FormEvent<HTMLButtonElement>) => {
+        event.preventDefault();
         if (!currentSource) {
             console.error("No current source");
             setErrorMessage("No current source");

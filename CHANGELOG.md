@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.86.2](https://github.com/souslesens/souslesensVocables/compare/1.86.1...1.86.2) (2024-10-01)
+
+
+### Features
+
+* **api:** add route to perfom a batched search query on elasticsearch ([53d6f44](https://github.com/souslesens/souslesensVocables/commit/53d6f44ba1ae5491262bab97817489449dfcf30a))
+* **vocables:** use elastic/search api to search terms on multiple sources ([1449b00](https://github.com/souslesens/souslesensVocables/commit/1449b00cc7a758f85f82b95bca3539a972bca111))
+
+
 ### [1.86.1](https://github.com/souslesens/souslesensVocables/compare/1.86.0...1.86.1) (2024-09-30)
 
 

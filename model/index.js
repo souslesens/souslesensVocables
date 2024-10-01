@@ -1,5 +1,6 @@
 const { readMainConfig } = require("./config");
 const { Client: Client7 } = require("es7");
+const { chunk } = require("./utils");
 
 class IndexModel {
     /**
@@ -15,7 +16,7 @@ class IndexModel {
         this.skipSslVerify = elasticsearchSkipSslVerify;
     }
 
-    getIndices = async () => {
+    getClient = () => {
         if (this.skipSslVerify) {
             process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
         }
@@ -25,6 +26,11 @@ class IndexModel {
             connInfo = { ...connInfo, auth: auth };
         }
         const client = new Client7(connInfo);
+        return client;
+    };
+
+    getIndices = async () => {
+        const client = this.getClient();
         const indices = await client.cat.indices({ format: "json" });
         const indexNames = indices.body
             .map((index) => {
@@ -36,6 +42,32 @@ class IndexModel {
                 }
             });
         return indexNames;
+    };
+
+    searchTerm = async (indices, uris) => {
+        const client = this.getClient();
+        const chunkedIndices = chunk(indices, 5);
+
+        let allHits = [];
+        for (const i in chunkedIndices) {
+            const chunk = chunkedIndices[i];
+            const payload = {
+                index: chunk,
+                body: {
+                    query: {
+                        terms: {
+                            "id.keyword": uris,
+                        },
+                    },
+                },
+            };
+            const results = await client.search(payload);
+            const hits = results.body.hits.hits;
+            hits.forEach((hit) => {
+                allHits.push(hit);
+            });
+        }
+        return allHits;
     };
 
     /**

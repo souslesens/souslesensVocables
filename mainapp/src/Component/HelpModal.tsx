@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Grid, IconButton, Modal, Typography } from "@mui/material";
+import { Box, Grid, IconButton, Modal, Tooltip, Typography } from "@mui/material";
 import HelpIcon from "@mui/icons-material/Help";
 import CloseIcon from "@mui/icons-material/Close";
 import { style } from "../Utils";
@@ -38,5 +38,13 @@ export function HelpButton({ title, message }: { title: string; message: string 
                 </Box>
             </Modal>
         </>
+    );
+}
+
+export function HelpTooltip({ title }: { title: string }) {
+    return (
+        <Tooltip title={title}>
+            <HelpIcon />
+        </Tooltip>
     );
 }

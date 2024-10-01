@@ -68,10 +68,6 @@
     "slsApi": {
         "url": "http://localhost:8008"
     },
-    "logger": {
-        "errorsLogPath": "logs/error.log",
-        "usersLogPath": "logs/vocables.log"
-    },
     "authenticationDatabase": {
         "user": "",
         "password": "",

@@ -59,7 +59,8 @@
         "user": "elastic",
         "password": "toto",
         "skipSslVerify": false,
-        "other_servers": []
+        "other_servers": [],
+        "searchChunkSize": 20
     },
     "jowlServer": {
         "url": "http://localhost"

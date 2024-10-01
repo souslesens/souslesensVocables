@@ -9,11 +9,12 @@ class IndexModel {
      * @param {string} elasticsearchPassword - password of elasticsearch
      * @param {boolean} elasticsearchSkipSslVerify - skip ssl check
      */
-    constructor(elasticsearchUrl, elasticsearchUser, elasticsearchPassword, elasticsearchSkipSslVerify) {
+    constructor(elasticsearchUrl, elasticsearchUser, elasticsearchPassword, elasticsearchSkipSslVerify, searchChunkSize) {
         this.elasticsearchUrl = elasticsearchUrl;
         this.elasticsearchUser = elasticsearchUser;
         this.elasticsearchPassword = elasticsearchPassword;
         this.skipSslVerify = elasticsearchSkipSslVerify;
+        this.searchChunkSize = searchChunkSize;
     }
 
     getClient = () => {
@@ -46,7 +47,7 @@ class IndexModel {
 
     searchTerm = async (indices, uris) => {
         const client = this.getClient();
-        const chunkedIndices = chunk(indices, 5);
+        const chunkedIndices = chunk(indices, this.searchChunkSize);
 
         let allHits = [];
         for (const i in chunkedIndices) {
@@ -82,6 +83,6 @@ class IndexModel {
 }
 
 const config = readMainConfig();
-const indexModel = new IndexModel(config.ElasticSearch.url, config.ElasticSearch.user, config.ElasticSearch.password, config.ElasticSearch.skipSslVerify);
+const indexModel = new IndexModel(config.ElasticSearch.url, config.ElasticSearch.user, config.ElasticSearch.password, config.ElasticSearch.skipSslVerify, config.ElasticSearch.searchChunkSize || 20);
 
 module.exports = { IndexModel, indexModel };

@@ -60,6 +60,11 @@ class IndexModel {
                             "id.keyword": uris,
                         },
                     },
+                    from: 0,
+                    size: 1000,
+                    _source: {
+                        excludes: ["attachment.content", "parents"],
+                    },
                 },
             };
             const results = await client.search(payload);

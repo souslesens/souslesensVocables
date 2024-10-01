@@ -223,16 +223,28 @@ indexes.push(source.toLowerCase());
                                     excludes: ["attachment.content", "parents"],
                                 },
                             };
-                            ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
-                                if (err) {
-                                    return callbackSeries(err);
-                                }
-                                result.hits.hits.forEach(function (hit) {
-                                    parentsMap[hit._source.id] = hit._source.label;
-                                });
-                                allClassesArray.parentIdsLabelsMap = parentsMap;
-                                return callbackSeries();
-                            });
+
+                            const payload = {
+                                method: "POST",
+                                headers: { "content-type": "application/json" },
+                                body: JSON.stringify({ indices: indexes, uris: ids }),
+                            };
+
+                            fetch(`${Config.apiUrl}/elasticsearch/search`, payload)
+                                .then((result) => {
+                                    result
+                                        .json()
+                                        .then((json) => {
+                                            const hits = json.hits;
+                                            hits.forEach(function (hit) {
+                                                parentsMap[hit._source.id] = hit._source.label;
+                                            });
+                                            allClassesArray.parentIdsLabelsMap = parentsMap;
+                                            return callbackSeries();
+                                        })
+                                        .catch((e) => callbackSeries(e));
+                                })
+                                .catch((e) => callbackSeries(e));
                         },
                     ],
 

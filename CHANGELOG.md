@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.86.3](https://github.com/souslesens/souslesensVocables/compare/1.86.2...1.86.3) (2024-10-01)
+
+
+### Bug Fixes
+
+* **api:** add missing parameters in elasticsearch search query ([ee798bc](https://github.com/souslesens/souslesensVocables/commit/ee798bc4eddbce22347057d563ff4344b6e86b94))
+
 ### [1.86.2](https://github.com/souslesens/souslesensVocables/compare/1.86.1...1.86.2) (2024-10-01)
 
 

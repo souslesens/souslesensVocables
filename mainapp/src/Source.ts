@@ -1,5 +1,4 @@
 import { ulid } from "ulid";
-import { Mode, Type, Msg_ } from "./Component/SourcesTable";
 import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import React from "react";
@@ -76,38 +75,33 @@ function mapSources(resources: ServerSource[]) {
     return mapped_sources;
 }
 
-export async function saveSource(body: ServerSource, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
+export async function saveSource(source: ServerSource, edition: boolean) {
     try {
         let response = null;
-        if (mode === Mode.Edition) {
-            response = await fetch(endpoint + "/" + body.name, {
+        if (edition) {
+            response = await fetch(endpoint + "/" + source.name, {
                 method: "put",
-                body: JSON.stringify(body, null, "\t"),
+                body: JSON.stringify(source, null, "\t"),
                 headers: { "Content-Type": "application/json" },
             });
         } else {
             response = await fetch(endpoint, {
                 method: "post",
-                body: JSON.stringify({ [body.name]: body }, null, "\t"),
+                body: JSON.stringify({ [source.name]: source }, null, "\t"),
                 headers: { "Content-Type": "application/json" },
             });
         }
         const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
-            if (mode === Mode.Edition) {
+            if (edition) {
                 const sources: ServerSource[] = await getSources();
-                updateModel({ type: "sources", payload: success(mapSources(sources)) });
-            } else {
-                updateModel({ type: "sources", payload: success(mapSources(resources)) });
+                return { status: 200, message: mapSources(sources) };
             }
-            updateLocal({ type: Type.UserClickedModal, payload: false });
-            updateLocal({ type: Type.ResetSource, payload: mode });
-        } else {
-            updateModel({ type: "sources", payload: failure(`${response.status}, ${message}`) });
+            return { status: 200, message: mapSources(resources) };
         }
+        return { status: response.status, message: message };
     } catch (e) {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        updateModel({ type: "sources", payload: failure(`Uncatched : ${e}`) });
+        return { status: 500, message: e };
     }
 }
 

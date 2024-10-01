@@ -93,17 +93,41 @@ var Lineage_whiteboard = (function () {
     self.onLoaded = function () {
         if (self.firstLoad) {
             self.firstLoad = false;
-            // Overcharge only one time at first lineage load
-
+            
             SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
-
-            //AddEdge overcharge
+           
         }
-
+        if(!self.decorationData[Lineage_sources.activeSource]){
+            var visjsGraphFileName = Lineage_sources.activeSource + "_decoration.json";
+            var payload = {
+                dir: "graphs/",
+                fileName: visjsGraphFileName,
+            };
+            //get decoration file
+            $.ajax({
+                type: "GET",
+                url: `${Config.apiUrl}/data/file`,
+                data: payload,
+                dataType: "json",
+                success: function (result, _textStatus, _jqXHR) {
+                    var data = JSON.parse(result);
+                    if(Object.keys(data).length>0){
+                        self.decorationData[Lineage_sources.activeSource]=data;
+                    }
+                    self.onLoaded();
+                },
+                error(err) {
+                  self.onLoaded();
+                },
+            });
+            return;
+        }
+       
         UI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
+        
     };
     self.unload = function () {
         $("#graphDiv").empty();

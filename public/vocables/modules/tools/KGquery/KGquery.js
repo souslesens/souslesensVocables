@@ -38,7 +38,7 @@ var KGquery = (function () {
         Lineage_sources.showHideEditButtons = UI.disableEditButtons;
 
         UI.initMenuBar(KGquery.loadSource);
-        KGquery.clearAll();
+        //KGquery.clearAll();
         if (Config.clientCache.KGquery) {
             KGquery_myQueries.load(null, Config.clientCache.KGquery);
         }

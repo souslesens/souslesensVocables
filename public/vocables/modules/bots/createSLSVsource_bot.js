@@ -1,4 +1,4 @@
-import botEngine from "./_botEngine.js";
+import _botEngine from "./_botEngine.js";
 
 var CreateSLSVsource_bot = (function () {
     var self = {};
@@ -95,48 +95,10 @@ var CreateSLSVsource_bot = (function () {
             });
         },
         uploadFromFileFn: function () {
-            var html =
-                '<form id="myForm" enctype="multipart/form-data" method="POST">\n' +
-                //  "  <input type=\"file\" id=\"file\" name=\"data\">\n" +
-                '  <input type="file" id="file" name="importRDF">\n' +
-                '  <button type="submit">Submit</button>\n' +
-                "</form>\n" +
-                "</body>\n" +
-                "<script>\n" +
-                '  const form = document.querySelector("#myForm");\n' +
-                '  form.addEventListener("submit", (e) => {\n' +
-                "    e.preventDefault();\n" +
-                "    CreateSLSVsource_bot.uploadGraphFromFile();\n" +
-                "  });\n" +
-                "</script>";
-
-            $("#smallDialogDiv").html(html);
-            $("#smallDialogDiv").dialog("open");
-            $("#smallDialogDiv").parent().css("z-index", 1);
-            $("#smallDialogDiv").dialog("option", "title", "Upload");
-            $(".selector").on("dialogclose", function (event, ui) {
+            window.UploadGraphModal.open(self.params.sourceLabel, () => {
                 _botEngine.currentObj = self.workflowUpload;
                 _botEngine.nextStep(self.workflowUpload);
             });
-        },
-        uploadFromFileFnResonsive: function () {
-            var html =
-                '<form id="myForm" enctype="multipart/form-data" method="POST">\n' +
-                //  "  <input type=\"file\" id=\"file\" name=\"data\">\n" +
-                '  <input type="file" id="file" name="importRDF">\n' +
-                '  <button type="submit">Submit</button>\n' +
-                "</form>\n" +
-                "</body>\n" +
-                "<script>\n" +
-                '  const form = document.querySelector("#myForm");\n' +
-                '  form.addEventListener("submit", (e) => {\n' +
-                "    e.preventDefault();\n" +
-                "    CreateSLSVsource_bot.uploadGraphFromFile();\n" +
-                "  });\n" +
-                "</script>";
-
-            $("#smallDialogDiv").html(html);
-            $("#smallDialogDiv").dialog("open");
         },
 
         saveFn: function () {
@@ -194,24 +156,6 @@ var CreateSLSVsource_bot = (function () {
 
         self.upload(formData, function (err, result) {
             return callback(err);
-        });
-    };
-
-    self.uploadGraphFromFile = function () {
-        const form = document.querySelector("#myForm");
-        const formData = new FormData(form);
-        var input = document.getElementById("file");
-        var files = input.files;
-        for (var i = 0; i != files.length; i++) {
-            formData.append("files", files[i]);
-        }
-        formData.append("graphUri", self.params.graphUri);
-        self.upload(formData, function (err, result) {
-            if (err) {
-                alert(err.responseText);
-                return _botEngine.reset();
-            }
-            return false;
         });
     };
 

@@ -33,17 +33,17 @@ module.exports = function () {
 
 
         var headers = {
-            "content-type": "application/json",
+            "Content-Type": "application/json",
         };
         var jowlConfig = ConfigManager.config.jowlServer;
         var url = jowlConfig.url + "reasoner/" + req.query.operation
-        httpProxy.post(url, headers, payload, function (err, _result) {
+        httpProxy.post(url, headers, payload, function (err, result) {
 
             //    HttpProxy.post(jowlConfig.url, {}, function (err, result) {
             if (err) {
                 next(err);
             } else {
-                return processResponse(res, err, JSON.parse(result));
+                return processResponse(res, err, result);
             }
         });
         return

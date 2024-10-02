@@ -482,7 +482,8 @@ sourceDivId +
             ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.showSource();"> Show </span>' +
             ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource();"> Group </span>' +
             ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();"> ungroup </span>' +
-            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.exportOWL();"> export OWL </span>';
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.copyGraphUri();"> copy graph URI </span>'
+        //   ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.exportOWL();"> export OWL </span>';
 
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
     };
@@ -721,6 +722,13 @@ sourceDivId +
                 source = Lineage_sources.activeSource;
             }
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(source);
+        },
+        copyGraphUri:function (source) {
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
+            var graphUri =Config.sources[source].graphUri
+            common.copyTextToClipboard(graphUri)
         },
         exportOWL: function (source) {
             if (!source) {

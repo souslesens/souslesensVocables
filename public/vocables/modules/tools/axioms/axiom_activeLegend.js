@@ -2,6 +2,8 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axiom_editor from "./axiom_editor.js";
 import Axioms_graph from "./axioms_graph.js";
 import Axioms_suggestions from "./axioms_suggestions.js";
+import common from "../../shared/common.js";
+import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 
 var Axiom_activeLegend = (function () {
     var self = {};
@@ -167,6 +169,7 @@ var Axiom_activeLegend = (function () {
         // new Axiom
         if ( !Axiom_activeLegend.isLegendActive) {
             // create new Axiom
+            self.newAxiomNode=NodeInfosAxioms.currentResource
             Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv", NodeInfosAxioms.currentSource, NodeInfosAxioms.currentResource, resourceUri);
             return $("#axioms_legend_suggestionsSelect").children().remove().end();
         }
@@ -436,6 +439,7 @@ var Axiom_activeLegend = (function () {
         var html = "";
         html = '    <span class="popupMenuItem" onclick="Axiom_activeLegend.removeNodeFromGraph();"> Remove Node</span>';
         html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.nodeInfos()">Node Infos</span>';
+        html += '    <span class="popupMenuItem" onclick="Axiom_activeLegend.createAxiomFromGraph();"> create Axiom</span>';
 
         $("#popupMenuWidgetDiv").html(html);
         point.x = event.x;
@@ -622,7 +626,7 @@ var Axiom_activeLegend = (function () {
                 return alert(message);
             }
 
-            var manchesterStr = Axiom_manager.parseManchesterClassAxioms(self.currentResource.data.id, result);
+            var manchesterStr = Axiom_manager.parseManchesterClassAxioms(self.newAxiomNode.id, result);
             $("#axiomsEditor_textDiv").html(manchesterStr);
             if (callback) {
                 return callback(null, manchesterStr);
@@ -639,14 +643,17 @@ var Axiom_activeLegend = (function () {
         var nodesMap = {};
         var edgesFromMap = {};
         nodes.forEach(function (node) {
+            if(node.level>=self.newAxiomNode.level)
             nodesMap[node.id] = node;
         });
 
         edges.forEach(function (edge) {
-            if (!edgesFromMap[edge.from]) {
-                edgesFromMap[edge.from] = [];
+            if(nodesMap[edge.from] && nodesMap[edge.to]) {
+                if (!edgesFromMap[edge.from]) {
+                    edgesFromMap[edge.from] = [];
+                }
+                edgesFromMap[edge.from].push(edge);
             }
-            edgesFromMap[edge.from].push(edge);
         });
 
         var triples = [];
@@ -722,8 +729,8 @@ var Axiom_activeLegend = (function () {
                 recurse(toNode.id);
             });
         }
-
-        recurse(nodes[0].id);
+var rootNode=self.newAxiomNode || nodes[0]
+        recurse(rootNode.id);
 
         var nodeTypes = {
             ObjectProperty: "http://www.w3.org/2002/07/owl#ObjectProperty",
@@ -731,16 +738,18 @@ var Axiom_activeLegend = (function () {
             Connective: "http://www.w3.org/2002/07/owl#Class",
             Restriction: "http://www.w3.org/2002/07/owl#Restriction",
         };
-
-        nodes.forEach(function (node) {
-            if (nodeTypes[node.data.type]) {
+for (var nodeId in nodesMap){
+        var node=nodesMap[nodeId]
+            if (node.data.type  ) {
                 triples.push({
                     subject: node.data.id,
                     predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                    object: nodeTypes[node.data.type],
+                    object: nodeTypes[node.data.type] || node.data.type
                 });
+            }else{
+                var x=3
             }
-        });
+        };
 
         return triples;
     };
@@ -782,12 +791,27 @@ var Axiom_activeLegend = (function () {
     };
 
     self.createAxiomFromGraph=function(){
-        var node=Axioms_graph.currentGraphNode;
-       return  NodeInfosAxioms.newAxiom()
+        self.newAxiomNode=Axioms_graph.currentGraphNode;
+     NodeInfosAxioms.newAxiom()
+        var newNodes=[]
+Axioms_graph.axiomsVisjsGraph.data.nodes.forEach(function(node){
+    if( node.id!=self.newAxiomNode.id){
+        var color= common.colorToRgba(node.color, Lineage_whiteboard.defaultLowOpacity);
+       var  fontColor = common.colorToRgba(Lineage_whiteboard.defaultNodeFontColor, Lineage_whiteboard.defaultLowOpacity);
+       var opacity=0.3
 
+        newNodes.push({id:node.id,
+            color:color,
+            opacity:opacity,
+            font:{color:fontColor,opacity:opacity}
+        })
+    }
+    Axioms_graph.axiomsVisjsGraph.data.nodes.update(newNodes)
 
-        var options = self.axiomTypes
-        common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);
+})
+
+   /*     var options = self.axiomTypes
+        common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);*/
 
 
     }

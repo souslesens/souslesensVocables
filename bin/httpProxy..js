@@ -77,7 +77,12 @@ var httpProxy = {
 
         if (headers) {
             options.headers = headers;
-            if (headers["Content-Type"] && headers["Content-Type"].indexOf("json") > -1) options.json = params;
+            if (headers["Content-Type"] && headers["Content-Type"].indexOf("json") > -1){
+                options.json = params;
+            }
+           else if (headers["content-type"] && headers["content-type"].indexOf("json") > -1){
+                options.json = params;
+            }
             // if (headers["content-type"] && headers["content-type"].indexOf("json") > -1) options.json = params;
             else options.form = params;
         } else {

@@ -3,6 +3,7 @@ import { Dialog, DialogTitle, DialogContent, Stack, Alert, LinearProgress, Typog
 import { VisuallyHiddenInput, fetchMe } from "../Utils";
 import { ChangeEvent, MouseEvent, useEffect, useRef, useState } from "react";
 import { writeLog } from "../Log";
+import { createRoot } from "react-dom/client";
 
 interface UploadGraphModalProps {
     onClose: () => void;
@@ -209,3 +210,21 @@ export function UploadGraphModal({ onClose, open, sourceName }: UploadGraphModal
         </Dialog>
     );
 }
+
+declare global {
+    interface Window {
+        UploadGraphModal: {
+            createApp: (props: Omit<UploadGraphModalProps, "open">) => void;
+        };
+    }
+}
+
+window.UploadGraphModal = {
+    createApp: (props: Omit<UploadGraphModalProps, "open">) => {
+        const container = document.getElementById("mount-edit-upload-graph-modal-here");
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const root = createRoot(container!);
+        root.render(<UploadGraphModal open={true} {...props} />);
+        return root;
+    },
+};

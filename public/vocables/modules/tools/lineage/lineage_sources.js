@@ -482,7 +482,7 @@ sourceDivId +
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.showSource();">Show</span>' +
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource();">Group</span>' +
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();">Ungroup</span>';
-        if (source !== "_defaultSource") {
+        if (source !== "_defaultSource" && self.isSourceOwnedByUser(source)) {
             html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.editSource();">Edit</span>';
         }
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
@@ -726,6 +726,19 @@ sourceDivId +
         editSource: () => {
             window.EditSourceDialog.open(Lineage_sources.activeSource);
         },
+    };
+
+    self.isSourceOwnedByUser = function (sourceName) {
+        const source = Config.sources[sourceName];
+        if (!source) {
+            return false;
+        }
+
+        if (authentication.currentUser.login == source.owner) {
+            return true;
+        }
+
+        return false;
     };
 
     self.isSourceEditableForUser = function (source) {

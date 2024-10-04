@@ -1,5 +1,6 @@
 const { readMainConfig } = require("./config");
 const { Client: Client7 } = require("es7");
+const { chunk } = require("./utils");
 
 class IndexModel {
     /**
@@ -8,14 +9,15 @@ class IndexModel {
      * @param {string} elasticsearchPassword - password of elasticsearch
      * @param {boolean} elasticsearchSkipSslVerify - skip ssl check
      */
-    constructor(elasticsearchUrl, elasticsearchUser, elasticsearchPassword, elasticsearchSkipSslVerify) {
+    constructor(elasticsearchUrl, elasticsearchUser, elasticsearchPassword, elasticsearchSkipSslVerify, searchChunkSize) {
         this.elasticsearchUrl = elasticsearchUrl;
         this.elasticsearchUser = elasticsearchUser;
         this.elasticsearchPassword = elasticsearchPassword;
         this.skipSslVerify = elasticsearchSkipSslVerify;
+        this.searchChunkSize = searchChunkSize;
     }
 
-    getIndices = async () => {
+    getClient = () => {
         if (this.skipSslVerify) {
             process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
         }
@@ -25,6 +27,11 @@ class IndexModel {
             connInfo = { ...connInfo, auth: auth };
         }
         const client = new Client7(connInfo);
+        return client;
+    };
+
+    getIndices = async () => {
+        const client = this.getClient();
         const indices = await client.cat.indices({ format: "json" });
         const indexNames = indices.body
             .map((index) => {
@@ -36,6 +43,37 @@ class IndexModel {
                 }
             });
         return indexNames;
+    };
+
+    searchTerm = async (indices, uris) => {
+        const client = this.getClient();
+        const chunkedIndices = chunk(indices, this.searchChunkSize);
+
+        let allHits = [];
+        for (const i in chunkedIndices) {
+            const chunk = chunkedIndices[i];
+            const payload = {
+                index: chunk,
+                body: {
+                    query: {
+                        terms: {
+                            "id.keyword": uris,
+                        },
+                    },
+                    from: 0,
+                    size: 1000,
+                    _source: {
+                        excludes: ["attachment.content", "parents"],
+                    },
+                },
+            };
+            const results = await client.search(payload);
+            const hits = results.body.hits.hits;
+            hits.forEach((hit) => {
+                allHits.push(hit);
+            });
+        }
+        return allHits;
     };
 
     /**
@@ -50,6 +88,6 @@ class IndexModel {
 }
 
 const config = readMainConfig();
-const indexModel = new IndexModel(config.ElasticSearch.url, config.ElasticSearch.user, config.ElasticSearch.password, config.ElasticSearch.skipSslVerify);
+const indexModel = new IndexModel(config.ElasticSearch.url, config.ElasticSearch.user, config.ElasticSearch.password, config.ElasticSearch.skipSslVerify, config.ElasticSearch.searchChunkSize || 20);
 
 module.exports = { IndexModel, indexModel };

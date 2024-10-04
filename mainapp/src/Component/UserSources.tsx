@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react";
 import {
-    Autocomplete,
     Button,
-    Checkbox,
     Chip,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
-    FormControlLabel,
-    FormGroup,
     IconButton,
     Link,
     Paper,
@@ -24,24 +20,17 @@ import {
     TableSortLabel,
     TextField,
 } from "@mui/material";
-import { CheckBox, CheckBoxOutlineBlank, Delete, Edit } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 
-import { getSourcesForUser, ServerSource, ServerSourceSchema } from "../Source";
+import { getSourcesForUser, ServerSource } from "../Source";
 import { cleanUpText, fetchMe } from "../Utils";
 import { Severity } from "../user-management";
+import { EditSourceDialog } from "./EditSourceDialog";
 
 interface DeleteSourceDialogProps {
     onClose: () => void;
     onDelete: () => void;
     open: boolean;
-    sourceName: string;
-}
-
-interface SubmitSourceDialogProps {
-    onClose: () => void;
-    onSubmit: (source: ServerSource) => void;
-    open: boolean;
-    sources: ServerSource[];
     sourceName: string;
 }
 
@@ -69,121 +58,6 @@ const DeleteSourceDialog = ({ onClose, onDelete, open, sourceName }: DeleteSourc
                 </Button>
                 <Button color="error" onClick={onDelete}>
                     Delete
-                </Button>
-            </DialogActions>
-        </Dialog>
-    );
-};
-
-const SubmitSourceDialog = ({ onClose, onSubmit, open, sources, sourceName }: SubmitSourceDialogProps) => {
-    const [predicates, setPredicates] = useState<string[]>([]);
-    const [sourceNames, setSourceNames] = useState<string[]>([]);
-    const [source, setSource] = useState<ServerSource | undefined>();
-
-    useEffect(() => {
-        const filteredSources = sources.filter((source) => source.name === sourceName);
-        setPredicates([...new Set(sources.flatMap((s) => s.taxonomyPredicates))]);
-        setSourceNames(sources.flatMap((s) => s.name));
-        setSource(filteredSources[0]);
-    }, [sources, sourceName]);
-
-    const handleField = (fieldName: string, value: string | boolean | string[]) => {
-        if (source) {
-            setSource({ ...source, [fieldName]: value });
-        }
-    };
-
-    const icon = <CheckBoxOutlineBlank fontSize="small" />;
-    const checkedIcon = <CheckBox fontSize="small" />;
-
-    return (
-        <Dialog
-            aria-labelledby="submit-dialog-title"
-            fullWidth
-            maxWidth="md"
-            open={open}
-            onClose={onClose}
-            PaperProps={{
-                component: "form",
-                onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-                    event.preventDefault();
-                    const parsedForm = ServerSourceSchema.safeParse(source);
-                    if (parsedForm.success && source) {
-                        onSubmit(source);
-                    }
-                },
-            }}
-        >
-            <DialogTitle id="submit-dialog-title">{`Edit ${sourceName}`}</DialogTitle>
-            <DialogContent>
-                <Stack spacing={2} sx={{ pt: 1 }} useFlexGap>
-                    <Autocomplete
-                        freeSolo
-                        id="taxonomyPredicates"
-                        limitTags={2}
-                        multiple
-                        onChange={(_e, value) => handleField("taxonomyPredicates", value)}
-                        options={predicates}
-                        renderInput={(params) => <TextField {...params} label="Taxonomy Predicates" />}
-                        renderOption={(props, option, { selected }) => {
-                            return (
-                                <li key={option} {...props}>
-                                    <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 2 }} checked={selected} />
-                                    {option}
-                                </li>
-                            );
-                        }}
-                        renderTags={(tagValue, getTagProps) =>
-                            tagValue.map((option, index) => {
-                                const { key, ...rest } = getTagProps({ index });
-                                return <Chip key={key} label={option} {...rest} />;
-                            })
-                        }
-                        value={source ? source.taxonomyPredicates : []}
-                    />
-                    <TextField
-                        id="topClassFilter"
-                        label="Top Class Filters"
-                        multiline
-                        onChange={(event) => handleField("topClassFilter", event.target.value)}
-                        rows={4}
-                        value={source ? source.topClassFilter : ""}
-                    />
-                    <Autocomplete
-                        disableCloseOnSelect
-                        id="imports"
-                        multiple
-                        onChange={(_e, value) => handleField("imports", value)}
-                        options={sourceNames}
-                        renderInput={(params) => <TextField {...params} label="Imports" />}
-                        renderOption={(props, option, { selected }) => {
-                            return (
-                                <li key={option} {...props}>
-                                    <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 2 }} checked={selected} />
-                                    {option}
-                                </li>
-                            );
-                        }}
-                        renderTags={(tagValue, getTagProps) =>
-                            tagValue.map((option, index) => {
-                                const { key, ...rest } = getTagProps({ index });
-                                return <Chip key={key} label={option} {...rest} />;
-                            })
-                        }
-                        value={source ? source.imports : []}
-                    />
-                    <FormGroup>
-                        <FormControlLabel
-                            control={<Checkbox checked={source ? source.allowIndividuals : false} onChange={(event) => handleField("allowIndividuals", event.target.checked)} />}
-                            label="Allow Individuals?"
-                        />
-                    </FormGroup>
-                </Stack>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
-                <Button color="primary" type="submit">
-                    Submit
                 </Button>
             </DialogActions>
         </Dialog>
@@ -242,27 +116,9 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
         setIsOpen({ ...isOpen, delete: false });
     };
 
-    const handleSubmitSource = async (source: ServerSource) => {
-        try {
-            const response = await fetch(`/api/v1/sources/${selectedSource}`, {
-                body: JSON.stringify(source, null, "\t"),
-                headers: { "Content-Type": "application/json" },
-                method: "put",
-            });
-
-            const data = (await response.json()) as { resources: Record<string, ServerSource>; message: string };
-            if (response.status == 200) {
-                setSources(Object.values(data.resources));
-                handleSnackbar(`The source '${selectedSource}' have been updated`);
-            } else {
-                console.error(data.message);
-                handleSnackbar(`An error occurs during updating: ${data.message}`, "error");
-            }
-        } catch (error) {
-            console.error(error);
-            handleSnackbar(`An error occurs during updating: ${error as string}`, "error");
-        }
-        setIsOpen({ ...isOpen, edit: false });
+    const onEditSuccess = (sources: ServerSource[]) => {
+        setSources(sources);
+        handleSnackbar(`The source '${selectedSource}' has been updated`);
     };
 
     const onOpenDialog = (dialogType: DialogType, sourceName?: string) => {
@@ -336,7 +192,7 @@ const UserSources = ({ handleSnackbar }: UserSourcesProps) => {
                 </Table>
             </TableContainer>
             <DeleteSourceDialog onClose={() => handleCloseDialog("delete")} onDelete={handleDeleteSource} open={isOpen["delete"]} sourceName={selectedSource} />
-            <SubmitSourceDialog onClose={() => handleCloseDialog("edit")} onSubmit={handleSubmitSource} open={isOpen["edit"]} sources={sources} sourceName={selectedSource} />
+            <EditSourceDialog onClose={() => handleCloseDialog("edit")} onEditSuccess={onEditSuccess} open={isOpen["edit"]} sources={sources} sourceName={selectedSource} />
         </Stack>
     );
 };

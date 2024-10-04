@@ -30,4 +30,18 @@ const convertType = (value, trimValue = true) => {
     return value;
 };
 
-module.exports = { convertType };
+/**
+ * Chunk a list into list of sublists
+ *
+ * @param {any[]} list – an array of elements
+ * @param {number} chunkSize – length of chunks
+ * @returns {any[][]}
+ */
+const chunk = (list, chunkSize = 10) => {
+    if (chunkSize <= 0) {
+        return [list];
+    }
+    return [...Array(Math.ceil(list.length / chunkSize))].map((_) => list.splice(0, chunkSize));
+};
+
+module.exports = { convertType, chunk };

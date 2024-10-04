@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.86.3](https://github.com/souslesens/souslesensVocables/compare/1.86.2...1.86.3) (2024-10-01)
+
+
+### Bug Fixes
+
+* **api:** add missing parameters in elasticsearch search query ([ee798bc](https://github.com/souslesens/souslesensVocables/commit/ee798bc4eddbce22347057d563ff4344b6e86b94))
+
+### [1.86.2](https://github.com/souslesens/souslesensVocables/compare/1.86.1...1.86.2) (2024-10-01)
+
+
+### Features
+
+* **api:** add route to perfom a batched search query on elasticsearch ([53d6f44](https://github.com/souslesens/souslesensVocables/commit/53d6f44ba1ae5491262bab97817489449dfcf30a))
+* **vocables:** use elastic/search api to search terms on multiple sources ([1449b00](https://github.com/souslesens/souslesensVocables/commit/1449b00cc7a758f85f82b95bca3539a972bca111))
+
+
+### [1.86.1](https://github.com/souslesens/souslesensVocables/compare/1.86.0...1.86.1) (2024-09-30)
+
+
+### Bug Fixes
+
+* **graphManagement:** preventDefault when submit upload/download form ([76e0e06](https://github.com/souslesens/souslesensVocables/commit/76e0e06b158bf66cdbb729922d649d2d7901eb1c))
+
 ## [1.86.0](https://github.com/souslesens/souslesensVocables/compare/1.85.0...1.86.0) (2024-09-27)
 
 > [!IMPORTANT]
@@ -29,6 +52,13 @@ npm run migrate
 
 * **api/config:** don't get all config even if user is admin ([95af912](https://github.com/souslesens/souslesensVocables/commit/95af9123fd9c024f6f5d0f3b4f63a2028a36fc12))
 * **userManagement:** use user routes for fetching sources ([cba02fd](https://github.com/souslesens/souslesensVocables/commit/cba02fd59f2c73b2996bf3e80f67634e119b0110))
+
+## [1.84.1](https://github.com/souslesens/souslesensVocables/compare/1.84.0...1.84.1) (2024-09-30)
+
+
+### Bug Fixes
+
+* **graphManagement:** preventDefault when submit upload/download form ([333509a](https://github.com/souslesens/souslesensVocables/commit/333509a13c56eb5ebe1381056b9bc47f92dff87f))
 
 ## [1.84.0](https://github.com/souslesens/souslesensVocables/compare/1.83.0...1.84.0) (2024-09-20)
 

@@ -170,6 +170,9 @@ var Lineage_selection = (function () {
                 if (!node.data) {
                     return;
                 }
+                if (node.from) {
+                    return;
+                }
                 var obj = { id: node.id };
                 if (color) {
                     obj.color = color;
@@ -206,6 +209,10 @@ var Lineage_selection = (function () {
             var shape = $("#lineage_selection_decorate_shapeSelect").val();
             var size = $("#lineage_selection_decorate_sizeInput").val();
             var file_icon = $("#lineage_selection_decorate_iconInput")[0].files[0];
+
+            if (!file_icon) {
+                return alert("missing icon file");
+            }
 
             async.series(
                 [

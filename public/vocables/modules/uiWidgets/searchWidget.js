@@ -382,6 +382,7 @@ var SearchWidget = (function () {
         if (!self.currentSource && Lineage_sources.activeSource) {
             self.currentSource = Lineage_sources.activeSource;
         }
+
         items.nodeInfos = {
             label: "Node infos",
             action: function (_e) {
@@ -403,27 +404,33 @@ var SearchWidget = (function () {
                     }
                 },
             };
-
-            items.axioms = {
-                label: "Node axioms",
+            items.copyNodes = {
+                label: "Copy Node(s)",
                 action: function (e) {
-                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
-
-                    NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+                    common.copyTextToClipboard(JSON.stringify(self.currentTreeNode));
                 },
             };
-
-            /*  items.descendantsAxioms = {
-                label: "Descendants axioms",
-                action: function (e) {
-                    $("#mainDialogDiv").dialog("open");
-                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
-                    var descendants = JstreeWidget.getNodeDescendants("LineageNodesJsTreeDiv", self.currentTreeNode.id);
-                    descendants.push(self.currentTreeNode);
-                    NodeInfosAxioms.showResourceDescendantsAxioms(self.currentTreeNode.data.source, self.currentTreeNode, descendants, "mainDialogDiv");
-                },
-            };*/
         }
+
+        items.axioms = {
+            label: "Node axioms",
+            action: function (e) {
+                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+
+                NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+            },
+        };
+
+        /*  items.descendantsAxioms = {
+            label: "Descendants axioms",
+            action: function (e) {
+                $("#mainDialogDiv").dialog("open");
+                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+                var descendants = JstreeWidget.getNodeDescendants("LineageNodesJsTreeDiv", self.currentTreeNode.id);
+                descendants.push(self.currentTreeNode);
+                NodeInfosAxioms.showResourceDescendantsAxioms(self.currentTreeNode.data.source, self.currentTreeNode, descendants, "mainDialogDiv");
+            },
+        };*/
 
         return items;
     };

@@ -23,7 +23,7 @@
                 </div>
 
                 <div style="display: flex; flex-direction: column">
-                    <a style="color: #096eac; margin: 3px; font-weight: bold; text-decoration: underline" onclick="NodeInfosAxioms.newAxiom()">New axiom</a>
+                    <a style="color: #096eac; margin: 3px; font-weight: bold; text-decoration: underline" id="nodeInfosAxioms_newAxiomBtn" onclick="NodeInfosAxioms.newAxiom(true)">New axiom</a>
                     <div id="nodeInfosAxioms_activeLegendDiv" style="width: 100px; height: 200px; background-color: #ddd"></div>
                 </div>
             </div>
@@ -45,7 +45,7 @@
         </div>
     </div>
 
-    <div id="nodeInfosAxioms_manchesterDiv" style="display: none">
+    <div id="nodeInfosAxioms_manchesterDiv" style="display: block">
         <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.axiomTriplesToManchester()">toManchester</button>
         <span id="axiomsEditor_textDiv" style="width: 80%; height: 50px; background-color: #ddd"></span>
     </div>

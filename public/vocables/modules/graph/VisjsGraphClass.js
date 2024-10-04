@@ -967,11 +967,11 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     var context = JSON.parse(JSON.stringify(data.context).replace(/self./g, "Lineage_whiteboard."));
                     //  var context = data.context
 
-                    for (var key in context.options) {
+                    /*     for (var key in context.options) {
                         if (key.indexOf("Fn") > 0) {
                             context.options[key] = eval(key + "=" + context.options[key]);
                         }
-                    }
+                    }*/
                     if (context.callback) {
                         callback = context.callback;
                     }

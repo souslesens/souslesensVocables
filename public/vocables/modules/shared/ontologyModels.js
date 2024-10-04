@@ -859,9 +859,6 @@ var OntologyModels = (function () {
 
                     if (!options.keepSuperClasses) {
                         function recurse(propId) {
-                            if (propId == "http://purl.obolibrary.org/obo/BFO_0000110") {
-                                var x = 3;
-                            }
                             if (allConstraints[propId]) {
                                 var superProp = allConstraints[propId].superProp;
 

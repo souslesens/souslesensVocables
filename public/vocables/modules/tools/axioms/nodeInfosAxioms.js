@@ -17,6 +17,10 @@ var NodeInfosAxioms = (function () {
         $("#" + divId).load("modules/tools/axioms/html/nodeInfosAxioms.html", function () {
             if (divId && divId.indexOf("Dialog") > -1) $("#" + divId).dialog("open");
             Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv");
+            if (!Lineage_sources.isSourceEditableForUser(self.currentSource)) {
+                $("#nodeInfosAxioms_newAxiomBtn").css("display", "none");
+            }
+
             // onclick="Axiom_activeLegend.onSuggestionsSelect($(this).val())"
             $("#axioms_legend_suggestionsSelect").on("click", function (event) {
                 if (event.ctrlKey) {
@@ -179,10 +183,14 @@ var NodeInfosAxioms = (function () {
         var node = obj.node;
         self.currentJstreeNode = node;
         self.switchLeftPanelDisplay("show");
+        Axioms_graph.clearGraph();
         Axiom_activeLegend.isLegendActive = false;
+        if (Lineage_sources.isSourceEditableForUser(self.currentSource)) {
+            Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv", NodeInfosAxioms.currentSource, NodeInfosAxioms.currentResource, self.currentJstreeNode.data.id);
+        }
 
         if (node.id == "newAxiom") {
-            return NodeInfosAxioms.newAxiom();
+            return NodeInfosAxioms.newAxiom(true);
         }
 
         if (node.parent == "#") {
@@ -213,8 +221,10 @@ var NodeInfosAxioms = (function () {
         }
     };
     self.onNodeGraphClick = function (node, point, nodeEvent) {
-        Axioms_graph.currentGraphNode = node;
-        Axioms_graph.outlineNode(node.id);
+        if (node && node.id) {
+            Axioms_graph.currentGraphNode = node;
+            Axioms_graph.outlineNode(node.id);
+        }
     };
     self.expandGraphFromNode = function () {
         var node = Axioms_graph.currentGraphNode;
@@ -328,34 +338,15 @@ var NodeInfosAxioms = (function () {
         },
     };
 
-    self.newAxiom = function () {
-        Axiom_activeLegend.isLegendActive = false;
+    self.newAxiom = function (clearAll) {
+        if (clearAll) {
+            Axiom_activeLegend.isLegendActive = false;
+            Axioms_graph.clearGraph();
+        }
         self.switchLeftPanelDisplay("new");
 
-        //  Axiom_activeLegend.init("nodeInfosAxioms_activeLegendDiv", "nodeInfosAxioms_graphDiv",self.currentSource,self.currentResource );
-
-        var options = ["SubClassOf", "EquivalentClass", "DisjointWith", "DisjointUnionOf"];
+        var options = Axiom_activeLegend.axiomtypes;
         common.fillSelectOptions("axioms_legend_suggestionsSelect", options, false);
-
-        /*
-
-
-            SimpleListSelectorWidget.showDialog(
-                null,
-                function (callbackLoad) {
-                    return callbackLoad(["subClassOf", "equivalentClass", "disjointWith", "disjointUnionOf"]);
-                },
-
-                function (axiomType) {
-                    if (!axiomType) {
-                        return;
-                    }
-
-
-
-
-                }
-            );*/
     };
 
     self.switchLeftPanelDisplay = function (role) {
@@ -364,13 +355,11 @@ var NodeInfosAxioms = (function () {
             $("#nodeInfosAxioms_manchesterDiv").css("display", "flex");
             $("#nodeInfosAxioms_graphPanelDiv").css("display", "none");
             $("#nodeInfosAxioms_graphDiv").width("50vw");
-            Axioms_graph.clearGraph();
         } else if (role == "show") {
             $("#nodeInfosAxioms_newAxiomPanel").css("display", "none");
-            $("#nodeInfosAxioms_manchesterDiv").css("display", "none");
+            //   $("#nodeInfosAxioms_manchesterDiv").css("display", "none");
             $("#nodeInfosAxioms_graphPanelDiv").css("display", "flex");
             $("#nodeInfosAxioms_graphDiv").width("70vw");
-            Axioms_graph.clearGraph();
         }
     };
 

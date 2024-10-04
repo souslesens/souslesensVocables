@@ -38,7 +38,7 @@ var MappingModeler_bot = (function () {
                     },
                 },
                 "set column as datatypeProperty": {
-                    listTableColumnsFn: {listDatatypePropertyRangeFn:{labelFn:{}}},
+                    listTableColumnsFn: { listDatatypePropertyRangeFn: { labelFn: {} } },
                 },
                 "create  datatypeProperty": {
                     createDatatypePropertyFn: {},

@@ -457,7 +457,7 @@ enabled:true},*/
         html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.startFromNode();"> start from Node</span>';
         html += '    <span class="popupMenuItem" onclick="NodeInfosAxioms.nodeInfos();"> NodeInfos</span>';
 
-        if( Lineage_sources.isSourceEditableForUser(NodeInfosAxioms.currentSource)){
+        if (Lineage_sources.isSourceEditableForUser(NodeInfosAxioms.currentSource)) {
             html += '    <span class="popupMenuItem" onclick="Axioms_graph.removeNodeFromGraph();"> Remove node</span>';
             html += '    <span class="popupMenuItem" onclick="Axiom_activeLegend.createAxiomFromGraph();"> create Axiom</span>';
         }
@@ -476,13 +476,13 @@ enabled:true},*/
         self.axiomsVisjsGraph.decorateNodes(null, { borderWidth: 1 });
         self.axiomsVisjsGraph.decorateNodes(nodeId, { borderWidth: 5 });
     };
-    self.removeNodeFromGraph= function () {
+    self.removeNodeFromGraph = function () {
         if (confirm("delete node")) {
             var edges = self.axiomsVisjsGraph.network.getConnectedEdges(self.currentGraphNode.id);
             self.axiomsVisjsGraph.data.edges.remove(edges);
             self.axiomsVisjsGraph.data.nodes.remove(self.currentGraphNode.id);
         }
-    }
+    };
 
     return self;
 })();

@@ -371,12 +371,19 @@ var Lineage_sources = (function () {
             if (indexedSources.indexOf(source) < 0) {
                 UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");
-                SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
-                    if (err) {
-                        return UI.message(err, true);
+                SearchUtil.generateElasticIndex(
+                    source,
+                    {
+                        indexProperties: 1,
+                        indexNamedIndividuals: 1,
+                    },
+                    function (err, _result) {
+                        if (err) {
+                            return UI.message(err, true);
+                        }
+                        UI.message("ALL DONE", true);
                     }
-                    UI.message("ALL DONE", true);
-                });
+                );
             }
         });
     };
@@ -481,7 +488,8 @@ sourceDivId +
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.hideSource();">Hide</span>' +
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.showSource();">Show</span>' +
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource();">Group</span>' +
-            '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();">Ungroup</span>';
+            '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();">Ungroup</span>' +
+            '<span  class="popupMenuItem" onclick="Lineage_sources.menuActions.copyGraphUri();"> copy graph URI </span>';
         if (source !== "_defaultSource" && self.isSourceOwnedByUser(source)) {
             html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.editSource();">Edit</span>';
         }
@@ -723,12 +731,12 @@ sourceDivId +
             }
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(source);
         },
-        copyGraphUri:function (source) {
+        copyGraphUri: function (source) {
             if (!source) {
                 source = Lineage_sources.activeSource;
             }
-            var graphUri =Config.sources[source].graphUri
-            common.copyTextToClipboard(graphUri)
+            var graphUri = Config.sources[source].graphUri;
+            common.copyTextToClipboard(graphUri);
         },
         exportOWL: function (source) {
             if (!source) {
@@ -738,7 +746,9 @@ sourceDivId +
                 if (err) {
                     return console.log(err);
                 }
-        editSource: () => {
+            });
+        },
+        editSource: function () {
             window.EditSourceDialog.open(Lineage_sources.activeSource);
         },
     };
@@ -829,36 +839,45 @@ Lineage_whiteboard.lineageVisjsGraph.network.options.edges.font = { color: self.
         }
     };
     self.getSourcesClasses = function (source, callback) {
-        Sparql_OWL.getDictionary(self.activeSource, { selectGraph: true, lang: Config.default_lang, type: "owl:Class" }, null, function (err, result) {
-            if (err) {
-                callback(err);
-            }
+        Sparql_OWL.getDictionary(
+            self.activeSource,
+            {
+                selectGraph: true,
+                lang: Config.default_lang,
+                type: "owl:Class",
+            },
+            null,
+            function (err, result) {
+                if (err) {
+                    callback(err);
+                }
 
-            var sourceObjects = [];
-            var TopLevelOntologyObjects = [];
-            result.forEach(function (item) {
-                if (item.label) {
-                    var prefix = "";
-                    if (Config.currentTopLevelOntology && item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
-                        prefix = "_" + Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";
+                var sourceObjects = [];
+                var TopLevelOntologyObjects = [];
+                result.forEach(function (item) {
+                    if (item.label) {
+                        var prefix = "";
+                        if (Config.currentTopLevelOntology && item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
+                            prefix = "_" + Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";
+                        }
+                        sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
                     }
-                    sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
-                }
-            });
-            sourceObjects.sort(function (a, b) {
-                if (!a.label || !b.label) {
+                });
+                sourceObjects.sort(function (a, b) {
+                    if (!a.label || !b.label) {
+                        return 0;
+                    }
+                    if (a.label > b.label) {
+                        return 1;
+                    }
+                    if (a.label < b.label) {
+                        return -1;
+                    }
                     return 0;
-                }
-                if (a.label > b.label) {
-                    return 1;
-                }
-                if (a.label < b.label) {
-                    return -1;
-                }
-                return 0;
-            });
-            callback(null, sourceObjects);
-        });
+                });
+                callback(null, sourceObjects);
+            }
+        );
     };
 
     self.test3D = function () {

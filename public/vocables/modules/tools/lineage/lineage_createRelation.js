@@ -151,7 +151,7 @@ var Lineage_createRelation = (function () {
                     },
 
                     function (callbackSeries) {
-                        OntologyModels.getAllowedPropertiesBetweenNodes(source, self.sourceNode.id, self.targetNode.id, {keepSuperClasses:true}, function (err, result) {
+                        OntologyModels.getAllowedPropertiesBetweenNodes(source, self.sourceNode.id, self.targetNode.id, { keepSuperClasses: true }, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
@@ -325,7 +325,7 @@ var Lineage_createRelation = (function () {
                         };
                         self.domainOntologyProperties.push(newProp);
                         var propId = newProp.id;
-                      //  var ontology = self.currentPropertiesTreeNode.parents[self.currentPropertiesTreeNode.parents.length - 2];
+                        //  var ontology = self.currentPropertiesTreeNode.parents[self.currentPropertiesTreeNode.parents.length - 2];
                         var ontology = self.currentPropertiesTreeNode.data.source;
                         var x = Config.ontologiesVocabularyModels[ontology].constraints;
                         var superpropConstraints = JSON.parse(

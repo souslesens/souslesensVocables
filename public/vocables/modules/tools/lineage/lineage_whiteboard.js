@@ -19,7 +19,6 @@ import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 
-
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -1373,7 +1372,7 @@ var Lineage_whiteboard = (function () {
             parentIds = [];
             var nodes = self.lineageVisjsGraph.data.nodes.get();
             nodes.forEach(function (/** @type {{ data: { source: any; id: any; }; }} */ node) {
-                if ((source == Lineage_sources.activeSource || (node.data && node.data.source == source)) && (node.data && node.data.id != source)) {
+                if ((source == Lineage_sources.activeSource || (node.data && node.data.source == source)) && node.data && node.data.id != source) {
                     parentIds.push(node.data.id);
                 }
             });
@@ -2509,7 +2508,7 @@ restrictionSource = Config.predicatesSource;
         }
     };
 
-    self.setGraphPopupMenus = function  (node,  event) {
+    self.setGraphPopupMenus = function (node, event) {
         if (!node || !node.data) {
             return;
         }
@@ -2549,25 +2548,25 @@ restrictionSource = Config.predicatesSource;
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' +
                 ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showAxioms();"> Axioms</span>' +
                 '   <span  id=\'lineage_graphPopupMenuItem\' class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.expand();"> Expand</span>' +
-                '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawParents();"> Parents</span>'
+                '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawParents();"> Parents</span>';
 
-            if(node.data && node.data.type=="container") {
-                html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.pasteNodeIntoContainer();"> past intoToContainer</span>'
-            } else{
-                html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
-                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
-                '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' +
-                // '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +
-                //  "   <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('direct',null,'Graph');\">Relations</span>" +
-                //   "    <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('inverse',null,'Graph');\">Inverse Rels</span>" +
-                //  "    <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.graphNodeNeighborhood('all');\">ObjectProperties</span>" +
-                //   "    <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.showRestrictions();\">Restrictions</span>" +
-                //   "  <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.showRestrictions();\">Inv Restr</span>" +
-                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.hideShowOthers();">Hide/show others</span>' +
-                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>' +
-                '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>';
+            if (node.data && node.data.type == "container") {
+                html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.pasteNodeIntoContainer();"> past intoToContainer</span>';
+            } else {
+                html +=
+                    '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
+                    '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
+                    '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' +
+                    // '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +
+                    //  "   <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('direct',null,'Graph');\">Relations</span>" +
+                    //   "    <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('inverse',null,'Graph');\">Inverse Rels</span>" +
+                    //  "    <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.graphNodeNeighborhood('all');\">ObjectProperties</span>" +
+                    //   "    <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.showRestrictions();\">Restrictions</span>" +
+                    //   "  <span  class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.showRestrictions();\">Inv Restr</span>" +
+                    '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.hideShowOthers();">Hide/show others</span>' +
+                    '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>' +
+                    '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>';
             }
-
         }
 
         $("#popupMenuWidgetDiv").html(html);
@@ -3027,9 +3026,8 @@ self.zoomGraphOnNode(node.data[0].id, false);
             });
         },
 
-        pasteNodeIntoContainer:function(){
-     if(SearchWidget.currentTreeNode)
-            Containers_tree.pasteNodeIntoContainer(Lineage_sources.activeSource,self.currentGraphNode);
+        pasteNodeIntoContainer: function () {
+            if (SearchWidget.currentTreeNode) Containers_tree.pasteNodeIntoContainer(Lineage_sources.activeSource, self.currentGraphNode);
         },
         graphNodeNeighborhood: function (/** @type {any} */ filter) {
             Lineage_whiteboard.graphNodeNeighborhood(self.currentGraphNode.data, filter);
@@ -3273,8 +3271,8 @@ attrs.color=self.getSourceColor(superClassValue)
                 label: node.data.label,
                 source: node.data.source,
                 data: node.data,
-            },
-          //  self.currentTreeNode.id + "_anchor"
+            }
+            //  self.currentTreeNode.id + "_anchor"
         );
     };
 
@@ -3296,25 +3294,20 @@ attrs.color=self.getSourceColor(superClassValue)
         },
 
         saveWhiteboard: function () {
-            var visjsFileName=prompt("file name")
-            if(!visjsFileName)
-                return
-            Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName)
-
+            var visjsFileName = prompt("file name");
+            if (!visjsFileName) return;
+            Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName);
         },
         loadSavedGraph: function () {
-            var visjsFileName=prompt("file name")
-            if(!visjsFileName)
-                return
+            var visjsFileName = prompt("file name");
+            if (!visjsFileName) return;
             try {
-                Lineage_whiteboard.lineageVisjsGraph.loadGraph(visjsFileName,false,function(err,visjsData){
-                    if(err)
-                        return alert(err.responseText || err)
-                    Lineage_whiteboard.drawNewGraph(visjsData,"graphDiv")
-
-                })
-            }catch(e){
-                alert( "file not found")
+                Lineage_whiteboard.lineageVisjsGraph.loadGraph(visjsFileName, false, function (err, visjsData) {
+                    if (err) return alert(err.responseText || err);
+                    Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
+                });
+            } catch (e) {
+                alert("file not found");
             }
         },
     };

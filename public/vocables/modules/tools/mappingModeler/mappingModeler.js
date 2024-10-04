@@ -16,12 +16,12 @@ var MappingModeler = (function () {
     self.currentDataSource = null;
     self.graphDiv = "mappingModeler_graphDiv";
     self.legendItemsArray = [
-        {label: "Table", color: "#375521", shape: "ellipse"},
-        {label: "Column", color: "#cb9801", shape: "ellipse"},
-        {label: "RowIndex", color: "#cb9801", shape: "triangle"},
-        {label: "VirtualColumn", color: "#cb9801", shape: "square"},
+        { label: "Table", color: "#375521", shape: "ellipse" },
+        { label: "Column", color: "#cb9801", shape: "ellipse" },
+        { label: "RowIndex", color: "#cb9801", shape: "triangle" },
+        { label: "VirtualColumn", color: "#cb9801", shape: "square" },
 
-        {label: "Class", color: "#00afef", shape: "box"},
+        { label: "Class", color: "#00afef", shape: "box" },
     ];
 
     self.onLoaded = function () {
@@ -89,7 +89,7 @@ var MappingModeler = (function () {
 
             //init visjsGraph
             function (callbackSeries) {
-                var visjsData = {nodes: [], edges: []};
+                var visjsData = { nodes: [], edges: [] };
                 self.drawGraphCanvas(self.graphDiv, visjsData, function () {
                     callbackSeries();
                 });
@@ -145,8 +145,7 @@ var MappingModeler = (function () {
         self.initActiveLegend(divId);
         try {
             self.loadVisjsGraph();
-        } catch (e) {
-        }
+        } catch (e) {}
     };
     self.initActiveLegend = function (divId) {
         var options = {
@@ -184,9 +183,8 @@ var MappingModeler = (function () {
         } else if (resourceUri == "createObjectProperty") {
             return self.showCreateResourceBot("ObjectProperty", null);
         } else if (self.currentResourceType == "Table") {
-            self.saveVisjsGraph()
-            return self.onDataSourcesJstreeSelect(null, {node: {id: resourceUri, data: {type: "csvSource"}}})
-
+            self.saveVisjsGraph();
+            return self.onDataSourcesJstreeSelect(null, { node: { id: resourceUri, data: { type: "csvSource" } } });
         } else if (self.currentResourceType == "Column") {
             newResource = {
                 id: id,
@@ -202,7 +200,7 @@ var MappingModeler = (function () {
             };
             self.drawResource(newResource);
             setTimeout(function () {
-                self.onLegendNodeClick({id: "Class"});
+                self.onLegendNodeClick({ id: "Class" });
             }, 500);
         } else if (self.currentResourceType == "Class") {
             var resource = self.allResourcesMap[resourceUri];
@@ -236,7 +234,7 @@ var MappingModeler = (function () {
             };
             self.drawResource(newResource);
             setTimeout(function () {
-                self.onLegendNodeClick({id: "Class"});
+                self.onLegendNodeClick({ id: "Class" });
             }, 500);
         } else if (self.currentResourceType == "VirtualColumn") {
             newResource = {
@@ -254,13 +252,13 @@ var MappingModeler = (function () {
             };
             self.drawResource(newResource);
             setTimeout(function () {
-                self.onLegendNodeClick({id: "Class"});
+                self.onLegendNodeClick({ id: "Class" });
             }, 500);
         } else if (self.currentResourceType == "ObjectProperty") {
             var smooth = null;
             var property = self.allResourcesMap[resourceUri];
             if (self.currentRelation) {
-                self.currentRelation.data = {type: "Objectproperty", propId: resourceUri};
+                self.currentRelation.data = { type: "Objectproperty", propId: resourceUri };
 
                 var color = "#1244e8";
                 // ObjectProperty
@@ -268,7 +266,7 @@ var MappingModeler = (function () {
                     self.currentRelation.label = self.allResourcesMap[resourceUri].label;
                 } else {
                     //other
-                    smooth = {type: "curvedCW"};
+                    smooth = { type: "curvedCW" };
                     self.currentRelation.label = resourceUri;
                     color = "#375521";
                 }
@@ -307,7 +305,7 @@ var MappingModeler = (function () {
         };
         var edgeColor = "#ccc";
         if (!self.currentOffest) {
-            self.currentOffest = {x: -graphDivWidth / 2, y: 0};
+            self.currentOffest = { x: -graphDivWidth / 2, y: 0 };
         }
         if (self.currentGraphNode && newResource.data.type == "Class") {
             newResource.x = self.currentGraphNode.x;
@@ -319,9 +317,9 @@ var MappingModeler = (function () {
             }
             newResource.y = self.currentOffest.y;
         }
-        newResource.fixed = {x: true, y: true};
+        newResource.fixed = { x: true, y: true };
 
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
         var visjsNode = newResource;
 
         if (newResource.data.type == "Class") {
@@ -354,7 +352,7 @@ var MappingModeler = (function () {
                     label: label,
                     to: newResource.id,
                     width: 2,
-                    data: {type: type},
+                    data: { type: type },
                     arrows: arrows,
                     color: edgeColor,
                 });
@@ -433,16 +431,16 @@ var MappingModeler = (function () {
 
             if (!self.currentRelation) {
                 self.currentRelation = {
-                    from: {id: node.id, classId: getColumnClass(node)},
+                    from: { id: node.id, classId: getColumnClass(node) },
                     to: null,
                     type: node.data.type,
                 };
             } else {
-                self.currentRelation.to = {id: node.id, classId: getColumnClass(node)};
+                self.currentRelation.to = { id: node.id, classId: getColumnClass(node) };
                 if (self.currentRelation.from.type != "Class" && node.data.type == "Class") {
                     self.graphActions.drawColumnToClassEdge(self.currentRelation);
                 } else if (self.currentRelation.from.type != "Class" && node.data.type != "Class") {
-                    self.onLegendNodeClick({id: "ObjectProperty"});
+                    self.onLegendNodeClick({ id: "ObjectProperty" });
                 }
             }
         } else {
@@ -474,22 +472,20 @@ var MappingModeler = (function () {
                 html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.addSuperClassToGraph()">draw superClass</span>';
                 html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.showDomainAndRangeProperties()">allowed relations</span>';
                 html += '    <span class="popupMenuItem" onclick="MappingModeler.graphActions.showDomainAndRangeProperties(true)">allowed inverse relations</span>';
-
-
             }
         }
 
         $("#popupMenuWidgetDiv").html(html);
         point.x = event.x;
         point.y = event.y;
-        self.currentGraphPoint = point
+        self.currentGraphPoint = point;
         PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
     };
 
     self.graphActions = {
         outlineNode: function (nodeId) {
-            self.visjsGraph.decorateNodes(null, {borderWidth: 1});
-            self.visjsGraph.decorateNodes(nodeId, {borderWidth: 5});
+            self.visjsGraph.decorateNodes(null, { borderWidth: 1 });
+            self.visjsGraph.decorateNodes(nodeId, { borderWidth: 5 });
         },
         removeNodeFromGraph: function () {
             if (confirm("delete node")) {
@@ -551,7 +547,7 @@ var MappingModeler = (function () {
                             type: "arrow",
                         },
                     },
-                    data: {type: "rdf:type"},
+                    data: { type: "rdf:type" },
                 },
             ];
 
@@ -565,7 +561,7 @@ var MappingModeler = (function () {
                     $("#smallDialogDiv").dialog("open");
                     self.mappingColumnInfo.editColumnInfos();
                     self.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);
-                 //   self.showDatatypeGraph(self.currentGraphNode.label);
+                    //   self.showDatatypeGraph(self.currentGraphNode.label);
                 });
             } else {
                 NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
@@ -576,67 +572,63 @@ var MappingModeler = (function () {
             var directProperties, inverseProperties;
             var fromUri = null;
             var toUri = null;
-            var title=""
+            var title = "";
             if (inverse) {
-                title="range for properties"
+                title = "range for properties";
                 toUri = classUri;
             } else {
-                title="Domain Of properties"
-                fromUri = classUri
+                title = "Domain Of properties";
+                fromUri = classUri;
             }
             self.getValidPropertiesArray(self.currentGraphNode.data.source, fromUri, toUri, {}, function (err, properties) {
                 if (err) {
-                    return alert(err.responseText)
+                    return alert(err.responseText);
                 }
-                    var html = self.currentGraphNode.label + "<br>" +
-                       title+" <br><select id='mappingModeler_PropertiesSelect' size='10'></select>"
-                    $("#popupMenuWidgetDiv").html(html);
-                    PopupMenuWidget.showPopup(self.currentGraphPoint, "popupMenuWidgetDiv");
-                    //  $("#smallDialogDiv").html(html);
-                    //  $("#smallDialogDiv").dialog("open")
-                    common.fillSelectOptions("mappingModeler_PropertiesSelect", properties, null, "label")
-
-                })
-
-        }
+                var html = self.currentGraphNode.label + "<br>" + title + " <br><select id='mappingModeler_PropertiesSelect' size='10'></select>";
+                $("#popupMenuWidgetDiv").html(html);
+                PopupMenuWidget.showPopup(self.currentGraphPoint, "popupMenuWidgetDiv");
+                //  $("#smallDialogDiv").html(html);
+                //  $("#smallDialogDiv").dialog("open")
+                common.fillSelectOptions("mappingModeler_PropertiesSelect", properties, null, "label");
+            });
+        },
     };
     self.mappingColumnInfo = {
         editColumnInfos: function () {
-
             var data = self.currentGraphNode.data;
-          self.loadCsvDatasourceInfos(data.datasource,  function (err, tableObj) {
-              if (err) {
-                  return alert("file not found");
-              }
+            self.loadCsvDatasourceInfos(data.datasource, function (err, tableObj) {
+                if (err) {
+                    return alert("file not found");
+                }
 
-              if (!data.uriType) {
-                  // showBot
-                  var params = {
-                      title: "" + data.label,
-                      columns:tableObj.columns,
-                  };
+                if (!data.uriType) {
+                    // showBot
+                    var params = {
+                        title: "" + data.label,
+                        columns: tableObj.columns,
+                    };
 
-                  MappingModeler_bot.start(MappingModeler_bot.workflowMappingDetail, params, function (err, result) {
-                      var params = MappingModeler_bot.params;
-                      data.uriType = params.URItype;
-                      data.rdfType = params.rdfType;
-                      data.rdfsLabel = params.rdfsLabel;
-                      self.visjsGraph.data.nodes.update({
-                          id: self.currentGraphNode.id,
-                          data: data
-                      });
-                      self.mappingColumnInfo.editColumnInfos();
-                      self.showDatatypeGraph(self.currentGraphNode.label);
-                  });
-              }
+                    MappingModeler_bot.start(MappingModeler_bot.workflowMappingDetail, params, function (err, result) {
+                        var params = MappingModeler_bot.params;
+                        data.uriType = params.URItype;
+                        data.rdfType = params.rdfType;
+                        data.rdfsLabel = params.rdfsLabel;
+                        self.visjsGraph.data.nodes.update({
+                            id: self.currentGraphNode.id,
+                            data: data,
+                        });
+                        self.mappingColumnInfo.editColumnInfos();
+                        self.showDatatypeGraph(self.currentGraphNode.label);
+                    });
+                }
 
-              self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", data);
-          })
+                self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", data);
+            });
         },
         save: function () {
             var data = self.mappingColumnEditor.get();
             self.currentGraphNode.data = data;
-            self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data});
+            self.visjsGraph.data.nodes.update({ id: self.currentGraphNode.id, data: data });
             $("#smallDialogDiv").dialog("close");
             self.saveVisjsGraph();
             self.showDatatypeGraph(self.currentGraphNode.label);
@@ -663,7 +655,7 @@ var MappingModeler = (function () {
                         range: Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range,
                         dateFormat: params.nonObjectPropertyDateFormat || null, //if any
                     });
-                    self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data});
+                    self.visjsGraph.data.nodes.update({ id: self.currentGraphNode.id, data: data });
                     //  self.mappingColumnInfo.editColumnInfos()
                     self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", data);
                     self.showDatatypeGraph(self.currentGraphNode.label);
@@ -680,17 +672,17 @@ var MappingModeler = (function () {
 
         if (self.currentResourceType == "Table") {
             if (KGcreator.currentConfig.currentDataSource.type == "databaseSource") {
-                var tables = Object.keys(KGcreator.currentDataSource.tables).sort()
+                var tables = Object.keys(KGcreator.currentDataSource.tables).sort();
             }
             if (KGcreator.currentConfig.csvSources) {
-                var tables = Object.keys(KGcreator.currentConfig.csvSources).sort()
+                var tables = Object.keys(KGcreator.currentConfig.csvSources).sort();
             }
             common.fillSelectOptions("axioms_legend_suggestionsSelect", tables, false);
         } else if (self.currentResourceType == "Column") {
             common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         } else if (self.currentResourceType == "Class") {
             //   self.hideLegendItems();
-            var newObject = {id: "createClass", label: "_Create new Class_"};
+            var newObject = { id: "createClass", label: "_Create new Class_" };
             self.getAllClasses(self.currentSource, function (err, classes) {
                 if (err) {
                     return alert(err);
@@ -701,8 +693,8 @@ var MappingModeler = (function () {
         } else if (self.currentResourceType == "ObjectProperty") {
             //   self.hideLegendItems();
             var newObjects = [
-                {id: "createObjectProperty", label: "_Create new ObjectProperty_"},
-                {id: "rdfs:member", label: "_rdfs:member_"},
+                { id: "createObjectProperty", label: "_Create new ObjectProperty_" },
+                { id: "rdfs:member", label: "_rdfs:member_" },
             ];
             self.getValidPropertiesArray(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, {}, function (err, properties) {
                 if (err) {
@@ -715,7 +707,7 @@ var MappingModeler = (function () {
                 self.setSuggestionsSelect(properties, false, newObjects);
             });
         } else if (self.currentResourceType == "RowIndex") {
-            self.onSuggestionsSelect({id: "RowIndex"});
+            self.onSuggestionsSelect({ id: "RowIndex" });
         } else if (self.currentResourceType == "VirtualColumn") {
             var columnName = prompt("Virtual column name");
             if (columnName) {
@@ -724,8 +716,7 @@ var MappingModeler = (function () {
         }
     };
 
-    self.showLegendGraphPopupMenu = function () {
-    };
+    self.showLegendGraphPopupMenu = function () {};
 
     self.switchDataSourcePanel = function (target) {
         if (target == "show") {
@@ -815,7 +806,7 @@ var MappingModeler = (function () {
         var newNodes = [];
         legendNodes.forEach(function (nodeId) {
             var hidden = !hiddenNodes || hiddenNodes.indexOf(nodeId) > -1;
-            newNodes.push({id: nodeId, hidden: hidden});
+            newNodes.push({ id: nodeId, hidden: hidden });
         });
         self.visjsGraph.data.nodes.update(newNodes);
     };
@@ -877,9 +868,8 @@ var MappingModeler = (function () {
         self.visjsGraph.clearGraph();
         $("#" + self.graphDivId).html("");
         self.visjsGraph = null;
-        var visjsData = {nodes: [], edges: []};
-        self.drawGraphCanvas(self.graphDiv, visjsData, function () {
-        });
+        var visjsData = { nodes: [], edges: [] };
+        self.drawGraphCanvas(self.graphDiv, visjsData, function () {});
     };
     self.saveMappings = function () {
         $("#" + self.graphDivId).html("");
@@ -896,7 +886,7 @@ var MappingModeler = (function () {
         } else {
             return alert("no valid resourceType");
         }
-        var params = {source: self.currentSource, filteredUris: filteredUris};
+        var params = { source: self.currentSource, filteredUris: filteredUris };
         return CreateAxiomResource_bot.start(botWorkFlow, params, function (err, result) {
             if (err) {
                 return alert(err);
@@ -951,12 +941,11 @@ var MappingModeler = (function () {
 
         $("#smallDialogDiv").html(
             '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
-            ' <textarea id="mappingModeler_infosTA" style="display: block;width:800px;height: 500px;overflow: auto;"> </textarea>'
+                ' <textarea id="mappingModeler_infosTA" style="display: block;width:800px;height: 500px;overflow: auto;"> </textarea>'
         );
         $("#smallDialogDiv").dialog("open");
         $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
     };
-
 
     self.nodeToKGcreatorColumnName = function (data) {
         var colname;
@@ -982,12 +971,11 @@ var MappingModeler = (function () {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
             if (!allMappings[data.datasource]) {
-                allMappings[data.datasource] ={tripleModels: []}
+                allMappings[data.datasource] = { tripleModels: [] };
             }
             if (data.rdfType) {
-                var predicate="rdf:type"
-                if(data.rdfType=="owl:Class")
-                    predicate="rdfs:subClassOf"
+                var predicate = "rdf:type";
+                if (data.rdfType == "owl:Class") predicate = "rdfs:subClassOf";
                 allMappings[data.datasource].tripleModels.push({
                     s: subject,
                     p: predicate,
@@ -1048,9 +1036,8 @@ var MappingModeler = (function () {
             }
         }
 
-        var json = allMappings
-        json.transform = {}
-
+        var json = allMappings;
+        json.transform = {};
 
         return json;
     };
@@ -1089,14 +1076,12 @@ var MappingModeler = (function () {
             setTimeout(function () {
                 self.visjsGraph.network.fit();
                 var maxX = 0;
-                var maxY = 0
+                var maxY = 0;
                 self.visjsGraph.data.nodes.get().forEach(function (node) {
-                    maxX = Math.max(node.x, maxX)
-                    maxY = Math.max(node.y, maxY)
-                })
-                self.currentOffest = {y: maxY, x: maxX}
-
-
+                    maxX = Math.max(node.x, maxX);
+                    maxY = Math.max(node.y, maxY);
+                });
+                self.currentOffest = { y: maxY, x: maxX };
             }, 500);
         }, 500);
     };
@@ -1124,7 +1109,7 @@ var MappingModeler = (function () {
             return item.data.type != "Class";
         });
         notClassNodes.forEach(function (item) {
-            var Column = {id: item.id, label: item.data.label};
+            var Column = { id: item.id, label: item.data.label };
             var typeId = edges.filter(function (edge) {
                 return edge.from == Column.id && edge.label == "a";
             })[0].to;
@@ -1197,7 +1182,6 @@ var MappingModeler = (function () {
         self.graphActions.showNodeInfos();
     };
 
-
     self.sampleData = function (column) {
         if (!column) {
             return;
@@ -1205,7 +1189,6 @@ var MappingModeler = (function () {
         //rajouter toutes les colonnes en lien avec celle la et mettre celle qui nous intéresse en premier
         KGcreator.showSampleData(self.currentTreeNode, column);
     };
-
 
     self.saveDefineClass = function () {
         // Step 1 : Enregistrer le dictionnaire
@@ -1228,7 +1211,6 @@ var MappingModeler = (function () {
     };
 
     self.showDatatypeGraph = function (column) {
-
         return;
         //datatypeMappingGraph
         var mappings = self.generateBasicContentMappingContent()[self.currentTreeNode.id].tripleModels;
@@ -1252,7 +1234,7 @@ var MappingModeler = (function () {
             divId = "technicalMappingColumnGraphDiv";
         }
         var sourceMappings = mappings;
-        var visjsData = {nodes: [], edges: []};
+        var visjsData = { nodes: [], edges: [] };
 
         var existingNodes = {};
         var json = {};
@@ -1306,18 +1288,18 @@ var MappingModeler = (function () {
 
                 function getNodeAttrs(str) {
                     if (str.indexOf("http") > -1) {
-                        return {type: "Class", color: "#70ac47", shape: "box", size: 30};
+                        return { type: "Class", color: "#70ac47", shape: "box", size: 30 };
                     } else if (str.indexOf(":") > -1) {
                         drawRelation = false; //rdf Bag
                         return null;
-                        return {type: "OwlType", color: "#aaa", shape: "ellipse"};
+                        return { type: "OwlType", color: "#aaa", shape: "ellipse" };
                     } else if (str.endsWith("_$")) {
-                        return {type: "blankNode", color: "#00afef", shape: "square"};
+                        return { type: "blankNode", color: "#00afef", shape: "square" };
                     } else if (str.indexOf("_rowIndex") > -1) {
-                        return {type: "rowIndex", color: "#f90edd", shape: "star"};
+                        return { type: "rowIndex", color: "#f90edd", shape: "star" };
                     } else {
                         drawRelation = false;
-                        return {type: "OwlType", color: "#00afef", shape: "hexagon"};
+                        return { type: "OwlType", color: "#00afef", shape: "hexagon" };
                     }
                 }
 
@@ -1357,7 +1339,7 @@ var MappingModeler = (function () {
                         label: label,
                         shape: attrs.shape,
                         color: attrs.color,
-                        font: {color: attrs.color},
+                        font: { color: attrs.color },
                         size: Lineage_whiteboard.defaultShapeSize,
                         data: {
                             id: item.s,
@@ -1383,7 +1365,7 @@ var MappingModeler = (function () {
                             label: label,
                             shape: attrs.shape,
                             color: attrs.color,
-                            font: attrs.shape == "box" ? {color: "white"} : {color: attrs.color},
+                            font: attrs.shape == "box" ? { color: "white" } : { color: attrs.color },
                             size: Lineage_whiteboard.defaultShapeSize,
                             data: {
                                 id: item.o,
@@ -1411,7 +1393,7 @@ var MappingModeler = (function () {
                             label: label,
                             color: color,
                             dashes: dashes,
-                            font: {size: 12, ital: true, color: color || "brown"},
+                            font: { size: 12, ital: true, color: color || "brown" },
                             // color: getNodeAttrs(item.o),
                             arrows: {
                                 to: {
@@ -1462,59 +1444,53 @@ var MappingModeler = (function () {
     };
 
     self.getValidPropertiesArray = function (source, domainClassId, rangeClassId, options, callback) {
-        OntologyModels.getAllowedPropertiesBetweenNodes(source, domainClassId, rangeClassId, {keepSuperClasses: true}, function (err, result) {
+        OntologyModels.getAllowedPropertiesBetweenNodes(source, domainClassId, rangeClassId, { keepSuperClasses: true }, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            var properties = []
+            var properties = [];
             for (var type in result.constraints) {
                 for (var propId in result.constraints[type]) {
-                    var property = result.constraints[type][propId]
-                    var label = property.source + ":"
+                    var property = result.constraints[type][propId];
+                    var label = property.source + ":";
                     if (!property.label) {
-                        property.label = Sparql_common.getLabelFromURI(propId)
+                        property.label = Sparql_common.getLabelFromURI(propId);
                     }
-
 
                     if (domainClassId) {
-                        label += property.label + "->" + (property.rangeLabel || "any")
+                        label += property.label + "->" + (property.rangeLabel || "any");
                     } else if (rangeClassId) {
-                        label += (property.domainLabel || "any") + "->" + property.label + "->"
+                        label += (property.domainLabel || "any") + "->" + property.label + "->";
                     }
-                    properties.push({id: propId, label: label})
-
+                    properties.push({ id: propId, label: label });
                 }
             }
-            return callback(null, properties)
+            return callback(null, properties);
+        });
+    };
 
-        })
-    }
+    self.loadCsvDatasourceInfos = function (csvFileName, callback) {
+        var payload = {
+            fileName: csvFileName,
+            dir: "CSV/" + self.currentSource,
+            lines: 100,
+        };
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/data/csv",
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var columns = result.headers;
+                var sampleData = result.data;
 
-    self.loadCsvDatasourceInfos=function(csvFileName,callback){
-
-
-                        var payload = {
-                            fileName: csvFileName,
-                            dir: "CSV/" + self.currentSource,
-                            lines: 100,
-                        };
-                        $.ajax({
-                            type: "GET",
-                            url: Config.apiUrl + "/data/csv",
-                            data: payload,
-                            dataType: "json",
-                            success: function (result, _textStatus, _jqXHR) {
-                                var columns = result.headers;
-                                var sampleData=result.data
-                              
-
-                                callback(null,{columns:columns,sampleData:sampleData});
-                            },
-                            error: function (err) {
-                                callback(err);
-                            },
-                        });
-        }
+                callback(null, { columns: columns, sampleData: sampleData });
+            },
+            error: function (err) {
+                callback(err);
+            },
+        });
+    };
 
     return self;
 })();

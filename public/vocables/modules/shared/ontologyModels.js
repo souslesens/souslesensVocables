@@ -859,7 +859,6 @@ var OntologyModels = (function () {
 
                     if (!options.keepSuperClasses) {
                         function recurse(propId) {
-
                             if (allConstraints[propId]) {
                                 var superProp = allConstraints[propId].superProp;
 

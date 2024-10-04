@@ -5,7 +5,7 @@ var Lineage_selection = (function () {
     self.addNodeToSelection = function (node) {
         Lineage_selection.selectedNodes.push(node);
         $("#Lineageclasses_selectedNodesCount").html(Lineage_selection.selectedNodes.length);
-        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update({id: node.data.id, borderWidth: 6});
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update({ id: node.data.id, borderWidth: 6 });
         $("#Lineage_combine_mergeNodesDialogButton").css("display", "block");
     };
 
@@ -17,7 +17,7 @@ var Lineage_selection = (function () {
         var newSelection = [];
         Lineage_selection.selectedNodes.forEach(function (node) {
             if (!ids || ids.indexOf(node.data.id) > -1) {
-                newNodes.push({id: node.data.id, borderWidth: 1});
+                newNodes.push({ id: node.data.id, borderWidth: 1 });
             }
             if (ids && ids.indexOf(node.data.id) < 0) {
                 newSelection.push(node);
@@ -71,8 +71,7 @@ var Lineage_selection = (function () {
         $("#smallDialogDiv").load("modules/tools/lineage/html/selection/lineageSelectionDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
             try {
-                JstreeWidget.loadJsTree("lineage_selection_selectedNodesTreeDiv", jstreeData, options, function (err, result) {
-                });
+                JstreeWidget.loadJsTree("lineage_selection_selectedNodesTreeDiv", jstreeData, options, function (err, result) {});
             } catch (e) {
                 var x = e;
             }
@@ -137,7 +136,7 @@ var Lineage_selection = (function () {
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("modules/tools/lineage/html/selection/lineage_selection_filterBy.html", function () {
                 return;
-                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, {withoutSourceObjects: 1}, function (err, result) {
+                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, { withoutSourceObjects: 1 }, function (err, result) {
                     if (err) {
                         return alert(err.responseText);
                     }
@@ -174,7 +173,7 @@ var Lineage_selection = (function () {
                 if (node.from) {
                     return;
                 }
-                var obj = {id: node.id};
+                var obj = { id: node.id };
                 if (color) {
                     obj.color = color;
                 }
@@ -212,7 +211,7 @@ var Lineage_selection = (function () {
             var file_icon = $("#lineage_selection_decorate_iconInput")[0].files[0];
 
             if (!file_icon) {
-                return alert("missing icon file")
+                return alert("missing icon file");
             }
 
             async.series(
@@ -227,7 +226,7 @@ var Lineage_selection = (function () {
                                 var payload = {
                                     dir: "classIcons/",
                                     fileName: $("#lineage_selection_decorate_iconInput")[0].files[0].name,
-                                    data: JSON.stringify({data: base64Data}),
+                                    data: JSON.stringify({ data: base64Data }),
                                 };
                                 $.ajax({
                                     type: "POST",
@@ -254,7 +253,7 @@ var Lineage_selection = (function () {
                             if (!node.data) {
                                 return;
                             }
-                            var obj = {id: node.id};
+                            var obj = { id: node.id };
                             if (color) {
                                 obj.color = color;
                             }
@@ -376,7 +375,7 @@ var Lineage_selection = (function () {
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("modules/tools/lineage/html/selection/lineage_selection_modifyPredicates.html", function () {
                 return;
-                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, {withoutSourceObjects: 1}, function (err, result) {
+                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, { withoutSourceObjects: 1 }, function (err, result) {
                     if (err) {
                         return alert(err.responseText);
                     }

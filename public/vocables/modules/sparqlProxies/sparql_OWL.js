@@ -2713,9 +2713,9 @@ var Sparql_OWL = (function () {
             "    {select ?sub where{ GRAPH  <" +
             graphUri +
             "> {\n" +
-            "       ?sub rdfs:subClassOf|owl:equivalentClass|owl:disjointWith|owl:disjointUnionOf|owl:differentFrom ?obj2.\n" +
+            "       ?sub ?p2 ?obj2.\n" +
             "   }\n" +
-            "  } limit 5000\n" +
+            "  } limit 500\n" +
             "  }\n" +
             " }\n" +
             "}";

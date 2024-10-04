@@ -322,7 +322,7 @@ var SearchWidget = (function () {
             sourceLabel = Lineage_sources.activeSource;
         }
         if (!options) {
-            options = { withoutImports: false, selectGraph: true };
+            options = {withoutImports: false, selectGraph: true};
         }
 
         if (options.targetDiv) {
@@ -382,6 +382,8 @@ var SearchWidget = (function () {
         if (!self.currentSource && Lineage_sources.activeSource) {
             self.currentSource = Lineage_sources.activeSource;
         }
+
+
         items.nodeInfos = {
             label: "Node infos",
             action: function (_e) {
@@ -401,85 +403,96 @@ var SearchWidget = (function () {
                     } else {
                         Lineage_whiteboard.drawNodesAndParents(self.currentTreeNode, 0);
                     }
-                },
-            };
-
-            items.axioms = {
-                label: "Node axioms",
+                }
+            }
+            items.copyNodes = {
+                label: "Copy Node(s)",
                 action: function (e) {
-                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+                    common.copyTextToClipboard(JSON.stringify(self.currentTreeNode))
 
-                    NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
                 },
             };
 
-            /*  items.descendantsAxioms = {
-                label: "Descendants axioms",
-                action: function (e) {
-                    $("#mainDialogDiv").dialog("open");
-                    $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
-                    var descendants = JstreeWidget.getNodeDescendants("LineageNodesJsTreeDiv", self.currentTreeNode.id);
-                    descendants.push(self.currentTreeNode);
-                    NodeInfosAxioms.showResourceDescendantsAxioms(self.currentTreeNode.data.source, self.currentTreeNode, descendants, "mainDialogDiv");
-                },
-            };*/
         }
 
-        return items;
-    };
+        items.axioms = {
+            label: "Node axioms",
+            action: function (e) {
+                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
 
-    self.exportAllDescendants = function () {
-        var parentId = self.currentTreeNode.data.id;
-        var indexes = [self.currentTreeNode.data.source.toLowerCase()];
-        Export.exportAllDescendants(parentId, {}, indexes);
-    };
+                NodeInfosAxioms.init(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+            },
+        };
 
-    self.openTreeNode = function (divId, sourceLabel, node, options) {
-        if (!options) {
-            options = {};
+
+        /*  items.descendantsAxioms = {
+            label: "Descendants axioms",
+            action: function (e) {
+                $("#mainDialogDiv").dialog("open");
+                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + self.currentTreeNode.data.label);
+                var descendants = JstreeWidget.getNodeDescendants("LineageNodesJsTreeDiv", self.currentTreeNode.id);
+                descendants.push(self.currentTreeNode);
+                NodeInfosAxioms.showResourceDescendantsAxioms(self.currentTreeNode.data.source, self.currentTreeNode, descendants, "mainDialogDiv");
+            },
+        };*/
+
+
+    return items;
+};
+
+self.exportAllDescendants = function () {
+    var parentId = self.currentTreeNode.data.id;
+    var indexes = [self.currentTreeNode.data.source.toLowerCase()];
+    Export.exportAllDescendants(parentId, {}, indexes);
+};
+
+self.openTreeNode = function (divId, sourceLabel, node, options) {
+    if (!options) {
+        options = {};
+    }
+    if (node.children && node.children.length > 0) {
+        if (!options.reopen) {
+            return;
+        } else {
+            JstreeWidget.deleteBranch(divId, node.id);
         }
-        if (node.children && node.children.length > 0) {
-            if (!options.reopen) {
-                return;
-            } else {
-                JstreeWidget.deleteBranch(divId, node.id);
-            }
+    }
+    var descendantsDepth = 1;
+    if (options.depth) {
+        descendantsDepth = options.depth;
+    }
+    // options.filterCollections = Collection.currentCollectionFilter;
+    Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, descendantsDepth, options, function (err, result) {
+        if (err) {
+            return UI.message(err);
         }
-        var descendantsDepth = 1;
-        if (options.depth) {
-            descendantsDepth = options.depth;
+        if (options.beforeDrawingFn) {
+            options.beforeDrawingFn(result);
         }
-        // options.filterCollections = Collection.currentCollectionFilter;
-        Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, descendantsDepth, options, function (err, result) {
-            if (err) {
-                return UI.message(err);
-            }
-            if (options.beforeDrawingFn) {
-                options.beforeDrawingFn(result);
-            }
-            var jsTreeOptions = {
-                source: sourceLabel,
-                type: node.data.type,
-            };
-            if (options.optionalData) {
-                jsTreeOptions.optionalData = options.optionalData;
-            }
-            TreeController.drawOrUpdateTree(divId, result, node.id, "child1", jsTreeOptions);
+        var jsTreeOptions = {
+            source: sourceLabel,
+            type: node.data.type,
+        };
+        if (options.optionalData) {
+            jsTreeOptions.optionalData = options.optionalData;
+        }
+        TreeController.drawOrUpdateTree(divId, result, node.id, "child1", jsTreeOptions);
 
-            $("#waitImg").css("display", "none");
-        });
-    };
+        $("#waitImg").css("display", "none");
+    });
+};
 
-    self.editThesaurusConceptInfos = function (sourceLabel, node, _callback) {
-        NodeInfosWidget.showNodeInfos(sourceLabel, node, "graphDiv");
-    };
+self.editThesaurusConceptInfos = function (sourceLabel, node, _callback) {
+    NodeInfosWidget.showNodeInfos(sourceLabel, node, "graphDiv");
+};
 
-    self.onSearchClass = function () {
-        PromptedSelectWidget.prompt("owl:Class", "GenericTools_searchAllClassSelect", self.activeSource);
-    };
+self.onSearchClass = function () {
+    PromptedSelectWidget.prompt("owl:Class", "GenericTools_searchAllClassSelect", self.activeSource);
+};
 
-    return self;
-})();
+return self;
+})
+();
 
 export default SearchWidget;
 window.SearchWidget = SearchWidget;

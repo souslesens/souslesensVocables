@@ -831,7 +831,7 @@ var query =
         });
     };
 
-    self.pasteNodesInContainer = function (source, container) {
+    self.pasteNodesInContainer = function (source, container, node) {
         common.pasteTextFromClipboard(function (text) {
             // debugger
             if (!text) {

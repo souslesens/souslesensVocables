@@ -977,23 +977,26 @@ var MappingModeler = (function () {
         var columnsMapLabels = Object.values(columnsMap).map(function (column) {
             return column.label;
         });
-        var tripleModels = {};
+        var allMappings = {};
         for (var nodeId in columnsMap) {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
-            if (!tripleModels[data.datasource]) {
-                tripleModels[data.datasource] = []
+            if (!allMappings[data.datasource]) {
+                allMappings[data.datasource] ={tripleModels: []}
             }
             if (data.rdfType) {
-                tripleModels[data.datasource].push({
+                var predicate="rdf:type"
+                if(data.rdfType=="owl:Class")
+                    predicate="rdfs:subClassOf"
+                allMappings[data.datasource].tripleModels.push({
                     s: subject,
-                    p: "rdf:type",
+                    p: predicate,
                     o: data.rdfType,
                 });
             }
 
             if (data.rdfsLabel) {
-                tripleModels[data.datasource].push({
+                allMappings[data.datasource].tripleModels.push({
                     s: subject,
                     p: "rdfs:label",
                     o: data.rdfsLabel,
@@ -1013,7 +1016,7 @@ var MappingModeler = (function () {
                         })[0].data
                     );
                 }
-                tripleModels[data.datasource].push({
+                allMappings[data.datasource].tripleModels.push({
                     s: subject,
                     p: property,
                     o: object,
@@ -1040,12 +1043,12 @@ var MappingModeler = (function () {
                         triple.dateFormat = predicate.dateFormat;
                     }
 
-                    tripleModels[data.datasource].push(triple);
+                    allMappings[data.datasource].tripleModels.push(triple);
                 });
             }
         }
 
-        var json = tripleModels
+        var json = allMappings
         json.transform = {}
 
 
@@ -1065,85 +1068,6 @@ var MappingModeler = (function () {
             colname = "@" + colname;
         }
         return colname;
-    };
-    self.mappingsToKGcreatorJson = function (columnsMap) {
-        var columnsMapLabels = Object.values(columnsMap).map(function (column) {
-            return column.label;
-        });
-        var tripleModels = {};
-        for (var nodeId in columnsMap) {
-
-            var data = columnsMap[nodeId].data;
-            if(!tripleModels[data.datasource])
-                tripleModels[data.datasource]=[]
-            var subject = self.nodeToKGcreatorColumnName(data);
-
-            if (data.rdfType) {
-                tripleModels[data.datasource].push({
-                    s: subject,
-                    p: "rdf:type",
-                    o: data.rdfType,
-                });
-            }
-
-            if (data.rdfsLabel) {
-                tripleModels[data.datasource].push({
-                    s: subject,
-                    p: "rdfs:label",
-                    o: data.rdfsLabel,
-                    isString: true,
-                });
-            }
-
-            var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
-
-            connections.forEach(function (connection) {
-                var property = connection.edge.data.type;
-                var object = connection.toNode.data.id;
-                if (columnsMapLabels.includes(object)) {
-                    object = self.nodeToKGcreatorColumnName(
-                        Object.values(columnsMap).filter(function (node) {
-                            return object == node.label;
-                        })[0].data
-                    );
-                }
-                tripleModels[data.datasource].push({
-                    s: subject,
-                    p: property,
-                    o: object,
-                });
-            });
-            if (data.otherPredicates) {
-                data.otherPredicates.forEach(function (predicate) {
-                    var triple = {
-                        s: subject,
-                        p: predicate.property,
-                        o: predicate.object,
-                    };
-
-                    if (predicate.range) {
-                        if (predicate.range.indexOf("Resource") > -1) {
-                            triple.isString = true;
-                        } else {
-                            triple.dataType = predicate.range;
-                        }
-                    } else {
-                        triple.isString = true;
-                    }
-                    if (predicate.dateFormat) {
-                        triple.dateFormat = predicate.dateFormat;
-                    }
-
-                    tripleModels[data.datasource].push(triple);
-                });
-            }
-        }
-
-        var json =  tripleModels
-        json.transform= {};
-
-
-        return json;
     };
 
     self.copyKGcreatorMappings = function () {

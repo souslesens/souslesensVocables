@@ -707,6 +707,7 @@ var Containers_tree = (function () {
         });
     };
 
+
     /**
      *
      * add nodes to a container(owl:bag)
@@ -880,6 +881,23 @@ var Containers_tree = (function () {
             }
         });
     };
+    self.pasteNodeIntoContainer = function (source, container) {
+        try{
+              common.pasteTextFromClipboard(function(str) {
+                if (!str)
+                    throw "xx"
+                var obj = JSON.parse(str)
+                self.menuActions.addResourcesToContainer(source, container, obj.data, true, function (er, result) {
+
+                })
+            })
+
+        }catch(e){
+            alert("invalid clipboard content")
+        }
+
+
+    }
 
     return self;
 })();

@@ -19,6 +19,7 @@ import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 
+
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -1372,7 +1373,7 @@ var Lineage_whiteboard = (function () {
             parentIds = [];
             var nodes = self.lineageVisjsGraph.data.nodes.get();
             nodes.forEach(function (/** @type {{ data: { source: any; id: any; }; }} */ node) {
-                if ((source == Lineage_sources.activeSource || (node.data && node.data.source == source)) && node.data.id && node.data.id != source) {
+                if ((source == Lineage_sources.activeSource || (node.data && node.data.source == source)) && (node.data && node.data.id != source)) {
                     parentIds.push(node.data.id);
                 }
             });
@@ -2508,7 +2509,7 @@ restrictionSource = Config.predicatesSource;
         }
     };
 
-    self.setGraphPopupMenus = function (/** @type {{ id: string | string[]; data: { cluster: string | any[]; }; }} */ node, /** @type {any} */ event) {
+    self.setGraphPopupMenus = function  (node,  event) {
         if (!node || !node.data) {
             return;
         }
@@ -2523,7 +2524,7 @@ restrictionSource = Config.predicatesSource;
             html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listClusterContent();"> list cluster content</span>';
             html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listClusterToClipboard();"> list to clipboard</span>';
         } else if (node.from && node.data.bNodeId) {
-            html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showPropertyInfos(true);"> Relation Infos</span>';
+            html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showPropertyInfos();"> Relation Infos</span>';
             if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
                 //   if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
                 html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.deleteRestriction();"> Delete relation</span>';
@@ -2548,8 +2549,12 @@ restrictionSource = Config.predicatesSource;
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' +
                 ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showAxioms();"> Axioms</span>' +
                 '   <span  id=\'lineage_graphPopupMenuItem\' class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.expand();"> Expand</span>' +
-                '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawParents();"> Parents</span>' +
-                '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
+                '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawParents();"> Parents</span>'
+
+            if(node.data && node.data.type=="container") {
+                html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.pasteNodeIntoContainer();"> past intoToContainer</span>'
+            } else{
+                html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
                 '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' +
                 // '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +
@@ -2561,6 +2566,8 @@ restrictionSource = Config.predicatesSource;
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.hideShowOthers();">Hide/show others</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>';
+            }
+
         }
 
         $("#popupMenuWidgetDiv").html(html);
@@ -3019,6 +3026,11 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 self.lineageVisjsGraph.data.edges.add(visjsData.edges);
             });
         },
+
+        pasteNodeIntoContainer:function(){
+     if(SearchWidget.currentTreeNode)
+            Containers_tree.pasteNodeIntoContainer(Lineage_sources.activeSource,self.currentGraphNode);
+        },
         graphNodeNeighborhood: function (/** @type {any} */ filter) {
             Lineage_whiteboard.graphNodeNeighborhood(self.currentGraphNode.data, filter);
         },
@@ -3075,6 +3087,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 });
             }
         },
+
         createSubPropertyAndreplaceRelation: function () {
             var edge = self.currentGraphEdge;
 
@@ -3261,7 +3274,7 @@ attrs.color=self.getSourceColor(superClassValue)
                 source: node.data.source,
                 data: node.data,
             },
-            self.currentTreeNode.id + "_anchor"
+          //  self.currentTreeNode.id + "_anchor"
         );
     };
 
@@ -3280,6 +3293,29 @@ attrs.color=self.getSourceColor(superClassValue)
         },
         exportGraphToDataTable: function () {
             Export.exportGraphToDataTable(self.lineageVisjsGraph);
+        },
+
+        saveWhiteboard: function () {
+            var visjsFileName=prompt("file name")
+            if(!visjsFileName)
+                return
+            Lineage_whiteboard.lineageVisjsGraph.saveGraph(visjsFileName)
+
+        },
+        loadSavedGraph: function () {
+            var visjsFileName=prompt("file name")
+            if(!visjsFileName)
+                return
+            try {
+                Lineage_whiteboard.lineageVisjsGraph.loadGraph(visjsFileName,false,function(err,visjsData){
+                    if(err)
+                        return alert(err.responseText || err)
+                    Lineage_whiteboard.drawNewGraph(visjsData,"graphDiv")
+
+                })
+            }catch(e){
+                alert( "file not found")
+            }
         },
     };
 

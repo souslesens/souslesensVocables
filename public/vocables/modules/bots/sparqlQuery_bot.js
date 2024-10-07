@@ -1,15 +1,9 @@
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import common from "../shared/common.js";
-//import KGquery_graph from "..tools/KGquery/KGquery_graph.js";
-import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import Lineage_relationIndividualsFilter from "../tools/lineage/lineage_relationIndividualsFilter.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
-import IndividualValueFilterWidget from "../uiWidgets/individualValuefilterWidget.js";
-import _botEngine from "./_botEngine.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import OntologyModels from "../shared/ontologyModels.js";
-import BotEngine from "./_botEngine.js";
+import _botEngine from "./_botEngine.js";
 
 var SparqlQuery_bot = (function () {
     var self = {};
@@ -22,48 +16,6 @@ var SparqlQuery_bot = (function () {
         });
     };
 
-    /* self.workflow_individualsFilter = {
-
-             _OR: {
-                 "property":{
-                     chooseIndividualsPredicate:
-                         { choosePropertyOperatorFn: {promptPropertyValueFn:{}}
-
-
-         }
-     },
-                 "label contains": { promptIndividualsLabelFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
-                 "list labels": { listIndividualsFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
-
-                 // }
-             },
-
-     };
-     self.workflow_individualsFilterXX = {
-         listFilterTypes: {
-             _OR: {
-                 label: { promptIndividualsLabelFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
-                 list: { listIndividualsFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
-                 advanced: { promptIndividualsAdvandedFilterFn: { listWhiteBoardFilterType: { executeQuery: {} } } },
-                 // }
-             },
-         },
-     };
-
-
-     self.workflow_individualsRole = {
-         listIndividualFilterRole: {
-             _OR: {
-                 all: {
-                     listWhiteBoardFilterType: {
-                         executeQuery: {},
-                     },
-                 },
-                 subject: self.workflow_individualsFilter,
-                 object: self.workflow_individualsFilter,
-             },
-         },
-     };*/
 
     self.workflow = {
         _OR: {

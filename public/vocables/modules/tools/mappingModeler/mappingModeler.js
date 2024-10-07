@@ -9,6 +9,7 @@ import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Clipboard from "../../shared/clipboard.js";
 import KGcreator_graph from "../KGcreator/KGcreator_graph.js";
+import SimpleListFilterWidget from "../../uiWidgets/simpleListFilterWidget.js";
 
 var MappingModeler = (function () {
     var self = {};
@@ -56,8 +57,10 @@ var MappingModeler = (function () {
             },
 
             function (callbackSeries) {
-                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPannel.html", function (err) {
+                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
                     $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
+
+                        $("#mappingModeler_suggestionsnput").on("keyup",MappingModeler.filterSugestionsSelect)
                         //$("#mainDialogDiv").dialog("open");
                         return callbackSeries();
                     });
@@ -284,7 +287,7 @@ var MappingModeler = (function () {
                     data: {
                         id: resourceUri,
                         type: resourceUri,
-                        source: property.source,
+                        source: property?property.source:null,
                     },
                     color: color,
                 };
@@ -695,6 +698,7 @@ var MappingModeler = (function () {
             var newObjects = [
                 { id: "createObjectProperty", label: "_Create new ObjectProperty_" },
                 { id: "rdfs:member", label: "_rdfs:member_" },
+                { id: "owl:subClassOf", label: "_owl:subClassOf_" },
             ];
             self.getValidPropertiesArray(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, {}, function (err, properties) {
                 if (err) {
@@ -1491,6 +1495,10 @@ var MappingModeler = (function () {
             },
         });
     };
+
+    self.filterSugestionsSelect=function(event,){
+        SimpleListFilterWidget.filterList(event,"axioms_legend_suggestionsSelect")
+    }
 
     return self;
 })();

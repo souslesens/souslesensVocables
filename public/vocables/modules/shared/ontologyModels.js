@@ -245,7 +245,10 @@ var OntologyModels = (function () {
                                         if (err) {
                                             return callbackSeries(err);
                                         }
+
                                         result.results.bindings.forEach(function (item) {
+                                            if(item.sub.value=="http://souslesens.org/resources/ontology/cfihos-s-v01/Pressure")
+                                                var x=3
                                             if (!Config.ontologiesVocabularyModels[source].classes[item.sub.value]) {
                                                 Config.ontologiesVocabularyModels[source].classes[item.sub.value] = {
                                                     id: item.sub.value,

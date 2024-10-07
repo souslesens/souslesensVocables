@@ -303,7 +303,7 @@ var _botEngine = (function () {
     self.filterList = function (evt) {
         //var str = $(this).val();
         var str = $(evt.currentTarget).val();
-        if (!str && self.lastFilterListStr.length < str.length) {
+        if (!str &&  self.lastFilterListStr.length < str.length) {
             return;
         } else {
             common.fillSelectOptions("bot_resourcesProposalSelect", self.currentList, false, "label", "id");

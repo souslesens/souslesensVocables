@@ -2319,8 +2319,24 @@ var Sparql_OWL = (function () {
 
         var fromStr = "";
         if (options.source) {
-            fromStr = Sparql_common.getFromStr(options.source);
+            sourceLabel=options.source;
+            options.graphUri=Config.sources[options.source].graphUri
+
         }
+
+        if(!sourceLabel){
+            if(  !options.graphUri && options.source)
+                return callback("no source or graphUri specified")
+            else{
+
+                fromStr="FROM <"+options.graphUri+"> "
+            }
+
+        }else{
+            fromStr = Sparql_common.getFromStr(sourceLabel);
+        }
+
+
 
         var slices = [[]];
         if (role && ids) {
@@ -2346,7 +2362,7 @@ var Sparql_OWL = (function () {
 
                 query += "}LIMIT 10000";
 
-                var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+                var url = Config.sources[(sourceLabel|| "_defaultSource")].sparql_server.url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
                     if (err) {
                         return callbackEach(err);
@@ -2702,7 +2718,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getGraphsWithSameClasses = function (sourceLabel, callback) {
+    self.getGraphsWithSameClasses = function (sourceLabel,filter, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
 
         var query =
@@ -2714,8 +2730,9 @@ var Sparql_OWL = (function () {
             graphUri +
             "> {\n" +
             "       ?sub ?p2 ?obj2.\n" +
+            (filter || "")+
             "   }\n" +
-            "  } limit 500\n" +
+            "  } limit 10000\n" +
             "  }\n" +
             " }\n" +
             "}";

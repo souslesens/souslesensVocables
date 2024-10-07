@@ -1,5 +1,4 @@
 import _botEngine from "./_botEngine.js";
-import KGcreator from "../tools/KGcreator/KGcreator.js";
 import OntologyModels from "../shared/ontologyModels.js";
 
 var CommonBotFunctions = (function () {

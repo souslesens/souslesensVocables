@@ -1,10 +1,8 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
-
 import SparqlQuery_bot from "./sparqlQuery_bot.js";
-
-import BotEngine from "./_botEngine.js";
 import _botEngine from "./_botEngine.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
+
 
 var KGquery_filter_bot = (function () {
     var self = {};
@@ -23,17 +21,17 @@ var KGquery_filter_bot = (function () {
             workflow = self.workflow_filterClass;
         }
 
-        BotEngine.init(KGquery_filter_bot, workflow, null, function () {
+        _botEngine.init(KGquery_filter_bot, workflow, null, function () {
             self.validateFn = validateFn;
             self.callbackFn = function () {
-                var filterLabel = BotEngine.getQueryText();
+                var filterLabel = _botEngine.getQueryText();
                 return self.validateFn(null, { filter: self.filter, filterLabel: filterLabel, filterParams: self.filterParams });
             };
 
             self.params = currentQuery;
             SparqlQuery_bot.params = currentQuery;
 
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         });
     };
 
@@ -100,7 +98,7 @@ var KGquery_filter_bot = (function () {
             { id: "label", label: "rdfs:label contains" },
             { id: "labelsList", label: "Choose rdfs:label" },
         ];
-        BotEngine.showList(choices, "individualsFilterType");
+        _botEngine.showList(choices, "individualsFilterType");
     };
     self.functions.listPropertiesFn = function () {
         if (self.params.property) {
@@ -112,7 +110,7 @@ var KGquery_filter_bot = (function () {
         if (self.data && self.data.nonObjectProperties) {
             choices = choices.concat(self.data.nonObjectProperties);
         }
-        BotEngine.showList(choices, "property");
+        _botEngine.showList(choices, "property");
     };
 
     self.functions.choosePropertyOperatorFn = function () {
@@ -137,17 +135,17 @@ var KGquery_filter_bot = (function () {
             choices = ["=", "!=", "contains", ">", "!contains", "ChooseInList"];
         }
 
-        BotEngine.showList(choices, "propertyOperator");
+        _botEngine.showList(choices, "propertyOperator");
     };
 
     self.functions.promptIndividualsLabelFn = function () {
         self.params.individualsFilterType = "label";
-        BotEngine.promptValue("enter value", "individualsFilterValue");
+        _botEngine.promptValue("enter value", "individualsFilterValue");
     };
 
     self.functions.promptPropertyValueFn = function () {
         if (!self.params.propertyDatatype || self.params.propertyDatatype == "xsd:string") {
-            BotEngine.promptValue("enter value", "propertyValue");
+            _botEngine.promptValue("enter value", "propertyValue");
         } else if (
             !self.params.propertyDatatype ||
             self.params.propertyDatatype == "http://www.w3.org/2001/XMLSchema#date" ||
@@ -161,16 +159,16 @@ var KGquery_filter_bot = (function () {
                 });
                 return;
             } else {
-                BotEngine.promptValue("enter value", "propertyValue", null, { datePicker: 1 });
+                _botEngine.promptValue("enter value", "propertyValue", null, { datePicker: 1 });
             }
         } else {
-            BotEngine.promptValue("enter value", "propertyValue");
+            _botEngine.promptValue("enter value", "propertyValue");
         }
     };
 
     self.functions.listLogicalOperatorFn = function () {
         var choices = ["end", "AND", "OR"];
-        BotEngine.showList(choices, "filterBooleanOperator");
+        _botEngine.showList(choices, "filterBooleanOperator");
     };
 
     self.functions.setSparqlQueryFilterFn = function () {
@@ -241,7 +239,7 @@ var KGquery_filter_bot = (function () {
         if (self.params.filterBooleanOperator == "end") {
             self.functions.writeFilterFn();
 
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         } else {
             _botEngine.currentObj = self.workflow_filterClass;
             _botEngine.currentBot.params.property = "";

@@ -2911,7 +2911,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (!self.currentGraphNode) {
                 return;
             }
-            var memberPredicate = self.currentGraphNode.data.type == "container";
+            var memberPredicate =false;
+            if( self.currentGraphNode.data )
+                memberPredicate =(self.currentGraphNode.data.type == "container");
             Lineage_whiteboard.addNodesAndParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id], { memberPredicate: memberPredicate });
         },
 

@@ -555,7 +555,7 @@ var util = {
         }
 
         var date = new Date(Date.UTC(year, month, day));
-        return util.dateToRDFString(date);
+        return date.toISOString();
         // return date.toISOString()
 
 

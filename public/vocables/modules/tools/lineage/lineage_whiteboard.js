@@ -97,31 +97,7 @@ var Lineage_whiteboard = (function () {
             SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
            
         }
-        if(!self.decorationData[Lineage_sources.activeSource]){
-            var visjsGraphFileName = Lineage_sources.activeSource + "_decoration.json";
-            var payload = {
-                dir: "graphs/",
-                fileName: visjsGraphFileName,
-            };
-            //get decoration file
-            $.ajax({
-                type: "GET",
-                url: `${Config.apiUrl}/data/file`,
-                data: payload,
-                dataType: "json",
-                success: function (result, _textStatus, _jqXHR) {
-                    var data = JSON.parse(result);
-                    if(Object.keys(data).length>0){
-                        self.decorationData[Lineage_sources.activeSource]=data;
-                    }
-                    self.onLoaded();
-                },
-                error(err) {
-                  self.onLoaded();
-                },
-            });
-            return;
-        }
+       
        
         UI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html");
@@ -622,7 +598,11 @@ var Lineage_whiteboard = (function () {
                             Lineage_sources.activeSource = node.data.source;
                         }
                         if (true) {
-                            Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
+                            var nodes=self.lineageVisjsGraph.data.nodes.get(_properties.items)
+                            if(nodes){
+                                Lineage_decoration.decorateNodeAndDrawLegend(nodes, _options.legendType);
+                            }
+                            
                             //!self.lineageVisjsGraph.skipColorGraphNodesByType) {
                             //  var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                         }
@@ -694,63 +674,29 @@ var Lineage_whiteboard = (function () {
             }
 
             Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-        } else {
-        }
+        } else {}
+        
 
         if (!graphDiv) {
             graphDiv = "graphDiv";
         }
-        var visjsGraphFileName = Lineage_sources.activeSource + "_decoration.json";
-        var payload = {
-            dir: "graphs/",
-            fileName: visjsGraphFileName,
-        };
-        //get decoration file
-        $.ajax({
-            type: "GET",
-            url: `${Config.apiUrl}/data/file`,
-            data: payload,
-            dataType: "json",
-            success: function (result, _textStatus, _jqXHR) {
-                var data = JSON.parse(result);
-                if(Object.keys(data).length>0){
-                    self.decorationData[Lineage_sources.activeSource]=data;
-                }
-                visjsData.nodes.forEach(function(node){
-                    if(data[node.id] && data[node.id].image){
-                        node.image=data[node.id].image;
-                        node.shape='circularImage'
-                    }   
-                });
-                
-                self.lineageVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
-                self.lineageVisjsGraph.draw(function () {
-                    UI.message("", true);
+        
+        
+        
+        
+        self.lineageVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
+        self.lineageVisjsGraph.draw(function () {
+            UI.message("", true);
 
-                    //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
+            //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
 
-                    if (self.lineageVisjsGraph.isGraphNotEmpty() && !_options.noDecorations) {
-                        Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
-                        //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
-                    }
-                });
-                Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-            },
-            error(err) {
-                self.lineageVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
-                self.lineageVisjsGraph.draw(function () {
-                    UI.message("", true);
-
-                    //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
-
-                    if (self.lineageVisjsGraph.isGraphNotEmpty() && !_options.noDecorations) {
-                        Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
-                        //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
-                    }
-                });
-                Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-            },
+            if (self.lineageVisjsGraph.isGraphNotEmpty() && !_options.noDecorations) {
+                Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
+                //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
+            }
         });
+        Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
+         
         
 
         return;
@@ -3452,6 +3398,31 @@ attrs.color=self.getSourceColor(superClassValue)
             self.MoreOptionsShow[divId] = true;
         }
     };
+    self.loadDecorationData=function(sourceLabel){
+        var visjsGraphFileName = sourceLabel + "_decoration.json";
+            var payload = {
+                dir: "graphs/",
+                fileName: visjsGraphFileName,
+            };
+            //get decoration file
+            $.ajax({
+                type: "GET",
+                url: `${Config.apiUrl}/data/file`,
+                data: payload,
+                dataType: "json",
+                success: function (result, _textStatus, _jqXHR) {
+                    var data = JSON.parse(result);
+                    if(Object.keys(data).length>0){
+                        self.decorationData[sourceLabel]=data;
+                    }
+                    
+                },
+                error(err) {
+                    
+
+                },
+            });
+    }
 
     return self;
 })();

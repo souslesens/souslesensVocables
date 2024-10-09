@@ -159,6 +159,12 @@ var Sparql_common = (function () {
                     if (!id) {
                         return;
                     }
+
+                    if (id.startsWith("_:") && !options.useFilterKeyWord) {
+                        // The use of blank nodes in VALUES is not allowed by SPARQL 1.1 specification at '_:b1d86e2d604'
+                        return;
+                    }
+
                     if (conceptIdsStr != "") {
                         conceptIdsStr += options.useFilterKeyWord ? "," : " ";
                     }

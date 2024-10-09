@@ -319,6 +319,7 @@ var KGbuilder_triplesMaker = {
                             return callback(null, null);
                         }
                     } else if (str.match(/[.-]*Z/)) {//ISO string format (coming from database)
+                        // is relevant dates coming from dataBases have mapping.dateFormat=ISO-time?
                         str = util.formatStringForTriple(str);
                         str = util.convertISOStringDateForTriple(str);
                     } else {

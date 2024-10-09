@@ -303,7 +303,7 @@ var KGcreator_bot = (function () {
         },
         promptTargetColumnVocabularyFn: function () {
             CommonBotFunctions.listVocabsFn(self.params.source, "predicateObjectColumnVocabulary");
-            // BotEngine.nextStep();
+            // _botEngine.nextStep();
         },
 
         predicateObjectColumnClassFn: function () {
@@ -347,7 +347,7 @@ var KGcreator_bot = (function () {
         listFilteredPropertiesFn: function () {
             var columnClasses = self.getColumnClasses(KGcreator.currentConfig.currentMappings[self.params.table].tripleModels, self.params.column);
             /*  if (self.params.predicateObjectColumnClass.startsWith("@")) {
-                BotEngine.abort("cannot find predicates for a dynamic class object");
+                _botEngine.abort("cannot find predicates for a dynamic class object");
             }*/
             if (!columnClasses || columnClasses.lengh == 0) return _botEngine.abort("cannot find column type");
 
@@ -489,7 +489,7 @@ var KGcreator_bot = (function () {
                 if (KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns.indexOf(self.currentUri) < 0) {
                     KGcreator.currentConfig.currentMappings[self.params.table].virtualColumns.push(self.currentUri);
                 }
-                //  return callback ? callback() : BotEngine.nextStep();
+                //  return callback ? callback() : _botEngine.nextStep();
             }
 
             if (uriType) {
@@ -575,7 +575,7 @@ var KGcreator_bot = (function () {
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();
                 KGcreator.showTableVirtualColumnsTree(self.params.table);
-                //   return callback ? callback() : BotEngine.nextStep();
+                //   return callback ? callback() : _botEngine.nextStep();
             }
             if (valueType && valueColumn) {
                 self.params.valueType = null;
@@ -587,7 +587,7 @@ var KGcreator_bot = (function () {
                 };
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn();
-                //  return callback ? callback() : BotEngine.nextStep();
+                //  return callback ? callback() : _botEngine.nextStep();
             }
 
             if (propertyId && predicateObjectColumn) {
@@ -627,18 +627,18 @@ var KGcreator_bot = (function () {
                 }
                 self.params.tripleModels.push(triple);
                 self.functions.saveFn(callback);
-                //  return callback ? callback() : BotEngine.nextStep();
-                //  return BotEngine.nextStep();
+                //  return callback ? callback() : _botEngine.nextStep();
+                //  return _botEngine.nextStep();
             }
         },
 
         ObjectPredicateInOtherTableFn: function () {
             if (!self.params.predicateObjectTable) {
-                return BotEngine.abort("no targetColumnTable");
+                return _botEngine.abort("no targetColumnTable");
             }
 
             if (self.params.predicateObjectTable == self.params.table) {
-                return BotEngine.abort(" targetColumnTable==table");
+                return _botEngine.abort(" targetColumnTable==table");
             }
 
             var sourcecolumnType = self.getColumnClasses(self.params.tripleModels, self.params.column);
@@ -649,10 +649,10 @@ var KGcreator_bot = (function () {
             var ok = sourcecolumnType && targetcolumnType;
 
             if (!ok) {
-                return BotEngine.abort(" cannot proceed :no class defined for both subject and object");
+                return _botEngine.abort(" cannot proceed :no class defined for both subject and object");
             }
             self.params.predicateObjectColumnClass = targetcolumnType;
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         },
         writeObjectPredicateJoinKeyFn: function () {
             var triple = {
@@ -665,7 +665,7 @@ var KGcreator_bot = (function () {
             KGcreator.currentConfig.currentMappings[self.params.predicateObjectTable].tripleModels = self.params.targetTripleModels;
             KGcreator.saveDataSourceMappings(self.params.source, self.params.datasource.name, KGcreator.currentConfig.currentMappings, function (err, result) {
                 if (err) {
-                    return BotEngine.abort(err);
+                    return _botEngine.abort(err);
                 }
                 _botEngine.message("mapping Saved");
                 return _botEngine.nextStep();
@@ -681,9 +681,9 @@ var KGcreator_bot = (function () {
             KGcreator.rawConfig.databaseSources[KGcreator.currentConfig.currentDataSource.name].tableJoins.push(join);
             KGcreator.saveSlsvSourceConfig(function (err, result) {
                 if (err) {
-                    BotEngine.abort(err);
+                    _botEngine.abort(err);
                 }
-                BotEngine.nextStep();
+                _botEngine.nextStep();
                 KGcreator_graph.drawDataSourceMappings();
             });
         },

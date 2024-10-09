@@ -9,16 +9,16 @@ var KGquery_annotations_bot = (function () {
 
     self.start = function (currentQuery, validateFn) {
         _botEngine.startParams = _botEngine.fillStartParams(arguments);
-        BotEngine.init(KGquery_annotations_bot, self.workflow_selectproperties, null, function () {
+        _botEngine.init(KGquery_annotations_bot, self.workflow_selectproperties, null, function () {
             self.validateFn = validateFn;
             self.callbackFn = function () {
-                var filterLabel = BotEngine.getQueryText();
+                var filterLabel = _botEngine.getQueryText();
                 return self.validateFn(null, { filter: self.filter, filterLabel: filterLabel });
             };
 
             self.params = currentQuery;
             SparqlQuery_bot.params = currentQuery;
-            BotEngine.nextStep();
+            _botEngine.nextStep();
         });
     };
 
@@ -49,7 +49,7 @@ var KGquery_annotations_bot = (function () {
         } else if (individualsFilterType == "advanced") {
             self.filter = advancedFilter;
         }
-        BotEngine.nextStep();
+        _botEngine.nextStep();
     };
 
     return self;

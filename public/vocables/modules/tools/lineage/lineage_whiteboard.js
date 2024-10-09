@@ -55,7 +55,7 @@ var Lineage_whiteboard = (function () {
     self.defaultNodeFontColor = "#343434";
     self.defaultEdgeFontColor = "#343434";
     self.defaultLowOpacity = 0.35;
-
+    self.decorationData = {};
     self.arrowTypes = {
         subClassOf: {
             to: {
@@ -93,11 +93,8 @@ var Lineage_whiteboard = (function () {
     self.onLoaded = function () {
         if (self.firstLoad) {
             self.firstLoad = false;
-            // Overcharge only one time at first lineage load
 
             SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
-
-            //AddEdge overcharge
         }
 
         UI.initMenuBar(self.loadSources);
@@ -303,7 +300,7 @@ var Lineage_whiteboard = (function () {
                             return alert(err.response);
                         }
                         var options = { output: "graph" };
-                        if (!Lineage_whiteboard.lineageVisjsGraph.data.nodes.get) {
+                        if (!Lineage_whiteboard.lineageVisjsGraph.data?.nodes?.get) {
                             nodes = [];
                         } else {
                             var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
@@ -598,7 +595,11 @@ var Lineage_whiteboard = (function () {
                             Lineage_sources.activeSource = node.data.source;
                         }
                         if (true) {
-                            Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
+                            var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
+                            if (nodes) {
+                                Lineage_decoration.decorateNodeAndDrawLegend(nodes, _options.legendType);
+                            }
+
                             //!self.lineageVisjsGraph.skipColorGraphNodesByType) {
                             //  var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                         }
@@ -2185,6 +2186,7 @@ var Lineage_whiteboard = (function () {
         if (classIds == "all" || options.allNodes) {
             classIds = null;
         }
+
         var physics = true;
 
         var excludeRelationsFromPhysic = $("#Lineage_whiteboard_excludeRelationsFromGraphSpatializationCBX").prop("checked");
@@ -2911,7 +2913,8 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (!self.currentGraphNode) {
                 return;
             }
-            var memberPredicate = self.currentGraphNode.data.type == "container";
+            var memberPredicate = false;
+            if (self.currentGraphNode.data) memberPredicate = self.currentGraphNode.data.type == "container";
             Lineage_whiteboard.addNodesAndParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id], { memberPredicate: memberPredicate });
         },
 
@@ -3417,6 +3420,27 @@ attrs.color=self.getSourceColor(superClassValue)
             $("#" + divId).hide();
             self.MoreOptionsShow[divId] = true;
         }
+    };
+    self.loadDecorationData = function (sourceLabel) {
+        var visjsGraphFileName = sourceLabel + "_decoration.json";
+        var payload = {
+            dir: "graphs/",
+            fileName: visjsGraphFileName,
+        };
+        //get decoration file
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var data = JSON.parse(result);
+                if (Object.keys(data).length > 0) {
+                    self.decorationData[sourceLabel] = data;
+                }
+            },
+            error(err) {},
+        });
     };
 
     return self;

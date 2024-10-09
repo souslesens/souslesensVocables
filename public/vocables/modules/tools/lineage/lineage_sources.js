@@ -396,7 +396,9 @@ var Lineage_sources = (function () {
         if (self.loadedSources[sourceLabel]) {
             return callback();
         }
-
+        if (!Lineage_whiteboard.decorationData[sourceLabel]) {
+            Lineage_whiteboard.loadDecorationData(sourceLabel);
+        }
         OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
             if (err) {
                 return callback(err);

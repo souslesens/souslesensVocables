@@ -95,8 +95,8 @@ var CreateResource_bot = (function () {
         promptResourceLabelFn: function () {
             _botEngine.promptValue("resource label ", "resourceLabel");
             /*  self.params.resourceLabel = prompt("resource label ");
-            BotEngine.writeCompletedHtml(self.params.resourceLabel);
-            BotEngine.nextStep();*/
+            _botEngine.writeCompletedHtml(self.params.resourceLabel);
+            _botEngine.nextStep();*/
         },
 
         listSuperClassesFn: function () {
@@ -228,7 +228,7 @@ var CreateResource_bot = (function () {
                     if (self.callback) {
                         return self.callback();
                     }
-                    BotEngine.nextStep();
+                    _botEngine.nextStep();
                 });
             });
         },

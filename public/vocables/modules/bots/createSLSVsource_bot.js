@@ -1,10 +1,4 @@
 import botEngine from "./_botEngine.js";
-import Sparql_common from "../sparqlProxies/sparql_common.js";
-import KGquery from "../tools/KGquery/KGquery.js";
-import SparqlQuery_bot from "./sparqlQuery_bot.js";
-import _botEngine from "./_botEngine.js";
-import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import CommonBotFunctions from "./_commonBotFunctions.js";
 
 var CreateSLSVsource_bot = (function () {
     var self = {};
@@ -81,7 +75,7 @@ var CreateSLSVsource_bot = (function () {
         },
 
         afterImportFn: function () {
-            //BotEngine.previousStep();
+            //_botEngine.previousStep();
             _botEngine.currentObj = self.workflow2;
             _botEngine.nextStep(self.workflow2);
         },

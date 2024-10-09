@@ -1,11 +1,7 @@
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import common from "../shared/common.js";
-//import KGquery_graph from "..tools/KGquery/KGquery_graph.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import Lineage_relationIndividualsFilter from "../tools/lineage/lineage_relationIndividualsFilter.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
-import IndividualValueFilterWidget from "../uiWidgets/individualValuefilterWidget.js";
 import _botEngine from "./_botEngine.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 

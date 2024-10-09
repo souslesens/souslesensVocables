@@ -755,86 +755,96 @@ var Sparql_OWL = (function () {
                 url = self.sparql_url;
             }
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, dontCacheCurrentQuery: true }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
+        Sparql_proxy.querySPARQL_GET_proxy(
+            url,
+            query,
+            "",
+            {
+                source: sourceLabel,
+                dontCacheCurrentQuery: true,
+            },
+            function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
 
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "superClassSubClass"], { source: sourceLabel });
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "superClassSubClass"], { source: sourceLabel });
 
-            var hierarchies = {};
+                var hierarchies = {};
 
-            if (!options.descendants) {
-                classIds.forEach(function (id) {
-                    hierarchies[id] = [];
+                if (!options.descendants) {
+                    classIds.forEach(function (id) {
+                        hierarchies[id] = [];
 
-                    result.results.bindings.forEach(function (item) {
-                        if (item.superClass.type == "bnode")
-                            // if superClass is bnode  it causes problem !!
-                            return;
-                        if (!options.descendants && item.subject.value == id) {
-                            hierarchies[id].push(item);
-                        }
-                        if (options.descendants && item.class.value == id) {
-                            hierarchies[id].push(item);
-                        }
-                    });
-
-                    for (var baseClassId in hierarchies) {
-                        var hierarchy = hierarchies[baseClassId];
-                        var parentsMap = {};
-                        hierarchy.forEach(function (item) {
-                            if (item.superClassSubClass) {
-                                parentsMap[item.superClassSubClass.value] = item;
+                        result.results.bindings.forEach(function (item) {
+                            if (item.superClass.type == "bnode") {
+                                // if superClass is bnode  it causes problem !!
+                                return;
+                            }
+                            if (!options.descendants && item.subject.value == id) {
+                                hierarchies[id].push(item);
+                            }
+                            if (options.descendants && item.class.value == id) {
+                                hierarchies[id].push(item);
                             }
                         });
-                        var uniqueClass = {};
+
+                        for (var baseClassId in hierarchies) {
+                            var hierarchy = hierarchies[baseClassId];
+                            var parentsMap = {};
+                            hierarchy.forEach(function (item) {
+                                if (item.superClassSubClass) {
+                                    parentsMap[item.superClassSubClass.value] = item;
+                                }
+                            });
+                            var uniqueClass = {};
+                            var orderedHierarchy = [];
+
+                            function recurse(classId) {
+                                if (parentsMap[classId] && !uniqueClass[classId]) {
+                                    uniqueClass[classId] = 1;
+                                    orderedHierarchy.push(parentsMap[classId]);
+                                    if (parentsMap[classId].superClass.value) {
+                                        recurse(parentsMap[classId].superClass.value);
+                                    }
+                                }
+                            }
+
+                            recurse(baseClassId);
+                            hierarchies[baseClassId] = orderedHierarchy;
+                        }
+                        // tions.descendants
+                    });
+                } else {
+                    //options.descendants
+
+                    classIds.forEach(function (baseClassId) {
+                        var childrenMap = {};
+                        result.results.bindings.forEach(function (item) {
+                            if (item.superClass.value == baseClassId) {
+                                childrenMap[item.superClassSubClass.value] = item;
+                            }
+                        });
+
                         var orderedHierarchy = [];
 
                         function recurse(classId) {
-                            if (parentsMap[classId] && !uniqueClass[classId]) {
-                                uniqueClass[classId] = 1;
-                                orderedHierarchy.push(parentsMap[classId]);
-                                if (parentsMap[classId].superClass.value) {
-                                    recurse(parentsMap[classId].superClass.value);
+                            for (var key in childrenMap) {
+                                if (childrenMap[key].class.value == classId) {
+                                    orderedHierarchy.push(childrenMap[key]);
+                                    recurse(childrenMap[key].superClassSubClass.value);
                                 }
                             }
                         }
 
                         recurse(baseClassId);
                         hierarchies[baseClassId] = orderedHierarchy;
-                    }
-                    // tions.descendants
-                });
-            } else {
-                //options.descendants
-
-                classIds.forEach(function (baseClassId) {
-                    var childrenMap = {};
-                    result.results.bindings.forEach(function (item) {
-                        if (item.superClass.value == baseClassId) {
-                            childrenMap[item.superClassSubClass.value] = item;
-                        }
                     });
+                }
 
-                    var orderedHierarchy = [];
-
-                    function recurse(classId) {
-                        for (var key in childrenMap) {
-                            if (childrenMap[key].class.value == classId) {
-                                orderedHierarchy.push(childrenMap[key]);
-                                recurse(childrenMap[key].superClassSubClass.value);
-                            }
-                        }
-                    }
-
-                    recurse(baseClassId);
-                    hierarchies[baseClassId] = orderedHierarchy;
-                });
+                return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
             }
-
-            return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
-        });
+        );
     };
 
     self.getNodesTypesMap = function (sourceLabel, ids, options, callback) {
@@ -870,16 +880,25 @@ var Sparql_OWL = (function () {
                 url = self.sparql_url;
             }
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, dontCacheCurrentQuery: true }, function (err, result) {
-            if (err) {
-                return callback(err);
+        Sparql_proxy.querySPARQL_GET_proxy(
+            url,
+            query,
+            "",
+            {
+                source: sourceLabel,
+                dontCacheCurrentQuery: true,
+            },
+            function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                var map = {};
+                result.results.bindings.forEach(function (item) {
+                    map[item.id.value] = item.types.value;
+                });
+                return callback(null, map);
             }
-            var map = {};
-            result.results.bindings.forEach(function (item) {
-                map[item.id.value] = item.types.value;
-            });
-            return callback(null, map);
-        });
+        );
     };
 
     self.getFilteredTriples2 = function (sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
@@ -1048,16 +1067,25 @@ var Sparql_OWL = (function () {
             if (self.no_params) {
                 url = self.sparql_url;
             }
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, caller: "getFilteredTriples" }, function (err, result) {
-                if (err) {
-                    return callbackQuery(err);
-                }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["object", "prop", "subject"], {
+            Sparql_proxy.querySPARQL_GET_proxy(
+                url,
+                query,
+                "",
+                {
                     source: sourceLabel,
                     caller: "getFilteredTriples",
-                });
-                return callbackQuery(null, result.results.bindings);
-            });
+                },
+                function (err, result) {
+                    if (err) {
+                        return callbackQuery(err);
+                    }
+                    result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["object", "prop", "subject"], {
+                        source: sourceLabel,
+                        caller: "getFilteredTriples",
+                    });
+                    return callbackQuery(null, result.results.bindings);
+                }
+            );
         }
 
         var slicedSubjectIds = null;
@@ -1404,6 +1432,7 @@ var Sparql_OWL = (function () {
 
         var filterStr = "";
         if (ids) {
+            ids = OntologyModels.filterClassIds(sourceLabel, ids);
             if (options.inverseRestriction) {
                 options.someValuesFrom = 1;
                 filterStr = Sparql_common.setFilter("value", ids, null, options);
@@ -1476,18 +1505,27 @@ var Sparql_OWL = (function () {
 
         var url = self.sparql_url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, caller: "getObjectRestrictions" }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            Sparql_common.setSparqlResultPropertiesLabels(sourceLabel, result.results.bindings, "prop", function (err, result2) {
+        Sparql_proxy.querySPARQL_GET_proxy(
+            url,
+            query,
+            "",
+            {
+                source: sourceLabel,
+                caller: "getObjectRestrictions",
+            },
+            function (err, result) {
                 if (err) {
                     return callback(err);
                 }
-                result2 = Sparql_generic.setBindingsOptionalProperties(result2, ["prop", "node", "subject", "value"], { source: sourceLabel });
-                return callback(null, result2);
-            });
-        });
+                Sparql_common.setSparqlResultPropertiesLabels(sourceLabel, result.results.bindings, "prop", function (err, result2) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    result2 = Sparql_generic.setBindingsOptionalProperties(result2, ["prop", "node", "subject", "value"], { source: sourceLabel });
+                    return callback(null, result2);
+                });
+            }
+        );
     };
 
     self.getInverseRestriction = function (sourceLabel, restrictionId, callback) {
@@ -1498,12 +1536,21 @@ var Sparql_OWL = (function () {
         query += "{ graph ?g {?subject owl:inverseOf <" + restrictionId + ">." + "?subject ?predicate ?object.}}";
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, caller: "getInverseRestrictions" }, function (err, result) {
-            if (err) {
-                return callback(err);
+        Sparql_proxy.querySPARQL_GET_proxy(
+            url,
+            query,
+            "",
+            {
+                source: sourceLabel,
+                caller: "getInverseRestrictions",
+            },
+            function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result.results.bindings);
             }
-            return callback(null, result.results.bindings);
-        });
+        );
     };
 
     self.getNamedIndividuals = function (sourceLabel, ids, options, callback) {
@@ -2319,7 +2366,18 @@ var Sparql_OWL = (function () {
 
         var fromStr = "";
         if (options.source) {
-            fromStr = Sparql_common.getFromStr(options.source);
+            sourceLabel = options.source;
+            options.graphUri = Config.sources[options.source].graphUri;
+        }
+
+        if (!sourceLabel) {
+            if (!options.graphUri && options.source) {
+                return callback("no source or graphUri specified");
+            } else {
+                fromStr = "FROM <" + options.graphUri + "> ";
+            }
+        } else {
+            fromStr = Sparql_common.getFromStr(sourceLabel);
         }
 
         var slices = [[]];
@@ -2346,7 +2404,7 @@ var Sparql_OWL = (function () {
 
                 query += "}LIMIT 10000";
 
-                var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+                var url = Config.sources[sourceLabel || "_defaultSource"].sparql_server.url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
                     if (err) {
                         return callbackEach(err);
@@ -2520,7 +2578,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getDataTypePropertyValues = function (sourceLabel, propertyUri, callback) {
+    self.getDataTypePropertyValues = function (sourceLabel, propertyboUri, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel);
 
         var query =
@@ -2702,7 +2760,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getGraphsWithSameClasses = function (sourceLabel, callback) {
+    self.getGraphsWithSameClasses = function (sourceLabel, filter, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
 
         var query =
@@ -2714,8 +2772,9 @@ var Sparql_OWL = (function () {
             graphUri +
             "> {\n" +
             "       ?sub ?p2 ?obj2.\n" +
+            (filter || "") +
             "   }\n" +
-            "  } limit 500\n" +
+            "  } limit 10000\n" +
             "  }\n" +
             " }\n" +
             "}";

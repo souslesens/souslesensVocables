@@ -1,8 +1,5 @@
-import Sparql_common from "../sparqlProxies/sparql_common.js";
 import _botEngine from "./_botEngine.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
-import common from "../shared/common.js";
-import KGcreator from "../tools/KGcreator/KGcreator.js";
 import CreateResource_bot from "./createResource_bot.js";
 
 var MappingModeler_bot = (function () {

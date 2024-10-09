@@ -192,7 +192,7 @@ var JstreeWidget = (function () {
                 checkbox: {
                     tie_selection: options.tie_selection === true,
                     whole_node: false,
-                    //  cascade:false
+                    
                 },
                 types: JstreeWidget.types,
 

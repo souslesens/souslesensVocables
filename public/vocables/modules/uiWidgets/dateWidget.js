@@ -42,6 +42,8 @@ var DateWidget = (function () {
             // showOn: "button",
             //  buttonImage: "images/calendar.gif",
             //  buttonImageOnly: true, //
+            changeMonth: true,
+            changeYear: true,
             buttonText: "Select date",
             dateFormat: "yy-mm-dd",
             onClose: function (selectedDate) {

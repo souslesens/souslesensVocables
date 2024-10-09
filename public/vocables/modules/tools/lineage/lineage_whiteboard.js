@@ -2185,6 +2185,11 @@ var Lineage_whiteboard = (function () {
         if (classIds == "all" || options.allNodes) {
             classIds = null;
         }
+
+
+
+
+
         var physics = true;
 
         var excludeRelationsFromPhysic = $("#Lineage_whiteboard_excludeRelationsFromGraphSpatializationCBX").prop("checked");

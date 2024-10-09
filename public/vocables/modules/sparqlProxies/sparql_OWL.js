@@ -1413,8 +1413,11 @@ var Sparql_OWL = (function () {
             options = {};
         }
 
+
+
         var filterStr = "";
         if (ids) {
+            ids=OntologyModels.filterClassIds(sourceLabel,ids)
             if (options.inverseRestriction) {
                 options.someValuesFrom = 1;
                 filterStr = Sparql_common.setFilter("value", ids, null, options);

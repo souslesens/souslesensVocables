@@ -1559,6 +1559,27 @@ var OntologyModels = (function () {
         });
     };
 
+    self.filterClassIds = function (sourceLabel, ids) {
+        if(!Array.isArray(ids)){
+            ids=[ids]
+        }
+        var sourceModel = Config.ontologiesVocabularyModels[sourceLabel]
+        if (sourceModel && sourceModel.classes) {
+
+
+            var classIds = []
+            ids.forEach(function (id) {
+                if (sourceModel.classes[id]) {
+                    classIds.push(id)
+                }
+
+            })
+        }else{
+            return ids
+        }
+        return classIds
+    }
+
     return self;
 })();
 

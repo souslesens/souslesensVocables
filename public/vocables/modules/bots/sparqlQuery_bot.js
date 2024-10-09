@@ -16,7 +16,6 @@ var SparqlQuery_bot = (function () {
         });
     };
 
-
     self.workflow = {
         _OR: {
             Class: {

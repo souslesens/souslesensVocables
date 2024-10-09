@@ -24,7 +24,7 @@ var Lineage_decoration = (function () {
         if (!visjsNodes) visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
         self.decorateByUpperOntologyByClass(visjsNodes);
         return;
-        
+
         if (legendType == "individualClasses") {
             self.drawIndividualTypesLegend(visjsNodes, function () {});
         } else if (legendType == "queryInfos") {
@@ -424,19 +424,19 @@ var Lineage_decoration = (function () {
                     self.drawLegend(legendJsTreeData);
                     callbackSeries();
                 },
-                // add icons if there is 
+                // add icons if there is
                 function (callbackSeries) {
-                    if(Lineage_whiteboard.decorationData[Lineage_sources.activeSource]){
-                        var data=Lineage_whiteboard.decorationData[Lineage_sources.activeSource];
-                        newVisJsNodes.forEach(function(node){
-                            if(data[node.id] && data[node.id].image){
-                                node.image=data[node.id].image;
-                                node.shape='circularImage';
-                            }   
+                    if (Lineage_whiteboard.decorationData[Lineage_sources.activeSource]) {
+                        var data = Lineage_whiteboard.decorationData[Lineage_sources.activeSource];
+                        newVisJsNodes.forEach(function (node) {
+                            if (data[node.id] && data[node.id].image) {
+                                node.image = data[node.id].image;
+                                node.shape = "circularImage";
+                            }
                         });
                     }
                     callbackSeries();
-                }
+                },
             ],
             function (err) {
                 //change vijsNodes Color

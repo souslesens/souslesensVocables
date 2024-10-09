@@ -3,7 +3,6 @@ import SparqlQuery_bot from "./sparqlQuery_bot.js";
 import _botEngine from "./_botEngine.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 
-
 var KGquery_filter_bot = (function () {
     var self = {};
     self.title = "Filter Class";

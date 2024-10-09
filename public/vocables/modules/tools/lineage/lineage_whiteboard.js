@@ -55,7 +55,7 @@ var Lineage_whiteboard = (function () {
     self.defaultNodeFontColor = "#343434";
     self.defaultEdgeFontColor = "#343434";
     self.defaultLowOpacity = 0.35;
-    self.decorationData={};
+    self.decorationData = {};
     self.arrowTypes = {
         subClassOf: {
             to: {
@@ -93,17 +93,14 @@ var Lineage_whiteboard = (function () {
     self.onLoaded = function () {
         if (self.firstLoad) {
             self.firstLoad = false;
-            
+
             SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
-           
         }
-       
-       
+
         UI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
-        
     };
     self.unload = function () {
         $("#graphDiv").empty();
@@ -552,7 +549,7 @@ var Lineage_whiteboard = (function () {
         if (!_options) {
             _options = {};
         }
-        
+
         graphContext = {};
         var options = {};
         if (_options.visjsOptions) {
@@ -598,11 +595,11 @@ var Lineage_whiteboard = (function () {
                             Lineage_sources.activeSource = node.data.source;
                         }
                         if (true) {
-                            var nodes=self.lineageVisjsGraph.data.nodes.get(_properties.items)
-                            if(nodes){
+                            var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
+                            if (nodes) {
                                 Lineage_decoration.decorateNodeAndDrawLegend(nodes, _options.legendType);
                             }
-                            
+
                             //!self.lineageVisjsGraph.skipColorGraphNodesByType) {
                             //  var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                         }
@@ -674,16 +671,13 @@ var Lineage_whiteboard = (function () {
             }
 
             Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-        } else {}
-        
+        } else {
+        }
 
         if (!graphDiv) {
             graphDiv = "graphDiv";
         }
-        
-        
-        
-        
+
         self.lineageVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
         self.lineageVisjsGraph.draw(function () {
             UI.message("", true);
@@ -696,8 +690,6 @@ var Lineage_whiteboard = (function () {
             }
         });
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-         
-        
 
         return;
     };
@@ -2195,10 +2187,6 @@ var Lineage_whiteboard = (function () {
             classIds = null;
         }
 
-
-
-
-
         var physics = true;
 
         var excludeRelationsFromPhysic = $("#Lineage_whiteboard_excludeRelationsFromGraphSpatializationCBX").prop("checked");
@@ -2925,9 +2913,8 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (!self.currentGraphNode) {
                 return;
             }
-            var memberPredicate =false;
-            if( self.currentGraphNode.data )
-                memberPredicate =(self.currentGraphNode.data.type == "container");
+            var memberPredicate = false;
+            if (self.currentGraphNode.data) memberPredicate = self.currentGraphNode.data.type == "container";
             Lineage_whiteboard.addNodesAndParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id], { memberPredicate: memberPredicate });
         },
 
@@ -3434,31 +3421,27 @@ attrs.color=self.getSourceColor(superClassValue)
             self.MoreOptionsShow[divId] = true;
         }
     };
-    self.loadDecorationData=function(sourceLabel){
+    self.loadDecorationData = function (sourceLabel) {
         var visjsGraphFileName = sourceLabel + "_decoration.json";
-            var payload = {
-                dir: "graphs/",
-                fileName: visjsGraphFileName,
-            };
-            //get decoration file
-            $.ajax({
-                type: "GET",
-                url: `${Config.apiUrl}/data/file`,
-                data: payload,
-                dataType: "json",
-                success: function (result, _textStatus, _jqXHR) {
-                    var data = JSON.parse(result);
-                    if(Object.keys(data).length>0){
-                        self.decorationData[sourceLabel]=data;
-                    }
-                    
-                },
-                error(err) {
-                    
-
-                },
-            });
-    }
+        var payload = {
+            dir: "graphs/",
+            fileName: visjsGraphFileName,
+        };
+        //get decoration file
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var data = JSON.parse(result);
+                if (Object.keys(data).length > 0) {
+                    self.decorationData[sourceLabel] = data;
+                }
+            },
+            error(err) {},
+        });
+    };
 
     return self;
 })();

@@ -247,8 +247,7 @@ var OntologyModels = (function () {
                                         }
 
                                         result.results.bindings.forEach(function (item) {
-                                            if(item.sub.value=="http://souslesens.org/resources/ontology/cfihos-s-v01/Pressure")
-                                                var x=3
+                                            if (item.sub.value == "http://souslesens.org/resources/ontology/cfihos-s-v01/Pressure") var x = 3;
                                             if (!Config.ontologiesVocabularyModels[source].classes[item.sub.value]) {
                                                 Config.ontologiesVocabularyModels[source].classes[item.sub.value] = {
                                                     id: item.sub.value,
@@ -1514,14 +1513,14 @@ var OntologyModels = (function () {
             "SELECT distinct ?label ?id" +
             fromStr +
             "WHERE { ?id rdf:type owl:Class.\n" +
-            "  ?x rdf:type ?id. optional {?id rdfs:label ?label  }} limit 10000"
+            "  ?x rdf:type ?id. optional {?id rdfs:label ?label  }} limit 10000";
 
         var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["id"],);
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["id"]);
 
             return callback(null, result.results.bindings);
         });
@@ -1531,9 +1530,8 @@ var OntologyModels = (function () {
             options = {};
         }
         var fromStr = Sparql_common.getFromStr(sourceLabel);
-        var classFilter="";
-        if(classIds)
-            classFilter=Sparql_common.setFilter("classId",classIds)
+        var classFilter = "";
+        if (classIds) classFilter = Sparql_common.setFilter("classId", classIds);
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>SELECT distinct \n" +
             "?classId ?p ?pRange ?pLabel ?pType " +
@@ -1546,39 +1544,36 @@ var OntologyModels = (function () {
             "  filter (?pType in (owl:DatatypeProperty, owl:ObjectProperty))\n" +
             classFilter +
             "\n" +
-            "} limit 10000"
+            "} limit 10000";
 
         var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["id"],);
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["id"]);
 
             return callback(null, result.results.bindings);
         });
     };
 
     self.filterClassIds = function (sourceLabel, ids) {
-        if(!Array.isArray(ids)){
-            ids=[ids]
+        if (!Array.isArray(ids)) {
+            ids = [ids];
         }
-        var sourceModel = Config.ontologiesVocabularyModels[sourceLabel]
+        var sourceModel = Config.ontologiesVocabularyModels[sourceLabel];
         if (sourceModel && sourceModel.classes) {
-
-
-            var classIds = []
+            var classIds = [];
             ids.forEach(function (id) {
                 if (sourceModel.classes[id]) {
-                    classIds.push(id)
+                    classIds.push(id);
                 }
-
-            })
-        }else{
-            return ids
+            });
+        } else {
+            return ids;
         }
-        return classIds
-    }
+        return classIds;
+    };
 
     return self;
 })();

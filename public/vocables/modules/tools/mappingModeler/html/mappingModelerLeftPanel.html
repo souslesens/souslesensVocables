@@ -13,8 +13,13 @@
             <!--  <button onclick="mappingModeler.actions.setLayout('randomlayout')">Random Layout</button>-->
 
             <div>
-                <input id="mappingModeler_suggestionsnput" style="width: 200px; height: 33.5px; border-bottom-left-radius: 14px; border-top-left-radius: 14px" value="" onkeyup="_botEngine.filterList(event)">
-                <br>
+                <input
+                    id="mappingModeler_suggestionsnput"
+                    style="width: 200px; height: 33.5px; border-bottom-left-radius: 14px; border-top-left-radius: 14px"
+                    value=""
+                    onkeyup="_botEngine.filterList(event)"
+                />
+                <br />
                 <select id="axioms_legend_suggestionsSelect" onclick="MappingModeler.onSuggestionsSelect($(this).val())" size="30" style="width: 250px; overflow: auto"></select>
                 <div>
                     <button class="w3-button slsv-button-3" onclick="MappingModeler.clearMappings()">clear</button>

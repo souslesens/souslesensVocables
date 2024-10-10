@@ -269,11 +269,16 @@ var _botEngine = (function () {
         }
         common.fillSelectOptions("bot_resourcesProposalSelect", values, false, "label", "id");
         $("#bot_resourcesProposalSelect").unbind("click");
-
+        UI.adjustSelectListSize('bot_resourcesProposalSelect',10);
+        $('#botPanel').scrollTop($('#botPanel')[0].scrollHeight);
         $("#bot_resourcesProposalSelect").bind("click", function (evt) {
             var x = evt;
 
             var text = $("#bot_resourcesProposalSelect option:selected").text();
+            if(text==''){
+                return;
+
+            }
             self.writeCompletedHtml(text + ":");
             //voir avec Claude
             //Donne une liste pour cet élement de façon inconnue
@@ -320,6 +325,8 @@ var _botEngine = (function () {
             }
         });
         common.fillSelectOptions("bot_resourcesProposalSelect", selection, false, "label", "id");
+        UI.adjustSelectListSize('bot_resourcesProposalSelect',10);
+        $('#botPanel').scrollTop($('#botPanel')[0].scrollHeight);
     };
 
     self.promptValue = function (message, varToFill, defaultValue, options, callback) {
@@ -381,6 +388,9 @@ var _botEngine = (function () {
         }
         var tokenId = "token_" + common.getRandomHexaId(5);
         var html = "<span class='" + chat_class + "' id='" + tokenId + "'>" + str + "</span>";
+        if(chat_class=='chat-right'){
+            html+='<span style="flex-basis:100%;" ></span>'
+        }
         $(html).insertBefore("#bot_input");
         $("#bot_input").val("");
         $("#bot_input").focus();

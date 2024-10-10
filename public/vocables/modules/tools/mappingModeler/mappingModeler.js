@@ -11,6 +11,9 @@ import Clipboard from "../../shared/clipboard.js";
 import KGcreator_graph from "../KGcreator/KGcreator_graph.js";
 import SimpleListFilterWidget from "../../uiWidgets/simpleListFilterWidget.js";
 
+// imports React app
+import("/assets/mappingModeler_upload_app.js");
+
 var MappingModeler = (function () {
     var self = {};
     self.currentSource = null;
@@ -24,7 +27,51 @@ var MappingModeler = (function () {
 
         { label: "Class", color: "#00afef", shape: "box" },
     ];
+    
+    self.umountKGUploadApp = null;
+    self.createApp = null;
 
+    self.uploadFormData = {
+        displayForm: "", // can be database, file or ""
+        currentSource: "",
+        selectedDatabase: "",
+        selectedFiles: [],
+    };
+    
+    self.displayUploadApp = function (displayForm) {
+        self.uploadFormData.displayForm = displayForm;
+        //   return   $.getScript("/kg_upload_app.js");
+        if (!displayForm) {
+            return;
+        }
+        var html = ' <div style="width:500px;height: 400px" id="mount-mappingModeler-upload-app-here"></div>';
+        $("#smallDialogDiv").html(html);
+
+        $("#smallDialogDiv").dialog({
+            open: function (event, ui) {
+                if (self.createApp === null) {
+                    throw new Error("React app is not ready");
+                }
+
+                self.uploadFormData.currentSource = self.currentSource;
+                
+                self.umountKGUploadApp = self.createApp(self.uploadFormData);
+            },
+            beforeClose: function () {
+                self.umountKGUploadApp();
+                KGcreator.currentSlsvSource = self.currentSource;
+                KGcreator.getSlsvSourceConfig(self.currentSource, function (err, result) {
+                    if (err) {
+                        return err;
+                    }
+
+                    KGcreator.currentConfig = result;
+                    
+                });
+            },
+        });
+        $("#smallDialogDiv").dialog("open");
+    };
     self.onLoaded = function () {
         async.series([
             //init source
@@ -57,7 +104,7 @@ var MappingModeler = (function () {
             },
 
             function (callbackSeries) {
-                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPannel.html", function (err) {
+                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
                     $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
                         //$("#mainDialogDiv").dialog("open");
                         return callbackSeries();
@@ -75,9 +122,32 @@ var MappingModeler = (function () {
 
             // load jstree
             function (callbackSeries) {
-                var options = {
+                var options ={
                     openAll: true,
                     selectTreeNodeFn: self.onDataSourcesJstreeSelect,
+                    contextMenu:function(node,x){
+                        var items = {};
+                        if (node.id == "databaseSources") {
+                            items.addDatabaseSource = {
+                                label: "addDatabaseSources",
+                                action: function (_e) {
+                                    self.displayUploadApp("database");
+                                    // KGcreator.createDataBaseSourceMappings();
+                                },
+                            };
+                            return items;
+                        } else if (node.id == "csvSources") {
+                            items.csvSources = {
+                                label: "add Csv Sources",
+                                action: function (_e) {
+                                    // pb avec source
+                                    self.displayUploadApp("file");
+                                    // KGcreator.createCsvSourceMappings();
+                                },
+                            };
+                            return items;
+                        }
+                    }
                 };
                 KGcreator.loadDataSourcesJstree("mappingModeler_jstreeDiv", options, function (err, result) {
                     return callbackSeries(err);
@@ -139,7 +209,7 @@ var MappingModeler = (function () {
             self.currentResourceType = "Column";
             common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         }
-        self.currentDataSource = KGcreator.currentConfig.currentDataSource.name;
+        self.currentDataSource = KGcreator.currentConfig.currentDataSource?.name;
     };
     self.hideDataSources = function (divId) {
         MappingModeler.switchDataSourcePanel("hide");
@@ -1155,10 +1225,10 @@ var MappingModeler = (function () {
 
     self.showDatatypeGraph = function (column) {
         //datatypeMappingGraph
-        var mappings = self.generateBasicContentMappingContent()[self.currentTreeNode.id].tripleModels;
+        var mappings = self.generateBasicContentMappingContent()[self.currentDataSource].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {
-            return mapping.s == column || mapping.o == column;
+            return mapping.s.replaceAll('_$','').replaceAll('_£').replaceAll('@','') == column || mapping.o.replaceAll('_$','').replaceAll('_£').replaceAll('@','') == column;
         });
 
         self.currentMappings = {};
@@ -1384,7 +1454,59 @@ var MappingModeler = (function () {
         $("#KGcreatorVisjsLegendCanvas").css("top", 0);
         $("#KGcreatorVisjsLegendCanvas").css("right", 200);
     };
+    self.createDataBaseSourceMappings = function () {
+        // hide uploadApp
+        self.displayUploadApp("");
+        $("#smallDialogDiv").dialog("close");
 
+        var datasource = self.uploadFormData.selectedDatabase;
+        if (!datasource) {
+            return;
+        }
+        self.currentConfig.databaseSources[datasource.id] = { name: datasource.name };
+        self.rawConfig.databaseSources[datasource.id] = { name: datasource.name };
+        self.saveSlsvSourceConfig(function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
+        });
+    };
+
+    self.createCsvSourceMappings = function () {
+        // hide uploadApp
+        self.displayUploadApp("");
+        $("#smallDialogDiv").dialog("close");
+        var datasourceName = self.uploadFormData.selectedFiles[0];
+        if (!datasourceName) {
+            return;
+        }
+
+        KGcreator.currentConfig.csvSources[datasourceName] = {};
+        KGcreator.rawConfig=KGcreator.currentConfig;
+
+        KGcreator.saveSlsvSourceConfig(function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            MappingModeler.onLoaded();
+            /*$('#mappingModeler_jstreeDiv').jstree().destroy();
+            KGcreator.currentSlsvSource = self.currentSource;
+            KGcreator.getSlsvSourceConfig(self.currentSource, function (err, result) {
+                if (err) {
+                    return err;
+                }
+
+                KGcreator.currentConfig = result;
+                var options = self.jstreeOptions;
+                KGcreator.loadDataSourcesJstree("mappingModeler_jstreeDiv", options, function (err, result) {
+                    
+                 }); 
+            });
+           */ 
+        });
+        
+    };
     return self;
 })();
 

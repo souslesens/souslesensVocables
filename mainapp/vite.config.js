@@ -14,6 +14,7 @@ export default defineConfig({
                 kg_upload_app: path.resolve(__dirname, "src/kg-upload-app.tsx"),
                 graph_management: path.resolve(__dirname, "src/graph-management.tsx"),
                 user_management: path.resolve(__dirname, "src/user-management.tsx"),
+                mappingModeler_upload_app: path.resolve(__dirname, "src/mappingModeler-upload-app.tsx"),
             },
             output: {
                 entryFileNames: `assets/[name].js`,

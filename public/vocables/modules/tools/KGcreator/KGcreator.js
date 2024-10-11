@@ -39,7 +39,7 @@ var KGcreator = (function () {
                 }
 
                 self.uploadFormData.currentSource = self.currentSlsvSource;
-                
+
                 self.umountKGUploadApp = self.createApp(self.uploadFormData);
             },
             beforeClose: function () {

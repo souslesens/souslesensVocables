@@ -15,13 +15,12 @@ interface UploadFormData {
 
 declare global {
     interface Window {
-       
-        MappingModeler:{
+        MappingModeler: {
             uploadFormData: UploadFormData;
             createDataBaseSourceMappings: () => void;
             createCsvSourceMappings: () => void;
             createApp: (uploadFormData: UploadFormData) => void;
-        }
+        };
     }
 }
 

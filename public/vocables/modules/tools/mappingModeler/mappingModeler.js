@@ -10,6 +10,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Clipboard from "../../shared/clipboard.js";
 import KGcreator_graph from "../KGcreator/KGcreator_graph.js";
 import SimpleListFilterWidget from "../../uiWidgets/simpleListFilterWidget.js";
+import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
 // imports React app
 import("/assets/mappingModeler_upload_app.js");
@@ -167,7 +168,100 @@ var MappingModeler = (function () {
             },
         ]);
     };
+    self.loadSuggestionSelectJstree=function(objects,parentName){
+        if($('#suggestionsSelectJstreeDiv').jstree()){
+            try{
+                $('#suggestionsSelectJstreeDiv').jstree().destroy();
+            } catch{
 
+            }  
+            
+        }
+        var options ={
+            openAll: true,
+            selectTreeNodeFn: self.onSuggestionsSelect,
+           
+        };
+        var jstreeData=[];
+        jstreeData.push({
+            id:parentName,
+            parent:'#',
+            text:parentName,
+            data:{
+                id:parentName,
+                label:parentName,
+            }   
+        });
+        
+
+        
+        
+        if(parentName=='Classes' || parentName=='Properties'){
+            var uniqueSources={}
+            objects.forEach(function(item){
+                if(item.source){
+                    if(!uniqueSources[item.source]){
+                        uniqueSources[item.source]=1;
+                        
+                        jstreeData.push({
+                            id:item.source,
+                            parent:parentName,
+                            text:item.source,
+                            data:{
+                                id:item.source,
+                                label:item.source,
+                            }   
+                        });
+                    }
+                    jstreeData.push({
+                        id:item.id,
+                        parent:item.source,
+                        text:item.label.split(':')[1],
+                        data:{
+                            id:item.id,
+                            text:item.label.split(':')[1],
+                            resourceType:item.resourceType
+                        }   
+                    });
+                }
+                else{
+                    jstreeData.push({
+                        id:item.id,
+                        parent:parentName,
+                        text:item.label,
+                        data:{
+                            id:item.id,
+                            text:item.label
+                            
+                        }   
+                    });
+                }
+                
+            });
+            
+        }
+        else{
+            
+            objects.forEach(function(item){
+
+            
+                jstreeData.push({
+                    id:item,
+                    parent:parentName,
+                    text:item,
+                    data:{
+                        id:item,
+                        label:item,
+                    }   
+                });
+            
+            
+            });
+        }
+        JstreeWidget.loadJsTree('suggestionsSelectJstreeDiv',jstreeData,options,function(){
+
+        });
+    }
     self.onDataSourcesJstreeSelect = function (event, obj) {
         self.currentTreeNode = obj.node;
 
@@ -193,7 +287,8 @@ var MappingModeler = (function () {
                     name: obj.node.id,
                     columns: columns,
                 };
-                common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false);
+                self.loadSuggestionSelectJstree(columns,'Columns');
+                //common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false);
             });
             self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
         } else if (obj.node.data.type == "table") {
@@ -207,7 +302,8 @@ var MappingModeler = (function () {
             self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
             self.hideForbiddenResources("Table");
             self.currentResourceType = "Column";
-            common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
+            self.loadSuggestionSelectJstree(self.currentTable.columns,'Columns');
+            //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         }
         self.currentDataSource = KGcreator.currentConfig.currentDataSource?.name;
     };
@@ -243,7 +339,8 @@ var MappingModeler = (function () {
         Axiom_activeLegend.hideLegendItems(hiddenNodes);
     };
 
-    self.onSuggestionsSelect = function (resourceUri) {
+    self.onSuggestionsSelect = function (event, obj) {
+        var resourceUri=obj.node.id
         var newResource = null;
         var id = common.getRandomHexaId(8);
         if (resourceUri == "createClass") {
@@ -251,6 +348,7 @@ var MappingModeler = (function () {
         } else if (resourceUri == "createObjectProperty") {
             return self.showCreateResourceBot("ObjectProperty", null);
         } else if (self.currentResourceType == "Column") {
+
             newResource = {
                 id: id,
                 label: resourceUri,
@@ -361,7 +459,8 @@ var MappingModeler = (function () {
                 };
                 self.visjsGraph.data.edges.add([edge]);
                 self.currentRelation = null;
-                $("#axioms_legend_suggestionsSelect").empty();
+                //$("#axioms_legend_suggestionsSelect").empty();
+                $('#suggestionsSelectJstreeDiv').jstree().destroy();
             }
         }
     };
@@ -435,7 +534,8 @@ var MappingModeler = (function () {
         }
 
         self.hideForbiddenResources(newResource.data.type);
-        $("#axioms_legend_suggestionsSelect").empty();
+        //$("#axioms_legend_suggestionsSelect").empty();
+        $('#suggestionsSelectJstreeDiv').jstree().destroy();
 
         self.currentGraphNode = newResource;
     };
@@ -702,7 +802,8 @@ var MappingModeler = (function () {
         self.currentResourceType = node.id;
 
         if (self.currentResourceType == "Column") {
-            common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
+            self.loadSuggestionSelectJstree(self.currentTable.columns,'Columns');
+            //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         } else if (self.currentResourceType == "Class") {
             //   self.hideLegendItems();
             var newObject = { id: "createClass", label: "_Create new Class_" };
@@ -710,11 +811,15 @@ var MappingModeler = (function () {
                 if (err) {
                     return alert(err);
                 }
+                /*
                 if(classes[0].id!='createClass'){
                     self.setSuggestionsSelect(classes, false, newObject);
                 }else{
                     self.setSuggestionsSelect(classes, false);
-                }
+                }*/
+                var classesCopy=JSON.parse(JSON.stringify(classes));
+                classesCopy.unshift(newObject);
+                self.loadSuggestionSelectJstree(classesCopy,'Classes');
                 
             });
         } else if (self.currentResourceType == "ObjectProperty") {
@@ -731,14 +836,18 @@ var MappingModeler = (function () {
                     item.label = item.source.substring(0, 3) + ":" + item.label;
                 });
                 properties = common.array.sort(properties, "label");
-                self.setSuggestionsSelect(properties, false, newObjects);
+                //To add NewObjects only one time
+                var propertiesCopy=JSON.parse(JSON.stringify(properties));
+                propertiesCopy.unshift(...newObjects);
+                self.loadSuggestionSelectJstree(propertiesCopy,'Properties');
+                //self.setSuggestionsSelect(properties, false, newObjects);
             });
         } else if (self.currentResourceType == "RowIndex") {
-            self.onSuggestionsSelect({ id: "RowIndex" });
+            self.onSuggestionsSelect(null,{node:{ id: "RowIndex" }});
         } else if (self.currentResourceType == "VirtualColumn") {
             var columnName = prompt("Virtual column name");
             if (columnName) {
-                self.onSuggestionsSelect(columnName);
+                self.onSuggestionsSelect(null,{node:{ id:  columnName}});
             }
         }
     };

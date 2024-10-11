@@ -67,10 +67,10 @@ const SourcesTable = () => {
         setOpenModal(false);
 
         if (response.status === 200) {
-            updateModel({ type: "sources", payload: success(response.message) });
+            updateModel({ type: "sources", payload: success(response.message as ServerSource[]) });
             void writeLog(me, "ConfigEditor", editModal ? "edit" : "create", source.name);
         } else {
-            updateModel({ type: "sources", payload: failure(response.message) });
+            updateModel({ type: "sources", payload: failure(response.message as string) });
         }
     };
 

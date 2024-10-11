@@ -535,7 +535,7 @@ const PluginsRepositories = (props: DispatcherProps) => {
 
                 const handleDeleteRepository = () => {
                     setDeleteDialog({ ...deleteDialog, open: false });
-                    onDeleteRepository(deleteDialog.selectedRepository);
+                    onDeleteRepository(deleteDialog.selectedRepository as string);
                 };
 
                 const handleFetchRepository = (repositoryId: string) => {

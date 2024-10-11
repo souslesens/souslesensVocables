@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 
 import { Button, Dialog, DialogActions, DialogContent, IconButton, InputAdornment, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableRow, TextField } from "@mui/material";
 import { Add, EditNote, Remove } from "@mui/icons-material";
@@ -8,23 +8,23 @@ import { HelpTooltip } from "./HelpModal";
 
 type HeadersListProps = {
     headers: Record<string, string>;
-    onSubmit: () => void;
+    onSubmit: (headers: Record<string, string>) => void;
 };
 
 type HeadersDialogProps = {
     edit: boolean;
     open: boolean;
     onClose: () => void;
-    onSubmit: () => void;
+    onSubmit: (header: HeaderType) => void;
     selected?: HeaderType | null;
 };
 
 type HeaderType = {
     name: string;
-    value?: string;
+    value: string;
 };
 
-const emptyHeader = { name: "", value: "" };
+const emptyHeader: HeaderType = { name: "", value: "" };
 
 export const HeadersList = ({ headers, onSubmit }: HeadersListProps) => {
     const [edit, setEdit] = useState(false);
@@ -101,13 +101,13 @@ const HeadersDialog = ({ edit, open, onClose, onSubmit, selected }: HeadersDialo
         if (!open) {
             setHeader(emptyHeader);
         } else {
-            setHeader(selected);
+            setHeader(selected as HeaderType);
         }
     }, [open]);
 
     const handleField = (key: string, value: string) => setHeader({ ...header, [key]: value });
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (event: MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         onSubmit(header);
     };

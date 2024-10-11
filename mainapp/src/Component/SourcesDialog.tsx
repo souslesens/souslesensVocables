@@ -33,7 +33,7 @@ type SourcesDialogProps = {
     edit: boolean;
     me: string;
     onClose: () => void;
-    onSubmit: () => void;
+    onSubmit: (source: ServerSource) => void;
     open: boolean;
     selectedSource?: ServerSource | null;
     sources: ServerSource[];
@@ -46,16 +46,18 @@ const permissionLabels = {
     published: "Published",
 };
 
+const emptySource: ServerSource = defaultSource(ulid());
+
 export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSource, sources }: SourcesDialogProps) => {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [groups, setGroups] = useState<string[]>([]);
     const [predicates, setPredicates] = useState<string[]>([]);
     const [schemaTypes, setSchemaTypes] = useState<string[]>([]);
-    const [source, setSource] = useState<ServerSource>({ sparql_server: {}, owner: me });
+    const [source, setSource] = useState<ServerSource>(emptySource);
     const [sourcesNames, setSourcesNames] = useState<string[]>([]);
-    const [users, setUsers] = useState<string[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
 
-    const handleField = (key: string, value: string | string[] | Record<string, string>) => {
+    const handleField = (key: string, value: string | string[] | Record<string, string> | boolean | null) => {
         if (key.startsWith("sparql_server")) {
             const [_section, option] = key.split(".");
             setSource({ ...source, sparql_server: { ...source.sparql_server, [option]: value } });
@@ -125,7 +127,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
             void getUsers().then((availableUsers) => setUsers(availableUsers));
 
             if (edit) {
-                setSource(selectedSource);
+                setSource(selectedSource as ServerSource);
             }
         }
     }, [open]);
@@ -149,7 +151,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     {edit || (
                         <TextField
                             autoFocus
-                            error={errors.name !== undefined ? errors.name : undefined}
+                            error={errors.name !== undefined}
                             fullWidth
                             helperText={errors.name}
                             id="name"
@@ -169,8 +171,8 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     )}
                     <TextField
                         fullWidth
-                        error={errors.graphUri !== undefined ? errors.graphUri : undefined}
-                        helperText={errors.graphUri}
+                        error={errors.graphUri !== undefined}
+                        helperText={errors.graphUri !== undefined}
                         id="graphUri"
                         InputProps={{
                             endAdornment: (
@@ -191,7 +193,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         id="group"
                         onChange={(_e, value) => handleField("group", value)}
                         options={groups}
-                        renderInput={(params) => <TextField error={errors.group !== undefined ? errors.group : undefined} helperText={errors.group} {...params} label="Group" />}
+                        renderInput={(params) => <TextField error={errors.group !== undefined} helperText={errors.group} {...params} label="Group" />}
                         value={source.group}
                     />
                     <Autocomplete
@@ -201,14 +203,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         multiple
                         onChange={(_e, value) => handleField("taxonomyPredicates", value)}
                         options={predicates}
-                        renderInput={(params) => (
-                            <TextField
-                                error={errors.taxonomyPredicates !== undefined ? errors.taxonomyPredicates : undefined}
-                                helperText={errors.taxonomyPredicates}
-                                {...params}
-                                label="Taxonomy Predicates"
-                            />
-                        )}
+                        renderInput={(params) => <TextField error={errors.taxonomyPredicates !== undefined} helperText={errors.taxonomyPredicates} {...params} label="Taxonomy Predicates" />}
                         renderOption={(props, option, { selected }) => {
                             return (
                                 <li key={option} {...props}>
@@ -304,7 +299,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                             <AccordionDetails>
                                 <Stack spacing={2} useFlexGap>
                                     <TextField
-                                        error={errors.owner !== undefined ? errors.owner : undefined}
+                                        error={errors.owner !== undefined}
                                         fullWidth
                                         helperText={errors.owner}
                                         id="owner"
@@ -328,9 +323,15 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                                         ))}
                                     </TextField>
                                     <FormGroup>
-                                        {Object.entries(permissionLabels).map(([key, label]: string[]) => (
+                                        {Object.entries(permissionLabels).map(([key, label]) => (
                                             <FormControlLabel
-                                                control={<Checkbox checked={source[key] as boolean} key={`check-${key}`} onChange={(event) => handleField(key, event.target.checked)} />}
+                                                control={
+                                                    <Checkbox
+                                                        checked={source[key as keyof ServerSource] as boolean}
+                                                        key={`check-${key}`}
+                                                        onChange={(event) => handleField(key, event.target.checked)}
+                                                    />
+                                                }
                                                 key={key}
                                                 label={label}
                                             />
@@ -349,7 +350,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                             <AccordionDetails>
                                 <Stack spacing={2} useFlexGap>
                                     <TextField
-                                        error={errors.controller !== undefined ? errors.controller : undefined}
+                                        error={errors.controller !== undefined}
                                         fullWidth
                                         helperText={errors.controller}
                                         id="controller"
@@ -373,7 +374,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                                         ))}
                                     </TextField>
                                     <TextField
-                                        error={errors.schemaType !== undefined ? errors.schemaType : undefined}
+                                        error={errors.schemaType !== undefined}
                                         fullWidth
                                         helperText={errors.schemaType}
                                         id="schemaType"

@@ -106,6 +106,7 @@ var MappingModeler = (function () {
 
             function (callbackSeries) {
                 $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
+                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
                     $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
                         //$("#mainDialogDiv").dialog("open");
                         return callbackSeries();
@@ -305,6 +306,7 @@ var MappingModeler = (function () {
             self.loadSuggestionSelectJstree(self.currentTable.columns,'Columns');
             //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         }
+        self.currentDataSource = KGcreator.currentConfig.currentDataSource?.name;
         self.currentDataSource = KGcreator.currentConfig.currentDataSource?.name;
     };
     self.hideDataSources = function (divId) {
@@ -1106,10 +1108,13 @@ var MappingModeler = (function () {
             var subject = self.nodeToKGcreatorColumnName(data);
             if (!allMappings[data.dataTable]) {
                 allMappings[data.dataTable] = { tripleModels: [] };
+            if (!allMappings[data.dataTable]) {
+                allMappings[data.dataTable] = { tripleModels: [] };
             }
             if (data.rdfType) {
                 var predicate = "rdf:type";
                 if (data.rdfType == "owl:Class") predicate = "rdfs:subClassOf";
+                allMappings[data.dataTable].tripleModels.push({
                 allMappings[data.dataTable].tripleModels.push({
                     s: subject,
                     p: predicate,
@@ -1118,6 +1123,7 @@ var MappingModeler = (function () {
             }
 
             if (data.rdfsLabel) {
+                allMappings[data.dataTable].tripleModels.push({
                 allMappings[data.dataTable].tripleModels.push({
                     s: subject,
                     p: "rdfs:label",
@@ -1145,6 +1151,7 @@ var MappingModeler = (function () {
                     );
                 }
                 allMappings[data.dataTable].tripleModels.push({
+                allMappings[data.dataTable].tripleModels.push({
                     s: subject,
                     p: property,
                     o: object,
@@ -1171,6 +1178,7 @@ var MappingModeler = (function () {
                         triple.dateFormat = predicate.dateFormat;
                     }
 
+                    allMappings[data.dataTable].tripleModels.push(triple);
                     allMappings[data.dataTable].tripleModels.push(triple);
                 });
             }
@@ -1363,6 +1371,7 @@ var MappingModeler = (function () {
 
     self.showDatatypeGraph = function (column) {
         //datatypeMappingGraph
+        var mappings = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
         var mappings = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {

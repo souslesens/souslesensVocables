@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.87.0](https://github.com/souslesens/souslesensVocables/compare/1.86.3...1.87.0) (2024-10-11)
+
+
+### Features
+
+* **lineage:** add edit source dialog ([7940f8b](https://github.com/souslesens/souslesensVocables/commit/7940f8b1a42e0e761661937550f5d108cffac36a))
+* **lineage:** check if source is owned by user to show the edit source btn ([3d6b53d](https://github.com/souslesens/souslesensVocables/commit/3d6b53dc4c4f67e5e6fa72524eb53198050c1a04))
+* **mainapp:** move the UserSources delete dialog to a dedicated component ([d9dd873](https://github.com/souslesens/souslesensVocables/commit/d9dd8732a7c9a6593f892e3186c6b9ae02c4498a))
+* **mainapp:** rewrite the form to edit Source in the ConfigEditor ([1ca4a35](https://github.com/souslesens/souslesensVocables/commit/1ca4a35e8c2e19b1794d9d81368590bd14c9cb47))
+* **public:** use upload graph modal in onto creator ([898e893](https://github.com/souslesens/souslesensVocables/commit/898e8934ecaefadde80e0b3246e721040e7174f0))
+
 ### [1.86.3](https://github.com/souslesens/souslesensVocables/compare/1.86.2...1.86.3) (2024-10-01)
 
 

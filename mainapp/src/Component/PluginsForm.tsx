@@ -40,7 +40,7 @@ import {
     Tab,
     AlertColor,
 } from "@mui/material";
-import { Add, Extension, DeleteForever, AddCircle, Done, Download } from "@mui/icons-material";
+import { Add, Edit, Extension, DeleteForever, AddCircle, Done, Download } from "@mui/icons-material";
 
 import { SRD, success } from "srd";
 import { ulid } from "ulid";
@@ -62,7 +62,7 @@ import {
     writeRepository,
 } from "../Plugins";
 
-import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
+import { DeleteDialog } from "./DeleteDialog";
 import { PasswordField } from "./PasswordField";
 import { cleanUpText } from "../Utils";
 
@@ -492,12 +492,23 @@ const PluginsRepositories = (props: DispatcherProps) => {
         open: false,
     });
 
+    const [deleteDialog, setDeleteDialog] = useState<{
+        open: boolean;
+        selectedRepository?: string | null;
+    }>({
+        open: false,
+    });
+
     const [filter, setFilter] = useState<string>("");
     const [order, setOrder] = useState<Order>("asc");
     const [orderBy, setOrderBy] = useState<keyof RepositoryType>("url");
 
     const handleCloseModal = () => {
         setModal({ ...modal, open: false });
+    };
+
+    const handleCloseDeleteDialog = () => {
+        setDeleteDialog({ ...deleteDialog, open: false });
     };
 
     const renderRepositories = SRD.match(
@@ -516,6 +527,15 @@ const PluginsRepositories = (props: DispatcherProps) => {
             success: (repositories) => {
                 const handleOpenModal = (edit: boolean, repositoryId: string | null = null) => {
                     setModal({ open: true, edit, selectedRepository: repositoryId });
+                };
+
+                const handleOpenDeleteDialog = (repositoryId: string) => {
+                    setDeleteDialog({ open: true, selectedRepository: repositoryId });
+                };
+
+                const handleDeleteRepository = () => {
+                    setDeleteDialog({ ...deleteDialog, open: false });
+                    onDeleteRepository(deleteDialog.selectedRepository as string);
                 };
 
                 const handleFetchRepository = (repositoryId: string) => {
@@ -601,16 +621,18 @@ const PluginsRepositories = (props: DispatcherProps) => {
                                                     </TableCell>
                                                     <TableCell align="center">{data.version && <Chip label={data.version} size="small" />}</TableCell>
                                                     <TableCell align="center">
-                                                        <IconButton color="primary" onClick={() => handleFetchRepository(key)} title="Fetch Repository">
+                                                        <IconButton aria-label="fetch" color="primary" onClick={() => handleFetchRepository(key)} title="Fetch Repository">
                                                             <Download />
                                                         </IconButton>
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
-                                                            <Button onClick={() => handleOpenModal(true, key)} variant="contained">
-                                                                Edit
-                                                            </Button>
-                                                            <ButtonWithConfirmation label="Delete" msg={() => onDeleteRepository(key)} />
+                                                            <IconButton aria-label="edit" color="primary" onClick={() => handleOpenModal(true, key)} size="small" title={"Edit Repository"}>
+                                                                <Edit />
+                                                            </IconButton>
+                                                            <IconButton aria-label="delete" color="error" onClick={() => handleOpenDeleteDialog(key)} size="small" title={"Delete Repository"}>
+                                                                <DeleteForever />
+                                                            </IconButton>
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>
@@ -633,6 +655,13 @@ const PluginsRepositories = (props: DispatcherProps) => {
                             edit={modal.edit}
                             repositories={repositories}
                             selectedRepository={modal.selectedRepository}
+                        />
+                        <DeleteDialog
+                            description={"This repository will be erased from this instance. Are you sure?"}
+                            isOpen={deleteDialog.open}
+                            onClose={handleCloseDeleteDialog}
+                            onDelete={handleDeleteRepository}
+                            title={"Delete Repository"}
                         />
                     </Stack>
                 );

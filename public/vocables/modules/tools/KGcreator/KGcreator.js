@@ -38,6 +38,7 @@ var KGcreator = (function () {
                     throw new Error("React app is not ready");
                 }
 
+
                 self.uploadFormData.currentSource = self.currentSlsvSource;
                 
                 self.umountKGUploadApp = self.createApp(self.uploadFormData);

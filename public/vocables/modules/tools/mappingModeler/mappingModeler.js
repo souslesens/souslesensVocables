@@ -105,7 +105,7 @@ var MappingModeler = (function () {
             },
 
             function (callbackSeries) {
-                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
+                
                 $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
                     $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
                         //$("#mainDialogDiv").dialog("open");
@@ -1106,15 +1106,14 @@ var MappingModeler = (function () {
         for (var nodeId in columnsMap) {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
-            if (!allMappings[data.dataTable]) {
-                allMappings[data.dataTable] = { tripleModels: [] };
+           
             if (!allMappings[data.dataTable]) {
                 allMappings[data.dataTable] = { tripleModels: [] };
             }
             if (data.rdfType) {
                 var predicate = "rdf:type";
                 if (data.rdfType == "owl:Class") predicate = "rdfs:subClassOf";
-                allMappings[data.dataTable].tripleModels.push({
+                
                 allMappings[data.dataTable].tripleModels.push({
                     s: subject,
                     p: predicate,
@@ -1123,7 +1122,7 @@ var MappingModeler = (function () {
             }
 
             if (data.rdfsLabel) {
-                allMappings[data.dataTable].tripleModels.push({
+                
                 allMappings[data.dataTable].tripleModels.push({
                     s: subject,
                     p: "rdfs:label",
@@ -1150,7 +1149,7 @@ var MappingModeler = (function () {
                         })[0].data
                     );
                 }
-                allMappings[data.dataTable].tripleModels.push({
+                
                 allMappings[data.dataTable].tripleModels.push({
                     s: subject,
                     p: property,
@@ -1179,7 +1178,7 @@ var MappingModeler = (function () {
                     }
 
                     allMappings[data.dataTable].tripleModels.push(triple);
-                    allMappings[data.dataTable].tripleModels.push(triple);
+                    
                 });
             }
         }

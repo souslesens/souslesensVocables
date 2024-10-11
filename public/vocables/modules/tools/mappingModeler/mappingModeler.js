@@ -1273,46 +1273,56 @@ var MappingModeler = (function () {
             }
         });
     };
-    self.addRowClass = function (column) {
+    self.addRowClass=function(column){
         /*var classIndexes=Object.keys(self.classDialogData);
-
-            if(classIndexes.length>0){
-
-                var rowIndex=parseInt(classIndexes[classIndexes.length-1])+1;
-            }
-            else{
-                var rowIndex=0;
-            }*/
+        
+        if(classIndexes.length>0){
+            
+            var rowIndex=parseInt(classIndexes[classIndexes.length-1])+1;
+        }
+        else{
+            var rowIndex=0;
+        }*/
         //self.classDialogData[rowIndex]={Column:'',Type:'',Label:'',DatatypeProperties:{},Transform:{}};
-
-        $("#classDefineColumn").append(`<span id='class-column-${column}'> ${column} </span> `);
-        $("#classDefineType").append(`<span id='class-type-${column}' >${self.allResourcesMap[self.classDialogData[column].type.id].label} </span>  `);
-        $("#classDefineRDFType").append(`<select id='class-RDFType-${column}' style='padding:2px 2px'> </select>  `);
-        $("#classDefineLabel").append(`<select id='class-label-${column}' style='padding:2px 2px'> <select> `);
-        $("#classURIType").append(`<select id='class-URITType-${column}' style='padding:2px 2px'> </select>  `);
-        $("#classDefineDatatypeProperty").append(
-            `<button class='slsv-button-1' id='class-datatype-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.datatypePropertiesDefine("${column}")'> Datatype </button>   `
-        );
-        $("#classDefineSample").append(
-            `<button class='slsv-button-1' id='class-sample-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.sampleData("${column}")'> Sample</button> `
-        );
-        $("#classDefineTransform").append(`<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px;margin:0px;'> Fn</button>  `);
+        
+        $('#classDefineColumn').append(`<span id='class-column-${column}'> ${column} </span> `);
+        $('#classDefineType').append(`<span id='class-type-${column}' >${self.allResourcesMap[self.classDialogData[column].type.id].label} </span>  `);
+        $('#classDefineRDFType').append(`<select id='class-RDFType-${column}' style='padding:2px 2px'> </select>  `);
+        $('#classDefineLabel').append(`<select id='class-label-${column}' style='padding:2px 2px'> <select> `);
+        $('#classURIType').append(`<select id='class-URITType-${column}' style='padding:2px 2px'> </select>  `);
+        $('#classDefineDatatypeProperty').append(`<button class='slsv-button-1' id='class-datatype-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.datatypePropertiesDefine("${column}")'> Datatype </button>   `);
+        $('#classDefineSample').append(`<button class='slsv-button-1' id='class-sample-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.sampleData("${column}")'> Sample</button> `);
+        $('#classDefineTransform').append(`<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button>  `);
         //$('#classDefineClose').append(`<button class='slsv-button-1' id='class-close-${column}' style='padding:2px 2px;margin:0px;'> X</button>  `)
-        var columns = JSON.parse(JSON.stringify(self.currentTable.columns));
+        var columns=JSON.parse(JSON.stringify(self.currentTable.columns));
+        common.array.insertFirstArray(columns,column);
+        
+        
+        var URITType=["fromColumnTitle", "blankNode", "randomIdentifier"];
+        var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
+        //  sort by similarity for others than rowIndex
+        
+        var graphNodes=MappingModeler.visjsGraph.data.nodes.get();
+        var currentGraphNode=graphNodes.filter(function(node){
+            return node.data.label==column
+        })[0];
+        if(currentGraphNode.data.rdfType){
 
-        let index = columns.indexOf(column);
-        if (index > -1) {
-            columns.splice(index, 1);
-            columns.unshift(column);
+            common.array.insertFirstArray(rdfObjectsType,currentGraphNode.data.rdfType);
+        }
+        if(currentGraphNode.data.uriType){
+
+            common.array.insertFirstArray(URITType,currentGraphNode.data.uriType);
+        }
+        if(currentGraphNode.data.rdfsLabel){
+
+            common.array.insertFirstArray(columns,currentGraphNode.data.rdfsLabel);
         }
 
-        var URITType = ["fromLabel", "blankNode", "randomIdentifier"];
-        var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
-        // to comment and to sort by similarity for others than rowIndex
-
-        common.fillSelectOptions(`class-label-${column}`, columns, false);
-        common.fillSelectOptions(`class-RDFType-${column}`, rdfObjectsType, false);
-        common.fillSelectOptions(`class-URITType-${column}`, URITType, false);
+        common.fillSelectOptions(`class-label-${column}`,columns, false);
+        common.fillSelectOptions(`class-RDFType-${column}`,rdfObjectsType, false);
+        common.fillSelectOptions(`class-URITType-${column}`,URITType, false);
+            
     };
     self.datatypePropertiesDefine = function (column) {
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
@@ -1325,28 +1335,30 @@ var MappingModeler = (function () {
         if (!column) {
             return;
         }
+        var mappings = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
+
+        var filteredMapping = mappings.filter(function (mapping) {
+            return mapping.s.replaceAll('_$','').replaceAll('_£').replaceAll('@','') == column || mapping.o.replaceAll('_$','').replaceAll('_£').replaceAll('@','') == column;
+        });
         //rajouter toutes les colonnes en lien avec celle la et mettre celle qui nous intéresse en premier
+        
         KGcreator.showSampleData(self.currentTreeNode, column);
     };
 
-    self.saveDefineClass = function () {
-        // Step 1 : Enregistrer le dictionnaire
-        Object.keys(self.classDialogData).forEach(function (rowIndex) {
-            self.classDialogData[rowIndex].Column = $("#class-column-" + rowIndex).val();
-            self.classDialogData[rowIndex].Type = $("#class-type-" + rowIndex).val();
-            self.classDialogData[rowIndex].Label = $("#class-label-" + rowIndex).val();
+    self.saveTechnicalView=function(){
+   
+        var nodes=MappingModeler.visjsGraph.data.nodes.get();
+        Object.keys(self.classDialogData).forEach(function(rowIndex){
+            var currentNode=nodes.filter(function(node){return node.label==rowIndex})[0];
+          
+            currentNode.data.uriType = $('#class-URITType-'+rowIndex).val();
+            currentNode.data.rdfsLabel = $('#class-label-'+rowIndex).val();
+            currentNode.data.rdfType = $('#class-RDFType-'+rowIndex).val();
+            self.visjsGraph.data.nodes.update(currentNode);
         });
-        self.updateModelFromDict();
-        //self.classDialogData[rowIndex]={Column:'',Type:'',Label:'',DatatypeProperties:{},Transform:{}};
-        // Step 2 : Dessiner le mapping à partir du dictionnaire
-    };
-    self.updateModelFromDict = function () {
-        Object.keys(self.classDialogData).forEach(function (rowIndex) {
-            // traiter le cas d'un noeud préexistant à modifier non traité ici
-            self.onSuggestionsSelect(self.classDialogData[rowIndex].Column);
-            self.onSuggestionsSelect(self.classDialogData[rowIndex].Type);
-            //traiter le label
-        });
+        MappingModeler.saveVisjsGraph();
+
+
     };
 
     self.showDatatypeGraph = function (column) {

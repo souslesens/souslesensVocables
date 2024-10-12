@@ -57,7 +57,7 @@ var MappingModeler = (function () {
             },
 
             function (callbackSeries) {
-                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPannel.html", function (err) {
+                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
                     $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
                         //$("#mainDialogDiv").dialog("open");
                         return callbackSeries();

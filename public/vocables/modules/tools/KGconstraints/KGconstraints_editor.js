@@ -7,6 +7,8 @@ import _botEngine from "../../bots/_botEngine.js";
 var KGconstraints_editor = (function () {
     var self = {};
 
+    self.shacl_constraints = {}
+
     self.onLoaded = function () {
         $("#graphDiv").load("./modules/tools/KGconstraints/html/centralPanel.html", function () {
             $("#lateralPanelDiv").load("./modules/tools/KGconstraints/html/leftPanel.html", function () {
@@ -15,59 +17,30 @@ var KGconstraints_editor = (function () {
         });
     };
 
-    self.getModelFromKGOld = function (callback) {
-        var inferredModel = {};
-        //getClassesFomKG
-        async.series(
-            [
-                //get effective distinct ObjectProperties
-                function (callbackSeries) {
-                    KGquery_graph.message("getInferredModel");
-                    OntologyModels.getInferredModel(source, {}, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-                        inferredModel = inferredModel.concat(result);
+    self.initConstraintsJsTree=function(){
 
-                        callbackSeries();
-                    });
-                },
+        var jstreeData=[
 
-                function (callbackSeries) {
-                    KGquery_graph.message("getInferredClassValueDataTypes");
-                    OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-
-                        result.forEach(function (item) {
-                            if (item.datatype) {
-                                if (!nonObjectProperties[item.class.value]) {
-                                    nonObjectProperties[item.class.value] = [];
-                                }
-                                nonObjectProperties[item.class.value].push({
-                                    label: Sparql_common.getLabelFromURI(item.prop.value),
-                                    id: item.prop.value,
-                                    datatype: item.datatype.value,
-                                });
-                            }
-                        });
-                        callbackSeries();
-                    });
-                },
-            ],
-            function (err) {
-                return callback(err, model);
+            {id:self.currentSource,
+            text:self.currentSource,
+                parent:"#"
             }
-        );
-    };
+        ]
+
+        JstreeWidget.loadJsTree("KGconstraintsEditor_constraintsTreeDiv",jstreeData,options)
+
+
+
+    }
+
 
     self.startConstraintEidtorBot = function () {
+
         KGquery_graph.getInferredModelVisjsData(self.currentSource, function (err, model) {
             if (err) {
                 return alert(err);
             }
-            var params = { source: self.currentSource, model: model, constraintsMap: self.constraintsMap };
+            var params = {source: self.currentSource, model: model, constraintsMap: self.constraintsMap};
             KGconstraintsEditor_bot.start(KGconstraintsEditor_bot.workflow_dataTypePropertyConstraint, params, function (err, result) {
                 if (err) {
                     return alert(err);
@@ -79,40 +52,139 @@ var KGconstraints_editor = (function () {
     };
 
     self.buildClassShape = function (botParams) {
-        var shape = {
-            classUri: botParams.classUri,
-            path: botParams.propertyUri,
+
+        var classLabel = botParams.nodesMap[botParams.shacl_classUri].label
+        var constraintName = prompt("constraint name",classLabel)
+
+
+        var obj = {
+            shapeName: constraintName,
+            classUri: botParams.shacl_classUri,
+            classLabel: classLabel,
+            path: botParams.shacl_propertyUri,
+            shacl_constraintType: botParams.shacl_constraintType,
+            shacl_constraint: botParams.shacl_constraint,
+            shacl_propertyUri: botParams.shacl_propertyUri
         };
-        if (botParams.propertyTargetClass) shape.value = "<" + botParams.propertyTargetClass + ">";
-        else if (botParams.propertyTargetString) shape.value = '"' + botParams.propertyTargetClass + '"';
-        else if (botParams.propertyTargetInt) shape.value = botParams.propertyTargetClass;
-        else shape.value = '"' + botParams.propertyTargetClass + '"';
+        if (botParams.shacl_valueDataType=="class") {
+            obj.shacl_value = "<" + botParams.shacl_value + ">";
+        } else if (botParams.shacl_valueDataType=="string") {
+            obj.shacl_value = '"' + botParams.shacl_value + '"';
+        } else if (botParams.shacl_value=="int") {
+            obj.shacl_value = '"'+botParams.shacl_value+'"^^xsd:int';
+        }
+        else if (botParams.shacl_valueDataType=="float") {
+            obj.shacl_value = '"'+botParams.shacl_value+'"^^xsd:float';
+        }
+        else if (botParams.shacl_valueDataType=="dateTime") {
+            obj.shacl_value = '"'+botParams.shacl_value+'"^^xsd:dateTime';
+        }
+        else if (botParams.shacl_valueDataType=="date") {
+            obj.shacl_value = '"'+botParams.shacl_value+'"^^xsd:date';
+        }else if(botParams.shacl_value) {
+            obj.shacl_value = '"' + botParams.shacl_value + '"';
+        }
 
-        var shape =
-            "schema:" +
-            shape.classUri +
-            "Shape\n" +
-            "    a sh:NodeShape ;\n" +
-            "    sh:targetClass <" +
-            shape.classUri +
-            ">;\n" +
-            "    sh:property [\n" +
-            "        sh:path " +
-            shape.path +
-            " ;\n" +
-            shape.value +
-            "    ] ;";
 
-        var x = shape;
+        var graph = self.getConstraintGraph(obj)
+        if (!self.shacl_constraints[constraintName]) {
+            self.shacl_constraints[constraintName] = []
+        }
+        self.shacl_constraints[constraintName].push(graph)
 
-        var header =
+
+
+
+
+    };
+
+
+    self.getConstraintGraph = function (constraints) {
+
+
+        var targetClass = "<" + constraints[0].classUri + ">"
+        var str =
+            "schema:" + shapeName + " a sh:NodeShape ;\n" +
+            "    sh:targetClass " + targetClass +";\n"
+        constraints.forEach(function (constraint) {
+            str += "    sh:property [\n";
+            if (constraint.shacl_propertyUri) {
+                str += "     sh:path " + constraint.shacl_propertyUri + ";\n"
+            }
+            str += constraint.shacl_constraint + " " + constraint.shacl_value+ ";\n"
+
+
+        })
+        str +="] ."
+
+        var prefixes =
             "@prefix dash: <http://datashapes.org/dash#> .\n" +
             "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
             "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" +
             "@prefix schema: <http://schema.org/> .\n" +
             "@prefix sh: <http://www.w3.org/ns/shacl#> .\n" +
             "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
-    };
+
+
+        var shapesGraph=self.setPrefixesInSchema(str,prefixes)
+
+
+        return shapesGraph
+
+    }
+
+    self.setPrefixesInSchema = function (schema,header) {
+
+        var regex = /^[^@].*<([^>]*)/gm
+        var array = [];
+        var urisMap = {}
+        while ((array = regex.exec(schema)) != null) {
+            var uri = array[1]
+            if( header.indexOf(uri) < 0) {
+                var lastSep = uri.lastIndexOf("#");
+                if(lastSep<0)
+                    lastSep = uri.lastIndexOf("/");
+
+                if (lastSep == uri.length - 1) {
+                    return;
+                }
+
+                var prefixStr = uri.substring(0, lastSep + 1)
+                if (!urisMap[prefixStr]) {
+                    urisMap[prefixStr] = 1
+                }
+            }
+        }
+
+        var prefixStr = ""
+        var index = 1
+        for (var uri in urisMap) {
+
+            var prefix = "ns" + (index++)
+            prefixStr += "@prefix " + prefix + ": <" + uri + "> .\n"
+            schema = schema.replaceAll(uri, prefix + ":")
+        }
+        schema = schema.replace(/[<>]/gm, "")
+        var shape = prefixStr + header+ schema
+
+
+        return shape
+
+
+    }
+
+
+    self.loadSourceConstraints=function(sourceLabel){
+
+
+
+    }
+    self.saveSourceConstraints=function(sourceLabel){
+
+
+
+    }
+
 
     //https://docs.cambridgesemantics.com/anzograph/v3.1/userdoc/shacl-constraints.htm
     self.constraintsMap = {

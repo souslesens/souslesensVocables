@@ -101,6 +101,11 @@ var Sparql_proxy = (function () {
         if (!options) {
             options = {};
         }
+
+
+
+
+
         // query=query.replace(/[\n\r]/g," ")
         if (false) {
             query = self.addFromLabelsGraphToQuery(query);
@@ -143,7 +148,9 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             useProxy = true;
         }
 
-        if (sourceParams && sourceParams.sparql_server.method && sourceParams.sparql_server.method == "GET") {
+
+        var getMethod=sourceParams && sourceParams.sparql_server.method && sourceParams.sparql_server.method == "GET"
+        if (getMethod) {
             payload.GET = true;
             var query2 = encodeURIComponent(query);
             query2 = query2.replace(/%2B/g, "+").trim();
@@ -151,6 +158,25 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             if (sourceParams && sourceParams.sparql_server.headers) {
                 payload.options = JSON.stringify({ headers: sourceParams.sparql_server.headers, useProxy: useProxy });
             }
+           return $.ajax({
+                type: "GET",
+                url: `${Config.apiUrl}/sparqlProxy`,
+                data: payload,
+                dataType: "json",
+                success: function (data, _textStatus, _jqXHR) {
+                    if (headers["Accept"] && headers["Accept"].indexOf("json") < 0) {
+                        return callback(null, data);
+                    }
+                },
+                    error: function (data){
+
+
+                }
+        })
+
+
+
+
         } else {
             //POST
             payload.POST = true;
@@ -162,12 +188,18 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 url = url.replace("&query=", "");
             }
 
-            if (options.acceptHeader) {
+
+
+           else  if (options.acceptHeader) {
                 headers["Accept"] = options.acceptHeader;
             } else {
                 headers["Accept"] = "application/sparql-results+json";
             }
             headers["Content-Type"] = "application/x-www-form-urlencoded";
+
+            if(query.toLowerCase().indexOf("construct")> -1){
+                headers={"Content-Type":"text/turtle; charset=UTF-8"}
+            }
             var body = {
                 params: { query: query, useProxy: useProxy },
                 headers: headers,
@@ -194,6 +226,11 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 if (headers["Accept"] && headers["Accept"].indexOf("json") < 0) {
                     return callback(null, data);
                 }
+
+                if (headers["Content-Type"] && headers["Content-Type"].indexOf("text") >-1) {
+                    return callback(null, data);
+                }
+
                 if (data.result && typeof data.result != "object") {
                     data = JSON.parse(data.result.trim());
                 }

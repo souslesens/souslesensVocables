@@ -84,13 +84,39 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-        try {
-            httpProxy.get(req.query, function (err, result) {
-                processResponse(res, err, result);
-            });
-        } catch (e) {
-            next(e);
-        }
+        var options = JSON.parse(req.query.options)
+
+        if (ConfigManager.config && req.query.url.indexOf(ConfigManager.config.sparql_server.url) == 0) {
+            if (ConfigManager.config.sparql_server.user) {
+                options.auth = {
+                    user: ConfigManager.config.sparql_server.user,
+                    pass: ConfigManager.config.sparql_server.password,
+                    sendImmediately: false,
+                };
+            }
+            ConfigManager.getUser(req, res, function (err, user) {
+                ConfigManager.getUserSources(req, res, function (err, userSources) {
+                    if (err) {
+                        return processResponse(res, err, userSources);
+                    }
+                    UserRequestFiltering.filterSparqlRequest(req.query.url, userSources, user, function (parsingError, filteredQuery) {
+                        if (parsingError) {
+                            return processResponse(res, parsingError, null);
+                        }
+                        req.query.url = filteredQuery;
+
+                        try {
+
+                            httpProxy.get(req.query.url, options, function (err, result) {
+                                processResponse(res, err, result);
+                            });
+                        } catch (e) {
+                            next(e);
+                        }
+                    })
+                })
+            })
+            }
     }
 
     return operations;

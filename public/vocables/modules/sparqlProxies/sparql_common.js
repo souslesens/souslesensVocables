@@ -68,6 +68,7 @@ var Sparql_common = (function () {
             }
             return self.formatStringForTriple(str);
         }
+
         var labelSuffix = options.labelSuffix || "Label";
 
         if (!options) {
@@ -231,7 +232,7 @@ var Sparql_common = (function () {
 
         //get props labels
         var filter = Sparql_common.setFilter("property", propIds);
-        Sparql_OWL.getObjectProperties(sourceLabel, { filter: filter }, function (err, resultProps) {
+        Sparql_OWL.getObjectProperties(sourceLabel, {filter: filter}, function (err, resultProps) {
             if (err) {
                 return callback(err);
             }
@@ -242,7 +243,7 @@ var Sparql_common = (function () {
 
             SparqlResults.forEach(function (item) {
                 if (labelsMap[item[propVariable].value]) {
-                    item[propVariable + "Label"] = { type: "literal", value: labelsMap[item[propVariable].value] };
+                    item[propVariable + "Label"] = {type: "literal", value: labelsMap[item[propVariable].value]};
                 }
             });
 
@@ -692,9 +693,58 @@ var Sparql_common = (function () {
         return false;
     };
 
+
+    self.setPrefixesInSelectQuery = function (query) {
+
+        var whereIndex = query.toLowerCase().indexOf("where")
+
+        var strWhere = query.substring(whereIndex)
+        var str0 = query.substring(0, query.toLowerCase().indexOf("select"))
+        var regex = /^[^@].*<([^>]*)/gm
+        var array = [];
+        var urisMap = {}
+        while ((array = regex.exec(strWhere)) != null) {
+            var uri = array[1]
+            if( str0.indexOf(uri) < 0) {
+                var lastSep = uri.lastIndexOf("#");
+                if(lastSep<0)
+                 lastSep = uri.lastIndexOf("/");
+
+                if (lastSep == uri.length - 1) {
+                    return;
+                }
+
+                var prefixStr = uri.substring(0, lastSep + 1)
+                if (!urisMap[prefixStr]) {
+                    urisMap[prefixStr] = 1
+                }
+            }
+        }
+
+        var prefixStr = ""
+        var index = 1
+        for (var uri in urisMap) {
+
+            var prefix = "ns" + (index++)
+            prefixStr += "PREFIX " + prefix + ": <" + uri + "> \n"
+            strWhere = strWhere.replaceAll(uri, prefix + ":")
+        }
+        strWhere = strWhere.replace(/[<>]/gm, "")
+        query = prefixStr +
+            query.substring(0, whereIndex) + strWhere
+
+
+        return query
+
+
+    }
+
     return self;
 })();
+
 
 export default Sparql_common;
 
 window.Sparql_common = Sparql_common;
+
+

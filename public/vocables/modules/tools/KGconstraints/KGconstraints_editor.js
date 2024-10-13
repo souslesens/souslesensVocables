@@ -2,6 +2,8 @@ import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 import KGconstraintsEditor_bot from "../../bots/KGconstraintsEditor_bot.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import _botEngine from "../../bots/_botEngine.js";
+import UI from "../../shared/UI.js";
+
 
 //https://docs.cambridgesemantics.com/anzograph/v3.1/userdoc/shacl-constraints.htm
 var KGconstraints_editor = (function () {
@@ -13,28 +15,44 @@ var KGconstraints_editor = (function () {
         $("#graphDiv").load("./modules/tools/KGconstraints/html/centralPanel.html", function () {
             $("#lateralPanelDiv").load("./modules/tools/KGconstraints/html/leftPanel.html", function () {
                 self.currentSource = "DALIA_LIFEX_COSTS"; // Lineage_sources.activeSource
+                self.initConstraintsJsTree()
             });
         });
     };
 
-    self.initConstraintsJsTree=function(){
-
-        var jstreeData=[
-
-            {id:self.currentSource,
-            text:self.currentSource,
-                parent:"#"
+    self.initConstraintsJsTree = function () {
+        self.loadSourceConstraints(self.currentSource, function (err, result) {
+            if (err) {
+                return alert(err.responseText || err)
             }
-        ]
+            var jstreeData=result
+            if (jstreeData) {
+                jstreeData = result
+            }
 
-        JstreeWidget.loadJsTree("KGconstraintsEditor_constraintsTreeDiv",jstreeData,options)
+                jstreeData.push(
+                    {
+                        id: self.currentSource,
+                        text: self.currentSource,
+                        parent: "#"
+                    }
+                )
 
+            var options = {
+                onSelectTreeNode: function (obj, node) {
+                },
+                openAll: true,
+                withCheckboxes: true
+            }
 
+            JstreeWidget.loadJsTree("KGconstraintsEditor_constraintsTreeDiv", jstreeData, options)
+
+        })
 
     }
 
 
-    self.startConstraintEidtorBot = function () {
+    self.startConstraintEditorBot = function () {
 
         KGquery_graph.getInferredModelVisjsData(self.currentSource, function (err, model) {
             if (err) {
@@ -53,69 +71,86 @@ var KGconstraints_editor = (function () {
 
     self.buildClassShape = function (botParams) {
 
-        var classLabel = botParams.nodesMap[botParams.shacl_classUri].label
-        var constraintName = prompt("constraint name",classLabel)
 
+        var constraintName = botParams.shacl_constraintName;// prompt("constraint name",classLabel)
+
+        if (!constraintName) {
+            return;
+        }
 
         var obj = {
             shapeName: constraintName,
             classUri: botParams.shacl_classUri,
-            classLabel: classLabel,
             path: botParams.shacl_propertyUri,
             shacl_constraintType: botParams.shacl_constraintType,
             shacl_constraint: botParams.shacl_constraint,
             shacl_propertyUri: botParams.shacl_propertyUri
         };
-        if (botParams.shacl_valueDataType=="class") {
+        if (botParams.shacl_valueDataType == "class") {
             obj.shacl_value = "<" + botParams.shacl_value + ">";
-        } else if (botParams.shacl_valueDataType=="string") {
+        } else if (botParams.shacl_valueDataType == "string") {
             obj.shacl_value = '"' + botParams.shacl_value + '"';
-        } else if (botParams.shacl_value=="int") {
-            obj.shacl_value = '"'+botParams.shacl_value+'"^^xsd:int';
-        }
-        else if (botParams.shacl_valueDataType=="float") {
-            obj.shacl_value = '"'+botParams.shacl_value+'"^^xsd:float';
-        }
-        else if (botParams.shacl_valueDataType=="dateTime") {
-            obj.shacl_value = '"'+botParams.shacl_value+'"^^xsd:dateTime';
-        }
-        else if (botParams.shacl_valueDataType=="date") {
-            obj.shacl_value = '"'+botParams.shacl_value+'"^^xsd:date';
-        }else if(botParams.shacl_value) {
+        } else if (botParams.shacl_value == "int") {
+            obj.shacl_value = '"' + botParams.shacl_value + '"^^xsd:int';
+        } else if (botParams.shacl_valueDataType == "float") {
+            obj.shacl_value = '"' + botParams.shacl_value + '"^^xsd:float';
+        } else if (botParams.shacl_valueDataType == "dateTime") {
+            obj.shacl_value = '"' + botParams.shacl_value + '"^^xsd:dateTime';
+        } else if (botParams.shacl_valueDataType == "date") {
+            obj.shacl_value = '"' + botParams.shacl_value + '"^^xsd:date';
+        } else if (botParams.shacl_value) {
             obj.shacl_value = '"' + botParams.shacl_value + '"';
         }
 
 
-        var graph = self.getConstraintGraph(obj)
+        var graph = self.getConstraintGraph(constraintName, obj)
         if (!self.shacl_constraints[constraintName]) {
             self.shacl_constraints[constraintName] = []
         }
         self.shacl_constraints[constraintName].push(graph)
 
-
-
+        self.addConstraintToJstree(self.currentSource, constraintName)
 
 
     };
-
-
-    self.getConstraintGraph = function (constraints) {
-
-
-        var targetClass = "<" + constraints[0].classUri + ">"
-        var str =
-            "schema:" + shapeName + " a sh:NodeShape ;\n" +
-            "    sh:targetClass " + targetClass +";\n"
-        constraints.forEach(function (constraint) {
-            str += "    sh:property [\n";
-            if (constraint.shacl_propertyUri) {
-                str += "     sh:path " + constraint.shacl_propertyUri + ";\n"
+    self.addConstraintToJstree = function (sourceLabel, constraintName) {
+        var jstreeData = {
+            id: constraintName,
+            text: constraintName,
+            parent: sourceLabel,
+            data: {
+                shacl_graph: self.shacl_constraints[constraintName],
+                source: sourceLabel
             }
-            str += constraint.shacl_constraint + " " + constraint.shacl_value+ ";\n"
-
-
+        }
+        JstreeWidget.addNodesToJstree("KGconstraintsEditor_constraintsTreeDiv", sourceLabel, jstreeData, null, function () {
+            self.saveSourceConstraints(self.currentSource, jstreeData, function (err, result) {
+                if (err) {
+                    return alert(err.responseText || err)
+                }
+                return UI.message("file saved")
+            })
         })
-        str +="] ."
+    }
+
+
+    self.getConstraintGraph = function (name, data) {
+
+
+        var targetClass = "<" + data.classUri + ">"
+        var str =
+            "schema:" + name + " a sh:NodeShape ;\n" +
+            "    sh:targetClass " + targetClass + ";\n"
+        //   data.forEach(function (constraint) {
+        str += "    sh:property [\n";
+        if (data.shacl_propertyUri) {
+            str += "     sh:path " + data.shacl_propertyUri + ";\n"
+        }
+        str += data.shacl_constraint + " " + data.shacl_value + ";\n"
+
+
+        //   })
+        str += "] ."
 
         var prefixes =
             "@prefix dash: <http://datashapes.org/dash#> .\n" +
@@ -126,24 +161,25 @@ var KGconstraints_editor = (function () {
             "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
 
 
-        var shapesGraph=self.setPrefixesInSchema(str,prefixes)
+        var shapesGraph = self.setPrefixesInSchema(str, prefixes)
 
 
         return shapesGraph
 
     }
 
-    self.setPrefixesInSchema = function (schema,header) {
+    self.setPrefixesInSchema = function (schema, header) {
 
         var regex = /^[^@].*<([^>]*)/gm
         var array = [];
         var urisMap = {}
         while ((array = regex.exec(schema)) != null) {
             var uri = array[1]
-            if( header.indexOf(uri) < 0) {
+            if (header.indexOf(uri) < 0) {
                 var lastSep = uri.lastIndexOf("#");
-                if(lastSep<0)
+                if (lastSep < 0) {
                     lastSep = uri.lastIndexOf("/");
+                }
 
                 if (lastSep == uri.length - 1) {
                     return;
@@ -165,7 +201,7 @@ var KGconstraints_editor = (function () {
             schema = schema.replaceAll(uri, prefix + ":")
         }
         schema = schema.replace(/[<>]/gm, "")
-        var shape = prefixStr + header+ schema
+        var shape = prefixStr + header + schema
 
 
         return shape
@@ -174,13 +210,51 @@ var KGconstraints_editor = (function () {
     }
 
 
-    self.loadSourceConstraints=function(sourceLabel){
+    self.loadSourceConstraints = function (sourceLabel, callback) {
+        var payload = {
+            dir: "shacl",
+            fileName: sourceLabel + ".json",
+        };
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var json;
+                try {
+                    json = JSON.parse(result);
+                } catch (e) {
+                    return callback(e);
+                }
+                callback(null, json);
+            },
+            error(err) {
+                return callback(null, null);
+            },
+        });
+    };
 
 
-
-    }
-    self.saveSourceConstraints=function(sourceLabel){
-
+    self.saveSourceConstraints = function (sourceLabel, data, callback) {
+        var payload = {
+            dir: "shacl",
+            fileName: sourceLabel + ".json",
+            data: JSON.stringify(data, null, 2),
+        };
+        $.ajax({
+            type: "POST",
+            url: Config.apiUrl + "/data/file",
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                UI.message("SHACL constraints" + sourceLabel + "config saved");
+                callback();
+            },
+            error: function (err) {
+                callback(err);
+            },
+        });
 
 
     }

@@ -32,8 +32,8 @@ var KGquery_filter_bot = (function () {
                 list_constraintsFn: {
                     dispatch_shapeTypeFn: {
                         _OR: {
-                            "sh:property": {listPropertiesFn: {promptDatatypeValue: {}}},
-                            "sh:node": {promptDatatypeValue: {}},
+                            "sh:property": {listPropertiesFn: {promptDatatypeValueFn: {promptContraintNameFn:{}}}},
+                            "sh:node": {promptDatatypeValueFn: {promptContraintNameFn:{}}},
                         },
                     },
                 },
@@ -47,7 +47,8 @@ var KGquery_filter_bot = (function () {
         list_constraintTypesFn: "Choose an property",
         list_constraintsFn: "Choose an property",
         dispatch_shapeTypeFn: "choose shacl_shapeType",
-        promptDatatypeValue: "Enter a value",
+        promptDatatypeValueFn: "Enter a value",
+        promptContraintNameFn:"Enter Constraint name"
     };
 
     self.functions = {}; //SparqlQuery_bot.functions;
@@ -98,7 +99,7 @@ var KGquery_filter_bot = (function () {
         }
     };
 
-    self.functions.promptDatatypeValue = function () {
+    self.functions.promptDatatypeValueFn = function () {
         var shacl_property = self.params.constraintsMap[self.params.shacl_constraintType][self.params.shacl_constraint];
         if (shacl_property.dataType.indexOf("URI") > -1 || shacl_property.dataType.indexOf("URI list") > -1) {
             if (self.params.shapeType == "sh:property") {
@@ -179,6 +180,14 @@ var KGquery_filter_bot = (function () {
         common.array.sortObjectArray(properties, "label");
         _botEngine.showList(properties, "shacl_propertyUri");
     };
+
+    self.functions.promptContraintNameFn=function(){
+        var classLabel=self.params.nodesMap[self.params.shacl_classUri].label
+        var property=self.params["shacl_propertyUri"]
+        var propertylabel=property?Sparql_common.getLabelFromURI(property):""
+        var defaultValue=classLabel+"_"+propertylabel+"_"+self.params["shacl_constraint"];
+        _botEngine.promptValue("","shacl_constraintName",defaultValue)
+    }
 
     return self;
 })();

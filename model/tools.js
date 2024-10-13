@@ -22,7 +22,7 @@ const NATIVE_TOOLS = [
     { name: "KGcreator", controller: "KGcreator", useSource: true, multiSources: false, toTools: {} },
     { name: "KGquery", controller: "KGquery", useSource: true, multiSources: false, toTools: {} },
     { name: "MappingModeler", controller: "MappingModeler", useSource: true, multiSources: false, toTools: {} },
-    { name: "KGconstraintsEditor", controller: "KGconstraints_editor", useSource: true, multiSources: false, toTools: {} },
+    { name: "KGconstraintsModeler", controller: "KGconstraintsModeler", useSource: true, multiSources: false, toTools: {} },
     { name: "KGconstraintsValidator", controller: "KGconstraints_validator", useSource: true, multiSources: false, toTools: {} },
     { name: "SPARQL", label: "SPARQL endpoint", controller: "SPARQL_endpoint", useSource: false, multiSources: false, toTools: {} },
     { name: "OntoCreator", controller: "Lineage_createSLSVsource", useSource: false, multiSources: false, toTools: {} },

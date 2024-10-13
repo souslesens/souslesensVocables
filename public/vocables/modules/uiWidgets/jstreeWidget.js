@@ -42,12 +42,12 @@ var JstreeWidget = (function () {
         },
 
         Class: {
-            li_attr: { style: "color:black" },
+            li_attr: {style: "color:black"},
             icon: "./icons/JstreeIcons/Classes.png",
         },
 
         Property: {
-            li_attr: { style: "color:black" },
+            li_attr: {style: "color:black"},
             icon: "./icons/JstreeIcons/Property.png",
         },
         Container: {
@@ -96,7 +96,7 @@ var JstreeWidget = (function () {
         },
         // Triple
         "owl:Class": {
-            li_attr: { style: "color:black" },
+            li_attr: {style: "color:black"},
             icon: "./icons/JstreeIcons/Classes.png",
         },
         // double
@@ -195,7 +195,7 @@ var JstreeWidget = (function () {
                 },
                 types: JstreeWidget.types,
 
-                contextmenu: { items: options.contextMenu },
+                contextmenu: {items: options.contextMenu},
             })
             .on("loaded.jstree", function () {
                 //  setTimeout(function () {
@@ -314,13 +314,17 @@ var JstreeWidget = (function () {
             options = {};
         }
         if (!callback) {
-            callback = function () {};
+            callback = function () {
+            };
         }
         var position = "first";
         if (options.positionLast) {
             position = "last";
         }
         self.orderJstreeDataForCreation(jstreeDiv, jstreeData);
+        if (!Array.isArray(jstreeData)) {
+            jstreeData = [jstreeData]
+        }
         jstreeData.forEach(function (node) {
             var Jstree_id = $("#" + jstreeDiv)
                 .jstree(true)
@@ -422,7 +426,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         var idList = [];
         var jsonNodes = $("#" + jstreeDiv)
             .jstree()
-            .get_json(parentNodeId, { flat: true });
+            .get_json(parentNodeId, {flat: true});
 
         if (IdsOnly) {
             jsonNodes.forEach(function (item) {
@@ -459,7 +463,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
         var jsonNodes = $("#" + jstreeDiv)
             .jstree(true)
-            .get_json("#", { flat: true });
+            .get_json("#", {flat: true});
         var matchingNode = null;
         jsonNodes.forEach(function (node) {
             if (node.data && node.data[property] == value) {

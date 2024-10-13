@@ -1,4 +1,4 @@
-import Axiom_activeLegend from "../axioms/axiom_activeLegend.js";
+import KGconstraintsModeler_activeLegend from "../axioms/axiom_activeLegend.js";
 import KGcreator from "../KGcreator/KGcreator.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
@@ -10,6 +10,10 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Clipboard from "../../shared/clipboard.js";
 import KGcreator_graph from "../KGcreator/KGcreator_graph.js";
 import SimpleListFilterWidget from "../../uiWidgets/simpleListFilterWidget.js";
+import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
+
+// imports React app
+
 
 var KGconstraintsModeler = (function () {
     var self = {};
@@ -17,27 +21,28 @@ var KGconstraintsModeler = (function () {
     self.currentDataSource = null;
     self.graphDiv = "KGconstraintsModeler_graphDiv";
     self.legendItemsArray = [
-        { label: "Table", color: "#375521", shape: "ellipse" },
-        { label: "Column", color: "#cb9801", shape: "ellipse" },
-        { label: "RowIndex", color: "#cb9801", shape: "triangle" },
-        { label: "VirtualColumn", color: "#cb9801", shape: "square" },
+        {label: "Individual", color: "#eab3b3", shape: "ellipse"},
+        {label: "Class", color: "#00afef", shape: "box"},
+        {label: "ObjectProperty", color: "#efbf00", shape: "square"},
+        {label: "DatatypeProperty", color: "#90d6e4", shape: "square"},
+        {label: "Constraint", color: "#ef4270", shape: "triangle"},
 
-        { label: "Class", color: "#00afef", shape: "box" },
+
     ];
+
+    self.umountKGUploadApp = null;
+    self.createApp = null;
+
+    self.uploadFormData = {
+        displayForm: "", // can be database, file or ""
+        currentSource: "",
+        selectedDatabase: "",
+        selectedFiles: [],
+    };
+
 
     self.onLoaded = function () {
         async.series([
-            //init source
-            /*function(callbackSeries) {
-                    SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, function(source) {
-                        var source = SourceSelectorWidget.getSelectedSource()[0];
-                        $("#mainDialogDiv").dialog("close");
-
-                            self.currentSource = source;
-
-                        return callbackSeries();
-                    });
-                },*/
             function (callbackSeries) {
                 self.currentSource = MainController.currentSource;
                 self.initResourcesMap(self.currentSource);
@@ -57,8 +62,11 @@ var KGconstraintsModeler = (function () {
             },
 
             function (callbackSeries) {
-                $("#lateralPanelDiv").load("./modules/tools/KGconstraintsModeler/html/KGconstraintsModelerLeftPanel.html", function (err) {
-                    $("#graphDiv").load("./modules/tools/KGconstraintsModeler/html/KGconstraintsModeler_graphDiv.html", function (err) {
+
+                $("#lateralPanelDiv").load("./modules/tools/KGconstraints/html/KGconstraintsModeler_LeftPanel.html", function (err) {
+
+                    self.initActiveLegend("KGconstraintsModeler_activeLegendDiv");
+                    $("#graphDiv").load("./modules/tools/KGconstraints/html/KGconstraintsModeler_graphDiv.html", function (err) {
                         //$("#mainDialogDiv").dialog("open");
                         return callbackSeries();
                     });
@@ -66,9 +74,7 @@ var KGconstraintsModeler = (function () {
             },
 
             function (callbackSeries) {
-                //var divId = "nodeInfosAxioms_activeLegendDiv";
 
-                //    self.initActiveLegend(divId);
 
                 return callbackSeries();
             },
@@ -78,10 +84,31 @@ var KGconstraintsModeler = (function () {
                 var options = {
                     openAll: true,
                     selectTreeNodeFn: self.onDataSourcesJstreeSelect,
+                    contextMenu: function (node, x) {
+                        var items = {};
+                        if (node.id == "databaseSources") {
+                            items.addDatabaseSource = {
+                                label: "addDatabaseSources",
+                                action: function (_e) {
+                                    self.displayUploadApp("database");
+                                    // KGcreator.createDataBaseSourceConstraints();
+                                },
+                            };
+                            return items;
+                        } else if (node.id == "csvSources") {
+                            items.csvSources = {
+                                label: "add Csv Sources",
+                                action: function (_e) {
+                                    // pb avec source
+                                    self.displayUploadApp("file");
+                                    // KGcreator.createCsvSourceConstraints();
+                                },
+                            };
+                            return items;
+                        }
+                    }
                 };
-                KGcreator.loadDataSourcesJstree("KGconstraintsModeler_jstreeDiv", options, function (err, result) {
-                    return callbackSeries(err);
-                });
+
             },
             //initDataSource
             function (callbackSeries) {
@@ -90,64 +117,105 @@ var KGconstraintsModeler = (function () {
 
             //init visjsGraph
             function (callbackSeries) {
-                var visjsData = { nodes: [], edges: [] };
+                var visjsData = {nodes: [], edges: []};
                 self.drawGraphCanvas(self.graphDiv, visjsData, function () {
                     callbackSeries();
                 });
             },
         ]);
     };
+    self.loadSuggestionSelectJstree = function (objects, parentName) {
+        if ($('#suggestionsSelectJstreeDiv').jstree()) {
+            try {
+                $('#suggestionsSelectJstreeDiv').jstree().destroy();
+            } catch {
 
-    self.onDataSourcesJstreeSelect = function (event, obj) {
-        self.currentTreeNode = obj.node;
+            }
 
-        //  KGcreator_run.getTableAndShowMappings();
-
-        if (obj.node.data.type == "databaseSource") {
-            KGcreator.initDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
-
-            KGcreator.loadDataBaseSource(KGcreator.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
-        } else if (obj.node.data.type == "csvSource") {
-            KGcreator.initDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
-            KGcreator.loadCsvSource(KGcreator.currentSlsvSource, obj.node.id, false, function (err, jstreeData) {
-                if (err) {
-                    return alert("file not found");
-                }
-                var columns = [];
-                jstreeData.forEach(function (item) {
-                    columns.push(item.data.id);
-                });
-                //self.hideForbiddenResources("Table");
-                self.currentResourceType = "Column";
-                self.currentTable = {
-                    name: obj.node.id,
-                    columns: columns,
-                };
-                common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false);
-            });
-            self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
-        } else if (obj.node.data.type == "table") {
-            self.currentTable = {
-                name: obj.node.data.label,
-                columns: KGcreator.currentConfig.currentDataSource.tables[obj.node.data.id],
-            };
-            var table = obj.node.data.id;
-            KGcreator.currentConfig.currentDataSource.currentTable = table;
-
-            self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
-            self.hideForbiddenResources("Table");
-            self.currentResourceType = "Column";
-            common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         }
-        self.currentDataSource = KGcreator.currentConfig.currentDataSource.name;
-    };
-    self.hideDataSources = function (divId) {
-        KGconstraintsModeler.switchDataSourcePanel("hide");
-        self.initActiveLegend(divId);
-        try {
-            self.loadVisjsGraph();
-        } catch (e) {}
-    };
+        var options = {
+            openAll: true,
+            selectTreeNodeFn: self.onSuggestionsSelect,
+
+        };
+        var jstreeData = [];
+        jstreeData.push({
+            id: parentName,
+            parent: '#',
+            text: parentName,
+            data: {
+                id: parentName,
+                label: parentName,
+            }
+        });
+
+
+        if (parentName == 'Classes' || parentName == 'Properties') {
+            var uniqueSources = {}
+            objects.forEach(function (item) {
+                if (item.source) {
+                    if (!uniqueSources[item.source]) {
+                        uniqueSources[item.source] = 1;
+
+                        jstreeData.push({
+                            id: item.source,
+                            parent: parentName,
+                            text: item.source,
+                            data: {
+                                id: item.source,
+                                label: item.source,
+                            }
+                        });
+                    }
+                    jstreeData.push({
+                        id: item.id,
+                        parent: item.source,
+                        text: item.label,
+                        data: {
+                            id: item.id,
+                            text: item.label,
+                            resourceType: item.resourceType
+                        }
+                    });
+                } else {
+                    jstreeData.push({
+                        id: item.id,
+                        parent: parentName,
+                        text: item.label,
+                        data: {
+                            id: item.id,
+                            text: item.label
+
+                        }
+                    });
+                }
+
+            });
+
+        } else {
+
+            objects.forEach(function (item) {
+
+
+                jstreeData.push({
+                    id: item,
+                    parent: parentName,
+                    text: item,
+                    data: {
+                        id: item,
+                        label: item,
+                    }
+                });
+
+
+            });
+        }
+        JstreeWidget.loadJsTree('suggestionsSelectJstreeDiv', jstreeData, options, function () {
+
+        });
+    }
+
+
     self.initActiveLegend = function (divId) {
         var options = {
             onLegendNodeClick: self.onLegendNodeClick,
@@ -160,135 +228,144 @@ var KGconstraintsModeler = (function () {
             self.legendItems[item.label] = item;
         });
 
-        Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", self.legendItemsArray, options);
+        Axiom_activeLegend.drawLegend("KGconstraintsModeler_activeLegendDiv", self.legendItemsArray, options);
     };
 
     self.hideForbiddenResources = function (resourceType) {
         var hiddenNodes = [];
-        if (resourceType == "Table") {
+        if (resourceType == "Individual") {
+            hiddenNodes.push("Individual");
             hiddenNodes.push("ObjectProperty");
-            hiddenNodes.push("Class");
-            hiddenNodes.push("Connective");
+            hiddenNodes.push("DatatypeProperty");
+            hiddenNodes.push("Constraint");
         }
-        Axiom_activeLegend.hideLegendItems(hiddenNodes);
+        if (resourceType == "Class") {
+            hiddenNodes.push("Class");
+            hiddenNodes.push("Constraint");
+        }
+        if (resourceType == "ObjectProperty") {
+            hiddenNodes.push("ObjectProperty");
+            hiddenNodes.push("DatatypeProperty");
+
+        }
+        if (resourceType == "DatatypeProperty") {
+            hiddenNodes.push("DatatypeProperty");
+            hiddenNodes.push("Class");
+
+        }
+        if (resourceType == "Constraint") {
+            hiddenNodes.push("Constraint");
+
+
+        }
+
+        KGconstraintsModeler_activeLegend.hideLegendItems(hiddenNodes);
     };
 
-    self.onSuggestionsSelect = function (resourceUri) {
+    self.onSuggestionsSelect = function (event, obj) {
+        var resourceUri = obj.node.id
         var newResource = null;
         var id = common.getRandomHexaId(8);
         if (resourceUri == "createClass") {
             return self.showCreateResourceBot("Class", null);
         } else if (resourceUri == "createObjectProperty") {
             return self.showCreateResourceBot("ObjectProperty", null);
-        } else if (self.currentResourceType == "Column") {
-            newResource = {
+        } else if (self.currentResourceType == "Individual") {
+            var individual = prompt("Individual name");
+            if (!individual) {
+                return;
+            }
+            var newResource = {
                 id: id,
-                label: resourceUri,
+                label: individual,
                 shape: self.legendItems[self.currentResourceType].shape,
                 color: self.legendItems[self.currentResourceType].color,
                 level: 0,
                 data: {
-                    id: resourceUri,
-                    label: resourceUri,
+                    id: individual,
+                    label: individual,
                     type: self.currentResourceType,
+                    source: self.currentSource
+
                 },
             };
-            self.drawResource(newResource);
+            self.drawResource(newResource)
             setTimeout(function () {
-                self.onLegendNodeClick({ id: "Class" });
+                self.onLegendNodeClick({id: "Class"});
             }, 500);
+            return;
         } else if (self.currentResourceType == "Class") {
             var resource = self.allResourcesMap[resourceUri];
+            id = common.getRandomHexaId(5)
             newResource = {
-                id: resourceUri,
+                id: id,
                 label: resource.label,
                 shape: self.legendItems[self.currentResourceType].shape,
                 color: self.legendItems[self.currentResourceType].color,
                 data: {
                     id: resourceUri,
                     label: resource.label,
-                    type: "Class",
+                    type: self.currentResourceType,
                     source: resource.source,
                 },
             };
 
             self.drawResource(newResource);
-        } else if (self.currentResourceType == "RowIndex") {
-            newResource = {
-                id: id,
-                label: "#",
-                shape: self.legendItems[self.currentResourceType].shape,
-                color: self.legendItems[self.currentResourceType].color,
-                size: 12,
-                data: {
-                    id: id,
-                    label: "#",
 
-                    type: self.currentResourceType,
-                },
-            };
-            self.drawResource(newResource);
-            setTimeout(function () {
-                self.onLegendNodeClick({ id: "Class" });
-            }, 500);
-        } else if (self.currentResourceType == "VirtualColumn") {
+        } else if (self.currentResourceType == "ObjectProperty") {
+            id = common.getRandomHexaId(5)
+            var resource = self.allResourcesMap[resourceUri];
             newResource = {
                 id: id,
-                label: resourceUri,
+                label: resource.label,
                 shape: self.legendItems[self.currentResourceType].shape,
                 color: self.legendItems[self.currentResourceType].color,
-                size: 12,
 
                 data: {
                     id: resourceUri,
-                    label: resourceUri,
+                    label: resource.label,
                     type: self.currentResourceType,
+                    source: resource.source,
                 },
             };
-            self.drawResource(newResource);
-            setTimeout(function () {
-                self.onLegendNodeClick({ id: "Class" });
-            }, 500);
-        } else if (self.currentResourceType == "ObjectProperty") {
-            var smooth = null;
-            var property = self.allResourcesMap[resourceUri];
-            if (self.currentRelation) {
-                self.currentRelation.data = { type: "Objectproperty", propId: resourceUri };
+            self.drawResource(newResource)
+        } else if (self.currentResourceType == "DatatypeProperty") {
+            id = common.getRandomHexaId(5)
+            var resource = self.allResourcesMap[resourceUri];
+            newResource = {
+                id: id,
+                label: resource.label,
+                shape: self.legendItems[self.currentResourceType].shape,
+                color: self.legendItems[self.currentResourceType].color,
 
-                var color = "#1244e8";
-                // ObjectProperty
-                if (self.allResourcesMap[resourceUri]) {
-                    self.currentRelation.label = self.allResourcesMap[resourceUri].label;
-                } else {
-                    //other
-                    smooth = { type: "curvedCW" };
-                    self.currentRelation.label = resourceUri;
-                    color = "#375521";
-                }
-                var edge = {
-                    from: self.currentRelation.from.id,
-                    to: self.currentRelation.to.id,
-                    label: self.currentRelation.label,
-                    arrows: {
-                        to: {
-                            enabled: true,
-                            type: "diamond",
-                        },
-                    },
-                    smooth: smooth,
-                    data: {
-                        id: resourceUri,
-                        type: resourceUri,
-                        source: property.source,
-                    },
-                    color: color,
-                };
-                self.visjsGraph.data.edges.add([edge]);
-                self.currentRelation = null;
-                $("#axioms_legend_suggestionsSelect").empty();
-            }
+                data: {
+                    id: resourceUri,
+                    label: resource.label,
+                    type: self.currentResourceType,
+                    source: resource.source,
+                },
+            };
+            self.drawResource(newResource)
+        } else if (self.currentResourceType == "Constraint") {
+            id = common.getRandomHexaId(5)
+            var resource = self.allResourcesMap[resourceUri];
+            newResource = {
+                id: id,
+                label: resource.label,
+                shape: self.legendItems[self.currentResourceType].shape,
+                color: self.legendItems[self.currentResourceType].color,
+
+                data: {
+                    id: resourceUri,
+                    label: resource.label,
+                    type: self.currentResourceType,
+                    source: resource.source,
+                },
+            };
+            self.drawResource(newResource)
         }
-    };
+
+    }
 
     self.drawResource = function (newResource) {
         var graphDivWidth = $("#KGconstraintsModeler_graphDiv").width();
@@ -300,7 +377,7 @@ var KGconstraintsModeler = (function () {
         };
         var edgeColor = "#ccc";
         if (!self.currentOffest) {
-            self.currentOffest = { x: -graphDivWidth / 2, y: 0 };
+            self.currentOffest = {x: -graphDivWidth / 2, y: 0};
         }
         if (self.currentGraphNode && newResource.data.type == "Class") {
             newResource.x = self.currentGraphNode.x;
@@ -312,40 +389,41 @@ var KGconstraintsModeler = (function () {
             }
             newResource.y = self.currentOffest.y;
         }
-        newResource.fixed = { x: true, y: true };
+        newResource.fixed = {x: true, y: true};
 
-        var visjsData = { nodes: [], edges: [] };
+
+        newResource.size = 12
+        var visjsData = {nodes: [], edges: []};
         var visjsNode = newResource;
-        if (newResource.data.type == "Class") {
-            if (!self.objectIdExistsInGraph(newResource.data.id)) {
-                visjsData.nodes.push(visjsNode);
-            }
-        } else {
-            visjsData.nodes.push(visjsNode);
-        }
+
+        visjsData.nodes.push(visjsNode);
+
 
         if (self.visjsGraph) {
             self.visjsGraph.data.nodes.add(visjsData.nodes);
 
-            if (newResource.data.type == "Class" && self.currentGraphNode) {
+            if (newResource.data.type != "Individual" && self.currentGraphNode) {
                 var label, type;
-                if (self.currentGraphNode.data.type == "Class") {
-                    label = "";
-                    type = "rdfs:subClassOf";
-                } else {
+                var edgeArrows = null
+                if (newResource.data.type == "Class") {
                     label = "a";
+                    type = "rdfs:subClassOf";
+                    edgeArrows = arrows
+                } else {
+                    label = "";
                     type = "rdf:type";
                 }
 
                 var edgeId = common.getRandomHexaId(5);
+
                 visjsData.edges.push({
                     id: edgeId,
                     from: self.currentGraphNode.id,
                     label: label,
                     to: newResource.id,
                     width: 2,
-                    data: { type: type },
-                    arrows: arrows,
+                    data: {type: type},
+                    arrows: null,
                     color: edgeColor,
                 });
 
@@ -359,9 +437,13 @@ var KGconstraintsModeler = (function () {
         }
 
         self.hideForbiddenResources(newResource.data.type);
-        $("#axioms_legend_suggestionsSelect").empty();
-
-        self.currentGraphNode = newResource;
+        //$("#axioms_legend_suggestionsSelect").empty();
+        /* if ($('#suggestionsSelectJstreeDiv').jstree().destroy) {
+             $('#suggestionsSelectJstreeDiv').jstree().destroy();
+         }*/
+        if (!self.currentGraphNode || self.currentGraphNode.data.type != "Individual") {
+            self.currentGraphNode = newResource;
+        }
     };
 
     self.objectIdExistsInGraph = function (id) {
@@ -406,38 +488,9 @@ var KGconstraintsModeler = (function () {
 
     self.onVisjsGraphClick = function (node, event, options) {
         self.currentGraphNode = node;
-
+        self.hideForbiddenResources(self.currentGraphNode.data.type)
         //add relation between columns
-        if (options.ctrlKey) {
-            function getColumnClass(node) {
-                var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(node.id);
 
-                var classId = null;
-                connections.forEach(function (connection) {
-                    if ((connection.edge.data.type = "rdf:type")) {
-                        classId = connection.toNode.data.id;
-                    }
-                });
-                return classId;
-            }
-
-            if (!self.currentRelation) {
-                self.currentRelation = {
-                    from: { id: node.id, classId: getColumnClass(node) },
-                    to: null,
-                    type: node.data.type,
-                };
-            } else {
-                self.currentRelation.to = { id: node.id, classId: getColumnClass(node) };
-                if (self.currentRelation.from.type != "Class" && node.data.type == "Class") {
-                    self.graphActions.drawColumnToClassEdge(self.currentRelation);
-                } else if (self.currentRelation.from.type != "Class" && node.data.type != "Class") {
-                    self.onLegendNodeClick({ id: "ObjectProperty" });
-                }
-            }
-        } else {
-            self.currentRelation = null;
-        }
     };
 
     self.showGraphPopupMenu = function (node, point, event) {
@@ -473,8 +526,8 @@ var KGconstraintsModeler = (function () {
 
     self.graphActions = {
         outlineNode: function (nodeId) {
-            self.visjsGraph.decorateNodes(null, { borderWidth: 1 });
-            self.visjsGraph.decorateNodes(nodeId, { borderWidth: 5 });
+            self.visjsGraph.decorateNodes(null, {borderWidth: 1});
+            self.visjsGraph.decorateNodes(nodeId, {borderWidth: 5});
         },
         removeNodeFromGraph: function () {
             if (confirm("delete node")) {
@@ -536,7 +589,7 @@ var KGconstraintsModeler = (function () {
                             type: "arrow",
                         },
                     },
-                    data: { type: "rdf:type" },
+                    data: {type: "rdf:type"},
                 },
             ];
 
@@ -572,7 +625,10 @@ var KGconstraintsModeler = (function () {
                     var params = KGconstraintsModeler_bot.params;
                     data.uriType = params.URItype;
                     data.rdfType = params.rdfType;
-                    (data.rdfsLabel = params.rdfsLabel), self.visjsGraph.data.nodes.update({ id: self.currentGraphNode.id, data: data });
+                    (data.rdfsLabel = params.rdfsLabel), self.visjsGraph.data.nodes.update({
+                        id: self.currentGraphNode.id,
+                        data: data
+                    });
                     self.mappingColumnInfo.editColumnInfos();
                     self.showDatatypeGraph(self.currentGraphNode.label);
                 });
@@ -583,7 +639,7 @@ var KGconstraintsModeler = (function () {
         save: function () {
             var data = self.mappingColumnEditor.get();
             self.currentGraphNode.data = data;
-            self.visjsGraph.data.nodes.update({ id: self.currentGraphNode.id, data: data });
+            self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data});
             $("#smallDialogDiv").dialog("close");
             self.saveVisjsGraph();
             self.showDatatypeGraph(self.currentGraphNode.label);
@@ -610,7 +666,7 @@ var KGconstraintsModeler = (function () {
                         range: Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range,
                         dateFormat: params.nonObjectPropertyDateFormat || null, //if any
                     });
-                    self.visjsGraph.data.nodes.update({ id: self.currentGraphNode.id, data: data });
+                    self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data});
                     //  self.mappingColumnInfo.editColumnInfos()
                     self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", data);
                     self.showDatatypeGraph(self.currentGraphNode.label);
@@ -625,57 +681,71 @@ var KGconstraintsModeler = (function () {
         }
         self.currentResourceType = node.id;
 
-        if (self.currentResourceType == "Column") {
-            common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
+        if (self.currentResourceType == "Individual") {
+
+            return self.onSuggestionsSelect(null, {node: {}})
+
+
         } else if (self.currentResourceType == "Class") {
             //   self.hideLegendItems();
-            var newObject = { id: "createClass", label: "_Create new Class_" };
+            var newObject = {id: "createClass", label: "_Create new Class_"};
             self.getAllClasses(self.currentSource, function (err, classes) {
                 if (err) {
                     return alert(err);
                 }
 
-                self.setSuggestionsSelect(classes, false, newObject);
+                var classesCopy = JSON.parse(JSON.stringify(classes));
+                classesCopy.unshift(newObject);
+                self.loadSuggestionSelectJstree(classesCopy, 'Classes');
+
             });
+        } else if (self.currentResourceType == "Constraints") {
+            self.onSuggestionsSelect(null, {node: {id: "RowIndex"}});
         } else if (self.currentResourceType == "ObjectProperty") {
             //   self.hideLegendItems();
             var newObjects = [
-                { id: "createObjectProperty", label: "_Create new ObjectProperty_" },
-                { id: "rdfs:member", label: "_rdfs:member_" },
+                {id: "createObjectProperty", label: "_Create new ObjectProperty_"},
+
+            ];
+            var currentClass = self.currentGraphNode.data.id
+            Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, currentClass, null, function (err, properties) {
+                if (err) {
+                    return alert(err);
+                }
+                /* properties.forEach(function (item) {
+                     item.label = item.source.substring(0, 3) + ":" + item.label;
+                 });*/
+                properties = common.array.sort(properties, "label");
+                //To add NewObjects only one time
+                var propertiesCopy = JSON.parse(JSON.stringify(properties));
+                propertiesCopy.unshift(...newObjects);
+                self.loadSuggestionSelectJstree(propertiesCopy, 'Properties');
+                //self.setSuggestionsSelect(properties, false, newObjects);
+            });
+        } else if (self.currentResourceType == "DatatypeProperty") {
+            //   self.hideLegendItems();
+            var newObjects = [
+                {id: "createObjectProperty", label: "_Create new ObjectProperty_"},
+                {id: "rdfs:member", label: "_rdfs:member_"},
             ];
             Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, function (err, properties) {
                 if (err) {
                     return alert(err);
                 }
-                properties.forEach(function (item) {
-                    item.label = item.source.substring(0, 3) + ":" + item.label;
-                });
+                /* properties.forEach(function (item) {
+                     item.label = item.source.substring(0, 3) + ":" + item.label;
+                 });*/
                 properties = common.array.sort(properties, "label");
-                self.setSuggestionsSelect(properties, false, newObjects);
+                //To add NewObjects only one time
+                var propertiesCopy = JSON.parse(JSON.stringify(properties));
+                propertiesCopy.unshift(...newObjects);
+                self.loadSuggestionSelectJstree(propertiesCopy, 'Properties');
+                //self.setSuggestionsSelect(properties, false, newObjects);
             });
-        } else if (self.currentResourceType == "RowIndex") {
-            self.onSuggestionsSelect({ id: "RowIndex" });
-        } else if (self.currentResourceType == "VirtualColumn") {
-            var columnName = prompt("Virtual column name");
-            if (columnName) {
-                self.onSuggestionsSelect(columnName);
-            }
         }
     };
 
-    self.showLegendGraphPopupMenu = function () {};
 
-    self.switchDataSourcePanel = function (target) {
-        if (target == "show") {
-            $("#KGconstraintsModeler_jstreeDiv").css("display", "block");
-            $("#KGconstraintsModeler_mainDiv").css("display", "none");
-            $("#KGconstraintsModeler_graphPanelDiv").css("display", "none");
-        } else {
-            $("#KGconstraintsModeler_jstreeDiv").css("display", "none");
-            $("#KGconstraintsModeler_mainDiv").css("display", "block");
-            $("#KGconstraintsModeler_graphPanelDiv").css("display", "block");
-        }
-    };
     self.getAllClasses = function (source, callback) {
         if (!source) {
             source = self.currentSource;
@@ -695,9 +765,9 @@ var KGconstraintsModeler = (function () {
                         self.allClasses.push(item);
                     }
                 });
-                self.allClasses.forEach(function (item) {
-                    item.label = item.source.substring(0, 3) + ":" + item.label;
-                });
+                /*  self.allClasses.forEach(function (item) {
+                      item.label = item.source.substring(0, 3) + ":" + item.label;
+                  });*/
                 self.allClasses = common.array.sort(self.allClasses, "label");
                 common.array.sort(self.allClasses, "label");
                 if (callback) {
@@ -747,11 +817,11 @@ var KGconstraintsModeler = (function () {
         }
     };
     self.hideLegendItems = function (hiddenNodes) {
-        var legendNodes = Axiom_activeLegend.data.nodes.getIds();
+        var legendNodes = KGconstraintsModeler_activeLegend.data.nodes.getIds();
         var newNodes = [];
         legendNodes.forEach(function (nodeId) {
             var hidden = !hiddenNodes || hiddenNodes.indexOf(nodeId) > -1;
-            newNodes.push({ id: nodeId, hidden: hidden });
+            newNodes.push({id: nodeId, hidden: hidden});
         });
         self.visjsGraph.data.nodes.update(newNodes);
     };
@@ -809,14 +879,17 @@ var KGconstraintsModeler = (function () {
         });
     };
 
-    self.clearMappings = function () {
-        self.visjsGraph.clearGraph();
+    self.clearConstraints = function () {
+        if (self.visjsGraph) {
+            self.visjsGraph.clearGraph();
+        }
         $("#" + self.graphDivId).html("");
         self.visjsGraph = null;
-        var visjsData = { nodes: [], edges: [] };
-        self.drawGraphCanvas(self.graphDiv, visjsData, function () {});
+        var visjsData = {nodes: [], edges: []};
+        self.drawGraphCanvas(self.graphDiv, visjsData, function () {
+        });
     };
-    self.saveMappings = function () {
+    self.saveConstraints = function () {
         $("#" + self.graphDivId).html("");
     };
 
@@ -831,12 +904,12 @@ var KGconstraintsModeler = (function () {
         } else {
             return alert("no valid resourceType");
         }
-        var params = { source: self.currentSource, filteredUris: filteredUris };
+        var params = {source: self.currentSource, filteredUris: filteredUris};
         return CreateAxiomResource_bot.start(botWorkFlow, params, function (err, result) {
             if (err) {
                 return alert(err);
             }
-            CreateAxiomResource_bot.params.newObject.label = self.currentSource.substring(0, 3) + ":" + CreateAxiomResource_bot.params.newObject.label;
+            CreateAxiomResource_bot.params.newObject.label = self.currentSource + ":" + CreateAxiomResource_bot.params.newObject.label;
             // update Axiom_manager
             if (resourceType == "Class") {
                 self.allClasses.push(CreateAxiomResource_bot.params.newObject);
@@ -866,7 +939,7 @@ var KGconstraintsModeler = (function () {
             columnsMap[node.id] = node;
         });
         var x = columnsMap;
-        var json = self.mappingsToKGcreatorJson(columnsMap);
+        var json = self.ConstraintsToKGcreatorJson(columnsMap);
         return json;
     };
 
@@ -881,12 +954,12 @@ var KGconstraintsModeler = (function () {
         return type;
     };
 
-    self.generateBasicMappings = function () {
+    self.generateBasicConstraints = function () {
         var json = self.generateBasicContentMappingContent();
 
         $("#smallDialogDiv").html(
-            '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" KGconstraintsModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
-                ' <textarea id="KGconstraintsModeler_infosTA" style="display: block;width:800px;height: 500px;overflow: auto;"> </textarea>'
+            '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" KGconstraintsModeler.copyKGcreatorConstraints()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
+            ' <textarea id="KGconstraintsModeler_infosTA" style="display: block;width:800px;height: 500px;overflow: auto;"> </textarea>'
         );
         $("#smallDialogDiv").dialog("open");
         $("#KGconstraintsModeler_infosTA").val(JSON.stringify(json, null, 2));
@@ -906,21 +979,26 @@ var KGconstraintsModeler = (function () {
         }
         return colname;
     };
-    self.mappingsToKGcreatorJson = function (columnsMap) {
+    self.ConstraintsToKGcreatorJson = function (columnsMap) {
         var columnsMapLabels = Object.values(columnsMap).map(function (column) {
             return column.label;
         });
-        var allMappings = {};
+        var allConstraints = {};
+
         for (var nodeId in columnsMap) {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
-            if (!allMappings[data.datasource]) {
-                allMappings[data.datasource] = { tripleModels: [] };
+
+            if (!allConstraints[data.dataTable]) {
+                allConstraints[data.dataTable] = {tripleModels: []};
             }
             if (data.rdfType) {
                 var predicate = "rdf:type";
-                if (data.rdfType == "owl:Class") predicate = "rdfs:subClassOf";
-                allMappings[data.datasource].tripleModels.push({
+                if (data.rdfType == "owl:Class") {
+                    predicate = "rdfs:subClassOf";
+                }
+
+                allConstraints[data.dataTable].tripleModels.push({
                     s: subject,
                     p: predicate,
                     o: data.rdfType,
@@ -928,12 +1006,19 @@ var KGconstraintsModeler = (function () {
             }
 
             if (data.rdfsLabel) {
-                allMappings[data.datasource].tripleModels.push({
+
+                allConstraints[data.dataTable].tripleModels.push({
                     s: subject,
                     p: "rdfs:label",
                     o: data.rdfsLabel,
                     isString: true,
                 });
+            }
+            if (data.transform) {
+                if (!allConstraints[data.dataTable].transform) {
+                    allConstraints[data.dataTable].transform = {};
+                }
+                allConstraints[data.dataTable].transform[data.label] = data.transform;
             }
 
             var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
@@ -948,7 +1033,8 @@ var KGconstraintsModeler = (function () {
                         })[0].data
                     );
                 }
-                allMappings[data.datasource].tripleModels.push({
+
+                allConstraints[data.dataTable].tripleModels.push({
                     s: subject,
                     p: property,
                     o: object,
@@ -975,13 +1061,14 @@ var KGconstraintsModeler = (function () {
                         triple.dateFormat = predicate.dateFormat;
                     }
 
-                    allMappings[data.datasource].tripleModels.push(triple);
+                    allConstraints[data.dataTable].tripleModels.push(triple);
+
                 });
             }
         }
 
-        var json = allMappings;
-        json.transform = {};
+        var json = allConstraints;
+
 
         return json;
     };
@@ -1001,22 +1088,21 @@ var KGconstraintsModeler = (function () {
         return colname;
     };
 
-    self.copyKGcreatorMappings = function () {
+    self.copyKGcreatorConstraints = function () {
         var text = $("#KGconstraintsModeler_infosTA").val();
         $("#KGconstraintsModeler_infosTA").focus();
         common.copyTextToClipboard(text);
     };
 
     self.saveVisjsGraph = function () {
-        self.visjsGraph.saveGraph("mappings_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name, true);
-        self.visjsGraph.saveGraph("mappings_" + self.currentSource + "_ALL" + ".json", true);
+        self.visjsGraph.saveGraph("Constraints_" + self.currentSource + "_ALL" + ".json", true);
     };
 
     self.loadVisjsGraph = function () {
-        self.clearMappings();
+        self.clearConstraints();
         setTimeout(function () {
-            self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_ALL" + ".json");
-            //    self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name + ".json");
+            self.visjsGraph.loadGraph("Constraints_" + self.currentSource + "_ALL" + ".json");
+            //    self.visjsGraph.loadGraph("Constraints_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name + ".json");
             setTimeout(function () {
                 self.visjsGraph.network.fit();
                 var maxX = 0;
@@ -1025,7 +1111,7 @@ var KGconstraintsModeler = (function () {
                     maxX = Math.max(node.x, maxX);
                     maxY = Math.max(node.y, maxY);
                 });
-                self.currentOffest = { y: maxY, x: maxX };
+                self.currentOffest = {y: maxY, x: maxX};
             }, 500);
         }, 500);
     };
@@ -1040,20 +1126,20 @@ var KGconstraintsModeler = (function () {
             $("#mainDialogDiv").dialog("open");
 
             //self.addRowClass();
-            self.calculateColumnMappingsFromGraph();
+            self.calculateColumnConstraintsFromGraph();
             Object.keys(self.classDialogData).forEach(function (column) {
                 self.addRowClass(column);
             });
         });
     };
-    self.calculateColumnMappingsFromGraph = function () {
+    self.calculateColumnConstraintsFromGraph = function () {
         var graphNodes = KGconstraintsModeler.visjsGraph.data.nodes.get();
         var edges = KGconstraintsModeler.visjsGraph.data.edges.get();
         var notClassNodes = graphNodes.filter(function (item) {
             return item.data.type != "Class";
         });
         notClassNodes.forEach(function (item) {
-            var Column = { id: item.id, label: item.data.label };
+            var Column = {id: item.id, label: item.data.label};
             var typeId = edges.filter(function (edge) {
                 return edge.from == Column.id && edge.label == "a";
             })[0].to;
@@ -1079,44 +1165,54 @@ var KGconstraintsModeler = (function () {
     };
     self.addRowClass = function (column) {
         /*var classIndexes=Object.keys(self.classDialogData);
-
-            if(classIndexes.length>0){
-
-                var rowIndex=parseInt(classIndexes[classIndexes.length-1])+1;
-            }
-            else{
-                var rowIndex=0;
-            }*/
+        
+        if(classIndexes.length>0){
+            
+            var rowIndex=parseInt(classIndexes[classIndexes.length-1])+1;
+        }
+        else{
+            var rowIndex=0;
+        }*/
         //self.classDialogData[rowIndex]={Column:'',Type:'',Label:'',DatatypeProperties:{},Transform:{}};
 
-        $("#classDefineColumn").append(`<span id='class-column-${column}'> ${column} </span> `);
-        $("#classDefineType").append(`<span id='class-type-${column}' >${self.allResourcesMap[self.classDialogData[column].type.id].label} </span>  `);
-        $("#classDefineRDFType").append(`<select id='class-RDFType-${column}' style='padding:2px 2px'> </select>  `);
-        $("#classDefineLabel").append(`<select id='class-label-${column}' style='padding:2px 2px'> <select> `);
-        $("#classURIType").append(`<select id='class-URITType-${column}' style='padding:2px 2px'> </select>  `);
-        $("#classDefineDatatypeProperty").append(
-            `<button class='slsv-button-1' id='class-datatype-${column}' style='padding:2px 2px;margin:0px;' onclick='KGconstraintsModeler.datatypePropertiesDefine("${column}")'> Datatype </button>   `
-        );
-        $("#classDefineSample").append(
-            `<button class='slsv-button-1' id='class-sample-${column}' style='padding:2px 2px;margin:0px;' onclick='KGconstraintsModeler.sampleData("${column}")'> Sample</button> `
-        );
-        $("#classDefineTransform").append(`<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px;margin:0px;'> Fn</button>  `);
+        $('#classDefineColumn').append(`<span id='class-column-${column}'> ${column} </span> `);
+        $('#classDefineType').append(`<span id='class-type-${column}' >${self.allResourcesMap[self.classDialogData[column].type.id].label} </span>  `);
+        $('#classDefineRDFType').append(`<select id='class-RDFType-${column}' style='padding:2px 2px'> </select>  `);
+        $('#classDefineLabel').append(`<select id='class-label-${column}' style='padding:2px 2px'> <select> `);
+        $('#classURIType').append(`<select id='class-URITType-${column}' style='padding:2px 2px'> </select>  `);
+        $('#classDefineDatatypeProperty').append(`<button class='slsv-button-1' id='class-datatype-${column}' style='padding:2px 2px;margin:0px;' onclick='KGconstraintsModeler.datatypePropertiesDefine("${column}")'> Datatype </button>   `);
+        $('#classDefineSample').append(`<button class='slsv-button-1' id='class-sample-${column}' style='padding:2px 2px;margin:0px;' onclick='KGconstraintsModeler.sampleData("${column}")'> Sample</button> `);
+        $('#classDefineTransform').append(`<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px;margin:0px;' onclick='KGconstraintsModeler.transformDialog("${column}")'> Fn</button>  `);
         //$('#classDefineClose').append(`<button class='slsv-button-1' id='class-close-${column}' style='padding:2px 2px;margin:0px;'> X</button>  `)
         var columns = JSON.parse(JSON.stringify(self.currentTable.columns));
+        common.array.insertFirstArray(columns, column);
 
-        let index = columns.indexOf(column);
-        if (index > -1) {
-            columns.splice(index, 1);
-            columns.unshift(column);
-        }
 
-        var URITType = ["fromLabel", "blankNode", "randomIdentifier"];
+        var URITType = ["fromColumnTitle", "blankNode", "randomIdentifier"];
         var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
-        // to comment and to sort by similarity for others than rowIndex
+        //  sort by similarity for others than rowIndex
+
+        var graphNodes = KGconstraintsModeler.visjsGraph.data.nodes.get();
+        var currentGraphNode = graphNodes.filter(function (node) {
+            return node.data.label == column
+        })[0];
+        if (currentGraphNode.data.rdfType) {
+
+            common.array.insertFirstArray(rdfObjectsType, currentGraphNode.data.rdfType);
+        }
+        if (currentGraphNode.data.uriType) {
+
+            common.array.insertFirstArray(URITType, currentGraphNode.data.uriType);
+        }
+        if (currentGraphNode.data.rdfsLabel) {
+
+            common.array.insertFirstArray(columns, currentGraphNode.data.rdfsLabel);
+        }
 
         common.fillSelectOptions(`class-label-${column}`, columns, false);
         common.fillSelectOptions(`class-RDFType-${column}`, rdfObjectsType, false);
         common.fillSelectOptions(`class-URITType-${column}`, URITType, false);
+
     };
     self.datatypePropertiesDefine = function (column) {
         var graphNodes = KGconstraintsModeler.visjsGraph.data.nodes.get();
@@ -1129,59 +1225,64 @@ var KGconstraintsModeler = (function () {
         if (!column) {
             return;
         }
+        var Constraints = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
+
+        var filteredMapping = Constraints.filter(function (mapping) {
+            return mapping.s.replaceAll('_$', '').replaceAll('_£').replaceAll('@', '') == column || mapping.o.replaceAll('_$', '').replaceAll('_£').replaceAll('@', '') == column;
+        });
         //rajouter toutes les colonnes en lien avec celle la et mettre celle qui nous intéresse en premier
+
         KGcreator.showSampleData(self.currentTreeNode, column);
     };
 
-    self.saveDefineClass = function () {
-        // Step 1 : Enregistrer le dictionnaire
+    self.saveTechnicalView = function () {
+
+        var nodes = KGconstraintsModeler.visjsGraph.data.nodes.get();
         Object.keys(self.classDialogData).forEach(function (rowIndex) {
-            self.classDialogData[rowIndex].Column = $("#class-column-" + rowIndex).val();
-            self.classDialogData[rowIndex].Type = $("#class-type-" + rowIndex).val();
-            self.classDialogData[rowIndex].Label = $("#class-label-" + rowIndex).val();
+            var currentNode = nodes.filter(function (node) {
+                return node.label == rowIndex
+            })[0];
+
+            currentNode.data.uriType = $('#class-URITType-' + rowIndex).val();
+            currentNode.data.rdfsLabel = $('#class-label-' + rowIndex).val();
+            currentNode.data.rdfType = $('#class-RDFType-' + rowIndex).val();
+            self.visjsGraph.data.nodes.update(currentNode);
         });
-        self.updateModelFromDict();
-        //self.classDialogData[rowIndex]={Column:'',Type:'',Label:'',DatatypeProperties:{},Transform:{}};
-        // Step 2 : Dessiner le mapping à partir du dictionnaire
-    };
-    self.updateModelFromDict = function () {
-        Object.keys(self.classDialogData).forEach(function (rowIndex) {
-            // traiter le cas d'un noeud préexistant à modifier non traité ici
-            self.onSuggestionsSelect(self.classDialogData[rowIndex].Column);
-            self.onSuggestionsSelect(self.classDialogData[rowIndex].Type);
-            //traiter le label
-        });
+        KGconstraintsModeler.saveVisjsGraph();
+
+
     };
 
     self.showDatatypeGraph = function (column) {
         //datatypeMappingGraph
-        var mappings = self.generateBasicContentMappingContent()[self.currentTreeNode.id].tripleModels;
+        var Constraints = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
+        var Constraints = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
 
-        var filteredMapping = mappings.filter(function (mapping) {
-            return mapping.s == column || mapping.o == column;
+        var filteredMapping = Constraints.filter(function (mapping) {
+            return mapping.s.replaceAll('_$', '').replaceAll('_£').replaceAll('@', '') == column || mapping.o.replaceAll('_$', '').replaceAll('_£').replaceAll('@', '') == column;
         });
 
-        self.currentMappings = {};
-        self.currentMappings[self.currentTreeNode.id] = filteredMapping;
-        self.drawDatatypeGraphFromMappings(self.currentMappings, "technicalMappingColumnGraphDiv");
-        //KGcreator_graph.drawDetailedMappings(self.currentTreeNode.id,"technicalMappingColumnGraphDiv");
+        self.currentConstraints = {};
+        self.currentConstraints[self.currentTreeNode.id] = filteredMapping;
+        self.drawDatatypeGraphFromConstraints(self.currentConstraints, "technicalMappingColumnGraphDiv");
+        //KGcreator_graph.drawDetailedConstraints(self.currentTreeNode.id,"technicalMappingColumnGraphDiv");
 
         //KGcreator_graph.graphColumnToClassPredicates([table]);
     };
-    self.drawDatatypeGraphFromMappings = function (mappings, divId) {
+    self.drawDatatypeGraphFromConstraints = function (Constraints, divId) {
         /*if (tablesToDraw && !Array.isArray(tablesToDraw)) {
                 tablesToDraw = [tablesToDraw];
             }*/
         if (!divId) {
             divId = "technicalMappingColumnGraphDiv";
         }
-        var sourceMappings = mappings;
-        var visjsData = { nodes: [], edges: [] };
+        var sourceConstraints = Constraints;
+        var visjsData = {nodes: [], edges: []};
 
         var existingNodes = {};
         var json = {};
         var shape = "box";
-        for (var table in sourceMappings) {
+        for (var table in sourceConstraints) {
             if (!existingNodes[table]) {
                 existingNodes[table] = 1;
                 /*visjsData.nodes.push({
@@ -1199,7 +1300,7 @@ var KGconstraintsModeler = (function () {
                     });*/
             }
 
-            //var mappings = sourceMappings[table];
+            //var Constraints = sourceConstraints[table];
             var columns = KGconstraintsModeler.currentTable.columns;
             if (columns == undefined) {
                 //There is a mapping for this column but the Table is not on db anymore
@@ -1222,26 +1323,26 @@ var KGconstraintsModeler = (function () {
                 return role;
             }
 
-            json[table] = mappings[table];
-            mappings[table].forEach(function (item, index) {
+            json[table] = Constraints[table];
+            Constraints[table].forEach(function (item, index) {
                 if (!item.s || !item.p || !item.o) {
                     return alert("tripleModel is malformed " + JSON.stringify(item));
                 }
 
                 function getNodeAttrs(str) {
                     if (str.indexOf("http") > -1) {
-                        return { type: "Class", color: "#70ac47", shape: "box", size: 30 };
+                        return {type: "Class", color: "#70ac47", shape: "box", size: 30};
                     } else if (str.indexOf(":") > -1) {
                         drawRelation = false; //rdf Bag
                         return null;
-                        return { type: "OwlType", color: "#aaa", shape: "ellipse" };
+                        return {type: "OwlType", color: "#aaa", shape: "ellipse"};
                     } else if (str.endsWith("_$")) {
-                        return { type: "blankNode", color: "#00afef", shape: "square" };
+                        return {type: "blankNode", color: "#00afef", shape: "square"};
                     } else if (str.indexOf("_rowIndex") > -1) {
-                        return { type: "rowIndex", color: "#f90edd", shape: "star" };
+                        return {type: "rowIndex", color: "#f90edd", shape: "star"};
                     } else {
                         drawRelation = false;
-                        return { type: "OwlType", color: "#00afef", shape: "hexagon" };
+                        return {type: "OwlType", color: "#00afef", shape: "hexagon"};
                     }
                 }
 
@@ -1281,7 +1382,7 @@ var KGconstraintsModeler = (function () {
                         label: label,
                         shape: attrs.shape,
                         color: attrs.color,
-                        font: { color: attrs.color },
+                        font: {color: attrs.color},
                         size: Lineage_whiteboard.defaultShapeSize,
                         data: {
                             id: item.s,
@@ -1307,7 +1408,7 @@ var KGconstraintsModeler = (function () {
                             label: label,
                             shape: attrs.shape,
                             color: attrs.color,
-                            font: attrs.shape == "box" ? { color: "white" } : { color: attrs.color },
+                            font: attrs.shape == "box" ? {color: "white"} : {color: attrs.color},
                             size: Lineage_whiteboard.defaultShapeSize,
                             data: {
                                 id: item.o,
@@ -1335,7 +1436,7 @@ var KGconstraintsModeler = (function () {
                             label: label,
                             color: color,
                             dashes: dashes,
-                            font: { size: 12, ital: true, color: color || "brown" },
+                            font: {size: 12, ital: true, color: color || "brown"},
                             // color: getNodeAttrs(item.o),
                             arrows: {
                                 to: {
@@ -1384,7 +1485,168 @@ var KGconstraintsModeler = (function () {
         $("#KGcreatorVisjsLegendCanvas").css("top", 0);
         $("#KGcreatorVisjsLegendCanvas").css("right", 200);
     };
+    self.createDataBaseSourceConstraints = function () {
+        // hide uploadApp
+        self.displayUploadApp("");
+        $("#smallDialogDiv").dialog("close");
 
+        var datasource = self.uploadFormData.selectedDatabase;
+        if (!datasource) {
+            return;
+        }
+        self.currentConfig.databaseSources[datasource.id] = {name: datasource.name};
+        self.rawConfig.databaseSources[datasource.id] = {name: datasource.name};
+        self.saveSlsvSourceConfig(function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
+        });
+    };
+
+    self.createCsvSourceConstraints = function () {
+        // hide uploadApp
+        self.displayUploadApp("");
+        $("#smallDialogDiv").dialog("close");
+        var datasourceName = self.uploadFormData.selectedFiles[0];
+        if (!datasourceName) {
+            return;
+        }
+
+        KGcreator.currentConfig.csvSources[datasourceName] = {};
+        KGcreator.rawConfig = KGcreator.currentConfig;
+
+        KGcreator.saveSlsvSourceConfig(function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            KGconstraintsModeler.onLoaded();
+
+        });
+
+    };
+    self.transformDialog = function (column) {
+        // return if  virtuals and rowIndex
+        if (!column) {
+            column = self.currentGraphNode.label;
+        }
+        $("#smallDialogDiv").load("./modules/tools/KGconstraintsModeler/html/transformColumnDialog.html", function (err) {
+            $("#smallDialogDiv").dialog('open');
+            $("#smallDialogDiv").dialog("option", "title", "Transform for " + column);
+            self.transformColumn = column;
+
+
+        });
+    };
+    self.createPrefixTransformFn = function () {
+        if (!self.currentTreeNode) {
+            var column_selected = $("#KGcreator_transformColumnSelect").val();
+        } else {
+            var column_selected = self.currentTreeNode.data.id;
+        }
+        var prefix = prompt("Enter Prefix", column_selected);
+        if (!prefix) {
+            return;
+        }
+        var str = "if((mapping.isString||mapping.dataType) && role=='o') return value; else return '" + prefix + "-'+value;";
+        $("#KGcreator_fnBody").val(str);
+    };
+
+    self.testTransform = function () {
+        //  display view sample triples with added transform for column mapping
+        var transformFnStr = $('#KGcreator_fnBody').val();
+
+        transformFnStr = transformFnStr.replace(/"/g, "'");
+
+        try {
+            new Function("row", "mapping", transformFnStr);
+        } catch (err) {
+            return alert("error in function code " + err.message);
+        }
+        var transformFn = "function{" + transformFnStr + "}";
+        var Constraints = (self.generateBasicContentMappingContent())[self.currentTable.name].tripleModels;
+
+        var filteredMapping = Constraints.filter(function (mapping) {
+            return mapping.s.replace('@', '').replace('_$', '').replace('_£', '') == self.transformColumn || mapping.o.replace('@', '').replace('_$', '').replace('_£', '') == self.transformColumn
+        });
+
+        var mappingWithTransform = {};
+        mappingWithTransform[KGconstraintsModeler.currentTable.name] = {tripleModels: filteredMapping, transform: {}};
+        mappingWithTransform[KGconstraintsModeler.currentTable.name].transform[self.transformColumn] = transformFn;
+
+        // get transform and add to filtered mapping 
+        // change select view sample triple then use it
+        self.viewSampleTriples(mappingWithTransform);
+    }
+
+    self.viewSampleTriples = function (Constraints) {
+        var options = {}
+        if (Config.clientSocketId) {
+            options.clientSocketId = Config.clientSocketId;
+        }
+        options.deleteOldGraph = false;
+        options.sampleSize = 500;
+        options.ConstraintsFilter = Constraints;
+        UI.message("creating triples...");
+        var payload = {
+            source: KGconstraintsModeler.currentSource,
+            datasource: KGconstraintsModeler.currentDataSource,
+            table: KGconstraintsModeler.currentTable.name,
+            options: JSON.stringify(options),
+        };
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/kg/triples`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+
+                // var str = JSON.stringify(result, null, 2);
+
+                //   $("#KGcreator_infosDiv").val(str);
+                KGcreator_run.showTriplesInDataTable(result);
+                $('#mainDialogDiv').parent().css('z-index', 1);
+                $('#mainDialogDiv').dialog({
+                    close: function (event, ui) {
+                        $('#mainDialogDiv').parent().css('z-index', 'unset')
+                    }
+                })
+                UI.message("", true);
+
+
+            },
+            error(err) {
+                if (callback) {
+                    return callback(err.responseText);
+                }
+                return alert(err.responseText);
+            },
+        });
+
+
+    }
+    self.saveTransform = function () {
+
+        var transformFnStr = $('#KGcreator_fnBody').val();
+
+        transformFnStr = transformFnStr.replace(/"/g, "'");
+
+        try {
+            new Function("row", "mapping", transformFnStr);
+        } catch (err) {
+            return alert("error in function code " + err.message);
+        }
+        var transformFn = "function{" + transformFnStr + "}";
+        var nodes = KGconstraintsModeler.visjsGraph.data.nodes.get();
+        var currentNode = nodes.filter(function (node) {
+            return node.label == self.transformColumn
+        })[0];
+        currentNode.data.transform = transformFn;
+        self.visjsGraph.data.nodes.update(currentNode);
+        KGconstraintsModeler.saveVisjsGraph();
+
+
+    }
     return self;
 })();
 

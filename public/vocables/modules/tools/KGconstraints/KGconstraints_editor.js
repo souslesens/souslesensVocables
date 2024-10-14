@@ -16,6 +16,7 @@ var KGconstraints_editor = (function () {
             $("#lateralPanelDiv").load("./modules/tools/KGconstraints/html/leftPanel.html", function () {
                 self.currentSource = "DALIA_LIFEX_COSTS"; // Lineage_sources.activeSource
                 self.initConstraintsJsTree()
+
             });
         });
     };

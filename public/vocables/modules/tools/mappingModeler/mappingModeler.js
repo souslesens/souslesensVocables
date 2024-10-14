@@ -592,7 +592,7 @@ var MappingModeler = (function () {
 
                 var classId = null;
                 connections.forEach(function (connection) {
-                    if ((connection.edge.data.type = "rdf:type")) {
+                    if ((connection.edge.data.type = "rdf:type")&& (connection.edge.label=='a')) {
                         classId = connection.toNode.data.id;
                     }
                 });
@@ -607,7 +607,7 @@ var MappingModeler = (function () {
                 };
             } else {
                 self.currentRelation.to = { id: node.id, classId: getColumnClass(node) };
-                if (self.currentRelation.from.type != "Class" && node.data.type == "Class") {
+                if (self.currentRelation.type != "Class" && node.data.type == "Class") {
                     self.graphActions.drawColumnToClassEdge(self.currentRelation);
                 } else if (self.currentRelation.from.type != "Class" && node.data.type != "Class") {
                     self.onLegendNodeClick({ id: "ObjectProperty" });
@@ -830,7 +830,8 @@ var MappingModeler = (function () {
                 { id: "createObjectProperty", label: "_Create new ObjectProperty_" },
                 { id: "rdfs:member", label: "_rdfs:member_" },
             ];
-            Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, function (err, properties) {
+            var options={includesnoConstraintsProperties:true};
+            Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId,options, function (err, properties) {
                 if (err) {
                     return alert(err);
                 }

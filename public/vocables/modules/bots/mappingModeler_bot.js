@@ -28,7 +28,7 @@ var MappingModeler_bot = (function () {
                 "set other predicate": {
                     listNonObjectPropertiesVocabsFn: {
                         listNonObjectPropertiesFn: {
-                            listLitteralFormatFn: {
+                            listDatatypePropertyRangeFn: {
                                 listTableColumnsFn: {},
                             },
                         },
@@ -170,6 +170,7 @@ var MappingModeler_bot = (function () {
             var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
             _botEngine.showList(choices, "datatypePropertyRange");
         },
+        
     };
 
     return self;

@@ -708,7 +708,7 @@ var KGconstraintsModeler = (function () {
 
             ];
             var currentClass = self.currentGraphNode.data.id
-            Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, currentClass, null, function (err, properties) {
+            Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, currentClass, null,{}, function (err, properties) {
                 if (err) {
                     return alert(err);
                 }
@@ -728,7 +728,7 @@ var KGconstraintsModeler = (function () {
                 {id: "createObjectProperty", label: "_Create new ObjectProperty_"},
                 {id: "rdfs:member", label: "_rdfs:member_"},
             ];
-            Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, function (err, properties) {
+            Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId,{}, function (err, properties) {
                 if (err) {
                     return alert(err);
                 }

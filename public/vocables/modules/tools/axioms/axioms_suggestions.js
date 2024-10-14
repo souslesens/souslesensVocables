@@ -216,8 +216,14 @@ var Axioms_suggestions = (function () {
         });
     };
 
-    self.getValidPropertiesForClasses = function (source, domainClassId, rangeClassId, callback) {
+    self.getValidPropertiesForClasses = function (source, domainClassId, rangeClassId, options,callback) {
+        if(!options){
+            options={}
+
+        }
+        
         OntologyModels.getAllowedPropertiesBetweenNodes(source, domainClassId, rangeClassId, { keepSuperClasses: true }, function (err, result) {
+            
             if (err) {
                 return callback(err);
             }
@@ -265,7 +271,7 @@ var Axioms_suggestions = (function () {
                         }
                     }
                 }
-                if (!domainClassId && !rangeClassId) {
+                if ((!domainClassId && !rangeClassId) || (options.includesnoConstraintsProperties)) {
                     for (var prop in result.constraints.noConstraints) {
                         data.push({
                             id: prop,
@@ -276,11 +282,12 @@ var Axioms_suggestions = (function () {
                     }
                 }
             }
-
+           
             data = common.array.distinctValues(data, "id");
             data = common.array.sort(data, "label");
             return callback(null, data);
         });
+        
     };
 
     return self;

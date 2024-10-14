@@ -69,7 +69,7 @@ var Axiom_activeLegend = (function () {
                 }
                 var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
                 var rangeClassUri = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
-                Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, domainClassUri, rangeClassUri, function (err, properties) {
+                Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, domainClassUri, rangeClassUri,{}, function (err, properties) {
                     self.setSuggestionsSelect(properties, true, newObject);
                 });
             } else if (node.data.type == "Restriction") {
@@ -200,7 +200,7 @@ var Axiom_activeLegend = (function () {
             var domainClassUri = self.getRestrictionAncestorClass(Axioms_graph.currentGraphNode.id);
 
             if (Axioms_graph.currentGraphNode.data.type == "Restriction" && domainClassUri) {
-                Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, domainClassUri, rangeClassUri, function (err, properties) {
+                Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, domainClassUri, rangeClassUri,{}, function (err, properties) {
                     if (err) {
                         return alert(err);
                     }

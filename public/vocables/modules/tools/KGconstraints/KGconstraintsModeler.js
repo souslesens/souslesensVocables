@@ -26,8 +26,8 @@ var KGconstraintsModeler = (function () {
         self.legendItemsArray = [
             {label: "Individual", color: "#eab3b3", shape: "ellipse"},
             {label: "Class", color: "#00afef", shape: "box"},
-            {label: "ObjectProperty", color: "#efbf00", shape: "square"},
-            {label: "DatatypeProperty", color: "#90d6e4", shape: "square"},
+            {label: "ObjectProperty", color: "#efbf00", shape: "diamond"},
+            {label: "DatatypeProperty", color: "#90d6e4", shape: "diamond"},
             {label: "Constraint", color: "#ef4270", shape: "triangle"},
 
 
@@ -116,96 +116,7 @@ var KGconstraintsModeler = (function () {
 
             ]);
         };
-        self.loadSuggestionSelectJstree = function (objects, parentName) {
-            if ($('#suggestionsSelectJstreeDiv').jstree()) {
-                try {
-                    $('#suggestionsSelectJstreeDiv').jstree().destroy();
-                } catch {
 
-                }
-
-            }
-            var options = {
-                openAll: true,
-                selectTreeNodeFn: self.onSuggestionsSelect,
-
-            };
-            var jstreeData = [];
-            jstreeData.push({
-                id: parentName,
-                parent: '#',
-                text: parentName,
-                data: {
-                    id: parentName,
-                    label: parentName,
-                }
-            });
-
-
-            if (parentName == 'Classes' || parentName == 'Properties') {
-                var uniqueSources = {}
-                objects.forEach(function (item) {
-                    if (item.source) {
-                        if (!uniqueSources[item.source]) {
-                            uniqueSources[item.source] = 1;
-
-                            jstreeData.push({
-                                id: item.source,
-                                parent: parentName,
-                                text: item.source,
-                                data: {
-                                    id: item.source,
-                                    label: item.source,
-                                }
-                            });
-                        }
-                        jstreeData.push({
-                            id: item.id,
-                            parent: item.source,
-                            text: item.label,
-                            data: {
-                                id: item.id,
-                                text: item.label,
-                                resourceType: item.resourceType
-                            }
-                        });
-                    } else {
-                        jstreeData.push({
-                            id: item.id,
-                            parent: parentName,
-                            text: item.label,
-                            data: {
-                                id: item.id,
-                                text: item.label
-
-                            }
-                        });
-                    }
-
-                });
-
-            } else {
-
-                objects.forEach(function (item) {
-
-
-                    jstreeData.push({
-                        id: item,
-                        parent: parentName,
-                        text: item,
-                        data: {
-                            id: item,
-                            label: item,
-                        }
-                    });
-
-
-                });
-            }
-            JstreeWidget.loadJsTree('suggestionsSelectJstreeDiv', jstreeData, options, function () {
-
-            });
-        }
 
 
         self.initActiveLegend = function (divId) {
@@ -224,10 +135,20 @@ var KGconstraintsModeler = (function () {
         };
 
         self.hideForbiddenResources = function (resourceType) {
+
+            var connectedEdges
+            if (self.currentGraphNode) {
+                connectedEdges = self.visjsGraph.network.getConnectedEdges(self.currentGraphNode.id).length
+            }
             var hiddenNodes = [];
             if (resourceType == "Individual") {
                 hiddenNodes.push("Individual");
-                hiddenNodes.push("ObjectProperty");
+                if (connectedEdges == 0) {
+                    hiddenNodes.push("ObjectProperty");
+
+                } else {
+                    hiddenNodes.push("Class");
+                }
                 hiddenNodes.push("DatatypeProperty");
                 hiddenNodes.push("Constraint");
             }
@@ -255,6 +176,10 @@ var KGconstraintsModeler = (function () {
         };
 
         self.onSuggestionsSelect = function (event, obj) {
+
+            if (obj.node && obj.node.children && obj.node.children.length > 0) {
+                return;
+            }
             var resourceUri = obj.node.id
             var newResource = null;
             var id = common.getRandomHexaId(8);
@@ -262,7 +187,14 @@ var KGconstraintsModeler = (function () {
                 return self.showCreateResourceBot("Class", null);
             } else if (resourceUri == "createObjectProperty") {
                 return self.showCreateResourceBot("ObjectProperty", null);
-            } else if (self.currentResourceType == "Individual") {
+
+        } else if (resourceUri == "createDatatypeProperty") {
+        return self.showCreateDatatypePropertyBot("ObjectProperty", null);
+    }
+
+
+
+            else if (self.currentResourceType == "Individual") {
                 var individual = prompt("Individual name");
                 if (!individual) {
                     return;
@@ -342,16 +274,16 @@ var KGconstraintsModeler = (function () {
                 id = common.getRandomHexaId(5)
                 var resource = self.allResourcesMap[resourceUri];
                 newResource = {
-                    id: id,
-                    label: resource.label,
+                    id: resourceUri,
+                    label: resourceUri.substring(3),
                     shape: self.legendItems[self.currentResourceType].shape,
                     color: self.legendItems[self.currentResourceType].color,
 
                     data: {
                         id: resourceUri,
-                        label: resource.label,
+                        label: resourceUri.label,
                         type: self.currentResourceType,
-                        source: resource.source,
+                        source: "shacl"
                     },
                 };
                 self.drawResource(newResource)
@@ -371,9 +303,13 @@ var KGconstraintsModeler = (function () {
             if (!self.currentOffest) {
                 self.currentOffest = {x: -graphDivWidth / 2, y: 0};
             }
-            if (self.currentGraphNode && newResource.data.type == "Class") {
-                newResource.x = self.currentGraphNode.x;
-                newResource.y = self.currentGraphNode.y - 100;
+            if (self.currentGraphNode && newResource.data.type != "Individual") {
+                var edges = self.visjsGraph.network.getConnectedEdges(self.currentGraphNode.id)
+                var n = edges.length || 1
+                var pointAround = common.getpointCoordinatesAtAngle(self.currentGraphNode.x|| self.currentGraphNode._graphPosition.x,
+                    self.currentGraphNode.y || self.currentGraphNode._graphPosition.y, -180 / n, 100)
+                newResource.x = pointAround.x;
+                newResource.y = pointAround.y;
             } else {
                 newResource.x = self.currentOffest.x += 200;
                 if (self.currentOffest.x > graphDivWidth) {
@@ -680,7 +616,7 @@ var KGconstraintsModeler = (function () {
 
             } else if (self.currentResourceType == "Class") {
                 //   self.hideLegendItems();
-                var newObject = {id: "createClass", label: "_Create new Class_"};
+                var newObject = {id: "createClass", label: "_Create New"};
                 self.getAllClasses(self.currentSource, function (err, classes) {
                     if (err) {
                         return alert(err);
@@ -688,19 +624,17 @@ var KGconstraintsModeler = (function () {
 
                     var classesCopy = JSON.parse(JSON.stringify(classes));
                     classesCopy.unshift(newObject);
-                    self.loadSuggestionSelectJstree(classesCopy, 'Classes');
+                    self.loadSuggestionSelectJstree(classesCopy, 'Class');
 
                 });
-            } else if (self.currentResourceType == "Constraints") {
-                self.onSuggestionsSelect(null, {node: {id: "RowIndex"}});
             } else if (self.currentResourceType == "ObjectProperty") {
                 //   self.hideLegendItems();
                 var newObjects = [
-                    {id: "createObjectProperty", label: "_Create new ObjectProperty_"},
+                    {id: "createObjectProperty", label: "_Create New "},
 
                 ];
                 var currentClass = self.currentGraphNode.data.id
-                Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, currentClass, null, function (err, properties) {
+                Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, currentClass, null, null, function (err, properties) {
                     if (err) {
                         return alert(err);
                     }
@@ -711,14 +645,13 @@ var KGconstraintsModeler = (function () {
                     //To add NewObjects only one time
                     var propertiesCopy = JSON.parse(JSON.stringify(properties));
                     propertiesCopy.unshift(...newObjects);
-                    self.loadSuggestionSelectJstree(propertiesCopy, 'Properties');
+                    self.loadSuggestionSelectJstree(propertiesCopy, 'ObjectProperty');
                     //self.setSuggestionsSelect(properties, false, newObjects);
                 });
             } else if (self.currentResourceType == "DatatypeProperty") {
                 self.loadSuggestionSelectJstree(null, 'DatatypeProperty');
                 //self.setSuggestionsSelect(properties, false, newObjects);
-            }
-            else if (self.currentResourceType == "Constraint") {
+            } else if (self.currentResourceType == "Constraint") {
                 self.loadSuggestionSelectJstree(null, 'Constraint');
                 //self.setSuggestionsSelect(properties, false, newObjects);
             }
@@ -876,6 +809,8 @@ var KGconstraintsModeler = (function () {
             var visjsData = {nodes: [], edges: []};
             self.drawGraphCanvas(self.graphDiv, visjsData, function () {
             });
+
+            KGconstraintsModeler_activeLegend.hideLegendItems([])
         };
         self.saveConstraints = function () {
             $("#" + self.graphDivId).html("");
@@ -1665,7 +1600,7 @@ var KGconstraintsModeler = (function () {
             });
 
 
-            if (parentName == 'Classes' || parentName == 'Properties') {
+            if (parentName == 'Class' || parentName == 'ObjectProperty') {
                 var uniqueSources = {}
                 objects.forEach(function (item) {
                     if (item.source) {
@@ -1713,8 +1648,14 @@ var KGconstraintsModeler = (function () {
                 if (imports) {
                     vocabs = imports
                 }
-               vocabs=vocabs.concat( Object.keys(Config.basicVocabularies))
+                vocabs = vocabs.concat(Object.keys(Config.basicVocabularies))
                 vocabs.splice(0, 0, self.currentSource)
+
+                jstreeData.push(
+                    {id: "createDatatypeProperty",
+                        text: "_Create New",
+                        parent: parentName
+                    })
 
                 vocabs.forEach(function (vocab) {
                     jstreeData.push({
@@ -1722,7 +1663,9 @@ var KGconstraintsModeler = (function () {
                         text: vocab,
                         parent: parentName
                     })
-                    var properties=Config.ontologiesVocabularyModels[vocab].nonObjectProperties
+
+                    var properties = Config.ontologiesVocabularyModels[vocab].nonObjectProperties
+
                     for (var key in properties) {
 
                         var property = properties[key]
@@ -1734,33 +1677,34 @@ var KGconstraintsModeler = (function () {
                         self.allResourcesMap[property.id] = property
                     }
 
+
                 })
 
-            }
-         else if (parentName == "Constraint") {
+            } else if (parentName == "Constraint") {
 
 
-      for(var constraintType in  KGconstraints_editor.constraintsMap){
-            jstreeData.push({
-                id: constraintType,
-                text: constraintType,
-                parent: parentName
-            })
-        var constraints= KGconstraints_editor.constraintsMap[constraintType]
-            for (var key in constraints) {
+                for (var constraintType in KGconstraints_editor.constraintsMap) {
+                    jstreeData.push({
+                        id: constraintType,
+                        text: constraintType,
+                        parent: parentName
+                    })
 
-                var constraint = constraints[key]
-                jstreeData.push({
-                    id:constraint,
-                    text: constraint,
-                    parent: constraintType
-                })
-                self.allResourcesMap[constraint.id] = constraint
-            }
+                    var constraints = KGconstraints_editor.constraintsMap[constraintType]
+                    for (var key in constraints) {
 
-        }
+                        var constraint = constraints[key]
+                        jstreeData.push({
+                            id: key,
+                            text: key.substring(3),
+                            parent: constraintType
+                        })
+                        self.allResourcesMap[constraint.id] = constraint
+                    }
 
-    } else {
+                }
+
+            } else {
 
                 objects.forEach(function (item) {
 

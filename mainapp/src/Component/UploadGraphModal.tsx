@@ -129,9 +129,9 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                 // POST data
                 const res = await fetch(`${slsApiBaseUrl}api/v1/rdf/graph`, { method: "post", headers: { Authorization: `Bearer ${currentUser.token}` }, body: formData });
                 if (res.status != 200) {
-                    const message = (await res.json()) as { error: string };
-                    console.error(message.error);
-                    setErrorMessage(message.error);
+                    const message = (await res.json()) as { error?: string; detail?: string };
+                    console.error(message);
+                    setErrorMessage(message.error ?? message.detail ?? "Internal server error");
                     return;
                 } else {
                     const json = (await res.json()) as { identifier: string };

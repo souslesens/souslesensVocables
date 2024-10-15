@@ -262,6 +262,8 @@ var KGconstraints_editor = (function () {
 
 
     //https://docs.cambridgesemantics.com/anzograph/v3.1/userdoc/shacl-constraints.htm
+
+    //https://book.validatingrdf.com/bookHtml011.html
     self.constraintsMap = {
         "Cardinality Constraints": {
             "sh:maxCount": {

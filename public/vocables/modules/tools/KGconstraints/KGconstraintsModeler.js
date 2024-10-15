@@ -26,8 +26,8 @@ var KGconstraintsModeler = (function () {
         self.legendItemsArray = [
             {label: "Individual", color: "#eab3b3", shape: "ellipse"},
             {label: "Class", color: "#00afef", shape: "box"},
-            {label: "ObjectProperty", color: "#efbf00", shape: "diamond"},
-            {label: "DatatypeProperty", color: "#90d6e4", shape: "diamond"},
+            {label: "ObjectProperty", color: "#efbf00", shape: "text"},
+            {label: "DatatypeProperty", color: "#90d6e4", shape: "text"},
             {label: "Constraint", color: "#ef4270", shape: "triangle"},
 
 
@@ -118,7 +118,6 @@ var KGconstraintsModeler = (function () {
         };
 
 
-
         self.initActiveLegend = function (divId) {
             var options = {
                 onLegendNodeClick: self.onLegendNodeClick,
@@ -188,13 +187,9 @@ var KGconstraintsModeler = (function () {
             } else if (resourceUri == "createObjectProperty") {
                 return self.showCreateResourceBot("ObjectProperty", null);
 
-        } else if (resourceUri == "createDatatypeProperty") {
-        return self.showCreateDatatypePropertyBot("ObjectProperty", null);
-    }
-
-
-
-            else if (self.currentResourceType == "Individual") {
+            } else if (resourceUri == "createDatatypeProperty") {
+                return self.showCreateDatatypePropertyBot("ObjectProperty", null);
+            } else if (self.currentResourceType == "Individual") {
                 var individual = prompt("Individual name");
                 if (!individual) {
                     return;
@@ -299,26 +294,33 @@ var KGconstraintsModeler = (function () {
                     type: "arrow",
                 },
             };
-            var edgeColor = "#ccc";
-            if (!self.currentOffest) {
-                self.currentOffest = {x: -graphDivWidth / 2, y: 0};
-            }
-            if (self.currentGraphNode && newResource.data.type != "Individual") {
-                var edges = self.visjsGraph.network.getConnectedEdges(self.currentGraphNode.id)
-                var n = edges.length || 1
-                var pointAround = common.getpointCoordinatesAtAngle(self.currentGraphNode.x|| self.currentGraphNode._graphPosition.x,
-                    self.currentGraphNode.y || self.currentGraphNode._graphPosition.y, -180 / n, 100)
-                newResource.x = pointAround.x;
-                newResource.y = pointAround.y;
+            if (self.currentGraphNode && self.currentGraphNode.level) {
+                newResource.level = self.currentGraphNode.level+1
             } else {
-                newResource.x = self.currentOffest.x += 200;
-                if (self.currentOffest.x > graphDivWidth) {
-                    self.currentOffest.y += 150;
-                }
-                newResource.y = self.currentOffest.y;
+                newResource.level = 0
             }
-            newResource.fixed = {x: true, y: true};
+            var edgeColor = "#ccc";
 
+            if (false) {
+                if (!self.currentOffest) {
+                    self.currentOffest = {x: -graphDivWidth / 2, y: 0};
+                }
+                if (self.currentGraphNode && newResource.data.type != "Individual") {
+                    var edges = self.visjsGraph.network.getConnectedEdges(self.currentGraphNode.id)
+                    var n = edges.length || 1
+                    var pointAround = common.getpointCoordinatesAtAngle(self.currentGraphNode.x || self.currentGraphNode._graphPosition.x,
+                        self.currentGraphNode.y || self.currentGraphNode._graphPosition.y, -180 / n, 100)
+                    newResource.x = pointAround.x;
+                    newResource.y = pointAround.y;
+                } else {
+                    newResource.x = self.currentOffest.x += 200;
+                    if (self.currentOffest.x > graphDivWidth) {
+                        self.currentOffest.y += 150;
+                    }
+                    newResource.y = self.currentOffest.y;
+                }
+                newResource.fixed = {x: true, y: true};
+            }
 
             newResource.size = 12
             var visjsData = {nodes: [], edges: []};
@@ -334,7 +336,7 @@ var KGconstraintsModeler = (function () {
                     var label, type;
                     var edgeArrows = null
                     if (newResource.data.type == "Class") {
-                        label = "a";
+                        label = "";
                         type = "rdfs:subClassOf";
                         edgeArrows = arrows
                     } else {
@@ -386,10 +388,24 @@ var KGconstraintsModeler = (function () {
         };
 
         self.drawGraphCanvas = function (graphDiv, visjsData, callback) {
+            var xOffset = 200
+            var yOffset = 30
             self.graphOptions = {
                 keepNodePositionOnDrag: true,
-                /* physics: {
-        enabled:true},*/
+                layoutHierarchical: {
+                    direction: "LR",
+                    sortMethod: "hubsize",
+                    levelSeparation: xOffset,
+                    // parentCentralization: false,
+                    shakeTowards: "roots",
+                    blockShifting: true,
+                    edgeMinimization: true,
+                    parentCentralization: true,
+
+                    nodeSpacing: yOffset,
+
+                },
+
 
                 visjsOptions: {
                     edges: {
@@ -442,7 +458,7 @@ var KGconstraintsModeler = (function () {
             if (node.data) {
                 html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.showNodeInfos()">Node Infos</span>';
                 if (node.data.type == "Class") {
-                    html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.addSuperClassToGraph()">draw superClass</span>';
+                    html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.addItemToCurrentShacl()">Select</span>';
                 }
             }
 
@@ -537,6 +553,8 @@ var KGconstraintsModeler = (function () {
                     NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
                 }
             },
+
+            addItemToCurrentShacl
         };
         self.mappingColumnInfo = {
             editColumnInfos: function () {
@@ -841,7 +859,21 @@ var KGconstraintsModeler = (function () {
                 }
                 self.allResourcesMap[CreateAxiomResource_bot.params.newObject.id] = CreateAxiomResource_bot.params.newObject;
 
-                $("#axioms_legend_suggestionsSelect option").eq(0).before($("<option></option>").val(CreateAxiomResource_bot.params.newObject.id).text(CreateAxiomResource_bot.params.newObject.label));
+                var jstreeData = []
+                jstreeData.push({
+                    id: CreateAxiomResource_bot.params.newObject.id,
+                    parent: resourceType,
+                    text: CreateAxiomResource_bot.params.newObject.label,
+                    data: {
+                        id: CreateAxiomResource_bot,
+                        label: CreateAxiomResource_bot.params.newObject.label,
+                        source:self.currentSource
+                    }
+                });
+
+                JstreeWidget.addNodesToJstree('suggestionsSelectJstreeDiv', resourceType, jstreeData)
+
+                //  $("#axioms_legend_suggestionsSelect option").eq(0).before($("<option></option>").val(CreateAxiomResource_bot.params.newObject.id).text(CreateAxiomResource_bot.params.newObject.label));
                 //   self.onLegendNodeClick({data:{id:"Class"}})
             });
         };
@@ -1587,6 +1619,7 @@ var KGconstraintsModeler = (function () {
                 openAll: true,
                 selectTreeNodeFn: self.onSuggestionsSelect,
 
+
             };
             var jstreeData = [];
             jstreeData.push({
@@ -1652,7 +1685,8 @@ var KGconstraintsModeler = (function () {
                 vocabs.splice(0, 0, self.currentSource)
 
                 jstreeData.push(
-                    {id: "createDatatypeProperty",
+                    {
+                        id: "createDatatypeProperty",
                         text: "_Create New",
                         parent: parentName
                     })

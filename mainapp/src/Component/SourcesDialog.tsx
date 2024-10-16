@@ -172,7 +172,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     <TextField
                         fullWidth
                         error={errors.graphUri !== undefined}
-                        helperText={errors.graphUri !== undefined}
+                        helperText={errors.graphUri}
                         id="graphUri"
                         InputProps={{
                             endAdornment: (

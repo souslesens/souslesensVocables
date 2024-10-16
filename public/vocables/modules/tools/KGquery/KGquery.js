@@ -22,6 +22,7 @@ import UI from "../../../modules/shared/UI.js";
 import KGquery_filter from "./KGquery_filter.js";
 
 import Containers_widget from "../containers/containers_widget.js";
+import KGconstraints_validator from "../KGconstraints/KGconstraints_validator.js";
 
 var KGquery = (function () {
     var self = {};
@@ -326,11 +327,10 @@ var KGquery = (function () {
                 }
             }
 
-            if (result.results.bindings.length == 0) {
-                return alert("no result");
+            if (result.results) {
+                if (result.results.bindings.length == 0) return alert("no result");
+                self.message("found items :" + result.results.bindings.length);
             }
-
-            self.message("found items :" + result.results.bindings.length);
 
             KGquery_myQueries.save(function (err, query) {
                 Config.clientCache.KGquery = query;
@@ -340,6 +340,8 @@ var KGquery = (function () {
                 self.queryResultToTable(result);
             } else if (output == "Graph") {
                 self.queryResultToVisjsGraph(result);
+            } else if (output == "shacl") {
+                KGconstraints_validator.process(result);
             } else {
                 Config.userTools.KGquery.toTools[output](result);
             }
@@ -503,7 +505,12 @@ var KGquery = (function () {
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                         "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
 
-                    query += " Select " + selectStr + "  " + fromStr + " where {" + whereStr + "}";
+                    var queryType = "SELECT";
+                    if (options.output == "shacl") {
+                        queryType = "CONSTRUCT";
+                        selectStr = "";
+                    }
+                    query += queryType + " " + selectStr + "  " + fromStr + " where {" + whereStr + "}";
 
                     query += " " + groupByStr + " limit 10000";
 
@@ -512,13 +519,16 @@ var KGquery = (function () {
 
                 //execute query
                 function (callbackSeries) {
-                    var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
+                    var url = Config.sources[self.currentSource].sparql_server.url + "?format=text&query=";
+
+                    url = "http://51.178.139.80:8890/sparql?format=text/Turtle&query=";
 
                     self.currentSparqlQuery = {
                         url: url,
                         query: query,
                         source: self.currentSource,
                     };
+                    query = Sparql_common.setPrefixesInSelectQuery(query);
 
                     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource, caller: "getObjectRestrictions" }, function (err, result) {
                         if (err) {
@@ -802,6 +812,11 @@ var KGquery = (function () {
             });
         }
     };
+
+    self.checkRequirements = function () {
+        KGquery.queryKG("shacl");
+    };
+
     return self;
 })();
 

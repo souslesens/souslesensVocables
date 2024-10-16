@@ -28,8 +28,10 @@ var MappingModeler_bot = (function () {
                 "set other predicate": {
                     listNonObjectPropertiesVocabsFn: {
                         listNonObjectPropertiesFn: {
-                            listLitteralFormatFn: {
-                                listTableColumnsFn: {},
+                            listDatatypePropertyRangeFn: {
+                                dateTreatment: {
+                                    listTableColumnsFn: {},
+                                },
                             },
                         },
                     },
@@ -128,7 +130,29 @@ var MappingModeler_bot = (function () {
 
             CommonBotFunctions.listNonObjectPropertiesFn(self.params.nonObjectPropertyVocab, "nonObjectPropertyId", columnRdfType);
         },
-        v: function () {
+        dateTreatment: function () {
+            var datatypePropertyRange = _botEngine.currentBot.params.datatypePropertyRange;
+            if (datatypePropertyRange != "xsd:dateTime") {
+                return _botEngine.nextStep();
+            } else {
+                var choices = [
+                    { id: "FR", label: "FR : DD/MM/YYYY" },
+                    { id: "ISO", label: "ISO : YYYY-MM-DD" },
+                    { id: "USA", label: "USA : MM/DD/YYYY" },
+                    { id: "EUR", label: "EUR : DD. MM. YYYY" },
+                    { id: "JIS", label: "JIS : YYYY-MM-DD" },
+                    { id: "ISO-time", label: "ISO-time : 2022-09-27 18:00:00.000" },
+                    { id: "other", label: "other" },
+                ];
+                _botEngine.showList(choices, "nonObjectPropertyDateFormat", null, false, function (result) {
+                    if (result == "other") {
+                        return _botEngine.nextStep();
+                    }
+                    self.params.nonObjectPropertyDateFormat = result;
+                    _botEngine.nextStep();
+                });
+            }
+            /*
             var range = Config.ontologiesVocabularyModels[self.params.nonObjectPropertyVocab].nonObjectProperties[self.params.nonObjectPropertyId].range;
             if (!range) {
                 return _botEngine.nextStep();
@@ -152,7 +176,7 @@ var MappingModeler_bot = (function () {
                     self.params.nonObjectPropertyDateFormat = result;
                     _botEngine.nextStep();
                 });
-            }
+            }*/
         },
 
         listTableColumnsFn: function () {

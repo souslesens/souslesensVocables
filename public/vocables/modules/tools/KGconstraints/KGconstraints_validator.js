@@ -1,14 +1,9 @@
-var KGconstraints_editor_editor = (function () {
+var KGconstraints_validator = (function () {
     var self = {};
 
-    self.onLoaded = function () {
-        $("#graphDiv").load("./modules/tools/KGcontstraints/html/centralPanel.html", function () {
-            $("#lateralPanelDiv").load("./modules/tools/KGcontstraints/html/leftPanel.html", function () {});
-        });
-    };
+    self.onLoaded = function () {};
 
-    self.startConstraintEidtorBot = function () {};
     return self;
 })();
-export default KGconstraints_editor;
-window.KGconstraints_editor = KGconstraints_editor;
+export default KGconstraints_validator;
+window.KGconstraints_validator = KGconstraints_validator;

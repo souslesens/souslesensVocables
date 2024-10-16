@@ -68,6 +68,7 @@ var Sparql_common = (function () {
             }
             return self.formatStringForTriple(str);
         }
+
         var labelSuffix = options.labelSuffix || "Label";
 
         if (!options) {
@@ -170,8 +171,9 @@ var Sparql_common = (function () {
                     }
 
                     id = "" + id;
-
-                    if (!id.startsWith("http") && id.match(/^.{1,5}:.{3,}$/)) {
+                    if (id.startsWith("_:")) {
+                        conceptIdsStr += "<" + id + ">";
+                    } else if (!id.startsWith("http") && id.match(/^.{1,5}:.{3,}$/)) {
                         // prefix
                         conceptIdsStr += id;
                     } else if (id.match(/<.*>/)) {
@@ -690,6 +692,46 @@ var Sparql_common = (function () {
         }
 
         return false;
+    };
+
+    self.setPrefixesInSelectQuery = function (query) {
+        var whereIndex = query.toLowerCase().indexOf("where");
+
+        var strWhere = query.substring(whereIndex);
+        var str0 = query.substring(0, query.toLowerCase().indexOf("select"));
+        var regex = /^[^@].*<([^>]*)/gm;
+        var array = [];
+        var urisMap = {};
+        while ((array = regex.exec(strWhere)) != null) {
+            var uri = array[1];
+            if (str0.indexOf(uri) < 0) {
+                var lastSep = uri.lastIndexOf("#");
+                if (lastSep < 0) {
+                    lastSep = uri.lastIndexOf("/");
+                }
+
+                if (lastSep == uri.length - 1) {
+                    return;
+                }
+
+                var prefixStr = uri.substring(0, lastSep + 1);
+                if (!urisMap[prefixStr]) {
+                    urisMap[prefixStr] = 1;
+                }
+            }
+        }
+
+        var prefixStr = "";
+        var index = 1;
+        for (var uri in urisMap) {
+            var prefix = "ns" + index++;
+            prefixStr += "PREFIX " + prefix + ": <" + uri + "> \n";
+            strWhere = strWhere.replaceAll(uri, prefix + ":");
+        }
+        strWhere = strWhere.replace(/[<>]/gm, "");
+        query = prefixStr + query.substring(0, whereIndex) + strWhere;
+
+        return query;
     };
 
     return self;

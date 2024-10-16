@@ -2394,7 +2394,12 @@ var Sparql_OWL = (function () {
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                     "SELECT  * " +
                     fromStr +
-                    " WHERE { ?subject ?predicate ?object.";
+                    " WHERE { ?subject ?predicate ?object." +
+                    "OPTIONAL {?subject rdfs:label ?subjectLabel.}" +
+                    "OPTIONAL {?predicate rdfs:label ?predicateLabel.}" +
+                    "OPTIONAL {?object rdfs:label ?objectLabel.}" +
+                    "";
+
                 if (role && ids) {
                     query += Sparql_common.setFilter(role, sliceIds);
                 }

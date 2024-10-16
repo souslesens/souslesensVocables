@@ -2,67 +2,50 @@ import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
 import KGconstraintsEditor_bot from "../../bots/KGconstraintsEditor_bot.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import _botEngine from "../../bots/_botEngine.js";
+import UI from "../../shared/UI.js";
 
 //https://docs.cambridgesemantics.com/anzograph/v3.1/userdoc/shacl-constraints.htm
 var KGconstraints_editor = (function () {
     var self = {};
 
+    self.shacl_constraints = {};
+
     self.onLoaded = function () {
         $("#graphDiv").load("./modules/tools/KGconstraints/html/centralPanel.html", function () {
             $("#lateralPanelDiv").load("./modules/tools/KGconstraints/html/leftPanel.html", function () {
                 self.currentSource = "DALIA_LIFEX_COSTS"; // Lineage_sources.activeSource
+                self.initConstraintsJsTree();
             });
         });
     };
 
-    self.getModelFromKGOld = function (callback) {
-        var inferredModel = {};
-        //getClassesFomKG
-        async.series(
-            [
-                //get effective distinct ObjectProperties
-                function (callbackSeries) {
-                    KGquery_graph.message("getInferredModel");
-                    OntologyModels.getInferredModel(source, {}, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-                        inferredModel = inferredModel.concat(result);
-
-                        callbackSeries();
-                    });
-                },
-
-                function (callbackSeries) {
-                    KGquery_graph.message("getInferredClassValueDataTypes");
-                    OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-
-                        result.forEach(function (item) {
-                            if (item.datatype) {
-                                if (!nonObjectProperties[item.class.value]) {
-                                    nonObjectProperties[item.class.value] = [];
-                                }
-                                nonObjectProperties[item.class.value].push({
-                                    label: Sparql_common.getLabelFromURI(item.prop.value),
-                                    id: item.prop.value,
-                                    datatype: item.datatype.value,
-                                });
-                            }
-                        });
-                        callbackSeries();
-                    });
-                },
-            ],
-            function (err) {
-                return callback(err, model);
+    self.initConstraintsJsTree = function () {
+        self.loadSourceConstraints(self.currentSource, function (err, result) {
+            if (err) {
+                return alert(err.responseText || err);
             }
-        );
+            var jstreeData = result;
+            if (jstreeData) {
+                jstreeData = result;
+            }
+
+            jstreeData.push({
+                id: self.currentSource,
+                text: self.currentSource,
+                parent: "#",
+            });
+
+            var options = {
+                onSelectTreeNode: function (obj, node) {},
+                openAll: true,
+                withCheckboxes: true,
+            };
+
+            JstreeWidget.loadJsTree("KGconstraintsEditor_constraintsTreeDiv", jstreeData, options);
+        });
     };
 
-    self.startConstraintEidtorBot = function () {
+    self.startConstraintEditorBot = function () {
         KGquery_graph.getInferredModelVisjsData(self.currentSource, function (err, model) {
             if (err) {
                 return alert(err);
@@ -79,42 +62,175 @@ var KGconstraints_editor = (function () {
     };
 
     self.buildClassShape = function (botParams) {
-        var shape = {
-            classUri: botParams.classUri,
-            path: botParams.propertyUri,
+        var constraintName = botParams.shacl_constraintName; // prompt("constraint name",classLabel)
+
+        if (!constraintName) {
+            return;
+        }
+
+        var obj = {
+            shapeName: constraintName,
+            classUri: botParams.shacl_classUri,
+            path: botParams.shacl_propertyUri,
+            shacl_constraintType: botParams.shacl_constraintType,
+            shacl_constraint: botParams.shacl_constraint,
+            shacl_propertyUri: botParams.shacl_propertyUri,
         };
-        if (botParams.propertyTargetClass) shape.value = "<" + botParams.propertyTargetClass + ">";
-        else if (botParams.propertyTargetString) shape.value = '"' + botParams.propertyTargetClass + '"';
-        else if (botParams.propertyTargetInt) shape.value = botParams.propertyTargetClass;
-        else shape.value = '"' + botParams.propertyTargetClass + '"';
+        if (botParams.shacl_valueDataType == "class") {
+            obj.shacl_value = "<" + botParams.shacl_value + ">";
+        } else if (botParams.shacl_valueDataType == "string") {
+            obj.shacl_value = '"' + botParams.shacl_value + '"';
+        } else if (botParams.shacl_value == "int") {
+            obj.shacl_value = '"' + botParams.shacl_value + '"^^xsd:int';
+        } else if (botParams.shacl_valueDataType == "float") {
+            obj.shacl_value = '"' + botParams.shacl_value + '"^^xsd:float';
+        } else if (botParams.shacl_valueDataType == "dateTime") {
+            obj.shacl_value = '"' + botParams.shacl_value + '"^^xsd:dateTime';
+        } else if (botParams.shacl_valueDataType == "date") {
+            obj.shacl_value = '"' + botParams.shacl_value + '"^^xsd:date';
+        } else if (botParams.shacl_value) {
+            obj.shacl_value = '"' + botParams.shacl_value + '"';
+        }
 
-        var shape =
-            "schema:" +
-            shape.classUri +
-            "Shape\n" +
-            "    a sh:NodeShape ;\n" +
-            "    sh:targetClass <" +
-            shape.classUri +
-            ">;\n" +
-            "    sh:property [\n" +
-            "        sh:path " +
-            shape.path +
-            " ;\n" +
-            shape.value +
-            "    ] ;";
+        var graph = self.getConstraintGraph(constraintName, obj);
+        if (!self.shacl_constraints[constraintName]) {
+            self.shacl_constraints[constraintName] = [];
+        }
+        self.shacl_constraints[constraintName].push(graph);
 
-        var x = shape;
+        self.addConstraintToJstree(self.currentSource, constraintName);
+    };
+    self.addConstraintToJstree = function (sourceLabel, constraintName) {
+        var jstreeData = {
+            id: constraintName,
+            text: constraintName,
+            parent: sourceLabel,
+            data: {
+                shacl_graph: self.shacl_constraints[constraintName],
+                source: sourceLabel,
+            },
+        };
+        JstreeWidget.addNodesToJstree("KGconstraintsEditor_constraintsTreeDiv", sourceLabel, jstreeData, null, function () {
+            self.saveSourceConstraints(self.currentSource, jstreeData, function (err, result) {
+                if (err) {
+                    return alert(err.responseText || err);
+                }
+                return UI.message("file saved");
+            });
+        });
+    };
 
-        var header =
+    self.getConstraintGraph = function (name, data) {
+        var targetClass = "<" + data.classUri + ">";
+        var str = "schema:" + name + " a sh:NodeShape ;\n" + "    sh:targetClass " + targetClass + ";\n";
+        //   data.forEach(function (constraint) {
+        str += "    sh:property [\n";
+        if (data.shacl_propertyUri) {
+            str += "     sh:path " + data.shacl_propertyUri + ";\n";
+        }
+        str += data.shacl_constraint + " " + data.shacl_value + ";\n";
+
+        //   })
+        str += "] .";
+
+        var prefixes =
             "@prefix dash: <http://datashapes.org/dash#> .\n" +
             "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n" +
             "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" +
             "@prefix schema: <http://schema.org/> .\n" +
             "@prefix sh: <http://www.w3.org/ns/shacl#> .\n" +
             "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
+
+        var shapesGraph = self.setPrefixesInSchema(str, prefixes);
+
+        return shapesGraph;
+    };
+
+    self.setPrefixesInSchema = function (schema, header) {
+        var regex = /^[^@].*<([^>]*)/gm;
+        var array = [];
+        var urisMap = {};
+        while ((array = regex.exec(schema)) != null) {
+            var uri = array[1];
+            if (header.indexOf(uri) < 0) {
+                var lastSep = uri.lastIndexOf("#");
+                if (lastSep < 0) {
+                    lastSep = uri.lastIndexOf("/");
+                }
+
+                if (lastSep == uri.length - 1) {
+                    return;
+                }
+
+                var prefixStr = uri.substring(0, lastSep + 1);
+                if (!urisMap[prefixStr]) {
+                    urisMap[prefixStr] = 1;
+                }
+            }
+        }
+
+        var prefixStr = "";
+        var index = 1;
+        for (var uri in urisMap) {
+            var prefix = "ns" + index++;
+            prefixStr += "@prefix " + prefix + ": <" + uri + "> .\n";
+            schema = schema.replaceAll(uri, prefix + ":");
+        }
+        schema = schema.replace(/[<>]/gm, "");
+        var shape = prefixStr + header + schema;
+
+        return shape;
+    };
+
+    self.loadSourceConstraints = function (sourceLabel, callback) {
+        var payload = {
+            dir: "shacl",
+            fileName: sourceLabel + ".json",
+        };
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var json;
+                try {
+                    json = JSON.parse(result);
+                } catch (e) {
+                    return callback(e);
+                }
+                callback(null, json);
+            },
+            error(err) {
+                return callback(null, null);
+            },
+        });
+    };
+
+    self.saveSourceConstraints = function (sourceLabel, data, callback) {
+        var payload = {
+            dir: "shacl",
+            fileName: sourceLabel + ".json",
+            data: JSON.stringify(data, null, 2),
+        };
+        $.ajax({
+            type: "POST",
+            url: Config.apiUrl + "/data/file",
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                UI.message("SHACL constraints" + sourceLabel + "config saved");
+                callback();
+            },
+            error: function (err) {
+                callback(err);
+            },
+        });
     };
 
     //https://docs.cambridgesemantics.com/anzograph/v3.1/userdoc/shacl-constraints.htm
+
+    //https://book.validatingrdf.com/bookHtml011.html
     self.constraintsMap = {
         "Cardinality Constraints": {
             "sh:maxCount": {

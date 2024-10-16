@@ -25,6 +25,10 @@ var httpProxy = {
         }
 
         var request = superagent.get(url);
+        /*   if(options.auth){
+
+               options.headers["Authorization"]= "Basic " + new Buffer(options.auth.user+":"+options.auth.pass).toString("base64")
+           }*/
 
         if (proxy) {
             request.proxy(proxy);
@@ -40,7 +44,9 @@ var httpProxy = {
                 console.log("HTTP_PROXY_GET_ERROR" + err);
                 return callback(err);
             }
-            if (res.text) return callback(null, res.text.trim());
+            if (res.text) {
+                return callback(null, res.text.trim());
+            }
             callback(null, res.body);
         });
     },
@@ -71,20 +77,24 @@ var httpProxy = {
             url: url,
         };
 
-        if (params.GET) options.method = "GET";
+        if (params.GET) {
+            options.method = "GET";
+        }
 
-        if (params.auth) options.auth = params.auth;
+        if (params.auth) {
+            options.auth = params.auth;
+        }
 
         if (headers) {
             options.headers = headers;
-            if (headers["Content-Type"] && headers["Content-Type"].indexOf("json") > -1){
+            if (headers["Content-Type"] && headers["Content-Type"].indexOf("json") > -1) {
                 options.json = params;
             }
-           else if (headers["content-type"] && headers["content-type"].indexOf("json") > -1){
-                options.json = params;
-            }
+
             // if (headers["content-type"] && headers["content-type"].indexOf("json") > -1) options.json = params;
-            else options.form = params;
+            else {
+                options.form = params;
+            }
         } else {
             options.headers = {
                 "content-type": "application/x-www-form-urlencoded",
@@ -98,6 +108,7 @@ var httpProxy = {
             console.log(" POST-----------USING  proxy---------" + proxy);
         }
 
+
         options.rejectUnauthorized = false;
 
         request(options, function (error, response, body) {
@@ -105,23 +116,26 @@ var httpProxy = {
                 console.log(error);
                 //  console.log("HTTP_PROXY_ERROR"+JSON.stringify(error, null, 2))
                 return callback(error);
+            } else if (response.statusCode != 200) {
+                return callback(body || "" + " " + response.statusMessage);
+            } else if (headers && headers["Accept"] && headers["Accept"].indexOf("json") < 0) {
+                return callback(null, body);
             }
-            else if (response.statusCode != 200){
-                return callback(body || ""+" "+response.statusMessage);
-            }
-
-            else if (headers && headers["Accept"] && headers["Accept"].indexOf("json") < 0) {
+            else if (headers && headers["Content-Type"] && headers["Content-Type"].indexOf("text") >-1) {
                 return callback(null, body);
             }
             else if (typeof body === "string") {
-                if(body=="")
+                if (body == "") {
                     return callback("undefined ERROR ")
+                }
                 body = body.trim();
                 var p = body.toLowerCase().indexOf("bindings");
                 var q = body.toLowerCase().indexOf("results");
-                if (p < 0 && q < 0 )
+                if (p < 0 && q < 0)
                     // error virtuoso
+                {
                     return callback(body);
+                }
                 // if ((body.toLowerCase().indexOf("error") > -1 && body.indexOf("error") < 30) || body.indexOf("{") < 0) return callback(body); //error
 
                 var err = null;

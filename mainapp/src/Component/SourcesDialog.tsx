@@ -19,7 +19,7 @@ import {
     Stack,
     TextField,
 } from "@mui/material";
-import { CheckBox, CheckBoxOutlineBlank, ExpandMore, MiscellaneousServices, RuleFolder, Storage } from "@mui/icons-material";
+import { Assignment, CheckBox, CheckBoxOutlineBlank, ExpandMore, MiscellaneousServices, RuleFolder, Storage } from "@mui/icons-material";
 
 import { ulid } from "ulid";
 import { z } from "zod";
@@ -221,31 +221,6 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         }
                         value={source.imports}
                     />
-                    <Autocomplete
-                        disableCloseOnSelect
-                        freeSolo
-                        id="taxonomyPredicates"
-                        limitTags={2}
-                        multiple
-                        onChange={(_e, value) => handleField("taxonomyPredicates", value)}
-                        options={predicates}
-                        renderInput={(params) => <TextField error={errors.taxonomyPredicates !== undefined} helperText={errors.taxonomyPredicates} {...params} label="Taxonomy Predicates" />}
-                        renderOption={(props, option, { selected }) => {
-                            return (
-                                <li key={option} {...props}>
-                                    <Checkbox checked={selected} checkedIcon={checkedIcon} icon={icon} key={`check-${option}`} style={{ marginRight: 2 }} />
-                                    {option}
-                                </li>
-                            );
-                        }}
-                        renderTags={(tagValue, getTagProps) =>
-                            tagValue.map((option, index) => {
-                                const { key, ...rest } = getTagProps({ index });
-                                return <Chip key={key} label={option} {...rest} />;
-                            })
-                        }
-                        value={source.taxonomyPredicates}
-                    />
                     <div>
                         <Accordion>
                             <AccordionSummary expandIcon={<ExpandMore />} aria-controls="source-sparql-content" id="source-sparql-header">
@@ -296,6 +271,46 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                                             </MenuItem>
                                         </TextField>
                                     </Stack>
+                                    <HeadersList headers={source.sparql_server.headers} onSubmit={(headers: Record<string, string>) => handleField("sparql_server.headers", headers)} />
+                                </Stack>
+                            </AccordionDetails>
+                        </Accordion>
+                        <Accordion>
+                            <AccordionSummary expandIcon={<ExpandMore />} aria-controls="source-lineage-content" id="source-lineage-header">
+                                <Stack direction="row" spacing={1} useFlexGap>
+                                    <Assignment />
+                                    {"Lineage Predicates"}
+                                </Stack>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Stack spacing={2} useFlexGap>
+                                    <Autocomplete
+                                        disableCloseOnSelect
+                                        freeSolo
+                                        id="taxonomyPredicates"
+                                        limitTags={2}
+                                        multiple
+                                        onChange={(_e, value) => handleField("taxonomyPredicates", value)}
+                                        options={predicates}
+                                        renderInput={(params) => (
+                                            <TextField error={errors.taxonomyPredicates !== undefined} helperText={errors.taxonomyPredicates} {...params} label="Taxonomy Predicates" />
+                                        )}
+                                        renderOption={(props, option, { selected }) => {
+                                            return (
+                                                <li key={option} {...props}>
+                                                    <Checkbox checked={selected} checkedIcon={checkedIcon} icon={icon} key={`check-${option}`} style={{ marginRight: 2 }} />
+                                                    {option}
+                                                </li>
+                                            );
+                                        }}
+                                        renderTags={(tagValue, getTagProps) =>
+                                            tagValue.map((option, index) => {
+                                                const { key, ...rest } = getTagProps({ index });
+                                                return <Chip key={key} label={option} {...rest} />;
+                                            })
+                                        }
+                                        value={source.taxonomyPredicates}
+                                    />
                                     <TextField
                                         id="topClassFilter"
                                         InputProps={{
@@ -311,7 +326,6 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                                         rows={4}
                                         value={source.topClassFilter}
                                     />
-                                    <HeadersList headers={source.sparql_server.headers} onSubmit={(headers: Record<string, string>) => handleField("sparql_server.headers", headers)} />
                                 </Stack>
                             </AccordionDetails>
                         </Accordion>

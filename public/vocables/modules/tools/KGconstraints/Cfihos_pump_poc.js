@@ -202,12 +202,30 @@ var Cfihos_pump_poc = (function () {
                     callbackSeries()
 
                 })
+            },
+
+            // get datatypes
+            function(callbackSeries) {
+            return   callbackSeries();
+                Sparql_OWL.getAllTriples("CFIHOS_1_5_PLUS", "predicate", ["http://rds.posccaesar.org/ontology/lis14/rdl/hasDatatype"], null, function (err, result) {
+
+                    result.forEach(function (item) {
+
+                        visjsData.nodes.forEach(function (node) {
+                            if (node.data.id == item.predicate.value) {
+
+                                node.data.superClass = "Datatype"
+                                node.data.datatype = item.object.value
+                            }
+                        })
+
+
+                    })
+                    callbackSeries()
+                })
+
+
             }
-
-
-
-
-
 
 
 
@@ -221,7 +239,8 @@ var Cfihos_pump_poc = (function () {
 
 
     self.getPickListContent=function(picklist,callback) {
-        Sparql_OWL.getAllTriples("CFIHOS_1_5_PLUS", "subject", [picklist], null, function (err, result) {
+        Sparql_OWL.getFilteredTriples("CFIHOS_1_5_PLUS",[picklist],"rdf:value", null,{includeLiterals:true}, function (err, result) {
+      //  getAllTriples("CFIHOS_1_5_PLUS", "subject", [picklist], null, function (err, result) {
 
           if(err)
               return callback(err)

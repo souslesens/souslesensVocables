@@ -584,9 +584,12 @@ var KGconstraintsModeler = (function () {
                             "<button onclick='Cfihos_pump_poc.saveCheckedPicklistValues()'"
                         $("#smallDialogDiv").html(html)
                         $("#smallDialogDiv").dialog("open")
-                        var options={withCheckboxes:true}
+                        $("#smallDialogDiv").dialog("option","title","Picklist values")
+                        var options={withCheckboxes:true,openAll:true}
                         JstreeWidget.loadJsTree("KGconstraint_picklistTreeDiv",jstreeData, options)
                     })
+
+                }else if(self.currentGraphNode.data.superClass=="Datatype"){
 
                 }
 

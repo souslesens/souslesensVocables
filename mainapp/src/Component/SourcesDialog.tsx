@@ -84,6 +84,21 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     path: ["name"],
                 });
             }
+            if (value.group.trim().length < 3) {
+                context.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "3 chars min",
+                    path: ["group"],
+                });
+            }
+
+            if (value.group.startsWith("/")) {
+                context.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Cannot start with /",
+                    path: ["group"],
+                });
+            }
 
             if (value.published && value.group.trim() === "PRIVATE") {
                 context.addIssue({
@@ -206,12 +221,13 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         value={source.prefix}
                     />
                     <Autocomplete
+                        autoSelect
                         disableCloseOnSelect
                         freeSolo
                         id="group"
                         onChange={(_e, value) => handleField("group", value)}
                         options={groups}
-                        renderInput={(params) => <TextField error={errors.group !== undefined} helperText={errors.group} {...params} label="Group" />}
+                        renderInput={(params) => <TextField error={errors.group !== undefined} helperText={errors.group} {...params} label="Group" required />}
                         value={source.group}
                     />
                     <Autocomplete

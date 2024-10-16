@@ -171,8 +171,9 @@ var Sparql_common = (function () {
                     }
 
                     id = "" + id;
-
-                    if (!id.startsWith("http") && id.match(/^.{1,5}:.{3,}$/)) {
+                    if (id.startsWith("_:")) {
+                        conceptIdsStr += "<" + id + ">";
+                    } else if (!id.startsWith("http") && id.match(/^.{1,5}:.{3,}$/)) {
                         // prefix
                         conceptIdsStr += id;
                     } else if (id.match(/<.*>/)) {

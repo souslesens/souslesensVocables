@@ -221,7 +221,12 @@ var OntologyModel = {
 
                 //set inherited Constraints
                 function (callbackSeries) {
+                    /*
                     if (!Config.sources[source] || !Config.topLevelOntologies[source]) {
+                        return callbackSeries();
+                    }
+                        */
+                    if (!Config.sources[source] ) {
                         return callbackSeries();
                     }
                     var constraints = ontologyModel.constraints;

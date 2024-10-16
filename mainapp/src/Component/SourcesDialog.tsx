@@ -58,7 +58,10 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
     const [users, setUsers] = useState<User[]>([]);
 
     const handleField = (key: string, value: string | string[] | Record<string, string> | boolean | null) => {
-        if (key.startsWith("sparql_server")) {
+        if (key.startsWith("predicates")) {
+            const [_section, option] = key.split(".");
+            setSource({ ...source, predicates: { ...source.predicates, [option]: value } });
+        } else if (key.startsWith("sparql_server")) {
             const [_section, option] = key.split(".");
             setSource({ ...source, sparql_server: { ...source.sparql_server, [option]: value } });
         } else {

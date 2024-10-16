@@ -14,6 +14,8 @@ import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import _commonBotFunctions from "../../bots/_commonBotFunctions.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import KGconstraints_editor from "./KGconstraints_editor.js";
+import Cfihos_pump_poc from "./Cfihos_pump_poc.js";
+
 
 // imports React app
 
@@ -431,6 +433,8 @@ var KGconstraintsModeler = (function () {
         };
 
         self.onVisjsGraphClick = function (node, event, options) {
+            if(!node)
+                return;
             self.currentGraphNode = node;
             self.hideForbiddenResources(self.currentGraphNode.data.type)
             //add relation between columns
@@ -457,8 +461,8 @@ var KGconstraintsModeler = (function () {
             }
             if (node.data) {
                 html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.showNodeInfos()">Node Infos</span>';
-                if (node.data.type == "Class") {
-                    html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.addItemToCurrentShacl()">Select</span>';
+                if (true || node.data.type == "Class") {
+                    html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.setItemAsSelected()">Select</span>';
                 }
             }
 
@@ -554,7 +558,43 @@ var KGconstraintsModeler = (function () {
                 }
             },
 
-            addItemToCurrentShacl
+            setItemAsSelected:function() {
+                self.isTemplateModified=true;
+                var type = self.currentGraphNode.data.type
+
+                if(self.currentGraphNode.data.superClass=="Picklist"){
+                    Cfihos_pump_poc.getPickListContent(self.currentGraphNode.data.id,function(err, result){
+                        if(err)
+                            return alert(err.responseText || err)
+                        var jstreeData=[]
+                        jstreeData.push({
+                            id:self.currentGraphNode.data.id,
+                            text:self.currentGraphNode.data.label,
+                            parent:"#"
+                        })
+                        result.forEach(function(item){
+                            jstreeData.push({
+                                id:item.id,
+                                text:item.label,
+                                parent:self.currentGraphNode.data.id
+                            })
+                        })
+
+                        var html="<div id='KGconstraint_picklistTreeDiv' style='width:350px;height:500px;overflow:auto'></div>" +
+                            "<button onclick='Cfihos_pump_poc.saveCheckedPicklistValues()'"
+                        $("#smallDialogDiv").html(html)
+                        $("#smallDialogDiv").dialog("open")
+                        var options={withCheckboxes:true}
+                        JstreeWidget.loadJsTree("KGconstraint_picklistTreeDiv",jstreeData, options)
+                    })
+
+                }
+
+                else if (type == "Class") {
+                    self.currentGraphNode.data.Selected=true;
+                    self.visjsGraph.data.nodes.update({id:self.currentGraphNode.id,color:"#b5d8ed"})
+                }
+            }
         };
         self.mappingColumnInfo = {
             editColumnInfos: function () {
@@ -1050,7 +1090,18 @@ var KGconstraintsModeler = (function () {
         };
 
         self.saveVisjsGraph = function () {
-            self.visjsGraph.saveGraph("Constraints_" + self.currentSource + "_ALL" + ".json", true);
+            var version="ALL"
+            if( self.isTemplateModified){
+                var templateName=prompt("new template version")
+                if(!templateName){
+                    alert("your modifications will be ignored")
+                }else{
+                    version=templateName
+                }
+            }
+
+
+            self.visjsGraph.saveGraph("Constraints_" + self.currentSource + "_" +version+ ".json", true);
         };
 
         self.loadVisjsGraph = function () {
@@ -1609,7 +1660,8 @@ var KGconstraintsModeler = (function () {
         self.loadSuggestionSelectJstree = function (objects, parentName) {
             if ($('#suggestionsSelectJstreeDiv').jstree()) {
                 try {
-                    $('#suggestionsSelectJstreeDiv').jstree().destroy();
+                  //  $('#suggestionsSelectJstreeDiv').jstree().destroy();
+                    $('#suggestionsSelectJstreeDiv').jstree().empty();
                 } catch {
 
                 }

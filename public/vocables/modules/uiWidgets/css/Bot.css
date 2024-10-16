@@ -16,7 +16,7 @@
     width: 96%;
 }
 #bot_resourcesProposalSelect option {
-   padding: 5px;
+    padding: 5px;
 }
 .chat-left {
     background-color: @dark-background-color;
@@ -44,4 +44,3 @@
     justify-self: end;
     margin-right: 10px;
 }
-

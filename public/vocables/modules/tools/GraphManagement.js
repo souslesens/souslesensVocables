@@ -14,6 +14,7 @@ const GraphManagement = (function () {
             $("#mainDialogDiv").dialog("option", "title", "Graph Management");
 
             $("#mainDialogDiv").on("dialogclose", function (event, ui) {
+                window.history.replaceState(null, "", window.location.pathname);
                 self.umountKGUploadApp();
             });
 

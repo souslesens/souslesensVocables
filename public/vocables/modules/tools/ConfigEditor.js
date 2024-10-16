@@ -18,6 +18,7 @@ var ConfigEditor = (function () {
         $("#mainDialogDiv").dialog("option", "title", "Config Editor");
         $("#mainDialogDiv").on("dialogclose", function (event, ui) {
             self.umountKGUploadApp();
+            window.history.replaceState(null, "", window.location.pathname);
         });
 
         $("#mainDialogDiv").html("");

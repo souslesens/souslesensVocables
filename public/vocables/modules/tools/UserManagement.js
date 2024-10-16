@@ -11,7 +11,10 @@ const UserManagement = (() => {
 
         setTimeout(() => {
             $("#mainDialogDiv").dialog("option", "title", "User Management");
-            $("#mainDialogDiv").on("dialogclose", (event, ui) => self.unload());
+            $("#mainDialogDiv").on("dialogclose", (event, ui) => {
+                window.history.replaceState(null, "", window.location.pathname);
+                self.unload();
+            });
             $("#mainDialogDiv").html(`<div style="width:90vw;height:80vh"><div id="mount-user-management-here"></div></div>`);
             $("#mainDialogDiv").dialog("open");
 

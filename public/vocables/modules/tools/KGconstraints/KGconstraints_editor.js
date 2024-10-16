@@ -16,6 +16,7 @@ var KGconstraints_editor = (function () {
             $("#lateralPanelDiv").load("./modules/tools/KGconstraints/html/leftPanel.html", function () {
                 self.currentSource = "DALIA_LIFEX_COSTS"; // Lineage_sources.activeSource
                 self.initConstraintsJsTree()
+
             });
         });
     };
@@ -261,6 +262,8 @@ var KGconstraints_editor = (function () {
 
 
     //https://docs.cambridgesemantics.com/anzograph/v3.1/userdoc/shacl-constraints.htm
+
+    //https://book.validatingrdf.com/bookHtml011.html
     self.constraintsMap = {
         "Cardinality Constraints": {
             "sh:maxCount": {

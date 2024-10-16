@@ -126,7 +126,7 @@ var PredicatesSelectorWidget = (function () {
         }
     };
 
-    self.setVocabulariesSelect = function (source, filter) {
+    self.setVocabulariesSelect = function (source, filter, callback) {
         var vocabularies = [];
         if (!filter || filter == "_all") {
             vocabularies = ["usual"];
@@ -146,6 +146,9 @@ var PredicatesSelectorWidget = (function () {
             }
             vocabularies = filter;
         }
+        if (callback) {
+            return callback(null, vocabularies);
+        }
         common.fillSelectOptions("editPredicate_vocabularySelect", vocabularies, true);
         common.fillSelectOptions("editPredicate_vocabularySelect2", vocabularies, true);
     };
@@ -155,12 +158,14 @@ var PredicatesSelectorWidget = (function () {
 
         if (vocabulary == "usual") {
             self.usualProperties.forEach(function (item) {
-                properties.push({ label: item, id: item });
+                properties.push({label: item, id: item});
             });
-            properties.push({ label: "-------", id: "" });
-            common.fillSelectOptions(selectId, properties, true, "label", "id");
+            properties.push({label: "-------", id: ""});
+            if (selectId) {
+                common.fillSelectOptions(selectId, properties, true, "label", "id");
+            }
             if (callback) {
-                callback();
+                callback(null, properties);
             }
         } else {
             OntologyModels.registerSourcesModel([vocabulary], function (err, result) {
@@ -169,9 +174,11 @@ var PredicatesSelectorWidget = (function () {
                 properties = properties.concat(datatypeProperties);
                 properties = common.array.unduplicateArray(properties, "id");
                 common.array.sort(properties, "label");
-                common.fillSelectOptions(selectId, properties, true, "label", "id");
+                if (selectId) {
+                    common.fillSelectOptions(selectId, properties, true, "label", "id");
+                }
                 if (callback) {
-                    callback();
+                    callback(null, datatypeProperties);
                 }
             });
         }
@@ -369,7 +376,7 @@ var PredicatesSelectorWidget = (function () {
         });
     };
     self.fillSelectRecentEditPredicate = function () {
-        var recentEditPredicatesFill = [{ id: "Recents", label: "Recents" }];
+        var recentEditPredicatesFill = [{id: "Recents", label: "Recents"}];
         var recentEditPredicates = JSON.parse(localStorage.getItem("recentEditPredicates"));
         if (!recentEditPredicates) {
             return;
@@ -380,7 +387,7 @@ var PredicatesSelectorWidget = (function () {
             var name = `${editPredicate.predicate[0] == "usual" ? "" : editPredicate.predicate[0] + ":"}${editPredicate.predicate[1].label} 
             / ${editPredicate.object[0] == "usual" ? "" : editPredicate.object[0] + ":"}${editPredicate.object[1].label}`;
             var id = JSON.stringify(editPredicate);
-            recentEditPredicatesFill.push({ id: index, label: name });
+            recentEditPredicatesFill.push({id: index, label: name});
         });
         common.fillSelectOptions("editPredicate_recentSelect", recentEditPredicatesFill, false, "label", "id");
     };
@@ -391,9 +398,15 @@ var PredicatesSelectorWidget = (function () {
         var recentEditPredicates = {
             predicate: [
                 $("#editPredicate_vocabularySelect").val(),
-                { id: $("#editPredicate_currentVocabPredicateSelect").val(), label: $("#editPredicate_currentVocabPredicateSelect").find("option:selected").text() },
+                {
+                    id: $("#editPredicate_currentVocabPredicateSelect").val(),
+                    label: $("#editPredicate_currentVocabPredicateSelect").find("option:selected").text()
+                },
             ],
-            object: [$("#editPredicate_vocabularySelect2").val(), { id: $("#editPredicate_objectSelect").val(), label: $("#editPredicate_objectSelect").find("option:selected").text() }],
+            object: [$("#editPredicate_vocabularySelect2").val(), {
+                id: $("#editPredicate_objectSelect").val(),
+                label: $("#editPredicate_objectSelect").find("option:selected").text()
+            }],
         };
         var recentEditPredicatesStr = JSON.stringify(recentEditPredicates);
         common.storeLocally(recentEditPredicatesStr, "recentEditPredicates");

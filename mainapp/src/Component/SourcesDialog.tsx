@@ -12,8 +12,8 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    FormGroup,
     FormControlLabel,
+    FormGroup,
     InputAdornment,
     MenuItem,
     Stack,
@@ -197,6 +197,32 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         value={source.group}
                     />
                     <Autocomplete
+                        disableCloseOnSelect
+                        freeSolo
+                        id="imports"
+                        limitTags={5}
+                        multiple
+                        onChange={(_e, value) => handleField("imports", value)}
+                        options={sourcesNames}
+                        renderInput={(params) => <TextField error={errors.imports !== undefined} helperText={errors.imports} {...params} label="Import Sources" />}
+                        renderOption={(props, option, { selected }) => {
+                            return (
+                                <li key={option} {...props}>
+                                    <Checkbox checked={selected} checkedIcon={checkedIcon} icon={icon} key={`check-${option}`} style={{ marginRight: 2 }} />
+                                    {option}
+                                </li>
+                            );
+                        }}
+                        renderTags={(tagValue, getTagProps) =>
+                            tagValue.map((option, index) => {
+                                const { key, ...rest } = getTagProps({ index });
+                                return <Chip key={key} label={option} {...rest} />;
+                            })
+                        }
+                        value={source.imports}
+                    />
+                    <Autocomplete
+                        disableCloseOnSelect
                         freeSolo
                         id="taxonomyPredicates"
                         limitTags={2}

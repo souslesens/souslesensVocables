@@ -165,7 +165,7 @@ var Cfihos_pump_poc = (function () {
                                 "color": "#ccc"
                             })
 
-                            if (!uniqueNodes[item.object.value]) {
+
                                 var objectId = common.getRandomHexaId(5)
                                 uniqueNodes[item.object.value] = objectId
                                 distinctPicklists.push(item.object.value)
@@ -179,6 +179,7 @@ var Cfihos_pump_poc = (function () {
                                         "id": item.object.value,
                                         "label": item.objectLabel.value,
                                         "type": "Class",
+                                        "superClass":"Picklist",
                                         "source": "CFIHOS_1_5_PLUS"
                                     }
 
@@ -195,85 +196,14 @@ var Cfihos_pump_poc = (function () {
                                     "color": "#ccc"
                                 })
                             }
-                        }
+
                     })
 
                     callbackSeries()
 
                 })
-            },
-            // getPickListValues and build constraints
-            function(callbackSeries){
-                Sparql_OWL.getAllTriples("CFIHOS_1_5_PLUS", "subject", distinctPicklists, null, function (err, result) {
-return    callbackSeries();
-                    result.forEach(function (item) {
-                        if (uniqueNodes[item.subject.value]) {
-                            var constraintId = common.getRandomHexaId(5)
-                            uniqueNodes[item.subject.value] = constraintId
-
-                            visjsData.nodes.push({
-                                "id": constraintId,
-                                "label": "sh:in",
-                                "shape": "text",
-                                "color": "#efbf00",
-                                level: 4,
-                                "data": {
-                                    "id": "sh:in",
-                                    "label": "sh:in",
-                                    "type": "Constraint",
-                                    "source": "shacl"
-                                }
-
-                            })
-                            visjsData.edges.push({
-                                "from": propId,
-                                "label": "",
-                                "to": uniqueNodes[item.subject.value],
-                                "width": 2,
-                                "data": {},
-                                "arrows": null,
-                                "color": "#ccc"
-                            })
-
-                            if (!uniqueNodes[item.object.value]) {
-                                var objectId = common.getRandomHexaId(5)
-                                uniqueNodes[item.object.value] = objectId
-
-                                visjsData.nodes.push({
-                                    "id": objectId,
-                                    "label": item.objectLabel.value,
-                                    "shape": "box",
-                                    "color": "#00afef",
-                                    level: 5,
-                                    "data": {
-                                        "id": item.object.value,
-                                        "label": item.objectLabel.value,
-                                        "type": "Class",
-                                        "source": "CFIHOS_1_5_PLUS"
-                                    }
-
-                                })
-                                visjsData.edges.push({
-                                    "from": propId,
-                                    "label": "",
-                                    "to": objectId,
-                                    "width": 2,
-                                    "data": {
-                                        "type": "rdf:type"
-                                    },
-                                    "arrows": null,
-                                    "color": "#ccc"
-                                })
-                            }
-                        }
-                    })
-
-                    callbackSeries()
-
-                })
-
-
             }
+
 
 
 
@@ -285,23 +215,32 @@ return    callbackSeries();
             KGconstraintsModeler.drawGraphCanvas(KGconstraintsModeler.graphDiv, visjsData);
         })
 
-
-
-
-
-
-
-
-
-
-            
-
-        
-        
-        
         
     }
 
+
+
+    self.getPickListContent=function(picklist,callback) {
+        Sparql_OWL.getAllTriples("CFIHOS_1_5_PLUS", "subject", [picklist], null, function (err, result) {
+
+          if(err)
+              return callback(err)
+
+            var values = []
+            result.forEach(function (item) {
+                values.push({
+                    "id": item.object.value,
+                    "label": item.object.value,
+                })
+            })
+            return callback(null,values)
+        })
+    }
+
+    self.saveCheckedPicklistValues=function(){
+
+
+    }
 
         return self;
 

@@ -706,10 +706,11 @@ var Sparql_common = (function () {
         var urisMap = {}
         while ((array = regex.exec(strWhere)) != null) {
             var uri = array[1]
-            if( str0.indexOf(uri) < 0) {
+            if (str0.indexOf(uri) < 0) {
                 var lastSep = uri.lastIndexOf("#");
-                if(lastSep<0)
-                 lastSep = uri.lastIndexOf("/");
+                if (lastSep < 0) {
+                    lastSep = uri.lastIndexOf("/");
+                }
 
                 if (lastSep == uri.length - 1) {
                     return;

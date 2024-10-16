@@ -187,6 +187,24 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         required
                         value={source.graphUri}
                     />
+                    <TextField
+                        fullWidth
+                        error={errors.prefix !== undefined}
+                        helperText={errors.prefix}
+                        id="prefix"
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <HelpTooltip title={sourceHelp.prefix} />
+                                </InputAdornment>
+                            ),
+                        }}
+                        label="Prefix"
+                        name="prefix"
+                        onChange={(event) => handleField("prefix", event.target.value)}
+                        required
+                        value={source.prefix}
+                    />
                     <Autocomplete
                         disableCloseOnSelect
                         freeSolo

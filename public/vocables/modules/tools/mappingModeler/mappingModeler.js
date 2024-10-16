@@ -178,6 +178,7 @@ var MappingModeler = (function () {
             }  
             
         }
+        self.filterSuggestionList=null;
         var options ={
             openAll: true,
             selectTreeNodeFn: self.onSuggestionsSelect,
@@ -226,6 +227,7 @@ var MappingModeler = (function () {
                     });
                 }
                 else{
+                    
                     jstreeData.push({
                         id:item.id,
                         parent:parentName,
@@ -245,16 +247,18 @@ var MappingModeler = (function () {
             
             objects.forEach(function(item){
 
-            
-                jstreeData.push({
-                    id:item,
-                    parent:parentName,
-                    text:item,
-                    data:{
+                if(item!='' && item!='#'){
+                    jstreeData.push({
                         id:item,
-                        label:item,
-                    }   
-                });
+                        parent:parentName,
+                        text:item,
+                        data:{
+                            id:item,
+                            label:item,
+                        }   
+                    });
+                }
+                
             
             
             });
@@ -342,6 +346,7 @@ var MappingModeler = (function () {
     };
 
     self.onSuggestionsSelect = function (event, obj) {
+       
         var resourceUri=obj.node.id
         var newResource = null;
         var id = common.getRandomHexaId(8);
@@ -462,7 +467,7 @@ var MappingModeler = (function () {
                 self.visjsGraph.data.edges.add([edge]);
                 self.currentRelation = null;
                 //$("#axioms_legend_suggestionsSelect").empty();
-                $('#suggestionsSelectJstreeDiv').jstree().destroy();
+                JstreeWidget.empty('suggestionsSelectJstreeDiv');
             }
         }
     };
@@ -537,7 +542,8 @@ var MappingModeler = (function () {
 
         self.hideForbiddenResources(newResource.data.type);
         //$("#axioms_legend_suggestionsSelect").empty();
-        $('#suggestionsSelectJstreeDiv').jstree().destroy();
+        JstreeWidget.empty('suggestionsSelectJstreeDiv');
+        //$('#suggestionsSelectJstreeDiv').jstree().destroy();
 
         self.currentGraphNode = newResource;
     };
@@ -798,9 +804,10 @@ var MappingModeler = (function () {
     };
 
     self.onLegendNodeClick = function (node, event) {
-        if (!node) {
+        if (!node ) {
             return;
         }
+        
         self.currentResourceType = node.id;
 
         if (self.currentResourceType == "Column") {
@@ -1772,6 +1779,40 @@ var MappingModeler = (function () {
         self.visjsGraph.data.nodes.update(currentNode);
         MappingModeler.saveVisjsGraph();
 
+
+    }
+    self.filterSuggestionTree=function(){
+        var keyword=$('#mappingModeler_suggestionsnput').val();
+        var data=$('#suggestionsSelectJstreeDiv').jstree()._model.data;
+        /*if(!keyword){
+            return;
+        }*/
+        if(!data){
+            return;
+        }
+        if(!self.filterSuggestionList){
+            self.filterSuggestionList=JSON.parse(JSON.stringify(data));
+        }
+        keyword=keyword.toLowerCase()
+
+        var newData=[];
+        Object.keys(self.filterSuggestionList).forEach(function(nodeId){
+            var  node=self.filterSuggestionList[nodeId];
+            // We filter only last leafs of jstree
+            if(node.children.length==0){
+                var node_text=node.text.toLowerCase();
+                if(node_text.includes(keyword)){
+                    newData.push(node);
+                }
+            }else{
+                newData.push(node);
+                
+            }
+        });
+        //JstreeWidget.empty('suggestionsSelectJstreeDiv');
+        JstreeWidget.updateJstree('suggestionsSelectJstreeDiv',newData)
+        //$("#suggestionsSelectJstreeDiv").jstree(true).settings.core.data=newData;
+        //$("#suggestionsSelectJstreeDiv").jstree(true).refresh();
 
     }
     return self;

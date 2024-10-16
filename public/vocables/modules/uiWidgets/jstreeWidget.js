@@ -305,7 +305,9 @@ var JstreeWidget = (function () {
             .jstree("destroy")
             .empty();
     };
-
+    self.empty=function(jstreeDiv){
+        $('#'+jstreeDiv).jstree(true).delete_node($('#'+jstreeDiv).jstree(true).get_node('#').children);
+    }
     self.addNodesToJstree = function (jstreeDiv, parentNodeId_, jstreeData, options, callback) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
@@ -730,6 +732,26 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .search(value);
         $("#jstreeWidget_searchInput").val("");
     };
+    self.updateJstree=function(divId,newData){
+        if(!Array.isArray(newData)){
+            return;
+        }
+        var newData2=JSON.parse(JSON.stringify(newData));
+        var keyToKeep=['data','text','id','parent'];
+        newData2.forEach(function(item){
+           
+            for(let key in item){
+                if(!keyToKeep.includes(key)){
+                    delete item[key]
+                }
+            }
+        });
+        newData2=newData2.filter(function(item){return item.id!='#'})
+        $("#"+divId).jstree(true).settings.core.data=newData2;
+
+        $("#"+divId).jstree(true).refresh();
+
+    }
 
     return self;
 })();

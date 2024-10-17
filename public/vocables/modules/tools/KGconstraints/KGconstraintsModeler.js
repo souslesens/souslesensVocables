@@ -297,7 +297,7 @@ var KGconstraintsModeler = (function () {
                 },
             };
             if (self.currentGraphNode && self.currentGraphNode.level) {
-                newResource.level = self.currentGraphNode.level+1
+                newResource.level = self.currentGraphNode.level + 1
             } else {
                 newResource.level = 0
             }
@@ -433,11 +433,14 @@ var KGconstraintsModeler = (function () {
         };
 
         self.onVisjsGraphClick = function (node, event, options) {
-            if(!node)
+            if (!node) {
                 return;
+            }
             self.currentGraphNode = node;
             self.hideForbiddenResources(self.currentGraphNode.data.type)
             //add relation between columns
+
+            KGconstraintsModeler.graphActions.setItemAsSelected()
 
         };
 
@@ -461,7 +464,7 @@ var KGconstraintsModeler = (function () {
             }
             if (node.data) {
                 html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.showNodeInfos()">Node Infos</span>';
-                if (true || node.data.type == "Class") {
+                if (false &&  node.data.type == "Class") {
                     html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.setItemAsSelected()">Select</span>';
                 }
             }
@@ -558,44 +561,67 @@ var KGconstraintsModeler = (function () {
                 }
             },
 
-            setItemAsSelected:function() {
-                self.isTemplateModified=true;
-                var type = self.currentGraphNode.data.type
-
-                if(self.currentGraphNode.data.superClass=="Picklist"){
-                    Cfihos_pump_poc.getPickListContent(self.currentGraphNode.data.id,function(err, result){
-                        if(err)
+            setItemAsSelected: function () {
+                self.isTemplateModified = true;
+                var datatype = self.currentGraphNode.data.datatype
+                var html="<div style='width:300px;minHeight:250px'>"
+                if (datatype == "Picklist") {
+                    Cfihos_pump_poc.getPickListContent(self.currentGraphNode.data.id, function (err, result) {
+                        if (err) {
                             return alert(err.responseText || err)
-                        var jstreeData=[]
-                        jstreeData.push({
-                            id:self.currentGraphNode.data.id,
-                            text:self.currentGraphNode.data.label,
-                            parent:"#"
-                        })
-                        result.forEach(function(item){
-                            jstreeData.push({
-                                id:item.id,
-                                text:item.label,
-                                parent:self.currentGraphNode.data.id
-                            })
-                        })
+                        }
 
-                        var html="<div id='KGconstraint_picklistTreeDiv' style='width:350px;height:500px;overflow:auto'></div>" +
-                            "<button onclick='Cfihos_pump_poc.saveCheckedPicklistValues()'"
-                        $("#smallDialogDiv").html(html)
+                        html += "<select size='10' style='width:200px' id='KGconstraint_PicklistValueSelect'  onchange='Cfihos_pump_poc.saveConstraintValues()'>"
+
+                            $("#smallDialogDiv").html(html)
                         $("#smallDialogDiv").dialog("open")
-                        $("#smallDialogDiv").dialog("option","title","Picklist values")
-                        var options={withCheckboxes:true,openAll:true}
-                        JstreeWidget.loadJsTree("KGconstraint_picklistTreeDiv",jstreeData, options)
+                        $("#smallDialogDiv").dialog("option", "title", "Picklist values")
+                        var options = {openAll: true}
+                        common.fillSelectOptions("KGconstraint_PicklistValueSelect", result, false, "label", "id")
+
                     })
 
-                }else if(self.currentGraphNode.data.superClass=="Datatype"){
+                } else if (datatype == "Litteral") {
 
-                }
+                    if (self.currentGraphNode.data.id == "Boolean") {
+                        html += "<select style='width:100px' id='KGconstraint_litteralValue' >" +
+                            "<options>true</options>" +
+                            "<options>false</options>" +
+                            "</select>"
+                    } else {
+                       html += "<textarea  id='KGconstraint_litteralValue'></textarea>"
+                    }
 
-                else if (type == "Class") {
-                    self.currentGraphNode.data.Selected=true;
-                    self.visjsGraph.data.nodes.update({id:self.currentGraphNode.id,color:"#b5d8ed"})
+                    html += "<br><button onclick='Cfihos_pump_poc.saveConstraintValues()'>OK</button>"
+
+                    $("#smallDialogDiv").html(html)
+                    $("#smallDialogDiv").dialog("open")
+                    $("#smallDialogDiv").dialog("option", "title", "Enter value")
+
+
+                } else if (datatype == "PhysicalQuantity") {
+                    Cfihos_pump_poc.getUnitOfMeasureContent(self.currentGraphNode.data.id, function (err, result) {
+
+                        html += "<input  id='KGconstraint_PhysicalQuantityValue'></input>"
+                        html += "<select size='3' style='width:100px' id='KGconstraint_UnitOfMesasureSelect' onchange='Cfihos_pump_poc.saveConstraintValues()' ></select>"
+
+
+
+
+                     //   html += "<br><button onclick='Cfihos_pump_poc.saveConstraintValues()'>OK</button>"
+                        html+="</div>"
+
+                        $("#smallDialogDiv").html(html)
+                        $("#smallDialogDiv").dialog("open")
+                        $("#smallDialogDiv").dialog("option", "title", "Enter value")
+                        common.fillSelectOptions("KGconstraint_UnitOfMesasureSelect",result,false,"label","id")
+
+                    })
+                } else if (datatype == "Property") {
+                    if(confirm ("select property")) {
+                        self.currentGraphNode.data.Selected = true;
+                        self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, color: "#b5d8ed"})
+                    }
                 }
             }
         };
@@ -910,7 +936,7 @@ var KGconstraintsModeler = (function () {
                     data: {
                         id: CreateAxiomResource_bot,
                         label: CreateAxiomResource_bot.params.newObject.label,
-                        source:self.currentSource
+                        source: self.currentSource
                     }
                 });
 
@@ -1093,18 +1119,18 @@ var KGconstraintsModeler = (function () {
         };
 
         self.saveVisjsGraph = function () {
-            var version="ALL"
-            if( self.isTemplateModified){
-                var templateName=prompt("new template version")
-                if(!templateName){
+            var version = "ALL"
+            if (self.isTemplateModified) {
+                var templateName = prompt("new template version")
+                if (!templateName) {
                     alert("your modifications will be ignored")
-                }else{
-                    version=templateName
+                } else {
+                    version = templateName
                 }
             }
 
 
-            self.visjsGraph.saveGraph("Constraints_" + self.currentSource + "_" +version+ ".json", true);
+            self.visjsGraph.saveGraph("Constraints_" + self.currentSource + "_" + version + ".json", true);
         };
 
         self.loadVisjsGraph = function () {
@@ -1663,7 +1689,7 @@ var KGconstraintsModeler = (function () {
         self.loadSuggestionSelectJstree = function (objects, parentName) {
             if ($('#suggestionsSelectJstreeDiv').jstree()) {
                 try {
-                  //  $('#suggestionsSelectJstreeDiv').jstree().destroy();
+                    //  $('#suggestionsSelectJstreeDiv').jstree().destroy();
                     $('#suggestionsSelectJstreeDiv').jstree().empty();
                 } catch {
 

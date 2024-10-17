@@ -1163,7 +1163,7 @@ var MappingModeler = (function () {
                     s: subject,
                     p: "rdfs:label",
                     o: data.rdfsLabel,
-                    isString: true,
+                    "dataType": "xsd:string",
                 });
             }
             if (data.transform) {
@@ -1176,7 +1176,10 @@ var MappingModeler = (function () {
             var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
-                var property = connection.edge.data.type;
+                var property = connection.edge.data.id;
+                if(!property){
+                    property=connection.edge.data.type;
+                }
                 var object = connection.toNode.data.id;
                 if (columnsMapLabels.includes(object)) {
                     object = self.nodeToKGcreatorColumnName(
@@ -1202,12 +1205,12 @@ var MappingModeler = (function () {
 
                     if (predicate.range) {
                         if (predicate.range.indexOf("Resource") > -1) {
-                            triple.isString = true;
+                            triple.dataType= "xsd:string"
                         } else {
                             triple.dataType = predicate.range;
                         }
                     } else {
-                        triple.isString = true;
+                        triple.dataType= "xsd:string"
                     }
                     if (predicate.dateFormat) {
                         triple.dateFormat = predicate.dateFormat;
@@ -1286,10 +1289,11 @@ var MappingModeler = (function () {
         });
     };
     self.calculateColumnMappingsFromGraph = function () {
+        self.classDialogData={};
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
         var edges = MappingModeler.visjsGraph.data.edges.get();
         var notClassNodes = graphNodes.filter(function (item) {
-            return item.data.type != "Class";
+            return item.data.type != "Class" && item.data.dataTable == MappingModeler.currentTable.name ;
         });
         notClassNodes.forEach(function (item) {
             var Column = {id: item.id, label: item.data.label};
@@ -1350,7 +1354,7 @@ var MappingModeler = (function () {
 
 
         var URITType = ["fromColumnTitle", "blankNode", "randomIdentifier"];
-        var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
+        var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class",''];
         //  sort by similarity for others than rowIndex
 
        

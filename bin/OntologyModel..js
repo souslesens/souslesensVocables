@@ -221,7 +221,12 @@ var OntologyModel = {
 
                 //set inherited Constraints
                 function (callbackSeries) {
+                    /*
                     if (!Config.sources[source] || !Config.topLevelOntologies[source]) {
+                        return callbackSeries();
+                    }
+                        */
+                    if (!Config.sources[source] ) {
                         return callbackSeries();
                     }
                     var constraints = ontologyModel.constraints;
@@ -456,7 +461,7 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
             BFO: { uriPattern: "obo", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
             // "BFO-2020": { uriPattern: "obo", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
             // "bfo.owl": { uriPattern: "obo", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
-
+           
             DOLCE: { uriPattern: "dul", prefix: "dul", prefixtarget: "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#" },
             //   LML: { uriPattern: "lml", prefix: "lml", prefixtarget: "http://souslesens.org/ontology/lml/" },
         };

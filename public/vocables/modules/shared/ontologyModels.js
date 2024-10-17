@@ -358,9 +358,12 @@ var OntologyModels = (function () {
 
                         //set inherited Constraints
                         function (callbackSeries) {
-                            if (!Config.sources[source]){// || !Config.topLevelOntologies[source]) {
+                            /*if (!Config.sources[source] || !Config.topLevelOntologies[source]) {
                                 return callbackSeries();
-                            }
+                            }*/
+                                if (!Config.sources[source] ) {
+                                    return callbackSeries();
+                                }
                             var constraints = Config.ontologiesVocabularyModels[source].constraints;
                             for (var prop in Config.ontologiesVocabularyModels[source].properties) {
                                 var prop = Config.ontologiesVocabularyModels[source].properties[prop];

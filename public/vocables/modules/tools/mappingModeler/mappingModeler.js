@@ -1138,9 +1138,11 @@ var MappingModeler = (function () {
         for (var nodeId in columnsMap) {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
-
-            if (!allMappings[data.dataTable]) {
-                allMappings[data.dataTable] = {tripleModels: []};
+            if(!allMappings[data.datasource]){
+                allMappings[data.datasource]={}
+            }
+            if (!allMappings[data.datasource][data.dataTable]) {
+                allMappings[data.datasource][data.dataTable] = {tripleModels: []};
             }
             if (data.rdfType) {
                 var predicate = "rdf:type";
@@ -1148,7 +1150,7 @@ var MappingModeler = (function () {
                     predicate = "rdfs:subClassOf";
                 }
 
-                allMappings[data.dataTable].tripleModels.push({
+                allMappings[data.datasource][data.dataTable].tripleModels.push({
                     s: subject,
                     p: predicate,
                     o: data.rdfType,
@@ -1157,7 +1159,7 @@ var MappingModeler = (function () {
 
             if (data.rdfsLabel) {
 
-                allMappings[data.dataTable].tripleModels.push({
+                allMappings[data.datasource][data.dataTable].tripleModels.push({
                     s: subject,
                     p: "rdfs:label",
                     o: data.rdfsLabel,
@@ -1165,10 +1167,10 @@ var MappingModeler = (function () {
                 });
             }
             if (data.transform) {
-                if (!allMappings[data.dataTable].transform) {
-                    allMappings[data.dataTable].transform = {};
+                if (!allMappings[data.datasource][data.dataTable].transform) {
+                    allMappings[data.datasource][data.dataTable].transform = {};
                 }
-                allMappings[data.dataTable].transform[data.label] = data.transform;
+                allMappings[data.datasource][data.dataTable].transform[data.label] = data.transform;
             }
 
             var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
@@ -1184,7 +1186,7 @@ var MappingModeler = (function () {
                     );
                 }
 
-                allMappings[data.dataTable].tripleModels.push({
+                allMappings[data.datasource][data.dataTable].tripleModels.push({
                     s: subject,
                     p: property,
                     o: object,
@@ -1211,7 +1213,7 @@ var MappingModeler = (function () {
                         triple.dateFormat = predicate.dateFormat;
                     }
 
-                    allMappings[data.dataTable].tripleModels.push(triple);
+                    allMappings[data.datasource][data.dataTable].tripleModels.push(triple);
 
                 });
             }
@@ -1325,6 +1327,15 @@ var MappingModeler = (function () {
             var rowIndex=0;
         }*/
         //self.classDialogData[rowIndex]={Column:'',Type:'',Label:'',DatatypeProperties:{},Transform:{}};
+        var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
+        var currentGraphNode = graphNodes.filter(function (node) {
+            return node.data.label == column
+        })[0];
+        // columns depend on datasource
+        // return if currentDatasource different of this Node
+        if(currentGraphNode.data.dataTable != MappingModeler.currentTable.name        ){
+            return;
+        }
 
         $('#classDefineColumn').append(`<span id='class-column-${column}'> ${column} </span> `);
         $('#classDefineType').append(`<span id='class-type-${column}' >${self.allResourcesMap[self.classDialogData[column].type.id].label} </span>  `);
@@ -1335,18 +1346,16 @@ var MappingModeler = (function () {
         $('#classDefineSample').append(`<button class='slsv-button-1' id='class-sample-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.sampleData("${column}")'> Sample</button> `);
         $('#classDefineTransform').append(`<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button>  `);
         //$('#classDefineClose').append(`<button class='slsv-button-1' id='class-close-${column}' style='padding:2px 2px;margin:0px;'> X</button>  `)
-        var columns = JSON.parse(JSON.stringify(self.currentTable.columns));
-        common.array.insertFirstArray(columns, column);
+        
 
 
         var URITType = ["fromColumnTitle", "blankNode", "randomIdentifier"];
         var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
         //  sort by similarity for others than rowIndex
 
-        var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
-        var currentGraphNode = graphNodes.filter(function (node) {
-            return node.data.label == column
-        })[0];
+       
+        var columns = JSON.parse(JSON.stringify(self.currentTable.columns));
+        common.array.insertFirstArray(columns, column);
         if (currentGraphNode.data.rdfType) {
 
             common.array.insertFirstArray(rdfObjectsType, currentGraphNode.data.rdfType);
@@ -1831,6 +1840,59 @@ var MappingModeler = (function () {
         //$("#suggestionsSelectJstreeDiv").jstree(true).settings.core.data=newData;
         //$("#suggestionsSelectJstreeDiv").jstree(true).refresh();
 
+    }
+
+    self.mappingToKGcreator=function(){
+        var currentMappings=self.generateBasicContentMappingContent();
+        var datasources=Object.keys(KGcreator.currentConfig.databaseSources).concat(Object.keys(KGcreator.currentConfig.csvSources));
+        if(datasources){
+            async.eachSeries(
+                datasources,
+                function (datasource, callbackEach) {
+                    if(!currentMappings[datasource]){
+                        callbackEach()
+                    }
+                    KGcreator.saveDataSourceMappings(self.currentSource,datasource,currentMappings[datasource],function(err){
+                        if(err){
+                            callbackEach(err)
+                        }
+                        callbackEach()
+                    })
+                },
+                function (err) {
+                    MainController.onToolSelect('KGcreator',null,function(){});
+
+                }
+            );
+        }
+        /*datasources.forEach(function(datasource){
+            if(!currentMappings[datasource]){
+                return;
+            }else{
+                
+                KGcreator.saveDataSourceMappings(self.currentSource,database,currentMappings[datasource],function(err){
+                    if(err){
+                        console.log(err)
+                    }
+                    
+                })
+            }
+        });
+        
+        
+        Object.keys(KGcreator.currentConfig.csvSources).forEach(function(csv){
+            if(!currentMappings[csv]){
+                return;
+            }else{
+                KGcreator.saveDataSourceMappings(self.currentSource,csv,currentMappings[csv],function(err){
+                    if(err){
+                        console.log(err)
+                    }
+                    
+                })
+
+            }
+        });*/
     }
     return self;
 })

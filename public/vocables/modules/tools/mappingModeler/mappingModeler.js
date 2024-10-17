@@ -619,11 +619,15 @@ var MappingModeler = (function () {
 
             if (!self.currentRelation) {
                 self.currentRelation = {
-                    from: {id: node.id, classId: getColumnClass(node)},
+                    from: {id: node.id, classId: getColumnClass(node),dataTable:node.data.dataTable},
                     to: null,
                     type: node.data.type,
                 };
             } else {
+                
+                if(node.data.dataTable!=self.currentRelation.from.dataTable){
+                    return alert('Columns not from same dataTable');
+                }
                 self.currentRelation.to = {id: node.id, classId: getColumnClass(node)};
                 if (self.currentRelation.type != "Class" && node.data.type == "Class") {
                     self.graphActions.drawColumnToClassEdge(self.currentRelation);

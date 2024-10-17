@@ -337,13 +337,16 @@
                                 var id = $(this).attr("href");
                                 event.preventDefault();
                                 var divId = "mainDialogDiv";
-                                if (MainController.currentTool == "KGquery") {
+                                if (MainController.currentTool == "KGquery" || NodeInfosAxioms.nodeInfosAxiomsLoaded==true) {
                                     divId = "smallDialogDiv";
                                 }
                                 NodeInfosWidget.showNodeInfos(null, id, divId, null, function (err, result) {
                                     if (err) {
                                         $("#mainDialogDiv").dialog("close");
                                         window.open(id, "_blank");
+                                    }
+                                    if(NodeInfosAxioms.nodeInfosAxiomsLoaded){
+                                        NodeInfosAxioms.reduceNodeInfoAxioms();
                                     }
                                 });
                             }

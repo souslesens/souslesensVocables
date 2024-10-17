@@ -1055,7 +1055,7 @@ var Sparql_OWL = (function () {
                 (" ?prop rdf:type owl:ObjectProperty.");
             }
 
-            if (!options.includeLiterals  &&  !(options.filter && options.filter.indexOf("?object") > -1)) {
+            if (!options.includeLiterals && !(options.filter && options.filter.indexOf("?object") > -1)) {
                 query += " filter (!isLiteral(?object) )";
             }
             query += " } order by ?propLabel ";
@@ -2735,8 +2735,8 @@ var Sparql_OWL = (function () {
         if (options.depth) {
             pathOperator = "{0," + options.depth + "}";
         }
-        if(!taxonomyPredicate){
-            taxonomyPredicate="rdfs:subClassOf"
+        if (!taxonomyPredicate) {
+            taxonomyPredicate = "rdfs:subClassOf";
         }
 
         var query =

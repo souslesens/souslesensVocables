@@ -42,12 +42,12 @@ var JstreeWidget = (function () {
         },
 
         Class: {
-            li_attr: {style: "color:black"},
+            li_attr: { style: "color:black" },
             icon: "./icons/JstreeIcons/Classes.png",
         },
 
         Property: {
-            li_attr: {style: "color:black"},
+            li_attr: { style: "color:black" },
             icon: "./icons/JstreeIcons/Property.png",
         },
         Container: {
@@ -96,7 +96,7 @@ var JstreeWidget = (function () {
         },
         // Triple
         "owl:Class": {
-            li_attr: {style: "color:black"},
+            li_attr: { style: "color:black" },
             icon: "./icons/JstreeIcons/Classes.png",
         },
         // double
@@ -195,7 +195,7 @@ var JstreeWidget = (function () {
                 },
                 types: JstreeWidget.types,
 
-                contextmenu: {items: options.contextMenu},
+                contextmenu: { items: options.contextMenu },
             })
             .on("loaded.jstree", function () {
                 //  setTimeout(function () {
@@ -305,9 +305,15 @@ var JstreeWidget = (function () {
             .jstree("destroy")
             .empty();
     };
-    self.empty=function(jstreeDiv){
-        $('#'+jstreeDiv).jstree(true).delete_node($('#'+jstreeDiv).jstree(true).get_node('#').children);
-    }
+    self.empty = function (jstreeDiv) {
+        $("#" + jstreeDiv)
+            .jstree(true)
+            .delete_node(
+                $("#" + jstreeDiv)
+                    .jstree(true)
+                    .get_node("#").children
+            );
+    };
     self.addNodesToJstree = function (jstreeDiv, parentNodeId_, jstreeData, options, callback) {
         if (!jstreeDiv) {
             jstreeDiv = self.jstreeDiv;
@@ -316,8 +322,7 @@ var JstreeWidget = (function () {
             options = {};
         }
         if (!callback) {
-            callback = function () {
-            };
+            callback = function () {};
         }
         var position = "first";
         if (options.positionLast) {
@@ -325,7 +330,7 @@ var JstreeWidget = (function () {
         }
         self.orderJstreeDataForCreation(jstreeDiv, jstreeData);
         if (!Array.isArray(jstreeData)) {
-            jstreeData = [jstreeData]
+            jstreeData = [jstreeData];
         }
         jstreeData.forEach(function (node) {
             var Jstree_id = $("#" + jstreeDiv)
@@ -428,7 +433,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         var idList = [];
         var jsonNodes = $("#" + jstreeDiv)
             .jstree()
-            .get_json(parentNodeId, {flat: true});
+            .get_json(parentNodeId, { flat: true });
 
         if (IdsOnly) {
             jsonNodes.forEach(function (item) {
@@ -465,7 +470,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
         var jsonNodes = $("#" + jstreeDiv)
             .jstree(true)
-            .get_json("#", {flat: true});
+            .get_json("#", { flat: true });
         var matchingNode = null;
         jsonNodes.forEach(function (node) {
             if (node.data && node.data[property] == value) {
@@ -732,26 +737,28 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .search(value);
         $("#jstreeWidget_searchInput").val("");
     };
-    self.updateJstree=function(divId,newData){
-        if(!Array.isArray(newData)){
+    self.updateJstree = function (divId, newData) {
+        if (!Array.isArray(newData)) {
             return;
         }
-        var newData2=JSON.parse(JSON.stringify(newData));
-        var keyToKeep=['data','text','id','parent'];
-        newData2.forEach(function(item){
-           
-            for(let key in item){
-                if(!keyToKeep.includes(key)){
-                    delete item[key]
+        var newData2 = JSON.parse(JSON.stringify(newData));
+        var keyToKeep = ["data", "text", "id", "parent"];
+        newData2.forEach(function (item) {
+            for (let key in item) {
+                if (!keyToKeep.includes(key)) {
+                    delete item[key];
                 }
             }
         });
-        newData2=newData2.filter(function(item){return item.id!='#'})
-        $("#"+divId).jstree(true).settings.core.data=newData2;
+        newData2 = newData2.filter(function (item) {
+            return item.id != "#";
+        });
+        $("#" + divId).jstree(true).settings.core.data = newData2;
 
-        $("#"+divId).jstree(true).refresh();
-
-    }
+        $("#" + divId)
+            .jstree(true)
+            .refresh();
+    };
 
     return self;
 })();

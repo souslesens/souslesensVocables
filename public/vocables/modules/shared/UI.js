@@ -332,19 +332,19 @@ var UI = (function () {
         Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
         $(".vis-edit-mode").css("display", "none");
     };
-    self.adjustSelectListSize=function(selectListDivId,maxSize){
-        var numberOfOptions=$('#'+selectListDivId).find('option').length;
+    self.adjustSelectListSize = function (selectListDivId, maxSize) {
+        var numberOfOptions = $("#" + selectListDivId).find("option").length;
         if (numberOfOptions < maxSize) {
             // Si le nombre d'éléments est inférieur à 10, on ajuste la taille
-            $('#'+selectListDivId).attr('size', numberOfOptions);
-            if(numberOfOptions==1){
-                $('#'+selectListDivId).attr('size', 2);
+            $("#" + selectListDivId).attr("size", numberOfOptions);
+            if (numberOfOptions == 1) {
+                $("#" + selectListDivId).attr("size", 2);
             }
-          } else {
+        } else {
             // Sinon, on fixe à 10
-            $('#'+selectListDivId).attr('size', maxSize);
-          }
-    }
+            $("#" + selectListDivId).attr("size", maxSize);
+        }
+    };
     return self;
 })();
 export default UI;

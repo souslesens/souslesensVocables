@@ -38,9 +38,8 @@ var KGcreator = (function () {
                     throw new Error("React app is not ready");
                 }
 
-
                 self.uploadFormData.currentSource = self.currentSlsvSource;
-                
+
                 self.umountKGUploadApp = self.createApp(self.uploadFormData);
             },
             beforeClose: function () {
@@ -1051,8 +1050,7 @@ var KGcreator = (function () {
         if (self.currentConfig.currentDataSource.sampleData) {
             showTable(self.currentConfig.currentDataSource.sampleData);
         } else if (self.currentConfig.currentDataSource.type == "databaseSource") {
-            if(!node || !node.data)
-                return alert("not implemented yet for databases")
+            if (!node || !node.data) return alert("not implemented yet for databases");
             var size = 200;
             var sqlQuery = "select top  " + size + "* from " + node.data.id;
             if (self.currentConfig.currentDataSource.sqlType == "postgres") {

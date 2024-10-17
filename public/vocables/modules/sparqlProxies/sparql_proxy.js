@@ -102,10 +102,6 @@ var Sparql_proxy = (function () {
             options = {};
         }
 
-
-
-
-
         // query=query.replace(/[\n\r]/g," ")
         if (false) {
             query = self.addFromLabelsGraphToQuery(query);
@@ -148,8 +144,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             useProxy = true;
         }
 
-
-        var getMethod=sourceParams && sourceParams.sparql_server.method && sourceParams.sparql_server.method == "GET"
+        var getMethod = sourceParams && sourceParams.sparql_server.method && sourceParams.sparql_server.method == "GET";
         if (getMethod) {
             payload.GET = true;
             var query2 = encodeURIComponent(query);
@@ -158,7 +153,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             if (sourceParams && sourceParams.sparql_server.headers) {
                 payload.options = JSON.stringify({ headers: sourceParams.sparql_server.headers, useProxy: useProxy });
             }
-           return $.ajax({
+            return $.ajax({
                 type: "GET",
                 url: `${Config.apiUrl}/sparqlProxy`,
                 data: payload,
@@ -168,15 +163,8 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                         return callback(null, data);
                     }
                 },
-                    error: function (data){
-
-
-                }
-        })
-
-
-
-
+                error: function (data) {},
+            });
         } else {
             //POST
             payload.POST = true;
@@ -186,19 +174,15 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             }
             if (sourceParams && sourceParams.sparql_server.type == "fuseki") {
                 url = url.replace("&query=", "");
-            }
-
-
-
-           else  if (options.acceptHeader) {
+            } else if (options.acceptHeader) {
                 headers["Accept"] = options.acceptHeader;
             } else {
                 headers["Accept"] = "application/sparql-results+json";
             }
             headers["Content-Type"] = "application/x-www-form-urlencoded";
 
-            if(query.toLowerCase().indexOf("construct")> -1){
-                headers={"Content-Type":"text/turtle; charset=UTF-8"}
+            if (query.toLowerCase().indexOf("construct") > -1) {
+                headers = { "Content-Type": "text/turtle; charset=UTF-8" };
             }
             var body = {
                 params: { query: query, useProxy: useProxy },
@@ -227,7 +211,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                     return callback(null, data);
                 }
 
-                if (headers["Content-Type"] && headers["Content-Type"].indexOf("text") >-1) {
+                if (headers["Content-Type"] && headers["Content-Type"].indexOf("text") > -1) {
                     return callback(null, data);
                 }
 

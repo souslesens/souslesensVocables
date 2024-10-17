@@ -9,6 +9,7 @@ var Cfihos_pump_poc = (function () {
             if (!uri) {
                 uri = "http://data.totalenergies.com/resource/ontology/cfihos_1.5/EquipmentClassCFIHOS-30000521"
             }
+            KGconstraintsModeler.visjsGraph.clearGraph()
             var uniqueNodes = {}
             var visjsData = {nodes: [], edges: []}
 
@@ -18,7 +19,12 @@ var Cfihos_pump_poc = (function () {
                 //getRestrictions  and addNodes
                 function (callbackSeries) {
                     Sparql_OWL.getObjectRestrictions("CFIHOS_1_5_PLUS", uri, null, function (err, result) {
+if(err)
+    return alert(err.responseText || err)
+                        if(result.length==0) {
 
+                            return alert("no data")
+                        }
 
                         var individualId = common.getRandomHexaId(5)
                         visjsData.nodes.push({
@@ -371,6 +377,57 @@ var Cfihos_pump_poc = (function () {
 
 
         self.listEquipments=function(){
+          //  Sparql_OWL.getNodesAncestorsOrDescendants("CFIHOS_1_5_PLUS", "http://data.totalenergies.com/resource/ontology/cfihos_1.5/EquipmentClassCFIHOS-30000311",{ excludeItself: 0, descendants:true }, function (err, result) {
+var rootId="http://data.totalenergies.com/resource/ontology/cfihos_1.5/EquipmentClassCFIHOS-30000311"
+              Sparql_OWL.getAllDescendants("CFIHOS_1_5_PLUS",rootId,null,null,function(err,result){
+                if(err)
+                    return alert(err.responseText || err)
+                var x=result;
+
+
+                var jstreedata=[]
+               /*   jstreedata.push({
+                      id:rootId.value,
+                      text:"EqupmentClass",
+                      parent:"#"
+                  })*/
+                  var parentsMap={}
+
+
+                  var distinctNodes={}
+                  result.forEach(function(item){
+                      if(!distinctNodes[item.descendantParent.value]){
+                          distinctNodes[item.descendantParent.value]=1
+                          parentsMap[item.descendantParent.value]=1
+                      }
+
+                  })
+                  result.forEach(function(item){
+                        if(!distinctNodes[item.descendant.value]){
+                            distinctNodes[item.descendant.value]=1
+                          if(!parentsMap[item.descendant.value]) {
+                              jstreedata.push({
+                                  id: item.descendant.value,
+                                  text: item.descendantLabel.value,
+                                  parent: "#"
+                              })
+                          }
+
+                      }
+
+                  })
+
+
+                  var options={
+                      selectTreeNodeFn:function(event,obj){
+                        Cfihos_pump_poc.query(obj.node.id)
+                    }
+                  }
+
+                  JstreeWidget.loadJsTree("KGconstraintsModeler_equipmentsJstreeDiv",jstreedata,options)
+
+
+            })
 
 
         }

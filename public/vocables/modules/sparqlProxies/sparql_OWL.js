@@ -2735,6 +2735,9 @@ var Sparql_OWL = (function () {
         if (options.depth) {
             pathOperator = "{0," + options.depth + "}";
         }
+        if(!taxonomyPredicate){
+            taxonomyPredicate="rdfs:subClassOf"
+        }
 
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +

@@ -585,8 +585,8 @@ var KGconstraintsModeler = (function () {
 
                     if (self.currentGraphNode.data.id == "Boolean") {
                         html += "<select style='width:100px' id='KGconstraint_litteralValue' >" +
-                            "<options>true</options>" +
-                            "<options>false</options>" +
+                            "<option>true</option>" +
+                            "<option>false</option>" +
                             "</select>"
                     } else {
                        html += "<textarea  id='KGconstraint_litteralValue'></textarea>"

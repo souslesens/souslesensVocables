@@ -2,6 +2,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import KGconstraintsModeler from "./KGconstraintsModeler.js";
 import common from "../../shared/common.js";
 
+
 var Cfihos_pump_poc = (function() {
     var self = {};
 
@@ -23,7 +24,7 @@ var Cfihos_pump_poc = (function() {
                             return alert(err.responseText || err);
                         }
                         if (result.length == 0) {
-                            return alert("no data");
+                          return  UI.message("no data");
                         }
 
                         var individualId = common.getRandomHexaId(5);
@@ -31,18 +32,19 @@ var Cfihos_pump_poc = (function() {
                             id: individualId,
                             label: "my" + result[0].subjectLabel.value,
                             color: "#eab3b3",
-                            level: 1,
+                            level: 0,
                             data: {
-                                id: "MyPump",
-                                label: "MyPump",
+                                id: result[0].subject.value,
+                                label: "my" + result[0].subjectLabel.value,
                                 type: "Individual",
                                 source: "CFIHOS_1_5_PLUS"
                             }
                         });
-
+                        var classId
                         result.forEach(function(item) {
+
                             if (!uniqueNodes[item.subject.value]) {
-                                var classId = common.getRandomHexaId(5);
+                                 classId = common.getRandomHexaId(5);
                                 uniqueNodes[item.subject.value] = classId;
 
                                 visjsData.nodes.push({
@@ -50,7 +52,7 @@ var Cfihos_pump_poc = (function() {
                                     label: item.subjectLabel.value,
                                     shape: "box",
                                     color: "#00afef",
-                                    level: 0,
+                                    level: 1,
                                     data: {
                                         id: item.subject.value,
                                         label: item.subjectLabel.value,
@@ -71,35 +73,7 @@ var Cfihos_pump_poc = (function() {
                                 });
                             }
 
-                            if (true || !uniqueNodes[item.prop.value]) {
-                                var propId = common.getRandomHexaId(5);
-                                uniqueNodes[item.prop.value] = propId;
 
-                                visjsData.nodes.push({
-                                    id: propId,
-                                    label: item.propLabel.value,
-                                    shape: "text",
-                                    color: "#efbf00",
-                                    level: 2,
-                                    data: {
-                                        id: item.prop.value,
-                                        label: item.propLabel.value,
-                                        type: "ObjectProperty",
-                                        source: "CFIHOS_1_5_PLUS"
-                                    }
-                                });
-                                visjsData.edges.push({
-                                    from: individualId,
-                                    label: "",
-                                    to: propId,
-                                    width: 2,
-                                    data: {
-                                        type: "rdf:type"
-                                    },
-                                    arrows: null,
-                                    color: "#ccc"
-                                });
-                            }
 
                             if (!uniqueNodes[item.value.value]) {
                                 var objectId = common.getRandomHexaId(5);
@@ -120,12 +94,14 @@ var Cfihos_pump_poc = (function() {
                                     }
                                 });
                                 visjsData.edges.push({
-                                    from: propId,
-                                    label: "",
+                                    from: classId,
+                                    label: "",//item.propLabel.value,
                                     to: objectId,
                                     width: 2,
                                     data: {
-                                        type: "rdf:type"
+                                        type: "rdf:type",
+                                        id:item.prop.value,
+                                        label:item.propLabel.value,
                                     },
                                     arrows: null,
                                     color: "#ccc"
@@ -396,7 +372,7 @@ var Cfihos_pump_poc = (function() {
         } else if (datatype == "Property") {
             if (confirm("select property")) {
                 KGconstraintsModeler.currentGraphNode.data.Selected = true;
-                self.visjsGraph.data.nodes.update({ id: KGconstraintsModeler.currentGraphNode.id, color: "#b5d8ed" });
+                KGconstraintsModeler.visjsGraph.data.nodes.update({ id: KGconstraintsModeler.currentGraphNode.id, color: "#b5d8ed" });
             }
         }
     }
@@ -441,6 +417,7 @@ var Cfihos_pump_poc = (function() {
 
                 var options = {
                     selectTreeNodeFn: function(event, obj) {
+                        KGconstraintsModeler.currentClassUri=obj.node.id
                         Cfihos_pump_poc.query(obj.node.id);
                     }
                 };

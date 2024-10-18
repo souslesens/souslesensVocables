@@ -386,11 +386,21 @@ var _botEngine = (function () {
             var chat_class = "chat-right";
         }
         var tokenId = "token_" + common.getRandomHexaId(5);
-        var html = "<span class='" + chat_class + "' id='" + tokenId + "'>" + str + "</span>";
-        if (chat_class == "chat-right") {
-            html += '<span style="flex-basis:100%;" ></span>';
+        var html=''
+        if(chat_class=='chat-left'){
+            html +='<div style="display: flex; flex-direction: row;justify-content: space-between; align-items: center; ">'
         }
-        $(html).insertBefore("#bot_input");
+        html += "<span class='" + chat_class + "' id='" + tokenId + "'>" + str + "</span>";
+        if (chat_class == "chat-left") {
+            html += '</div>';
+            self.lastTokenId=tokenId
+        }
+        if (chat_class == "chat-right") {
+           $(html).insertAfter('#'+self.lastTokenId);
+        }else{
+            $(html).insertBefore("#bot_input");
+        }
+        
         $("#bot_input").val("");
         $("#bot_input").focus();
         if ($("#botDiv")[0].scrollHeight > 500) {

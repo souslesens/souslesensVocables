@@ -259,20 +259,24 @@ var NodeInfosAxioms = (function () {
         NodeInfosAxioms.loadAxiomsJstree();
     };
     self.nodeInfos = function () {
-        self.nodeInfosAxiomsLoaded = true;
+       /* self.nodeInfosAxiomsLoaded = true;
         self.nodeBeforeNodeInfos = JSON.parse(JSON.stringify(NodeInfosWidget.currentNode));
-        $("#nodeInfosWidget_InfosTabDiv").remove();
+        $("#nodeInfosWidget_InfosTabDiv").remove();*/
 
-        NodeInfosWidget.showNodeInfos(self.currentSource, Axioms_graph.currentGraphNode, "smallDialogDiv", null, function () {
-            self.reduceNodeInfoAxioms();
+        NodeInfosWidget.showNodeInfos(self.currentSource, Axioms_graph.currentGraphNode, "mainDialogDiv", null, function () {
+            // switch tab
+
+
+            //self.reduceNodeInfoAxioms();
         });
     };
+    /*
     self.reduceNodeInfoAxioms = function () {
         $("#smallDialogDiv").find("#nodeInfosWidget_AxiomsTabDiv").remove();
         $("#smallDialogDiv").find("#nodeInfosWidget_metaDataTabDiv").remove();
         $($("#smallDialogDiv").find("#nodeInfosWidget_tabsDiv").children()[0]).remove();
         $("#smallDialogDiv").find("#nodeInfosWidget_InfosTabDiv").css("border-top-left-radius", "14px");
-    };
+    };*/
     self.showResourceDescendantsAxioms = function (source, resource, descendants, divId) {
         self.currentSource = source;
         self.currentResource = resource;

@@ -4,19 +4,17 @@ import OntologyModels from "../../shared/ontologyModels.js";
 import _botEngine from "../../bots/_botEngine.js";
 import UI from "../../shared/UI.js";
 
-
 //https://docs.cambridgesemantics.com/anzograph/v3.1/userdoc/shacl-constraints.htm
 var KGconstraints_editor = (function () {
     var self = {};
 
-    self.shacl_constraints = {}
+    self.shacl_constraints = {};
 
     self.onLoaded = function () {
         $("#graphDiv").load("./modules/tools/KGconstraints/html/centralPanel.html", function () {
             $("#lateralPanelDiv").load("./modules/tools/KGconstraints/html/leftPanel.html", function () {
                 self.currentSource = "DALIA_LIFEX_COSTS"; // Lineage_sources.activeSource
-                self.initConstraintsJsTree()
-
+                self.initConstraintsJsTree();
             });
         });
     };
@@ -24,42 +22,35 @@ var KGconstraints_editor = (function () {
     self.initConstraintsJsTree = function () {
         self.loadSourceConstraints(self.currentSource, function (err, result) {
             if (err) {
-                return alert(err.responseText || err)
+                return alert(err.responseText || err);
             }
-            var jstreeData=result
+            var jstreeData = result;
             if (jstreeData) {
-                jstreeData = result
+                jstreeData = result;
             }
 
-                jstreeData.push(
-                    {
-                        id: self.currentSource,
-                        text: self.currentSource,
-                        parent: "#"
-                    }
-                )
+            jstreeData.push({
+                id: self.currentSource,
+                text: self.currentSource,
+                parent: "#",
+            });
 
             var options = {
-                onSelectTreeNode: function (obj, node) {
-                },
+                onSelectTreeNode: function (obj, node) {},
                 openAll: true,
-                withCheckboxes: true
-            }
+                withCheckboxes: true,
+            };
 
-            JstreeWidget.loadJsTree("KGconstraintsEditor_constraintsTreeDiv", jstreeData, options)
-
-        })
-
-    }
-
+            JstreeWidget.loadJsTree("KGconstraintsEditor_constraintsTreeDiv", jstreeData, options);
+        });
+    };
 
     self.startConstraintEditorBot = function () {
-
         KGquery_graph.getInferredModelVisjsData(self.currentSource, function (err, model) {
             if (err) {
                 return alert(err);
             }
-            var params = {source: self.currentSource, model: model, constraintsMap: self.constraintsMap};
+            var params = { source: self.currentSource, model: model, constraintsMap: self.constraintsMap };
             KGconstraintsEditor_bot.start(KGconstraintsEditor_bot.workflow_dataTypePropertyConstraint, params, function (err, result) {
                 if (err) {
                     return alert(err);
@@ -71,9 +62,7 @@ var KGconstraints_editor = (function () {
     };
 
     self.buildClassShape = function (botParams) {
-
-
-        var constraintName = botParams.shacl_constraintName;// prompt("constraint name",classLabel)
+        var constraintName = botParams.shacl_constraintName; // prompt("constraint name",classLabel)
 
         if (!constraintName) {
             return;
@@ -85,7 +74,7 @@ var KGconstraints_editor = (function () {
             path: botParams.shacl_propertyUri,
             shacl_constraintType: botParams.shacl_constraintType,
             shacl_constraint: botParams.shacl_constraint,
-            shacl_propertyUri: botParams.shacl_propertyUri
+            shacl_propertyUri: botParams.shacl_propertyUri,
         };
         if (botParams.shacl_valueDataType == "class") {
             obj.shacl_value = "<" + botParams.shacl_value + ">";
@@ -103,16 +92,13 @@ var KGconstraints_editor = (function () {
             obj.shacl_value = '"' + botParams.shacl_value + '"';
         }
 
-
-        var graph = self.getConstraintGraph(constraintName, obj)
+        var graph = self.getConstraintGraph(constraintName, obj);
         if (!self.shacl_constraints[constraintName]) {
-            self.shacl_constraints[constraintName] = []
+            self.shacl_constraints[constraintName] = [];
         }
-        self.shacl_constraints[constraintName].push(graph)
+        self.shacl_constraints[constraintName].push(graph);
 
-        self.addConstraintToJstree(self.currentSource, constraintName)
-
-
+        self.addConstraintToJstree(self.currentSource, constraintName);
     };
     self.addConstraintToJstree = function (sourceLabel, constraintName) {
         var jstreeData = {
@@ -121,37 +107,31 @@ var KGconstraints_editor = (function () {
             parent: sourceLabel,
             data: {
                 shacl_graph: self.shacl_constraints[constraintName],
-                source: sourceLabel
-            }
-        }
+                source: sourceLabel,
+            },
+        };
         JstreeWidget.addNodesToJstree("KGconstraintsEditor_constraintsTreeDiv", sourceLabel, jstreeData, null, function () {
             self.saveSourceConstraints(self.currentSource, jstreeData, function (err, result) {
                 if (err) {
-                    return alert(err.responseText || err)
+                    return alert(err.responseText || err);
                 }
-                return UI.message("file saved")
-            })
-        })
-    }
-
+                return UI.message("file saved");
+            });
+        });
+    };
 
     self.getConstraintGraph = function (name, data) {
-
-
-        var targetClass = "<" + data.classUri + ">"
-        var str =
-            "schema:" + name + " a sh:NodeShape ;\n" +
-            "    sh:targetClass " + targetClass + ";\n"
+        var targetClass = "<" + data.classUri + ">";
+        var str = "schema:" + name + " a sh:NodeShape ;\n" + "    sh:targetClass " + targetClass + ";\n";
         //   data.forEach(function (constraint) {
         str += "    sh:property [\n";
         if (data.shacl_propertyUri) {
-            str += "     sh:path " + data.shacl_propertyUri + ";\n"
+            str += "     sh:path " + data.shacl_propertyUri + ";\n";
         }
-        str += data.shacl_constraint + " " + data.shacl_value + ";\n"
-
+        str += data.shacl_constraint + " " + data.shacl_value + ";\n";
 
         //   })
-        str += "] ."
+        str += "] .";
 
         var prefixes =
             "@prefix dash: <http://datashapes.org/dash#> .\n" +
@@ -161,21 +141,17 @@ var KGconstraints_editor = (function () {
             "@prefix sh: <http://www.w3.org/ns/shacl#> .\n" +
             "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
 
+        var shapesGraph = self.setPrefixesInSchema(str, prefixes);
 
-        var shapesGraph = self.setPrefixesInSchema(str, prefixes)
-
-
-        return shapesGraph
-
-    }
+        return shapesGraph;
+    };
 
     self.setPrefixesInSchema = function (schema, header) {
-
-        var regex = /^[^@].*<([^>]*)/gm
+        var regex = /^[^@].*<([^>]*)/gm;
         var array = [];
-        var urisMap = {}
+        var urisMap = {};
         while ((array = regex.exec(schema)) != null) {
-            var uri = array[1]
+            var uri = array[1];
             if (header.indexOf(uri) < 0) {
                 var lastSep = uri.lastIndexOf("#");
                 if (lastSep < 0) {
@@ -186,30 +162,25 @@ var KGconstraints_editor = (function () {
                     return;
                 }
 
-                var prefixStr = uri.substring(0, lastSep + 1)
+                var prefixStr = uri.substring(0, lastSep + 1);
                 if (!urisMap[prefixStr]) {
-                    urisMap[prefixStr] = 1
+                    urisMap[prefixStr] = 1;
                 }
             }
         }
 
-        var prefixStr = ""
-        var index = 1
+        var prefixStr = "";
+        var index = 1;
         for (var uri in urisMap) {
-
-            var prefix = "ns" + (index++)
-            prefixStr += "@prefix " + prefix + ": <" + uri + "> .\n"
-            schema = schema.replaceAll(uri, prefix + ":")
+            var prefix = "ns" + index++;
+            prefixStr += "@prefix " + prefix + ": <" + uri + "> .\n";
+            schema = schema.replaceAll(uri, prefix + ":");
         }
-        schema = schema.replace(/[<>]/gm, "")
-        var shape = prefixStr + header + schema
+        schema = schema.replace(/[<>]/gm, "");
+        var shape = prefixStr + header + schema;
 
-
-        return shape
-
-
-    }
-
+        return shape;
+    };
 
     self.loadSourceConstraints = function (sourceLabel, callback) {
         var payload = {
@@ -236,7 +207,6 @@ var KGconstraints_editor = (function () {
         });
     };
 
-
     self.saveSourceConstraints = function (sourceLabel, data, callback) {
         var payload = {
             dir: "shacl",
@@ -256,10 +226,7 @@ var KGconstraints_editor = (function () {
                 callback(err);
             },
         });
-
-
-    }
-
+    };
 
     //https://docs.cambridgesemantics.com/anzograph/v3.1/userdoc/shacl-constraints.htm
 

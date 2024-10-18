@@ -1,9 +1,7 @@
 var KGconstraints_validator = (function () {
     var self = {};
 
-    self.onLoaded = function () {
-
-    };
+    self.onLoaded = function () {};
 
     return self;
 })();

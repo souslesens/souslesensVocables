@@ -13,7 +13,7 @@ var KGquery_filter_bot = (function () {
         self.filter = "";
         self.filterItems = [];
         self.workflow = workflow;
-        self.callbackFn = validateFn
+        self.callbackFn = validateFn;
 
         _botEngine.init(KGquery_filter_bot, workflow, null, function () {
             self.params = {};
@@ -32,8 +32,8 @@ var KGquery_filter_bot = (function () {
                 list_constraintsFn: {
                     dispatch_shapeTypeFn: {
                         _OR: {
-                            "sh:property": {listPropertiesFn: {promptDatatypeValueFn: {promptContraintNameFn:{}}}},
-                            "sh:node": {promptDatatypeValueFn: {promptContraintNameFn:{}}},
+                            "sh:property": { listPropertiesFn: { promptDatatypeValueFn: { promptContraintNameFn: {} } } },
+                            "sh:node": { promptDatatypeValueFn: { promptContraintNameFn: {} } },
                         },
                     },
                 },
@@ -48,7 +48,7 @@ var KGquery_filter_bot = (function () {
         list_constraintsFn: "Choose an property",
         dispatch_shapeTypeFn: "choose shacl_shapeType",
         promptDatatypeValueFn: "Enter a value",
-        promptContraintNameFn:"Enter Constraint name"
+        promptContraintNameFn: "Enter Constraint name",
     };
 
     self.functions = {}; //SparqlQuery_bot.functions;
@@ -57,7 +57,7 @@ var KGquery_filter_bot = (function () {
         var classes = [];
         self.params.nodesMap = {};
         self.params.model.nodes.forEach(function (node) {
-            classes.push({id: node.data.id, label: node.data.label});
+            classes.push({ id: node.data.id, label: node.data.label });
             self.params.nodesMap[node.data.id] = node;
         });
         common.array.sortObjectArray(classes, "label");
@@ -69,7 +69,7 @@ var KGquery_filter_bot = (function () {
         var choices = [];
 
         for (var type in self.params.constraintsMap) {
-            choices.push({id: type, label: type});
+            choices.push({ id: type, label: type });
         }
 
         common.array.sortObjectArray(choices, "label");
@@ -79,7 +79,7 @@ var KGquery_filter_bot = (function () {
         var shacl_constraints = [];
 
         for (var shacl_constraint in self.params.constraintsMap[self.params.shacl_constraintType]) {
-            shacl_constraints.push({id: shacl_constraint, label: shacl_constraint});
+            shacl_constraints.push({ id: shacl_constraint, label: shacl_constraint });
         }
         common.array.sortObjectArray(shacl_constraints, "label");
         _botEngine.showList(shacl_constraints, "shacl_constraint");
@@ -91,7 +91,7 @@ var KGquery_filter_bot = (function () {
             var shacl_shapeTypes = [];
 
             shacl_constraint.shapeType.forEach(function (shacl_shapeType) {
-                shacl_shapeTypes.push({id: "sh:" + shacl_shapeType, label: "sh:" + shacl_shapeType});
+                shacl_shapeTypes.push({ id: "sh:" + shacl_shapeType, label: "sh:" + shacl_shapeType });
             });
             _botEngine.showList(shacl_shapeTypes, "shacl_shapeType");
         } else {
@@ -108,39 +108,33 @@ var KGquery_filter_bot = (function () {
                 return self.functions.listPropertiesFn();
             }
         } else {
-
-            if (shacl_property.shapeType== "int") {
-                self.params.shacl_valueDataType="int"
+            if (shacl_property.shapeType == "int") {
+                self.params.shacl_valueDataType = "int";
                 return _botEngine.promptValue("enter property value", "shacl_value");
-            }
-            else if (shacl_property.shapeType == "string") {
-                self.params.shacl_valueDataType="string"
+            } else if (shacl_property.shapeType == "string") {
+                self.params.shacl_valueDataType = "string";
                 return _botEngine.promptValue("enter property value", "shacl_value");
-            }
-
-            else {
-
+            } else {
                 var nonObjectProperties = self.params.nodesMap[self.params.shacl_classUri].data.nonObjectProperties;
-                var shacl_valueDataType = null
+                var shacl_valueDataType = null;
                 nonObjectProperties.forEach(function (property) {
                     if (property.id == self.params.shacl_propertyUri) {
-                        shacl_valueDataType = property.datatype
+                        shacl_valueDataType = property.datatype;
                     }
-                })
-                if(shacl_valueDataType.endsWith("int")){
-                    self.params.shacl_valueDataType="int"
+                });
+                if (shacl_valueDataType.endsWith("int")) {
+                    self.params.shacl_valueDataType = "int";
                     return _botEngine.promptValue("enter int value", "shacl_value");
                 }
-                if(shacl_valueDataType.endsWith("float")){
-                    self.params.shacl_valueDataType="float"
+                if (shacl_valueDataType.endsWith("float")) {
+                    self.params.shacl_valueDataType = "float";
                     return _botEngine.promptValue("enter float (ex 10.0) value", "shacl_value");
                 }
-                if(shacl_valueDataType.endsWith("dateTime") ||shacl_valueDataType.endsWith("date" )){
-                    self.params.shacl_valueDataType="dateTime"
+                if (shacl_valueDataType.endsWith("dateTime") || shacl_valueDataType.endsWith("date")) {
+                    self.params.shacl_valueDataType = "dateTime";
                     return _botEngine.promptValue("enter date value (YYYY-MM-DD)", "shacl_value");
-                }else
-                    self.params.shacl_valueDataType="string"
-                    return _botEngine.promptValue("enter string value", "shacl_value");
+                } else self.params.shacl_valueDataType = "string";
+                return _botEngine.promptValue("enter string value", "shacl_value");
             }
         }
     };
@@ -154,10 +148,10 @@ var KGquery_filter_bot = (function () {
             } else if (edge.to == self.params.classUri) {
                 targetClassUri = edge.from;
             }
-            classes.push({id: targetClassUri, label: self.params.model.nodes[targetClassUri].label});
+            classes.push({ id: targetClassUri, label: self.params.model.nodes[targetClassUri].label });
         });
         common.array.sortObjectArray(classes, "label");
-        self.params.shacl_valueDataType="class"
+        self.params.shacl_valueDataType = "class";
         _botEngine.showList(classes, "shacl_value");
     };
     self.functions.listPropertiesFn = function () {
@@ -165,29 +159,29 @@ var KGquery_filter_bot = (function () {
 
         self.params.model.edges.forEach(function (edge) {
             if (edge.from == self.params.classUri) {
-                properties.push({id: edge.data.propertyId, label: edge.data.propertyLabel});
+                properties.push({ id: edge.data.propertyId, label: edge.data.propertyLabel });
             } else if (edge.to == self.params.classUri) {
-                properties.push({id: edge.data.propertyId, label: edge.data.propertyLabel});
+                properties.push({ id: edge.data.propertyId, label: edge.data.propertyLabel });
             }
         });
 
         var nonObjectProperties = self.params.nodesMap[self.params.shacl_classUri].data.nonObjectProperties;
         if (nonObjectProperties) {
             nonObjectProperties.forEach(function (property) {
-                properties.push({id: property.id, label: property.label});
+                properties.push({ id: property.id, label: property.label });
             });
         }
         common.array.sortObjectArray(properties, "label");
         _botEngine.showList(properties, "shacl_propertyUri");
     };
 
-    self.functions.promptContraintNameFn=function(){
-        var classLabel=self.params.nodesMap[self.params.shacl_classUri].label
-        var property=self.params["shacl_propertyUri"]
-        var propertylabel=property?Sparql_common.getLabelFromURI(property):""
-        var defaultValue=classLabel+"_"+propertylabel+"_"+self.params["shacl_constraint"];
-        _botEngine.promptValue("","shacl_constraintName",defaultValue)
-    }
+    self.functions.promptContraintNameFn = function () {
+        var classLabel = self.params.nodesMap[self.params.shacl_classUri].label;
+        var property = self.params["shacl_propertyUri"];
+        var propertylabel = property ? Sparql_common.getLabelFromURI(property) : "";
+        var defaultValue = classLabel + "_" + propertylabel + "_" + self.params["shacl_constraint"];
+        _botEngine.promptValue("", "shacl_constraintName", defaultValue);
+    };
 
     return self;
 })();

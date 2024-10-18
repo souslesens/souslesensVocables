@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.88.0](https://github.com/souslesens/souslesensVocables/compare/1.87.0...1.88.0) (2024-10-16)
+
+> [!IMPORTANT]
+> Updating to 1.88.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Features
+
+* **mainapp:** add prefix field on SourcesDialog ([e12c334](https://github.com/souslesens/souslesensVocables/commit/e12c334916c3250900c6e557a2f57e411062e37e))
+* **mainapp:** add the Lineage Predicates accordion to Source form dialog ([9261836](https://github.com/souslesens/souslesensVocables/commit/926183658cb85a6c7f35a99c277ecad2bb039e09))
+* **migrations:** add prefix field in sources.json ([e8950a1](https://github.com/souslesens/souslesensVocables/commit/e8950a1de9240dbf83ddd88e0aa4dd34b722ef7e))
+
+
+### Bug Fixes
+
+* **mainapp:** add the missing imports field in the Source form dialog ([5d89cb8](https://github.com/souslesens/souslesensVocables/commit/5d89cb84e121cebfbe4398ccf132b69114fc17c1))
+* **mainapp:** fix group validation ([33f8134](https://github.com/souslesens/souslesensVocables/commit/33f8134c214c6ddba8adc4eb8a1447392ead777f))
+* **mainapp:** handle predicates correctly ([7859f0b](https://github.com/souslesens/souslesensVocables/commit/7859f0bbd0cc9f15bea963a5c4d1aa9a4ec71b71))
+* **mainapp:** set error string to helperText ([c741a88](https://github.com/souslesens/souslesensVocables/commit/c741a88014de3b7d4e223f009386ff607bd41f3c))
+
 ## [1.87.0](https://github.com/souslesens/souslesensVocables/compare/1.86.3...1.87.0) (2024-10-11)
 
 

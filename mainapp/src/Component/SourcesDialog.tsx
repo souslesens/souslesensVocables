@@ -58,7 +58,10 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
     const [users, setUsers] = useState<User[]>([]);
 
     const handleField = (key: string, value: string | string[] | Record<string, string> | boolean | null) => {
-        if (key.startsWith("sparql_server")) {
+        if (key.startsWith("predicates")) {
+            const [_section, option] = key.split(".");
+            setSource({ ...source, predicates: { ...source.predicates, [option]: value } });
+        } else if (key.startsWith("sparql_server")) {
             const [_section, option] = key.split(".");
             setSource({ ...source, sparql_server: { ...source.sparql_server, [option]: value } });
         } else {
@@ -82,6 +85,21 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     code: z.ZodIssueCode.custom,
                     message: "This name is already used by another source",
                     path: ["name"],
+                });
+            }
+            if (value.group.trim().length < 3) {
+                context.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "3 chars min",
+                    path: ["group"],
+                });
+            }
+
+            if (value.group.startsWith("/")) {
+                context.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Cannot start with /",
+                    path: ["group"],
                 });
             }
 
@@ -172,7 +190,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     <TextField
                         fullWidth
                         error={errors.graphUri !== undefined}
-                        helperText={errors.graphUri !== undefined}
+                        helperText={errors.graphUri}
                         id="graphUri"
                         InputProps={{
                             endAdornment: (
@@ -187,13 +205,32 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         required
                         value={source.graphUri}
                     />
+                    <TextField
+                        fullWidth
+                        error={errors.prefix !== undefined}
+                        helperText={errors.prefix}
+                        id="prefix"
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <HelpTooltip title={sourceHelp.prefix} />
+                                </InputAdornment>
+                            ),
+                        }}
+                        label="Prefix"
+                        name="prefix"
+                        onChange={(event) => handleField("prefix", event.target.value)}
+                        required
+                        value={source.prefix}
+                    />
                     <Autocomplete
+                        autoSelect
                         disableCloseOnSelect
                         freeSolo
                         id="group"
                         onChange={(_e, value) => handleField("group", value)}
                         options={groups}
-                        renderInput={(params) => <TextField error={errors.group !== undefined} helperText={errors.group} {...params} label="Group" />}
+                        renderInput={(params) => <TextField error={errors.group !== undefined} helperText={errors.group} {...params} label="Group" required />}
                         value={source.group}
                     />
                     <Autocomplete

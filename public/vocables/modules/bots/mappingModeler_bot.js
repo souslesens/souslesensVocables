@@ -28,13 +28,11 @@ var MappingModeler_bot = (function () {
                 "set other predicate": {
                     listNonObjectPropertiesVocabsFn: {
                         listNonObjectPropertiesFn: {
-                            
-                                listDatatypePropertyRangeFn: {
-                                    dateTreatment: {
-                                        listTableColumnsFn: {},
-                                    }
+                            listDatatypePropertyRangeFn: {
+                                dateTreatment: {
+                                    listTableColumnsFn: {},
                                 },
-                            
+                            },
                         },
                     },
                 },
@@ -133,10 +131,10 @@ var MappingModeler_bot = (function () {
             CommonBotFunctions.listNonObjectPropertiesFn(self.params.nonObjectPropertyVocab, "nonObjectPropertyId", columnRdfType);
         },
         dateTreatment: function () {
-            var datatypePropertyRange=_botEngine.currentBot.params.datatypePropertyRange;
-            if (datatypePropertyRange!="xsd:dateTime") {
+            var datatypePropertyRange = _botEngine.currentBot.params.datatypePropertyRange;
+            if (datatypePropertyRange != "xsd:dateTime") {
                 return _botEngine.nextStep();
-            }else{
+            } else {
                 var choices = [
                     { id: "FR", label: "FR : DD/MM/YYYY" },
                     { id: "ISO", label: "ISO : YYYY-MM-DD" },
@@ -196,7 +194,6 @@ var MappingModeler_bot = (function () {
             var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
             _botEngine.showList(choices, "datatypePropertyRange");
         },
-        
     };
 
     return self;

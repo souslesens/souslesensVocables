@@ -523,8 +523,8 @@ var KGquery = (function () {
 
                     //url="http://51.178.139.80:8890/sparql?format=text/Turtle&query="
                     var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
-                    if( options.output=="shacl"){
-                        url="http://51.178.139.80:8890/sparql?format=text/Turtle&query="
+                    if (options.output == "shacl") {
+                        url = "http://51.178.139.80:8890/sparql?format=text/Turtle&query=";
                     }
                     self.currentSparqlQuery = {
                         url: url,

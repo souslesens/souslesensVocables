@@ -390,7 +390,7 @@ var Export = (function () {
             div = options.divId;
         } else {
             div = "mainDialogDiv";
-            $("#" + div).dialog("open");
+            //$("#" + div).dialog("open");
         }
 
         $("#" + div).html("<div style='width: 97%;height: 75vh'> <table id='dataTableDivExport'></table></div>");
@@ -437,6 +437,10 @@ fixedColumns: true*/
             params.paging = true;
         }
         self.dataTable = $("#dataTableDivExport").DataTable(params);
+        if (div == "mainDialogDiv") {
+            //open the dialog after the datatable is loaded to be on center
+            $("#" + div).dialog("open");
+        }
         if (callback) {
             return callback(null, self.dataTable);
         }

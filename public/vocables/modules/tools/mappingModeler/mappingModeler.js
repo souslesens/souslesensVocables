@@ -597,16 +597,15 @@ var MappingModeler = (function () {
 
             if (!self.currentRelation) {
                 self.currentRelation = {
-                    from: {id: node.id, classId: getColumnClass(node),dataTable:node.data.dataTable},
+                    from: { id: node.id, classId: getColumnClass(node), dataTable: node.data.dataTable },
                     to: null,
                     type: node.data.type,
                 };
             } else {
-                
-                if(node.data.dataTable!=self.currentRelation.from.dataTable){
-                    return alert('Columns not from same dataTable');
+                if (node.data.dataTable != self.currentRelation.from.dataTable) {
+                    return alert("Columns not from same dataTable");
                 }
-                self.currentRelation.to = {id: node.id, classId: getColumnClass(node)};
+                self.currentRelation.to = { id: node.id, classId: getColumnClass(node) };
                 if (self.currentRelation.type != "Class" && node.data.type == "Class") {
                     self.graphActions.drawColumnToClassEdge(self.currentRelation);
                 } else if (self.currentRelation.from.type != "Class" && node.data.type != "Class") {
@@ -1118,11 +1117,11 @@ var MappingModeler = (function () {
         for (var nodeId in columnsMap) {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
-            if(!allMappings[data.datasource]){
-                allMappings[data.datasource]={}
+            if (!allMappings[data.datasource]) {
+                allMappings[data.datasource] = {};
             }
             if (!allMappings[data.datasource][data.dataTable]) {
-                allMappings[data.datasource][data.dataTable] = {tripleModels: []};
+                allMappings[data.datasource][data.dataTable] = { tripleModels: [] };
             }
             if (data.rdfType) {
                 var predicate = "rdf:type";
@@ -1138,12 +1137,11 @@ var MappingModeler = (function () {
             }
 
             if (data.rdfsLabel) {
-
                 allMappings[data.datasource][data.dataTable].tripleModels.push({
                     s: subject,
                     p: "rdfs:label",
                     o: data.rdfsLabel,
-                    "dataType": "xsd:string",
+                    dataType: "xsd:string",
                 });
             }
             if (data.transform) {
@@ -1157,8 +1155,8 @@ var MappingModeler = (function () {
 
             connections.forEach(function (connection) {
                 var property = connection.edge.data.id;
-                if(!property){
-                    property=connection.edge.data.type;
+                if (!property) {
+                    property = connection.edge.data.type;
                 }
                 var object = connection.toNode.data.id;
                 if (columnsMapLabels.includes(object)) {
@@ -1185,19 +1183,18 @@ var MappingModeler = (function () {
 
                     if (predicate.range) {
                         if (predicate.range.indexOf("Resource") > -1) {
-                            triple.dataType= "xsd:string"
+                            triple.dataType = "xsd:string";
                         } else {
                             triple.dataType = predicate.range;
                         }
                     } else {
-                        triple.dataType= "xsd:string"
+                        triple.dataType = "xsd:string";
                     }
                     if (predicate.dateFormat) {
                         triple.dateFormat = predicate.dateFormat;
                     }
 
                     allMappings[data.datasource][data.dataTable].tripleModels.push(triple);
-
                 });
             }
         }
@@ -1268,11 +1265,11 @@ var MappingModeler = (function () {
         });
     };
     self.calculateColumnMappingsFromGraph = function () {
-        self.classDialogData={};
+        self.classDialogData = {};
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
         var edges = MappingModeler.visjsGraph.data.edges.get();
         var notClassNodes = graphNodes.filter(function (item) {
-            return item.data.type != "Class" && item.data.dataTable == MappingModeler.currentTable.name ;
+            return item.data.type != "Class" && item.data.dataTable == MappingModeler.currentTable.name;
         });
         notClassNodes.forEach(function (item) {
             var Column = { id: item.id, label: item.data.label };
@@ -1312,11 +1309,11 @@ var MappingModeler = (function () {
         //self.classDialogData[rowIndex]={Column:'',Type:'',Label:'',DatatypeProperties:{},Transform:{}};
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
         var currentGraphNode = graphNodes.filter(function (node) {
-            return node.data.label == column
+            return node.data.label == column;
         })[0];
         // columns depend on datasource
         // return if currentDatasource different of this Node
-        if(currentGraphNode.data.dataTable != MappingModeler.currentTable.name        ){
+        if (currentGraphNode.data.dataTable != MappingModeler.currentTable.name) {
             return;
         }
 
@@ -1335,14 +1332,11 @@ var MappingModeler = (function () {
             `<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button>  `
         );
         //$('#classDefineClose').append(`<button class='slsv-button-1' id='class-close-${column}' style='padding:2px 2px;margin:0px;'> X</button>  `)
-        
-
 
         var URITType = ["fromColumnTitle", "blankNode", "randomIdentifier"];
-        var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class",''];
+        var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class", ""];
         //  sort by similarity for others than rowIndex
 
-       
         var columns = JSON.parse(JSON.stringify(self.currentTable.columns));
         common.array.insertFirstArray(columns, column);
         if (currentGraphNode.data.rdfType) {
@@ -1808,29 +1802,27 @@ var MappingModeler = (function () {
         JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", newData);
         //$("#suggestionsSelectJstreeDiv").jstree(true).settings.core.data=newData;
         //$("#suggestionsSelectJstreeDiv").jstree(true).refresh();
+    };
 
-    }
-
-    self.mappingToKGcreator=function(){
-        var currentMappings=self.generateBasicContentMappingContent();
-        var datasources=Object.keys(KGcreator.currentConfig.databaseSources).concat(Object.keys(KGcreator.currentConfig.csvSources));
-        if(datasources){
+    self.mappingToKGcreator = function () {
+        var currentMappings = self.generateBasicContentMappingContent();
+        var datasources = Object.keys(KGcreator.currentConfig.databaseSources).concat(Object.keys(KGcreator.currentConfig.csvSources));
+        if (datasources) {
             async.eachSeries(
                 datasources,
                 function (datasource, callbackEach) {
-                    if(!currentMappings[datasource]){
-                        callbackEach()
+                    if (!currentMappings[datasource]) {
+                        callbackEach();
                     }
-                    KGcreator.saveDataSourceMappings(self.currentSource,datasource,currentMappings[datasource],function(err){
-                        if(err){
-                            callbackEach(err)
+                    KGcreator.saveDataSourceMappings(self.currentSource, datasource, currentMappings[datasource], function (err) {
+                        if (err) {
+                            callbackEach(err);
                         }
-                        callbackEach()
-                    })
+                        callbackEach();
+                    });
                 },
                 function (err) {
-                    MainController.onToolSelect('KGcreator',null,function(){});
-
+                    MainController.onToolSelect("KGcreator", null, function () {});
                 }
             );
         }
@@ -1862,7 +1854,7 @@ var MappingModeler = (function () {
 
             }
         });*/
-    }
+    };
     return self;
 })();
 

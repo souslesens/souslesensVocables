@@ -35,6 +35,12 @@ var NodeInfosWidget = (function () {
                     $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
 
                     setTimeout(function () {
+                        if (NodeInfosAxioms.nodeInfosAxiomsLoaded) {
+                            //reset nodeInfos
+
+                            self.showNodeInfos(Lineage_sources.activeSource, NodeInfosAxioms.nodeBeforeNodeInfos, "mainDialogDiv", null, null);
+                        }
+
                         $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
                         if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                             var source = self.currentSource;

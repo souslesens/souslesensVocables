@@ -489,7 +489,7 @@ var KGquery = (function () {
                         if (optionalPredicatesSparql) {
                             if (!predicateStr) {
                                 // if only optional predicate make first predicate not optional (when only one class ...)
-                                optionalPredicatesSparql = `?${querySet.elements[0].fromNode.label} rdf:type <${querySet.elements[0].fromNode.id}>.` + optionalPredicatesSparql;
+                                optionalPredicatesSparql = `?${querySet.elements[0].fromNode.label} rdf:type <${querySet.elements[0].fromNode.id}>.\n` + optionalPredicatesSparql;
                                 optionalPredicatesSparql = optionalPredicatesSparql.replace("OPTIONAL", "");
                             }
 
@@ -519,10 +519,13 @@ var KGquery = (function () {
 
                 //execute query
                 function (callbackSeries) {
-                    var url = Config.sources[self.currentSource].sparql_server.url + "?format=text&query=";
+                    //var url = Config.sources[self.currentSource].sparql_server.url + "?format=text&query=";
 
-                    url = "http://51.178.139.80:8890/sparql?format=text/Turtle&query=";
-
+                    //url="http://51.178.139.80:8890/sparql?format=text/Turtle&query="
+                    var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
+                    if (options.output == "shacl") {
+                        url = "http://51.178.139.80:8890/sparql?format=text/Turtle&query=";
+                    }
                     self.currentSparqlQuery = {
                         url: url,
                         query: query,

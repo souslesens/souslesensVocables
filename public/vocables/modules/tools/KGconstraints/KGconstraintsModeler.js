@@ -420,7 +420,7 @@ var KGconstraintsModeler = (function () {
         self.hideForbiddenResources(self.currentGraphNode.data.type);
         //add relation between columns
 
-        KGconstraintsModeler.graphActions.setItemAsSelected();
+        Cfihos_pump_poc.setItemAsSelected();
     };
 
     self.showGraphPopupMenu = function (node, point, event) {
@@ -444,7 +444,7 @@ var KGconstraintsModeler = (function () {
         if (node.data) {
             html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.showNodeInfos()">Node Infos</span>';
             if (false && node.data.type == "Class") {
-                html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.setItemAsSelected()">Select</span>';
+                html += '    <span class="popupMenuItem" onclick="Cfihos_pump_poc.setItemAsSelected()">Select</span>';
             }
         }
 
@@ -540,56 +540,7 @@ var KGconstraintsModeler = (function () {
             }
         },
 
-        setItemAsSelected: function () {
-            self.isTemplateModified = true;
-            var datatype = self.currentGraphNode.data.datatype;
-            var html = "<div style='width:300px;minHeight:250px'>";
-            if (datatype == "Picklist") {
-                Cfihos_pump_poc.getPickListContent(self.currentGraphNode.data.id, function (err, result) {
-                    if (err) {
-                        return alert(err.responseText || err);
-                    }
 
-                    html += "<select size='10' style='width:200px' id='KGconstraint_PicklistValueSelect'  onchange='Cfihos_pump_poc.saveConstraintValues()'>";
-
-                    $("#smallDialogDiv").html(html);
-                    $("#smallDialogDiv").dialog("open");
-                    $("#smallDialogDiv").dialog("option", "title", "Picklist values");
-                    var options = { openAll: true };
-                    common.fillSelectOptions("KGconstraint_PicklistValueSelect", result, false, "label", "id");
-                });
-            } else if (datatype == "Litteral") {
-                if (self.currentGraphNode.data.id == "Boolean") {
-                    html += "<select style='width:100px' id='KGconstraint_litteralValue' >" + "<option>true</option>" + "<option>false</option>" + "</select>";
-                } else {
-                    html += "<textarea  id='KGconstraint_litteralValue'></textarea>";
-                }
-
-                html += "<br><button onclick='Cfihos_pump_poc.saveConstraintValues()'>OK</button>";
-
-                $("#smallDialogDiv").html(html);
-                $("#smallDialogDiv").dialog("open");
-                $("#smallDialogDiv").dialog("option", "title", "Enter value");
-            } else if (datatype == "PhysicalQuantity") {
-                Cfihos_pump_poc.getUnitOfMeasureContent(self.currentGraphNode.data.id, function (err, result) {
-                    html += "<input  id='KGconstraint_PhysicalQuantityValue'></input>";
-                    html += "<select size='3' style='width:100px' id='KGconstraint_UnitOfMesasureSelect' onchange='Cfihos_pump_poc.saveConstraintValues()' ></select>";
-
-                    //   html += "<br><button onclick='Cfihos_pump_poc.saveConstraintValues()'>OK</button>"
-                    html += "</div>";
-
-                    $("#smallDialogDiv").html(html);
-                    $("#smallDialogDiv").dialog("open");
-                    $("#smallDialogDiv").dialog("option", "title", "Enter value");
-                    common.fillSelectOptions("KGconstraint_UnitOfMesasureSelect", result, false, "label", "id");
-                });
-            } else if (datatype == "Property") {
-                if (confirm("select property")) {
-                    self.currentGraphNode.data.Selected = true;
-                    self.visjsGraph.data.nodes.update({ id: self.currentGraphNode.id, color: "#b5d8ed" });
-                }
-            }
-        },
     };
     self.mappingColumnInfo = {
         editColumnInfos: function () {

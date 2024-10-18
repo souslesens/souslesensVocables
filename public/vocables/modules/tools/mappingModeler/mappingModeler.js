@@ -1393,7 +1393,7 @@ var MappingModeler = (function () {
         if (!column) {
             return;
         }
-        var mappings = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
+        var mappings = self.generateBasicContentMappingContent()[self.currentDataSource][self.currentTable.name].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {
             return mapping.s.replaceAll('_$', '').replaceAll('_£').replaceAll('@', '') == column || mapping.o.replaceAll('_$', '').replaceAll('_£').replaceAll('@', '') == column;
@@ -1423,8 +1423,8 @@ var MappingModeler = (function () {
 
     self.showDatatypeGraph = function (column) {
         //datatypeMappingGraph
-        var mappings = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
-        var mappings = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
+        var mappings = self.generateBasicContentMappingContent()[self.currentDataSource][self.currentTable.name].tripleModels;
+        var mappings = self.generateBasicContentMappingContent()[self.currentDataSource][self.currentTable.name].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {
             return mapping.s.replaceAll('_$', '').replaceAll('_£').replaceAll('@', '') == column || mapping.o.replaceAll('_$', '').replaceAll('_£').replaceAll('@', '') == column;
@@ -1732,7 +1732,7 @@ var MappingModeler = (function () {
             return alert("error in function code " + err.message);
         }
         var transformFn = "function{" + transformFnStr + "}";
-        var mappings = (self.generateBasicContentMappingContent())[self.currentTable.name].tripleModels;
+        var mappings = self.generateBasicContentMappingContent()[self.currentDataSource][self.currentTable.name].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {
             return mapping.s.replace('@', '').replace('_$', '').replace('_£', '') == self.transformColumn || mapping.o.replace('@', '').replace('_$', '').replace('_£', '') == self.transformColumn

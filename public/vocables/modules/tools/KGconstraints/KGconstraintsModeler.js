@@ -539,8 +539,6 @@ var KGconstraintsModeler = (function () {
                 NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
             }
         },
-
-
     };
     self.mappingColumnInfo = {
         editColumnInfos: function () {
@@ -1581,6 +1579,11 @@ var KGconstraintsModeler = (function () {
         var options = {
             openAll: true,
             selectTreeNodeFn: self.onSuggestionsSelect,
+            searchPlugin: {
+                case_insensitive: true,
+                fuzzy: false,
+                show_only_matches: true,
+            },
         };
         var jstreeData = [];
         jstreeData.push({
@@ -1700,6 +1703,7 @@ var KGconstraintsModeler = (function () {
         }
         JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {});
     };
+
     return self;
 })();
 

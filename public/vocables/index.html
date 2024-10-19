@@ -173,7 +173,6 @@
         <script type="module" src="modules/tools/KGconstraints/KGconstraintsModeler.js"></script>
         <script type="module" src="modules/tools/KGconstraints/KGconstraints_validator.js"></script>
 
-
         <link
             rel="stylesheet"
             type="text/css"
@@ -338,7 +337,8 @@
                                 var id = $(this).attr("href");
                                 event.preventDefault();
                                 var divId = "mainDialogDiv";
-                                if (MainController.currentTool == "KGquery") {
+                                //if (MainController.currentTool == "KGquery" || NodeInfosAxioms.nodeInfosAxiomsLoaded == true) {
+                                if (MainController.currentTool == "KGquery"){
                                     divId = "smallDialogDiv";
                                 }
                                 NodeInfosWidget.showNodeInfos(null, id, divId, null, function (err, result) {
@@ -346,6 +346,10 @@
                                         $("#mainDialogDiv").dialog("close");
                                         window.open(id, "_blank");
                                     }
+                                    /*
+                                    if (NodeInfosAxioms.nodeInfosAxiomsLoaded) {
+                                        NodeInfosAxioms.reduceNodeInfoAxioms();
+                                    }*/
                                 });
                             }
                         });

@@ -597,11 +597,14 @@ var MappingModeler = (function () {
 
             if (!self.currentRelation) {
                 self.currentRelation = {
-                    from: { id: node.id, classId: getColumnClass(node) },
+                    from: { id: node.id, classId: getColumnClass(node), dataTable: node.data.dataTable },
                     to: null,
                     type: node.data.type,
                 };
             } else {
+                if (node.data.dataTable != self.currentRelation.from.dataTable) {
+                    return alert("Columns not from same dataTable");
+                }
                 self.currentRelation.to = { id: node.id, classId: getColumnClass(node) };
                 if (self.currentRelation.type != "Class" && node.data.type == "Class") {
                     self.graphActions.drawColumnToClassEdge(self.currentRelation);
@@ -1138,7 +1141,7 @@ var MappingModeler = (function () {
                     s: subject,
                     p: "rdfs:label",
                     o: data.rdfsLabel,
-                    isString: true,
+                    dataType: "xsd:string",
                 });
             }
             if (data.transform) {
@@ -1151,7 +1154,10 @@ var MappingModeler = (function () {
             var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
-                var property = connection.edge.data.type;
+                var property = connection.edge.data.id;
+                if (!property) {
+                    property = connection.edge.data.type;
+                }
                 var object = connection.toNode.data.id;
                 if (columnsMapLabels.includes(object)) {
                     object = self.nodeToKGcreatorColumnName(
@@ -1177,12 +1183,12 @@ var MappingModeler = (function () {
 
                     if (predicate.range) {
                         if (predicate.range.indexOf("Resource") > -1) {
-                            triple.isString = true;
+                            triple.dataType = "xsd:string";
                         } else {
                             triple.dataType = predicate.range;
                         }
                     } else {
-                        triple.isString = true;
+                        triple.dataType = "xsd:string";
                     }
                     if (predicate.dateFormat) {
                         triple.dateFormat = predicate.dateFormat;
@@ -1259,10 +1265,11 @@ var MappingModeler = (function () {
         });
     };
     self.calculateColumnMappingsFromGraph = function () {
+        self.classDialogData = {};
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
         var edges = MappingModeler.visjsGraph.data.edges.get();
         var notClassNodes = graphNodes.filter(function (item) {
-            return item.data.type != "Class";
+            return item.data.type != "Class" && item.data.dataTable == MappingModeler.currentTable.name;
         });
         notClassNodes.forEach(function (item) {
             var Column = { id: item.id, label: item.data.label };
@@ -1327,7 +1334,7 @@ var MappingModeler = (function () {
         //$('#classDefineClose').append(`<button class='slsv-button-1' id='class-close-${column}' style='padding:2px 2px;margin:0px;'> X</button>  `)
 
         var URITType = ["fromColumnTitle", "blankNode", "randomIdentifier"];
-        var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
+        var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class", ""];
         //  sort by similarity for others than rowIndex
 
         var columns = JSON.parse(JSON.stringify(self.currentTable.columns));
@@ -1357,7 +1364,7 @@ var MappingModeler = (function () {
         if (!column) {
             return;
         }
-        var mappings = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
+        var mappings = self.generateBasicContentMappingContent()[self.currentDataSource][self.currentTable.name].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {
             return mapping.s.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column;
@@ -1384,8 +1391,8 @@ var MappingModeler = (function () {
 
     self.showDatatypeGraph = function (column) {
         //datatypeMappingGraph
-        var mappings = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
-        var mappings = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
+        var mappings = self.generateBasicContentMappingContent()[self.currentDataSource][self.currentTable.name].tripleModels;
+        var mappings = self.generateBasicContentMappingContent()[self.currentDataSource][self.currentTable.name].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {
             return mapping.s.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column;
@@ -1689,7 +1696,7 @@ var MappingModeler = (function () {
             return alert("error in function code " + err.message);
         }
         var transformFn = "function{" + transformFnStr + "}";
-        var mappings = self.generateBasicContentMappingContent()[self.currentTable.name].tripleModels;
+        var mappings = self.generateBasicContentMappingContent()[self.currentDataSource][self.currentTable.name].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {
             return mapping.s.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn || mapping.o.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn;

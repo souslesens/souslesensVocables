@@ -207,6 +207,7 @@ var KGbuilder_triplesMaker = {
             if (!line[mapping.s] || (mapping.o.indexOf(":") > -1 && line[mapping.o]) == "null") {
                 return callback(null, null);
             }
+            
             subjectStr = line[mapping.s];
         }
         if (mapping.lookup_s) {

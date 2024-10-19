@@ -187,7 +187,7 @@ var KGquery_filter = (function () {
         var str = "";
         for (var key in groupByPredicates) {
             var obj = groupByPredicates[key];
-            str += " ?" + obj.classLabel + " <" + obj.prop.id + "> ?" + obj.label + ". ";
+            str += " ?" + obj.classLabel + " <" + obj.prop.id + "> ?" + obj.label + ". \n";
         }
 
         return str;

@@ -259,7 +259,7 @@ var util = {
             str = str.replace(/\)/gm, "_");
 
             str = str.replace(/[^a-zA-Z0-9-_]/g, "");
-
+            //str = str.replace(/-/g, "_");
 
         }
 

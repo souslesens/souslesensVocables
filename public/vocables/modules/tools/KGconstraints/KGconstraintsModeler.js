@@ -413,10 +413,14 @@ var KGconstraintsModeler = (function () {
     };
 
     self.onVisjsGraphClick = function (node, event, options) {
-        if (!node) return;
+        if (!node) {
+            return;
+        }
         self.currentGraphNode = node;
         self.hideForbiddenResources(self.currentGraphNode.data.type);
         //add relation between columns
+
+        Cfihos_pump_poc.setItemAsSelected();
     };
 
     self.showGraphPopupMenu = function (node, point, event) {
@@ -439,8 +443,8 @@ var KGconstraintsModeler = (function () {
         }
         if (node.data) {
             html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.showNodeInfos()">Node Infos</span>';
-            if (true || node.data.type == "Class") {
-                html += '    <span class="popupMenuItem" onclick="KGconstraintsModeler.graphActions.setItemAsSelected()">Select</span>';
+            if (false && node.data.type == "Class") {
+                html += '    <span class="popupMenuItem" onclick="Cfihos_pump_poc.setItemAsSelected()">Select</span>';
             }
         }
 
@@ -533,39 +537,6 @@ var KGconstraintsModeler = (function () {
                 });
             } else {
                 NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
-            }
-        },
-
-        setItemAsSelected: function () {
-            self.isTemplateModified = true;
-            var type = self.currentGraphNode.data.type;
-
-            if (self.currentGraphNode.data.superClass == "Picklist") {
-                Cfihos_pump_poc.getPickListContent(self.currentGraphNode.data.id, function (err, result) {
-                    if (err) return alert(err.responseText || err);
-                    var jstreeData = [];
-                    jstreeData.push({
-                        id: self.currentGraphNode.data.id,
-                        text: self.currentGraphNode.data.label,
-                        parent: "#",
-                    });
-                    result.forEach(function (item) {
-                        jstreeData.push({
-                            id: item.id,
-                            text: item.label,
-                            parent: self.currentGraphNode.data.id,
-                        });
-                    });
-
-                    var html = "<div id='KGconstraint_picklistTreeDiv' style='width:350px;height:500px;overflow:auto'></div>" + "<button onclick='Cfihos_pump_poc.saveCheckedPicklistValues()'";
-                    $("#smallDialogDiv").html(html);
-                    $("#smallDialogDiv").dialog("open");
-                    var options = { withCheckboxes: true };
-                    JstreeWidget.loadJsTree("KGconstraint_picklistTreeDiv", jstreeData, options);
-                });
-            } else if (type == "Class") {
-                self.currentGraphNode.data.Selected = true;
-                self.visjsGraph.data.nodes.update({ id: self.currentGraphNode.id, color: "#b5d8ed" });
             }
         },
     };
@@ -1608,6 +1579,11 @@ var KGconstraintsModeler = (function () {
         var options = {
             openAll: true,
             selectTreeNodeFn: self.onSuggestionsSelect,
+            searchPlugin: {
+                case_insensitive: true,
+                fuzzy: false,
+                show_only_matches: true,
+            },
         };
         var jstreeData = [];
         jstreeData.push({
@@ -1727,6 +1703,7 @@ var KGconstraintsModeler = (function () {
         }
         JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {});
     };
+
     return self;
 })();
 

@@ -760,6 +760,18 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .refresh();
     };
 
+    self.filterTree = function (input, jstreeDiv) {
+        if (!jstreeDiv) {
+            jstreeDiv = self.jstreeDiv;
+        }
+        var keyword = input.val();
+        if (keyword != "" && keyword.length < 2) {
+            return;
+        }
+        $("#" + jstreeDiv).jstree("search", keyword);
+        //input.val("")
+    };
+
     return self;
 })();
 

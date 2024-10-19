@@ -1771,38 +1771,6 @@ var MappingModeler = (function () {
         self.visjsGraph.data.nodes.update(currentNode);
         MappingModeler.saveVisjsGraph();
     };
-    self.filterSuggestionTree = function () {
-        var keyword = $("#mappingModeler_suggestionsnput").val();
-        var data = $("#suggestionsSelectJstreeDiv").jstree()._model.data;
-        /*if(!keyword){
-            return;
-        }*/
-        if (!data) {
-            return;
-        }
-        if (!self.filterSuggestionList) {
-            self.filterSuggestionList = JSON.parse(JSON.stringify(data));
-        }
-        keyword = keyword.toLowerCase();
-
-        var newData = [];
-        Object.keys(self.filterSuggestionList).forEach(function (nodeId) {
-            var node = self.filterSuggestionList[nodeId];
-            // We filter only last leafs of jstree
-            if (node.children.length == 0) {
-                var node_text = node.text.toLowerCase();
-                if (node_text.includes(keyword)) {
-                    newData.push(node);
-                }
-            } else {
-                newData.push(node);
-            }
-        });
-        //JstreeWidget.empty('suggestionsSelectJstreeDiv');
-        JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", newData);
-        //$("#suggestionsSelectJstreeDiv").jstree(true).settings.core.data=newData;
-        //$("#suggestionsSelectJstreeDiv").jstree(true).refresh();
-    };
 
     self.mappingToKGcreator = function () {
         var currentMappings = self.generateBasicContentMappingContent();

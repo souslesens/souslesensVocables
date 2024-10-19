@@ -37,7 +37,7 @@ var CreateResource_bot = (function () {
     self.workflow_saveResource = {
         saveResourceFn: {
             _OR: {
-                Edit: { editResourceFn: self.workflow_end },
+                Edit: { editResourceFn: {} },
                 Draw: { drawResourceFn: self.workflow_end },
             },
         },
@@ -145,7 +145,8 @@ var CreateResource_bot = (function () {
 
         editResourceFn: function () {
             NodeInfosWidget.showNodeInfos(self.params.source, self.params.resourceId, "mainDialogDiv");
-            _botEngine.nextStep();
+            _botEngine.end();
+            //  _botEngine.nextStep();
         },
         drawResourceFn: function () {
             var nodeData = {

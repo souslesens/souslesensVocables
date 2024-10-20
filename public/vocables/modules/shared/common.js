@@ -984,7 +984,7 @@ if (callback) return callback(err);
         if (month < 10) month = "0" + month;
         return year + "-" + month + "-" + day;
     };
-    self.storeLocally = function (stringToStore, localStorageVar) {
+    self.storeLocally = function (stringToStore, localStorageVar,satckSize) {
         var Varcontent = JSON.parse(localStorage.getItem(localStorageVar));
         if (!Varcontent) {
             Varcontent = [];
@@ -992,7 +992,7 @@ if (callback) return callback(err);
             localStorage.setItem(localStorageVar, JSON.stringify(Varcontent));
         }
         if (Varcontent && !Varcontent.includes(stringToStore)) {
-            if (Varcontent.length >= 5) {
+            if (Varcontent.length >= satckSize ||5) {
                 Varcontent.shift();
             }
             Varcontent.push(stringToStore);

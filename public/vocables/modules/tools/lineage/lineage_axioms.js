@@ -12,10 +12,13 @@ var Lineage_axioms = (function () {
                 return alert(err);
             }
             var axiomTypes = {};
-            var visjsData = { nodes: [], edges: [] };
-            if (result.result)
+            var visjsData = {nodes: [], edges: []};
+            if (!result.forEach)
                 // nothing found
+            {
                 return alert(result.result);
+            }
+
             result.forEach(function (item) {
                 item.axiomTypes.forEach(function (type) {
                     if (!axiomTypes[type]) {

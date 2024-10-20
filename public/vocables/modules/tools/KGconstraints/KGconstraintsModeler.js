@@ -372,7 +372,7 @@ var KGconstraintsModeler = (function () {
     };
 
     self.drawGraphCanvas = function (graphDiv, visjsData, callback) {
-        var xOffset = 200;
+        var xOffset = 150;
         var yOffset = 30;
         self.graphOptions = {
             keepNodePositionOnDrag: true,
@@ -380,11 +380,11 @@ var KGconstraintsModeler = (function () {
                 direction: "LR",
                 sortMethod: "hubsize",
                 levelSeparation: xOffset,
-                // parentCentralization: false,
-                shakeTowards: "roots",
-                blockShifting: true,
-                edgeMinimization: true,
-                parentCentralization: true,
+
+              //  shakeTowards: "roots",
+             //   blockShifting: true,
+             //   edgeMinimization: true,
+              //  parentCentralization: true,
 
                 nodeSpacing: yOffset,
             },
@@ -1033,7 +1033,9 @@ var KGconstraintsModeler = (function () {
     self.loadVisjsGraph = function () {
         self.clearConstraints();
         setTimeout(function () {
-            self.visjsGraph.loadGraph("Constraints_" + self.currentSource + "_ALL" + ".json");
+            self.visjsGraph.loadGraph("Constraints_" + self.currentSource + "_ALL" + ".json",false,function(err){
+
+            });
             //    self.visjsGraph.loadGraph("Constraints_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name + ".json");
             setTimeout(function () {
                 self.visjsGraph.network.fit();

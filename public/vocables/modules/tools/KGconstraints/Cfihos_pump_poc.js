@@ -77,7 +77,7 @@ var Cfihos_pump_poc = (function () {
 
                         if ( !uniqueNodes[result[0].subjectLabel.value]) {
                             uniqueNodes[result[0].subjectLabel.value]=1
-                            individualId = common.getRandomHexaId(5);
+                          var  individualId = common.getRandomHexaId(5);
 
                             visjsData.nodes.push({
                                 id: individualId,

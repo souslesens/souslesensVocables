@@ -42,6 +42,8 @@ export const EditSourceDialog = ({ onClose, onEditSuccess, open, sources: source
             const data = (await response.json()) as { resources: Record<string, ServerSource>; message: string };
 
             if (response.status == 200) {
+                window.Config.sources = data.resources;
+
                 setError(undefined);
                 if (onEditSuccess) {
                     onEditSuccess(Object.values(data.resources));

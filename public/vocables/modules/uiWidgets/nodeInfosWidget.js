@@ -32,8 +32,7 @@ var NodeInfosWidget = (function () {
                     $("#nodeInfosWidget_tabsDiv").tabs({
                         //  active: options.showAxioms ? 1 : 0,
 
-                        load: function (event, ui) {
-                        },
+                        load: function (event, ui) {},
                         activate: function (event, ui) {
                             $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
 
@@ -54,7 +53,7 @@ var NodeInfosWidget = (function () {
                             }, 100);
                         },
                     });
-                }
+                },
             });
             $("#" + divId).dialog("open");
             $(".nodeInfosWidget_tabDiv").css("margin", "0px");
@@ -276,7 +275,7 @@ var NodeInfosWidget = (function () {
         }
         var valueLabelsMap = {};
         $(".infosTable").html("");
-        self.propertiesMap = {label: "", id: "", properties: {}};
+        self.propertiesMap = { label: "", id: "", properties: {} };
         var blankNodes = [];
         Sparql_generic.getNodeInfos(
             sourceLabel,
@@ -364,7 +363,7 @@ value = item.valueLabel.value;*/
                         };
                     }
                     var predicateId = common.getRandomHexaId(5);
-                    PredicatesSelectorWidget.predicatesIdsMap[predicateId] = {item: item};
+                    PredicatesSelectorWidget.predicatesIdsMap[predicateId] = { item: item };
 
                     // dont manage lang clustering when source is editable
 
@@ -374,7 +373,7 @@ value = item.valueLabel.value;*/
                         }
                         self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]].push({
                             value: value,
-                            predicateId: predicateId
+                            predicateId: predicateId,
                         });
                     } else {
                         if (!self.propertiesMap.properties[propName].value) {
@@ -383,7 +382,7 @@ value = item.valueLabel.value;*/
                         if (Lineage_sources.isSourceEditableForUser(sourceLabel) && item.value && item.value["xml:lang"]) {
                             value += "@" + item.value["xml:lang"];
                         }
-                        self.propertiesMap.properties[propName].value.push({value: value, predicateId: predicateId});
+                        self.propertiesMap.properties[propName].value.push({ value: value, predicateId: predicateId });
                     }
                 });
 
@@ -570,7 +569,7 @@ defaultLang = 'en';*/
                 $("#" + divId).html(str);
                 $("#nodeInfosWidget_metaDataTabDiv").html(metaDataStr);
                 if (callback) {
-                    return callback(null, {types: types, blankNodes: blankNodes});
+                    return callback(null, { types: types, blankNodes: blankNodes });
                 }
             }
         );
@@ -584,7 +583,7 @@ defaultLang = 'en';*/
             [
                 //direct restrictions
                 function (callbackSeries) {
-                    Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, {withoutBlankNodes: 1}, function (err, result) {
+                    Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, { withoutBlankNodes: 1 }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -723,7 +722,7 @@ defaultLang = 'en';*/
         query += "  Optional {?value rdfs:label ?valueLabel}  ";
         query += "} order by ?valueLabel limit 1000 ";
         var url = sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -798,7 +797,7 @@ defaultLang = 'en';*/
                         id: prop,
                         label: constraint.label,
                         rangeId: constraint.range,
-                        rangeLabel: constraint.rangeLabel
+                        rangeLabel: constraint.rangeLabel,
                     });
                 }
                 if (constraint.range == nodeId) {
@@ -806,7 +805,7 @@ defaultLang = 'en';*/
                         id: prop,
                         label: constraint.label,
                         domainId: constraint.domain,
-                        domainLabel: constraint.domainLabel
+                        domainLabel: constraint.domainLabel,
                     });
                 }
             }
@@ -1016,7 +1015,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             },
         };
 
-        self.showNodeInfos(self.currentNodeIdInfosSource, node, self.currentNodeIdInfosDivId, {previousNode: true});
+        self.showNodeInfos(self.currentNodeIdInfosSource, node, self.currentNodeIdInfosDivId, { previousNode: true });
     };
 
     self.showVisitedNode = function (direction) {
@@ -1070,8 +1069,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 // store Annotator infos in source/userGraph
                 if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
                     var userGraphUri = Config.sources[self.currentSource].graphUri + authentication.currentUser.login;
-                    Sparql_generic.insertTriples(null, triples, {graphUri: userGraphUri}, function (err, _result) {
-                    });
+                    Sparql_generic.insertTriples(null, triples, { graphUri: userGraphUri }, function (err, _result) {});
                 }
 
                 self.isModified = true;
@@ -1122,7 +1120,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                             object = {
                                 isString: true,
                                 value: currentEditingItem.item.value.value,
-                                lang: currentEditingItem.item.value["xml:lang"]
+                                lang: currentEditingItem.item.value["xml:lang"],
                             };
                             /*   if(currentEditingItem.item.value["xml:lang"])
 object+="@"+currentEditingItem.item.value["xml:lang"]*/
@@ -1181,7 +1179,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                             var data = {};
                             data["constraints"] = [self.currentNodeId];
                             data["properties"] = [self.currentNodeId];
-                            OntologyModels.updateModel(self.currentNode.data.source, data, {remove: true}, function (err, result2) {
+                            OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
                                 callbackSeries(err);
                             });
                         } else {
@@ -1251,7 +1249,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             if (self.currentNode && self.currentNode.from) {
                 var data = [];
                 for (var id in self.newProperties) {
-                    data.push({id: id, label: self.newProperties[id], type: "property", owltype: "ObjectProperty"});
+                    data.push({ id: id, label: self.newProperties[id], type: "property", owltype: "ObjectProperty" });
                 }
 
                 SearchUtil.addPropertiesToIndex(self.currentSource, data, function (err, _result) {
@@ -1288,7 +1286,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
         var oldValue = self.currentEditingItem.item.value.value;
         if (self.currentEditingItem.item.value.type == "literal") {
-            oldValue = {isString: true, value: oldValue};
+            oldValue = { isString: true, value: oldValue };
         }
         Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, self.currentEditingItem.item.prop.value, oldValue, function (err, _result) {
             if (err) {
@@ -1307,14 +1305,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                             Lineage_whiteboard.lineageVisjsGraph.data.edges.update({
                                 id: self.currentNodeId,
-                                label: newValue
+                                label: newValue,
                             });
                         }
                     } else {
                         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                             Lineage_whiteboard.lineageVisjsGraph.data.nodes.update({
                                 id: self.currentNodeId,
-                                label: newValue
+                                label: newValue,
                             });
                         }
                         var jstreeNode = JstreeWidget.getNodeByDataField("LineageNodesJsTreeDiv", "id", self.currentNode.data.id);
@@ -1379,7 +1377,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
                 self.deletePredicate(predicateId, false, function () {
                     self.addPredicate(null, null, null, null, function () {
-                        self.showNodeInfos(MainController.currentSource, self.currentNode, "mainDialogDiv", {resetVisited: 1});
+                        self.showNodeInfos(MainController.currentSource, self.currentNode, "mainDialogDiv", { resetVisited: 1 });
                     });
                 });
             });
@@ -1482,7 +1480,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             setTimeout(function () {
                 $("#nodeInfosWidget_tabsDiv").tabs("option", "active", 2), 500;
             });
-            SearchUtil.generateElasticIndex(source, {ids: [proposedUri]}, function (err, result) {
+            SearchUtil.generateElasticIndex(source, { ids: [proposedUri] }, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }

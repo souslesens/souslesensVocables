@@ -1083,4 +1083,4 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     };
 };
 export default VisjsGraphClass;
-window.VisjsGraphClass=VisjsGraphClass
+window.VisjsGraphClass = VisjsGraphClass;

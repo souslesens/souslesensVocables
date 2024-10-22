@@ -412,7 +412,7 @@ var PredicatesSelectorWidget = (function () {
             ],
         };
         var recentEditPredicatesStr = JSON.stringify(recentEditPredicates);
-        common.storeLocally(recentEditPredicatesStr, "recentEditPredicates",5);
+        common.storeLocally(recentEditPredicatesStr, "recentEditPredicates", 5);
     };
     return self;
 })();

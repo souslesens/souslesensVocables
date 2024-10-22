@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.90.0](https://github.com/souslesens/souslesensVocables/compare/1.89.0...1.90.0) (2024-10-22)
+
+
+### Features
+
+* **mainapp:** reload the sources in the window.Config constant ([5876ba0](https://github.com/souslesens/souslesensVocables/commit/5876ba0ae97298c98e99724cef2bd8f0ba830f28))
+
 ## [1.89.0](https://github.com/souslesens/souslesensVocables/compare/1.88.0...1.89.0) (2024-10-18)
 
 ## [1.88.0](https://github.com/souslesens/souslesensVocables/compare/1.87.0...1.88.0) (2024-10-16)

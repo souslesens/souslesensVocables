@@ -316,7 +316,7 @@ var SourceSelectorWidget = (function () {
         if (source) {
             params.set("source", source);
         }
-        common.storeLocally(source, "recentSources");
+        common.storeLocally(source, "recentSources", 8);
         window.history.replaceState(null, "", `?${params.toString()}`);
         MainController.initTool(MainController.currentTool, function (err, result) {
             if (err) {

@@ -26,32 +26,36 @@ var NodeInfosWidget = (function () {
         $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
             $("#addPredicateButton").remove();
             $("#deleteButton").remove();
-            $("#" + divId).dialog("open");
-            $("#nodeInfosWidget_tabsDiv").tabs({
-                //  active: options.showAxioms ? 1 : 0,
 
-                load: function (event, ui) {},
-                activate: function (event, ui) {
-                    $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
+            $("#" + divId).dialog({
+                open: function (event, ui) {
+                    $("#nodeInfosWidget_tabsDiv").tabs({
+                        //  active: options.showAxioms ? 1 : 0,
 
-                    setTimeout(function () {
-                        /*if (NodeInfosAxioms.nodeInfosAxiomsLoaded) {
-                            //reset nodeInfos
+                        load: function (event, ui) {},
+                        activate: function (event, ui) {
+                            $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
 
-                            self.showNodeInfos(Lineage_sources.activeSource, NodeInfosAxioms.nodeBeforeNodeInfos, "mainDialogDiv", null, null);
-                        }*/
+                            setTimeout(function () {
+                                /*if (NodeInfosAxioms.nodeInfosAxiomsLoaded) {
+                                    //reset nodeInfos
 
-                        $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
-                        if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
-                            var source = self.currentSource;
-                            // source = Lineage_sources.mainSource;
-                            NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
-                        }
-                        0;
-                    }, 100);
+                                    self.showNodeInfos(Lineage_sources.activeSource, NodeInfosAxioms.nodeBeforeNodeInfos, "mainDialogDiv", null, null);
+                                }*/
+
+                                $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
+                                if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
+                                    var source = self.currentSource;
+                                    // source = Lineage_sources.mainSource;
+                                    NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
+                                }
+                                0;
+                            }, 100);
+                        },
+                    });
                 },
             });
-
+            $("#" + divId).dialog("open");
             $(".nodeInfosWidget_tabDiv").css("margin", "0px");
             $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
             callback();
@@ -367,7 +371,10 @@ value = item.valueLabel.value;*/
                         if (!self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]]) {
                             self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]] = [];
                         }
-                        self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]].push({ value: value, predicateId: predicateId });
+                        self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]].push({
+                            value: value,
+                            predicateId: predicateId,
+                        });
                     } else {
                         if (!self.propertiesMap.properties[propName].value) {
                             self.propertiesMap.properties[propName].value = [];
@@ -442,6 +449,7 @@ defaultLang = 'en';*/
                     }
                     return optionalStr;
                 }
+
                 var metaDataStr = str;
                 var metaDataProps = Object.values(Config.dictionaryMetaDataPropertiesMap);
                 defaultProps.forEach(function (key) {
@@ -785,10 +793,20 @@ defaultLang = 'en';*/
             for (var prop in ontologySourceModel.constraints) {
                 var constraint = ontologySourceModel.constraints[prop];
                 if (constraint.domain == nodeId) {
-                    domainOfProperties.push({ id: prop, label: constraint.label, rangeId: constraint.range, rangeLabel: constraint.rangeLabel });
+                    domainOfProperties.push({
+                        id: prop,
+                        label: constraint.label,
+                        rangeId: constraint.range,
+                        rangeLabel: constraint.rangeLabel,
+                    });
                 }
                 if (constraint.range == nodeId) {
-                    rangeOfProperties.push({ id: prop, label: constraint.label, domainId: constraint.domain, domainLabel: constraint.domainLabel });
+                    rangeOfProperties.push({
+                        id: prop,
+                        label: constraint.label,
+                        domainId: constraint.domain,
+                        domainLabel: constraint.domainLabel,
+                    });
                 }
             }
 
@@ -1099,7 +1117,11 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                     function (callbackSeries) {
                         var object = currentEditingItem.item.value.value;
                         if (currentEditingItem.item.value.type == "literal") {
-                            object = { isString: true, value: currentEditingItem.item.value.value, lang: currentEditingItem.item.value["xml:lang"] };
+                            object = {
+                                isString: true,
+                                value: currentEditingItem.item.value.value,
+                                lang: currentEditingItem.item.value["xml:lang"],
+                            };
                             /*   if(currentEditingItem.item.value["xml:lang"])
 object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         }
@@ -1281,11 +1303,17 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                             $("#Lineage_propertiesTree").jstree().rename_node(jstreeNode, newValue);
                         }
                         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                            Lineage_whiteboard.lineageVisjsGraph.data.edges.update({ id: self.currentNodeId, label: newValue });
+                            Lineage_whiteboard.lineageVisjsGraph.data.edges.update({
+                                id: self.currentNodeId,
+                                label: newValue,
+                            });
                         }
                     } else {
                         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update({ id: self.currentNodeId, label: newValue });
+                            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update({
+                                id: self.currentNodeId,
+                                label: newValue,
+                            });
                         }
                         var jstreeNode = JstreeWidget.getNodeByDataField("LineageNodesJsTreeDiv", "id", self.currentNode.data.id);
                         if (jstreeNode) {

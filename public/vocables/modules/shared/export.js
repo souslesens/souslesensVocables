@@ -393,7 +393,7 @@ var Export = (function () {
             //$("#" + div).dialog("open");
         }
 
-        $("#" + div).html("<div style='width: 97%;height: 75vh'> <table id='dataTableDivExport'></table></div>");
+        $("#" + div).html("<div style='width: 97%;height: 75vh'> <table class='cell-border' id='dataTableDivExport'></table></div>");
 
         if (!buttons) {
             buttons = "Bfrtip";

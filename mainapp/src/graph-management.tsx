@@ -81,7 +81,7 @@ export default function GraphManagement() {
 
     return (
         <>
-            {displayModal === "upload" && currentSource ? <UploadGraphModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource} /> : null}{" "}
+            {displayModal === "upload" && currentSource ? <UploadGraphModal indexAfterSuccess={true} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource} /> : null}{" "}
             {displayModal === "download" && currentSource ? <DownloadGraphModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource ?? ""} /> : null}
             <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                 <Autocomplete

@@ -244,7 +244,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         renderInput={(params) => <TextField error={errors.imports !== undefined} helperText={errors.imports} {...params} label="Import Sources" />}
                         renderOption={(props, option, { selected }) => {
                             return (
-                                <li key={option} {...props}>
+                                <li {...props}>
                                     <Checkbox checked={selected} checkedIcon={checkedIcon} icon={icon} key={`check-${option}`} style={{ marginRight: 2 }} />
                                     {option}
                                 </li>
@@ -334,7 +334,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                                         )}
                                         renderOption={(props, option, { selected }) => {
                                             return (
-                                                <li key={option} {...props}>
+                                                <li {...props}>
                                                     <Checkbox checked={selected} checkedIcon={checkedIcon} icon={icon} key={`check-${option}`} style={{ marginRight: 2 }} />
                                                     {option}
                                                 </li>

@@ -1,4 +1,4 @@
-import { useState, Dispatch } from "react";
+import { useState } from "react";
 import {
     Alert,
     Box,
@@ -26,7 +26,7 @@ import CsvDownloader from "react-csv-downloader";
 import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
 import { failure, SRD, success } from "srd";
 
-import { Msg, useModel } from "../Admin";
+import { useModel } from "../Admin";
 import { deleteSource, getGraphSize, saveSource, ServerSource } from "../Source";
 import { writeLog } from "../Log";
 import { joinWhenArray, humanizeSize, cleanUpText, jsonToDownloadUrl } from "../Utils";
@@ -57,9 +57,21 @@ const SourcesTable = () => {
     const indices = SRD.withDefault(null, model.indices);
     const graphs = SRD.withDefault(null, model.graphs);
 
-    const handleDeleteSource = (source: ServerSource, updateModel: Dispatch<Msg>) => {
-        void deleteSource(source, updateModel);
-        void writeLog(me, "ConfigEditor", "delete", source.name);
+    const reformatSource = (sources: ServerSource[]) => {
+        const mapSources = sources.map((s: ServerSource) => [s.name, s]);
+        return Object.fromEntries(mapSources as [string, ServerSource][]);
+    };
+
+    const handleDeleteSource = async (source: ServerSource) => {
+        const response = await deleteSource(source);
+        if (response.status === 200) {
+            const receivedSources = response.message as ServerSource[];
+            window.Config.sources = reformatSource(receivedSources);
+            updateModel({ type: "sources", payload: success(receivedSources) });
+            void writeLog(me, "ConfigEditor", "delete", source.name);
+        } else {
+            updateModel({ type: "sources", payload: failure(response.message as string) });
+        }
     };
 
     const handleUpdateSource = async (source: ServerSource) => {
@@ -67,7 +79,9 @@ const SourcesTable = () => {
         setOpenModal(false);
 
         if (response.status === 200) {
-            updateModel({ type: "sources", payload: success(response.message as ServerSource[]) });
+            const receivedSources = response.message as ServerSource[];
+            window.Config.sources = reformatSource(receivedSources);
+            updateModel({ type: "sources", payload: success(receivedSources) });
             void writeLog(me, "ConfigEditor", editModal ? "edit" : "create", source.name);
         } else {
             updateModel({ type: "sources", payload: failure(response.message as string) });
@@ -216,7 +230,7 @@ const SourcesTable = () => {
                                                             <IconButton aria-label="edit" color="primary" onClick={() => handleOpenModal(source)} size="small" title={"Edit Repository"}>
                                                                 <Edit />
                                                             </IconButton>
-                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteSource(source, updateModel)} />
+                                                            <ButtonWithConfirmation label="Delete" msg={() => handleDeleteSource(source)} />
                                                         </Stack>
                                                     </TableCell>
                                                 </TableRow>

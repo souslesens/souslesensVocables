@@ -1,7 +1,4 @@
 import { ulid } from "ulid";
-import { failure, success } from "srd";
-import { Msg } from "./Admin";
-import React from "react";
 import { z } from "zod";
 
 const endpoint = "/api/v1/admin/sources";
@@ -105,18 +102,17 @@ export async function saveSource(source: ServerSource, edition: boolean) {
     }
 }
 
-export async function deleteSource(source: ServerSource, updateModel: React.Dispatch<Msg>) {
+export async function deleteSource(source: ServerSource) {
     try {
         const response = await fetch(`${endpoint}/${source.name}`, { method: "delete" });
         const { message, resources } = (await response.json()) as Response;
+
         if (response.status === 200) {
-            updateModel({ type: "sources", payload: success(mapSources(resources)) });
-        } else {
-            updateModel({ type: "sources", payload: failure(`${response.status}, ${message}`) });
+            return { status: 200, message: mapSources(resources) };
         }
+        return { status: response.status, message: message };
     } catch (e) {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        updateModel({ type: "sources", payload: failure(`Unhandled Error : ${e}`) });
+        return { status: 500, message: e };
     }
 }
 

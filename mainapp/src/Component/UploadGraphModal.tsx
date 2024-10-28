@@ -5,13 +5,25 @@ import { ChangeEvent, MouseEvent, useEffect, useRef, useState } from "react";
 import { writeLog } from "../Log";
 import { createRoot } from "react-dom/client";
 
+declare global {
+    interface Window {
+        SearchUtil: {
+            generateElasticIndex: (sourceName: string, options: Record<string, number>, callback: () => void) => void;
+        };
+        UI: {
+            message: (text: string, status: boolean) => void;
+        };
+    }
+}
+
 interface UploadGraphModalProps {
     onClose: () => void;
     open: boolean;
     sourceName: string;
+    indexAfterSuccess: boolean;
 }
 
-export function UploadGraphModal({ onClose, open, sourceName }: UploadGraphModalProps) {
+export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess = false }: UploadGraphModalProps) {
     const [currentUser, setCurrentUser] = useState<{ login: string; token: string } | null>(null);
     const [transferPercent, setTransferPercent] = useState(0);
     const [uploadfile, setUploadFile] = useState<File[]>([]);
@@ -129,6 +141,17 @@ export function UploadGraphModal({ onClose, open, sourceName }: UploadGraphModal
                 }
             }
             setTransferPercent(100);
+
+            if (indexAfterSuccess) {
+                try {
+                    window.SearchUtil.generateElasticIndex(sourceName, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
+                        window.UI.message(`${sourceName} was updated successfully`, true);
+                    });
+                } catch (error) {
+                    console.error(error);
+                    window.UI.message(`An error occurs during ${sourceName} update`, true);
+                }
+            }
         } catch (error) {
             console.error(error);
             setErrorMessage((error as Error).message);

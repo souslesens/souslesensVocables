@@ -110,7 +110,7 @@ export const EditSourceDialog = ({ onClose, onEditSuccess, open, sources: source
                         renderInput={(params) => <TextField {...params} label="Taxonomy Predicates" />}
                         renderOption={(props, option, { selected }) => {
                             return (
-                                <li key={option} {...props}>
+                                <li {...props}>
                                     <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 2 }} checked={selected} />
                                     {option}
                                 </li>
@@ -143,7 +143,7 @@ export const EditSourceDialog = ({ onClose, onEditSuccess, open, sources: source
                         renderInput={(params) => <TextField {...params} label="Imports" />}
                         renderOption={(props, option, { selected }) => {
                             return (
-                                <li key={option} {...props}>
+                                <li {...props}>
                                     <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 2 }} checked={selected} />
                                     {option}
                                 </li>

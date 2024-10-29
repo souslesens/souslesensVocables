@@ -52,8 +52,13 @@ var NodeInfosWidget = (function () {
                                 0;
                             }, 100);
                         },
+                       
                     });
-                },
+                }, 
+                close: function(event,ui){
+                    $("#addPredicateButton").remove();
+                    $("#deleteButton").remove();
+                }
             });
             $("#" + divId).dialog("open");
             $(".nodeInfosWidget_tabDiv").css("margin", "0px");

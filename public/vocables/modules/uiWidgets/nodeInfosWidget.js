@@ -26,7 +26,7 @@ var NodeInfosWidget = (function () {
         $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
             $("#addPredicateButton").remove();
             $("#deleteButton").remove();
-
+            $("#" + divId).dialog("close");
             $("#" + divId).dialog({
                 open: function (event, ui) {
                     $("#nodeInfosWidget_tabsDiv").tabs({

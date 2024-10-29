@@ -296,7 +296,25 @@ var Lineage_decoration = (function () {
         var legendTreeNode = {};
         var okNodeIds = [];
         async.series(
-            [
+            [   
+
+
+                // Decorate blank nodes
+                function (callbackSeries) {
+                    var newVisJsNodes=[];
+                    visjsNodes.forEach(function (item) {
+                        if (item.id.startsWith("_:b")) {
+                            item.label=null;
+                            item.shape='square'
+                           
+                        }
+                        newVisJsNodes.push(item);
+                        
+                    });
+                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
+                    callbackSeries();
+                },
+
                 function (callbackSeries) {
                     nodeIds.forEach(function (item) {
                         if (item.startsWith("http")) {

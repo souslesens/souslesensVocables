@@ -55,6 +55,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
     const [schemaTypes, setSchemaTypes] = useState<string[]>([]);
     const [source, setSource] = useState<ServerSource>(emptySource);
     const [sourcesNames, setSourcesNames] = useState<string[]>([]);
+    const [sourcesPrefixes, setSourcesPrefixes] = useState<string[]>([]);
     const [users, setUsers] = useState<User[]>([]);
 
     const handleField = (key: string, value: string | string[] | Record<string, string> | boolean | null) => {
@@ -85,6 +86,13 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                     code: z.ZodIssueCode.custom,
                     message: "This name is already used by another source",
                     path: ["name"],
+                });
+            }
+            if (sourcesPrefixes.includes(value.prefix)) {
+                context.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "This prefix is already used by another source",
+                    path: ["prefix"],
                 });
             }
             if (value.group.trim().length < 3) {
@@ -142,6 +150,7 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
             setPredicates([...new Set(sources.flatMap((s) => s.taxonomyPredicates))]);
             setSchemaTypes([...new Set(sources.flatMap((s) => s.schemaType))]);
             setSourcesNames(sources.map((s) => s.name));
+            setSourcesPrefixes(sources.map((s) => s.prefix));
             void getUsers().then((availableUsers) => setUsers(availableUsers));
 
             if (edit) {

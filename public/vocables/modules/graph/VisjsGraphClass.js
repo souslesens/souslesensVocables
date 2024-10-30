@@ -978,10 +978,17 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     if (self.data.nodes || self.isGraphNotEmpty()) {
                         self.data.edges.add(visjsData.edges);
                         self.data.nodes.add(visjsData.nodes);
+                        self.network.fit();
                     } else {
                         // self.draw(context.divId, visjsData, context.options, callback);
-                        self.draw(callback);
+                        self.draw(function(){
+
+                            if(callback)
+                                return callback()
+                            self.network.fit();
+                        });
                     }
+
                     self.message("");
                 }
             },

@@ -2727,11 +2727,13 @@ var Sparql_OWL = (function () {
         var filter = options.filter || "";
         if (resourcesIds) {
             // needs options.useFilterKeyWord because VALUES dont work
-            filter = Sparql_common.setFilter("parent", resourcesIds, null, {useFilterKeyWord: 1});
+            filter += Sparql_common.setFilter("parent", resourcesIds, null, {useFilterKeyWord: 1});
         }
 
         var pathOperator = "+";
 
+        if(options.includeParent)
+            pathOperator = "*";
         if (options.depth) {
             pathOperator = "{0," + options.depth + "}";
         }

@@ -24,7 +24,9 @@ var SparqlQuery_bot = (function () {
                     chooseQueryScopeFn: {
                         promptKeywordFn: {
                             chooseResourceTypeFn: {
-                                searchKeywordFn: {}
+                                chooseOutputTypeFn: {
+                                    searchKeywordFn: {}
+                                }
                             }
                         }
                     }
@@ -43,6 +45,7 @@ var SparqlQuery_bot = (function () {
         promptKeywordFn:"enter a keyword",
         searchKeywordFn:"matching keywords",
         chooseResourceTypeFn:"choose resource type",
+        chooseOutputTypeFn:"choose outup type",
 
 
 
@@ -61,10 +64,11 @@ var SparqlQuery_bot = (function () {
     self.functions = {
         chooseQueryScopeFn:function(){
             var choices=[
-                "active source",
-                "current sources",
-                "all sources",
-                "whiteboard resource"
+                {id:"activeSource",label: "active source"},
+                {id:"whiteboardSources",label: "current sources"},
+                {id:"all_OWLsources",label:  "all sources"}
+
+
             ]
             _botEngine.showList(choices,"queryScope")
         },
@@ -88,9 +92,54 @@ var SparqlQuery_bot = (function () {
 
         },
 
+        chooseOutputTypeFn:function(){
+            var choices=[
+                "Tree",
+                "Table",
+                "Graph",
+            ]
+            _botEngine.showList(choices,"outputType")
+
+        },
+
         searchKeywordFn:function(){
             var resourceType=self.params.resourceType;
+            var searchedSources=self.params.queryScope
+            if(searchedSources=="activeSource")
+                searchedSources=[Lineage_sources.activeSource]
+            else if(searchedSources=="whiteboardSources"){
+                searchedSources=[Lineage_sources.loadedSources]
+            }else{
+                searchedSources =Config.currentProfile.userSources
+            }
             if(resourceType=="Class"){
+                var options={
+                    term:self.params.keyword,
+                    searchedSources:searchedSources
+                }
+                SearchWidget.searchTermInSources(options, function(err, result){
+                    if(err)
+                        return _botEngine.abort(err.responseText || err)
+                    if(result.length==0)
+                       // alert("no result")
+                        return _botEngine.abort("no result")
+                    var outputType=self.params.outputType;
+                    if(outputType=="Tree"){
+                        UI.openTab('lineage-tab','classesTab',Lineage_whiteboard.initClassesTab,this)
+                        SearchWidget.searchResultToJstree("LineageNodesJsTreeDiv", result, {}, function (err, _result) {
+                            if (err) {
+                                return alert(err.responseText || err);
+                            }
+                        });
+
+                    }
+                    else if(outputType=="Table"){
+
+                    }
+                    if(outputType=="Graph"){
+
+                    }
+                })
 
             }
             if(resourceType=="ObjectProperty"){

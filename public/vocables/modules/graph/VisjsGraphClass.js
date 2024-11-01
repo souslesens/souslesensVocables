@@ -35,6 +35,11 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         var visjsData = self.data;
         var _options = self.options;
 
+        var improvedLayout=true;
+        //When enabled, the network will use the Kamada Kawai algorithm for initial layout. For networks larger than 100 nodes, ...
+        if(self.data.edges.getIds && self.data.edges.getIds().length>150)
+            improvedLayout=false
+
         self.drawingDone = false;
         self.currentContext = { divId: divId, options: _options, callback: callback };
         if (!_options) {
@@ -83,7 +88,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             edges: {
                 //  scaling:{min:1,max:8}
             },
-            layout: { improvedLayout: false },
+
+            layout: { improvedLayout: improvedLayout },
         };
 
         for (var key in _options) {
@@ -98,17 +104,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         } else {
             $("#visjsGraph_layoutSelect").val("");
         }
-        /*
-        self.globalOptions = options;
-        
-        options.visjsOptions.physics={};
-        options.visjsOptions.physics.stabilization = {
-            enabled: true,
-            iterations: 1000, // Nombre d'itérations pour stabiliser le réseau
-            updateInterval: 25,
-            onlyDynamicEdges: false,
-            fit: false
-          };*/
+
         self.network = new vis.Network(container, self.data, options.visjsOptions);
         self.simulationOn = true;
 

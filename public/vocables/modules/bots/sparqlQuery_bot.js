@@ -17,6 +17,116 @@ var SparqlQuery_bot = (function () {
     };
 
     self.workflow = {
+
+
+            _OR: {
+                keyword: {
+                    chooseQueryScopeFn: {
+                        promptKeywordFn: {
+                            chooseResourceTypeFn: {
+                                searchKeywordFn: {}
+                            }
+                        }
+                    }
+                },
+                sparqlQuery: {showSparqlEditorFn:{}},
+                similars: {  chooseQueryScopeFn: {}
+                },
+
+        }
+    }
+
+
+
+    self.functionTitles = {
+        chooseQueryScopeFn:"choose query scope",
+        promptKeywordFn:"enter a keyword",
+        searchKeywordFn:"matching keywords",
+        chooseResourceTypeFn:"choose resource type",
+
+
+
+        listVocabsFn: "Choose a source",
+        showSparqlEditorFn:"",
+
+        listClassesFn: "Choose a  a class ",
+        listPropertiesFn: "Choose a property",
+        listAnnotationPropertiesVocabsFn: "Choose a reference ontology",
+        listAnnotationPropertiesFn: "Choose a property",
+        promptAnnotationPropertyValue: "Filter value ",
+        listWhiteBoardFilterType: "Choose a scope",
+        listQueryTypeFn: "Choose a query type ",
+    };
+
+    self.functions = {
+        chooseQueryScopeFn:function(){
+            var choices=[
+                "active source",
+                "current sources",
+                "all sources",
+                "whiteboard resource"
+            ]
+            _botEngine.showList(choices,"queryScope")
+        },
+        promptKeywordFn:function(){
+            _botEngine.promptValue("keyword","keyword")
+        }
+        ,
+        showSparqlEditorFn  :function(){
+
+        },
+
+        chooseResourceTypeFn:function(){
+            var choices=[
+                "Class",
+                "ObjectProperty",
+                "dataTypeProperty",
+                "Individual",
+                "litteral value"
+            ]
+            _botEngine.showList(choices,"resourceType")
+
+        },
+
+        searchKeywordFn:function(){
+            var resourceType=self.params.resourceType;
+            if(resourceType=="Class"){
+
+            }
+            if(resourceType=="ObjectProperty"){
+
+            }
+            if(resourceType=="dataTypeProperty"){
+
+            }
+            if(resourceType=="Individual"){
+
+            }
+            if(resourceType=="litteral value"){
+
+            }
+
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    self.workflowOld = {
         _OR: {
             Class: {
                 listVocabsFn: {
@@ -84,7 +194,7 @@ var SparqlQuery_bot = (function () {
         },
     };
 
-    self.functionTitles = {
+    self.functionTitlesOld = {
         listVocabsFn: "Choose a reference ontology",
         listQueryTypeFn: "Choose a query type ",
         listClassesFn: "Choose a  a class ",
@@ -95,7 +205,7 @@ var SparqlQuery_bot = (function () {
         listWhiteBoardFilterType: "Choose a scope",
     };
 
-    self.functions = {
+    self.functionsOld = {
         listVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
         },

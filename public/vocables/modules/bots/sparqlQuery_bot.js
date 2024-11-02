@@ -4,6 +4,7 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import _botEngine from "./_botEngine.js";
+import Export from "../shared/export.js";
 
 var SparqlQuery_bot = (function () {
     var self = {};
@@ -21,8 +22,8 @@ var SparqlQuery_bot = (function () {
 
             _OR: {
                 keyword: {
+                    promptKeywordFn: {
                     chooseQueryScopeFn: {
-                        promptKeywordFn: {
                             chooseResourceTypeFn: {
                                 chooseOutputTypeFn: {
                                     searchKeywordFn: {}
@@ -42,7 +43,7 @@ var SparqlQuery_bot = (function () {
 
     self.functionTitles = {
         chooseQueryScopeFn:"choose query scope",
-        promptKeywordFn:"enter a keyword",
+        promptKeywordFn:"enter a keyword or enter for any ",
         searchKeywordFn:"matching keywords",
         chooseResourceTypeFn:"choose resource type",
         chooseOutputTypeFn:"choose outup type",
@@ -66,14 +67,14 @@ var SparqlQuery_bot = (function () {
             var choices=[
                 {id:"activeSource",label: "active source"},
                 {id:"whiteboardSources",label: "current sources"},
-                {id:"all_OWLsources",label:  "all sources"}
+                {id:"",label:  "all sources"}
 
 
             ]
             _botEngine.showList(choices,"queryScope")
         },
         promptKeywordFn:function(){
-            _botEngine.promptValue("keyword","keyword")
+            _botEngine.promptValue("keyword","keyword","pump")
         }
         ,
         showSparqlEditorFn  :function(){
@@ -108,38 +109,149 @@ var SparqlQuery_bot = (function () {
             if(searchedSources=="activeSource")
                 searchedSources=[Lineage_sources.activeSource]
             else if(searchedSources=="whiteboardSources"){
-                searchedSources=[Lineage_sources.loadedSources]
+                searchedSources=Object.keys(Lineage_sources.loadedSources)
             }else{
                 searchedSources =Config.currentProfile.userSources
             }
+
+            var outputType=self.params.outputType;
             if(resourceType=="Class"){
-                var options={
-                    term:self.params.keyword,
-                    searchedSources:searchedSources
-                }
-                SearchWidget.searchTermInSources(options, function(err, result){
-                    if(err)
-                        return _botEngine.abort(err.responseText || err)
-                    if(result.length==0)
-                       // alert("no result")
-                        return _botEngine.abort("no result")
-                    var outputType=self.params.outputType;
-                    if(outputType=="Tree"){
-                        UI.openTab('lineage-tab','classesTab',Lineage_whiteboard.initClassesTab,this)
-                        SearchWidget.searchResultToJstree("LineageNodesJsTreeDiv", result, {}, function (err, _result) {
-                            if (err) {
-                                return alert(err.responseText || err);
+                async.series([
+
+                    //search Elastic
+                    function(callbackSeries) {
+                        var options={
+                            term:self.params.keyword,
+                            searchedSources:searchedSources
+                        }
+                        SearchWidget.searchTermInSources(options, function(err, result) {
+                            if(err){
+                                callbackSeries(err)
                             }
-                        });
+                            if (result.length == 0)
+                                // alert("no result")
+                                return _botEngine.abort("no result")
+                            self.params.elasticResult=result
+                          callbackSeries()
+                        })
+                    } ,
+
+                    //tree
+                    function(callbackSeries) {
+                        if(outputType!="Tree") {
+                            return callbackSeries()
+                        }
+
+                            UI.openTab('lineage-tab','classesTab',Lineage_whiteboard.initClassesTab,this)
+                            setTimeout(function(){
+                                SearchWidget.searchResultToJstree("LineageNodesJsTreeDiv", self.params.elasticResult, {}, function (err, _result) {
+                                   callbackSeries(err)
+                                });
+                            },500)
+
+
+
+                    } ,
+
+                    //table
+                    function(callbackSeries) {
+                        if(outputType!="Table") {
+                            return callbackSeries()
+                        }
+
+                            var cols=[]
+                            cols.push(
+                                { title: "source", defaultContent: "" },
+                                { title: "label", defaultContent: "" },
+                                { title: "uri" , defaultContent: "" },
+                            )
+                            var dataset=[]
+
+
+
+                        self.params.elasticResult.forEach(function(item0){
+
+                                for( var source in item0.matches){
+                                    item0.matches[source].forEach(function(item){
+                                        var obj=[item.source,item.label,item.id]
+                                        if(!item.parents || !item.parents.forEach){
+                                            var x=3
+                                        }else {
+                                            item.parents.forEach(function (parent, indexParent) {
+                                                if(indexParent==0)
+                                                    return;
+                                                if (cols.length <= indexParent + 3) {
+                                                    cols.push({title: "ancestor_" + indexParent, defaultContent: ""})
+                                                }
+
+                                                var parentLabel=self.params.elasticResult.parentIdsLabelsMap[parent]
+                                                obj.push(parentLabel || parent)
+
+                                            })
+                                        }
+                                        dataset.push(obj)
+
+                                    })
+                                }
+
+
+                            })
+
+                            Export.showDataTable("mainDialogDiv",cols,dataset)
+                        callbackSeries()
+
+                    } ,
+
+                    //graph
+                    function(callbackSeries) {
+                        if (outputType != "Graph") {
+                            return callbackSeries()
+                        }
+                        var visjsData={nodes:[],edges:[]}
+                        self.params.elasticResult.forEach(function(item0) {
+
+
+
+                            var uniqueNodes= {}
+                            for (var source in item0.matches) {
+                                item0.matches[source].forEach(function (item) {
+                                    if(!uniqueNodes[item.id]){
+                                        visjsData.nodes.push({
+                                            id:item.id,
+                                            label:item.label,
+                                            shape: "dot",
+                                            color:"#dda",
+                                            data:{
+                                                id:item.id,
+                                                label:item.label,
+                                                source:item.source
+                                            }
+
+                                        })
+                                    }
+                                })
+
+                            }
+                        })
+                        Lineage_whiteboard.drawNewGraph(visjsData)
+
+                       // Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes)
+                        callbackSeries()
+
+
 
                     }
-                    else if(outputType=="Table"){
 
-                    }
-                    if(outputType=="Graph"){
-
-                    }
+                ],function(err){
+                    if (err)
+                        return _botEngine.abort(err.responseText || err)
+                  return _botEngine.end()
                 })
+
+
+
+
+
 
             }
             if(resourceType=="ObjectProperty"){

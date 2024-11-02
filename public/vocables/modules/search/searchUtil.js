@@ -242,8 +242,11 @@ indexes.push(source.toLowerCase());
                                             allClassesArray.parentIdsLabelsMap = parentsMap;
                                             return callbackSeries();
                                         })
-                                        .catch((e) =>
-                                            callbackSeries(e));
+                                        .catch((e) =>{
+                                            console.log(e)
+                                            callbackSeries(e)}
+                                        );
+
                                 })
                                 .catch((e) =>
                                     callbackSeries(e));

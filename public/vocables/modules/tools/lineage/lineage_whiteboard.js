@@ -549,6 +549,9 @@ var Lineage_whiteboard = (function () {
         if (!_options) {
             _options = {};
         }
+        if(!graphDiv){
+            graphDiv="graphDiv"
+        }
 
         graphContext = {};
         var options = {};

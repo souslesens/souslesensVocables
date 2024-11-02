@@ -12,7 +12,7 @@ var SparqlQuery_bot = (function () {
     self.start = function () {
         self.title = "Query graph";
         _botEngine.init(SparqlQuery_bot, self.workflow, null, function () {
-            self.params = { source: Lineage_sources.activeSource };
+            self.params = {source: Lineage_sources.activeSource};
             _botEngine.nextStep();
         });
     };
@@ -20,38 +20,59 @@ var SparqlQuery_bot = (function () {
     self.workflow = {
 
 
-            _OR: {
-                keyword: {
-                    promptKeywordFn: {
+        _OR: {
+            keyword: {
+                promptKeywordFn: {
                     chooseQueryScopeFn: {
-                            chooseResourceTypeFn: {
-                                chooseOutputTypeFn: {
-                                    searchKeywordFn: {}
+                        chooseResourceTypeFn: {
+                            _OR: {
+                                ObjectProperty: {
+                                    chooseObjectPropertyResourceFn: {
+                                        chooseOutputTypeFn: {
+                                            searchKeywordFn: {}
+                                        }
+                                    }
+                                },
+                                DatatypeProperty: {
+                                    chooseDatatypePropertyResourceFn: {
+                                        chooseOutputTypeFn: {
+                                            searchKeywordFn: {}
+                                        }
+                                    }
+                                },
+                                _DEFAULT: {
+                                    chooseOutputTypeFn: {
+                                        searchKeywordFn: {}
+                                    }
                                 }
-                            }
+
+
+                            },
+
                         }
                     }
-                },
-                sparqlQuery: {showSparqlEditorFn:{}},
-                similars: {  chooseQueryScopeFn: {}
-                },
+                }
+            },
+            sparqlQuery: {showSparqlEditorFn: {}},
+            similars: {
+                chooseQueryScopeFn: {}
+            },
 
         }
     }
 
 
-
     self.functionTitles = {
-        chooseQueryScopeFn:"choose query scope",
-        promptKeywordFn:"enter a keyword or enter for any ",
-        searchKeywordFn:"matching keywords",
-        chooseResourceTypeFn:"choose resource type",
-        chooseOutputTypeFn:"choose outup type",
-
+        chooseQueryScopeFn: "choose query scope",
+        promptKeywordFn: "enter a keyword or enter for any ",
+        searchKeywordFn: "matching keywords",
+        chooseResourceTypeFn: "choose resource type",
+        chooseOutputTypeFn: "choose outup type",
+        chooseObjectPropertyResourceFn: "choose propety resources",
 
 
         listVocabsFn: "Choose a source",
-        showSparqlEditorFn:"",
+        showSparqlEditorFn: "",
 
         listClassesFn: "Choose a  a class ",
         listPropertiesFn: "Choose a property",
@@ -63,229 +84,379 @@ var SparqlQuery_bot = (function () {
     };
 
     self.functions = {
-        chooseQueryScopeFn:function(){
-            var choices=[
-                {id:"activeSource",label: "active source"},
-                {id:"whiteboardSources",label: "current sources"},
-                {id:"",label:  "all sources"}
+        chooseQueryScopeFn: function () {
+            var choices = [
+                {id: "activeSource", label: "active source"},
+                {id: "whiteboardSources", label: "current sources"},
+                {id: "", label: "all sources"}
 
 
             ]
-            _botEngine.showList(choices,"queryScope")
+            _botEngine.showList(choices, "queryScope")
         },
-        promptKeywordFn:function(){
-            _botEngine.promptValue("keyword","keyword","pump")
+        promptKeywordFn: function () {
+            _botEngine.promptValue("keyword", "keyword", "pump")
         }
         ,
-        showSparqlEditorFn  :function(){
-
+        showSparqlEditorFn: function () {
+            MainController.onToolSelect("SPARQL")
+            _botEngine.end()
         },
 
-        chooseResourceTypeFn:function(){
-            var choices=[
+        chooseResourceTypeFn: function () {
+            var choices = [
                 "Class",
                 "ObjectProperty",
                 "dataTypeProperty",
                 "Individual",
                 "litteral value"
             ]
-            _botEngine.showList(choices,"resourceType")
+            _botEngine.showList(choices, "resourceType")
 
         },
 
-        chooseOutputTypeFn:function(){
-            var choices=[
+        chooseOutputTypeFn: function () {
+            var choices = [
                 "Tree",
                 "Table",
                 "Graph",
             ]
-            _botEngine.showList(choices,"outputType")
+            _botEngine.showList(choices, "outputType")
 
         },
 
-        searchKeywordFn:function(){
-            var resourceType=self.params.resourceType;
-            var searchedSources=self.params.queryScope
-            if(searchedSources=="activeSource")
-                searchedSources=[Lineage_sources.activeSource]
-            else if(searchedSources=="whiteboardSources"){
-                searchedSources=Object.keys(Lineage_sources.loadedSources)
-            }else{
-                searchedSources =Config.currentProfile.userSources
+        searchKeywordFn: function () {
+
+
+            var resourceType = self.params.resourceType;
+            if (resourceType == "Class") {
+                self.processClassQuery()
             }
-
-            var outputType=self.params.outputType;
-            if(resourceType=="Class"){
-                async.series([
-
-                    //search Elastic
-                    function(callbackSeries) {
-                        var options={
-                            term:self.params.keyword,
-                            searchedSources:searchedSources
-                        }
-                        SearchWidget.searchTermInSources(options, function(err, result) {
-                            if(err){
-                                callbackSeries(err)
-                            }
-                            if (result.length == 0)
-                                // alert("no result")
-                                return _botEngine.abort("no result")
-                            self.params.elasticResult=result
-                          callbackSeries()
-                        })
-                    } ,
-
-                    //tree
-                    function(callbackSeries) {
-                        if(outputType!="Tree") {
-                            return callbackSeries()
-                        }
-
-                            UI.openTab('lineage-tab','classesTab',Lineage_whiteboard.initClassesTab,this)
-                            setTimeout(function(){
-                                SearchWidget.searchResultToJstree("LineageNodesJsTreeDiv", self.params.elasticResult, {}, function (err, _result) {
-                                   callbackSeries(err)
-                                });
-                            },500)
-
-
-
-                    } ,
-
-                    //table
-                    function(callbackSeries) {
-                        if(outputType!="Table") {
-                            return callbackSeries()
-                        }
-
-                            var cols=[]
-                            cols.push(
-                                { title: "source", defaultContent: "" },
-                                { title: "label", defaultContent: "" },
-                                { title: "uri" , defaultContent: "" },
-                            )
-                            var dataset=[]
-
-
-
-                        self.params.elasticResult.forEach(function(item0){
-
-                                for( var source in item0.matches){
-                                    item0.matches[source].forEach(function(item){
-                                        var obj=[item.source,item.label,item.id]
-                                        if(!item.parents || !item.parents.forEach){
-                                            var x=3
-                                        }else {
-                                            item.parents.forEach(function (parent, indexParent) {
-                                                if(indexParent==0)
-                                                    return;
-                                                if (cols.length <= indexParent + 3) {
-                                                    cols.push({title: "ancestor_" + indexParent, defaultContent: ""})
-                                                }
-
-                                                var parentLabel=self.params.elasticResult.parentIdsLabelsMap[parent]
-                                                obj.push(parentLabel || parent)
-
-                                            })
-                                        }
-                                        dataset.push(obj)
-
-                                    })
-                                }
-
-
-                            })
-
-                            Export.showDataTable("mainDialogDiv",cols,dataset)
-                        callbackSeries()
-
-                    } ,
-
-                    //graph
-                    function(callbackSeries) {
-                        if (outputType != "Graph") {
-                            return callbackSeries()
-                        }
-                        var visjsData={nodes:[],edges:[]}
-                        self.params.elasticResult.forEach(function(item0) {
-
-
-
-                            var uniqueNodes= {}
-                            for (var source in item0.matches) {
-                                item0.matches[source].forEach(function (item) {
-                                    if(!uniqueNodes[item.id]){
-                                        visjsData.nodes.push({
-                                            id:item.id,
-                                            label:item.label,
-                                            shape: "dot",
-                                            color:"#dda",
-                                            data:{
-                                                id:item.id,
-                                                label:item.label,
-                                                source:item.source
-                                            }
-
-                                        })
-                                    }
-                                })
-
-                            }
-                        })
-                        Lineage_whiteboard.drawNewGraph(visjsData)
-
-                       // Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes)
-                        callbackSeries()
-
-
-
-                    }
-
-                ],function(err){
-                    if (err)
-                        return _botEngine.abort(err.responseText || err)
-                  return _botEngine.end()
-                })
-
-
-
-
-
+            if (resourceType == "ObjectProperty") {
+                self.processObjectPropertyQuery()
+            }
+            if (resourceType == "dataTypeProperty") {
 
             }
-            if(resourceType=="ObjectProperty"){
+            if (resourceType == "Individual") {
 
             }
-            if(resourceType=="dataTypeProperty"){
+            if (resourceType == "litteral value") {
 
             }
-            if(resourceType=="Individual"){
 
-            }
-            if(resourceType=="litteral value"){
+        },
+        chooseObjectPropertyResourceFn: function () {
+            var choices = [
 
-            }
+                "RangeAndDomain",
+                "Restriction",
+                "Predicate",
+
+            ]
+
+            _botEngine.showList(choices, "objectPropertyResourceType")
 
         }
     }
 
 
+    self.processClassQuery = function () {
+        var outputType = self.params.outputType;
+        var searchedSources = self.params.queryScope
+        if (searchedSources == "activeSource") {
+            searchedSources = [Lineage_sources.activeSource]
+        } else if (searchedSources == "whiteboardSources") {
+            searchedSources = Object.keys(Lineage_sources.loadedSources)
+        } else {
+            searchedSources = Config.currentProfile.userSources
+        }
+        async.series([
+
+            //search Elastic
+            function (callbackSeries) {
+                var options = {
+                    term: self.params.keyword,
+                    searchedSources: searchedSources
+                }
+                SearchWidget.searchTermInSources(options, function (err, result) {
+                    if (err) {
+                        callbackSeries(err)
+                    }
+                    if (result.length == 0)
+                        // alert("no result")
+                    {
+                        return _botEngine.abort("no result")
+                    }
+                    self.params.elasticResult = result
+                    callbackSeries()
+                })
+            },
+
+            //tree
+            function (callbackSeries) {
+                if (outputType != "Tree") {
+                    return callbackSeries()
+                }
+
+                UI.openTab('lineage-tab', 'classesTab', Lineage_whiteboard.initClassesTab, this)
+                setTimeout(function () {
+                    SearchWidget.searchResultToJstree("LineageNodesJsTreeDiv", self.params.elasticResult, {}, function (err, _result) {
+                        callbackSeries(err)
+                    });
+                }, 500)
 
 
+            },
+
+            //table
+            function (callbackSeries) {
+                if (outputType != "Table") {
+                    return callbackSeries()
+                }
+
+                var cols = []
+                cols.push(
+                    {title: "source", defaultContent: ""},
+                    {title: "label", defaultContent: ""},
+                    {title: "uri", defaultContent: ""},
+                )
+                var dataset = []
 
 
+                self.params.elasticResult.forEach(function (item0) {
+
+                    for (var source in item0.matches) {
+                        item0.matches[source].forEach(function (item) {
+                            var obj = [item.source, item.label, item.id]
+                            if (!item.parents || !item.parents.forEach) {
+                                var x = 3
+                            } else {
+                                item.parents.forEach(function (parent, indexParent) {
+                                    if (indexParent == 0) {
+                                        return;
+                                    }
+                                    if (cols.length <= indexParent + 3) {
+                                        cols.push({title: "ancestor_" + indexParent, defaultContent: ""})
+                                    }
+
+                                    var parentLabel = self.params.elasticResult.parentIdsLabelsMap[parent]
+                                    obj.push(parentLabel || parent)
+
+                                })
+                            }
+                            dataset.push(obj)
+
+                        })
+                    }
 
 
+                })
+
+                Export.showDataTable("mainDialogDiv", cols, dataset)
+                callbackSeries()
+
+            },
+
+            //graph
+            function (callbackSeries) {
+                if (outputType != "Graph") {
+                    return callbackSeries()
+                }
+                var visjsData = {nodes: [], edges: []}
+                var sources = []
+                self.params.elasticResult.forEach(function (item0) {
 
 
+                    var uniqueNodes = {}
+                    for (var source in item0.matches) {
+                        if (sources.indexOf(source) < 0) {
+                            sources.push(source)
+                        }
+                        item0.matches[source].forEach(function (item) {
+                            if (!uniqueNodes[item.id]) {
+                                uniqueNodes[item.id] = 1
+                                visjsData.nodes.push({
+                                    id: item.id,
+                                    label: item.label,
+                                    shape: "dot",
+                                    color: "#dda",
+                                    data: {
+                                        id: item.id,
+                                        label: item.label,
+                                        source: item.source
+                                    }
+
+                                })
+                            }
+                        })
+
+                    }
+                })
+                Lineage_whiteboard.drawNewGraph(visjsData)
+                //   Lineage_sources.loadSources(sources);
+
+                // Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes)
+                callbackSeries()
 
 
+            }
+
+        ], function (err) {
+            if (err) {
+                return _botEngine.abort(err.responseText || err)
+            }
+            return _botEngine.end()
+        })
 
 
+    }
 
 
+    self.processObjectPropertyQuery = function () {
+        var outputType = self.params.outputType;
+        var searchedSources = self.params.queryScope
+        if (searchedSources == "activeSource") {
+            searchedSources = [Lineage_sources.activeSource]
+        } else if (searchedSources == "whiteboardSources") {
+            searchedSources = Object.keys(Lineage_sources.loadedSources)
+        } else {
+            searchedSources = Config.currentProfile.userSources
+        }
 
+        var objectPropertyResourceType = self.params.objectPropertyResourceType
+        var properties = {}
+        async.series([
+
+            //select propertie in Config.ontologiesVocabularyModels
+            function (callbackSeries) {
+
+
+                OntologyModels.registerSourcesModel(searchedSources, function (err, result) {
+                    searchedSources.forEach(function (source) {
+
+                        var sourceOntologyModel = Config.ontologiesVocabularyModels[source]
+                        for (var property in sourceOntologyModel.properties) {
+                            var propLabel=sourceOntologyModel.properties[property].label
+                            if (!self.params.keyword || propLabel.indexOf(self.params.keyword) > -1) {
+                                properties[property] = sourceOntologyModel.properties[property];
+                                properties[property].source = source
+                                properties[property].constraints = sourceOntologyModel.constraints[property] ||{};
+                                properties[property].restrictions = sourceOntologyModel.restrictions[property] ||{};
+
+                            }
+
+                        }
+                    })
+
+                    callbackSeries();
+
+
+                })
+            }
+
+            //draw Graph
+            , function (callbackSeries) {
+                if (outputType != "Graph") {
+                    return callbackSeries()
+                }
+                var visjsData = {nodes: [], edges: []}
+                var existingNodes={}
+                for (var property in properties) {
+
+                    if (objectPropertyResourceType.indexOf("RangeAndDomain") > -1) {
+                        var constraint= properties[property].constraints
+                        var range =constraint.range
+                        var domain = constraint.domain
+                        if (range && range !=domain) {
+                            if(!existingNodes[range]) {
+                                existingNodes[range]=1
+                                visjsData.nodes.push({
+                                    id: range,
+                                    label: constraint.rangeLabel,
+                                    shape: "dot",
+                                    color: "#d44",
+                                    data: {
+                                        id: range,
+                                        label: constraint.rangeLabel,
+                                        source: properties[property].source
+                                    }
+                                })
+                            }
+                        } else {
+                            range=common.getRandomHexaId(5),
+                            visjsData.nodes.push({
+                                id:range,
+                                label: "none",
+                                shape: "text",
+                                color: "#efbf00",
+                                data: {
+
+                                }
+                            })
+                        }
+                        if (domain && range !=domain) {
+                            if(!existingNodes[domain]) {
+                                existingNodes[domain] = 1
+                                visjsData.nodes.push({
+                                    id: domain,
+                                    label: constraint.domainLabel,
+                                    shape: "dot",
+                                    color: "#d44",
+                                    data: {
+                                        id: domain,
+                                        label: constraint.domainLabel,
+                                        source: properties[property].source
+                                    }
+                                })
+                            }
+                        } else {
+                            domain=common.getRandomHexaId(5),
+                            visjsData.nodes.push({
+                                id: common.getRandomHexaId(5),
+                                label: "none",
+                                shape: "text",
+                                color: "#efbf00",
+                                data: {
+
+                                }
+                            })
+                        }
+                        var label=properties[property].label
+                        visjsData.edges.push({
+                            id:property,
+                            label:label,
+                            from:domain,
+                            to:range,
+                            data:{
+                                id:property,
+                                label:label,
+                                source:properties[property] .source
+
+
+                            }
+                        })
+
+                        Lineage_whiteboard.drawNewGraph(visjsData)
+
+
+                    } else if (objectPropertyResourceType.indexOf("Restriction") > -1) {
+
+                    }
+                    if (objectPropertyResourceType.indexOf("Predicate") > -1) {
+
+                    }
+
+                }
+
+            }
+
+
+        ], function (err) {
+
+        })
+
+    }
 
     self.workflowOld = {
         _OR: {
@@ -293,45 +464,45 @@ var SparqlQuery_bot = (function () {
                 listVocabsFn: {
                     listClassesFn: {
                         _OR: {
-                            "Any Predicate": { listWhiteBoardFilterType: { executeQuery: {} } },
+                            "Any Predicate": {listWhiteBoardFilterType: {executeQuery: {}}},
                             "Choose Predicate": {
                                 listPredicatePathsFn: {
                                     _OR: {
-                                        empty: { listWhiteBoardFilterType: { executeQuery: {} } },
-                                        ok: { listWhiteBoardFilterType: { executeQuery: {} } }, //self.workflow_individualsRole,
+                                        empty: {listWhiteBoardFilterType: {executeQuery: {}}},
+                                        ok: {listWhiteBoardFilterType: {executeQuery: {}}}, //self.workflow_individualsRole,
                                     },
                                 },
                             },
-                            " Restrictions": { listWhiteBoardFilterType: { drawRestrictions: {} } },
-                            "Inverse Restrictions": { listWhiteBoardFilterType: { drawInverseRestrictions: {} } },
-                            Individuals: { setIndividualsTypeFilter: { executeQuery: {} } },
+                            " Restrictions": {listWhiteBoardFilterType: {drawRestrictions: {}}},
+                            "Inverse Restrictions": {listWhiteBoardFilterType: {drawInverseRestrictions: {}}},
+                            Individuals: {setIndividualsTypeFilter: {executeQuery: {}}},
                         },
                     },
                 },
             },
             Individual: {
                 listActiveSourceVocabsFn: {
-                    listClassesFn: { switchToIndividualsBotFn: {} },
+                    listClassesFn: {switchToIndividualsBotFn: {}},
                 },
             },
             "Object Property": {
                 listVocabsFn: {
                     listPropertiesFn: {
                         _OR: {
-                            "Any Predicate": { listWhiteBoardFilterType: { executeQuery: {} } },
+                            "Any Predicate": {listWhiteBoardFilterType: {executeQuery: {}}},
 
                             //  _DEFAULT: {
                             "Choose Predicate": {
                                 listPredicatePathsFn: {
                                     _OR: {
-                                        empty: { listWhiteBoardFilterType: { executeQuery: {} } },
+                                        empty: {listWhiteBoardFilterType: {executeQuery: {}}},
                                         ok: self.workflow_individualsRole,
                                     },
                                 },
                             },
-                            Restrictions: { listWhiteBoardFilterType: { drawRestrictions: {} } },
-                            "Inverse Restrictions": { listWhiteBoardFilterType: { drawInverseRestrictions: {} } },
-                            Individuals: { setIndividualsTypeFilter: { executeQuery: {} } },
+                            Restrictions: {listWhiteBoardFilterType: {drawRestrictions: {}}},
+                            "Inverse Restrictions": {listWhiteBoardFilterType: {drawInverseRestrictions: {}}},
+                            Individuals: {setIndividualsTypeFilter: {executeQuery: {}}},
 
                             // },
                         },
@@ -351,7 +522,7 @@ var SparqlQuery_bot = (function () {
             },
             /*  "Sample of Classes": { promptClassesSampleSizeFn: { executeQuery: {} } },
               "Sample of Individuals": { promptIndividualsSampleSizeFn: { executeQuery: {} } },*/
-            "Sample of Predicates": { promptPredicatesSampleSizeFn: { executeQuery: {} } },
+            "Sample of Predicates": {promptPredicatesSampleSizeFn: {executeQuery: {}}},
         },
     };
 
@@ -378,11 +549,17 @@ var SparqlQuery_bot = (function () {
         },
 
         listClassesFn: function () {
-            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "currentClass", true, [{ label: ".Any Class", id: "AnyClass" }]);
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "currentClass", true, [{
+                label: ".Any Class",
+                id: "AnyClass"
+            }]);
         },
 
         listPropertiesFn: function () {
-            CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "currentProperty", [{ label: ".Any property", id: "AnyProperty" }]);
+            CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "currentProperty", [{
+                label: ".Any property",
+                id: "AnyProperty"
+            }]);
         },
 
         listPredicatePathsFn: function () {
@@ -476,14 +653,14 @@ var SparqlQuery_bot = (function () {
 
         listWhiteBoardFilterType: function () {
             var choices = [
-                { id: "sourceNodes", label: "active Source " },
-                { id: "allSources", label: "all referenced Sources " },
+                {id: "sourceNodes", label: "active Source "},
+                {id: "allSources", label: "all referenced Sources "},
             ];
             if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                choices.push({ id: "whiteboardNodes", label: "whiteboard nodes" });
+                choices.push({id: "whiteboardNodes", label: "whiteboard nodes"});
             }
             if (Lineage_whiteboard.currentGraphNode) {
-                choices.push({ id: "selectedNode", label: "selectedNode" });
+                choices.push({id: "selectedNode", label: "selectedNode"});
             }
             _botEngine.showList(choices, "whiteboardFilterType");
         },
@@ -575,9 +752,9 @@ var SparqlQuery_bot = (function () {
                 if (!path) {
                     if (currentClass && currentClass != "AnyClass") {
                         if (allindividuals) {
-                            return "filter(?prop=rdf:type)" + Sparql_common.setFilter("object", currentClass, null, { useFilterKeyWord: 1 });
+                            return "filter(?prop=rdf:type)" + Sparql_common.setFilter("object", currentClass, null, {useFilterKeyWord: 1});
                         }
-                        filterPath = Sparql_common.setFilter("subject", currentClass, null, { useFilterKeyWord: 1 });
+                        filterPath = Sparql_common.setFilter("subject", currentClass, null, {useFilterKeyWord: 1});
                     } else {
                         withImports = false;
                         OnlySubjects = true;
@@ -600,8 +777,8 @@ var SparqlQuery_bot = (function () {
                     return "";
                 }
                 var propFilter = Sparql_common.setFilter("prop", array[1]);
-                var subjectClassFilter = Sparql_common.setFilter("subjectType", array[0], null, { useFilterKeyWord: 1 });
-                var objectClassFilter = Sparql_common.setFilter("objectType", array[2], null, { useFilterKeyWord: 1 });
+                var subjectClassFilter = Sparql_common.setFilter("subjectType", array[0], null, {useFilterKeyWord: 1});
+                var objectClassFilter = Sparql_common.setFilter("objectType", array[2], null, {useFilterKeyWord: 1});
                 return propFilter + " " + subjectClassFilter + " " + objectClassFilter;
             }
 
@@ -618,7 +795,7 @@ var SparqlQuery_bot = (function () {
                 if (individualsFilterType == "label") {
                     filter = Sparql_common.setFilter(individualsFilterRole, null, individualsFilterValue);
                 } else if (individualsFilterType == "list") {
-                    filter = Sparql_common.setFilter(individualsFilterRole, individualsFilterValue, null, { useFilterKeyWord: 1 });
+                    filter = Sparql_common.setFilter(individualsFilterRole, individualsFilterValue, null, {useFilterKeyWord: 1});
                 } else if (individualsFilterType == "advanced") {
                     filter = advancedFilter;
                 }

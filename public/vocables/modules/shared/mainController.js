@@ -172,7 +172,7 @@ var MainController = (function () {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
                         // return callbackSeries();
 
-                        OntologyModels.registerSourcesModel(sources, function (err) {
+                        OntologyModels.registerSourcesModel(sources, null,function (err) {
                             callbackSeries(err);
                         });
                     },

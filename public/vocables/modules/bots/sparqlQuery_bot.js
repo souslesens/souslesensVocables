@@ -28,8 +28,13 @@ var SparqlQuery_bot = (function () {
                             _OR: {
                                 ObjectProperty: {
                                     chooseObjectPropertyResourceFn: {
-                                        chooseOutputTypeFn: {
-                                            searchKeywordFn: {}
+                                        _OR: {
+                                            Predicate:{choosePredicateFilterFn:{}},
+                                            _DEFAULT: {
+                                                chooseOutputTypeFn: {
+                                                    searchKeywordFn: {}
+                                                }
+                                            }
                                         }
                                     }
                                 },
@@ -69,6 +74,7 @@ var SparqlQuery_bot = (function () {
         chooseResourceTypeFn: "choose resource type",
         chooseOutputTypeFn: "choose outup type",
         chooseObjectPropertyResourceFn: "choose propety resources",
+        choosePredicateFilterFn:"choose predicateFilter mode",
 
 
         listVocabsFn: "Choose a source",
@@ -108,8 +114,7 @@ var SparqlQuery_bot = (function () {
                 "Class",
                 "ObjectProperty",
                 "dataTypeProperty",
-                "Individual",
-                "litteral value"
+              
             ]
             _botEngine.showList(choices, "resourceType")
 
@@ -138,12 +143,7 @@ var SparqlQuery_bot = (function () {
             if (resourceType == "dataTypeProperty") {
 
             }
-            if (resourceType == "Individual") {
-
-            }
-            if (resourceType == "litteral value") {
-
-            }
+          
 
         },
         chooseObjectPropertyResourceFn: function () {
@@ -157,6 +157,16 @@ var SparqlQuery_bot = (function () {
 
             _botEngine.showList(choices, "objectPropertyResourceType")
 
+        },
+
+        choosePredicateFilterFn:function(){
+            var choices = [
+                "filterProperty",
+                "filterSubject",
+                "filterObject",
+            ]
+
+            _botEngine.showList(choices, "predicateFilterType")
         }
     }
 
@@ -332,17 +342,17 @@ var SparqlQuery_bot = (function () {
             function (callbackSeries) {
 
 
-                OntologyModels.registerSourcesModel(searchedSources, function (err, result) {
+                OntologyModels.registerSourcesModel(searchedSources, {noCache: false}, function (err, result) {
                     searchedSources.forEach(function (source) {
 
                         var sourceOntologyModel = Config.ontologiesVocabularyModels[source]
                         for (var property in sourceOntologyModel.properties) {
-                            var propLabel=sourceOntologyModel.properties[property].label
+                            var propLabel = sourceOntologyModel.properties[property].label
                             if (!self.params.keyword || propLabel.indexOf(self.params.keyword) > -1) {
                                 properties[property] = sourceOntologyModel.properties[property];
                                 properties[property].source = source
-                                properties[property].constraints = sourceOntologyModel.constraints[property] ||{};
-                                properties[property].restrictions = sourceOntologyModel.restrictions[property] ||{};
+                                properties[property].constraints = sourceOntologyModel.constraints[property] || {};
+                                properties[property].restrictions = sourceOntologyModel.restrictions[property] || {};
 
                             }
 
@@ -361,80 +371,100 @@ var SparqlQuery_bot = (function () {
                     return callbackSeries()
                 }
                 var visjsData = {nodes: [], edges: []}
-                var existingNodes={}
+                var existingNodes = {}
                 for (var property in properties) {
 
-                    if (objectPropertyResourceType.indexOf("RangeAndDomain") > -1) {
-                        var constraint= properties[property].constraints
-                        var range =constraint.range
-                        var domain = constraint.domain
-                        if (range && range !=domain) {
-                            if(!existingNodes[range]) {
-                                existingNodes[range]=1
-                                visjsData.nodes.push({
-                                    id: range,
-                                    label: constraint.rangeLabel,
-                                    shape: "dot",
-                                    color: "#d44",
-                                    data: {
-                                        id: range,
-                                        label: constraint.rangeLabel,
-                                        source: properties[property].source
-                                    }
-                                })
-                            }
-                        } else {
-                            range=common.getRandomHexaId(5),
-                            visjsData.nodes.push({
-                                id:range,
-                                label: "none",
-                                shape: "text",
-                                color: "#efbf00",
-                                data: {
+                    if (objectPropertyResourceType=="RangeAndDomain"  || objectPropertyResourceType=="Restriction" ) {
 
+                        var constraints;
+                        var edgeDomainLabel;
+                        var edgeRangeLabel;
+                        var propertyColor
+                       if( objectPropertyResourceType=="RangeAndDomain") {
+                           constraints = properties[property].constraints
+                           edgeDomainLabel="domain"
+                           edgeRangeLabel="range"
+                           propertyColor="#dfa"
+                       }
+                        else if( objectPropertyResourceType=="Restriction") {
+                           constraints = properties[property].restrictions
+                           edgeDomainLabel="subClassOf"
+                           edgeRangeLabel="somevaluesFrom"
+                           propertyColor="#eab3b3"
+                       }
+
+                        if(!Array.isArray(constraints))
+                            constraints=[constraints]
+                        constraints.forEach(function(constraint) {
+
+                            var range = constraint.range
+                            var domain = constraint.domain
+                            if (range != domain) {
+                                if (range) {
+                                    if (!existingNodes[range]) {
+                                        existingNodes[range] = 1
+                                        visjsData.nodes.push({
+                                            id: range,
+                                            label: constraint.rangeLabel,
+                                            shape: "dot",
+                                            color: "#d44",
+                                            data: {
+                                                id: range,
+                                                label: constraint.rangeLabel,
+                                                source: properties[property].source
+                                            }
+                                        })
+                                    }
                                 }
-                            })
-                        }
-                        if (domain && range !=domain) {
-                            if(!existingNodes[domain]) {
-                                existingNodes[domain] = 1
-                                visjsData.nodes.push({
-                                    id: domain,
-                                    label: constraint.domainLabel,
-                                    shape: "dot",
-                                    color: "#d44",
-                                    data: {
+                            }
+
+
+                            if (domain) {
+                                if (!existingNodes[domain]) {
+                                    existingNodes[domain] = 1
+                                    visjsData.nodes.push({
                                         id: domain,
                                         label: constraint.domainLabel,
-                                        source: properties[property].source
-                                    }
-                                })
+                                        shape: "dot",
+                                        color: "#d44",
+                                        data: {
+                                            id: domain,
+                                            label: constraint.domainLabel,
+                                            source: properties[property].source
+                                        }
+                                    })
+                                }
                             }
-                        } else {
-                            domain=common.getRandomHexaId(5),
+                            var label = properties[property].label
+                            var propertyVisjsId=common.getRandomHexaId(5)
                             visjsData.nodes.push({
-                                id: common.getRandomHexaId(5),
-                                label: "none",
-                                shape: "text",
-                                color: "#efbf00",
+                                id: propertyVisjsId,
+                                label: label,
+                                shape: "box",
+                                color:propertyColor,
                                 data: {
-
+                                    id: property,
+                                    label: label,
+                                    source: properties[property].source
                                 }
                             })
-                        }
-                        var label=properties[property].label
-                        visjsData.edges.push({
-                            id:property,
-                            label:label,
-                            from:domain,
-                            to:range,
-                            data:{
-                                id:property,
-                                label:label,
-                                source:properties[property] .source
 
-
-                            }
+                            visjsData.edges.push({
+                                id: common.getRandomHexaId(5),
+                                label:edgeRangeLabel,
+                                from: propertyVisjsId,
+                                to: range,
+                                data: {},
+                                arrow:"to"
+                            })
+                            visjsData.edges.push({
+                                id: common.getRandomHexaId(5),
+                                label: edgeDomainLabel,
+                                from: propertyVisjsId,
+                                to: domain,
+                                data: {},
+                                arrow:"to"
+                            })
                         })
 
                         Lineage_whiteboard.drawNewGraph(visjsData)
@@ -442,20 +472,33 @@ var SparqlQuery_bot = (function () {
 
                     } else if (objectPropertyResourceType.indexOf("Restriction") > -1) {
 
+
                     }
                     if (objectPropertyResourceType.indexOf("Predicate") > -1) {
-
+                        
+                        self.processObjectPropertyQuery()
+                        
+                        
+                        
+                        
                     }
-
                 }
-
+                callbackSeries()
             }
 
 
         ], function (err) {
-
+            _botEngine.end()
         })
 
+    }
+
+
+
+
+    self.processObjectPropertyQuery=function(){
+        
+        
     }
 
     self.workflowOld = {

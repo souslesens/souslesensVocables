@@ -8,6 +8,7 @@ import Export from "../shared/export.js";
 
 var SparqlQuery_bot = (function () {
     var self = {};
+    self.maxGraphDisplay=150
 
     self.start = function () {
         self.title = "Query graph";
@@ -20,50 +21,50 @@ var SparqlQuery_bot = (function () {
     self.workflow = {
 
 
-        _OR: {
-            keyword: {
-                promptKeywordFn: {
-                    chooseQueryScopeFn: {
-                        chooseResourceTypeFn: {
-                            _OR: {
-                                ObjectProperty: {
-                                    chooseObjectPropertyResourceFn: {
-                                        _OR: {
-                                            Predicate:{choosePredicateFilterFn:{}},
-                                            _DEFAULT: {
-                                                chooseOutputTypeFn: {
-                                                    searchKeywordFn: {}
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                DatatypeProperty: {
-                                    chooseDatatypePropertyResourceFn: {
-                                        chooseOutputTypeFn: {
-                                            searchKeywordFn: {}
-                                        }
-                                    }
-                                },
-                                _DEFAULT: {
-                                    chooseOutputTypeFn: {
-                                        searchKeywordFn: {}
-                                    }
+        chooseResourceTypeFn: {
+
+            _OR: {
+                ObjectProperty: {
+                    promptKeywordFn: {
+                        chooseObjectPropertyResourceFn: {
+                            chooseQueryScopeFn: {
+                                chooseOutputTypeFn: {
+                                    searchKeywordFn: {}
                                 }
+                            }
 
-
-                            },
 
                         }
                     }
+                },
+                Individuals: {
+                    chooseQueryScopeFn: {
+                        choosePredicateFilterFn: {}
+                    }
+
+
+                },
+                Class: {
+                    promptKeywordFn: {
+
+                            chooseQueryScopeFn: {
+                                chooseOutputTypeFn: {
+                                searchKeywordFn: {}
+                            }
+                        }
+                    }
                 }
-            },
-            sparqlQuery: {showSparqlEditorFn: {}},
-            similars: {
-                chooseQueryScopeFn: {}
+
+
             },
 
-        }
+
+        },
+        sparqlQuery: {showSparqlEditorFn: {}},
+        similars: {
+            chooseQueryScopeFn: {}
+        },
+
     }
 
 
@@ -74,7 +75,7 @@ var SparqlQuery_bot = (function () {
         chooseResourceTypeFn: "choose resource type",
         chooseOutputTypeFn: "choose outup type",
         chooseObjectPropertyResourceFn: "choose propety resources",
-        choosePredicateFilterFn:"choose predicateFilter mode",
+        choosePredicateFilterFn: "choose predicateFilter mode",
 
 
         listVocabsFn: "Choose a source",
@@ -113,8 +114,8 @@ var SparqlQuery_bot = (function () {
             var choices = [
                 "Class",
                 "ObjectProperty",
-                "dataTypeProperty",
-              
+                "Individuals",
+
             ]
             _botEngine.showList(choices, "resourceType")
 
@@ -141,9 +142,9 @@ var SparqlQuery_bot = (function () {
                 self.processObjectPropertyQuery()
             }
             if (resourceType == "dataTypeProperty") {
-
+                self.processIndividualsQuery();
             }
-          
+
 
         },
         chooseObjectPropertyResourceFn: function () {
@@ -159,7 +160,7 @@ var SparqlQuery_bot = (function () {
 
         },
 
-        choosePredicateFilterFn:function(){
+        choosePredicateFilterFn: function () {
             var choices = [
                 "filterProperty",
                 "filterSubject",
@@ -171,7 +172,7 @@ var SparqlQuery_bot = (function () {
     }
 
 
-    self.processClassQuery = function () {
+    self.processClassQueryOld = function () {
         var outputType = self.params.outputType;
         var searchedSources = self.params.queryScope
         if (searchedSources == "activeSource") {
@@ -322,7 +323,124 @@ var SparqlQuery_bot = (function () {
 
     }
 
+    self.processClassQuery = function () {
+        var outputType = self.params.outputType;
+        var searchedSources = self.params.queryScope
+        if (searchedSources == "activeSource") {
+            searchedSources = [Lineage_sources.activeSource]
+        } else if (searchedSources == "whiteboardSources") {
+            searchedSources = Object.keys(Lineage_sources.loadedSources)
+        } else {
+            searchedSources = Config.currentProfile.userSources
+        }
 
+
+        var classes = {}
+        async.series([
+
+                //select propertie in Config.ontologiesVocabularyModels
+                function (callbackSeries) {
+
+
+                    OntologyModels.registerSourcesModel(searchedSources, {noCache: false}, function (err, result) {
+                        searchedSources.forEach(function (source) {
+
+                            var sourceOntologyModel = Config.ontologiesVocabularyModels[source]
+                            for (var classId in sourceOntologyModel.classes) {
+                                var classLabel = sourceOntologyModel.classes[classId].label
+                                if (!self.params.keyword || classLabel.indexOf(self.params.keyword) > -1) {
+                                    classes[classId] = sourceOntologyModel.classes[classId];
+                                    classes[classId].source=source
+
+
+                                }
+
+                            }
+                        })
+
+                        callbackSeries();
+
+
+                    })
+                }
+
+                //draw Graph
+                , function (callbackSeries) {
+                    if (outputType != "Graph") {
+                        return callbackSeries()
+                    }
+                    if (Object.keys(classes).length >self.maxGraphDisplay) {
+                        return _botEngine.abort("too many nodes to display a usable graph")
+                    }
+                    var visjsData = {nodes: [], edges: []}
+                    var existingNodes = {}
+                    for (var classId in classes) {
+
+
+                        var classLabel = classes[classId].label
+                        var superClass = classes[classId].superClass
+                        var superClassLabel = classes[classId].superClassLabel
+                        var source = classes[classId].source
+
+
+                        if (!existingNodes[classId]) {
+                            existingNodes[classId] = 1
+                            visjsData.nodes.push({
+                                id: classId,
+                                label: classLabel,
+                                shape: "dot",
+                                color: "#d44",
+                                data: {
+                                    id: classId,
+                                    label: classLabel,
+                                    source: source
+                                }
+                            })
+                        }
+
+                  /*      if (!existingNodes[superClass]) {
+                            existingNodes[superClass] = 1
+                            visjsData.nodes.push({
+                                id: superClass,
+                                label: superClassLabel,
+                                shape: "dot",
+                                color: "#d44",
+                                data: {
+                                    id: superClass,
+                                    label: superClassLabel,
+                                    source: source
+                                }
+                            })
+                        }
+
+
+                        visjsData.edges.push({
+                            id: common.getRandomHexaId(10),
+                            label: "subClassOf",
+                            from: classId,
+                            to: superClass,
+                            data: {},
+                            arrows: "to"
+                        })*/
+
+
+
+
+
+                    }
+                    Lineage_whiteboard.drawNewGraph(visjsData)
+                    callbackSeries()
+                }
+
+
+            ],
+
+            function (err) {
+                _botEngine.end()
+            }
+        )
+
+    }
     self.processObjectPropertyQuery = function () {
         var outputType = self.params.outputType;
         var searchedSources = self.params.queryScope
@@ -370,32 +488,37 @@ var SparqlQuery_bot = (function () {
                 if (outputType != "Graph") {
                     return callbackSeries()
                 }
+                if (Object.keys(properties).length >self.maxGraphDisplay) {
+                    return _botEngine.abort("too many nodes to display a usable graph")
+                }
                 var visjsData = {nodes: [], edges: []}
                 var existingNodes = {}
                 for (var property in properties) {
 
-                    if (objectPropertyResourceType=="RangeAndDomain"  || objectPropertyResourceType=="Restriction" ) {
+                    if (objectPropertyResourceType == "RangeAndDomain" || objectPropertyResourceType == "Restriction") {
 
                         var constraints;
                         var edgeDomainLabel;
                         var edgeRangeLabel;
                         var propertyColor
-                       if( objectPropertyResourceType=="RangeAndDomain") {
-                           constraints = properties[property].constraints
-                           edgeDomainLabel="domain"
-                           edgeRangeLabel="range"
-                           propertyColor="#dfa"
-                       }
-                        else if( objectPropertyResourceType=="Restriction") {
-                           constraints = properties[property].restrictions
-                           edgeDomainLabel="subClassOf"
-                           edgeRangeLabel="somevaluesFrom"
-                           propertyColor="#eab3b3"
-                       }
+                        var arrowDir="to"
+                        if (objectPropertyResourceType == "RangeAndDomain") {
+                            constraints = properties[property].constraints
+                            edgeDomainLabel = "domain"
+                            edgeRangeLabel = "range"
+                            propertyColor = "#dfa"
+                        } else if (objectPropertyResourceType == "Restriction") {
+                            constraints = properties[property].restrictions
+                            edgeDomainLabel = "subClassOf"
+                            edgeRangeLabel = "somevaluesFrom"
+                            propertyColor = "#eab3b3"
+                            arrowDir="from"
+                        }
 
-                        if(!Array.isArray(constraints))
-                            constraints=[constraints]
-                        constraints.forEach(function(constraint) {
+                        if (!Array.isArray(constraints)) {
+                            constraints = [constraints]
+                        }
+                        constraints.forEach(function (constraint) {
 
                             var range = constraint.range
                             var domain = constraint.domain
@@ -436,53 +559,46 @@ var SparqlQuery_bot = (function () {
                                 }
                             }
                             var label = properties[property].label
-                            var propertyVisjsId=common.getRandomHexaId(5)
-                            visjsData.nodes.push({
-                                id: propertyVisjsId,
-                                label: label,
-                                shape: "box",
-                                color:propertyColor,
-                                data: {
-                                    id: property,
+                            var propertyVisjsId = property//common.getRandomHexaId(10)
+                            if (!existingNodes[propertyVisjsId]) {
+                                existingNodes[propertyVisjsId] = 1
+                                visjsData.nodes.push({
+                                    id: propertyVisjsId,
                                     label: label,
-                                    source: properties[property].source
-                                }
-                            })
+                                    shape: "box",
+                                    color: propertyColor,
+                                    data: {
+                                        id: property,
+                                        label: label,
+                                        source: properties[property].source
+                                    }
+                                })
+                            }
 
                             visjsData.edges.push({
-                                id: common.getRandomHexaId(5),
-                                label:edgeRangeLabel,
+                                id: common.getRandomHexaId(10),
+                                label: edgeRangeLabel,
                                 from: propertyVisjsId,
                                 to: range,
                                 data: {},
-                                arrow:"to"
+                                arrows: "to"
                             })
                             visjsData.edges.push({
-                                id: common.getRandomHexaId(5),
+                                id: common.getRandomHexaId(10),
                                 label: edgeDomainLabel,
                                 from: propertyVisjsId,
                                 to: domain,
                                 data: {},
-                                arrow:"to"
+                                arrows: arrowDir
                             })
                         })
 
-                        Lineage_whiteboard.drawNewGraph(visjsData)
 
 
-                    } else if (objectPropertyResourceType.indexOf("Restriction") > -1) {
 
-
-                    }
-                    if (objectPropertyResourceType.indexOf("Predicate") > -1) {
-                        
-                        self.processObjectPropertyQuery()
-                        
-                        
-                        
-                        
                     }
                 }
+                Lineage_whiteboard.drawNewGraph(visjsData)
                 callbackSeries()
             }
 
@@ -494,11 +610,9 @@ var SparqlQuery_bot = (function () {
     }
 
 
+    self.processIndividualsQuery = function () {
 
 
-    self.processObjectPropertyQuery=function(){
-        
-        
     }
 
     self.workflowOld = {
@@ -931,7 +1045,8 @@ var SparqlQuery_bot = (function () {
     };
 
     return self;
-})();
+})
+();
 
 export default SparqlQuery_bot;
 window.SparqlQuery_bot = SparqlQuery_bot;

@@ -851,7 +851,7 @@ var Lineage_createRelation = (function () {
         }
 
         self.addImportToCurrentSource(mainSourceLabel, importedSourceLabel, function (_err, _result) {
-            OntologyModels.registerSourcesModel(importedSourceLabel);
+            OntologyModels.registerSourcesModel(importedSourceLabel,null,);
             callback();
         });
     };

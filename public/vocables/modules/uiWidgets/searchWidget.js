@@ -42,7 +42,7 @@ var SearchWidget = (function () {
      *  -contextMenufn
      *
      */
-    self.searchTermInSources = function (options) {
+    self.searchTermInSources = function (options,callback) {
         if (!options) {
             options = {};
         }
@@ -78,7 +78,7 @@ var SearchWidget = (function () {
             if ($("#searchAll_sourcesTree").jstree().get_checked) {
                 selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();
             } else {
-                selectedSources = [Lineage_sources.currentSource];
+                selectedSources = [Lineage_sources.activeSource];
             }
         }
 
@@ -167,18 +167,29 @@ var SearchWidget = (function () {
 
         SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
             if (_err) {
-                return alert(_err.responseText || err);
+                if(callback) {
+                    return callback(_err.responseText || _err)
+                }
+                return alert(_err.responseText || _err);
+            }
+
+            if(callback){
+                return callback(null,result)
             }
             if (Object.keys(result[0].matches).length == 0) {
                 return $("#" + (options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>");
             }
 
-            self.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
-                if (err) {
-                    return alert(err.responseText || err);
-                }
-            });
+
+                self.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
+                    if (err) {
+                        return alert(err.responseText || err);
+                    }
+                });
+
+
         });
+
     };
 
     self.searchResultToJstree = function (targetDiv, result, _options, _callback) {

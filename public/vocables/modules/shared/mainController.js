@@ -172,7 +172,7 @@ var MainController = (function () {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
                         // return callbackSeries();
 
-                        OntologyModels.registerSourcesModel(sources, function (err) {
+                        OntologyModels.registerSourcesModel(sources, null,function (err) {
                             callbackSeries(err);
                         });
                     },
@@ -230,9 +230,9 @@ var MainController = (function () {
                 if (clickedElement.id == "toolsSelect") {
                     return;
                 } else if (clickedElement.innerHTML) {
-                    var toolId = clickedElement.innerHTML;
+                     toolId = clickedElement.innerHTML;
                 } else {
-                    var toolId = clickedElement.nextSibling.innerHTML;
+                     toolId = clickedElement.nextSibling.innerHTML;
                 }
             }
         }
@@ -253,7 +253,7 @@ var MainController = (function () {
         }
         $("#currentToolTitle").html(toolId);
         if (UI.currentTheme["@" + toolId + "-logo"]) {
-            $("#currentToolTitle").html(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
+            $("#currentToolTitle").prepend(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
         }
         MainController.currentTool = toolId;
 

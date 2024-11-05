@@ -901,6 +901,7 @@ var MappingModeler = (function () {
                     }
                 });
                 self.allClasses.forEach(function (item) {
+                    if(item.source)
                     item.label = item.source.substring(0, 3) + ":" + item.label;
                 });
                 self.allClasses = common.array.sort(self.allClasses, "label");

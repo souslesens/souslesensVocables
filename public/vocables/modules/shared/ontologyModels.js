@@ -7,12 +7,16 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 // eslint-disable-next-line no-global-assign
 var OntologyModels = (function () {
     self.loadedSources = {};
-    self.registerSourcesModel = function (sources, callback) {
+
+    self.registerSourcesModel = function (sources,options, callback) {
         UI.message("loading ontology models");
         if (!Array.isArray(sources)) {
             sources = [sources];
         }
 
+        if(!options){
+            options={}
+        }
         let url = Config.sparql_server.url + "?format=json&query=";
 
         var queryP = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + "PREFIX owl: <http://www.w3.org/2002/07/owl#>";
@@ -32,7 +36,7 @@ var OntologyModels = (function () {
                     }
                     Config.ontologiesVocabularyModels[source] = { graphUri: graphUri };
                 } else {
-                    if (self.loadedSources[source]) {
+                    if (!options.noCache && self.loadedSources[source]) {
                         return callbackEach();
                     }
                 }
@@ -53,6 +57,10 @@ var OntologyModels = (function () {
                 async.series(
                     [
                         function (callbackSeries) {
+
+                        if(options.noCache){
+                            return callbackSeries();
+                        }
                             self.readModelOnServerCache(source, function (err, result) {
                                 self.loadedSources[source] = 1;
                                 if (result) {
@@ -272,10 +280,11 @@ var OntologyModels = (function () {
                             var query =
                                 queryP +
                                 "" +
-                                " select distinct ?prop ?domain FROM <" +
+                                " select distinct ?prop ?domain ?domainLabel FROM <" +
                                 graphUri +
                                 "> where{" +
                                 " ?prop rdfs:domain ?domain." +
+                                "FILTER (!isBlank(?domain)) "+
                                 Sparql_common.getVariableLangLabel("domain", true, true) +
                                 " }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
@@ -297,7 +306,11 @@ var OntologyModels = (function () {
                         //set range constraints
                         function (callbackSeries) {
                             var query =
-                                queryP + " select distinct ?prop ?range FROM <" + graphUri + "> where{" + " ?prop rdfs:range ?range." + Sparql_common.getVariableLangLabel("range", true, true) + " }";
+                                queryP + " select distinct ?prop ?range ?rangeLabel FROM <" + graphUri + "> where{" +
+                                " ?prop rdfs:range ?range." +
+                                Sparql_common.getVariableLangLabel("range", true, true) +
+                                "FILTER (!isBlank(?range)) "+
+                                " }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -447,6 +460,12 @@ var OntologyModels = (function () {
 
                         // set transSourceRangeAndDomainLabels
                         function (callbackSeries) {
+
+                            if (true) {
+                                return callbackSeries();
+                            }
+
+
                             if (!Config.sources[source]) {
                                 return callbackSeries();
                             }
@@ -511,7 +530,7 @@ var OntologyModels = (function () {
             function (err) {
                 UI.message("", true);
                 if (callback) {
-                    return callback(err);
+                    return callback(err,Config.ontologiesVocabularyModels);
                 }
             }
         );

@@ -285,7 +285,7 @@ var KGcreator = (function () {
                             label: "show sample data",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator.showSampleData(node, true, 200);
+                                KGcreator.showSampleData(node, null, 200);
                             },
                         };
                         items.removeTableMappings = {
@@ -376,7 +376,7 @@ var KGcreator = (function () {
                             label: "show sample Data",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator.showSampleData(node, true, 200);
+                                KGcreator.showSampleData(node, null, 200);
                             },
                         };
                         items.removeTableMappings = {

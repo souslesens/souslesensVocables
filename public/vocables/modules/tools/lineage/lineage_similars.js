@@ -42,7 +42,8 @@ var Lineage_similars = (function () {
         self.currentSource = obj.node.id;
         // self.drawSourceSimilars(source);
     };
-    self.onValidateSources = function () {};
+    self.onValidateSources = function () {
+    };
 
     self.drawSimilars = function () {
         if (!Lineage_whiteboard.lineageVisjsGraph.data) {
@@ -67,8 +68,8 @@ var Lineage_similars = (function () {
             var whiteboardLabelsMap = {};
             nodes.forEach(function (node) {
                 if (node.data.label) {
-                    whiteboardLabelsMap[node.data.label] = { fromNode: node, similars: [] };
-                    whiteboardLabelsMap[node.data.label.toLowerCase()] = { fromNode: node, similars: [] };
+                    whiteboardLabelsMap[node.data.label] = {fromNode: node, similars: []};
+                    whiteboardLabelsMap[node.data.label.toLowerCase()] = {fromNode: node, similars: []};
                 }
             });
 
@@ -105,13 +106,19 @@ var Lineage_similars = (function () {
                                 if ($("#Similars_Only_exact_match").is(":checked")) {
                                     if (hit._source.label.toLowerCase() == actual_word_label.toLowerCase()) {
                                         if (!whiteboardLabelsMap[hit._source.label]) {
-                                            whiteboardLabelsMap[hit._source.label] = { fromNode: whiteboardLabelsMap[actual_word_label].fromNode, similars: [] };
+                                            whiteboardLabelsMap[hit._source.label] = {
+                                                fromNode: whiteboardLabelsMap[actual_word_label].fromNode,
+                                                similars: []
+                                            };
                                         }
                                         whiteboardLabelsMap[hit._source.label].similars.push(hit._source);
                                     }
                                 } else {
                                     if (!whiteboardLabelsMap[hit._source.label]) {
-                                        whiteboardLabelsMap[hit._source.label] = { fromNode: whiteboardLabelsMap[actual_word_label].fromNode, similars: [] };
+                                        whiteboardLabelsMap[hit._source.label] = {
+                                            fromNode: whiteboardLabelsMap[actual_word_label].fromNode,
+                                            similars: []
+                                        };
                                     }
                                     whiteboardLabelsMap[hit._source.label].similars.push(hit._source);
                                 }
@@ -127,7 +134,7 @@ var Lineage_similars = (function () {
                     }
                     var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
-                    var visjsData = { nodes: [], edges: [] };
+                    var visjsData = {nodes: [], edges: []};
                     for (var label in whiteboardLabelsMap) {
                         var whiteboardNode = whiteboardLabelsMap[label];
 
@@ -217,17 +224,20 @@ var Lineage_similars = (function () {
                 if (node1.data.id == node2.data.id && node1.data.source == node2.data.source) {
                     return;
                 }
+                if (!node2.data.label) {
+                    node2.data.label = Sparql_common.getLabelFromURI(node2.data.id)
+                }
                 if (node1.data.label.toLowerCase().replace(/ /g, "") == node2.data.label.toLowerCase().replace(/ /g, "")) {
-                    commonNodes.push({ fromNode: node1, toNode: node2 });
+                    commonNodes.push({fromNode: node1, toNode: node2});
                 }
                 if (node1.label == node2.label) {
-                    commonNodes.push({ fromNode: node1, toNode: node2 });
+                    commonNodes.push({fromNode: node1, toNode: node2});
                 }
             });
         });
 
         if (true || output == "graph") {
-            var visjsData = { nodes: [], edges: [] };
+            var visjsData = {nodes: [], edges: []};
             commonNodes.forEach(function (item) {
                 var edgeId = item.fromNode.id + "_" + item.toNode.id;
                 var inverseEdgeId = item.toNode.id + "_" + item.fromNode.id;

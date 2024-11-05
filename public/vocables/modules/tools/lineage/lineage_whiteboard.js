@@ -549,6 +549,9 @@ var Lineage_whiteboard = (function () {
         if (!_options) {
             _options = {};
         }
+        if(!graphDiv){
+            graphDiv="graphDiv"
+        }
 
         graphContext = {};
         var options = {};
@@ -679,12 +682,14 @@ var Lineage_whiteboard = (function () {
         }
 
         self.lineageVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
+        Lineage_decoration.decorationDone=false
         self.lineageVisjsGraph.draw(function () {
             UI.message("", true);
 
             //  Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
 
-            if (self.lineageVisjsGraph.isGraphNotEmpty() && !_options.noDecorations) {
+            if ( !Lineage_decoration.decorationDone && self.lineageVisjsGraph.isGraphNotEmpty() && !_options.noDecorations) {
+                Lineage_decoration.decorationDone=true
                 Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes, _options.legendType);
                 //  GraphDisplayLegend.drawLegend("Lineage", "LineageVisjsLegendCanvas");
             }
@@ -3364,7 +3369,7 @@ attrs.color=self.getSourceColor(superClassValue)
         if ($("#propertiesTab").children().length == 0) {
             $("#propertiesTab").load("./modules/tools/lineage/html/propertiesTab.html", function (s) {
                 Lineage_whiteboard.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
-                Lineage_properties.searchTermInSources();
+              //  Lineage_properties.searchTermInSources();
                 self.hideShowMoreOptions("show", "Lineage_MorePropertiesOptions");
             });
         }

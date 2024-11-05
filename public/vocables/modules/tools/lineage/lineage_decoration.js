@@ -230,7 +230,7 @@ var Lineage_decoration = (function () {
         }
 
         function getNodeLegendAttrs(ancestors) {
-            function getLegendTreeNode(ancestorNode, parent) {
+           /* function getLegendTreeNode(ancestorNode, parent) {
                 var treeObj = null;
                 var color = legendClassesMap[ancestorNode.superClass.value];
                 if (!color) {
@@ -257,8 +257,50 @@ var Lineage_decoration = (function () {
                 }
 
                 return legendClassesMap[ancestorNode.superClass.value];
-            }
+            }*/
+        function getLegendTreeNode(ancestorNode, parent) {
+                var treeObj = null;
+                var colorId=ancestorNode.class.value;
+                var labelVar=ancestorNode.classLabel;
+                color = getPredefinedColor(ancestorNode.class.value);
+                if (!color) {
+                    color = legendClassesMap[ancestorNode.superClassSubClass.value];
+                    colorId=ancestorNode.superClassSubClass.value;
+                    labelVar=ancestorNode.superClassSubClassLabel;
+                }
+                if (!color) {
+                       color = getPredefinedColor(ancestorNode.superClassSubClass.value);
+                       colorId=ancestorNode.superClassSubClass.value;
+                       labelVar=ancestorNode.superClassSubClassLabel;
+                }
+                if (!color) {
+                    color = legendClassesMap[ancestorNode.superClass.value];
+                    colorId=ancestorNode.superClass.value;
+                    labelVar=ancestorNode.superClassLabel;
+                }
+                if (!color) {
+                       color = getPredefinedColor(ancestorNode.superClass.value);
+                       colorId=ancestorNode.superClass.value;
+                       labelVar=ancestorNode.superClassLabel;
+                }
+                if (color) {
+                        if (!uniqueLegendJsTreeDataNodes[colorId]) {
+                            legendClassesMap[colorId] = { id: colorId, color: color };
+                            uniqueLegendJsTreeDataNodes[colorId] = 1;
+                            var label = labelVar ? labelVar.value : Sparql_common.getLabelFromURI(colorId);
+                            treeObj = {
+                                id: colorId,
+                                text: "<span  style='font-size:10px;background-color:" + color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + label,
+                                parent: "#",
+                                color: color,
+                            };
+                            legendJsTreeData.push(treeObj);
+                        }
+                }
+                
 
+                return legendClassesMap[colorId];
+            }
             var color = null;
             var legendTreeNode = null;
             for (var i = ancestors.length - 1; i > -1; i--) {
@@ -375,7 +417,20 @@ var Lineage_decoration = (function () {
 
                 function (callbackSeries) {
                     var uniqueNewVisJsNodes = {};
+                    
                     for (var nodeId in hierarchies) {
+                        if(nodeId=='http://rds.posccaesar.org/ontology/lis14/rdl/Activity'){
+                            console.log('here');
+                        }
+                        if (nodeIds.indexOf(nodeId) > -1) {
+                            var classColor=getPredefinedColor(nodeId);
+                            if(classColor){
+                                legendClassesMap[nodeId] = {id:nodeId,color:classColor};
+                                
+                            }
+                            
+                        }
+                       
                         var ancestors = hierarchies[nodeId];
                         var color = null;
 
@@ -401,9 +456,15 @@ var Lineage_decoration = (function () {
                             obj.font = { color: color };
                         }
                         if (nodeIds.indexOf(nodeId) > -1) {
+                            if(classColor){
+                                obj.color=classColor;
+                            }
                             newVisJsNodes.push(obj);
                         } else {
-                            legendClassesMap[nodeId] = legendTreeNode;
+                            if(legendTreeNode){
+                                legendClassesMap[nodeId] = legendTreeNode;
+                            }
+                            
                         }
                     }
 
@@ -439,6 +500,25 @@ var Lineage_decoration = (function () {
 
                 //draw legend
                 function (callbackSeries) {
+                    for (var nodeId in legendClassesMap){
+                        var isInLegend=legendJsTreeData.filter(function(node){return node.id==nodeId});
+                        if(isInLegend.length==0){    
+                            var color=legendClassesMap[nodeId]?.color;
+                            var label = Sparql_common.getLabelFromURI(nodeId);
+                            if(color){
+                                var treeObj = {
+                                    id: nodeId,
+                                    text: "<span  style='font-size:10px;background-color:" +color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + label,
+                                    parent: "#",
+                                    color: color,
+                                };
+                                legendJsTreeData.push(treeObj);
+                            }
+                           
+                        }
+                    }
+                   
+                    
                     self.drawLegend(legendJsTreeData);
                     callbackSeries();
                 },

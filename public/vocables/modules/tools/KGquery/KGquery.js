@@ -36,10 +36,12 @@ var KGquery = (function () {
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
     self.onLoaded = function () {
-        Lineage_sources.showHideEditButtons = UI.disableEditButtons;
-
+        //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
+        //self.oldshowHideEditButtons=Lineage_sources.showHideEditButtons;
+        //Lineage_sources.showHideEditButtons = UI.disableEditButtons;
         UI.initMenuBar(KGquery.loadSource);
         //KGquery.clearAll();
+        UI.disableEditButtons();
         if (Config.clientCache.KGquery) {
             KGquery_myQueries.load(null, Config.clientCache.KGquery);
         }
@@ -48,6 +50,7 @@ var KGquery = (function () {
     };
     self.unload = function () {
         Lineage_sources.registerSource = UI.oldRegisterSource;
+        //Lineage_sources.showHideEditButtons = self.oldshowHideEditButtons;
         //reapply changed DOM
 
         $("#KGquery_messageDiv").attr("id", "messageDiv");
@@ -76,6 +79,7 @@ var KGquery = (function () {
             }
             $("#graphDiv").load("./modules/tools/KGquery/html/KGquery_centralPanel.html", function () {
                 $("#lateralPanelDiv").load("./modules/tools/KGquery/html/KGquery_leftPanel.html", function () {
+                    UI.disableEditButtons();
                     KGquery_graph.drawVisjsModel("saved");
                     UI.openTab("lineage-tab", "tabs_Query", KGquery.initQuery, "#QueryTabButton");
                     UI.resetWindowHeight();

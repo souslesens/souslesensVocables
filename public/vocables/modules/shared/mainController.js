@@ -250,6 +250,7 @@ var MainController = (function () {
 
         if (toolId != "lineage" && !Config.userTools[toolId].noSource) {
             Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
+            $('#Lineage_graphEditionButtons').hide();
         }
         $("#currentToolTitle").html('');
         if (UI.currentTheme["@" + toolId + "-logo"]) {

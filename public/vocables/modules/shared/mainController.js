@@ -251,9 +251,11 @@ var MainController = (function () {
         if (toolId != "lineage" && !Config.userTools[toolId].noSource) {
             Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
         }
-        $("#currentToolTitle").html(toolId);
+        $("#currentToolTitle").html('');
         if (UI.currentTheme["@" + toolId + "-logo"]) {
             $("#currentToolTitle").prepend(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
+        }else{
+            $("#currentToolTitle").html(toolId);
         }
         MainController.currentTool = toolId;
 

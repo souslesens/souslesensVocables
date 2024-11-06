@@ -166,7 +166,7 @@ var NodeInfosWidget = (function () {
 
                 function (callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
-                        $("#nodeInfos_individualsDiv").hide();
+                        //$("#nodeInfos_individualsDiv").hide();
                         return callbackSeries();
                     }
                     $("#nodeInfos_individualsDiv").show();
@@ -185,7 +185,7 @@ var NodeInfosWidget = (function () {
 
                 function (callbackSeries) {
                     if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
-                        $("#nodeInfos_restrictionsDiv").hide();
+                        //$("#nodeInfos_restrictionsDiv").hide();
                         return callbackSeries();
                     }
 
@@ -779,7 +779,7 @@ defaultLang = 'en';*/
 
                 str += "</tr>";
             });
-            if (result.length == 0) {
+            if (result.length > 0) {
                 $("#" + divId).show();
                 $("#" + divId).append(str);
             } else {
@@ -791,30 +791,40 @@ defaultLang = 'en';*/
     };
 
     self.showAssociatedProperties = function (sourceLabel, nodeId, divId, callback) {
-        var ontologySourceModel = Config.ontologiesVocabularyModels[sourceLabel];
-        if (ontologySourceModel) {
-            var domainOfProperties = [];
-            var rangeOfProperties = [];
-            for (var prop in ontologySourceModel.constraints) {
-                var constraint = ontologySourceModel.constraints[prop];
-                if (constraint.domain == nodeId) {
-                    domainOfProperties.push({
-                        id: prop,
-                        label: constraint.label,
-                        rangeId: constraint.range,
-                        rangeLabel: constraint.rangeLabel,
-                    });
-                }
-                if (constraint.range == nodeId) {
-                    rangeOfProperties.push({
-                        id: prop,
-                        label: constraint.label,
-                        domainId: constraint.domain,
-                        domainLabel: constraint.domainLabel,
-                    });
+        var sources=[sourceLabel];
+        var imports=Config.sources[sourceLabel].imports;
+        sources=sources.concat(imports);
+        var ancestors=OntologyModels.getClassHierarchyTreeData(sourceLabel, nodeId, "ancestors");
+        var ancestorsIds=ancestors.map(function(x){return x.id});
+        var domainOfProperties = [];
+        var rangeOfProperties = [];
+        sources.forEach(function(source){
+            var ontologySourceModel = Config.ontologiesVocabularyModels[source];
+            
+            if (ontologySourceModel) {
+               
+                for (var prop in ontologySourceModel.constraints) {
+                    var constraint = ontologySourceModel.constraints[prop];
+                    if ( ancestorsIds.includes(constraint.domain) ) {
+                        domainOfProperties.push({
+                            id: prop,
+                            label: constraint.label,
+                            rangeId: constraint.range,
+                            rangeLabel: constraint.rangeLabel,
+                        });
+                    }
+                    if (ancestorsIds.includes(constraint.range) ) {
+                        rangeOfProperties.push({
+                            id: prop,
+                            label: constraint.label,
+                            domainId: constraint.domain,
+                            domainLabel: constraint.domainLabel,
+                        });
+                    }
                 }
             }
-
+        })
+        
             var html = "";
             if (domainOfProperties.length > 0) {
                 html += "<b><div class='nodesInfos_titles'>Domain of</div></b>";
@@ -844,7 +854,7 @@ defaultLang = 'en';*/
             } else {
                 $("#" + divId).hide();
             }
-        }
+        
         if (callback) {
             callback();
         }

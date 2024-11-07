@@ -177,12 +177,15 @@ indexes.push(source.toLowerCase());
                                         if (!matches[source]) {
                                             matches[source] = [];
                                         }
-                                        matches[source].push({
-                                            source: source,
-                                            id: toHit._source.id,
-                                            label: toHit._source.label,
-                                            parents: toHit._source.parents,
-                                        });
+                                        if(!options.type  || toHit._source.type.indexOf(options.type)>-1) {
+                                            matches[source].push({
+                                                source: source,
+                                                id: toHit._source.id,
+                                                label: toHit._source.label,
+                                                parents: toHit._source.parents,
+                                                type: toHit._source.type
+                                            });
+                                        }
                                         var parentsArray = toHit._source.parents;
                                         if (Array.isArray(parentsArray)) {
                                             //} && toHit._source.parents.split) {

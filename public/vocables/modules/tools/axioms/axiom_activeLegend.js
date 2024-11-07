@@ -59,7 +59,7 @@ var Axiom_activeLegend = (function () {
                         self.setSuggestionsSelect(classes, true, newObject);
                     });
                 } else {
-                    var classes = Axiom_manager.getAllClasses();
+                    var classes = Axiom_manager.getAllClasses(self.currentSource );
                     self.setSuggestionsSelect(classes, true, newObject);
                 }
             } else if (node.data.type == "ObjectProperty") {

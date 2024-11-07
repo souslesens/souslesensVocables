@@ -69,7 +69,7 @@ var NodeInfosAxioms = (function () {
         self.getResourceAxioms(self.currentResource.data.id, {}, function (err, result) {
             $("#waitImg").css("display", "none");
             if (err) {
-                return alert(err.responseText);
+                return alert(err.responseText || err);
             }
 
             if (!result.manchester || result.manchester.length == 0) {

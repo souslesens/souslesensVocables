@@ -579,7 +579,7 @@ var Axiom_activeLegend = (function () {
         if (confirm("Save Axiom")) {
             //check manchester Syntax
             self.axiomTriplesToManchester(function (err, manchesterStr) {
-                if (err) {
+                if (false  && err) {
                     return alert(err);
                 }
 

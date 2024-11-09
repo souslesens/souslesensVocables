@@ -355,7 +355,7 @@ var Axiom_activeLegend = (function () {
                   hiddenNodes.push("Complement");*/
             hiddenNodes.push("DisjointWith");
         } else if (resourceType == "Restriction") {
-            // hiddenNodes.push("Restriction");
+           hiddenNodes.push("Restriction");
 
             /// begin with property to respect range and domains
             var hasProperty = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "ObjectProperty");
@@ -363,9 +363,14 @@ var Axiom_activeLegend = (function () {
                 hiddenNodes.push("ObjectProperty");
             }
             var hasClass = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
-            if (hasClass) {
+
+            var isCardinalityRestriction=Axioms_graph.currentGraphNode.data.subType.indexOf("ardinality")>-1
+            if (isCardinalityRestriction || hasClass) {
                 hiddenNodes.push("Class");
             }
+            if(isCardinalityRestriction)
+                hiddenNodes.push("Connective");
+
         } else if (resourceType == "Connective") {
             hiddenNodes.push("ObjectProperty");
         }
@@ -577,10 +582,23 @@ var Axiom_activeLegend = (function () {
 
     self.saveAxiom = function () {
         if (confirm("Save Axiom")) {
+
+            var triples = self.visjsGraphToTriples();
+            var hasCardinalityRestriction=false
+            triples.forEach(function(triple){
+                if(triple.predicate.indexOf("ardinality")>-1){
+                    hasCardinalityRestriction=true
+                }
+            })
+
+
+
             //check manchester Syntax
-            self.axiomTriplesToManchester(function (err, manchesterStr) {
-                if (false  && err) {
-                    return alert(err);
+            self.axiomTriplesToManchester(triples,function (err, manchesterStr) {
+                if ( err) {
+                   //machstersyntax dont work yet with cardinality restrictions but we store the triples anyway
+                    if(!hasCardinalityRestriction)
+                        return alert(err);
                 }
 
                 var triples = self.visjsGraphToTriples();
@@ -624,8 +642,9 @@ var Axiom_activeLegend = (function () {
         JstreeWidget.addNodesToJstree("nodeInfosAxioms_axiomsJstreeDiv", self.axiomType, jstreeData);
     };
 
-    self.axiomTriplesToManchester = function (callback) {
-        var triples = self.visjsGraphToTriples();
+    self.axiomTriplesToManchester = function (triples,callback) {
+
+
         Axiom_manager.getManchesterAxiomsFromTriples(self.currentSource, triples, function (err, result) {
             if (err) {
                 if (callback) {

@@ -27,7 +27,7 @@ var NodeInfosWidget = (function () {
         }
         $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
             $("#addPredicateButton").remove();
-            $("#addRestrictionButton").remove();
+            // $("#addRestrictionButton").remove();
             $("#deleteButton").remove();
             $("#" + divId).dialog("close");
             $("#" + divId).dialog({
@@ -61,7 +61,7 @@ var NodeInfosWidget = (function () {
                 },
                 close: function (event, ui) {
                     $("#addPredicateButton").remove();
-                    $("#addRestrictionButton").remove();
+                    //  $("#addRestrictionButton").remove();
                     $("#deleteButton").remove();
                 }
             });
@@ -98,7 +98,7 @@ var NodeInfosWidget = (function () {
                     //when  a property in a restriction
                     //  node.data.id = node.data.propertyId;
 
-                    return self.showRestrictionInfos(node)
+                    return self.showRestrictionInfos(node, null, true)
                 }
                 if (node.data.from && !node.data.id) {
                     //when  a property in a restriction
@@ -150,10 +150,10 @@ var NodeInfosWidget = (function () {
                     self.showNodeInfosToolbar(options);
 
                     $("#deleteButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
-                    $("#addRestrictionButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
+                    //  $("#addRestrictionButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
                     $("#addPredicateButton").insertAfter($("#mainDialogDiv").parent().find(".ui-dialog-title"));
                     $("#addPredicateButton").css("margin-left", "25px !important");
-                    $("#addRestrictionButton").css("margin-left", "25px !important");
+                    //  $("#addRestrictionButton").css("margin-left", "25px !important");
                 });
             }
         });
@@ -248,9 +248,9 @@ var NodeInfosWidget = (function () {
             str +=
                 "<button id='addPredicateButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
-            str +=
-                "<button id='addRestriction' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
-                "onclick='NodeInfosWidget.showAddRestrictionWidget()'>  Add restriction </button>";
+            /* str +=
+                 "<button id='addRestriction' class='w3-button slsv-right-top-bar-button nodeInfos-button' " +
+                 "onclick='NodeInfosWidget.showAddRestrictionWidget()'>  Add restriction </button>";*/
 
             str += "<button id='deleteButton' class='w3-button slsv-right-top-bar-button nodeInfos-button' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
             str += "<div id='sourceBrowser_addPropertyDiv' style=''>";
@@ -593,6 +593,10 @@ defaultLang = 'en';*/
     };
 
     self.showClassRestrictions = function (sourceLabel, nodeId, _options, callback) {
+
+        return self.showRestrictionInfos(self.currentNode,"nodeInfos_restrictionsDiv",false)
+
+
         // blankNodes.
         var str = "";
         var isResult = false;
@@ -1537,18 +1541,16 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     };
 
 
-    self.showRestrictionInfos = function (node) {
-        var filter = "FILTER (?prop=<" + node.data.propertyId + ">)"
-        Sparql_OWL.getObjectRestrictions(node.data.source, node.data.subClassId, {filter: filter}, function (err, result) {
+    self.showRestrictionInfos = function (node, targetDiv, filterProp) {
+
+        var filter = ""
+        if (filterProp) {
+            filter = "FILTER (?prop=<" + node.data.propertyId + ">)"
+        }
+        Sparql_OWL.getObjectRestrictions(node.data.source, node.data.subClassId || node.data.id, {filter: filter}, function (err, result) {
             if (err) {
                 return alert(err.responseText || err)
             }
-
-            //    $("#smallDialogDiv").load("./modules/uiWidgets/html/classRestrictionInfos.html", function () {
-            $("#smallDialogDiv").dialog("open");
-            $("#addPredicateButton").remove();
-            $("#addRestrictionButton").remove();
-            $("#deleteButton").remove();
 
 
             var cardinalitiesMap = {}
@@ -1567,8 +1569,8 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 }
             })
 
-
-            var html = "<div style=\"width:800px;height:400px\">" +
+            var html = "<b class='nodesInfos_titles'>Restrictions </b> ";
+             html += "<div style=\"width:800px;height:400px\">" +
                 " <table>\n" +
                 "        <tr>\n" +
                 "            <td class='detailsCellName'> <span class=\"title\">subClass</span></td>\n" +
@@ -1584,7 +1586,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     fieldsMap[key] = restriction[key].value
                 }
 
-                if (fieldsMap.constraintType .indexOf("ardinality") > -1) {
+                if (fieldsMap.constraintType.indexOf("ardinality") > -1) {
                     return;
                 }
 
@@ -1593,17 +1595,30 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.prop + "'>" + fieldsMap.propLabel + "</a></td>"
 
                 html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.constraintType + "'>" + Sparql_common.getLabelFromURI(fieldsMap.constraintType) + "</a></td>"
-                   html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.value + "'>" + fieldsMap.valueLabel + "</a></td>"
+                html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.value + "'>" + fieldsMap.valueLabel + "</a></td>"
 
-               if (cardinalitiesMap[fieldsMap.prop]) {
-                    html += "<td class='detailsCellValue'>" + cardinalitiesMap[fieldsMap.prop].label + "</td>"
+                if (cardinalitiesMap[fieldsMap.prop]) {
+                    html += "<td class='detailsCellValue'>" + cardinalitiesMap[fieldsMap.prop].label + "<button onclick=''>...</button></td>"
+                }else{
+                    html += "<td class='detailsCellValue'>" + "<button onclick=''>...</button>" + "</td>"
                 }
+
+
 
                 html += "</tr>"
             })
 
             html += "</table></div>"
-            $("#smallDialogDiv").html(html)
+
+            if(!targetDiv){
+                targetDiv="smallDialogDiv"
+                $("#"+targetDiv).dialog("open");
+                $("#addPredicateButton").remove();
+
+                $("#deleteButton").remove();
+            }
+            $("#"+targetDiv).html(html)
+
 
 
         })

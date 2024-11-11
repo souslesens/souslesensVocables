@@ -436,7 +436,7 @@ targets: [0]
             ">" +
             " WHERE {{ ?domain rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction. ?node owl:onProperty ?prop ." +
             " OPTIONAL {?prop rdfs:label ?propLabel} " +
-            "?node owl:someValuesFrom ?range." +
+            "?node ?p ?range." +
             " OPTIONAL {?node <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel}\n" +
             "  OPTIONAL {?node <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel} \n" +
             "  OPTIONAL {?node <http://purl.org/dc/terms/created> ?creationDate} \n" +

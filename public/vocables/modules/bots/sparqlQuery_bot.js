@@ -687,7 +687,7 @@ var SparqlQuery_bot = (function () {
                             } else if (objectPropertyResourceType == "Restriction") {
                                 constraints = properties[property].restrictions
                                 edgeDomainLabel = "subClassOf"
-                                edgeRangeLabel = "somevaluesFrom"
+                                edgeRangeLabel = "targetClass"
                                 propertyColor = "#eab3b3"
                                 arrowDir = "from"
                             }
@@ -812,7 +812,7 @@ var SparqlQuery_bot = (function () {
                         )
 
                         edgeDomainLabel = "subClassOf"
-                        edgeRangeLabel = "somevaluesFrom"
+                        edgeRangeLabel = "targetClass"
 
                     }
 
@@ -872,7 +872,7 @@ var SparqlQuery_bot = (function () {
                     } else if (objectPropertyResourceType == "Restriction") {
 
                         edgeDomainLabel = "subClassOf"
-                        edgeRangeLabel = "somevaluesFrom"
+                        edgeRangeLabel = "targetClass"
 
 
                     }

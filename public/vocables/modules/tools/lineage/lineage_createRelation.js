@@ -5,6 +5,7 @@ import OntologyModels from "../../shared/ontologyModels.js";
 import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_sources from "./lineage_sources.js";
+import CreateRestriction_bot from "../../bots/createRestriction_bot.js";
 
 var Lineage_createRelation = (function () {
     var self = {};
@@ -14,8 +15,8 @@ var Lineage_createRelation = (function () {
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
-            self.sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
-            self.targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
+            self.sourceNode =edgeData.from;// Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
+            self.targetNode = edgeData.to;//Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
             var source = Lineage_sources.activeSource;
 
@@ -687,9 +688,30 @@ var Lineage_createRelation = (function () {
             createInverseRelation = false;
         }
         var blankNodeId;
+        var constraintType=null;
         async.series(
             [
-                //mangae import if from another source
+               //shwo constraintType bot
+                function (callbackSeries) {
+
+                        var params={
+                            source:inSource,
+                            currentNode:self.sourceNode,
+                            objectPropertyUri:type
+
+                        }
+                        CreateRestriction_bot.start(CreateRestriction_bot.workflowChooseConstraintTypeFn,params,function(err, result){
+
+                            constraintType=CreateRestriction_bot.params.constraintType ||"owl:someValuesFrom"
+                            callbackSeries()
+
+                        })
+
+
+
+
+                },
+                //manage import if from another source
                 function (callbackSeries) {
                     if (!addImportToCurrentSource) {
                         return callbackSeries();
@@ -702,7 +724,7 @@ var Lineage_createRelation = (function () {
                 function (callbackSeries) {
                     var allTriples = [];
 
-                    var restrictionTriples = self.getRestrictionTriples(sourceNode.id, targetNode.id, type);
+                    var restrictionTriples = self.getRestrictionTriples(sourceNode.id, targetNode.id, constraintType,type);
                     blankNodeId = restrictionTriples.blankNode;
 
                     var metadataOptions = {
@@ -737,6 +759,9 @@ var Lineage_createRelation = (function () {
                                     range: targetNode.id,
                                     domainLabel: sourceNode.label,
                                     rangeLabel: targetNode.label,
+                                    constraintType:constraintType,
+                                    constraintTypeLabel:Sparql_common.getLabelFromURI(constraintType),
+
                                 },
                             ],
                         },
@@ -878,7 +903,7 @@ var Lineage_createRelation = (function () {
         });
     };
 
-    self.getRestrictionTriples = function (sourceNodeId, targetNodeId, propId) {
+    self.getRestrictionTriples = function (sourceNodeId, targetNodeId,constraint , propId) {
         var restrictionsTriples = [];
         var blankNode = "_:b" + common.getRandomHexaId(10);
 
@@ -899,7 +924,7 @@ var Lineage_createRelation = (function () {
         });
         restrictionsTriples.push({
             subject: blankNode,
-            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            predicate:constraint ,// "http://www.w3.org/2002/07/owl#someValuesFrom",
             object: targetNodeId,
         });
 

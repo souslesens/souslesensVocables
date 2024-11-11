@@ -640,8 +640,9 @@ var Lineage_whiteboard = (function () {
 
                 addEdge: function (edgeData, callback) {
                     var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from);
+                    edgeData.from=sourceNode.data
                     var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
-
+                    edgeData.to=targetNode.data
                     if (false && sourceNode.data && sourceNode.data.type != "container" && targetNode.data && targetNode.data.type == "container") {
                         return Containers_graph.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);
                     }
@@ -2334,6 +2335,7 @@ restrictionSource = Config.predicatesSource;
                                     bNodeId: item.node.value,
                                     source: restrictionSource,
                                     propertyLabel: item.propLabel.value,
+                                    subClassId:item.value.value
                                 },
 
                                 arrows: {
@@ -2360,6 +2362,7 @@ restrictionSource = Config.predicatesSource;
                                     bNodeId: item.node.value,
                                     source: restrictionSource,
                                     propertyLabel: item.propLabel.value,
+                                    subClassId:item.subject.value
                                 },
 
                                 arrows: {
@@ -2531,7 +2534,7 @@ restrictionSource = Config.predicatesSource;
             html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listClusterContent();"> list cluster content</span>';
             html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.listClusterToClipboard();"> list to clipboard</span>';
         } else if (node.from && node.data.bNodeId) {
-            html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showPropertyInfos();"> Relation Infos</span>';
+            html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showPropertyInfos();"> restriction Infos</span>';
             if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
                 //   if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
                 html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.deleteRestriction();"> Delete relation</span>';
@@ -2971,6 +2974,10 @@ self.zoomGraphOnNode(node.data[0].id, false);
             }
         },
         showPropertyInfos: function (hideModifyButtons) {
+            NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv", { hideModifyButtons: hideModifyButtons });
+        },
+
+        showRestrictionInfos: function (hideModifyButtons) {
             NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv", { hideModifyButtons: hideModifyButtons });
         },
 

@@ -1490,6 +1490,7 @@ var Sparql_OWL = (function () {
         } else {
             query+="  filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:maxCardinality,owl:minCardinality,owl:cardinality))"
         }
+
         query+=  Sparql_common.getVariableLangLabel("value", true);
 
         if (options.getMetadata) {
@@ -1507,6 +1508,7 @@ var Sparql_OWL = (function () {
             filter2 = filter2.replace(/object/g, "value");
             query += " " + filter2 + " ";
         }
+
 
         query += "} }";
         var limit = options.limit || Config.queryLimit;

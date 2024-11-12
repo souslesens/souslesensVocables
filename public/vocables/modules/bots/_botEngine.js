@@ -194,7 +194,7 @@ var _botEngine = (function () {
         }
     };
 
-    self.end = function () {
+    self.end = function (dontCallBack) {
         self.currentBot.params.queryText = self.getQueryText();
         if (self.divId) {
             var dialogWindow = $("#" + self.divId)
@@ -205,7 +205,7 @@ var _botEngine = (function () {
         } else {
             $("#botPanel").dialog("close");
         }
-        if (self.currentBot.callbackFn) {
+        if ( !dontCallBack && self.currentBot.callbackFn) {
             return self.currentBot.callbackFn();
         }
     };

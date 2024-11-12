@@ -1575,7 +1575,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 //}
             })
 
-            var html = "<b class='nodesInfos_titles'>Restrictions </b> <button onclick='NodeInfosWidget.addRestiction()'>+</button>" ;
+            var html = "<b class='nodesInfos_titles'>Restrictions </b>   <button onclick='NodeInfosWidget.showAddRestrictionWidget()'>+</button>" ;
             html += "<div style=\"width:800px;height:400px\">" +
                 " <table>\n" +
                 "        <tr>\n" +
@@ -1641,7 +1641,20 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
     }
 
-    self.addRestrictionWidget=function(){
+    self.showAddRestrictionWidget=function(){
+
+
+            var params={
+                source:self.currentSource,
+                currentNode:self.currentNode,
+
+
+            }
+            CreateRestriction_bot.start(CreateRestriction_bot.workflow,params,function(err, result){
+
+                self.showRestrictionInfos(self.currentNode, "nodeInfos_restrictionsDiv", false)
+
+            })
 
     }
     self.showCardinalityWidget = function (restrictionUri) {

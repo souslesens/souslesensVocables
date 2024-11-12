@@ -6,7 +6,6 @@ import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
 
-
 var CreateRestriction_bot = (function () {
     var self = {};
     self.title = "Create Resource";
@@ -130,10 +129,12 @@ var CreateRestriction_bot = (function () {
 
 
         saveCardinalityRestrictionFn: function () {
-            if(!self.params.constraintType && !self.params.cardinalityType)
-                return   _botEngine.end()
-            if(!self.params.cardinalityValue)
-                return   _botEngine.end()
+            if (!self.params.constraintType && !self.params.cardinalityType) {
+                return _botEngine.end()
+            }
+            if (!self.params.cardinalityValue) {
+                return _botEngine.end()
+            }
 
 
             self.saveCardinalityRestriction(
@@ -155,24 +156,23 @@ var CreateRestriction_bot = (function () {
 
         showValueRestictionWidgetFn: function () {
             var edgeData = {
-                from: {
-                    data: self.params.currentNode.data
-                },
+                from: self.params.currentNode.data,
+
                 to: {
-                    data: {
-                        id: self.params.targetClassUri,
-                        label: Sparql_common.getLabelFromURI(self.params.targetClassUri),
-                        source: self.params.currentVocab
-                    }
+                    id: self.params.targetClassUri,
+                    label: Sparql_common.getLabelFromURI(self.params.targetClassUri),
+                    source: self.params.currentVocab
+
                 }
 
 
             }
             Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
-                if (err) {
+             if (err) {
                     _botEngine.abort(err.responseText || err)
                 }
                 //add manchester to Axioms JSTree
+
                 _botEngine.end()
             })
         }
@@ -237,7 +237,7 @@ var CreateRestriction_bot = (function () {
 
     }
 
-    self.deleteCardinalityRestriction = function (source, restrictionUri,callback) {
+    self.deleteCardinalityRestriction = function (source, restrictionUri, callback) {
         async.series(
             [
                 // delete restriction

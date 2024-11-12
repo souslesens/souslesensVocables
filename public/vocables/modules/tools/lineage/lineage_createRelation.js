@@ -11,6 +11,7 @@ var Lineage_createRelation = (function () {
     var self = {};
 
     self.showAddEdgeFromGraphDialog = function (edgeData, callback) {
+        self.callbackFn=callback
         $("#smallDialogDiv").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
         Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
         $("#smallDialogDiv").load("modules/tools/lineage/html/lineageAddEdgeDialog.html", function () {
@@ -592,9 +593,7 @@ var Lineage_createRelation = (function () {
             ],
             function (err) {
                 $("#smallDialogDiv").dialog("close");
-                if (err) {
-                    return alert(err);
-                }
+
             }
         );
     };
@@ -703,6 +702,9 @@ var Lineage_createRelation = (function () {
                         CreateRestriction_bot.start(CreateRestriction_bot.workflowChooseConstraintTypeFn,params,function(err, result){
 
                             constraintType=CreateRestriction_bot.params.constraintType ||"owl:someValuesFrom"
+                            if(self.callbackFn)
+                                 self.callbackFn()
+
                             callbackSeries()
 
                         })

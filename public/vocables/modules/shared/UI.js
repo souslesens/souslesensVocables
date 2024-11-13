@@ -94,12 +94,23 @@ var UI = (function () {
     self.init = function () {
         self.oldRegisterSource = Lineage_sources.registerSource;
 
-        // Config.userTools.forEach((item, index) => {
-        for (var item in Config.userTools) {
-            var logoTool = `<div style='height:35px;width:37px;' class='${item}-logo' ></div>`;
-            var strTool = `<div class='Lineage_PopUpStyleDiv' style='display:flex;flex-direction:row;align-items:center;' >${logoTool}<div  value="${item}">${item}</div></div>`;
+        const selector = document.getElementById("toolsSelect");
+        if (selector !== null) {
+            Config.tools_available.forEach((tool) => {
+                if (tool in Config.userTools) {
+                    let rowLogo = document.createElement("div");
+                    rowLogo.setAttribute("class", `${tool}-logo`);
+                    let rowText = document.createElement("div");
+                    rowText.appendChild(document.createTextNode(tool));
+                    rowText.setAttribute("value", tool);
 
-            $("#toolsSelect").append(strTool);
+                    let row = document.createElement("div");
+                    row.setAttribute("class", "Lineage_PopUpStyleDiv");
+                    row.appendChild(rowLogo);
+                    row.appendChild(rowText);
+                    selector.appendChild(row);
+                }
+            });
         }
 
         window.addEventListener(

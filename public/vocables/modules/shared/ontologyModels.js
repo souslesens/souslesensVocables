@@ -6,6 +6,8 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
 // eslint-disable-next-line no-global-assign
 var OntologyModels = (function () {
+    var self={}
+
     self.loadedSources = {};
 
     self.registerSourcesModel = function (sources,options, callback) {

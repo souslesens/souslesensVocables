@@ -7,6 +7,7 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+import Sparql_common from "../sparqlProxies/sparql_common.js";
 
 var common = (function () {
     var self = {};
@@ -1022,6 +1023,18 @@ if (callback) return callback(err);
 
         return result;
     };
+    self.getRestrictionCardinalityLabel=function(type, value) {
+        var str = ""
+        if (type &&type.indexOf("ardinality") > -1 &&  valueStr) {
+
+        var typeStr = Sparql_common.getLabelFromURI(type).toLowerCase().replace("cardinality", "")
+        var valueStr = value.split("^")[0]
+        str = typeStr + " " + valueStr
+    }
+
+    }
+
+
     return self;
 })();
 

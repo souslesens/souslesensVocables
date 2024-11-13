@@ -2315,6 +2315,13 @@ restrictionSource = Config.predicatesSource;
                         visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.value.value, item.valueLabel.value, predicateUri));
                     }
                     var edgeId = item.node.value; //item.value.value + "_" + item.subject.value + "_" + item.prop.value;
+
+                    var cardinalitylabel=""
+                    if(item.cardinalityType){
+                       cardinalitylabel=common.getRestrictionCardinalityLabel(item.cardinalityType.value,item.cardinalityValue.value)
+                   }
+
+
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
                         if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
@@ -2328,7 +2335,7 @@ restrictionSource = Config.predicatesSource;
                                 from: item.value.value,
                                 to: item.subject.value,
                                 //  label: "<i>" + item.propLabel.value + "</i>",
-                                label: item.propLabel.value,
+                                label: cardinalitylabel+" "+item.propLabel.value,
                                 font: { color: options.edgesColor || Lineage_whiteboard.restrictionColor },
                                 data: {
                                     propertyId: item.prop.value,

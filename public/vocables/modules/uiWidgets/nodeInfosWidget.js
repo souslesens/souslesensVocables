@@ -897,7 +897,7 @@ defaultLang = 'en';*/
                 html += "</div>";
             });
         }
-        html+="</div>"
+        html += "</div>"
         html += "<div><b><div  class='nodesInfos_titles'>Range of</div></b>";
         if (rangeOfProperties.length > 0) {
 
@@ -910,8 +910,8 @@ defaultLang = 'en';*/
                 html += " <a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a> </div>";
             });
         }
-        html+="</div>"
-        html+="</div>"
+        html += "</div>"
+        html += "</div>"
         if (html) {
             $("#" + divId).show();
             $("#" + divId).append(html);
@@ -954,7 +954,7 @@ defaultLang = 'en';*/
             });
         }
 
-        var html = "<b><div  class='nodesInfos_titles'>Class hierarchy</div></b>" + "<div id='classHierarchyTreeDiv' style='width:300px;height: 330px;overflow: auto;font-size: 12px'></div>";
+        var html = "<b><div  class='nodesInfos_titles'>Class hierarchy</div></b>" + "<div id='classHierarchyTreeDiv' style='max-width:800px;max-height: 330px;overflow: auto;font-size: 12px'></div>";
 
         $("#" + divId).html(html);
 
@@ -1583,80 +1583,87 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     self.showRestrictionInfos = function (node, targetDiv, filterProp, callback) {
 
         var filter = ""
-        if (filterProp) {
+        var subClassId = node.data.id
+        if (node.from) {
             filter = "FILTER (?prop=<" + node.data.propertyId + ">)"
+            subClassId = node.from
         }
-        Sparql_OWL.getObjectRestrictions(node.data.source, node.data.id, {filter: filter}, function (err, result) {
+        Sparql_OWL.getObjectRestrictions(node.data.source,subClassId, {filter: filter}, function (err, result) {
             if (err) {
                 return callback(err.responseText || err)
             }
 
 
-            self.cardinalitiesMap = {}
-            self.currentRestrictionsMap = {};
-            result.forEach(function (restriction) {
-                self.currentRestrictionsMap[restriction.node.value] = restriction
-                //  for (var key in restriction) {
-                if (restriction.constraintType && restriction.constraintType.value.indexOf("ardinality") > -1) {
-                    var type = Sparql_common.getLabelFromURI(restriction.constraintType.value).toLowerCase().replace("cardinality", "")
-                    var value = restriction.value.value.split("^")[0]
-                    if (!self.cardinalitiesMap[restriction.prop.value]) {
-                        self.cardinalitiesMap[restriction.prop.value] = []
-                    }
+            result.sort(function (a, b) {
 
-                    self.cardinalitiesMap[restriction.prop.value].push({
-                        cardinality: type,
-                        value: value,
-                        label: type + " " + value,
-                        restrictionUri: restriction.node.value
-                    })
+                if (a.prop.value > b.prop.value) {
+                    return 1;
                 }
-                //}
+                if (a.prop.value < b.prop.value) {
+                    return -1;
+                }
+                return 0;
+
             })
 
-            var html = "<b class='nodesInfos_titles'>Restrictions </b>   <button onclick='NodeInfosWidget.showAddRestrictionWidget()'>+</button>";
+
+            self.currentRestrictionsMap = {};
+
+
+            var html = "<b class='nodesInfos_titles'>Restrictions </b>  "
+             if(!node.from)
+                 html+=" <button onclick='NodeInfosWidget.showAddRestrictionWidget()'>+</button>";
             html += "<div style=\"max-width:800px;max-height:400px\">" +
                 " <table>\n" +
-                "        <tr>\n" +
-                "            <td class='detailsCellName'> <span class=\"title\">subClass</span></td>\n" +
-                "            <td class='detailsCellName' ><span class=\"title\">onProperty</span></td>\n" +
-                "            <td class='detailsCellName'> <span class=\"title\">constraint type</span></td>\n" +
+                "        <tr>\n"
+            if (filterProp) {
+                html += "     <td class='detailsCellName'> <span class=\"title\">subClass</span></td>\n"
+            }
+            html += "        <td class='detailsCellName' ><span class=\"title\">onProperty</span></td>\n" +
+                "            <td class='detailsCellName'> <span class=\"title\">constraint </span></td>\n" +
                 "            <td class='detailsCellName'  ><span class=\"title\">targetClass</span></td>\n" +
-                "            <td class='detailsCellName' ><span class=\"title\">cardinality</span></td>" +
+
                 "         </tr>"
 
+
             result.forEach(function (restriction) {
+
                 var fieldsMap = {}
                 for (var key in restriction) {
                     fieldsMap[key] = restriction[key].value
                 }
 
-                if (fieldsMap.constraintType.indexOf("ardinality") > -1) {
-                    return;
+                self.currentRestrictionsMap[fieldsMap.subject] = {
+                    id: fieldsMap.subject,
+                    data: {
+                        bNodeId: fieldsMap.value,
+                        propertyId: fieldsMap.prop
+                    }
                 }
 
+
                 html += "<tr>"
-                html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.subject + "'>" + fieldsMap.subjectLabel + "</a></td>"
+                if (filterProp) {
+                    html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.subject + "'>" + fieldsMap.subjectLabel + "</a></td>"
+                }
                 html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.prop + "'>" + fieldsMap.propLabel + "</a></td>"
 
-                html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.constraintType + "'>" + Sparql_common.getLabelFromURI(fieldsMap.constraintType) + "</a></td>"
+                if (fieldsMap.cardinalityType) {
+                  var str=common.getRestrictionCardinalityLabel(fieldsMap.cardinalityType,fieldsMap.cardinalityValue)
+                    html += "<td class='detailsCellValue'>" + str + "</td>"
+                } else {
+                    html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.constraintType + "'>" + Sparql_common.getLabelFromURI(fieldsMap.constraintType) + "</a></td>"
+
+                }
+
                 html += "<td class='detailsCellValue'><a target='_slsvCallback' href='" + fieldsMap.value + "'>" + fieldsMap.valueLabel + "</a></td>"
 
 
                 var modifyButton = ""
                 if (Lineage_sources.isSourceEditableForUser(self.currentSource)) {
-                    modifyButton = "<button onclick='NodeInfosWidget.showCardinalityWidget(\"" + fieldsMap.node + "\")'>...</button>"
-                }
-                if (self.cardinalitiesMap[fieldsMap.prop]) {
-                    var str = ""
-                    self.cardinalitiesMap[fieldsMap.prop].forEach(function (item) {
-                        str += item.label + " "
-                    })
-
-
-                    html += "<td class='detailsCellValue'>" + str + modifyButton + "</td>"
-                } else {
+                    modifyButton = "<button onclick='NodeInfosWidget.deleteRestriction(\"" + fieldsMap.subject + "\")'>X</button>"
                     html += "<td class='detailsCellValue'>" + modifyButton + "</td>"
+
                 }
 
 
@@ -1674,7 +1681,9 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             }
             $("#" + targetDiv).html(html)
 
-            callback()
+            if (callback) {
+                callback()
+            }
 
 
         })
@@ -1698,76 +1707,19 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         })
 
     }
-    self.showCardinalityWidget = function (restrictionUri) {
+    self.deleteRestriction = function (restrictionUri) {
 
-        var restrictionData = self.currentRestrictionsMap[restrictionUri]
-        for (var key in restrictionData) {
-            restrictionData[key] = restrictionData[key].value
-        }
+        var restrictionNode = self.currentRestrictionsMap[restrictionUri]
+        Lineage_createRelation.deleteRestriction(self.currentSource, restrictionNode, function (err, result) {
 
-        var newCardinalityType = null
-        async.series([
-            function (callbackSeries) {
-
-
-                restrictionData.id = restrictionData.subject
-                var params = {
-                    source: self.currentSource,
-                    currentNode: restrictionData,
-                    objectPropertyUri: restrictionData.prop,
-                    deletePrevious: true
-
-
-                }
-                CreateRestriction_bot.start(CreateRestriction_bot.workflowChooseCardinalityFn, params, function (err, result) {
-
-                    /*  var cardinalityType=CreateRestriction_bot.params.cardinalityType;
-                       var cardinalityValue=CreateRestriction_bot.params.cardinalityValue;
-                      if(! cardinalityType || !cardinalityValue)
-                       return;*/
-                    newCardinalityType = CreateRestriction_bot.params.cardinalityType
-                    return callbackSeries()
-
-
-                })
-
-            },
-            function (callbackSeries) {
-                if (!self.cardinalitiesMap[restrictionData.prop]) {
-                    return callbackSeries()
-                }
-                var oldCardinalitiesToDelete = []
-                self.cardinalitiesMap[restrictionData.prop].forEach(function (item) {
-                    if (newCardinalityType.indexOf(item.cardinality) > -1) {
-                        oldCardinalitiesToDelete.push(item.restrictionUri)
-                    }
-
-                })
-                if (oldCardinalitiesToDelete && oldCardinalitiesToDelete.length > 0) {
-                    async.eachSeries(oldCardinalitiesToDelete, function (oldCardinalitiesToDelete, callbackEach) {
-                        CreateRestriction_bot.deleteCardinalityRestriction(self.currentSource, oldCardinalitiesToDelete, function (err) {
-                            if (err) {
-                                callbackEach(err.responseText || err)
-                            }
-
-                            return callbackEach()
-
-                        })
-                    }, function (err) {
-                        return callbackSeries()
-                    })
-
-
-                } else {
-                    return callbackSeries()
-                }
-            },
-        ], function (err) {
             if (err) {
-                alert(err)
+                return alert(err.responseText || err)
             }
             self.showRestrictionInfos(self.currentNode, "nodeInfos_restrictionsDiv", false)
+
         })
+
+
     }
 
     return self;

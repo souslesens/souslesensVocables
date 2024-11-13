@@ -1481,14 +1481,16 @@ var Sparql_OWL = (function () {
 
         query+="    ?node ?constraintType ?value. ";
 
+        query+="optional {?node ?cardinalityType ?cardinalityValue filter (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality ))}"
+
         if ( options.someValuesFrom) {
-            query += "filter (type= owl:someValuesFrom) ?value." ;
+            query += " filter (?constraintType in (owl:someValuesFrom, owl:onClass))" ;
         } else if (options.allValuesFrom) {
-            query += "filter (type= owl:someValuesFrom) ?value." ;
+            query += " filter (?constraintType in (owl:allValuesFrom,owl:onClass))" ;
         } else if (options.hasValue) {
-            query += "filter (type= owl:someValuesFrom) ?value." ;
+            query += " filter (?constraintType in (owl:hasValue,owl:onClass))" ;
         } else {
-            query+="  filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:maxCardinality,owl:minCardinality,owl:cardinality))"
+            query+="  filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:onClass))"
         }
 
         query+=  Sparql_common.getVariableLangLabel("value", true);
@@ -2083,7 +2085,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.generateInverseRestrictions = function (source, propId, inversePropId, callback) {
+    self.generateInverseRestrictions = function (source, propId, inversePropId,cardinality, callback) {
         var filter = "filter (?prop=<" + propId + ">)";
         self.getObjectRestrictions(source, null, {filter: filter}, function (err, result) {
             if (err) {
@@ -2092,7 +2094,7 @@ var Sparql_OWL = (function () {
             var triples = [];
             result.forEach(function (item) {
                 if (item.value && item.subject) {
-                    triples = triples.concat(Lineage_createRelation.getRestrictionTriples(item.value.value, item.subject.value, inversePropId));
+                    triples = triples.concat(Lineage_createRelation.getRestrictionTriples(item.value.value, item.subject.value,null, inversePropId));
                 }
             });
             var totalItems = 0;

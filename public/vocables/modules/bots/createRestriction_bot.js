@@ -25,28 +25,18 @@ var CreateRestriction_bot = (function () {
 
 
     self.workflow = {
-        listRestrictionsTypesFn: {
-            _OR: {
-                "CardinalityRestriction": {
+
                     listVocabsFn: {
-                        listTargetPropertyFn: {
-                            chooseCardinalityTypeFn: {
-                                promptCardinalityNumberFn: {
-                                    saveCardinalityRestrictionFn: {}
-                                }
+                        listTargetClassFn: {
+                            showValueRestictionWidgetFn: {
+
                             }
                         }
                     }
-                },
+                }
 
-                "ValueRestriction": {
-                    listVocabsFn: {listTargetClassFn: {showValueRestictionWidgetFn: {}}},
 
-                },
-            },
 
-        }
-    };
     self.workflowChooseConstraintTypeFn = {
         chooseConstraintTypeFn: {
             processConstraintTypeFn: {}
@@ -68,8 +58,9 @@ var CreateRestriction_bot = (function () {
         _OR: "Select an option",
         listRestrictionsTypesFn: "Choose a Restriction type",
 
-        listVocabsFn: "Choose a reference ontology",
+        listVocabsFn: "Choose target ontology",
         listPropertiesFn: "choose a property",
+        listTargetClassFn: " choose  target Class",
         chooseCardinalityTypeFn: "choose cardinality type",
         promptCardinalityNumberFn: " enter cardinality value",
         chooseConstraintTypeFn: "choose cardinality type",
@@ -188,7 +179,8 @@ var CreateRestriction_bot = (function () {
                         return _botEngine.end()
                     }
                     self.params.cardinality = cardinality;
-                    self.functions.saveCardinalityRestrictionFn()
+                    _botEngine.end()
+                   // self.functions.saveCardinalityRestrictionFn()
 
                 })
             } else {

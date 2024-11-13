@@ -291,9 +291,9 @@ var Lineage_createRelation = (function () {
                     }
                     Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
                     if (edgeData.from === edgeData.to) {
-                        return callback(null);
+                        return ;// callback(null);
                     } else {
-                        return callback(null);
+                        return ;//callback(null);
                     }
                 }
             );
@@ -592,6 +592,8 @@ var Lineage_createRelation = (function () {
                 },
             ],
             function (err) {
+                if(self.callbackFn)
+                    self.callbackFn()
                 $("#smallDialogDiv").dialog("close");
 
             }
@@ -702,8 +704,7 @@ var Lineage_createRelation = (function () {
                         CreateRestriction_bot.start(CreateRestriction_bot.workflowChooseConstraintTypeFn,params,function(err, result){
 
                             constraintType=CreateRestriction_bot.params.constraintType ||"owl:someValuesFrom"
-                            if(self.callbackFn)
-                                 self.callbackFn()
+
 
                             callbackSeries()
 
@@ -784,6 +785,7 @@ var Lineage_createRelation = (function () {
                     }
                     return alert(err);
                 }
+
                 if (callback) {
                     return callback(null, blankNodeId);
                 }

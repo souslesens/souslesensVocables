@@ -167,14 +167,16 @@ var CreateRestriction_bot = (function () {
 
 
             }
-            Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
+            _botEngine.closeDialog()
+            Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData,self.callbackFn)
+           /*     Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
              if (err) {
                     _botEngine.abort(err.responseText || err)
                 }
                 //add manchester to Axioms JSTree
 
-                _botEngine.end()
-            })
+                _botEngine.end(true)
+            })*/
         }
 
         , processConstraintTypeFn: function () {

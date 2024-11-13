@@ -19,58 +19,6 @@ import CreateRestriction_bot from "../bots/createRestriction_bot.js";
 var NodeInfosWidget = (function () {
     var self = {};
 
-    self.initDialog = function (sourceLabel, divId, options, callback) {
-        self.divId = divId
-        self.currentSource = sourceLabel;
-        if (!options.noDialog) {
-            $("#" + divId).dialog("option", "title", " Node infos :"); // source " + sourceLabel);
-        }
-        $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
-            $("#addPredicateButton").remove();
-            // $("#addRestrictionButton").remove();
-            $("#deleteButton").remove();
-            $("#" + divId).dialog("close");
-            $("#" + divId).dialog({
-                open: function (event, ui) {
-                    $("#nodeInfosWidget_tabsDiv").tabs({
-                        //  active: options.showAxioms ? 1 : 0,
-
-                        load: function (event, ui) {
-                        },
-                        activate: function (event, ui) {
-                            $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
-
-                            setTimeout(function () {
-                                /*if (NodeInfosAxioms.nodeInfosAxiomsLoaded) {
-                                    //reset nodeInfos
-
-                                    self.showNodeInfos(Lineage_sources.activeSource, NodeInfosAxioms.nodeBeforeNodeInfos, "mainDialogDiv", null, null);
-                                }*/
-
-                                $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
-                                if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
-                                    var source = self.currentSource;
-                                    // source = Lineage_sources.mainSource;
-                                    NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
-                                }
-                                0;
-                            }, 100);
-                        },
-
-                    });
-                },
-                close: function (event, ui) {
-                    $("#addPredicateButton").remove();
-                    //  $("#addRestrictionButton").remove();
-                    $("#deleteButton").remove();
-                }
-            });
-            $("#" + divId).dialog("open");
-            $(".nodeInfosWidget_tabDiv").css("margin", "0px");
-            $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
-            callback();
-        });
-    };
 
     self.showNodeInfos = function (sourceLabel, node, divId, options, callback) {
         self.currentNodeIdInfosSource = sourceLabel;
@@ -159,10 +107,88 @@ var NodeInfosWidget = (function () {
         });
     };
 
+    self.initDialog = function (sourceLabel, divId, options, callback) {
+        self.divId = divId
+        self.currentSource = sourceLabel;
+        if (!options.noDialog) {
+            $("#" + divId).dialog("option", "title", " Node infos :"); // source " + sourceLabel);
+        }
+        $("#" + divId).load("modules/uiWidgets/html/nodeInfosWidget.html", function () {
+            $("#addPredicateButton").remove();
+            // $("#addRestrictionButton").remove();
+            $("#deleteButton").remove();
+            $("#" + divId).dialog("close");
+            $("#" + divId).dialog({
+                open: function (event, ui) {
+                    $("#nodeInfosWidget_tabsDiv").tabs({
+                        //  active: options.showAxioms ? 1 : 0,
+
+                        load: function (event, ui) {
+                        },
+                        activate: function (event, ui) {
+                            $(".nodeInfosWidget_tabDiv").removeClass("nodesInfos-selectedTab");
+
+                            setTimeout(function () {
+                                /*if (NodeInfosAxioms.nodeInfosAxiomsLoaded) {
+                                    //reset nodeInfos
+
+                                    self.showNodeInfos(Lineage_sources.activeSource, NodeInfosAxioms.nodeBeforeNodeInfos, "mainDialogDiv", null, null);
+                                }*/
+
+                                $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
+                                if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
+                                    var source = self.currentSource;
+                                    // source = Lineage_sources.mainSource;
+                                    NodeInfosAxioms.init(source, self.currentNode, "nodeInfosWidget_AxiomsTabDiv");
+                                }
+                                0;
+                            }, 100);
+                        },
+
+                    });
+                },
+                close: function (event, ui) {
+                    $("#addPredicateButton").remove();
+                    //  $("#addRestrictionButton").remove();
+                    $("#deleteButton").remove();
+                }
+            });
+            $("#" + divId).dialog("open");
+            $(".nodeInfosWidget_tabDiv").css("margin", "0px");
+            $("[aria-selected='true']").addClass("nodesInfos-selectedTab");
+            callback();
+        });
+    };
+
+
     self.drawAllInfos = function (sourceLabel, nodeId, options, callback) {
         var types;
         async.series(
             [
+                function (callbackSeries) {
+                    if (self.currentNode) {
+                        return callbackSeries()
+                    }
+                    Sparql_generic.getNodeParents(sourceLabel, null, nodeId, 0, null, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err)
+                        }
+                        var item = result[0];
+                        self.currentNode = {
+                            id: item.subject.value,
+                            label: item.subjectLabel.value,
+                            data: {
+                                id: item.subject.value,
+                                label: item.subjectLabel.value,
+                                source: sourceLabel,
+                                type: "",
+                            }
+                        }
+
+                        return callbackSeries()
+                    })
+
+                },
                 function (callbackSeries) {
                     self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (err, result) {
                         if (err) {
@@ -581,6 +607,7 @@ defaultLang = 'en';*/
                     " <div id='nodeInfos_listsDiv' >" +
                     "<div id='nodeInfos_classHierarchyDiv' class='nodeInfos_rigthDiv' ></div><br>" +
                     "<div id='nodeInfos_restrictionsDiv' class='nodeInfos_rigthDiv'  style='display:table-caption;'></div>" +
+                    //  " <div id='nodeInfos_associatedPropertiesDiv' className='nodeInfos_rigthDiv'></div>" +
                     "<div id='nodeInfos_individualsDiv' class='nodeInfos_rigthDiv' style=' display:flex;flex-direction: ></div></div>";
 
                 $("#" + divId).html(str);
@@ -594,7 +621,14 @@ defaultLang = 'en';*/
 
     self.showClassRestrictions = function (sourceLabel, nodeId, _options, callback) {
 
-        return self.showRestrictionInfos(self.currentNode, "nodeInfos_restrictionsDiv", false)
+        return self.showRestrictionInfos(self.currentNode, "nodeInfos_restrictionsDiv", false, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback()
+
+
+        })
 
 
         // blankNodes.
@@ -851,9 +885,10 @@ defaultLang = 'en';*/
             }
         })
 
-        var html = "";
+        var html = "<div style='display:flex;flex-direction:row'>"
+        html += "<div><b><div class='nodesInfos_titles'>Domain of</div></b>";
         if (domainOfProperties.length > 0) {
-            html += "<b><div class='nodesInfos_titles'>Domain of</div></b>";
+
             domainOfProperties.forEach(function (property) {
                 html += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a>";
                 if (property.rangeId) {
@@ -862,8 +897,10 @@ defaultLang = 'en';*/
                 html += "</div>";
             });
         }
+        html+="</div>"
+        html += "<div><b><div  class='nodesInfos_titles'>Range of</div></b>";
         if (rangeOfProperties.length > 0) {
-            html += "<b><div  class='nodesInfos_titles'>Range of</div></b>";
+
             rangeOfProperties.forEach(function (property) {
                 html += "  <div class='XdetailsCellValue'>";
                 if (property.domainId) {
@@ -873,6 +910,8 @@ defaultLang = 'en';*/
                 html += " <a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a> </div>";
             });
         }
+        html+="</div>"
+        html+="</div>"
         if (html) {
             $("#" + divId).show();
             $("#" + divId).append(html);
@@ -1541,15 +1580,15 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     };
 
 
-    self.showRestrictionInfos = function (node, targetDiv, filterProp) {
+    self.showRestrictionInfos = function (node, targetDiv, filterProp, callback) {
 
         var filter = ""
         if (filterProp) {
             filter = "FILTER (?prop=<" + node.data.propertyId + ">)"
         }
-        Sparql_OWL.getObjectRestrictions(node.data.source,  node.data.id, {filter: filter}, function (err, result) {
+        Sparql_OWL.getObjectRestrictions(node.data.source, node.data.id, {filter: filter}, function (err, result) {
             if (err) {
-                return alert(err.responseText || err)
+                return callback(err.responseText || err)
             }
 
 
@@ -1575,8 +1614,8 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 //}
             })
 
-            var html = "<b class='nodesInfos_titles'>Restrictions </b>   <button onclick='NodeInfosWidget.showAddRestrictionWidget()'>+</button>" ;
-            html += "<div style=\"width:800px;height:400px\">" +
+            var html = "<b class='nodesInfos_titles'>Restrictions </b>   <button onclick='NodeInfosWidget.showAddRestrictionWidget()'>+</button>";
+            html += "<div style=\"max-width:800px;max-height:400px\">" +
                 " <table>\n" +
                 "        <tr>\n" +
                 "            <td class='detailsCellName'> <span class=\"title\">subClass</span></td>\n" +
@@ -1635,26 +1674,28 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             }
             $("#" + targetDiv).html(html)
 
+            callback()
+
 
         })
 
 
     }
 
-    self.showAddRestrictionWidget=function(){
+    self.showAddRestrictionWidget = function () {
 
 
-            var params={
-                source:self.currentSource,
-                currentNode:self.currentNode,
+        var params = {
+            source: self.currentSource,
+            currentNode: self.currentNode,
 
 
-            }
-            CreateRestriction_bot.start(CreateRestriction_bot.workflow,params,function(err, result){
+        }
+        CreateRestriction_bot.start(CreateRestriction_bot.workflow, params, function (err, result) {
 
-                self.showRestrictionInfos(self.currentNode, "nodeInfos_restrictionsDiv", false)
+            self.showRestrictionInfos(self.currentNode, "nodeInfos_restrictionsDiv", false)
 
-            })
+        })
 
     }
     self.showCardinalityWidget = function (restrictionUri) {

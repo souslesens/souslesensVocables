@@ -13,11 +13,11 @@ module.exports = function () {
             if (repositories.hasOwnProperty(repository)) {
                 const info = repositories[repository];
 
-                const success = await toolModel.fetchRepository(repository, info);
-                if (success) {
+                const response = await toolModel.fetchRepository(repository, info);
+                if (response.status === "success") {
                     res.status(200).json({ message: "The repository was updated successsfully", status: 200 });
                 } else {
-                    res.status(500).json({ message: "An error occurs during the fetching of the repository", status: 500 });
+                    res.status(500).json(response);
                 }
             } else {
                 res.status(404).json({ message: "Cannot found the repository", status: 404 });

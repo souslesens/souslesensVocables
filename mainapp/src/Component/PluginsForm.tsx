@@ -58,6 +58,7 @@ import {
     getRepositoryPlugins,
     getRepositoryTags,
     readRepositories,
+    Response,
     writeConfig,
     writeRepository,
 } from "../Plugins";
@@ -541,10 +542,10 @@ const PluginsRepositories = (props: DispatcherProps) => {
                 const handleFetchRepository = (repositoryId: string) => {
                     fetchRepository(repositoryId)
                         .then((response) => {
-                            if (response.status == 200) {
+                            if (response.status == "success") {
                                 snack("The repository have been successfully updated", "success");
                             } else {
-                                snack("An error occurs during the repository fetching", "error");
+                                snack(`An error occurs during fetching: ${response.message as string}`, "error");
                             }
                         })
                         .catch((error) => snack(error as string, "error"));
@@ -722,12 +723,12 @@ const PluginsForm = () => {
             identifier = ulid();
         }
         handleSnackbar("Updating in progress…", "warning");
-        const response = await writeRepository(identifier, data, true);
+        const response = (await writeRepository(identifier, data, true)) as Response;
         if (response.status == 200) {
             await updateModelRepositories();
             handleSnackbar("The repository have been successfully updated", "success");
         } else {
-            handleSnackbar("An error occurs during the repository updating", "error");
+            handleSnackbar(`An error occurs: ${response.message as string}`, "error");
         }
     };
 

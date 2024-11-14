@@ -54,28 +54,31 @@ module.exports = function () {
                     status: 400,
                 });
             } else {
-                await toolModel.fetchRepository(repository, req.body.data);
-
-                const response = await toolModel.getRepositoryPlugins(repository);
-
-                // check if the repo is a multiplugin repo
+                let response = await toolModel.fetchRepository(repository, req.body.data);
                 if (response.status === "success") {
-                    const message = response.message;
-                    if (message.length > 1 || (message.length == 1 && message[0] !== repository)) {
-                        req.body.data.plugins = req.body.data.plugins || [];
+                    response = await toolModel.getRepositoryPlugins(repository);
+
+                    // check if the repo is a multiplugin repo
+                    if (response.status === "success") {
+                        const message = response.message;
+                        if (message.length > 1 || (message.length == 1 && message[0] !== repository)) {
+                            req.body.data.plugins = req.body.data.plugins || [];
+                        }
+                    } else {
+                        res.status(500).json({ message: response.message, status: response.status });
                     }
-                } else {
-                    res.status(500).json({ message: response.message, status: response.status });
+
+                    const repositories = toolModel.readRepositories();
+                    repositories[repository] = req.body.data;
+                    await toolModel.writeRepositories(repositories);
+
+                    res.status(200).json({
+                        message: "The repository have been updated",
+                        status: 200,
+                    });
+                } else  {
+                    res.status(500).json(response);
                 }
-
-                const repositories = toolModel.readRepositories();
-                repositories[repository] = req.body.data;
-                await toolModel.writeRepositories(repositories);
-
-                res.status(200).json({
-                    message: "The repository have been updated",
-                    status: 200,
-                });
             }
         } catch (error) {
             res.status(500).json({ message: error.message, status: error.cause });

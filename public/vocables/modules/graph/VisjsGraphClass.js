@@ -992,6 +992,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 if (callback) {
                     return callback(err);
                 }
+                if(err.responseJSON=="file does not exist"){
+                    return;
+                }
                 return alert(err);
             },
         });

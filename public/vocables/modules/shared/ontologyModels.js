@@ -334,7 +334,8 @@ var OntologyModels = (function () {
                             if (!Config.sources[source]) {
                                 return callbackSeries();
                             }
-                            Sparql_OWL.getObjectRestrictions(source, null, { withoutBlankNodes: 1, withoutImports: 1 }, function (err, result) {
+                            //Sparql_OWL.getObjectRestrictions(source, null, { withoutBlankNodes: 1, withoutImports: 1 }, function (err, result) {
+                            Sparql_OWL.getObjectRestrictions(source, null, {  withoutImports: 1 }, function (err, result) {
                                 result.forEach(function (item) {
                                     var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
                                     var domainLabel = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
@@ -356,6 +357,7 @@ var OntologyModels = (function () {
                                         range: item.value.value,
                                         domainLabel: domainLabel,
                                         rangeLabel: rangeLabel,
+                                        blankNodeId : item.node.value,
                                     });
                                 });
 

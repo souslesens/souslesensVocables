@@ -1186,8 +1186,11 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
     self.deleteNode = function () {
         if (confirm("delete node " + self.currentNodeId)) {
+        var concernedRestrictions=[];
             async.series(
                 [
+
+
                     // Update cache when it's a property
                     function (callbackSeries) {
                         if (Config.ontologiesVocabularyModels[self.currentNode.data.source]["properties"][self.currentNodeId]) {
@@ -1200,6 +1203,62 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         } else {
                             callbackSeries();
                         }
+                    },
+                    // Get related restrictions
+                    function (callbackSeries){
+                        Sparql_OWL.getObjectRestrictions(Lineage_sources.activeSource, null, {  withoutImports: 1 }, function (err, result) {
+
+                            
+                            /*Object.values(Config.ontologiesVocabularyModels[self.currentNode.data.source]["restrictions"]).filter(function(restriction){
+                                return restriction[0].range==self.currentNodeId || restriction[0].domain==self.currentNodeId ;
+                            });*/
+                            result.forEach(function (item) {
+                               if(item.subject.value ==self.currentNodeId|| item.value.value ==self.currentNodeId){
+                                concernedRestrictions.push(item);
+
+                               }
+                            });
+                            callbackSeries();
+
+                        });
+                    },
+                    
+                    // Update model restrictions
+                    function (callbackSeries) {
+                        
+                      
+                        if (concernedRestrictions.length>0 ) {
+                            var data = {};
+                            data["restrictions"] = {};
+                            var blankNodesIds=concernedRestrictions.map(function(restriction){return restriction.node.value});
+                            Object.keys(Config.ontologiesVocabularyModels[self.currentNode.data.source]["restrictions"]).forEach(function(key){
+                                var restriction=Config.ontologiesVocabularyModels[self.currentNode.data.source]["restrictions"][key];
+                                if(blankNodesIds.includes(restriction[0].blankNodeId)){
+                                    data["restrictions"][key]=key;
+                                }
+                                
+                            }); 
+                           
+                            OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
+                                callbackSeries(err);
+                            });
+                        } else {
+                            callbackSeries();
+                        }
+                    },
+                    // delete restrictions triples
+                    function (callbackSeries) {
+                       if(concernedRestrictions.length>0){
+                        var blankNodesIds=concernedRestrictions.map(function(restriction){return restriction.node.value});
+                        // Delete restrictions in Lineage_whiteboard edges cache
+                       
+                        Sparql_generic.deleteTriples(self.currentSource, blankNodesIds, null, null, function (err, _result) {
+                            Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(blankNodesIds);
+                            return callbackSeries(err);
+                        });
+                       }else{
+                        callbackSeries();
+                       }
                     },
                     //delete triples where id is subject
                     function (callbackSeries) {

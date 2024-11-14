@@ -539,7 +539,9 @@ return Sparql_common.getLabelFromURI(uri);*/
         Declarations: ["rdfs:Datatype", "owl:Class", "owl:ObjectProperty", "owl:DatatypeProperty", "owl:AnnotationProperty", "owl:NamedIndividual"],
         Boolean_Connectives: ["owl:intersectionOf", "owl:unionOf", "owl:complementOf", "owl:enumeration"],
 
-        Object_Property_Restrictions: ["owl:allValues", "owl:someValuesFrom", "owl:hasValue"],
+        Object_Property_Restrictions: ["owl:allValues", "owl:someValuesFrom", "owl:hasValue","owl#:minCardinality",
+            "owl:maxCardinality",
+            "owl:cardinality"],
         Class_Expressions: ["rdfs:subClassOf", "owl:equivalentClass", "owl:disjointWith", "owl:disjointUnionOf"],
     };
 

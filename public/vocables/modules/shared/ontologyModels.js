@@ -6,6 +6,8 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
 // eslint-disable-next-line no-global-assign
 var OntologyModels = (function () {
+    var self={}
+
     self.loadedSources = {};
 
     self.registerSourcesModel = function (sources,options, callback) {
@@ -159,72 +161,7 @@ var OntologyModels = (function () {
                                 callbackSeries();
                             });
                         },
-                        //set AnnotationProperties and datatypeProperties
-                        // We need to add Types for properties added to distinguish annotations,datatypes and rdf:Property
-                        // which can be either datatype and object properties depending the ontology
-                        // Problem is that some of this information types are classified on the wrong source (like rdfs:label type annotation
-                        //is stored in owl)
-                        // Resolution add others basic ontology to have all the data required for the properties and add in other vocab
-                        // if the vocabulary detected from uri is different from current source
-                        //Problem with this method is first apparition of the property
-                        /*
-                        function (callbackSeries) {
-    
-                            var addedSource= (source=='rdf'||source=='rdfs') ? " from <http://www.w3.org/2002/07/owl#>" : '';
-                            addedSource = (source=='dc') ?  " from <http://purl.org/dc/terms/>" : addedSource;
 
-                            var query = queryP +" SELECT distinct ?prop ?propLabel ?propDomain ?propRange ?type from <" +
-                                graphUri +">"+addedSource+" WHERE {\n" +
-                                " ?prop rdf:type ?type. filter (?type in (rdf:Property,<http://www.w3.org/2002/07/owl#AnnotationProperty>,owl:DatatypeProperty))  " +
-                                Sparql_common.getVariableLangLabel("prop", true, true) +
-                                "OPTIONAL {?prop rdfs:domain ?propDomain} OPTIONAL {?prop rdfs:range ?propRange}" +
-                                "} limit 10000";
-                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
-                                if (err) {
-                                    return callbackSeries(err);
-                                }
-                                
-                                result.results.bindings.forEach(function (item) {
-                                    //if (true || !uniqueProperties[item.prop.value]) {
-                                    var vocabulary=common.getVocabularyFromURI(item.prop.value);
-                                    if(vocabulary){
-                                        vocabulary=vocabulary[0];
-                                        
-                                    }else{
-                                        vocabulary=source;
-                                    }
-                                    
-                                    
-                                    
-                                    if(!uniqueAnnotationsProperties[item.prop.value] ){
-                                        uniqueProperties[item.prop.value] = 1;
-                                        uniqueAnnotationsProperties[item.prop.value]=1;
-                                        
-                                        if()
-                                        Config.ontologiesVocabularyModels[vocabulary].nonObjectProperties[item.prop.value] = {
-                                            id: item.prop.value,
-                                            label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
-                                            domain: item.propDomain ? item.propDomain.value : null,
-                                            range: item.propRange ? item.propRange.value : null,
-                                            types:[item.type.value]
-                                        };
-                                    }else{
-                                    
-                                        Config.ontologiesVocabularyModels[vocabulary].nonObjectProperties[item.prop.value].types.push(item.type.value);
-                                    
-                                    }
-                                });
-
-                                callbackSeries();
-                            });
-                        },*/
-                        // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)
-                        // problem with current method
-                        // Some properties or information overload about a property are stored in other source like iof-av or owl who store
-                        //information about rdf/owl properties
-                        //The rdf:Property type are object properties that cause trouble in nodeInfos addPredicate which are based on
-                        // this section and should be stored on properties
-                        // Needed to separate both datatype and object properties
 
                         // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)
                         function (callbackSeries) {
@@ -341,6 +278,8 @@ var OntologyModels = (function () {
                                     var domainLabel = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
                                     var rangeLabel = item.valueLabel ? item.valueLabel.value : Sparql_common.getLabelFromURI(item.value.value);
                                     var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
+                                    var constraintType=item.constraintType?item.constraintType.value:null
+                                    var constraintTypeLabel=item.constraintType?Sparql_common.getLabelFromURI(item.constraintType.value):null
 
                                     if (!uniqueProperties[item.prop.value]) {
                                         uniqueProperties[item.prop.value] = 1;
@@ -358,6 +297,8 @@ var OntologyModels = (function () {
                                         domainLabel: domainLabel,
                                         rangeLabel: rangeLabel,
                                         blankNodeId : item.node.value,
+                                        constraintType:constraintType,
+                                        constraintTypeLabel:constraintTypeLabel
                                     });
                                 });
 
@@ -1599,6 +1540,21 @@ var OntologyModels = (function () {
         return classIds;
     };
 
+    self.constraintsToShacl=function(sourceLabel,callback) {
+        self.registerSourcesModel(sourceLabel, null, function (err, model) {
+var shProperties=[]
+            for (var properties in model.restrictions) {
+               var  shProperty=" [\n" +
+                   "        sh:path schema:birthDate ;\n" +
+                   "        sh:lessThan schema:deathDate ;\n" +
+                   "        sh:maxCount 1 ;\n" +
+                   "    ] ;"
+
+            }
+
+
+        })
+    }
     return self;
 })();
 

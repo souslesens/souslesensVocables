@@ -187,54 +187,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         // pass
     };
 
-    self.execSparqlFilterQuery = function (classIds, callback) {
-        var sparql =
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT * from <http://data.total.com/resource/tsf/property-filtering/> from <http://data.totalenergies.com/resource/ontology/cfihos_1.5/> WHERE {\n" +
-            "  ?class rdfs:subClassOf ?restriction .\n" +
-            "  ?class rdfs:label ?classLabel.\n" +
-            "  ?restriction rdf:type owl:Restriction.\n" +
-            "  ?restriction ?aspect ?filterId.\n" +
-            " ?restriction owl:onProperty <http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality>.\n" +
-            " ?restriction owl:someValuesFrom ?property.\n" +
-            "   ?property rdfs:label ?propertyLabel.\n";
 
-        if (classIds) {
-            sparql += Sparql_common.setFilter("class", classIds);
-        }
-
-        function addFilters(aspect, selectId) {
-            var filterId = $("#" + selectId).val();
-            if (!filterId) {
-                return;
-            }
-            var predicate = self.aspectsMap[aspect];
-            sparql += " filter ( ?aspect=<" + predicate + "> &&  ?filterId=<" + filterId + ">  )";
-        }
-
-        addFilters("LifeCycle", "KGpropertyFilter_lifeCycleSelect2");
-        addFilters("Discipline", "KGpropertyFilter_disciplineSelect2");
-        addFilters("Organization", "KGpropertyFilter_organizationSelect2");
-
-        sparql += "} limit 10000";
-        var url = Config.sources[self.propertyFilteringSource].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, sparql, "", { source: self.currentSource }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            var data = [];
-            result.results.bindings.forEach(function (item) {
-                var obj = {};
-                for (var key in item) {
-                    obj[key] = item[key].value;
-                }
-                data.push(obj);
-            });
-            return callback(null, data);
-        });
-    };
 
     self.client = {};
 

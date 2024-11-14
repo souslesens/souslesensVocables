@@ -1043,7 +1043,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         if (schemaType == "OWL") {
             parentType = Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel);
 
-            conceptType = "owl:Class|owl:NamedIndividual";
+            conceptType = "owl:Class";
         } else if (schemaType == "KNOWLEDGE_GRAPH") {
             parentType = "rdf:type";
             conceptType = "owl:NamedIndividual";

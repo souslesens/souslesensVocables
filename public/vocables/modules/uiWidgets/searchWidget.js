@@ -14,7 +14,7 @@ var SearchWidget = (function () {
     var self = {};
 
     self.init = function () {
-        if (Config.ontologiesVocabularyModels[Lineage_sources.activeSource] && Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classesCount <= Config.ontologyModelMaxClasses) {
+       /* if (Config.ontologiesVocabularyModels[Lineage_sources.activeSource] && Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classesCount <= Config.ontologyModelMaxClasses) {
             var classes = [];
             for (var classId in Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classes) {
                 var classObj = Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classes[classId];
@@ -24,7 +24,7 @@ var SearchWidget = (function () {
                 });
             }
             common.fillSelectOptions("GenericTools_searchAllClassSelect", classes, true, "label", "id");
-        }
+        }*/
     };
 
     /**
@@ -47,7 +47,7 @@ var SearchWidget = (function () {
             options = {};
         }
 
-        var classFilter = $("#GenericTools_searchAllClassSelect").val();
+      //  var classFilter = $("#GenericTools_searchAllClassSelect").val();
 
         $("#sourcesSelectionDialogdiv").dialog("close");
 
@@ -58,9 +58,9 @@ var SearchWidget = (function () {
             term = $("#searchWidget_searchTermInput").val();
         }
         if (!term) {
-            if (!classFilter) {
+          /*  if (false  && !classFilter) {
                 return alert("nothing to search");
-            }
+            }*/
             term = "*";
         }
 
@@ -155,12 +155,10 @@ var SearchWidget = (function () {
         }
 
         options.parentlabels = true;
-        // PROBLEM
-        // eslint-disable-next-line no-constant-condition
 
-        if (classFilter) {
+     /*   if (classFilter) {
             options.classFilter = classFilter;
-        }
+        }*/
         if (searchAllLabels) {
             options.skosLabels = 1;
         }

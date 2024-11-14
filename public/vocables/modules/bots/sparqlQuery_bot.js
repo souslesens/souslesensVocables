@@ -6,6 +6,8 @@ import OntologyModels from "../shared/ontologyModels.js";
 import _botEngine from "./_botEngine.js";
 import Export from "../shared/export.js";
 import KGquery from "../tools/KGquery/KGquery.js";
+import _commonBotFunctions from "./_commonBotFunctions.js";
+
 
 var SparqlQuery_bot = (function () {
         var self = {};
@@ -27,7 +29,8 @@ var SparqlQuery_bot = (function () {
                 _OR: {
                     ObjectProperty: {
                         promptKeywordFn: {
-                            chooseObjectPropertyResourceFn: {
+                            chooseObjectPropertyResourceTypeFn: {
+
                                 chooseQueryScopeFn: {
                                     chooseOutputTypeFn: {
                                         searchKeywordFn: {}
@@ -39,19 +42,20 @@ var SparqlQuery_bot = (function () {
                         }
                     },
                     Individuals: {
-                        chooseQueryScopeFn: {
-                            choosePredicateFilterFn: {
-                                processIndividualsQueryFn: {}
 
-                            }
+                        choosePredicateFilterFn: {
+                            setPredicateFilterFn: {}
+
+
                         }
 
 
                     },
                     Class: {
-                        promptKeywordFn: {
+                        chooseQueryScopeFn: {
+                            promptKeywordFn: {
 
-                            chooseQueryScopeFn: {
+
                                 chooseOutputTypeFn: {
                                     searchKeywordFn: {}
                                 }
@@ -78,7 +82,7 @@ var SparqlQuery_bot = (function () {
             searchKeywordFn: "matching keywords",
             chooseResourceTypeFn: "choose resource type",
             chooseOutputTypeFn: "choose outup type",
-            chooseObjectPropertyResourceFn: "choose propety resources",
+            chooseObjectPropertyResourceTypeFn: "choose propety resources",
             choosePredicateFilterFn: "choose predicateFilter mode",
 
 
@@ -99,14 +103,21 @@ var SparqlQuery_bot = (function () {
                 var choices = [
                     {id: "activeSource", label: "active source"},
                     {id: "whiteboardSources", label: "current sources"},
-                    {id: "", label: "all sources"}
-
-
                 ]
+                if (self.params.resourceType == "Class") {
+                    choices.push({id: "", label: "all sources"})
+                }
+
+
                 _botEngine.showList(choices, "queryScope")
             },
             promptKeywordFn: function () {
-                _botEngine.promptValue("keyword", "keyword", "")
+                if (false && self.params.queryScope == "activeSource") {
+                    CommonBotFunctions.listVocabClasses(self.params.source, "selectedClass");
+
+                } else {
+                    _botEngine.promptValue("keyword", "keyword", "")
+                }
             }
             ,
             showSparqlEditorFn: function () {
@@ -140,18 +151,16 @@ var SparqlQuery_bot = (function () {
 
                 var resourceType = self.params.resourceType;
                 if (resourceType == "Class") {
-                    self.processClassQuery()
+                    self.processClassQuerySearch()
+                    // self.processClassQuery()
                 }
                 if (resourceType == "ObjectProperty") {
                     self.processObjectPropertyQuery()
                 }
-                /*  if (resourceType == "dataTypeProperty") {
-                      self.processIndividualsQuery();
-                  }*/
 
 
             },
-            chooseObjectPropertyResourceFn: function () {
+            chooseObjectPropertyResourceTypeFn: function () {
                 var choices = [
 
                     "RangeAndDomain",
@@ -166,19 +175,178 @@ var SparqlQuery_bot = (function () {
 
             choosePredicateFilterFn: function () {
                 var choices = [
-                    "filterProperty",
-                    "filterSubject",
-                    "filterObject",
+                    "filterObjectTypeProperty",
+                    "filterDatatypeProperty",
+                    "filterSubjectType",
+                    "filterObjectType",
+                    "_proceed"
                 ]
 
                 _botEngine.showList(choices, "predicateFilterType")
             },
-            processIndividualsQueryFn: function () {
+            setPredicateFilterFn: function () {
 
-                self.loadIndiviualsModel(self.params.source, function (err, result) {
+                self.loadIndiviualsModel(self.params.source, function (err, model) {
+
+                    if (self.params.predicateFilterType == "filterObjectTypeProperty") {
+                        var properties = []
+                        var distinctNodes = {}
+                        model.forEach(function (item) {
+                            if (self.params.IndividualSubjectClass && item.sClass.value != self.params.IndividualSubjectClass) {
+                                return;
+                            }
+                            if (self.params.IndividualObjectClass && item.oClass.value != self.params.IndividualObjectClass) {
+                                return;
+                            }
+
+
+                            if (!distinctNodes[item.prop.value]) {
+                                distinctNodes[item.prop.value] = 1
+                                properties.push({
+                                    id: item.prop.value,
+                                    label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value)
+                                })
+                            }
+                        })
+
+                        if (properties.length == 0) {
+                            alert("no matching property ")
+                            return self.functions.choosePredicateFilterFn();
+
+                        }
+
+
+                        common.array.sort(properties, "label")
+                        _botEngine.showList(properties, "IndividualObjectPropertyFilter", null, true, function (selectedValue) {
+                            self.params.IndividualObjectPropertyFilter = selectedValue
+                            _botEngine.previousStep()
+                        })
+                    } else if (self.params.predicateFilterType == "filterSubjectType") {
+
+                        var distinctValues = {}
+                        var filteredClasses = []
+                        model.forEach(function (item) {
+                            var ok = false
+                            if (!self.params.IndividualObjectPropertyFilter && !self.params.IndividualObjectClass) {
+                                ok = true
+                            } else if (item.prop.value == self.params.IndividualObjectPropertyFilter) {
+                                ok = true
+                            } else if (item.oClass.value == self.params.IndividualObjectClass) {
+                                ok = true
+                            }
+
+                            if (ok) {
+                                if (!distinctValues[item.sClass.value]) {
+                                    distinctValues[item.sClass.value] = 1
+                                    filteredClasses.push({id: item.sClass.value, label: item.sClassLabel.value})
+                                }
+
+                            }
+                        })
+
+
+                        _botEngine.showList(filteredClasses, "IndividualSubjectClass", null, true, function (selectedValue) {
+                            self.params.IndividualSubjectClass = selectedValue
+
+                            _botEngine.previousStep()
+
+                        });
+
+                    } else if (self.params.predicateFilterType == "filterObjectType") {
+                        var filteredClasses = []
+                        model.forEach(function (item) {
+                            var ok = false
+                            if (!self.params.IndividualObjectPropertyFilter && !self.params.IndividualSubjectClass) {
+                                ok = true
+                            } else if (item.prop.value == self.params.IndividualObjectPropertyFilter) {
+                                ok = true
+                            } else if (item.sClass.value == self.params.IndividualSubjectClass) {
+                                ok = true
+                            }
+
+                            if (ok) {
+                                if (!distinctValues[item.oClass.value]) {
+                                    distinctValues[item.oClass.value] = 1
+                                    filteredClasses.push({id: item.oClass.value, label: item.oClassLabel.value})
+                                }
+                            }
+                        })
+                        _botEngine.showList(filteredClasses, "IndividualObjectClass", null, true, function (selectedValue) {
+                            self.params.IndividualObjectClass = selectedValue
+                            _botEngine.previousStep()
+                        })
+
+
+                    } else if (self.params.predicateFilterType == "_proceed") {
+
+
+                        async.series([
+                            function (callbackSeries) {
+                                if (!self.params.IndividualObjectClass) {
+                                    return callbackSeries()
+                                }
+                                var currentClass = {
+                                    id: self.params.IndividualObjectClass,
+                                    label: "object"
+                                }
+                                self.runFilterClassBot(model, currentClass, function (err, result) {
+                                    self.params.IndividualObjectFilter = result;
+                                    return callbackSeries()
+                                })
+
+                            },
+
+                            function (callbackSeries) {
+                                if (!self.params.IndividualSubjectClass) {
+                                    return callbackSeries()
+                                }
+
+                                var currentClass = {
+                                    id: self.params.IndividualSubjectClass,
+                                    label: "subject"
+                                }
+                                self.runFilterClassBot(model, currentClass, function (err, result) {
+                                    self.params.IndividualSubjectFilter = result;
+                                    return callbackSeries()
+                                })
+
+                            }
+
+
+                        ], function (err) {
+                            if (err) {
+                                return alert(err.responseText || err)
+                            }
+                            self.processIndividualsQuery()
+                           // _botEngine.end()
+                        })
+
+
+                    }
 
                 })
             }
+
+
+        }
+
+
+        self.runFilterClassBot = function (model, currentClass, callback) {
+            if (currentClass) {
+                var currentFilterQuery = {
+                    currentClass: currentClass.id,
+                    source: self.params.source,
+                    varName: currentClass.label
+                }
+                var data = model.nonObjectPropertiesmap[currentClass.id]
+                KGquery_filter_bot.start(data, currentFilterQuery, function (err, result) {
+                    return callback(err, result.filter.replace("_label", "Label"))
+
+                    s
+                })
+            }
+
+
         }
 
 
@@ -198,7 +366,8 @@ var SparqlQuery_bot = (function () {
                 function (callbackSeries) {
                     var options = {
                         term: self.params.keyword,
-                        searchedSources: searchedSources
+                        searchedSources: searchedSources,
+                        type: "Class"
                     }
                     SearchWidget.searchTermInSources(options, function (err, result) {
                         if (err) {
@@ -358,7 +527,8 @@ var SparqlQuery_bot = (function () {
                                 var sourceOntologyModel = Config.ontologiesVocabularyModels[source]
                                 for (var classId in sourceOntologyModel.classes) {
                                     var classLabel = sourceOntologyModel.classes[classId].label
-                                    if (!self.params.keyword || classLabel.indexOf(self.params.keyword) > -1) {
+
+                                    if ((!self.params.selectedClass && !self.params.keyword) || classLabel.indexOf(self.params.keyword) > -1 || classId == self.params.selectedClass) {
                                         classes[classId] = sourceOntologyModel.classes[classId];
                                         classes[classId].source = source
 
@@ -437,7 +607,7 @@ var SparqlQuery_bot = (function () {
                         }
                         Lineage_whiteboard.drawNewGraph(visjsData)
                         callbackSeries()
-                    }
+                    },
 
 
                 ],
@@ -517,7 +687,7 @@ var SparqlQuery_bot = (function () {
                             } else if (objectPropertyResourceType == "Restriction") {
                                 constraints = properties[property].restrictions
                                 edgeDomainLabel = "subClassOf"
-                                edgeRangeLabel = "somevaluesFrom"
+                                edgeRangeLabel = "targetClass"
                                 propertyColor = "#eab3b3"
                                 arrowDir = "from"
                             }
@@ -642,7 +812,7 @@ var SparqlQuery_bot = (function () {
                         )
 
                         edgeDomainLabel = "subClassOf"
-                        edgeRangeLabel = "somevaluesFrom"
+                        edgeRangeLabel = "targetClass"
 
                     }
 
@@ -702,11 +872,12 @@ var SparqlQuery_bot = (function () {
                     } else if (objectPropertyResourceType == "Restriction") {
 
                         edgeDomainLabel = "subClassOf"
-                        edgeRangeLabel = "somevaluesFrom"
+                        edgeRangeLabel = "targetClass"
 
 
                     }
                     var jstreeData = []
+                    var uniqueNodes = {}
                     for (var property in properties) {
 
                         if (objectPropertyResourceType == "RangeAndDomain") {
@@ -717,33 +888,44 @@ var SparqlQuery_bot = (function () {
                         if (!Array.isArray(constraints)) {
                             constraints = [constraints]
                         }
+
+
+                        if (!uniqueNodes[properties[property].source]) {
+                            uniqueNodes[properties[property].source] = 1
+                            jstreeData.push({
+                                id: properties[property].source,
+                                text: properties[property].source,
+                                parent: "#",
+                                data: {
+                                    id: properties[property].source,
+                                    label: properties[property].source,
+                                    source: properties[property].source,
+                                }
+                            })
+                        }
+
+                        var propertyId = common.getRandomHexaId(10)
+                        jstreeData.push({
+                            id: propertyId,
+                            text: properties[property].label,
+                            parent: properties[property].source,
+                            data: {
+                                id: properties[property].id,
+                                label: properties[property].label,
+                                source: properties[property].source,
+                            }
+                        })
+
+
                         constraints.forEach(function (constraint) {
-                            jstreeData.push({
-                                id: properties[property].id,
-                                text: properties[property].label,
-                                parent: "#",
-                                data: {
-                                    id: properties[property].id,
-                                    label: properties[property].label,
-                                    source: properties[property].source,
-                                }
-                            })
-                            jstreeData.push({
-                                id: properties[property].id,
-                                text: properties[property].label,
-                                parent: "#",
-                                data: {
-                                    id: properties[property].id,
-                                    label: properties[property].label,
-                                    source: properties[property].source,
-                                }
-                            })
+
+
                             var domainId = common.getRandomHexaId(10)
                             if (constraint.domain) {
                                 jstreeData.push({
                                     id: domainId,
                                     text: edgeDomainLabel + " : " + constraint.domainLabel,
-                                    parent: properties[property].id,
+                                    parent: propertyId,
                                     data: {
                                         id: constraint.domain,
                                         label: constraint.domainLabel,
@@ -755,7 +937,7 @@ var SparqlQuery_bot = (function () {
                                 jstreeData.push({
                                     id: common.getRandomHexaId(10),
                                     text: edgeRangeLabel + " : " + constraint.rangeLabel,
-                                    parent: constraint.domain ? domainId : properties[property].id,
+                                    parent: constraint.domain ? domainId : propertyId,
                                     data: {
                                         id: constraint.range,
                                         label: constraint.rangeLabel,
@@ -792,24 +974,55 @@ var SparqlQuery_bot = (function () {
         }
 
 
-        self.loadIndiviualsModel = function (sources, callback) {
+        self.processIndividualsQuery = function () {
+            var IndividualSubjectClass = self.params.IndividualSubjectClass
+            var IndividualObjectClass = self.params.IndividualObjectClass
+            var IndividualObjectPropertyFilter = self.params.IndividualObjectPropertyFilter
+            var IndividualSubjectFilter = self.params.IndividualSubjectFilter
+            var IndividualObjectFilter = self.params.IndividualObjectFilter
 
 
-
-            if(!self.IndividualsModels){
-                self.IndividualsModels={}
+            var filter = ""
+            if (IndividualSubjectClass) {
+                filter += "FILTER (?subjectType=<" + IndividualSubjectClass + ">) "
+            }
+            if (IndividualObjectClass) {
+                filter += "FILTER (?objectType=<" + IndividualObjectClass + ">) "
             }
 
-            if(self.IndividualsModels[sources[0]]){
-                return callback(null,self.IndividualsModels[sources[0]])
+            if (IndividualSubjectFilter) {
+                filter += IndividualSubjectFilter
+            }
+            if (IndividualObjectFilter) {
+                filter += IndividualObjectFilter
+            }
+
+
+            var options = {filter: filter}
+            Sparql_OWL.getFilteredTriples(self.params.source, null, IndividualObjectPropertyFilter, null, options, function (err, result) {
+
+            })
+
+
+        }
+
+
+        self.loadIndiviualsModel = function (sources, callback) {
+            if (!Array.isArray(sources)) {
+                sources = [sources]
+            }
+
+
+            if (!self.IndividualsModels) {
+                self.IndividualsModels = {}
+            }
+
+            if (self.IndividualsModels[sources[0]]) {
+                return callback(null, self.IndividualsModels[sources[0]])
             }
 
             var model = []
 
-
-            if (!Array.isArray(sources)) {
-                sources = [sources]
-            }
 
             async.eachSeries(
                 sources,
@@ -829,7 +1042,19 @@ var SparqlQuery_bot = (function () {
                             },
 
                             function (callbackSeries) {
+                                model.classesLabelsMap = {}
+                                model.forEach(function (item) {
+                                    if (!model.classesLabelsMap[item.sClass.value]) {
+                                        model.classesLabelsMap[item.sClass.value] = item.sClassLabel.value;
+                                    }
+                                    if (!model.classesLabelsMap[item.oClass.value]) {
+                                        model.classesLabelsMap[item.oClass.value] = item.oClassLabel.value;
+                                    }
+                                })
+                                return callbackSeries();
+                            },
 
+                            function (callbackSeries) {
                                 return callbackSeries();
                                 UI.message("getInferredClassValueDataTypes");
                                 OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
@@ -837,7 +1062,9 @@ var SparqlQuery_bot = (function () {
                                         return callbackSeries(err);
                                     }
 
+
                                     model.forEach(function (item) {
+
                                         if (item.datatype) {
                                             if (!nonObjectProperties[item.class.value]) {
                                                 nonObjectProperties[item.class.value] = [];
@@ -874,7 +1101,7 @@ var SparqlQuery_bot = (function () {
                     )
                 }
                 , function (err) {
-                    self.IndividualsModels[source]=model
+                    self.IndividualsModels[sources[0]] = model
                     return callback(err, model)
                 }
             )

@@ -35,6 +35,18 @@ th, td{
     border-radius: 3px;
     background-color: white;
 }
+detailsCellVerticalTabValue{
+    .font-table;
+    padding: 2px;
+    border-radius: 3px;
+    background-color: white;
+    min-width: 100px;
+    border: 1px solid black;
+    max-width: 200px;
+    line-height: 1.8;
+    max-height: 25px;
+    overflow: auto;
+}
 .detailsCellValueContent {
     line-height: 1.8;
     max-height: 100px;

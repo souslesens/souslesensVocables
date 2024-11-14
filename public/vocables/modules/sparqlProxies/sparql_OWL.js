@@ -383,7 +383,7 @@ var Sparql_OWL = (function () {
             query += "graph ?g ";
         }
         query += "{<" + conceptId + "> ?prop ?value.  ";
-        query += "OPTIONAL {?value owl:hasValue ?objectValue.} ";
+
         if (options.getValuesLabels) {
             query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} ";
         }
@@ -399,10 +399,13 @@ var Sparql_OWL = (function () {
             }
             query += "}";
         }
+        if(options.noRestrictions){
+            query +="  FILTER (!exists{?value rdf:type owl:Restriction} )"
+        }
 
         query += " }";
         var limit = options.limit || Config.queryLimit;
-        query += " limit " + limit;
+        query += " LIMIT " + limit;
 
         var url = self.sparql_url + "?format=json&query=";
         self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
@@ -1425,21 +1428,24 @@ var Sparql_OWL = (function () {
      *  - ?g ?subject  ?prop ?propLabel ?subjectLabel  ?value ?valueLabel ?node
      */
 
-    self.getObjectRestrictions = function (sourceLabel, ids, options, callback) {
+    self.getObjectRestrictions = function (sourceLabel, subClassIds, options, callback) {
         if (!options) {
             options = {};
         }
 
         var filterStr = "";
-        if (ids) {
-            ids = OntologyModels.filterClassIds(sourceLabel, ids);
+        if (subClassIds) {
+            subClassIds = OntologyModels.filterClassIds(sourceLabel, subClassIds);
             if (options.inverseRestriction) {
-                options.someValuesFrom = 1;
-                filterStr = Sparql_common.setFilter("value", ids, null, options);
+
+                filterStr = Sparql_common.setFilter("value", subClassIds, null, options);
             } else {
-                filterStr = Sparql_common.setFilter("subject", ids, null, options);
+                filterStr = Sparql_common.setFilter("subject", subClassIds, null, options);
             }
         }
+        else if(options.restrictionIds){
+            filterStr = Sparql_common.setFilter("value", options.restrictionIds, null, options);
+    }
         var fromStr = "";
         if (sourceLabel) {
             self.graphUri = Config.sources[sourceLabel].graphUri;
@@ -1457,7 +1463,7 @@ var Sparql_OWL = (function () {
         if (options.listPropertiesOnly) {
             query += " SELECT distinct ?prop ?propLabel ";
         } else if (options.withoutBlankNodes) {
-            query += " SELECT distinct ?subject  ?subjectLabel  ?prop ?propLabel ?value ?valueLabel ";
+            query += " SELECT distinct ?subject  ?subjectLabel  ?prop ?propLabel ?value ?valueLabel ?constraintType";
         } else {
             query += "SELECT distinct * ";
         }
@@ -1472,16 +1478,22 @@ var Sparql_OWL = (function () {
             Sparql_common.getVariableLangLabel("prop", true, null, filterStr) +
             Sparql_common.getVariableLangLabel("subject", true, null, filterStr);
 
-        if (true || options.someValuesFrom) {
-            query += "?node owl:someValuesFrom ?value." + Sparql_common.getVariableLangLabel("value", true); //OPTIONAL {?value rdfs:label ?valueLabel}";
+
+        query+="    ?node ?constraintType ?value. ";
+
+        query+="optional {?node ?cardinalityType ?cardinalityValue filter (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality ))}"
+
+        if ( options.someValuesFrom) {
+            query += " filter (?constraintType in (owl:someValuesFrom, owl:onClass))" ;
         } else if (options.allValuesFrom) {
-            query += "?node owl:allValuesFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
-        } else if (options.aValueFrom) {
-            query += "?node owl:aValueFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
+            query += " filter (?constraintType in (owl:allValuesFrom,owl:onClass))" ;
+        } else if (options.hasValue) {
+            query += " filter (?constraintType in (owl:hasValue,owl:onClass))" ;
         } else {
-            query += " ?node ?p ?value. ?value rdf:type ?valueType.OPTIONAL {?value rdfs:label ?valueLabel} filter (?valueType in (rdf:Class,owl:Class)) ";
-            // query += "?node owl:allValuesFrom|owl:someValuesFrom|owl:aValueFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
+            query+="  filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:onClass))"
         }
+
+        query+=  Sparql_common.getVariableLangLabel("value", true);
 
         if (options.getMetadata) {
             query +=
@@ -1498,6 +1510,7 @@ var Sparql_OWL = (function () {
             filter2 = filter2.replace(/object/g, "value");
             query += " " + filter2 + " ";
         }
+
 
         query += "} }";
         var limit = options.limit || Config.queryLimit;
@@ -1552,6 +1565,10 @@ var Sparql_OWL = (function () {
             }
         );
     };
+
+
+
+
 
     self.getNamedIndividuals = function (sourceLabel, ids, options, callback) {
         if (!options) {
@@ -1775,7 +1792,7 @@ var Sparql_OWL = (function () {
             "  ?sourceClass " +
             Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) +
             " ?restriction." +
-            "  OPTIONAL {?restriction  owl:someValuesFrom ?targetClass. " +
+            "  OPTIONAL {?restriction ?constraintType ?targetClass. filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:maxCardinality,owl:minCardinality,owl:cardinality))}"
             "  OPTIONAL {?targetClass rdfs:label ?targetClassLabel}}" +
             "  OPTIONAL {?sourceClass rdfs:label ?sourceClassLabel}" +
             "  OPTIONAL {?prop rdfs:label ?propLabel}";
@@ -2068,7 +2085,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.generateInverseRestrictions = function (source, propId, inversePropId, callback) {
+    self.generateInverseRestrictions = function (source, propId, inversePropId,cardinality, callback) {
         var filter = "filter (?prop=<" + propId + ">)";
         self.getObjectRestrictions(source, null, {filter: filter}, function (err, result) {
             if (err) {
@@ -2077,7 +2094,7 @@ var Sparql_OWL = (function () {
             var triples = [];
             result.forEach(function (item) {
                 if (item.value && item.subject) {
-                    triples = triples.concat(Lineage_createRelation.getRestrictionTriples(item.value.value, item.subject.value, inversePropId));
+                    triples = triples.concat(Lineage_createRelation.getRestrictionTriples(item.value.value, item.subject.value,null, inversePropId));
                 }
             });
             var totalItems = 0;

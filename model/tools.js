@@ -159,7 +159,7 @@ class ToolModel {
             }
 
             if (repositoryInfo.hasOwnProperty("version")) {
-                await simpleGit(repositoryPath).checkout(repositoryInfo.version);
+                await simpleGit(repositoryPath).checkout(repositoryInfo.version || ".");
             }
         } catch (error) {
             console.error(error);

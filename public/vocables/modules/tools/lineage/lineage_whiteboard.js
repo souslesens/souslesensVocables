@@ -298,7 +298,12 @@ var Lineage_whiteboard = (function () {
                     //  options.skipTopClassFilter = 1;
                     self.drawTopConcepts(source, options, graphDiv, function (err, result) {
                         if (err) {
-                            return alert(err.response);
+                            if(err.response){
+                                return alert(err.response);
+                            }
+                            else{
+                                return
+                            }
                         }
                         var options = { output: "graph" };
                         if (!Lineage_whiteboard.lineageVisjsGraph.data?.nodes?.get) {
@@ -451,7 +456,8 @@ var Lineage_whiteboard = (function () {
                     }
 
                     if (!Lineage_whiteboard.isResultAcceptable(result)) {
-                        return callbackEach(" ");
+                       return callbackEach(" ");
+                       //return callbackEach();
                     }
 
                     var ids = [];
@@ -503,9 +509,15 @@ var Lineage_whiteboard = (function () {
                 });
             },
             function (/** @type {any} */ err, /** @type {any} */ _result) {
+               
                 if (err) {
+                    
                     if (callback) {
                         return callback(err);
+                    }
+                    if(err==' '){
+                    
+                        return ;
                     }
                     return alert(err);
                 }
@@ -3337,7 +3349,7 @@ attrs.color=self.getSourceColor(superClassValue)
 
     self.initWhiteboardTab = function () {
         if ($("#whiteboardTab").children().length == 0) {
-            $("#whiteboardTab").load("./modules/tools//lineage/html/whiteboardTab.html", function (s) {
+            $("#whiteboardTab").load("./modules/tools/lineage/html/whiteboardTab.html", function (s) {
                 $("#WhiteboardTabButton").addClass("slsv-tabButtonSelected");
                 $("#WhiteboardTabButton").parent().addClass("slsv-selectedTabDiv");
                 Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);

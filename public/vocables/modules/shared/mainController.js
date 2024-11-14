@@ -269,7 +269,11 @@ var MainController = (function () {
         } else {
             UI.cleanPage();
             self.initTool(toolId);
-
+            $("#mainDialogDiv").dialog({
+                close: function () {
+                    UI.homePage();
+                }
+            });
             //Config.userTools[self.currentTool].controller.unload=UI.homePage;
             self.currentSource = null;
         }

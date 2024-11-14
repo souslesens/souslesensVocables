@@ -122,8 +122,8 @@ const checkMainConfig = (config) => {
     return true;
 };
 
-const readMainConfig = () => {
-    return JSON.parse(fs.readFileSync(`${configPath}/mainConfig.json`).toString());
+const readMainConfig = (path = mainConfigPath) => {
+    return JSON.parse(fs.readFileSync(path).toString());
 };
 const config = readMainConfig();
 

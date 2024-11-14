@@ -46,7 +46,8 @@ const MainConfigObject = z.object({
                 clientSecret: z.string(),
             }),
         })
-        .deepPartial(),
+        .deepPartial()
+        .optional(),
     keycloak: z
         .object({
             realm: z.string(),
@@ -55,7 +56,8 @@ const MainConfigObject = z.object({
             clientSecret: z.string(),
             authServerURL: z.string().url(),
         })
-        .partial(),
+        .partial()
+        .optional(),
     health_enabled_services: z.array(z.string()),
     sparql_server: z.object({
         url: z.string().url(),
@@ -70,12 +72,16 @@ const MainConfigObject = z.object({
         other_servers: z.array(z.string()),
         searchChunkSize: z.number().positive(),
     }),
-    jowlServer: z.object({
-        url: z.string().url(),
-    }),
-    slsApi: z.object({
-        url: z.string().url(),
-    }),
+    jowlServer: z
+        .object({
+            url: z.string().url(),
+        })
+        .optional(),
+    slsApi: z
+        .object({
+            url: z.string().url(),
+        })
+        .optional(),
     authenticationDatabase: z.object({
         user: z.string(),
         password: z.string(),

@@ -54,7 +54,7 @@
         "uploadDirPath": null
     },
     "wiki": {
-        "url": ""
+        "url": "http://wiki.example.org"
     },
     "theme": {
         "selector": false,

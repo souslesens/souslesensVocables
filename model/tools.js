@@ -137,7 +137,7 @@ class ToolModel {
      * @param {string} repositoryId – The identifier of the repository to fetch
      * @param {{}} repositoryInfo – The information of the repository
      *
-     * @returns {boolean} – The status of the fetch process
+     * @returns {{}} – The status of the fetch process
      */
     fetchRepository = async (repositoryId, repositoryInfo) => {
         try {
@@ -163,10 +163,16 @@ class ToolModel {
             }
         } catch (error) {
             console.error(error);
-            return false;
+
+            const result = error.toString().match(/remote: ([^\.]+)/);
+            if (result !== null) {
+                return { status: "failure", message: result[1] };
+            }
+
+            return { status: "failure", message: "Unknown error occurs on the server" };
         }
 
-        return true;
+        return { status: "success" };
     };
 
     /**

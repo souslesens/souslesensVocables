@@ -26,7 +26,7 @@ const RepositorySchema = z
 
 export type RepositoryType = z.infer<typeof RepositorySchema>;
 
-type Response<T = unknown> =
+export type Response<T = unknown> =
     | {
           status: number;
           message: T;
@@ -34,6 +34,10 @@ type Response<T = unknown> =
     | {
           status: 500;
           message: unknown;
+      }
+    | {
+          status: string;
+          message: string;
       };
 
 async function deleteRepository(repositoryId: string) {
@@ -50,7 +54,7 @@ async function deleteRepository(repositoryId: string) {
 async function fetchRepository(repositoryId: string) {
     try {
         const response = await fetch(`${endpoint}/repositories/fetch/${repositoryId}`);
-        return response;
+        return response.json() as Promise<Response>;
     } catch (error) {
         return { status: 500, message: error };
     }
@@ -105,6 +109,11 @@ async function writeRepository(identifier: string, data: object, toFetch: boolea
             body: JSON.stringify(body, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
+
+        if (response.status >= 500) {
+            const responseData = (await response.json()) as Response;
+            return { status: responseData.status, message: responseData.message };
+        }
 
         return response;
     } catch (error) {

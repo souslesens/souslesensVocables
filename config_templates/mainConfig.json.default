@@ -1,7 +1,7 @@
 {
     "souslesensUrl": "http://localhost:3010",
     "souslesensUrlForVirtuoso": "http://vocables:3010",
-    "listenPort": "3010",
+    "listenPort": 3010,
     "serverUrl": "../slsv",
     "theme": {
         "selector": true,

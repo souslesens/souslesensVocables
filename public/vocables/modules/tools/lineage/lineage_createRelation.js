@@ -470,7 +470,7 @@ var Lineage_createRelation = (function () {
             }
         }
 
-        if (!confirm("create Relation " + self.sourceNode.label + "-" + Sparql_common.getLabelFromURI(propId) + "->" + self.targetNode.label + " in Graph " + inSource)) {
+        if (false && !confirm("create Relation " + self.sourceNode.label + "-" + Sparql_common.getLabelFromURI(propId) + "->" + self.targetNode.label + " in Graph " + inSource)) {
             return;
         }
         $("#smallDialogDiv").dialog("close");

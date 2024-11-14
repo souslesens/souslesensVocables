@@ -1633,10 +1633,10 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     fieldsMap[key] = restriction[key].value
                 }
 
-                self.currentRestrictionsMap[fieldsMap.subject] = {
+                self.currentRestrictionsMap[fieldsMap.value] = {
                     id: fieldsMap.subject,
                     data: {
-                        bNodeId: fieldsMap.value,
+                        bNodeId: fieldsMap.node,
                         propertyId: fieldsMap.prop
                     }
                 }
@@ -1661,7 +1661,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
                 var modifyButton = ""
                 if (Lineage_sources.isSourceEditableForUser(self.currentSource)) {
-                    modifyButton = "<button onclick='NodeInfosWidget.deleteRestriction(\"" + fieldsMap.subject + "\")'>X</button>"
+                    modifyButton = "<button onclick='NodeInfosWidget.deleteRestriction(\"" + fieldsMap.value + "\")'>X</button>"
                     html += "<td class='detailsCellValue'>" + modifyButton + "</td>"
 
                 }
@@ -1708,7 +1708,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
     }
     self.deleteRestriction = function (restrictionUri) {
-
+ return alert ("in progress...use edge popup menu in whiteboard")
         var restrictionNode = self.currentRestrictionsMap[restrictionUri]
         Lineage_createRelation.deleteRestriction(self.currentSource, restrictionNode, function (err, result) {
 

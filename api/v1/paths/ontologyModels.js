@@ -172,12 +172,20 @@ module.exports = function() {
                 for (var id in req.body.data[entryType]) {
                     if (req.body.options && req.body.options.remove == "true") {
                         if (entryType == "restrictions" && req.body.data[entryType][id].blankNodeId ) {
-                            for (var restriction in ontologyModelsCache[source][entryType][id]){
-
-                                if(Config.ontologiesVocabularyModels[source][entryType][id][restriction].blankNodeId==data[entryType][id].blankNodeId){
-                                    delete Config.ontologiesVocabularyModels[source][entryType][id][restriction]
-                                }
+                            if(!Array.isArray(req.body.data[entryType][id].blankNodeId)){
+                                req.body.data[entryType][id].blankNodeId=[req.body.data[entryType][id].blankNodeId];
                             }
+                            if(req.body.data[entryType][id].blankNodeId.length==0){
+                                return;
+                            }
+                            ontologyModelsCache[req.body.source][entryType][id]=ontologyModelsCache[req.body.source][entryType][id].filter(function(restriction){
+                                return !req.body.data[entryType][id].blankNodeId.includes(restriction.blankNodeId);
+                            });
+                            if(ontologyModelsCache[req.body.source][entryType][id].length==0){
+                                delete ontologyModelsCache[req.body.source][entryType][id]
+                            }  
+                                
+                            
                         }else{
                             delete ontologyModelsCache[req.body.source][entryType][req.body.data[entryType][id]];
                         }

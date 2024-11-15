@@ -573,13 +573,21 @@ var OntologyModels = (function () {
                             delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
                         }
                         else{
-                          
-                            for (var restriction in Config.ontologiesVocabularyModels[source][entryType][id]){
+                            if(!Array.isArray(data[entryType][id].blankNodeId)){
+                                data[entryType][id].blankNodeId=[data[entryType][id].blankNodeId];
+                            }
+                            Config.ontologiesVocabularyModels[source][entryType][id]=Config.ontologiesVocabularyModels[source][entryType][id].filter(function(restriction){
+                                return !data[entryType][id].blankNodeId.includes(restriction.blankNodeId);
+                            });
+                            if(Config.ontologiesVocabularyModels[source][entryType][id].length==0){
+                                delete Config.ontologiesVocabularyModels[source][entryType][id]
+                            }  
+                            /*for (var restriction in Config.ontologiesVocabularyModels[source][entryType][id]){
 
                                 if(Config.ontologiesVocabularyModels[source][entryType][id][restriction].blankNodeId==data[entryType][id].blankNodeId){
                                     delete Config.ontologiesVocabularyModels[source][entryType][id][restriction]
                                 }
-                            }
+                            }*/
                         }
                        
                     } else {

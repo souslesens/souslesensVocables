@@ -2876,6 +2876,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (node.from) {
                 self.currentGraphEdge = node;
                 self.currentGraphNode = null;
+                point = {};
+                point.x = event.x;
+                point.y = event.y;
                 if (true) {
                     //   if (!self.currentGraphEdge.data || !self.currentGraphEdge.data.propertyId) return;
                     self.setGraphPopupMenus(node, event);

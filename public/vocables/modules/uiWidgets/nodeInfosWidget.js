@@ -1288,7 +1288,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
                         });
                     },
-                    
+                    /*
                     // Update model restrictions
                     function (callbackSeries) {
                         
@@ -1311,23 +1311,27 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         } else {
                             callbackSeries();
                         }
-                    },
+                    },*/
                     // delete restrictions triples
                     function (callbackSeries) {
                        if(concernedRestrictions.length>0){
                         var blankNodesIds=concernedRestrictions.map(function(restriction){return restriction.node.value});
+                        
                         // Delete restrictions in Lineage_whiteboard edges cache
-                       
-                        Sparql_generic.deleteTriples(self.currentSource, blankNodesIds, null, null, function (err, _result) {
-                            Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(blankNodesIds);
-                            return callbackSeries(err);
-                        });
+                        Lineage_createRelation.deleteRestrictionsByUri(self.currentSource, blankNodesIds,function(err){
+                            callbackSeries();
+                        })
+                            /*Sparql_generic.deleteTriples(self.currentSource, blankNodesIds, null, null, function (err, _result) {
+                                Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(blankNodesIds);
+                                return callbackSeries(err);
+                            });*/
                        }else{
                         callbackSeries();
                        }
                     },
                     //delete triples where id is subject
                     function (callbackSeries) {
+                        //Sparql_generic.deleteRestriction()
                         Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function (err, _result) {
                             return callbackSeries(err);
                         });

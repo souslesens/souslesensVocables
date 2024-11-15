@@ -171,7 +171,17 @@ module.exports = function() {
             for (var entryType in req.body.data) {
                 for (var id in req.body.data[entryType]) {
                     if (req.body.options && req.body.options.remove == "true") {
-                        delete ontologyModelsCache[req.body.source][entryType][req.body.data[entryType][id]];
+                        if (entryType == "restrictions" && req.body.data[entryType][id].blankNodeId ) {
+                            for (var restriction in ontologyModelsCache[source][entryType][id]){
+
+                                if(Config.ontologiesVocabularyModels[source][entryType][id][restriction].blankNodeId==data[entryType][id].blankNodeId){
+                                    delete Config.ontologiesVocabularyModels[source][entryType][id][restriction]
+                                }
+                            }
+                        }else{
+                            delete ontologyModelsCache[req.body.source][entryType][req.body.data[entryType][id]];
+                        }
+                        
                     } else {
                         if (!ontologyModelsCache[req.body.source][entryType]) {
                             ontologyModelsCache[req.body.source][entryType] = {};

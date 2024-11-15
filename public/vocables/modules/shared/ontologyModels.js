@@ -569,7 +569,19 @@ var OntologyModels = (function () {
             for (var id in data[entryType]) {
                 if (entryType == "restrictions") {
                     if (options.remove) {
-                        delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
+                        if(!data[entryType][id].blankNodeId){
+                            delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
+                        }
+                        else{
+                           var i=0;
+                            for (var restriction in Config.ontologiesVocabularyModels[source][entryType][id]){
+
+                                if(Config.ontologiesVocabularyModels[source][entryType][id][restriction].blankNodeId==data[entryType][id].blankNodeId){
+                                    delete Config.ontologiesVocabularyModels[source][entryType][id][restriction]
+                                }
+                            }
+                        }
+                       
                     } else {
                         data[entryType][id].forEach((_restriction) => {
                             Config.ontologiesVocabularyModels[source][entryType][id].push(_restriction);

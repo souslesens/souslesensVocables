@@ -264,7 +264,11 @@ var Lineage_decoration = (function () {
                 var labelVar=ancestorNode.classLabel;
                 color = getPredefinedColor(ancestorNode.class.value);
                 if (!color) {
-                    color = legendClassesMap[ancestorNode.superClassSubClass.value];
+                    color = legendClassesMap[ancestorNode.class.value]?.color;
+
+                }
+                if (!color) {
+                    color = legendClassesMap[ancestorNode.superClassSubClass.value]?.color;
                     colorId=ancestorNode.superClassSubClass.value;
                     labelVar=ancestorNode.superClassSubClassLabel;
                 }
@@ -274,7 +278,7 @@ var Lineage_decoration = (function () {
                        labelVar=ancestorNode.superClassSubClassLabel;
                 }
                 if (!color) {
-                    color = legendClassesMap[ancestorNode.superClass.value];
+                    color = legendClassesMap[ancestorNode.superClass.value]?.color;
                     colorId=ancestorNode.superClass.value;
                     labelVar=ancestorNode.superClassLabel;
                 }
@@ -419,13 +423,14 @@ var Lineage_decoration = (function () {
                     var uniqueNewVisJsNodes = {};
                     
                     for (var nodeId in hierarchies) {
-                        if(nodeId=='http://rds.posccaesar.org/ontology/lis14/rdl/Activity'){
+                        if(nodeId=='http://tsf/resources/ontology/DEXPIProcess_gfi_2/ProcessStep'){
                             console.log('here');
                         }
                         if (nodeIds.indexOf(nodeId) > -1) {
                             var classColor=getPredefinedColor(nodeId);
                             if(classColor){
                                 legendClassesMap[nodeId] = {id:nodeId,color:classColor};
+                                uniqueLegendJsTreeDataNodes[nodeId] = 1;
                                 
                             }
                             
@@ -441,7 +446,7 @@ var Lineage_decoration = (function () {
                             color = getPredefinedColor(nodeId);
                         }
                         if (!color) {
-                            var x = 3;
+                            color='white';
                         }
 
                         // var obj = { id: nodeId, color: color,legendType: legendTreeNode.id  };
@@ -450,6 +455,7 @@ var Lineage_decoration = (function () {
                         if (nodeOwlTypesMap[nodeId] && nodeOwlTypesMap[nodeId].indexOf("Individual") > -1) {
                             obj.shape = "triangle";
                         }
+
                         if (nodeOwlTypesMap[nodeId] && nodeOwlTypesMap[nodeId].indexOf("Bag") > -1) {
                             obj.shape = Containers_graph.containerStyle.shape;
                             obj.color = Containers_graph.containerStyle.color;
@@ -463,6 +469,7 @@ var Lineage_decoration = (function () {
                         } else {
                             if(legendTreeNode){
                                 legendClassesMap[nodeId] = legendTreeNode;
+                                uniqueLegendJsTreeDataNodes[nodeId] = 1;
                             }
                             
                         }
@@ -483,8 +490,12 @@ var Lineage_decoration = (function () {
                                 var color = legendClassesMap[nodeTypesMap[nodeId].class].color;
                                 if (color) {
                                     if (nodeTypesMap[nodeId] && nodeTypesMap[nodeId].allTypes.indexOf("Bag") > -1) {
+                                        // update the node instead of add 2 times
+                                        newVisJsNodes=newVisJsNodes.filter(function(node){return node.id!=nodeId})
                                         newVisJsNodes.push({ id: nodeId, font: { color: color }, color: "#ddd", legendType: legendTreeNode.id });
                                     } else {
+                                        newVisJsNodes=newVisJsNodes.filter(function(node){return node.id!=nodeId})
+                                        
                                         newVisJsNodes.push({ id: nodeId, color: color, legendType: legendTreeNode.id });
                                     }
                                 }
@@ -495,6 +506,21 @@ var Lineage_decoration = (function () {
                 },
 
                 function (callbackSeries) {
+                    // Get uncolored nodes that should be because of  order in hierarchies var
+                    var uncolored_nodes=newVisJsNodes.filter(function(node){return node.color=='white'});
+                    uncolored_nodes.forEach(function(node){
+                        // treated in last callbackSeries
+                        if(!hierarchies[node.id]){
+                            return 
+                        }
+                        var ancestors=hierarchies[node.id]
+                        var legendTreeNode = getNodeLegendAttrs(ancestors);
+                        if (legendTreeNode) {
+                           node.color=legendTreeNode.color;
+                        }
+                        
+                    });
+                    //
                     callbackSeries();
                 },
 

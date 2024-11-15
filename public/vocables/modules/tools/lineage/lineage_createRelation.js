@@ -784,6 +784,7 @@ var Lineage_createRelation = (function () {
                                     rangeLabel: targetNode.label,
                                     constraintType: constraintType,
                                     constraintTypeLabel: Sparql_common.getLabelFromURI(constraintType),
+                                    blankNodeId: blankNodeId,
 
                                 },
                             ],
@@ -813,7 +814,52 @@ var Lineage_createRelation = (function () {
         );
     };
 
+    self.deleteRestrictionsByUri = function(source,restrictionsNodeIds,callback){
+        if(!source){
+            return;
+        }
+        if(!restrictionsNodeIds){
+            return;
+        }
+        if(!Array.isArray(restrictionsNodeIds)){
+            restrictionsNodeIds=[restrictionsNodeIds]
+        }
+        
+       
+    
+       
+        async.eachSeries(restrictionsNodeIds,
+            function (item, callbackEach) {
+                var edgeNode={};
+                edgeNode.id=item;
+                edgeNode.data={};
+                edgeNode.data.bNodeId=item;
+                
+                Object.keys(Config.ontologiesVocabularyModels[source].restrictions).forEach(function(property){
+                    var propertyRestrictions=Config.ontologiesVocabularyModels[source].restrictions[property];
+                    propertyRestrictions.forEach(function(restriction){
+                        if( restriction.blankNodeId==item){
+                            edgeNode.data.propertyId=property;
+                        }
+                    })
 
+                    
+                });
+                self.deleteRestriction(source,edgeNode,function(err){
+                    callbackEach(err);
+                })
+            
+            }, 
+            function (err) {
+                if(err){
+                    return err;
+                }
+                if(callback){
+                    return callback(err);
+                }
+                
+            });
+    }
 
     self.deleteRestriction = function (inSource, restrictionNode, callback) {
         if (callback || confirm("delete selected restriction")) {
@@ -872,7 +918,8 @@ var Lineage_createRelation = (function () {
                     },
                     function (callbackSeries) {
                         // update OntologyModel by removing restriction
-                        var dataToRemove = {restrictions: [restrictionNode.data.propertyId]};
+                        var dataToRemove = {restrictions:{} };
+                        dataToRemove['restrictions'][restrictionNode.data.propertyId]={blankNodeId:restrictionNode.data.bNodeId}
                         OntologyModels.updateModel(inSource, dataToRemove, {remove: true}, function (err, result) {
                             callbackSeries(err);
                         });

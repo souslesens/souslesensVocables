@@ -573,7 +573,7 @@ var OntologyModels = (function () {
                             delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
                         }
                         else{
-                           var i=0;
+                          
                             for (var restriction in Config.ontologiesVocabularyModels[source][entryType][id]){
 
                                 if(Config.ontologiesVocabularyModels[source][entryType][id][restriction].blankNodeId==data[entryType][id].blankNodeId){

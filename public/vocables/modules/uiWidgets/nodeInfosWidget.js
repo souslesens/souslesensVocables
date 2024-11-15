@@ -1693,7 +1693,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 }
 
                 self.currentRestrictionsMap[fieldsMap.value] = {
-                    id: fieldsMap.subject,
+                    id: fieldsMap.node,
                     data: {
                         bNodeId: fieldsMap.node,
                         propertyId: fieldsMap.prop
@@ -1767,8 +1767,15 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
     }
     self.deleteRestriction = function (restrictionUri) {
- return alert ("in progress...use edge popup menu in whiteboard")
+ //return alert ("in progress...use edge popup menu in whiteboard")
         var restrictionNode = self.currentRestrictionsMap[restrictionUri]
+        if(  Lineage_whiteboard.lineageVisjsGraph.data) {
+            var edges=Lineage_whiteboard.lineageVisjsGraph.data.edges.get()
+            edges.forEach(function(edge){
+
+            })
+        }
+
         Lineage_createRelation.deleteRestriction(self.currentSource, restrictionNode, function (err, result) {
 
             if (err) {

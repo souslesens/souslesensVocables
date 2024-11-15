@@ -832,44 +832,8 @@ var Lineage_createRelation = (function () {
                             callbackSeries();
                         });
                     },
-                    // search if inverse exists
-                    function (callbackSeries) {
-
-                        return callbackSeries();
 
 
-                        /*   Sparql_OWL.getInverseRestriction(inSource, bNodeId, function (err, result) {
-                               if (err) {
-                                   return callbackSeries(err);
-                               }
-                               if (result.length == 0) {
-                                   return callbackSeries();
-                               }
-                               inverseRestriction = result[0].subject.value;
-                               callbackSeries();
-                           });*/
-                    },
-                    // delete inverse restriction
-                    function (callbackSeries) {
-
-                        return callbackSeries();
-
-                        /*   if (!inverseRestriction) {
-                               return callbackSeries();
-                           }
-                           Sparql_generic.deleteTriples(inSource, inverseRestriction, null, null, function (_err, _result) {
-                               callbackSeries();
-                           });*/
-                    },
-                    function (callbackSeries) {
-                        return callbackSeries();
-                        /*  if (!inverseRestriction) {
-                              return callbackSeries();
-                          }
-                          Sparql_generic.deleteTriples(inSource, null, null, inverseRestriction, function (_err, _result) {
-                              callbackSeries();
-                          });*/
-                    },
                     function (callbackSeries) {
                         // update OntologyModel by removing restriction
                         var dataToRemove = {restrictions: [restrictionNode.data.propertyId]};

@@ -181,7 +181,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             }
             headers["Content-Type"] = "application/x-www-form-urlencoded";
 
-            if (query.indexOf("CONSTRUCT ") > -1) {
+            if (query.toUpperCase().indexOf("CONSTRUCT ") > -1) {
                 headers = { "Content-Type": "text/turtle; charset=UTF-8" };
             }
             var body = {

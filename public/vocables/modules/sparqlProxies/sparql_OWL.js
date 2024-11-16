@@ -776,7 +776,12 @@ var Sparql_OWL = (function () {
                 var hierarchies = {};
 
                 if (!options.descendants) {
+
                     classIds.forEach(function (id) {
+                        hierarchies = {};
+                        if(id=="http://tsf/resources/ontology/DEXPIProcess_gfi_2/AmbientTemperature")
+                            var x=3
+
                         hierarchies[id] = [];
 
                         result.results.bindings.forEach(function (item) {
@@ -784,12 +789,12 @@ var Sparql_OWL = (function () {
                                 // if superClass is bnode  it causes problem !!
                                 return;
                             }
-                            if (!options.descendants && item.subject.value == id) {
+
+
+                            if(item.subject.value == id){
                                 hierarchies[id].push(item);
                             }
-                            if (options.descendants && item.class.value == id) {
-                                hierarchies[id].push(item);
-                            }
+
                         });
 
                         for (var baseClassId in hierarchies) {

@@ -185,7 +185,8 @@ var OntologyModels = (function () {
                                         "OPTIONAL {?sub rdfs:subClassOf ?superClass. " +
                                         " OPTIONAL {?superClass rdfs:label ?superClassLabel}}" +
                                         Sparql_common.getVariableLangLabel("sub", true, true) +
-                                        " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
+                                     //   " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
+                                    " VALUES ?class {owl:Class rdf:class rdfs:Class} .  filter (not exists{ ?superClass  rdf:type owl:Restriction})} order by ?sub";
                                     Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                         if (err) {
                                             return callbackSeries(err);

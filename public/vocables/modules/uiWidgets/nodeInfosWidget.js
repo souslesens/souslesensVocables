@@ -325,7 +325,7 @@ var NodeInfosWidget = (function () {
             nodeId,
             {
                 getValuesLabels: true,
-                //  selectGraph: true,
+                 selectGraph: true,
                 noRestrictions: true
             },
             function (err, data) {

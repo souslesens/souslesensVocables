@@ -6,6 +6,7 @@ import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_relations from "./lineage_relations.js";
 import LegendWidget from "../../uiWidgets/legendWidget.js";
 import Containers_graph from "../containers/containers_graph.js";
+import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
@@ -21,24 +22,25 @@ var Lineage_decoration = (function () {
     self.currentVisjGraphNodesMap = {};
 
     self.decorateNodeAndDrawLegend = function (visjsNodes, legendType) {
-            self.decorateByUpperOntologyByClass(visjsNodes);
+        self.decorateByUpperOntologyByClass(visjsNodes);
 
     };
 
 
-    self.getPredefinedColor=function(classId) {
+    self.getPredefinedColor = function (classId,source) {
         var color = null;
         for (var key in Config.topLevelOntologyFixedlegendMap) {
-            if (!color) {
-              /*  if (!Config.topLevelOntologyFixedlegendMap[key]) {
-                    return common.getSourceColor("class", key);
-                }*/
-                color = Config.topLevelOntologyFixedlegendMap[key][classId];
+            if(!source || key==source) {
+                if (!color) {
+                    /*  if (!Config.topLevelOntologyFixedlegendMap[key]) {
+                          return common.getSourceColor("class", key);
+                      }*/
+                    color = Config.topLevelOntologyFixedlegendMap[key][classId];
+                }
             }
         }
         return color;
     }
-
 
 
     self.decorateByUpperOntologyByClass = function (visjsNodes) {
@@ -59,106 +61,120 @@ var Lineage_decoration = (function () {
             nodeIds.push(node.id);
         });
 
-        var hierarchies = {};
-        var legendJsTreeData = [];
-        var legendClassesMap = {};
-        var newVisJsNodes = [];
-        var uniqueLegendJsTreeDataNodes = {};
+        /*  var hierarchies = {};
+          var legendJsTreeData = [];
+          var legendClassesMap = {};
+          var newVisJsNodes = [];*/
+
 
         var distinctNodeClassesMap = {}
-
+        var legendColorsMap = {}
 
         async.series([
-            //build distinctNodeClassesMap
-            function (callbackSeries) {
-                visjsNodes.forEach(function (node) {
-                    if (!node.data)
-                        return;
-                    var classUri = node.data.id
+                //build distinctNodeClassesMap
+                function (callbackSeries) {
+                    visjsNodes.forEach(function (node) {
+                        if (!node.data) {
+                            return;
+                        }
+                        var classUri = node.data.id
 
-                    if (!distinctNodeClassesMap[classUri])
-                        distinctNodeClassesMap[classUri] = []
-                    distinctNodeClassesMap[classUri].push(node)
-                })
-                callbackSeries()
-            },
+                        if (!distinctNodeClassesMap[classUri]) {
+                            distinctNodeClassesMap[classUri] = []
+                        }
+                        distinctNodeClassesMap[classUri].push(node)
+                    })
+                    callbackSeries()
+                },
 
-            // get nodeClassesAncestors and set classes colors
-            function (callbackSeries) {
-                var uniqueTypes = {};
-                var classes = Object.keys(distinctNodeClassesMap)
-                var slices = common.array.slice(classes, Config.slicedArrayLength);
-                async.eachSeries(
-                    slices,
-                    function (slice, callbackEach) {
+                // get nodeClassesAncestors and set classes colors
+                function (callbackSeries) {
+                    var uniqueTypes = {};
+                    var classes = Object.keys(distinctNodeClassesMap)
 
-                        Sparql_OWL.getNodesAncestorsOrDescendants(Lineage_sources.activeSource, slice, {
-                            excludeItself: 0,
-                            withLabels: true
-                        }, function (err, result) {
-                            if (err) {
-                                return callbackEach(err);
+                    for (var classUri in distinctNodeClassesMap) {
+                        var ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, classUri, "ancestors");
+                        if (!ancestors) {
+                            var x = 3
+                        } else {
+
+                            var color = null;
+                            ancestors.forEach(function (ancestor) {
+                                if (!color) {
+                                    color = self.getPredefinedColor(ancestor.id,Config.currentTopLevelOntology)
+                                    if(color) {
+                                        ancestor.color=color
+                                        legendColorsMap[ancestor.id] = ancestor
+                                    }
+                                }
+
+                            })
+                            if (!color) {
+                                color = "#ddd"
                             }
-                            for (var key in result.hierarchies) {
-                               var color=null;
-                                result.hierarchies[key].forEach(function (item) {
-                                    if(!item.superClass)
-                                        return;
-                                    var ancestor = item.superClass.value
-                                    if(!color)
-                                    color = self.getPredefinedColor(ancestor)
+                            distinctNodeClassesMap[classUri].color = color
 
-                                })
-                                if(!color)
-                                     color = "#ddd"
-                                distinctNodeClassesMap[key].color = color
-                            }
-                            callbackEach();
+
+                        }
+                    }
+
+                    callbackSeries();
+                },
+                // build legend
+                function (callbackSeries) {
+                    var legendJsTreeData = []
+                    legendJsTreeData.push( {
+                        id: Config.currentTopLevelOntology,
+                        text: Config.currentTopLevelOntology,
+                        parent: "#",
+
+                    });
+                    for (var legendClassUri in legendColorsMap) {
+
+                        var color = legendColorsMap[legendClassUri].color
+                        var label=legendColorsMap[legendClassUri].label
+                        var treeObj = {
+                            id: legendClassUri,
+                            text: "<span  style='font-size:10px;background-color:" + color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + label,
+                            parent: Config.currentTopLevelOntology,
+                            color: color,
+                        };
+                        legendJsTreeData.push(treeObj);
+                    }
+                  self.drawLegend(legendJsTreeData)
+                    callbackSeries()
+                },
+                // set visjsNodesColor
+                function (callbackSeries) {
+                    var newVisJsNodes = [];
+
+                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
+                    for (var key in distinctNodeClassesMap) {
+                        distinctNodeClassesMap[key].forEach(function (node) {
+                            newVisJsNodes.push({id: node.id, color: distinctNodeClassesMap[key].color});
                         });
 
-                    },
-                    function (err) {
-                        callbackSeries();
                     }
-                );
+                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
+                    callbackSeries();
+                },
+                ///draw Legend
+                function (callbackSeries) {
+                    callbackSeries();
+                }
 
 
-            },
-  // set visjsNodesColor
-            function (callbackSeries) {
-                var newVisJsNodes = [];
+            ],
 
-                Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
-            for( var key in  distinctNodeClassesMap){
-                distinctNodeClassesMap[key].forEach(function (node) {
-                    newVisJsNodes.push({ id: node.id, color: distinctNodeClassesMap[key].color });
-                });
+            function (err) {
+
+
+                var x = distinctNodeClassesMap
 
             }
-                Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
-                callbackSeries();
-            },
-   ///draw Legend
-            function (callbackSeries) {
-                callbackSeries();
-            }
-
-
-
-
-        ], function (err) {
-
-
-            var x =distinctNodeClassesMap
-
-        })
+        )
 
     }
-
-
-
-
-
 
 
     self.drawLegend = function (jstreeData) {
@@ -175,7 +191,8 @@ var Lineage_decoration = (function () {
     };
 
     return self;
-})();
+})
+();
 
 export default Lineage_decoration;
 

@@ -1,7 +1,7 @@
 {
     "souslesensUrl": "http://localhost:3010",
     "souslesensUrlForVirtuoso": "http://vocables:3010",
-    "listenPort": "3010",
+    "listenPort": 3010,
     "serverUrl": "../slsv",
     "theme": {
         "selector": true,
@@ -68,14 +68,11 @@
     "slsApi": {
         "url": "http://localhost:8008"
     },
-    "logger": {
-        "errorsLogPath": "logs/error.log",
-        "usersLogPath": "logs/vocables.log"
-    },
     "authenticationDatabase": {
         "user": "",
         "password": "",
         "host": "",
+        "port": 3306,
         "database": "",
         "table": "",
         "loginColumn": "",

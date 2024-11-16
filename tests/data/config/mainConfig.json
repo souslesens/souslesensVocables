@@ -1,9 +1,13 @@
 {
     "souslesensUrl": "http://localhost:3011",
-    "listenPort": "3011",
+    "souslesensUrlForVirtuoso": "http://localhost:3011",
+    "listenPort": 3011,
+    "serverUrl": "../slsv",
     "auth": "local",
     "defaultGroups": [],
     "logDir": "logs",
+    "default_lang": "en",
+    "formalOntologySourceLabel": "ISO",
     "sentryDsnNode": "",
     "sentryDsnJsFront": "",
     "tools_available": [
@@ -25,18 +29,22 @@
         "admin",
         "ConfigEditor"
     ],
-    "keycloak": {
-        "realm": "",
-        "publicClient": false,
-        "clientID": "",
-        "clientSecret": "",
-        "authServerURL": ""
-    },
+    "cookieSameSite": "",
+    "cookieMaxAge": 2629800000,
+    "cookieSecure": false,
+    "cookieSecureTrustProxy": false,
+    "health_enabled_services": ["virtuoso", "elasticsearch"],
     "sparql_server": {
-        "url": "http://localhost:8899/sparql"
+        "url": "http://localhost:8899/sparql",
+        "user": "dba",
+        "password": "dba"
     },
     "ElasticSearch": {
         "url": "http://localhost:9201/",
+        "user": "elastic",
+        "password": "elastic",
+        "skipSslVerify": false,
+        "searchChunkSize": 50,
         "other_servers": []
     },
     "annotator": {
@@ -46,7 +54,7 @@
         "uploadDirPath": null
     },
     "wiki": {
-        "url": ""
+        "url": "http://wiki.example.org"
     },
     "theme": {
         "selector": false,
@@ -64,4 +72,3 @@
         "groupsColumn": "groups"
     }
 }
-

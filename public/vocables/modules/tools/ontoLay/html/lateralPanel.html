@@ -1,0 +1,92 @@
+
+<div>
+
+
+    <div id="sourcesActionsSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
+        <div id="Title1" class="titleboxButtons font-button1-color"></div>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" title="Restrictions"><img src="./icons/CommonIcons/ModelIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Expand"><img src="./icons/CommonIcons/ExpandIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" title="Parents"><img src="./icons/CommonIcons/ParentIcon.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>
+        <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
+        <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
+        <button class="w3-button slsv-button-3 size-of-button-small" onclick="OntoLay.setHiearchicalLayout()">Hier.</button>
+
+    </div>
+</div>
+
+<div id="ontoLay_currentabActions">
+    <div class="w3-container">
+        <div class="input-group mb-3" style="width: 100%; height: 30px">
+            <div class="input-group-prepend">
+                <div id="Lineage_classes_moreOptionsButtonOnSearchbar" class="input-group-append">
+                    <div class="SearchButtonIconLeft border-without-raduis-theme1" onclick="Lineage_whiteboard.hideShowMoreOptions(null,'Lineage_MoreClassesOptions')" style="height: 33.5px">
+                        <button class="moreOptions-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-top: 5px; margin-left: 5px"></button>
+                    </div>
+                </div>
+            </div>
+            <input id="searchWidget_searchTermInput" class="border-without-raduis-theme1" autocomplete="off" style="width: 35%; height: 33.5px; border-left: 0px" value="" />
+
+            <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 6px">
+                <button class="search-icon slsv-invisible-button" onclick="SearchWidget.searchTermInSources()" style="margin-top: 4px; height: 20px; width: 20px"></button>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div id="ontoLay_tabButtons" style="display: flex;flex-direction: row">
+    <div class="" title="Classes">
+        <button class="" onclick="UI.openTab('lineage-tab','classesTab',Lineage_whiteboard.initClassesTab,this)">Classes </button>
+    </div>
+    <div class="" title="Properties">
+        <button class="" onclick="UI.openTab('lineage-tab','propertiesTab',Lineage_whiteboard.initPropertiesTab,this)">Properties </button>
+    </div>
+</div>
+
+
+
+
+
+
+<div id="classesTab" class="w3-container lineage-tab slsv-bg-pale">
+    <div class="Lineage_classes_jstreeContainer" style="width: 90%; margin-top: 50px; max-height: 63dvh">
+        <div id="LineageNodesJsTreeDiv"></div>
+    </div>
+
+</div>
+
+<div id="propertiesTab" class="w3-container lineage-tab slsv-bg-pale">
+
+    <div id="Lineage_PropertiesFondamentalButtonsDiv" class="w3-panel w3-border w3-round-small border-classic-color-theme3 font-button3-color" style="width: 90%">
+        <div class="titleboxButtons font-button3-color" style="display: inline-flex">Actions</div>
+
+        <div id="lineage_actionsWrapper" class="lineage_actionDiv">
+            <div style="display: flex">
+                <div class="slsv-invisible-button" style="margin-top: 10px" id="lineageProperties_nodesSelectionSelect" onclick="Lineage_properties.changeIconForPropertiesGraphAction(this)">
+                    <button class="allPropertyIcon slsv-invisible-button" style="margin-bottom: -10px"></button>
+                </div>
+
+                <button class="w3-button slsv-button-3 size-of-button-small" onclick="Lineage_properties.onPropertyActionClick('relations','visj')">Relations</button>
+
+                <button class="w3-button slsv-button-3 size-of-button-small" onclick="Lineage_properties.onPropertyActionClick('predicates','visj')">Predicates</button>
+
+                <button class="w3-button slsv-button-3 size-of-button-small" onclick="Lineage_properties.onPropertyActionClick('restrictions','visj')">Restrictions</button>
+
+                <button class="w3-button slsv-button-3 size-of-button-small" onclick="Lineage_properties.onPropertyActionClick('rangesAndDomains','visj')">RangesAndDomains</button>
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="jstreeContainer" style="width: 95%; height: 450px; max-height: 45dvh; margin: 3px; padding: 3px">
+        <div class="jstree" id="Lineage_propertiesTree"></div>
+    </div>
+
+
+</div>
+
+

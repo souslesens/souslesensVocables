@@ -451,7 +451,7 @@ var Sparql_OWL = (function () {
         if (true || options.excludeType) {
             selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes)';
             for (var i = 1; i <= ancestorsDepth; i++) {
-                selectStr += '(GROUP_CONCAT(?broaderGraph1;SEPARATOR=",") AS ?broaderGraphs1 ) ?broader' + i + " ?broader" + i + "Label";
+                selectStr += '(GROUP_CONCAT(?broaderGraph1;SEPARATOR=",") AS ?broaderGraphs'+i+' ) ?broader' + i + " ?broader" + i + "Label";
             }
         }
         var query =

@@ -205,6 +205,8 @@ var MainController = (function () {
         self.initControllers();
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
+      /*  if(!Config.userTools[toolId].controller)
+            Config.userTools[toolId].controller= window[toolId]*/
         if (Config.userTools[toolId].controller.onLoaded) {
             Config.userTools[toolId].controller.onLoaded();
         } else {

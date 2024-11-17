@@ -6,18 +6,18 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
 // eslint-disable-next-line no-global-assign
 var OntologyModels = (function () {
-    var self={}
+    var self = {}
 
     self.loadedSources = {};
 
-    self.registerSourcesModel = function (sources,options, callback) {
+    self.registerSourcesModel = function (sources, options, callback) {
         UI.message("loading ontology models");
         if (!Array.isArray(sources)) {
             sources = [sources];
         }
 
-        if(!options){
-            options={}
+        if (!options) {
+            options = {}
         }
         let url = Config.sparql_server.url + "?format=json&query=";
 
@@ -36,7 +36,7 @@ var OntologyModels = (function () {
                     if (!graphUri) {
                         return callbackEach();
                     }
-                    Config.ontologiesVocabularyModels[source] = { graphUri: graphUri };
+                    Config.ontologiesVocabularyModels[source] = {graphUri: graphUri};
                 } else {
                     if (!options.noCache && self.loadedSources[source]) {
                         return callbackEach();
@@ -60,9 +60,9 @@ var OntologyModels = (function () {
                     [
                         function (callbackSeries) {
 
-                        if(options.noCache){
-                            return callbackSeries();
-                        }
+                            if (options.noCache) {
+                                return callbackSeries();
+                            }
                             self.readModelOnServerCache(source, function (err, result) {
                                 self.loadedSources[source] = 1;
                                 if (result) {
@@ -185,15 +185,17 @@ var OntologyModels = (function () {
                                         "OPTIONAL {?sub rdfs:subClassOf ?superClass. " +
                                         " OPTIONAL {?superClass rdfs:label ?superClassLabel}}" +
                                         Sparql_common.getVariableLangLabel("sub", true, true) +
-                                     //   " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
-                                    " VALUES ?class {owl:Class rdf:class rdfs:Class} .  filter (not exists{ ?superClass  rdf:type owl:Restriction})} order by ?sub";
+                                        //   " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
+                                        " VALUES ?class {owl:Class rdf:class rdfs:Class} .  filter (not exists{ ?superClass  rdf:type owl:Restriction})} order by ?sub";
                                     Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                         if (err) {
                                             return callbackSeries(err);
                                         }
 
                                         result.results.bindings.forEach(function (item) {
-                                            if (item.sub.value == "http://souslesens.org/resources/ontology/cfihos-s-v01/Pressure") var x = 3;
+                                            if (item.sub.value == "http://souslesens.org/resources/ontology/cfihos-s-v01/Pressure") {
+                                                var x = 3;
+                                            }
                                             if (!Config.ontologiesVocabularyModels[source].classes[item.sub.value]) {
                                                 Config.ontologiesVocabularyModels[source].classes[item.sub.value] = {
                                                     id: item.sub.value,
@@ -222,7 +224,7 @@ var OntologyModels = (function () {
                                 graphUri +
                                 "> where{" +
                                 " ?prop rdfs:domain ?domain." +
-                                "FILTER (!isBlank(?domain)) "+
+                                "FILTER (!isBlank(?domain)) " +
                                 Sparql_common.getVariableLangLabel("domain", true, true) +
                                 " }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
@@ -231,7 +233,12 @@ var OntologyModels = (function () {
                                 }
                                 result.results.bindings.forEach(function (item) {
                                     if (!Config.ontologiesVocabularyModels[source].constraints[item.prop.value]) {
-                                        Config.ontologiesVocabularyModels[source].constraints[item.prop.value] = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                                        Config.ontologiesVocabularyModels[source].constraints[item.prop.value] = {
+                                            domain: "",
+                                            range: "",
+                                            domainLabel: "",
+                                            rangeLabel: ""
+                                        };
                                     }
                                     Config.ontologiesVocabularyModels[source].constraints[item.prop.value].domain = item.domain.value;
                                     Config.ontologiesVocabularyModels[source].constraints[item.prop.value].domainLabel = item.domainLabel
@@ -247,7 +254,7 @@ var OntologyModels = (function () {
                                 queryP + " select distinct ?prop ?range ?rangeLabel FROM <" + graphUri + "> where{" +
                                 " ?prop rdfs:range ?range." +
                                 Sparql_common.getVariableLangLabel("range", true, true) +
-                                "FILTER (!isBlank(?range)) "+
+                                "FILTER (!isBlank(?range)) " +
                                 " }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
@@ -255,7 +262,12 @@ var OntologyModels = (function () {
                                 }
                                 result.results.bindings.forEach(function (item) {
                                     if (!Config.ontologiesVocabularyModels[source].constraints[item.prop.value]) {
-                                        Config.ontologiesVocabularyModels[source].constraints[item.prop.value] = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                                        Config.ontologiesVocabularyModels[source].constraints[item.prop.value] = {
+                                            domain: "",
+                                            range: "",
+                                            domainLabel: "",
+                                            rangeLabel: ""
+                                        };
                                     }
                                     Config.ontologiesVocabularyModels[source].constraints[item.prop.value].range = item.range.value;
                                     Config.ontologiesVocabularyModels[source].constraints[item.prop.value].rangeLabel = item.rangeLabel
@@ -273,14 +285,14 @@ var OntologyModels = (function () {
                                 return callbackSeries();
                             }
                             //Sparql_OWL.getObjectRestrictions(source, null, { withoutBlankNodes: 1, withoutImports: 1 }, function (err, result) {
-                            Sparql_OWL.getObjectRestrictions(source, null, {  withoutImports: 1 }, function (err, result) {
+                            Sparql_OWL.getObjectRestrictions(source, null, {withoutImports: 1}, function (err, result) {
                                 result.forEach(function (item) {
                                     var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
                                     var domainLabel = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
                                     var rangeLabel = item.valueLabel ? item.valueLabel.value : Sparql_common.getLabelFromURI(item.value.value);
                                     var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
-                                    var constraintType=item.constraintType?item.constraintType.value:null
-                                    var constraintTypeLabel=item.constraintType?Sparql_common.getLabelFromURI(item.constraintType.value):null
+                                    var constraintType = item.constraintType ? item.constraintType.value : null
+                                    var constraintTypeLabel = item.constraintType ? Sparql_common.getLabelFromURI(item.constraintType.value) : null
 
                                     if (!uniqueProperties[item.prop.value]) {
                                         uniqueProperties[item.prop.value] = 1;
@@ -297,9 +309,9 @@ var OntologyModels = (function () {
                                         range: item.value.value,
                                         domainLabel: domainLabel,
                                         rangeLabel: rangeLabel,
-                                        blankNodeId : item.node.value,
-                                        constraintType:constraintType,
-                                        constraintTypeLabel:constraintTypeLabel
+                                        blankNodeId: item.node.value,
+                                        constraintType: constraintType,
+                                        constraintTypeLabel: constraintTypeLabel
                                     });
                                 });
 
@@ -345,7 +357,7 @@ var OntologyModels = (function () {
                             if (props.length == 0) {
                                 return callbackSeries();
                             }
-                            Sparql_OWL.getPropertiesInheritedConstraints(source, props, { withoutImports: 0 }, function (err, propsMap) {
+                            Sparql_OWL.getPropertiesInheritedConstraints(source, props, {withoutImports: 0}, function (err, propsMap) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
@@ -362,7 +374,10 @@ var OntologyModels = (function () {
                                     var inheritedConstaint = propsMap[propId];
                                     if (inheritedConstaint) {
                                         if (!Config.ontologiesVocabularyModels[source].constraints[propId]) {
-                                            Config.ontologiesVocabularyModels[source].constraints[propId] = { domain: "", range: "" };
+                                            Config.ontologiesVocabularyModels[source].constraints[propId] = {
+                                                domain: "",
+                                                range: ""
+                                            };
                                         }
 
                                         // inheritance but no overload of constraint
@@ -450,7 +465,7 @@ var OntologyModels = (function () {
                                     graphUri: graphUri,
                                     controllerName: Sparql_OWL,
                                     controller: Sparql_OWL,
-                                    sparql_server: { url: Config.sparql_server.url },
+                                    sparql_server: {url: Config.sparql_server.url},
                                 };
                             }
                             return callbackSeries();
@@ -474,7 +489,7 @@ var OntologyModels = (function () {
             function (err) {
                 UI.message("", true);
                 if (callback) {
-                    return callback(err,Config.ontologiesVocabularyModels);
+                    return callback(err, Config.ontologiesVocabularyModels);
                 }
             }
         );
@@ -485,11 +500,11 @@ var OntologyModels = (function () {
             var propConstraints = Config.ontologiesVocabularyModels[source].constraints[propId];
             var inversePropConstraints = Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]];
             if (!propConstraints) {
-                propConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                propConstraints = {domain: "", range: "", domainLabel: "", rangeLabel: ""};
                 Config.ontologiesVocabularyModels[source].constraints[propId] = propConstraints;
             }
             if (!inversePropConstraints) {
-                inversePropConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                inversePropConstraints = {domain: "", range: "", domainLabel: "", rangeLabel: ""};
                 Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]] = inversePropConstraints;
             }
 
@@ -570,19 +585,18 @@ var OntologyModels = (function () {
             for (var id in data[entryType]) {
                 if (entryType == "restrictions") {
                     if (options.remove) {
-                        if(!data[entryType][id].blankNodeId){
+                        if (!data[entryType][id].blankNodeId) {
                             delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
-                        }
-                        else{
-                            if(!Array.isArray(data[entryType][id].blankNodeId)){
-                                data[entryType][id].blankNodeId=[data[entryType][id].blankNodeId];
+                        } else {
+                            if (!Array.isArray(data[entryType][id].blankNodeId)) {
+                                data[entryType][id].blankNodeId = [data[entryType][id].blankNodeId];
                             }
-                            Config.ontologiesVocabularyModels[source][entryType][id]=Config.ontologiesVocabularyModels[source][entryType][id].filter(function(restriction){
+                            Config.ontologiesVocabularyModels[source][entryType][id] = Config.ontologiesVocabularyModels[source][entryType][id].filter(function (restriction) {
                                 return !data[entryType][id].blankNodeId.includes(restriction.blankNodeId);
                             });
-                            if(Config.ontologiesVocabularyModels[source][entryType][id].length==0){
+                            if (Config.ontologiesVocabularyModels[source][entryType][id].length == 0) {
                                 delete Config.ontologiesVocabularyModels[source][entryType][id]
-                            }  
+                            }
                             /*for (var restriction in Config.ontologiesVocabularyModels[source][entryType][id]){
 
                                 if(Config.ontologiesVocabularyModels[source][entryType][id][restriction].blankNodeId==data[entryType][id].blankNodeId){
@@ -590,7 +604,7 @@ var OntologyModels = (function () {
                                 }
                             }*/
                         }
-                       
+
                     } else {
                         data[entryType][id].forEach((_restriction) => {
                             Config.ontologiesVocabularyModels[source][entryType][id].push(_restriction);
@@ -725,7 +739,10 @@ var OntologyModels = (function () {
                     if (startNodeIds.length == 0) {
                         return callbackSeries();
                     }
-                    Sparql_OWL.getNodesAncestorsOrDescendants(source, startNodeIds, { excludeItself: 0, filter: filter }, function (err, result) {
+                    Sparql_OWL.getNodesAncestorsOrDescendants(source, startNodeIds, {
+                        excludeItself: 0,
+                        filter: filter
+                    }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -737,7 +754,10 @@ var OntologyModels = (function () {
                     if (endNodeIds.length == 0) {
                         return callbackSeries();
                     }
-                    Sparql_OWL.getNodesAncestorsOrDescendants(source, endNodeIds, { excludeItself: 0, filter: filter }, function (err, result) {
+                    Sparql_OWL.getNodesAncestorsOrDescendants(source, endNodeIds, {
+                        excludeItself: 0,
+                        filter: filter
+                    }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -877,7 +897,7 @@ var OntologyModels = (function () {
                         });
                     }
 
-                    validConstraints = { both: {}, domain: {}, range: {}, noConstraints: {} };
+                    validConstraints = {both: {}, domain: {}, range: {}, noConstraints: {}};
 
                     propertiesMatchingBoth.forEach(function (propId) {
                         if (propsToRemove.indexOf(propId) < 0) {
@@ -935,7 +955,10 @@ var OntologyModels = (function () {
                 },
             ],
             function (err) {
-                return callback(err, { constraints: validConstraints, nodes: { startNode: startNodeAncestorIds, endNode: endNodeAncestorIds } });
+                return callback(err, {
+                    constraints: validConstraints,
+                    nodes: {startNode: startNodeAncestorIds, endNode: endNodeAncestorIds}
+                });
             }
         );
     };
@@ -978,14 +1001,14 @@ var OntologyModels = (function () {
                                 if (item.range) {
                                     if (!objectType || objectType == "range") {
                                         if (!allRanges[item.range]) {
-                                            allRanges[item.range] = { id: item.range, label: item.rangeLabel };
+                                            allRanges[item.range] = {id: item.range, label: item.rangeLabel};
                                         }
                                     }
                                 }
                                 if (item.domain) {
                                     if (!objectType || objectType == "domain") {
                                         if (!allDomains[item.domain]) {
-                                            allDomains[item.domain] = { id: item.domain, label: item.domainLabel };
+                                            allDomains[item.domain] = {id: item.domain, label: item.domainLabel};
                                         }
                                     }
                                 }
@@ -1001,7 +1024,9 @@ var OntologyModels = (function () {
                                 anyRange = true;
                             }
                             var allRangesArray = Object.keys(allRanges);
-                            if (allRangesArray.length == 0) return callbackSeries();
+                            if (allRangesArray.length == 0) {
+                                return callbackSeries();
+                            }
                             Sparql_OWL.getAllDescendants(source, allRangesArray, "rdfs:subClassOf", {}, function (err, result) {
                                 if (err) {
                                     return callback(err);
@@ -1028,7 +1053,9 @@ var OntologyModels = (function () {
                                 anyDomain = true;
                             }
                             var allDomainsArray = Object.keys(allDomains);
-                            if (allDomainsArray.length == 0) return callbackSeries();
+                            if (allDomainsArray.length == 0) {
+                                return callbackSeries();
+                            }
                             Sparql_OWL.getAllDescendants(source, allDomainsArray, "rdfs:subClassOf", {}, function (err, result) {
                                 if (err) {
                                     return callback(err);
@@ -1054,7 +1081,12 @@ var OntologyModels = (function () {
                 );
             },
             function (err) {
-                return callback(null, { ranges: allRanges, domains: allDomains, anyRange: anyRange, anyDomain: anyDomain });
+                return callback(null, {
+                    ranges: allRanges,
+                    domains: allDomains,
+                    anyRange: anyRange,
+                    anyDomain: anyDomain
+                });
             }
         );
     };
@@ -1166,7 +1198,7 @@ var OntologyModels = (function () {
                     return callback(err);
                 }
 
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], {source: source});
 
                 //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
                 return callback(null, result.results.bindings);
@@ -1232,7 +1264,11 @@ var OntologyModels = (function () {
 
                     result.results.bindings.forEach(function (item) {
                         if (!nonObjectPropertiesmap[item.class.value]) {
-                            nonObjectPropertiesmap[item.class.value] = { label: item.classLabel.value, id: item.class.value, properties: [] };
+                            nonObjectPropertiesmap[item.class.value] = {
+                                label: item.classLabel.value,
+                                id: item.class.value,
+                                properties: []
+                            };
                         }
                         nonObjectPropertiesmap[item.class.value].properties.push({
                             label: item.propLabel.value,
@@ -1318,7 +1354,52 @@ var OntologyModels = (function () {
             return callback(null, result.results.bindings);
         });
     };
+    /**
+     *  calculate top classes from classes taxonomy
+     * @param sourceLabel
+     * @param includeImports
+     * @param maxClasses
+     * @param maxDepth
+     * @param callback
+     */
+    self.getTopClasses = function (sourceLabel, includeImports, maxClasses, maxDepth, callback) {
+        var options = {withoutImports: !includeImports}
+        Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
+            if (err) {
+                return callback(err)
+            }
+            if (!maxClasses) {
+                maxClasses = 100;
+            }
+            if(!maxDepth)
+            maxDepth=10
+            var depthMap = {}
+            for (var classUri in result.classesMap) {
+                var parents = result.classesMap[classUri].parents;
+                if (!depthMap["" + parents.length]) {
+                    depthMap["" + parents.length] = []
+                }
+                depthMap["" + parents.length].push(classUri)
 
+
+            }
+
+            var topClasses = null
+
+            var currentDepth
+            for (currentDepth = 0; currentDepth < maxDepth; currentDepth++) {
+                var parents = depthMap["" + currentDepth]
+                if (parents && parents.length > 0 && parents.length < maxClasses) {
+                    topClasses = depthMap["" + currentDepth]
+                    break;
+                }
+            }
+            return callback(null,topClasses)
+        })
+
+
+
+    }
     self.getClassHierarchyTreeData = function (sourcelabel, baseClassId, direction, options) {
         if (!options) {
             options = {};
@@ -1487,6 +1568,8 @@ var OntologyModels = (function () {
 
         return hierarchyArray;
     };
+
+
     self.getAllClassesFromIndividuals = function (sourceLabel, options, callback) {
         if (!options) {
             options = {};
@@ -1502,7 +1585,7 @@ var OntologyModels = (function () {
             "  ?x rdf:type ?id. optional {?id rdfs:label ?label  }} limit 10000";
 
         var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1517,7 +1600,9 @@ var OntologyModels = (function () {
         }
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         var classFilter = "";
-        if (classIds) classFilter = Sparql_common.setFilter("classId", classIds);
+        if (classIds) {
+            classFilter = Sparql_common.setFilter("classId", classIds);
+        }
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>SELECT distinct \n" +
             "?classId ?p ?pRange ?pLabel ?pType " +
@@ -1533,7 +1618,7 @@ var OntologyModels = (function () {
             "} limit 10000";
 
         var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1561,15 +1646,15 @@ var OntologyModels = (function () {
         return classIds;
     };
 
-    self.constraintsToShacl=function(sourceLabel,callback) {
+    self.constraintsToShacl = function (sourceLabel, callback) {
         self.registerSourcesModel(sourceLabel, null, function (err, model) {
-var shProperties=[]
+            var shProperties = []
             for (var properties in model.restrictions) {
-               var  shProperty=" [\n" +
-                   "        sh:path schema:birthDate ;\n" +
-                   "        sh:lessThan schema:deathDate ;\n" +
-                   "        sh:maxCount 1 ;\n" +
-                   "    ] ;"
+                var shProperty = " [\n" +
+                    "        sh:path schema:birthDate ;\n" +
+                    "        sh:lessThan schema:deathDate ;\n" +
+                    "        sh:maxCount 1 ;\n" +
+                    "    ] ;"
 
             }
 

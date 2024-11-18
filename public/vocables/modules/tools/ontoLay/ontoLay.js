@@ -57,12 +57,8 @@ self.getTopClasses = function (sourceLabel, options, callback) {
             return callback(err)
         }
      
-        var depthMap = {}
-        for (var classUri in result.classesMap) {
-            var parents = result.classesMap[classUri].parents;
-            if (!depthMap["" + parents.length]) {
-                depthMap["" + parents.length] = []
-            }
+        
+        
 
             var depthMap = {};
             for (var classUri in result.classesMap) {

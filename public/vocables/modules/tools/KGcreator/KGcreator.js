@@ -62,8 +62,6 @@ var KGcreator = (function () {
     };
     self.unload = function () {
         self.currentTab = "";
-        Lineage_sources.registerSource = UI.oldRegisterSource;
-        self.currentTab = "";
         $("#KGcreator_topButtons").css("flex-direction", "row");
         $("#KGcreator_topButtons").attr("id", "Lineage_graphEditionButtons");
         $("#MenuBar").css("height", "90px");

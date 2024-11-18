@@ -3403,10 +3403,10 @@ attrs.color=self.getSourceColor(superClassValue)
             $("#classesTab").load("./modules/tools//lineage/html/classesTab.html", function (s) {
                 SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
                 //$("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
-                SearchWidget.init();
+                //SearchWidget.init();
                 $("#GenericTools_searchInAllSources").prop("checked", false);
                 $("#Lineage_MoreClassesOptions").hide();
-                SearchWidget.showTopConcepts();
+                //SearchWidget.showTopConcepts();
                 self.hideShowMoreOptions("show", "Lineage_MoreClassesOptions");
                 /*
                     $("#lateralPanelDiv").resizable({
@@ -3432,7 +3432,7 @@ attrs.color=self.getSourceColor(superClassValue)
     self.initContainersTab = function () {
         if ($("#containersTab").children().length == 0) {
             $("#containersTab").load("./modules/tools//lineage/html/containersTab.html", function (s) {
-                Containers_tree.search("lineage_containers_containersJstree");
+                //Containers_tree.search("lineage_containers_containersJstree");
             });
         }
     };

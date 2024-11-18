@@ -1,8 +1,5 @@
-
-<div style="margin-left: 10px;">
+<div style="margin-left: 10px">
     <div>
-
-
         <div id="sourcesActionsSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
             <div id="Title1" class="titleboxButtons font-button1-color"></div>
             <!--<button class="w3-button slsv-button-1" onclick="OntoLay.loadTopClasses()" title="TopClasses"><img src="./icons/CommonIcons/TopClassesIcon.png" /></button>-->
@@ -13,7 +10,6 @@
             <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
             <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="OntoLay.clearAll()" title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
             <button class="w3-button slsv-button-3 size-of-button-small" onclick="OntoLay.setHiearchicalLayout()">Hier.</button>
-
         </div>
     </div>
 
@@ -27,20 +23,25 @@
                         </div>
                     </div>
                 </div>
-                <input id="ontolay_searchTermInput" class="border-without-raduis-theme1" autocomplete="off" style="width: 35%; height: 33.5px; border-left: 0px" value="" onkeyup="if (event.keyCode == 13 || event.keyCode == 9){OntoLay.search()}"/>
+                <input
+                    id="ontolay_searchTermInput"
+                    class="border-without-raduis-theme1"
+                    autocomplete="off"
+                    style="width: 35%; height: 33.5px; border-left: 0px"
+                    value=""
+                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9){OntoLay.search()}"
+                />
 
                 <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 6px">
-                    <button class="slsv-invisible-button" onclick="OntoLay.search('Class')" style="margin-top: 3px;">Class </button>
+                    <button class="slsv-invisible-button" onclick="OntoLay.search('Class')" style="margin-top: 3px">Class</button>
 
-                    <button class="slsv-invisible-button" onclick="OntoLay.search('Property')"  style="margin-top: 3px;">Prop </button>
+                    <button class="slsv-invisible-button" onclick="OntoLay.search('Property')" style="margin-top: 3px">Prop</button>
 
-                    <button class="slsv-invisible-button" onclick="OntoLay.search('Whiteboard')"  style="margin-top: 3px;">Whiteboard </button>
-                <!--  <button class="search-icon slsv-invisible-button" onclick="SearchWidget.searchTermInSources()" style="margin-top: 4px; height: 20px; width: 20px"></button>-->
+                    <button class="slsv-invisible-button" onclick="OntoLay.search('Whiteboard')" style="margin-top: 3px">Whiteboard</button>
+                    <!--  <button class="search-icon slsv-invisible-button" onclick="SearchWidget.searchTermInSources()" style="margin-top: 4px; height: 20px; width: 20px"></button>-->
                 </div>
-
             </div>
         </div>
-
     </div>
 </div>
 

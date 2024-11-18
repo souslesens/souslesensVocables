@@ -271,7 +271,6 @@ var MainController = (function () {
         } else {
             UI.cleanPage();
             self.initTool(toolId);
-<<<<<<< HEAD
             if(toolId!='OntoCreator'){
                 $("#mainDialogDiv").dialog({
                     close: function () {
@@ -280,13 +279,6 @@ var MainController = (function () {
                 });
             }
            
-=======
-            $("#mainDialogDiv").dialog({
-                close: function () {
-                    UI.homePage();
-                },
-            });
->>>>>>> origin/master
             //Config.userTools[self.currentTool].controller.unload=UI.homePage;
             self.currentSource = null;
         }

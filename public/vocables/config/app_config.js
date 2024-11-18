@@ -279,11 +279,7 @@ var Config = (function () {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#70309f",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Prescriptive": "#00B5EC",
         },
-<<<<<<< HEAD
         */
-=======
-
->>>>>>> origin/master
         /*
         "ISO_15926-part-14_PCA": {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#ED008C",

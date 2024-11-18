@@ -2,15 +2,9 @@ import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
 
 var OntoLay = (function () {
-<<<<<<< HEAD
     var self = {}
        self.maxClasses = 100;
     self.currentTab='Class'
-=======
-    var self = {};
-    self.maxClasses = 100;
-
->>>>>>> origin/master
     self.onLoaded = function () {
         if (self.firstLoad) {
             self.firstLoad = false;
@@ -37,7 +31,6 @@ var OntoLay = (function () {
             $("#lateralPanelDiv").load("./modules/tools/OntoLay/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
-<<<<<<< HEAD
                 self.loadTopClasses();
                 
             });
@@ -69,27 +62,6 @@ self.getTopClasses = function (sourceLabel, options, callback) {
             var parents = result.classesMap[classUri].parents;
             if (!depthMap["" + parents.length]) {
                 depthMap["" + parents.length] = []
-=======
-
-                self.getTopClasses(Lineage_sources.activeSource, {}, function (err, result) {
-                    if (err) {
-                        alert(err);
-                    }
-                    self.nodeIds = result.nodeIds;
-                    self.currentDepth = result.currentDepth;
-
-                    self.drawTopClasses(self.nodeIds, self.currentDepth);
-                });
-            });
-        });
-    };
-
-    self.getTopClasses = function (sourceLabel, options, callback) {
-        var options = { withoutImports: true };
-        Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
-            if (err) {
-                return callback(err);
->>>>>>> origin/master
             }
 
             var depthMap = {};
@@ -191,7 +163,6 @@ self.getTopClasses = function (sourceLabel, options, callback) {
         $("#classesTab").css("display", "none");
         $("#propertiesTab").css("display", "none");
 
-<<<<<<< HEAD
         $("#classesTab").css("display","none")
         $("#propertiesTab").css("display","none")
         if(!type){
@@ -234,24 +205,6 @@ self.getTopClasses = function (sourceLabel, options, callback) {
         Lineage_whiteboard.initUI();
         self.loadTopClasses();
     }
-=======
-        if (type == "Class") {
-            $("#classesTab").css("display", "block");
-            var options = {
-                term: term,
-                searchedSources: true,
-            };
-
-            SearchWidget.searchTermInSources(options);
-        } else if (type == "Property") {
-            $("#propertiesTab").css("display", "block");
-            Lineage_properties.searchTermInSources(term, true);
-        } else if (type == "Whitboard") {
-            Lineage_whiteboard.graph.searchNode(null, term);
-        }
-    };
-
->>>>>>> origin/master
     return self;
 })();
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.91.1](https://github.com/souslesens/souslesensVocables/compare/1.91.0...1.91.1) (2024-11-18)
+
+
+### Bug Fixes
+
+* **public:** use an empty list for the selector when the config is missing ([7884c3d](https://github.com/souslesens/souslesensVocables/commit/7884c3dfee40ec1efc7dbd75829c0e2bc521863c))
+
 ## [1.91.0](https://github.com/souslesens/souslesensVocables/compare/1.90.0...1.91.0) (2024-11-18)
 
 

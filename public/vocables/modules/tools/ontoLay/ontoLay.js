@@ -4,7 +4,7 @@ import MainController from "../../shared/mainController.js";
 var OntoLay = (function () {
     var self = {};
     self.maxClasses = 100;
-
+    self.currentTab = "Class";
     self.onLoaded = function () {
         if (self.firstLoad) {
             self.firstLoad = false;
@@ -31,17 +31,19 @@ var OntoLay = (function () {
             $("#lateralPanelDiv").load("./modules/tools/OntoLay/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
-
-                self.getTopClasses(Lineage_sources.activeSource, {}, function (err, result) {
-                    if (err) {
-                        alert(err);
-                    }
-                    self.nodeIds = result.nodeIds;
-                    self.currentDepth = result.currentDepth;
-
-                    self.drawTopClasses(self.nodeIds, self.currentDepth);
-                });
+                self.loadTopClasses();
             });
+        });
+    };
+    self.loadTopClasses = function () {
+        self.getTopClasses(Lineage_sources.activeSource, {}, function (err, result) {
+            if (err) {
+                alert(err);
+            }
+            self.nodeIds = result.nodeIds;
+            self.currentDepth = result.currentDepth;
+
+            self.drawTopClasses(self.nodeIds, self.currentDepth);
         });
     };
 
@@ -151,22 +153,35 @@ var OntoLay = (function () {
         $("#classesTab").css("display", "none");
         $("#propertiesTab").css("display", "none");
 
+        $("#classesTab").css("display", "none");
+        $("#propertiesTab").css("display", "none");
+        if (!type) {
+            type = self.currentTab;
+        } else {
+            self.currentTab = type;
+        }
+
         if (type == "Class") {
             $("#classesTab").css("display", "block");
             var options = {
                 term: term,
-                searchedSources: true,
+                searchedSources: [Lineage_sources.activeSource],
+                jstreeDiv: "LineageNodesJsTreeDiv",
             };
 
             SearchWidget.searchTermInSources(options);
         } else if (type == "Property") {
             $("#propertiesTab").css("display", "block");
-            Lineage_properties.searchTermInSources(term, true);
-        } else if (type == "Whitboard") {
+            Lineage_properties.searchTermInSources(term, true, false, "property");
+        } else if (type == "Whiteboard") {
             Lineage_whiteboard.graph.searchNode(null, term);
         }
     };
 
+    self.clearAll = function () {
+        Lineage_whiteboard.initUI();
+        self.loadTopClasses();
+    };
     return self;
 })();
 

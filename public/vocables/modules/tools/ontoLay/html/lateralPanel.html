@@ -1,35 +1,45 @@
-<div>
-    <div id="sourcesActionsSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
-        <div id="Title1" class="titleboxButtons font-button1-color"></div>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" title="Restrictions"><img src="./icons/CommonIcons/ModelIcon.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Expand"><img src="./icons/CommonIcons/ExpandIcon.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" title="Parents"><img src="./icons/CommonIcons/ParentIcon.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
-        <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Lineage_whiteboard.initUI()" title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
-        <button class="w3-button slsv-button-3 size-of-button-small" onclick="OntoLay.setHiearchicalLayout()">Hier.</button>
+<div style="margin-left: 10px">
+    <div>
+        <div id="sourcesActionsSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
+            <div id="Title1" class="titleboxButtons font-button1-color"></div>
+            <!--<button class="w3-button slsv-button-1" onclick="OntoLay.loadTopClasses()" title="TopClasses"><img src="./icons/CommonIcons/TopClassesIcon.png" /></button>-->
+            <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" title="Restrictions"><img src="./icons/CommonIcons/ModelIcon.png" /></button>
+            <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Expand"><img src="./icons/CommonIcons/ExpandIcon.png" /></button>
+            <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" title="Parents"><img src="./icons/CommonIcons/ParentIcon.png" /></button>
+            <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>
+            <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
+            <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="OntoLay.clearAll()" title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
+            <button class="w3-button slsv-button-3 size-of-button-small" onclick="OntoLay.setHiearchicalLayout()">Hier.</button>
+        </div>
     </div>
-</div>
 
-<div id="ontoLay_currentabActions">
-    <div class="w3-container">
-        <div class="input-group mb-3" style="width: 100%; height: 30px">
-            <div class="input-group-prepend">
-                <div id="Lineage_classes_moreOptionsButtonOnSearchbar" class="input-group-append">
-                    <div class="SearchButtonIconLeft border-without-raduis-theme1" onclick="Lineage_whiteboard.hideShowMoreOptions(null,'Lineage_MoreClassesOptions')" style="height: 33.5px">
-                        <button class="moreOptions-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-top: 5px; margin-left: 5px"></button>
+    <div id="ontoLay_currentabActions">
+        <div class="w3-container">
+            <div class="input-group mb-3" style="width: 100%; height: 30px">
+                <div class="input-group-prepend">
+                    <div id="Lineage_classes_moreOptionsButtonOnSearchbar" class="input-group-append">
+                        <div class="SearchButtonIconLeft border-without-raduis-theme1" onclick="Lineage_whiteboard.hideShowMoreOptions(null,'Lineage_MoreClassesOptions')" style="height: 33.5px">
+                            <button class="moreOptions-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-top: 5px; margin-left: 5px"></button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <input id="ontolay_searchTermInput" class="border-without-raduis-theme1" autocomplete="off" style="width: 35%; height: 33.5px; border-left: 0px" value="" />
+                <input
+                    id="ontolay_searchTermInput"
+                    class="border-without-raduis-theme1"
+                    autocomplete="off"
+                    style="width: 35%; height: 33.5px; border-left: 0px"
+                    value=""
+                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9){OntoLay.search()}"
+                />
 
-            <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 6px">
-                <button class="" onclick="OntoLay.search('Class')">Class</button>
+                <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 6px">
+                    <button class="slsv-invisible-button" onclick="OntoLay.search('Class')" style="margin-top: 3px">Class</button>
 
-                <button class="" onclick="OntoLay.search('Property')">Prop</button>
+                    <button class="slsv-invisible-button" onclick="OntoLay.search('Property')" style="margin-top: 3px">Prop</button>
 
-                <button class="" onclick="OntoLay.search('Whiteboard')">Whiteboard</button>
-                <!--  <button class="search-icon slsv-invisible-button" onclick="SearchWidget.searchTermInSources()" style="margin-top: 4px; height: 20px; width: 20px"></button>-->
+                    <button class="slsv-invisible-button" onclick="OntoLay.search('Whiteboard')" style="margin-top: 3px">Whiteboard</button>
+                    <!--  <button class="search-icon slsv-invisible-button" onclick="SearchWidget.searchTermInSources()" style="margin-top: 4px; height: 20px; width: 20px"></button>-->
+                </div>
             </div>
         </div>
     </div>

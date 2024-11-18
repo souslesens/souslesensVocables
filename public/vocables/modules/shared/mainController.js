@@ -240,6 +240,9 @@ var MainController = (function () {
         }
 
         if (self.currentTool != null) {
+            if (toolId == "lineage") {
+                Lineage_sources.registerSource = self.oldRegisterSource;
+            }
             if (Config.userTools[self.currentTool].controller.unload) {
                 try {
                     Config.userTools[self.currentTool].controller.unload();
@@ -251,6 +254,7 @@ var MainController = (function () {
         self.currentTool = toolId;
 
         if (toolId != "lineage" && !Config.userTools[toolId].noSource) {
+            self.oldRegisterSource = Lineage_sources.registerSource;
             Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
             $("#Lineage_graphEditionButtons").hide();
         }
@@ -271,11 +275,14 @@ var MainController = (function () {
         } else {
             UI.cleanPage();
             self.initTool(toolId);
-            $("#mainDialogDiv").dialog({
-                close: function () {
-                    UI.homePage();
-                },
-            });
+            if (toolId != "OntoCreator") {
+                $("#mainDialogDiv").dialog({
+                    close: function () {
+                        UI.homePage();
+                    },
+                });
+            }
+
             //Config.userTools[self.currentTool].controller.unload=UI.homePage;
             self.currentSource = null;
         }

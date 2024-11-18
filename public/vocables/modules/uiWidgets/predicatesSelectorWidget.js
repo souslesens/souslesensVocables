@@ -294,7 +294,7 @@ var PredicatesSelectorWidget = (function () {
                             label: classObj.label,
                         });
                     }
-
+                    classes = common.array.sort(classes, "label", "");
                     common.fillSelectOptions(selectId, classes, true, "label", "id");
                 } else {
                     //PromptedSelectWidget

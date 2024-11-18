@@ -399,7 +399,7 @@ var Containers_tree = (function () {
 
     self.listContainerResources = function (container) {
         var source = container.data.source;
-        Containers_query.getContainerDescendants(source, container.data.id, {depth:1}, function (err, result) {
+        Containers_query.getContainerDescendants(source, container.data.id, { depth: 1 }, function (err, result) {
             if (err) {
                 return alert(err.responsetext);
             }

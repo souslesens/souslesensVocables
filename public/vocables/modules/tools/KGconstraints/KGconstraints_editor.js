@@ -52,7 +52,7 @@ var KGconstraints_editor = (function () {
             }
             var params = { source: self.currentSource, model: model, constraintsMap: self.constraintsMap };
 
-         /*  OBSOLETE
+            /*  OBSOLETE
 
             KGconstraintsEditor_bot.start(KGconstraintsEditor_bot.workflow_dataTypePropertyConstraint, params, function (err, result) {
                 if (err) {

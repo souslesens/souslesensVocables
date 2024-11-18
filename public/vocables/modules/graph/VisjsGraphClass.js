@@ -35,10 +35,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         var visjsData = self.data;
         var _options = self.options;
 
-        var improvedLayout=true;
+        var improvedLayout = true;
         //When enabled, the network will use the Kamada Kawai algorithm for initial layout. For networks larger than 100 nodes, ...
-        if(self.data.edges.getIds && self.data.edges.getIds().length>150)
-            improvedLayout=false
+        if (self.data.edges.getIds && self.data.edges.getIds().length > 150) improvedLayout = false;
 
         self.drawingDone = false;
         self.currentContext = { divId: divId, options: _options, callback: callback };
@@ -785,7 +784,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     };
 
     self.searchNode = function (id, word) {
-
         if (!word || word == "") {
             word = $("#visjsGraph_searchInput").val();
             if (word == "") {
@@ -976,10 +974,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                         self.network.fit();
                     } else {
                         // self.draw(context.divId, visjsData, context.options, callback);
-                        self.draw(function(){
-
-                            if(callback)
-                                return callback()
+                        self.draw(function () {
+                            if (callback) return callback();
                             self.network.fit();
                         });
                     }
@@ -991,7 +987,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 if (callback) {
                     return callback(err);
                 }
-                if(err.responseJSON=="file does not exist"){
+                if (err.responseJSON == "file does not exist") {
                     return;
                 }
                 return alert(err);

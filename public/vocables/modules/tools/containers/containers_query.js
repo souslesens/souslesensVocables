@@ -60,33 +60,24 @@ var Containers_query = (function () {
             pathOperator = "{1," + options.depth + "}";
         }
 
-
-
-
-        var query ="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
             "SELECT distinct ?parent  ?member ?parentLabel  ?memberLabel " +
-            "(GROUP_CONCAT( distinct ?memberType;separator=\",\") as ?memberTypes) " +
+            '(GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes) ' +
             fromStr +
-            " WHERE {"+
+            " WHERE {" +
             "  ?root  rdfs:member" +
             pathOperator +
             " ?member.\n" +
-
             "  ?parent rdfs:member ?member .\n" +
             "?member rdf:type ?memberType." +
             "   OPTIONAL{?member rdfs:label ?memberLabel} \n" +
             "   OPTIONAL{?parent rdfs:label ?parentLabel} \n" +
             filter +
-            "} limit 10000 "
+            "} limit 10000 ";
 
-
-
-
-
-
-
-         /*   "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+        /*   "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
             "SELECT distinct ?descendant ?descendantParent ?descendantLabel ?descendantParentLabel " +
             fromStr +

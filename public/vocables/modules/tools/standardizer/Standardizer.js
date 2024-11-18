@@ -196,7 +196,7 @@ var Standardizer = (function () {
                     label: hit._source.label,
                     status: "exactMatch",
                 };
-                if(obj.label.toLowerCase()==entity.label.toLowerCase()) {
+                if (obj.label.toLowerCase() == entity.label.toLowerCase()) {
                     //  entity.status="exactMatch";
                     if (typeof obj === "object") entity.sourceHit = obj;
                     entitiesMap[word][entity.index] = entity;
@@ -1851,7 +1851,7 @@ sortMethod: "hubsize",
             obj.forEach(function (entity) {
                 if (entity == null) return;
                 else {
-                   var line = [self.currentSource, entity.sourceHit ? entity.sourceHit.label : "", entity.sourceHit ? entity.sourceHit.id : ""];
+                    var line = [self.currentSource, entity.sourceHit ? entity.sourceHit.label : "", entity.sourceHit ? entity.sourceHit.id : ""];
                     line.push(entity.index, entity.label, entity.id);
                     dataSet.push(line);
                 }

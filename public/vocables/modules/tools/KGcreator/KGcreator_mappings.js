@@ -447,7 +447,7 @@ tripleObj.objectIsSpecificUri = true;
     };
 
     self.setPredicatesBetweenColumnsInTable = function (columnFromData, columnToData, foreignKey, callback) {
-        OntologyModels.registerSourcesModel(KGcreator.currentSlsvSource, null,function (err, result) {
+        OntologyModels.registerSourcesModel(KGcreator.currentSlsvSource, null, function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }

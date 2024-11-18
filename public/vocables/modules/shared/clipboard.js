@@ -57,7 +57,7 @@ var Clipboard = (function () {
         if (!initialShape) initialShape = "box";
 
         function nodeFlash(nodeId, _stop) {
-         var   stopInterv = _stop; //!!! variable globale
+            var stopInterv = _stop; //!!! variable globale
             setInt = setInterval(function () {
                 if (stopInterv && !hidden && setInt) {
                     clearInterval(setInt);

@@ -168,7 +168,7 @@ var PredicatesSelectorWidget = (function () {
                 callback(null, properties);
             }
         } else {
-            OntologyModels.registerSourcesModel([vocabulary], null,function (err, result) {
+            OntologyModels.registerSourcesModel([vocabulary], null, function (err, result) {
                 properties = OntologyModels.getPropertiesArray(vocabulary);
                 var datatypeProperties = OntologyModels.getAnnotationProperties(vocabulary);
                 properties = properties.concat(datatypeProperties);
@@ -281,7 +281,7 @@ var PredicatesSelectorWidget = (function () {
                 callback();
             }
         } else {
-            OntologyModels.registerSourcesModel([vocabulary], null,function (err, result) {
+            OntologyModels.registerSourcesModel([vocabulary], null, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }

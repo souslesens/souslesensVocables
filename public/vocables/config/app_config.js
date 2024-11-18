@@ -279,7 +279,7 @@ var Config = (function () {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#70309f",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Prescriptive": "#00B5EC",
         },
-        
+
         /*
         "ISO_15926-part-14_PCA": {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#ED008C",
@@ -309,7 +309,6 @@ var Config = (function () {
             "http://purl.obolibrary.org/obo/BFO_0000203": "#70309f",
             "http://purl.obolibrary.org/obo/BFO_0000015": "#70309f",
             "http://purl.obolibrary.org/obo/BFO_0000008": "#70309f",
-
         },
 
         BFO: {
@@ -326,35 +325,26 @@ var Config = (function () {
         },
 
         DOLCE: {
-"http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Event":"#70309f",
-           "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Quality" :"#a8da83",
-            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Quality" :"#a8da83",
-            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Situation" :"#efbf00",
-            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Object" :"#00AFEF",
-            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Abstract" :"#eab3b3",
+            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Event": "#70309f",
+            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Quality": "#a8da83",
+            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Quality": "#a8da83",
+            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Situation": "#efbf00",
+            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Object": "#00AFEF",
+            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Abstract": "#eab3b3",
         },
 
         IDO: {
-
             "http://rds.posccaesar.org/ontology/lis14/rdl/Object": "#00B5EC",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Potential": "#efbf00",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Quality": "#a8da83",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#70309f",
         },
         "IDO-3": {
-
             "http://rds.posccaesar.org/ontology/lis14/rdl/Object": "#00B5EC",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Potential": "#efbf00",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Quality": "#a9e87b",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#b96af4",
         },
-
-
-
-
-
-
-
     };
     self.lessIconsFileNames = {
         "@arrow-icon": "caret-right",

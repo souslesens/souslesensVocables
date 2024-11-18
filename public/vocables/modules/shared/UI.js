@@ -96,7 +96,8 @@ var UI = (function () {
 
         const selector = document.getElementById("toolsSelect");
         if (selector !== null) {
-            Config.tools_available.forEach((tool) => {
+            const tools = Config.tools_available || [];
+            tools.forEach((tool) => {
                 if (tool in Config.userTools) {
                     let rowLogo = document.createElement("div");
                     rowLogo.setAttribute("class", `${tool}-logo`);

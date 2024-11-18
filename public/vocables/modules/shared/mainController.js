@@ -172,7 +172,7 @@ var MainController = (function () {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
                         // return callbackSeries();
 
-                        OntologyModels.registerSourcesModel(sources, null,function (err) {
+                        OntologyModels.registerSourcesModel(sources, null, function (err) {
                             callbackSeries(err);
                         });
                     },
@@ -205,7 +205,7 @@ var MainController = (function () {
         self.initControllers();
         Clipboard.clear();
         Lineage_sources.loadedSources = {};
-      /*  if(!Config.userTools[toolId].controller)
+        /*  if(!Config.userTools[toolId].controller)
             Config.userTools[toolId].controller= window[toolId]*/
         if (Config.userTools[toolId].controller.onLoaded) {
             Config.userTools[toolId].controller.onLoaded();
@@ -232,9 +232,9 @@ var MainController = (function () {
                 if (clickedElement.id == "toolsSelect") {
                     return;
                 } else if (clickedElement.innerHTML) {
-                     toolId = clickedElement.innerHTML;
+                    toolId = clickedElement.innerHTML;
                 } else {
-                     toolId = clickedElement.nextSibling.innerHTML;
+                    toolId = clickedElement.nextSibling.innerHTML;
                 }
             }
         }
@@ -252,12 +252,12 @@ var MainController = (function () {
 
         if (toolId != "lineage" && !Config.userTools[toolId].noSource) {
             Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
-            $('#Lineage_graphEditionButtons').hide();
+            $("#Lineage_graphEditionButtons").hide();
         }
-        $("#currentToolTitle").html('');
+        $("#currentToolTitle").html("");
         if (UI.currentTheme["@" + toolId + "-logo"]) {
             $("#currentToolTitle").prepend(`<button class="${toolId}-logo slsv-invisible-button" style="height:41px;width:41px;">`);
-        }else{
+        } else {
             $("#currentToolTitle").html(toolId);
         }
         MainController.currentTool = toolId;
@@ -271,6 +271,7 @@ var MainController = (function () {
         } else {
             UI.cleanPage();
             self.initTool(toolId);
+<<<<<<< HEAD
             if(toolId!='OntoCreator'){
                 $("#mainDialogDiv").dialog({
                     close: function () {
@@ -279,6 +280,13 @@ var MainController = (function () {
                 });
             }
            
+=======
+            $("#mainDialogDiv").dialog({
+                close: function () {
+                    UI.homePage();
+                },
+            });
+>>>>>>> origin/master
             //Config.userTools[self.currentTool].controller.unload=UI.homePage;
             self.currentSource = null;
         }

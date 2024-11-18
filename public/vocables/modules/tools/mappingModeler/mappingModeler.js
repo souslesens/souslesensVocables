@@ -164,7 +164,7 @@ var MappingModeler = (function () {
                 self.drawGraphCanvas(self.graphDiv, visjsData, function () {
                     callbackSeries();
                 });
-                $('#mappingModeler_newAxiomPanel').hide();
+                $("#mappingModeler_newAxiomPanel").hide();
             },
         ]);
     };
@@ -286,7 +286,7 @@ var MappingModeler = (function () {
                     columns: columns,
                 };
                 self.loadSuggestionSelectJstree(columns, "Columns");
-                $('#mappingModeler_newAxiomPanel').show();
+                $("#mappingModeler_newAxiomPanel").show();
                 //common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false);
             });
             self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
@@ -302,7 +302,7 @@ var MappingModeler = (function () {
             self.hideForbiddenResources("Table");
             self.currentResourceType = "Column";
             self.loadSuggestionSelectJstree(self.currentTable.columns, "Columns");
-            $('#mappingModeler_newAxiomPanel').show();
+            $("#mappingModeler_newAxiomPanel").show();
             //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         }
         self.currentDataSource = KGcreator.currentConfig.currentDataSource?.name;
@@ -901,8 +901,7 @@ var MappingModeler = (function () {
                     }
                 });
                 self.allClasses.forEach(function (item) {
-                    if(item.source)
-                    item.label = item.source.substring(0, 3) + ":" + item.label;
+                    if (item.source) item.label = item.source.substring(0, 3) + ":" + item.label;
                 });
                 self.allClasses = common.array.sort(self.allClasses, "label");
                 common.array.sort(self.allClasses, "label");
@@ -1802,9 +1801,8 @@ var MappingModeler = (function () {
                 newData.push(node);
             }
         });
-       
+
         JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", newData);
-        
     };
     self.mappingToKGcreator = function () {
         var currentMappings = self.generateBasicContentMappingContent();

@@ -14,7 +14,7 @@ var SearchWidget = (function () {
     var self = {};
 
     self.init = function () {
-       /* if (Config.ontologiesVocabularyModels[Lineage_sources.activeSource] && Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classesCount <= Config.ontologyModelMaxClasses) {
+        /* if (Config.ontologiesVocabularyModels[Lineage_sources.activeSource] && Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classesCount <= Config.ontologyModelMaxClasses) {
             var classes = [];
             for (var classId in Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classes) {
                 var classObj = Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classes[classId];
@@ -42,12 +42,12 @@ var SearchWidget = (function () {
      *  -contextMenufn
      *
      */
-    self.searchTermInSources = function (options,callback) {
+    self.searchTermInSources = function (options, callback) {
         if (!options) {
             options = {};
         }
 
-      //  var classFilter = $("#GenericTools_searchAllClassSelect").val();
+        //  var classFilter = $("#GenericTools_searchAllClassSelect").val();
 
         $("#sourcesSelectionDialogdiv").dialog("close");
 
@@ -58,7 +58,7 @@ var SearchWidget = (function () {
             term = $("#searchWidget_searchTermInput").val();
         }
         if (!term) {
-          /*  if (false  && !classFilter) {
+            /*  if (false  && !classFilter) {
                 return alert("nothing to search");
             }*/
             term = "*";
@@ -156,7 +156,7 @@ var SearchWidget = (function () {
 
         options.parentlabels = true;
 
-     /*   if (classFilter) {
+        /*   if (classFilter) {
             options.classFilter = classFilter;
         }*/
         if (searchAllLabels) {
@@ -165,29 +165,25 @@ var SearchWidget = (function () {
 
         SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
             if (_err) {
-                if(callback) {
-                    return callback(_err.responseText || _err)
+                if (callback) {
+                    return callback(_err.responseText || _err);
                 }
                 return alert(_err.responseText || _err);
             }
 
-            if(callback){
-                return callback(null,result)
+            if (callback) {
+                return callback(null, result);
             }
             if (Object.keys(result[0].matches).length == 0) {
                 return $("#" + (options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>");
             }
 
-
-                self.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
-                    if (err) {
-                        return alert(err.responseText || err);
-                    }
-                });
-
-
+            self.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
+                if (err) {
+                    return alert(err.responseText || err);
+                }
+            });
         });
-
     };
 
     self.searchResultToJstree = function (targetDiv, result, _options, _callback) {

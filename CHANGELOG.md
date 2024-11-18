@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.91.1](https://github.com/souslesens/souslesensVocables/compare/1.91.0...1.91.1) (2024-11-18)
+
+
+### Bug Fixes
+
+* **public:** use an empty list for the selector when the config is missing ([7884c3d](https://github.com/souslesens/souslesensVocables/commit/7884c3dfee40ec1efc7dbd75829c0e2bc521863c))
+
+## [1.91.0](https://github.com/souslesens/souslesensVocables/compare/1.90.0...1.91.0) (2024-11-18)
+
+
+### Features
+
+* **express:** use zod to validate the mainConfig.json at startup ([31f98d1](https://github.com/souslesens/souslesensVocables/commit/31f98d121923686839f4ee4f0cb73d0ad79b23b0))
+* **mainapp:** update ElasticSearch indexes when uploading a graph ([5ebd876](https://github.com/souslesens/souslesensVocables/commit/5ebd8763ce3c580a777f0815bb427678fec2e90e))
+* optional entries in mainconfig ([b9566f5](https://github.com/souslesens/souslesensVocables/commit/b9566f52e846bc7b7fb32ba7e6e8733374aa94ae))
+* **public/vocables:** sort tools selector from the tools_available field ([37f7494](https://github.com/souslesens/souslesensVocables/commit/37f749430456c38fa6854fb52bbf31d14f536286))
+* strict mainconfig validation ([db19adf](https://github.com/souslesens/souslesensVocables/commit/db19adf63e38dd6030c23c7439cbaad9809240ea))
+
+
+### Bug Fixes
+
+* **configEditor:** SourcesDialog: prefix must be uniq ([99cab17](https://github.com/souslesens/souslesensVocables/commit/99cab170faf1e988ed608c8fb2f01be7e2a71163))
+* **mainapp:** ensure to checkout the plugin repository with an empty version ([f6e7b0b](https://github.com/souslesens/souslesensVocables/commit/f6e7b0b821eea47b19d697a51693b5110047d572))
+* **mainapp:** show the reason of the error when a plugin cannot be fetched ([2a6c0da](https://github.com/souslesens/souslesensVocables/commit/2a6c0daf4776f7e6a9f94d176b60382686dffde6))
+
 ## [1.90.0](https://github.com/souslesens/souslesensVocables/compare/1.89.0...1.90.0) (2024-10-22)
 
 

@@ -1023,18 +1023,16 @@ if (callback) return callback(err);
 
         return result;
     };
-    self.getRestrictionCardinalityLabel=function(type, value) {
-        var str = ""
-        if (type &&type.indexOf("ardinality") > -1 &&  value) {
+    self.getRestrictionCardinalityLabel = function (type, value) {
+        var str = "";
+        if (type && type.indexOf("ardinality") > -1 && value) {
+            var typeStr = Sparql_common.getLabelFromURI(type).toLowerCase().replace("cardinality", "");
+            var valueStr = value.split("^")[0];
+            str = typeStr + " " + valueStr;
+        }
 
-        var typeStr = Sparql_common.getLabelFromURI(type).toLowerCase().replace("cardinality", "")
-        var valueStr = value.split("^")[0]
-        str = typeStr + " " + valueStr
-    }
-
-        return str
-    }
-
+        return str;
+    };
 
     return self;
 })();

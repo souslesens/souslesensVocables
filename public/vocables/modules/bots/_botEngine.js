@@ -196,13 +196,13 @@ var _botEngine = (function () {
 
     self.end = function (dontCallBack) {
         self.currentBot.params.queryText = self.getQueryText();
-       self.closeDialog()
-        if ( !dontCallBack && self.currentBot.callbackFn) {
+        self.closeDialog();
+        if (!dontCallBack && self.currentBot.callbackFn) {
             return self.currentBot.callbackFn();
         }
     };
 
-    self.closeDialog=function(){
+    self.closeDialog = function () {
         if (self.divId) {
             /*  var dialogWindow = $("#" + self.divId)
                   .parents()
@@ -212,7 +212,7 @@ var _botEngine = (function () {
         } else {
             $("#botPanel").dialog("close");
         }
-    }
+    };
 
     self.setStepMessage = function (step) {
         if (self.currentBot.functionTitles) {

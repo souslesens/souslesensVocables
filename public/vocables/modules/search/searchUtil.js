@@ -177,13 +177,13 @@ indexes.push(source.toLowerCase());
                                         if (!matches[source]) {
                                             matches[source] = [];
                                         }
-                                        if(!options.type  || toHit._source.type.indexOf(options.type)>-1) {
+                                        if (!options.type || toHit._source.type.indexOf(options.type) > -1) {
                                             matches[source].push({
                                                 source: source,
                                                 id: toHit._source.id,
                                                 label: toHit._source.label,
                                                 parents: toHit._source.parents,
-                                                type: toHit._source.type
+                                                type: toHit._source.type,
                                             });
                                         }
                                         var parentsArray = toHit._source.parents;
@@ -245,14 +245,12 @@ indexes.push(source.toLowerCase());
                                             allClassesArray.parentIdsLabelsMap = parentsMap;
                                             return callbackSeries();
                                         })
-                                        .catch((e) =>{
-                                            console.log(e)
-                                            callbackSeries(e)}
-                                        );
-
+                                        .catch((e) => {
+                                            console.log(e);
+                                            callbackSeries(e);
+                                        });
                                 })
-                                .catch((e) =>
-                                    callbackSeries(e));
+                                .catch((e) => callbackSeries(e));
                         },
                     ],
 
@@ -523,7 +521,7 @@ indexes.push(source.toLowerCase());
 
         var withImports = $("#admin_refreshIndexWithImportCBX").prop("checked");
         options.withoutImports = true;
-        options.parentsTopDown=true
+        options.parentsTopDown = true;
         var sources = [sourceLabel];
         if (withImports) {
             sources = sources.concat(Config.sources[sourceLabel].imports || []);
@@ -725,7 +723,7 @@ indexes.push(source.toLowerCase());
     self.addObjectsToIndex = function (sourceLabel, ids, callback) {
         var filter = " filter (?subject =<" + self.currentNodeId + ">) ";
         filter = Sparql_common.setFilter("subject", ids);
-        Sparql_generic.getSourceTaxonomy(sourceLabel, { filter: filter,withoutImports:true,parentsTopDown:true }, function (err, result) {
+        Sparql_generic.getSourceTaxonomy(sourceLabel, { filter: filter, withoutImports: true, parentsTopDown: true }, function (err, result) {
             var classesArray = [];
             for (var key in result.classesMap) {
                 classesArray.push(result.classesMap[key]);

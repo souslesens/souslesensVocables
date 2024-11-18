@@ -1,7 +1,6 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axiom_activeLegend from "./axiom_activeLegend.js";
 
-
 var Axioms_graph = (function () {
     var self = {};
 

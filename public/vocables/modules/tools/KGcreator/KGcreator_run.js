@@ -21,7 +21,7 @@ var KGcreator_run = (function () {
         }
         selectedText = selectedText.replace(/[\r\n]/g, "");
 
-        if (selectedText.indexOf("\"s\":")<0 || selectedText.indexOf("\"p\":")<0 || selectedText.indexOf("\"o\":")<0) {
+        if (selectedText.indexOf('"s":') < 0 || selectedText.indexOf('"p":') < 0 || selectedText.indexOf('"o":') < 0) {
             KGcreator_mappings.currentMappingsSelection = null;
             return null;
         }

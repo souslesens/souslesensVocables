@@ -393,16 +393,13 @@ var Export = (function () {
             //$("#" + div).dialog("open");
         }
 
+        var width = "97%";
+        if (options.width) width = options.width;
+        var height = "75vh";
+        if (options.height) height = options.height;
 
-        var width="97%"
-        if(options.width)
-            width= options.width
-        var height="75vh"
-        if(options.height)
-            height= options.height
-
-        $("#" + div).html("<div style='width: "+width+";height:"+height+"'> <table class='cell-border' id='dataTableDivExport'></table></div>");
-      //  $("#" + div).html("<div style='width: 97%;height:75vh'> <table class='cell-border' id='dataTableDivExport'></table></div>");
+        $("#" + div).html("<div style='width: " + width + ";height:" + height + "'> <table class='cell-border' id='dataTableDivExport'></table></div>");
+        //  $("#" + div).html("<div style='width: 97%;height:75vh'> <table class='cell-border' id='dataTableDivExport'></table></div>");
 
         if (!buttons) {
             buttons = "Bfrtip";

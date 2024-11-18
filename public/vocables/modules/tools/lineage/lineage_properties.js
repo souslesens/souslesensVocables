@@ -41,7 +41,7 @@ var Lineage_properties = (function () {
                 action: function (_e) {
                     // pb avec source
 
-                    NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv", {resetVisited: 1}, function (_err, _result) {
+                    NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv", { resetVisited: 1 }, function (_err, _result) {
                         // pass
                     });
                 },
@@ -91,7 +91,7 @@ var Lineage_properties = (function () {
     };
 
     self.openNode = function (node) {
-        var options = {subPropIds: node.data.id};
+        var options = { subPropIds: node.data.id };
         UI.message("searching in " + node.data.source);
         // @ts-ignore
         Sparql_OWL.getObjectPropertiesDomainAndRange(node.data.source, null, options, function (err, result) {
@@ -192,7 +192,7 @@ var Lineage_properties = (function () {
                 function (callbackSeries) {
                     return callbackSeries(null);
 
-                    options = {distinct: "?prop ?Label"};
+                    options = { distinct: "?prop ?Label" };
                     Sparql_OWL.getFilteredTriples(source, null, null, null, options, function (err, result) {
                         if (err) {
                             return callback(err);
@@ -252,7 +252,7 @@ var Lineage_properties = (function () {
                 alert(err.responseText);
                 return UI.message(err.responseText, true);
             }
-            var visjsData = {nodes: [], edges: []};
+            var visjsData = { nodes: [], edges: [] };
 
             var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             var isNewGraph = true;
@@ -286,7 +286,7 @@ var Lineage_properties = (function () {
                         id: item.restriction.value,
                         label: item.sourceClassLabel.value + (item.targetClassLabel ? " -> " + item.targetClassLabel.value : " -> any"),
                         shape: "box",
-                        font: {background: "#ddd"},
+                        font: { background: "#ddd" },
                         //  size: Lineage_whiteboard.defaultShapeSize,
                         // color: color,
                         data: {
@@ -304,7 +304,7 @@ var Lineage_properties = (function () {
                             id: edgeId,
                             from: item.prop.value,
                             to: item.restriction.value,
-                            data: {restrictionId: item.restriction.value, propertyId: item.prop.value, source: source},
+                            data: { restrictionId: item.restriction.value, propertyId: item.prop.value, source: source },
 
                             arrows: {
                                 to: {
@@ -328,7 +328,7 @@ var Lineage_properties = (function () {
                             label: item.propLabel.value,
                             from: item.sourceClass.value,
                             to: item.targetClass.value,
-                            data: {restrictionId: item.restriction.value, propertyId: item.prop.value, source: source},
+                            data: { restrictionId: item.restriction.value, propertyId: item.prop.value, source: source },
 
                             arrows: {
                                 to: {
@@ -439,7 +439,7 @@ var Lineage_properties = (function () {
 
             result = result.concat(inversePropsItems);
 
-            var visjsData = {nodes: [], edges: []};
+            var visjsData = { nodes: [], edges: [] };
             var existingNodes = {};
             if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes) {
                 existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
@@ -487,7 +487,7 @@ var Lineage_properties = (function () {
                         size: self.defaultShapeSize,
                         color: propColor,
                         shape: propShape,
-                        font: {color: "blue", size: 12},
+                        font: { color: "blue", size: 12 },
                     });
                 }
                 if (item.subProperties) {
@@ -503,7 +503,7 @@ var Lineage_properties = (function () {
                                     subProperties: [],
                                     source: Lineage_sources.activeSource,
                                 },
-                                font: {color: "blue", size: 12},
+                                font: { color: "blue", size: 12 },
                                 size: self.defaultShapeSize,
                                 color: propColor,
                                 shape: propShape,
@@ -516,7 +516,7 @@ var Lineage_properties = (function () {
                                 id: edgeId,
                                 from: item.property.value,
                                 to: subProperty.id,
-                                data: {id: edgeId, source: Lineage_sources.activeSource},
+                                data: { id: edgeId, source: Lineage_sources.activeSource },
                                 color: Lineage_whiteboard.defaultEdgeColor,
                                 arrows: {
                                     from: {
@@ -544,7 +544,7 @@ var Lineage_properties = (function () {
                                 subProperties: [],
                                 source: Lineage_sources.activeSource,
                             },
-                            font: {color: "blue", size: 12},
+                            font: { color: "blue", size: 12 },
                             size: self.defaultShapeSize,
                             color: propColor,
                             shape: propShape,
@@ -558,7 +558,7 @@ var Lineage_properties = (function () {
                             from: item.property.value,
                             to: subProperty,
                             color: Lineage_whiteboard.defaultEdgeColor,
-                            data: {id: edgeId, source: Lineage_sources.activeSource},
+                            data: { id: edgeId, source: Lineage_sources.activeSource },
                             arrows: {
                                 from: {
                                     enabled: true,
@@ -572,7 +572,7 @@ var Lineage_properties = (function () {
 
                 if (item.range) {
                     if (!existingNodes[item.range.value]) {
-                        allNodeIds.push({id: item.range.value});
+                        allNodeIds.push({ id: item.range.value });
                         if (item.rangeType) {
                             if (item.rangeType.value.indexOf("Class") > -1) {
                                 shape = Lineage_whiteboard.defaultShape;
@@ -604,8 +604,8 @@ var Lineage_properties = (function () {
                             from: item.property.value,
                             to: item.range.value,
                             label: "R",
-                            font: {size: 12, color: "#cb6601"},
-                            data: {id: edgeId, source: Lineage_sources.activeSource},
+                            font: { size: 12, color: "#cb6601" },
+                            data: { id: edgeId, source: Lineage_sources.activeSource },
                             color: "#cb6601",
                             arrows: {
                                 to: {
@@ -619,7 +619,7 @@ var Lineage_properties = (function () {
                 }
                 if (item.domain) {
                     if (!existingNodes[item.domain.value]) {
-                        allNodeIds.push({id: item.domain.value});
+                        allNodeIds.push({ id: item.domain.value });
                         existingNodes[item.domain.value] = 1;
                         var shape = "text";
                         if (item.domainType) {
@@ -653,8 +653,8 @@ var Lineage_properties = (function () {
                             to: item.domain.value,
                             color: "#008000",
                             label: "D",
-                            font: {size: 12, color: "#008000"},
-                            data: {id: edgeId, source: Lineage_sources.activeSource},
+                            font: { size: 12, color: "#008000" },
+                            data: { id: edgeId, source: Lineage_sources.activeSource },
                             arrows: {
                                 to: {
                                     enabled: true,
@@ -667,7 +667,7 @@ var Lineage_properties = (function () {
                 }
                 if (item.range) {
                     if (!existingNodes[item.range.value]) {
-                        allNodeIds.push({id: item.range.value});
+                        allNodeIds.push({ id: item.range.value });
                         shape = "text";
                         if (item.rangeType) {
                             if (item.rangeType.value.indexOf("Class") > -1) {
@@ -701,8 +701,8 @@ var Lineage_properties = (function () {
                             to: item.range.value,
                             color: "#cb6601",
                             label: "R",
-                            font: {size: 12, color: "#cb6601"},
-                            data: {id: edgeId, source: Lineage_sources.activeSource},
+                            font: { size: 12, color: "#cb6601" },
+                            data: { id: edgeId, source: Lineage_sources.activeSource },
                             arrows: {
                                 to: {
                                     enabled: true,
@@ -740,7 +740,7 @@ var Lineage_properties = (function () {
                             from: item.property.value,
                             to: item.inverseProperty.value,
                             color: "#0067bb",
-                            data: {id: edgeId, source: Lineage_sources.activeSource},
+                            data: { id: edgeId, source: Lineage_sources.activeSource },
                             dashes: true,
                         });
                     }
@@ -820,22 +820,22 @@ var Lineage_properties = (function () {
                 }
 
                 allProps.forEach(function (item) {
-                    item.property = {value: item.prop};
-                    item.propertyLabel = {value: item.propLabel};
-                    item.domain = {value: item.domain};
-                    item.domainLabel = {value: item.domainLabel};
-                    item.range = {value: item.range};
-                    item.rangeLabel = {value: item.rangeLabel};
-                    item.subProperty = {value: item.subProp};
-                    item.subPropertyLabel = {value: item.subPropLabel};
-                    item.inverseProperty = {value: item.inverseProp};
+                    item.property = { value: item.prop };
+                    item.propertyLabel = { value: item.propLabel };
+                    item.domain = { value: item.domain };
+                    item.domainLabel = { value: item.domainLabel };
+                    item.range = { value: item.range };
+                    item.rangeLabel = { value: item.rangeLabel };
+                    item.subProperty = { value: item.subProp };
+                    item.subPropertyLabel = { value: item.subPropLabel };
+                    item.inverseProperty = { value: item.inverseProp };
                     item.subProperties = [];
                     item.subProps.forEach(function (subPropId) {
                         if (result[subPropId]) {
-                            item.subProperties.push({id: subPropId, label: result[subPropId].propLabel});
+                            item.subProperties.push({ id: subPropId, label: result[subPropId].propLabel });
                         }
                     });
-                    item.inversePropertyLabel = {value: item.inversePropLabel};
+                    item.inversePropertyLabel = { value: item.inversePropLabel };
                 });
 
                 return callback(null, allProps);
@@ -848,10 +848,10 @@ var Lineage_properties = (function () {
                 }
 
                 result.forEach(function (item) {
-                    item.range = {value: item.object.value};
-                    item.rangeLabel = {value: item.objectLabel.value};
-                    item.domain = {value: item.subject.value};
-                    item.domainLabel = {value: item.subjectLabel.value};
+                    item.range = { value: item.object.value };
+                    item.rangeLabel = { value: item.objectLabel.value };
+                    item.domain = { value: item.subject.value };
+                    item.domainLabel = { value: item.subjectLabel.value };
                 });
                 return callback(null, result);
             });
@@ -867,14 +867,12 @@ var Lineage_properties = (function () {
         },
     };
 
-    self.searchTermInSources = function (term,inCurrentSource, exactMatch, searchType) {
-
-       if(!term)
-        term = $("#LineageProperties_searchAllSourcesTermInput").val();
+    self.searchTermInSources = function (term, inCurrentSource, exactMatch, searchType) {
+        if (!term) term = $("#LineageProperties_searchAllSourcesTermInput").val();
         if (!exactMatch) {
             exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked");
         }
-        var searchAllSources=false
+        var searchAllSources = false;
         if (!inCurrentSource) {
             searchAllSources = $("#LineageProperties_searchInAllSources").prop("checked");
         }
@@ -949,7 +947,7 @@ var Lineage_properties = (function () {
                                 text: text,
                                 type: "Source",
                                 parent: "#",
-                                data: {source: sourceLabel}
+                                data: { source: sourceLabel },
                             });
                         }
 
@@ -1030,7 +1028,7 @@ var Lineage_properties = (function () {
                     var domainsRow = [""];
                     classes.forEach(function (aClass1, index1) {
                         let class1Label = Sparql_common.getLabelFromURI(aClass1);
-                        cols.push({title: class1Label, defaultContent: ""});
+                        cols.push({ title: class1Label, defaultContent: "" });
 
                         let row = [];
                         var cell = "";
@@ -1058,15 +1056,14 @@ var Lineage_properties = (function () {
                         dataSet.push(row);
                     });
                     dataSet.splice(0, 0, domainsRow);
-                    cols.splice(0, 0, {title: "any", defaultContent: ""});
+                    cols.splice(0, 0, { title: "any", defaultContent: "" });
                     let x = dataSet;
                     Export.showDataTable(null, cols, dataSet);
                     return callbackSeries();
                 },
             ],
 
-            function (err) {
-            }
+            function (err) {}
         );
     };
 
@@ -1114,19 +1111,19 @@ var Lineage_properties = (function () {
                 return alert("You must select properties or nodes to show predicates");
             }
             if (target == "visj") {
-                Lineage_whiteboard.drawPredicatesGraph(source, nodeIds, properties, {withoutImports: true});
+                Lineage_whiteboard.drawPredicatesGraph(source, nodeIds, properties, { withoutImports: true });
             } else if (target == "table") {
                 //  Lineage_whiteboard.graphNodeNeighborhood(data, "outcoming", function(err, result) {
             }
         } else if (action == "restrictions") {
             if (target == "visj") {
-                Lineage_properties.drawObjectPropertiesRestrictions(source, nodeIds, properties, {withoutImports: true});
+                Lineage_properties.drawObjectPropertiesRestrictions(source, nodeIds, properties, { withoutImports: true });
             } else if (target == "table") {
-                Lineage_properties.drawObjectPropertiesRestrictions(source, nodeIds, properties, {withoutImports: true});
+                Lineage_properties.drawObjectPropertiesRestrictions(source, nodeIds, properties, { withoutImports: true });
             }
         } else if (action == "rangesAndDomains") {
             if (target == "visj") {
-                self.drawRangeAndDomainsGraph(source, nodeIds, {withoutImports: true}, properties);
+                self.drawRangeAndDomainsGraph(source, nodeIds, { withoutImports: true }, properties);
             } else if (target == "table") {
                 self.exportRangeAndDomainsGraph(source, nodeIds, properties);
             }

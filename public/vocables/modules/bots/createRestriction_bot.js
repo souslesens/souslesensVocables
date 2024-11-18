@@ -5,7 +5,6 @@ import Lineage_createRelation from "../tools/lineage/lineage_createRelation.js";
 import common from "../shared/common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
-
 var CreateRestriction_bot = (function () {
     var self = {};
     self.title = "Create Resource";
@@ -13,46 +12,36 @@ var CreateRestriction_bot = (function () {
     self.start = function (workflow, params, callback) {
         _botEngine.startParams = _botEngine.fillStartParams(arguments);
         self.callbackFn = callback;
-        self.params = params
+        self.params = params;
         if (!workflow) {
             workflow = self.workflow;
         }
         _botEngine.init(CreateRestriction_bot, workflow, null, function () {
-
             _botEngine.nextStep();
         });
     };
 
-
     self.workflow = {
-
-                    listVocabsFn: {
-                        listTargetClassFn: {
-                            showValueRestictionWidgetFn: {
-
-                            }
-                        }
-                    }
-                }
-
-
+        listVocabsFn: {
+            listTargetClassFn: {
+                showValueRestictionWidgetFn: {},
+            },
+        },
+    };
 
     self.workflowChooseConstraintTypeFn = {
         chooseConstraintTypeFn: {
-            processConstraintTypeFn: {}
-
-        }
-    }
-
+            processConstraintTypeFn: {},
+        },
+    };
 
     self.workflowChooseCardinalityFn = {
         chooseCardinalityTypeFn: {
             promptCardinalityNumberFn: {
-                saveCardinalityRestrictionFn: {}
-            }
-        }
-    }
-
+                saveCardinalityRestrictionFn: {},
+            },
+        },
+    };
 
     self.functionTitles = {
         _OR: "Select an option",
@@ -64,16 +53,13 @@ var CreateRestriction_bot = (function () {
         chooseCardinalityTypeFn: "choose cardinality type",
         promptCardinalityNumberFn: " enter cardinality value",
         chooseConstraintTypeFn: "choose cardinality type",
-
-
     };
 
     self.functions = {
         listRestrictionsTypesFn: function () {
             var choices = [
-                {id: "CardinalityRestriction", label: "CardinalityRestriction"},
-                {id: "ValueRestriction", label: "ValueRestriction"},
-
+                { id: "CardinalityRestriction", label: "CardinalityRestriction" },
+                { id: "ValueRestriction", label: "ValueRestriction" },
             ];
             _botEngine.showList(choices, "resourceType");
         },
@@ -81,7 +67,6 @@ var CreateRestriction_bot = (function () {
         listVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(self.params.source, "currentVocab");
         },
-
 
         listTargetClassFn: function () {
             CommonBotFunctions.listVocabClasses(self.params.currentVocab, "targetClassUri", true);
@@ -92,41 +77,35 @@ var CreateRestriction_bot = (function () {
 
         chooseCardinalityTypeFn: function () {
             var choices = [
-                {id: "owl:maxCardinality", label: "owl:maxCardinality"},
-                {id: "owl:minCardinality", label: "owl:minCardinality"},
-                {id: "owl:cardinality", label: "owl:cardinality"},
-
+                { id: "owl:maxCardinality", label: "owl:maxCardinality" },
+                { id: "owl:minCardinality", label: "owl:minCardinality" },
+                { id: "owl:cardinality", label: "owl:cardinality" },
             ];
             _botEngine.showList(choices, "cardinalityType");
         },
         chooseConstraintTypeFn: function () {
             var choices = [
-                {id: "owl:someValuesFrom", label: "owl:someValuesFrom"},
-                {id: "owl:allValuesFrom ", label: "owl:allValuesFrom "},
-                {id: "owl:hasValue ", label: "owl:hasValue "},
-                {id: "owl:maxCardinality", label: "owl:maxCardinality"},
-                {id: "owl:maxCardinality", label: "owl:maxCardinality"},
-                {id: "owl:minCardinality", label: "owl:minCardinality"},
-                {id: "owl:cardinality", label: "owl:cardinality"},
-
+                { id: "owl:someValuesFrom", label: "owl:someValuesFrom" },
+                { id: "owl:allValuesFrom ", label: "owl:allValuesFrom " },
+                { id: "owl:hasValue ", label: "owl:hasValue " },
+                { id: "owl:maxCardinality", label: "owl:maxCardinality" },
+                { id: "owl:maxCardinality", label: "owl:maxCardinality" },
+                { id: "owl:minCardinality", label: "owl:minCardinality" },
+                { id: "owl:cardinality", label: "owl:cardinality" },
             ];
             _botEngine.showList(choices, "constraintType");
         },
         promptCardinalityNumberFn: function () {
-            _botEngine.promptValue("enter Cardinality value", "cardinalityValue")
-
-
+            _botEngine.promptValue("enter Cardinality value", "cardinalityValue");
         },
-
 
         saveCardinalityRestrictionFn: function () {
             if (!self.params.constraintType && !self.params.cardinalityType) {
-                return _botEngine.end()
+                return _botEngine.end();
             }
             if (!self.params.cardinalityValue) {
-                return _botEngine.end()
+                return _botEngine.end();
             }
-
 
             self.saveCardinalityRestriction(
                 self.params.source,
@@ -136,13 +115,12 @@ var CreateRestriction_bot = (function () {
                 self.params.cardinalityValue,
                 function (err, result) {
                     if (err) {
-                        _botEngine.abort(err.responseText || err)
+                        _botEngine.abort(err.responseText || err);
                     }
                     //add manchester to Axioms JSTree
-                    _botEngine.end()
-                })
-
-
+                    _botEngine.end();
+                }
+            );
         },
 
         showValueRestictionWidgetFn: function () {
@@ -152,15 +130,12 @@ var CreateRestriction_bot = (function () {
                 to: {
                     id: self.params.targetClassUri,
                     label: Sparql_common.getLabelFromURI(self.params.targetClassUri),
-                    source: self.params.currentVocab
-
-                }
-
-
-            }
-            _botEngine.closeDialog()
-            Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData,self.callbackFn)
-           /*     Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
+                    source: self.params.currentVocab,
+                },
+            };
+            _botEngine.closeDialog();
+            Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, self.callbackFn);
+            /*     Lineage_createRelation.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
              if (err) {
                     _botEngine.abort(err.responseText || err)
                 }
@@ -168,68 +143,57 @@ var CreateRestriction_bot = (function () {
 
                 _botEngine.end(true)
             })*/
-        }
+        },
 
-        , processConstraintTypeFn: function () {
+        processConstraintTypeFn: function () {
             var constraintType = self.params.constraintType;
 
             if (constraintType.indexOf("ardinality") > -1) {
                 _botEngine.promptValue("enter Cardinality value", "cardinalityValue", "", null, function (cardinality) {
                     if (!cardinality) {
-                        return _botEngine.end()
+                        return _botEngine.end();
                     }
                     self.params.cardinality = cardinality;
-                    _botEngine.end()
-                   // self.functions.saveCardinalityRestrictionFn()
-
-                })
+                    _botEngine.end();
+                    // self.functions.saveCardinalityRestrictionFn()
+                });
             } else {
-
                 //return  self.params.constraintType
-                _botEngine.end()
+                _botEngine.end();
             }
-
-        }
-
-
+        },
     };
 
-
     self.saveCardinalityRestriction = function (source, subClassUri, propertyUri, cardinalityType, value, callback) {
-
-
         var triples = [];
 
-        var restrictionId = "_:" + common.getRandomHexaId(10)
+        var restrictionId = "_:" + common.getRandomHexaId(10);
         triples.push({
             subject: subClassUri,
             predicate: "rdfs:subClassOf",
-            object: restrictionId
-        })
+            object: restrictionId,
+        });
         triples.push({
             subject: restrictionId,
             predicate: "rdf:type",
-            object: "owl:Restriction"
-        })
+            object: "owl:Restriction",
+        });
         triples.push({
             subject: restrictionId,
             predicate: "owl:onProperty",
-            object: propertyUri
-        })
+            object: propertyUri,
+        });
 
         triples.push({
             subject: restrictionId,
             predicate: cardinalityType,
-            object: "\"" + value + "^^http://www.w3.org/2001/XMLSchema#nonNegativeInteger\""
-        })
-
-
-        Sparql_generic.insertTriples(source, triples, {}, function (err, result) {
-            callback(err, result)
-
+            object: '"' + value + '^^http://www.w3.org/2001/XMLSchema#nonNegativeInteger"',
         });
 
-    }
+        Sparql_generic.insertTriples(source, triples, {}, function (err, result) {
+            callback(err, result);
+        });
+    };
 
     self.deleteCardinalityRestriction = function (source, restrictionUri, callback) {
         async.series(
@@ -244,12 +208,13 @@ var CreateRestriction_bot = (function () {
                     Sparql_generic.deleteTriples(source, null, null, restrictionUri, function (_err, _result) {
                         callbackSeries();
                     });
-                }
-            ], function (err, result) {
-                return callback(err)
-            })
-
-    }
+                },
+            ],
+            function (err, result) {
+                return callback(err);
+            }
+        );
+    };
 
     return self;
 })();

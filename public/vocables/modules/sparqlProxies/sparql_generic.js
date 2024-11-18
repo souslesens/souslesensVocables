@@ -882,8 +882,6 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         return bindings;
     };
 
-
-
     self.getLangFilterStr = function (options, variable) {
         var langFilter = "";
         if (!options || !options.lang) {
@@ -942,7 +940,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
                     var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
 
-var filter=options.filter|| ""
+                    var filter = options.filter || "";
 
                     if (schemaType == "OWL") {
                         var query =
@@ -952,14 +950,17 @@ var filter=options.filter|| ""
                             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                             "SELECT distinct *  " +
                             fromStr +
-                            "  WHERE {{  ?subject   rdfs:subClassOf   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. " +filter+
+                            "  WHERE {{  ?subject   rdfs:subClassOf   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. " +
+                            filter +
                             // "filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
                             "OPTIONAL{?subject skos:altLabel \n" +
                             "          ?skosAltLabel. } }" +
                             " UNION " +
-                            "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  }" +filter+
+                            "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  }" +
+                            filter +
                             "UNION  {" +
-                            "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +filter+
+                            "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +
+                            filter +
                             //  "   filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
                             "  OPTIONAL{?subject skos:altLabel  ?skosAltLabel}" +
                             "  filter( not exists{  ?subject   rdfs:subClassOf   ?aParent.  ?aParent rdf:type owl:Class.  })}" +
@@ -1136,9 +1137,9 @@ var filter=options.filter|| ""
                         var obj = allClassesMap[key];
                         var parentArray = obj.parents;
                         if (options.parentsTopDown) {
-                        parentArray.push(sourceLabel);
-                        parentArray = parentArray.reverse();
-                    }
+                            parentArray.push(sourceLabel);
+                            parentArray = parentArray.reverse();
+                        }
 
                         //   delete allClassesMap[key].parent;
                         allClassesMap[key].parents = parentArray;

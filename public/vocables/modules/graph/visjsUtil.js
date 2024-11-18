@@ -85,6 +85,9 @@ var VisjsUtil = (function () {
                 node.data[key] = options.data[key];
             }
         }
+        if (!options.level) {
+            node.level = Lineage_whiteboard.currentExpandLevel;
+        }
         return node;
     };
 

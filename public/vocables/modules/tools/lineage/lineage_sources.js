@@ -399,7 +399,7 @@ var Lineage_sources = (function () {
         if (!Lineage_whiteboard.decorationData[sourceLabel]) {
             Lineage_whiteboard.loadDecorationData(sourceLabel);
         }
-        OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
+        OntologyModels.registerSourcesModel(sourceLabel, null, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -441,7 +441,7 @@ sourceDivId +
             return callback();
         }
 
-        OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
+        OntologyModels.registerSourcesModel(sourceLabel, null, function (err, result) {
             if (err) {
                 return callback(err);
             }

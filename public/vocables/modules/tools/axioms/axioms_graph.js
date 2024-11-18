@@ -1,28 +1,6 @@
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axiom_activeLegend from "./axiom_activeLegend.js";
-//import Axiom_editor from "./axiom_editor.js";
 
-/*
-restriction	objectPropertyExpression some primary	ObjectSomeValuesFrom(T(objectPropertyExpression) T(primary))
-restriction	objectPropertyExpression only primary	ObjectAllValuesFrom(T(objectPropertyExpression) T(primary))
-restriction	objectPropertyExpression value individual	ObjectHasValue(T(objectPropertyExpression) individual)
-restriction	objectPropertyExpression min nni	ObjectMinCardinality(T(objectPropertyExpression) nni)
-restriction	objectPropertyExpression min nni primary	ObjectMinCardinality(T(objectPropertyExpression) nni T(primary))
-restriction	objectPropertyExpression exactly nni	ObjectExactCardinality(T(objectPropertyExpression) nni)
-restriction	objectPropertyExpression exactly nni primary	ObjectExactCardinality(T(objectPropertyExpression) nni T(primary))
-restriction	objectPropertyExpression max nni	ObjectMaxCardinality(T(objectPropertyExpression) nni)
-restriction	objectPropertyExpression max nni primary	ObjectMaxCardinality(T(objectPropertyExpression) nni T(primary))
-restriction	objectPropertyExpression Self	ObjectHasSelf(T(objectPropertyExpression))
-restriction	dataPropertyExpression some dataRange	DataSomeValuesFrom(T(dataPropertyExpression) T(dataRange))
-restriction	dataPropertyExpression only dataRange	DataAllValuesFrom(T(dataPropertyExpression) T(dataRange))
-restriction	dataPropertyExpression value literal	DataHasValue(T(dataPropertyExpression) T(literal))
-restriction	dataPropertyExpression min nni	DataMinCardinality(T(dataPropertyExpression) nni)
-restriction	dataPropertyExpression min nni dataRange	DataMinCardinality(T(dataPropertyExpression) nni T(dataRange))
-restriction	dataPropertyExpression exactly nni	DataExactCardinality(T(dataPropertyExpression) nni)
-restriction	dataPropertyExpression exactly nni dataRange	DataExactCardinality(T(dataPropertyExpression) nni T(dataRange))
-restriction	dataPropertyExpression max nni	DataMaxCardinality(T(dataPropertyExpression) nni)
-restriction	dataPropertyExpression max nni dataRange	DataMaxCardinality(T(dataPropertyExpression) nni T(dataRange))
- */
 var Axioms_graph = (function () {
     var self = {};
 

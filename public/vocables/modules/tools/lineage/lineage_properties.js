@@ -791,7 +791,9 @@ var Lineage_properties = (function () {
                     filterNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
                 }
             }
-            if (properties && properties.length > 0) options.filter = Sparql_common.setFilter("prop", properties);
+            if (properties && properties.length > 0) {
+                options.filter = Sparql_common.setFilter("prop", properties);
+            }
             UI.message("searching...");
             Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, options, function (err, result) {
                 if (err) {
@@ -865,13 +867,18 @@ var Lineage_properties = (function () {
         },
     };
 
-    self.searchTermInSources = function () {
-        // var term = $("#LineageProperties_searchTermInSourcesInput").val();
-        var term = $("#LineageProperties_searchAllSourcesTermInput").val();
-
-        var exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked");
-        var searchAllSources = $("#LineageProperties_searchInAllSources").prop("checked");
-        var searchType = $("#LineageProperties_searchAllType").val();
+    self.searchTermInSources = function (term, inCurrentSource, exactMatch, searchType) {
+        if (!term) term = $("#LineageProperties_searchAllSourcesTermInput").val();
+        if (!exactMatch) {
+            exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked");
+        }
+        var searchAllSources = false;
+        if (!inCurrentSource) {
+            searchAllSources = $("#LineageProperties_searchInAllSources").prop("checked");
+        }
+        if (!searchType) {
+            searchType = $("#LineageProperties_searchAllType").val();
+        }
 
         if (!term || term == "") {
             term == null;
@@ -935,7 +942,13 @@ var Lineage_properties = (function () {
 
                         if (result.length > 0) {
                             var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>";
-                            jstreeData.push({ id: sourceLabel, text: text, type: "Source", parent: "#", data: { source: sourceLabel } });
+                            jstreeData.push({
+                                id: sourceLabel,
+                                text: text,
+                                type: "Source",
+                                parent: "#",
+                                data: { source: sourceLabel },
+                            });
                         }
 
                         callbackEach();

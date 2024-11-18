@@ -21,7 +21,7 @@ var MappingModeler = (function () {
     self.currentDataSource = null;
     self.graphDiv = "mappingModeler_graphDiv";
     self.legendItemsArray = [
-        { label: "Table", color: "#a8da83", shape: "ellipse" },
+        //{ label: "Table", color: "#a8da83", shape: "ellipse" },
         { label: "Column", color: "#cb9801", shape: "ellipse" },
         { label: "RowIndex", color: "#cb9801", shape: "triangle" },
         { label: "VirtualColumn", color: "#cb9801", shape: "square" },
@@ -164,6 +164,7 @@ var MappingModeler = (function () {
                 self.drawGraphCanvas(self.graphDiv, visjsData, function () {
                     callbackSeries();
                 });
+                $("#mappingModeler_newAxiomPanel").hide();
             },
         ]);
     };
@@ -285,6 +286,7 @@ var MappingModeler = (function () {
                     columns: columns,
                 };
                 self.loadSuggestionSelectJstree(columns, "Columns");
+                $("#mappingModeler_newAxiomPanel").show();
                 //common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false);
             });
             self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
@@ -300,6 +302,7 @@ var MappingModeler = (function () {
             self.hideForbiddenResources("Table");
             self.currentResourceType = "Column";
             self.loadSuggestionSelectJstree(self.currentTable.columns, "Columns");
+            $("#mappingModeler_newAxiomPanel").show();
             //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         }
         self.currentDataSource = KGcreator.currentConfig.currentDataSource?.name;
@@ -898,7 +901,7 @@ var MappingModeler = (function () {
                     }
                 });
                 self.allClasses.forEach(function (item) {
-                    item.label = item.source.substring(0, 3) + ":" + item.label;
+                    if (item.source) item.label = item.source.substring(0, 3) + ":" + item.label;
                 });
                 self.allClasses = common.array.sort(self.allClasses, "label");
                 common.array.sort(self.allClasses, "label");
@@ -1771,7 +1774,36 @@ var MappingModeler = (function () {
         self.visjsGraph.data.nodes.update(currentNode);
         MappingModeler.saveVisjsGraph();
     };
+    self.filterSuggestionTree = function () {
+        var keyword = $("#mappingModeler_suggestionsnput").val();
+        var data = $("#suggestionsSelectJstreeDiv").jstree()._model.data;
+        /*if(!keyword){
+            return;
+        }*/
+        if (!data) {
+            return;
+        }
+        if (!self.filterSuggestionList) {
+            self.filterSuggestionList = JSON.parse(JSON.stringify(data));
+        }
+        keyword = keyword.toLowerCase();
 
+        var newData = [];
+        Object.keys(self.filterSuggestionList).forEach(function (nodeId) {
+            var node = self.filterSuggestionList[nodeId];
+            // We filter only last leafs of jstree
+            if (node.children.length == 0) {
+                var node_text = node.text.toLowerCase();
+                if (node_text.includes(keyword)) {
+                    newData.push(node);
+                }
+            } else {
+                newData.push(node);
+            }
+        });
+
+        JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", newData);
+    };
     self.mappingToKGcreator = function () {
         var currentMappings = self.generateBasicContentMappingContent();
         var datasources = Object.keys(KGcreator.currentConfig.databaseSources).concat(Object.keys(KGcreator.currentConfig.csvSources));

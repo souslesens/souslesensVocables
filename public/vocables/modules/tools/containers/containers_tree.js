@@ -127,7 +127,7 @@ var Containers_tree = (function () {
         });
     };
 
-    self.graphResources = function (source, containerData, options, callback) {
+    self.graphResourcesXXXX = function (source, containerData, options, callback) {
         if (!options) {
             options = {};
         }
@@ -399,7 +399,7 @@ var Containers_tree = (function () {
 
     self.listContainerResources = function (container) {
         var source = container.data.source;
-        Containers_query.getContainerDescendants(source, container.data.id, {}, function (err, result) {
+        Containers_query.getContainerDescendants(source, container.data.id, { depth: 1 }, function (err, result) {
             if (err) {
                 return alert(err.responsetext);
             }
@@ -411,11 +411,11 @@ var Containers_tree = (function () {
 
             var existingNodes = {};
             result.results.bindings.forEach(function (item) {
-                var id = item.descendant.value;
-                var label = item.descendantLabel ? item.descendantLabel.value : Sparql_common.getLabelFromURI(item.descendant.value);
+                var id = item.member.value;
+                var label = item.memberLabel ? item.memberLabel.value : Sparql_common.getLabelFromURI(item.member.value);
                 var jstreeId = "_" + common.getRandomHexaId(5);
 
-                var parent = self.idsMap[item.descendantParent.value];
+                var parent = self.idsMap[item.parent.value];
 
                 if (!self.idsMap[id]) {
                     self.idsMap[id] = jstreeId;

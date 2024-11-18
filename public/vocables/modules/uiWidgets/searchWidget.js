@@ -14,7 +14,7 @@ var SearchWidget = (function () {
     var self = {};
 
     self.init = function () {
-        if (Config.ontologiesVocabularyModels[Lineage_sources.activeSource] && Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classesCount <= Config.ontologyModelMaxClasses) {
+        /* if (Config.ontologiesVocabularyModels[Lineage_sources.activeSource] && Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classesCount <= Config.ontologyModelMaxClasses) {
             var classes = [];
             for (var classId in Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classes) {
                 var classObj = Config.ontologiesVocabularyModels[Lineage_sources.activeSource].classes[classId];
@@ -24,7 +24,7 @@ var SearchWidget = (function () {
                 });
             }
             common.fillSelectOptions("GenericTools_searchAllClassSelect", classes, true, "label", "id");
-        }
+        }*/
     };
 
     /**
@@ -42,12 +42,12 @@ var SearchWidget = (function () {
      *  -contextMenufn
      *
      */
-    self.searchTermInSources = function (options) {
+    self.searchTermInSources = function (options, callback) {
         if (!options) {
             options = {};
         }
 
-        var classFilter = $("#GenericTools_searchAllClassSelect").val();
+        //  var classFilter = $("#GenericTools_searchAllClassSelect").val();
 
         $("#sourcesSelectionDialogdiv").dialog("close");
 
@@ -58,9 +58,9 @@ var SearchWidget = (function () {
             term = $("#searchWidget_searchTermInput").val();
         }
         if (!term) {
-            if (!classFilter) {
+            /*  if (false  && !classFilter) {
                 return alert("nothing to search");
-            }
+            }*/
             term = "*";
         }
 
@@ -78,7 +78,7 @@ var SearchWidget = (function () {
             if ($("#searchAll_sourcesTree").jstree().get_checked) {
                 selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();
             } else {
-                selectedSources = [Lineage_sources.currentSource];
+                selectedSources = [Lineage_sources.activeSource];
             }
         }
 
@@ -90,8 +90,8 @@ var SearchWidget = (function () {
         }
 
         var searchAllSources;
-        if (options.searchAllSources) {
-            searchAllSources = options.searchAllSources;
+        if (options.inCurrentSource) {
+            searchAllSources = !options.inCurrentSource;
         } else {
             searchAllSources = $("#GenericTools_searchInAllSources").prop("checked");
         }
@@ -155,19 +155,24 @@ var SearchWidget = (function () {
         }
 
         options.parentlabels = true;
-        // PROBLEM
-        // eslint-disable-next-line no-constant-condition
 
-        if (classFilter) {
+        /*   if (classFilter) {
             options.classFilter = classFilter;
-        }
+        }*/
         if (searchAllLabels) {
             options.skosLabels = 1;
         }
 
         SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
             if (_err) {
-                return alert(_err.responseText || err);
+                if (callback) {
+                    return callback(_err.responseText || _err);
+                }
+                return alert(_err.responseText || _err);
+            }
+
+            if (callback) {
+                return callback(null, result);
             }
             if (Object.keys(result[0].matches).length == 0) {
                 return $("#" + (options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>");

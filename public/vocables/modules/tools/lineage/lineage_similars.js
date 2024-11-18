@@ -105,13 +105,19 @@ var Lineage_similars = (function () {
                                 if ($("#Similars_Only_exact_match").is(":checked")) {
                                     if (hit._source.label.toLowerCase() == actual_word_label.toLowerCase()) {
                                         if (!whiteboardLabelsMap[hit._source.label]) {
-                                            whiteboardLabelsMap[hit._source.label] = { fromNode: whiteboardLabelsMap[actual_word_label].fromNode, similars: [] };
+                                            whiteboardLabelsMap[hit._source.label] = {
+                                                fromNode: whiteboardLabelsMap[actual_word_label].fromNode,
+                                                similars: [],
+                                            };
                                         }
                                         whiteboardLabelsMap[hit._source.label].similars.push(hit._source);
                                     }
                                 } else {
                                     if (!whiteboardLabelsMap[hit._source.label]) {
-                                        whiteboardLabelsMap[hit._source.label] = { fromNode: whiteboardLabelsMap[actual_word_label].fromNode, similars: [] };
+                                        whiteboardLabelsMap[hit._source.label] = {
+                                            fromNode: whiteboardLabelsMap[actual_word_label].fromNode,
+                                            similars: [],
+                                        };
                                     }
                                     whiteboardLabelsMap[hit._source.label].similars.push(hit._source);
                                 }
@@ -216,6 +222,9 @@ var Lineage_similars = (function () {
                 }
                 if (node1.data.id == node2.data.id && node1.data.source == node2.data.source) {
                     return;
+                }
+                if (!node2.data.label) {
+                    node2.data.label = Sparql_common.getLabelFromURI(node2.data.id);
                 }
                 if (node1.data.label.toLowerCase().replace(/ /g, "") == node2.data.label.toLowerCase().replace(/ /g, "")) {
                     commonNodes.push({ fromNode: node1, toNode: node2 });

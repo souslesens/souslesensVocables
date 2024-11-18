@@ -59,7 +59,7 @@ var Axiom_activeLegend = (function () {
                         self.setSuggestionsSelect(classes, true, newObject);
                     });
                 } else {
-                    var classes = Axiom_manager.getAllClasses();
+                    var classes = Axiom_manager.getAllClasses(self.currentSource);
                     self.setSuggestionsSelect(classes, true, newObject);
                 }
             } else if (node.data.type == "ObjectProperty") {
@@ -249,6 +249,12 @@ var Axiom_activeLegend = (function () {
                 label = $("#axioms_legend_suggestionsSelect option:selected").text();
                 subType = $("#axioms_legend_suggestionsSelect").val();
             }
+
+            var cardinality = "";
+            if (label == "max" || label == "min" || label == "cardinality") {
+                cardinality = prompt("cardinanlity min ");
+            }
+
             var symbolsMap = {
                 IntersectionOf: "⊓",
                 UnionOf: "⨆",
@@ -257,7 +263,7 @@ var Axiom_activeLegend = (function () {
             var id = self.getBlankNodeId();
             newResource = {
                 id: id,
-                label: label,
+                label: label + (cardinality ? "  : " + cardinality : ""),
                 resourceType: nodeType,
                 symbol: symbolsMap[label],
                 data: {
@@ -265,6 +271,7 @@ var Axiom_activeLegend = (function () {
                     label: label,
                     type: nodeType,
                     subType: subType,
+                    cardinality: cardinality,
                 },
                 predicates: [],
             };
@@ -355,9 +362,12 @@ var Axiom_activeLegend = (function () {
                 hiddenNodes.push("ObjectProperty");
             }
             var hasClass = self.getGraphSiblingUri(Axioms_graph.currentGraphNode.id, "Class");
-            if (hasClass) {
+
+            var isCardinalityRestriction = Axioms_graph.currentGraphNode.data.subType.indexOf("ardinality") > -1;
+            if (isCardinalityRestriction || hasClass) {
                 hiddenNodes.push("Class");
             }
+            if (isCardinalityRestriction) hiddenNodes.push("Connective");
         } else if (resourceType == "Connective") {
             hiddenNodes.push("ObjectProperty");
         }
@@ -568,10 +578,19 @@ var Axiom_activeLegend = (function () {
 
     self.saveAxiom = function () {
         if (confirm("Save Axiom")) {
+            var triples = self.visjsGraphToTriples();
+            var hasCardinalityRestriction = false;
+            triples.forEach(function (triple) {
+                if (triple.predicate.indexOf("ardinality") > -1) {
+                    hasCardinalityRestriction = true;
+                }
+            });
+
             //check manchester Syntax
-            self.axiomTriplesToManchester(function (err, manchesterStr) {
+            self.axiomTriplesToManchester(triples, function (err, manchesterStr) {
                 if (err) {
-                    return alert(err);
+                    //machstersyntax dont work yet with cardinality restrictions but we store the triples anyway
+                    if (!hasCardinalityRestriction) return alert(err);
                 }
 
                 var triples = self.visjsGraphToTriples();
@@ -615,8 +634,7 @@ var Axiom_activeLegend = (function () {
         JstreeWidget.addNodesToJstree("nodeInfosAxioms_axiomsJstreeDiv", self.axiomType, jstreeData);
     };
 
-    self.axiomTriplesToManchester = function (callback) {
-        var triples = self.visjsGraphToTriples();
+    self.axiomTriplesToManchester = function (triples, callback) {
         Axiom_manager.getManchesterAxiomsFromTriples(self.currentSource, triples, function (err, result) {
             if (err) {
                 if (callback) {
@@ -675,6 +693,7 @@ var Axiom_activeLegend = (function () {
                 var triple = {};
                 var fromNode = nodesMap[nodeId];
                 var toNode = nodesMap[edge.to];
+                var cardinalityStr = "";
 
                 var object = toNode.data.id;
                 var predicate = null;
@@ -731,6 +750,14 @@ var Axiom_activeLegend = (function () {
                         subject: toNode.data.id,
                         predicate: toNode.data.subType,
                         object: toNode.data.bNodeid,
+                    });
+                }
+
+                if (fromNode.data.cardinality) {
+                    triples.push({
+                        subject: fromNode.data.bNodeid || fromNode.data.id,
+                        predicate: fromNode.data.subType,
+                        object: '"' + fromNode.data.cardinality + '^^http://www.w3.org/2001/XMLSchema#nonNegativeInteger"',
                     });
                 }
 

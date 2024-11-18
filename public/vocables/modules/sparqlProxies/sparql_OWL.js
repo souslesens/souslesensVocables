@@ -383,7 +383,7 @@ var Sparql_OWL = (function () {
             query += "graph ?g ";
         }
         query += "{<" + conceptId + "> ?prop ?value.  ";
-        query += "OPTIONAL {?value owl:hasValue ?objectValue.} ";
+
         if (options.getValuesLabels) {
             query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} ";
         }
@@ -399,10 +399,13 @@ var Sparql_OWL = (function () {
             }
             query += "}";
         }
+        if (options.noRestrictions) {
+            query += "  FILTER (!exists{?value rdf:type owl:Restriction} )";
+        }
 
         query += " }";
         var limit = options.limit || Config.queryLimit;
-        query += " limit " + limit;
+        query += " LIMIT " + limit;
 
         var url = self.sparql_url + "?format=json&query=";
         self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
@@ -448,7 +451,7 @@ var Sparql_OWL = (function () {
         if (true || options.excludeType) {
             selectStr = ' ?subject ?subjectLabel (GROUP_CONCAT(?subjectType;SEPARATOR=",") AS ?subjectTypes)';
             for (var i = 1; i <= ancestorsDepth; i++) {
-                selectStr += '(GROUP_CONCAT(?broaderGraph1;SEPARATOR=",") AS ?broaderGraphs1 ) ?broader' + i + " ?broader" + i + "Label";
+                selectStr += '(GROUP_CONCAT(?broaderGraph1;SEPARATOR=",") AS ?broaderGraphs' + i + " ) ?broader" + i + " ?broader" + i + "Label";
             }
         }
         var query =
@@ -774,6 +777,9 @@ var Sparql_OWL = (function () {
 
                 if (!options.descendants) {
                     classIds.forEach(function (id) {
+                        hierarchies = {};
+                        if (id == "http://tsf/resources/ontology/DEXPIProcess_gfi_2/AmbientTemperature") var x = 3;
+
                         hierarchies[id] = [];
 
                         result.results.bindings.forEach(function (item) {
@@ -781,10 +787,8 @@ var Sparql_OWL = (function () {
                                 // if superClass is bnode  it causes problem !!
                                 return;
                             }
-                            if (!options.descendants && item.subject.value == id) {
-                                hierarchies[id].push(item);
-                            }
-                            if (options.descendants && item.class.value == id) {
+
+                            if (item.subject.value == id) {
                                 hierarchies[id].push(item);
                             }
                         });
@@ -1425,20 +1429,21 @@ var Sparql_OWL = (function () {
      *  - ?g ?subject  ?prop ?propLabel ?subjectLabel  ?value ?valueLabel ?node
      */
 
-    self.getObjectRestrictions = function (sourceLabel, ids, options, callback) {
+    self.getObjectRestrictions = function (sourceLabel, subClassIds, options, callback) {
         if (!options) {
             options = {};
         }
 
         var filterStr = "";
-        if (ids) {
-            ids = OntologyModels.filterClassIds(sourceLabel, ids);
+        if (subClassIds) {
+            subClassIds = OntologyModels.filterClassIds(sourceLabel, subClassIds);
             if (options.inverseRestriction) {
-                options.someValuesFrom = 1;
-                filterStr = Sparql_common.setFilter("value", ids, null, options);
+                filterStr = Sparql_common.setFilter("value", subClassIds, null, options);
             } else {
-                filterStr = Sparql_common.setFilter("subject", ids, null, options);
+                filterStr = Sparql_common.setFilter("subject", subClassIds, null, options);
             }
+        } else if (options.restrictionIds) {
+            filterStr = Sparql_common.setFilter("value", options.restrictionIds, null, options);
         }
         var fromStr = "";
         if (sourceLabel) {
@@ -1454,10 +1459,13 @@ var Sparql_OWL = (function () {
         }
 
         var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
-        if (options.listPropertiesOnly) {
+
+        if (options.turtle) {
+            query += " CONSTRUCT {?subject  ?prop  ?value  ?constraintType}";
+        } else if (options.listPropertiesOnly) {
             query += " SELECT distinct ?prop ?propLabel ";
         } else if (options.withoutBlankNodes) {
-            query += " SELECT distinct ?subject  ?subjectLabel  ?prop ?propLabel ?value ?valueLabel ";
+            query += " SELECT distinct ?subject  ?subjectLabel  ?prop ?propLabel ?value ?valueLabel ?constraintType";
         } else {
             query += "SELECT distinct * ";
         }
@@ -1472,16 +1480,21 @@ var Sparql_OWL = (function () {
             Sparql_common.getVariableLangLabel("prop", true, null, filterStr) +
             Sparql_common.getVariableLangLabel("subject", true, null, filterStr);
 
-        if (true || options.someValuesFrom) {
-            query += "?node owl:someValuesFrom ?value." + Sparql_common.getVariableLangLabel("value", true); //OPTIONAL {?value rdfs:label ?valueLabel}";
+        query += "    ?node ?constraintType ?value. ";
+
+        query += "optional {?node ?cardinalityType ?cardinalityValue filter (?cardinalityType in (owl:maxCardinality,owl:minCardinality,owl:cardinality ))}";
+
+        if (options.someValuesFrom) {
+            query += " filter (?constraintType in (owl:someValuesFrom, owl:onClass))";
         } else if (options.allValuesFrom) {
-            query += "?node owl:allValuesFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
-        } else if (options.aValueFrom) {
-            query += "?node owl:aValueFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
+            query += " filter (?constraintType in (owl:allValuesFrom,owl:onClass))";
+        } else if (options.hasValue) {
+            query += " filter (?constraintType in (owl:hasValue,owl:onClass))";
         } else {
-            query += " ?node ?p ?value. ?value rdf:type ?valueType.OPTIONAL {?value rdfs:label ?valueLabel} filter (?valueType in (rdf:Class,owl:Class)) ";
-            // query += "?node owl:allValuesFrom|owl:someValuesFrom|owl:aValueFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
+            query += "  filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:onClass))";
         }
+
+        query += Sparql_common.getVariableLangLabel("value", true);
 
         if (options.getMetadata) {
             query +=
@@ -1775,10 +1788,8 @@ var Sparql_OWL = (function () {
             "  ?sourceClass " +
             Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) +
             " ?restriction." +
-            "  OPTIONAL {?restriction  owl:someValuesFrom ?targetClass. " +
-            "  OPTIONAL {?targetClass rdfs:label ?targetClassLabel}}" +
-            "  OPTIONAL {?sourceClass rdfs:label ?sourceClassLabel}" +
-            "  OPTIONAL {?prop rdfs:label ?propLabel}";
+            "  OPTIONAL {?restriction ?constraintType ?targetClass. filter (?constraintType in (owl:someValuesFrom, owl:allValuesFrom,owl:hasValue,owl:maxCardinality,owl:minCardinality,owl:cardinality))}";
+        "  OPTIONAL {?targetClass rdfs:label ?targetClassLabel}}" + "  OPTIONAL {?sourceClass rdfs:label ?sourceClassLabel}" + "  OPTIONAL {?prop rdfs:label ?propLabel}";
         var limit = options.limit || Config.queryLimit;
         query += " }";
         query += "  limit " + limit;
@@ -2068,7 +2079,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.generateInverseRestrictions = function (source, propId, inversePropId, callback) {
+    self.generateInverseRestrictions = function (source, propId, inversePropId, cardinality, callback) {
         var filter = "filter (?prop=<" + propId + ">)";
         self.getObjectRestrictions(source, null, { filter: filter }, function (err, result) {
             if (err) {
@@ -2077,7 +2088,7 @@ var Sparql_OWL = (function () {
             var triples = [];
             result.forEach(function (item) {
                 if (item.value && item.subject) {
-                    triples = triples.concat(Lineage_createRelation.getRestrictionTriples(item.value.value, item.subject.value, inversePropId));
+                    triples = triples.concat(Lineage_createRelation.getRestrictionTriples(item.value.value, item.subject.value, null, inversePropId));
                 }
             });
             var totalItems = 0;
@@ -2727,16 +2738,23 @@ var Sparql_OWL = (function () {
         var filter = options.filter || "";
         if (resourcesIds) {
             // needs options.useFilterKeyWord because VALUES dont work
-            filter = Sparql_common.setFilter("parent", resourcesIds, null, { useFilterKeyWord: 1 });
+            filter += Sparql_common.setFilter("parent", resourcesIds, null, { useFilterKeyWord: 1 });
         }
 
         var pathOperator = "+";
 
+        if (options.includeParent) pathOperator = "*";
         if (options.depth) {
             pathOperator = "{0," + options.depth + "}";
         }
         if (!taxonomyPredicate) {
             taxonomyPredicate = "rdfs:subClassOf";
+        }
+        var inverseTaxonomyPredicate = taxonomyPredicate;
+        if (taxonomyPredicate.indexOf("^") < 0) {
+            inverseTaxonomyPredicate = "^" + inverseTaxonomyPredicate;
+        } else {
+            inverseTaxonomyPredicate = inverseTaxonomyPredicate.replace("^", "");
         }
 
         var query =
@@ -2750,8 +2768,8 @@ var Sparql_OWL = (function () {
             " ?descendantParent.\n" +
             "  OPTIONAL{?descendant rdfs:label ?descendantLabel}   \n" +
             "  OPTIONAL{?descendantParent rdfs:label ?descendantParentLabel}  \n" +
-            "  ?parent  ^" +
-            taxonomyPredicate +
+            "  ?parent " +
+            inverseTaxonomyPredicate +
             pathOperator +
             " ?descendant.\n" +
             filter +

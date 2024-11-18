@@ -38,7 +38,7 @@ var Standardizer = (function () {
             });
         });
 
-        $("#actionDivContolPanelDiv").load("modules/tools/standardizer/standardizer_left.html", function () {
+        $("#lateralPanelDiv").load("modules/tools/standardizer/standardizer_left.html", function () {
             $("#Lineage_classes_SearchSourceInput").bind("keydown", null, Standardizer.searchInSourcesTree);
             $("#Standardizer_leftTab").tabs({});
         });
@@ -196,8 +196,11 @@ var Standardizer = (function () {
                     label: hit._source.label,
                     status: "exactMatch",
                 };
-                if (typeof obj === "object") entity.sourceHit = obj;
-                entitiesMap[word][entity.index] = entity;
+                if (obj.label.toLowerCase() == entity.label.toLowerCase()) {
+                    //  entity.status="exactMatch";
+                    if (typeof obj === "object") entity.sourceHit = obj;
+                    entitiesMap[word][entity.index] = entity;
+                }
             });
         });
 
@@ -1848,7 +1851,7 @@ sortMethod: "hubsize",
             obj.forEach(function (entity) {
                 if (entity == null) return;
                 else {
-                    line = [self.currentSource, entity.sourceHit ? entity.sourceHit.label : "", entity.sourceHit ? entity.sourceHit.id : ""];
+                    var line = [self.currentSource, entity.sourceHit ? entity.sourceHit.label : "", entity.sourceHit ? entity.sourceHit.id : ""];
                     line.push(entity.index, entity.label, entity.id);
                     dataSet.push(line);
                 }

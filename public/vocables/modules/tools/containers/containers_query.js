@@ -47,20 +47,37 @@ var Containers_query = (function () {
         var filter = options.filter || "";
         if (containerId) {
             // needs options.useFilterKeyWord because VALUES dont work
-            filter = Sparql_common.setFilter("parent", containerId, null, { useFilterKeyWord: 1 });
+            filter = Sparql_common.setFilter("root", containerId, null, { useFilterKeyWord: 1 });
         }
 
         if (!options.leaves) {
-            filter += " FILTER (?descendantType in(rdf:Bag,rdf:List))";
+            filter += " FILTER (?memberType in(rdf:Bag,rdf:List))";
         }
 
-        var pathOperator = "";
+        var pathOperator = "+";
 
         if (options.depth) {
             pathOperator = "{1," + options.depth + "}";
         }
+
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+            "SELECT distinct ?parent  ?member ?parentLabel  ?memberLabel " +
+            '(GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes) ' +
+            fromStr +
+            " WHERE {" +
+            "  ?root  rdfs:member" +
+            pathOperator +
+            " ?member.\n" +
+            "  ?parent rdfs:member ?member .\n" +
+            "?member rdf:type ?memberType." +
+            "   OPTIONAL{?member rdfs:label ?memberLabel} \n" +
+            "   OPTIONAL{?parent rdfs:label ?parentLabel} \n" +
+            filter +
+            "} limit 10000 ";
+
+        /*   "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
             "SELECT distinct ?descendant ?descendantParent ?descendantLabel ?descendantParentLabel " +
             fromStr +
@@ -76,7 +93,7 @@ var Containers_query = (function () {
             filter +
             "}order by ?descendantLabel " +
             "   LIMIT   " +
-            self.descendantsLimit;
+            self.descendantsLimit;*/
 
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
@@ -84,7 +101,7 @@ var Containers_query = (function () {
             if (err) {
                 return callback(err);
             }
-            if (result.results.bindings.length >= self.descendantsLimit) {
+            if (false && result.results.bindings.length >= self.descendantsLimit) {
                 alert("cannot show all nodes  :only: " + self.descendantsLimit + "");
             }
             return callback(null, result);
@@ -104,17 +121,17 @@ var Containers_query = (function () {
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
         function execQuery(filter, callback) {
-            var pathOperator = "+";
+            var pathOperator = "*";
             if (options.depth) {
                 pathOperator = "{1," + options.depth + "}";
             }
             var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-                "SELECT distinct ?ancestor ?ancestorChild " +
+                "SELECT distinct ?ancestor ?ancestorChild ?ancestorChildLabel" +
                 fromStr +
                 "WHERE {\n" +
-                " optional{?ancestor rdfs:member ?ancestorChild.}\n" +
+                " optional{?ancestor rdfs:member ?ancestorChild .}\n" +
                 "  ?ancestorChild  rdfs:member" +
                 pathOperator +
                 " ?child.\n" +

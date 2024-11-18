@@ -20,6 +20,12 @@ var KGcreator_run = (function () {
             return null;
         }
         selectedText = selectedText.replace(/[\r\n]/g, "");
+
+        if (selectedText.indexOf('"s":') < 0 || selectedText.indexOf('"p":') < 0 || selectedText.indexOf('"o":') < 0) {
+            KGcreator_mappings.currentMappingsSelection = null;
+            return null;
+        }
+
         if (selectedText.endsWith(",")) {
             selectedText = selectedText.substring(0, selectedText.length - 2);
         }

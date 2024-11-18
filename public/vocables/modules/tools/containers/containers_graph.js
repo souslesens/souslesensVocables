@@ -76,7 +76,7 @@ var Containers_graph = (function () {
                         shadow: self.nodeShadow,
                         shape: Containers_graph.containerStyle.shape,
                         size: Containers_graph.containerStyle.size,
-                        font: { color: color2 },
+                        font: { color: self.containerStyle.color },
                         color: Containers_graph.containerStyle.parentContainerColor,
                         data: {
                             type: "container",
@@ -133,7 +133,7 @@ var Containers_graph = (function () {
                     //  options.descendants = true;
                     // options.leaves = true;
                     UI.message("searching...");
-                    Containers_query.getContainerDescendantsOld(source, containerData.id, options, function (err, result) {
+                    Containers_query.getContainerDescendants(source, containerData.id, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }

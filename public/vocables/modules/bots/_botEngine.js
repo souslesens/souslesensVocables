@@ -194,19 +194,23 @@ var _botEngine = (function () {
         }
     };
 
-    self.end = function () {
+    self.end = function (dontCallBack) {
         self.currentBot.params.queryText = self.getQueryText();
+        self.closeDialog();
+        if (!dontCallBack && self.currentBot.callbackFn) {
+            return self.currentBot.callbackFn();
+        }
+    };
+
+    self.closeDialog = function () {
         if (self.divId) {
-            var dialogWindow = $("#" + self.divId)
-                .parents()
-                .filter('div[role="dialog"]')[0];
-            var idDialog = "#" + $(dialogWindow).attr("aria-describedby");
-            $(idDialog).dialog("close");
+            /*  var dialogWindow = $("#" + self.divId)
+                  .parents()
+                  .filter('div[role="dialog"]')[0];
+              var idDialog = "#" + $(dialogWindow).attr("aria-describedby");*/
+            $(self.divId).dialog("close");
         } else {
             $("#botPanel").dialog("close");
-        }
-        if (self.currentBot.callbackFn) {
-            return self.currentBot.callbackFn();
         }
     };
 

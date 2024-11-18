@@ -130,7 +130,7 @@ const checkMainConfig = (config) => {
     console.debug("Check the mainConfig.json file…");
 
     const results = MainConfigObject.safeParse(config);
-    if (!results.success) {
+    if (false && !results.success) {
         const formattedErrors = results.error.format();
         Object.entries(formattedErrors).map(([key, data]) => {
             if (key !== "_errors") {

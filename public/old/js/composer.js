@@ -560,7 +560,7 @@ var Composer = (function () {
             "  ?restriction rdf:type owl:Restriction.\n" +
             "  ?restriction ?aspect ?filterId.\n" +
             " ?restriction owl:onProperty <http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality>.\n" +
-            " ?restriction owl:someValuesFrom ?property.\n" +
+            " ?restriction ?containtType ?property.\n" +
             "   ?property rdfs:label ?propertyLabel.\n";
 
         if (classIds) {

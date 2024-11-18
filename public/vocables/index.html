@@ -140,6 +140,8 @@
 
         <script type="module" src="modules/bots/nodeRelations_bot.js"></script>
         <script type="module" src="modules/bots/createAxiomResource_bot.js"></script>
+
+        <script type="module" src="modules/bots/createRestriction_bot.js"></script>
         <script type="module" src="modules/bots/mappingModeler_bot.js"></script>
         <!--   <script type="module" src="modules/sparqlProxies/sparql_INDIVIDUALS.js"></script>-->
 
@@ -156,8 +158,12 @@
         <script type="module" src="modules/search/elasticSearchProxy.js"></script>
 
         <script type="module" src="modules/tools/lineage/lineage_reasoner.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_subGraph.js"></script>
 
         <script type="module" src="modules/tools/lineage/lineage_similars.js"></script>
+
+        <script type="module" src="modules/tools/ontoLay/ontoLay.js"></script>
+
         <script type="module" src="modules/shared/graphLoader.js"></script>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
@@ -168,7 +174,7 @@
 
         <script type="module" src="modules/tools/KGconstraints/Cfihos_pump_poc.js"></script>
 
-        <script type="module" src="modules/bots/KGconstraintsEditor_bot.js"></script>
+        <!--  <script type="module" src="modules/bots/KGconstraintsEditor_bot.js"></script>-->
         <script type="module" src="modules/tools/KGconstraints/KGconstraints_editor.js"></script>
         <script type="module" src="modules/tools/KGconstraints/KGconstraintsModeler.js"></script>
         <script type="module" src="modules/tools/KGconstraints/KGconstraints_validator.js"></script>
@@ -341,6 +347,7 @@
                                 if (MainController.currentTool == "KGquery") {
                                     divId = "smallDialogDiv";
                                 }
+
                                 NodeInfosWidget.showNodeInfos(null, id, divId, null, function (err, result) {
                                     if (err) {
                                         $("#mainDialogDiv").dialog("close");
@@ -409,7 +416,7 @@
                                 </div>
                             </div>
 
-                            <div id="currentToolTitle"></div>
+                            <div id="currentToolTitle" style="display: flex; flex-direction: row; align-items: center"></div>
                         </div>
                     </div>
 

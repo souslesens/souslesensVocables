@@ -1,5 +1,5 @@
 import KGquery_filter_bot from "../../bots/KGquery_filter_bot.js";
-import KGconstraintsEditor_bot from "../../bots/KGconstraintsEditor_bot.js";
+//import KGconstraintsEditor_bot from "../../bots/KGconstraintsEditor_bot.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import _botEngine from "../../bots/_botEngine.js";
 import UI from "../../shared/UI.js";
@@ -51,13 +51,16 @@ var KGconstraints_editor = (function () {
                 return alert(err);
             }
             var params = { source: self.currentSource, model: model, constraintsMap: self.constraintsMap };
+
+            /*  OBSOLETE
+
             KGconstraintsEditor_bot.start(KGconstraintsEditor_bot.workflow_dataTypePropertyConstraint, params, function (err, result) {
                 if (err) {
                     return alert(err);
                 }
 
                 self.buildClassShape(KGconstraintsEditor_bot.params);
-            });
+            });*/
         });
     };
 

@@ -4,9 +4,13 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import _botEngine from "./_botEngine.js";
+import Export from "../shared/export.js";
+import KGquery from "../tools/KGquery/KGquery.js";
+import _commonBotFunctions from "./_commonBotFunctions.js";
 
 var SparqlQuery_bot = (function () {
     var self = {};
+    self.maxGraphDisplay = 150;
 
     self.start = function () {
         self.title = "Query graph";
@@ -17,426 +21,920 @@ var SparqlQuery_bot = (function () {
     };
 
     self.workflow = {
-        _OR: {
-            Class: {
-                listVocabsFn: {
-                    listClassesFn: {
-                        _OR: {
-                            "Any Predicate": { listWhiteBoardFilterType: { executeQuery: {} } },
-                            "Choose Predicate": {
-                                listPredicatePathsFn: {
-                                    _OR: {
-                                        empty: { listWhiteBoardFilterType: { executeQuery: {} } },
-                                        ok: { listWhiteBoardFilterType: { executeQuery: {} } }, //self.workflow_individualsRole,
-                                    },
+        chooseResourceTypeFn: {
+            _OR: {
+                ObjectProperty: {
+                    promptKeywordFn: {
+                        chooseObjectPropertyResourceTypeFn: {
+                            chooseQueryScopeFn: {
+                                chooseOutputTypeFn: {
+                                    searchKeywordFn: {},
                                 },
                             },
-                            " Restrictions": { listWhiteBoardFilterType: { drawRestrictions: {} } },
-                            "Inverse Restrictions": { listWhiteBoardFilterType: { drawInverseRestrictions: {} } },
-                            Individuals: { setIndividualsTypeFilter: { executeQuery: {} } },
                         },
                     },
                 },
-            },
-            Individual: {
-                listActiveSourceVocabsFn: {
-                    listClassesFn: { switchToIndividualsBotFn: {} },
-                },
-            },
-            "Object Property": {
-                listVocabsFn: {
-                    listPropertiesFn: {
-                        _OR: {
-                            "Any Predicate": { listWhiteBoardFilterType: { executeQuery: {} } },
-
-                            //  _DEFAULT: {
-                            "Choose Predicate": {
-                                listPredicatePathsFn: {
-                                    _OR: {
-                                        empty: { listWhiteBoardFilterType: { executeQuery: {} } },
-                                        ok: self.workflow_individualsRole,
-                                    },
-                                },
-                            },
-                            Restrictions: { listWhiteBoardFilterType: { drawRestrictions: {} } },
-                            "Inverse Restrictions": { listWhiteBoardFilterType: { drawInverseRestrictions: {} } },
-                            Individuals: { setIndividualsTypeFilter: { executeQuery: {} } },
-
-                            // },
-                        },
+                Individuals: {
+                    choosePredicateFilterFn: {
+                        setPredicateFilterFn: {},
                     },
                 },
-            },
-            "Annotation/Datatype property": {
-                listAnnotationPropertiesVocabsFn: {
-                    listAnnotationPropertiesFn: {
-                        promptAnnotationPropertyValue: {
-                            listWhiteBoardFilterType: {
-                                executeQuery: {},
+                Class: {
+                    chooseQueryScopeFn: {
+                        promptKeywordFn: {
+                            chooseOutputTypeFn: {
+                                searchKeywordFn: {},
                             },
                         },
                     },
                 },
             },
-            /*  "Sample of Classes": { promptClassesSampleSizeFn: { executeQuery: {} } },
-              "Sample of Individuals": { promptIndividualsSampleSizeFn: { executeQuery: {} } },*/
-            "Sample of Predicates": { promptPredicatesSampleSizeFn: { executeQuery: {} } },
+        },
+        sparqlQuery: { showSparqlEditorFn: {} },
+        similars: {
+            chooseQueryScopeFn: {},
         },
     };
 
     self.functionTitles = {
-        listVocabsFn: "Choose a reference ontology",
-        listQueryTypeFn: "Choose a query type ",
+        chooseQueryScopeFn: "choose query scope",
+        promptKeywordFn: "enter a keyword or enter for any ",
+        searchKeywordFn: "matching keywords",
+        chooseResourceTypeFn: "choose resource type",
+        chooseOutputTypeFn: "choose outup type",
+        chooseObjectPropertyResourceTypeFn: "choose propety resources",
+        choosePredicateFilterFn: "choose predicateFilter mode",
+
+        listVocabsFn: "Choose a source",
+        showSparqlEditorFn: "",
+
         listClassesFn: "Choose a  a class ",
         listPropertiesFn: "Choose a property",
         listAnnotationPropertiesVocabsFn: "Choose a reference ontology",
         listAnnotationPropertiesFn: "Choose a property",
         promptAnnotationPropertyValue: "Filter value ",
         listWhiteBoardFilterType: "Choose a scope",
+        listQueryTypeFn: "Choose a query type ",
     };
 
     self.functions = {
-        listVocabsFn: function () {
-            CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
-        },
-        listActiveSourceVocabsFn: function () {
-            self.params.currentVocab = self.params.source;
-            self.params.allindividuals = true;
-            self.params.individualsFilterRole = "subject";
-            _botEngine.nextStep();
-        },
-
-        listClassesFn: function () {
-            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "currentClass", true, [{ label: ".Any Class", id: "AnyClass" }]);
-        },
-
-        listPropertiesFn: function () {
-            CommonBotFunctions.listVocabPropertiesFn(self.params.currentVocab, "currentProperty", [{ label: ".Any property", id: "AnyProperty" }]);
-        },
-
-        listPredicatePathsFn: function () {
-            var property = self.params.currentProperty;
-            var fromClass = self.params.currentClass;
-            var toClass = self.params.currentClass;
-
-            self.getSourceInferredModelVisjsData(self.params.source + "_KGmodelGraph.json", function (err, visjsData) {
-                if (err) {
-                    console.log(err.responseText);
-                    return _botEngine.nextStep("empty");
-                }
-                var nodesMap = {};
-                visjsData.nodes.forEach(function (node) {
-                    nodesMap[node.id] = node;
-                });
-                var paths = [];
-                visjsData.edges.forEach(function (edge) {
-                    var selected = false;
-                    if (property && edge.data.propertyId == property) {
-                        selected = true;
-                    }
-                    if (fromClass && edge.from == fromClass) {
-                        selected = true;
-                    }
-                    if (toClass && edge.to == toClass) {
-                        selected = true;
-                    }
-                    if (selected) {
-                        edge.fromLabel = nodesMap[edge.from].label;
-                        (edge.toLabel = nodesMap[edge.to].label),
-                            paths.push({
-                                id: edge.from + "|" + edge.data.propertyId + "|" + edge.to,
-                                label: edge.fromLabel + " -" + edge.data.propertyLabel + "-> " + edge.toLabel,
-                            });
-                    }
-                });
-                if (paths.length == 0) {
-                    _botEngine.nextStep("empty");
-                    return;
-                }
-                _botEngine.showList(paths, "path", "ok");
-                return;
-            });
-        },
-
-        listAnnotationPropertiesVocabsFn: function () {
-            CommonBotFunctions.listVocabsFn(self.params.source, "annotationPropertyVocab", true);
-        },
-
-        listAnnotationPropertiesFn: function () {
-            // filter properties compatible with
-            CommonBotFunctions.listAnnotationPropertiesFn(self.params.annotationPropertyVocab, "annotationPropertyId");
-        },
-
-        promptAnnotationPropertyValue: function () {
-            _botEngine.promptValue("value contains ", "annotationValue");
-        },
-
-        switchToIndividualsBotFn: function () {
-            OntologyModels.getKGnonObjectProperties(self.params.source, null, function (err, allProps) {
-                var obj = {
-                    label: Sparql_common.getLabelFromURI(self.params.currentClass),
-                    id: self.params.currentClass,
-
-                    source: self.params.source,
-                    nonObjectProperties: allProps[self.params.currentClass].properties,
-                };
-                var currentFilterQuery = {
-                    source: self.currentSource,
-                    currentClass: self.params.currentClass,
-                    varName: "x",
-                };
-
-                KGquery_filter_bot.start(obj, currentFilterQuery, function (err, result) {
-                    var individualBotFilter = "?object <" + result.filterParams.property + "> ?x_" + result.filterParams.propertyLabel + ". " + result.filter;
-                    var typeFilter = " ?subject rdf:type <" + self.params.currentClass + ">.";
-
-                    var options = {
-                        filter: individualBotFilter + typeFilter,
-                        limit: self.searchLimit,
-                        getFilteredTriples2: null,
-                        OnlySubjects: false,
-                        withImports: false,
-                    };
-
-                    Lineage_whiteboard.drawPredicatesGraph(Lineage_sources.activeSource, [], null, options);
-                });
-            });
-        },
-
-        listWhiteBoardFilterType: function () {
+        chooseQueryScopeFn: function () {
             var choices = [
-                { id: "sourceNodes", label: "active Source " },
-                { id: "allSources", label: "all referenced Sources " },
+                { id: "activeSource", label: "active source" },
+                { id: "whiteboardSources", label: "current sources" },
             ];
-            if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                choices.push({ id: "whiteboardNodes", label: "whiteboard nodes" });
+            if (self.params.resourceType == "Class") {
+                choices.push({ id: "", label: "all sources" });
             }
-            if (Lineage_whiteboard.currentGraphNode) {
-                choices.push({ id: "selectedNode", label: "selectedNode" });
+
+            _botEngine.showList(choices, "queryScope");
+        },
+        promptKeywordFn: function () {
+            if (false && self.params.queryScope == "activeSource") {
+                CommonBotFunctions.listVocabClasses(self.params.source, "selectedClass");
+            } else {
+                _botEngine.promptValue("keyword", "keyword", "");
             }
-            _botEngine.showList(choices, "whiteboardFilterType");
+        },
+        showSparqlEditorFn: function () {
+            MainController.onToolSelect("SPARQL");
+            _botEngine.end();
         },
 
-        promptClassesSampleSizeFn: function () {
-            self.params.sampleType = "owl:Class";
-            _botEngine.promptValue("enter sample size", "sampleSize", 500);
-        },
-        promptIndividualsSampleSizeFn: function () {
-            self.params.sampleType = "owl:NamedIndividual";
-            _botEngine.promptValue("enter sample size", "sampleSize", 500);
-        },
-        promptPredicatesSampleSizeFn: function () {
-            self.params.sampleType = "Predicates";
-            _botEngine.promptValue("enter sample size", "sampleSize", 500);
-        },
-        setIndividualsTypeFilter: function () {
-            self.params.allindividuals = true;
-            _botEngine.nextStep();
+        chooseResourceTypeFn: function () {
+            var choices = ["Class", "ObjectProperty", "Individuals"];
+            _botEngine.showList(choices, "resourceType");
         },
 
-        drawRestrictions: function (inverse) {
-            var options = {};
-            var whiteboardFilterType = self.params.whiteboardFilterType;
-            var nodeIds = null;
-            if (whiteboardFilterType == "whiteboardNodes") {
-                Lineage_sources.fromAllWhiteboardSources = true;
-                if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                    data = null;
-                } else {
-                    data = [];
-                    var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
-                    nodes.forEach(function (node) {
-                        if (node.data && (!node.data.type || node.data.type != "literal")) {
-                            data.push(node.id);
+        chooseOutputTypeFn: function () {
+            var choices = ["Tree", "Table", "Graph"];
+            _botEngine.showList(choices, "outputType");
+        },
+
+        searchKeywordFn: function () {
+            var resourceType = self.params.resourceType;
+            if (resourceType == "Class") {
+                self.processClassQuerySearch();
+                // self.processClassQuery()
+            }
+            if (resourceType == "ObjectProperty") {
+                self.processObjectPropertyQuery();
+            }
+        },
+        chooseObjectPropertyResourceTypeFn: function () {
+            var choices = ["RangeAndDomain", "Restriction", "Predicate"];
+
+            _botEngine.showList(choices, "objectPropertyResourceType");
+        },
+
+        choosePredicateFilterFn: function () {
+            var choices = ["filterObjectTypeProperty", "filterDatatypeProperty", "filterSubjectType", "filterObjectType", "_proceed"];
+
+            _botEngine.showList(choices, "predicateFilterType");
+        },
+        setPredicateFilterFn: function () {
+            self.loadIndiviualsModel(self.params.source, function (err, model) {
+                if (self.params.predicateFilterType == "filterObjectTypeProperty") {
+                    var properties = [];
+                    var distinctNodes = {};
+                    model.forEach(function (item) {
+                        if (self.params.IndividualSubjectClass && item.sClass.value != self.params.IndividualSubjectClass) {
+                            return;
+                        }
+                        if (self.params.IndividualObjectClass && item.oClass.value != self.params.IndividualObjectClass) {
+                            return;
+                        }
+
+                        if (!distinctNodes[item.prop.value]) {
+                            distinctNodes[item.prop.value] = 1;
+                            properties.push({
+                                id: item.prop.value,
+                                label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                            });
                         }
                     });
-                }
-            } else {
-                options.allNodes = true;
-            }
-            if (self.params.currentProperty && self.params.currentProperty != "AnyProperty") {
-                options.filter = Sparql_common.setFilter("prop", self.params.currentProperty);
-            }
-            if (self.params.currentClass && self.params.currentClass != "AnyClass") {
-                options.filter = Sparql_common.setFilter(inverse ? "value" : "subject", self.params.currentClass);
-            }
-            if (inverse) {
-                options.inverseRestriction = true;
-            }
-            Lineage_whiteboard.drawRestrictions(self.params.source, nodeIds, null, null, options, function (err, result) {
-                if (err) {
-                }
-                _botEngine.nextStep();
-            });
-        },
-        drawInverseRestrictions: function () {
-            self.functions.drawRestrictions(true);
-        },
-        executeQuery: function () {
-            var source = self.params.source;
-            var currentClass = self.params.currentClass;
-            var currentProperty = self.params.currentProperty;
-            var path = self.params.path;
-            var individualsFilterRole = self.params.individualsFilterRole;
-            var individualsFilterType = self.params.individualsFilterType;
-            var individualsFilterValue = self.params.individualsFilterValue;
-            var allindividuals = self.params.allindividuals;
-            var advancedFilter = self.params.advancedFilter || "";
-            var annotationPropertyId = self.params.annotationPropertyId;
-            var annotationValue = self.params.annotationValue;
 
-            var sampleType = self.params.sampleType;
-            var sampleSize = self.params.sampleSize;
-            var OnlySubjects = false;
-            var withImports = false;
+                    if (properties.length == 0) {
+                        alert("no matching property ");
+                        return self.functions.choosePredicateFilterFn();
+                    }
 
-            function setAnnotationPropertyFilter() {
-                if (!annotationPropertyId) {
-                    return "";
-                }
-                var filterProp = "FILTER (?prop=<" + annotationPropertyId + ">)";
-                var filterValue = annotationValue ? 'FILTER(regex(?object, "' + annotationValue + '", "i"))' : "";
-                return filterProp + "" + filterValue;
-            }
-
-            function getPathFilter() {
-                var filterPath = "";
-                if (!path) {
-                    if (currentClass && currentClass != "AnyClass") {
-                        if (allindividuals) {
-                            return "filter(?prop=rdf:type)" + Sparql_common.setFilter("object", currentClass, null, { useFilterKeyWord: 1 });
+                    common.array.sort(properties, "label");
+                    _botEngine.showList(properties, "IndividualObjectPropertyFilter", null, true, function (selectedValue) {
+                        self.params.IndividualObjectPropertyFilter = selectedValue;
+                        _botEngine.previousStep();
+                    });
+                } else if (self.params.predicateFilterType == "filterSubjectType") {
+                    var distinctValues = {};
+                    var filteredClasses = [];
+                    model.forEach(function (item) {
+                        var ok = false;
+                        if (!self.params.IndividualObjectPropertyFilter && !self.params.IndividualObjectClass) {
+                            ok = true;
+                        } else if (item.prop.value == self.params.IndividualObjectPropertyFilter) {
+                            ok = true;
+                        } else if (item.oClass.value == self.params.IndividualObjectClass) {
+                            ok = true;
                         }
-                        filterPath = Sparql_common.setFilter("subject", currentClass, null, { useFilterKeyWord: 1 });
-                    } else {
-                        withImports = false;
-                        OnlySubjects = true;
-                        filterPath = " ?subject rdf:type owl:Class. filter(!isBlank(?object))   filter (?prop=rdf:type)";
-                    }
-                    if (currentProperty && currentProperty != "AnyProperty") {
-                        OnlySubjects = false;
-                        filterPath = Sparql_common.setFilter("prop", currentProperty);
-                    } else if (!currentClass) {
-                        OnlySubjects = false;
-                        withImports = true;
-                        filterPath = "graph ?g{ ?prop rdf:type owl:ObjectProperty.}" + "?subject rdf:type owl:Class.";
-                    }
 
-                    return filterPath;
-                }
-
-                var array = path.split("|");
-                if (array.length != 3) {
-                    return "";
-                }
-                var propFilter = Sparql_common.setFilter("prop", array[1]);
-                var subjectClassFilter = Sparql_common.setFilter("subjectType", array[0], null, { useFilterKeyWord: 1 });
-                var objectClassFilter = Sparql_common.setFilter("objectType", array[2], null, { useFilterKeyWord: 1 });
-                return propFilter + " " + subjectClassFilter + " " + objectClassFilter;
-            }
-
-            function getIndividualsFilter() {
-                var filter = "";
-
-                if (self.params.individualBotFilter) {
-                    return self.params.individualBotFilter;
-                }
-
-                if (!individualsFilterRole) {
-                    return "";
-                }
-                if (individualsFilterType == "label") {
-                    filter = Sparql_common.setFilter(individualsFilterRole, null, individualsFilterValue);
-                } else if (individualsFilterType == "list") {
-                    filter = Sparql_common.setFilter(individualsFilterRole, individualsFilterValue, null, { useFilterKeyWord: 1 });
-                } else if (individualsFilterType == "advanced") {
-                    filter = advancedFilter;
-                }
-                filter += " ?subject rdf:type owl:NamedIndividual.";
-                return filter;
-            }
-
-            function getWhiteBoardFilter() {
-                var data;
-
-                var whiteboardFilterType = self.params.whiteboardFilterType;
-
-                if (whiteboardFilterType == "selectedNode") {
-                    data = Lineage_whiteboard.currentGraphNode.data.id;
-                } else if (whiteboardFilterType == "whiteboardNodes") {
-                    Lineage_sources.fromAllWhiteboardSources = true;
-                    if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                        data = null;
-                    } else {
-                        data = [];
-                        var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
-                        nodes.forEach(function (node) {
-                            if (node.data && (!node.data.type || node.data.type != "literal")) {
-                                data.push(node.id);
+                        if (ok) {
+                            if (!distinctValues[item.sClass.value]) {
+                                distinctValues[item.sClass.value] = 1;
+                                filteredClasses.push({ id: item.sClass.value, label: item.sClassLabel.value });
                             }
-                        });
-                    }
-                } else if (whiteboardFilterType == "all") {
-                    data = null;
-                } else if (whiteboardFilterType == "allSources") {
-                    // use search engine first
-                    return alert("coming soon");
+                        }
+                    });
+
+                    _botEngine.showList(filteredClasses, "IndividualSubjectClass", null, true, function (selectedValue) {
+                        self.params.IndividualSubjectClass = selectedValue;
+
+                        _botEngine.previousStep();
+                    });
+                } else if (self.params.predicateFilterType == "filterObjectType") {
+                    var filteredClasses = [];
+                    model.forEach(function (item) {
+                        var ok = false;
+                        if (!self.params.IndividualObjectPropertyFilter && !self.params.IndividualSubjectClass) {
+                            ok = true;
+                        } else if (item.prop.value == self.params.IndividualObjectPropertyFilter) {
+                            ok = true;
+                        } else if (item.sClass.value == self.params.IndividualSubjectClass) {
+                            ok = true;
+                        }
+
+                        if (ok) {
+                            if (!distinctValues[item.oClass.value]) {
+                                distinctValues[item.oClass.value] = 1;
+                                filteredClasses.push({ id: item.oClass.value, label: item.oClassLabel.value });
+                            }
+                        }
+                    });
+                    _botEngine.showList(filteredClasses, "IndividualObjectClass", null, true, function (selectedValue) {
+                        self.params.IndividualObjectClass = selectedValue;
+                        _botEngine.previousStep();
+                    });
+                } else if (self.params.predicateFilterType == "_proceed") {
+                    async.series(
+                        [
+                            function (callbackSeries) {
+                                if (!self.params.IndividualObjectClass) {
+                                    return callbackSeries();
+                                }
+                                var currentClass = {
+                                    id: self.params.IndividualObjectClass,
+                                    label: "object",
+                                };
+                                self.runFilterClassBot(model, currentClass, function (err, result) {
+                                    self.params.IndividualObjectFilter = result;
+                                    return callbackSeries();
+                                });
+                            },
+
+                            function (callbackSeries) {
+                                if (!self.params.IndividualSubjectClass) {
+                                    return callbackSeries();
+                                }
+
+                                var currentClass = {
+                                    id: self.params.IndividualSubjectClass,
+                                    label: "subject",
+                                };
+                                self.runFilterClassBot(model, currentClass, function (err, result) {
+                                    self.params.IndividualSubjectFilter = result;
+                                    return callbackSeries();
+                                });
+                            },
+                        ],
+                        function (err) {
+                            if (err) {
+                                return alert(err.responseText || err);
+                            }
+                            self.processIndividualsQuery();
+                            // _botEngine.end()
+                        }
+                    );
                 }
-
-                return data;
-            }
-
-            var data = getWhiteBoardFilter();
-            var filter = "";
-            var limit = null;
-            var getFilteredTriples2 = null;
-            if (sampleType) {
-                getFilteredTriples2 = true;
-
-                if (sampleType == "Predicates") {
-                    filter = " filter(?prop not in (rdf:type,rdfs:subClassOf ))";
-                } else {
-                    filter = " ?subject rdf:type " + sampleType + ". "; //filter(?object!=" + sampleType + ") filter(?prop=rdf:type || ?prop=rdfs:subClassOf )  ";
-                }
-                try {
-                    limit = parseInt(sampleSize);
-                } catch (e) {
-                    alert("wrong number for sampleSize");
-                    return _botEngine.reset();
-                }
-            } else {
-                filter = setAnnotationPropertyFilter() || getPathFilter() + " " + getIndividualsFilter();
-            }
-            var options = {
-                filter: filter,
-                limit: limit,
-                getFilteredTriples2: getFilteredTriples2,
-                OnlySubjects: OnlySubjects,
-                withImports: withImports,
-            };
-
-            Lineage_whiteboard.drawPredicatesGraph(source, data, null, options);
-
-            _botEngine.nextStep();
+            });
         },
     };
 
-    self.getSourceInferredModelVisjsData = function (sourceLabel, callback) {
-        if (self.params.currentSourceInferredModelVijsData) {
-            return callback(null, self.params.currentSourceInferredModelVijsData);
+    self.runFilterClassBot = function (model, currentClass, callback) {
+        if (currentClass) {
+            var currentFilterQuery = {
+                currentClass: currentClass.id,
+                source: self.params.source,
+                varName: currentClass.label,
+            };
+            var data = model.nonObjectPropertiesmap[currentClass.id];
+            KGquery_filter_bot.start(data, currentFilterQuery, function (err, result) {
+                return callback(err, result.filter.replace("_label", "Label"));
+
+                s;
+            });
         }
-        var visjsGraphFileName = self.params.source + "_KGmodelGraph.json";
-        $.ajax({
-            type: "GET",
-            url: `${Config.apiUrl}/data/file?dir=graphs&fileName=${visjsGraphFileName}`,
-            dataType: "json",
-            success: function (result, _textStatus, _jqXHR) {
-                self.params.currentSourceInferredModelVijsData = JSON.parse(result);
-                return callback(null, self.params.currentSourceInferredModelVijsData);
+    };
+
+    self.processClassQuerySearch = function () {
+        var outputType = self.params.outputType;
+        var searchedSources = self.params.queryScope;
+        if (searchedSources == "activeSource") {
+            searchedSources = [Lineage_sources.activeSource];
+        } else if (searchedSources == "whiteboardSources") {
+            searchedSources = Object.keys(Lineage_sources.loadedSources);
+        } else {
+            searchedSources = Config.currentProfile.userSources;
+        }
+        async.series(
+            [
+                //search Elastic
+                function (callbackSeries) {
+                    var options = {
+                        term: self.params.keyword,
+                        searchedSources: searchedSources,
+                        type: "Class",
+                    };
+                    SearchWidget.searchTermInSources(options, function (err, result) {
+                        if (err) {
+                            callbackSeries(err);
+                        }
+                        if (result.length == 0) {
+                            // alert("no result")
+                            return _botEngine.abort("no result");
+                        }
+                        self.params.elasticResult = result;
+                        callbackSeries();
+                    });
+                },
+
+                //tree
+                function (callbackSeries) {
+                    if (outputType != "Tree") {
+                        return callbackSeries();
+                    }
+
+                    UI.openTab("lineage-tab", "classesTab", Lineage_whiteboard.initClassesTab, this);
+                    setTimeout(function () {
+                        SearchWidget.searchResultToJstree("LineageNodesJsTreeDiv", self.params.elasticResult, {}, function (err, _result) {
+                            callbackSeries(err);
+                        });
+                    }, 500);
+                },
+
+                //table
+                function (callbackSeries) {
+                    if (outputType != "Table") {
+                        return callbackSeries();
+                    }
+
+                    var cols = [];
+                    cols.push({ title: "source", defaultContent: "" }, { title: "label", defaultContent: "" }, { title: "uri", defaultContent: "" });
+                    var dataset = [];
+
+                    self.params.elasticResult.forEach(function (item0) {
+                        for (var source in item0.matches) {
+                            item0.matches[source].forEach(function (item) {
+                                var obj = [item.source, item.label, item.id];
+                                if (!item.parents || !item.parents.forEach) {
+                                    var x = 3;
+                                } else {
+                                    item.parents.forEach(function (parent, indexParent) {
+                                        if (indexParent == 0) {
+                                            return;
+                                        }
+                                        if (cols.length <= indexParent + 3) {
+                                            cols.push({ title: "ancestor_" + indexParent, defaultContent: "" });
+                                        }
+
+                                        var parentLabel = self.params.elasticResult.parentIdsLabelsMap[parent];
+                                        obj.push(parentLabel || parent);
+                                    });
+                                }
+                                dataset.push(obj);
+                            });
+                        }
+                    });
+
+                    Export.showDataTable("mainDialogDiv", cols, dataset);
+                    callbackSeries();
+                },
+
+                //graph
+                function (callbackSeries) {
+                    if (outputType != "Graph") {
+                        return callbackSeries();
+                    }
+                    var visjsData = { nodes: [], edges: [] };
+                    var sources = [];
+                    self.params.elasticResult.forEach(function (item0) {
+                        var uniqueNodes = {};
+                        for (var source in item0.matches) {
+                            if (sources.indexOf(source) < 0) {
+                                sources.push(source);
+                            }
+                            item0.matches[source].forEach(function (item) {
+                                if (!uniqueNodes[item.id]) {
+                                    uniqueNodes[item.id] = 1;
+                                    visjsData.nodes.push({
+                                        id: item.id,
+                                        label: item.label,
+                                        shape: "dot",
+                                        color: "#dda",
+                                        data: {
+                                            id: item.id,
+                                            label: item.label,
+                                            source: item.source,
+                                        },
+                                    });
+                                }
+                            });
+                        }
+                    });
+                    Lineage_whiteboard.drawNewGraph(visjsData);
+                    //   Lineage_sources.loadSources(sources);
+
+                    // Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes)
+                    callbackSeries();
+                },
+            ],
+            function (err) {
+                if (err) {
+                    return _botEngine.abort(err.responseText || err);
+                }
+                return _botEngine.end();
+            }
+        );
+    };
+
+    self.processClassQuery = function () {
+        var outputType = self.params.outputType;
+        var searchedSources = self.params.queryScope;
+        if (searchedSources == "activeSource") {
+            searchedSources = [Lineage_sources.activeSource];
+        } else if (searchedSources == "whiteboardSources") {
+            searchedSources = Object.keys(Lineage_sources.loadedSources);
+        } else {
+            searchedSources = Config.currentProfile.userSources;
+        }
+
+        var classes = {};
+        async.series(
+            [
+                //select propertie in Config.ontologiesVocabularyModels
+                function (callbackSeries) {
+                    OntologyModels.registerSourcesModel(searchedSources, { noCache: false }, function (err, result) {
+                        searchedSources.forEach(function (source) {
+                            var sourceOntologyModel = Config.ontologiesVocabularyModels[source];
+                            for (var classId in sourceOntologyModel.classes) {
+                                var classLabel = sourceOntologyModel.classes[classId].label;
+
+                                if ((!self.params.selectedClass && !self.params.keyword) || classLabel.indexOf(self.params.keyword) > -1 || classId == self.params.selectedClass) {
+                                    classes[classId] = sourceOntologyModel.classes[classId];
+                                    classes[classId].source = source;
+                                }
+                            }
+                        });
+
+                        callbackSeries();
+                    });
+                },
+
+                //draw Graph
+                function (callbackSeries) {
+                    if (outputType != "Graph") {
+                        return callbackSeries();
+                    }
+                    if (Object.keys(classes).length > self.maxGraphDisplay) {
+                        return _botEngine.abort("too many nodes to display a usable graph");
+                    }
+                    var visjsData = { nodes: [], edges: [] };
+                    var existingNodes = {};
+                    for (var classId in classes) {
+                        var classLabel = classes[classId].label;
+                        var superClass = classes[classId].superClass;
+                        var superClassLabel = classes[classId].superClassLabel;
+                        var source = classes[classId].source;
+
+                        if (!existingNodes[classId]) {
+                            existingNodes[classId] = 1;
+                            visjsData.nodes.push({
+                                id: classId,
+                                label: classLabel,
+                                shape: "dot",
+                                color: "#d44",
+                                data: {
+                                    id: classId,
+                                    label: classLabel,
+                                    source: source,
+                                },
+                            });
+                        }
+
+                        /*      if (!existingNodes[superClass]) {
+                                      existingNodes[superClass] = 1
+                                      visjsData.nodes.push({
+                                          id: superClass,
+                                          label: superClassLabel,
+                                          shape: "dot",
+                                          color: "#d44",
+                                          data: {
+                                              id: superClass,
+                                              label: superClassLabel,
+                                              source: source
+                                          }
+                                      })
+                                  }
+
+
+                                  visjsData.edges.push({
+                                      id: common.getRandomHexaId(10),
+                                      label: "subClassOf",
+                                      from: classId,
+                                      to: superClass,
+                                      data: {},
+                                      arrows: "to"
+                                  })*/
+                    }
+                    Lineage_whiteboard.drawNewGraph(visjsData);
+                    callbackSeries();
+                },
+            ],
+
+            function (err) {
+                _botEngine.end();
+            }
+        );
+    };
+    self.processObjectPropertyQuery = function () {
+        var outputType = self.params.outputType;
+        var searchedSources = self.params.queryScope;
+        if (searchedSources == "activeSource") {
+            searchedSources = [Lineage_sources.activeSource];
+        } else if (searchedSources == "whiteboardSources") {
+            searchedSources = Object.keys(Lineage_sources.loadedSources);
+        } else {
+            searchedSources = Config.currentProfile.userSources;
+        }
+
+        var objectPropertyResourceType = self.params.objectPropertyResourceType;
+        var properties = {};
+        async.series(
+            [
+                //select propertie in Config.ontologiesVocabularyModels
+                function (callbackSeries) {
+                    OntologyModels.registerSourcesModel(searchedSources, { noCache: false }, function (err, result) {
+                        searchedSources.forEach(function (source) {
+                            var sourceOntologyModel = Config.ontologiesVocabularyModels[source];
+                            for (var property in sourceOntologyModel.properties) {
+                                var propLabel = sourceOntologyModel.properties[property].label;
+                                if (!self.params.keyword || propLabel.indexOf(self.params.keyword) > -1) {
+                                    properties[property] = sourceOntologyModel.properties[property];
+                                    properties[property].source = source;
+                                    properties[property].constraints = sourceOntologyModel.constraints[property] || {};
+                                    properties[property].restrictions = sourceOntologyModel.restrictions[property] || {};
+                                }
+                            }
+                        });
+
+                        callbackSeries();
+                    });
+                },
+
+                //draw Graph
+                function (callbackSeries) {
+                    if (outputType != "Graph") {
+                        return callbackSeries();
+                    }
+                    if (Object.keys(properties).length > self.maxGraphDisplay) {
+                        return _botEngine.abort("too many nodes to display a usable graph");
+                    }
+                    var visjsData = { nodes: [], edges: [] };
+                    var existingNodes = {};
+                    for (var property in properties) {
+                        if (objectPropertyResourceType == "RangeAndDomain" || objectPropertyResourceType == "Restriction") {
+                            var constraints;
+                            var edgeDomainLabel;
+                            var edgeRangeLabel;
+                            var propertyColor;
+                            var arrowDir = "to";
+                            if (objectPropertyResourceType == "RangeAndDomain") {
+                                constraints = properties[property].constraints;
+                                edgeDomainLabel = "domain";
+                                edgeRangeLabel = "range";
+                                propertyColor = "#dfa";
+                            } else if (objectPropertyResourceType == "Restriction") {
+                                constraints = properties[property].restrictions;
+                                edgeDomainLabel = "subClassOf";
+                                edgeRangeLabel = "targetClass";
+                                propertyColor = "#eab3b3";
+                                arrowDir = "from";
+                            }
+
+                            if (!Array.isArray(constraints)) {
+                                constraints = [constraints];
+                            }
+                            constraints.forEach(function (constraint) {
+                                var range = constraint.range;
+                                var domain = constraint.domain;
+                                if (range != domain) {
+                                    if (range) {
+                                        if (!existingNodes[range]) {
+                                            existingNodes[range] = 1;
+                                            visjsData.nodes.push({
+                                                id: range,
+                                                label: constraint.rangeLabel,
+                                                shape: "dot",
+                                                color: "#d44",
+                                                data: {
+                                                    id: range,
+                                                    label: constraint.rangeLabel,
+                                                    source: properties[property].source,
+                                                },
+                                            });
+                                        }
+                                    }
+                                }
+
+                                if (domain) {
+                                    if (!existingNodes[domain]) {
+                                        existingNodes[domain] = 1;
+                                        visjsData.nodes.push({
+                                            id: domain,
+                                            label: constraint.domainLabel,
+                                            shape: "dot",
+                                            color: "#d44",
+                                            data: {
+                                                id: domain,
+                                                label: constraint.domainLabel,
+                                                source: properties[property].source,
+                                            },
+                                        });
+                                    }
+                                }
+                                var label = properties[property].label;
+                                var propertyVisjsId = property; //common.getRandomHexaId(10)
+                                if (!existingNodes[propertyVisjsId]) {
+                                    existingNodes[propertyVisjsId] = 1;
+                                    visjsData.nodes.push({
+                                        id: propertyVisjsId,
+                                        label: label,
+                                        shape: "box",
+                                        color: propertyColor,
+                                        data: {
+                                            id: property,
+                                            label: label,
+                                            source: properties[property].source,
+                                        },
+                                    });
+                                }
+
+                                visjsData.edges.push({
+                                    id: common.getRandomHexaId(10),
+                                    label: edgeRangeLabel,
+                                    from: propertyVisjsId,
+                                    to: range,
+                                    data: {},
+                                    arrows: "to",
+                                });
+                                visjsData.edges.push({
+                                    id: common.getRandomHexaId(10),
+                                    label: edgeDomainLabel,
+                                    from: propertyVisjsId,
+                                    to: domain,
+                                    data: {},
+                                    arrows: arrowDir,
+                                });
+                            });
+                        }
+                    }
+                    Lineage_whiteboard.drawNewGraph(visjsData);
+                    callbackSeries();
+                },
+                function (callbackSeries) {
+                    if (outputType != "Table") {
+                        return callbackSeries();
+                    }
+
+                    var cols = [];
+                    var dataset = [];
+                    cols.push({ title: "source", defaultContent: "" }, { title: "label", defaultContent: "" });
+                    var constraints;
+                    var edgeDomainLabel;
+                    var edgeRangeLabel;
+                    var propertyColor;
+                    var arrowDir = "to";
+                    if (objectPropertyResourceType == "RangeAndDomain") {
+                        cols.push(
+                            { title: "domainLabel", defaultContent: "" },
+                            { title: "rangeLabel", defaultContent: "" },
+                            { title: "domainUri", defaultContent: "" },
+                            { title: "rangeUri", defaultContent: "" }
+                        );
+
+                        edgeDomainLabel = "domain";
+                        edgeRangeLabel = "range";
+                    } else if (objectPropertyResourceType == "Restriction") {
+                        cols.push(
+                            { title: "subClassLabel", defaultContent: "" },
+                            { title: "propertyLabel", defaultContent: "" },
+                            { title: "subClassUri", defaultContent: "" },
+                            { title: "propertyUri", defaultContent: "" }
+                        );
+
+                        edgeDomainLabel = "subClassOf";
+                        edgeRangeLabel = "targetClass";
+                    }
+
+                    cols.push({ title: "Propertyuri", defaultContent: "" }, { title: "superProperty", defaultContent: "" }, { title: "inverseProperty", defaultContent: "" });
+
+                    for (var property in properties) {
+                        if (objectPropertyResourceType == "RangeAndDomain") {
+                            constraints = properties[property].constraints;
+                        } else if (objectPropertyResourceType == "Restriction") {
+                            constraints = properties[property].restrictions;
+                        }
+                        if (!Array.isArray(constraints)) {
+                            constraints = [constraints];
+                        }
+                        constraints.forEach(function (constraint) {
+                            dataset.push([
+                                properties[property].source,
+                                properties[property].label,
+                                constraint.domainLabel,
+                                constraint.rangeLabel,
+                                properties[property].id,
+                                constraint.domain,
+                                constraint.range,
+                                properties[property].superProp || "",
+                                properties[property].inverseProp || "",
+                            ]);
+                        });
+                    }
+
+                    Export.showDataTable("mainDialogDiv", cols, dataset);
+                    callbackSeries();
+                },
+
+                function (callbackSeries) {
+                    if (outputType != "Tree") {
+                        return callbackSeries();
+                    }
+
+                    var constraints;
+                    var edgeDomainLabel;
+                    var edgeRangeLabel;
+                    var propertyColor;
+                    var arrowDir = "to";
+                    if (objectPropertyResourceType == "RangeAndDomain") {
+                        edgeDomainLabel = "domain";
+                        edgeRangeLabel = "range";
+                    } else if (objectPropertyResourceType == "Restriction") {
+                        edgeDomainLabel = "subClassOf";
+                        edgeRangeLabel = "targetClass";
+                    }
+                    var jstreeData = [];
+                    var uniqueNodes = {};
+                    for (var property in properties) {
+                        if (objectPropertyResourceType == "RangeAndDomain") {
+                            constraints = properties[property].constraints;
+                        } else if (objectPropertyResourceType == "Restriction") {
+                            constraints = properties[property].restrictions;
+                        }
+                        if (!Array.isArray(constraints)) {
+                            constraints = [constraints];
+                        }
+
+                        if (!uniqueNodes[properties[property].source]) {
+                            uniqueNodes[properties[property].source] = 1;
+                            jstreeData.push({
+                                id: properties[property].source,
+                                text: properties[property].source,
+                                parent: "#",
+                                data: {
+                                    id: properties[property].source,
+                                    label: properties[property].source,
+                                    source: properties[property].source,
+                                },
+                            });
+                        }
+
+                        var propertyId = common.getRandomHexaId(10);
+                        jstreeData.push({
+                            id: propertyId,
+                            text: properties[property].label,
+                            parent: properties[property].source,
+                            data: {
+                                id: properties[property].id,
+                                label: properties[property].label,
+                                source: properties[property].source,
+                            },
+                        });
+
+                        constraints.forEach(function (constraint) {
+                            var domainId = common.getRandomHexaId(10);
+                            if (constraint.domain) {
+                                jstreeData.push({
+                                    id: domainId,
+                                    text: edgeDomainLabel + " : " + constraint.domainLabel,
+                                    parent: propertyId,
+                                    data: {
+                                        id: constraint.domain,
+                                        label: constraint.domainLabel,
+                                        source: properties[property].source,
+                                    },
+                                });
+                            }
+                            if (constraint.range) {
+                                jstreeData.push({
+                                    id: common.getRandomHexaId(10),
+                                    text: edgeRangeLabel + " : " + constraint.rangeLabel,
+                                    parent: constraint.domain ? domainId : propertyId,
+                                    data: {
+                                        id: constraint.range,
+                                        label: constraint.rangeLabel,
+                                        source: properties[property].source,
+                                    },
+                                });
+                            }
+                        });
+                    }
+                    UI.openTab("lineage-tab", "propertiesTab", Lineage_whiteboard.initPropertiesTab, this);
+                    setTimeout(function () {
+                        var options = {
+                            selectTreeNodeFn: Lineage_properties.onTreeNodeClick,
+                            openAll: true,
+                            // withCheckboxes: true,
+                            contextMenu: Lineage_properties.jstreeContextMenu(),
+                        };
+
+                        JstreeWidget.loadJsTree("Lineage_propertiesTree", jstreeData, options);
+
+                        callbackSeries();
+                    }, 500);
+                },
+            ],
+            function (err) {
+                _botEngine.end();
+            }
+        );
+    };
+
+    self.processIndividualsQuery = function () {
+        var IndividualSubjectClass = self.params.IndividualSubjectClass;
+        var IndividualObjectClass = self.params.IndividualObjectClass;
+        var IndividualObjectPropertyFilter = self.params.IndividualObjectPropertyFilter;
+        var IndividualSubjectFilter = self.params.IndividualSubjectFilter;
+        var IndividualObjectFilter = self.params.IndividualObjectFilter;
+
+        var filter = "";
+        if (IndividualSubjectClass) {
+            filter += "FILTER (?subjectType=<" + IndividualSubjectClass + ">) ";
+        }
+        if (IndividualObjectClass) {
+            filter += "FILTER (?objectType=<" + IndividualObjectClass + ">) ";
+        }
+
+        if (IndividualSubjectFilter) {
+            filter += IndividualSubjectFilter;
+        }
+        if (IndividualObjectFilter) {
+            filter += IndividualObjectFilter;
+        }
+
+        var options = { filter: filter };
+        Sparql_OWL.getFilteredTriples(self.params.source, null, IndividualObjectPropertyFilter, null, options, function (err, result) {});
+    };
+
+    self.loadIndiviualsModel = function (sources, callback) {
+        if (!Array.isArray(sources)) {
+            sources = [sources];
+        }
+
+        if (!self.IndividualsModels) {
+            self.IndividualsModels = {};
+        }
+
+        if (self.IndividualsModels[sources[0]]) {
+            return callback(null, self.IndividualsModels[sources[0]]);
+        }
+
+        var model = [];
+
+        async.eachSeries(
+            sources,
+            function (source, callbackEach) {
+                async.series(
+                    [
+                        //get effective distinct ObjectProperties
+                        function (callbackSeries) {
+                            UI.message("getInferredModel");
+                            OntologyModels.getInferredModel(source, {}, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+                                model = model.concat(result);
+                                callbackSeries();
+                            });
+                        },
+
+                        function (callbackSeries) {
+                            model.classesLabelsMap = {};
+                            model.forEach(function (item) {
+                                if (!model.classesLabelsMap[item.sClass.value]) {
+                                    model.classesLabelsMap[item.sClass.value] = item.sClassLabel.value;
+                                }
+                                if (!model.classesLabelsMap[item.oClass.value]) {
+                                    model.classesLabelsMap[item.oClass.value] = item.oClassLabel.value;
+                                }
+                            });
+                            return callbackSeries();
+                        },
+
+                        function (callbackSeries) {
+                            return callbackSeries();
+                            UI.message("getInferredClassValueDataTypes");
+                            OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+
+                                model.forEach(function (item) {
+                                    if (item.datatype) {
+                                        if (!nonObjectProperties[item.class.value]) {
+                                            nonObjectProperties[item.class.value] = [];
+                                        }
+                                        nonObjectProperties[item.class.value].push({
+                                            label: Sparql_common.getLabelFromURI(item.prop.value),
+                                            id: item.prop.value,
+                                            datatype: item.datatype.value,
+                                        });
+                                    }
+                                });
+                                callbackSeries();
+                            });
+                        },
+                        function (callbackSeries) {
+                            UI.message("loading datatypeProperties");
+                            OntologyModels.getKGnonObjectProperties(source, {}, function (err, nonObjectPropertiesmap) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+
+                                model.nonObjectPropertiesmap = nonObjectPropertiesmap;
+
+                                callbackSeries();
+                            });
+                        },
+                    ],
+                    function (err) {
+                        return callbackEach(err);
+                    }
+                );
             },
-            error: function (err) {
-                return callback(err);
-            },
-        });
+            function (err) {
+                self.IndividualsModels[sources[0]] = model;
+                return callback(err, model);
+            }
+        );
     };
 
     return self;

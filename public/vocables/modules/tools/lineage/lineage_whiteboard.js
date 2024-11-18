@@ -3336,8 +3336,8 @@ attrs.color=self.getSourceColor(superClassValue)
     };
 
     self.graph = {
-        searchNode: function () {
-            self.lineageVisjsGraph.searchNode();
+        searchNode: function (id,word) {
+            self.lineageVisjsGraph.searchNode(id,word);
         },
         setLayout: function (layout) {
             self.lineageVisjsGraph.setLayout();

@@ -83,8 +83,9 @@ self.getTopClasses = function (sourceLabel, options, callback) {
 }
 
 
-    self.drawTopClasses = function (nodeIds, currentDepth) {
-        var options = {}
+    self.drawTopClasses = function (nodeIds, currentDepth,options) {
+       if(!options)
+           options = {}
         var totalDrawnClasses = 0
         var newNodes = []
         options.startLevel = currentDepth + 2
@@ -134,27 +135,65 @@ self.getTopClasses = function (sourceLabel, options, callback) {
     }
 
     self.setHiearchicalLayout = function () {
-        var options = {}
-         options.shape = "box"
-        options.layoutHierarchical= {
+        var options={}
+        if(!self.isHierarchical) {
+            self.isHierarchical=true;
+            options.shape = "box"
+            options.layoutHierarchical = {
                 direction: "LR",
                 sortMethod: "hubsize",
-
                 // parentCentralization: false,
                 shakeTowards: "roots",
                 blockShifting: true,
-
                 edgeMinimization: true,
                 parentCentralization: true,
-
                 nodeSpacing: 30,
                 treeSpacing: 50,
                 levelSeparation: 200,
 
+            };
+        }else{
+            self.isHierarchical=false
+        }
 
-        };
-        self.drawTopClasses ( self.nodeIds, self.currentDepth)
+        Lineage_whiteboard.lineageVisjsGraph.clearGraph()
+        self.drawTopClasses ( self.nodeIds, self.currentDepth,options)
         // Lineage_whiteboard.lineageVisjsGraph.network.setOptions(options);
+    }
+
+
+    self.search=function(type){
+        var term=$("#ontolay_searchTermInput").val()
+
+        $("#classesTab").css("display","none")
+        $("#propertiesTab").css("display","none")
+
+        if(type=="Class"){
+            $("#classesTab").css("display","block")
+            var options={
+                term:term,
+                searchedSources:true
+            }
+
+            SearchWidget.searchTermInSources(options)
+        }
+
+        else if(type=="Property"){
+            $("#propertiesTab").css("display","block")
+            Lineage_properties.searchTermInSources(term,true)
+        }
+        else if(type=="Whitboard"){
+
+            Lineage_whiteboard.graph.searchNode(null, term)
+        }
+
+
+
+
+
+
+
+
     }
 
 

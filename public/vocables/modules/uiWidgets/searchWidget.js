@@ -90,8 +90,8 @@ var SearchWidget = (function () {
         }
 
         var searchAllSources;
-        if (options.searchAllSources) {
-            searchAllSources = options.searchAllSources;
+        if (options.inCurrentSource) {
+            searchAllSources = !options.inCurrentSource;
         } else {
             searchAllSources = $("#GenericTools_searchInAllSources").prop("checked");
         }

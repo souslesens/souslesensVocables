@@ -784,9 +784,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         common.copyTextToClipboard(xmlStr);
     };
 
-    self.searchNode = function (/** @type {any} */ id, /** @type {string | number | string[] | undefined} */ word) {
-        /*   if (word === null && !id)
-    return;*/
+    self.searchNode = function (id, word) {
+
         if (!word || word == "") {
             word = $("#visjsGraph_searchInput").val();
             if (word == "") {

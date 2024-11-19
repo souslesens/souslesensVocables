@@ -77,7 +77,10 @@ self.getTopClasses = function (sourceLabel, options, callback) {
                     break;
                 }
             }
-
+if(!bottomClasses){
+ alert ("this graph has a horizontal hierarchical structure , cannot extract top Classes" )
+ return  Lineage_whiteboard.drawTopConcepts(Lineage_sources.activeSource)
+}
             var nodeIds = [];
             bottomClasses.forEach(function (classUri) {
                 nodeIds.push({ data: { id: classUri } });

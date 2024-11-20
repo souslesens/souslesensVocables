@@ -3427,7 +3427,7 @@ attrs.color=self.getSourceColor(superClassValue)
         if ($("#propertiesTab").children().length == 0) {
             $("#propertiesTab").load("./modules/tools/lineage/html/propertiesTab.html", function (s) {
                 Lineage_whiteboard.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
-                //  Lineage_properties.searchTermInSources();
+                Lineage_properties.searchTermInSources();
                 self.hideShowMoreOptions("show", "Lineage_MorePropertiesOptions");
             });
         }

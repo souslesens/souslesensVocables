@@ -272,7 +272,7 @@ var KGquery = (function () {
                 if(self.currentQueryElement){
                     alias += (self.currentQueryElement.paths.length + 1);
                 }else{
-                    alias += 1;
+                    return;
                 }
                 toNode.alias = alias;
                 return KGquery.addEdgeNodes(fromNode, toNode, edge);

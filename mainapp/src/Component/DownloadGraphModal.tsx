@@ -19,6 +19,7 @@ import {
 import { fetchMe } from "../Utils";
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { writeLog } from "../Log";
+import { createRoot } from "react-dom/client";
 
 interface DownloadGraphModalProps {
     onClose: () => void;
@@ -258,3 +259,21 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
         </Dialog>
     );
 }
+
+declare global {
+    interface Window {
+        DownloadGraphModal: {
+            createApp: (props: Omit<DownloadGraphModalProps, "open">) => void;
+        };
+    }
+}
+
+window.DownloadGraphModal = {
+    createApp: (props: Omit<DownloadGraphModalProps, "open">) => {
+        const container = document.getElementById("mount-download-graph-modal-here");
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const root = createRoot(container!);
+        root.render(<DownloadGraphModal open={true} {...props} />);
+        return root;
+    },
+};

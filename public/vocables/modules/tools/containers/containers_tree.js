@@ -51,6 +51,7 @@ var Containers_tree = (function () {
         // set rootnodes
         data.forEach(function (item) {
             var id = item.member.value;
+            var jstreeId = common.getRandomHexaId(5);
             var label = item.memberLabel ? item.memberLabel.value : Sparql_common.getLabelFromURI(item.member.value);
             var jstreeId = "_" + common.getRandomHexaId(8);
 

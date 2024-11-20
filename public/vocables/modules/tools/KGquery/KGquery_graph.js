@@ -78,9 +78,9 @@ var KGquery_graph = (function () {
                     KGquery_graph.message("loading graph display");
                     self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                         if (err) {
-                            // return callbackSeries("notFound");
+                            return callbackSeries("notFound");
 
-                            self.DrawImportsCommonGraph(source);
+                            //self.DrawImportsCommonGraph(source);
                             ///  return callbackSeries("generate commonGraph");
                         }
                         visjsData = result;
@@ -431,6 +431,7 @@ var KGquery_graph = (function () {
                     callback("no inferred model for source " + source);
                 }
 
+                var reflexiveEdges = {};
                 inferredModel.forEach(function (item) {
                     item.sClass = item.sClass || item.sparent;
                     item.oClass = item.oClass || item.oparent;
@@ -482,7 +483,14 @@ var KGquery_graph = (function () {
                             color: Lineage_whiteboard.defaultPredicateEdgeColor,
                         };
                         if (item.sClass.value == item.oClass.value) {
-                            (edge.dashes = [5, 5]), (edge.selfReference = { renderBehindTheNode: true, size: 50 });
+                            if (!reflexiveEdges[item.sClass.value]) {
+                                reflexiveEdges[item.sClass.value] = 0;
+                            }
+
+                            var edgeSize = 30 + reflexiveEdges[item.sClass.value];
+
+                            (edge.dashes = [5, 5]), (edge.selfReference = { renderBehindTheNode: true, size: edgeSize });
+                            reflexiveEdges[item.sClass.value] += 15;
                         }
                         visjsData.edges.push(edge);
                     }

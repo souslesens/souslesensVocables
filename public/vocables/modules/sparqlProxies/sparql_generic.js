@@ -102,34 +102,34 @@ var Sparql_generic = (function () {
     };
 
     /**
-   *
-   * request example with collection filtering
-   PREFIX  terms:<http://purl.org/dc/terms/> PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX  elements:<http://purl.org/dc/elements/1.1/>  select distinct ?child1,?child1Label, ?subjectLabel,?collLabel  FROM <http://souslesens/thesaurus/TEST/>   WHERE {?child1 skos:broader ?subject.
+     *
+     * request example with collection filtering
+     PREFIX  terms:<http://purl.org/dc/terms/> PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX  elements:<http://purl.org/dc/elements/1.1/>  select distinct ?child1,?child1Label, ?subjectLabel,?collLabel  FROM <http://souslesens/thesaurus/TEST/>   WHERE {?child1 skos:broader ?subject.
 
-  ?subject skos:prefLabel ?subjectLabel.
+     ?subject skos:prefLabel ?subjectLabel.
 
-  OPTIONAL{ ?child1 skos:prefLabel ?child1Label. } .filter( ?subject =<http://souslesens/thesaurus/TEST/9d53e3925c>)OPTIONAL{?child1 rdf:type ?child1Type.}
+     OPTIONAL{ ?child1 skos:prefLabel ?child1Label. } .filter( ?subject =<http://souslesens/thesaurus/TEST/9d53e3925c>)OPTIONAL{?child1 rdf:type ?child1Type.}
 
-  ?collection skos:member* ?acollection. ?acollection rdf:type skos:Collection.   ?collection skos:prefLabel ?collLabel.  ?acollection skos:prefLabel ?acollLabel.filter (?collection= <http://souslesens/thesaurus/TEST/5d97abb964> )
-   ?acollection skos:member ?aconcept. ?aconcept rdf:type skos:Concept.?aconcept skos:prefLabel ?aconceptLabel.
-  ?childX skos:broader ?aconcept.?childX skos:prefLabel ?childLabel.  ?childX skos:broader* ?child1
+     ?collection skos:member* ?acollection. ?acollection rdf:type skos:Collection.   ?collection skos:prefLabel ?collLabel.  ?acollection skos:prefLabel ?acollLabel.filter (?collection= <http://souslesens/thesaurus/TEST/5d97abb964> )
+     ?acollection skos:member ?aconcept. ?aconcept rdf:type skos:Concept.?aconcept skos:prefLabel ?aconceptLabel.
+     ?childX skos:broader ?aconcept.?childX skos:prefLabel ?childLabel.  ?childX skos:broader* ?child1
 
-}ORDER BY ?child1Label limit 1000
+     }ORDER BY ?child1Label limit 1000
 
-   *
-   * @param
-    sourceLabel
-   * @param
-    words
-   * @param
-    ids
-   * @param
-    descendantsDepth
-   * @param
-    options
-   * @param
-    callback
-   */
+     *
+     * @param
+     sourceLabel
+     * @param
+     words
+     * @param
+     ids
+     * @param
+     descendantsDepth
+     * @param
+     options
+     * @param
+     callback
+     */
 
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         $("#waitImg").css("display", "block");
@@ -415,9 +415,15 @@ var Sparql_generic = (function () {
     };
 
     self.triplesObjectToString = function (item) {
-        if (!item.subject) item.subject = item.s;
-        if (!item.predicate) item.predicate = item.p;
-        if (!item.object) item.object = item.o;
+        if (!item.subject) {
+            item.subject = item.s;
+        }
+        if (!item.predicate) {
+            item.predicate = item.p;
+        }
+        if (!item.object) {
+            item.object = item.o;
+        }
 
         var allowedPrefixes = Object.keys(Config.defaultSparqlPrefixes);
 
@@ -497,7 +503,9 @@ var Sparql_generic = (function () {
         }
         var graphUri;
         if (!sourceLabel) {
-            if (!options.graphUri) return callback("no sourceLabel or graphUri");
+            if (!options.graphUri) {
+                return callback("no sourceLabel or graphUri");
+            }
             graphUri = options.graphUri;
         } else {
             graphUri = Config.sources[sourceLabel].graphUri;
@@ -614,7 +622,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     try {
                         var regex = / (\d)+ /;
                         resultSize = result.match(regex)[1];
-                        if (resultSize) resultSize = parseInt(resultSize);
+                        if (resultSize) {
+                            resultSize = parseInt(resultSize);
+                        }
                     } catch (e) {
                         console.log(e);
                         resultSize = -1;
@@ -956,8 +966,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                             "OPTIONAL{?subject skos:altLabel \n" +
                             "          ?skosAltLabel. } }" +
                             " UNION " +
-                            "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  }" +
+                            "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel } " +
                             filter +
+                            " }" +
                             "UNION  {" +
                             "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +
                             filter +

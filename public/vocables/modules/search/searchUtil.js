@@ -579,10 +579,6 @@ indexes.push(source.toLowerCase());
 
                         // indexNamedIndividuals
                         function (callbackSeries) {
-                            /*   if (true || !options.indexNamedIndividuals) {
-                  return callbackSeries();
-              }*/
-
                             var taxonomyClassesIdsMap = {};
                             taxonomyClasses.forEach(function (item) {
                                 taxonomyClassesIdsMap[item.id] = item;

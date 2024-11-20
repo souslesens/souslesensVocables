@@ -1442,7 +1442,9 @@ var Sparql_OWL = (function () {
 
         var filterStr = "";
         if (subClassIds) {
-            subClassIds = OntologyModels.filterClassIds(sourceLabel, subClassIds);
+            var filteredClasses = OntologyModels.filterClassIds(sourceLabel, subClassIds);
+            if (filteredClasses.length != 0) subClassIds = filteredClasses;
+
             if (options.inverseRestriction) {
                 filterStr = Sparql_common.setFilter("value", subClassIds, null, options);
             } else {

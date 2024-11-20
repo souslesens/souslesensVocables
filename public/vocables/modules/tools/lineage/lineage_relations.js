@@ -523,7 +523,7 @@ var Lineage_relations = (function () {
                     /*reflexiveEdges.forEach(function(edge){
                         if(!reflexiveEdgesSizes[edge.to]){
                             reflexiveEdgesSizes[edge.to]=5;
-                        }
+                        } 
                         else{
                             reflexiveEdgesSizes[edge.to]+=15;
                         }

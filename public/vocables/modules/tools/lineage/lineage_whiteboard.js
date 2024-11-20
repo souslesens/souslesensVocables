@@ -2665,6 +2665,9 @@ restrictionSource = Config.predicatesSource;
      * @returns {void|*}
      */
     self.drawNodesAndParents = function (nodes, ancestorsDepth, options, callback) {
+        if(!options){
+            options={}
+        }
         var source = Lineage_sources.activeSource;
         if (!Array.isArray(nodes)) {
             nodes = [nodes];
@@ -3432,7 +3435,7 @@ attrs.color=self.getSourceColor(superClassValue)
     self.initContainersTab = function () {
         if ($("#containersTab").children().length == 0) {
             $("#containersTab").load("./modules/tools//lineage/html/containersTab.html", function (s) {
-                //Containers_tree.search("lineage_containers_containersJstree");
+                Containers_tree.search("lineage_containers_containersJstree");
             });
         }
     };

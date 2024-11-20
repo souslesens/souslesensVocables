@@ -492,8 +492,11 @@ sourceDivId +
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource();">Group</span>' +
             '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();">Ungroup</span>' +
             '<span  class="popupMenuItem" onclick="Lineage_sources.menuActions.copyGraphUri();"> copy graph URI </span>';
-        if (source !== "_defaultSource" && self.isSourceOwnedByUser(source)) {
-            html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.editSource();">Edit</span>';
+        if (source !== "_defaultSource") {
+            if (self.isSourceOwnedByUser(source)) {
+                html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.editSource();">Edit</span>';
+            }
+            html += '<span class="popupMenuItem" onclick="Lineage_sources.menuActions.downloadGraph();">Download</span>';
         }
         PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
     };
@@ -752,6 +755,9 @@ sourceDivId +
         },
         editSource: function () {
             window.EditSourceDialog.open(Lineage_sources.activeSource);
+        },
+        downloadGraph: function () {
+            window.DownloadGraphModal.open(Lineage_sources.activeSource);
         },
     };
 

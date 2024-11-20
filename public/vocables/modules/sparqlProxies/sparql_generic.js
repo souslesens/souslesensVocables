@@ -134,7 +134,7 @@ var Sparql_generic = (function () {
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         $("#waitImg").css("display", "block");
         if (!options) {
-            options = {depth: 0};
+            options = { depth: 0 };
         }
         options.source = sourceLabel;
         var fitlerType;
@@ -183,7 +183,7 @@ var Sparql_generic = (function () {
         }
         $("#waitImg").css("display", "block");
         if (!options) {
-            options = {depth: 0};
+            options = { depth: 0 };
         }
         options.source = sourceLabel;
 
@@ -233,7 +233,7 @@ var Sparql_generic = (function () {
 
     self.getSingleNodeAllGenealogy = function (sourceLabel, id, callback) {
         if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
-            Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, {source: sourceLabel}, function (err, result) {
+            Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, { source: sourceLabel }, function (err, result) {
                 callback(err, result);
             });
             return;
@@ -257,7 +257,7 @@ var Sparql_generic = (function () {
         query += "limit " + sourceVariables.limit + " ";
 
         var url = sourceVariables.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -287,7 +287,7 @@ var Sparql_generic = (function () {
         query += "limit " + sourceVariables.limit + " ";
 
         var url = sourceVariables.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -316,7 +316,7 @@ var Sparql_generic = (function () {
 
         query += "}limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: sourceLabel}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -359,7 +359,7 @@ var Sparql_generic = (function () {
 
                 var query = " select    distinct * " + sourceVariables.fromStr + "  WHERE {" + "?subject ?prop ?value. FILTER (?subject in" + filterStr + ")} limit " + sliceSize + 1;
                 let url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -406,7 +406,7 @@ var Sparql_generic = (function () {
         query += "with <" + graphUri + "> " + " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}";
         var queryOptions = "";
         let url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source: sourceLabel}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -541,7 +541,7 @@ var Sparql_generic = (function () {
                 }
                 // console.log(query)
                 var url = Config.sources[sourceLabel] ? Config.sources[sourceLabel].sparql_server.url : Config.sparql_server.url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, _result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
                     return callbackEach(err);
                 });
             },
@@ -591,7 +591,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             }
         }
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             return callback(err, _result);
         });
     };
@@ -616,7 +616,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
             function (callbackWhilst) {
                 var queryOffest = query + " offset=" + offset + "limit =" + limit;
-                Sparql_proxy.querySPARQL_GET_proxy(url, queryOffest, null, {source: fromSourceLabel}, function (err, _result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, queryOffest, null, { source: fromSourceLabel }, function (err, _result) {
                     var result = result.results.bindings[0]["callret-0"].value;
 
                     try {
@@ -653,7 +653,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             fromStr +
             " WHERE {?s ?p ?o. optional{?p ?x ?pLabel. filter(?x in (skos:prefLabel,rdfs:label))}}";
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (_err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (_err, result) {
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["p"]);
             return callback(null, result.results.bindings);
         });
@@ -793,7 +793,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                             var query = " WITH GRAPH  <" + toGraphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
 
                             var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
-                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: fromSourceLabel}, function (err, _result) {
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: fromSourceLabel }, function (err, _result) {
                                 return callbackEach(err);
                             });
                         },
@@ -834,7 +834,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         _fields.forEach(function (_field) {
             bindings.forEach(function (item) {
                 if (item[_field] && !item[_field + "Label"]) {
-                    item[_field + "Label"] = {value: Sparql_common.getLabelFromURI(item[_field].value)};
+                    item[_field + "Label"] = { value: Sparql_common.getLabelFromURI(item[_field].value) };
                 }
 
                 //   item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
@@ -864,9 +864,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     }
                     if (!options.noType && !item[field + "Type"]) {
                         if (options.type) {
-                            item[field + "Type"] = {value: options.type};
+                            item[field + "Type"] = { value: options.type };
                         } else {
-                            item[field + "Type"] = {value: "http://www.w3.org/2004/02/skos/core#Concept"};
+                            item[field + "Type"] = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
                         }
                     }
                     var id = item[field].value;
@@ -877,10 +877,10 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                         } else {
                             var p = id.lastIndexOf("#");
                             if (p > -1) {
-                                item[field + "Label"] = {value: id.substring(p + 1)};
+                                item[field + "Label"] = { value: id.substring(p + 1) };
                             } else {
                                 p = id.lastIndexOf("/");
-                                item[field + "Label"] = {value: id.substring(p + 1)};
+                                item[field + "Label"] = { value: id.substring(p + 1) };
                             }
                         }
                     }
@@ -1181,7 +1181,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                 },
             ],
             function (err) {
-                return callback(err, {classesMap: allClassesMap, labels: allLabels});
+                return callback(err, { classesMap: allClassesMap, labels: allLabels });
             }
         );
     };

@@ -268,10 +268,10 @@ var KGquery = (function () {
                     KGquery.addEdgeNodes(fromNode, toNode, edge);
                 });
             } else {
-                var alias=toNode.label;
-                if(self.currentQueryElement){
-                    alias += (self.currentQueryElement.paths.length + 1);
-                }else{
+                var alias = toNode.label;
+                if (self.currentQueryElement) {
+                    alias += self.currentQueryElement.paths.length + 1;
+                } else {
                     alias += 1;
                 }
                 toNode.alias = alias;

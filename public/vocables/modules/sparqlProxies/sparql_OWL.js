@@ -378,7 +378,13 @@ var Sparql_OWL = (function () {
 
         fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
-        var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "+ "select distinct * " + fromStr + " where {";
+        var query =
+            " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "select distinct * " +
+            fromStr +
+            " where {";
         if (options.selectGraph && Config.sources[sourceLabel].graphUri) {
             query += "graph ?g ";
         }
@@ -1436,9 +1442,8 @@ var Sparql_OWL = (function () {
 
         var filterStr = "";
         if (subClassIds) {
-           var filteredClasses  = OntologyModels.filterClassIds(sourceLabel, subClassIds);
-           if(filteredClasses.length!=0)
-               subClassIds=filteredClasses;
+            var filteredClasses = OntologyModels.filterClassIds(sourceLabel, subClassIds);
+            if (filteredClasses.length != 0) subClassIds = filteredClasses;
 
             if (options.inverseRestriction) {
                 filterStr = Sparql_common.setFilter("value", subClassIds, null, options);

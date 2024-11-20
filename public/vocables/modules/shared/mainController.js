@@ -271,14 +271,14 @@ var MainController = (function () {
         } else {
             UI.cleanPage();
             self.initTool(toolId);
-            if(toolId!='OntoCreator'){
+            if (toolId != "OntoCreator") {
                 $("#mainDialogDiv").dialog({
                     close: function () {
                         UI.homePage();
-                    }
+                    },
                 });
             }
-           
+
             //Config.userTools[self.currentTool].controller.unload=UI.homePage;
             self.currentSource = null;
         }

@@ -1,9 +1,8 @@
-import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
-import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-import Lineage_sources from "./lineage_sources.js";
+import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
+import Sparql_common from "../sparqlProxies/sparql_common.js";
 
-var Lineage_subGraph = (function () {
+
+var SubGraph = (function () {
     var self = {};
 
     self.getSubGraphResources = function (sourceLabel, baseClassId, callback) {
@@ -13,6 +12,12 @@ var Lineage_subGraph = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         async.series(
             [
+
+                function (callbackSeries) {
+                    OntologyModels.registerSourcesModel(sourceLabel,null, function(err, result){
+                        callbackSeries(err);
+                    })
+                },
                 ///getsubClasses
                 function (callbackSeries) {
                     var treeData = OntologyModels.getClassHierarchyTreeData(sourceLabel, baseClassId, "descendants");
@@ -167,6 +172,7 @@ var Lineage_subGraph = (function () {
                         }
                     }
                 }
+                return callback(null, newTriples)
             });
         });
     };
@@ -247,5 +253,5 @@ var Lineage_subGraph = (function () {
     return self;
 })();
 
-export default Lineage_subGraph;
-window.Lineage_subGraph = Lineage_subGraph;
+export default SubGraph;
+window.SubGraph = SubGraph;

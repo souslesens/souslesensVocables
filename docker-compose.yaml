@@ -1,7 +1,7 @@
 services:
     vocables:
         restart: unless-stopped
-        image: souslesensvocables:${TAG:-latest}
+        image: souslesensvocables:${VOCABLES_TAG:-latest}
         build:
             context: .
             dockerfile: Dockerfile
@@ -20,15 +20,9 @@ services:
             VOCABLES__sparql_server__user: dba
             VOCABLES__sparql_server__password: ${DBA_PASSWORD}
             VOCABLES__formalOntologySourceLabel: ${FORMAL_ONTOLOGY_SOURCE_LABEL}
-            VOCABLES__SQLserver__user: SA
-            VOCABLES__SQLserver__password: ${SA_PASSWORD}
-            VOCABLES__SQLserver__server: sqlserver
-            VOCABLES__SQLserver__database: master
             VOCABLES__ElasticSearch__url: http://elasticsearch:9200/
-            VOCABLES__annotator__spacyServerUrl: http://spacyserver:8000/pos
             VOCABLES__jowlServer__url: http://jowl:9170
             VOCABLES__slsApi__url: http://sls-api:8008
-            VOCABLES__wiki__url: ""
         networks:
             - backend
 
@@ -53,17 +47,6 @@ services:
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         volumes:
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/postgres:/var/lib/postgresql/data"
-        networks:
-            - backend
-
-    sqlserver:
-        image: mcr.microsoft.com/mssql/server:2019-latest
-        environment:
-            ACCEPT_EULA: "Y"
-            SA_PASSWORD: ${SA_PASSWORD}
-        volumes:
-            - "${DATA_ROOT_DIR:-/tmp}/souslesens/sqlserver:\
-              /var/opt/mssql"
         networks:
             - backend
 
@@ -95,11 +78,11 @@ services:
     sls-api:
         image: sls-api:latest
         build:
-            context: ${SLS_API_PATH}
+            context: ${SLSPYAPI_PATH}
             dockerfile: Dockerfile
         restart: always
         ports:
-            - ${SLS_API_LISTEN_PORT:-8008}:8000
+            - ${SLSPYAPI_LISTEN_PORT:-8008}:8000
         environment:
             MAIN_SOUSLESENS_CONFIG_DIR: /souslesens_config
             MAIN_LOG_LEVEL: debug

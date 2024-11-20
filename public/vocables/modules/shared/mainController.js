@@ -241,7 +241,10 @@ var MainController = (function () {
 
         if (self.currentTool != null) {
             if (toolId == "lineage") {
-                Lineage_sources.registerSource = self.oldRegisterSource;
+                if(self.oldRegisterSource){
+                    Lineage_sources.registerSource = self.oldRegisterSource;
+                }
+                
             }
             if (Config.userTools[self.currentTool].controller.unload) {
                 try {

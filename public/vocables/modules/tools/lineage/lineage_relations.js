@@ -516,6 +516,31 @@ var Lineage_relations = (function () {
                         return callbackSeries();
                     }
                 },
+                // reflexive edges treatement
+                function(callbackSeries){
+                    var reflexiveEdgesSizes={}
+                    var reflexiveEdges=allVisjsData.edges.filter(function(edge){if(edge.to==edge.from){return edge}});
+                    /*reflexiveEdges.forEach(function(edge){
+                        if(!reflexiveEdgesSizes[edge.to]){
+                            reflexiveEdgesSizes[edge.to]=5;
+                        } 
+                        else{
+                            reflexiveEdgesSizes[edge.to]+=15;
+                        }
+                    });*/
+                    var reflexiveEdgesIds=reflexiveEdges.map(function(edge){ return edge.id});
+                    allVisjsData.edges.forEach(function(edge){
+                        if(reflexiveEdgesIds.includes(edge.id)){
+                            if(!reflexiveEdgesSizes[edge.to]){
+                                reflexiveEdgesSizes[edge.to]=15;
+                            }
+                            edge.selfReference={size:reflexiveEdgesSizes[edge.to]};
+                            reflexiveEdgesSizes[edge.to]+=15;
+                        }
+                    });
+                    callbackSeries();
+
+                }
             ],
 
             function (err) {

@@ -2665,6 +2665,9 @@ restrictionSource = Config.predicatesSource;
      * @returns {void|*}
      */
     self.drawNodesAndParents = function (nodes, ancestorsDepth, options, callback) {
+        if(!options){
+            options={}
+        }
         var source = Lineage_sources.activeSource;
         if (!Array.isArray(nodes)) {
             nodes = [nodes];
@@ -3403,10 +3406,10 @@ attrs.color=self.getSourceColor(superClassValue)
             $("#classesTab").load("./modules/tools//lineage/html/classesTab.html", function (s) {
                 SearchWidget.targetDiv = "LineageNodesJsTreeDiv";
                 //$("#GenericTools_searchAllDiv").load("./snippets/searchAllResponsive.html", function () {
-                SearchWidget.init();
+                //SearchWidget.init();
                 $("#GenericTools_searchInAllSources").prop("checked", false);
                 $("#Lineage_MoreClassesOptions").hide();
-                SearchWidget.showTopConcepts();
+                //SearchWidget.showTopConcepts();
                 self.hideShowMoreOptions("show", "Lineage_MoreClassesOptions");
                 /*
                     $("#lateralPanelDiv").resizable({

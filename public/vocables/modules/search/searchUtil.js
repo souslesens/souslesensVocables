@@ -680,6 +680,8 @@ indexes.push(source.toLowerCase());
                                 );
                             });
                         },
+
+                        // containers --> like classes --> care to refresh
                     ],
                     function (err) {
                         // UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());

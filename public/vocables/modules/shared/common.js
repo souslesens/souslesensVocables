@@ -993,7 +993,7 @@ if (callback) return callback(err);
             localStorage.setItem(localStorageVar, JSON.stringify(Varcontent));
         }
         if (Varcontent && !Varcontent.includes(stringToStore)) {
-            if (Varcontent.length >= satckSize || 5) {
+            if (Varcontent.length >= satckSize) {
                 Varcontent.shift();
             }
             Varcontent.push(stringToStore);

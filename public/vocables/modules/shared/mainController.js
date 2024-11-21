@@ -278,13 +278,21 @@ var MainController = (function () {
         } else {
             UI.cleanPage();
             self.initTool(toolId);
-            if (toolId != "OntoCreator") {
-                $("#mainDialogDiv").dialog({
+            var homePageOptions={};
+            if (toolId != "ConfigEditor") {
+                homePageOptions["notRefresh"]=true;
+            }
+            if(Config.userTools[toolId].resetURLParamsDiv){
+                $("#"+Config.userTools[toolId].resetURLParamsDiv).dialog({
                     close: function () {
-                        UI.homePage();
+                        UI.homePage(homePageOptions);
+                        
+                        
                     },
                 });
             }
+           
+            
 
             //Config.userTools[self.currentTool].controller.unload=UI.homePage;
             self.currentSource = null;

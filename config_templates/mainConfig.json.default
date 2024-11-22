@@ -63,9 +63,11 @@
         "searchChunkSize": 20
     },
     "jowlServer": {
+        "enabled": true,
         "url": "http://localhost"
     },
     "slsApi": {
+        "enabled": true,
         "url": "http://localhost:8008"
     },
     "authenticationDatabase": {

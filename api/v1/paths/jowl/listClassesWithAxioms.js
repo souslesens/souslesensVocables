@@ -1,4 +1,3 @@
-
 const { processResponse } = require("../utils");
 const request = require("request");
 const async = require("async");
@@ -12,32 +11,33 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-
-
-      var  jowlConfigUrl=ConfigManager.config.jowlServer.url
-        if(!jowlConfigUrl.endsWith("/"))
-            jowlConfigUrl+="/"
-                jowlConfigUrl+="axioms/listClassesWithAxioms";
-
-        var payload={
-            "graphName": req.query.graphName
-
-
+        const jowlServerConfig = ConfigManager.config.jowlServer;
+        if (!jowlServerConfig.enabled) {
+            res.status(500).json({ message: "Jowl Server is disable"});
         }
 
-                    var options = {
-                        method: "POST",
-                        json: payload,
-                        headers: {
-                            "content-type": "application/json",
-                        },
-                        url: jowlConfigUrl,
-                    };
-                    request(options, function (error, response, body) {
-                        return processResponse(res, error, body);
-                    });
-                }
+        let jowlConfigUrl = jowlServerConfig.url;
+        if (!jowlConfigUrl.endsWith("/")) {
+            jowlConfigUrl += "/";
+        }
+        jowlConfigUrl += "axioms/listClassesWithAxioms";
 
+        const payload = {
+            "graphName": req.query.graphName,
+        }
+
+        const options = {
+            method: "POST",
+            json: payload,
+            headers: {
+                "content-type": "application/json",
+            },
+            url: jowlConfigUrl,
+        };
+        request(options, function (error, response, body) {
+            return processResponse(res, error, body);
+        });
+    }
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],

@@ -85,30 +85,28 @@ var Lineage_decoration = (function () {
                 },
                 // named Individuals parentClass
                 function (callbackSeries) {
-                    
-                    var namedIndividualNodes=[];
+                    var namedIndividualNodes = [];
                     for (var classUri in distinctNodeClassesMap) {
-                        if(distinctNodeClassesMap[classUri][0].data.rdfType == 'NamedIndividual'){
+                        if (distinctNodeClassesMap[classUri][0].data.rdfType == "NamedIndividual") {
                             namedIndividualNodes.push(classUri);
                         }
                     }
-                    if(namedIndividualNodes.length==0){
-                       return callbackSeries();
+                    if (namedIndividualNodes.length == 0) {
+                        return callbackSeries();
                     }
-                    Sparql_OWL.getNodeParents(Lineage_sources.activeSource,null,namedIndividualNodes,1,{},function(err,result){
-                        result.forEach(function(parent){
-                            if(namedIndividualNodes.includes(parent.subject.value)){
-                                var allTypes=parent.subjectTypes.value.split(',')
+                    Sparql_OWL.getNodeParents(Lineage_sources.activeSource, null, namedIndividualNodes, 1, {}, function (err, result) {
+                        result.forEach(function (parent) {
+                            if (namedIndividualNodes.includes(parent.subject.value)) {
+                                var allTypes = parent.subjectTypes.value.split(",");
                                 var nodeType;
-                                for(var type in allTypes){
-                                    if(allTypes[type] != "http://www.w3.org/2002/07/owl#NamedIndividual"){
-                                        nodeType=allTypes[type];
+                                for (var type in allTypes) {
+                                    if (allTypes[type] != "http://www.w3.org/2002/07/owl#NamedIndividual") {
+                                        nodeType = allTypes[type];
                                     }
                                 }
-                                if(nodeType ){
-                                    distinctNodeClassesMap[ parent.subject.value][0].data.parentClass= nodeType;
+                                if (nodeType) {
+                                    distinctNodeClassesMap[parent.subject.value][0].data.parentClass = nodeType;
                                 }
-                                
                             }
                         });
                         callbackSeries();
@@ -129,33 +127,28 @@ var Lineage_decoration = (function () {
                     var classes = Object.keys(distinctNodeClassesMap);
 
                     for (var classUri in distinctNodeClassesMap) {
-                        
-                       
-                            var ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, classUri, "ancestors");
-                            if(distinctNodeClassesMap[classUri][0].data.rdfType == 'NamedIndividual'){
-                                ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource,distinctNodeClassesMap[classUri][0].data.parentClass  , "ancestors");
-                            }
-                            if (!ancestors) {
-                                var x = 3;
-                            } else {
-
-                                var color = null;   
-                                ancestors.forEach(function (ancestor) {
-                                    if (!color) {
-                                        color = self.getPredefinedColor(ancestor.id, Config.currentTopLevelOntology);
-                                        if (color) {
-                                            ancestor.color = color;
-                                            legendColorsMap[ancestor.id] = ancestor;
-                                        }
-                                    }
-                                });
+                        var ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, classUri, "ancestors");
+                        if (distinctNodeClassesMap[classUri][0].data.rdfType == "NamedIndividual") {
+                            ancestors = OntologyModels.getClassHierarchyTreeData(Lineage_sources.activeSource, distinctNodeClassesMap[classUri][0].data.parentClass, "ancestors");
+                        }
+                        if (!ancestors) {
+                            var x = 3;
+                        } else {
+                            var color = null;
+                            ancestors.forEach(function (ancestor) {
                                 if (!color) {
-                                    color = "#ddd";
+                                    color = self.getPredefinedColor(ancestor.id, Config.currentTopLevelOntology);
+                                    if (color) {
+                                        ancestor.color = color;
+                                        legendColorsMap[ancestor.id] = ancestor;
+                                    }
                                 }
-                                distinctNodeClassesMap[classUri].color = color;
+                            });
+                            if (!color) {
+                                color = "#ddd";
                             }
-                        
-                        
+                            distinctNodeClassesMap[classUri].color = color;
+                        }
                     }
 
                     callbackSeries();
@@ -186,22 +179,21 @@ var Lineage_decoration = (function () {
                 function (callbackSeries) {
                     var newVisJsNodes = [];
                     // get source decoration data
-                    
 
                     Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     for (var key in distinctNodeClassesMap) {
                         distinctNodeClassesMap[key].forEach(function (node) {
-                            var newNode={ id: node.id, color: distinctNodeClassesMap[key].color };
+                            var newNode = { id: node.id, color: distinctNodeClassesMap[key].color };
                             // blank nodes
-                            if(newNode.id.startsWith("_:b")){
-                                newNode.shape='hexagon'
+                            if (newNode.id.startsWith("_:b")) {
+                                newNode.shape = "hexagon";
                             }
                             // class with icons
-                            if(Lineage_whiteboard.decorationData[Lineage_sources.activeSource] && Lineage_whiteboard.decorationData[Lineage_sources.activeSource][node.id]?.image){
+                            if (Lineage_whiteboard.decorationData[Lineage_sources.activeSource] && Lineage_whiteboard.decorationData[Lineage_sources.activeSource][node.id]?.image) {
                                 node.image = Lineage_whiteboard.decorationData[Lineage_sources.activeSource][node.id].image;
                                 node.shape = "circularImage";
                             }
-        
+
                             newVisJsNodes.push(newNode);
                         });
                     }

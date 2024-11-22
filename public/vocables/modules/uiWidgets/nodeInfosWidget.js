@@ -373,6 +373,9 @@ var NodeInfosWidget = (function () {
                     if (item.value.type == "bnode") {
                         return blankNodes.push(item.value.value);
                     }
+                    if (item.value.value.startsWith("_:")) {
+                        return blankNodes.push(item.value.value);
+                    }
 
                     if (item.prop.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                         types.push(item.value.value);
@@ -622,134 +625,6 @@ defaultLang = 'en';*/
             }
             return callback();
         });
-
-        // blankNodes.
-        var str = "";
-        var isResult = false;
-        async.series(
-            [
-                //direct restrictions
-                function (callbackSeries) {
-                    Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, { withoutBlankNodes: 1 }, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-                        if (result.length > 0) {
-                            isResult = true;
-                        }
-                        str = "<b class='nodesInfos_titles'>Restrictions </b> <div style=''> <table style='display:table-caption'>";
-
-                        result.forEach(function (item) {
-                            var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
-                            str += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(item.prop.value) + "' href='" + item.prop.value + "'>" + propStr + "</a>";
-                            str += " " + Sparql_common.getLabelFromURI(item.constraintType.value) + " ";
-
-                            var valueLabel = item.valueLabel.value;
-                            if (item.constraintType.value.indexOf("ardinality") > -1) {
-                                valueLabel = item.value.value.split("^")[0];
-                            }
-                            var targetClassStr = "any";
-
-                            if (item.value) {
-                                str += "&nbsp; <i><a style='color: #aaa' target='" + NodeInfosWidget.getUriTarget(item.value.value) + "' href='" + item.value.value + "'>" + valueLabel + "</a></i>";
-                            }
-                            str += "</div>";
-                        });
-
-                        /*   result.forEach(function(item) {
-                               str += "<tr class='infos_table'>";
-
-                               var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
-
-                               str += "<td class=''>" + propStr + "</td>";
-
-                               var targetClassStr = "any";
-                               if (item.value) {
-                                   targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
-                               }
-                               str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
-
-                               str += "</tr>";
-                           });
-
-                           str += "</table> </div>" + "</div>";*/
-
-                        callbackSeries();
-                    });
-                },
-                //inverse restrictions
-                function (callbackSeries) {
-                    Sparql_OWL.getObjectRestrictions(
-                        sourceLabel,
-                        nodeId,
-                        {
-                            withoutBlankNodes: 1,
-                            inverseRestriction: 1,
-                        },
-                        function (err, result) {
-                            if (err) {
-                                return callbackSeries(err);
-                            }
-                            if (result.length > 0) {
-                                isResult = true;
-                            }
-
-                            str += "<br><b class='nodesInfos_titles'>Inverse Restrictions </b> <div style='font-size:15px;'> <table >";
-                            result.forEach(function (item) {
-                                var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
-                                str += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(item.prop.value) + "' href='" + item.prop.value + "'>" + propStr + "</a>";
-
-                                var targetClassStr = "any";
-                                if (item.value) {
-                                    str +=
-                                        "&nbsp; <i><a style='color: #aaa' target='" +
-                                        NodeInfosWidget.getUriTarget(item.subject.value) +
-                                        "' href='" +
-                                        item.subject.value +
-                                        "'>" +
-                                        item.subjectLabel.value +
-                                        "</a></i>";
-                                }
-                                str += "</div>";
-                            });
-
-                            /*   result.forEach(function(item) {
-                                   str += "<tr class='infos_table'>";
-
-                                   var propStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
-
-                                   str += "<td class=''>" + propStr + "</td>";
-
-                                   var targetClassStr = "any";
-                                   if (item.value) {
-                                       targetClassStr = "<span class='' onclick=' NodeInfosWidget.onClickLink(\"" + item.subject.value + "\")'>" + item.subjectLabel.value + "</span>";
-                                   }
-                                   str += "<td style='padding-left:8px;white-space: nowrap;'>" + targetClassStr + "</td>";
-
-                                   str += "</tr>";
-                               });
-
-                               str += "</table> </div>" + "</div>";
-
-                               callbackSeries();
-                           }*/
-                            callbackSeries();
-                        }
-                    );
-                },
-            ],
-            function (err) {
-                if (!err) {
-                    if (isResult) {
-                        $("#nodeInfos_restrictionsDiv").show();
-                        $("#nodeInfos_restrictionsDiv").html(str);
-                    } else {
-                        $("#nodeInfos_restrictionsDiv").hide();
-                    }
-                }
-                return callback(err);
-            }
-        );
     };
 
     self.showClassIndividuals = function (sourceLabel, nodeId, callback) {
@@ -908,6 +783,7 @@ defaultLang = 'en';*/
         var jstreeData = [];
         var ancestors = OntologyModels.getClassHierarchyTreeData(sourceLabel, nodeId, "ancestors");
 
+        if (ancestors.length == 0) return callback();
         var uniqueIds = {};
         if (ancestors.length > 0) {
             ancestors.forEach(function (item) {

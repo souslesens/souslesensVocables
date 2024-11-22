@@ -601,6 +601,17 @@ var util = {
             return [output.groups.scheme, output.groups.token];
         }
     }
+
+      ,  getLabelFromURI: function (id) {
+            const p = id.lastIndexOf("#");
+            if (p > -1) {
+                return id.substring(p + 1);
+            } else {
+                const p = id.lastIndexOf("/");
+                return id.substring(p + 1);
+            }
+
+    },
 };
 
 module.exports = util;

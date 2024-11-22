@@ -2665,8 +2665,8 @@ restrictionSource = Config.predicatesSource;
      * @returns {void|*}
      */
     self.drawNodesAndParents = function (nodes, ancestorsDepth, options, callback) {
-        if(!options){
-            options={}
+        if (!options) {
+            options = {};
         }
         var source = Lineage_sources.activeSource;
         if (!Array.isArray(nodes)) {

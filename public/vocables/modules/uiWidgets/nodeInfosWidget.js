@@ -1139,7 +1139,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
                 // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
                 self.drawAllInfos(self.currentSource, self.currentNode.data.id, {}, function (err, result) {
-                    //  self.showNodeInfosToolbar();
+                    // manage particular cases
                     if (property == "<http://www.w3.org/2000/01/rdf-schema#subClassOf>" || property=='rdfs:subClassOf') {
                         // update Ontology model cache parent class 
                         if(Config.ontologiesVocabularyModels[self.currentSource]["classes"][self.currentNode.data.id]){
@@ -1153,8 +1153,29 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                                 Lineage_whiteboard.drawNodesAndParents(self.currentNode,null,{},function(){});
                             });
                         }
+                        
                        
                     }
+                    // update cache after change subPropertyOf but properties not available in Add Predicates selector
+                    /*
+                    if (property == "<http://www.w3.org/2000/01/rdf-schema#subPropertyOf>" || property=='rdfs:subPropertyOf') {
+                        // update Ontology model cache parent property
+                        if(Config.ontologiesVocabularyModels[self.currentSource]["properties"][self.currentNode.data.id]){
+                            var data={'properties':{}};
+                            data['properties'][self.currentNode.data.id]=Config.ontologiesVocabularyModels[self.currentSource]["properties"][self.currentNode.data.id];
+                            var valueCleaned=value.replaceAll('<','').replaceAll('>','');
+                            data['properties'][self.currentNode.data.id].superProp=valueCleaned;
+                            
+                            OntologyModels.updateModel(self.currentSource,data,{},function(err,result){
+                                //Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(self.currentNode.data.id);
+                                //Lineage_whiteboard.drawNodesAndParents(self.currentNode,null,{},function(){});
+                            });
+                        }
+                        
+                       
+                    }*/
+
+
                     if (callback) {
                         return callback(null, self.currentNodeId);
                     }

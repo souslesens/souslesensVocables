@@ -126,31 +126,55 @@ const MainConfigObject = z
     })
     .strict();
 
+// Recursive function used to manage sub-sections of the config
+const checkMainConfigSection = (errors, cleanedErrors) => {
+    Object.entries(errors).map(([key, values]) => {
+        if (key !== "_errors") {
+            if (values._errors.length === 0) {
+                cleanedErrors[key] = checkMainConfigSection(values, cleanedErrors[key] || {});
+            } else {
+                cleanedErrors[key] = values._errors[0];
+            }
+        } else if (values.length > 0) {
+            cleanedErrors["root"] = values[0];
+        }
+    });
+
+    return cleanedErrors;
+};
+
+const colorText = (text, color = "31;1") => `\x1b[${color}m${text}\x1b[0m`;
+
+const printErrorReport = (errors, section) => {
+    Object.entries(errors).forEach(([key, data]) => {
+        if (typeof data !== "string") {
+            printErrorReport(data, key);
+        } else {
+            const option = section === null ? key : `${section}.${key}`;
+            if (data === "Required") {
+                console.error(`⛔ The option ${colorText(option)} is missing`);
+            } else if (data.startsWith("Unrecognized key")) {
+                const keys = data.split(": ")[1];
+                if (option === "root") {
+                    console.error(`❓ Unknown key(s): ${keys}`);
+                } else {
+                    console.error(`❓ Unknown key(s) for the option ${colorText(option)}: ${keys}`);
+                }
+            } else {
+                console.error(`❌ Wrong value for the option ${colorText(option)}: ${data}`);
+            }
+        }
+    });
+};
+
 const checkMainConfig = (config) => {
     console.debug("Check the mainConfig.json file…");
 
     const results = MainConfigObject.safeParse(config);
     if (!results.success) {
-        const formattedErrors = results.error.format();
-        Object.entries(formattedErrors).map(([key, data]) => {
-            if (key !== "_errors") {
-                if (data._errors.length > 0) {
-                    console.error(`!! ${key}: ${data._errors}`);
-                } else {
-                    console.error(`!! ${key}:`);
-                    Object.entries(data).map(([name, option]) => {
-                        if (name !== "_errors") {
-                            console.error(`  - ${name}: ${option._errors}`);
-                        }
-                    });
-                }
-            } else {
-                data.forEach((e) => {
-                    console.error(`!! ${e}`);
-                });
-            }
-        });
-
+        const errors = checkMainConfigSection(results.error.format(), {});
+        console.error("The configuration file is invalid:");
+        printErrorReport(errors, null);
         return false;
     }
 

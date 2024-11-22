@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.92.0](https://github.com/souslesens/souslesensVocables/compare/1.91.2...1.92.0) (2024-11-20)
+
+
+### Features
+
+* Add graph download button in lineage ([6e70270](https://github.com/souslesens/souslesensVocables/commit/6e70270c371bf2a2539c5bfac014182808a1ebb8))
+* **mainapp:** catch sls-api errors ([2a90e2f](https://github.com/souslesens/souslesensVocables/commit/2a90e2f3ff4bb1e52785dc6ae953f1bf43b6b3f3))
+
+### [1.91.2](https://github.com/souslesens/souslesensVocables/compare/1.91.1...1.91.2) (2024-11-18)
+
 ### [1.91.1](https://github.com/souslesens/souslesensVocables/compare/1.91.0...1.91.1) (2024-11-18)
 
 

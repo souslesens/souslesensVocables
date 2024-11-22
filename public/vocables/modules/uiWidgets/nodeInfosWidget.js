@@ -15,6 +15,7 @@ import UI from "../../modules/shared/UI.js";
 import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 import Axioms_manager from "../tools/axioms/axioms_manager.js";
 import CreateRestriction_bot from "../bots/createRestriction_bot.js";
+import OntologyModels from "../shared/ontologyModels.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
@@ -1139,19 +1140,20 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
                 self.drawAllInfos(self.currentSource, self.currentNode.data.id, {}, function (err, result) {
                     //  self.showNodeInfosToolbar();
-                    if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
-                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.push({
-                            id: self.currentNodeId,
-                            label: value,
-                            shape: Lineage_whiteboard.defaultShape,
-                            size: Lineage_whiteboard.defaultShapeSize,
-                            color: Lineage_whiteboard.getSourceColor(self.currentSource),
-                            data: {
-                                id: self.currentNodeId,
-                                label: value,
-                                source: self.currentSource,
-                            },
-                        });
+                    if (property == "<http://www.w3.org/2000/01/rdf-schema#subClassOf>" || property=='rdfs:subClassOf') {
+                        // update Ontology model cache parent class 
+                        if(Config.ontologiesVocabularyModels[self.currentSource]["classes"][self.currentNode.data.id]){
+                            var data={'classes':{}};
+                            data['classes'][self.currentNode.data.id]=Config.ontologiesVocabularyModels[self.currentSource]["classes"][self.currentNode.data.id];
+                            var valueCleaned=value.replaceAll('<','').replaceAll('>','');
+                            data['classes'][self.currentNode.data.id].superClass=valueCleaned;
+                            data['classes'][self.currentNode.data.id].superClassLabel=Sparql_common.getLabelFromURI(valueCleaned);
+                            OntologyModels.updateModel(self.currentSource,data,{},function(err,result){
+                                Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(self.currentNode.data.id);
+                                Lineage_whiteboard.drawNodesAndParents(self.currentNode,null,{},function(){});
+                            });
+                        }
+                       
                     }
                     if (callback) {
                         return callback(null, self.currentNodeId);

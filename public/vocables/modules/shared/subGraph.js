@@ -260,8 +260,32 @@ var SubGraph = (function () {
 
 
                 }
+                var payload = {
+                    turtle: allSahcls,
 
-                var x = allSahcls
+                };
+                const params = new URLSearchParams(payload);
+                Axiom_editor.message("getting Class axioms");
+                $.ajax({
+                    type: "GET",
+                    url: Config.apiUrl + "/rdf-io?" + params.toString(),
+                    dataType: "json",
+
+                    success: function (data, _textStatus, _jqXHR) {
+                        if (data.result && data.result.indexOf("Error") > -1) {
+                            return callback(data.result);
+                        }
+                        return callback(null,data.triples)
+                        //  callback(null, data);
+                    },
+                    error(err) {
+                        callback(err.responseText);
+                    },
+                });
+
+
+
+
 
 
             })

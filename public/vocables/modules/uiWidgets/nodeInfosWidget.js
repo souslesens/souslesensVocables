@@ -1232,7 +1232,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             var concernedRestrictions = [];
             async.series(
                 [
-                    // Update cache when it's a property
+                    // Update OntologyModel cache (except restrictions,other callbackSeries for it)
                     function (callbackSeries) {
                         if (Config.ontologiesVocabularyModels[self.currentNode.data.source]["properties"][self.currentNodeId]) {
                             var data = {};
@@ -1241,7 +1241,13 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                             OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
                                 callbackSeries(err);
                             });
-                        } else {
+                        }else if(Config.ontologiesVocabularyModels[self.currentNode.data.source]["classes"][self.currentNodeId]){
+                            var data = {};
+                            data["classes"] = [self.currentNodeId];
+                            OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
+                                callbackSeries(err);
+                            });
+                        }else {
                             callbackSeries();
                         }
                     },
@@ -1252,37 +1258,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                                 return restriction[0].range==self.currentNodeId || restriction[0].domain==self.currentNodeId ;
                             });*/
                             result.forEach(function (item) {
-                                if (item.subject.value == self.currentNodeId || item.value.value == self.currentNodeId) {
+                                if (item.subject.value == self.currentNodeId || item.value.value == self.currentNodeId || item.prop.value == self.currentNodeId) {
                                     concernedRestrictions.push(item);
                                 }
                             });
                             callbackSeries();
                         });
                     },
-                    /*
-                    // Update model restrictions
-                    function (callbackSeries) {
-                        
-                      
-                        if (concernedRestrictions.length>0 ) {
-                            var data = {};
-                            data["restrictions"] = {};
-                            var blankNodesIds=concernedRestrictions.map(function(restriction){return restriction.node.value});
-                            Object.keys(Config.ontologiesVocabularyModels[self.currentNode.data.source]["restrictions"]).forEach(function(key){
-                                var restriction=Config.ontologiesVocabularyModels[self.currentNode.data.source]["restrictions"][key];
-                                if(blankNodesIds.includes(restriction[0].blankNodeId)){
-                                    data["restrictions"][key]=key;
-                                }
-                                
-                            }); 
-                           
-                            OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
-                                callbackSeries(err);
-                            });
-                        } else {
-                            callbackSeries();
-                        }
-                    },*/
+                    
                     // delete restrictions triples
                     function (callbackSeries) {
                         if (concernedRestrictions.length > 0) {

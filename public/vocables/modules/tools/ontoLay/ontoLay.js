@@ -17,6 +17,7 @@ var OntoLay = (function () {
         $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
+        
     };
     self.unload = function () {
         $("#graphDiv").empty();
@@ -116,6 +117,7 @@ var OntoLay = (function () {
                 },
                 function (err) {
                     Lineage_whiteboard.currentExpandLevel += options.startLevel;
+                    self.search('Whiteboard');
                 }
             );
         });
@@ -152,9 +154,8 @@ var OntoLay = (function () {
 
         $("#classesTab").css("display", "none");
         $("#propertiesTab").css("display", "none");
-
-        $("#classesTab").css("display", "none");
-        $("#propertiesTab").css("display", "none");
+        $('#whiteboardTab').css("display", "none");
+     
         if (!type) {
             type = self.currentTab;
         } else {
@@ -174,6 +175,7 @@ var OntoLay = (function () {
             $("#propertiesTab").css("display", "block");
             Lineage_properties.searchTermInSources(term, true, false, "property");
         } else if (type == "Whiteboard") {
+            $("#whiteboardTab").css("display", "block");
             Lineage_whiteboard.graph.searchNode(null, term);
         }
     };

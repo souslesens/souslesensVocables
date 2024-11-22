@@ -2723,7 +2723,8 @@ restrictionSource = Config.predicatesSource;
 
             var conceptType = "Class";
             result.forEach(function (item) {
-                if (item.subjectType && item.subjectType.value.indexOf("NamedIndividual") > -1) {
+                //if (item.subjectType && item.subjectType.value.indexOf("NamedIndividual") > -1) {
+                if (item.subjectTypes && item.subjectTypes.value.indexOf("NamedIndividual") > -1) {
                     conceptType = "NamedIndividual";
                 }
             });
@@ -2735,6 +2736,7 @@ restrictionSource = Config.predicatesSource;
                 }
                 if (!existingNodes[item.subject.value]) {
                     existingNodes[item.subject.value] = 1;
+                    // add  rdfType for legend, need to homegenize rdfType and type parameters for nodes line 1563
                     visjsData.nodes.push({
                         id: item.subject.value,
                         label: item.subjectLabel.value,
@@ -2743,6 +2745,7 @@ restrictionSource = Config.predicatesSource;
                             label: item.subjectLabel.value,
                             source: source,
                             type: conceptType,
+                            rdfType:conceptType,
                         },
                         shadow: self.nodeShadow,
                         level: options.startLevel || 0,

@@ -240,6 +240,9 @@ var MainController = (function () {
         }
 
         if (self.currentTool != null) {
+            if(Config.userTools[self.currentTool].resetURLParamsDiv){
+                $('#'+Config.userTools[self.currentTool].resetURLParamsDiv).dialog("close");
+            }
             if (toolId == "lineage") {
                 if(self.oldRegisterSource){
                     Lineage_sources.registerSource = self.oldRegisterSource;

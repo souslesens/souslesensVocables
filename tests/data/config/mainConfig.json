@@ -70,5 +70,11 @@
         "loginColumn": "login",
         "passwordColumn": "password",
         "groupsColumn": "groups"
+    },
+    "jowlServer": {
+        "enabled": false
+    },
+    "slsApi": {
+        "enabled": false
     }
 }

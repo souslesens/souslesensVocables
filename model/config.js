@@ -85,16 +85,16 @@ const MainConfigObject = z
             .strict(),
         jowlServer: z
             .object({
-                url: z.string().url(),
+                enabled: z.boolean(),
+                url: z.string().url().optional(),
             })
-            .strict()
-            .optional(),
+            .strict(),
         slsApi: z
             .object({
-                url: z.string().url(),
+                enabled: z.boolean(),
+                url: z.string().url().optional(),
             })
-            .strict()
-            .optional(),
+            .strict(),
         authenticationDatabase: z
             .object({
                 user: z.string(),

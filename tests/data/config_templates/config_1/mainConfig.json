@@ -28,6 +28,11 @@
     },
     "wiki": {
         "url": ""
+    },
+    "jowlServer": {
+        "enabled": false
+    },
+    "slsApi": {
+        "enabled": false
     }
 }
-

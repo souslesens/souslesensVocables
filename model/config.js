@@ -135,7 +135,7 @@ const checkMainConfigSection = (errors, cleanedErrors) => {
             } else {
                 cleanedErrors[key] = values._errors[0];
             }
-        } else {
+        } else if (values.length > 0) {
             cleanedErrors["root"] = values[0];
         }
     });

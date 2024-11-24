@@ -30,6 +30,33 @@ var GraphMlExport = (function () {
      */
 
     self.VisjsDataToGraphMl = function (visjsData) {
+
+
+        // remove orphan nodes or edges
+
+            var nodesMap = {};
+            visjsData.nodes.forEach(function (node) {
+                nodesMap[node.id] = node;
+            })
+            var newNodes = []
+            var newEdges = []
+            var newNodesMap = {}
+            visjsData.edges.forEach(function (edge) {
+                if (nodesMap[edge.from] && nodesMap[edge.to]) {
+                    if (!newNodesMap[edge.from]) {
+                        newNodes.push(nodesMap[edge.from])
+                    }
+                    if (!newNodesMap[edge.to]) {
+                        newNodes.push(nodesMap[edge.to])
+                    }
+                    newEdges.push(edge)
+                }
+            })
+
+        visjsData={nodes:newNodes,edges:newEdges}
+
+
+
         var xml =
             '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' +
             "<graphml\n" +
@@ -42,6 +69,9 @@ var GraphMlExport = (function () {
         xml += '  <key for="node" id="d1" yfiles.type="nodegraphics"/>' + ' <graph edgedefault="directed" id="G">';
 
         visjsData.nodes.forEach(function (node) {
+            if (!node.label) {
+                node.label = "?"
+            }
             xml +=
                 ' \n<node id="' +
                 node.id +

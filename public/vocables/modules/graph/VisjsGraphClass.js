@@ -823,6 +823,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.redraw();
     };
 
+
     self.toGraphMl = function () {
         var visjsData = {
             nodes: self.data.nodes.get(),

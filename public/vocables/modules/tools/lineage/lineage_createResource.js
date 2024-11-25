@@ -247,7 +247,12 @@ var Lineage_createResource = (function () {
                         modelData.label = item.object;
                         modelData.id = item.subject;
                     }
+                    if(item.predicate == 'rdfs:subClassOf'){
+                        modelData.superClass=item.object;
+                        modelData.superClassLabel=Sparql_common.getLabelFromURI(item.object);
+                    }
                 });
+               
                 var modelData = {
                     classes: { [modelData.id]: modelData },
                 };

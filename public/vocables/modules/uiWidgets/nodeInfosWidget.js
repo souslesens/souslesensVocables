@@ -15,6 +15,7 @@ import UI from "../../modules/shared/UI.js";
 import NodeInfosAxioms from "../tools/axioms/nodeInfosAxioms.js";
 import Axioms_manager from "../tools/axioms/axioms_manager.js";
 import CreateRestriction_bot from "../bots/createRestriction_bot.js";
+import OntologyModels from "../shared/ontologyModels.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
@@ -1014,21 +1015,43 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
                 // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
                 self.drawAllInfos(self.currentSource, self.currentNode.data.id, {}, function (err, result) {
-                    //  self.showNodeInfosToolbar();
-                    if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
-                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.push({
-                            id: self.currentNodeId,
-                            label: value,
-                            shape: Lineage_whiteboard.defaultShape,
-                            size: Lineage_whiteboard.defaultShapeSize,
-                            color: Lineage_whiteboard.getSourceColor(self.currentSource),
-                            data: {
-                                id: self.currentNodeId,
-                                label: value,
-                                source: self.currentSource,
-                            },
-                        });
+                    // manage particular cases
+                    if (property == "<http://www.w3.org/2000/01/rdf-schema#subClassOf>" || property=='rdfs:subClassOf') {
+                        // update Ontology model cache parent class 
+                        if(Config.ontologiesVocabularyModels[self.currentSource]["classes"][self.currentNode.data.id]){
+                            var data={'classes':{}};
+                            data['classes'][self.currentNode.data.id]=Config.ontologiesVocabularyModels[self.currentSource]["classes"][self.currentNode.data.id];
+                            var valueCleaned=value.replaceAll('<','').replaceAll('>','');
+                            data['classes'][self.currentNode.data.id].superClass=valueCleaned;
+                            data['classes'][self.currentNode.data.id].superClassLabel=Sparql_common.getLabelFromURI(valueCleaned);
+                            OntologyModels.updateModel(self.currentSource,data,{},function(err,result){
+                                Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(self.currentNode.data.id);
+                                Lineage_whiteboard.drawNodesAndParents(self.currentNode,null,{},function(){});
+                            });
+                        }
+                        
+                       
                     }
+                    // update cache after change subPropertyOf but properties not available in Add Predicates selector
+                    /*
+                    if (property == "<http://www.w3.org/2000/01/rdf-schema#subPropertyOf>" || property=='rdfs:subPropertyOf') {
+                        // update Ontology model cache parent property
+                        if(Config.ontologiesVocabularyModels[self.currentSource]["properties"][self.currentNode.data.id]){
+                            var data={'properties':{}};
+                            data['properties'][self.currentNode.data.id]=Config.ontologiesVocabularyModels[self.currentSource]["properties"][self.currentNode.data.id];
+                            var valueCleaned=value.replaceAll('<','').replaceAll('>','');
+                            data['properties'][self.currentNode.data.id].superProp=valueCleaned;
+                            
+                            OntologyModels.updateModel(self.currentSource,data,{},function(err,result){
+                                //Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(self.currentNode.data.id);
+                                //Lineage_whiteboard.drawNodesAndParents(self.currentNode,null,{},function(){});
+                            });
+                        }
+                        
+                       
+                    }*/
+
+
                     if (callback) {
                         return callback(null, self.currentNodeId);
                     }
@@ -1108,7 +1131,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             var concernedRestrictions = [];
             async.series(
                 [
-                    // Update cache when it's a property
+                    // Update OntologyModel cache (except restrictions,other callbackSeries for it)
                     function (callbackSeries) {
                         if (Config.ontologiesVocabularyModels[self.currentNode.data.source]["properties"][self.currentNodeId]) {
                             var data = {};
@@ -1117,7 +1140,13 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                             OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
                                 callbackSeries(err);
                             });
-                        } else {
+                        }else if(Config.ontologiesVocabularyModels[self.currentNode.data.source]["classes"][self.currentNodeId]){
+                            var data = {};
+                            data["classes"] = [self.currentNodeId];
+                            OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
+                                callbackSeries(err);
+                            });
+                        }else {
                             callbackSeries();
                         }
                     },
@@ -1128,37 +1157,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                                 return restriction[0].range==self.currentNodeId || restriction[0].domain==self.currentNodeId ;
                             });*/
                             result.forEach(function (item) {
-                                if (item.subject.value == self.currentNodeId || item.value.value == self.currentNodeId) {
+                                if (item.subject.value == self.currentNodeId || item.value.value == self.currentNodeId || item.prop.value == self.currentNodeId) {
                                     concernedRestrictions.push(item);
                                 }
                             });
                             callbackSeries();
                         });
                     },
-                    /*
-                    // Update model restrictions
-                    function (callbackSeries) {
-                        
-                      
-                        if (concernedRestrictions.length>0 ) {
-                            var data = {};
-                            data["restrictions"] = {};
-                            var blankNodesIds=concernedRestrictions.map(function(restriction){return restriction.node.value});
-                            Object.keys(Config.ontologiesVocabularyModels[self.currentNode.data.source]["restrictions"]).forEach(function(key){
-                                var restriction=Config.ontologiesVocabularyModels[self.currentNode.data.source]["restrictions"][key];
-                                if(blankNodesIds.includes(restriction[0].blankNodeId)){
-                                    data["restrictions"][key]=key;
-                                }
-                                
-                            }); 
-                           
-                            OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
-                                callbackSeries(err);
-                            });
-                        } else {
-                            callbackSeries();
-                        }
-                    },*/
+                    
                     // delete restrictions triples
                     function (callbackSeries) {
                         if (concernedRestrictions.length > 0) {

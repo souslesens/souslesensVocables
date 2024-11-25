@@ -2728,7 +2728,8 @@ restrictionSource = Config.predicatesSource;
 
             var conceptType = "Class";
             result.forEach(function (item) {
-                if (item.subjectType && item.subjectType.value.indexOf("NamedIndividual") > -1) {
+                //if (item.subjectType && item.subjectType.value.indexOf("NamedIndividual") > -1) {
+                if (item.subjectTypes && item.subjectTypes.value.indexOf("NamedIndividual") > -1) {
                     conceptType = "NamedIndividual";
                 }
             });
@@ -2740,6 +2741,7 @@ restrictionSource = Config.predicatesSource;
                 }
                 if (!existingNodes[item.subject.value]) {
                     existingNodes[item.subject.value] = 1;
+                    // add  rdfType for legend, need to homegenize rdfType and type parameters for nodes line 1563
                     visjsData.nodes.push({
                         id: item.subject.value,
                         label: item.subjectLabel.value,
@@ -2748,6 +2750,7 @@ restrictionSource = Config.predicatesSource;
                             label: item.subjectLabel.value,
                             source: source,
                             type: conceptType,
+                            rdfType:conceptType,
                         },
                         shadow: self.nodeShadow,
                         level: options.startLevel || 0,
@@ -3435,7 +3438,7 @@ attrs.color=self.getSourceColor(superClassValue)
         if ($("#propertiesTab").children().length == 0) {
             $("#propertiesTab").load("./modules/tools/lineage/html/propertiesTab.html", function (s) {
                 Lineage_whiteboard.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
-                //  Lineage_properties.searchTermInSources();
+                Lineage_properties.searchTermInSources();
                 self.hideShowMoreOptions("show", "Lineage_MorePropertiesOptions");
             });
         }

@@ -48,7 +48,7 @@ var OntoLay = (function () {
     };
 
     self.getTopClasses = function (sourceLabel, options, callback) {
-        var options = {withoutImports: true};
+        var options = { withoutImports: true };
         Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
             if (err) {
                 return callback(err);
@@ -77,16 +77,14 @@ var OntoLay = (function () {
             }
             var nodeIds = [];
             bottomClasses.forEach(function (classUri) {
-                nodeIds.push({data: {id: classUri}});
+                nodeIds.push({ data: { id: classUri } });
             });
-            callback(null, {nodeIds: nodeIds, currentDepth: currentDepth});
+            callback(null, { nodeIds: nodeIds, currentDepth: currentDepth });
         });
     };
 
-    self.drawTopClasses = function (nodes, currentDepth, options) {
-        if (!options) {
-            options = {};
-        }
+    self.drawTopClasses = function (nodeIds, currentDepth, options) {
+        if (!options) options = {};
         var totalDrawnClasses = 0;
         var newNodes = [];
         options.startLevel = currentDepth + 2;
@@ -193,9 +191,8 @@ var OntoLay = (function () {
 
         $("#classesTab").css("display", "none");
         $("#propertiesTab").css("display", "none");
+        $('#whiteboardTab').css("display", "none");
 
-        $("#classesTab").css("display", "none");
-        $("#propertiesTab").css("display", "none");
         if (!type) {
             type = self.currentTab;
         } else {
@@ -215,6 +212,7 @@ var OntoLay = (function () {
             $("#propertiesTab").css("display", "block");
             Lineage_properties.searchTermInSources(term, true, false, "property");
         } else if (type == "Whiteboard") {
+            $("#whiteboardTab").css("display", "block");
             Lineage_whiteboard.graph.searchNode(null, term);
         }
     };

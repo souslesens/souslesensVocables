@@ -19,12 +19,26 @@ import {
 import { fetchMe } from "../Utils";
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { writeLog } from "../Log";
+import { createRoot } from "react-dom/client";
 
 interface DownloadGraphModalProps {
     onClose: () => void;
     open: boolean;
     sourceName: string;
 }
+
+type ApiServerResponseOk = {
+    filesize: number;
+    data: BlobPart;
+    next_offset: number;
+    identifier: string;
+};
+
+type ApiServerResponseError = {
+    detail: string;
+};
+
+type ApiServerResponse = ApiServerResponseError | ApiServerResponseOk;
 
 export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphModalProps) {
     const [currentUser, setCurrentUser] = useState<{ login: string; token: string } | null>(null);
@@ -78,7 +92,11 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
                 headers: { Authorization: `Bearer ${currentUser?.token ?? ""}` },
             }
         );
-        return (await response.json()) as { filesize: number; data: BlobPart; next_offset: number; identifier: string };
+        const json = (await response.json()) as ApiServerResponse;
+        if (response.status !== 200) {
+            return { status: response.status, message: (json as ApiServerResponseError).detail ?? "Internal serveur error" };
+        }
+        return { status: response.status, message: json as ApiServerResponseOk };
     };
 
     const downloadSourceUsingPythonApi = async (name: string) => {
@@ -89,19 +107,25 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
         while (offset !== null) {
             if (cancelCurrentOperation.current) {
                 cancelCurrentOperation.current = false;
-                return [];
+                return { blobParts: [], message: "ok" };
             }
-            const data = await fetchGraphPartUsingPythonApi(name, offset, currentDownloadFormat, identifier, skipNamedIndividuals);
+            const response = await fetchGraphPartUsingPythonApi(name, offset, currentDownloadFormat, identifier, skipNamedIndividuals);
+            const status = response.status;
+            if (status >= 400) {
+                const errorMessage = response.message as string;
+                return { blobParts: null, message: errorMessage };
+            }
+            const message = response.message as ApiServerResponseOk;
             // percent
-            const percent = Math.min(100, (offset * 100) / data.filesize);
+            const percent = Math.min(100, (offset * 100) / message.filesize);
             setTransferPercent(percent);
 
-            blobParts.push(data.data);
-            offset = data.next_offset;
-            identifier = data.identifier;
+            blobParts.push(message.data);
+            offset = message.next_offset;
+            identifier = message.identifier;
         }
         setTransferPercent(100);
-        return blobParts;
+        return { blobParts: blobParts, message: "ok" };
     };
 
     const fetchGraphPart = async (name: string, limit: number, offset: number) => {
@@ -147,7 +171,8 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
             setTransferPercent(0);
             cancelCurrentOperation.current = false;
 
-            let blobParts: BlobPart[];
+            let blobParts: BlobPart[] | null;
+            let message = "";
             if (slsApiBaseUrl === "/") {
                 const graphInfo = await fetchSourceInfo(sourceName);
                 const graphSize = graphInfo.graphSize;
@@ -155,10 +180,17 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
 
                 blobParts = await recursDownloadSource(sourceName, 0, graphSize, pageSize, []);
             } else {
-                blobParts = await downloadSourceUsingPythonApi(sourceName);
+                const result = await downloadSourceUsingPythonApi(sourceName);
+                blobParts = result.blobParts;
+                message = result.message;
             }
 
-            if (blobParts.length == 0) {
+            if (message != "ok") {
+                setErrorMessage(message);
+                return;
+            }
+
+            if (!blobParts || blobParts.length == 0) {
                 setErrorMessage("Receive empty data from the API");
                 return;
             }
@@ -258,3 +290,21 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
         </Dialog>
     );
 }
+
+declare global {
+    interface Window {
+        DownloadGraphModal: {
+            createApp: (props: Omit<DownloadGraphModalProps, "open">) => void;
+        };
+    }
+}
+
+window.DownloadGraphModal = {
+    createApp: (props: Omit<DownloadGraphModalProps, "open">) => {
+        const container = document.getElementById("mount-download-graph-modal-here");
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const root = createRoot(container!);
+        root.render(<DownloadGraphModal open={true} {...props} />);
+        return root;
+    },
+};

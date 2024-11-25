@@ -24,11 +24,13 @@ var SparqlQuery_bot = (function () {
         chooseResourceTypeFn: {
             _OR: {
                 ObjectProperty: {
-                    promptKeywordFn: {
-                        chooseObjectPropertyResourceTypeFn: {
-                            chooseQueryScopeFn: {
-                                chooseOutputTypeFn: {
-                                    searchKeywordFn: {},
+                    listObjectPropertiesFn: {
+                        promptKeywordFn: {
+                            chooseObjectPropertyResourceTypeFn: {
+                                chooseQueryScopeFn: {
+                                    chooseOutputTypeFn: {
+                                        searchKeywordFn: {},
+                                    },
                                 },
                             },
                         },
@@ -64,7 +66,7 @@ var SparqlQuery_bot = (function () {
         chooseOutputTypeFn: "choose outup type",
         chooseObjectPropertyResourceTypeFn: "choose propety resources",
         choosePredicateFilterFn: "choose predicateFilter mode",
-
+        listObjectPropertiesFn: "choose objectProperty ",
         listVocabsFn: "Choose a source",
         showSparqlEditorFn: "",
 
@@ -90,6 +92,9 @@ var SparqlQuery_bot = (function () {
             _botEngine.showList(choices, "queryScope");
         },
         promptKeywordFn: function () {
+            if (self.params.currentObjectProperty) {
+                return _botEngine.nextStep();
+            }
             if (false && self.params.queryScope == "activeSource") {
                 CommonBotFunctions.listVocabClasses(self.params.source, "selectedClass");
             } else {
@@ -121,20 +126,26 @@ var SparqlQuery_bot = (function () {
                 self.processObjectPropertyQuery();
             }
         },
+        listObjectPropertiesFn: function () {
+            CommonBotFunctions.listSourceAllObjectProperties(self.params.source, "currentObjectProperty", null, function (err, properties) {
+                common.array.sort(properties, "label");
+                _botEngine.showList(properties, "currentObjectProperty");
+            });
+        },
         chooseObjectPropertyResourceTypeFn: function () {
-            var choices = ["RangeAndDomain", "Restriction", "Predicate"];
+            var choices = ["RangeAndDomain", "Restriction"]; //"Predicate"
 
             _botEngine.showList(choices, "objectPropertyResourceType");
         },
 
         choosePredicateFilterFn: function () {
-            var choices = ["filterObjectTypeProperty", "filterDatatypeProperty", "filterSubjectType", "filterObjectType", "_proceed"];
+            var choices = ["filterObjectProperty", "filterDatatypeProperty", "filterSubject", "filterObject", "_proceed"];
 
             _botEngine.showList(choices, "predicateFilterType");
         },
         setPredicateFilterFn: function () {
             self.loadIndiviualsModel(self.params.source, function (err, model) {
-                if (self.params.predicateFilterType == "filterObjectTypeProperty") {
+                if (self.params.predicateFilterType == "filterObjectProperty") {
                     var properties = [];
                     var distinctNodes = {};
                     model.forEach(function (item) {
@@ -164,7 +175,7 @@ var SparqlQuery_bot = (function () {
                         self.params.IndividualObjectPropertyFilter = selectedValue;
                         _botEngine.previousStep();
                     });
-                } else if (self.params.predicateFilterType == "filterSubjectType") {
+                } else if (self.params.predicateFilterType == "filterSubject") {
                     var distinctValues = {};
                     var filteredClasses = [];
                     model.forEach(function (item) {
@@ -190,7 +201,7 @@ var SparqlQuery_bot = (function () {
 
                         _botEngine.previousStep();
                     });
-                } else if (self.params.predicateFilterType == "filterObjectType") {
+                } else if (self.params.predicateFilterType == "filterObject") {
                     var filteredClasses = [];
                     model.forEach(function (item) {
                         var ok = false;
@@ -327,7 +338,14 @@ var SparqlQuery_bot = (function () {
                     }
 
                     var cols = [];
-                    cols.push({ title: "source", defaultContent: "" }, { title: "label", defaultContent: "" }, { title: "uri", defaultContent: "" });
+                    cols.push(
+                        { title: "source", defaultContent: "" },
+                        {
+                            title: "label",
+                            defaultContent: "",
+                        },
+                        { title: "uri", defaultContent: "" }
+                    );
                     var dataset = [];
 
                     self.params.elasticResult.forEach(function (item0) {
@@ -515,6 +533,7 @@ var SparqlQuery_bot = (function () {
             searchedSources = Config.currentProfile.userSources;
         }
 
+        var currentObjectProperty = self.params.currentObjectProperty;
         var objectPropertyResourceType = self.params.objectPropertyResourceType;
         var properties = {};
         async.series(
@@ -524,13 +543,22 @@ var SparqlQuery_bot = (function () {
                     OntologyModels.registerSourcesModel(searchedSources, { noCache: false }, function (err, result) {
                         searchedSources.forEach(function (source) {
                             var sourceOntologyModel = Config.ontologiesVocabularyModels[source];
-                            for (var property in sourceOntologyModel.properties) {
-                                var propLabel = sourceOntologyModel.properties[property].label;
-                                if (!self.params.keyword || propLabel.indexOf(self.params.keyword) > -1) {
-                                    properties[property] = sourceOntologyModel.properties[property];
-                                    properties[property].source = source;
-                                    properties[property].constraints = sourceOntologyModel.constraints[property] || {};
-                                    properties[property].restrictions = sourceOntologyModel.restrictions[property] || {};
+
+                            if (sourceOntologyModel.properties[currentObjectProperty]) {
+                                var property = currentObjectProperty;
+                                properties[property] = sourceOntologyModel.properties[property];
+                                properties[property].source = source;
+                                properties[property].constraints = sourceOntologyModel.constraints[property] || {};
+                                properties[property].restrictions = sourceOntologyModel.restrictions[property] || {};
+                            } else {
+                                for (var property in sourceOntologyModel.properties) {
+                                    var propLabel = sourceOntologyModel.properties[property].label;
+                                    if (!self.params.keyword || propLabel.indexOf(self.params.keyword) > -1) {
+                                        properties[property] = sourceOntologyModel.properties[property];
+                                        properties[property].source = source;
+                                        properties[property].constraints = sourceOntologyModel.constraints[property] || {};
+                                        properties[property].restrictions = sourceOntologyModel.restrictions[property] || {};
+                                    }
                                 }
                             }
                         });
@@ -684,7 +712,14 @@ var SparqlQuery_bot = (function () {
                         edgeRangeLabel = "targetClass";
                     }
 
-                    cols.push({ title: "Propertyuri", defaultContent: "" }, { title: "superProperty", defaultContent: "" }, { title: "inverseProperty", defaultContent: "" });
+                    cols.push(
+                        { title: "Propertyuri", defaultContent: "" },
+                        {
+                            title: "superProperty",
+                            defaultContent: "",
+                        },
+                        { title: "inverseProperty", defaultContent: "" }
+                    );
 
                     for (var property in properties) {
                         if (objectPropertyResourceType == "RangeAndDomain") {

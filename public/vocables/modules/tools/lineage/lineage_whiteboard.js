@@ -295,6 +295,9 @@ var Lineage_whiteboard = (function () {
         async.series(
             [
                 function (callbackSeries) {
+                    if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                        return callbackSeries();
+                    }
                     //  options.skipTopClassFilter = 1;
                     self.drawTopConcepts(source, options, graphDiv, function (err, result) {
                         if (err) {
@@ -323,7 +326,11 @@ var Lineage_whiteboard = (function () {
                 function (callbackSeries) {
                     var options = { data: topConcepts, source: source };
                     Lineage_relations.currentQueryInfos = null;
-                    Lineage_relations.drawRelations(null, "restrictions", null, options, graphDiv);
+                    if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                        options.data = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+                    }
+
+                    Lineage_relations.drawRelations("direct", "restrictions", null, options, graphDiv);
                     callbackSeries();
                 },
 
@@ -363,14 +370,6 @@ var Lineage_whiteboard = (function () {
 
         if (!Config.sources[source]) {
             return;
-        }
-
-        var topClassFilter = Config.sources[source].topClassFilter;
-        if (options.topClassFilter) {
-            topClassFilter = options.topClassFilter;
-        }
-        if (!topClassFilter) {
-            return UI.message("no topConceptFilter defined for this source");
         }
 
         var allSources = [];
@@ -2723,7 +2722,8 @@ restrictionSource = Config.predicatesSource;
 
             var conceptType = "Class";
             result.forEach(function (item) {
-                if (item.subjectType && item.subjectType.value.indexOf("NamedIndividual") > -1) {
+                //if (item.subjectType && item.subjectType.value.indexOf("NamedIndividual") > -1) {
+                if (item.subjectTypes && item.subjectTypes.value.indexOf("NamedIndividual") > -1) {
                     conceptType = "NamedIndividual";
                 }
             });
@@ -2735,6 +2735,7 @@ restrictionSource = Config.predicatesSource;
                 }
                 if (!existingNodes[item.subject.value]) {
                     existingNodes[item.subject.value] = 1;
+                    // add  rdfType for legend, need to homegenize rdfType and type parameters for nodes line 1563
                     visjsData.nodes.push({
                         id: item.subject.value,
                         label: item.subjectLabel.value,
@@ -2743,6 +2744,7 @@ restrictionSource = Config.predicatesSource;
                             label: item.subjectLabel.value,
                             source: source,
                             type: conceptType,
+                            rdfType: conceptType,
                         },
                         shadow: self.nodeShadow,
                         level: options.startLevel || 0,
@@ -2847,7 +2849,7 @@ restrictionSource = Config.predicatesSource;
             }
             if (callback) {
                 if (!options.drawBeforeCallback) {
-                    callback(null, visjsData);
+                    return callback(null, visjsData);
                 }
             }
 
@@ -3349,6 +3351,9 @@ attrs.color=self.getSourceColor(superClassValue)
         toSVG: function () {
             self.lineageVisjsGraph.toSVG();
         },
+        toGraphMl: function () {
+            self.lineageVisjsGraph.toGraphMl();
+        },
         exportGraphToDataTable: function () {
             Export.exportGraphToDataTable(self.lineageVisjsGraph);
         },
@@ -3427,7 +3432,7 @@ attrs.color=self.getSourceColor(superClassValue)
         if ($("#propertiesTab").children().length == 0) {
             $("#propertiesTab").load("./modules/tools/lineage/html/propertiesTab.html", function (s) {
                 Lineage_whiteboard.hideShowMoreOptions("hide", "Lineage_MorePropertiesOptions");
-                //  Lineage_properties.searchTermInSources();
+                Lineage_properties.searchTermInSources();
                 self.hideShowMoreOptions("show", "Lineage_MorePropertiesOptions");
             });
         }

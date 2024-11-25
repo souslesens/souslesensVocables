@@ -372,7 +372,7 @@ var PredicatesSelectorWidget = (function () {
         $("#editPredicate_vocabularySelect2").val(selectedEditPredicate.object[0]);
         PredicatesSelectorWidget.setCurrentVocabClassesSelect(selectedEditPredicate.object[0], "editPredicate_objectSelect", function () {
             $("#editPredicate_objectSelect").val(selectedEditPredicate.object[1].id);
-            PredicatesSelectorWidget.onSelectCurrentVocabObject(selectedEditPredicate.object[1].label);
+            PredicatesSelectorWidget.onSelectCurrentVocabObject(selectedEditPredicate.object[1].id);
         });
     };
     self.fillSelectRecentEditPredicate = function () {

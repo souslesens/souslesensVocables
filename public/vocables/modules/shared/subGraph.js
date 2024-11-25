@@ -1,9 +1,8 @@
-import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
-import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-import Lineage_sources from "./lineage_sources.js";
+import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
+import Sparql_common from "../sparqlProxies/sparql_common.js";
+import Shacl from "./shacl.js";
 
-var Lineage_subGraph = (function () {
+var SubGraph = (function () {
     var self = {};
 
     self.getSubGraphResources = function (sourceLabel, baseClassId, callback) {
@@ -13,6 +12,11 @@ var Lineage_subGraph = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         async.series(
             [
+                function (callbackSeries) {
+                    OntologyModels.registerSourcesModel(sourceLabel, null, function (err, result) {
+                        callbackSeries(err);
+                    });
+                },
                 ///getsubClasses
                 function (callbackSeries) {
                     var treeData = OntologyModels.getClassHierarchyTreeData(sourceLabel, baseClassId, "descendants");
@@ -108,6 +112,46 @@ var Lineage_subGraph = (function () {
         );
     };
 
+    self.rawTriplesToNodesMap = function (rawTriples) {
+        var nodesMap = {};
+        rawTriples.forEach(function (item) {
+            if (!nodesMap[item.s.value]) {
+                nodesMap[item.s.value] = {};
+            }
+
+            if (item.p.value.endsWith("type")) {
+                var o = Sparql_common.getLabelFromURI(item.o.value);
+                nodesMap[item.s.value].type = o;
+            }
+
+            if (item.p.value.endsWith("label")) {
+                nodesMap[item.s.value].label = item.o.value;
+            }
+            if (item.p.value.endsWith("onProperty")) {
+                nodesMap[item.s.value].property = item.o.value;
+            }
+            if (item.p.value.endsWith("onClass")) {
+                nodesMap[item.s.value].range = item.o.value;
+            }
+            if (item.p.value.endsWith("someValuesFrom")) {
+                nodesMap[item.s.value].range = item.o.value;
+            }
+            if (item.p.value.endsWith("ardinality")) {
+                var p = Sparql_common.getLabelFromURI(item.p.value);
+                nodesMap[item.s.value][p] = item.o.value;
+            }
+            if (item.p.value.endsWith("subClassOf")) {
+                if (item.o.value.indexOf("http") < 0) {
+                    if (!nodesMap[item.s.value].restrictions) {
+                        nodesMap[item.s.value].restrictions = [];
+                    }
+                    nodesMap[item.s.value].restrictions.push(item.o.value);
+                }
+            }
+        });
+        return nodesMap;
+    };
+
     self.instantiateSubGraph = function (sourceLabel, classUri, callback) {
         if (!classUri) {
             classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
@@ -117,29 +161,7 @@ var Lineage_subGraph = (function () {
             var resources = result.classes.concat(result.restrictions);
             // return;
             self.getResourcesPredicates(sourceLabel, resources, "SELECT", {}, function (err, result) {
-                var itemsMap = {};
-                result.forEach(function (item) {
-                    if (!itemsMap[item.s.value]) itemsMap[item.s.value] = {};
-
-                    if (item.p.value.endsWith("type")) {
-                        var o = Sparql_common.getLabelFromURI(item.o.value);
-                        itemsMap[item.s.value].type = o;
-                    }
-
-                    if (item.p.value.endsWith("label")) itemsMap[item.s.value].label = item.o.value;
-                    if (item.p.value.endsWith("onProperty")) itemsMap[item.s.value].property = item.o.value;
-                    if (item.p.value.endsWith("onClass")) itemsMap[item.s.value].range = item.o.value;
-                    if (item.p.value.endsWith("someValuesFrom")) itemsMap[item.s.value].range = item.o.value;
-                    if (item.p.value.endsWith("ardinality")) {
-                        var p = Sparql_common.getLabelFromURI(item.p.value);
-                        itemsMap[item.s.value][p] = item.o.value;
-                    }
-                    if (item.p.value.endsWith("subClassOf")) {
-                        if (item.o.value.indexOf("http") < 0) {
-                            itemsMap[item.s.value].restriction = item.o.value;
-                        }
-                    }
-                });
+                var itemsMap = self.rawTriplesToNodesMap(result);
                 var newTriples = [];
                 // var prefix=Config.sources[sourceLabel].graphUri
                 for (var classUri in itemsMap) {
@@ -156,17 +178,97 @@ var Lineage_subGraph = (function () {
                             predicate: "rdfs:label",
                             object: item.label,
                         });
-                        if (item.restriction) {
-                            var restriction = itemsMap[item.restriction];
-                            if (restriction)
-                                newTriples.push({
-                                    subject: id,
-                                    predicate: restriction.property,
-                                    object: restriction.range,
-                                });
+                        if (item.restrictions) {
+                            item.restrictions.forEach(function (restriction) {
+                                var restriction = itemsMap[item.restriction];
+                                if (restriction) {
+                                    newTriples.push({
+                                        subject: id,
+                                        predicate: restriction.property,
+                                        object: restriction.range,
+                                    });
+                                }
+                            });
                         }
                     }
                 }
+                return callback(null, newTriples);
+            });
+        });
+    };
+
+    self.getSubGraphShacl = function (sourceLabel, classUri, callback) {
+        if (!classUri) {
+            classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
+        }
+
+        Shacl.initSourceLabelPrefixes(sourceLabel);
+
+        self.getSubGraphResources(sourceLabel, classUri, function (err, result) {
+            var resources = result.classes.concat(result.restrictions);
+            // return;
+
+            self.getResourcesPredicates(sourceLabel, resources, "SELECT", {}, function (err, result) {
+                var itemsMap = self.rawTriplesToNodesMap(result);
+                var newTriples = [];
+                // var prefix=Config.sources[sourceLabel].graphUri
+
+                var allSahcls = "";
+                for (var classUri in itemsMap) {
+                    var item = itemsMap[classUri];
+                    if (item.type == "Class") {
+                        var shaclProperties = [];
+                        if (item.restrictions) {
+                            item.restrictions.forEach(function (retrictionUri) {
+                                var restriction = itemsMap[retrictionUri];
+                                if (!restriction.property || !restriction.range) {
+                                    return;
+                                }
+                                var count = -1;
+                                if (restriction.cardinality) {
+                                    count = parseInt(restriction.cardinality.substring(1));
+                                }
+
+                                if (restriction.property.endsWith("Quality")) return;
+                                var propStr = Shacl.uriToPrefixedUri(restriction.property);
+                                var rangeStr = Shacl.uriToPrefixedUri(restriction.range);
+                                var property = " sh:path " + propStr + " ;\n";
+                                if (count > -1) property += "        sh:minCount " + count + " ;";
+                                //  "        sh:maxCount " + count + " ;" +
+                                property += "        sh:node " + rangeStr + " ;";
+
+                                shaclProperties.push(property);
+                            });
+
+                            var domain = Shacl.uriToPrefixedUri(classUri);
+                            var shaclStr = Shacl.getShacl(domain, null, shaclProperties);
+
+                            if (allSahcls == "") allSahcls = Shacl.getPrefixes();
+                            allSahcls += "\n" + shaclStr;
+                        }
+                    }
+                }
+                var payload = {
+                    turtle: allSahcls,
+                };
+                const params = new URLSearchParams(payload);
+                Axiom_editor.message("getting Class axioms");
+                $.ajax({
+                    type: "GET",
+                    url: Config.apiUrl + "/rdf-io?" + params.toString(),
+                    dataType: "json",
+
+                    success: function (data, _textStatus, _jqXHR) {
+                        if (data.result && data.result.indexOf("Error") > -1) {
+                            return callback(data.result);
+                        }
+                        return callback(null, data.triples);
+                        //  callback(null, data);
+                    },
+                    error(err) {
+                        callback(err.responseText);
+                    },
+                });
             });
         });
     };
@@ -211,6 +313,10 @@ var Lineage_subGraph = (function () {
 
     self.query = function (sourceLabel, query, callback) {
         var url = Config._defaultSource.sparql_server.url;
+
+        var prefixStr = "PREFIX " + Config.sources[sourceLabel].prefix + ": <" + Config.sources[sourceLabel].graphUri + ">\n";
+        query = prefixStr + query;
+
         Sparql_proxy.querySPARQL_GET_proxy(
             url,
             query,
@@ -247,5 +353,5 @@ var Lineage_subGraph = (function () {
     return self;
 })();
 
-export default Lineage_subGraph;
-window.Lineage_subGraph = Lineage_subGraph;
+export default SubGraph;
+window.SubGraph = SubGraph;

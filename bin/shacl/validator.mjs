@@ -30,6 +30,11 @@ async function main() {
 
 
 
+
+
+
+
+
 var constraintsStr="type\tconstraint\tshapeType\tdataType\texample\tdescription\n" +
     "Cardinality Constraints\tsh:maxCount\tproperty\tint\tsh:property [ sh:path ex:lastName ; sh:maxCount 1; sh:datatype xsd:string; ]\tThis constraint sets a limit on the maximum number of values for a property. The following example limits the lastName property to one value\n" +
     "Cardinality Constraints\tsh:minCount\tproperty\tint\tsh:property [ sh:path ex:lastName ; sh:minCount 1; sh:maxCount 1; sh:datatype xsd:string ]\tThis constraint requires a minimum number of values for a property. The following example requires the lastName property to have one value.\n" +
@@ -87,5 +92,10 @@ function getConstraintsMap(){
     return map;
 
 }
+
+
+
+
+
 
 getConstraintsMap()

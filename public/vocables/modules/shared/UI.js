@@ -331,7 +331,12 @@ var UI = (function () {
         }
     };
     //keep
-    self.homePage = function () {
+    self.homePage = function (options) {
+        if (options?.notRefresh) {
+            window.history.pushState({}, "", window.document.location.origin + "/vocables/");
+            $("#mainDialogDiv").dialog({ close: function () {} });
+            return;
+        }
         window.document.location.href = window.document.location.origin + "/vocables/";
     };
     //keep

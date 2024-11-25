@@ -1379,7 +1379,9 @@ var OntologyModels = (function () {
             if (!maxClasses) {
                 maxClasses = 100;
             }
-            if (!maxDepth) maxDepth = 10;
+            if (!maxDepth) {
+                maxDepth = 10;
+            }
             var depthMap = {};
             for (var classUri in result.classesMap) {
                 var parents = result.classesMap[classUri].parents;
@@ -1408,8 +1410,18 @@ var OntologyModels = (function () {
         }
 
         var sources = [sourcelabel];
+        /*  if (Config.sources[sourcelabel].imports  && !options.excludeImports) {
+              sources = sources.concat(Config.sources[sourcelabel].imports);
+          }*/
         if (Config.sources[sourcelabel].imports) {
-            sources = sources.concat(Config.sources[sourcelabel].imports);
+            Config.sources[sourcelabel].imports.forEach(function (importSource) {
+                if (!options.excludeImports) {
+                    sources.push(importSource);
+                } else {
+                    if (options.excludeImports === true) return;
+                    if (options.excludeImports.indexOf(importSource) < 0) sources.push(importSource);
+                }
+            });
         }
 
         var classes = {};

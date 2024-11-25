@@ -8,7 +8,8 @@
         <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawTopConcepts()" title="TopClasses"><img src="./icons/CommonIcons/TopClassesIcon.png" /></button>
         <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Expand"><img src="./icons/CommonIcons/ExpandIcon.png" /></button>
         <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" title="Parents"><img src="./icons/CommonIcons/ParentIcon.png" /></button>
-        <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>
+        <!-- <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>-->
+        <button class="w3-buttonx slsv-button-1x" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/KGA/SearchIcon-KGA.png" /></button>
         <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
     </div>
 
@@ -60,6 +61,7 @@
             <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.loadSavedGraph()">loadSavedGraph</button>
 
             <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.toSVG()">SVG</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.graph.toGraphMl()">graphML</button>
             <button class="w3-button slsv-button-3" onclick="GraphDecorationWidget.showDecorateDialog()">decorate nodes</button>
             <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.showHideIndividuals()">Show/Hide Individuals</button>
 

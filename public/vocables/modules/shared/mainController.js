@@ -240,8 +240,13 @@ var MainController = (function () {
         }
 
         if (self.currentTool != null) {
+            if (Config.userTools[self.currentTool].resetURLParamsDiv) {
+                $("#" + Config.userTools[self.currentTool].resetURLParamsDiv).dialog("close");
+            }
             if (toolId == "lineage") {
-                Lineage_sources.registerSource = self.oldRegisterSource;
+                if (self.oldRegisterSource) {
+                    Lineage_sources.registerSource = self.oldRegisterSource;
+                }
             }
             if (Config.userTools[self.currentTool].controller.unload) {
                 try {
@@ -275,10 +280,14 @@ var MainController = (function () {
         } else {
             UI.cleanPage();
             self.initTool(toolId);
-            if (toolId != "OntoCreator") {
-                $("#mainDialogDiv").dialog({
+            var homePageOptions = {};
+            if (toolId != "ConfigEditor") {
+                homePageOptions["notRefresh"] = true;
+            }
+            if (Config.userTools[toolId].resetURLParamsDiv) {
+                $("#" + Config.userTools[toolId].resetURLParamsDiv).dialog({
                     close: function () {
-                        UI.homePage();
+                        UI.homePage(homePageOptions);
                     },
                 });
             }

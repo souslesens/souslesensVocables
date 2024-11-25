@@ -6,11 +6,30 @@
             <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" title="Restrictions"><img src="./icons/CommonIcons/ModelIcon.png" /></button>
             <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Expand"><img src="./icons/CommonIcons/ExpandIcon.png" /></button>
             <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" title="Parents"><img src="./icons/CommonIcons/ParentIcon.png" /></button>
-            <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>
+            <!-- <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>-->
+            <button class="w3-buttonx slsv-button-1x" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/KGA/SearchIcon-KGA.png" /></button>
             <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
             <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="OntoLay.clearAll()" title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
             <button class="w3-button slsv-button-3 size-of-button-small" onclick="OntoLay.setHiearchicalLayout()">Hier.</button>
         </div>
+    </div>
+    <div class="titleboxButtons font-button3-color" style="display: inline-flex">
+        More Actions
+        <div class="slsv-invisible-button">
+            <button class="moreOptions-icon slsv-invisible-button" onclick="Lineage_whiteboard.hideShowMoreActions()" style="width: 20px; height: 20px; margin-left: 5px"></button>
+        </div>
+    </div>
+    <div id="Lineage_MoreActionsButtons" style="display: none">
+        <!--WhiteBoard Display Buttons -->
+        <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.saveWhiteboard()">saveWhiteboard</button>
+        <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.loadSavedGraph()">loadSavedGraph</button>
+
+        <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.toSVG()">SVG</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.graph.toGraphMl()">graphML</button>
+        <button class="w3-button slsv-button-3" id="lineage_actionDiv_reasoner" onclick="Lineage_reasoner.showReasonerDialog()">Reasoner</button>
+        <button class="w3-button slsv-button-3" id="lineage_actionXX" onclick="Lineage_subGraph.getSubGraphTurtles(Lineage_sources.activeSource)">SubGraph</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.graph.showGraphConfig()">Display</button>
+        <span id="visjsConfigureDiv">&nbsp;</span>
     </div>
 
     <div id="ontoLay_currentabActions">
@@ -42,6 +61,13 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div id="whiteboardTab" class="w3-container lineage-tab slsv-bg-pale" style="display: none">
+    <div id="lineage_legendWrapperSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width" style="max-height: 26dvh">
+        <div class="titleboxButtons font-lengend-color">Query Legend</div>
+        <div id="Lineage_classes_graphDecoration_legendDiv" style="flex-wrap: nowrap; height: auto" class="lineage_actionDiv"></div>
     </div>
 </div>
 

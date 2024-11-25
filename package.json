@@ -108,6 +108,7 @@
         "simple-git": "^3.27.0",
         "socket.io": "^4.8.1",
         "sparqljs": "^3.7.3",
+        "streamify-string": "^1.0.1",
         "superagent": "^8.1.2",
         "superagent-proxy": "^3.0.0",
         "swagger-ui-express": "^4.6.3",

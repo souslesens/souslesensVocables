@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.93.1](https://github.com/souslesens/souslesensVocables/compare/1.93.0...1.93.1) (2024-11-25)
+
+
+### Bug Fixes
+
+* **package:** restore node-graphviz in package.json ([28fed65](https://github.com/souslesens/souslesensVocables/commit/28fed65c8fab69dfaaf9312fd59a7e9e52f8906e))
+
 ## [1.93.0](https://github.com/souslesens/souslesensVocables/compare/1.92.0...1.93.0) (2024-11-25)
 
 

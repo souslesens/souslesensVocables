@@ -375,13 +375,7 @@ var Lineage_whiteboard = (function () {
             return;
         }
 
-        var topClassFilter = Config.sources[source].topClassFilter;
-        if (options.topClassFilter) {
-            topClassFilter = options.topClassFilter;
-        }
-        if (!topClassFilter) {
-            return UI.message("no topConceptFilter defined for this source");
-        }
+
 
         var allSources = [];
 
@@ -2858,7 +2852,7 @@ restrictionSource = Config.predicatesSource;
             }
             if (callback) {
                 if (!options.drawBeforeCallback) {
-                    callback(null, visjsData);
+                   return callback(null, visjsData);
                 }
             }
 

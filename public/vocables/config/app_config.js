@@ -345,6 +345,7 @@ var Config = (function () {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Quality": "#a9e87b",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#b96af4",
         },
+
     };
     self.lessIconsFileNames = {
         "@arrow-icon": "caret-right",

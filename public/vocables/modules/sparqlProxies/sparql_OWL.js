@@ -106,8 +106,7 @@ var Sparql_OWL = (function () {
             }
         }
 
-        if(options.filter)
-            strFilterTopConcept+=options.filter
+        if (options.filter) strFilterTopConcept += options.filter;
 
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -207,8 +206,8 @@ var Sparql_OWL = (function () {
             options.selectGraph = false;
         }
 
-        if(options.filter){
-            strFilter+=options.filter
+        if (options.filter) {
+            strFilter += options.filter;
         }
 
         fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports, options);

@@ -240,14 +240,13 @@ var MainController = (function () {
         }
 
         if (self.currentTool != null) {
-            if(Config.userTools[self.currentTool].resetURLParamsDiv){
-                $('#'+Config.userTools[self.currentTool].resetURLParamsDiv).dialog("close");
+            if (Config.userTools[self.currentTool].resetURLParamsDiv) {
+                $("#" + Config.userTools[self.currentTool].resetURLParamsDiv).dialog("close");
             }
             if (toolId == "lineage") {
-                if(self.oldRegisterSource){
+                if (self.oldRegisterSource) {
                     Lineage_sources.registerSource = self.oldRegisterSource;
                 }
-                
             }
             if (Config.userTools[self.currentTool].controller.unload) {
                 try {
@@ -281,21 +280,17 @@ var MainController = (function () {
         } else {
             UI.cleanPage();
             self.initTool(toolId);
-            var homePageOptions={};
+            var homePageOptions = {};
             if (toolId != "ConfigEditor") {
-                homePageOptions["notRefresh"]=true;
+                homePageOptions["notRefresh"] = true;
             }
-            if(Config.userTools[toolId].resetURLParamsDiv){
-                $("#"+Config.userTools[toolId].resetURLParamsDiv).dialog({
+            if (Config.userTools[toolId].resetURLParamsDiv) {
+                $("#" + Config.userTools[toolId].resetURLParamsDiv).dialog({
                     close: function () {
                         UI.homePage(homePageOptions);
-                        
-                        
                     },
                 });
             }
-           
-            
 
             //Config.userTools[self.currentTool].controller.unload=UI.homePage;
             self.currentSource = null;

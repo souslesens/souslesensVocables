@@ -238,7 +238,7 @@ var SearchWidget = (function () {
                                     id: nodeId,
                                     text: label,
                                     parent: parentId,
-                                    type:'Class',
+                                    type: "Class",
                                     data: {
                                         id: aClass,
                                         label: label,
@@ -251,9 +251,9 @@ var SearchWidget = (function () {
                         nodeId = source;
                     }
                     var leafId = nodeId + match.id;
-                    var type='Class';
-                    if(match.type!="owl:Class"){
-                        type='Individual'
+                    var type = "Class";
+                    if (match.type != "owl:Class") {
+                        type = "Individual";
                     }
                     if (!existingNodes[leafId]) {
                         existingNodes[leafId] = 1;
@@ -261,7 +261,7 @@ var SearchWidget = (function () {
                             id: leafId,
                             text: "<span class='searched_concept'>" + match.label + "</span>",
                             parent: nodeId,
-                            type:type,
+                            type: type,
                             data: {
                                 id: match.id,
                                 label: match.label,

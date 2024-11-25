@@ -1016,21 +1016,19 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
                 self.drawAllInfos(self.currentSource, self.currentNode.data.id, {}, function (err, result) {
                     // manage particular cases
-                    if (property == "<http://www.w3.org/2000/01/rdf-schema#subClassOf>" || property=='rdfs:subClassOf') {
-                        // update Ontology model cache parent class 
-                        if(Config.ontologiesVocabularyModels[self.currentSource]["classes"][self.currentNode.data.id]){
-                            var data={'classes':{}};
-                            data['classes'][self.currentNode.data.id]=Config.ontologiesVocabularyModels[self.currentSource]["classes"][self.currentNode.data.id];
-                            var valueCleaned=value.replaceAll('<','').replaceAll('>','');
-                            data['classes'][self.currentNode.data.id].superClass=valueCleaned;
-                            data['classes'][self.currentNode.data.id].superClassLabel=Sparql_common.getLabelFromURI(valueCleaned);
-                            OntologyModels.updateModel(self.currentSource,data,{},function(err,result){
+                    if (property == "<http://www.w3.org/2000/01/rdf-schema#subClassOf>" || property == "rdfs:subClassOf") {
+                        // update Ontology model cache parent class
+                        if (Config.ontologiesVocabularyModels[self.currentSource]["classes"][self.currentNode.data.id]) {
+                            var data = { classes: {} };
+                            data["classes"][self.currentNode.data.id] = Config.ontologiesVocabularyModels[self.currentSource]["classes"][self.currentNode.data.id];
+                            var valueCleaned = value.replaceAll("<", "").replaceAll(">", "");
+                            data["classes"][self.currentNode.data.id].superClass = valueCleaned;
+                            data["classes"][self.currentNode.data.id].superClassLabel = Sparql_common.getLabelFromURI(valueCleaned);
+                            OntologyModels.updateModel(self.currentSource, data, {}, function (err, result) {
                                 Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(self.currentNode.data.id);
-                                Lineage_whiteboard.drawNodesAndParents(self.currentNode,null,{},function(){});
+                                Lineage_whiteboard.drawNodesAndParents(self.currentNode, null, {}, function () {});
                             });
                         }
-                        
-                       
                     }
                     // update cache after change subPropertyOf but properties not available in Add Predicates selector
                     /*
@@ -1050,7 +1048,6 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                         
                        
                     }*/
-
 
                     if (callback) {
                         return callback(null, self.currentNodeId);
@@ -1140,13 +1137,13 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                             OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
                                 callbackSeries(err);
                             });
-                        }else if(Config.ontologiesVocabularyModels[self.currentNode.data.source]["classes"][self.currentNodeId]){
+                        } else if (Config.ontologiesVocabularyModels[self.currentNode.data.source]["classes"][self.currentNodeId]) {
                             var data = {};
                             data["classes"] = [self.currentNodeId];
                             OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
                                 callbackSeries(err);
                             });
-                        }else {
+                        } else {
                             callbackSeries();
                         }
                     },
@@ -1164,7 +1161,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                             callbackSeries();
                         });
                     },
-                    
+
                     // delete restrictions triples
                     function (callbackSeries) {
                         if (concernedRestrictions.length > 0) {

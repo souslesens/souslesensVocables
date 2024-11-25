@@ -10,7 +10,7 @@ import Containers_graph from "./containers_graph.js";
 var Containers_tree = (function () {
     var self = {};
     self.jstreeDivId = "lineage_containers_containersJstree";
-    
+
     self.search = function (jstreeDivId, source, options, callback) {
         if (jstreeDivId) {
             self.jstreeDivId = jstreeDivId;
@@ -38,7 +38,7 @@ var Containers_tree = (function () {
             });
         } else {
             Containers_query.getTopContainer(self.currentSource, options, function (err, result) {
-                self.clickedContainers={};
+                self.clickedContainers = {};
                 self.drawTree(self.jstreeDivId, self.currentSource, "#", result.results.bindings, options);
             });
         }
@@ -402,11 +402,11 @@ var Containers_tree = (function () {
     self.listContainerResources = function (container) {
         var source = container.data.source;
         // if container clicked don't click again on because no restrictions on container and class URIs (same class can be drawed n times in arborescence) anymore
-        if(self.clickedContainers[container.id]){
+        if (self.clickedContainers[container.id]) {
             return;
         }
-        self.clickedContainers[container.id]=1;
-        
+        self.clickedContainers[container.id] = 1;
+
         Containers_query.getContainerDescendants(source, container.data.id, { depth: 1, leaves: true }, function (err, result) {
             if (err) {
                 return alert(err.responsetext);
@@ -418,25 +418,23 @@ var Containers_tree = (function () {
             var jstreeData = [];
 
             var existingNodes = {};
-            var descendantsURI={};
+            var descendantsURI = {};
             var parent = container.id;
             result.results.bindings.forEach(function (item) {
-
                 var id = item.member.value;
-                if(descendantsURI[id]){
+                if (descendantsURI[id]) {
                     return;
-                }
-                else{
+                } else {
                     descendantsURI[id] = 1;
                 }
                 var label = item.memberLabel ? item.memberLabel.value : Sparql_common.getLabelFromURI(item.member.value);
                 var jstreeId = "_" + common.getRandomHexaId(5);
 
                 //var parent = self.idsMap[item.parent.value];
-                
-                var type='Container';
-                if(item.memberTypes.value=="http://www.w3.org/2002/07/owl#Class"){
-                    type="Class"
+
+                var type = "Container";
+                if (item.memberTypes.value == "http://www.w3.org/2002/07/owl#Class") {
+                    type = "Class";
                 }
                 if (!self.idsMap[id]) {
                     self.idsMap[id] = jstreeId;

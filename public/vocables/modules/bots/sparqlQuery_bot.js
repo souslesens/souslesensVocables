@@ -15,7 +15,7 @@ var SparqlQuery_bot = (function () {
     self.start = function () {
         self.title = "Query graph";
         _botEngine.init(SparqlQuery_bot, self.workflow, null, function () {
-            self.params = {source: Lineage_sources.activeSource};
+            self.params = { source: Lineage_sources.activeSource };
             _botEngine.nextStep();
         });
     };
@@ -52,7 +52,7 @@ var SparqlQuery_bot = (function () {
                 },
             },
         },
-        sparqlQuery: {showSparqlEditorFn: {}},
+        sparqlQuery: { showSparqlEditorFn: {} },
         similars: {
             chooseQueryScopeFn: {},
         },
@@ -82,19 +82,18 @@ var SparqlQuery_bot = (function () {
     self.functions = {
         chooseQueryScopeFn: function () {
             var choices = [
-                {id: "activeSource", label: "active source"},
-                {id: "whiteboardSources", label: "current sources"},
+                { id: "activeSource", label: "active source" },
+                { id: "whiteboardSources", label: "current sources" },
             ];
             if (self.params.resourceType == "Class") {
-                choices.push({id: "", label: "all sources"});
+                choices.push({ id: "", label: "all sources" });
             }
 
             _botEngine.showList(choices, "queryScope");
         },
         promptKeywordFn: function () {
-
             if (self.params.currentObjectProperty) {
-                return _botEngine.nextStep()
+                return _botEngine.nextStep();
             }
             if (false && self.params.queryScope == "activeSource") {
                 CommonBotFunctions.listVocabClasses(self.params.source, "selectedClass");
@@ -128,17 +127,13 @@ var SparqlQuery_bot = (function () {
             }
         },
         listObjectPropertiesFn: function () {
-
             CommonBotFunctions.listSourceAllObjectProperties(self.params.source, "currentObjectProperty", null, function (err, properties) {
                 common.array.sort(properties, "label");
                 _botEngine.showList(properties, "currentObjectProperty");
-
-            })
-
-
+            });
         },
         chooseObjectPropertyResourceTypeFn: function () {
-            var choices = ["RangeAndDomain", "Restriction",];//"Predicate"
+            var choices = ["RangeAndDomain", "Restriction"]; //"Predicate"
 
             _botEngine.showList(choices, "objectPropertyResourceType");
         },
@@ -196,7 +191,7 @@ var SparqlQuery_bot = (function () {
                         if (ok) {
                             if (!distinctValues[item.sClass.value]) {
                                 distinctValues[item.sClass.value] = 1;
-                                filteredClasses.push({id: item.sClass.value, label: item.sClassLabel.value});
+                                filteredClasses.push({ id: item.sClass.value, label: item.sClassLabel.value });
                             }
                         }
                     });
@@ -221,7 +216,7 @@ var SparqlQuery_bot = (function () {
                         if (ok) {
                             if (!distinctValues[item.oClass.value]) {
                                 distinctValues[item.oClass.value] = 1;
-                                filteredClasses.push({id: item.oClass.value, label: item.oClassLabel.value});
+                                filteredClasses.push({ id: item.oClass.value, label: item.oClassLabel.value });
                             }
                         }
                     });
@@ -343,10 +338,14 @@ var SparqlQuery_bot = (function () {
                     }
 
                     var cols = [];
-                    cols.push({title: "source", defaultContent: ""}, {
-                        title: "label",
-                        defaultContent: ""
-                    }, {title: "uri", defaultContent: ""});
+                    cols.push(
+                        { title: "source", defaultContent: "" },
+                        {
+                            title: "label",
+                            defaultContent: "",
+                        },
+                        { title: "uri", defaultContent: "" }
+                    );
                     var dataset = [];
 
                     self.params.elasticResult.forEach(function (item0) {
@@ -361,7 +360,7 @@ var SparqlQuery_bot = (function () {
                                             return;
                                         }
                                         if (cols.length <= indexParent + 3) {
-                                            cols.push({title: "ancestor_" + indexParent, defaultContent: ""});
+                                            cols.push({ title: "ancestor_" + indexParent, defaultContent: "" });
                                         }
 
                                         var parentLabel = self.params.elasticResult.parentIdsLabelsMap[parent];
@@ -382,7 +381,7 @@ var SparqlQuery_bot = (function () {
                     if (outputType != "Graph") {
                         return callbackSeries();
                     }
-                    var visjsData = {nodes: [], edges: []};
+                    var visjsData = { nodes: [], edges: [] };
                     var sources = [];
                     self.params.elasticResult.forEach(function (item0) {
                         var uniqueNodes = {};
@@ -440,7 +439,7 @@ var SparqlQuery_bot = (function () {
             [
                 //select propertie in Config.ontologiesVocabularyModels
                 function (callbackSeries) {
-                    OntologyModels.registerSourcesModel(searchedSources, {noCache: false}, function (err, result) {
+                    OntologyModels.registerSourcesModel(searchedSources, { noCache: false }, function (err, result) {
                         searchedSources.forEach(function (source) {
                             var sourceOntologyModel = Config.ontologiesVocabularyModels[source];
                             for (var classId in sourceOntologyModel.classes) {
@@ -465,7 +464,7 @@ var SparqlQuery_bot = (function () {
                     if (Object.keys(classes).length > self.maxGraphDisplay) {
                         return _botEngine.abort("too many nodes to display a usable graph");
                     }
-                    var visjsData = {nodes: [], edges: []};
+                    var visjsData = { nodes: [], edges: [] };
                     var existingNodes = {};
                     for (var classId in classes) {
                         var classLabel = classes[classId].label;
@@ -541,22 +540,18 @@ var SparqlQuery_bot = (function () {
             [
                 //select propertie in Config.ontologiesVocabularyModels
                 function (callbackSeries) {
-
-                    OntologyModels.registerSourcesModel(searchedSources, {noCache: false}, function (err, result) {
-
+                    OntologyModels.registerSourcesModel(searchedSources, { noCache: false }, function (err, result) {
                         searchedSources.forEach(function (source) {
                             var sourceOntologyModel = Config.ontologiesVocabularyModels[source];
 
                             if (sourceOntologyModel.properties[currentObjectProperty]) {
-                                var property = currentObjectProperty
+                                var property = currentObjectProperty;
                                 properties[property] = sourceOntologyModel.properties[property];
                                 properties[property].source = source;
                                 properties[property].constraints = sourceOntologyModel.constraints[property] || {};
                                 properties[property].restrictions = sourceOntologyModel.restrictions[property] || {};
                             } else {
-
                                 for (var property in sourceOntologyModel.properties) {
-
                                     var propLabel = sourceOntologyModel.properties[property].label;
                                     if (!self.params.keyword || propLabel.indexOf(self.params.keyword) > -1) {
                                         properties[property] = sourceOntologyModel.properties[property];
@@ -580,7 +575,7 @@ var SparqlQuery_bot = (function () {
                     if (Object.keys(properties).length > self.maxGraphDisplay) {
                         return _botEngine.abort("too many nodes to display a usable graph");
                     }
-                    var visjsData = {nodes: [], edges: []};
+                    var visjsData = { nodes: [], edges: [] };
                     var existingNodes = {};
                     for (var property in properties) {
                         if (objectPropertyResourceType == "RangeAndDomain" || objectPropertyResourceType == "Restriction") {
@@ -689,7 +684,7 @@ var SparqlQuery_bot = (function () {
 
                     var cols = [];
                     var dataset = [];
-                    cols.push({title: "source", defaultContent: ""}, {title: "label", defaultContent: ""});
+                    cols.push({ title: "source", defaultContent: "" }, { title: "label", defaultContent: "" });
                     var constraints;
                     var edgeDomainLabel;
                     var edgeRangeLabel;
@@ -697,30 +692,34 @@ var SparqlQuery_bot = (function () {
                     var arrowDir = "to";
                     if (objectPropertyResourceType == "RangeAndDomain") {
                         cols.push(
-                            {title: "domainLabel", defaultContent: ""},
-                            {title: "rangeLabel", defaultContent: ""},
-                            {title: "domainUri", defaultContent: ""},
-                            {title: "rangeUri", defaultContent: ""}
+                            { title: "domainLabel", defaultContent: "" },
+                            { title: "rangeLabel", defaultContent: "" },
+                            { title: "domainUri", defaultContent: "" },
+                            { title: "rangeUri", defaultContent: "" }
                         );
 
                         edgeDomainLabel = "domain";
                         edgeRangeLabel = "range";
                     } else if (objectPropertyResourceType == "Restriction") {
                         cols.push(
-                            {title: "subClassLabel", defaultContent: ""},
-                            {title: "propertyLabel", defaultContent: ""},
-                            {title: "subClassUri", defaultContent: ""},
-                            {title: "propertyUri", defaultContent: ""}
+                            { title: "subClassLabel", defaultContent: "" },
+                            { title: "propertyLabel", defaultContent: "" },
+                            { title: "subClassUri", defaultContent: "" },
+                            { title: "propertyUri", defaultContent: "" }
                         );
 
                         edgeDomainLabel = "subClassOf";
                         edgeRangeLabel = "targetClass";
                     }
 
-                    cols.push({title: "Propertyuri", defaultContent: ""}, {
-                        title: "superProperty",
-                        defaultContent: ""
-                    }, {title: "inverseProperty", defaultContent: ""});
+                    cols.push(
+                        { title: "Propertyuri", defaultContent: "" },
+                        {
+                            title: "superProperty",
+                            defaultContent: "",
+                        },
+                        { title: "inverseProperty", defaultContent: "" }
+                    );
 
                     for (var property in properties) {
                         if (objectPropertyResourceType == "RangeAndDomain") {
@@ -876,9 +875,8 @@ var SparqlQuery_bot = (function () {
             filter += IndividualObjectFilter;
         }
 
-        var options = {filter: filter};
-        Sparql_OWL.getFilteredTriples(self.params.source, null, IndividualObjectPropertyFilter, null, options, function (err, result) {
-        });
+        var options = { filter: filter };
+        Sparql_OWL.getFilteredTriples(self.params.source, null, IndividualObjectPropertyFilter, null, options, function (err, result) {});
     };
 
     self.loadIndiviualsModel = function (sources, callback) {

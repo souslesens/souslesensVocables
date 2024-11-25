@@ -769,10 +769,60 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
         self.data.nodes.update(newNodes);
     };
+
+    self.toSVG_graphviz = function () {
+
+        var nodes = self.data.nodes.get()
+        var edges = self.data.edges.get()
+
+
+        var nodesMap = {};
+        nodes.forEach(function (node) {
+            nodesMap[node.id] = node;
+        })
+
+        var str = "digraph G {\n"
+
+        edges.forEach(function (edge) {
+            str += nodesMap[edge.from].label + "->" + nodesMap[edge.to].label + ";\n"
+
+
+        })
+        str += "}"
+
+        var payload = {
+            dotStr: str,
+            format: "svg",
+            output: "text"
+
+        };
+        const params = new URLSearchParams(payload);
+        Axiom_editor.message("getting Class axioms");
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/graphvis?" + params.toString(),
+            dataType: "text",
+
+            success: function (data, _textStatus, _jqXHR) {
+                var svg = JSON.parse(data).result
+                //  return callback(null,data.result)
+                //  callback(null, data);
+            },
+            error(err) {
+                callback(err.responseText);
+            },
+        });
+
+        return;
+    }
+
+
+
     self.toSVG = function () {
         SVGexport.toSVG(self.network);
         self.redraw();
     };
+
 
     self.toGraphMl = function () {
         var visjsData = {
@@ -780,7 +830,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             edges: self.data.edges.get(),
         };
         var xmlStr = GraphMlExport.VisjsDataToGraphMl(visjsData);
-        common.copyTextToClipboard(xmlStr);
+
+        download(xmlStr, "SLSwhiteboard.graphml", "graphml")
+       // common.copyTextToClipboard(xmlStr);
     };
 
     self.searchNode = function (id, word) {

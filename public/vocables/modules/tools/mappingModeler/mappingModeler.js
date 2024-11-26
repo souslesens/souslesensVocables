@@ -11,6 +11,7 @@ import Clipboard from "../../shared/clipboard.js";
 import KGcreator_graph from "../KGcreator/KGcreator_graph.js";
 import SimpleListFilterWidget from "../../uiWidgets/simpleListFilterWidget.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
+import OntologyModels from "../../shared/ontologyModels.js";
 
 // imports React app
 import("/assets/mappingModeler_upload_app.js");
@@ -844,10 +845,26 @@ var MappingModeler = (function () {
                 { id: "rdfs:member", label: "_rdfs:member_" },
             ];
             var options = { includesnoConstraintsProperties: true };
-            Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, options, function (err, properties) {
+            //Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, options, function (err, properties) {
+            OntologyModels.getAllowedPropertiesBetweenNodes(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, { keepSuperClasses: true }, function (err, result) {
+
                 if (err) {
                     return alert(err);
                 }
+                var properties=[];
+                for(var group in result.constraints){
+                    for(var propId in result.constraints[group]){
+                        properties.push({
+                            id: propId,
+                            label: result.constraints[group][propId].label,
+                            source: result.constraints[group][propId].source,
+                            resourceType: "ObjectProperty",
+                        });
+                        
+                    }
+                }
+                properties = common.array.distinctValues(properties, "id");
+                properties = common.array.sort(properties, "label");
                 properties.forEach(function (item) {
                     item.label = item.source.substring(0, 3) + ":" + item.label;
                 });

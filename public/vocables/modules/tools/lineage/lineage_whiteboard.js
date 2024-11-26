@@ -2865,7 +2865,7 @@ restrictionSource = Config.predicatesSource;
                 }
             }
 
-            Lineage_sources.registerSource(source);
+            //Lineage_sources.registerSource(source);
 
             if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
                 self.drawNewGraph(visjsData, null, options);

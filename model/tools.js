@@ -33,7 +33,7 @@ const NATIVE_TOOLS = [
     { name: "TSF_Dictionary", controller: "Lineage_dictionary", useSource: false, multiSources: false, toTools: {} },
     { name: "UserManagement", controller: "UserManagement", useSource: false, multiSources: false, toTools: {} },
 
-    { name: "OntoLay", controller: "OntoLay", useSource: true, multiSources: false, toTools: {} },
+    { name: "OntoWagon", controller: "OntoWagon", useSource: true, multiSources: false, toTools: {} },
    // { name: "Lifex_cost", controller: "Lifex_cost", useSource: false, multiSources: false, toTools: {} },
 
     

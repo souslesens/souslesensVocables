@@ -1583,6 +1583,11 @@ var OntologyModels = (function () {
         return hierarchyArray;
     };
 
+
+
+
+
+
     self.getAllClassesFromIndividuals = function (sourceLabel, options, callback) {
         if (!options) {
             options = {};

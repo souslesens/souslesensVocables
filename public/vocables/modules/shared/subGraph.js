@@ -5,10 +5,15 @@ import Shacl from "./shacl.js";
 var SubGraph = (function () {
     var self = {};
 
-    self.getSubGraphResources = function (sourceLabel, baseClassId, callback) {
-        var distinctClasses = {};
+    self.getSubGraphResources = function (sourceLabel, baseClassId,options, callback) {
+
+        if(!options){
+            options={}
+        }
+        var classesMap = {};
         var allClasses = [];
         var allRestrictions = [];
+
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         async.series(
             [
@@ -17,11 +22,29 @@ var SubGraph = (function () {
                         callbackSeries(err);
                     });
                 },
+
+                function (callbackSeries) {
+
+
+                    var treeData = OntologyModels.getClassHierarchyTreeData(sourceLabel, baseClassId, "ancestors");
+                    treeData.forEach(function (item) {
+                        classesMap[item.id] = item;
+                            if( ! options.skipAncestors || (options.skipAncestors&& baseClassId==item.id)) {
+                                allClasses.push(item.id);
+                            }
+                    });
+
+                    callbackSeries();
+                },
+
                 ///getsubClasses
                 function (callbackSeries) {
+                    if(  !options.includeDescendants){
+                        return callbackSeries();
+                    }
                     var treeData = OntologyModels.getClassHierarchyTreeData(sourceLabel, baseClassId, "descendants");
                     treeData.forEach(function (item) {
-                        distinctClasses[item.id] = 1;
+                        classesMap[item.id] = item;
                         allClasses.push(item.id);
                     });
 
@@ -61,8 +84,8 @@ var SubGraph = (function () {
                                 }
                                 currentClasses = [];
                                 result.results.bindings.forEach(function (item) {
-                                    if (!distinctClasses[item.o.value]) {
-                                        distinctClasses[item.o.value] = 1;
+                                    if (!classesMap[item.o.value]) {
+                                        classesMap[item.o.value] = 1;
                                         allRestrictions.push(item.o.value);
                                         currentClasses.push(item.o.value);
                                         currentRestrictions.push(item.o.value);
@@ -88,8 +111,8 @@ var SubGraph = (function () {
                                     }
                                     currentClasses = [];
                                     result.results.bindings.forEach(function (item) {
-                                        if (!distinctClasses[item.s.value]) {
-                                            distinctClasses[item.s.value] = 1;
+                                        if (!classesMap[item.s.value]) {
+                                            classesMap[item.s.value] = [];
                                             allClasses.push(item.s.value);
                                             currentClasses.push(item.s.value);
                                         }
@@ -105,9 +128,13 @@ var SubGraph = (function () {
                         }
                     );
                 },
+
+
+
+
             ],
             function (err) {
-                return callback(err, { classes: allClasses, restrictions: allRestrictions });
+                return callback(err, { classes: allClasses, restrictions: allRestrictions, classesMap:classesMap });
             }
         );
     };
@@ -152,12 +179,12 @@ var SubGraph = (function () {
         return nodesMap;
     };
 
-    self.instantiateSubGraph = function (sourceLabel, classUri, callback) {
+    self.instantiateSubGraph = function (sourceLabel, classUri,options, callback) {
         if (!classUri) {
             classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
         }
 
-        self.getSubGraphResources(sourceLabel, classUri, function (err, result) {
+        self.getSubGraphResources(sourceLabel, classUri, options,function (err, result) {
             var resources = result.classes.concat(result.restrictions);
             // return;
             self.getResourcesPredicates(sourceLabel, resources, "SELECT", {}, function (err, result) {
@@ -197,15 +224,21 @@ var SubGraph = (function () {
         });
     };
 
-    self.getSubGraphShacl = function (sourceLabel, classUri, callback) {
+    self.getSubGraphShaclTriples = function (sourceLabel, classUri,options, callback) {
+        if(!options){
+            options={}
+        }
         if (!classUri) {
             classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
         }
 
         Shacl.initSourceLabelPrefixes(sourceLabel);
 
-        self.getSubGraphResources(sourceLabel, classUri, function (err, result) {
+
+
+        self.getSubGraphResources(sourceLabel, classUri, options,function (err, result) {
             var resources = result.classes.concat(result.restrictions);
+            var classesMap=result.classesMap
             // return;
 
             self.getResourcesPredicates(sourceLabel, resources, "SELECT", {}, function (err, result) {
@@ -251,8 +284,9 @@ var SubGraph = (function () {
                 var payload = {
                     turtle: allSahcls,
                 };
+
+                // transfom shacl to triples
                 const params = new URLSearchParams(payload);
-                Axiom_editor.message("getting Class axioms");
                 $.ajax({
                     type: "GET",
                     url: Config.apiUrl + "/rdf-io?" + params.toString(),
@@ -334,7 +368,7 @@ var SubGraph = (function () {
         );
     };
 
-    self.getSubGraphTurtles = function (sourceLabel, classUri) {
+    self.getSubGraphTurtles = function (sourceLabel,options, classUri) {
         if (!classUri) {
             classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
         }
@@ -342,7 +376,7 @@ var SubGraph = (function () {
         self.instantiateSubGraph(sourceLabel, classUri, function (err, result) {});
 
         return;
-        self.getSubGraphResources(sourceLabel, classUri, function (err, result) {
+        self.getSubGraphResources(sourceLabel, classUri, options,function (err, result) {
             var resources = result.classes.concat(result.restrictions);
             self.getResourcesPredicates(sourceLabel, resources, "SELECT", null, function (err, result) {
                 console.log(result);

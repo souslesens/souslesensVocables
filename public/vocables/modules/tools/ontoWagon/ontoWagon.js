@@ -1,7 +1,7 @@
 import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
 
-var OntoLay = (function () {
+var OntoWagon = (function () {
     var self = {};
     self.maxClasses = 100;
     self.currentTab = "Class";
@@ -28,10 +28,11 @@ var OntoLay = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            $("#lateralPanelDiv").load("./modules/tools/OntoLay/html/lateralPanel.html", function () {
+            $("#lateralPanelDiv").load("./modules/tools/OntoWagon/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
                 self.loadTopClasses();
+                $("#ontoWagon_searchTermInput").focus()
             });
         });
     };
@@ -155,7 +156,10 @@ var OntoLay = (function () {
                     );
                 },
             ],
-            function (err) {}
+            function (err) {
+                self.search('Whiteboard');
+
+            }
         );
     };
 
@@ -190,9 +194,7 @@ var OntoLay = (function () {
 
         $("#classesTab").css("display", "none");
         $("#propertiesTab").css("display", "none");
-
-        $("#classesTab").css("display", "none");
-        $("#propertiesTab").css("display", "none");
+        $('#whiteboardTab').css("display", "none");
         if (!type) {
             type = self.currentTab;
         } else {
@@ -212,16 +214,22 @@ var OntoLay = (function () {
             $("#propertiesTab").css("display", "block");
             Lineage_properties.searchTermInSources(term, true, false, "property");
         } else if (type == "Whiteboard") {
+            $("#whiteboardTab").css("display", "block");
             Lineage_whiteboard.graph.searchNode(null, term);
         }
     };
+
 
     self.clearAll = function () {
         Lineage_whiteboard.initUI();
         self.loadTopClasses();
     };
+
+
+
+
     return self;
 })();
 
-export default OntoLay;
-window.OntoLay = OntoLay;
+export default OntoWagon;
+window.OntoWagon = OntoWagon;

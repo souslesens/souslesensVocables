@@ -17,7 +17,6 @@ var OntoLay = (function () {
         $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
-        
     };
     self.unload = function () {
         $("#graphDiv").empty();
@@ -84,46 +83,80 @@ var OntoLay = (function () {
         });
     };
 
-    self.drawTopClasses = function (nodeIds, currentDepth, options) {
-        if (!options) options = {};
+    self.drawTopClasses = function (nodes, currentDepth, options) {
+        if (!options) {
+            options = {};
+        }
         var totalDrawnClasses = 0;
         var newNodes = [];
         options.startLevel = currentDepth + 2;
-
-        Lineage_whiteboard.drawNodesAndParents(nodeIds, currentDepth + 6, options, function (err, result) {
-            result.nodes.forEach(function (node) {
-                newNodes.push(node.id);
-            });
-            totalDrawnClasses += newNodes.length;
-            options.drawBeforeCallback = true;
-            async.whilst(
-                function (callbackTest) {
-                    //test
-
-                    return totalDrawnClasses < self.maxClasses;
-                },
-
-                function (callbackWhilst) {
-                    //   setTimeout(function () {
-
-                    Lineage_whiteboard.addChildrenToGraph(Lineage_sources.activeSource, newNodes, options, function (err, result) {
-                        newNodes = [];
+        async.series(
+            [
+                function (callbackSeries) {
+                    options.drawBeforeCallback = true;
+                    Lineage_whiteboard.drawNodesAndParents(nodes, currentDepth + 6, options, function (err, result) {
+                        if (err) {
+                            return callbackSeries();
+                        }
                         result.nodes.forEach(function (node) {
                             newNodes.push(node.id);
                         });
-                        //  newNodes=result.nodes
                         totalDrawnClasses += newNodes.length;
-                        options.startLevel += 1;
-                        callbackWhilst();
+                        callbackSeries();
                     });
-                    //  }, 1000)
                 },
-                function (err) {
-                    Lineage_whiteboard.currentExpandLevel += options.startLevel;
-                    self.search('Whiteboard');
-                }
-            );
-        });
+
+                // if no parents draw nodes
+                function (callbackSeries) {
+                    if (newNodes.length > 0) {
+                        return callbackSeries();
+                    }
+                    var nodeIds = [];
+                    nodes.forEach(function (node) {
+                        nodeIds.push(node.data.id);
+                    });
+                    newNodes = nodeIds;
+                    var options = { filter: Sparql_common.setFilter("topConcept", nodeIds) };
+                    Lineage_whiteboard.drawTopConcepts(Lineage_sources.activeSource, options, null, function (err, result) {
+                        return callbackSeries(err);
+                    });
+                },
+
+                function (callbackSeries) {
+                    totalDrawnClasses += newNodes.length;
+                    options.drawBeforeCallback = true;
+
+                    async.whilst(
+                        function (callbackTest) {
+                            //test
+
+                            return totalDrawnClasses < self.maxClasses;
+                        },
+
+                        function (callbackWhilst) {
+                            //   setTimeout(function () {
+                            //   options.filter = " ?child1 rdf:type owl:Class."
+                            Lineage_whiteboard.addChildrenToGraph(Lineage_sources.activeSource, newNodes, options, function (err, result) {
+                                newNodes = [];
+                                result.nodes.forEach(function (node) {
+                                    newNodes.push(node.id);
+                                });
+                                //  newNodes=result.nodes
+                                totalDrawnClasses += newNodes.length;
+                                options.startLevel += 1;
+                                callbackWhilst();
+                            });
+                            //  }, 1000)
+                        },
+                        function (err) {
+                            Lineage_whiteboard.currentExpandLevel += options.startLevel;
+                            callbackSeries();
+                        }
+                    );
+                },
+            ],
+            function (err) {}
+        );
     };
 
     self.setHiearchicalLayout = function () {
@@ -157,8 +190,9 @@ var OntoLay = (function () {
 
         $("#classesTab").css("display", "none");
         $("#propertiesTab").css("display", "none");
-        $('#whiteboardTab').css("display", "none");
-     
+
+        $("#classesTab").css("display", "none");
+        $("#propertiesTab").css("display", "none");
         if (!type) {
             type = self.currentTab;
         } else {
@@ -178,7 +212,6 @@ var OntoLay = (function () {
             $("#propertiesTab").css("display", "block");
             Lineage_properties.searchTermInSources(term, true, false, "property");
         } else if (type == "Whiteboard") {
-            $("#whiteboardTab").css("display", "block");
             Lineage_whiteboard.graph.searchNode(null, term);
         }
     };

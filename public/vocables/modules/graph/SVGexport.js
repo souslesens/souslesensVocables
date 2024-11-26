@@ -22,11 +22,6 @@ var SVGexport = (function () {
         C2S.prototype.dashedLine = CanvasRenderingContext2D.prototype.dashedLine;
 
         function exportSvg() {
-
-
-
-
-
             var networkContainer = network.body.container;
             var ctx = new C2S({
                 width: networkContainer.clientWidth,

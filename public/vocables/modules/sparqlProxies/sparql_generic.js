@@ -967,7 +967,8 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                             "          ?skosAltLabel. } }" +
                             " UNION " +
                             "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  " +
-                            filter +"}"+
+                            filter +
+                            "}" +
                             "UNION  {" +
                             "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +
                             filter +

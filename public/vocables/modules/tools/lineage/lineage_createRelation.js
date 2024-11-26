@@ -312,9 +312,9 @@ var Lineage_createRelation = (function () {
                     if (false && self.currentPropertiesTreeNode.data.source != Config.currentTopLevelOntology) {
                         return alert("only properties from " + Config.currentTopLevelOntology + " can be refined");
                     }
-                    //var subPropertyLabel = true; 
+                    //var subPropertyLabel = true;
                     //
-                    var subPropertyLabel =prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
+                    var subPropertyLabel = prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
                     if (!subPropertyLabel) {
                         return;
                     }

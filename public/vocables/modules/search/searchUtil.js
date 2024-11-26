@@ -596,8 +596,6 @@ indexes.push(source.toLowerCase());
                                     if (taxonomyClassesIdsMap[item.type2.value]) {
                                         parent = item.type2.value;
                                         parents = taxonomyClassesIdsMap[item.type2.value].parents.concat(item.type2.value);
-                                        
-
                                     } else {
                                         parent = item.type2.value;
                                         parents = [item.type2.value, sourceLabel];

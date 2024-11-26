@@ -18,9 +18,9 @@ async function loadToolsAndPlugins(callback) {
                 toolDescriptionImg: null,
                 toTools: tool.toTools,
             };
-            if(tool.resetURLParamsDiv){
-                allTools[tool.name].resetURLParamsDiv = tool.resetURLParamsDiv
-            }else{
+            if (tool.resetURLParamsDiv) {
+                allTools[tool.name].resetURLParamsDiv = tool.resetURLParamsDiv;
+            } else {
                 allTools[tool.name].resetURLParamsDiv = false;
             }
         });

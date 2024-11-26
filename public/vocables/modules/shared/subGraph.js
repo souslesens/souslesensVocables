@@ -2,7 +2,6 @@ import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Shacl from "./shacl.js";
 
-
 var SubGraph = (function () {
     var self = {};
 
@@ -13,11 +12,10 @@ var SubGraph = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         async.series(
             [
-
                 function (callbackSeries) {
                     OntologyModels.registerSourcesModel(sourceLabel, null, function (err, result) {
                         callbackSeries(err);
-                    })
+                    });
                 },
                 ///getsubClasses
                 function (callbackSeries) {
@@ -109,13 +107,13 @@ var SubGraph = (function () {
                 },
             ],
             function (err) {
-                return callback(err, {classes: allClasses, restrictions: allRestrictions});
+                return callback(err, { classes: allClasses, restrictions: allRestrictions });
             }
         );
     };
 
     self.rawTriplesToNodesMap = function (rawTriples) {
-        var nodesMap = {}
+        var nodesMap = {};
         rawTriples.forEach(function (item) {
             if (!nodesMap[item.s.value]) {
                 nodesMap[item.s.value] = {};
@@ -145,14 +143,14 @@ var SubGraph = (function () {
             if (item.p.value.endsWith("subClassOf")) {
                 if (item.o.value.indexOf("http") < 0) {
                     if (!nodesMap[item.s.value].restrictions) {
-                        nodesMap[item.s.value].restrictions = []
+                        nodesMap[item.s.value].restrictions = [];
                     }
                     nodesMap[item.s.value].restrictions.push(item.o.value);
                 }
             }
         });
-        return nodesMap
-    }
+        return nodesMap;
+    };
 
     self.instantiateSubGraph = function (sourceLabel, classUri, callback) {
         if (!classUri) {
@@ -163,7 +161,7 @@ var SubGraph = (function () {
             var resources = result.classes.concat(result.restrictions);
             // return;
             self.getResourcesPredicates(sourceLabel, resources, "SELECT", {}, function (err, result) {
-                var itemsMap = self.rawTriplesToNodesMap(result)
+                var itemsMap = self.rawTriplesToNodesMap(result);
                 var newTriples = [];
                 // var prefix=Config.sources[sourceLabel].graphUri
                 for (var classUri in itemsMap) {
@@ -190,79 +188,68 @@ var SubGraph = (function () {
                                         object: restriction.range,
                                     });
                                 }
-                            })
+                            });
                         }
                     }
                 }
-                return callback(null, newTriples)
+                return callback(null, newTriples);
             });
         });
     };
-
 
     self.getSubGraphShacl = function (sourceLabel, classUri, callback) {
         if (!classUri) {
             classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
         }
 
-        Shacl.initSourceLabelPrefixes(sourceLabel)
+        Shacl.initSourceLabelPrefixes(sourceLabel);
 
         self.getSubGraphResources(sourceLabel, classUri, function (err, result) {
             var resources = result.classes.concat(result.restrictions);
             // return;
 
             self.getResourcesPredicates(sourceLabel, resources, "SELECT", {}, function (err, result) {
-
-
-                var itemsMap = self.rawTriplesToNodesMap(result)
+                var itemsMap = self.rawTriplesToNodesMap(result);
                 var newTriples = [];
                 // var prefix=Config.sources[sourceLabel].graphUri
 
-                var allSahcls =  ""
+                var allSahcls = "";
                 for (var classUri in itemsMap) {
                     var item = itemsMap[classUri];
                     if (item.type == "Class") {
-                        var shaclProperties = []
+                        var shaclProperties = [];
                         if (item.restrictions) {
                             item.restrictions.forEach(function (retrictionUri) {
-                                var restriction = itemsMap[retrictionUri]
+                                var restriction = itemsMap[retrictionUri];
                                 if (!restriction.property || !restriction.range) {
-                                    return
+                                    return;
                                 }
-                                var count = -1
+                                var count = -1;
                                 if (restriction.cardinality) {
-                                    count = parseInt(restriction.cardinality.substring(1))
+                                    count = parseInt(restriction.cardinality.substring(1));
                                 }
 
-                                if(restriction.property.endsWith("Quality"))
-                                    return
+                                if (restriction.property.endsWith("Quality")) return;
                                 var propStr = Shacl.uriToPrefixedUri(restriction.property);
                                 var rangeStr = Shacl.uriToPrefixedUri(restriction.range);
-                                var property = " sh:path " + propStr + " ;\n"
-                                if(count>-1)
-                                    property+= "        sh:minCount " + count + " ;"
-                                  //  "        sh:maxCount " + count + " ;" +
-                                    property+= "        sh:node " + rangeStr + " ;"
+                                var property = " sh:path " + propStr + " ;\n";
+                                if (count > -1) property += "        sh:minCount " + count + " ;";
+                                //  "        sh:maxCount " + count + " ;" +
+                                property += "        sh:node " + rangeStr + " ;";
 
+                                shaclProperties.push(property);
+                            });
 
-                                shaclProperties.push(property)
+                            var domain = Shacl.uriToPrefixedUri(classUri);
+                            var shaclStr = Shacl.getShacl(domain, null, shaclProperties);
 
-                            })
-
-                            var domain=Shacl.uriToPrefixedUri(classUri);
-                            var shaclStr = Shacl.getShacl(domain, null, shaclProperties)
-
-                            if(allSahcls=="")
-                                allSahcls= Shacl.getPrefixes()
-                            allSahcls+="\n"+shaclStr
+                            if (allSahcls == "") allSahcls = Shacl.getPrefixes();
+                            allSahcls += "\n" + shaclStr;
                         }
                     }
-
-
                 }
                 var payload = {
                     turtle: allSahcls,
-
                 };
                 const params = new URLSearchParams(payload);
                 Axiom_editor.message("getting Class axioms");
@@ -275,23 +262,16 @@ var SubGraph = (function () {
                         if (data.result && data.result.indexOf("Error") > -1) {
                             return callback(data.result);
                         }
-                        return callback(null,data.triples)
+                        return callback(null, data.triples);
                         //  callback(null, data);
                     },
                     error(err) {
                         callback(err.responseText);
                     },
                 });
-
-
-
-
-
-
-            })
-        })
-    }
-
+            });
+        });
+    };
 
     self.getResourcesPredicates = function (sourceLabel, resources, action, options, callback) {
         if (!options) {
@@ -334,9 +314,8 @@ var SubGraph = (function () {
     self.query = function (sourceLabel, query, callback) {
         var url = Config._defaultSource.sparql_server.url;
 
-        var prefixStr = "PREFIX " + Config.sources[sourceLabel].prefix + ": <" + Config.sources[sourceLabel].graphUri + ">\n"
-        query = prefixStr + query
-
+        var prefixStr = "PREFIX " + Config.sources[sourceLabel].prefix + ": <" + Config.sources[sourceLabel].graphUri + ">\n";
+        query = prefixStr + query;
 
         Sparql_proxy.querySPARQL_GET_proxy(
             url,
@@ -360,8 +339,7 @@ var SubGraph = (function () {
             classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
         }
 
-        self.instantiateSubGraph(sourceLabel, classUri, function (err, result) {
-        });
+        self.instantiateSubGraph(sourceLabel, classUri, function (err, result) {});
 
         return;
         self.getSubGraphResources(sourceLabel, classUri, function (err, result) {

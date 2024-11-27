@@ -288,7 +288,11 @@ var Lineage_createResource = (function () {
         $("#lineageCreateResource_predicateDiv").html("");
     };
     self.drawNodeAxioms = function () {};
-
+    self.startCreateRessourceBot = function(){
+        CreateResource_bot.start(null, { source: Lineage_sources.activeSource }, function (err, result) {
+           
+        });
+    }   
     return self;
 })();
 

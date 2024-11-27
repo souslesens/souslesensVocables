@@ -846,6 +846,7 @@ var MappingModeler = (function () {
             ];
             var options = { includesnoConstraintsProperties: true };
             //Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, options, function (err, properties) {
+            
             OntologyModels.getAllowedPropertiesBetweenNodes(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, { keepSuperClasses: true }, function (err, result) {
 
                 if (err) {
@@ -1357,7 +1358,8 @@ var MappingModeler = (function () {
         var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class", ""];
         //  sort by similarity for others than rowIndex
 
-        var columns = JSON.parse(JSON.stringify(self.currentTable.columns));
+        var columns = [''].concat(JSON.parse(JSON.stringify(self.currentTable.columns)));
+        
         common.array.insertFirstArray(columns, column);
         if (currentGraphNode.data.rdfType) {
             common.array.insertFirstArray(rdfObjectsType, currentGraphNode.data.rdfType);

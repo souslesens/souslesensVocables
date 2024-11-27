@@ -955,7 +955,11 @@ var OntologyModels = (function () {
                         }
 
                         for (var subProp in subPropConstraints) {
-                            validConstraints[key][subProp] = subPropConstraints[subProp];
+                            // add subProperties only if they aren't already treated in matching properties callbackSeries
+                            if(!Config.ontologiesVocabularyModels[subPropConstraints[subProp].source].constraints[subProp]){
+                                validConstraints[key][subProp] = subPropConstraints[subProp];
+                            }
+                            
                         }
                     }
 

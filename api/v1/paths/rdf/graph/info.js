@@ -23,7 +23,8 @@ module.exports = function () {
 
             const graphSize = await rdfDataModel.getTripleCount(graphUri);
             const pageSize = Math.min(await rdfDataModel.getPageSize(graphUri), 2000);
-            res.status(200).send({ graph: graphUri, graphSize: graphSize, pageSize: pageSize });
+            const metadata = await rdfDataModel.getRdfMetadata(graphUri);
+            res.status(200).send({ graph: graphUri, metadata: metadata, graphSize: graphSize, pageSize: pageSize });
         } catch (error) {
             console.error(error);
             res.status(500).send({ error: error });

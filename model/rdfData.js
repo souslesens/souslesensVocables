@@ -84,6 +84,21 @@ class RdfDataModel {
 
     /**
      * @param {string} graphUri - the graph URI
+     * @returns {Promise<any>} - response
+     */
+    getRdfMetadata = async (graphUri) => {
+        const query = `SELECT *
+                       FROM <${graphUri}>
+                       WHERE { <${graphUri}> ?key ?value . }`;
+        const json = await this._query(query);
+        const result = json.map((entry) => {
+            return { metadata: entry.key.value, ...entry.value };
+        });
+        return result;
+    };
+
+    /**
+     * @param {string} graphUri - the graph URI
      * @returns {Promise<number>} - number of triples per page
      */
     getPageSize = async (graphUri) => {

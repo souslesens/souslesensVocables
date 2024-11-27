@@ -29,9 +29,9 @@ var SubGraph = (function () {
                     var treeData = OntologyModels.getClassHierarchyTreeData(sourceLabel, baseClassId, "ancestors");
                     treeData.forEach(function (item) {
                         classesMap[item.id] = item;
-                            if( ! options.skipAncestors || (options.skipAncestors&& baseClassId==item.id)) {
-                                allClasses.push(item.id);
-                            }
+                        if( ! options.skipAncestors || (options.skipAncestors&& baseClassId==item.id)) {
+                            allClasses.push(item.id);
+                        }
                     });
 
                     callbackSeries();
@@ -275,12 +275,15 @@ var SubGraph = (function () {
 
                             var domain = Shacl.uriToPrefixedUri(classUri);
                             var shaclStr = Shacl.getShacl(domain, null, shaclProperties);
+                            allSahcls +=shaclStr
 
-                            if (allSahcls == "") allSahcls = Shacl.getPrefixes();
-                            allSahcls += "\n" + shaclStr;
+
                         }
                     }
                 }
+
+              var prefixes = Shacl.getPrefixes();
+                allSahcls = prefixes+"\n" + allSahcls;
                 var payload = {
                     turtle: allSahcls,
                 };

@@ -33,7 +33,7 @@ services:
             - backend
 
     virtuoso:
-        image: askomics/virtuoso:7.2.7
+        image: askomics/virtuoso:7.2.14
         ports:
             - ${VIRTUOSO_LISTEN_PORT:-8890}:8890
         environment:

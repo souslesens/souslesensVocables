@@ -84,6 +84,101 @@ class RdfDataModel {
 
     /**
      * @param {string} graphUri - the graph URI
+     * @returns {Promise<any>} - response
+     */
+    getRdfMetadata = async (graphUri) => {
+        const query = `SELECT *
+                       FROM <${graphUri}>
+                       WHERE { <${graphUri}> ?key ?value . }`;
+        const json = await this._query(query);
+        const result = json.map((entry) => {
+            return { metadata: entry.key.value, ...entry.value };
+        });
+        return result;
+    };
+
+    /**
+     * @param {string} graphUri - the graph URI
+     */
+    _dropMetadata = async (graphUri) => {
+        const query = `WITH <${graphUri}>
+                       DELETE { <${graphUri}> ?p ?o }
+                       WHERE {
+                         <${graphUri}> ?p ?o .
+                       }`;
+        await this._query(query);
+    };
+
+    /**
+     * @param {any} metadataEntry - a metadata object
+     * @returns {string} - formated object
+     */
+    _formatObject = (metadataEntry) => {
+        const type = metadataEntry.type;
+        //escape the quote
+        const value = metadataEntry.value.replace(/"/g, '\\"');
+        if (type === "uri") {
+            return `<${value}>`;
+        }
+
+        if (type === "typed-literal") {
+            return `"${value}"^^<${metadataEntry.datatype}>`;
+        }
+
+        if (type == "literal" && "xml:lang" in metadataEntry) {
+            return `"${value}"@${metadataEntry["xml:lang"]}`;
+        }
+
+        return `"${value}"`;
+    };
+
+    /**
+     * @param {string} graphUri - the graph URI
+     * @param {any[]} metadata - The new metadata array
+     * @returns {Promise<any>} - The new metadata array
+     */
+    rewritesMetadata = async (graphUri, metadata) => {
+        await this._dropMetadata(graphUri);
+        for (const i in metadata) {
+            const m = metadata[i];
+            const object = this._formatObject(m);
+            const query = `INSERT DATA {
+                             GRAPH <${graphUri}> {
+                               <${graphUri}> <${m.metadata}> ${object} .
+                             }
+                           }`;
+            await this._query(query);
+        }
+
+        return await this.getRdfMetadata(graphUri);
+    };
+
+    removeMetadata = async (graphUri, metadata) => {
+        for (const i in metadata) {
+            const m = metadata[i];
+            const object = this._formatObject(m);
+            const query = `WITH <${graphUri}>
+                           DELETE { <${graphUri}> <${m.metadata}> ${object} }
+                           WHERE { <${graphUri}> <${m.metadata}> ${object} }`;
+            await this._query(query);
+        }
+    };
+
+    addMetadata = async (graphUri, metadata) => {
+        for (const i in metadata) {
+            const m = metadata[i];
+            const object = this._formatObject(m);
+            const query = `INSERT DATA {
+                             GRAPH <${graphUri}> {
+                               <${graphUri}> <${m.metadata}> ${object} .
+                             }
+                           }`;
+            await this._query(query);
+        }
+    };
+
+    /**
+     * @param {string} graphUri - the graph URI
      * @returns {Promise<number>} - number of triples per page
      */
     getPageSize = async (graphUri) => {

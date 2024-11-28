@@ -8,6 +8,7 @@ import { humanizeSize, cleanUpText } from "./Utils";
 
 import { getGraphSize, GraphInfo, ServerSource } from "./Source";
 import { UploadGraphModal } from "./Component/UploadGraphModal";
+import { MetadataModal } from "./Component/MetadataModal";
 import { DownloadGraphModal } from "./Component/DownloadGraphModal";
 
 declare global {
@@ -31,7 +32,7 @@ export default function GraphManagement() {
     const [currentSource, setCurrentSource] = useState<string | null>(null);
 
     // modal
-    const [displayModal, setDisplayModal] = useState<"upload" | "download" | null>(null);
+    const [displayModal, setDisplayModal] = useState<"upload" | "download" | "metadata" | null>(null);
 
     // sorting
     type Order = "asc" | "desc";
@@ -83,6 +84,7 @@ export default function GraphManagement() {
         <>
             {displayModal === "upload" && currentSource ? <UploadGraphModal indexAfterSuccess={true} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource} /> : null}{" "}
             {displayModal === "download" && currentSource ? <DownloadGraphModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource ?? ""} /> : null}
+            {displayModal === "metadata" && currentSource ? <MetadataModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource ?? ""} /> : null}
             <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                 <TextField
                     inputProps={{ autocomplete: "off" }}
@@ -130,6 +132,16 @@ export default function GraphManagement() {
                                             <TableCell align="center">{humanizeSize(getGraphSize(source, graphs))}</TableCell>
                                             <TableCell align="center">
                                                 <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
+                                                    <Button
+                                                        variant="outlined"
+                                                        value={source.name}
+                                                        onClick={(event) => {
+                                                            setCurrentSource(event.currentTarget.value);
+                                                            setDisplayModal("metadata");
+                                                        }}
+                                                    >
+                                                        Metadata
+                                                    </Button>
                                                     <Button
                                                         variant="contained"
                                                         disabled={

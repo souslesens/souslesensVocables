@@ -60,14 +60,12 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
 
     const fetchConfig = async () => {
         const response = await fetch("/api/v1/config");
-        const json = (await response.json()) as { slsApi: { url: string } };
+        const json = (await response.json()) as { slsApi: { enabled: boolean; url: string } };
         const slsApi = json.slsApi;
-        if (slsApi !== undefined) {
-            if (slsApi.url) {
-                // force presence of trailing /
-                setSlsApiBaseUrl(json.slsApi.url.replace(/\/$/, "").concat("/"));
-                return;
-            }
+        if (slsApi.enabled && slsApi.url) {
+            // force presence of trailing /
+            setSlsApiBaseUrl(json.slsApi.url.replace(/\/$/, "").concat("/"));
+            return;
         }
         setSlsApiBaseUrl("/");
     };

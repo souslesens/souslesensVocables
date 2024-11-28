@@ -1,4 +1,3 @@
-
 const { processResponse } = require("../utils");
 const request = require("request");
 const async = require("async");
@@ -12,36 +11,37 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
+        const jowlServerConfig = ConfigManager.config.jowlServer;
+        if (!jowlServerConfig.enabled) {
+            res.status(500).json({ message: "Jowl Server is disable"});
+        }
 
+        let jowlConfigUrl = jowlServerConfig.url;
+        if (!jowlConfigUrl.endsWith("/")) {
+            jowlConfigUrl += "/";
+        }
+        jowlConfigUrl += "axioms/manchester2triples";
 
-      var  jowlConfigUrl=ConfigManager.config.jowlServer.url
-        if(!jowlConfigUrl.endsWith("/"))
-            jowlConfigUrl+="/"
-        jowlConfigUrl+="axioms/manchester2triples";
-
-
-
-        var payload={
-            input:req.query.manchesterContent,
-            graphName:req.query.graphUri,
+        const payload = {
+            input: req.query.manchesterContent,
+            graphName: req.query.graphUri,
             "classUri": req.query.classUri,
             "axiomType":  req.query.axiomType,
-            "saveTriples": (req.query.saveTriples=="true")?true:false,
-            "checkConsistency": (req.query.checkConsistency=="true")?true:false,
+            "saveTriples": (req.query.saveTriples=="true") ? true : false,
+            "checkConsistency": (req.query.checkConsistency=="true") ? true : false,
         }
-                    var options = {
-                        method: "POST",
-                        json: payload,
-                        headers: {
-                            "content-type": "application/json",
-                        },
-                        url: jowlConfigUrl,
-                    };
-                    request(options, function (error, response, body) {
-                        return processResponse(res, error, body);
-                    });
-                }
-
+        const options = {
+            method: "POST",
+            json: payload,
+            headers: {
+                "content-type": "application/json",
+            },
+            url: jowlConfigUrl,
+        };
+        request(options, function (error, response, body) {
+            return processResponse(res, error, body);
+        });
+    }
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],

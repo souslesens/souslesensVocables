@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.93.1](https://github.com/souslesens/souslesensVocables/compare/1.93.0...1.93.1) (2024-11-25)
+
+
+### Bug Fixes
+
+* **package:** restore node-graphviz in package.json ([28fed65](https://github.com/souslesens/souslesensVocables/commit/28fed65c8fab69dfaaf9312fd59a7e9e52f8906e))
+
+## [1.93.0](https://github.com/souslesens/souslesensVocables/compare/1.92.0...1.93.0) (2024-11-25)
+
+
+### Features
+
+* **model/config:** improve the readibility of the validation errors report ([e51b4f2](https://github.com/souslesens/souslesensVocables/commit/e51b4f29efc988ee64966c85d669c44c926aeab7))
+
+
+### Bug Fixes
+
+* **model/config:** do not retrieve empty values for the root category ([255bb08](https://github.com/souslesens/souslesensVocables/commit/255bb084c565e1b81226c102ed8375068d9a1e27))
+
 ## [1.92.0](https://github.com/souslesens/souslesensVocables/compare/1.91.2...1.92.0) (2024-11-20)
 
 

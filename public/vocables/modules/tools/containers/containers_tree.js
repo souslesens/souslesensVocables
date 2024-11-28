@@ -595,7 +595,7 @@ var Containers_tree = (function () {
         items["GraphNode"] = {
             label: "Graph node",
             action: function (_e) {
-                if (self.currentContainer.data.type == "container") {
+                if (self.currentContainer.data.type == "Container") {
                     Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { onlyOneLevel: true });
                 } else {
                     Lineage_whiteboard.drawNodesAndParents(self.currentContainer, 0);

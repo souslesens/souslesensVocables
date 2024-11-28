@@ -263,7 +263,7 @@ var Lineage_sources = (function () {
             $("#lineage_createResourceBtn").hide();
         }
         $("#Title1").text($(".Lineage_selectedSourceDiv").text());
-        Lineage_whiteboard.resetCurrentTab();
+        //Lineage_whiteboard.resetCurrentTab();
     };
 
     self.whiteboard_setGraphOpacity = function (source) {

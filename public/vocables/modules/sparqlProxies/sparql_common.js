@@ -735,6 +735,11 @@ var Sparql_common = (function () {
         return query;
     };
 
+    self.getIntFromTypeLiteral = function (value) {
+        var valueStr = value.split("^")[0];
+        return parseInt(valueStr);
+    };
+
     return self;
 })();
 

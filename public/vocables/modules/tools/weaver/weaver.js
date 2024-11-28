@@ -1,7 +1,8 @@
 import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
+import SearchWidget from "../../uiWidgets/searchWidget.js";
 
-var OntoLay = (function () {
+var Weaver = (function () {
     var self = {};
     self.maxClasses = 100;
     self.currentTab = "Class";
@@ -28,10 +29,11 @@ var OntoLay = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            $("#lateralPanelDiv").load("./modules/tools/OntoLay/html/lateralPanel.html", function () {
+            $("#lateralPanelDiv").load("./modules/tools/Weaver/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
                 self.loadTopClasses();
+                $("#weaver_searchTermInput").focus();
             });
         });
     };
@@ -155,7 +157,9 @@ var OntoLay = (function () {
                     );
                 },
             ],
-            function (err) {}
+            function (err) {
+                self.search("Whiteboard");
+            }
         );
     };
 
@@ -186,13 +190,11 @@ var OntoLay = (function () {
     };
 
     self.search = function (type) {
-        var term = $("#ontolay_searchTermInput").val();
+        var term = $("#weaver_searchTermInput").val();
 
         $("#classesTab").css("display", "none");
         $("#propertiesTab").css("display", "none");
-
-        $("#classesTab").css("display", "none");
-        $("#propertiesTab").css("display", "none");
+        $("#whiteboardTab").css("display", "none");
         if (!type) {
             type = self.currentTab;
         } else {
@@ -205,6 +207,7 @@ var OntoLay = (function () {
                 term: term,
                 searchedSources: [Lineage_sources.activeSource],
                 jstreeDiv: "LineageNodesJsTreeDiv",
+                contextMenu: self.contextMenu(),
             };
 
             SearchWidget.searchTermInSources(options);
@@ -212,6 +215,7 @@ var OntoLay = (function () {
             $("#propertiesTab").css("display", "block");
             Lineage_properties.searchTermInSources(term, true, false, "property");
         } else if (type == "Whiteboard") {
+            $("#whiteboardTab").css("display", "block");
             Lineage_whiteboard.graph.searchNode(null, term);
         }
     };
@@ -220,8 +224,42 @@ var OntoLay = (function () {
         Lineage_whiteboard.initUI();
         self.loadTopClasses();
     };
+    self.contextMenu = function () {
+        var items = {};
+        if (!self.currentSource && Lineage_sources.activeSource) {
+            self.currentSource = Lineage_sources.activeSource;
+        }
+        items.nodeInfos = {
+            label: "Node infos",
+            action: function (_e) {
+                // pb avec source
+                NodeInfosWidget.showNodeInfos(SearchWidget.currentTreeNode.data.source, SearchWidget.currentTreeNode, "mainDialogDiv");
+            },
+        };
+        items.graphNode = {
+            label: "graph Node",
+            action: function (_e) {
+                // pb avec source
+                var selectedNodes = $("#LineageNodesJsTreeDiv").jstree().get_selected(true);
+                if (selectedNodes.length > 1) {
+                    Lineage_whiteboard.drawNodesAndParents(selectedNodes, 0);
+                } else {
+                    Lineage_whiteboard.drawNodesAndParents(SearchWidget.currentTreeNode, 0);
+                }
+            },
+        };
+        items.axioms = {
+            label: "Node axioms",
+            action: function (e) {
+                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + SearchWidget.currentTreeNode.data.label);
+
+                NodeInfosAxioms.init(SearchWidget.currentTreeNode.data.source, SearchWidget.currentTreeNode, "mainDialogDiv");
+            },
+        };
+        return items;
+    };
     return self;
 })();
 
-export default OntoLay;
-window.OntoLay = OntoLay;
+export default Weaver;
+window.Weaver = Weaver;

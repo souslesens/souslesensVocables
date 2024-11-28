@@ -63,7 +63,7 @@ var ElasticSearchProxy = (function () {
             query: {
                 query: {
                     terms: {
-                        _id: ids,
+                        ["id.keyword"]: ids,
                     },
                 },
             },

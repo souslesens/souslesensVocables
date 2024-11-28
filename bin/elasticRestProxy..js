@@ -75,8 +75,10 @@ var elasticRestProxy = {
         var elasticUrl = ConfigManager.config.ElasticSearch.url;
         var url = elasticUrl + indexesStr + urlPath;
         var method = "POST";
-        /* if(urlPath.indexOf("_delete_by_query")>-1)
-        method="DELETE"*/
+        /* if(urlPath.indexOf("_delete_by_query")>-1){
+            method="DELETE"
+            
+         }*/
 
         var options = {
             method: method,

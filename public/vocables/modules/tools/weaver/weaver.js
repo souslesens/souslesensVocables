@@ -1,5 +1,6 @@
 import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
+import SearchWidget from "../../uiWidgets/searchWidget.js";
 
 var Weaver = (function () {
     var self = {};
@@ -206,6 +207,7 @@ var Weaver = (function () {
                 term: term,
                 searchedSources: [Lineage_sources.activeSource],
                 jstreeDiv: "LineageNodesJsTreeDiv",
+                contextMenu : self.contextMenu()
             };
 
             SearchWidget.searchTermInSources(options);
@@ -222,7 +224,40 @@ var Weaver = (function () {
         Lineage_whiteboard.initUI();
         self.loadTopClasses();
     };
+    self.contextMenu= function(){
+        var items = {};
+        if (!self.currentSource && Lineage_sources.activeSource) {
+            self.currentSource = Lineage_sources.activeSource;
+        }
+        items.nodeInfos = {
+            label: "Node infos",
+            action: function (_e) {
+                // pb avec source
+                NodeInfosWidget.showNodeInfos(SearchWidget.currentTreeNode.data.source, SearchWidget.currentTreeNode, "mainDialogDiv");
+            },
+        };
+        items.graphNode = {
+            label: "graph Node",
+            action: function (_e) {
+                // pb avec source
+                var selectedNodes = $("#LineageNodesJsTreeDiv").jstree().get_selected(true);
+                if (selectedNodes.length > 1) {
+                    Lineage_whiteboard.drawNodesAndParents(selectedNodes, 0);
+                } else {
+                    Lineage_whiteboard.drawNodesAndParents(SearchWidget.currentTreeNode, 0);
+                }
+            },
+        };
+        items.axioms = {
+            label: "Node axioms",
+            action: function (e) {
+                $("#mainDialogDiv").dialog("option", "title", "Axioms of resource " + SearchWidget.currentTreeNode.data.label);
 
+                NodeInfosAxioms.init(SearchWidget.currentTreeNode.data.source, SearchWidget.currentTreeNode, "mainDialogDiv");
+            },
+        };
+        return items
+    }
     return self;
 })();
 

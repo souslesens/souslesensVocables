@@ -144,6 +144,18 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
                 try {
                     window.SearchUtil.generateElasticIndex(sourceName, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
                         window.UI.message(`${sourceName} was updated successfully`, true);
+                        window.$.ajax({
+                            type: "DELETE",
+                            url: window.Config.apiUrl + "/ontologyModels?" + `source=${sourceName}`,
+                            dataType: "json",
+                
+                            success: function (data, _textStatus, _jqXHR) {
+                                return  window.UI.message(`${sourceName} was updated successfully`);
+                            },
+                            error: function (err) {
+                                return alert(err);
+                            },
+                        });
                     });
                 } catch (error) {
                     console.error(error);

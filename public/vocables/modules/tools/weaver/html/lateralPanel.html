@@ -2,15 +2,15 @@
     <div>
         <div id="sourcesActionsSection" class="w3-panel w3-border w3-round-small lateralPanelSection-width">
             <div id="Title1" class="titleboxButtons font-button1-color"></div>
-            <!--<button class="w3-button slsv-button-1" onclick="OntoWagon.loadTopClasses()" title="TopClasses"><img src="./icons/CommonIcons/TopClassesIcon.png" /></button>-->
+            <!--<button class="w3-button slsv-button-1" onclick="Weaver.loadTopClasses()" title="TopClasses"><img src="./icons/CommonIcons/TopClassesIcon.png" /></button>-->
             <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.drawModel()" title="Restrictions"><img src="./icons/CommonIcons/ModelIcon.png" /></button>
             <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addChildrenToGraph()" title="Expand"><img src="./icons/CommonIcons/ExpandIcon.png" /></button>
             <button class="w3-button slsv-button-1" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()" title="Parents"><img src="./icons/CommonIcons/ParentIcon.png" /></button>
             <!-- <button class="w3-button slsv-button-1" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/CommonIcons/Query.png" /></button>-->
             <button class="w3-buttonx slsv-button-1x" onclick="SparqlQuery_bot.start()" title="Query"><img src="./icons/KGA/SearchIcon-KGA.png" /></button>
             <button class="w3-button slsv-button-1" onclick="Lineage_axioms.drawClassesWithAxioms()" title="Axioms">A</button>
-            <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="OntoWagon.clearAll()" title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
-            <button class="w3-button slsv-button-3 size-of-button-small" onclick="OntoWagon.setHiearchicalLayout()">Hier.</button>
+            <button class="w3-button slsv-button-2" style="font-weight: bold" onclick="Weaver.clearAll()" title="Clear all"><img src="./icons/CommonIcons/ClearAllIcon.png" /></button>
+            <button class="w3-button slsv-button-3 size-of-button-small" onclick="Weaver.setHiearchicalLayout()">Hier.</button>
         </div>
     </div>
     <div class="titleboxButtons font-button3-color" style="display: inline-flex">
@@ -32,7 +32,7 @@
         <span id="visjsConfigureDiv">&nbsp;</span>
     </div>
 
-    <div id="ontoWagon_currentabActions">
+    <div id="weaver_currentabActions">
         <div class="w3-container">
             <div class="input-group mb-3" style="width: 100%; height: 30px">
                 <div class="input-group-prepend">
@@ -43,20 +43,20 @@
                     </div>
                 </div>
                 <input
-                    id="ontoWagon_searchTermInput"
+                    id="weaver_searchTermInput"
                     class="border-without-raduis-theme1"
                     autocomplete="off"
                     style="width: 35%; height: 33.5px; border-left: 0px"
                     value=""
-                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9){OntoWagon.search()}"
+                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Weaver.search()}"
                 />
 
                 <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 6px">
-                    <button class="slsv-invisible-button" onclick="OntoWagon.search('Class')" style="margin-top: 3px">Class</button>
+                    <button class="slsv-invisible-button" onclick="Weaver.search('Class')" style="margin-top: 3px">Class</button>
 
-                    <button class="slsv-invisible-button" onclick="OntoWagon.search('Property')" style="margin-top: 3px">Prop</button>
+                    <button class="slsv-invisible-button" onclick="Weaver.search('Property')" style="margin-top: 3px">Prop</button>
 
-                    <button class="slsv-invisible-button" onclick="OntoWagon.search('Whiteboard')" style="margin-top: 3px">Whiteboard</button>
+                    <button class="slsv-invisible-button" onclick="Weaver.search('Whiteboard')" style="margin-top: 3px">Whiteboard</button>
                     <!--  <button class="search-icon slsv-invisible-button" onclick="SearchWidget.searchTermInSources()" style="margin-top: 4px; height: 20px; width: 20px"></button>-->
                 </div>
             </div>

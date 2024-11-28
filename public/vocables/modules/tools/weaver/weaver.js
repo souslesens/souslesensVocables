@@ -1,7 +1,7 @@
 import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
 
-var OntoWagon = (function () {
+var Weaver = (function () {
     var self = {};
     self.maxClasses = 100;
     self.currentTab = "Class";
@@ -28,11 +28,11 @@ var OntoWagon = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            $("#lateralPanelDiv").load("./modules/tools/OntoWagon/html/lateralPanel.html", function () {
+            $("#lateralPanelDiv").load("./modules/tools/Weaver/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
                 self.loadTopClasses();
-                $("#ontoWagon_searchTermInput").focus()
+                $("#weaver_searchTermInput").focus()
             });
         });
     };
@@ -190,7 +190,7 @@ var OntoWagon = (function () {
     };
 
     self.search = function (type) {
-        var term = $("#ontolay_searchTermInput").val();
+        var term = $("#weaver_searchTermInput").val();
 
         $("#classesTab").css("display", "none");
         $("#propertiesTab").css("display", "none");
@@ -231,5 +231,5 @@ var OntoWagon = (function () {
     return self;
 })();
 
-export default OntoWagon;
-window.OntoWagon = OntoWagon;
+export default Weaver;
+window.Weaver = Weaver;

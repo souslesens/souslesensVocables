@@ -5,14 +5,14 @@ import Shacl from "./shacl.js";
 var SubGraph = (function () {
     var self = {};
 
-    self.getSubGraphResources = function (sourceLabel, baseClassId,options, callback) {
+    self.getSubGraphResources = function (sourceLabel, baseClassId, options, callback) {
 
-        if(!options){
-            options={}
+        if (!options) {
+            options = {}
         }
         var classesMap = {};
         var allClasses = [];
-        var allRestrictions = [];
+        var allRestrictionProperties = [];
 
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         async.series(
@@ -24,120 +24,29 @@ var SubGraph = (function () {
                 },
 
                 function (callbackSeries) {
-
-
-                    var treeData = OntologyModels.getClassHierarchyTreeData(sourceLabel, baseClassId, "ancestors");
-                    treeData.forEach(function (item) {
-                        classesMap[item.id] = item;
-                        if( ! options.skipAncestors || (options.skipAncestors&& baseClassId==item.id)) {
-                            allClasses.push(item.id);
+                    options.restrictions = true
+                    OntologyModels.getAllowedPropertiesBetweenNodes(sourceLabel, [baseClassId], null, options, function (err, result) {
+                        //  OntologyModels.getObjectPropertiesFromRestrictions(sourceLabel, [baseClassId], null, options, function (err, result) {
+                        if (err) {
+                            return callbackSeries(null, {})
                         }
-                    });
-
-                    callbackSeries();
+                        allRestrictionProperties = result.constraints.noConstraints
+                        return callbackSeries()
+                    })
                 },
-
-                ///getsubClasses
-                function (callbackSeries) {
-                    if(  !options.includeDescendants){
-                        return callbackSeries();
-                    }
-                    var treeData = OntologyModels.getClassHierarchyTreeData(sourceLabel, baseClassId, "descendants");
-                    treeData.forEach(function (item) {
-                        classesMap[item.id] = item;
-                        allClasses.push(item.id);
-                    });
-
-                    callbackSeries();
-                },
-
-                //get RestrictionsUri
-                function (callbackSeries) {
-                    var currentClasses = allClasses;
-                    var currentRestrictions = [];
-                    var nRestrictions = 1;
-
-                    async.whilst(
-                        function (callbackTest) {
-                            return nRestrictions > 0;
-                        },
-
-                        function (callbackWhilst) {
-                            var filter = Sparql_common.setFilter("s", currentClasses);
-                            // var filter2 = 'filter (regex(str(?o),"_:b")) ';
-                            var filter2 = " ?o rdf:type owl:Restriction.";
-                            var query =
-                                "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX" +
-                                " rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                                "select  ?s ?p ?o " +
-                                fromStr +
-                                "  WHERE {\n" +
-                                "  ?s ?p ?o. " + //?s rdfs:label ?sLabel " +
-                                filter +
-                                filter2 +
-                                "} limit 10000";
-
-                            self.query(sourceLabel, query, function (err, result) {
-                                if (err) {
-                                    return alert(err);
-                                }
-                                currentClasses = [];
-                                result.results.bindings.forEach(function (item) {
-                                    if (!classesMap[item.o.value]) {
-                                        classesMap[item.o.value] = 1;
-                                        allRestrictions.push(item.o.value);
-                                        currentClasses.push(item.o.value);
-                                        currentRestrictions.push(item.o.value);
-                                    }
-                                });
-
-                                var filter = Sparql_common.setFilter("x", currentRestrictions);
-
-                                var query =
-                                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX" +
-                                    " rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                                    "select  ?s " +
-                                    fromStr +
-                                    "  WHERE {\n" +
-                                    "   ?x ?p ?s. ?s rdf:type owl:Class   " + //?s rdfs:label ?sLabel " +
-                                    filter +
-                                    "} limit 10000";
-
-                                self.query(sourceLabel, query, function (err, result) {
-                                    if (err) {
-                                        return alert(err);
-                                    }
-                                    currentClasses = [];
-                                    result.results.bindings.forEach(function (item) {
-                                        if (!classesMap[item.s.value]) {
-                                            classesMap[item.s.value] = [];
-                                            allClasses.push(item.s.value);
-                                            currentClasses.push(item.s.value);
-                                        }
-                                    });
-
-                                    nRestrictions = currentClasses.length;
-                                    callbackWhilst();
-                                });
-                            });
-                        },
-                        function (err) {
-                            callbackSeries();
-                        }
-                    );
-                },
-
-
 
 
             ],
             function (err) {
-                return callback(err, { classes: allClasses, restrictions: allRestrictions, classesMap:classesMap });
+                return callback(err, {
+                    classes: allClasses,
+                    restrictions: allRestrictionProperties,
+                    classesMap: classesMap
+                });
             }
         );
     };
+
 
     self.rawTriplesToNodesMap = function (rawTriples) {
         var nodesMap = {};
@@ -179,12 +88,12 @@ var SubGraph = (function () {
         return nodesMap;
     };
 
-    self.instantiateSubGraph = function (sourceLabel, classUri,options, callback) {
+    self.instantiateSubGraph = function (sourceLabel, classUri, options, callback) {
         if (!classUri) {
             classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
         }
 
-        self.getSubGraphResources(sourceLabel, classUri, options,function (err, result) {
+        self.getSubGraphResources(sourceLabel, classUri, options, function (err, result) {
             var resources = result.classes.concat(result.restrictions);
             // return;
             self.getResourcesPredicates(sourceLabel, resources, "SELECT", {}, function (err, result) {
@@ -224,9 +133,9 @@ var SubGraph = (function () {
         });
     };
 
-    self.getSubGraphShaclTriples = function (sourceLabel, classUri,options, callback) {
-        if(!options){
-            options={}
+    self.getSubGraphShaclTriples = function (sourceLabel, classUri, options, callback) {
+        if (!options) {
+            options = {}
         }
         if (!classUri) {
             classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
@@ -235,160 +144,177 @@ var SubGraph = (function () {
         Shacl.initSourceLabelPrefixes(sourceLabel);
 
 
-
-        self.getSubGraphResources(sourceLabel, classUri, options,function (err, result) {
-            var resources = result.classes.concat(result.restrictions);
-            var classesMap=result.classesMap
-            // return;
-
-            self.getResourcesPredicates(sourceLabel, resources, "SELECT", {}, function (err, result) {
-                var itemsMap = self.rawTriplesToNodesMap(result);
-                var newTriples = [];
-                // var prefix=Config.sources[sourceLabel].graphUri
-
-                var allSahcls = "";
-                for (var classUri in itemsMap) {
-                    var item = itemsMap[classUri];
-                    if (item.type == "Class") {
-                        var shaclProperties = [];
-                        if (item.restrictions) {
-                            item.restrictions.forEach(function (retrictionUri) {
-                                var restriction = itemsMap[retrictionUri];
-                                if (!restriction.property || !restriction.range) {
-                                    return;
-                                }
-                                var count = -1;
-                                if (restriction.cardinality) {
-                                    count = parseInt(restriction.cardinality.substring(1));
-                                }
-
-                                if (restriction.property.endsWith("Quality")) return;
-                                var propStr = Shacl.uriToPrefixedUri(restriction.property);
-                                var rangeStr = Shacl.uriToPrefixedUri(restriction.range);
-                                var property = " sh:path " + propStr + " ;\n";
-                                if (count > -1) property += "        sh:minCount " + count + " ;";
-                                //  "        sh:maxCount " + count + " ;" +
-                                property += "        sh:node " + rangeStr + " ;";
-
-                                shaclProperties.push(property);
-                            });
-
-                            var domain = Shacl.uriToPrefixedUri(classUri);
-                            var shaclStr = Shacl.getShacl(domain, null, shaclProperties);
-                            allSahcls +=shaclStr
+        self.getSubGraphResources(sourceLabel, classUri, options, function (err, result) {
 
 
-                        }
+            var classes = {}
+            for (var property in result.restrictions) {
+
+                var items = result.restrictions[property];
+                if(!Array.isArray(items))
+                    items=[items]
+                items.forEach(function (item) {
+                    if (!classes[item.domain]) {
+                        classes[item.domain] = []
                     }
-                }
+                    item.property=property
+                    classes[item.domain].push(item)
+                })
+            }
 
-              var prefixes = Shacl.getPrefixes();
-                allSahcls = prefixes+"\n" + allSahcls;
-                var payload = {
-                    turtle: allSahcls,
-                };
 
-                // transfom shacl to triples
-                const params = new URLSearchParams(payload);
-                $.ajax({
-                    type: "GET",
-                    url: Config.apiUrl + "/rdf-io?" + params.toString(),
-                    dataType: "json",
+            var allSahcls = "";
+            for (var classUri in classes) {
+              var classRestrictions=classes[classUri]
+                    var shaclProperties = [];
 
-                    success: function (data, _textStatus, _jqXHR) {
-                        if (data.result && data.result.indexOf("Error") > -1) {
-                            return callback(data.result);
+                classRestrictions.forEach(function(restriction){
+
+                        if (!restriction.property || !restriction.range) {
+                            return;
                         }
-                        return callback(null, data.triples);
-                        //  callback(null, data);
-                    },
-                    error(err) {
-                        callback(err.responseText);
-                    },
-                });
-            });
+                        var count = -1;
+                        if (restriction.cardinality) {
+                            count =Sparql_common.getIntFromTypeLiteral(restriction.cardinality)
+                        }
+
+                        if (restriction.property.endsWith("Quality")) {
+                            return;
+                        }
+                        var propStr = Shacl.uriToPrefixedUri(restriction.property);
+                        var rangeStr = Shacl.uriToPrefixedUri(restriction.range);
+                        var property = " sh:path " + propStr + " ;\n";
+                        if (count > -1) {
+                            property += "        sh:minCount " + count + " ;";
+                        }
+                        //  "        sh:maxCount " + count + " ;" +
+                        property += "        sh:node " + rangeStr + " ;";
+
+                        shaclProperties.push(property);
+                    })
+
+
+                    var domain = Shacl.uriToPrefixedUri(classUri);
+                    var shaclStr = Shacl.getShacl(classUri, null, shaclProperties);
+
+
+                    allSahcls += "\n" + shaclStr;
+
+            }
+
+
+        allSahcls = Shacl.getPrefixes() + allSahcls;
+
+        var payload = {
+            turtle: allSahcls,
+        };
+
+        // transfom shacl to triples
+        const params = new URLSearchParams(payload);
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/rdf-io?" + params.toString(),
+            dataType: "json",
+
+            success: function (data, _textStatus, _jqXHR) {
+                if (data.result && data.result.indexOf("Error") > -1) {
+                    return callback(data.result);
+                }
+                return callback(null, data.triples);
+                //  callback(null, data);
+            },
+            error(err) {
+                callback(err.responseText);
+            },
         });
-    };
 
-    self.getResourcesPredicates = function (sourceLabel, resources, action, options, callback) {
-        if (!options) {
-            options = {};
+    }
+)
+    ;
+};
+
+self.getResourcesPredicates = function (sourceLabel, resources, action, options, callback) {
+    if (!options) {
+        options = {};
+    }
+    var selectStr = "SELECT ?s ?p ?o ";
+    if (action == "CONSTRUCT") {
+        selectStr = "CONSTRUCT {?s ?p ?o} ";
+    }
+
+    var fromStr = Sparql_common.getFromStr(sourceLabel);
+    var filter = Sparql_common.setFilter("s", resources);
+    if (options.filter) {
+        filter += options.filter;
+    }
+    var query =
+        "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX" +
+        " rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+        selectStr +
+        fromStr +
+        " WHERE {\n" +
+        "  ?s ?p ?o. " +
+        filter +
+        "} limit 10000";
+
+    self.query(sourceLabel, query, function (err, result) {
+        if (err) {
+            return callback(err);
         }
-        var selectStr = "SELECT ?s ?p ?o ";
+
         if (action == "CONSTRUCT") {
-            selectStr = "CONSTRUCT {?s ?p ?o} ";
+            callback(null, result.result);
+        } else {
+            return callback(null, result.results.bindings);
         }
+    });
+};
 
-        var fromStr = Sparql_common.getFromStr(sourceLabel);
-        var filter = Sparql_common.setFilter("s", resources);
-        if (options.filter) {
-            filter += options.filter;
-        }
-        var query =
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX" +
-            " rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            selectStr +
-            fromStr +
-            " WHERE {\n" +
-            "  ?s ?p ?o. " +
-            filter +
-            "} limit 10000";
+self.query = function (sourceLabel, query, callback) {
+    var url = Config._defaultSource.sparql_server.url;
 
-        self.query(sourceLabel, query, function (err, result) {
+    var prefixStr = "PREFIX " + Config.sources[sourceLabel].prefix + ": <" + Config.sources[sourceLabel].graphUri + ">\n";
+    query = prefixStr + query;
+
+    Sparql_proxy.querySPARQL_GET_proxy(
+        url,
+        query,
+        "",
+        {
+            source: sourceLabel,
+        },
+        function (err, result) {
             if (err) {
                 return callback(err);
             }
 
-            if (action == "CONSTRUCT") {
-                callback(null, result.result);
-            } else {
-                return callback(null, result.results.bindings);
-            }
-        });
-    };
-
-    self.query = function (sourceLabel, query, callback) {
-        var url = Config._defaultSource.sparql_server.url;
-
-        var prefixStr = "PREFIX " + Config.sources[sourceLabel].prefix + ": <" + Config.sources[sourceLabel].graphUri + ">\n";
-        query = prefixStr + query;
-
-        Sparql_proxy.querySPARQL_GET_proxy(
-            url,
-            query,
-            "",
-            {
-                source: sourceLabel,
-            },
-            function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-
-                return callback(null, result);
-            }
-        );
-    };
-
-    self.getSubGraphTurtles = function (sourceLabel,options, classUri) {
-        if (!classUri) {
-            classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
+            return callback(null, result);
         }
+    );
+};
 
-        self.instantiateSubGraph(sourceLabel, classUri, function (err, result) {});
+self.getSubGraphTurtles = function (sourceLabel, options, classUri) {
+    if (!classUri) {
+        classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
+    }
 
-        return;
-        self.getSubGraphResources(sourceLabel, classUri, options,function (err, result) {
-            var resources = result.classes.concat(result.restrictions);
-            self.getResourcesPredicates(sourceLabel, resources, "SELECT", null, function (err, result) {
-                console.log(result);
-            });
+    self.instantiateSubGraph(sourceLabel, classUri, function (err, result) {
+    });
+
+    return;
+    self.getSubGraphResources(sourceLabel, classUri, options, function (err, result) {
+        var resources = result.classes.concat(result.restrictions);
+        self.getResourcesPredicates(sourceLabel, resources, "SELECT", null, function (err, result) {
+            console.log(result);
         });
-    };
+    });
+};
 
-    return self;
-})();
+
+return self;
+})
+();
 
 export default SubGraph;
 window.SubGraph = SubGraph;

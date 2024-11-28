@@ -1601,32 +1601,37 @@ var OntologyModels = (function () {
 
 
         self.getObjectPropertiesFromRestrictions = function (sourceLabel, classes, properties, options, callback) {
-
-            options.restrictions = true
-            OntologyModels.getAllowedPropertiesBetweenNodes(sourceLabel, classes, null, options, function (err, result) {
-                if (err) {
+            OntologyModels.registerSourcesModel(sourceLabel, null,function(err, result) {
+                if (err)
                     return callback(err)
-                }
-                var classesMap = {}
 
+                options.restrictions = true
+                OntologyModels.getAllowedPropertiesBetweenNodes(sourceLabel, classes, null, options, function (err, result) {
 
-                for (var property in result.constraints.noConstraints) {
-                    if (!properties || properties.indexOf(property) > -1) {
-                        var prorertyObj = result.constraints.noConstraints[property];
-                        prorertyObj.forEach(function (item) {
-                            if (!classes || classes.indexOf(item.domain) > -1) {
-                                if (!classesMap[item.domain]) {
-                                    classesMap[item.domain] = []
-                                }
-                                classesMap[item.domain].push(item)
-                            }
-                        })
-
+                    if (err) {
+                        return callback(err)
                     }
-                }
-                return callback(null, classesMap)
+                    var classesMap = {}
 
 
+                    for (var property in result.constraints.noConstraints) {
+                        if (!properties || properties.indexOf(property) > -1) {
+                            result.constraints.noConstraints[property].forEach(function(item){
+                                if (!classes || classes.indexOf(item.domain) > -1) {
+                                    if (!classesMap[item.domain]) {
+                                        classesMap[item.domain] = []
+                                    }
+                                    classesMap[item.domain].push(item)
+                                }
+                            })
+
+
+                        }
+                    }
+                    return callback(null, classesMap)
+
+
+                })
             })
         }
 

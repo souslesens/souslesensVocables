@@ -172,7 +172,7 @@ var Lineage_decoration = (function () {
                         };
                         legendJsTreeData.push(treeObj);
                     }
-                    self.currentLegendJsTree=legendJsTreeData;
+                    self.currentLegendJsTree = legendJsTreeData;
                     self.drawLegend(legendJsTreeData);
                     callbackSeries();
                 },

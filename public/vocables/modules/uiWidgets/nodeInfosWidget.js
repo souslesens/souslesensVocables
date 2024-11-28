@@ -736,8 +736,8 @@ defaultLang = 'en';*/
                         rangeOfProperties.push({
                             id: prop,
                             label: constraint.label,
-                            rangeId:constraint.range,
-                            rangeLabel:constraint.rangeLabel,
+                            rangeId: constraint.range,
+                            rangeLabel: constraint.rangeLabel,
                             domainId: constraint.domain,
                             domainLabel: constraint.domainLabel,
                         });
@@ -754,19 +754,32 @@ defaultLang = 'en';*/
                     <td class="detailsCellName"> <span class="title">onProperty </span></td>
                     <td class="detailsCellName"><span class="title">Range on</span></td>
                  </tr>`;
-        
+
         if (domainOfProperties.length > 0) {
             domainOfProperties.forEach(function (property) {
-                html+='<tr> '
-                
-                html += "<td class='detailsCellValue'><a style='color: #aaa' target='" + NodeInfosWidget.getUriTarget(property.domainId) + "' href='" + property.domainId + "'>" + property.domainLabel + "</a></td>";
-                
-                html +=  "<td class='detailsCellValue'><a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label||property.id + "</a></td>";
+                html += "<tr> ";
+
+                html +=
+                    "<td class='detailsCellValue'><a style='color: #aaa' target='" +
+                    NodeInfosWidget.getUriTarget(property.domainId) +
+                    "' href='" +
+                    property.domainId +
+                    "'>" +
+                    property.domainLabel +
+                    "</a></td>";
+
+                html += "<td class='detailsCellValue'><a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label || property.id + "</a></td>";
                 if (property.rangeId) {
-                    html += "<td class='detailsCellValue'><a style='color: #aaa' target='" + NodeInfosWidget.getUriTarget(property.rangeId) + "' href='" + property.rangeId + "'>" + property.rangeLabel + "</a></td>";
-                }
-                else{
-                    html += "<td class='detailsCellValue'><a style='color: #aaa' >" + 'any' + "</a></td>";
+                    html +=
+                        "<td class='detailsCellValue'><a style='color: #aaa' target='" +
+                        NodeInfosWidget.getUriTarget(property.rangeId) +
+                        "' href='" +
+                        property.rangeId +
+                        "'>" +
+                        property.rangeLabel +
+                        "</a></td>";
+                } else {
+                    html += "<td class='detailsCellValue'><a style='color: #aaa' >" + "any" + "</a></td>";
                 }
                 html += "</tr> ";
             });
@@ -779,21 +792,32 @@ defaultLang = 'en';*/
                     <td class="detailsCellName"> <span class="title">onProperty </span></td>
                     <td class="detailsCellName"><span class="title"> ancestorConcerned</span></td>
                  </tr>`;
-        
+
         if (rangeOfProperties.length > 0) {
             rangeOfProperties.forEach(function (property) {
-                html+='<tr> '
+                html += "<tr> ";
                 if (property.domainId) {
-                    html += "<td class='detailsCellValue'><a style='color: #aaa' target='" + NodeInfosWidget.getUriTarget(property.domainId) + "' href='" + property.domainId + "'>" + property.domainLabel + "</a></td>";
+                    html +=
+                        "<td class='detailsCellValue'><a style='color: #aaa' target='" +
+                        NodeInfosWidget.getUriTarget(property.domainId) +
+                        "' href='" +
+                        property.domainId +
+                        "'>" +
+                        property.domainLabel +
+                        "</a></td>";
+                } else {
+                    html += "<td class='detailsCellValue'><a style='color: #aaa' >" + "any" + "</a></td>";
                 }
-                else{
-                    html += "<td class='detailsCellValue'><a style='color: #aaa' >" + 'any' + "</a></td>";
-                }
-                html +=  "<td class='detailsCellValue'><a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label||property.id + "</a></td>";
-                html += "<td class='detailsCellValue'><a style='color: #aaa' target='" + NodeInfosWidget.getUriTarget(property.rangeId) + "' href='" + property.rangeId + "'>" + property.rangeLabel + "</a></td>";
-                
-                
-                
+                html += "<td class='detailsCellValue'><a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label || property.id + "</a></td>";
+                html +=
+                    "<td class='detailsCellValue'><a style='color: #aaa' target='" +
+                    NodeInfosWidget.getUriTarget(property.rangeId) +
+                    "' href='" +
+                    property.rangeId +
+                    "'>" +
+                    property.rangeLabel +
+                    "</a></td>";
+
                 html += "</tr> ";
             });
         }
@@ -1565,9 +1589,11 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             self.currentRestrictionsMap = {};
 
             var html = "<div style='display:flex;align-items:center;'> <b class='nodesInfos_titles'>Restrictions </b> ";
-            
-            if (!node.from) html += " <div class='addEdgeButtonColor' style='padding: 2px 4px;margin-left:10px;' onclick='NodeInfosWidget.showAddRestrictionWidget()'><button  class='slsv-invisible-button add-icon' style='margin-right: 2px; height: 26px; width: 27px;border-radius:14px;' ></button></div>";
-            html+='</div>'
+
+            if (!node.from)
+                html +=
+                    " <div class='addEdgeButtonColor' style='padding: 2px 4px;margin-left:10px;' onclick='NodeInfosWidget.showAddRestrictionWidget()'><button  class='slsv-invisible-button add-icon' style='margin-right: 2px; height: 26px; width: 27px;border-radius:14px;' ></button></div>";
+            html += "</div>";
             html += '<div style="max-width:800px;max-height:400px">' + " <table>\n" + "        <tr>\n";
             if (filterProp) {
                 html += "     <td class='detailsCellName'> <span class=\"title\">subClass</span></td>\n";
@@ -1609,7 +1635,10 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
                 var modifyButton = "";
                 if (Lineage_sources.isSourceEditableForUser(self.currentSource)) {
-                    modifyButton = "<button class='  KGquery_smallButton  deleteIcon' onclick='NodeInfosWidget.deleteRestriction(\"" + fieldsMap.value + "\")' style='margin:unset !important;background-color:unset!important;'></button>";
+                    modifyButton =
+                        "<button class='  KGquery_smallButton  deleteIcon' onclick='NodeInfosWidget.deleteRestriction(\"" +
+                        fieldsMap.value +
+                        "\")' style='margin:unset !important;background-color:unset!important;'></button>";
                     html += "<td class='detailsCellValue'>" + modifyButton + "</td>";
                 }
 

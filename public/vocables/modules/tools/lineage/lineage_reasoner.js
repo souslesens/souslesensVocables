@@ -365,7 +365,7 @@ var Lineage_reasoner = (function () {
             var triple = {
                 subject: array[1],
                 predicate: "rdfs:subClassOf",
-                object: array[2].replace('<','').replace('>',''),
+                object: array[2].replace("<", "").replace(">", ""),
             };
             subClasses.push(triple);
         }

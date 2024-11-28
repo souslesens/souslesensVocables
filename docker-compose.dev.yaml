@@ -5,6 +5,8 @@ services:
             VIRT_SPARQL_DefaultQuery: SELECT DISTINCT ?graph count(?s) as ?number_of_triples WHERE { GRAPH ?graph { ?s ?p ?o . }}
             SPARQL_UPDATE: "true"
             VIRT_SPARQL_MaxDataSourceSize: 100000000
+            VIRT_SPARQL_MaxQueryCostEstimationTime: 0
+            VIRT_SPARQL_MaxQueryExecutionTime: 0
         ports:
             - 8890:8890
             - 1111:1111

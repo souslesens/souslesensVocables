@@ -11,20 +11,22 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
+        const jowlServerConfig = ConfigManager.config.jowlServer;
+        if (!jowlServerConfig.enabled) {
+            res.status(500).json({ message: "Jowl Server is disable"});
+        }
 
-
-        var jowlConfigUrl = ConfigManager.config.jowlServer.url
+        let jowlConfigUrl = jowlServerConfig.url;
         if (!jowlConfigUrl.endsWith("/")) {
             jowlConfigUrl += "/"
         }
         jowlConfigUrl += "axioms/triples2manchester";
 
-        var payload = {
+        const payload = {
             "graphName": req.query.ontologyGraphUri,
-            "triples": JSON.parse(req.query.axiomTriples)
-
+            "triples": JSON.parse(req.query.axiomTriples),
         }
-        var options = {
+        const options = {
             method: "POST",
             json: payload,
             headers: {
@@ -36,7 +38,6 @@ module.exports = function () {
             return processResponse(res, error, body);
         });
     }
-
 
     GET.apiDoc = {
         security: [{restrictLoggedUser: []}],

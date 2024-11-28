@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.94.0](https://github.com/souslesens/souslesensVocables/compare/1.93.1...1.94.0) (2024-11-27)
+
+> [!IMPORTANT]
+> Updating to 1.94.0 require a manual operation to upgrade to virtuoso 7.2.14. Execute the following
+> script **before** upgrade.
+
+```bash
+docker compose exec virtuoso sh
+# on the virtuoso container
+isql-v
+# on the isql console
+exec('checkpoint');
+# back on the virtuoso container
+rm virtuoso.trx
+# back on host
+docker compose up -d
+```
+
+### Features
+
+* **api/jowl:** activate jowlServer when the enabled flag is true ([b0c791b](https://github.com/souslesens/souslesensVocables/commit/b0c791be979a1dc2bd58445f0398148919a925bb))
+* **mainapp:** activate slsApi when the enabled flag is true ([8a28581](https://github.com/souslesens/souslesensVocables/commit/8a28581879e88375aa3ebf56edec790444f94e8f))
+
+
+### Various changes
+
+* **compose:** upgrade virtuoso version to 7.2.14 ([218f9709](https://github.com/souslesens/souslesensVocables/commit/218f9709215c5efbe0e0f945ab18d0ef52026939))
+
+
 ### [1.93.1](https://github.com/souslesens/souslesensVocables/compare/1.93.0...1.93.1) (2024-11-25)
 
 

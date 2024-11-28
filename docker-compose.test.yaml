@@ -1,6 +1,6 @@
 services:
     virtuoso:
-        image: askomics/virtuoso:7.2.7
+        image: askomics/virtuoso:7.2.14
         environment:
             VIRT_SPARQL_DefaultQuery: SELECT DISTINCT ?graph count(?s) as ?number_of_triples WHERE { GRAPH ?graph { ?s ?p ?o . }}
         ports:

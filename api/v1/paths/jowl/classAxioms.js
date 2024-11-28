@@ -1,4 +1,3 @@
-
 const { processResponse } = require("../utils");
 const request = require("request");
 const async = require("async");
@@ -12,40 +11,46 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-
-
-       var jowlConfigUrl=ConfigManager.config.jowlServer.url
-        if(!jowlConfigUrl.endsWith("/"))
-            jowlConfigUrl+="/"
-        jowlConfigUrl+="axioms/getClassAxioms";
-
-        var payload={
-            "graphName": req.query.graphUri,
-            "classUri":   req.query.classUri,
-            "tripleFormat": req.query.getTriples?true:false,
-            "manchetserFormat": req.query.getManchesterExpression?true:false,
-
+        const jowlServerConfig = ConfigManager.config.jowlServer;
+        if (!jowlServerConfig.enabled) {
+            res.status(500).json({ message: "Jowl Server is disable"});
         }
-        if(req.query.axiomType)
-            payload.axiomType=req.query.axiomType
-        if(req.query.getTriples)
-            payload.getTriples=true
-        if(req.query.getManchesterExpression)
-            payload.manchetserFormat=true
 
-                    var options = {
-                        method: "POST",
-                        json: payload,
-                        headers: {
-                            "content-type": "application/json",
-                        },
-                        url: jowlConfigUrl,
-                    };
-                    request(options, function (error, response, body) {
-                        return processResponse(res, error, body);
-                    });
-                }
+        let jowlConfigUrl = jowlServerConfig.url;
+        if (!jowlConfigUrl.endsWith("/")) {
+            jowlConfigUrl += "/"
+        }
+        jowlConfigUrl += "axioms/getClassAxioms";
 
+        const payload = {
+            "graphName": req.query.graphUri,
+            "classUri": req.query.classUri,
+            "tripleFormat": req.query.getTriples ? true : false,
+            "manchetserFormat": req.query.getManchesterExpression ? true : false,
+        }
+
+        if (req.query.axiomType) {
+            payload.axiomType=req.query.axiomType;
+        }
+        if (req.query.getTriples) {
+            payload.getTriples = true;
+        }
+        if (req.query.getManchesterExpression) {
+            payload.manchetserFormat = true;
+        }
+
+        const options = {
+            method: "POST",
+            json: payload,
+            headers: {
+                "content-type": "application/json",
+            },
+            url: jowlConfigUrl,
+        };
+        request(options, function (error, response, body) {
+            return processResponse(res, error, body);
+        });
+    }
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],

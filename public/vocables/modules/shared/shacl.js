@@ -16,7 +16,6 @@ var Shacl = (function () {
         return prefixes;
     };
 
-
     self.initSourceLabelPrefixes = function (sourceLabel) {
         self.prefixMap[Config.sources[sourceLabel].prefix] = Config.sources[sourceLabel].graphUri;
     };
@@ -27,9 +26,8 @@ var Shacl = (function () {
             p = uri.lastIndexOf("/");
         }
         if (p < 0) {
-            return uri
+            return uri;
         }
-
 
         var prefix2 = uri.substring(0, p + 1);
         var suffix = uri.substring(p + 1);
@@ -42,7 +40,6 @@ var Shacl = (function () {
         var prefixId = "ns" + Object.keys(self.prefixMap).length;
         self.prefixMap[prefixId] = prefix2;
         return prefixId + ":" + suffix;
-
     };
 
     self.getShacl = function (sourceClassUri, targetClassUri, shaclProperties) {

@@ -129,7 +129,7 @@ var SparqlQuery_bot = (function () {
         listObjectPropertiesFn: function () {
             CommonBotFunctions.listSourceAllObjectProperties(self.params.source, "currentObjectProperty", null, function (err, properties) {
                 common.array.sort(properties, "label");
-                properties.unshift({id:'anyProperty',label:'anyProperty'});
+                properties.unshift({ id: "anyProperty", label: "anyProperty" });
                 _botEngine.showList(properties, "currentObjectProperty");
             });
         },

@@ -225,9 +225,8 @@ var Axioms_suggestions = (function () {
             if (err) {
                 return callback(err);
             }
-            if(options.getAllProperties){
+            if (options.getAllProperties) {
                 //return toutes les proprietes
-                
             }
             var data = [];
 

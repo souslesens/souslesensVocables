@@ -846,22 +846,20 @@ var MappingModeler = (function () {
             ];
             var options = { includesnoConstraintsProperties: true };
             //Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, options, function (err, properties) {
-            
-            OntologyModels.getAllowedPropertiesBetweenNodes(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, { keepSuperClasses: true }, function (err, result) {
 
+            OntologyModels.getAllowedPropertiesBetweenNodes(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, { keepSuperClasses: true }, function (err, result) {
                 if (err) {
                     return alert(err);
                 }
-                var properties=[];
-                for(var group in result.constraints){
-                    for(var propId in result.constraints[group]){
+                var properties = [];
+                for (var group in result.constraints) {
+                    for (var propId in result.constraints[group]) {
                         properties.push({
                             id: propId,
                             label: result.constraints[group][propId].label,
                             source: result.constraints[group][propId].source,
                             resourceType: "ObjectProperty",
                         });
-                        
                     }
                 }
                 properties = common.array.distinctValues(properties, "id");
@@ -1358,8 +1356,8 @@ var MappingModeler = (function () {
         var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class", ""];
         //  sort by similarity for others than rowIndex
 
-        var columns = [''].concat(JSON.parse(JSON.stringify(self.currentTable.columns)));
-        
+        var columns = [""].concat(JSON.parse(JSON.stringify(self.currentTable.columns)));
+
         common.array.insertFirstArray(columns, column);
         if (currentGraphNode.data.rdfType) {
             common.array.insertFirstArray(rdfObjectsType, currentGraphNode.data.rdfType);

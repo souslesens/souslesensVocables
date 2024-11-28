@@ -555,9 +555,9 @@ indexes.push(source.toLowerCase());
                                         if (index++ == 0 && !options.ids) {
                                             replaceIndex = true;
                                         }
-                                        data.forEach(function(item){
-                                            item.type="Class"
-                                        })
+                                        data.forEach(function (item) {
+                                            item.type = "Class";
+                                        });
                                         self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
                                             if (err) {
                                                 return callbackEach(err);
@@ -611,8 +611,8 @@ indexes.push(source.toLowerCase());
                                         skoslabels: [skosLabel],
                                         parent: parent,
                                         parents: parents,
-                                        type:"NamedIndividual"
-                                      //  type: item.type2.value,
+                                        type: "NamedIndividual",
+                                        //  type: item.type2.value,
                                     });
                                 });
 
@@ -656,7 +656,7 @@ indexes.push(source.toLowerCase());
                                     allData.push({
                                         id: item.property.value,
                                         label: item.propertyLabel.value,
-                                       // type: "property",
+                                        // type: "property",
                                         type: "ObjectProperty",
                                     });
                                 });

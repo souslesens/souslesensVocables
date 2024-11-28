@@ -32,7 +32,7 @@ var Weaver = (function () {
                 Lineage_whiteboard.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
                 self.loadTopClasses();
-                $("#weaver_searchTermInput").focus()
+                $("#weaver_searchTermInput").focus();
             });
         });
     };
@@ -157,8 +157,7 @@ var Weaver = (function () {
                 },
             ],
             function (err) {
-                self.search('Whiteboard');
-
+                self.search("Whiteboard");
             }
         );
     };
@@ -194,7 +193,7 @@ var Weaver = (function () {
 
         $("#classesTab").css("display", "none");
         $("#propertiesTab").css("display", "none");
-        $('#whiteboardTab').css("display", "none");
+        $("#whiteboardTab").css("display", "none");
         if (!type) {
             type = self.currentTab;
         } else {
@@ -219,14 +218,10 @@ var Weaver = (function () {
         }
     };
 
-
     self.clearAll = function () {
         Lineage_whiteboard.initUI();
         self.loadTopClasses();
     };
-
-
-
 
     return self;
 })();

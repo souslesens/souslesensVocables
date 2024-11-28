@@ -207,7 +207,7 @@ var Weaver = (function () {
                 term: term,
                 searchedSources: [Lineage_sources.activeSource],
                 jstreeDiv: "LineageNodesJsTreeDiv",
-                contextMenu : self.contextMenu()
+                contextMenu: self.contextMenu(),
             };
 
             SearchWidget.searchTermInSources(options);
@@ -224,7 +224,7 @@ var Weaver = (function () {
         Lineage_whiteboard.initUI();
         self.loadTopClasses();
     };
-    self.contextMenu= function(){
+    self.contextMenu = function () {
         var items = {};
         if (!self.currentSource && Lineage_sources.activeSource) {
             self.currentSource = Lineage_sources.activeSource;
@@ -256,8 +256,8 @@ var Weaver = (function () {
                 NodeInfosAxioms.init(SearchWidget.currentTreeNode.data.source, SearchWidget.currentTreeNode, "mainDialogDiv");
             },
         };
-        return items
-    }
+        return items;
+    };
     return self;
 })();
 

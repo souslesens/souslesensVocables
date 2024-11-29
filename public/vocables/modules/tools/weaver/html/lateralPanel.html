@@ -13,22 +13,23 @@
             <button class="w3-button slsv-button-3 size-of-button-small" onclick="Weaver.setHiearchicalLayout()">Hier.</button>
         </div>
     </div>
-    <div class="titleboxButtons font-button3-color" style="display: inline-flex">
+
+    <div class="titleboxButtons font-button3-color" style="display: inline-flex; margin-top: -8px">
         More Actions
         <div class="slsv-invisible-button">
             <button class="moreOptions-icon slsv-invisible-button" onclick="Lineage_whiteboard.hideShowMoreActions()" style="width: 20px; height: 20px; margin-left: 5px"></button>
         </div>
     </div>
-    <div id="Lineage_MoreActionsButtons" style="display: none">
+    <div id="Lineage_MoreActionsButtons" style="display: none; margin-top: 35px">
         <!--WhiteBoard Display Buttons -->
         <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.saveWhiteboard()">saveWhiteboard</button>
         <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.loadSavedGraph()">loadSavedGraph</button>
 
         <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.toSVG()">SVG</button>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.graph.toGraphMl()">graphML</button>
+        <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.toGraphMl()">graphML</button>
         <button class="w3-button slsv-button-3" id="lineage_actionDiv_reasoner" onclick="Lineage_reasoner.showReasonerDialog()">Reasoner</button>
         <!--  <button class="w3-button slsv-button-3" id="lineage_actionXX" onclick="Lineage_subGraph.getSubGraphTurtles(Lineage_sources.activeSource)">SubGraph</button>-->
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.graph.showGraphConfig()">Display</button>
+        <button class="w3-button slsv-button-3" onclick="Lineage_whiteboard.graph.showGraphConfig()">Display</button>
         <span id="visjsConfigureDiv">&nbsp;</span>
     </div>
 
@@ -38,7 +39,7 @@
                 <div class="input-group-prepend">
                     <div id="Lineage_classes_moreOptionsButtonOnSearchbar" class="input-group-append">
                         <div class="SearchButtonIconLeft border-without-raduis-theme1" onclick="Lineage_whiteboard.hideShowMoreOptions(null,'Lineage_MoreClassesOptions')" style="height: 33.5px">
-                            <button class="moreOptions-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-top: 5px; margin-left: 5px"></button>
+                            <button class="search-icon slsv-invisible-button" style="width: 20px; height: 20px; margin-top: 5px; margin-left: 5px" onclick="Weaver.search()"></button>
                         </div>
                     </div>
                 </div>
@@ -99,7 +100,7 @@
 
                 <button class="w3-button slsv-button-3 size-of-button-small" onclick="Lineage_properties.onPropertyActionClick('rangesAndDomains','visj')">RangesAndDomains</button>
 
-                <button class="w3-button slsv-button-3 size-of-button-small" onClick="visjsGraph.showGraphConfig()">Graph Config</button>;
+                <button class="w3-button slsv-button-3 size-of-button-small" onClick="visjsGraph.showGraphConfig()">Graph Config</button>
             </div>
         </div>
     </div>

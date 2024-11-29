@@ -728,12 +728,16 @@ defaultLang = 'en';*/
                             label: constraint.label,
                             rangeId: constraint.range,
                             rangeLabel: constraint.rangeLabel,
+                            domainId: constraint.domain,
+                            domainLabel: constraint.domainLabel,
                         });
                     }
                     if (ancestorsIds.includes(constraint.range)) {
                         rangeOfProperties.push({
                             id: prop,
                             label: constraint.label,
+                            rangeId: constraint.range,
+                            rangeLabel: constraint.rangeLabel,
                             domainId: constraint.domain,
                             domainLabel: constraint.domainLabel,
                         });
@@ -743,17 +747,83 @@ defaultLang = 'en';*/
         });
 
         var html = "<div style='display:flex;flex-direction:row'>";
-        html += "<div><b><div class='nodesInfos_titles'>Domain of</div></b>";
+        html += "<div><b><div class='nodesInfos_titles'>Ranges Authorized </div></b>";
+        html += `<table> <tbody> 
+                <tr>
+                    <td class="detailsCellName"><span class="title">ancestorConcerned</span></td>
+                    <td class="detailsCellName"> <span class="title">onProperty </span></td>
+                    <td class="detailsCellName"><span class="title">Range on</span></td>
+                 </tr>`;
+
         if (domainOfProperties.length > 0) {
             domainOfProperties.forEach(function (property) {
-                html += "  <div class='XdetailsCellValue'> " + "<a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a>";
+                html += "<tr> ";
+
+                html +=
+                    "<td class='detailsCellValue'><a style='color: #aaa' target='" +
+                    NodeInfosWidget.getUriTarget(property.domainId) +
+                    "' href='" +
+                    property.domainId +
+                    "'>" +
+                    property.domainLabel +
+                    "</a></td>";
+
+                html += "<td class='detailsCellValue'><a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label || property.id + "</a></td>";
                 if (property.rangeId) {
-                    html += "&nbsp; <i><a style='color: #aaa' target='" + NodeInfosWidget.getUriTarget(property.rangeId) + "' href='" + property.rangeId + "'>" + property.rangeLabel + "</a></i>";
+                    html +=
+                        "<td class='detailsCellValue'><a style='color: #aaa' target='" +
+                        NodeInfosWidget.getUriTarget(property.rangeId) +
+                        "' href='" +
+                        property.rangeId +
+                        "'>" +
+                        property.rangeLabel +
+                        "</a></td>";
+                } else {
+                    html += "<td class='detailsCellValue'><a style='color: #aaa' >" + "any" + "</a></td>";
                 }
-                html += "</div>";
+                html += "</tr> ";
             });
         }
+        html += "</table> </tbody> </div>";
+        html += "<div style='margin-left:25px;'><b><div class='nodesInfos_titles'>Domain Authorized </div></b>";
+        html += `<table> <tbody> 
+                <tr>
+                    <td class="detailsCellName"><span class="title">Domain on</span></td>
+                    <td class="detailsCellName"> <span class="title">onProperty </span></td>
+                    <td class="detailsCellName"><span class="title"> ancestorConcerned</span></td>
+                 </tr>`;
+
+        if (rangeOfProperties.length > 0) {
+            rangeOfProperties.forEach(function (property) {
+                html += "<tr> ";
+                if (property.domainId) {
+                    html +=
+                        "<td class='detailsCellValue'><a style='color: #aaa' target='" +
+                        NodeInfosWidget.getUriTarget(property.domainId) +
+                        "' href='" +
+                        property.domainId +
+                        "'>" +
+                        property.domainLabel +
+                        "</a></td>";
+                } else {
+                    html += "<td class='detailsCellValue'><a style='color: #aaa' >" + "any" + "</a></td>";
+                }
+                html += "<td class='detailsCellValue'><a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label || property.id + "</a></td>";
+                html +=
+                    "<td class='detailsCellValue'><a style='color: #aaa' target='" +
+                    NodeInfosWidget.getUriTarget(property.rangeId) +
+                    "' href='" +
+                    property.rangeId +
+                    "'>" +
+                    property.rangeLabel +
+                    "</a></td>";
+
+                html += "</tr> ";
+            });
+        }
+        html += "</table> </tbody> </div>";
         html += "</div>";
+        /*
         html += "<div><b><div  class='nodesInfos_titles'>Range of</div></b>";
         if (rangeOfProperties.length > 0) {
             rangeOfProperties.forEach(function (property) {
@@ -764,8 +834,8 @@ defaultLang = 'en';*/
                 html += " <a target='" + NodeInfosWidget.getUriTarget(property.id) + "' href='" + property.id + "'>" + property.label + "</a> </div>";
             });
         }
-        html += "</div>";
-        html += "</div>";
+       
+        html += "</div>";*/
         if (html) {
             $("#" + divId).show();
             $("#" + divId).append(html);
@@ -1518,17 +1588,21 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
             self.currentRestrictionsMap = {};
 
-            var html = "<b class='nodesInfos_titles'>Restrictions </b>  ";
-            if (!node.from) html += " <button onclick='NodeInfosWidget.showAddRestrictionWidget()'>+</button>";
+            var html = "<div style='display:flex;align-items:center;'> <b class='nodesInfos_titles'>Restrictions </b> ";
+
+            if (!node.from)
+                html +=
+                    " <div class='slsv-button-2' style='padding: 2px 4px;margin-left:10px;border-radius:5px;height:32px;margin-bottom:5px;' onclick='NodeInfosWidget.showAddRestrictionWidget()'><button  class='slsv-invisible-button add-icon' style='margin-right: 2px; height: 26px; width: 27px;border-radius:14px;' ></button></div>";
+            html += "</div>";
             html += '<div style="max-width:800px;max-height:400px">' + " <table>\n" + "        <tr>\n";
             if (filterProp) {
                 html += "     <td class='detailsCellName'> <span class=\"title\">subClass</span></td>\n";
             }
             html +=
-                "        <td class='detailsCellName' ><span class=\"title\">onProperty</span></td>\n" +
-                "            <td class='detailsCellName'> <span class=\"title\">constraint </span></td>\n" +
-                "            <td class='detailsCellName'  ><span class=\"title\">targetClass</span></td>\n" +
-                "         </tr>";
+                " <td class='detailsCellName' ><span class=\"title\">onProperty</span></td>\n" +
+                " <td class='detailsCellName'> <span class=\"title\">constraint </span></td>\n" +
+                " <td class='detailsCellName'  ><span class=\"title\">targetClass</span></td>\n" +
+                " </tr>";
 
             result.forEach(function (restriction) {
                 var fieldsMap = {};
@@ -1561,7 +1635,10 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
                 var modifyButton = "";
                 if (Lineage_sources.isSourceEditableForUser(self.currentSource)) {
-                    modifyButton = "<button onclick='NodeInfosWidget.deleteRestriction(\"" + fieldsMap.value + "\")'>X</button>";
+                    modifyButton =
+                        "<button class='  KGquery_smallButton  deleteIcon' onclick='NodeInfosWidget.deleteRestriction(\"" +
+                        fieldsMap.value +
+                        "\")' style='margin:unset !important;background-color:unset!important;'></button>";
                     html += "<td class='detailsCellValue'>" + modifyButton + "</td>";
                 }
 

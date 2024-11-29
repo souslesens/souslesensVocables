@@ -17,12 +17,15 @@ async function loadToolsAndPlugins(callback) {
                 controller: window[tool.controller],
                 toolDescriptionImg: null,
                 toTools: tool.toTools,
+                resetURLParamsDiv: tool.resetURLParamsDiv ? tool.resetURLParamsDiv : false,
+                displayImports: tool.displayImports ? tool.displayImports : false,
             };
+            /*
             if (tool.resetURLParamsDiv) {
                 allTools[tool.name].resetURLParamsDiv = tool.resetURLParamsDiv;
             } else {
                 allTools[tool.name].resetURLParamsDiv = false;
-            }
+            }*/
         });
 
     // We import plugins and register them in the window

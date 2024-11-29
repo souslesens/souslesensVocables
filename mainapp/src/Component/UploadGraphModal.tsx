@@ -143,7 +143,13 @@ export function UploadGraphModal({ onClose, open, sourceName, indexAfterSuccess 
             if (indexAfterSuccess) {
                 try {
                     window.SearchUtil.generateElasticIndex(sourceName, { indexProperties: 1, indexNamedIndividuals: 1 }, () => {
-                        window.UI.message(`${sourceName} was updated successfully`, true);
+                        fetch(`/api/v1/ontologyModels?source=${sourceName}`, { method: "DELETE" })
+                            .then((_success) => {
+                                window.UI.message(`${sourceName} was updated successfully`, true);
+                            })
+                            .catch((error) => {
+                                alert(error);
+                            });
                     });
                 } catch (error) {
                     console.error(error);

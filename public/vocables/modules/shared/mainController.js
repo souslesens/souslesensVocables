@@ -243,7 +243,7 @@ var MainController = (function () {
             if (Config.userTools[self.currentTool].resetURLParamsDiv) {
                 $("#" + Config.userTools[self.currentTool].resetURLParamsDiv).dialog("close");
             }
-            if (toolId == "lineage") {
+            if (Config.userTools[toolId].displayImports){
                 if (self.oldRegisterSource) {
                     Lineage_sources.registerSource = self.oldRegisterSource;
                 }
@@ -258,7 +258,7 @@ var MainController = (function () {
         }
         self.currentTool = toolId;
 
-        if (toolId != "lineage" && !Config.userTools[toolId].noSource) {
+        if (!Config.userTools[toolId].displayImports && !Config.userTools[toolId].noSource) {
             self.oldRegisterSource = Lineage_sources.registerSource;
             Lineage_sources.registerSource = Lineage_sources.registerSourceWithoutDisplayingImports;
             $("#Lineage_graphEditionButtons").hide();

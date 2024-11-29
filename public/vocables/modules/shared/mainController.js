@@ -243,7 +243,7 @@ var MainController = (function () {
             if (Config.userTools[self.currentTool].resetURLParamsDiv) {
                 $("#" + Config.userTools[self.currentTool].resetURLParamsDiv).dialog("close");
             }
-            if (Config.userTools[toolId].displayImports){
+            if (Config.userTools[toolId].displayImports) {
                 if (self.oldRegisterSource) {
                     Lineage_sources.registerSource = self.oldRegisterSource;
                 }

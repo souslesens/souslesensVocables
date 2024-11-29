@@ -3011,7 +3011,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv");
             }
         },
-        showRestrictionPropertyNodeInfos:function(){
+        showRestrictionPropertyNodeInfos: function () {
             NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge?.data?.propertyId, "mainDialogDiv");
         },
         showAxioms: function () {

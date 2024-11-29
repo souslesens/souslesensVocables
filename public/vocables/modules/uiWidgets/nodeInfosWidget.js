@@ -1592,7 +1592,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
 
             if (!node.from)
                 html +=
-                    " <div class='addEdgeButtonColor' style='padding: 2px 4px;margin-left:10px;border-radius:5px;' onclick='NodeInfosWidget.showAddRestrictionWidget()'><button  class='slsv-invisible-button add-icon' style='margin-right: 2px; height: 26px; width: 27px;border-radius:14px;' ></button></div>";
+                    " <div class='slsv-button-2' style='padding: 2px 4px;margin-left:10px;border-radius:5px;height:32px;margin-bottom:5px;' onclick='NodeInfosWidget.showAddRestrictionWidget()'><button  class='slsv-invisible-button add-icon' style='margin-right: 2px; height: 26px; width: 27px;border-radius:14px;' ></button></div>";
             html += "</div>";
             html += '<div style="max-width:800px;max-height:400px">' + " <table>\n" + "        <tr>\n";
             if (filterProp) {

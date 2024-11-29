@@ -199,6 +199,9 @@ var Lineage_sources = (function () {
             highlightSourceDiv(source);
             self.whiteboard_setGraphOpacity(source);
             self.setAllWhiteBoardSources(true);
+            if (MainController.currentTool == "Weaver") {
+                Weaver.loadTopClasses();
+            }
         }
 
         $("#LineageNodesJsTreeDiv").empty();

@@ -17,7 +17,7 @@ const { configPluginsConfig, configPluginsRepository, directoryPlugins, director
  */
 
 const NATIVE_TOOLS = [
-    { name: "lineage", controller: "Lineage_whiteboard", useSource: true, multiSources: false, toTools: {} },
+    { name: "lineage", controller: "Lineage_whiteboard", useSource: true, multiSources: false, toTools: {},displayImports:true },
    // { name: "AxiomEditor", controller: "Axiom_editor", useSource: false, multiSources: false, toTools: {} },
     { name: "KGcreator", controller: "KGcreator", useSource: true, multiSources: false, toTools: {} },
     { name: "KGquery", controller: "KGquery", useSource: true, multiSources: false, toTools: {} },
@@ -33,7 +33,7 @@ const NATIVE_TOOLS = [
     { name: "TSF_Dictionary", controller: "Lineage_dictionary", useSource: false, multiSources: false, toTools: {} },
     { name: "UserManagement", controller: "UserManagement", useSource: false, multiSources: false, toTools: {} },
 
-    { name: "Weaver", controller: "Weaver", useSource: true, multiSources: false, toTools: {} },
+    { name: "Weaver", controller: "Weaver", useSource: true, multiSources: false, toTools: {},displayImports:true },
    // { name: "Lifex_cost", controller: "Lifex_cost", useSource: false, multiSources: false, toTools: {} },
 
     

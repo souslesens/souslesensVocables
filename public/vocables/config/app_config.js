@@ -338,6 +338,7 @@ var Config = (function () {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Potential": "#efbf00",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Quality": "#a8da83",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#70309f",
+            
         },
         "IDO-3": {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Object": "#00B5EC",

@@ -211,6 +211,7 @@ var Lineage_whiteboard = (function () {
         self.queriesStack = [];
         LegendWidget.clearLegend();
         Lineage_decoration.initLegend();
+        
 
         if (clearTree) {
             $("#lineage_drawnSources").html("");
@@ -230,6 +231,7 @@ var Lineage_whiteboard = (function () {
         }
 
         var xx = self.lineageVisjsGraph.network;
+        Lineage_decoration.decorateByUpperOntologyByClass();
     };
 
     self.showLastAddedNodesOnly = function () {
@@ -3110,12 +3112,14 @@ self.zoomGraphOnNode(node.data[0].id, false);
         },
         removeFromGraph: function () {
             self.lineageVisjsGraph.removeNodes("id", Lineage_whiteboard.currentGraphNode.id, true);
+            Lineage_decoration.decorateByUpperOntologyByClass();
         },
         removeOthersFromGraph: function () {
             if (!Lineage_whiteboard.currentGraphNode.id) {
                 return;
             }
             self.lineageVisjsGraph.removeOtherNodesFromGraph(Lineage_whiteboard.currentGraphNode.id);
+            Lineage_decoration.decorateByUpperOntologyByClass();
         },
         showObjectProperties: function () {
             var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey;

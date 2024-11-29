@@ -15,6 +15,7 @@ var Lineage_decoration = (function () {
 
     self.initLegend = function () {
         $("#Lineage_classes_graphDecoration_legendDiv").html("");
+        self.currentLegendData=null;
         self.legendColorsMap = {};
     };
     self.topOntologiesClassesMap = {};
@@ -47,6 +48,7 @@ var Lineage_decoration = (function () {
 
         if (!visjsNodes) {
             visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+            var notVisJsNodes=true;
         }
 
         if (visjsNodes.length == 0) {
@@ -172,7 +174,16 @@ var Lineage_decoration = (function () {
                         };
                         legendJsTreeData.push(treeObj);
                     }
-                    self.currentLegendJsTree = legendJsTreeData;
+                    //Combine new legend with already drawed
+                    
+                    if(self.currentLegendData && !notVisJsNodes){
+                        legendJsTreeData=  legendJsTreeData.concat(self.currentLegendData);
+                        legendJsTreeData=common.array.unduplicateArray(legendJsTreeData,'id');
+                    }
+                    
+
+
+                    self.currentLegendData = legendJsTreeData;
                     self.drawLegend(legendJsTreeData);
                     callbackSeries();
                 },

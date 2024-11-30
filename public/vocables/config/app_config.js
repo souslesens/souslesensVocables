@@ -321,11 +321,11 @@ var Config = (function () {
             "http://purl.obolibrary.org/obo/BFO_0000002": "#00AFEF",
             "http://purl.obolibrary.org/obo/BFO_0000020": "#efbf00",
             "http://purl.obolibrary.org/obo/BFO_0000031": "#a8da83",
-            "http://purl.obolibrary.org/obo/BFO_0000003": "#70309f",
+            "http://purl.obolibrary.org/obo/BFO_0000003": "#b96af4",
         },
 
         DOLCE: {
-            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Event": "#70309f",
+            "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Event": "#b96af4",
             "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Quality": "#a8da83",
             "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Quality": "#a8da83",
             "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Situation": "#efbf00",
@@ -337,7 +337,7 @@ var Config = (function () {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Object": "#00B5EC",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Potential": "#efbf00",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Quality": "#a8da83",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#70309f",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#b96af4",
         },
         "IDO-3": {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Object": "#00B5EC",

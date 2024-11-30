@@ -29,7 +29,7 @@ var Weaver = (function () {
             if (err) {
                 return alert(err.responseText);
             }
-            $("#lateralPanelDiv").load("./modules/tools/Weaver/html/lateralPanel.html", function () {
+            $("#lateralPanelDiv").load("./modules/tools/weaver/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
                 self.loadTopClasses();

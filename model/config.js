@@ -95,17 +95,13 @@ const MainConfigObject = z
                 url: z.string().url().optional(),
             })
             .strict(),
-        authenticationDatabase: z
+        database: z
             .object({
                 user: z.string(),
                 password: z.string(),
                 host: z.string(),
                 database: z.string(),
-                port: z.number().positive().max(65535),
-                table: z.string(),
-                loginColumn: z.string(),
-                passwordColumn: z.string(),
-                groupsColumn: z.string(),
+                port: z.number().positive().max(65535)
             })
             .strict(),
         annotator: z

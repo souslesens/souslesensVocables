@@ -70,15 +70,11 @@
         "enabled": true,
         "url": "http://localhost:8008"
     },
-    "authenticationDatabase": {
+    "database": {
         "user": "",
         "password": "",
         "host": "",
         "port": 3306,
-        "database": "",
-        "table": "",
-        "loginColumn": "",
-        "passwordColumn": "",
-        "groupsColumn": ""
+        "database": ""
     }
 }

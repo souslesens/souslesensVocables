@@ -134,6 +134,7 @@ var NodeRelations_bot = (function () {
                 options.filter = Sparql_common.setFilter("prop", self.params.currentProperty);
             }
             Lineage_whiteboard.drawRestrictions(self.params.source, self.params.currentClass, null, null, {}, function (err, result) {});
+            _botEngine.nextStep();
         },
         drawInverseRestrictions: function () {
             var options = { inverseRestriction: true };
@@ -141,6 +142,7 @@ var NodeRelations_bot = (function () {
                 options.filter = Sparql_common.setFilter("prop", self.params.currentProperty);
             }
             Lineage_whiteboard.drawRestrictions(self.params.source, self.params.currentClass, null, null, options, function (err, result) {});
+            _botEngine.nextStep();
         },
         executeQuery: function () {
             var source = self.params.source;

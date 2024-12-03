@@ -1995,6 +1995,12 @@ var Lineage_whiteboard = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
+                        if(result.length>self.showLimit){
+                            var resultNumber=result.length;
+                            data=result.slice(0,3000);
+                            alert('Too many results ('+resultNumber+'), only 1000 showed');
+                            return callbackSeries();
+                        }
                         if (!Lineage_whiteboard.isResultAcceptable(result)) {
                             if (callback) {
                                 return callback("no data found");
@@ -2027,7 +2033,7 @@ var Lineage_whiteboard = (function () {
                         }
                         return UI.message("no data found", true);
                     }
-
+                    var rdfType;
                     data.forEach(function (item) {
                         if (!existingNodes[item.subject.value]) {
                             existingNodes[item.subject.value] = 1;
@@ -2037,19 +2043,24 @@ var Lineage_whiteboard = (function () {
                             var size = Lineage_whiteboard.defaultShapeSize;
 
                             var type = item.subjectType ? item.subjectType.value : "?";
+                            rdfType='NamedIndividual';
                             if (type.indexOf("NamedIndividual") > -1) {
                                 shape = Lineage_whiteboard.namedIndividualShape;
                             }
+
+                            
 
                             if (item.subject.type == "bnode") {
                                 label = "";
                                 shape = "hexagon";
                                 color = "#EEE";
                                 size = 2;
+                                rdfType='bnode'
                             }
                             if (type.indexOf("Property") > -1) {
                                 shape = "text";
                                 color = "#c3c3c3";
+                                rdfType='Property'
                             }
 
                             var predicateUri = options.inversePredicate ? null : item.prop.value;
@@ -2057,6 +2068,7 @@ var Lineage_whiteboard = (function () {
                                 VisjsUtil.getVisjsNode(source, item.subject.value, label, predicateUri, {
                                     shape: shape,
                                     color: color,
+                                    rdfType:rdfType
                                 })
                             );
                         }
@@ -2076,6 +2088,7 @@ var Lineage_whiteboard = (function () {
                             var type = item.objectType ? item.objectType.value : "?";
 
                             var size = Lineage_whiteboard.defaultShapeSize;
+                            rdfType='NamedIndividual';
                             if (type.indexOf("NamedIndividual") > -1) {
                                 shape = Lineage_whiteboard.namedIndividualShape;
                             }
@@ -2085,10 +2098,12 @@ var Lineage_whiteboard = (function () {
                                 shape = "hexagon";
                                 color = "#EEE";
                                 size = 2;
+                                rdfType='bnode'
                             }
                             if (type.indexOf("Property") > -1) {
                                 shape = "text";
                                 color = "#c3c3c3";
+                                rdfType='Property'
                             }
 
                             var font = null;
@@ -2107,6 +2122,7 @@ var Lineage_whiteboard = (function () {
                                 VisjsUtil.getVisjsNode(source, item.object.value, label, predicateUri, {
                                     shape: shape,
                                     color: color,
+                                    rdfType:rdfType
                                 })
                             );
                         }
@@ -2175,14 +2191,16 @@ var Lineage_whiteboard = (function () {
                     } else {
                         Lineage_whiteboard.drawNewGraph(visjsData, null, { legendType: "individualClasses" });
                     }
-
+                    Lineage_decoration.decorateByUpperOntologyByClass(visjsData.nodes);
                     $("#waitImg").css("display", "none");
                     if (callback) {
                         return callback(null, visjsData);
                     }
                 },
             ],
-            function (err) {}
+            function (err) {
+
+            }
         );
     };
 

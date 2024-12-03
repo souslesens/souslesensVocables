@@ -433,8 +433,11 @@ var Containers_tree = (function () {
                 //var parent = self.idsMap[item.parent.value];
 
                 var type = "Container";
-                if (item.memberTypes.value == "http://www.w3.org/2002/07/owl#Class") {
+                if (item.memberTypes.value.indexOf("http://www.w3.org/2002/07/owl#Class")>-1) {
                     type = "Class";
+                }
+                if (item.memberTypes.value.indexOf("http://www.w3.org/2002/07/owl#NamedIndividual")>-1) {
+                    type = "Individual";
                 }
                 if (!self.idsMap[id]) {
                     self.idsMap[id] = jstreeId;

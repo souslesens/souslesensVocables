@@ -279,7 +279,7 @@ tripleObj.objectIsSpecificUri = true;
         $("#smallDialogDiv").dialog("close");
     };
     self.showFunctionDialog = function (_role) {
-        $("#KGcreator_dialogDiv").load("modules/tools/KGcreator/html/functionDialog.html", function () {
+        $("#KGcreator_dialogDiv").load("/old/html/snippets/KGcreator/functionDialog.html", function () {
             $("#KGcreator_dialogDiv").dialog("open");
         });
     };

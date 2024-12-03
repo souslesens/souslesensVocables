@@ -101,12 +101,15 @@ var Lineage_decoration = (function () {
                             if (namedIndividualNodes.includes(parent.subject.value)) {
                                 var allTypes = parent.subjectTypes.value.split(",");
                                 var nodeType;
+
+                                distinctNodeClassesMap[parent.subject.value][0].shape = 'triangle';
                                 for (var type in allTypes) {
                                     if (allTypes[type] != "http://www.w3.org/2002/07/owl#NamedIndividual") {
                                         nodeType = allTypes[type];
                                     }
                                 }
                                 if (nodeType) {
+                                    
                                     distinctNodeClassesMap[parent.subject.value][0].data.parentClass = nodeType;
                                 }
                             }
@@ -200,10 +203,15 @@ var Lineage_decoration = (function () {
                             if (newNode.id.startsWith("_:b")) {
                                 newNode.shape = "hexagon";
                             }
+                            
                             // class with icons
                             if (Lineage_whiteboard.decorationData[Lineage_sources.activeSource] && Lineage_whiteboard.decorationData[Lineage_sources.activeSource][node.id]?.image) {
                                 node.image = Lineage_whiteboard.decorationData[Lineage_sources.activeSource][node.id].image;
                                 node.shape = "circularImage";
+                            }
+                            // shape previously attribute
+                            if(node.shape && node.shape!='circularImage'){
+                                newNode.shape=node.shape
                             }
 
                             newVisJsNodes.push(newNode);

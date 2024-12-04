@@ -681,6 +681,9 @@ var Lineage_createRelation = (function () {
                         domainLabel: domainLabel,
                         rangeLabel: rangeLabel,
                         source: source,
+                        label:subPropertyLabel,
+                        superProp:superPropId,
+
                     },
                 },
             };

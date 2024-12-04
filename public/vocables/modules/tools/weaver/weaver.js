@@ -222,7 +222,7 @@ var Weaver = (function () {
 
     self.clearAll = function () {
         Lineage_whiteboard.initUI();
-        self.loadTopClasses();
+        //self.loadTopClasses();
     };
     self.contextMenu = function () {
         var items = {};

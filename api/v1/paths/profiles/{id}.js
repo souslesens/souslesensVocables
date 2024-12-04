@@ -10,7 +10,7 @@ module.exports = function () {
 
     async function GET(req, res, _next) {
         const userInfo = await userManager.getUser(req.user);
-        const profile = await profileModel.getOneUSerProfile(userInfo.user, req.params.id);
+        const profile = await profileModel.getOneUserProfile(userInfo.user, req.params.id);
         if (profile) {
             res.status(200).json(profile);
             return;

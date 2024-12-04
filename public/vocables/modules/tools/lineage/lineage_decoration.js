@@ -1,17 +1,17 @@
-import Sparql_common from "../../sparqlProxies/sparql_common.js";
+
 import Lineage_sources from "./lineage_sources.js";
-import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
-import Lineage_relations from "./lineage_relations.js";
 import LegendWidget from "../../uiWidgets/legendWidget.js";
-import Containers_graph from "../containers/containers_graph.js";
-import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
+import common from "../../shared/common.js";
+
 
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
     var self = {};
     self.legendColorsMap = {};
+    self.currentDisplay=null
+
 
     self.initLegend = function () {
         $("#Lineage_classes_graphDecoration_legendDiv").html("");
@@ -30,9 +30,6 @@ var Lineage_decoration = (function () {
         for (var key in Config.topLevelOntologyFixedlegendMap) {
             if (!source || key == source) {
                 if (!color) {
-                    /*  if (!Config.topLevelOntologyFixedlegendMap[key]) {
-                          return common.getSourceColor("class", key);
-                      }*/
                     color = Config.topLevelOntologyFixedlegendMap[key][classId];
                 }
             }
@@ -41,6 +38,8 @@ var Lineage_decoration = (function () {
     };
 
     self.decorateByUpperOntologyByClass = function (visjsNodes) {
+
+
         if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
             return $("#lineage_legendWrapperSection").css("display", "none");
         }
@@ -48,20 +47,13 @@ var Lineage_decoration = (function () {
         if (!visjsNodes) {
             visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         }
-
         if (visjsNodes.length == 0) {
             return;
         }
-
         var nodeIds = [];
         visjsNodes.forEach(function (node) {
             nodeIds.push(node.id);
         });
-
-        /*  var hierarchies = {};
-          var legendJsTreeData = [];
-          var legendClassesMap = {};
-          var newVisJsNodes = [];*/
 
         var distinctNodeClassesMap = {};
         var legendColorsMap = {};
@@ -111,15 +103,7 @@ var Lineage_decoration = (function () {
                         });
                         callbackSeries();
                     });
-                    /*async.eachSeries(
-                        namedIndividualNodes,
-                        function (item, callbackEach) {
-                            Sparql_OWL.getNodeParents()
-                        },
-                        function (err) {
 
-                        }
-                    )*/
                 },
                 // get nodeClassesAncestors and set classes colors
                 function (callbackSeries) {
@@ -148,6 +132,7 @@ var Lineage_decoration = (function () {
                                 color = "#ddd";
                             }
                             distinctNodeClassesMap[classUri].color = color;
+                            distinctNodeClassesMap[classUri].colorPastel = common.colorToRgba(color, 0.3);
                         }
                     }
 
@@ -181,19 +166,35 @@ var Lineage_decoration = (function () {
                     var newVisJsNodes = [];
                     // get source decoration data
 
-                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
+                   // Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     for (var key in distinctNodeClassesMap) {
                         distinctNodeClassesMap[key].forEach(function (node) {
+
+
                             var newNode = { id: node.id, color: distinctNodeClassesMap[key].color };
+
                             // blank nodes
                             if (newNode.id.startsWith("_:b")) {
                                 newNode.shape = "hexagon";
                             }
                             // class with icons
-                            if (Lineage_whiteboard.decorationData[Lineage_sources.activeSource] && Lineage_whiteboard.decorationData[Lineage_sources.activeSource][node.id]?.image) {
+                           else  if (Lineage_whiteboard.decorationData[Lineage_sources.activeSource] && Lineage_whiteboard.decorationData[Lineage_sources.activeSource][node.id]?.image) {
                                 node.image = Lineage_whiteboard.decorationData[Lineage_sources.activeSource][node.id].image;
                                 node.shape = "circularImage";
                             }
+                           else if(false && self.currentDisplay=="box"){
+                                node.shape = "box";
+                                node.color=distinctNodeClassesMap[key].color
+                               // newNode.borderWidth=1
+                                newNode.font= {  color: "#eee"}
+                            }
+
+
+
+
+
+
+
 
                             newVisJsNodes.push(newNode);
                         });

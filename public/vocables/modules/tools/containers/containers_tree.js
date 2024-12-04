@@ -623,7 +623,11 @@ var Containers_tree = (function () {
             label: "Add selected node to container",
             action: function (_e) {
                 var graphNodeData = Lineage_whiteboard.currentGraphNode.data;
-                Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData);
+                Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData, false,function(err, result){
+                    if(err)
+                        return alert(err.responseText || err)
+                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });
+                });
             },
         };
         items["PasteNodesInContainer"] = {
@@ -825,7 +829,7 @@ var Containers_tree = (function () {
             if (callback) {
                 return callback(null);
                 if (jstreeData) {
-                    callback(jstreeData);
+                    callback(null,jstreeData);
                 }
             }
         });

@@ -6,6 +6,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     if (!options) {
         options = {};
     }
+
     if (!options.visjsOptions) {
         options.visjsOptions = {};
     }
@@ -21,6 +22,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.currentScale;
     self.simulationOn;
     self.globalOptions = { nodes: {}, edges: {} };
+    self.defaultShape="dot"
 
     self.defaultTextSize = 14;
     self.defaultNodeSize = 7;
@@ -29,6 +31,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.drawingDone = false;
     var lastClickTime = new Date();
     var dbleClickIntervalDuration = 500;
+    if(options.defaultShape)
+    self.defaultShape=options.defaultShape
 
     self.draw = function (callback) {
         var divId = self.graphDiv;
@@ -79,7 +83,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             width: "" + self.canvasDimension.w + "px",
             height: "" + self.canvasDimension.h + "px",
             nodes: {
-                shape: "dot",
+             //   shape: self.defaultShape,
                 size: 12,
                 chosen: { node: true },
                 // scaling:{min:6,max:20}
@@ -739,7 +743,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
              */
             var newNodes = [];
             self.data.nodes.getIds().forEach(function (/** @type {any} */ nodeId) {
-                var shape = "dot";
+                var shape = self.defaultShape;
                 var size = self.defaultNodeSize;
                 if (nodeId == id) {
                     shape = "star";
@@ -865,7 +869,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
          */
         var newNodes = [];
         nodes.forEach(function (/** @type {{ data: { label: string; }; id: any; }} */ node) {
-            var shape = "dot";
+            var shape = self.defaultShape;
             var size = self.defaultNodeSize;
             var ok = false;
             if (word) {

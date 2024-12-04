@@ -2,6 +2,7 @@ import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Shacl from "./shacl.js";
 
+
 var SubGraph = (function () {
     var self = {};
 
@@ -13,6 +14,8 @@ var SubGraph = (function () {
         var allRestrictions = {};
         var allClasses = {};
         var uniqueRestrictions = {};
+        var allProperties = {}
+        var filteredProperties = {}
 
         var fromStr = Sparql_common.getFromStr(sourceLabel);
 
@@ -27,15 +30,14 @@ var SubGraph = (function () {
                         },
 
                         function (callbackWhilst) {
-                            var filter = Sparql_common.setFilter("s", currentClasses, null, { values: true });
+                            var filter = Sparql_common.setFilter("s", currentClasses, null, {values: true});
 
                             var query =
                                 "PREFIX dexp: <http://totalenergies/resources/tsf/ontology/dexpi-process/specific/>\n" +
                                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>SELECT distinct *  FROM   <http://totalenergies/resources/tsf/ontology/dexpi-process/specific/>    FROM   <http://totalenergies/resources/tsf/ontology/dexpi-process/generic/>  WHERE {\n" +
-                                "  ?s rdfs:subClassOf+ ?o. ?o rdf:type ?type " +
-                                "";
-                            filter +
-                                "optional { ?o owl:onProperty ?property. ?o owl:someValuesFrom|owl:onClass ?targetClass  optional { ?o ?cardinalityType  ?cardinalityValue. filter (?cardinality in (owl:minCardinality,owl:maxCardinality,owl:cardinality))}}\n" +
+                                "  ?s rdfs:subClassOf ?o. ?o rdf:type ?type " +
+                                filter +
+                                "optional { ?o owl:onProperty ?property. ?o owl:someValuesFrom|owl:onClass ?targetClass  optional { ?o ?cardinalityType  ?cardinalityValue. filter (?cardinalityType in (owl:minCardinality,owl:maxCardinality,owl:cardinality))}}\n" +
                                 "  } limit 10000";
                             self.query(sourceLabel, query, function (err, result) {
                                 if (err) {
@@ -46,34 +48,51 @@ var SubGraph = (function () {
                                     if (!item.type) {
                                         return;
                                     }
+                                    console.log(Sparql_common.getLabelFromURI(item.s.value) + "-->" + Sparql_common.getLabelFromURI(item.o.value) + "--" +
+                                        ((item.property ? Sparql_common.getLabelFromURI(item.property.value) : "")) + "--" +
+                                        (item.targetClass ? Sparql_common.getLabelFromURI(item.targetClass.value) : ""));
 
                                     if (item.type.value.endsWith("Class")) {
+
                                         if (!allClasses[item.o.value]) {
                                             currentClasses.push(item.o.value);
-                                            allClasses[item.o.value] = {};
+                                            allClasses[item.o.value] = {ancestors: []};
                                         }
                                         if (!allClasses[item.s.value]) {
                                             currentClasses.push(item.s.value);
                                         }
-                                        allClasses[item.s.value] = { superClass: item.o.value };
+                                        allClasses[item.s.value] = {ancestors: [item.o.value]};
                                     } else if (item.type.value.endsWith("Restriction")) {
+
+                                        if (options.excludedproperties.indexOf(item.property.value) > -1) {
+                                            return
+                                        }
+                                        if (!item.property) {
+                                            return
+                                        }
                                         if (!allRestrictions[item.s.value]) {
                                             allRestrictions[item.s.value] = {};
                                         }
 
                                         var obj = {
+                                            sourceClass: item.s.value,
                                             property: item.property ? item.property.value : null,
                                             targetClass: item.targetClass ? item.targetClass.value : null,
                                             cardinalityType: item.cardinalityType ? item.cardinalityType.value : null,
                                             cardinalityValue: item.cardinalityValue ? item.cardinalityValue.value : null,
                                         };
-                                        if (obj.targetClass.endsWith("Volume")) {
-                                            var x = 1;
+                                        if (!allProperties[item.property.value]) {
+                                            allProperties[item.property.value] = []
                                         }
+
+                                        if (allProperties[item.property.value].length == 0) {
+                                            allProperties[item.property.value].push(obj)
+                                        }
+
 
                                         if (item.targetClass) {
                                             if (!allClasses[item.targetClass.value]) {
-                                                allClasses[item.targetClass.value] = {};
+                                                allClasses[item.targetClass.value] = {ancestors: []};
                                                 currentClasses.push(item.targetClass.value);
                                             }
                                         }
@@ -96,6 +115,44 @@ var SubGraph = (function () {
                             callbackSeries();
                         }
                     );
+                },
+
+                // remove superClasses redandant Restrictions
+                function (callbackSeries) {
+
+                    //   remove ancestors restrcition target (keep the first one
+                    for (var property in allProperties) {
+                        allProperties[property].forEach(function (item) {
+
+                            if (!filteredProperties[property]) {
+                                filteredProperties[property] = allProperties[property][0].sourceClass
+                            }
+
+                        })
+                    }
+
+                    var filteredRestrictions = []
+                    for (var restriction in allRestrictions) {
+                        for (var property in allRestrictions[restriction]) {
+                            allRestrictions[restriction][property].forEach(function (item, index) {
+                                if (property == "http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity") {
+                                    ;
+                                } else {
+                                  //  if ([allProperties[property]] == item.sourceClass) {
+                                    if (allClasses[item.sourceClass] == item.sourceClass) {
+                                        delete allRestrictions[restriction][property][index]
+                                    }
+                                }
+
+
+                            })
+
+                        }
+                    }
+
+
+                    var y = filteredProperties
+                    callbackSeries()
                 },
 
                 function (callbackSeries) {
@@ -122,7 +179,7 @@ var SubGraph = (function () {
                 },
             ],
             function (err) {
-                return callback(err, { classes: allClasses, restrictions: allRestrictions });
+                return callback(err, {classes: allClasses, restrictions: allRestrictions});
             }
         );
     };
@@ -272,13 +329,15 @@ var SubGraph = (function () {
                         });
                     }
                     var domain = Shacl.uriToPrefixedUri(classUri2);
-                    var shaclStr = Shacl.getShacl(domain, null, shaclProperties);
-                    allSahcls += shaclStr;
+                    if (shaclProperties.length > 0) {
+                        var shaclStr = Shacl.getShacl(domain, null, shaclProperties);
+                        allSahcls += shaclStr;
+                    }
                 }
             }
 
             var prefixes = Shacl.getPrefixes();
-            allSahcls = prefixes + "\n" + allSahcls + ".";
+            allSahcls = prefixes + "\n" + allSahcls// + ".";
             var payload = {
                 turtle: allSahcls,
             };
@@ -294,7 +353,7 @@ var SubGraph = (function () {
                     if (data.result && data.result.indexOf("Error") > -1) {
                         return callback(data.result);
                     }
-                    return callback(null, { triples: data.triples, shacl: allSahcls, classesMap: classesMap });
+                    return callback(null, {triples: data.triples, shacl: allSahcls, classesMap: classesMap});
                     //  callback(null, data);
                 },
                 error(err) {
@@ -370,7 +429,8 @@ var SubGraph = (function () {
             classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
         }
 
-        self.instantiateSubGraph(sourceLabel, classUri, function (err, result) {});
+        self.instantiateSubGraph(sourceLabel, classUri, function (err, result) {
+        });
 
         return;
         self.getSubGraphResources(sourceLabel, classUri, options, function (err, result) {

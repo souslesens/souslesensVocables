@@ -49,7 +49,9 @@ var Lineage_whiteboard = (function () {
     self.defaultEdgeArrowType = "triangle";
     self.defaultEdgeColor = "#aaa";
     self.defaultPredicateEdgeColor = "#266264";
-    self.restrictionColor = "#fdbf01";
+    self.restrictionColor = "#efbf00";//"#fdbf01";
+    self.restrictionFontSize=12
+    self.restrictionEdgeWidth=1
     self.namedIndividualShape = "triangle";
     self.namedIndividualColor = "#0067bb";
     self.defaultNodeFontColor = "#343434";
@@ -863,7 +865,7 @@ var Lineage_whiteboard = (function () {
                                 label: match.label,
                                 color: color,
                                 shadow: self.nodeShadow,
-                                shape: "dot",
+                                shape: Lineage_whiteboard.defaultShape,
                                 size: Lineage_whiteboard.defaultShapeSize,
                                 data: {
                                     id: match.id,
@@ -1723,7 +1725,7 @@ var Lineage_whiteboard = (function () {
                         id: item.subject.value,
                         label: item.subjectLabel.value,
                         shadow: self.nodeShadow,
-                        shape: "dot",
+                        shape:  Lineage_whiteboard.defaultShape,
                         level: self.currentExpandLevel,
                         size: Lineage_whiteboard.defaultShapeSize,
                         color: "#ddd",
@@ -1743,7 +1745,7 @@ var Lineage_whiteboard = (function () {
                         label: item.objectLabel.value,
 
                         shadow: self.nodeShadow,
-                        shape: "dot",
+                        shape:  Lineage_whiteboard.defaultShape,
                         level: self.currentExpandLevel,
                         size: Lineage_whiteboard.defaultShapeSize,
                         color: "#ddd",
@@ -2351,6 +2353,7 @@ restrictionSource = Config.predicatesSource;
                             shape = "hegagon";
                             color = "#EEE";
                         }
+
                         if (options.inverse) {
                             visjsData.edges.push({
                                 id: edgeId,
@@ -2358,7 +2361,7 @@ restrictionSource = Config.predicatesSource;
                                 to: item.subject.value,
                                 //  label: "<i>" + item.propLabel.value + "</i>",
                                 label: cardinalitylabel + " " + item.propLabel.value,
-                                font: { color: options.edgesColor || Lineage_whiteboard.restrictionColor },
+                                font: { color: options.edgesColor || Lineage_whiteboard.restrictionColor,size:Lineage_whiteboard.restrictionFontSize},
                                 data: {
                                     propertyId: item.prop.value,
                                     bNodeId: item.node.value,
@@ -2374,9 +2377,10 @@ restrictionSource = Config.predicatesSource;
                                         scaleFactor: 0.5,
                                     },
                                 },
-                                // dashes: true,
+                                 dashes: true,
                                 color: options.edgesColor || Lineage_whiteboard.restrictionColor,
                                 physics: physics,
+                                width:self.restrictionEdgeWidth
                             });
                         } else if (!options.inverse) {
                             visjsData.edges.push({
@@ -2385,7 +2389,7 @@ restrictionSource = Config.predicatesSource;
                                 from: item.subject.value,
                                 //  label: "<i>" + item.propLabel.value + "</i>",
                                 label: item.propLabel.value,
-                                font: { color: options.edgesColor || Lineage_whiteboard.restrictionColor },
+                                font: { color: options.edgesColor || Lineage_whiteboard.restrictionColor,size:Lineage_whiteboard.restrictionFontSize},
                                 data: {
                                     propertyId: item.prop.value,
                                     bNodeId: item.node.value,
@@ -2401,7 +2405,8 @@ restrictionSource = Config.predicatesSource;
                                         scaleFactor: 0.5,
                                     },
                                 },
-                                dashes: true,
+                               dashes: true,
+                                width:self.restrictionEdgeWidth,
                                 color: options.edgesColor || Lineage_whiteboard.restrictionColor,
                                 physics: physics,
                             });
@@ -3352,6 +3357,8 @@ attrs.color=self.getSourceColor(superClassValue)
         showGraphConfig: function () {
             self.lineageVisjsGraph.showGraphConfig();
         },
+
+
         toSVG: function () {
             self.lineageVisjsGraph.toSVG();
         },
@@ -3514,6 +3521,17 @@ attrs.color=self.getSourceColor(superClassValue)
             error(err) {},
         });
     };
+
+    self.showWhiteBoardDisplay=function(){
+
+        $("#smallDialogDiv").load("./modules/tools/lineage/html/whiteboardDisplay.html",function(){
+            $("#smallDialogDiv").dialog("open")
+           var userPrefs=localStorage.getItem("whiteboardPreferences")
+            
+
+        });
+
+    }
 
     return self;
 })();

@@ -28,7 +28,7 @@ var Containers_query = (function () {
             "    ?member rdf:type ?memberType. " +
             " OPTIONAL { ?member rdfs:label ?memberLabel}  " +
             " FILTER (?memberType in(rdf:Bag,rdf:List))\n" +
-            "  filter (not exists{?parent rdfs:member ?member})\n" +
+            "  filter (not exists{?parent rdfs:member ?member. ?parent rdf:type ?parentType  FILTER (?parentType in(rdf:Bag,rdf:List))})"+
             filterStr +
             "    }";
 

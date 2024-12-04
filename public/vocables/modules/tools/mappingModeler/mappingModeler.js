@@ -454,7 +454,7 @@ var MappingModeler = (function () {
                     data: {
                         id: resourceUri,
                         type: resourceUri,
-                        source: property.source,
+                        source: property?property.source:null,
                     },
                     color: color,
                 };

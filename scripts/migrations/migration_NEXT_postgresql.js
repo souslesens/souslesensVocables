@@ -49,6 +49,11 @@ const migrateConfig = (configDirectory, writeMode) => {
         modification = true;
     }
 
+    if (configJSON.auth === "local") {
+        configJSON.auth = "database";
+        modification = true;
+    }
+
     if (writeMode) {
         if (modification) {
             fs.writeFileSync(configPath, JSON.stringify(configJSON, null, 2));
@@ -86,6 +91,43 @@ const migrateProfiles = async (configDirectory, writeMode) => {
         }
     }
 }
+
+const migrateUsers = async (configDirectory, writeMode) => {
+    console.info(" - Users");
+    const configPath = path.resolve(configDirectory, "mainConfig.json");
+    const configJSON = JSON.parse(fs.readFileSync(configPath, { encoding: "utf-8" }));
+
+    const usersPath = path.resolve(configDirectory, "users", "users.json");
+    if (fs.existsSync(usersPath)) {
+        const usersJSON = JSON.parse(fs.readFileSync(usersPath, { encoding: "utf-8" }));
+
+        const results = await knex({ client: "pg", connection: configJSON.database })
+            .select("label").from("profiles");
+        const profiles = results.map((profile) => profile.label);
+
+        const users = Object.values(usersJSON).map((user) => {
+            if (user.source === "json") {
+                user.source = "database";
+            }
+
+            return {
+                login: user.login,
+                password: user.password,
+                token: user.token,
+                create_source: user.allowSourceCreation,
+                maximum_source: user.maxNumberCreatedSource,
+                profiles: user.groups.filter((group) => profiles.includes(group)),
+                auth: user.source,
+            }
+        });
+
+        if (writeMode) {
+            const migrated_users = await insertData(configJSON.database, users, "users", "login");
+            if (migrated_users.length > 0) {
+                console.info(`  ✅ the following users were migrated: ${migrated_users}`);
+            } else {
+                console.info("  👍 Nothing to do");
+            }
         }
     }
 };
@@ -99,6 +141,7 @@ const main = async () => {
     console.info(argv.write ? "🚧 Prepare the migration…" : "🔧 Dry run mode…");
     migrateConfig(argv.config, argv.write);
     await migrateProfiles(argv.config, argv.write);
+    await migrateUsers(argv.config, argv.write);
 };
 
 main()

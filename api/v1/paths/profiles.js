@@ -15,7 +15,7 @@ module.exports = function () {
             const profiles = await profileModel.getUserProfiles(userInfo.user);
             resourceFetched(res, profiles);
         } catch (error) {
-            next(error);
+            res.status(500).json({ message: error.toString() });
         }
     }
     GET.apiDoc = {
@@ -36,8 +36,8 @@ module.exports = function () {
             );
             const profiles = await profileModel.getAllProfiles();
             resourceCreated(res, profiles);
-        } catch (err) {
-            next(err);
+        } catch (error) {
+            res.status(500).json({ message: error.toString() });
         }
     }
     POST.apiDoc = {

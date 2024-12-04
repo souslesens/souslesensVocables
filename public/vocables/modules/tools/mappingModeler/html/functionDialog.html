@@ -3,11 +3,13 @@
     <li>row : dataset current row object</li>
     <li>mapping : current mapping object</li>
 </ul>
-<textarea id="KGcreator_fnBody" style="width: 600px; height: 200px"></textarea>
+
+<b>Example</b>
+<textarea id="KGcreator_fnBody" style="width: 600px; height: 200px">if(row['PredicateColumn']=='value'){return 'predicateURI1'}else{return 'predicateURI2'}</textarea>
 
 <div>
     <span id="KGcreator_testFnResult"></span>
     <button onclick="KGcreator_mappings.testFunction()">Test</button>
-    <button onclick="KGcreator_mappings.addFunction()">Add</button>
+    <button onclick="MappingModeler.addPredicateFunction()">Add</button>
     <button onclick="$('#KGcreator_dialogDiv').dialog('close')">cancel</button>
 </div>

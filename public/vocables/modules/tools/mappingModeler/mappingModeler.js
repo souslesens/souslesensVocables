@@ -349,6 +349,8 @@ var MappingModeler = (function () {
             return self.showCreateResourceBot("Class", null);
         } else if (resourceUri == "createObjectProperty") {
             return self.showCreateResourceBot("ObjectProperty", null);
+        }else if(resourceUri == "function"){
+            return self.predicateFunctionShowDialog();
         } else if (self.currentResourceType == "Column") {
             newResource = {
                 id: id,
@@ -842,6 +844,7 @@ var MappingModeler = (function () {
             //   self.hideLegendItems();
             var newObjects = [
                 { id: "createObjectProperty", label: "_Create new ObjectProperty_" },
+                {id: "function", label: "function" },
                 { id: "rdfs:member", label: "_rdfs:member_" },
             ];
             var options = { includesnoConstraintsProperties: true };
@@ -1843,35 +1846,36 @@ var MappingModeler = (function () {
                 }
             );
         }
-        /*datasources.forEach(function(datasource){
-            if(!currentMappings[datasource]){
-                return;
-            }else{
-                
-                KGcreator.saveDataSourceMappings(self.currentSource,database,currentMappings[datasource],function(err){
-                    if(err){
-                        console.log(err)
-                    }
-                    
-                })
-            }
-        });
-        
-        
-        Object.keys(KGcreator.currentConfig.csvSources).forEach(function(csv){
-            if(!currentMappings[csv]){
-                return;
-            }else{
-                KGcreator.saveDataSourceMappings(self.currentSource,csv,currentMappings[csv],function(err){
-                    if(err){
-                        console.log(err)
-                    }
-                    
-                })
-
-            }
-        });*/
+       
     };
+
+    self.predicateFunctionShowDialog=function(){
+        $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/functionDialog.html", function () {
+            $("#smallDialogDiv").dialog("open");
+        });
+    }
+    self.addPredicateFunction=function(){
+        var edge = {
+            from: self.currentRelation.from.id,
+            to: self.currentRelation.to.id,
+            label: '_function_',
+            arrows: {
+                to: {
+                    enabled: true,
+                    type: "diamond",
+                },
+            },
+            smooth:  { type: "curvedCW" },
+            data: {
+                id: 'function{'+$('#KGcreator_fnBody').val()+'}',
+                type: "function",
+                source: 'function',
+            },
+            color: "#375521",
+        };
+        self.visjsGraph.data.edges.add([edge]);
+        $('#smallDialogDiv').dialog('close')
+    }
     return self;
 })();
 

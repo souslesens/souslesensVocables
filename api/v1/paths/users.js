@@ -52,28 +52,20 @@ module.exports = function () {
         try {
             await Promise.all(
                 Object.entries(req.body).map(async function ([_key, value]) {
-                    await userModel.addUserAccount(value); // XXX what about password ?
+                    await userModel.addUserAccount(value);
                 })
             );
             const users = await userModel.getUserAccounts();
             res.status(200).json(successfullyCreated(users));
         } catch (error) {
-            next(error);
+            res.status(403).json({ message: error.toString() });
         }
     }
     POST.apiDoc = {
         summary: "Create a new user",
         security: [{ restrictAdmin: [] }],
         operationId: "createUser",
-        parameters: [
-            // {
-            //     in: 'body',
-            //     name: "user",
-            //     type: 'object',
-            //     required: true
-            // }
-        ],
-
+        parameters: [],
         responses: responseSchema("Users", "POST"),
     };
 

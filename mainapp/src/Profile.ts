@@ -139,6 +139,7 @@ export const defaultProfile = (uuid: string): Profile => {
         allowedSourceSchemas: [],
         sourcesAccessControl: {},
         allowedTools: [],
+        theme: "",
     };
 };
 export { getProfiles, deleteProfile, ProfileSchema };

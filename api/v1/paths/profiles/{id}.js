@@ -10,7 +10,7 @@ module.exports = function () {
 
     async function GET(req, res, _next) {
         const userInfo = await userManager.getUser(req.user);
-        const profile = await profileModel.getOneUSerProfile(userInfo.user, req.params.id);
+        const profile = await profileModel.getOneUserProfile(userInfo.user, req.params.id);
         if (profile) {
             res.status(200).json(profile);
             return;
@@ -18,7 +18,7 @@ module.exports = function () {
         res.status(400).json({ message: `Profile with id ${req.params.id} not found` });
     }
 
-    async function DELETE(req, res, _next) {
+    async function DELETE(req, res, next) {
         if (!req.params.id) {
             res.status(500).json({ message: "I need a resource ID to perform this request" });
             return;

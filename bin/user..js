@@ -24,7 +24,7 @@ const user = {
                 auth: {},
             };
         } else if (logged) {
-            const findUser = await userModel.findUserAccount(reqUser.login);
+            const [_name, findUser] = await userModel.findUserAccount(reqUser.login);
             if (findUser === undefined) {
                 throw Error("could not find logged user " + reqUser);
             }

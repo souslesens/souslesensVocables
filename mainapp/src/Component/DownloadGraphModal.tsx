@@ -170,7 +170,7 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
             cancelCurrentOperation.current = false;
 
             let blobParts: BlobPart[] | null;
-            let message = "";
+            let message = "ok";
             if (slsPyApiBaseUrl === "/") {
                 const graphInfo = await fetchSourceInfo(sourceName);
                 const graphSize = graphInfo.graphSize;

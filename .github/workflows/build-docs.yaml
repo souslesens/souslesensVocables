@@ -1,0 +1,33 @@
+name: build-and-deploy-docs
+on:
+  - push
+jobs:
+  build:
+    # if: "github.ref == 'refs/heads/master'"
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    container:
+      image: python:3.11
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install
+        run: |
+          cd docs
+          python3 -m venv venv
+          . ./venv/bin/activate
+          pip install -U poetry
+          poetry install --without=dev
+          poetry run make html
+      - name: Upload
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/_build/html
+      - name: Pages
+        uses: actions/deploy-pages@v4
+

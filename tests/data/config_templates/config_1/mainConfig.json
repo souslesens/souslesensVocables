@@ -32,7 +32,7 @@
     "jowlServer": {
         "enabled": false
     },
-    "slsApi": {
+    "slsPyApi": {
         "enabled": false
     }
 }

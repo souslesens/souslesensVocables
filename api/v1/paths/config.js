@@ -22,7 +22,7 @@ module.exports = function () {
             version: process.env.npm_package_version,
             sentryDsnJsFront: config.sentryDsnJsFront,
             tools_available: config.tools_available,
-            slsApi: config.slsApi,
+            slsPyApi: config.slsPyApi,
             theme: config.theme,
         };
 

@@ -1448,7 +1448,7 @@ var Sparql_OWL = (function () {
 
         var filterStr = "";
         if (subClassIds) {
-            var filteredClasses = OntologyModels.filterClassIds(sourceLabel, subClassIds);
+            var filteredClasses = subClassIds ;//OntologyModels.filterClassIds(sourceLabel, subClassIds);
             if (filteredClasses.length != 0) subClassIds = filteredClasses;
 
             if (options.inverseRestriction) {

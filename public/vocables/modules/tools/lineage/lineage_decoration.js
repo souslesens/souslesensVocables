@@ -198,6 +198,9 @@ var Lineage_decoration = (function () {
                     Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     for (var key in distinctNodeClassesMap) {
                         distinctNodeClassesMap[key].forEach(function (node) {
+                            if(node.shape!="dot")
+                                return;
+
                             var newNode = { id: node.id, color: distinctNodeClassesMap[key].color };
                             // blank nodes
                             if (newNode.id.startsWith("_:b")) {

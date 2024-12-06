@@ -2617,8 +2617,8 @@ restrictionSource = Config.predicatesSource;
                 '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawParents();"> Parents</span>';
 
             if (node.data && node.data.type == "container") {
-                html += '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.pasteNodeIntoContainer();"> past intoToContainer</span>';
-            } else {
+                html += ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>'
+                          } else {
                 html +=
                     '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +

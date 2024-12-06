@@ -49,9 +49,9 @@ detailsCellVerticalTabValue {
 }
 .detailsCellValueContent {
     line-height: 1.8;
-    max-height: 100px;
+    max-height: 200px;
     overflow: auto;
-    max-width: 500px;
+    max-width: 700px;
 }
 
 .detailsCellName {

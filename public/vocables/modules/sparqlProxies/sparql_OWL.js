@@ -106,7 +106,9 @@ var Sparql_OWL = (function () {
             }
         }
 
-        if (options.filter) strFilterTopConcept += options.filter;
+        if (options.filter) {
+            strFilterTopConcept += options.filter;
+        }
 
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -160,7 +162,7 @@ var Sparql_OWL = (function () {
             url = self.sparql_url;
         }
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -294,18 +296,18 @@ var Sparql_OWL = (function () {
             url = self.sparql_url;
         }
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "child"], { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "child"], {source: sourceLabel});
             return callback(null, result.results.bindings);
         });
     };
 
     self.getNodesDescendants = function (sourceLabel, ids, options, callback) {
         var predicateStr = Sparql_common.getSpecificPredicates(options) || "rdfs:subClassOf";
-        var filterStr = Sparql_common.setFilter("parentClass", ids, null, { useFilterKeyWord: 1 });
+        var filterStr = Sparql_common.setFilter("parentClass", ids, null, {useFilterKeyWord: 1});
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.selectGraph, options);
 
         var query =
@@ -326,7 +328,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -346,7 +348,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -424,7 +426,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -528,11 +530,11 @@ var Sparql_OWL = (function () {
             url = self.sparql_url;
         }
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "broader"], { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "broader"], {source: sourceLabel});
             return callback(null, result.results.bindings);
         });
     };
@@ -575,11 +577,11 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "parent"], { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "parent"], {source: sourceLabel});
 
             var parentsArray = [];
 
@@ -659,12 +661,12 @@ var Sparql_OWL = (function () {
                 url = self.sparql_url;
             }
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
 
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "subClass"], { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "subClass"], {source: sourceLabel});
 
             var map = {};
             result.results.bindings.forEach(function (item) {
@@ -692,7 +694,7 @@ var Sparql_OWL = (function () {
                 });
             }
 
-            return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
+            return callback(null, {hierarchies: hierarchies, rawResult: result.results.bindings});
         });
     };
 
@@ -711,7 +713,7 @@ var Sparql_OWL = (function () {
         if (!Array.isArray(classIds)) {
             classIds = [classIds];
         }
-        var filterStr = Sparql_common.setFilter("class", classIds, null, { values: 1 });
+        var filterStr = Sparql_common.setFilter("class", classIds, null, {values: 1});
 
         var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
         var modifier = "*";
@@ -729,7 +731,7 @@ var Sparql_OWL = (function () {
             fromStr;
         var filterStr;
         if (!options.descendants) {
-            filterStr = Sparql_common.setFilter("subject", classIds, null, { values: 1 });
+            filterStr = Sparql_common.setFilter("subject", classIds, null, {values: 1});
             query +=
                 "  WHERE {" +
                 "  ?superClass ^rdfs:subClassOf ?superClassSubClass\n" +
@@ -740,7 +742,7 @@ var Sparql_OWL = (function () {
                 "    ?superClass rdf:type ?superClassType filter (?superClassType !=owl:Restriction)\n" +
                 "  ?subject  rdfs:subClassOf|rdf:type ?class. ?subject rdf:type ?subjectType ";
         } else {
-            filterStr = Sparql_common.setFilter("superClass", classIds, null, { values: 1 });
+            filterStr = Sparql_common.setFilter("superClass", classIds, null, {values: 1});
             query +=
                 "  WHERE {" +
                 "   ?superClassSubClass  rdfs:subClassOf ?class" +
@@ -783,14 +785,16 @@ var Sparql_OWL = (function () {
                     return callback(err);
                 }
 
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "superClassSubClass"], { source: sourceLabel });
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "superClassSubClass"], {source: sourceLabel});
 
                 var hierarchies = {};
 
                 if (!options.descendants) {
                     classIds.forEach(function (id) {
                         hierarchies = {};
-                        if (id == "http://tsf/resources/ontology/DEXPIProcess_gfi_2/AmbientTemperature") var x = 3;
+                        if (id == "http://tsf/resources/ontology/DEXPIProcess_gfi_2/AmbientTemperature") {
+                            var x = 3;
+                        }
 
                         hierarchies[id] = [];
 
@@ -858,7 +862,7 @@ var Sparql_OWL = (function () {
                     });
                 }
 
-                return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
+                return callback(null, {hierarchies: hierarchies, rawResult: result.results.bindings});
             }
         );
     };
@@ -980,7 +984,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1213,12 +1217,12 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
 
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "subject", { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "subject", {source: sourceLabel});
             return callback(null, result.results.bindings);
         });
     };
@@ -1244,11 +1248,11 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "superPropLabel"], { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "superPropLabel"], {source: sourceLabel});
             return callback(null, result.results.bindings);
         });
     };
@@ -1363,11 +1367,11 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "inverseProp", "domain", "range"], { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "inverseProp", "domain", "range"], {source: sourceLabel});
             if (options.addInverseRestrictions) {
                 delete options.addInverseRestrictions;
                 options.inverseRestriction = true;
@@ -1412,11 +1416,11 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["property", "subProperty"], { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["property", "subProperty"], {source: sourceLabel});
             return callback(null, result.results.bindings);
         });
     };
@@ -1448,8 +1452,10 @@ var Sparql_OWL = (function () {
 
         var filterStr = "";
         if (subClassIds) {
-            var filteredClasses = subClassIds ;//OntologyModels.filterClassIds(sourceLabel, subClassIds);
-            if (filteredClasses.length != 0) subClassIds = filteredClasses;
+            var filteredClasses = subClassIds;//OntologyModels.filterClassIds(sourceLabel, subClassIds);
+            if (filteredClasses.length != 0) {
+                subClassIds = filteredClasses;
+            }
 
             if (options.inverseRestriction) {
                 filterStr = Sparql_common.setFilter("value", subClassIds, null, options);
@@ -1548,7 +1554,7 @@ var Sparql_OWL = (function () {
                     if (err) {
                         return callback(err);
                     }
-                    result2 = Sparql_generic.setBindingsOptionalProperties(result2, ["prop", "node", "subject", "value"], { source: sourceLabel });
+                    result2 = Sparql_generic.setBindingsOptionalProperties(result2, ["prop", "node", "subject", "value"], {source: sourceLabel});
                     return callback(null, result2);
                 });
             }
@@ -1611,11 +1617,11 @@ var Sparql_OWL = (function () {
         query += " limit " + limit;
 
         var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["node", "subject"], { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["node", "subject"], {source: sourceLabel});
             return callback(null, result.results.bindings);
         });
     };
@@ -1658,11 +1664,11 @@ var Sparql_OWL = (function () {
 
         query += " limit " + sourceVariables.limit + " ";
 
-        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"], { source: sourceLabel });
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"], {source: sourceLabel});
             return callback(null, result.results.bindings);
         });
     };
@@ -1685,7 +1691,7 @@ var Sparql_OWL = (function () {
                 query += " limit " + 10000 + " ";
                 self.sparql_url = Config.sources[source].sparql_server.url;
                 var url = self.sparql_url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: source}, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -1722,7 +1728,7 @@ var Sparql_OWL = (function () {
                 query += " limit " + 10000 + " ";
                 self.sparql_url = Config.sources[source].sparql_server.url;
                 var url = self.sparql_url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: source}, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -1814,7 +1820,7 @@ var Sparql_OWL = (function () {
         if (self.no_params) {
             url = self.sparql_url;
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1853,7 +1859,7 @@ var Sparql_OWL = (function () {
         query += " LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -1948,11 +1954,11 @@ var Sparql_OWL = (function () {
 
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
                 var url = self.sparql_url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: sourceLabel }, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: sourceLabel}, function (err, result) {
                     if (err) {
                         return callbackWhilst(err);
                     }
-                    result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["label"], { source: sourceLabel });
+                    result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["label"], {source: sourceLabel});
                     resultSize = result.length;
                     offset += limitSize;
                     if (processor) {
@@ -1998,7 +2004,7 @@ var Sparql_OWL = (function () {
         query += "" + "{ ?sub ?property ?obj ." + Sparql_common.getVariableLangLabel("property", true, true) + "}" + "} LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2028,7 +2034,7 @@ var Sparql_OWL = (function () {
         query += options.withGraph ? " }" : "";
         query += "  }   limit 10000";
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2095,7 +2101,7 @@ var Sparql_OWL = (function () {
 
     self.generateInverseRestrictions = function (source, propId, inversePropId, cardinality, callback) {
         var filter = "filter (?prop=<" + propId + ">)";
-        self.getObjectRestrictions(source, null, { filter: filter }, function (err, result) {
+        self.getObjectRestrictions(source, null, {filter: filter}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2131,7 +2137,7 @@ var Sparql_OWL = (function () {
 
     self.getPropertiesInheritedConstraints = function (sourceLabel, properties, options, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph, options.withoutImports);
-        var filterProps = Sparql_common.setFilter("prop0", properties, null, { useFilterKeyWord: 1 });
+        var filterProps = Sparql_common.setFilter("prop0", properties, null, {useFilterKeyWord: 1});
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
@@ -2159,7 +2165,7 @@ var Sparql_OWL = (function () {
         } else {
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2274,7 +2280,7 @@ var Sparql_OWL = (function () {
             "} LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2340,7 +2346,7 @@ var Sparql_OWL = (function () {
         query += "  }" + "} LIMIT 10000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -2374,11 +2380,11 @@ var Sparql_OWL = (function () {
             "} LIMIT 20000";
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, _result) {
             if (err) {
                 return callback(err);
             }
-            _result.results.bindings = Sparql_generic.setBindingsOptionalProperties(_result.results.bindings, ["prop", "superProp"], { source: sourceLabel });
+            _result.results.bindings = Sparql_generic.setBindingsOptionalProperties(_result.results.bindings, ["prop", "superProp"], {source: sourceLabel});
 
             return callback(null, _result.results.bindings);
         });
@@ -2435,7 +2441,7 @@ var Sparql_OWL = (function () {
                 query += "}LIMIT 10000";
 
                 var url = Config.sources[sourceLabel || "_defaultSource"].sparql_server.url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, _result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -2489,7 +2495,7 @@ var Sparql_OWL = (function () {
         query += " LIMIT 10000";
 
         var url = Config.sources[sourceLabel] ? Config.sources[sourceLabel].sparql_server.url : Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -2507,7 +2513,7 @@ var Sparql_OWL = (function () {
         var query = "PREFIX slsv:<" + Config.storedQueries_graphUri + "> \nselect * " + fromStr + ' where {?s ?p ?o.?s slsv:hasScope "' + scope + '"}order by ?label';
 
         var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: source}, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -2600,7 +2606,7 @@ var Sparql_OWL = (function () {
             filterStr +
             "?id rdfs:label ?label  }} limit 10000";
         var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -2622,7 +2628,7 @@ var Sparql_OWL = (function () {
             propertyUri +
             "> ?o } LIMIT 10000";
         var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -2649,7 +2655,7 @@ var Sparql_OWL = (function () {
             "  FILTER (?type2=owl:NamedIndividual) " +
             "?id rdfs:label ?label  }} limit 10000";
         var url = Config.sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, _result) {
             if (err) {
                 return callback(err);
             }
@@ -2669,7 +2675,7 @@ var Sparql_OWL = (function () {
             filter +
             "  } limit 10000";
         var url = Config.sparql_server.url + "?query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: Config._defaultSource }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: Config._defaultSource}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2690,7 +2696,7 @@ var Sparql_OWL = (function () {
 
     self.clearGraph = function (graphUri, callback) {
         // return callbackSeries();
-        const payload = { graphUri: graphUri };
+        const payload = {graphUri: graphUri};
         $.ajax({
             type: "POST",
             url: `${Config.apiUrl}/kg/clearGraph`,
@@ -2748,28 +2754,36 @@ var Sparql_OWL = (function () {
         if (!options) {
             options = {};
         }
-        var fromStr = Sparql_common.getFromStr(source, false, false);
+        var fromStr = Sparql_common.getFromStr(source, false, false, options);
         var filter = options.filter || "";
         if (resourcesIds) {
             // needs options.useFilterKeyWord because VALUES dont work
-            filter += Sparql_common.setFilter("parent", resourcesIds, null, { useFilterKeyWord: 1 });
+            filter += Sparql_common.setFilter("parent", resourcesIds, null, {useFilterKeyWord: 1});
         }
 
         var pathOperator = "+";
 
-        if (options.includeParent) pathOperator = "*";
+        if (options.includeParent) {
+            pathOperator = "*";
+        }
         if (options.depth) {
             pathOperator = "{0," + options.depth + "}";
         }
         if (!taxonomyPredicate) {
             taxonomyPredicate = "rdfs:subClassOf";
+
         }
+        if (taxonomyPredicate == "rdfs:subClassOf") {
+            filter += " ?parent rdf:type owl:Class.  ?descendant rdf:type owl:Class."
+        }
+
         var inverseTaxonomyPredicate = taxonomyPredicate;
         if (taxonomyPredicate.indexOf("^") < 0) {
             inverseTaxonomyPredicate = "^" + inverseTaxonomyPredicate;
         } else {
             inverseTaxonomyPredicate = inverseTaxonomyPredicate.replace("^", "");
         }
+
 
         var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
@@ -2792,7 +2806,7 @@ var Sparql_OWL = (function () {
 
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2821,7 +2835,7 @@ var Sparql_OWL = (function () {
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }

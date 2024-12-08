@@ -84,7 +84,10 @@ $("#sourceDivControlPanelDiv").html(html);*/
                     return callbackEach();
                 }
                 $("#waitImg").css("display", "block");
-                SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
+                SearchUtil.generateElasticIndex(source, {
+                    indexProperties: 1,
+                    indexNamedIndividuals: 1
+                }, function (err, _result) {
                     UI.message("DONE " + source, true);
                     callbackEach(err);
                 });
@@ -242,9 +245,15 @@ $("#sourceDivControlPanelDiv").html(html);*/
         var sources = SourceSelectorWidget.getCheckedSources();
         var source;
         if (sources.length == 0) {
-            if (!confirm("clear all ontologyModel cache")) return;
-            else source = null;
-        } else source = sources[0];
+            return alert("select a source")
+           /* if (!confirm("clear all ontologyModel cache")) {
+                return;
+            } else {
+                source = null;
+            }*/
+        } else {
+            source = sources[0];
+        }
         const params = new URLSearchParams({
             source: source,
         });
@@ -256,6 +265,10 @@ $("#sourceDivControlPanelDiv").html(html);*/
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {
+                if (source) {
+                    Config.ontologiesVocabularyModels[source] = null
+                    OntologyModels.registerSourcesModel(source)
+                }
                 return UI.message("DONE");
             },
             error: function (err) {
@@ -312,7 +325,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
                 function (_callbackSeries) {
                     var cols = [];
                     for (var i = 1; i <= maxLevels; i++) {
-                        cols.push({ title: "Level_" + i, defaultContent: "" });
+                        cols.push({title: "Level_" + i, defaultContent: ""});
                     }
 
                     Export.showDataTable(null, cols, matrix);
@@ -362,12 +375,12 @@ $("#sourceDivControlPanelDiv").html(html);*/
         if (!toEndPointUrl) {
             return;
         }
-        var toEndPointConfig = { sparql_server: { url: toEndPointUrl } };
+        var toEndPointConfig = {sparql_server: {url: toEndPointUrl}};
         var clearEndpointGraph = true;
         var body = {
             source: source,
             toEndPointConfig: toEndPointConfig,
-            options: { clearEndpointGraph: clearEndpointGraph },
+            options: {clearEndpointGraph: clearEndpointGraph},
         };
 
         var payload = {
@@ -416,10 +429,12 @@ $("#sourceDivControlPanelDiv").html(html);*/
         if (!confirm("CONFIRM : clear  source " + source + " , graph " + graphUri)) {
             return;
         }
-        const payload = { graphUri: graphUri };
+        const payload = {graphUri: graphUri};
 
         Sparql_OWL.clearGraph(graphUri, function (err, result) {
-            if (err) return alert(err);
+            if (err) {
+                return alert(err);
+            }
             return UI.message("graph source " + source + " cleared ", true);
         });
     };

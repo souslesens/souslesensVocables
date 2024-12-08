@@ -19,7 +19,7 @@ var SubGraph = (function () {
 
         var filterPropStr = ""
 
-        var fromStr = Sparql_common.getFromStr(sourceLabel);
+        var fromStr = Sparql_common.getFromStr(sourceLabel, null, null, options);
 
         var currentClasses = [baseClassId];
 
@@ -33,10 +33,11 @@ var SubGraph = (function () {
 
                         function (callbackWhilst) {
                             var filter = Sparql_common.setFilter("s", currentClasses, null, {values: true});
-
+                            var strFrom = Sparql_common.getFromStr(sourceLabel,null,null,options)
                             var query =
-                                "PREFIX dexp: <http://totalenergies/resources/tsf/ontology/dexpi-process/specific/>\n" +
-                                "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>SELECT distinct *  FROM   <http://totalenergies/resources/tsf/ontology/dexpi-process/specific/>    FROM   <http://totalenergies/resources/tsf/ontology/dexpi-process/generic/>  WHERE {\n" +
+                                //  "PREFIX dexp: <http://totalenergies/resources/tsf/ontology/dexpi-process/specific/>\n" +
+                                "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>SELECT distinct * " +
+                                strFrom + "WHERE {"+
                                 "  ?s rdfs:subClassOf+ ?o. ?o rdf:type ?type " +
                                 filter + filterPropStr +
                                 "optional { ?o owl:onProperty ?property. ?o owl:someValuesFrom|owl:onClass ?targetClass  optional { ?o ?cardinalityType  ?cardinalityValue. filter (?cardinalityType in (owl:minCardinality,owl:maxCardinality,owl:cardinality))}}\n" +
@@ -319,14 +320,24 @@ var SubGraph = (function () {
                                 return;
                             }
                             var count = -1;
+                          var cardinalityType=null;
                             if (restriction.cardinalityValue) {
-                                count = restriction.cardinalityValue;
+                                count = Sparql_common.getIntFromTypeLiteral(restriction.cardinalityValue)
+
                             }
 
                             var propStr = Shacl.uriToPrefixedUri(restriction.property);
                             var rangeStr = Shacl.uriToPrefixedUri(restriction.targetClass);
                             var property = " sh:path " + propStr + " ;\n";
                             if (count > -1) {
+                                restriction.cardinalityType=self.(restriction.cardinalityType)
+
+                                self.shaclCardinalityTypes={
+                                    "http://www.w3.org/2002/07/owl#mincCardinality":"sh:minCount",
+                                    "http://www.w3.org/2002/07/owl#maxcCardinality":"sh:maxCount",
+                                        "http://www.w3.org/2002/07/owl#cardinality":  "xxx",
+                                }
+                                if(restriction.cardinalityType)
                                 property += "        sh:minCount " + count + " ;";
                             }
                             //  "        sh:maxCount " + count + " ;" +

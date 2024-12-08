@@ -101,15 +101,21 @@ var Lineage_whiteboard = (function () {
 
         UI.initMenuBar(self.loadSources);
         $("#Lineage_graphEditionButtons").show();
-        $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html");
+        $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html", );
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
-    };
+
+
+
+    }
+
     self.unload = function () {
         $("#graphDiv").empty();
         $("#lateralPanelDiv").resizable("destroy");
         $("#lateralPanelDiv").css("width", "435px");
-    };
+
+
+    }
     self.loadSources = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
@@ -118,6 +124,7 @@ var Lineage_whiteboard = (function () {
             $("#lateralPanelDiv").load("./modules/tools/lineage/html/lateralPanel.html", function () {
                 Lineage_whiteboard.initWhiteboardTab();
                 Lineage_whiteboard.initUI();
+
             });
         });
     };
@@ -328,13 +335,14 @@ var Lineage_whiteboard = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    var options = { data: topConcepts, source: source };
+                   options.data=topConcepts
+                    options.source= source
                     Lineage_relations.currentQueryInfos = null;
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                         options.data = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
                     }
 
-                    Lineage_relations.drawRelations("direct", "restrictions", null, options, graphDiv);
+                    Lineage_relations.drawRelations(options.inverse?"inverse":"direct", "restrictions", null, options, graphDiv);
                     callbackSeries();
                 },
 
@@ -2380,7 +2388,7 @@ restrictionSource = Config.predicatesSource;
                                 from: item.value.value,
                                 to: item.subject.value,
                                 //  label: "<i>" + item.propLabel.value + "</i>",
-                                label: cardinalitylabel + " " + item.propLabel.value,
+                                label: item.propLabel.value  + ":" + cardinalitylabel,
                                 font: { color: options.edgesColor || Lineage_whiteboard.restrictionColor,size:Lineage_whiteboard.restrictionFontSize},
                                 data: {
                                     propertyId: item.prop.value,
@@ -3427,6 +3435,10 @@ attrs.color=self.getSourceColor(superClassValue)
                 if (window.location.href.indexOf("localhost") < 0) {
                     $("#lineage_actionDiv_newAxiom").css("display", "none");
                 }
+                $("#lineageWhiteboard_modelBtn").bind("click", function (e) {
+
+                    Lineage_whiteboard.drawModel(null,null,{inverse: e.ctrlKey})
+                })
 
                 $("#lateralPanelDiv").resizable({
                     maxWidth: $(window).width() - 100,
@@ -3474,6 +3486,9 @@ attrs.color=self.getSourceColor(superClassValue)
         if ($("#containersTab").children().length == 0) {
             $("#containersTab").load("./modules/tools//lineage/html/containersTab.html", function (s) {
                 Containers_tree.search("lineage_containers_containersJstree");
+                $("#containers_showparentContainersBtn").bind("click",function(e){
+                    Containers_widget.showParentContainersDialog()
+                })
             });
         }
     };

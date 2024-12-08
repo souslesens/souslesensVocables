@@ -35,6 +35,9 @@ var Weaver = (function () {
                 Lineage_whiteboard.initUI();
                 self.loadTopClasses();
                 $("#weaver_searchTermInput").focus();
+                $("#weaver_modelBtn").bind("click", function (e) {
+                    Lineage_whiteboard.drawModel(null,null,{inverse: e.ctrlKey})
+                })
             });
         });
     };

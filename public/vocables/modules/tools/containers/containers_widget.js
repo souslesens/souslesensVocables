@@ -12,6 +12,9 @@ var Containers_widget = (function () {
         $("#mainDialogDiv").load("modules/tools/containers/containers_widget.html", function () {
             $("#mainDialogDiv").dialog("open");
 
+
+
+
             //   $("#mainDialogDiv").addClass("zIndexTop-10");
             Containers_tree.search(self.jstreeDivId, options);
         });

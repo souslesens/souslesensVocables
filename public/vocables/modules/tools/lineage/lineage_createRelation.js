@@ -336,20 +336,20 @@ var Lineage_createRelation = (function () {
                         //  var ontology = self.currentPropertiesTreeNode.parents[self.currentPropertiesTreeNode.parents.length - 2];
                         var ontology = self.currentPropertiesTreeNode.data.source;
                         var jstreeData = [
-                                    {
-                                        id: result.uri,
-                                        text: subPropertyLabel,
-                                        parent: self.currentPropertiesTreeNode.data.id,
-                                        data: {
-                                            id: result.uri,
-                                            label: subPropertyLabel,
-                                            source: Lineage_sources.activeSource,
-                                        },
-                                    },
-                                ];
+                            {
+                                id: result.uri,
+                                text: subPropertyLabel,
+                                parent: self.currentPropertiesTreeNode.data.id,
+                                data: {
+                                    id: result.uri,
+                                    label: subPropertyLabel,
+                                    source: Lineage_sources.activeSource,
+                                },
+                            },
+                        ];
 
-                            JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
-                            //}
+                        JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                        //}
                         //);
                     });
                 },
@@ -656,9 +656,8 @@ var Lineage_createRelation = (function () {
                         domainLabel: domainLabel,
                         rangeLabel: rangeLabel,
                         source: source,
-                        label:subPropertyLabel,
-                        superProp:superPropId,
-
+                        label: subPropertyLabel,
+                        superProp: superPropId,
                     },
                 },
             };

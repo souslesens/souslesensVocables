@@ -45,7 +45,7 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
     const [transferPercent, setTransferPercent] = useState(0);
     const [errorMessage, setErrorMessage] = useState("");
     const cancelCurrentOperation = useRef(false);
-    const [slsApiBaseUrl, setSlsApiBaseUrl] = useState("");
+    const [slsPyApiBaseUrl, setSlsPyApiBaseUrl] = useState("");
     const [currentDownloadFormat, setCurrentDownloadFormat] = useState("nt");
     const [skipNamedIndividuals, setSkipNamedIndividuals] = useState(false);
 
@@ -60,14 +60,14 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
 
     const fetchConfig = async () => {
         const response = await fetch("/api/v1/config");
-        const json = (await response.json()) as { slsApi: { enabled: boolean; url: string } };
-        const slsApi = json.slsApi;
-        if (slsApi.enabled && slsApi.url) {
+        const json = (await response.json()) as { slsPyApi: { enabled: boolean; url: string } };
+        const slsPyApi = json.slsPyApi;
+        if (slsPyApi.enabled && slsPyApi.url) {
             // force presence of trailing /
-            setSlsApiBaseUrl(json.slsApi.url.replace(/\/$/, "").concat("/"));
+            setSlsPyApiBaseUrl(json.slsPyApi.url.replace(/\/$/, "").concat("/"));
             return;
         }
-        setSlsApiBaseUrl("/");
+        setSlsPyApiBaseUrl("/");
     };
 
     const handleCancelOperation = () => {
@@ -85,7 +85,7 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
 
     const fetchGraphPartUsingPythonApi = async (name: string, offset: number, format = "nt", identifier = "", skipNamedIndividuals = false) => {
         const response = await fetch(
-            `${slsApiBaseUrl}api/v1/rdf/graph?source=${name}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${String(skipNamedIndividuals)}`,
+            `${slsPyApiBaseUrl}api/v1/rdf/graph?source=${name}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${String(skipNamedIndividuals)}`,
             {
                 headers: { Authorization: `Bearer ${currentUser?.token ?? ""}` },
             }
@@ -170,8 +170,8 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
             cancelCurrentOperation.current = false;
 
             let blobParts: BlobPart[] | null;
-            let message = "";
-            if (slsApiBaseUrl === "/") {
+            let message = "ok";
+            if (slsPyApiBaseUrl === "/") {
                 const graphInfo = await fetchSourceInfo(sourceName);
                 const graphSize = graphInfo.graphSize;
                 const pageSize = graphInfo.pageSize;
@@ -230,10 +230,10 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
                                 <MenuItem disabled={transferPercent > 0} value={"nt"}>
                                     N-triples
                                 </MenuItem>
-                                <MenuItem disabled={transferPercent > 0 || slsApiBaseUrl === "/"} value={"xml"}>
+                                <MenuItem disabled={transferPercent > 0 || slsPyApiBaseUrl === "/"} value={"xml"}>
                                     RDF/XML
                                 </MenuItem>
-                                <MenuItem disabled={transferPercent > 0 || slsApiBaseUrl === "/"} value={"ttl"}>
+                                <MenuItem disabled={transferPercent > 0 || slsPyApiBaseUrl === "/"} value={"ttl"}>
                                     Turtle
                                 </MenuItem>
                             </Select>
@@ -244,7 +244,7 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
                                 control={
                                     <Checkbox
                                         checked={skipNamedIndividuals}
-                                        disabled={transferPercent > 0 || slsApiBaseUrl === "/"}
+                                        disabled={transferPercent > 0 || slsPyApiBaseUrl === "/"}
                                         onChange={(event) => {
                                             setSkipNamedIndividuals(event.currentTarget.checked);
                                         }}

@@ -505,6 +505,9 @@ var Sparql_common = (function () {
         if (!withoutImports || self.includeImports) {
             if (imports) {
                 imports.forEach(function (source2) {
+                    if (options.excludeImports && options.excludeImports.indexOf(source2) > -1) {
+                        return;
+                    }
                     if (!Config.sources[source2]) {
                         return; // console.error(source2 + "not found");
                     }

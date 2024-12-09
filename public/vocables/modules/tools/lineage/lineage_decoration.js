@@ -15,7 +15,7 @@ var Lineage_decoration = (function () {
 
     self.initLegend = function () {
         $("#Lineage_classes_graphDecoration_legendDiv").html("");
-        self.currentLegendData=null;
+        self.currentLegendData = null;
         self.legendColorsMap = {};
     };
     self.topOntologiesClassesMap = {};
@@ -48,7 +48,7 @@ var Lineage_decoration = (function () {
 
         if (!visjsNodes) {
             visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
-            var notVisJsNodes=true;
+            var notVisJsNodes = true;
         }
 
         if (visjsNodes.length == 0) {
@@ -102,14 +102,13 @@ var Lineage_decoration = (function () {
                                 var allTypes = parent.subjectTypes.value.split(",");
                                 var nodeType;
 
-                                distinctNodeClassesMap[parent.subject.value][0].shape = 'triangle';
+                                distinctNodeClassesMap[parent.subject.value][0].shape = "triangle";
                                 for (var type in allTypes) {
                                     if (allTypes[type] != "http://www.w3.org/2002/07/owl#NamedIndividual") {
                                         nodeType = allTypes[type];
                                     }
                                 }
                                 if (nodeType) {
-                                    
                                     distinctNodeClassesMap[parent.subject.value][0].data.parentClass = nodeType;
                                 }
                             }
@@ -178,13 +177,11 @@ var Lineage_decoration = (function () {
                         legendJsTreeData.push(treeObj);
                     }
                     //Combine new legend with already drawed
-                    
-                    if(self.currentLegendData && !notVisJsNodes){
-                        legendJsTreeData=  legendJsTreeData.concat(self.currentLegendData);
-                        legendJsTreeData=common.array.unduplicateArray(legendJsTreeData,'id');
-                    }
-                    
 
+                    if (self.currentLegendData && !notVisJsNodes) {
+                        legendJsTreeData = legendJsTreeData.concat(self.currentLegendData);
+                        legendJsTreeData = common.array.unduplicateArray(legendJsTreeData, "id");
+                    }
 
                     self.currentLegendData = legendJsTreeData;
                     self.drawLegend(legendJsTreeData);
@@ -198,20 +195,22 @@ var Lineage_decoration = (function () {
                     Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     for (var key in distinctNodeClassesMap) {
                         distinctNodeClassesMap[key].forEach(function (node) {
+                            if (node.shape != "dot") return;
+
                             var newNode = { id: node.id, color: distinctNodeClassesMap[key].color };
                             // blank nodes
                             if (newNode.id.startsWith("_:b")) {
                                 newNode.shape = "hexagon";
                             }
-                            
+
                             // class with icons
                             if (Lineage_whiteboard.decorationData[Lineage_sources.activeSource] && Lineage_whiteboard.decorationData[Lineage_sources.activeSource][node.id]?.image) {
                                 node.image = Lineage_whiteboard.decorationData[Lineage_sources.activeSource][node.id].image;
                                 node.shape = "circularImage";
                             }
                             // shape previously attribute
-                            if(node.shape && node.shape!='circularImage'){
-                                newNode.shape=node.shape
+                            if (node.shape && node.shape != "circularImage") {
+                                newNode.shape = node.shape;
                             }
 
                             newVisJsNodes.push(newNode);

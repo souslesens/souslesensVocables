@@ -737,7 +737,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             .search(value);
         $("#jstreeWidget_searchInput").val("");
     };
-    self.updateJstree = function (divId, newData,options) {
+    self.updateJstree = function (divId, newData, options) {
         if (!Array.isArray(newData)) {
             return;
         }
@@ -755,16 +755,20 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         });
         $("#" + divId).jstree(true).settings.core.data = newData2;
         // deselect nodes clicked to not trigger events with refresh
-        $("#" + divId).jstree(true).deselect_all();
-        if(options.openAll){
-            $("#" + divId).on('refresh.jstree', function () {
-                $("#" + divId).jstree(true).open_all();
-                $("#" + divId).off('refresh.jstree');
+        $("#" + divId)
+            .jstree(true)
+            .deselect_all();
+        if (options.openAll) {
+            $("#" + divId).on("refresh.jstree", function () {
+                $("#" + divId)
+                    .jstree(true)
+                    .open_all();
+                $("#" + divId).off("refresh.jstree");
             });
         }
-        $("#" + divId).jstree(true).refresh();
-
-        
+        $("#" + divId)
+            .jstree(true)
+            .refresh();
     };
 
     self.filterTree = function (input, jstreeDiv) {

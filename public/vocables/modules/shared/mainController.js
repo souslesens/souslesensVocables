@@ -176,6 +176,17 @@ var MainController = (function () {
                             callbackSeries(err);
                         });
                     },
+                    function (callbackSeries) {
+                        $("#copyQueryBtn").bind("click", function (e) {
+                            if (e.ctrlKey) {
+                                Config.logQueries = true;
+                            } else {
+                                UI.copyCurrentQuery();
+                                Config.logQueries = false;
+                            }
+                        });
+                        callbackSeries();
+                    },
 
                     function (callbackSeries) {
                         MainController.parseUrlParam(function () {
@@ -243,7 +254,7 @@ var MainController = (function () {
             if (Config.userTools[self.currentTool].resetURLParamsDiv) {
                 $("#" + Config.userTools[self.currentTool].resetURLParamsDiv).dialog("close");
             }
-            if (Config.userTools[toolId].displayImports){
+            if (Config.userTools[toolId].displayImports) {
                 if (self.oldRegisterSource) {
                     Lineage_sources.registerSource = self.oldRegisterSource;
                 }

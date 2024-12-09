@@ -89,7 +89,7 @@ const MainConfigObject = z
                 url: z.string().url().optional(),
             })
             .strict(),
-        slsApi: z
+        slsPyApi: z
             .object({
                 enabled: z.boolean(),
                 url: z.string().url().optional(),

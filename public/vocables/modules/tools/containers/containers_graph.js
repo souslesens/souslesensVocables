@@ -4,8 +4,8 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
 var Containers_graph = (function () {
     var self = {};
-
-    self.containerStyle = { shape: "square", color: "#fdac00", size: 15, edgeColor: "#e7a1be", parentContainerColor: "#778dd7" };
+    self.parentContainersColors = [];
+    self.containerStyle = { shape: "square", color: "#fdac00", size: 5, edgeColor: "#e7a1be", parentContainerColor: "#778dd7" };
 
     self.getContainerTypes = function (source, options, callback) {
         if (!options) {
@@ -57,108 +57,104 @@ var Containers_graph = (function () {
         }
 
         options.depth = 1;
-        options.keepChild=true;
+        options.keepChild = true;
         var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
         var visjsData = { nodes: [], edges: [] };
-         Containers_query.getContainersAscendants(source, ids, options, function (err, result) {
-                    if (err) return alert(err.responseText);
-        
-                    
-        
-                    result.forEach(function (item) {
-                        if (!existingNodes[item.ancestor.value]) {
-                            existingNodes[item.ancestor.value] = 1;
-        
-                            var label = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
-        
-                            visjsData.nodes.push({
-                                id: item.ancestor.value,
-                                label: label,
-                                shadow: self.nodeShadow,
-                                shape: Containers_graph.containerStyle.shape,
-                                size: Containers_graph.containerStyle.size,
-                                font: { color: self.containerStyle.color },
-                                color: self.containerStyle.color,
-                                data: {
-                                    type: "Container",
-                                    source: Lineage_sources.activeSource,
-                                    id: item.ancestor.value,
-                                    label: label,
-                                },
-                            });
-                        }
-                        if (!existingNodes[item.ancestorChild.value]) {
-                            existingNodes[item.ancestorChild.value] = 1;
-        
-                            var label = item.ancestorChildLabel ? item.ancestorChildLabel.value : Sparql_common.getLabelFromURI(item.ancestorChild.value);
-        
-                            visjsData.nodes.push({
-                                id: item.ancestorChild.value,
-                                label: label,
-                                shadow: self.nodeShadow,
-                                shape: Containers_graph.containerStyle.shape,
-                                size: Containers_graph.containerStyle.size,
-                                font: { color: self.containerStyle.color },
-                                color: self.containerStyle.color,
-                                data: {
-                                    type: "Container",
-                                    source: Lineage_sources.activeSource,
-                                    id: item.ancestorChild.value,
-                                    label: label,
-                                },
-                            });
-                        }
-        
-                        var edgeId = item.ancestor.value + "_" + "member" + "_" + item.ancestorChild.value;
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1;
-        
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.ancestor.value,
-                                to: item.ancestorChild.value,
-                                arrows: "to",
-        
-                                data: { from: item.ancestor.value, to: item.ancestorChild.value, source: source },
-                                font: { multi: true, size: 10 },
-        
-                                //  dashes: true,
-                                color: Containers_graph.containerStyle.edgeColor,
-                            });
-                        }
-                        var edgeId = item.ancestorChild.value + "_" + "member" + "_" + item.child.value;
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1;
-        
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.ancestorChild.value,
-                                to: item.child.value,
-                                arrows: "to",
-        
-                                data: { from: item.ancestor.value, to: item.child.value, source: source },
-                                font: { multi: true, size: 10 },
-        
-                                //  dashes: true,
-                                color: Containers_graph.containerStyle.edgeColor,
-                            });
-                        }
-                        
+        Containers_query.getContainersAscendants(source, ids, options, function (err, result) {
+            if (err) return alert(err.responseText);
+
+            var color = common.palette[self.parentContainersColors.length + 3];
+            self.parentContainersColors.push(color);
+
+            result.forEach(function (item) {
+                if (!existingNodes[item.ancestor.value]) {
+                    existingNodes[item.ancestor.value] = 1;
+
+                    var label = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
+
+                    visjsData.nodes.push({
+                        id: item.ancestor.value,
+                        label: label,
+                        shadow: self.nodeShadow,
+                        shape: Containers_graph.containerStyle.shape,
+                        size: Containers_graph.containerStyle.size,
+                        font: { color: self.containerStyle.color },
+                        color: color,
+                        data: {
+                            type: "Container",
+                            source: Lineage_sources.activeSource,
+                            id: item.ancestor.value,
+                            label: label,
+                        },
                     });
-                   
-                
-                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                    Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
-                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
-                    Lineage_whiteboard.lineageVisjsGraph.network.fit();
-                    $("#waitImg").css("display", "none");
-                    if (callback) {
-                        return callback(null, visjsData);
-                    }
+                }
+                if (!existingNodes[item.ancestorChild.value]) {
+                    existingNodes[item.ancestorChild.value] = 1;
+
+                    var label = item.ancestorChildLabel ? item.ancestorChildLabel.value : Sparql_common.getLabelFromURI(item.ancestorChild.value);
+
+                    visjsData.nodes.push({
+                        id: item.ancestorChild.value,
+                        label: label,
+                        shadow: self.nodeShadow,
+                        shape: Containers_graph.containerStyle.shape,
+                        size: Containers_graph.containerStyle.size,
+                        font: { color: self.containerStyle.color },
+                        color: color,
+                        data: {
+                            type: "Container",
+                            source: Lineage_sources.activeSource,
+                            id: item.ancestorChild.value,
+                            label: label,
+                        },
+                    });
+                }
+
+                var edgeId = item.ancestor.value + "_" + "member" + "_" + item.ancestorChild.value;
+                if (!existingNodes[edgeId]) {
+                    existingNodes[edgeId] = 1;
+
+                    visjsData.edges.push({
+                        id: edgeId,
+                        from: item.ancestor.value,
+                        to: item.ancestorChild.value,
+                        arrows: "to",
+
+                        data: { from: item.ancestor.value, to: item.ancestorChild.value, source: source },
+                        font: { multi: true, size: 10 },
+
+                        //  dashes: true,
+                        color: Containers_graph.containerStyle.edgeColor,
+                    });
+                }
+                var edgeId = item.ancestorChild.value + "_" + "member" + "_" + item.child.value;
+                if (!existingNodes[edgeId]) {
+                    existingNodes[edgeId] = 1;
+
+                    visjsData.edges.push({
+                        id: edgeId,
+                        from: item.ancestorChild.value,
+                        to: item.child.value,
+                        arrows: "to",
+
+                        data: { from: item.ancestor.value, to: item.child.value, source: source },
+                        font: { multi: true, size: 10 },
+
+                        //  dashes: true,
+                        color: Containers_graph.containerStyle.edgeColor,
+                    });
+                }
             });
 
-           
-        
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
+            Lineage_whiteboard.lineageVisjsGraph.network.fit();
+            $("#waitImg").css("display", "none");
+            if (callback) {
+                return callback(null, visjsData);
+            }
+        });
     };
 
     self.graphResources = function (source, containerData, options, callback) {
@@ -230,7 +226,7 @@ var Containers_graph = (function () {
                     }
 
                     data.forEach(function (item) {
-                        if (!existingNodes[item.parent.value]) {
+                        if (false && !existingNodes[item.parent.value]) {
                             var type = "container";
 
                             var label = item.parentLabel ? item.parentLabel.value : Sparql_common.getLabelFromURI(item.parent);
@@ -361,7 +357,7 @@ var Containers_graph = (function () {
                     //    setNodesLevel(visjsData);
 
                     if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
-                        Lineage_whiteboard.drawNewGraph(visjsData, null, { noDecorations: 1 });
+                        Lineage_whiteboard.drawNewGraph(visjsData, null, { noDecorations: 0 });
                         //Lineage_whiteboard.drawNewGraph(visjsData, null);
                     } else {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);

@@ -46,12 +46,11 @@ var Containers_widget = (function () {
                 return alert(err.responseText);
             }
 
-            
             types.splice(0, 0, { id: "all", label: "all" });
             $("#containerSearchWidget_typesSelect").css("display", "block");
             common.fillSelectOptions("containerSearchWidget_typesSelect", types, true, "label", "id");
-            $('#containerSearchWidget_typesSelect').val('all');
-            $('#containerSearchWidget_typesSelect').hide();
+            $("#containerSearchWidget_typesSelect").val("all");
+            $("#containerSearchWidget_typesSelect").hide();
             self.execParentContainersSearch();
 
             //  PopupMenuWidget.initAndShow(html)

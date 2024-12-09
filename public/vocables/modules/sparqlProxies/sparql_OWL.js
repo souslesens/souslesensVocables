@@ -106,7 +106,9 @@ var Sparql_OWL = (function () {
             }
         }
 
-        if (options.filter) strFilterTopConcept += options.filter;
+        if (options.filter) {
+            strFilterTopConcept += options.filter;
+        }
 
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -790,7 +792,9 @@ var Sparql_OWL = (function () {
                 if (!options.descendants) {
                     classIds.forEach(function (id) {
                         hierarchies = {};
-                        if (id == "http://tsf/resources/ontology/DEXPIProcess_gfi_2/AmbientTemperature") var x = 3;
+                        if (id == "http://tsf/resources/ontology/DEXPIProcess_gfi_2/AmbientTemperature") {
+                            var x = 3;
+                        }
 
                         hierarchies[id] = [];
 
@@ -1448,8 +1452,10 @@ var Sparql_OWL = (function () {
 
         var filterStr = "";
         if (subClassIds) {
-            var filteredClasses = OntologyModels.filterClassIds(sourceLabel, subClassIds);
-            if (filteredClasses.length != 0) subClassIds = filteredClasses;
+            var filteredClasses = subClassIds; //OntologyModels.filterClassIds(sourceLabel, subClassIds);
+            if (filteredClasses.length != 0) {
+                subClassIds = filteredClasses;
+            }
 
             if (options.inverseRestriction) {
                 filterStr = Sparql_common.setFilter("value", subClassIds, null, options);
@@ -2751,7 +2757,7 @@ var Sparql_OWL = (function () {
         if (!options) {
             options = {};
         }
-        var fromStr = Sparql_common.getFromStr(source, false, false);
+        var fromStr = Sparql_common.getFromStr(source, false, false, options);
         var filter = options.filter || "";
         if (resourcesIds) {
             // needs options.useFilterKeyWord because VALUES dont work
@@ -2760,13 +2766,19 @@ var Sparql_OWL = (function () {
 
         var pathOperator = "+";
 
-        if (options.includeParent) pathOperator = "*";
+        if (options.includeParent) {
+            pathOperator = "*";
+        }
         if (options.depth) {
             pathOperator = "{0," + options.depth + "}";
         }
         if (!taxonomyPredicate) {
             taxonomyPredicate = "rdfs:subClassOf";
         }
+        if (taxonomyPredicate == "rdfs:subClassOf") {
+            filter += " ?parent rdf:type owl:Class.  ?descendant rdf:type owl:Class.";
+        }
+
         var inverseTaxonomyPredicate = taxonomyPredicate;
         if (taxonomyPredicate.indexOf("^") < 0) {
             inverseTaxonomyPredicate = "^" + inverseTaxonomyPredicate;

@@ -62,6 +62,7 @@ var OntologyModels = (function () {
                             if (options.noCache) {
                                 return callbackSeries();
                             }
+
                             self.readModelOnServerCache(source, function (err, result) {
                                 self.loadedSources[source] = 1;
                                 if (result) {
@@ -91,6 +92,7 @@ var OntologyModels = (function () {
 
                         // set properties
                         function (callbackSeries) {
+                            UI.message("loading ontology model " + source);
                             var query =
                                 queryP +
                                 " SELECT distinct ?prop ?propLabel ?inverseProp ?superProperty from <" +

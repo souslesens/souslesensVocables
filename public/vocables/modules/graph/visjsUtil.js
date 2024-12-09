@@ -73,7 +73,7 @@ var VisjsUtil = (function () {
                 label: attrs.label || label,
                 source: source,
                 type: options.type,
-                rdfType: options.rdfType
+                rdfType: options.rdfType,
             },
         };
         for (var key in options) {

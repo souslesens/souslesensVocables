@@ -20,79 +20,6 @@ var Sparql_proxy = (function () {
     /**
      * @param {string} url - URL of the sparql endpoint to query
      * @param {string} query - SPARQL query to execute
-     * @param {string} queryOptions - NOT USED
-     * @param {Object} options - NOT USED
-     * @param {Function} callback - Function called to process the result of the query
-     */
-    self.querySPARQL_GET_proxy_cursor = function (url, query, queryOptions, options, callback) {
-        var offset = 0;
-        var limit = Config.queryLimit;
-        var resultSize = 1;
-        var allData = {
-            results: { bindings: [] },
-        };
-
-        var p = query.toLowerCase().indexOf("limit");
-        if (p > -1) {
-            query = query.substring(0, p);
-        }
-        query += " LIMIT " + limit;
-
-        // XXX rewrite this data generator with fetch + async + await
-        async.whilst(
-            function (_callbackTest) {
-                return resultSize > 0;
-            },
-            function (callbackWhilst) {
-                //iterate
-                var queryCursor = query + " OFFSET " + offset;
-
-                var body = {
-                    params: { query: queryCursor },
-                    headers: {
-                        Accept: "application/sparql-results+json",
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                };
-
-                $("#waitImg").css("display", "block");
-
-                var payload = {
-                    url: url,
-                    body: body,
-                    POST: true,
-                };
-                $.ajax({
-                    type: "POST",
-                    url: `${Config.apiUrl}/sparqlProxy`,
-                    data: payload,
-                    dataType: "json",
-                    success: function (data, _textStatus, _jqXHR) {
-                        callbackWhilst(null, data);
-                        resultSize = data.results.bindings.length;
-                        allData.results.bindings = allData.results.bindings.concat(data.results.bindings);
-                        offset += limit;
-                    },
-                    error: function (err) {
-                        $("#messageDiv").html(err.responseText);
-                        $("#waitImg").css("display", "none");
-                        // eslint-disable-next-line no-console
-                        console.log(JSON.stringify(err));
-                        // eslint-disable-next-line no-console
-                        console.log(JSON.stringify(query));
-                        return callbackWhilst(err);
-                    },
-                });
-            },
-            function (err) {
-                callback(err, allData);
-            }
-        );
-    };
-
-    /**
-     * @param {string} url - URL of the sparql endpoint to query
-     * @param {string} query - SPARQL query to execute
      * @param {string} queryOptions - appended to the url
      * @param {Object} options - options.source is the name of the source being queried
      * @param {Function} callback - Function called to process the result of the query
@@ -192,6 +119,11 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
 
             payload.body = JSON.stringify(body);
             payload.url = url + queryOptions;
+
+            if (Config.logQueries) {
+                console.log(query);
+                Config.logQueries = false;
+            }
 
             if (options.caller) {
                 if (!self.queriesHistory[options.caller]) {

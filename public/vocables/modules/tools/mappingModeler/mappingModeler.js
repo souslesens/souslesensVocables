@@ -168,7 +168,6 @@ var MappingModeler = (function () {
                 });
                 $("#mappingModeler_newAxiomPanel").hide();
             },
-
         ]);
     };
     self.loadSuggestionSelectJstree = function (objects, parentName) {
@@ -351,7 +350,7 @@ var MappingModeler = (function () {
             return self.showCreateResourceBot("Class", null);
         } else if (resourceUri == "createObjectProperty") {
             return self.showCreateResourceBot("ObjectProperty", null);
-        }else if(resourceUri == "function"){
+        } else if (resourceUri == "function") {
             return self.predicateFunctionShowDialog();
         } else if (self.currentResourceType == "Column") {
             newResource = {
@@ -458,7 +457,7 @@ var MappingModeler = (function () {
                     data: {
                         id: resourceUri,
                         type: resourceUri,
-                        source: property.source,
+                        source: property ? property.source : null,
                     },
                     color: color,
                 };
@@ -846,7 +845,7 @@ var MappingModeler = (function () {
             //   self.hideLegendItems();
             var newObjects = [
                 { id: "createObjectProperty", label: "_Create new ObjectProperty_" },
-                {id: "function", label: "function" },
+                { id: "function", label: "function" },
                 { id: "rdfs:member", label: "_rdfs:member_" },
             ];
             var options = { includesnoConstraintsProperties: true };
@@ -1062,10 +1061,10 @@ var MappingModeler = (function () {
             if (err) {
                 return alert(err);
             }
-            var previousLabel=CreateAxiomResource_bot.params.newObject.label;
+            var previousLabel = CreateAxiomResource_bot.params.newObject.label;
             CreateAxiomResource_bot.params.newObject.label = self.currentSource.substring(0, 3) + ":" + CreateAxiomResource_bot.params.newObject.label;
             // update Axiom_manager
-            CreateAxiomResource_bot.params.newObject.source=self.currentSource;
+            CreateAxiomResource_bot.params.newObject.source = self.currentSource;
             if (resourceType == "Class") {
                 self.allClasses.push(CreateAxiomResource_bot.params.newObject);
             } else if (resourceType == "ObjectProperty") {
@@ -1075,32 +1074,30 @@ var MappingModeler = (function () {
             // update suggestion select jsTree
             var jstreeData = Object.values($("#suggestionsSelectJstreeDiv").jstree()._model.data);
             jstreeData.push({
-                id:CreateAxiomResource_bot.params.newObject.id,
-                text:previousLabel,
-                parent:self.currentSource,
-                data:{
-                    id:CreateAxiomResource_bot.params.newObject.id,
-                    text:CreateAxiomResource_bot.params.newObject.label,
-                    resourceType:'Class'
-                }
+                id: CreateAxiomResource_bot.params.newObject.id,
+                text: previousLabel,
+                parent: self.currentSource,
+                data: {
+                    id: CreateAxiomResource_bot.params.newObject.id,
+                    text: CreateAxiomResource_bot.params.newObject.label,
+                    resourceType: "Class",
+                },
             });
-            if(!$("#suggestionsSelectJstreeDiv").jstree().get_node(self.currentSource)){
+            if (!$("#suggestionsSelectJstreeDiv").jstree().get_node(self.currentSource)) {
                 jstreeData.push({
-                    id:self.currentSource,
-                    text:self.currentSource,
-                    parent: resourceType == "Class" ? 'Classes' : 'Properties',
-                    data:{
-                        id:self.currentSource,
-                        text:self.currentSource,
-                    }
+                    id: self.currentSource,
+                    text: self.currentSource,
+                    parent: resourceType == "Class" ? "Classes" : "Properties",
+                    data: {
+                        id: self.currentSource,
+                        text: self.currentSource,
+                    },
                 });
-                
-
             }
-            JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", jstreeData,{openAll:true});
+            JstreeWidget.updateJstree("suggestionsSelectJstreeDiv", jstreeData, { openAll: true });
             //$('#botPanel').hide();
             //$("#axioms_legend_suggestionsSelect option").eq(0).before($("<option></option>").val(CreateAxiomResource_bot.params.newObject.id).text(CreateAxiomResource_bot.params.newObject.label));
-            
+
             //   self.onLegendNodeClick({data:{id:"Class"}})
         });
     };
@@ -1877,46 +1874,43 @@ var MappingModeler = (function () {
                 }
             );
         }
-       
     };
 
-    self.predicateFunctionShowDialog=function(){
+    self.predicateFunctionShowDialog = function () {
         $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/functionDialog.html", function () {
             $("#smallDialogDiv").dialog("open");
         });
-    }
-    self.addPredicateFunction=function(){
+    };
+    (self.addPredicateFunction = function () {
         var edge = {
             from: self.currentRelation.from.id,
             to: self.currentRelation.to.id,
-            label: '_function_',
+            label: "_function_",
             arrows: {
                 to: {
                     enabled: true,
                     type: "diamond",
                 },
             },
-            smooth:  { type: "curvedCW" },
+            smooth: { type: "curvedCW" },
             data: {
-                id: 'function{'+$('#KGcreator_fnBody').val()+'}',
+                id: "function{" + $("#KGcreator_fnBody").val() + "}",
                 type: "function",
-                source: 'function',
+                source: "function",
             },
             color: "#375521",
         };
         self.visjsGraph.data.edges.add([edge]);
-        $('#smallDialogDiv').dialog('close')
-    },
-    self.loadSource = function () {
-       
-        Lineage_sources.loadSources(MainController.currentSource, function (err) {
-            if (err) {
-                return alert(err.responseText);
-            }
-            $("#Lineage_graphEditionButtons").hide();
-           
+        $("#smallDialogDiv").dialog("close");
+    }),
+        (self.loadSource = function () {
+            Lineage_sources.loadSources(MainController.currentSource, function (err) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+                $("#Lineage_graphEditionButtons").hide();
+            });
         });
-    };
     return self;
 })();
 

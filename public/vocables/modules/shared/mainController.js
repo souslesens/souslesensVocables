@@ -176,6 +176,17 @@ var MainController = (function () {
                             callbackSeries(err);
                         });
                     },
+                    function (callbackSeries) {
+                        $("#copyQueryBtn").bind("click", function (e) {
+                            if (e.ctrlKey) {
+                                Config.logQueries = true;
+                            } else {
+                                UI.copyCurrentQuery();
+                                Config.logQueries = false;
+                            }
+                        });
+                        callbackSeries();
+                    },
 
                     function (callbackSeries) {
                         MainController.parseUrlParam(function () {

@@ -712,7 +712,7 @@ if (callback) return callback(err);
         return /-?[0-9]+[.,]+[0-9]?/.test("" + value);
     };
     self.palette = [
-        "#8f52a0",
+        "#b96af4",
         "#00ae8d",
         "#799b79",
         "#fbb27b",

@@ -84,10 +84,17 @@ $("#sourceDivControlPanelDiv").html(html);*/
                     return callbackEach();
                 }
                 $("#waitImg").css("display", "block");
-                SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
-                    UI.message("DONE " + source, true);
-                    callbackEach(err);
-                });
+                SearchUtil.generateElasticIndex(
+                    source,
+                    {
+                        indexProperties: 1,
+                        indexNamedIndividuals: 1,
+                    },
+                    function (err, _result) {
+                        UI.message("DONE " + source, true);
+                        callbackEach(err);
+                    }
+                );
             },
             function (err) {
                 if (err) {
@@ -242,9 +249,15 @@ $("#sourceDivControlPanelDiv").html(html);*/
         var sources = SourceSelectorWidget.getCheckedSources();
         var source;
         if (sources.length == 0) {
-            if (!confirm("clear all ontologyModel cache")) return;
-            else source = null;
-        } else source = sources[0];
+            return alert("select a source");
+            /* if (!confirm("clear all ontologyModel cache")) {
+                return;
+            } else {
+                source = null;
+            }*/
+        } else {
+            source = sources[0];
+        }
         const params = new URLSearchParams({
             source: source,
         });
@@ -256,6 +269,10 @@ $("#sourceDivControlPanelDiv").html(html);*/
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {
+                if (source) {
+                    Config.ontologiesVocabularyModels[source] = null;
+                    OntologyModels.registerSourcesModel(source);
+                }
                 return UI.message("DONE");
             },
             error: function (err) {
@@ -419,7 +436,9 @@ $("#sourceDivControlPanelDiv").html(html);*/
         const payload = { graphUri: graphUri };
 
         Sparql_OWL.clearGraph(graphUri, function (err, result) {
-            if (err) return alert(err);
+            if (err) {
+                return alert(err);
+            }
             return UI.message("graph source " + source + " cleared ", true);
         });
     };

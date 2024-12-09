@@ -433,8 +433,11 @@ var Containers_tree = (function () {
                 //var parent = self.idsMap[item.parent.value];
 
                 var type = "Container";
-                if (item.memberTypes.value == "http://www.w3.org/2002/07/owl#Class") {
+                if (item.memberTypes.value.indexOf("http://www.w3.org/2002/07/owl#Class") > -1) {
                     type = "Class";
+                }
+                if (item.memberTypes.value.indexOf("http://www.w3.org/2002/07/owl#NamedIndividual") > -1) {
+                    type = "Individual";
                 }
                 if (!self.idsMap[id]) {
                     self.idsMap[id] = jstreeId;
@@ -623,7 +626,10 @@ var Containers_tree = (function () {
             label: "Add selected node to container",
             action: function (_e) {
                 var graphNodeData = Lineage_whiteboard.currentGraphNode.data;
-                Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData);
+                Containers_tree.menuActions.addResourcesToContainer(self.currentSource, self.currentContainer, graphNodeData, false, function (err, result) {
+                    if (err) return alert(err.responseText || err);
+                    Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });
+                });
             },
         };
         items["PasteNodesInContainer"] = {
@@ -825,7 +831,7 @@ var Containers_tree = (function () {
             if (callback) {
                 return callback(null);
                 if (jstreeData) {
-                    callback(jstreeData);
+                    callback(null, jstreeData);
                 }
             }
         });

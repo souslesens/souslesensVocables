@@ -34,6 +34,9 @@ var Weaver = (function () {
                 Lineage_whiteboard.initUI();
                 self.loadTopClasses();
                 $("#weaver_searchTermInput").focus();
+                $("#weaver_modelBtn").bind("click", function (e) {
+                    Lineage_whiteboard.drawModel(null, null, { inverse: e.ctrlKey });
+                });
             });
         });
     };
@@ -74,8 +77,8 @@ var Weaver = (function () {
                 }
             }
             if (!bottomClasses) {
-                alert("this graph has a horizontal hierarchical structure , cannot extract top Classes");
-                return Lineage_whiteboard.drawTopConcepts(Lineage_sources.activeSource);
+                return alert("this graph has a horizontal hierarchical structure , cannot extract top Classes");
+                // return Lineage_whiteboard.drawTopConcepts(Lineage_sources.activeSource);
             }
             var nodeIds = [];
             bottomClasses.forEach(function (classUri) {
@@ -86,12 +89,14 @@ var Weaver = (function () {
     };
 
     self.drawTopClasses = function (nodes, currentDepth, options) {
+        //  Lineage_decoration.currentDisplay="box"
         if (!options) {
             options = {};
         }
         var totalDrawnClasses = 0;
         var newNodes = [];
         options.startLevel = currentDepth + 2;
+        options.defaultShape = Lineage_whiteboard.defaultShape;
         async.series(
             [
                 function (callbackSeries) {

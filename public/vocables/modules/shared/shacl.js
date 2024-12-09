@@ -1,3 +1,5 @@
+import Sparql_common from "../sparqlProxies/sparql_common.js";
+
 var Shacl = (function () {
     var self = {};
 
@@ -57,6 +59,31 @@ var Shacl = (function () {
             }
         });
         return shacl;
+    };
+
+    self.getCardinalityProperty = function (restriction) {
+        var property = "";
+        self.shaclCardinalityTypes = {
+            "http://www.w3.org/2002/07/owl#minCardinality": "sh:minCount",
+            "http://www.w3.org/2002/07/owl#maxCardinality": "sh:maxCount",
+        };
+        var count = -1;
+        var cardinalityType = null;
+        if (restriction.cardinalityValue) {
+            count = Sparql_common.getIntFromTypeLiteral(restriction.cardinalityValue);
+        }
+        if (count > -1) {
+            if ((restriction.cardinalityType = "http://www.w3.org/2002/07/owl#cardinality")) {
+                property += "       sh:minCount " + count + " ;\n";
+                property += "      sh:maxCount " + count + " ;\n";
+            } else {
+                var cardinalityType = self.shaclCardinalityTypes[restriction.cardinalityType];
+                if (cardinalityType) {
+                    property += "        " + cardinalityType + " " + count + " ;\n";
+                }
+            }
+        }
+        return property;
     };
 
     return self;

@@ -335,47 +335,22 @@ var Lineage_createRelation = (function () {
                         var propId = newProp.id;
                         //  var ontology = self.currentPropertiesTreeNode.parents[self.currentPropertiesTreeNode.parents.length - 2];
                         var ontology = self.currentPropertiesTreeNode.data.source;
-                        var x = Config.ontologiesVocabularyModels[ontology].constraints;
-                        var superpropConstraints = JSON.parse(
-                            //  JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]["constraints"][self.currentPropertiesTreeNode.data.id])
-                            JSON.stringify(Config.ontologiesVocabularyModels[ontology]["constraints"][self.currentPropertiesTreeNode.data.id])
-                        );
-                        superpropConstraints.source = Lineage_sources.activeSource;
-                        superpropConstraints.label = subPropertyLabel;
-                        superpropConstraints.parent = self.currentPropertiesTreeNode.data.id;
-                        superpropConstraints.superProp = self.currentPropertiesTreeNode.data.id;
-                        var propertiesToAdd = {};
-                        propertiesToAdd[propId] = newProp;
-                        var constraintsToAdd = {};
-                        constraintsToAdd[propId] = superpropConstraints;
-                        OntologyModels.updateModel(
-                            Lineage_sources.activeSource,
+                        var jstreeData = [
                             {
-                                properties: propertiesToAdd,
-                                constraints: constraintsToAdd,
+                                id: result.uri,
+                                text: subPropertyLabel,
+                                parent: self.currentPropertiesTreeNode.data.id,
+                                data: {
+                                    id: result.uri,
+                                    label: subPropertyLabel,
+                                    source: Lineage_sources.activeSource,
+                                },
                             },
-                            null,
-                            function (err, result2) {
-                                if (err) {
-                                    return alert(err.responsetext);
-                                }
+                        ];
 
-                                var jstreeData = [
-                                    {
-                                        id: result.uri,
-                                        text: subPropertyLabel,
-                                        parent: self.currentPropertiesTreeNode.data.id,
-                                        data: {
-                                            id: result.uri,
-                                            label: subPropertyLabel,
-                                            source: Lineage_sources.activeSource,
-                                        },
-                                    },
-                                ];
-
-                                JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
-                            }
-                        );
+                        JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                        //}
+                        //);
                     });
                 },
             },
@@ -681,6 +656,8 @@ var Lineage_createRelation = (function () {
                         domainLabel: domainLabel,
                         rangeLabel: rangeLabel,
                         source: source,
+                        label: subPropertyLabel,
+                        superProp: superPropId,
                     },
                 },
             };

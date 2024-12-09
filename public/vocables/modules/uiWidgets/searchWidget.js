@@ -251,11 +251,11 @@ var SearchWidget = (function () {
                         nodeId = source;
                     }
                     var leafId = nodeId + match.id;
-                    if(match.id.indexOf('Branch')>-1){
-                        console.log('here');
+                    if (match.id.indexOf("Branch") > -1) {
+                        console.log("here");
                     }
                     var type = "Class";
-                    if (match.type.indexOf("Class")==-1) {
+                    if (match.type.indexOf("Class") == -1) {
                         type = "Individual";
                     }
                     if (!existingNodes[leafId]) {

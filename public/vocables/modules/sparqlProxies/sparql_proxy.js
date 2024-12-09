@@ -17,8 +17,6 @@ var Sparql_proxy = (function () {
     var self = {};
     self.queriesHistory = {};
 
-
-
     /**
      * @param {string} url - URL of the sparql endpoint to query
      * @param {string} query - SPARQL query to execute
@@ -122,12 +120,10 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
             payload.body = JSON.stringify(body);
             payload.url = url + queryOptions;
 
-
-
-          if(Config.logQueries){
-              console.log(query)
-              Config.logQueries=false
-          }
+            if (Config.logQueries) {
+                console.log(query);
+                Config.logQueries = false;
+            }
 
             if (options.caller) {
                 if (!self.queriesHistory[options.caller]) {

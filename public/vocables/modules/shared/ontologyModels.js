@@ -92,7 +92,7 @@ var OntologyModels = (function () {
 
                         // set properties
                         function (callbackSeries) {
-                            UI.message("loading ontology model "+source);
+                            UI.message("loading ontology model " + source);
                             var query =
                                 queryP +
                                 " SELECT distinct ?prop ?propLabel ?inverseProp ?superProperty from <" +

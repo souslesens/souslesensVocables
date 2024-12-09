@@ -176,15 +176,15 @@ var MainController = (function () {
                             callbackSeries(err);
                         });
                     },
-                    function(callbackSeries) {
-                        $("#copyQueryBtn").bind("click",function(e){
-                            if(e.ctrlKey){
-                                Config.logQueries=true
-                            }else{
-                                UI.copyCurrentQuery()
-                                Config.logQueries=false
+                    function (callbackSeries) {
+                        $("#copyQueryBtn").bind("click", function (e) {
+                            if (e.ctrlKey) {
+                                Config.logQueries = true;
+                            } else {
+                                UI.copyCurrentQuery();
+                                Config.logQueries = false;
                             }
-                        })
+                        });
                         callbackSeries();
                     },
 
@@ -192,9 +192,7 @@ var MainController = (function () {
                         MainController.parseUrlParam(function () {
                             callbackSeries();
                         });
-                    }
-
-
+                    },
                 ],
                 function (_err) {}
             );

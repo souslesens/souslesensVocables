@@ -28,7 +28,7 @@ var Containers_query = (function () {
             "    ?member rdf:type ?memberType. " +
             " OPTIONAL { ?member rdfs:label ?memberLabel}  " +
             " FILTER (?memberType in(rdf:Bag,rdf:List))\n" +
-            "  filter (not exists{?parent rdfs:member ?member. ?parent rdf:type ?parentType  FILTER (?parentType in(rdf:Bag,rdf:List))})"+
+            "  filter (not exists{?parent rdfs:member ?member. ?parent rdf:type ?parentType  FILTER (?parentType in(rdf:Bag,rdf:List))})" +
             filterStr +
             "    }";
 
@@ -125,16 +125,15 @@ var Containers_query = (function () {
             if (options.depth) {
                 pathOperator = "{1," + options.depth + "}";
             }
-            var childStr='';
-            if(options.keepChild){
-                childStr='?child ?childLabel' 
+            var childStr = "";
+            if (options.keepChild) {
+                childStr = "?child ?childLabel";
             }
             var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
                 "SELECT distinct ?ancestor ?ancestorChild ?ancestorChildLabel" +
-                childStr
-                +
+                childStr +
                 fromStr +
                 "WHERE {\n" +
                 " optional{?ancestor rdfs:member ?ancestorChild .}\n" +

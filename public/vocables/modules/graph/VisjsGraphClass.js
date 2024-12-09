@@ -22,7 +22,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.currentScale;
     self.simulationOn;
     self.globalOptions = { nodes: {}, edges: {} };
-    self.defaultShape="dot"
+    self.defaultShape = "dot";
 
     self.defaultTextSize = 14;
     self.defaultNodeSize = 7;
@@ -31,8 +31,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.drawingDone = false;
     var lastClickTime = new Date();
     var dbleClickIntervalDuration = 500;
-    if(options.defaultShape)
-    self.defaultShape=options.defaultShape
+    if (options.defaultShape) self.defaultShape = options.defaultShape;
 
     self.draw = function (callback) {
         var divId = self.graphDiv;
@@ -83,7 +82,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             width: "" + self.canvasDimension.w + "px",
             height: "" + self.canvasDimension.h + "px",
             nodes: {
-             //   shape: self.defaultShape,
+                //   shape: self.defaultShape,
                 size: 12,
                 chosen: { node: true },
                 // scaling:{min:6,max:20}

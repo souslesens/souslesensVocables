@@ -2,7 +2,6 @@ import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Shacl from "./shacl.js";
 
-
 var SubGraph = (function () {
     var self = {};
 
@@ -14,10 +13,10 @@ var SubGraph = (function () {
         var allRestrictions = {};
         var allClasses = {};
         var uniqueRestrictions = {};
-        var allProperties = {}
-        var filteredProperties = {}
+        var allProperties = {};
+        var filteredProperties = {};
 
-        var filterPropStr = ""
+        var filterPropStr = "";
 
         var fromStr = Sparql_common.getFromStr(sourceLabel, null, null, options);
 
@@ -32,14 +31,16 @@ var SubGraph = (function () {
                         },
 
                         function (callbackWhilst) {
-                            var filter = Sparql_common.setFilter("s", currentClasses, null, {values: true});
-                            var strFrom = Sparql_common.getFromStr(sourceLabel,null,null,options)
+                            var filter = Sparql_common.setFilter("s", currentClasses, null, { values: true });
+                            var strFrom = Sparql_common.getFromStr(sourceLabel, null, null, options);
                             var query =
                                 //  "PREFIX dexp: <http://totalenergies/resources/tsf/ontology/dexpi-process/specific/>\n" +
                                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>SELECT distinct * " +
-                                strFrom + "WHERE {"+
+                                strFrom +
+                                "WHERE {" +
                                 "  ?s rdfs:subClassOf+ ?o. ?o rdf:type ?type " +
-                                filter + filterPropStr +
+                                filter +
+                                filterPropStr +
                                 "optional { ?o owl:onProperty ?property. ?o owl:someValuesFrom|owl:onClass ?targetClass  optional { ?o ?cardinalityType  ?cardinalityValue. filter (?cardinalityType in (owl:minCardinality,owl:maxCardinality,owl:cardinality))}}\n" +
                                 "  } limit 10000";
                             self.query(sourceLabel, query, function (err, result) {
@@ -51,31 +52,34 @@ var SubGraph = (function () {
                                     if (!item.type) {
                                         return;
                                     }
-                                    console.log(Sparql_common.getLabelFromURI(item.s.value) + "-->" + Sparql_common.getLabelFromURI(item.o.value) + "--" +
-                                        ((item.property ? Sparql_common.getLabelFromURI(item.property.value) : "")) + "--" +
-                                        (item.targetClass ? Sparql_common.getLabelFromURI(item.targetClass.value) : ""));
+                                    console.log(
+                                        Sparql_common.getLabelFromURI(item.s.value) +
+                                            "-->" +
+                                            Sparql_common.getLabelFromURI(item.o.value) +
+                                            "--" +
+                                            (item.property ? Sparql_common.getLabelFromURI(item.property.value) : "") +
+                                            "--" +
+                                            (item.targetClass ? Sparql_common.getLabelFromURI(item.targetClass.value) : "")
+                                    );
 
                                     if (item.type.value.endsWith("Class")) {
-
-
                                         if (!allClasses[item.s.value]) {
-                                            allClasses[item.s.value] = {ancestors: []};
+                                            allClasses[item.s.value] = { ancestors: [] };
                                             currentClasses.push(item.s.value);
                                         }
                                         if (!allClasses[item.o.value]) {
                                             currentClasses.push(item.o.value);
-                                            allClasses[item.o.value] = {ancestors: []};
+                                            allClasses[item.o.value] = { ancestors: [] };
                                         }
                                         if (allClasses[item.s.value].ancestors.indexOf(item.o.value) < 0) {
                                             allClasses[item.s.value].ancestors.push(item.o.value);
                                         }
                                     } else if (item.type.value.endsWith("Restriction")) {
-
                                         if (!item.property) {
-                                            return
+                                            return;
                                         }
                                         if (options.excludedproperties.indexOf(item.property.value) > -1) {
-                                            return
+                                            return;
                                         }
 
                                         if (!allRestrictions[item.s.value]) {
@@ -90,14 +94,12 @@ var SubGraph = (function () {
                                             cardinalityValue: item.cardinalityValue ? item.cardinalityValue.value : null,
                                         };
                                         if (!allProperties[item.property.value]) {
-                                            allProperties[item.property.value] = 1
-
+                                            allProperties[item.property.value] = 1;
                                         }
-
 
                                         if (item.targetClass) {
                                             if (!allClasses[item.targetClass.value]) {
-                                                allClasses[item.targetClass.value] = {ancestors: []};
+                                                allClasses[item.targetClass.value] = { ancestors: [] };
                                                 currentClasses.push(item.targetClass.value);
                                             }
                                         }
@@ -112,8 +114,7 @@ var SubGraph = (function () {
                                     }
                                 });
 
-
-                                filterPropStr = Sparql_common.setFilter("property", Object.keys(allProperties)).replace(" in", " not in")
+                                filterPropStr = Sparql_common.setFilter("property", Object.keys(allProperties)).replace(" in", " not in");
 
                                 nClasses = currentClasses.length;
                                 callbackWhilst();
@@ -127,40 +128,33 @@ var SubGraph = (function () {
 
                 // remove superClasses redandant Restrictions
                 function (callbackSeries) {
-                    return callbackSeries()
+                    return callbackSeries();
                     //   remove ancestors restrcition target (keep the first one
                     for (var property in allProperties) {
                         allProperties[property].forEach(function (item) {
-
                             if (!filteredProperties[property]) {
-                                filteredProperties[property] = allProperties[property][0].sourceClass
+                                filteredProperties[property] = allProperties[property][0].sourceClass;
                             }
-
-                        })
+                        });
                     }
 
-                    var filteredRestrictions = []
+                    var filteredRestrictions = [];
                     for (var restriction in allRestrictions) {
                         for (var property in allRestrictions[restriction]) {
                             allRestrictions[restriction][property].forEach(function (item, index) {
                                 if (property == "http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity") {
-                                    ;
                                 } else {
                                     //  if ([allProperties[property]] == item.sourceClass) {
                                     if (allClasses[item.sourceClass] == item.sourceClass) {
-                                        delete allRestrictions[restriction][property][index]
+                                        delete allRestrictions[restriction][property][index];
                                     }
                                 }
-
-
-                            })
-
+                            });
                         }
                     }
 
-
-                    var y = filteredProperties
-                    callbackSeries()
+                    var y = filteredProperties;
+                    callbackSeries();
                 },
 
                 function (callbackSeries) {
@@ -187,7 +181,7 @@ var SubGraph = (function () {
                 },
             ],
             function (err) {
-                return callback(err, {classes: allClasses, restrictions: allRestrictions});
+                return callback(err, { classes: allClasses, restrictions: allRestrictions });
             }
         );
     };
@@ -319,29 +313,14 @@ var SubGraph = (function () {
                             if (!restriction.property || !restriction.targetClass) {
                                 return;
                             }
-                            var count = -1;
-                          var cardinalityType=null;
-                            if (restriction.cardinalityValue) {
-                                count = Sparql_common.getIntFromTypeLiteral(restriction.cardinalityValue)
-
-                            }
 
                             var propStr = Shacl.uriToPrefixedUri(restriction.property);
                             var rangeStr = Shacl.uriToPrefixedUri(restriction.targetClass);
                             var property = " sh:path " + propStr + " ;\n";
-                            if (count > -1) {
-                                restriction.cardinalityType=self.(restriction.cardinalityType)
 
-                                self.shaclCardinalityTypes={
-                                    "http://www.w3.org/2002/07/owl#mincCardinality":"sh:minCount",
-                                    "http://www.w3.org/2002/07/owl#maxcCardinality":"sh:maxCount",
-                                        "http://www.w3.org/2002/07/owl#cardinality":  "xxx",
-                                }
-                                if(restriction.cardinalityType)
-                                property += "        sh:minCount " + count + " ;";
-                            }
                             //  "        sh:maxCount " + count + " ;" +
                             property += "        sh:node " + rangeStr + " ;";
+                            property += Shacl.getCardinalityProperty(restriction);
 
                             shaclProperties.push(property);
                         });
@@ -355,7 +334,7 @@ var SubGraph = (function () {
             }
 
             var prefixes = Shacl.getPrefixes();
-            allSahcls = prefixes + "\n" + allSahcls// + ".";
+            allSahcls = prefixes + "\n" + allSahcls; // + ".";
             var payload = {
                 turtle: allSahcls,
             };
@@ -371,7 +350,7 @@ var SubGraph = (function () {
                     if (data.result && data.result.indexOf("Error") > -1) {
                         return callback(data.result);
                     }
-                    return callback(null, {triples: data.triples, shacl: allSahcls, classesMap: classesMap});
+                    return callback(null, { triples: data.triples, shacl: allSahcls, classesMap: classesMap });
                     //  callback(null, data);
                 },
                 error(err) {
@@ -447,8 +426,7 @@ var SubGraph = (function () {
             classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
         }
 
-        self.instantiateSubGraph(sourceLabel, classUri, function (err, result) {
-        });
+        self.instantiateSubGraph(sourceLabel, classUri, function (err, result) {});
 
         return;
         self.getSubGraphResources(sourceLabel, classUri, options, function (err, result) {

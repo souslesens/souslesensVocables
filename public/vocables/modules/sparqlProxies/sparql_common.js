@@ -233,7 +233,7 @@ var Sparql_common = (function () {
 
         //get props labels
         var filter = Sparql_common.setFilter("property", propIds);
-        Sparql_OWL.getObjectProperties(sourceLabel, {filter: filter}, function (err, resultProps) {
+        Sparql_OWL.getObjectProperties(sourceLabel, { filter: filter }, function (err, resultProps) {
             if (err) {
                 return callback(err);
             }
@@ -244,7 +244,7 @@ var Sparql_common = (function () {
 
             SparqlResults.forEach(function (item) {
                 if (labelsMap[item[propVariable].value]) {
-                    item[propVariable + "Label"] = {type: "literal", value: labelsMap[item[propVariable].value]};
+                    item[propVariable + "Label"] = { type: "literal", value: labelsMap[item[propVariable].value] };
                 }
             });
 
@@ -506,7 +506,7 @@ var Sparql_common = (function () {
             if (imports) {
                 imports.forEach(function (source2) {
                     if (options.excludeImports && options.excludeImports.indexOf(source2) > -1) {
-                        return
+                        return;
                     }
                     if (!Config.sources[source2]) {
                         return; // console.error(source2 + "not found");

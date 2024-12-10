@@ -1,6 +1,7 @@
 import Lineage_sources from "../lineage/lineage_sources.js";
 import MainController from "../../shared/mainController.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
+import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
 
 var Weaver = (function () {
     var self = {};
@@ -225,7 +226,12 @@ var Weaver = (function () {
         }
     };
     self.expand = function(){
-        
+        if(Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()){
+            Lineage_whiteboard.addChildrenToGraph();
+        }
+        else{
+            self.loadTopClasses();
+        }
     }
     self.clearAll = function () {
         Lineage_whiteboard.initUI();

@@ -49,6 +49,23 @@ var Lineage_properties = (function () {
             },
         };
         if (MainController.currentTool == "lineage") {
+           
+            items.restrictions = {
+                label: "Restrictions",
+                action: function (_e) {
+                    // pb avec source
+
+                    Lineage_properties.drawObjectPropertiesRestrictions(Lineage_sources.activeSource,null , [self.currentTreeNode.data.id], { withoutImports: true });
+                },
+            };
+            items.rangeAndDomain = {
+                label: "ranges and domains",
+                action: function (_e) {
+                    // pb avec source
+                    self.drawRangeAndDomainsGraph(Lineage_sources.activeSource, null, { withoutImports: true }, [self.currentTreeNode.data.id]);
+                    //Lineage_properties.drawObjectPropertiesRestrictions(Lineage_sources.activeSource,null , [self.currentTreeNode.data.id], { withoutImports: true });
+                },
+            };
             items.copyNodeToClipboard = {
                 label: "copy to Clipboard",
                 action: function (_e) {
@@ -57,22 +74,6 @@ var Lineage_properties = (function () {
                     Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
                 },
             };
-            items.restrictions = {
-                label: "Restrictions",
-                action: function (_e) {
-                    // pb avec source
-
-                    Lineage_properties.drawObjectPropertiesRestrictions(Lineage_sources.activeSource,null , [self.currentTreeNode.data.id], { withoutImports: true });
-                },
-            },
-            items.rangeAndDomain = {
-                label: "ranges and domains",
-                action: function (_e) {
-                    // pb avec source
-                    self.drawRangeAndDomainsGraph(Lineage_sources.activeSource, null, { withoutImports: true }, [self.currentTreeNode.data.id]);
-                    //Lineage_properties.drawObjectPropertiesRestrictions(Lineage_sources.activeSource,null , [self.currentTreeNode.data.id], { withoutImports: true });
-                },
-            }
             if (!Lineage_sources.activeSource || Config.sources[Lineage_sources.activeSource].editable) {
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",

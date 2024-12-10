@@ -129,14 +129,20 @@ var Containers_query = (function () {
             if (options.keepChild) {
                 childStr = "?child ?childLabel";
             }
+            var ancestorVars=""
+            var ancestorClause=""
+            if(options.keepAncestor){
+                ancestorVars='?ancestor '
+                ancestorClause=" optional{?ancestor rdfs:member ?ancestorChild .}\n" 
+            }
+
             var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-                "SELECT distinct ?ancestor ?ancestorChild ?ancestorChildLabel" +
+                "SELECT distinct "+ancestorVars+ "?ancestorChild ?ancestorChildLabel" +
                 childStr +
                 fromStr +
-                "WHERE {\n" +
-                " optional{?ancestor rdfs:member ?ancestorChild .}\n" +
+                "WHERE {\n" + ancestorClause +
                 "  ?ancestorChild  rdfs:member" +
                 pathOperator +
                 " ?child.\n" +

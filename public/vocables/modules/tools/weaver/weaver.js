@@ -224,7 +224,9 @@ var Weaver = (function () {
             Lineage_whiteboard.graph.searchNode(null, term);
         }
     };
-
+    self.expand = function(){
+        
+    }
     self.clearAll = function () {
         Lineage_whiteboard.initUI();
         //  self.loadTopClasses();

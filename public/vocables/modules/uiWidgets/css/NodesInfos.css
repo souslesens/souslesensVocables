@@ -96,7 +96,7 @@ detailsCellVerticalTabValue {
 #nodeInfos_associatedPropertiesDiv {
     .nodesInfosAdditionalInfos;
     max-height: 300px;
-    overflow: auto;
+    overflow: unset;
     margin-top: 10px;
 }
 #nodeInfos_classHierarchyDiv {

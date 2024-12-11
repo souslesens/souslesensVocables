@@ -67,27 +67,29 @@ var Containers_graph = (function () {
             self.parentContainersColors.push(color);
 
             result.forEach(function (item) {
-                if (!existingNodes[item.ancestor.value]) {
-                    existingNodes[item.ancestor.value] = 1;
+                if(item.ancestor){
+                    if (!existingNodes[item?.ancestor?.value]) {
+                        existingNodes[item.ancestor.value] = 1;
 
-                    var label = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
+                        var label = item.ancestorLabel ? item.ancestorLabel.value : Sparql_common.getLabelFromURI(item.ancestor.value);
 
-                    visjsData.nodes.push({
-                        id: item.ancestor.value,
-                        label: label,
-                        shadow: self.nodeShadow,
-                        shape: Containers_graph.containerStyle.shape,
-                        size: Containers_graph.containerStyle.size,
-                        font: { color: self.containerStyle.color },
-                        color: color,
-                        data: {
-                            type: "Container",
-                            source: Lineage_sources.activeSource,
+                        visjsData.nodes.push({
                             id: item.ancestor.value,
                             label: label,
-                        },
-                    });
-                }
+                            shadow: self.nodeShadow,
+                            shape: Containers_graph.containerStyle.shape,
+                            size: Containers_graph.containerStyle.size,
+                            font: { color: self.containerStyle.color },
+                            color: color,
+                            data: {
+                                type: "Container",
+                                source: Lineage_sources.activeSource,
+                                id: item.ancestor.value,
+                                label: label,
+                            },
+                        });
+                    }
+                }   
                 if (!existingNodes[item.ancestorChild.value]) {
                     existingNodes[item.ancestorChild.value] = 1;
 
@@ -109,40 +111,43 @@ var Containers_graph = (function () {
                         },
                     });
                 }
+                if(item.ancestor){
+                    var edgeId = item.ancestor.value + "_" + "member" + "_" + item.ancestorChild.value;
+                    if (!existingNodes[edgeId]) {
+                        existingNodes[edgeId] = 1;
 
-                var edgeId = item.ancestor.value + "_" + "member" + "_" + item.ancestorChild.value;
-                if (!existingNodes[edgeId]) {
-                    existingNodes[edgeId] = 1;
+                        visjsData.edges.push({
+                            id: edgeId,
+                            from: item.ancestor.value,
+                            to: item.ancestorChild.value,
+                            arrows: "to",
 
-                    visjsData.edges.push({
-                        id: edgeId,
-                        from: item.ancestor.value,
-                        to: item.ancestorChild.value,
-                        arrows: "to",
+                            data: { from: item.ancestor.value, to: item.ancestorChild.value, source: source },
+                            font: { multi: true, size: 10 },
 
-                        data: { from: item.ancestor.value, to: item.ancestorChild.value, source: source },
-                        font: { multi: true, size: 10 },
-
-                        //  dashes: true,
-                        color: Containers_graph.containerStyle.edgeColor,
-                    });
+                            //  dashes: true,
+                            color: Containers_graph.containerStyle.edgeColor,
+                        });
+                    }
                 }
-                var edgeId = item.ancestorChild.value + "_" + "member" + "_" + item.child.value;
-                if (!existingNodes[edgeId]) {
-                    existingNodes[edgeId] = 1;
+                if(item.child){
+                    var edgeId = item.ancestorChild.value + "_" + "member" + "_" + item.child.value;
+                    if (!existingNodes[edgeId]) {
+                        existingNodes[edgeId] = 1;
 
-                    visjsData.edges.push({
-                        id: edgeId,
-                        from: item.ancestorChild.value,
-                        to: item.child.value,
-                        arrows: "to",
+                        visjsData.edges.push({
+                            id: edgeId,
+                            from: item.ancestorChild.value,
+                            to: item.child.value,
+                            arrows: "to",
 
-                        data: { from: item.ancestor.value, to: item.child.value, source: source },
-                        font: { multi: true, size: 10 },
+                            data: { from: item.ancestorChild.value, to: item.child.value, source: source },
+                            font: { multi: true, size: 10 },
 
-                        //  dashes: true,
-                        color: Containers_graph.containerStyle.edgeColor,
-                    });
+                            //  dashes: true,
+                            color: Containers_graph.containerStyle.edgeColor,
+                        });
+                    }
                 }
             });
 

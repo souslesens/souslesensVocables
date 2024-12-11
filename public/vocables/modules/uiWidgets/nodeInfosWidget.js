@@ -747,7 +747,7 @@ defaultLang = 'en';*/
         });
 
         var html = "<div style='display:flex;flex-direction:row'>";
-        html += "<div><b><div class='nodesInfos_titles'>Ranges Authorized </div></b>";
+        html += "<div style='overflow:auto;max-height: 280px;'><b><div class='nodesInfos_titles'>Ranges Authorized </div></b>";
         html += `<table> <tbody> 
                 <tr>
                     <td class="detailsCellName"><span class="title">ancestorConcerned</span></td>
@@ -785,7 +785,7 @@ defaultLang = 'en';*/
             });
         }
         html += "</table> </tbody> </div>";
-        html += "<div style='margin-left:25px;'><b><div class='nodesInfos_titles'>Domain Authorized </div></b>";
+        html += "<div style='margin-left:25px;overflow:auto;max-height: 280px;'><b><div class='nodesInfos_titles'>Domain Authorized </div></b>";
         html += `<table> <tbody> 
                 <tr>
                     <td class="detailsCellName"><span class="title">Domain on</span></td>

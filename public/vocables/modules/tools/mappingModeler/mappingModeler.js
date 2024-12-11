@@ -92,7 +92,14 @@ var MappingModeler = (function () {
                 self.initResourcesMap(self.currentSource);
                 return callbackSeries();
             },
-
+            function (callbackSeries) {
+                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
+                    $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
+                        //$("#mainDialogDiv").dialog("open");
+                        return callbackSeries();
+                    });
+                });
+            },
             function (callbackSeries) {
                 KGcreator.currentSlsvSource = self.currentSource;
                 KGcreator.getSlsvSourceConfig(self.currentSource, function (err, result) {
@@ -105,14 +112,7 @@ var MappingModeler = (function () {
                 });
             },
 
-            function (callbackSeries) {
-                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
-                    $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
-                        //$("#mainDialogDiv").dialog("open");
-                        return callbackSeries();
-                    });
-                });
-            },
+           
 
             function (callbackSeries) {
                 //var divId = "nodeInfosAxioms_activeLegendDiv";

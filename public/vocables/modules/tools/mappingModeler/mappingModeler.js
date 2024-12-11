@@ -51,13 +51,7 @@ var MappingModeler = (function () {
 
         $("#smallDialogDiv").dialog({
             open: function (event, ui) {
-                if (self.createApp === null) {
-                    throw new Error("React app is not ready");
-                }
 
-                self.uploadFormData.currentSource = self.currentSource;
-
-                self.umountKGUploadApp = self.createApp(self.uploadFormData);
             },
             beforeClose: function () {
                 self.umountKGUploadApp();
@@ -143,7 +137,13 @@ var MappingModeler = (function () {
                                 label: "add Csv Sources",
                                 action: function (_e) {
                                     // pb avec source
+                                    if (self.createApp === null) {
+                                        throw new Error("React app is not ready");
+                                    }
                                     self.displayUploadApp("file");
+                                    self.uploadFormData.currentSource = self.currentSource;
+                                    self.umountKGUploadApp = self.createApp(self.uploadFormData);
+
                                     // KGcreator.createCsvSourceMappings();
                                 },
                             };

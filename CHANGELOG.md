@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.96.0](https://github.com/souslesens/souslesensVocables/compare/1.95.0...1.96.0) (2024-12-11)
+
+> [!IMPORTANT]
+> Updating to 1.96.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Bug Fixes
+
+* **graphManagement:** copy paste file durring upload instead of rename ([391206f](https://github.com/souslesens/souslesensVocables/commit/391206f61c8594a9c76d9ab96c866b94956c6380))
+* **graphManagement:** default is ok when downloading ([d23ada4](https://github.com/souslesens/souslesensVocables/commit/d23ada4a6f3d35eab838fcf54b38636e7501efd1))
+
 ## [1.95.0](https://github.com/souslesens/souslesensVocables/compare/1.94.0...1.95.0) (2024-11-28)
 
 ## [1.94.0](https://github.com/souslesens/souslesensVocables/compare/1.93.1...1.94.0) (2024-11-27)

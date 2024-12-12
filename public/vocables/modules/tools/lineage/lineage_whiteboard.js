@@ -105,12 +105,19 @@ var Lineage_whiteboard = (function () {
         $("#Lineage_graphEditionButtons").load("./modules/tools/lineage/html/AddNodeEdgeButtons.html");
         $("KGquery_messageDiv").attr("id", "messageDiv");
         $("KGquery_waitImg").attr("id", "waitImg");
+
+        self.resetVisjsGraph();
     };
 
     self.unload = function () {
         $("#graphDiv").empty();
         $("#lateralPanelDiv").resizable("destroy");
         $("#lateralPanelDiv").css("width", "435px");
+    };
+
+    self.resetVisjsGraph = function () {
+        $("#graphDiv").html("");
+        Lineage_whiteboard.drawNewGraph({ nodes: [], edges: [] });
     };
     self.loadSources = function () {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {

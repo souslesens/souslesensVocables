@@ -1,14 +1,25 @@
-<div style="width: 100%; overflow: auto">
-    <div style="display: flex; flex-direction: row">
-        <div id="mappingModeler_jstreeDiv"></div>
-        <div id="mappingModeler_mainDiv" style="display: none">
-            <div style="display: flex; flex-direction: column" id="mappingModeler_graphPanelDiv">
-                <button class="w3-button slsv-button-3" onclick="MappingModeler.switchDataSourcePanel('show')">DataSource</button>
+<div id="MappingModeler_leftTabs" style="width: 100%; overflow: auto">
 
-                <!--   <button class="w3-button slsv-button-2" onclick="mappingModeler.newAxiom()">New axiom</button>-->
-                <div id="nodeInfosAxioms_activeLegendDiv" style="width: 100px; height: 300px; background-color: #ddd"></div>
-            </div>
-        </div>
+
+    <ul>
+        <li><a href="#MappingModeler_dataSourcesTab">Data Sources</a></li>
+        <li><a href="#MappingModeler_mappingsTab">Mappings</a></li>
+        <li><a href="#MappingModeler_tripleFactoryTab">Triples</a></li>
+    </ul>
+
+
+    <!-- <div style="display: flex; flex-direction: row">-->
+    <div id="MappingModeler_dataSourcesTab">
+        <div id="mappingModeler_jstreeDiv"></div>
+    </div>
+
+    <div id="MappingModeler_mappingsTab" style="display: flex; flex-direction: column">
+
+
+            <!--   <button class="w3-button slsv-button-2" onclick="mappingModeler.newAxiom()">New axiom</button>-->
+            <div id="nodeInfosAxioms_activeLegendDiv" style="width: 400px; height: 50px; background-color: #ddd"></div>
+
+
         <div style="display: flex; flex-direction: row" id="mappingModeler_newAxiomPanel">
             <!--  <button onclick="mappingModeler.actions.setLayout('randomlayout')">Random Layout</button>-->
 
@@ -16,28 +27,54 @@
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <input
-                            id="mappingModeler_suggestionsnput"
-                            onkeyup="MappingModeler.filterSuggestionTree()"
-                            style="width: 200px; height: 33.5px; border-bottom-left-radius: 14px; border-top-left-radius: 14px"
+                                id="mappingModeler_suggestionsnput"
+                                onkeyup="MappingModeler.filterSuggestionTree()"
+                                style="width: 300px; height: 33.5px; border-bottom-left-radius: 14px; border-top-left-radius: 14px"
                         />
                     </div>
-                    <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
-                        <button class="search-icon slsv-invisible-button" onclick="MappingModeler.filterSuggestionTree()" style="margin-top: 4px; height: 20px; width: 20px"></button>
+                    <div class="SearchButtonIconRight border-without-raduis-theme1"
+                         style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+                        <button class="search-icon slsv-invisible-button"
+                                onclick="MappingModeler.filterSuggestionTree()"
+                                style="margin-top: 4px; height: 20px; width: 20px"></button>
                     </div>
                 </div>
 
-                <br />
-                <div id="suggestionsSelectJstreeDiv" style="width: 300px; height: 500px; overflow: auto"></div>
-                <div>
-                    <button class="w3-button slsv-button-3" onclick="MappingModeler.clearMappings()">clear</button>
-                    <!--  <button class="w3-button slsv-button-3" onclick="Axiom_activeLegend.showTriples()">triples</button>-->
-                    <button class="w3-button slsv-button-3" onclick="MappingModeler.classesDialog()">mappingsTechnicalView</button>
-                    <button class="w3-button slsv-button-3" onclick="MappingModeler.generateBasicMappings()">generateMappings</button>
-                    <button class="w3-button slsv-button-3" onclick="MappingModeler.mappingToKGcreator()">mappingToKGcreator</button>
-                    <button class="w3-button slsv-button-3" onclick="MappingModeler.saveVisjsGraph()">save graph</button>
-                    <button class="w3-button slsv-button-3" onclick="MappingModeler.loadVisjsGraph()">load graph</button>
-                </div>
+
+                <br/>
+                <div id="suggestionsSelectJstreeDiv" style="width: 450px; height: 500px; overflow: auto"></div>
+
             </div>
+        </div>
+        >
+    </div>
+    <div id="MappingModeler_tripleFactoryTab">
+        <div>
+
+
+            <button class="w3-button slsv-button-1" onclick="TripleFactory.showTripleSample()">show Sample</button>
+            <button class="w3-button slsv-button-1 " onclick="TripleFactory.writeTriples()" title="Create triples">Create triples</button>
+
+            &nbsp;  &nbsp;
+
+
+         <!--   <button class="w3-button slsv-button-1 " onclick="KGcreator_run.testSelectedMappings()" title="Test Selected Mappings">
+                Test Selected Mappings
+            </button>-->
+
+
+          <!--  <button class="w3-button slsv-button-2 " onclick="KGcreator_run.stopCreateTriples()" title="Abort">Abort</button>-->
+            <button class="w3-button slsv-button-2 " onclick="TripleFactory.createAllMappingsTriples()" title="Recreate graph">Recreate graph</button>
+            <button class="w3-button slsv-button-2 " onclick="TripleFactory.indexGraph()" title="Index graph">Index graph</button>
+
+            <button class="w3-button slsv-button-3 " onclick="TripleFactory.deleteTriples()" title="delete current file triples">
+                delete current file triples
+            </button>
+            <button class="w3-button slsv-button-3 " id="KGcreator_deleteKGcreatorTriplesBtn" onclick="TripleFactory.deleteTriples('all')" title="delete ALL KGreator triples">
+                delete ALL KGreator triples
+            </button>
+
+
         </div>
     </div>
 </div>

@@ -21,6 +21,7 @@ var MappingModeler = (function () {
     self.currentSource = null;
     self.currentDataSource = null;
     self.graphDiv = "mappingModeler_graphDiv";
+    self.legendGraphDivId="nodeInfosAxioms_activeLegendDiv";
     self.legendItemsArray = [
         //{ label: "Table", color: "#a8da83", shape: "ellipse" },
         { label: "Column", color: "#cb9801", shape: "ellipse" },
@@ -88,10 +89,16 @@ var MappingModeler = (function () {
             },
             function (callbackSeries) {
                 $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
-                    $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
-                        //$("#mainDialogDiv").dialog("open");
-                        return callbackSeries();
-                    });
+                    $("#MappingModeler_leftTabs").tabs({})
+
+
+                    return callbackSeries();
+                });
+            },
+            function (callbackSeries) {
+                $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
+                    //$("#mainDialogDiv").dialog("open");
+                    return callbackSeries();
                 });
             },
             function (callbackSeries) {
@@ -152,6 +159,7 @@ var MappingModeler = (function () {
                     },
                 };
                 KGcreator.loadDataSourcesJstree("mappingModeler_jstreeDiv", options, function (err, result) {
+
                     return callbackSeries(err);
                 });
             },
@@ -166,7 +174,7 @@ var MappingModeler = (function () {
                 self.drawGraphCanvas(self.graphDiv, visjsData, function () {
                     callbackSeries();
                 });
-                $("#mappingModeler_newAxiomPanel").hide();
+
             },
         ]);
     };
@@ -288,10 +296,11 @@ var MappingModeler = (function () {
                     columns: columns,
                 };
                 self.loadSuggestionSelectJstree(columns, "Columns");
-                $("#mappingModeler_newAxiomPanel").show();
+
+                MappingModeler.switchLeftPanel("mappings")
                 //common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false);
             });
-            self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
+
         } else if (obj.node.data.type == "table") {
             self.currentTable = {
                 name: obj.node.data.label,
@@ -300,33 +309,29 @@ var MappingModeler = (function () {
             var table = obj.node.data.id;
             KGcreator.currentConfig.currentDataSource.currentTable = table;
 
-            self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
+
             self.hideForbiddenResources("Table");
             self.currentResourceType = "Column";
             self.loadSuggestionSelectJstree(self.currentTable.columns, "Columns");
-            $("#mappingModeler_newAxiomPanel").show();
+            MappingModeler.switchLeftPanel("mappings")
             //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         }
         self.currentDataSource = KGcreator.currentConfig.currentDataSource?.name;
         self.currentDataSource = KGcreator.currentConfig.currentDataSource?.name;
     };
-    self.hideDataSources = function (divId) {
-        MappingModeler.switchDataSourcePanel("hide");
-        self.initActiveLegend(divId);
-        try {
-            self.loadVisjsGraph();
-        } catch (e) {}
-    };
+
     self.initActiveLegend = function (divId) {
         var options = {
             onLegendNodeClick: self.onLegendNodeClick,
             showLegendGraphPopupMenu: self.showLegendGraphPopupMenu,
-            xOffset: 300,
+           // xOffset: 300,
+            horizontal:true
         };
         Axiom_activeLegend.isLegendActive = true;
         self.legendItems = {};
         self.legendItemsArray.forEach(function (item) {
             self.legendItems[item.label] = item;
+
         });
 
         Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", self.legendItemsArray, options);
@@ -890,17 +895,25 @@ var MappingModeler = (function () {
 
     self.showLegendGraphPopupMenu = function () {};
 
-    self.switchDataSourcePanel = function (target) {
-        if (target == "show") {
-            $("#mappingModeler_jstreeDiv").css("display", "block");
-            $("#mappingModeler_mainDiv").css("display", "none");
-            $("#mappingModeler_graphPanelDiv").css("display", "none");
-        } else {
-            $("#mappingModeler_jstreeDiv").css("display", "none");
-            $("#mappingModeler_mainDiv").css("display", "block");
-            $("#mappingModeler_graphPanelDiv").css("display", "block");
+    self.switchLeftPanel = function (target) {
+        var tabsArray=[
+            "dataSource",
+            "mappings",
+            "triples"
+        ]
+        if(target=="mappings"){
+            MappingModeler.initActiveLegend(self.legendGraphDivId);
+            MappingModeler.loadVisjsGraph()
         }
+        if(target=="triples"){
+
+        }
+
+        $("#MappingModeler_leftTabs").tabs("option", "active",tabsArray.indexOf(target))
+
     };
+
+
     self.getAllClasses = function (source, callback) {
         if (!source) {
             source = self.currentSource;

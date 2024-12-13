@@ -897,6 +897,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
+
     self.saveGraph = function (fileName, raw) {
         if (!self.currentContext) {
             return;
@@ -912,13 +913,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
 
         var nodes = self.data.nodes.get();
-        /*   nodes.forEach(function(node) {
-            return;
-            console.log(node.x + "---" + node.y + "___" + node.id);
-
-            node.x = node.x || 0;
-            node.y = node.y || 0;
-        });*/
 
         var data = {
             nodes: nodes,
@@ -1001,7 +995,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                         if (positions[node.id]) {
                             node.x = positions[node.id].x;
                             node.y = positions[node.id].y;
-                            //node.fixed = { x: false, y: false };
+
                         }
                         visjsData.nodes.push(node);
                     }
@@ -1025,13 +1019,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 } else {
                     //functions
                     var context = JSON.parse(JSON.stringify(data.context).replace(/self./g, "Lineage_whiteboard."));
-                    //  var context = data.context
 
-                    /*     for (var key in context.options) {
-                        if (key.indexOf("Fn") > 0) {
-                            context.options[key] = eval(key + "=" + context.options[key]);
-                        }
-                    }*/
                     if (context.callback) {
                         callback = context.callback;
                     }
@@ -1040,7 +1028,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                         self.data.nodes.add(visjsData.nodes);
                         self.network.fit();
                     } else {
-                        // self.draw(context.divId, visjsData, context.options, callback);
+
                         self.draw(function () {
                             if (callback) return callback();
                             self.network.fit();
@@ -1137,17 +1125,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             width: 550,
             modal: false,
             title: "Graph parameters",
-            //position: { my: "left top", at: "right top" },
-        }); /*
-        setTimeout(function () {
-           
 
-           
-
-            setTimeout(function () {
-               
-            }, 500);
-        }, 500);*/
+        });
     };
 };
 export default VisjsGraphClass;

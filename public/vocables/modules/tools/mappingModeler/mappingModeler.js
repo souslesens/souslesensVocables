@@ -12,7 +12,7 @@ import KGcreator_graph from "../KGcreator/KGcreator_graph.js";
 import SimpleListFilterWidget from "../../uiWidgets/simpleListFilterWidget.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import OntologyModels from "../../shared/ontologyModels.js";
-import {MAP} from "yaml/dist/nodes/identity.js";
+
 
 // imports React app
 import("/assets/mappingModeler_upload_app.js");

@@ -101,19 +101,19 @@ var MappingModeler = (function () {
            
 
             function (callbackSeries) {
-                //var divId = "nodeInfosAxioms_activeLegendDiv";
+                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
 
-                //    self.initActiveLegend(divId);
+                        $("#MappingModeler_leftTabs").tabs({})
+                });
 
                 return callbackSeries();
             },
             function (callbackSeries) {
-                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
-                    $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
+                       $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
                         //$("#mainDialogDiv").dialog("open");
                         return callbackSeries();
                     });
-                });
+
             },
             // load jstree
             function (callbackSeries) {
@@ -291,10 +291,11 @@ var MappingModeler = (function () {
                     columns: columns,
                 };
                 self.loadSuggestionSelectJstree(columns, "Columns");
+                MappingModeler.switchLeftPanel("mappings")
                 $("#mappingModeler_newAxiomPanel").show();
                 //common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false);
             });
-            self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
+
         } else if (obj.node.data.type == "table") {
             self.currentTable = {
                 name: obj.node.data.label,
@@ -303,7 +304,7 @@ var MappingModeler = (function () {
             var table = obj.node.data.id;
             KGcreator.currentConfig.currentDataSource.currentTable = table;
 
-            self.hideDataSources("nodeInfosAxioms_activeLegendDiv");
+
             self.hideForbiddenResources("Table");
             self.currentResourceType = "Column";
             self.loadSuggestionSelectJstree(self.currentTable.columns, "Columns");
@@ -1899,12 +1900,13 @@ var MappingModeler = (function () {
         self.visjsGraph.data.edges.add([edge]);
         $("#smallDialogDiv").dialog("close");
     }
-    self.loadSource = function () {
+    self.loadSource = function (callback) {
         Lineage_sources.loadSources(MainController.currentSource, function (err) {
             if (err) {
                 return alert(err.responseText);
             }
             $("#Lineage_graphEditionButtons").hide();
+            return callback()
         });
     }
     return self;

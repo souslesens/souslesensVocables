@@ -1,6 +1,8 @@
 <div style="height: 80vh; width: 95vw">
-    <div id="classesDefineTable">
-        <div style="display: flex; flex-direction: row; gap: 50px">
+    <div >
+        <!--<div style="display: flex; flex-direction: row; gap: 50px">
+        
+
             <div id="classDefineColumn" style="display: flex; flex-direction: column; gap: 50px">
                 <span>Column</span>
             </div>
@@ -25,13 +27,47 @@
             <div id="classDefineTransform" style="display: flex; flex-direction: column; gap: 50px">
                 <span>Transform</span>
             </div>
-            <!--div id='classDefineClose' id='classDefineTransform' style='display: flex;flex-direction: column;gap:50px;'>
-                <span>Delete Row</span>
-            </div-->
-        </div>
+            <div id="classDataTable" style="display: flex; flex-direction: column; gap: 50px">
+                <span>DataTable</span>
+            </div>
+          
+        </div>-->
+        <table id="classesDefineTable" style="border-spacing: 17px; border-collapse: separate;">
+            <tbody>
+                <tr>
+                    <td id="classDefineColumn" style="white-space: nowrap">
+                        <span>Column</span>
+                    </td>
+                    <td id="classDefineType" style="white-space: nowrap">
+                        <span>Type</span>
+                    </td>
+                    <td id="classDefineRDFType" style="    white-space: nowrap">
+                        <span>RDF Object Type</span>
+                    </td>
+                    <td id="classDefineLabel" style="    white-space: nowrap">
+                        <span>Label</span>
+                    </td>
+                    <td id="classURIType" style="    white-space: nowrap">
+                        <span>URI Type</span>
+                    </td>
+                    <td id="classDefineDatatypeProperty" style="    white-space: nowrap">
+                        <span>Datatype properties</span>
+                    </td>
+                    <td id="classDefineSample" style="    white-space: nowrap">
+                        <span>Show sample data</span>
+                    </td>
+                    <td id="classDefineTransform" style="    white-space: nowrap">
+                        <span>Transform</span>
+                    </td>
+                    <td id="classDataTable" style="    white-space: nowrap">
+                        <span>DataTable</span>
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+
+
     </div>
-    <div style="display: flex; flex-direction: column; width: 60px">
-        <!--button class="w3-button slsv-button-1" onclick="MappingModeler.addRowClass()">+</button>-->
-        <button class="w3-button slsv-button-2" onclick="MappingModeler.saveTechnicalView()">Save</button>
-    </div>
+   
 </div>

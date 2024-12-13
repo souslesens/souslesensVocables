@@ -225,14 +225,13 @@ var Weaver = (function () {
             Lineage_whiteboard.graph.searchNode(null, term);
         }
     };
-    self.expand = function(){
-        if(Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()){
+    self.expand = function () {
+        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
             Lineage_whiteboard.addChildrenToGraph();
-        }
-        else{
+        } else {
             self.loadTopClasses();
         }
-    }
+    };
     self.clearAll = function () {
         Lineage_whiteboard.initUI();
         //  self.loadTopClasses();

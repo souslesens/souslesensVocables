@@ -48,28 +48,24 @@ var Containers_widget = (function () {
 
             types.splice(0, 0, { id: "all", label: "all" });
             $("#containerSearchWidget_typesSelect").css("display", "block");
-            $('#smallDialogDiv').dialog('open');
-            $('#smallDialogDiv').dialog("option", "title",'Parent Containers Type');
-            $('#smallDialogDiv').load('./modules/tools/lineage/html/parentContainers.html',function(){
-
+            $("#smallDialogDiv").dialog("open");
+            $("#smallDialogDiv").dialog("option", "title", "Parent Containers Type");
+            $("#smallDialogDiv").load("./modules/tools/lineage/html/parentContainers.html", function () {
                 common.fillSelectOptions("containerSearchWidget_typesSelect", types, true, "label", "id");
                 $("#containerSearchWidget_typesSelect").val("all");
                 //$("#containerSearchWidget_typesSelect").hide();
                 //self.execParentContainersSearch();
-
-            })
-          
+            });
         });
     };
 
     self.execParentContainersSearch = function () {
-        $('#smallDialogDiv').dialog('close');
+        $("#smallDialogDiv").dialog("close");
         var type = $("#containerSearchWidget_typesSelect").val();
         $("#containerSearchWidget_typesSelect").val("");
         var filter = "";
         if (type && type != "all") {
             filter = " ?container rdf:type <" + type + ">. ";
-            
         }
         Containers_graph.graphParentContainers(self.currentSource, null, { filter: filter });
     };

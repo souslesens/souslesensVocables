@@ -473,7 +473,7 @@ var Containers_tree = (function () {
         }
         var filter = Sparql_common.setFilter("child", null, term);
         options.filter = filter;
-        options.keepAncestor=true;
+        options.keepAncestor = true;
         Containers_query.getContainersAscendants(source, null, options, function (err, result) {
             if (err) {
                 return callback(err);

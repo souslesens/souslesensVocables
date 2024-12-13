@@ -19,7 +19,6 @@ import KGquery_graph from "../KGquery/KGquery_graph.js";
 import Lineage_createRelation from "./lineage_createRelation.js";
 import NodeInfosAxioms from "../axioms/nodeInfosAxioms.js";
 
-
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -342,9 +341,9 @@ var Lineage_whiteboard = (function () {
                     if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                         options.data = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
                     }
-                    var direction=options.inverse ? "inverse" : "direct";
-                    if(options.all){
-                        direction=null;
+                    var direction = options.inverse ? "inverse" : "direct";
+                    if (options.all) {
+                        direction = null;
                     }
                     Lineage_relations.drawRelations(direction, "restrictions", null, options, graphDiv);
                     callbackSeries();
@@ -3439,10 +3438,10 @@ attrs.color=self.getSourceColor(superClassValue)
                 });
                 $("#lineageWhiteboard_modelBtn").bind("contextmenu", function (e) {
                     e.preventDefault();
-                    var html='<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { inverse: false });">Direct Restrictions</span>' 
-                    html+='<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { inverse: true });">Inverse Restrictions</span>' 
-                    html+='<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { all: true })">All Restrictions</span>' 
-                    PopupMenuWidget.initAndShow(html,"popupMenuWidgetDiv");
+                    var html = '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { inverse: false });">Direct Restrictions</span>';
+                    html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { inverse: true });">Inverse Restrictions</span>';
+                    html += '<span class="popupMenuItem" onclick="Lineage_whiteboard.drawModel(null, null, { all: true })">All Restrictions</span>';
+                    PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
                 });
                 $("#lateralPanelDiv").resizable({
                     maxWidth: $(window).width() - 100,
@@ -3498,9 +3497,9 @@ attrs.color=self.getSourceColor(superClassValue)
                 });
                 $("#containers_showparentContainersBtn").bind("contextmenu", function (e) {
                     e.preventDefault();
-                    var html='<span class="popupMenuItem" onclick="Containers_widget.showParentContainersDialog();">Select type</span>' 
-                    html+='<span class="popupMenuItem" onclick="Containers_widget.execParentContainersSearch();">Load</span>' 
-                    PopupMenuWidget.initAndShow(html,"popupMenuWidgetDiv");
+                    var html = '<span class="popupMenuItem" onclick="Containers_widget.showParentContainersDialog();">Select type</span>';
+                    html += '<span class="popupMenuItem" onclick="Containers_widget.execParentContainersSearch();">Load</span>';
+                    PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
                 });
             });
         }

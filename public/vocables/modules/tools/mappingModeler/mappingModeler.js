@@ -51,7 +51,13 @@ var MappingModeler = (function () {
 
         $("#smallDialogDiv").dialog({
             open: function (event, ui) {
+                if (self.createApp === null) {
+                    throw new Error("React app is not ready");
+                }
 
+                self.uploadFormData.currentSource = self.currentSource;
+
+                self.umountKGUploadApp = self.createApp(self.uploadFormData);
             },
             beforeClose: function () {
                 self.umountKGUploadApp();
@@ -69,31 +75,20 @@ var MappingModeler = (function () {
     };
     self.onLoaded = function () {
         async.series([
-            //init source
-            /*function(callbackSeries) {
-                    SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, function(source) {
-                        var source = SourceSelectorWidget.getSelectedSource()[0];
-                        $("#mainDialogDiv").dialog("close");
-
-                            self.currentSource = source;
-
-                        return callbackSeries();
-                    });
-                },*/
+           
             function (callbackSeries) {
                 self.currentSource = MainController.currentSource;
-                UI.initMenuBar(self.loadSource);
-                self.initResourcesMap(self.currentSource);
-                return callbackSeries();
-            },
-            function (callbackSeries) {
-                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
-                    $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
-                        //$("#mainDialogDiv").dialog("open");
+                UI.initMenuBar(function(){
+                    self.loadSource(function(){
+                        self.initResourcesMap(self.currentSource);
                         return callbackSeries();
                     });
                 });
+              
+              
+                
             },
+            
             function (callbackSeries) {
                 KGcreator.currentSlsvSource = self.currentSource;
                 KGcreator.getSlsvSourceConfig(self.currentSource, function (err, result) {
@@ -106,16 +101,18 @@ var MappingModeler = (function () {
                 });
             },
 
-           
-
             function (callbackSeries) {
-                //var divId = "nodeInfosAxioms_activeLegendDiv";
-
-                //    self.initActiveLegend(divId);
 
                 return callbackSeries();
             },
-
+            function (callbackSeries) {
+                $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
+                    $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
+                        //$("#mainDialogDiv").dialog("open");
+                        return callbackSeries();
+                    });
+                });
+            },
             // load jstree
             function (callbackSeries) {
                 var options = {
@@ -137,13 +134,7 @@ var MappingModeler = (function () {
                                 label: "add Csv Sources",
                                 action: function (_e) {
                                     // pb avec source
-                                    if (self.createApp === null) {
-                                        throw new Error("React app is not ready");
-                                    }
                                     self.displayUploadApp("file");
-                                    self.uploadFormData.currentSource = self.currentSource;
-                                    self.umountKGUploadApp = self.createApp(self.uploadFormData);
-
                                     // KGcreator.createCsvSourceMappings();
                                 },
                             };
@@ -163,12 +154,17 @@ var MappingModeler = (function () {
             //init visjsGraph
             function (callbackSeries) {
                 var visjsData = { nodes: [], edges: [] };
-                self.drawGraphCanvas(self.graphDiv, visjsData, function () {
-                    callbackSeries();
-                });
                 $("#mappingModeler_newAxiomPanel").hide();
+                self.drawGraphCanvas(self.graphDiv, visjsData, function () {
+                    return callbackSeries();
+                });
+                
             },
-        ]);
+        ],function(err){
+            if(err){
+                return (err);
+            }
+        });
     };
     self.loadSuggestionSelectJstree = function (objects, parentName) {
         if ($("#suggestionsSelectJstreeDiv").jstree()) {
@@ -260,6 +256,11 @@ var MappingModeler = (function () {
                 }
             });
         }
+        var  sourceIndex=jstreeData.findIndex(obj => obj.id==self.currentSource);
+        if(sourceIndex>-1){
+            common.array.moveItem(jstreeData,sourceIndex,2);
+        }
+        
         JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {});
     };
     self.onDataSourcesJstreeSelect = function (event, obj) {
@@ -586,6 +587,11 @@ var MappingModeler = (function () {
     };
 
     self.onVisjsGraphClick = function (node, event, options) {
+        if (!node) {
+            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+
+            return;
+        }
         self.currentGraphNode = node;
 
         //add relation between columns
@@ -779,6 +785,7 @@ var MappingModeler = (function () {
             var data = self.mappingColumnEditor.get();
             self.currentGraphNode.data = data;
             self.visjsGraph.data.nodes.update({ id: self.currentGraphNode.id, data: data });
+            self.switchTypeToSubclass(self.currentGraphNode);
             $("#smallDialogDiv").dialog("close");
             self.saveVisjsGraph();
             self.showDatatypeGraph(self.currentGraphNode.label);
@@ -847,6 +854,7 @@ var MappingModeler = (function () {
                 { id: "createObjectProperty", label: "_Create new ObjectProperty_" },
                 { id: "function", label: "function" },
                 { id: "rdfs:member", label: "_rdfs:member_" },
+                { id: "rdfs:subClassOf", label: "_rdfs:subClassOf_" },
             ];
             var options = { includesnoConstraintsProperties: true };
             //Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, options, function (err, properties) {
@@ -1111,7 +1119,7 @@ var MappingModeler = (function () {
 
         var columnsMap = {};
         nodes.forEach(function (node, callbackEach) {
-            if (node.data.type == "Class") {
+            if (node.data.type == "Class" || node.data.type=="dataTable") {
                 return;
             }
 
@@ -1145,11 +1153,12 @@ var MappingModeler = (function () {
     };
     self.nodeToKGcreatorColumnName = function (data) {
         var colname;
-        if (data.uriType == "blankNode" || !data.rdfsLabel) {
+        //if (data.uriType == "blankNode" || !data.rdfsLabel) {
+        if (data.uriType == "blankNode" ) {
             colname = data.id + "_$";
         } else if (data.uriType == "randomIdentifier") {
             colname = data.id + "_£";
-        } else if (data.uriType == "fromColumnTitle") {
+        } else{
             colname = data.id;
         }
 
@@ -1175,9 +1184,9 @@ var MappingModeler = (function () {
             }
             if (data.rdfType) {
                 var predicate = "rdf:type";
-                if (data.rdfType == "owl:Class") {
+                /*if (data.rdfType == "owl:Class") {
                     predicate = "rdfs:subClassOf";
-                }
+                }*/
 
                 allMappings[data.datasource][data.dataTable].tripleModels.push({
                     s: subject,
@@ -1204,6 +1213,10 @@ var MappingModeler = (function () {
             var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
+                if(!connection.edge.data){
+                    // pass dataTable edges
+                    return;
+                }
                 var property = connection.edge.data.id;
                 if (!property) {
                     property = connection.edge.data.type;
@@ -1253,22 +1266,7 @@ var MappingModeler = (function () {
 
         return json;
     };
-    self.nodeToKGcreatorColumnName = function (data) {
-        var colname;
-        if (data.uriType == "blankNode" || !data.rdfsLabel) {
-            colname = data.id + "_$";
-        } else if (data.uriType == "randomIdentifier") {
-            colname = data.id + "_£";
-        } else if (data.uriType == "fromColumnTitle") {
-            colname = data.id;
-        }
-
-        if (data.type == "VirtualColumn") {
-            colname = "@" + colname;
-        }
-        return colname;
-    };
-
+    
     self.copyKGcreatorMappings = function () {
         var text = $("#mappingModeler_infosTA").val();
         $("#mappingModeler_infosTA").focus();
@@ -1284,8 +1282,10 @@ var MappingModeler = (function () {
         self.clearMappings();
         setTimeout(function () {
             self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_ALL" + ".json");
+            
             //    self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name + ".json");
             setTimeout(function () {
+                self.addDataTableGroups();
                 self.visjsGraph.network.fit();
                 var maxX = 0;
                 var maxY = 0;
@@ -1294,11 +1294,82 @@ var MappingModeler = (function () {
                     maxY = Math.max(node.y, maxY);
                 });
                 self.currentOffest = { y: maxY, x: maxX };
+                
             }, 500);
         }, 500);
     };
 
-    self.classDialogData = {};
+    self.addDataTableGroups=function(){
+        var nodes=self.visjsGraph.data.nodes.get();
+        var edges=self.visjsGraph.data.edges.get();
+        var allDataTables={};
+
+        nodes.forEach(function(node){
+            if(node.data.dataTable && !allDataTables[node.data.dataTable]){
+                allDataTables[node.data.dataTable]=1;
+            }
+            
+            
+        });
+        var dataTablesNodes=[];
+        var dataTablesEdges=[];
+        Object.keys(allDataTables).forEach(function(dataTable){
+            var dataTableVisjsNode=nodes.filter(function(node){return node.label==dataTable});
+            if(dataTableVisjsNode.length==0){
+                dataTablesNodes.push({
+                    id:dataTable,
+                    label:dataTable,
+                    level: 1,
+                    shadow: true,
+                    shape : "ellipse",
+                    size: 5,
+                    color: "#ddd",
+                    data:{
+                        id:dataTable,
+                        label:dataTable,
+                        type:'dataTable'
+                    },
+                    
+                    
+                    
+                });
+            }
+            //Add links to all nodes in dataTable
+            var currentDataTableNodes=nodes.filter(function(node){
+                return node.data.dataTable==dataTable;
+            });
+            if(currentDataTableNodes.length>0){
+                
+                currentDataTableNodes.forEach(function(node){
+                    var dataTableVisjsEdge=edges.filter(function(edge){return edge.from==dataTable && edge.to==node.id});
+                    if(dataTableVisjsEdge.length==0){
+                        dataTablesEdges.push({
+                            from:dataTable,
+                            to:node.id,
+                            id:common.getRandomHexaId(5),
+                            color:"#ddd",
+                            width:1,
+                            arrow:{
+                                to:{enabled:true,type:'arrow'}
+                            }
+                        })
+                    }
+                });
+            }
+            
+
+
+
+        });
+        if(dataTablesNodes.length>0){
+            self.visjsGraph.data.nodes.add(dataTablesNodes);
+        }
+        if(dataTablesEdges.length>0){
+            self.visjsGraph.data.edges.add(dataTablesEdges);
+        }
+        MappingModeler.saveVisjsGraph();
+        return;
+    }
 
     self.classesDialog = function (divId) {
         if (!divId) {
@@ -1306,7 +1377,12 @@ var MappingModeler = (function () {
         }
         $("#mainDialogDiv").load("./modules/tools/mappingModeler/html/classesDialog.html", function () {
             $("#mainDialogDiv").dialog("open");
-
+            $("#mainDialogDiv").dialog({
+                beforeClose: function () {
+                    MappingModeler.saveTechnicalView();
+                    $("#mainDialogDiv").dialog({beforeClose: function () {}});
+                }
+            });
             //self.addRowClass();
             self.calculateColumnMappingsFromGraph();
             Object.keys(self.classDialogData).forEach(function (column) {
@@ -1314,38 +1390,68 @@ var MappingModeler = (function () {
             });
         });
     };
+
     self.calculateColumnMappingsFromGraph = function () {
         self.classDialogData = {};
+
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
+
         var edges = MappingModeler.visjsGraph.data.edges.get();
+
         var notClassNodes = graphNodes.filter(function (item) {
             return item.data.type != "Class" && item.data.dataTable == MappingModeler.currentTable.name;
         });
-        notClassNodes.forEach(function (item) {
-            var Column = { id: item.id, label: item.data.label };
-            var typeId = edges.filter(function (edge) {
-                return edge.from == Column.id && edge.label == "a";
-            })[0].to;
-            var type = graphNodes.filter(function (node) {
-                return node.id == typeId;
-            })[0].data;
-            var properties = edges.filter(function (edge) {
-                return edge.from == Column.id && edge.label != "a";
-            });
 
-            if (item.data.type == "RowIndex") {
+        notClassNodes.forEach(function (item) {
+            var Column = { id: item.id, label: item.data?.label };
+
+            var typeId;
+
+            if (edges.length > 0) {
+                var typeEdgesColumn=edges.filter(function (edge) {
+                    return edge.from == Column.id && edge.label == "a";
+                });
+                if(typeEdgesColumn.length>0){
+                    typeId = typeEdgesColumn[0]?.to;
+                }
+                
+            }
+
+            if (typeId) {
+                var type = graphNodes.filter(function (node) {
+                    return node.id == typeId;
+                })[0].data;
+            }
+
+            var properties;
+
+            if (edges.length > 0) {
+                properties = edges.filter(function (edge) {
+                    return edge.from == Column.id && edge.label != "a";
+                });
+            }
+
+            if (item.data?.type == "RowIndex") {
                 Column.label = "rowIndex";
             }
+
             if (!self.classDialogData[Column.label]) {
                 self.classDialogData[Column.label] = {};
             }
+
             self.classDialogData[Column.label].type = type;
+
             self.classDialogData[Column.label].properties = properties;
+
             if (item.data.type == "VirtualColumn") {
                 self.classDialogData[Column.label].isVirtualColumn = "true";
             }
+            if(item.data.dataTable){
+                self.classDialogData[Column.label].dataTable = item.data.dataTable;
+            }
         });
     };
+
     self.addRowClass = function (column) {
         /*var classIndexes=Object.keys(self.classDialogData);
 
@@ -1357,6 +1463,7 @@ var MappingModeler = (function () {
             var rowIndex=0;
         }*/
         //self.classDialogData[rowIndex]={Column:'',Type:'',Label:'',DatatypeProperties:{},Transform:{}};
+        
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
         var currentGraphNode = graphNodes.filter(function (node) {
             return node.data.label == column;
@@ -1366,9 +1473,9 @@ var MappingModeler = (function () {
         if (currentGraphNode.data.dataTable != MappingModeler.currentTable.name) {
             return;
         }
-
+        /*
         $("#classDefineColumn").append(`<span id='class-column-${column}'> ${column} </span> `);
-        $("#classDefineType").append(`<span id='class-type-${column}' >${self.allResourcesMap[self.classDialogData[column].type.id].label} </span>  `);
+        $("#classDefineType").append(`<span id='class-type-${column}' >${self.classDialogData[column].type ? self.allResourcesMap[self.classDialogData[column].type.id].label :'No Type'} </span>  `);
         $("#classDefineRDFType").append(`<select id='class-RDFType-${column}' style='padding:2px 2px'> </select>  `);
         $("#classDefineLabel").append(`<select id='class-label-${column}' style='padding:2px 2px'> <select> `);
         $("#classURIType").append(`<select id='class-URITType-${column}' style='padding:2px 2px'> </select>  `);
@@ -1381,23 +1488,53 @@ var MappingModeler = (function () {
         $("#classDefineTransform").append(
             `<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button>  `
         );
+        $("#classDataTable").append(
+            `<span id='class-column-${column}'> ${self.classDialogData[column].dataTable} </span> `
+        );
         //$('#classDefineClose').append(`<button class='slsv-button-1' id='class-close-${column}' style='padding:2px 2px;margin:0px;'> X</button>  `)
+        */
 
-        var URITType = ["fromColumnTitle", "blankNode", "randomIdentifier"];
-        var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class", ""];
+
+        var html=`<tr><td><span id='class-column-${column}'> ${column} </span> </td>`
+        html+=`<td><span id='class-type-${column}' >${self.classDialogData[column].type ? self.allResourcesMap[self.classDialogData[column].type.id]?.label :'No Type'} </span></td>  `
+        html+=`<td><select id='class-RDFType-${column}' style='padding:6px 6px'> </select> </td> `
+        
+        html+=`<td><select id='class-label-${column}' style='padding:6px 6px'> </select> </td>`
+        html+=`<td><select id='class-URITType-${column}' style='padding:6px 6px'> </select>  </td>`
+        html+=`<td><button class='slsv-button-1' id='class-datatype-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.datatypePropertiesDefine("${column}")'> Datatype </button> </td>  `
+        html+=`<td><button class='slsv-button-1' id='class-sample-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.sampleData("${column}")'> Sample</button> </td>`
+        html+=`<td><button class='slsv-button-1' id='class-transform-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button> </td> `
+        html+=`<td><span id='class-column-${column}'> ${self.classDialogData[column].dataTable} </span> </tr> </td>`
+
+        $('#classesDefineTable').append(html);
+
+        var URITType = ["fromLabel", "blankNode", "randomIdentifier"];
+        //var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
+        var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
         //  sort by similarity for others than rowIndex
 
-        var columns = [""].concat(JSON.parse(JSON.stringify(self.currentTable.columns)));
+        var columns = JSON.parse(JSON.stringify(self.currentTable.columns));
 
         common.array.insertFirstArray(columns, column);
         if (currentGraphNode.data.rdfType) {
             common.array.insertFirstArray(rdfObjectsType, currentGraphNode.data.rdfType);
         }
+        if(currentGraphNode.data.rdfType==''){
+            rdfObjectsType.unshift( '');
+        }else{
+            rdfObjectsType.push('');
+        }
+
         if (currentGraphNode.data.uriType) {
             common.array.insertFirstArray(URITType, currentGraphNode.data.uriType);
         }
         if (currentGraphNode.data.rdfsLabel) {
             common.array.insertFirstArray(columns, currentGraphNode.data.rdfsLabel);
+        }
+        if(currentGraphNode.data.rdfsLabel==''){
+            columns.unshift( '');
+        }else{
+            columns.push('');
         }
 
         common.fillSelectOptions(`class-label-${column}`, columns, false);
@@ -1427,6 +1564,7 @@ var MappingModeler = (function () {
 
     self.saveTechnicalView = function () {
         var nodes = MappingModeler.visjsGraph.data.nodes.get();
+        
         Object.keys(self.classDialogData).forEach(function (rowIndex) {
             var currentNode = nodes.filter(function (node) {
                 return node.label == rowIndex;
@@ -1436,9 +1574,49 @@ var MappingModeler = (function () {
             currentNode.data.rdfsLabel = $("#class-label-" + rowIndex).val();
             currentNode.data.rdfType = $("#class-RDFType-" + rowIndex).val();
             self.visjsGraph.data.nodes.update(currentNode);
+            self.switchTypeToSubclass(currentNode);
+            
         });
         MappingModeler.saveVisjsGraph();
     };
+    self.switchTypeToSubclass=function(node){
+        var nodes = MappingModeler.visjsGraph.data.nodes.get();
+        var edges = MappingModeler.visjsGraph.data.edges.get();
+        if(node.data.rdfType=='owl:Class'){
+            var typeEdge=edges.filter(function(edge){
+                 return edge.from == node.id && edge.label == "a";
+            });
+            if(typeEdge.length>0){
+                typeEdge[0].label='rdfs:subClassOf';
+                typeEdge[0].data.type='rdfs:subClassOf';
+                typeEdge[0].data.id='rdfs:subClassOf';
+                self.visjsGraph.data.edges.update(typeEdge[0]);
+            }
+            
+        }
+        else{
+            var typeEdge=edges.filter(function(edge){
+                return edge.from == node.id && edge.label == "rdfs:subClassOf";
+           });
+           if(typeEdge.length>0){
+                // care to rdfs:subclassOf between two columns don't switch
+                var edgeFrom=nodes.filter(function(node){
+                    return typeEdge[0].to==node.id
+                });
+                if(edgeFrom.length>0){
+                    if(edgeFrom[0].data.type!='Column'){
+                        typeEdge[0].label='a'
+                        typeEdge[0].data.type='rdf:type';
+                        typeEdge[0].data.id='rdf:type';
+                        self.visjsGraph.data.edges.update(typeEdge[0]);
+                    }
+                    
+                }
+               
+           }
+           
+        }
+    }
 
     self.showDatatypeGraph = function (column) {
         //datatypeMappingGraph
@@ -1518,7 +1696,7 @@ var MappingModeler = (function () {
 
                 function getNodeAttrs(str) {
                     if (str.indexOf("http") > -1) {
-                        return { type: "Class", color: "#70ac47", shape: "box", size: 30 };
+                        return { type: "Class", color: "#00afef", shape: "box", size: 30 };
                     } else if (str.indexOf(":") > -1) {
                         drawRelation = false; //rdf Bag
                         return null;
@@ -1529,7 +1707,7 @@ var MappingModeler = (function () {
                         return { type: "rowIndex", color: "#f90edd", shape: "star" };
                     } else {
                         drawRelation = false;
-                        return { type: "OwlType", color: "#00afef", shape: "hexagon" };
+                        return { type: "Column", color: "#cb9801", shape: "ellipse" };
                     }
                 }
 
@@ -1557,7 +1735,8 @@ var MappingModeler = (function () {
                         //   attrs.shape = "box";
                         drawRelation = false;
                     } else if (item.s.startsWith("@")) {
-                        attrs.color = "#8200fd";
+                        attrs.shape = "box";
+                        
                     }
                     /*  if (item.isString) {
                 attrs.shape = "text";
@@ -1569,7 +1748,7 @@ var MappingModeler = (function () {
                         label: label,
                         shape: attrs.shape,
                         color: attrs.color,
-                        font: { color: attrs.color },
+                       
                         size: Lineage_whiteboard.defaultShapeSize,
                         data: {
                             id: item.s,
@@ -1595,7 +1774,6 @@ var MappingModeler = (function () {
                             label: label,
                             shape: attrs.shape,
                             color: attrs.color,
-                            font: attrs.shape == "box" ? { color: "white" } : { color: attrs.color },
                             size: Lineage_whiteboard.defaultShapeSize,
                             data: {
                                 id: item.o,
@@ -1623,7 +1801,7 @@ var MappingModeler = (function () {
                             label: label,
                             color: color,
                             dashes: dashes,
-                            font: { size: 12, ital: true, color: color || "brown" },
+                            
                             // color: getNodeAttrs(item.o),
                             arrows: {
                                 to: {
@@ -1860,17 +2038,17 @@ var MappingModeler = (function () {
                 datasources,
                 function (datasource, callbackEach) {
                     if (!currentMappings[datasource]) {
-                        callbackEach();
+                        return callbackEach();
                     }
                     KGcreator.saveDataSourceMappings(self.currentSource, datasource, currentMappings[datasource], function (err) {
                         if (err) {
-                            callbackEach(err);
+                            return callbackEach(err);
                         }
-                        callbackEach();
+                        return callbackEach();
                     });
                 },
                 function (err) {
-                    MainController.onToolSelect("KGcreator", null, function () {});
+                    MainController.onToolSelect("KGcreator", null, null);
                 }
             );
         }
@@ -1903,12 +2081,15 @@ var MappingModeler = (function () {
         self.visjsGraph.data.edges.add([edge]);
         $("#smallDialogDiv").dialog("close");
     }),
-        (self.loadSource = function () {
+        (self.loadSource = function (callback) {
             Lineage_sources.loadSources(MainController.currentSource, function (err) {
                 if (err) {
                     return alert(err.responseText);
                 }
                 $("#Lineage_graphEditionButtons").hide();
+                if(callback){
+                    callback();
+                }
             });
         });
     return self;

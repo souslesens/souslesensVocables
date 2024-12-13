@@ -67,7 +67,7 @@ var Containers_graph = (function () {
             self.parentContainersColors.push(color);
 
             result.forEach(function (item) {
-                if(item.ancestor){
+                if (item.ancestor) {
                     if (!existingNodes[item?.ancestor?.value]) {
                         existingNodes[item.ancestor.value] = 1;
 
@@ -89,7 +89,7 @@ var Containers_graph = (function () {
                             },
                         });
                     }
-                }   
+                }
                 if (!existingNodes[item.ancestorChild.value]) {
                     existingNodes[item.ancestorChild.value] = 1;
 
@@ -111,7 +111,7 @@ var Containers_graph = (function () {
                         },
                     });
                 }
-                if(item.ancestor){
+                if (item.ancestor) {
                     var edgeId = item.ancestor.value + "_" + "member" + "_" + item.ancestorChild.value;
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
@@ -130,7 +130,7 @@ var Containers_graph = (function () {
                         });
                     }
                 }
-                if(item.child){
+                if (item.child) {
                     var edgeId = item.ancestorChild.value + "_" + "member" + "_" + item.child.value;
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;

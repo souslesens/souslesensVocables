@@ -21,22 +21,21 @@ var PopupMenuWidget = (function () {
             });
         } else {
             PopupMenuWidget.showPopup(point, popupDivId);
-            var clickedButton=$(e.currentTarget)
-            var clickedButtonId=$(e.currentTarget).attr('id')
+            var clickedButton = $(e.currentTarget);
+            var clickedButtonId = $(e.currentTarget).attr("id");
 
             $(e.currentTarget).on("mouseleave", function (event) {
-                if($(event.toElement).attr('id')!=popupDivId){
+                if ($(event.toElement).attr("id") != popupDivId) {
                     PopupMenuWidget.hidePopup(popupDivId);
-                    $(clickedButton).off('mouseleave')
+                    $(clickedButton).off("mouseleave");
                 }
             });
-            
+
             $("#" + popupDivId).on("mouseleave", function (event) {
-                if($(event.toElement).attr('id')!=clickedButtonId){
-                    PopupMenuWidget.hidePopup(popupDivId,"popupMenuWidgetDiv");
-                    $("#" + popupDivId).off('mouseleave')
+                if ($(event.toElement).attr("id") != clickedButtonId) {
+                    PopupMenuWidget.hidePopup(popupDivId, "popupMenuWidgetDiv");
+                    $("#" + popupDivId).off("mouseleave");
                 }
-                
             });
         }
     };

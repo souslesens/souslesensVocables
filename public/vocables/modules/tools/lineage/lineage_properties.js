@@ -49,13 +49,12 @@ var Lineage_properties = (function () {
             },
         };
         if (MainController.currentTool == "lineage") {
-           
             items.restrictions = {
                 label: "Restrictions",
                 action: function (_e) {
                     // pb avec source
 
-                    Lineage_properties.drawObjectPropertiesRestrictions(Lineage_sources.activeSource,null , [self.currentTreeNode.data.id], { withoutImports: true });
+                    Lineage_properties.drawObjectPropertiesRestrictions(Lineage_sources.activeSource, null, [self.currentTreeNode.data.id], { withoutImports: true });
                 },
             };
             items.rangeAndDomain = {

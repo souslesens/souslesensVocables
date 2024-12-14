@@ -79,8 +79,8 @@ var MappingModeler = (function () {
 
             function (callbackSeries) {
                 self.currentSource = MainController.currentSource;
-                UI.initMenuBar(function(){
-                    self.loadSource(function(){
+                UI.initMenuBar(function () {
+                    self.loadSource(function () {
                         self.initResourcesMap(self.currentSource);
                         return callbackSeries();
                     });
@@ -98,21 +98,20 @@ var MappingModeler = (function () {
                 });
             },
 
-           
 
             function (callbackSeries) {
                 $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
 
-                        $("#MappingModeler_leftTabs").tabs({})
+                    $("#MappingModeler_leftTabs").tabs({})
                 });
 
                 return callbackSeries();
             },
             function (callbackSeries) {
-                       $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
-                        //$("#mainDialogDiv").dialog("open");
-                        return callbackSeries();
-                    });
+                $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
+                    //$("#mainDialogDiv").dialog("open");
+                    return callbackSeries();
+                });
 
             },
             // load jstree
@@ -145,6 +144,7 @@ var MappingModeler = (function () {
                     },
                 };
                 KGcreator.loadDataSourcesJstree("mappingModeler_jstreeDiv", options, function (err, result) {
+                    self.dataSourcesConfig = result
                     return callbackSeries(err);
                 });
             },
@@ -161,8 +161,8 @@ var MappingModeler = (function () {
                 });
 
             },
-        ],function(err){
-            if(err){
+        ], function (err) {
+            if (err) {
                 return (err);
             }
         });
@@ -171,7 +171,8 @@ var MappingModeler = (function () {
         if ($("#suggestionsSelectJstreeDiv").jstree()) {
             try {
                 $("#suggestionsSelectJstreeDiv").jstree().empty();
-            } catch {}
+            } catch {
+            }
         }
         self.filterSuggestionList = null;
 
@@ -257,9 +258,9 @@ var MappingModeler = (function () {
                 }
             });
         }
-        var  sourceIndex=jstreeData.findIndex(obj => obj.id==self.currentSource);
-        if(sourceIndex>-1){
-            common.array.moveItem(jstreeData,sourceIndex,2);
+        var sourceIndex = jstreeData.findIndex(obj => obj.id == self.currentSource);
+        if (sourceIndex > -1) {
+            common.array.moveItem(jstreeData, sourceIndex, 2);
         }
 
         JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {
@@ -853,7 +854,7 @@ var MappingModeler = (function () {
                 {id: "createObjectProperty", label: "_Create new ObjectProperty_"},
                 {id: "function", label: "function"},
                 {id: "rdfs:member", label: "_rdfs:member_"},
-                { id: "rdfs:subClassOf", label: "_rdfs:subClassOf_" },
+                {id: "rdfs:subClassOf", label: "_rdfs:subClassOf_"},
             ];
             var options = {includesnoConstraintsProperties: true};
             //Axioms_suggestions.getValidPropertiesForClasses(self.currentSource, self.currentRelation.from.classId, self.currentRelation.to.classId, options, function (err, properties) {
@@ -1138,9 +1139,34 @@ var MappingModeler = (function () {
     self.loadVisjsGraph = function () {
         self.clearMappings();
         setTimeout(function () {
-            self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_ALL" + ".json");
-            //    self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name + ".json");
-            setTimeout(function () {
+            self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_ALL" + ".json", false, function (err, result) {
+                var tables = []
+                for (var table in self.dataSourcesConfig.csvSources) {
+
+
+                    var clusterOptionsByData = {
+                        joinCondition: function (node) {
+
+                            if (node.data && node.data.dataTable == table) {
+                                return true;
+                            }
+                            return false
+
+                        },
+
+                        clusterNodeProperties: {
+                            id: table,
+                            borderWidth: 3,
+                            shape: "database",
+                            label: table
+                        },
+                    }
+
+                    self.visjsGraph.network.clustering.cluster(clusterOptionsByData);
+                }
+
+                return;
+
                 self.addDataTableGroups();
                 self.visjsGraph.network.fit();
                 var maxX = 0;
@@ -1150,62 +1176,67 @@ var MappingModeler = (function () {
                     maxY = Math.max(node.y, maxY);
                 });
                 self.currentOffest = {y: maxY, x: maxX};
-            }, 500);
+            })
         }, 500);
     };
 
-    self.addDataTableGroups=function(){
-        var nodes=self.visjsGraph.data.nodes.get();
-        var edges=self.visjsGraph.data.edges.get();
-        var allDataTables={};
 
-        nodes.forEach(function(node){
-            if(node.data.dataTable && !allDataTables[node.data.dataTable]){
-                allDataTables[node.data.dataTable]=1;
+    self.addDataTableGroups = function () {
+        var nodes = self.visjsGraph.data.nodes.get();
+        var edges = self.visjsGraph.data.edges.get();
+        var allDataTables = {};
+
+        nodes.forEach(function (node) {
+            if (node.data.dataTable && !allDataTables[node.data.dataTable]) {
+                allDataTables[node.data.dataTable] = 1;
             }
 
 
         });
-        var dataTablesNodes=[];
-        var dataTablesEdges=[];
-        Object.keys(allDataTables).forEach(function(dataTable){
-            var dataTableVisjsNode=nodes.filter(function(node){return node.label==dataTable});
-            if(dataTableVisjsNode.length==0){
+        var dataTablesNodes = [];
+        var dataTablesEdges = [];
+        Object.keys(allDataTables).forEach(function (dataTable) {
+            var dataTableVisjsNode = nodes.filter(function (node) {
+                return node.label == dataTable
+            });
+            if (dataTableVisjsNode.length == 0) {
                 dataTablesNodes.push({
-                    id:dataTable,
-                    label:dataTable,
+                    id: dataTable,
+                    label: dataTable,
                     level: 1,
                     shadow: true,
-                    shape : "ellipse",
+                    shape: "ellipse",
                     size: 5,
-                    color: "#ddd",
-                    data:{
-                        id:dataTable,
-                        label:dataTable,
-                        type:'dataTable'
+                    color: "#8f8a8c",
+                    data: {
+                        id: dataTable,
+                        label: dataTable,
+                        type: 'dataTable'
                     },
-
 
 
                 });
             }
             //Add links to all nodes in dataTable
-            var currentDataTableNodes=nodes.filter(function(node){
-                return node.data.dataTable==dataTable;
+            var currentDataTableNodes = nodes.filter(function (node) {
+                return node.data.dataTable == dataTable;
             });
-            if(currentDataTableNodes.length>0){
+            if (currentDataTableNodes.length > 0) {
 
-                currentDataTableNodes.forEach(function(node){
-                    var dataTableVisjsEdge=edges.filter(function(edge){return edge.from==dataTable && edge.to==node.id});
-                    if(dataTableVisjsEdge.length==0){
+                currentDataTableNodes.forEach(function (node) {
+                    var dataTableVisjsEdge = edges.filter(function (edge) {
+                        return edge.from == dataTable && edge.to == node.id
+                    });
+                    if (dataTableVisjsEdge.length == 0) {
                         dataTablesEdges.push({
-                            from:dataTable,
-                            to:node.id,
-                            id:common.getRandomHexaId(5),
-                            color:"#ddd",
-                            width:1,
-                            arrow:{
-                                to:{enabled:true,type:'arrow'}
+                            from: dataTable,
+                            to: node.id,
+                            id: common.getRandomHexaId(5),
+                            color: "#8f8a8c",
+                            width: 1,
+                            data: {type: "tableToColumn"},
+                            arrow: {
+                                to: {enabled: true, type: 'arrow'},
                             }
                         })
                     }
@@ -1213,16 +1244,16 @@ var MappingModeler = (function () {
             }
 
 
-
-
         });
-        if(dataTablesNodes.length>0){
+        if (dataTablesNodes.length > 0) {
             self.visjsGraph.data.nodes.add(dataTablesNodes);
         }
-        if(dataTablesEdges.length>0){
+        if (dataTablesEdges.length > 0) {
             self.visjsGraph.data.edges.add(dataTablesEdges);
+
+
         }
-        MappingModeler.saveVisjsGraph();
+        //  MappingModeler.saveVisjsGraph();
         return;
     }
 
@@ -1235,7 +1266,10 @@ var MappingModeler = (function () {
             $("#mainDialogDiv").dialog({
                 beforeClose: function () {
                     MappingModeler.saveTechnicalView();
-                    $("#mainDialogDiv").dialog({beforeClose: function () {}});
+                    $("#mainDialogDiv").dialog({
+                        beforeClose: function () {
+                        }
+                    });
                 }
             });
             //self.addRowClass();
@@ -1258,10 +1292,10 @@ var MappingModeler = (function () {
             var typeId;
 
             if (edges.length > 0) {
-                var typeEdgesColumn=edges.filter(function (edge) {
+                var typeEdgesColumn = edges.filter(function (edge) {
                     return edge.from == Column.id && edge.label == "a";
                 });
-                if(typeEdgesColumn.length>0){
+                if (typeEdgesColumn.length > 0) {
                     typeId = typeEdgesColumn[0]?.to;
                 }
 
@@ -1292,7 +1326,7 @@ var MappingModeler = (function () {
             if (item.data.type == "VirtualColumn") {
                 self.classDialogData[Column.label].isVirtualColumn = "true";
             }
-            if(item.data.dataTable){
+            if (item.data.dataTable) {
                 self.classDialogData[Column.label].dataTable = item.data.dataTable;
             }
         });
@@ -1317,35 +1351,35 @@ var MappingModeler = (function () {
         if (currentGraphNode.data.dataTable != MappingModeler.currentTable.name) {
             return;
         }
-/*
-        $("#classDefineColumn").append(`<span id='class-column-${column}'> ${column} </span> `);
-        $("#classDefineType").append(`<span id='class-type-${column}' >${self.classDialogData[column].type ? self.allResourcesMap[self.classDialogData[column].type.id].label :'No Type'} </span>  `);
-        $("#classDefineRDFType").append(`<select id='class-RDFType-${column}' style='padding:2px 2px'> </select>  `);
-        $("#classDefineLabel").append(`<select id='class-label-${column}' style='padding:2px 2px'> <select> `);
-        $("#classURIType").append(`<select id='class-URITType-${column}' style='padding:2px 2px'> </select>  `);
-        $("#classDefineDatatypeProperty").append(
-            `<button class='slsv-button-1' id='class-datatype-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.datatypePropertiesDefine("${column}")'> Datatype </button>   `
-        );
-        $("#classDefineSample").append(
-            `<button class='slsv-button-1' id='class-sample-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.sampleData("${column}")'> Sample</button> `
-        );
-        $("#classDefineTransform").append(
-            `<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button>  `
-        );
-        //$('#classDefineClose').append(`<button class='slsv-button-1' id='class-close-${column}' style='padding:2px 2px;margin:0px;'> X</button>  `)
-        */
+        /*
+                $("#classDefineColumn").append(`<span id='class-column-${column}'> ${column} </span> `);
+                $("#classDefineType").append(`<span id='class-type-${column}' >${self.classDialogData[column].type ? self.allResourcesMap[self.classDialogData[column].type.id].label :'No Type'} </span>  `);
+                $("#classDefineRDFType").append(`<select id='class-RDFType-${column}' style='padding:2px 2px'> </select>  `);
+                $("#classDefineLabel").append(`<select id='class-label-${column}' style='padding:2px 2px'> <select> `);
+                $("#classURIType").append(`<select id='class-URITType-${column}' style='padding:2px 2px'> </select>  `);
+                $("#classDefineDatatypeProperty").append(
+                    `<button class='slsv-button-1' id='class-datatype-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.datatypePropertiesDefine("${column}")'> Datatype </button>   `
+                );
+                $("#classDefineSample").append(
+                    `<button class='slsv-button-1' id='class-sample-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.sampleData("${column}")'> Sample</button> `
+                );
+                $("#classDefineTransform").append(
+                    `<button class='slsv-button-1' id='class-transform-${column}' style='padding:2px 2px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button>  `
+                );
+                //$('#classDefineClose').append(`<button class='slsv-button-1' id='class-close-${column}' style='padding:2px 2px;margin:0px;'> X</button>  `)
+                */
 
 
-        var html=`<tr><td><span id='class-column-${column}'> ${column} </span> </td>`
-        html+=`<td><span id='class-type-${column}' >${self.classDialogData[column].type ? self.allResourcesMap[self.classDialogData[column].type.id]?.label :'No Type'} </span></td>  `
-        html+=`<td><select id='class-RDFType-${column}' style='padding:6px 6px'> </select> </td> `
+        var html = `<tr><td><span id='class-column-${column}'> ${column} </span> </td>`
+        html += `<td><span id='class-type-${column}' >${self.classDialogData[column].type ? self.allResourcesMap[self.classDialogData[column].type.id]?.label : 'No Type'} </span></td>  `
+        html += `<td><select id='class-RDFType-${column}' style='padding:6px 6px'> </select> </td> `
 
-        html+=`<td><select id='class-label-${column}' style='padding:6px 6px'> </select> </td>`
-        html+=`<td><select id='class-URITType-${column}' style='padding:6px 6px'> </select>  </td>`
-        html+=`<td><button class='slsv-button-1' id='class-datatype-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.datatypePropertiesDefine("${column}")'> Datatype </button> </td>  `
-        html+=`<td><button class='slsv-button-1' id='class-sample-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.sampleData("${column}")'> Sample</button> </td>`
-        html+=`<td><button class='slsv-button-1' id='class-transform-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button> </td> `
-        html+=`<td><span id='class-column-${column}'> ${self.classDialogData[column].dataTable} </span> </tr> </td>`
+        html += `<td><select id='class-label-${column}' style='padding:6px 6px'> </select> </td>`
+        html += `<td><select id='class-URITType-${column}' style='padding:6px 6px'> </select>  </td>`
+        html += `<td><button class='slsv-button-1' id='class-datatype-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.datatypePropertiesDefine("${column}")'> Datatype </button> </td>  `
+        html += `<td><button class='slsv-button-1' id='class-sample-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.sampleData("${column}")'> Sample</button> </td>`
+        html += `<td><button class='slsv-button-1' id='class-transform-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button> </td> `
+        html += `<td><span id='class-column-${column}'> ${self.classDialogData[column].dataTable} </span> </tr> </td>`
 
         $('#classesDefineTable').append(html);
 
@@ -1360,9 +1394,9 @@ var MappingModeler = (function () {
         if (currentGraphNode.data.rdfType) {
             common.array.insertFirstArray(rdfObjectsType, currentGraphNode.data.rdfType);
         }
-        if(currentGraphNode.data.rdfType==''){
-            rdfObjectsType.unshift( '');
-        }else{
+        if (currentGraphNode.data.rdfType == '') {
+            rdfObjectsType.unshift('');
+        } else {
             rdfObjectsType.push('');
         }
 
@@ -1372,9 +1406,9 @@ var MappingModeler = (function () {
         if (currentGraphNode.data.rdfsLabel) {
             common.array.insertFirstArray(columns, currentGraphNode.data.rdfsLabel);
         }
-        if(currentGraphNode.data.rdfsLabel==''){
-            columns.unshift( '');
-        }else{
+        if (currentGraphNode.data.rdfsLabel == '') {
+            columns.unshift('');
+        } else {
             columns.push('');
         }
 
@@ -1393,7 +1427,7 @@ var MappingModeler = (function () {
         if (!column) {
             return;
         }
-        var mappings = MappingTransform.generateBasicContentMappingContent()[self.currentDataSource][self.currentTable.name].tripleModels;
+        var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[self.currentDataSource][self.currentTable.name].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {
             return mapping.s.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column;
@@ -1419,48 +1453,47 @@ var MappingModeler = (function () {
         });
         MappingModeler.saveVisjsGraph();
     };
-    self.switchTypeToSubclass=function(node){
+    self.switchTypeToSubclass = function (node) {
         var nodes = MappingModeler.visjsGraph.data.nodes.get();
         var edges = MappingModeler.visjsGraph.data.edges.get();
-        if(node.data.rdfType=='owl:Class'){
-            var typeEdge=edges.filter(function(edge){
-                 return edge.from == node.id && edge.label == "a";
+        if (node.data.rdfType == 'owl:Class') {
+            var typeEdge = edges.filter(function (edge) {
+                return edge.from == node.id && edge.label == "a";
             });
-            if(typeEdge.length>0){
-                typeEdge[0].label='rdfs:subClassOf';
-                typeEdge[0].data.type='rdfs:subClassOf';
-                typeEdge[0].data.id='rdfs:subClassOf';
+            if (typeEdge.length > 0) {
+                typeEdge[0].label = 'rdfs:subClassOf';
+                typeEdge[0].data.type = 'rdfs:subClassOf';
+                typeEdge[0].data.id = 'rdfs:subClassOf';
                 self.visjsGraph.data.edges.update(typeEdge[0]);
             }
 
-        }
-        else{
-            var typeEdge=edges.filter(function(edge){
+        } else {
+            var typeEdge = edges.filter(function (edge) {
                 return edge.from == node.id && edge.label == "rdfs:subClassOf";
-           });
-           if(typeEdge.length>0){
+            });
+            if (typeEdge.length > 0) {
                 // care to rdfs:subclassOf between two columns don't switch
-                var edgeFrom=nodes.filter(function(node){
-                    return typeEdge[0].to==node.id
+                var edgeFrom = nodes.filter(function (node) {
+                    return typeEdge[0].to == node.id
                 });
-                if(edgeFrom.length>0){
-                    if(edgeFrom[0].data.type!='Column'){
-                        typeEdge[0].label='a'
-                        typeEdge[0].data.type='rdf:type';
-                        typeEdge[0].data.id='rdf:type';
+                if (edgeFrom.length > 0) {
+                    if (edgeFrom[0].data.type != 'Column') {
+                        typeEdge[0].label = 'a'
+                        typeEdge[0].data.type = 'rdf:type';
+                        typeEdge[0].data.id = 'rdf:type';
                         self.visjsGraph.data.edges.update(typeEdge[0]);
                     }
 
                 }
 
-           }
+            }
 
         }
     }
 
     self.showDatatypeGraph = function (column) {
         //datatypeMappingGraph
-        var mappings = MappingTransform.generateBasicContentMappingContent()[self.currentDataSource][self.currentTable.name].tripleModels;
+        var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[self.currentDataSource][self.currentTable.name].tripleModels;
 
 
         var filteredMapping = mappings.filter(function (mapping) {
@@ -1540,11 +1573,11 @@ var MappingModeler = (function () {
                     } else if (str.indexOf(":") > -1) {
                         drawRelation = false; //rdf Bag
                         return null;
-                        return { type: "OwlType", color: "#aaa", shape: "ellipse" };
+                        return {type: "OwlType", color: "#aaa", shape: "ellipse"};
                     } else if (str.endsWith("_$")) {
-                        return { type: "blankNode", color: "#00afef", shape: "square" };
+                        return {type: "blankNode", color: "#00afef", shape: "square"};
                     } else if (str.indexOf("_rowIndex") > -1) {
-                        return { type: "rowIndex", color: "#f90edd", shape: "star" };
+                        return {type: "rowIndex", color: "#f90edd", shape: "star"};
                     } else {
                         drawRelation = false;
                         return {type: "Column", color: "#cb9801", shape: "ellipse"};
@@ -1766,7 +1799,7 @@ var MappingModeler = (function () {
             return alert("error in function code " + err.message);
         }
         var transformFn = "function{" + transformFnStr + "}";
-        var mappings = MappingTransform.generateBasicContentMappingContent()[self.currentDataSource][self.currentTable.name].tripleModels;
+        var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[self.currentDataSource][self.currentTable.name].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {
             return mapping.s.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn || mapping.o.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn;

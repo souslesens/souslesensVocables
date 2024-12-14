@@ -1,5 +1,6 @@
 import KGcreator_run from "../KGcreator/KGcreator_run.js";
 import KGcreator from "../KGcreator/KGcreator.js";
+import MappingTransform from "./mappingTransform.js";
 
 var TripleFactory=(function(){
 
@@ -15,7 +16,7 @@ var TripleFactory=(function(){
          return;
 
         var options={table:MappingModeler.currentTable.name}
-        KGcreator_run.createTriples(true,false,options, function (err, result){
+        self.createTriples(true,false,options, function (err, result){
         } )
     }
 
@@ -23,7 +24,7 @@ var TripleFactory=(function(){
         if(!self.checkCurrentTable)
             return;
         var options={table:MappingModeler.currentTable.name}
-        KGcreator_run.createTriples(false,false,options, function (err, result){
+        self.createTriples(false,false,options, function (err, result){
         } )
 
     }
@@ -75,6 +76,11 @@ var TripleFactory=(function(){
     };
 
     self.createTriples = function (sampleData, table, options, callback) {
+        var mappingsFilterOption = MappingTransform.getSLSmappingsFromVisjsGraph();// self.getSelectedMappingTriplesOption();
+
+
+
+
         if (!options) {
             options = {};
         }
@@ -99,7 +105,7 @@ var TripleFactory=(function(){
             table = null;
         }
 
-        var mappingsFilterOption = null;// self.getSelectedMappingTriplesOption();
+
         if (mappingsFilterOption) {
             options.mappingsFilter = mappingsFilterOption;
         }

@@ -958,7 +958,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         $("#VisJsGraph_message").html(message);
     };
 
-    self.loadGraph = function (fileName, add, callback) {
+    self.loadGraph = function (fileName, add, callback, dontDraw) {
         if (!fileName) {
             fileName = $("#visjsGraph_savedGraphsSelect").val();
         }
@@ -1008,7 +1008,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     }
                 });
 
-                if (callback) {
+                if (dontDraw &&  callback) {
                     return callback(null, visjsData);
                 }
 
@@ -1027,11 +1027,13 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                         self.data.edges.add(visjsData.edges);
                         self.data.nodes.add(visjsData.nodes);
                         self.network.fit();
+                        if (callback) return callback();
                     } else {
 
                         self.draw(function () {
-                            if (callback) return callback();
+
                             self.network.fit();
+                            if (callback) return callback();
                         });
                     }
 

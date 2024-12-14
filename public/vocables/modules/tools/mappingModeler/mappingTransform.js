@@ -7,7 +7,7 @@ var MappingTransform=(function() {
 
 
     self.mappingToKGcreator = function () {
-        var currentMappings = MappingTransform.generateBasicContentMappingContent();
+        var currentMappings = MappingTransform.getSLSmappingsFromVisjsGraph();
         var datasources = Object.keys(KGcreator.currentConfig.databaseSources).concat(Object.keys(KGcreator.currentConfig.csvSources));
         if (datasources) {
             async.eachSeries(
@@ -34,7 +34,7 @@ var MappingTransform=(function() {
 
 
     self.generateBasicMappings = function () {
-        var json = MappingTransform.generateBasicContentMappingContent();
+        var json = MappingTransform.getSLSmappingsFromVisjsGraph();
 
         $("#smallDialogDiv").html(
             '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
@@ -48,9 +48,9 @@ var MappingTransform=(function() {
 
 
 
-    self.generateBasicContentMappingContent = function () {
+    self.getSLSmappingsFromVisjsGraph = function () {
         var nodesMap = {};
-        var nodes = self.visjsGraph.data.nodes.get();
+        var nodes = MappingModeler.visjsGraph.data.nodes.get();
 
         nodes.forEach(function (node) {
             nodesMap[node.id] = node;
@@ -128,9 +128,11 @@ var MappingTransform=(function() {
                 allMappings[data.datasource][data.dataTable].transform[data.label] = data.transform;
             }
 
-            var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
+            var connections = MappingModeler.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
+                if(connection.edge.data.type=="tableToColumn")
+                    return;
                 var property = connection.edge.data.id;
                 if (!property) {
                     property = connection.edge.data.type;

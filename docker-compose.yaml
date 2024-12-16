@@ -72,6 +72,10 @@ services:
         restart: always
         ports:
             - ${JOWL_LISTEN_PORT:-9170}:9170
+        environment:
+            VIRTUOSO_ENDPOINT: http://virtuoso:8890/sparql
+            VIRTUOSO_USER: dba
+            VIRTUOSO_PASSWORD: ${DBA_PASSWORD}
         networks:
             - backend
 

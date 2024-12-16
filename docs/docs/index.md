@@ -14,6 +14,7 @@ installation/install-a-development-instance.md
 :maxdepth: 1
 installation/advanced-configuration.md
 installation/sls-py-api.md
+configuration/jowl.md
 ```
 
 ## Contribute to development

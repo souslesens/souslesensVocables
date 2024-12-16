@@ -22,7 +22,7 @@ services:
             VOCABLES__formalOntologySourceLabel: ${FORMAL_ONTOLOGY_SOURCE_LABEL}
             VOCABLES__ElasticSearch__url: http://elasticsearch:9200/
             VOCABLES__jowlServer__url: http://jowl:9170
-            VOCABLES__slsApi__url: http://sls-api:8008
+            VOCABLES__slsPyApi__url: http://sls-py-api:8000
         networks:
             - backend
 
@@ -75,8 +75,8 @@ services:
         networks:
             - backend
 
-    sls-api:
-        image: sls-api:latest
+    sls-py-api:
+        image: sls-py-api:latest
         build:
             context: ${SLSPYAPI_PATH}
             dockerfile: Dockerfile
@@ -85,7 +85,12 @@ services:
             - ${SLSPYAPI_LISTEN_PORT:-8008}:8000
         environment:
             MAIN_SOUSLESENS_CONFIG_DIR: /souslesens_config
+            MAIN_API_URL_FOR_VIRTUOSO: http://sls-py-api:8000
             MAIN_LOG_LEVEL: debug
+            MAIN_GET_RDF_GRAPH_METHOD: isql
+            MAIN_POST_RDF_GRAPH_METHOD: sparql_load
+            VIRTUOSO_HOST: virtuoso
+            VIRTUOSO_PASSWORD: ${DBA_PASSWORD}
             CORS_ORIGINS: "*"
             RDF_BATCH_SIZE: 100000
         volumes:

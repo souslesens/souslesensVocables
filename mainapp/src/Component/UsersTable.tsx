@@ -99,6 +99,7 @@ const UsersTable = () => {
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         <TextField
+                            inputProps={{ autocomplete: "off" }}
                             label="Search Users by login"
                             id="search-users"
                             onChange={(event) => {

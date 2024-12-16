@@ -12,8 +12,8 @@ installation/install-a-development-instance.md
 
 ```{toctree}
 :maxdepth: 1
-installation/advanced-configuration.md
-installation/sls-py-api.md
+configuration/souslesens.md
+configuration/sls-py-api.md
 configuration/jowl.md
 ```
 

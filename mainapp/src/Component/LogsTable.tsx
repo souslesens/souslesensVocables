@@ -126,6 +126,7 @@ export const LogsTable = () => {
                                 ))}
                             </TextField>
                             <TextField
+                                inputProps={{ autocomplete: "off" }}
                                 label="Search logs by username"
                                 id="search-logs"
                                 onChange={(event) => {

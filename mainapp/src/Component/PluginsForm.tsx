@@ -573,6 +573,7 @@ const PluginsRepositories = (props: DispatcherProps) => {
                     <Stack spacing={{ xs: 2 }} useFlexGap>
                         <Stack spacing={{ xs: 2 }} sx={{ height: 400 }} useFlexGap>
                             <TextField
+                                inputProps={{ autocomplete: "off" }}
                                 label="Filter repositories by URL"
                                 id="filter-repositories"
                                 onChange={(event) => {

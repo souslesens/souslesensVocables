@@ -1,4 +1,4 @@
-# Configure `sls-py-api`
+# `sls-py-api` configuration
 
 ## Non-docker
 

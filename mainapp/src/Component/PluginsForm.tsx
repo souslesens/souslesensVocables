@@ -542,7 +542,7 @@ const PluginsRepositories = (props: DispatcherProps) => {
                 const handleFetchRepository = (repositoryId: string) => {
                     fetchRepository(repositoryId)
                         .then((response) => {
-                            if (response.status == "success") {
+                            if (response.status == 200) {
                                 snack("The repository have been successfully updated", "success");
                             } else {
                                 snack(`An error occurs during fetching: ${response.message as string}`, "error");

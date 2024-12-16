@@ -12,7 +12,9 @@ installation/install-a-development-instance.md
 
 ```{toctree}
 :maxdepth: 1
-installation/advanced-configuration.md
+configuration/souslesens.md
+configuration/sls-py-api.md
+configuration/jowl.md
 ```
 
 ## Contribute to development

@@ -1,4 +1,4 @@
-# Advanced configuration
+# SousLeSens configuration
 
 SouslesensVocables configuration is stored on the `config` directory.
 (under `${DATA_ROOT_DIR}/souslesens/vocables` if deployed with `docker`).

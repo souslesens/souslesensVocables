@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 
-import { Autocomplete, Button, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField } from "@mui/material";
+import { Button, Link, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, TextField } from "@mui/material";
 import CsvDownloader from "react-csv-downloader";
 
-import { humanizeSize } from "./Utils";
+import { humanizeSize, cleanUpText } from "./Utils";
 
 import { getGraphSize, GraphInfo, ServerSource } from "./Source";
 import { UploadGraphModal } from "./Component/UploadGraphModal";
@@ -84,14 +84,13 @@ export default function GraphManagement() {
             {displayModal === "upload" && currentSource ? <UploadGraphModal indexAfterSuccess={true} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource} /> : null}{" "}
             {displayModal === "download" && currentSource ? <DownloadGraphModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource ?? ""} /> : null}
             <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                <Autocomplete
-                    disablePortal
+                <TextField
+                    inputProps={{ autocomplete: "off" }}
+                    label="Search Sources by name"
                     id="search-graph"
-                    options={Object.entries(sources).map(([sourceName, _source]) => sourceName)}
-                    onInputChange={(_event, newInputValue) => {
-                        setFilteringChars(newInputValue);
+                    onChange={(event) => {
+                        setFilteringChars(event.target.value);
                     }}
-                    renderInput={(params) => <TextField {...params} label="Search Sources by name" />}
                 />
 
                 <TableContainer sx={{ height: "400px" }} component={Paper}>
@@ -120,7 +119,7 @@ export default function GraphManagement() {
                         </TableHead>
                         <TableBody sx={{ width: "100%", overflow: "visible" }}>
                             {memoizedSources
-                                .filter((source) => source.name.includes(filteringChars))
+                                .filter((source) => cleanUpText(source.name).includes(cleanUpText(filteringChars)))
                                 .map((source) => {
                                     return (
                                         <TableRow key={source.name}>

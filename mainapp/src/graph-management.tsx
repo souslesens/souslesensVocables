@@ -29,7 +29,7 @@ export default function GraphManagement() {
     const [graphs, setGraphs] = useState<GraphInfo[]>([]);
 
     // status of download/upload
-    const [currentSource, setCurrentSource] = useState<string | null>(null);
+    const [currentSource, setCurrentSource] = useState<ServerSource | null>(null);
 
     // modal
     const [displayModal, setDisplayModal] = useState<"upload" | "download" | "metadata" | null>(null);
@@ -82,9 +82,11 @@ export default function GraphManagement() {
 
     return (
         <>
-            {displayModal === "upload" && currentSource ? <UploadGraphModal indexAfterSuccess={true} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource} /> : null}{" "}
-            {displayModal === "download" && currentSource ? <DownloadGraphModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource ?? ""} /> : null}
-            {displayModal === "metadata" && currentSource ? <MetadataModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource ?? ""} /> : null}
+            {displayModal === "upload" && currentSource ? <UploadGraphModal indexAfterSuccess={true} open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} /> : null}{" "}
+            {displayModal === "download" && currentSource ? <DownloadGraphModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} /> : null}
+            {displayModal === "metadata" && currentSource ? (
+                <MetadataModal open={true} onClose={() => setDisplayModal(null)} sourceName={currentSource.name} isReadOnly={currentSource.accessControl !== "readwrite"} />
+            ) : null}
             <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                 <TextField
                     inputProps={{ autocomplete: "off" }}
@@ -134,9 +136,8 @@ export default function GraphManagement() {
                                                 <Stack direction="row" justifyContent="center" spacing={{ xs: 1 }} useFlexGap>
                                                     <Button
                                                         variant="outlined"
-                                                        value={source.name}
-                                                        onClick={(event) => {
-                                                            setCurrentSource(event.currentTarget.value);
+                                                        onClick={() => {
+                                                            setCurrentSource(source);
                                                             setDisplayModal("metadata");
                                                         }}
                                                     >
@@ -144,14 +145,10 @@ export default function GraphManagement() {
                                                     </Button>
                                                     <Button
                                                         variant="contained"
-                                                        disabled={
-                                                            // @ts-expect-error FIXME
-                                                            source.accessControl != "readwrite"
-                                                        }
+                                                        disabled={source.accessControl != "readwrite"}
                                                         color="secondary"
-                                                        value={source.name}
-                                                        onClick={(event) => {
-                                                            setCurrentSource(event.currentTarget.value);
+                                                        onClick={() => {
+                                                            setCurrentSource(source);
                                                             setDisplayModal("upload");
                                                         }}
                                                     >
@@ -160,9 +157,8 @@ export default function GraphManagement() {
                                                     <Button
                                                         variant="contained"
                                                         color="primary"
-                                                        value={source.name}
-                                                        onClick={(event) => {
-                                                            setCurrentSource(event.currentTarget.value);
+                                                        onClick={() => {
+                                                            setCurrentSource(source);
                                                             setDisplayModal("download");
                                                         }}
                                                     >

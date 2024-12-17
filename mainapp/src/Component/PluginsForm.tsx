@@ -505,7 +505,7 @@ const PluginsRepositories = (props: DispatcherProps) => {
     const [orderBy, setOrderBy] = useState<keyof RepositoryType>("url");
 
     const handleCloseModal = () => {
-        setModal({ ...modal, open: false });
+        setModal({ ...modal, open: false, selectedRepository: null });
     };
 
     const handleCloseDeleteDialog = () => {

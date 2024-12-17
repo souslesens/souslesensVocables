@@ -89,6 +89,7 @@ type PluginsRepositoryDialogProps = {
     edit?: boolean;
     selectedRepository?: string | null;
     repositories: Record<string, RepositoryType>;
+    snack: (message: string, severity?: AlertColor) => void;
 };
 
 const PluginsDialogForm = ({ onClose, onSubmit, open, plugin }: PluginsDialogFormProps) => {
@@ -317,7 +318,7 @@ interface RepositoryFormType {
     };
 }
 
-const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedRepository, repositories }: PluginsRepositoryDialogProps) => {
+const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedRepository, repositories, snack }: PluginsRepositoryDialogProps) => {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [pluginsAvailable, setPluginsAvailable] = useState<string[]>([]);
     const [pluginsEnabled, setPluginsEnabled] = useState<string[]>([]);
@@ -372,16 +373,20 @@ const PluginsRepositoryDialog = ({ onClose, onSubmit, open, edit, selectedReposi
                 .then((response) => {
                     if (response.status === 200) {
                         setTags(response.message);
+                    } else {
+                        snack(`Could not get repository tags: ${response.message as string}`, "error");
                     }
                 })
-                .catch(() => console.error("Could not get repository tags"));
+                .catch(() => snack("Could not get repository tags", "error"));
             getRepositoryPlugins(selectedRepository)
                 .then((response) => {
                     if (response.status === 200) {
                         setPluginsAvailable(response.message);
+                    } else {
+                        snack(`Could not get repository plugins: ${response.message as string}`, "error");
                     }
                 })
-                .catch(() => console.error("Could not get repository plugins"));
+                .catch(() => snack("Could not get repository plugins", "error"));
         } else {
             setRepository(emptyRepository);
         }
@@ -656,6 +661,7 @@ const PluginsRepositories = (props: DispatcherProps) => {
                             edit={modal.edit}
                             repositories={repositories}
                             selectedRepository={modal.selectedRepository}
+                            snack={snack}
                         />
                         <DeleteDialog
                             description={"This repository will be erased from this instance. Are you sure?"}

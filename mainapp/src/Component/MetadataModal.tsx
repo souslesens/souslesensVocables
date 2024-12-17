@@ -22,6 +22,7 @@ interface MetadataModalProps {
     onClose: () => void;
     open: boolean;
     sourceName: string | null;
+    isReadOnly?: boolean;
 }
 
 export type Metadata = {
@@ -43,6 +44,7 @@ type MetadataRow = Metadata & {
 
 interface MetadataTableProps {
     loading: boolean;
+    isReadOnly: boolean;
     metadata: Metadata[];
     prefixes: Record<string, string>;
     onSubmit: (newMetadata: Metadata[], addedData: Metadata[], removedData: Metadata[]) => Promise<void>;
@@ -143,7 +145,7 @@ function EditMetadataToolbar(props: {
     );
 }
 
-function MetadataTable({ metadata, prefixes, onSubmit, loading }: MetadataTableProps) {
+function MetadataTable({ metadata, prefixes, onSubmit, loading, isReadOnly }: MetadataTableProps) {
     const [rows, setRows] = useState<MetadataRow[]>([]);
     const [paginationModel, setPaginationModel] = useState({
         pageSize: 8,
@@ -282,7 +284,10 @@ function MetadataTable({ metadata, prefixes, onSubmit, loading }: MetadataTableP
             width: 200,
         },
         { field: "value", headerName: "Value", editable: true, flex: 1 },
-        {
+    ];
+
+    if (!isReadOnly) {
+        columns.push({
             field: "actions",
             type: "actions",
             headerName: "Actions",
@@ -311,22 +316,22 @@ function MetadataTable({ metadata, prefixes, onSubmit, loading }: MetadataTableP
                     <GridActionsCellItem key={"delete"} icon={<DeleteIcon />} label="Delete" onClick={handleDeleteClick(id)} color="inherit" />,
                 ];
             },
-        },
-    ];
+        });
+    }
 
     return (
         <Paper variant="outlined" style={{ height: "600px" }}>
             <DataGrid
                 rows={rows}
                 columns={columns}
-                editMode="row"
-                rowModesModel={rowModesModel}
-                onRowModesModelChange={handleRowModesModelChange}
-                onRowEditStop={handleRowEditStop}
-                processRowUpdate={processRowUpdate}
-                slots={{ toolbar: EditMetadataToolbar }}
+                editMode={isReadOnly ? undefined : "row"}
+                rowModesModel={isReadOnly ? undefined : rowModesModel}
+                onRowModesModelChange={isReadOnly ? undefined : handleRowModesModelChange}
+                onRowEditStop={isReadOnly ? undefined : handleRowEditStop}
+                processRowUpdate={isReadOnly ? undefined : processRowUpdate}
+                slots={{ toolbar: isReadOnly ? undefined : EditMetadataToolbar }}
                 slotProps={{
-                    toolbar: { setRows, setRowModesModel, rowNumber: rows.length, loading, onSave: handleSave, canSave },
+                    toolbar: isReadOnly ? undefined : { setRows, setRowModesModel, rowNumber: rows.length, loading, onSave: handleSave, canSave },
                 }}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
@@ -337,7 +342,7 @@ function MetadataTable({ metadata, prefixes, onSubmit, loading }: MetadataTableP
     );
 }
 
-export function MetadataModal({ onClose, open, sourceName }: MetadataModalProps) {
+export function MetadataModal({ onClose, open, sourceName, isReadOnly = false }: MetadataModalProps) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [metadata, setMetadata] = useState<Metadata[]>([]);
@@ -401,7 +406,7 @@ export function MetadataModal({ onClose, open, sourceName }: MetadataModalProps)
             <DialogContent sx={{ mt: 1 }}>
                 <Stack spacing={1}>
                     {error ? <Alert severity="error">{error}</Alert> : null}
-                    <MetadataTable metadata={metadata} prefixes={prefixes} onSubmit={onSubmit} loading={loading} />
+                    <MetadataTable metadata={metadata} prefixes={prefixes} onSubmit={onSubmit} loading={loading} isReadOnly={isReadOnly} />
                 </Stack>
             </DialogContent>
         </Dialog>

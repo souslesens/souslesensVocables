@@ -2,37 +2,7 @@ var JstreeWidget = (function () {
     var self = {};
 
     self.types = {
-        /*
-        deprecated
-        tool: {
-            icon: "../icons/tool.png",
-        },
-       
-        "owl:Restriction": {
-            icon: "../icons/restriction.png",
-        },
-        concept: {
-            icon: "../icons/concept.png",
-        },
-        collection: {
-            icon: "../icons/collection.png",
-        },
-        importedClass: {
-            li_attr: { style: "color:#ccc" },
-            icon: "../icons/externalObject.png",
-        },
-        importedProperty: {
-            li_attr: { style: "color:#ccc" },
-            icon: "../icons/externalObject.png",
-        },
-        importedRestriction: {
-            li_attr: { style: "color:#ccc" },
-            icon: "../icons/externalObject.png",
-        },
-        */
 
-        // Web semantic objects
-        //Thesaurus
         Thesaurus: {
             icon: "../icons/thesaurus.png",
         },
@@ -741,6 +711,8 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         if (!Array.isArray(newData)) {
             return;
         }
+        if(!options)
+            options={}
         var newData2 = JSON.parse(JSON.stringify(newData));
         var keyToKeep = ["data", "text", "id", "parent"];
         newData2.forEach(function (item) {

@@ -199,13 +199,13 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     return;
                 }
 
-                self.movingNodeStartPosition = self.network.getPosition(nodeId);
+                self.movingNodeStartPosition = self.network.getPositions(nodeId);
                 //   var nodes = self.data.nodes.getIds();
                 var newNodes = [];
                 var fixed = false;
 
                 newNodes.push({ id: nodeId, fixed: fixed });
-                self.data.nodes.update(newNodes);
+               self.data.nodes.update(newNodes);
                 /*self.network.setOptions({ physics: {enabled: true,
                     stabilization: {
                       enabled: true,
@@ -221,17 +221,20 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             .on("dragging", function (_params) {})
             .on("dragEnd", function (/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
                 //self.network.setOptions({ physics: { enabled: false } });
+
                 var startNode = self.data.nodes.get(params.nodes[0]);
+                if(!startNode )
+                    return;
 
                 //move nodes of same group together
-                if (startNode.group && !params.event.srcEvent.ctrlKey) {
-                    self.movingNodeEndPosition = self.network.getPosition(params.nodes[0]);
+                if ( startNode.group && !params.event.srcEvent.ctrlKey) {
+                    self.movingNodeEndPosition = self.network.getPositions(params.nodes[0]);
                     var offset = { x: self.movingNodeEndPosition.x - self.movingNodeStartPosition.x, y: self.movingNodeEndPosition.y - self.movingNodeStartPosition.y };
 
                     var newNodes = [];
                     self.data.nodes.get().forEach(function (node) {
                         if (node.group == startNode.group && startNode.id != node.id) {
-                            var position = self.network.getPosition(node.id);
+                            var position = self.network.getPositions(node.id);
                             newNodes.push({ id: node.id, x: position.x + offset.x, y: position.y + offset.y, fixed: true, color: node.color });
                         }
                     });
@@ -366,15 +369,14 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.clearGraph = function () {
         // comment ca marche  bad doc???
 
-        if (self.data && self.data.nodes) {
+        if (self.data && self.data.edges && self.data.edges.clear) {
             //  var edges = self.data.edges.getIds();
             self.data.edges.clear();
-            self.data.nodes.clear();
-            //  if (edges.length > 0) self.data.edges.remove(edges);
-            var nodes = self.data.nodes.getIds();
-            var edges = self.data.edges.getIds();
-            // if (nodes.length > 0) self.data.nodes.remove(nodes);
         }
+        if (self.data && self.data.nodes && self.data.nodes.clear) {
+            self.data.nodes.clear();
+        }
+
         self.data = null;
     };
 
@@ -682,6 +684,10 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             if (!node && self.network.isCluster(nodeId)) {
                 if (_options.onClusterClickFn) {
                     return _options.onClusterClickFn(nodeId, point, options);
+                }else{
+                    if (_options.onclickFn) {
+                        return   _options.onclickFn({id:nodeId}, point, options);
+                    }
                 }
             }
 
@@ -1027,13 +1033,13 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                         self.data.edges.add(visjsData.edges);
                         self.data.nodes.add(visjsData.nodes);
                         self.network.fit();
-                        if (callback) return callback();
+                        if (callback) return callback(null, visjsData);
                     } else {
 
                         self.draw(function () {
 
                             self.network.fit();
-                            if (callback) return callback();
+                            if (callback)  return callback(null, visjsData);
                         });
                     }
 

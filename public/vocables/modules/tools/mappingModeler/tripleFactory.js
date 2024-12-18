@@ -16,7 +16,7 @@ var TripleFactory=(function(){
          return;
 
         var options={table:MappingModeler.currentTable.name}
-        self.createTriples(true,false,options, function (err, result){
+        self.createTriples(true,MappingModeler.currentTable.name,options, function (err, result){
         } )
     }
 
@@ -24,7 +24,7 @@ var TripleFactory=(function(){
         if(!self.checkCurrentTable)
             return;
         var options={table:MappingModeler.currentTable.name}
-        self.createTriples(false,false,options, function (err, result){
+        self.createTriples(false,MappingModeler.currentTable.name,options, function (err, result){
         } )
 
     }
@@ -76,8 +76,7 @@ var TripleFactory=(function(){
     };
 
     self.createTriples = function (sampleData, table, options, callback) {
-        var mappingsFilterOption = MappingTransform.getSLSmappingsFromVisjsGraph();// self.getSelectedMappingTriplesOption();
-
+       var mappingsFilterOption = MappingTransform.getSLSmappingsFromVisjsGraph(table);// self.getSelectedMappingTriplesOption();
 
 
 

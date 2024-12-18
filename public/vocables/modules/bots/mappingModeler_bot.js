@@ -25,7 +25,10 @@ var MappingModeler_bot = (function () {
     self.workflowColumnmMappingOther = {
         startFn: {
             _OR: {
-                "set other predicate": {
+                "add rdf:Type": {
+                    rdfTypeFn: {}
+                },
+                "add other predicate": {
                     listNonObjectPropertiesVocabsFn: {
                         listNonObjectPropertiesFn: {
                             listDatatypePropertyRangeFn: {
@@ -56,28 +59,17 @@ var MappingModeler_bot = (function () {
             },
         },
     };
-
-    /* self.workflowMappingDetail={
-        startFn: {rdfTypeFn: {
-                URItypeFn: {
-                    labelFn: self.workflowColumnmMappingOther
-                    
-                        
-                    
-                }
-            }
-        }
-    }*/
-
-    /*  self.workflow = {
-        initDataSources: {
-            listListDataSourceTypeFn: {
-                _OR: {
-                    Database: { listDatabaseSourcesFn: { listTablesFn: {} }, CSV: { listCSVsourcesFn: { listTablesFn: {} } } },
+    self.workflowCreateSpecificResource = {
+        startFn: {
+            rdfTypeFn: {
+                    promptLabelFn: {},
                 },
             },
-        },
-    };*/
+
+    };
+
+
+
 
     self.functionTitles = {
         _OR: "Select an option",
@@ -118,6 +110,9 @@ var MappingModeler_bot = (function () {
             var choices = self.params.columns;
             choices.splice(0, 0, "");
             _botEngine.showList(choices, "rdfsLabel");
+        },
+        promptLabelFn:function(){
+            _botEngine.promptValue("enter resource label", "rdfsLabel");
         },
 
         listNonObjectPropertiesVocabsFn: function () {

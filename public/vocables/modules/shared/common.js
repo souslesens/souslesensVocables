@@ -912,6 +912,7 @@ if (callback) return callback(err);
             source = Lineage_sources.activeSource;
         }
         let graphUri = Config.sources[source].graphUri;
+
         if (!uriType || uriType == "fromLabel") {
             uri = graphUri + common.formatStringForTriple(label, true);
         } else if (uriType == "randomHexaNumber") {

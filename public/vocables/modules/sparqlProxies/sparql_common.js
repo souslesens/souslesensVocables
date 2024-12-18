@@ -715,6 +715,7 @@ var Sparql_common = (function () {
                     lastSep = uri.lastIndexOf("/");
                 }
 
+
                 if (lastSep == uri.length - 1) {
                     return;
                 }

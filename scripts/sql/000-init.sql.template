@@ -1,0 +1,3 @@
+create role ${DATABASE_USER} login;
+create database ${DATABASE_NAME} owner ${DATABASE_USER};
+grant all privileges on database ${DATABASE_NAME} to ${DATABASE_USER};

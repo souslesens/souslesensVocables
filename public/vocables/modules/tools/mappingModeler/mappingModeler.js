@@ -1352,57 +1352,7 @@ var MappingModeler = (function () {
             MappingModeler.onLoaded();
         });
     };
-    self.transformDialog = function (column) {
-        // return if  virtuals and rowIndex
-        if (!column) {
-            column = self.currentGraphNode.label;
-        }
-        $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function (err) {
-            $("#smallDialogDiv").dialog("open");
-            $("#smallDialogDiv").dialog("option", "title", "Transform for " + column);
-            self.transformColumn = column;
-        });
-    };
-    self.createPrefixTransformFn = function () {
-        if (!self.currentTreeNode) {
-            var column_selected = $("#KGcreator_transformColumnSelect").val();
-        } else {
-            var column_selected = self.currentTreeNode.data.id;
-        }
-        var prefix = prompt("Enter Prefix", column_selected);
-        if (!prefix) {
-            return;
-        }
-        var str = "if((mapping.isString||mapping.dataType) && role=='o') return value; else return '" + prefix + "-'+value;";
-        $("#KGcreator_fnBody").val(str);
-    };
 
-    self.testTransform = function () {
-        //  display view sample triples with added transform for column mapping
-        var transformFnStr = $("#KGcreator_fnBody").val();
-
-        transformFnStr = transformFnStr.replace(/"/g, "'");
-
-        try {
-            new Function("row", "mapping", transformFnStr);
-        } catch (err) {
-            return alert("error in function code " + err.message);
-        }
-        var transformFn = "function{" + transformFnStr + "}";
-        var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[self.currentDataSource][self.currentTable.name].tripleModels;
-
-        var filteredMapping = mappings.filter(function (mapping) {
-            return mapping.s.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn || mapping.o.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn;
-        });
-
-        var mappingWithTransform = {};
-        mappingWithTransform[MappingModeler.currentTable.name] = {tripleModels: filteredMapping, transform: {}};
-        mappingWithTransform[MappingModeler.currentTable.name].transform[self.transformColumn] = transformFn;
-
-        // get transform and add to filtered mapping
-        // change select view sample triple then use it
-        self.viewSampleTriples(mappingWithTransform);
-    };
 
     self.viewSampleTriples = function (mappings) {
         var options = {};
@@ -1445,25 +1395,7 @@ var MappingModeler = (function () {
             },
         });
     };
-    self.saveTransform = function () {
-        var transformFnStr = $("#KGcreator_fnBody").val();
 
-        transformFnStr = transformFnStr.replace(/"/g, "'");
-
-        try {
-            new Function("row", "mapping", transformFnStr);
-        } catch (err) {
-            return alert("error in function code " + err.message);
-        }
-        var transformFn = "function{" + transformFnStr + "}";
-        var nodes = MappingModeler.visjsGraph.data.nodes.get();
-        var currentNode = nodes.filter(function (node) {
-            return node.label == self.transformColumn;
-        })[0];
-        currentNode.data.transform = transformFn;
-        self.visjsGraph.data.nodes.update(currentNode);
-        MappingModeler.saveVisjsGraph();
-    };
     self.filterSuggestionTree = function () {
         var keyword = $("#mappingModeler_suggestionsnput").val();
         var data = $("#suggestionsSelectJstreeDiv").jstree()._model.data;

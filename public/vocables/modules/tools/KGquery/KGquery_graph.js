@@ -89,7 +89,7 @@ var KGquery_graph = (function () {
                         }
 
                         return callbackSeries();
-                    });
+                    },true);
                 },
                 //inferred
                 function (callbackSeries) {

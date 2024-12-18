@@ -1,6 +1,7 @@
 import _botEngine from "./_botEngine.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import CreateResource_bot from "./createResource_bot.js";
+import MappingsDetails from "../tools/mappingModeler/mappingsDetails.js";
 
 var MappingModeler_bot = (function () {
     var self = {};
@@ -28,11 +29,14 @@ var MappingModeler_bot = (function () {
                 "add rdf:Type": {
                     rdfTypeFn: {}
                 },
+                "add transform": {
+                    addTransformFn: {}
+                },
                 "add other predicate": {
                     listNonObjectPropertiesVocabsFn: {
                         listNonObjectPropertiesFn: {
                             listDatatypePropertyRangeFn: {
-                                dateTreatment: {
+                                choosedateTypeFn: {
                                     listTableColumnsFn: {},
                                 },
                             },
@@ -86,6 +90,8 @@ var MappingModeler_bot = (function () {
         createSubPropertyFn: "Enter subProperty label",
         listTableColumnsFn: "Choose a  a column for predicate object ",
 
+        addTransformFn:""
+
         /*  listVocabsFn: "Choose a source",
         listResourceTypesFn: "Choose a resource type",
         listListDataSourceType: " Choose a data source type",
@@ -104,6 +110,9 @@ var MappingModeler_bot = (function () {
         rdfTypeFn: function () {
             var choices = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
             _botEngine.showList(choices, "rdfType");
+        },
+        addTransformFn:function(){
+            MappingsDetails.showTansformDialog()
         },
 
         labelFn: function () {
@@ -125,7 +134,7 @@ var MappingModeler_bot = (function () {
 
             CommonBotFunctions.listNonObjectPropertiesFn(self.params.nonObjectPropertyVocab, "nonObjectPropertyId", columnRdfType);
         },
-        dateTreatment: function () {
+        choosedateTypeFn: function () {
             var datatypePropertyRange = _botEngine.currentBot.params.datatypePropertyRange;
             if (datatypePropertyRange != "xsd:dateTime") {
                 return _botEngine.nextStep();

@@ -704,6 +704,7 @@ var Sparql_common = (function () {
         var str0 = query.substring(0, query.toLowerCase().indexOf("select"));
         // var regex = /^[^@].*<([^>]*)/gm;
         var regex = /[^@].*<([^>]*)/gm;
+        var regex = /<([^>]*)>/gm;
         var array = [];
         var urisMap = {};
         while ((array = regex.exec(strWhere)) != null) {

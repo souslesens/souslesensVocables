@@ -55,19 +55,16 @@
     <div id="MappingModeler_tripleFactoryTab">
         <div>
 
+            <button class="w3-button slsv-button-3" onclick="MappingTransform.generateSLSmappings()">
+                view SLS mappings
+            </button>
+            <button class="w3-button slsv-button-3" onclick="MappingTransform.generateR2MLmappings()">
+                view R2ML mappings
+            </button>
 
             <button class="w3-button slsv-button-1" onclick="TripleFactory.showTripleSample()">show Sample</button>
             <button class="w3-button slsv-button-1 " onclick="TripleFactory.writeTriples()" title="Create triples">Create triples</button>
 
-            &nbsp;  &nbsp;
-
-
-         <!--   <button class="w3-button slsv-button-1 " onclick="KGcreator_run.testSelectedMappings()" title="Test Selected Mappings">
-                Test Selected Mappings
-            </button>-->
-
-
-          <!--  <button class="w3-button slsv-button-2 " onclick="KGcreator_run.stopCreateTriples()" title="Abort">Abort</button>-->
             <button class="w3-button slsv-button-2 " onclick="TripleFactory.createAllMappingsTriples()" title="Recreate graph">Recreate graph</button>
             <button class="w3-button slsv-button-2 " onclick="TripleFactory.indexGraph()" title="Index graph">Index graph</button>
 
@@ -77,6 +74,16 @@
             <button class="w3-button slsv-button-3 " id="KGcreator_deleteKGcreatorTriplesBtn" onclick="TripleFactory.deleteTriples('all')" title="delete ALL KGreator triples">
                 delete ALL KGreator triples
             </button>
+            &nbsp;  &nbsp;
+
+
+         <!--   <button class="w3-button slsv-button-1 " onclick="KGcreator_run.testSelectedMappings()" title="Test Selected Mappings">
+                Test Selected Mappings
+            </button>-->
+
+
+          <!--  <button class="w3-button slsv-button-2 " onclick="KGcreator_run.stopCreateTriples()" title="Abort">Abort</button>-->
+
 
 
         </div>

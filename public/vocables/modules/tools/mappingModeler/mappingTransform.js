@@ -33,7 +33,7 @@ var MappingTransform=(function() {
 
 
 
-    self.generateBasicMappings = function () {
+    self.generateSLSmappings = function () {
         var json = MappingTransform.getSLSmappingsFromVisjsGraph();
 
         $("#smallDialogDiv").html(
@@ -44,7 +44,10 @@ var MappingTransform=(function() {
         $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
     };
 
+    self.generateR2MLmappings = function () {
+        alert ("coming soon...")
 
+    }
 
 
 

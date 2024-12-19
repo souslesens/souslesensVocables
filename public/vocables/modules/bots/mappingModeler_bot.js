@@ -109,10 +109,15 @@ var MappingModeler_bot = (function () {
         },
         rdfTypeFn: function () {
             var choices = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
+            self.params.addingType=true
             _botEngine.showList(choices, "rdfType");
         },
         addTransformFn:function(){
-            MappingsDetails.showTansformDialog()
+
+            MappingsDetails.showTansformDialog();
+
+            self.params.addingTransform=true
+            _botEngine.end()
         },
 
         labelFn: function () {

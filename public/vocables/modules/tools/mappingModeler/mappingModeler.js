@@ -751,8 +751,8 @@ var MappingModeler = (function () {
             } else if (["Column", "RowIndex", "VirtualColumn"].indexOf(self.currentGraphNode.data.type) > -1) {
                 return $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/mappingColumnInfos.html", function () {
                     $("#smallDialogDiv").dialog("open");
-                    self.mappingColumnInfo.editColumnInfos();
-                    self.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);
+                    MappingsDetails.mappingColumnInfo.editColumnInfos();
+                    MappingsDetails.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);
                     MappingsDetails.showDatatypeGraph(self.currentGraphNode.label);
                 });
             } else {
@@ -764,74 +764,7 @@ var MappingModeler = (function () {
             KGcreator.showSampleData();
         },
     };
-    self.mappingColumnInfo = {
-        editColumnInfos: function () {
-            var data = self.currentGraphNode.data;
 
-            if (!data.uriType) {
-                // showBot
-                var params = {
-                    title: "" + data.label,
-                    columns: self.currentTable.columns,
-                };
-
-                MappingModeler_bot.start(MappingModeler_bot.workflowMappingDetail, params, function (err, result) {
-                    var params = MappingModeler_bot.params;
-                    data.uriType = params.URItype;
-                    data.rdfType = params.rdfType;
-                    (data.rdfsLabel = params.rdfsLabel),
-                        self.visjsGraph.data.nodes.update({
-                            id: self.currentGraphNode.id,
-                            data: data,
-                        });
-                    self.mappingColumnInfo.editColumnInfos();
-                    MappingsDetails.showDatatypeGraph(self.currentGraphNode.label);
-                });
-            }
-
-            self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", data);
-        },
-        save: function () {
-            var data = self.mappingColumnEditor.get();
-            self.currentGraphNode.data = data;
-            self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data});
-            MappingsDetails.switchTypeToSubclass(self.currentGraphNode);
-            $("#smallDialogDiv").dialog("close");
-            self.saveVisjsGraph();
-            MappingsDetails.showDatatypeGraph(self.currentGraphNode.label);
-        },
-
-        startOtherPredicatesBot: function () {
-            var params = {
-                source: self.currentSource,
-                columns: self.currentTable.columns,
-                title: "" + self.currentTable.name,
-                columnClass: self.mappingColumnInfo.columnClass,
-            };
-
-            MappingModeler_bot.start(MappingModeler_bot.workflowColumnmMappingOther, params, function (err, result) {
-                var params = MappingModeler_bot.params;
-
-
-                var data = self.mappingColumnEditor.get();
-                if (params.nonObjectPropertyId) {
-                    if (!data.otherPredicates) {
-                        data.otherPredicates = [];
-                    }
-                    data.otherPredicates.push({
-                        property: params.nonObjectPropertyId,
-                        object: params.predicateObjectColumn,
-                        range: Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range,
-                        dateFormat: params.nonObjectPropertyDateFormat || null, //if any
-                    });
-                    self.visjsGraph.data.nodes.update({id: self.currentGraphNode.id, data: data});
-                    //  self.mappingColumnInfo.editColumnInfos()
-                    self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", data);
-                    MappingsDetails.showDatatypeGraph(self.currentGraphNode.label);
-                }
-            });
-        },
-    };
 
     self.onLegendNodeClick = function (node, event) {
         if (!node) {

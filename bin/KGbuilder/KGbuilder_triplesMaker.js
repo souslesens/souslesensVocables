@@ -162,7 +162,7 @@ var KGbuilder_triplesMaker = {
         //get value for Subject
         var subjectStr = null;
         if (mapping.subjectIsSpecificUri || mapping.s.endsWith("_#")) {
-            subjectStr = mapping.s;
+            subjectStr = mapping.s.replace("_#","");;
         } else if (typeof mapping.s === "function") {
             try {
                 subjectStr = mapping.s(line, mapping);
@@ -252,7 +252,7 @@ var KGbuilder_triplesMaker = {
             objectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
             return objectStr;
         } else if (mapping.objectIsSpecificUri || mapping.o.endsWith("_#")) {
-            objectStr = mapping.o;
+            objectStr = mapping.o.replace("_#","");
         }
 
 

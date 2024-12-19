@@ -12,7 +12,7 @@ var MappingsDetails = (function () {
             divId = "mainDialogDiv";
         }
         $("#mainDialogDiv").load("./modules/tools/mappingModeler/html/detailsDialog.html", function () {
-            $("#mainDialogDiv").dialog("option","title","detailed mapping table "+MappingModeler.currentTable.name);
+            $("#mainDialogDiv").dialog("option","title","Detailed mappings : table "+MappingModeler.currentTable.name);
             $("#mainDialogDiv").dialog("open");
             $("#mainDialogDiv").dialog({
                 beforeClose: function () {
@@ -29,7 +29,7 @@ var MappingsDetails = (function () {
                 self.addRowClass(column);
             });
 
-            self.drawDatatypeGraphFromMappings()
+            self.drawDetailedMappingsGraph()
         });
     };
 
@@ -107,10 +107,10 @@ var MappingsDetails = (function () {
 
         var html = `<tr><td><span id='class-column-${column}'> ${column} </span> </td>`
         html += `<td><span id='class-type-${column}' >${self.detailledDataMap[column].type ? MappingModeler.allResourcesMap[self.detailledDataMap[column].type.id]?.label : 'No Type'} </span></td>  `
-        html += `<td><select id='class-RDFType-${column}' style='padding:6px 6px'> </select> </td> `
+        html += `<td><select id='columnDetails-rdfType${column}' style='padding:6px 6px'> </select> </td> `
 
-        html += `<td><select id='class-label-${column}' style='padding:6px 6px'> </select> </td>`
-        html += `<td><select id='class-URITType-${column}' style='padding:6px 6px'> </select>  </td>`
+        html += `<td><select id='columnDetails-rdfsLabel${column}' style='padding:6px 6px'> </select> </td>`
+        html += `<td><select id='columnDetails-UriType${column}' style='padding:6px 6px'> </select>  </td>`
         html += `<td><button class='slsv-button-1' id='class-datatype-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingsDetails.showSpecificMappingsBot("${column}")'> More mappings... </button> </td>  `
         /*  html += `<td><button class='slsv-button-1' id='class-sample-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.sampleData("${column}")'> Sample</button> </td>`
           html += `<td><button class='slsv-button-1' id='class-transform-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button> </td> `*/
@@ -147,9 +147,9 @@ var MappingsDetails = (function () {
             columns.push('');
         }
 
-        common.fillSelectOptions(`class-label-${column}`, columns, false);
-        common.fillSelectOptions(`class-RDFType-${column}`, rdfObjectsType, false);
-        common.fillSelectOptions(`class-URITType-${column}`, URITType, false);
+        common.fillSelectOptions(`columnDetails-rdfsLabel${column}`, columns, false);
+        common.fillSelectOptions(`columnDetails-rdfType${column}`, rdfObjectsType, false);
+        common.fillSelectOptions(`columnDetails-UriType${column}`, URITType, false);
     };
     self.showSpecificMappingsBot = function (column) {
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
@@ -195,7 +195,7 @@ var MappingsDetails = (function () {
 
 
             }
-            self.drawDatatypeGraphFromMappings(column)
+            self.drawDetailedMappingsGraph(column)
             /*    var data = self.mappingColumnEditor.get();
                    if (params.nonObjectPropertyId) {
                        if (!data.otherPredicates) {
@@ -237,9 +237,9 @@ var MappingsDetails = (function () {
                 return node.label == rowIndex;
             })[0];
 
-            currentNode.data.uriType = $("#class-URITType-" + rowIndex).val();
-            currentNode.data.rdfsLabel = $("#class-label-" + rowIndex).val();
-            currentNode.data.rdfType = $("#class-RDFType-" + rowIndex).val();
+            currentNode.data.uriType = $("#columnDetails-UriType" + rowIndex).val();
+            currentNode.data.rdfsLabel = $("#columnDetails-rdfsLabel" + rowIndex).val();
+            currentNode.data.rdfType = $("#columnDetails-rdfType" + rowIndex).val();
             MappingModeler.visjsGraph.data.nodes.update(currentNode);
             self.switchTypeToSubclass(currentNode);
 
@@ -284,7 +284,41 @@ var MappingsDetails = (function () {
         }
     }
 
-    self.drawDatatypeGraphFromMappings = function (column) {
+
+    self.showDetailedMappingsList= function (column,divId) {
+        if(!divId)
+            divId="detailedMappings_mappingsListDiv"
+        //datatypeMappingGraph
+        var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentTable.name].tripleModels;
+
+        if (column) {
+            mappings = mappings.filter(function (mapping) {
+                return mapping.s.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column;
+
+            });
+        }
+
+        var html="<table style='border: 1px'><tr>" +
+           "<td style = 'width:100px' >Subject</td>"+
+            "<td>Pedicate</td>"+
+            "<td>Object</td>"+
+            "<td>other</td>"+
+            "</tr>"
+        mappings.forEach(function(mapping){
+            var other=""
+html+="<tr>" +
+    "<td>"+mapping.s+"</td>"+
+    "<td>"+mapping.p+"</td>"+
+    "<td>"+mapping.o+"</td>"+
+    "<td>"+other+"</td>"+
+    "</tr>"
+        })
+        html+="</table>"
+$("#"+divId).html(html)
+    }
+
+
+        self.drawDetailedMappingsGraph = function (column) {
         //datatypeMappingGraph
         var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentTable.name].tripleModels;
 
@@ -476,7 +510,7 @@ var table=MappingModeler.currentTable.name
 
 
         var options = {
-            onclickFn: KGcreator_graph.onDetailedGraphNodeClick,
+            onclickFn: self.onDetailedMappingsGraphClick,
             visjsOptions: {
                 manipulation: {
                     enabled: false,
@@ -487,9 +521,12 @@ var table=MappingModeler.currentTable.name
         self.datatypeVisjsGraph = new VisjsGraphClass(divId, visjsData, options);
         self.datatypeVisjsGraph.draw();
 
-        $("#KGcreatorVisjsLegendCanvas").css("top", 0);
-        $("#KGcreatorVisjsLegendCanvas").css("right", 200);
+            self.showDetailedMappingsList(column)
     };
+
+    self.onDetailedMappingsGraphClick=function(obj, event, options){
+
+    }
 
 
     self.showTansformDialog = function (column) {

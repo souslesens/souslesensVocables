@@ -792,6 +792,7 @@ var MappingModeler = (function () {
                         data: {
                             id: uri,
                             label: params.rdfsLabel,
+                            rdfsLabel: params.rdfsLabel,
                             type: "URI",
                             rdfType: params.rdfType,
                             uriType:"fromLabel",

@@ -18,7 +18,7 @@ var Containers_graph = (function () {
             "SELECT distinct ?type ?typeLabel " +
             fromStr +
             "  WHERE {\n" +
-            " ?sub rdf:type rdf:Bag  .\n" +
+          //  " ?sub rdf:type rdf:Bag  .\n" +
             "  ?sub rdf:type  ?type . filter (!regex(str(?type),'owl') && ?type!='rdf:Bag')\n" +
             "  optional {?type rdfs:label ?typeLabel}" +
             "  }";

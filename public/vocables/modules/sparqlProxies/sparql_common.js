@@ -17,6 +17,12 @@ var Sparql_common = (function () {
     var self = {};
     self.withoutImports = false;
 
+    self.basicPrefixes= {
+        rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+        rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        owl: "http://www.w3.org/2002/07/owl#",
+    }
+
     var checkClosingBrackets = function (str) {
         var c1 = (str.match(/\(/g) || []).length;
         var c2 = (str.match(/\)/g) || []).length;
@@ -744,13 +750,15 @@ var Sparql_common = (function () {
         var whereIndex = query.toLowerCase().indexOf("where");
         var prefixesStr = query.substring(0, whereIndex);
         var whereStr = query.substring(whereIndex);
-        Object.keys(Config.basicVocabularies).forEach(function (vocab) {
-            var currentPrefix= "PREFIX " + vocab + ": <" + Config.basicVocabularies[vocab].graphUri + ">\n";
-            var regex = new RegExp("prefix\\s*"+vocab+":","gm");
-            if(!prefixesStr.toLowerCase().match(regex)){
-                prefixesStr = currentPrefix + prefixesStr;
+
+        for( var prefix in self.basicPrefixes){
+            if(prefixesStr.indexOf(self.basicPrefixes[prefix])<0){
+                var newPrefix=  "PREFIX " + prefix + ": <" + self.basicPrefixes[prefix] + ">\n";
+                prefixesStr = newPrefix + prefixesStr;
+
             }
-        });
+        }
+
         query=prefixesStr + whereStr;
         return query;
 

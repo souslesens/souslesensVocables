@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.97.0](https://github.com/souslesens/souslesensVocables/compare/1.96.0...1.97.0) (2024-12-20)
+
+
+### Features
+
+* **graphManagement:** standard searchbar ([d6f29c2](https://github.com/souslesens/souslesensVocables/commit/d6f29c2c9956666c51480c43af16a797a05278dc))
+
+
+### Bug Fixes
+
+* **docs:** build doc on master branch only ([35765bc](https://github.com/souslesens/souslesensVocables/commit/35765bc5246e92eed30eef672db648e7c00c6566))
+* **mainapp/configeditor:** do not validate own source prefix in edit mode ([d5b1781](https://github.com/souslesens/souslesensVocables/commit/d5b1781509a55fe98e82679b3dde527bb03a8698))
+* **mainapp/plugin:** do not show the error snack when fetching was successful ([9cb0cc8](https://github.com/souslesens/souslesensVocables/commit/9cb0cc8e85a88af6d6021dc9ed9056db1aab1001))
+* **mainapp:** correctly select the group in edit mode with the Source editor ([fb9047f](https://github.com/souslesens/souslesensVocables/commit/fb9047fa952bcfefa6d55147730b9f55b803fd56))
+* **mainapp:** disable autocomplete on searchbars ([47870ac](https://github.com/souslesens/souslesensVocables/commit/47870ac196eeb3965b4e62bd4a1b6ef827336a03))
+
 ## [1.96.0](https://github.com/souslesens/souslesensVocables/compare/1.95.0...1.96.0) (2024-12-11)
 
 > [!IMPORTANT]

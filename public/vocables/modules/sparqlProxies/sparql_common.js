@@ -17,11 +17,11 @@ var Sparql_common = (function () {
     var self = {};
     self.withoutImports = false;
 
-    self.basicPrefixes= {
+    self.basicPrefixes = {
         rdfs: "http://www.w3.org/2000/01/rdf-schema#",
         rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
         owl: "http://www.w3.org/2002/07/owl#",
-    }
+    };
 
     var checkClosingBrackets = function (str) {
         var c1 = (str.match(/\(/g) || []).length;
@@ -721,7 +721,6 @@ var Sparql_common = (function () {
                     lastSep = uri.lastIndexOf("/");
                 }
 
-
                 if (lastSep == uri.length - 1) {
                     return;
                 }
@@ -751,18 +750,15 @@ var Sparql_common = (function () {
         var prefixesStr = query.substring(0, whereIndex);
         var whereStr = query.substring(whereIndex);
 
-        for( var prefix in self.basicPrefixes){
-            if(prefixesStr.indexOf(self.basicPrefixes[prefix])<0){
-                var newPrefix=  "PREFIX " + prefix + ": <" + self.basicPrefixes[prefix] + ">\n";
+        for (var prefix in self.basicPrefixes) {
+            if (prefixesStr.indexOf(self.basicPrefixes[prefix]) < 0) {
+                var newPrefix = "PREFIX " + prefix + ": <" + self.basicPrefixes[prefix] + ">\n";
                 prefixesStr = newPrefix + prefixesStr;
-
             }
         }
 
-        query=prefixesStr + whereStr;
+        query = prefixesStr + whereStr;
         return query;
-
-
     };
 
     self.getIntFromTypeLiteral = function (value) {

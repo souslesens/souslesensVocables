@@ -76,11 +76,11 @@ var KGcreator_run = (function () {
         }
 
         //UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initRunTab, "#RunButton");
-        var table =null;
+        var table = null;
 
-        if(options.table){
-            table=options.table
-        }else {
+        if (options.table) {
+            table = options.table;
+        } else {
             self.getTableAndShowMappings(allmappings);
         }
         if (!allmappings && !table) {

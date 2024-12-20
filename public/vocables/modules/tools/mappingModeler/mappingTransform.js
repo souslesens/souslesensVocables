@@ -1,10 +1,8 @@
 import common from "../../shared/common.js";
 import KGcreator from "../KGcreator/KGcreator.js";
 
-var MappingTransform=(function() {
-
-    var self={}
-
+var MappingTransform = (function () {
+    var self = {};
 
     self.mappingToKGcreator = function () {
         var currentMappings = MappingTransform.getSLSmappingsFromVisjsGraph();
@@ -30,30 +28,23 @@ var MappingTransform=(function() {
         }
     };
 
-
-
-
     self.generateSLSmappings = function () {
         var json = MappingTransform.getSLSmappingsFromVisjsGraph();
 
         $("#smallDialogDiv").html(
             '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
-            ' <textarea id="mappingModeler_infosTA" style="display: block;width:800px;height: 500px;overflow: auto;"> </textarea>'
+                ' <textarea id="mappingModeler_infosTA" style="display: block;width:800px;height: 500px;overflow: auto;"> </textarea>'
         );
         $("#smallDialogDiv").dialog("open");
         $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
     };
 
     self.generateR2MLmappings = function () {
-        alert ("coming soon...")
-
-    }
-
-
+        alert("coming soon...");
+    };
 
     self.getSLSmappingsFromVisjsGraph = function (table) {
-        if(!table)
-            table=MappingModeler.currentTable.name
+        if (!table) table = MappingModeler.currentTable.name;
         var nodesMap = {};
         var nodes = MappingModeler.visjsGraph.data.nodes.get();
 
@@ -63,15 +54,13 @@ var MappingTransform=(function() {
 
         var columnsMap = {};
         nodes.forEach(function (node, callbackEach) {
-            if(node.data.dataTable!==table)
-                return;
+            if (node.data.dataTable !== table) return;
             if (node.data.type == "Class") {
                 return;
             }
             if (node.data.type == "table") {
                 return;
             }
-
 
             columnsMap[node.id] = node;
         });
@@ -80,11 +69,10 @@ var MappingTransform=(function() {
         return json;
     };
 
-
     self.nodeToKGcreatorColumnName = function (data) {
-        var colname=null;
-       // if (data.uriType == "blankNode" || !data.rdfsLabel) {
-        if (data.uriType == "blankNode" ) {
+        var colname = null;
+        // if (data.uriType == "blankNode" || !data.rdfsLabel) {
+        if (data.uriType == "blankNode") {
             colname = data.id + "_$";
         } else if (data.uriType == "randomIdentifier") {
             colname = data.id + "_£";
@@ -95,8 +83,8 @@ var MappingTransform=(function() {
         if (colname && data.type == "VirtualColumn") {
             colname = "@" + colname;
         }
-        if (data.type == "URI"  ) {
-            colname =data.id+"_#";
+        if (data.type == "URI") {
+            colname = data.id + "_#";
         }
         return colname;
     };
@@ -109,8 +97,8 @@ var MappingTransform=(function() {
         for (var nodeId in columnsMap) {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
-            if(!subject){
-                return alert("Error in column "+nodeId)
+            if (!subject) {
+                return alert("Error in column " + nodeId);
             }
 
             if (!allMappings[data.dataTable]) {
@@ -118,7 +106,7 @@ var MappingTransform=(function() {
             }
             if (data.rdfType) {
                 var predicate = "rdf:type";
-              /*  if (data.rdfType == "owl:Class") {
+                /*  if (data.rdfType == "owl:Class") {
                     predicate = "rdfs:subClassOf";
                 }*/
 
@@ -147,8 +135,7 @@ var MappingTransform=(function() {
             var connections = MappingModeler.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
-                if(connection.edge.data.type=="tableToColumn")
-                    return;
+                if (connection.edge.data.type == "tableToColumn") return;
                 var property = connection.edge.data.id;
                 if (!property) {
                     property = connection.edge.data.type;
@@ -199,32 +186,13 @@ var MappingTransform=(function() {
         return json;
     };
 
-
     self.copyKGcreatorMappings = function () {
         var text = $("#mappingModeler_infosTA").val();
         $("#mappingModeler_infosTA").focus();
         common.copyTextToClipboard(text);
     };
 
-
-
-
-
-
-
-
     return self;
-
-
-
-
-
-
-})()
+})();
 export default MappingTransform;
-window.MappingTransform=MappingTransform
-
-
-
-
-
+window.MappingTransform = MappingTransform;

@@ -2,47 +2,37 @@ import KGcreator_run from "../KGcreator/KGcreator_run.js";
 import KGcreator from "../KGcreator/KGcreator.js";
 import MappingTransform from "./mappingTransform.js";
 
-var TripleFactory=(function(){
+var TripleFactory = (function () {
+    var self = {};
 
-    var self={}
+    self.checkCurrentTable = function () {
+        if (!MappingModeler.currentTable) return alert("select a table or a csv source");
+    };
+    self.showTripleSample = function () {
+        if (!self.checkCurrentTable) return;
 
+        var options = { table: MappingModeler.currentTable.name };
+        self.createTriples(true, MappingModeler.currentTable.name, options, function (err, result) {});
+    };
 
-    self.checkCurrentTable=function(){
-        if(!MappingModeler.currentTable)
-            return alert ("select a table or a csv source")
-    }
-    self.showTripleSample=function(){
-     if(!self.checkCurrentTable)
-         return;
+    self.writeTriples = function () {
+        if (!self.checkCurrentTable) return;
+        var options = { table: MappingModeler.currentTable.name };
+        self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
+    };
 
-        var options={table:MappingModeler.currentTable.name}
-        self.createTriples(true,MappingModeler.currentTable.name,options, function (err, result){
-        } )
-    }
+    self.createAllMappingsTriples = function () {
+        KGcreator_run.createAllMappingsTriples();
+    };
 
-    self.writeTriples=function(){
-        if(!self.checkCurrentTable)
-            return;
-        var options={table:MappingModeler.currentTable.name}
-        self.createTriples(false,MappingModeler.currentTable.name,options, function (err, result){
-        } )
+    self.indexGraph = function () {
+        KGcreator_run.indexGraph();
+    };
 
-    }
-
-    self.createAllMappingsTriples=function(){
-        KGcreator_run.createAllMappingsTriples()
-    }
-
-    self.indexGraph=function(){
-        KGcreator_run.indexGraph()
-    }
-
-    self.deleteTriples=function(all,callback){
-
+    self.deleteTriples = function (all, callback) {
         var tables = [];
         if (!all) {
-            if(!self.checkCurrentTable)
-                return;
+            if (!self.checkCurrentTable) return;
             if (!confirm("Do you really want to delete  triples created with KGCreator in datasource " + KGcreator.currentConfig.currentDataSource.name)) {
                 return;
             }
@@ -76,14 +66,12 @@ var TripleFactory=(function(){
     };
 
     self.createTriples = function (sampleData, table, options, callback) {
-       var mappingsFilterOption = MappingTransform.getSLSmappingsFromVisjsGraph(table);// self.getSelectedMappingTriplesOption();
-
-
+        var mappingsFilterOption = MappingTransform.getSLSmappingsFromVisjsGraph(table); // self.getSelectedMappingTriplesOption();
 
         if (!options) {
             options = {};
         }
-        if (!sampleData && table!=="*") {
+        if (!sampleData && table !== "*") {
             if (!confirm("create triples for " + KGcreator.currentConfig.currentDataSource.name + " " + table || "")) {
                 return;
             }
@@ -99,11 +87,10 @@ var TripleFactory=(function(){
         if (Config.clientSocketId) {
             options.clientSocketId = Config.clientSocketId;
         }
-        if ( table==="*") {
+        if (table === "*") {
             options = {};
             table = null;
         }
-
 
         if (mappingsFilterOption) {
             options.mappingsFilter = mappingsFilterOption;
@@ -151,7 +138,6 @@ var TripleFactory=(function(){
     };
 
     self.createAllMappingsTriples = function () {
-
         if (!confirm("generate KGcreator triples of datasource " + KGcreator.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
             return;
         }
@@ -188,18 +174,8 @@ var TripleFactory=(function(){
         );
     };
 
-
-
-
-
-
-
-
     return self;
+})();
 
-
-
-})()
-
-export default  TripleFactory
-window.TripleFactory=TripleFactory
+export default TripleFactory;
+window.TripleFactory = TripleFactory;

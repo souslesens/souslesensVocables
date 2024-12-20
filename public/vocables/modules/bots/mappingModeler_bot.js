@@ -27,10 +27,10 @@ var MappingModeler_bot = (function () {
         startFn: {
             _OR: {
                 "add rdf:Type": {
-                    rdfTypeFn: {}
+                    rdfTypeFn: {},
                 },
                 "add transform": {
-                    addTransformFn: {}
+                    addTransformFn: {},
                 },
                 "add other predicate": {
                     listNonObjectPropertiesVocabsFn: {
@@ -66,14 +66,10 @@ var MappingModeler_bot = (function () {
     self.workflowCreateSpecificResource = {
         startFn: {
             rdfTypeFn: {
-                    promptLabelFn: {},
-                },
+                promptLabelFn: {},
             },
-
+        },
     };
-
-
-
 
     self.functionTitles = {
         _OR: "Select an option",
@@ -90,7 +86,7 @@ var MappingModeler_bot = (function () {
         createSubPropertyFn: "Enter subProperty label",
         listTableColumnsFn: "Choose a  a column for predicate object ",
 
-        addTransformFn:""
+        addTransformFn: "",
 
         /*  listVocabsFn: "Choose a source",
         listResourceTypesFn: "Choose a resource type",
@@ -109,15 +105,14 @@ var MappingModeler_bot = (function () {
         },
         rdfTypeFn: function () {
             var choices = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
-            self.params.addingType=true
+            self.params.addingType = true;
             _botEngine.showList(choices, "rdfType");
         },
-        addTransformFn:function(){
-
+        addTransformFn: function () {
             MappingsDetails.showTansformDialog();
 
-            self.params.addingTransform=true
-            _botEngine.end()
+            self.params.addingTransform = true;
+            _botEngine.end();
         },
 
         labelFn: function () {
@@ -125,7 +120,7 @@ var MappingModeler_bot = (function () {
             choices.splice(0, 0, "");
             _botEngine.showList(choices, "rdfsLabel");
         },
-        promptLabelFn:function(){
+        promptLabelFn: function () {
             _botEngine.promptValue("enter resource label", "rdfsLabel");
         },
 

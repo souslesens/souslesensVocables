@@ -142,7 +142,7 @@ var UI = (function () {
                 $("#AddSourceButton").remove();
                 $("#AllSourceButton").remove();
             }
-            if(callback){
+            if (callback) {
                 callback();
             }
         });

@@ -83,7 +83,7 @@ var CreateResource_bot = (function () {
                 // { id: "owl:ObjectProperty", label: "ObjectProperty" },
                 { id: "DatatypeProperty", label: "DatatypeProperty" },
                 { id: "ImportClass", label: "Import Class" },
-                { id: "ImportSource", label: "Add import source " },
+              //  { id: "ImportSource", label: "Add import source " },
             ];
             _botEngine.showList(choices, "resourceType");
         },

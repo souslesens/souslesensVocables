@@ -76,7 +76,13 @@ var KGcreator_run = (function () {
         }
 
         //UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initRunTab, "#RunButton");
-        var table = self.getTableAndShowMappings(allmappings);
+        var table = null;
+
+        if (options.table) {
+            table = options.table;
+        } else {
+            self.getTableAndShowMappings(allmappings);
+        }
         if (!allmappings && !table) {
             return alert("select a node");
         }
@@ -122,11 +128,7 @@ var KGcreator_run = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 if (sampleData) {
-                    // var str = JSON.stringify(result, null, 2);
-
-                    //   $("#KGcreator_infosDiv").val(str);
                     self.showTriplesInDataTable(result);
-
                     UI.message("", true);
                 } else {
                     if (options.deleteTriples) {

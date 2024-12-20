@@ -704,6 +704,7 @@ var Sparql_common = (function () {
         var str0 = query.substring(0, query.toLowerCase().indexOf("select"));
         // var regex = /^[^@].*<([^>]*)/gm;
         var regex = /[^@].*<([^>]*)/gm;
+        var regex = /<([^>]*)>/gm;
         var array = [];
         var urisMap = {};
         while ((array = regex.exec(strWhere)) != null) {
@@ -735,6 +736,21 @@ var Sparql_common = (function () {
         strWhere = strWhere.replace(/[<>]/gm, "");
         query = prefixStr + query.substring(0, whereIndex) + strWhere;
 
+        return query;
+    };
+
+    self.addBasicVocabulariesPrefixes = function (query) {
+        var whereIndex = query.toLowerCase().indexOf("where");
+        var prefixesStr = query.substring(0, whereIndex);
+        var whereStr = query.substring(whereIndex);
+        Object.keys(Config.basicVocabularies).forEach(function (vocab) {
+            var currentPrefix = "PREFIX " + vocab + ": <" + Config.basicVocabularies[vocab].graphUri + ">\n";
+            var regex = new RegExp("prefix\\s*" + vocab + ":", "gm");
+            if (!prefixesStr.toLowerCase().match(regex)) {
+                prefixesStr = currentPrefix + prefixesStr;
+            }
+        });
+        query = prefixesStr + whereStr;
         return query;
     };
 

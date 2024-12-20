@@ -5,6 +5,7 @@ import common from "../../shared/common.js";
 import Export from "../../shared/export.js";
 import GraphDisplayLegend from "../../graph/graphDisplayLegend.js";
 import Lineage_decoration from "./lineage_decoration.js";
+import Lineage_sources from "./lineage_sources.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -48,6 +49,22 @@ var Lineage_properties = (function () {
             },
         };
         if (MainController.currentTool == "lineage") {
+            items.restrictions = {
+                label: "Restrictions",
+                action: function (_e) {
+                    // pb avec source
+
+                    Lineage_properties.drawObjectPropertiesRestrictions(Lineage_sources.activeSource, null, [self.currentTreeNode.data.id], { withoutImports: true });
+                },
+            };
+            items.rangeAndDomain = {
+                label: "ranges and domains",
+                action: function (_e) {
+                    // pb avec source
+                    self.drawRangeAndDomainsGraph(Lineage_sources.activeSource, null, { withoutImports: true }, [self.currentTreeNode.data.id]);
+                    //Lineage_properties.drawObjectPropertiesRestrictions(Lineage_sources.activeSource,null , [self.currentTreeNode.data.id], { withoutImports: true });
+                },
+            };
             items.copyNodeToClipboard = {
                 label: "copy to Clipboard",
                 action: function (_e) {
@@ -56,7 +73,6 @@ var Lineage_properties = (function () {
                     Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
                 },
             };
-
             if (!Lineage_sources.activeSource || Config.sources[Lineage_sources.activeSource].editable) {
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
@@ -530,7 +546,7 @@ var Lineage_properties = (function () {
                     });
                 }
 
-                if (item.subProperty) {
+                if (item.subProperty?.value) {
                     var subProperty = item.subProperty.value;
                     let label = item.subPropertyLabel ? item.subPropertyLabel.value : Sparql_common.getLabelFromURI(item.subProperty.value);
                     if (!existingNodes[subProperty]) {
@@ -570,7 +586,7 @@ var Lineage_properties = (function () {
                     }
                 }
 
-                if (item.range) {
+                if (item.range?.value) {
                     if (!existingNodes[item.range.value]) {
                         allNodeIds.push({ id: item.range.value });
                         if (item.rangeType) {
@@ -617,7 +633,7 @@ var Lineage_properties = (function () {
                         });
                     }
                 }
-                if (item.domain) {
+                if (item.domain?.value) {
                     if (!existingNodes[item.domain.value]) {
                         allNodeIds.push({ id: item.domain.value });
                         existingNodes[item.domain.value] = 1;
@@ -665,7 +681,7 @@ var Lineage_properties = (function () {
                         });
                     }
                 }
-                if (item.range) {
+                if (item.range?.value) {
                     if (!existingNodes[item.range.value]) {
                         allNodeIds.push({ id: item.range.value });
                         shape = "text";
@@ -714,7 +730,7 @@ var Lineage_properties = (function () {
                     }
                 }
 
-                if (item.inverseProperty) {
+                if (item.inverseProperty?.value) {
                     if (!existingNodes[item.inverseProperty.value]) {
                         existingNodes[item.inverseProperty.value] = 1;
                         var propLabel = item.inversePropertyLabel ? item.inversePropertyLabel.value : Sparql_common.getLabelFromURI(item.inverseProperty.value);

@@ -60,11 +60,6 @@ var Lineage_sources = (function () {
         self.init(showDialog);
     };
 
-    self.resetVisjsGraph = function () {
-        $("#graphDiv").html("");
-        Lineage_whiteboard.drawNewGraph({ nodes: [], edges: [] });
-    };
-
     self.showSourcesDialog = function (forceDialog) {
         if (!forceDialog && Config.userTools["lineage"].urlParam_source) {
             return self.loadSources(Config.userTools["lineage"].urlParam_source);
@@ -164,7 +159,6 @@ var Lineage_sources = (function () {
 
         if (!self.activeSource) {
             self.activeSource = source;
-            self.resetVisjsGraph();
         } else {
             self.activeSource = source;
         }

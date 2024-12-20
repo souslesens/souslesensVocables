@@ -23,7 +23,7 @@ var UserRequestFiltering = {
   getUserGraphUrisMap: function(userSourcesMap) {
 
 
-    var basicVocabularies = basicVocabularies = {
+    var basicVocabularies  = {
       rdf: { graphUri: "https://www.w3.org/1999/02/22-rdf-syntax-ns" },
       rdfs: { graphUri: "https://www.w3.org/2000/01/rdf-schema" },
       owl: { graphUri: "https://www.w3.org/2002/07/owl" },

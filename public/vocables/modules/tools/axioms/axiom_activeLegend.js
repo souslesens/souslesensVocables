@@ -367,7 +367,9 @@ var Axiom_activeLegend = (function () {
             if (isCardinalityRestriction || hasClass) {
                 hiddenNodes.push("Class");
             }
-            if (isCardinalityRestriction) hiddenNodes.push("Connective");
+            if (isCardinalityRestriction) {
+                hiddenNodes.push("Connective");
+            }
         } else if (resourceType == "Connective") {
             hiddenNodes.push("ObjectProperty");
         }
@@ -531,6 +533,10 @@ var Axiom_activeLegend = (function () {
         }
 
         var yOffset = -450;
+        if (options.horizontal) {
+            yOffset = 0;
+            options.xOffset = -200;
+        }
         legendItems.forEach(function (item) {
             visjsData.nodes.push({
                 id: item.label,
@@ -553,7 +559,11 @@ var Axiom_activeLegend = (function () {
 
                 fixed: { x: true, y: true },
             });
-            yOffset += 50;
+            if (options.horizontal) {
+                options.xOffset += 100;
+            } else {
+                yOffset += 50;
+            }
         });
 
         var options = {
@@ -590,7 +600,9 @@ var Axiom_activeLegend = (function () {
             self.axiomTriplesToManchester(triples, function (err, manchesterStr) {
                 if (err) {
                     //machstersyntax dont work yet with cardinality restrictions but we store the triples anyway
-                    if (!hasCardinalityRestriction) return alert(err);
+                    if (!hasCardinalityRestriction) {
+                        return alert(err);
+                    }
                 }
 
                 var triples = self.visjsGraphToTriples();

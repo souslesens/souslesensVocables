@@ -132,7 +132,7 @@ var UI = (function () {
     // keep
 
     // keep here
-    self.initMenuBar = function (fn) {
+    self.initMenuBar = function (callback) {
         $("#index_topContolPanel").parent().show();
         $("#ChangeSourceButton").show();
         $("#index_topContolPanel").show();
@@ -142,7 +142,9 @@ var UI = (function () {
                 $("#AddSourceButton").remove();
                 $("#AllSourceButton").remove();
             }
-            fn();
+            if (callback) {
+                callback();
+            }
         });
     };
 
@@ -333,7 +335,7 @@ var UI = (function () {
     //keep
     self.homePage = function (options) {
         if (options?.notRefresh) {
-            window.history.pushState({}, "", window.document.location.origin + "/vocables/");
+            window.history.replaceState({}, "", window.document.location.origin + "/vocables/");
             $("#mainDialogDiv").dialog({ close: function () {} });
             return;
         }

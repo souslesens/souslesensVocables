@@ -22,7 +22,6 @@ import UI from "../../../modules/shared/UI.js";
 import KGquery_filter from "./KGquery_filter.js";
 
 import Containers_widget from "../containers/containers_widget.js";
-import KGconstraints_validator from "../KGconstraints/KGconstraints_validator.js";
 
 var KGquery = (function () {
     var self = {};
@@ -351,7 +350,7 @@ var KGquery = (function () {
             } else if (output == "Graph") {
                 self.queryResultToVisjsGraph(result);
             } else if (output == "shacl") {
-                KGconstraints_validator.process(result);
+                //  KGconstraints_validator.process(result);
             } else {
                 Config.userTools.KGquery.toTools[output](result);
             }

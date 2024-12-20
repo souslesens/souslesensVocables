@@ -116,6 +116,10 @@
         <script type="module" src="modules/tools/KGcreator/KGcreator_graph.js"></script>
         <script type="module" src="modules/tools/KGcreator/KGcreator_run.js"></script>
         <script type="module" src="modules/tools/mappingModeler/mappingModeler.js"></script>
+        <script type="module" src="modules/tools/mappingModeler/tripleFactory.js"></script>
+        <script type="module" src="modules/tools/mappingModeler/mappingTransform.js"></script>
+        <script type="module" src="modules/tools/mappingModeler/mappingsDetails.js"></script>
+
         <script type="module" src="modules/tools/KGcreator/KGcreator_joinTables.js"></script>
 
         <!--   <script type="module" src="modules/tools/KGcreatorGraph.js"></script>-->
@@ -172,11 +176,6 @@
         <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
         <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-
-        <script type="module" src="modules/tools/KGconstraints/Cfihos_pump_poc.js"></script>
-        <script type="module" src="modules/tools/KGconstraints/KGconstraints_editor.js"></script>
-        <script type="module" src="modules/tools/KGconstraints/KGconstraintsModeler.js"></script>
-        <script type="module" src="modules/tools/KGconstraints/KGconstraints_validator.js"></script>
 
         <script type="module" src="./modules/shared/shacl.js"></script>
 
@@ -386,12 +385,15 @@
                         <img src="./icons/CommonIcons/ArrowMenuBar.png" />
                     </button>
 
-                    <div id="SouslesensVocables_Github" class="w3-display-topright" style="font-size: 12px">
+                    <div id="SouslesensVocables_Github" class="w3-display-topright" style="font-size: 12px; margin-right: 10px">
+                        <a target="_blank noreferrer" href="/api/v1"><img src="/api/v1/favicon-16x16.png" style="margin-bottom: 3px; margin-right: 3px" /></a>
+                        Swagger API
                         <a target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"
                             ><span style="color: Black"><i class="fa-lg fab fa-github"></i></span
                         ></a>
                         SouslesensVocables <span id="souslesensversion"></span>
                     </div>
+
                     <!-- <button onclick="TagsGeometry.showDialog()">tagsGeo</button>-->
                 </div>
                 <div id="MenuBarFooter">

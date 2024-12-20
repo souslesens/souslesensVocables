@@ -132,6 +132,8 @@ var KGbuilder_triplesMaker = {
                                                     p: propertyStr,
                                                     o: objectStr
                                                 });
+                                            }else{
+                                                var x=3
                                             }
                                         } /* else{
                     console.log( "missing " +subjectStr +" "+ propertyStr +" "+  objectStr)
@@ -159,8 +161,8 @@ var KGbuilder_triplesMaker = {
     getTripleSubject: function (tableMappings, mapping, line, callback) {
         //get value for Subject
         var subjectStr = null;
-        if (mapping.subjectIsSpecificUri) {
-            subjectStr = mapping.s;
+        if (mapping.subjectIsSpecificUri || mapping.s.endsWith("_#")) {
+            subjectStr = mapping.s.replace("_#","");;
         } else if (typeof mapping.s === "function") {
             try {
                 subjectStr = mapping.s(line, mapping);
@@ -249,8 +251,8 @@ var KGbuilder_triplesMaker = {
         if (mapping.o === "_rowIndex") {
             objectStr = KGbuilder_triplesMaker.getBlankNodeId("_rowIndex");
             return objectStr;
-        } else if (mapping.objectIsSpecificUri) {
-            objectStr = mapping.o;
+        } else if (mapping.objectIsSpecificUri || mapping.o.endsWith("_#")) {
+            objectStr = mapping.o.replace("_#","");
         }
 
 

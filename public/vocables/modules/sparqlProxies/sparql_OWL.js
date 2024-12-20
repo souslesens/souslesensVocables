@@ -2594,7 +2594,10 @@ var Sparql_OWL = (function () {
         }
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         var filterStr = Sparql_common.setFilter("type", classIds);
-
+        var labelProperty = "rdfs:label";
+        if (options.otherProperty) {
+            labelProperty = "<" + options.otherProperty + ">";
+        }
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -2604,7 +2607,9 @@ var Sparql_OWL = (function () {
             "" +
             " WHERE {{ ?id rdf:type ?type. " +
             filterStr +
-            "?id rdfs:label ?label  }} limit 10000";
+            "?id " +
+            labelProperty +
+            " ?label  }} limit 10000";
         var url = Config.sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             if (err) {
@@ -2614,7 +2619,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getDataTypePropertyValues = function (sourceLabel, propertyboUri, callback) {
+    self.getDataTypePropertyValues = function (sourceLabel, propertyUri, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel);
 
         var query =

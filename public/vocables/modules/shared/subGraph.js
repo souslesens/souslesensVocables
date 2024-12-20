@@ -126,37 +126,6 @@ var SubGraph = (function () {
                     );
                 },
 
-                // remove superClasses redandant Restrictions
-                function (callbackSeries) {
-                    return callbackSeries();
-                    //   remove ancestors restrcition target (keep the first one
-                    for (var property in allProperties) {
-                        allProperties[property].forEach(function (item) {
-                            if (!filteredProperties[property]) {
-                                filteredProperties[property] = allProperties[property][0].sourceClass;
-                            }
-                        });
-                    }
-
-                    var filteredRestrictions = [];
-                    for (var restriction in allRestrictions) {
-                        for (var property in allRestrictions[restriction]) {
-                            allRestrictions[restriction][property].forEach(function (item, index) {
-                                if (property == "http://rds.posccaesar.org/ontology/lis14/rdl/hasPhysicalQuantity") {
-                                } else {
-                                    //  if ([allProperties[property]] == item.sourceClass) {
-                                    if (allClasses[item.sourceClass] == item.sourceClass) {
-                                        delete allRestrictions[restriction][property][index];
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    var y = filteredProperties;
-                    callbackSeries();
-                },
-
                 function (callbackSeries) {
                     var uris = Object.keys(allClasses).concat(Object.keys(allRestrictions));
                     var filter = Sparql_common.setFilter("s", uris);
@@ -277,9 +246,6 @@ var SubGraph = (function () {
         }
 
         self.classUri = _classUri;
-        if (!self.classUri) {
-            self.classUri = "http://tsf/resources/ontology/DEXPIProcess_gfi_2/TransportingFluidsActivity";
-        }
 
         Shacl.initSourceLabelPrefixes(sourceLabel);
 

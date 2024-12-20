@@ -25,10 +25,9 @@ var Containers_query = (function () {
             "SELECT distinct ?member ?memberLabel " +
             fromStr +
             " where {" +
-            "    ?member rdf:type ?memberType. " +
-            " OPTIONAL { ?member rdfs:label ?memberLabel}  " +
-            " FILTER (?memberType in(rdf:Bag,rdf:List))\n" +
-            "  filter (not exists{?parent rdfs:member ?member. ?parent rdf:type ?parentType  FILTER (?parentType in(rdf:Bag,rdf:List))})" +
+            " ?member rdfs:member ?x.\n" + // remove filter type rdf:Bag
+            "   OPTIONAL { ?member rdfs:label ?memberLabel}\n" +
+            "    filter (not exists{?parent rdfs:member ?member.}) \n" +
             filterStr +
             "    }";
 
@@ -51,7 +50,7 @@ var Containers_query = (function () {
         }
 
         if (!options.leaves) {
-            filter += " FILTER (?memberType in(rdf:Bag,rdf:List))";
+            filter += ""; // " FILTER (?memberType in(rdf:Bag,rdf:List))";
         }
 
         var pathOperator = "+";
@@ -129,14 +128,23 @@ var Containers_query = (function () {
             if (options.keepChild) {
                 childStr = "?child ?childLabel";
             }
+            var ancestorVars = "";
+            var ancestorClause = "";
+            if (options.keepAncestor) {
+                ancestorVars = "?ancestor ";
+                ancestorClause = " optional{?ancestor rdfs:member ?ancestorChild .}\n";
+            }
+
             var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-                "SELECT distinct ?ancestor ?ancestorChild ?ancestorChildLabel" +
+                "SELECT distinct " +
+                ancestorVars +
+                "?ancestorChild ?ancestorChildLabel" +
                 childStr +
                 fromStr +
                 "WHERE {\n" +
-                " optional{?ancestor rdfs:member ?ancestorChild .}\n" +
+                ancestorClause +
                 "  ?ancestorChild  rdfs:member" +
                 pathOperator +
                 " ?child.\n" +
@@ -203,7 +211,7 @@ var Containers_query = (function () {
 
         var filterLeaves = "";
         if (!options.leaves) {
-            filterLeaves = " FILTER (?memberType in(rdf:Bag,rdf:List))";
+            filterLeaves = ""; //" FILTER (?memberType in(rdf:Bag,rdf:List))";
         }
 
         //  var pathOperator = "+";

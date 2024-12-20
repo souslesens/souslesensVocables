@@ -1,6 +1,7 @@
 import _botEngine from "./_botEngine.js";
 import CommonBotFunctions from "./_commonBotFunctions.js";
 import CreateResource_bot from "./createResource_bot.js";
+import MappingsDetails from "../tools/mappingModeler/mappingsDetails.js";
 
 var MappingModeler_bot = (function () {
     var self = {};
@@ -25,11 +26,17 @@ var MappingModeler_bot = (function () {
     self.workflowColumnmMappingOther = {
         startFn: {
             _OR: {
-                "set other predicate": {
+                "add rdf:Type": {
+                    rdfTypeFn: {},
+                },
+                "add transform": {
+                    addTransformFn: {},
+                },
+                "add other predicate": {
                     listNonObjectPropertiesVocabsFn: {
                         listNonObjectPropertiesFn: {
                             listDatatypePropertyRangeFn: {
-                                dateTreatment: {
+                                choosedateTypeFn: {
                                     listTableColumnsFn: {},
                                 },
                             },
@@ -56,28 +63,13 @@ var MappingModeler_bot = (function () {
             },
         },
     };
-
-    /* self.workflowMappingDetail={
-        startFn: {rdfTypeFn: {
-                URItypeFn: {
-                    labelFn: self.workflowColumnmMappingOther
-                    
-                        
-                    
-                }
-            }
-        }
-    }*/
-
-    /*  self.workflow = {
-        initDataSources: {
-            listListDataSourceTypeFn: {
-                _OR: {
-                    Database: { listDatabaseSourcesFn: { listTablesFn: {} }, CSV: { listCSVsourcesFn: { listTablesFn: {} } } },
-                },
+    self.workflowCreateSpecificResource = {
+        startFn: {
+            rdfTypeFn: {
+                promptLabelFn: {},
             },
         },
-    };*/
+    };
 
     self.functionTitles = {
         _OR: "Select an option",
@@ -93,6 +85,8 @@ var MappingModeler_bot = (function () {
         listLitteralFormatFn: "choose date format",
         createSubPropertyFn: "Enter subProperty label",
         listTableColumnsFn: "Choose a  a column for predicate object ",
+
+        addTransformFn: "",
 
         /*  listVocabsFn: "Choose a source",
         listResourceTypesFn: "Choose a resource type",
@@ -111,13 +105,23 @@ var MappingModeler_bot = (function () {
         },
         rdfTypeFn: function () {
             var choices = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
+            self.params.addingType = true;
             _botEngine.showList(choices, "rdfType");
+        },
+        addTransformFn: function () {
+            MappingsDetails.showTansformDialog();
+
+            self.params.addingTransform = true;
+            _botEngine.end();
         },
 
         labelFn: function () {
             var choices = self.params.columns;
             choices.splice(0, 0, "");
             _botEngine.showList(choices, "rdfsLabel");
+        },
+        promptLabelFn: function () {
+            _botEngine.promptValue("enter resource label", "rdfsLabel");
         },
 
         listNonObjectPropertiesVocabsFn: function () {
@@ -130,7 +134,7 @@ var MappingModeler_bot = (function () {
 
             CommonBotFunctions.listNonObjectPropertiesFn(self.params.nonObjectPropertyVocab, "nonObjectPropertyId", columnRdfType);
         },
-        dateTreatment: function () {
+        choosedateTypeFn: function () {
             var datatypePropertyRange = _botEngine.currentBot.params.datatypePropertyRange;
             if (datatypePropertyRange != "xsd:dateTime") {
                 return _botEngine.nextStep();

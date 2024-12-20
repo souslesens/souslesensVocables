@@ -76,20 +76,25 @@ var KGquery_graph = (function () {
                     var visjsGraphFileName = source + "_KGmodelGraph.json";
 
                     KGquery_graph.message("loading graph display");
-                    self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
-                        if (err) {
-                            return callbackSeries("notFound");
+                    self.KGqueryGraph.loadGraph(
+                        visjsGraphFileName,
+                        null,
+                        function (err, result) {
+                            if (err) {
+                                return callbackSeries("notFound");
 
-                            //self.DrawImportsCommonGraph(source);
-                            ///  return callbackSeries("generate commonGraph");
-                        }
-                        visjsData = result;
-                        if (result && result.options && result.options.output) {
-                            display = result.options.output;
-                        }
+                                //self.DrawImportsCommonGraph(source);
+                                ///  return callbackSeries("generate commonGraph");
+                            }
+                            visjsData = result;
+                            if (result && result.options && result.options.output) {
+                                display = result.options.output;
+                            }
 
-                        return callbackSeries();
-                    });
+                            return callbackSeries();
+                        },
+                        true
+                    );
                 },
                 //inferred
                 function (callbackSeries) {

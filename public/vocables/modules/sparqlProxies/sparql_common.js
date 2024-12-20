@@ -715,7 +715,6 @@ var Sparql_common = (function () {
                     lastSep = uri.lastIndexOf("/");
                 }
 
-
                 if (lastSep == uri.length - 1) {
                     return;
                 }
@@ -745,16 +744,14 @@ var Sparql_common = (function () {
         var prefixesStr = query.substring(0, whereIndex);
         var whereStr = query.substring(whereIndex);
         Object.keys(Config.basicVocabularies).forEach(function (vocab) {
-            var currentPrefix= "PREFIX " + vocab + ": <" + Config.basicVocabularies[vocab].graphUri + ">\n";
-            var regex = new RegExp("prefix\\s*"+vocab+":","gm");
-            if(!prefixesStr.toLowerCase().match(regex)){
+            var currentPrefix = "PREFIX " + vocab + ": <" + Config.basicVocabularies[vocab].graphUri + ">\n";
+            var regex = new RegExp("prefix\\s*" + vocab + ":", "gm");
+            if (!prefixesStr.toLowerCase().match(regex)) {
                 prefixesStr = currentPrefix + prefixesStr;
             }
         });
-        query=prefixesStr + whereStr;
+        query = prefixesStr + whereStr;
         return query;
-
-
     };
 
     self.getIntFromTypeLiteral = function (value) {

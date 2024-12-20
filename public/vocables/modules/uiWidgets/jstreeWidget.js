@@ -2,7 +2,6 @@ var JstreeWidget = (function () {
     var self = {};
 
     self.types = {
-
         Thesaurus: {
             icon: "../icons/thesaurus.png",
         },
@@ -711,8 +710,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         if (!Array.isArray(newData)) {
             return;
         }
-        if(!options)
-            options={}
+        if (!options) options = {};
         var newData2 = JSON.parse(JSON.stringify(newData));
         var keyToKeep = ["data", "text", "id", "parent"];
         newData2.forEach(function (item) {

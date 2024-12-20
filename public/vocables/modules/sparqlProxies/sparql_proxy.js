@@ -112,9 +112,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
                 headers = { "Content-Type": "text/turtle; charset=UTF-8" };
             }
 
-            query=Sparql_common.addBasicVocabulariesPrefixes(query)
-
-
+            query = Sparql_common.addBasicVocabulariesPrefixes(query);
 
             var body = {
                 params: { query: query, useProxy: useProxy },

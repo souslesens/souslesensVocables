@@ -462,7 +462,7 @@ var KGcreator = (function () {
                 }
                 JstreeWidget.loadJsTree(jstreeDivId, jstreeData, options);
                 if (callback) {
-                    return callback(err,self.currentConfig);
+                    return callback(err, self.currentConfig);
                 }
             }
         );

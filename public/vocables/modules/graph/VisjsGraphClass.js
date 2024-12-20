@@ -205,7 +205,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 var fixed = false;
 
                 newNodes.push({ id: nodeId, fixed: fixed });
-               self.data.nodes.update(newNodes);
+                self.data.nodes.update(newNodes);
                 /*self.network.setOptions({ physics: {enabled: true,
                     stabilization: {
                       enabled: true,
@@ -223,11 +223,10 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 //self.network.setOptions({ physics: { enabled: false } });
 
                 var startNode = self.data.nodes.get(params.nodes[0]);
-                if(!startNode )
-                    return;
+                if (!startNode) return;
 
                 //move nodes of same group together
-                if ( startNode.group && !params.event.srcEvent.ctrlKey) {
+                if (startNode.group && !params.event.srcEvent.ctrlKey) {
                     self.movingNodeEndPosition = self.network.getPositions(params.nodes[0]);
                     var offset = { x: self.movingNodeEndPosition.x - self.movingNodeStartPosition.x, y: self.movingNodeEndPosition.y - self.movingNodeStartPosition.y };
 
@@ -684,9 +683,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             if (!node && self.network.isCluster(nodeId)) {
                 if (_options.onClusterClickFn) {
                     return _options.onClusterClickFn(nodeId, point, options);
-                }else{
+                } else {
                     if (_options.onclickFn) {
-                        return   _options.onclickFn({id:nodeId}, point, options);
+                        return _options.onclickFn({ id: nodeId }, point, options);
                     }
                 }
             }
@@ -903,7 +902,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
-
     self.saveGraph = function (fileName, raw) {
         if (!self.currentContext) {
             return;
@@ -1001,7 +999,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                         if (positions[node.id]) {
                             node.x = positions[node.id].x;
                             node.y = positions[node.id].y;
-
                         }
                         visjsData.nodes.push(node);
                     }
@@ -1014,7 +1011,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     }
                 });
 
-                if (dontDraw &&  callback) {
+                if (dontDraw && callback) {
                     return callback(null, visjsData);
                 }
 
@@ -1035,11 +1032,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                         self.network.fit();
                         if (callback) return callback(null, visjsData);
                     } else {
-
                         self.draw(function () {
-
                             self.network.fit();
-                            if (callback)  return callback(null, visjsData);
+                            if (callback) return callback(null, visjsData);
                         });
                     }
 
@@ -1133,7 +1128,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             width: 550,
             modal: false,
             title: "Graph parameters",
-
         });
     };
 };

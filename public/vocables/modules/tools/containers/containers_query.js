@@ -25,10 +25,9 @@ var Containers_query = (function () {
             "SELECT distinct ?member ?memberLabel " +
             fromStr +
             " where {" +
-            " ?member rdfs:member ?x.\n" +// remove filter type rdf:Bag
+            " ?member rdfs:member ?x.\n" + // remove filter type rdf:Bag
             "   OPTIONAL { ?member rdfs:label ?memberLabel}\n" +
             "    filter (not exists{?parent rdfs:member ?member.}) \n" +
-
             filterStr +
             "    }";
 
@@ -51,7 +50,7 @@ var Containers_query = (function () {
         }
 
         if (!options.leaves) {
-            filter +="";// " FILTER (?memberType in(rdf:Bag,rdf:List))";
+            filter += ""; // " FILTER (?memberType in(rdf:Bag,rdf:List))";
         }
 
         var pathOperator = "+";
@@ -212,7 +211,7 @@ var Containers_query = (function () {
 
         var filterLeaves = "";
         if (!options.leaves) {
-            filterLeaves = "";//" FILTER (?memberType in(rdf:Bag,rdf:List))";
+            filterLeaves = ""; //" FILTER (?memberType in(rdf:Bag,rdf:List))";
         }
 
         //  var pathOperator = "+";

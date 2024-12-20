@@ -235,8 +235,6 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         value={source.prefix}
                     />
                     <Autocomplete
-                        autoSelect
-                        disableCloseOnSelect
                         freeSolo
                         id="group"
                         onChange={(_e, value) => handleField("group", value)}

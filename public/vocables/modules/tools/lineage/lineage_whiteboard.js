@@ -1402,10 +1402,9 @@ var Lineage_whiteboard = (function () {
         if (nodeIds) {
             parentIds = nodeIds;
         } else {
-            if(!self.lineageVisjsGraph.data || !self.lineageVisjsGraph.data.nodes){
-                if(callback)
-                    return callback();
-                return ;
+            if (!self.lineageVisjsGraph.data || !self.lineageVisjsGraph.data.nodes) {
+                if (callback) return callback();
+                return;
             }
 
             parentIds = [];

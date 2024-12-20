@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.98.0](https://github.com/souslesens/souslesensVocables/compare/1.97.0...1.98.0) (2024-12-20)
+
+
+### Features
+
+* **api:** GET and POST metadata ([7139090](https://github.com/souslesens/souslesensVocables/commit/713909009988bb0308a7abcbb756b27c4adb1c8e))
+* **mainapp/graphManagement:** disable metadata editing for read only sources ([ba37ba7](https://github.com/souslesens/souslesensVocables/commit/ba37ba752eaa6d012d8932e7ff2ba1d82a923b77))
+* **mainapp/graphManagement:** display metadata modal ([98b4cdf](https://github.com/souslesens/souslesensVocables/commit/98b4cdf8522a7dc92acc018fb45802b7b4d3adbb))
+
 ## [1.97.0](https://github.com/souslesens/souslesensVocables/compare/1.96.0...1.97.0) (2024-12-20)
 
 

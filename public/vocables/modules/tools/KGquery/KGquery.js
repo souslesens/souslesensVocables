@@ -540,7 +540,7 @@ var KGquery = (function () {
                         query: query,
                         source: self.currentSource,
                     };
-                    query = Sparql_common.setPrefixesInSelectQuery(query);
+                    // query = Sparql_common.setPrefixesInSelectQuery(query);
 
                     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: self.currentSource, caller: "getObjectRestrictions" }, function (err, result) {
                         if (err) {

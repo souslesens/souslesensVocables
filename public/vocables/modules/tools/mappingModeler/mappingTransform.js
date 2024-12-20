@@ -106,9 +106,9 @@ var MappingTransform = (function () {
             }
             if (data.rdfType) {
                 var predicate = "rdf:type";
-                if (data.rdfType == "owl:Class") {
+              /*  if (data.rdfType == "owl:Class") {
                     predicate = "rdfs:subClassOf";
-                }
+                }*/
 
                 allMappings[data.dataTable].tripleModels.push({
                     s: subject,

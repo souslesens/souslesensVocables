@@ -704,6 +704,8 @@ var Sparql_common = (function () {
     };
 
     self.setPrefixesInSelectQuery = function (query) {
+        return query;
+
         var whereIndex = query.toLowerCase().indexOf("where");
 
         var strWhere = query.substring(whereIndex);

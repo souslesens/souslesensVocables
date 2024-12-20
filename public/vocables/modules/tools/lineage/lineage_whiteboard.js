@@ -56,7 +56,7 @@ var Lineage_whiteboard = (function () {
     self.namedIndividualColor = "#0067bb";
     self.defaultNodeFontColor = "#343434";
     self.defaultEdgeFontColor = "#343434";
-    self.defaultLowOpacity = 0.35;
+    self.defaultLowOpacity = 0.50;
     self.decorationData = {};
     self.arrowTypes = {
         subClassOf: {

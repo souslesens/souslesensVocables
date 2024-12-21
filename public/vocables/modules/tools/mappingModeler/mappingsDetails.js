@@ -216,7 +216,7 @@ var MappingsDetails = (function () {
         });
         //rajouter toutes les colonnes en lien avec celle la et mettre celle qui nous intéresse en premier
 
-        KGcreator.showSampleData(self.currentTreeNode, column);
+        MappingModeler.showSampleData(self.currentTreeNode, column);
     };
 
     self.saveMappingsDetailsToVisjsGraph = function () {
@@ -508,12 +508,12 @@ var MappingsDetails = (function () {
             return;
         }
         var str = "if((mapping.isString||mapping.dataType) && role=='o') return value; else return '" + prefix + "-'+value;";
-        $("#KGcreator_fnBody").val(str);
+        $("#MappingModeler_fnBody").val(str);
     };
 
     self.testTransform = function () {
         //  display view sample triples with added transform for column mapping
-        var transformFnStr = $("#KGcreator_fnBody").val();
+        var transformFnStr = $("#MappingModeler_fnBody").val();
 
         transformFnStr = transformFnStr.replace(/"/g, "'");
 
@@ -539,7 +539,7 @@ var MappingsDetails = (function () {
         MappingModeler.viewSampleTriples(mappingWithTransform);
     };
     self.saveTransform = function () {
-        var transformFnStr = $("#KGcreator_fnBody").val();
+        var transformFnStr = $("#MappingModeler_fnBody").val();
 
         transformFnStr = transformFnStr.replace(/"/g, "'");
 

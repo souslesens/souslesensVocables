@@ -1,5 +1,5 @@
 import KGcreator_run from "../KGcreator/KGcreator_run.js";
-import KGcreator from "../KGcreator/KGcreator.js";
+
 import MappingTransform from "./mappingTransform.js";
 
 var TripleFactory = (function () {
@@ -33,7 +33,7 @@ var TripleFactory = (function () {
         var tables = [];
         if (!all) {
             if (!self.checkCurrentTable) return;
-            if (!confirm("Do you really want to delete  triples created with KGCreator in datasource " + KGcreator.currentConfig.currentDataSource.name)) {
+            if (!confirm("Do you really want to delete  triples created with KGCreator in datasource " + SourcesManager.currentConfig.currentDataSource.name)) {
                 return;
             }
 
@@ -41,7 +41,7 @@ var TripleFactory = (function () {
         }
 
         var payload = {
-            source: KGcreator.currentSlsvSource,
+            source: SourcesManager.currentSlsvSource,
             tables: JSON.stringify(tables),
         };
         UI.message("deleting KGcreator  triples...");
@@ -72,7 +72,7 @@ var TripleFactory = (function () {
             options = {};
         }
         if (!sampleData && table !== "*") {
-            if (!confirm("create triples for " + KGcreator.currentConfig.currentDataSource.name + " " + table || "")) {
+            if (!confirm("create triples for " + SourcesManager.currentConfig.currentDataSource.name + " " + table || "")) {
                 return;
             }
         }
@@ -97,8 +97,8 @@ var TripleFactory = (function () {
         }
 
         var payload = {
-            source: KGcreator.currentSlsvSource,
-            datasource: KGcreator.currentConfig.currentDataSource.name,
+            source: SourcesManager.currentSlsvSource,
+            datasource: SourcesManager.currentConfig.currentDataSource.name,
             table: table,
             options: JSON.stringify(options),
         };
@@ -118,9 +118,8 @@ var TripleFactory = (function () {
                         $("#KGcreator_infosDiv").val(result.result);
                         UI.message(result.result, true);
                     } else {
-                        var message = result.result + " triples created in graph " + KGcreator.currentConfig.graphUri;
+                        var message = result.result + " triples created in graph " + SourcesManager.currentConfig.graphUri;
                         alert(message);
-                        //  $("#KGcreator_infosDiv").val(result.result + " triples created in graph " + KGcreator.currentConfig.graphUri);
                         UI.message(message, true);
                     }
                 }
@@ -138,10 +137,10 @@ var TripleFactory = (function () {
     };
 
     self.createAllMappingsTriples = function () {
-        if (!confirm("generate KGcreator triples of datasource " + KGcreator.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
+        if (!confirm("generate KGcreator triples of datasource " + SourcesManager.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
             return;
         }
-        //UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initRunTab, "#RunButton");
+
         $("#KGcreator_infosDiv").val("generating KGcreator triples form all mappings ");
         async.series(
             [

@@ -844,9 +844,9 @@ var Axiom_activeLegend = (function () {
         var newNodes = [];
         Axioms_graph.axiomsVisjsGraph.data.nodes.forEach(function (node) {
             if (node.id != self.newAxiomNode.id) {
-                var color = common.colorToRgba(node.color, Lineage_whiteboard.defaultLowOpacity);
-                var fontColor = common.colorToRgba(Lineage_whiteboard.defaultNodeFontColor, Lineage_whiteboard.defaultLowOpacity);
-                var opacity = 0.3;
+                var color = common.colorToRgba(node.color,1);
+                var fontColor = common.colorToRgba(Lineage_whiteboard.defaultNodeFontColor, 1);
+                var opacity =  Lineage_whiteboard.defaultLowOpacity;
 
                 newNodes.push({
                     id: node.id,

@@ -199,7 +199,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                     return;
                 }
 
-                self.movingNodeStartPosition = self.network.getPositions(nodeId);
+                self.movingNodeStartPosition = self.network.getPosition(nodeId);
                 //   var nodes = self.data.nodes.getIds();
                 var newNodes = [];
                 var fixed = false;
@@ -227,13 +227,13 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
                 //move nodes of same group together
                 if (startNode.group && !params.event.srcEvent.ctrlKey) {
-                    self.movingNodeEndPosition = self.network.getPositions(params.nodes[0]);
+                    self.movingNodeEndPosition = self.network.getPosition(params.nodes[0]);
                     var offset = { x: self.movingNodeEndPosition.x - self.movingNodeStartPosition.x, y: self.movingNodeEndPosition.y - self.movingNodeStartPosition.y };
 
                     var newNodes = [];
                     self.data.nodes.get().forEach(function (node) {
                         if (node.group == startNode.group && startNode.id != node.id) {
-                            var position = self.network.getPositions(node.id);
+                            var position = self.network.getPosition(node.id);
                             newNodes.push({ id: node.id, x: position.x + offset.x, y: position.y + offset.y, fixed: true, color: node.color });
                         }
                     });

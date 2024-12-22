@@ -106,6 +106,16 @@ var SourcesManager = (function () {
                     };
                     return items;
                 }
+             else if (true) {
+            items.csvSources = {
+                label: "show SampleData",
+                action: function (_e) {
+                    MappingModeler.showSampleData();
+
+                },
+            };
+            return items;
+        }
             },
         };
         self.dataSourcejstreeDivId = "mappingModeler_jstreeDiv";

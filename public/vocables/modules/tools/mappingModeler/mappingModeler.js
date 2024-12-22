@@ -767,6 +767,7 @@ var MappingModeler = (function () {
         if (target == "triples") {
         }
 
+
         $("#MappingModeler_leftTabs").tabs("option", "active", tabsArray.indexOf(target));
     };
 
@@ -1042,6 +1043,7 @@ var MappingModeler = (function () {
         if (obj.node.data.type == "databaseSource") {
             SourcesManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
             SourcesManager.loadDataBaseSource(SourcesManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
+            MappingModeler.switchLeftPanel("mappings");
         } else if (obj.node.data.type == "csvSource") {
             SourcesManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
             var fileName = SourcesManager.currentSlsvSource;
@@ -1057,6 +1059,7 @@ var MappingModeler = (function () {
                 };
                 self.loadSuggestionSelectJstree(columns, "Columns");
                 MappingModeler.switchLeftPanel("mappings");
+
 
             });
         } else if (obj.node.data.type == "table") {
@@ -1074,7 +1077,7 @@ var MappingModeler = (function () {
             //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         }
 
-        $("#MappingModeler_currentDataSource").html(SourcesManager.currentDataSource);
+        $("#MappingModeler_currentDataSource").html(SourcesManager.currentConfig.currentDataSource.name);
     };
 
 

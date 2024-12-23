@@ -543,7 +543,7 @@ var Axiom_activeLegend = (function () {
                 label: item.label,
                 shape: "box",
                 color: item.color,
-                size: 8,
+                size:item.size || 8,
                 level: -1,
                 font: {
                     bold: true,
@@ -560,7 +560,7 @@ var Axiom_activeLegend = (function () {
                 fixed: { x: true, y: true },
             });
             if (options.horizontal) {
-                options.xOffset += 100;
+                options.xOffset += 90;
             } else {
                 yOffset += 50;
             }

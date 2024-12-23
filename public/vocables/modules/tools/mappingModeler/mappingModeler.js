@@ -23,7 +23,7 @@ var MappingModeler = (function () {
     self.legendGraphDivId = "nodeInfosAxioms_activeLegendDiv";
     self.legendItemsArray = [
         //{ label: "Table", color: "#a8da83", shape: "ellipse" },
-        {label: "Column", color: "#cb9801", shape: "ellipse"},
+        {label: "Column", color: "#cb9801", shape: "ellipse",size:14},
         {label: "RowIndex", color: "#cb9801", shape: "triangle"},
         {label: "VirtualColumn", color: "#cb9801", shape: "square"},
         {label: "URI", color: "#bc7dec", shape: "square"},
@@ -1307,20 +1307,20 @@ var MappingModeler = (function () {
             return;
         }
 
-        if (self.currentConfig.currentDataSource.sampleData) {
-            showTable(self.currentConfig.currentDataSource.sampleData);
-        } else if (self.currentConfig.currentDataSource.type == "databaseSource") {
+        if (SourcesManager.currentConfig.currentDataSource.sampleData) {
+            showTable(SourcesManager.currentConfig.currentDataSource.sampleData);
+        } else if (SourcesManager.currentConfig.currentDataSource.type == "databaseSource") {
             if (!node || !node.data) {
                 return alert("not implemented yet for databases");
             }
             var size = 200;
             var sqlQuery = "select top  " + size + "* from " + node.data.id;
-            if (self.currentConfig.currentDataSource.sqlType == "postgres") {
+            if (SourcesManager.currentConfig.currentDataSource.sqlType == "postgres") {
                 sqlQuery = "select   " + "* from public." + node.data.id + " LIMIT " + size;
             }
             const params = new URLSearchParams({
-                type: self.currentConfig.currentDataSource.sqlType,
-                dbName: self.currentConfig.currentDataSource.name,
+                type: SourcesManager.currentConfig.currentDataSource.sqlType,
+                dbName: SourcesManager.currentConfig.currentDataSource.name,
                 sqlQuery: sqlQuery,
             });
 
@@ -1336,7 +1336,7 @@ var MappingModeler = (function () {
                     return alert(err.responseText);
                 },
             });
-        } else if (self.currentConfig.currentDataSource.type == "csvSource") {
+        } else if (SourcesManager.currentConfig.currentDataSource.type == "csvSource") {
             alert("Comming Soon...");
         }
     };

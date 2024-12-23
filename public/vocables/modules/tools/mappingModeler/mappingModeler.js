@@ -55,8 +55,8 @@ var MappingModeler = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    SourcesManager.currentSlsvSource = self.currentSource;
-                    SourcesManager.getSlsvSourceConfig(self.currentSource, function (err, result) {
+                    DataSourceManager.currentSlsvSource = self.currentSource;
+                    DataSourceManager.getSlsvSourceConfig(self.currentSource, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -69,7 +69,7 @@ var MappingModeler = (function () {
                 function (callbackSeries) {
                     $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
                         $("#MappingModeler_leftTabs").tabs({});
-                        SourcesManager.loaDataSourcesJstree(self.jstreeDivId, function (err) {
+                        DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, function (err) {
                             return callbackSeries();
                         })
                     });
@@ -1006,10 +1006,10 @@ var MappingModeler = (function () {
                 var tables = [];
                 var map = {};
                 var index = 0;
-                for (var table in SourcesManager.currentConfig.csvSources) {
+                for (var table in DataSourceManager.currentConfig.csvSources) {
                     var clusterOptionsByData = {
                         joinCondition: function (node) {
-                            if (node.data && node.data.dataTable == table && table != SourcesManager.currentConfig.currentDataSource.name) {
+                            if (node.data && node.data.dataTable == table && table != DataSourceManager.currentConfig.currentDataSource.name) {
                                 if (!map[node.id]) {
                                     map[node.id] = 1;
                                     return true;
@@ -1041,13 +1041,13 @@ var MappingModeler = (function () {
 
 
         if (obj.node.data.type == "databaseSource") {
-            SourcesManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
-            SourcesManager.loadDataBaseSource(SourcesManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
+            DataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
+            DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
             MappingModeler.switchLeftPanel("mappings");
         } else if (obj.node.data.type == "csvSource") {
-            SourcesManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
-            var fileName = SourcesManager.currentSlsvSource;
-            SourcesManager.loadCsvSource(SourcesManager.currentSlsvSource, obj.node.id, false, function (err, columns) {
+            DataSourceManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
+            var fileName = DataSourceManager.currentSlsvSource;
+            DataSourceManager.loadCsvSource(DataSourceManager.currentSlsvSource, obj.node.id, false, function (err, columns) {
                 if (err) {
                     return alert("file not found");
                 }
@@ -1065,10 +1065,10 @@ var MappingModeler = (function () {
         } else if (obj.node.data.type == "table") {
             self.currentTable = {
                 name: obj.node.data.label,
-                columns: SourcesManager.currentConfig.currentDataSource.tables[obj.node.data.id],
+                columns: DataSourceManager.currentConfig.currentDataSource.tables[obj.node.data.id],
             };
             var table = obj.node.data.id;
-            SourcesManager.currentConfig.currentDataSource.currentTable = table;
+            DataSourceManager.currentConfig.currentDataSource.currentTable = table;
 
             self.hideForbiddenResources("Table");
             self.currentResourceType = "Column";
@@ -1077,7 +1077,7 @@ var MappingModeler = (function () {
             //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
         }
 
-        $("#MappingModeler_currentDataSource").html(SourcesManager.currentConfig.currentDataSource.name);
+        $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
     };
 
 
@@ -1307,20 +1307,20 @@ var MappingModeler = (function () {
             return;
         }
 
-        if (SourcesManager.currentConfig.currentDataSource.sampleData) {
-            showTable(SourcesManager.currentConfig.currentDataSource.sampleData);
-        } else if (SourcesManager.currentConfig.currentDataSource.type == "databaseSource") {
+        if (DataSourceManager.currentConfig.currentDataSource.sampleData) {
+            showTable(DataSourceManager.currentConfig.currentDataSource.sampleData);
+        } else if (DataSourceManager.currentConfig.currentDataSource.type == "databaseSource") {
             if (!node || !node.data) {
                 return alert("not implemented yet for databases");
             }
             var size = 200;
             var sqlQuery = "select top  " + size + "* from " + node.data.id;
-            if (SourcesManager.currentConfig.currentDataSource.sqlType == "postgres") {
+            if (DataSourceManager.currentConfig.currentDataSource.sqlType == "postgres") {
                 sqlQuery = "select   " + "* from public." + node.data.id + " LIMIT " + size;
             }
             const params = new URLSearchParams({
-                type: SourcesManager.currentConfig.currentDataSource.sqlType,
-                dbName: SourcesManager.currentConfig.currentDataSource.name,
+                type: DataSourceManager.currentConfig.currentDataSource.sqlType,
+                dbName: DataSourceManager.currentConfig.currentDataSource.name,
                 sqlQuery: sqlQuery,
             });
 
@@ -1336,7 +1336,7 @@ var MappingModeler = (function () {
                     return alert(err.responseText);
                 },
             });
-        } else if (SourcesManager.currentConfig.currentDataSource.type == "csvSource") {
+        } else if (DataSourceManager.currentConfig.currentDataSource.type == "csvSource") {
             alert("Comming Soon...");
         }
     };
@@ -1374,13 +1374,13 @@ var MappingModeler = (function () {
             },
             beforeClose: function () {
                 self.umountKGUploadApp();
-                SourcesManager.currentSlsvSource = self.currentSource;
-                SourcesManager.getSlsvSourceConfig(self.currentSource, function (err, result) {
+                DataSourceManager.currentSlsvSource = self.currentSource;
+                DataSourceManager.getSlsvSourceConfig(self.currentSource, function (err, result) {
                     if (err) {
                         return err;
                     }
 
-                    SourcesManager.currentConfig = result;
+                    DataSourceManager.currentConfig = result;
                 });
             },
         });
@@ -1400,9 +1400,9 @@ var MappingModeler = (function () {
         if (!datasource.id) {
             datasource = {id: datasource, name: datasource}
         }
-        SourcesManager.currentConfig.databaseSources[datasource.id] = {name: datasource.name};
-        SourcesManager.rawConfig.databaseSources[datasource.id] = {name: datasource.name};
-        SourcesManager.saveSlsvSourceConfig(function (err, result) {
+        DataSourceManager.currentConfig.databaseSources[datasource.id] = {name: datasource.name};
+        DataSourceManager.rawConfig.databaseSources[datasource.id] = {name: datasource.name};
+        DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
                 return alert(err);
             }
@@ -1420,10 +1420,10 @@ var MappingModeler = (function () {
             return;
         }
 
-        SourcesManager.currentConfig.csvSources[datasourceName] = {};
-        SourcesManager.rawConfig = SourcesManager.currentConfig;
+        DataSourceManager.currentConfig.csvSources[datasourceName] = {};
+        DataSourceManager.rawConfig = DataSourceManager.currentConfig;
 
-        SourcesManager.saveSlsvSourceConfig(function (err, result) {
+        DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
                 return alert(err);
             }

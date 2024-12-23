@@ -33,7 +33,7 @@ var TripleFactory = (function () {
         var tables = [];
         if (!all) {
             if (!self.checkCurrentTable) return;
-            if (!confirm("Do you really want to delete  triples created with KGCreator in datasource " + SourcesManager.currentConfig.currentDataSource.name)) {
+            if (!confirm("Do you really want to delete  triples created with KGCreator in datasource " + DataSourceManager.currentConfig.currentDataSource.name)) {
                 return;
             }
 
@@ -41,7 +41,7 @@ var TripleFactory = (function () {
         }
 
         var payload = {
-            source: SourcesManager.currentSlsvSource,
+            source: DataSourceManager.currentSlsvSource,
             tables: JSON.stringify(tables),
         };
         UI.message("deleting KGcreator  triples...");
@@ -72,7 +72,7 @@ var TripleFactory = (function () {
             options = {};
         }
         if (!sampleData && table !== "*") {
-            if (!confirm("create triples for " + SourcesManager.currentConfig.currentDataSource.name + " " + table || "")) {
+            if (!confirm("create triples for " + DataSourceManager.currentConfig.currentDataSource.name + " " + table || "")) {
                 return;
             }
         }
@@ -97,8 +97,8 @@ var TripleFactory = (function () {
         }
 
         var payload = {
-            source: SourcesManager.currentSlsvSource,
-            datasource: SourcesManager.currentConfig.currentDataSource.name,
+            source: DataSourceManager.currentSlsvSource,
+            datasource: DataSourceManager.currentConfig.currentDataSource.name,
             table: table,
             options: JSON.stringify(options),
         };
@@ -118,7 +118,7 @@ var TripleFactory = (function () {
                         $("#KGcreator_infosDiv").val(result.result);
                         UI.message(result.result, true);
                     } else {
-                        var message = result.result + " triples created in graph " + SourcesManager.currentConfig.graphUri;
+                        var message = result.result + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
                         alert(message);
                         UI.message(message, true);
                     }
@@ -137,7 +137,7 @@ var TripleFactory = (function () {
     };
 
     self.createAllMappingsTriples = function () {
-        if (!confirm("generate KGcreator triples of datasource " + SourcesManager.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
+        if (!confirm("generate KGcreator triples of datasource " + DataSourceManager.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
             return;
         }
 

@@ -1,12 +1,12 @@
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
-import KGcreator_mappings from "../KGcreator/KGcreator_mappings.js";
 
 
 
 
 
 
-var SourcesManager = (function () {
+
+var DataSourceManager = (function () {
     var self = {}
     self.currentConfig = {};
     self.currentSlsvSource = {};
@@ -328,8 +328,8 @@ var SourcesManager = (function () {
  
 
     self.saveSlsvSourceConfig = function (callback) {
-        var data = SourcesManager.rawConfig;
-        var source = SourcesManager.currentSlsvSource;
+        var data = DataSourceManager.rawConfig;
+        var source = DataSourceManager.currentSlsvSource;
 
         var payload = {
             dir: mappingsDir + "/" + source,
@@ -354,5 +354,5 @@ var SourcesManager = (function () {
 
 })()
 
-export default SourcesManager
-window.SourcesManager = SourcesManager
+export default DataSourceManager
+window.DataSourceManager = DataSourceManager

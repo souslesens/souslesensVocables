@@ -76,9 +76,13 @@ var MappingTransform = (function () {
             colname = data.id + "_$";
         } else if (data.uriType == "randomIdentifier") {
             colname = data.id + "_£";
-        } else if (data.uriType == "fromLabel") {
+        } else{
             colname = data.id;
         }
+        /*
+        else if (data.uriType == "fromLabel") {
+            colname = data.id;
+        }*/
 
         if (colname && data.type == "VirtualColumn") {
             colname = "@" + colname;

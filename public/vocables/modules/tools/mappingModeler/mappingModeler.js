@@ -31,15 +31,7 @@ var MappingModeler = (function () {
         {label: "Class", color: "#00afef", shape: "box"},
     ];
 
-    self.umountKGUploadApp = null;
-
-
-    self.uploadFormData = {
-        displayForm: "", // can be database, file or ""
-        currentSource: "",
-        selectedDatabase: "",
-        selectedFiles: [],
-    };
+   
 
 
     self.onLoaded = function () {
@@ -1006,10 +998,14 @@ var MappingModeler = (function () {
                 var tables = [];
                 var map = {};
                 var index = 0;
-                for (var table in DataSourceManager.currentConfig.csvSources) {
+                var dataTables=self.visjsGraph.data.nodes.get().map(function (node) {return node.data.dataTable;});
+                dataTables=common.array.distinctValues(dataTables);
+                dataTables=dataTables.filter(function (item) {return item!=undefined});
+                for (var tableIndex in dataTables) {
+                    var table = dataTables[tableIndex];
                     var clusterOptionsByData = {
                         joinCondition: function (node) {
-                            if (node.data && node.data.dataTable == table && table != DataSourceManager.currentConfig.currentDataSource.name) {
+                            if (node.data && node.data.dataTable == table && table != MappingModeler.currentTable.name) {
                                 if (!map[node.id]) {
                                     map[node.id] = 1;
                                     return true;
@@ -1027,9 +1023,11 @@ var MappingModeler = (function () {
                             y: -500,
                             x: index++ * 200 - 400,
                             fixed: {x: true, y: true},
+                           
                         },
-                    };
 
+                    };
+                   
                     self.visjsGraph.network.clustering.cluster(clusterOptionsByData);
                 }
             });
@@ -1043,7 +1041,7 @@ var MappingModeler = (function () {
         if (obj.node.data.type == "databaseSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
             DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
-            MappingModeler.switchLeftPanel("mappings");
+            //MappingModeler.switchLeftPanel("mappings");
         } else if (obj.node.data.type == "csvSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
             var fileName = DataSourceManager.currentSlsvSource;
@@ -1070,7 +1068,7 @@ var MappingModeler = (function () {
             var table = obj.node.data.id;
             DataSourceManager.currentConfig.currentDataSource.currentTable = table;
 
-            self.hideForbiddenResources("Table");
+            //self.hideForbiddenResources("Table");
             self.currentResourceType = "Column";
             self.loadSuggestionSelectJstree(self.currentTable.columns, "Columns");
             MappingModeler.switchLeftPanel("mappings");
@@ -1341,95 +1339,6 @@ var MappingModeler = (function () {
         }
     };
 
-
-    /*********************************************************************************/
-    /***functions linked to REACT**/
-    // see assets/mappingModeler_upload_app.js
-    /***********************************************************************************/
-// imports React app
-    import("/assets/mappingModeler_upload_app.js");
-
-
-    self.displayUploadApp = function (displayForm) {
-        self.uploadFormData.displayForm = displayForm;
-        //   return   $.getScript("/kg_upload_app.js");
-        if (!displayForm) {
-            return;
-        }
-        if (displayForm == "database") {
-            self.uploadFormData.selectedFiles = null
-        }
-        var html = ' <div style="width:500px;height: 400px" id="mount-mappingModeler-upload-app-here"></div>';
-        $("#smallDialogDiv").html(html);
-
-        $("#smallDialogDiv").dialog({
-            open: function (event, ui) {
-                if (MappingModeler.createApp === null) {
-                    throw new Error("React app is not initialized see assets/mappingModeler_upload_app.js");
-                }
-
-                self.uploadFormData.currentSource = self.currentSource;
-
-                self.umountKGUploadApp = self.createApp(self.uploadFormData);
-            },
-            beforeClose: function () {
-                self.umountKGUploadApp();
-                DataSourceManager.currentSlsvSource = self.currentSource;
-                DataSourceManager.getSlsvSourceConfig(self.currentSource, function (err, result) {
-                    if (err) {
-                        return err;
-                    }
-
-                    DataSourceManager.currentConfig = result;
-                });
-            },
-        });
-        $("#smallDialogDiv").dialog("open");
-    };
-
-
-    self.createDataBaseSourceMappings = function () {
-        // hide uploadApp
-        self.displayUploadApp("");
-        $("#smallDialogDiv").dialog("close");
-
-        var datasource = self.uploadFormData.selectedDatabase;
-        if (!datasource) {
-            return;
-        }
-        if (!datasource.id) {
-            datasource = {id: datasource, name: datasource}
-        }
-        DataSourceManager.currentConfig.databaseSources[datasource.id] = {name: datasource.name};
-        DataSourceManager.rawConfig.databaseSources[datasource.id] = {name: datasource.name};
-        DataSourceManager.saveSlsvSourceConfig(function (err, result) {
-            if (err) {
-                return alert(err);
-            }
-            MappingModeler.onLoaded();
-            // self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
-        });
-    };
-
-    self.createCsvSourceMappings = function () {
-        // hide uploadApp
-        self.displayUploadApp("");
-        $("#smallDialogDiv").dialog("close");
-        var datasourceName = self.uploadFormData.selectedFiles[0];
-        if (!datasourceName) {
-            return;
-        }
-
-        DataSourceManager.currentConfig.csvSources[datasourceName] = {};
-        DataSourceManager.rawConfig = DataSourceManager.currentConfig;
-
-        DataSourceManager.saveSlsvSourceConfig(function (err, result) {
-            if (err) {
-                return alert(err);
-            }
-            MappingModeler.onLoaded();
-        });
-    };
 
 
     return self;

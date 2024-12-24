@@ -1,4 +1,5 @@
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
+import MappingModeler from "./mappingModeler.js";
 
 
 
@@ -13,9 +14,17 @@ var DataSourceManager = (function () {
 
 
     var mappingsDir = "mappings";
+    self.umountKGUploadApp = null;
 
 
+    self.uploadFormData = {
+        displayForm: "", // can be database, file or ""
+        currentSource: "",
+        selectedDatabase: "",
+        selectedFiles: [],
+    };
 
+    self.createApp = null;
     self.getSlsvSourceConfig = function (source, callback) {
         var payload = {
             dir: mappingsDir + "/" + source,
@@ -90,7 +99,7 @@ var DataSourceManager = (function () {
                     items.addDatabaseSource = {
                         label: "addDatabaseSources",
                         action: function (_e) {
-                            MappingModeler.displayUploadApp("database");
+                            self.displayUploadApp("database");
 
                         },
                     };
@@ -100,7 +109,7 @@ var DataSourceManager = (function () {
                         label: "add Csv Sources",
                         action: function (_e) {
                             // pb avec source
-                            MappingModeler.displayUploadApp("file");
+                            self.displayUploadApp("file");
 
                         },
                     };
@@ -192,14 +201,23 @@ var DataSourceManager = (function () {
 
     self.initNewDataSource = function (name, type, sqlType, table) {
         //close Previous DataSource
-        var parent_node = $("#" + self.dataSourcejstreeDivId).jstree()._model.data[self.currentConfig?.currentDataSource?.name];
+        var parent_node = $("#" + self.dataSourcejstreeDivId).jstree()._model.data[self.currentConfig?.currentDataSource?.id];
         if (parent_node) {
             $("#" + self.dataSourcejstreeDivId)
                 .jstree(true)
                 .delete_node(parent_node.children);
         }
+        var id;
+        if(type!='csvSource'){
+            var node = $("#" + self.dataSourcejstreeDivId).jstree(true).get_node(name);
+            id=name;
+            name=node.text;
+        }else{
+            id=name;
+        }
         self.currentConfig.currentDataSource = {
             name: name,
+            id:id,
             tables: [],
             type: type,
             sqlType: sqlType,
@@ -307,7 +325,7 @@ var DataSourceManager = (function () {
                                     },
                                 });
                             }
-                            JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, self.currentConfig.currentDataSource.name, jstreeData);
+                            JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, self.currentConfig.currentDataSource.id, jstreeData);
                             callbackSeries();
                         },
 
@@ -350,6 +368,98 @@ var DataSourceManager = (function () {
             },
         });
     };
+    
+    /*********************************************************************************/
+    /***functions linked to REACT**/
+    // see assets/mappingModeler_upload_app.js
+    /***********************************************************************************/
+// imports React app
+import("/assets/mappingModeler_upload_app.js");
+
+
+self.displayUploadApp = function (displayForm) {
+    self.uploadFormData.displayForm = displayForm;
+    //   return   $.getScript("/kg_upload_app.js");
+    if (!displayForm) {
+        return;
+    }
+    if (displayForm == "database") {
+        self.uploadFormData.selectedFiles = null
+    }
+    var html = ' <div style="width:500px;height: 400px" id="mount-mappingModeler-upload-app-here"></div>';
+    $("#smallDialogDiv").html(html);
+
+    $("#smallDialogDiv").dialog({
+        open: function (event, ui) {
+            if (self.createApp === null) {
+                throw new Error("React app is not initialized see assets/mappingModeler_upload_app.js");
+            }
+
+            self.uploadFormData.currentSource = MappingModeler.currentSource;
+
+            self.umountKGUploadApp = self.createApp(self.uploadFormData);
+        },
+        beforeClose: function () {
+            self.umountKGUploadApp();
+            DataSourceManager.currentSlsvSource = MappingModeler.currentSource;
+            DataSourceManager.getSlsvSourceConfig(MappingModeler.currentSource, function (err, result) {
+                if (err) {
+                    return err;
+                }
+
+                DataSourceManager.currentConfig = result;
+            });
+        },
+    });
+    $("#smallDialogDiv").dialog("open");
+};
+
+
+self.createDataBaseSourceMappings = function () {
+    // hide uploadApp
+    self.displayUploadApp("");
+    $("#smallDialogDiv").dialog("close");
+
+    var datasource = self.uploadFormData.selectedDatabase;
+    if (!datasource) {
+        return;
+    }
+    if (!datasource.id) {
+        datasource = {id: datasource, name: datasource}
+    }
+    DataSourceManager.currentConfig.databaseSources[datasource.id] = {name: datasource.name};
+    DataSourceManager.rawConfig.databaseSources[datasource.id] = {name: datasource.name};
+    DataSourceManager.saveSlsvSourceConfig(function (err, result) {
+        if (err) {
+            return alert(err);
+        }
+        MappingModeler.onLoaded();
+        // self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
+    });
+};
+
+self.createCsvSourceMappings = function () {
+    // hide uploadApp
+    self.displayUploadApp("");
+    $("#smallDialogDiv").dialog("close");
+    var datasourceName = self.uploadFormData.selectedFiles[0];
+    if (!datasourceName) {
+        return;
+    }
+
+    DataSourceManager.currentConfig.csvSources[datasourceName] = {};
+    DataSourceManager.rawConfig = DataSourceManager.currentConfig;
+
+    DataSourceManager.saveSlsvSourceConfig(function (err, result) {
+        if (err) {
+            return alert(err);
+        }
+        MappingModeler.onLoaded();
+    });
+};
+
+
+
     return self;
 
 })()

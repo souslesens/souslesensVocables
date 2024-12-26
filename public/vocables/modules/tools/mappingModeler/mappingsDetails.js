@@ -212,7 +212,7 @@ var MappingsDetails = (function () {
         var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentDataSource][MappingModeler.currentTable.name].tripleModels;
 
         var filteredMapping = mappings.filter(function (mapping) {
-            return mapping.s.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column;
+            return mapping.s.replaceAll("_$", "").replaceAll("_£","").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£","").replaceAll("@", "") == column;
         });
         //rajouter toutes les colonnes en lien avec celle la et mettre celle qui nous intéresse en premier
 
@@ -275,18 +275,24 @@ var MappingsDetails = (function () {
 
         if (column) {
             mappings = mappings.filter(function (mapping) {
-                return mapping.s.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column;
+                return mapping.s.replaceAll("_$", "").replaceAll("_£","").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£",'').replaceAll("@", "") == column;
             });
         }
         var data = mappings.map(function (mapping) {
-            return [mapping.s, mapping.p, mapping.o, '<button class="slsv-invisible-button deleteIcon" style="margin-left: 10px" onclick="MappingsDetails.deleteTriple(event)"></button>'];
+            if(MappingModeler.allResourcesMap[mapping.o]){
+                mapping.o=MappingModeler.allResourcesMap[mapping.o].label;
+            }
+            var deleteButton = '<button class="slsv-invisible-button deleteIcon" style="margin-left: 10px" onclick="MappingsDetails.deleteTripleMapping(event)"></button>';
+            return [deleteButton,mapping.s, mapping.p, mapping.o];
         });
         var columns= [
-            { title: "Subject", defaultContent: "", width: "25%"},
-            { title: "Predicate", defaultContent: "", width: "25%" },
-            { title: "Object" , defaultContent: "", width: "25%"},
-            { title: "Delete", defaultContent: "", width: "25%" }
-        ]
+            { title: "Delete", defaultContent: "", width: "10%" },
+            { title: "Subject", defaultContent: "", width: "30%"},
+            { title: "Predicate", defaultContent: "", width: "30%" },
+            { title: "Object" , defaultContent: "", width: "30%"}
+            
+        ];
+
         Export.showDataTable(divId,  columns,data,null,{divId:divId},function(err,result){
             self.currentMappingsList=result;
             $('#dataTableDivExport_wrapper').css('overflow','unset');
@@ -310,7 +316,7 @@ var MappingsDetails = (function () {
 
         if (column) {
             mappings = mappings.filter(function (mapping) {
-                return mapping.s.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£").replaceAll("@", "") == column;
+                return mapping.s.replaceAll("_$", "").replaceAll("_£","").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£","").replaceAll("@", "") == column;
             });
         }
 
@@ -499,37 +505,43 @@ var MappingsDetails = (function () {
 
         self.showDetailedMappingsList(column);
     };
-    self.deleteTriple = function (event) {
+    self.deleteTripleMapping = function (event) {
         var row=$(event.target).closest('tr')
         var rowData = self.currentMappingsList.row(row).data();
         var nodes = MappingModeler.visjsGraph.data.nodes.get();
-        var subject = rowData[0].replaceAll("_$", "").replaceAll("_£").replaceAll("@");
+        var subject = rowData[1].replaceAll("_$", "").replaceAll("_£","").replaceAll("@","");
+        var object = rowData[3].replaceAll("_$", "").replaceAll("_£","").replaceAll("@","");
+        var predicate = rowData[2]
         var nodeSelected=nodes.filter(function(node){
             return node.data.label==subject && node.data.dataTable==MappingModeler.currentTable.name;
         });
         if(nodeSelected.length>0){ 
             nodeSelected=nodeSelected[0];
+        }else{
+            return;
         }
 
         var isTripleDeleted=false;
         // rdfs:label and rdf:type (NamedIndividual or class) are details mappings properties included in node.data
-        if(rowData[1]=='rdfs:label' ){
+        if(predicate=='rdfs:label' ){
             
             if(nodeSelected.data.rdfsLabel){
                 nodeSelected.data.rdfsLabel="";
                 MappingModeler.visjsGraph.data.nodes.update(nodeSelected);
+                
             }
-            isTripleDeleted=true;
-            // Change input select
+            
+           
         }
-        if(rowData[1]=='rdf:type' && ['owl:Class','owl:NamedIndividual'].includes(rowData[2])){
+        if(predicate=='rdf:type' && ['owl:Class','owl:NamedIndividual'].includes(object)){
            
             if(nodeSelected.data.rdfType){
                 nodeSelected.data.rdfType="";
                 MappingModeler.visjsGraph.data.nodes.update(nodeSelected);
+               
             }
-            isTripleDeleted=true;
-            // Change input select
+            
+            
         }
         // datatype Properties
 
@@ -538,7 +550,7 @@ var MappingsDetails = (function () {
             var datatypePropertiesNumber=nodeSelected.data.otherPredicates.length;
             //datatype Properties to keep
             nodeSelected.data.otherPredicates=nodeSelected.data.otherPredicates.filter(function(predicate){
-                return predicate.property!=rowData[1] && predicate.object!=rowData[2];
+                return predicate.property!=predicate && predicate.object!=object;
             });
             if(datatypePropertiesNumber!=nodeSelected.data.otherPredicates.length){
                 MappingModeler.visjsGraph.data.nodes.update(nodeSelected);
@@ -555,19 +567,23 @@ var MappingsDetails = (function () {
             var edges = MappingModeler.visjsGraph.data.edges.get();
             edges.forEach(function(edge){
                 if(edge.from==nodeSelected.id){
-                    var edgeToId=nodes.filter(function(node){return node.id==edge.to});
-                    if(edgeToId.length>0){
-                        edgeToId=edgeToId[0];
-                        if(rowData[2]==edgeToId.label){
+                    var edgeToNode=nodes.filter(function(node){return node.id==edge.to});
+                    if(edgeToNode.length>0){
+                        edgeToNode=edgeToNode[0];
+                        if(object==edgeToNode.label && edge.data.type==predicate){
                             MappingModeler.visjsGraph.data.edges.remove(edge.id);
+                            isTripleDeleted=true;
                         }
                     }
                     
                 }
             });
         }
-        // delete row if isTripleDeleted
-
+        // reload Details
+        if(isTripleDeleted){
+            MappingModeler.saveVisjsGraph();
+            MappingsDetails.showDetailsDialog();
+        }
         //event.target
         console.log(event)
     }

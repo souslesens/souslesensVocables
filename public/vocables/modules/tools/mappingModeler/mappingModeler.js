@@ -13,6 +13,7 @@ import SimpleListFilterWidget from "../../uiWidgets/simpleListFilterWidget.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import MappingsDetails from "./mappingsDetails.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
 
 var MappingModeler = (function () {
@@ -190,7 +191,12 @@ var MappingModeler = (function () {
         }
         var sourceIndex = jstreeData.findIndex((obj) => obj.id == self.currentSource);
         if (sourceIndex > -1) {
-            common.array.moveItem(jstreeData, sourceIndex, 2);
+            if(parentName == "Properties"){
+                common.array.moveItem(jstreeData, sourceIndex, 5);
+            }else{
+                common.array.moveItem(jstreeData, sourceIndex, 2);
+            }
+            
         }
 
         JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {
@@ -485,7 +491,7 @@ var MappingModeler = (function () {
 
                 var classId = null;
                 connections.forEach(function (connection) {
-                    if ((connection.edge.data.type = "rdf:type") && connection.edge.label == "a") {
+                    if ((connection.edge.data.type == "rdf:type") && connection.edge.label == "a") {
                         classId = connection.toNode.data.id;
                     }
                 });
@@ -728,6 +734,9 @@ var MappingModeler = (function () {
                 properties = common.array.distinctValues(properties, "id");
                 properties = common.array.sort(properties, "label");
                 properties.forEach(function (item) {
+                    if(!item.label){
+                        item.label = Sparql_common.getLabelFromURI(item.id);
+                    }
                     item.label = item.source.substring(0, 3) + ":" + item.label;
                 });
                 properties = common.array.sort(properties, "label");

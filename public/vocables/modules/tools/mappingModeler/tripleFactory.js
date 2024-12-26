@@ -98,7 +98,7 @@ var TripleFactory = (function () {
 
         var payload = {
             source: DataSourceManager.currentSlsvSource,
-            datasource: DataSourceManager.currentConfig.currentDataSource.name,
+            datasource: DataSourceManager.currentConfig.currentDataSource.id,
             table: table,
             options: JSON.stringify(options),
         };

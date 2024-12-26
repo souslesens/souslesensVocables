@@ -100,7 +100,7 @@ var MappingModeler_bot = (function () {
             _botEngine.nextStep();
         },
         URItypeFn: function () {
-            var choices = ["fromColumnTitle", "blankNode", "randomIdentifier"];
+            var choices = ["fromLabel", "blankNode", "randomIdentifier"];
             _botEngine.showList(choices, "URItype");
         },
         rdfTypeFn: function () {

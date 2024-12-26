@@ -79,6 +79,9 @@ var MappingTransform = (function () {
         } else if (data.uriType == "fromLabel") {
             colname = data.id;
         }
+        else{
+            colname = data.id;
+        }
 
         if (colname && data.type == "VirtualColumn") {
             colname = "@" + colname;

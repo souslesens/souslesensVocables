@@ -25,7 +25,8 @@ var MappingsDetails = (function () {
                 beforeClose: function () {
                     MappingsDetails.saveMappingsDetailsToVisjsGraph();
                     $("#mainDialogDiv").dialog({
-                        beforeClose: function () {},
+                        beforeClose: function () {
+                        },
                     });
                 },
             });
@@ -87,11 +88,7 @@ var MappingsDetails = (function () {
         var currentGraphNode = graphNodes.filter(function (node) {
             return node.data.label == column && node.data.dataTable == MappingModeler.currentTable.name;
         })[0];
-        // columns depend on datasource
-        // return if currentDatasource different of this Node
-        if (currentGraphNode.data.dataTable != MappingModeler.currentTable.name) {
-            return;
-        }
+
         if (currentGraphNode.data.type == "table") {
             return;
         }
@@ -174,7 +171,7 @@ var MappingsDetails = (function () {
                     property: "rdf:type",
                     object: params.rdfType,
                 });
-                MappingModeler.visjsGraph.data.nodes.update({ id: MappingModeler.currentGraphNode.id, data: data });
+                MappingModeler.visjsGraph.data.nodes.update({id: MappingModeler.currentGraphNode.id, data: data});
                 MappingModeler.saveVisjsGraph();
             } else if (params.nonObjectPropertyId) {
                 data.otherPredicates.push({
@@ -183,7 +180,7 @@ var MappingsDetails = (function () {
                     range: Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range,
                     dateFormat: params.nonObjectPropertyDateFormat || null, //if any
                 });
-                MappingModeler.visjsGraph.data.nodes.update({ id: MappingModeler.currentGraphNode.id, data: data });
+                MappingModeler.visjsGraph.data.nodes.update({id: MappingModeler.currentGraphNode.id, data: data});
                 MappingModeler.saveVisjsGraph();
             }
             self.drawDetailedMappingsGraph(column);
@@ -269,7 +266,9 @@ var MappingsDetails = (function () {
     };
 
     self.showDetailedMappingsList = function (column, divId) {
-        if (!divId) divId = "detailedMappings_mappingsListDiv";
+        if (!divId) {
+            divId = "detailedMappings_mappingsListDiv";
+        }
         //datatypeMappingGraph
         var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentTable.name].tripleModels;
 
@@ -322,7 +321,7 @@ var MappingsDetails = (function () {
 
         var divId = "detailedMappingsGraphDiv";
 
-        var visjsData = { nodes: [], edges: [] };
+        var visjsData = {nodes: [], edges: []};
 
         var existingNodes = {};
         var json = {};
@@ -358,18 +357,18 @@ var MappingsDetails = (function () {
 
             function getNodeAttrs(str) {
                 if (str.indexOf("http") > -1) {
-                    return { type: "Class", color: "#00afef", shape: "box", size: 30 };
+                    return {type: "Class", color: "#00afef", shape: "box", size: 30};
                 } else if (str.indexOf(":") > -1) {
                     drawRelation = false; //rdf Bag
                     return null;
-                    return { type: "OwlType", color: "#aaa", shape: "ellipse" };
+                    return {type: "OwlType", color: "#aaa", shape: "ellipse"};
                 } else if (str.endsWith("_$")) {
-                    return { type: "blankNode", color: "#00afef", shape: "square" };
+                    return {type: "blankNode", color: "#00afef", shape: "square"};
                 } else if (str.indexOf("_rowIndex") > -1) {
-                    return { type: "rowIndex", color: "#f90edd", shape: "star" };
+                    return {type: "rowIndex", color: "#f90edd", shape: "star"};
                 } else {
                     drawRelation = false;
-                    return { type: "Column", color: "#cb9801", shape: "ellipse" };
+                    return {type: "Column", color: "#cb9801", shape: "ellipse"};
                 }
             }
 
@@ -435,7 +434,7 @@ var MappingsDetails = (function () {
                         label: label,
                         shape: attrs.shape,
                         color: attrs.color,
-                        font: attrs.shape == "box" ? { color: "white" } : { color: attrs.color },
+                        font: attrs.shape == "box" ? {color: "white"} : {color: attrs.color},
                         size: Lineage_whiteboard.defaultShapeSize,
                         data: {
                             id: item.o,
@@ -634,7 +633,7 @@ var MappingsDetails = (function () {
         });
 
         var mappingWithTransform = {};
-        mappingWithTransform[MappingModeler.currentTable.name] = { tripleModels: filteredMapping, transform: {} };
+        mappingWithTransform[MappingModeler.currentTable.name] = {tripleModels: filteredMapping, transform: {}};
         mappingWithTransform[MappingModeler.currentTable.name].transform[self.transformColumn] = transformFn;
 
         // get transform and add to filtered mapping
@@ -686,12 +685,12 @@ var MappingsDetails = (function () {
                 });
             }
 
-            self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", data);
+            // self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", data);
         },
         save: function () {
             var data = self.mappingColumnEditor.get();
             MappingModeler.currentGraphNode.data = data;
-            MappingModeler.visjsGraph.data.nodes.update({ id: MappingModeler.currentGraphNode.id, data: data });
+            MappingModeler.visjsGraph.data.nodes.update({id: MappingModeler.currentGraphNode.id, data: data});
             MappingsDetails.switchTypeToSubclass(MappingModeler.currentGraphNode);
             $("#smallDialogDiv").dialog("close");
             MappingModeler.saveVisjsGraph();

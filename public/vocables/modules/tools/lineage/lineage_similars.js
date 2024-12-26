@@ -137,13 +137,19 @@ var Lineage_similars = (function () {
                     for (var label in whiteboardLabelsMap) {
                         var whiteboardNode = whiteboardLabelsMap[label];
 
+
                         whiteboardNode.similars.forEach(function (similar) {
+
+                            var shape=Lineage_whiteboard.defaultShape;
+                            if(similar.type=="NamedIndividual") {
+                                shape = Lineage_whiteboard.namedIndividualShape;
+                            }
                             if (!existingNodes[similar.id]) {
                                 existingNodes[similar.id] = 1;
                                 visjsData.nodes.push({
                                     id: similar.id,
                                     label: similar.label,
-                                    shape: Lineage_whiteboard.defaultShape,
+                                    shape: shape,
                                     color: Lineage_whiteboard.getSourceColor(source),
                                     size: Lineage_whiteboard.defaultShapeSize,
                                     data: {

@@ -272,6 +272,8 @@ $("#sourceDivControlPanelDiv").html(html);*/
                 if (source) {
                     Config.ontologiesVocabularyModels[source] = null;
                     OntologyModels.registerSourcesModel(source);
+                }else{
+                    Config.ontologiesVocabularyModels={}
                 }
                 return UI.message("DONE");
             },

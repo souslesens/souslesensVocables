@@ -188,10 +188,16 @@ var DataSourceManager = (function () {
                     });
                 }
 
+                //underline files with mappings
+            
+                
+
                 JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options);
                 if (callback) {
                     return callback(err, self.currentConfig);
                 }
+                
+                
             }
         );
 
@@ -307,12 +313,14 @@ var DataSourceManager = (function () {
 
                         function (callbackSeries) {
                             var jstreeData = [];
-
+                            var dataTables=MappingModeler.visjsGraph.data.nodes.get().map(function (node) {return node.data.dataTable;});
+                            dataTables=common.array.distinctValues(dataTables);
+                            dataTables=dataTables.filter(function (item) {return item!=undefined});
                             for (var table in   self.currentConfig.currentDataSource.tables) {
                                 var label = table;
-                               /* if (self.currentConfig.currentMappings[table]) {
-                                    label = "<span class='KGcreator_fileWithMappings'>" + table + "</span>";
-                                }*/
+                                if (dataTables.includes(table)) {
+                                    label = "<span style='color:blue'>" + table + "</span>";
+                                }
                                 jstreeData.push({
                                     id: table,
                                     text: label,

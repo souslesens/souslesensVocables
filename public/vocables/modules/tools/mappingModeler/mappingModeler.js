@@ -16,6 +16,7 @@ import MappingsDetails from "./mappingsDetails.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
 
+
 var MappingModeler = (function () {
     var self = {};
 
@@ -58,7 +59,20 @@ var MappingModeler = (function () {
                         return callbackSeries();
                     });
                 },
-
+                function (callbackSeries) {
+                    $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
+                        //$("#mainDialogDiv").dialog("open");
+                        return callbackSeries();
+                    });
+                },
+                //init visjsGraph
+                function (callbackSeries) {
+                    var visjsData = {nodes: [], edges: []};
+                    self.drawGraphCanvas(self.graphDiv, visjsData, function () {
+                        callbackSeries();
+                    });
+                },
+               
                 function (callbackSeries) {
                     $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
                         $("#MappingModeler_leftTabs").tabs({});
@@ -69,25 +83,11 @@ var MappingModeler = (function () {
 
 
                 },
-                function (callbackSeries) {
-                    $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
-                        //$("#mainDialogDiv").dialog("open");
-                        return callbackSeries();
-                    });
-                },
+                
 
-                //initNewDataSource
-                function (callbackSeries) {
-                    return callbackSeries();
-                },
+               
 
-                //init visjsGraph
-                function (callbackSeries) {
-                    var visjsData = {nodes: [], edges: []};
-                    self.drawGraphCanvas(self.graphDiv, visjsData, function () {
-                        callbackSeries();
-                    });
-                },
+                
             ],
             function (err) {
                 if (err) {
@@ -988,7 +988,7 @@ var MappingModeler = (function () {
         self.visjsGraph.saveGraph("mappings_" + self.currentSource + "_ALL" + ".json", true);
     };
 
-    self.loadVisjsGraph = function () {
+    self.loadVisjsGraph = function (callback) {
         self.clearMappings();
         setTimeout(function () {
             self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_ALL" + ".json", false, function (err, result) {
@@ -1014,7 +1014,7 @@ var MappingModeler = (function () {
                     var table = dataTables[tableIndex];
                     var clusterOptionsByData = {
                         joinCondition: function (node) {
-                            if (node.data && node.data.dataTable == table && table != MappingModeler.currentTable.name) {
+                            if (node.data && node.data.dataTable == table && table != MappingModeler?.currentTable?.name) {
                                 if (!map[node.id]) {
                                     map[node.id] = 1;
                                     return true;
@@ -1039,6 +1039,9 @@ var MappingModeler = (function () {
                    
                     self.visjsGraph.network.clustering.cluster(clusterOptionsByData);
                 }
+                if(callback){
+                    return callback();
+                }
             });
         }, 500);
     };
@@ -1049,8 +1052,12 @@ var MappingModeler = (function () {
 
         if (obj.node.data.type == "databaseSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
-            DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
             //MappingModeler.switchLeftPanel("mappings");
+            MappingModeler.loadVisjsGraph(function(){
+                DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
+            });
+            
+            //
         } else if (obj.node.data.type == "csvSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
             var fileName = DataSourceManager.currentSlsvSource;

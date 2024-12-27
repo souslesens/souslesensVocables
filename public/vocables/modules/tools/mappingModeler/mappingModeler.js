@@ -72,10 +72,27 @@ var MappingModeler = (function () {
                         callbackSeries();
                     });
                 },
-               
+               //load visjs mapping graph
+               function (callbackSeries) {
+                    self.loadVisjsGraph(function (err) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        return callbackSeries();
+                    });
+               },
                 function (callbackSeries) {
                     $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
+                        
                         $("#MappingModeler_leftTabs").tabs({});
+                        $($('#MappingModeler_leftTabs').children()[0]).css('border-radius','0px');
+                        
+                        /*
+                        $($('#MappingModeler_leftTabs').children()[0]).find("*").removeAttr("class");
+                        
+                       
+                        $($('#MappingModeler_leftTabs').children()[0]).find("li").addClass('lineage-tabDiv');
+                        $($('#MappingModeler_leftTabs').children()[0]).find("a").css('text-decoration','none');*/
                         DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, function (err) {
                             return callbackSeries();
                         })
@@ -217,7 +234,10 @@ var MappingModeler = (function () {
             self.legendItems[item.label] = item;
         });
 
-        Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", self.legendItemsArray, options);
+        Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", self.legendItemsArray, options,function(){
+            $('#nodeInfosAxioms_activeLegendDiv').find('canvas').addClass('coloredContainerImportant');
+
+        });
     };
 
     self.hideForbiddenResources = function (resourceType) {
@@ -241,6 +261,14 @@ var MappingModeler = (function () {
         } else if (resourceUri == "function") {
             return self.predicateFunctionShowDialog();
         } else if (self.currentResourceType == "Column") {
+            // Verify that he not already exists
+            var nodeInVisjsGraph=self.visjsGraph.data.nodes.get().filter(function (node) {
+                return node.data.dataTable == self.currentTable.name && resourceUri == node.label;
+            });
+            if(nodeInVisjsGraph.length>0){
+                return alert("Column already exists in the graph");
+            }
+
             newResource = {
                 id: id,
                 label: resourceUri,
@@ -252,7 +280,7 @@ var MappingModeler = (function () {
                     label: resourceUri,
                     type: self.currentResourceType,
                     dataTable: self.currentTable.name,
-                    datasource: self.currentDataSource,
+                    datasource: DataSourceManager.currentConfig.currentDataSource.id,
                 },
             };
             self.drawResource(newResource);
@@ -349,7 +377,8 @@ var MappingModeler = (function () {
                     },
                     color: color,
                 };
-                self.visjsGraph.data.edges.add([edge]);
+                self.addEdge([edge]);
+
                 self.currentRelation = null;
                 //$("#axioms_legend_suggestionsSelect").empty();
                 JstreeWidget.empty("suggestionsSelectJstreeDiv");
@@ -392,7 +421,7 @@ var MappingModeler = (function () {
         }
 
         if (self.visjsGraph) {
-            self.visjsGraph.data.nodes.add(visjsData.nodes);
+            self.addNode(visjsData.nodes);
 
             if (newResource.data.type == "Class" && self.currentGraphNode) {
                 var label, type;
@@ -417,7 +446,7 @@ var MappingModeler = (function () {
                 });
 
                 //  self.updateCurrentGraphNode(visjsNode);
-                self.visjsGraph.data.edges.add(visjsData.edges);
+                self.addEdge(visjsData.edges);
             }
 
             //
@@ -563,14 +592,14 @@ var MappingModeler = (function () {
         removeNodeFromGraph: function () {
             if (confirm("delete node")) {
                 var edges = self.visjsGraph.network.getConnectedEdges(self.currentGraphNode.id);
-                self.visjsGraph.data.edges.remove(edges);
-                self.visjsGraph.data.nodes.remove(self.currentGraphNode.id);
+                self.removeEdge(edges);
+                self.removeNode(self.currentGraphNode.id);
             }
         },
 
         removeNodeEdgeGraph: function () {
             if (confirm("delete edge")) {
-                self.visjsGraph.data.edges.remove(self.currentGraphNode.id);
+                self.removeEdge(self.currentGraphNode.id);
             }
         },
         addSuperClassToGraph: function () {
@@ -624,7 +653,7 @@ var MappingModeler = (function () {
                 },
             ];
 
-            self.visjsGraph.data.edges.add(edges);
+            self.addEdge(edges);
             self.currentRelation = null;
         },
 
@@ -635,7 +664,7 @@ var MappingModeler = (function () {
                     $("#smallDialogDiv").dialog("open");
                     MappingsDetails.mappingColumnInfo.editColumnInfos();
                     MappingsDetails.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);
-                    MappingsDetails.showDatatypeGraph(self.currentGraphNode.label);
+                    //MappingsDetails.drawDetailedMappingsGraph(self.currentGraphNode.label);
                 });
             } else {
                 NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
@@ -851,7 +880,7 @@ var MappingModeler = (function () {
             var hidden = !hiddenNodes || hiddenNodes.indexOf(nodeId) > -1;
             newNodes.push({id: nodeId, hidden: hidden});
         });
-        self.visjsGraph.data.nodes.update(newNodes);
+        self.updateNode(newNodes);
     };
 
     /*
@@ -1007,9 +1036,9 @@ var MappingModeler = (function () {
                 var tables = [];
                 var map = {};
                 var index = 0;
-                var dataTables=self.visjsGraph.data.nodes.get().map(function (node) {return node.data.dataTable;});
-                dataTables=common.array.distinctValues(dataTables);
-                dataTables=dataTables.filter(function (item) {return item!=undefined});
+                var dataTables = self.getDataTablesFromVisjsGraph();
+
+                
                 for (var tableIndex in dataTables) {
                     var table = dataTables[tableIndex];
                     var clusterOptionsByData = {
@@ -1053,11 +1082,9 @@ var MappingModeler = (function () {
         if (obj.node.data.type == "databaseSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
             //MappingModeler.switchLeftPanel("mappings");
-            MappingModeler.loadVisjsGraph(function(){
-                DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
-            });
+            DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
             
-            //
+            
         } else if (obj.node.data.type == "csvSource") {
             DataSourceManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
             var fileName = DataSourceManager.currentSlsvSource;
@@ -1092,6 +1119,9 @@ var MappingModeler = (function () {
         }
 
         $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
+        if((obj.node.data.type == "table") ){
+            $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.currentTable);
+        }
     };
 
 
@@ -1154,10 +1184,10 @@ var MappingModeler = (function () {
             }
         });
         if (dataTablesNodes.length > 0) {
-            self.visjsGraph.data.nodes.add(dataTablesNodes);
+            self.addNode(dataTablesNodes);
         }
         if (dataTablesEdges.length > 0) {
-            self.visjsGraph.data.edges.add(dataTablesEdges);
+            self.addEdge(dataTablesEdges);
         }
         //  MappingModeler.saveVisjsGraph();
         return;
@@ -1259,7 +1289,7 @@ var MappingModeler = (function () {
             },
             color: "#375521",
         };
-        self.visjsGraph.data.edges.add([edge]);
+        self.addEdge([edge]);
         $("#smallDialogDiv").dialog("close");
     };
     self.loadSource = function (callback) {
@@ -1325,7 +1355,10 @@ var MappingModeler = (function () {
             showTable(DataSourceManager.currentConfig.currentDataSource.sampleData);
         } else if (DataSourceManager.currentConfig.currentDataSource.type == "databaseSource") {
             if (!node || !node.data) {
-                return alert("not implemented yet for databases");
+                node=MappingModeler.currentTreeNode;
+                if(!node.data){
+                    return alert("no Table  selected");
+                }
             }
             var size = 200;
             var sqlQuery = "select top  " + size + "* from " + node.data.id;
@@ -1334,7 +1367,7 @@ var MappingModeler = (function () {
             }
             const params = new URLSearchParams({
                 type: DataSourceManager.currentConfig.currentDataSource.sqlType,
-                dbName: DataSourceManager.currentConfig.currentDataSource.name,
+                dbName: DataSourceManager.currentConfig.currentDataSource.id,
                 sqlQuery: sqlQuery,
             });
 
@@ -1354,8 +1387,60 @@ var MappingModeler = (function () {
             alert("Comming Soon...");
         }
     };
+    self.getDataTablesFromVisjsGraph = function () {
+        var dataTables=self.visjsGraph.data.nodes.get().map(function (node) {return node?.data?.dataTable;});
+        if(dataTables.length>0){
+            dataTables=common.array.distinctValues(dataTables);
+            dataTables=dataTables.filter(function (item) {return item!=undefined});
+        }
+        else{
+            dataTables=[];
+        }
+        return dataTables;
+    };
+    self.updateNode=function(node){ 
+        if(!node){
+            return;
+        }
+        self.visjsGraph.data.nodes.update(node);
+        self.saveVisjsGraph();
 
-
+    };
+    self.removeNode=function(node){
+        if(!node){
+            return;
+        }
+        self.visjsGraph.data.nodes.remove(node);
+        self.saveVisjsGraph();
+    };
+    self.addNode=function(node){
+        if(!node){
+            return;
+        }
+        self.visjsGraph.data.nodes.add(node);
+        self.saveVisjsGraph();
+    };
+    self.updateEdge=function(edge){
+        if(!edge){
+            return;
+        }
+        self.visjsGraph.data.edges.update(edge);
+        self.saveVisjsGraph();
+    };
+    self.removeEdge=function(edge){
+        if(!edge){
+            return;
+        }
+        self.visjsGraph.data.edges.remove(edge);
+        self.saveVisjsGraph();
+    };
+    self.addEdge=function(edge){
+        if(!edge){
+            return;
+        }
+        self.visjsGraph.data.edges.add(edge);
+        self.saveVisjsGraph();
+    };
 
     return self;
 })();

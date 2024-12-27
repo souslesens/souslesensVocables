@@ -178,21 +178,38 @@ var DataSourceManager = (function () {
                 });
             },
             function (err) {
+                var dataTables=MappingModeler.getDataTablesFromVisjsGraph();
                 for (var datasource in self.currentConfig.csvSources) {
-                    jstreeData.push({
+                    var jstreeNode={
                         id: datasource,
                         text: datasource,
                         parent: "csvSources",
                         type: "CSV",
                         data: { id: datasource, type: "csvSource" },
-                    });
+                    };
+                    if(dataTables.includes(datasource)){
+                        jstreeNode.text="<span style='color:blue'>"+datasource+"</span>";
+                    }
+                    jstreeData.push(jstreeNode);
                 }
 
-                //underline files with mappings
-            
-                
+                //underline CSV with mappings
+                var dataSources=MappingModeler.visjsGraph.data.nodes.get().map(function (node) {return node?.data?.datasource;});
+                if(dataSources.length>0){
+                    dataSources=common.array.distinctValues(dataSources);
+                    dataSources=dataSources.filter(function (item) {return item!=undefined});
+                }
+                for (var node in jstreeData) {
+                    if(dataSources.includes(jstreeData[node].id)){
+                        jstreeData[node].text="<span style='color:blue'>"+jstreeData[node].text+"</span>";
+                    }
+                }
+              
 
-                JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options);
+
+                JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options,function(){
+                    $('#MappingModeler_dataSourcesTab').css('margin-top','0px');
+                });
                 if (callback) {
                     return callback(err, self.currentConfig);
                 }
@@ -313,9 +330,7 @@ var DataSourceManager = (function () {
 
                         function (callbackSeries) {
                             var jstreeData = [];
-                            var dataTables=MappingModeler.visjsGraph.data.nodes.get().map(function (node) {return node.data.dataTable;});
-                            dataTables=common.array.distinctValues(dataTables);
-                            dataTables=dataTables.filter(function (item) {return item!=undefined});
+                            var dataTables=MappingModeler.getDataTablesFromVisjsGraph();
                             for (var table in   self.currentConfig.currentDataSource.tables) {
                                 var label = table;
                                 if (dataTables.includes(table)) {

@@ -1,4 +1,5 @@
 import KGcreator_run from "../KGcreator/KGcreator_run.js";
+import MappingsDetails from "./mappingsDetails.js";
 
 import MappingTransform from "./mappingTransform.js";
 
@@ -6,17 +7,36 @@ var TripleFactory = (function () {
     var self = {};
 
     self.checkCurrentTable = function () {
-        if (!MappingModeler.currentTable) return alert("select a table or a csv source");
+        var check=false;
+        if (!MappingModeler.currentTable) {
+             alert("select a table or a csv source");
+             
+        }
+        var mappingsDetailsIsLoaded=false;
+        MappingModeler.visjsGraph.data.nodes.get().forEach(function(node){
+            if(node?.data?.dataTable===MappingModeler.currentTable.name){
+                if(node.data.uriType){
+                    mappingsDetailsIsLoaded=true;
+                }
+            }
+        });
+        if(mappingsDetailsIsLoaded){
+            check=true;
+        }else{
+            alert("Mappings details are not loaded for this table. Please load mappings details first");
+            MappingsDetails.showDetailsDialog();
+        }
+        return check;
     };
     self.showTripleSample = function () {
-        if (!self.checkCurrentTable) return;
+        if (!self.checkCurrentTable()) return;
 
         var options = { table: MappingModeler.currentTable.name };
         self.createTriples(true, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 
     self.writeTriples = function () {
-        if (!self.checkCurrentTable) return;
+        if (!self.checkCurrentTable()) return;
         var options = { table: MappingModeler.currentTable.name };
         self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
     };
@@ -95,7 +115,9 @@ var TripleFactory = (function () {
         if (mappingsFilterOption) {
             options.mappingsFilter = mappingsFilterOption;
         }
-
+        if(options.mappingsFilterOption){
+            options.mappingsFilter = options.mappingsFilterOption;
+        }
         var payload = {
             source: DataSourceManager.currentSlsvSource,
             datasource: DataSourceManager.currentConfig.currentDataSource.id,

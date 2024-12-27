@@ -3,31 +3,7 @@ import KGcreator from "../KGcreator/KGcreator.js";
 
 var MappingTransform = (function () {
     var self = {};
-
-    self.mappingToKGcreator = function () {
-        var currentMappings = MappingTransform.getSLSmappingsFromVisjsGraph();
-        var datasources = Object.keys(KGcreator.currentConfig.databaseSources).concat(Object.keys(KGcreator.currentConfig.csvSources));
-        if (datasources) {
-            async.eachSeries(
-                datasources,
-                function (datasource, callbackEach) {
-                    if (!currentMappings[datasource]) {
-                        callbackEach();
-                    }
-                    KGcreator.saveDataSourceMappings(self.currentSource, datasource, currentMappings[datasource], function (err) {
-                        if (err) {
-                            callbackEach(err);
-                        }
-                        callbackEach();
-                    });
-                },
-                function (err) {
-                    MainController.onToolSelect("KGcreator", null, function () {});
-                }
-            );
-        }
-    };
-
+    
     self.generateSLSmappings = function () {
         var json = MappingTransform.getSLSmappingsFromVisjsGraph();
 

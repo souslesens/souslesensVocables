@@ -2,6 +2,8 @@ import common from "../../shared/common.js";
 import KGcreator from "../KGcreator/KGcreator.js";
 import KGcreator_graph from "../KGcreator/KGcreator_graph.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
+import MappingModeler from "./mappingModeler.js";
+import TripleFactory from "./tripleFactory.js";
 
 var MappingsDetails = (function () {
     var self = {};
@@ -146,7 +148,7 @@ var MappingsDetails = (function () {
     self.showSpecificMappingsBot = function (column) {
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
         MappingModeler.currentGraphNode = graphNodes.filter(function (node) {
-            return node.data.label == column;
+            return node.data.label == column && node.data.dataTable == MappingModeler.currentTable.name;
         })[0];
 
         var params = {
@@ -171,7 +173,7 @@ var MappingsDetails = (function () {
                     property: "rdf:type",
                     object: params.rdfType,
                 });
-                MappingModeler.visjsGraph.data.nodes.update({id: MappingModeler.currentGraphNode.id, data: data});
+                MappingModeler.updateNode({id: MappingModeler.currentGraphNode.id, data: data});
                 MappingModeler.saveVisjsGraph();
             } else if (params.nonObjectPropertyId) {
                 data.otherPredicates.push({
@@ -180,10 +182,11 @@ var MappingsDetails = (function () {
                     range: Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range,
                     dateFormat: params.nonObjectPropertyDateFormat || null, //if any
                 });
-                MappingModeler.visjsGraph.data.nodes.update({id: MappingModeler.currentGraphNode.id, data: data});
+                MappingModeler.updateNode({id: MappingModeler.currentGraphNode.id, data: data});
                 MappingModeler.saveVisjsGraph();
             }
-            self.drawDetailedMappingsGraph(column);
+            self.showDetailsDialog();
+            //self.drawDetailedMappingsGraph(column);
             /*    var data = self.mappingColumnEditor.get();
                    if (params.nonObjectPropertyId) {
                        if (!data.otherPredicates) {
@@ -226,7 +229,7 @@ var MappingsDetails = (function () {
             currentNode.data.uriType = $("#columnDetails-UriType" + rowIndex).val();
             currentNode.data.rdfsLabel = $("#columnDetails-rdfsLabel" + rowIndex).val();
             currentNode.data.rdfType = $("#columnDetails-rdfType" + rowIndex).val();
-            MappingModeler.visjsGraph.data.nodes.update(currentNode);
+            MappingModeler.updateNode(currentNode);
             self.switchTypeToSubclass(currentNode);
         });
         MappingModeler.saveVisjsGraph();
@@ -242,7 +245,7 @@ var MappingsDetails = (function () {
                 typeEdge[0].label = "rdfs:subClassOf";
                 typeEdge[0].data.type = "rdfs:subClassOf";
                 typeEdge[0].data.id = "rdfs:subClassOf";
-                MappingModeler.visjsGraph.data.edges.update(typeEdge[0]);
+                MappingModeler.updateEdge(typeEdge[0]);
             }
         } else {
             var typeEdge = edges.filter(function (edge) {
@@ -258,7 +261,7 @@ var MappingsDetails = (function () {
                         typeEdge[0].label = "a";
                         typeEdge[0].data.type = "rdf:type";
                         typeEdge[0].data.id = "rdf:type";
-                        MappingModeler.visjsGraph.data.edges.update(typeEdge[0]);
+                        MappingModeler.updateEdge(typeEdge[0]);
                     }
                 }
             }
@@ -277,13 +280,25 @@ var MappingsDetails = (function () {
                 return mapping.s.replaceAll("_$", "").replaceAll("_£","").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£",'').replaceAll("@", "") == column;
             });
         }
+        var deleteButton = '<button class="slsv-invisible-button deleteIcon" style="margin-left: 10px" onclick="MappingsDetails.deleteTripleMapping(event)"></button>';
         var data = mappings.map(function (mapping) {
             if(MappingModeler.allResourcesMap[mapping.o]){
                 mapping.o=MappingModeler.allResourcesMap[mapping.o].label;
             }
-            var deleteButton = '<button class="slsv-invisible-button deleteIcon" style="margin-left: 10px" onclick="MappingsDetails.deleteTripleMapping(event)"></button>';
+           
             return [deleteButton,mapping.s, mapping.p, mapping.o];
         });
+        // add Transform to list so they can be showed and deleted
+        var transform=MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentTable.name].transform;
+        if(transform){
+            for(var key in transform){
+                data.push([deleteButton,key,'Transform',transform[key]]);
+            }
+            
+        }
+
+
+
         var columns= [
             { title: "Delete", defaultContent: "", width: "10%" },
             { title: "Subject", defaultContent: "", width: "30%"},
@@ -521,23 +536,35 @@ var MappingsDetails = (function () {
         }
 
         var isTripleDeleted=false;
+        if(predicate.startsWith('function{')){
+            predicate='function';
+        }
         // rdfs:label and rdf:type (NamedIndividual or class) are details mappings properties included in node.data
         if(predicate=='rdfs:label' ){
             
             if(nodeSelected.data.rdfsLabel){
                 nodeSelected.data.rdfsLabel="";
-                MappingModeler.visjsGraph.data.nodes.update(nodeSelected);
-                
+                MappingModeler.updateNode(nodeSelected);
+                isTripleDeleted=true;
             }
             
            
         }
+        if(predicate=='Transform'){
+            nodeSelected.data.transform="";
+            MappingModeler.updateNode(nodeSelected);
+            isTripleDeleted=true;
+        }
+        /*if(predicate.startsWith('function{')){
+            var edges = MappingModeler.visjsGraph.data.edges.get();
+
+        }*/
         if(predicate=='rdf:type' && ['owl:Class','owl:NamedIndividual'].includes(object)){
            
             if(nodeSelected.data.rdfType){
                 nodeSelected.data.rdfType="";
-                MappingModeler.visjsGraph.data.nodes.update(nodeSelected);
-               
+                MappingModeler.updateNode(nodeSelected);
+                isTripleDeleted=true;
             }
             
             
@@ -552,7 +579,7 @@ var MappingsDetails = (function () {
                 return predicate.property!=predicate && predicate.object!=object;
             });
             if(datatypePropertiesNumber!=nodeSelected.data.otherPredicates.length){
-                MappingModeler.visjsGraph.data.nodes.update(nodeSelected);
+                MappingModeler.updateNode(nodeSelected);
                 isTripleDeleted=true;
                
             }
@@ -570,7 +597,7 @@ var MappingsDetails = (function () {
                     if(edgeToNode.length>0){
                         edgeToNode=edgeToNode[0];
                         if(object==edgeToNode.label && edge.data.type==predicate){
-                            MappingModeler.visjsGraph.data.edges.remove(edge.id);
+                            MappingModeler.removeEdge(edge.id);
                             isTripleDeleted=true;
                         }
                     }
@@ -591,7 +618,7 @@ var MappingsDetails = (function () {
     self.showTansformDialog = function (column) {
         // return if  virtuals and rowIndex
         if (!column) {
-            column = self.currentGraphNode.label;
+            column = MappingModeler.currentGraphNode.label;
         }
         $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function (err) {
             $("#smallDialogDiv").dialog("open");
@@ -600,10 +627,10 @@ var MappingsDetails = (function () {
         });
     };
     self.createPrefixTransformFn = function () {
-        if (!self.currentTreeNode) {
+        if (!MappingModeler.currentTreeNode) {
             var column_selected = $("#KGcreator_transformColumnSelect").val();
         } else {
-            var column_selected = self.currentTreeNode.data.id;
+            var column_selected = MappingModeler.currentTreeNode.data.id;
         }
         var prefix = prompt("Enter Prefix", column_selected);
         if (!prefix) {
@@ -631,14 +658,12 @@ var MappingsDetails = (function () {
         var filteredMapping = mappings.filter(function (mapping) {
             return mapping.s.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn || mapping.o.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn;
         });
+        
 
         var mappingWithTransform = {};
         mappingWithTransform[MappingModeler.currentTable.name] = {tripleModels: filteredMapping, transform: {}};
         mappingWithTransform[MappingModeler.currentTable.name].transform[self.transformColumn] = transformFn;
-
-        // get transform and add to filtered mapping
-        // change select view sample triple then use it
-        MappingModeler.viewSampleTriples(mappingWithTransform);
+        TripleFactory.createTriples(true, MappingModeler.currentTable.name, {mappingsFilterOption:mappingWithTransform,table:MappingModeler.currentTable.name}, function (err, result) {});
     };
     self.saveTransform = function () {
         var transformFnStr = $("#MappingModeler_fnBody").val();
@@ -653,10 +678,10 @@ var MappingsDetails = (function () {
         var transformFn = "function{" + transformFnStr + "}";
         var nodes = MappingModeler.visjsGraph.data.nodes.get();
         var currentNode = nodes.filter(function (node) {
-            return node.label == self.transformColumn;
+            return node.label == self.transformColumn && node.data.dataTable == MappingModeler.currentTable.name;
         })[0];
         currentNode.data.transform = transformFn;
-        MappingModeler.visjsGraph.data.nodes.update(currentNode);
+        MappingModeler.updateNode(currentNode);
         MappingModeler.saveVisjsGraph();
     };
 
@@ -676,7 +701,7 @@ var MappingsDetails = (function () {
                     data.uriType = params.URItype;
                     data.rdfType = params.rdfType;
                     (data.rdfsLabel = params.rdfsLabel),
-                        MappingModeler.visjsGraph.data.nodes.update({
+                        MappingModeler.updateNode({
                             id: MappingModeler.currentGraphNode.id,
                             data: data,
                         });
@@ -690,7 +715,7 @@ var MappingsDetails = (function () {
         save: function () {
             var data = self.mappingColumnEditor.get();
             MappingModeler.currentGraphNode.data = data;
-            MappingModeler.visjsGraph.data.nodes.update({id: MappingModeler.currentGraphNode.id, data: data});
+            MappingModeler.updateNode({id: MappingModeler.currentGraphNode.id, data: data});
             MappingsDetails.switchTypeToSubclass(MappingModeler.currentGraphNode);
             $("#smallDialogDiv").dialog("close");
             MappingModeler.saveVisjsGraph();

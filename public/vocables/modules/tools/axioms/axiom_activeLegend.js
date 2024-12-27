@@ -513,7 +513,7 @@ var Axiom_activeLegend = (function () {
         $("#smallDialogDiv").dialog("open");
     };
 
-    self.drawLegend = function (graphLegendDiv, legendItems, options) {
+    self.drawLegend = function (graphLegendDiv, legendItems, options,callback) {
         if (!options) {
             options = {};
         }
@@ -577,7 +577,11 @@ var Axiom_activeLegend = (function () {
         };
 
         self.axiomsLegendVisjsGraph = new VisjsGraphClass(graphLegendDiv || self.graphLegendDiv, visjsData, options);
-        self.axiomsLegendVisjsGraph.draw(function () {});
+        self.axiomsLegendVisjsGraph.draw(function () {
+            if(callback){
+                return callback();
+            }
+        });
     };
 
     self.clearAxiom = function () {

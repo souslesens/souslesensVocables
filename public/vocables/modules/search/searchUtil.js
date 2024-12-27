@@ -372,26 +372,20 @@ indexes.push(source.toLowerCase());
         //  word=word.toLowerCase()
         var queryObj;
         if (!mode || mode == "exactMatch") {
-            var field = "label";
+
             queryObj = {
                 bool: {
                     must: [
                         {
-                            match: {
+                          //  match: {
+                                term: {
                                 [field]: word,
                             },
                         },
                     ],
                 },
             };
-            /* if (options.skosLabels) {
-           queryObj.bool.must.push( {
-               term: {
-                   "skoslabels.keyword": word,
-               },
-           })
 
-       }*/
         } else if (word.indexOf("*") > -1) {
             queryObj = {
                 bool: {
@@ -465,7 +459,7 @@ indexes.push(source.toLowerCase());
                     var query = {
                         query: queryObj,
                         from: from,
-                        size: size,
+                      //  size: size,
                         _source: {
                             excludes: ["attachment.content"],
                         },
@@ -601,7 +595,7 @@ indexes.push(source.toLowerCase());
                                         parents = taxonomyClassesIdsMap[item.type2.value].parents.concat(item.type2.value);
                                     } else {
                                         parent = item.type2.value;
-                                        parents = [item.type2.value, sourceLabel];
+                                        parents = [ sourceLabel,item.type2.value];
                                     }
 
                                     var skosLabel = item.skosPrefLabel ? item.skosPrefLabel.value : null;

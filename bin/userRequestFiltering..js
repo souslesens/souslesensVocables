@@ -212,6 +212,14 @@ var UserRequestFiltering = {
 
 
     var error = null;
+    if(!indices){
+      var indices=[]
+      for(var source in userSourcesMap){
+        indices.push(source.toLowerCase())
+      }
+      return callback(error, indices);
+    }
+
     indices.forEach(function(indexName) {
 
       if (!indicesMap[indexName]) {

@@ -386,7 +386,20 @@ indexes.push(source.toLowerCase());
                 },
             };
 
-        } else if (word.indexOf("*") > -1) {
+        }
+
+        else if (word=="*") {
+
+            queryObj = {
+
+                    "match_all": {}
+
+                }
+
+
+        }
+
+        else if (word.indexOf("*") > -1) {
             queryObj = {
                 bool: {
                     must: {
@@ -459,7 +472,7 @@ indexes.push(source.toLowerCase());
                     var query = {
                         query: queryObj,
                         from: from,
-                      //  size: size,
+                      size: size,
                         _source: {
                             excludes: ["attachment.content"],
                         },
@@ -471,6 +484,8 @@ indexes.push(source.toLowerCase());
                     if (err) {
                         return callbackEach(err);
                     }
+
+                    from+=size
 
                     allResults = allResults.concat(result);
                     callbackEach();

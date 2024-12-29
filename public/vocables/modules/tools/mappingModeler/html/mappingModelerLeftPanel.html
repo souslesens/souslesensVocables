@@ -1,18 +1,20 @@
-<div id="MappingModeler_leftTabs" style="width: 100%; overflow: auto">
+
+
+<div id="MappingModeler_leftTabs" style="width: 100%; overflow: auto;padding: 0px;border-radius: 0px;">
     <ul>
-        <li><a href="#MappingModeler_dataSourcesTab">Data Sources</a></li>
-        <li><a href="#MappingModeler_mappingsTab">Mappings</a></li>
-        <li><a href="#MappingModeler_tripleFactoryTab">Triples</a></li>
+        <li class="mappingModeler-tabDiv"><a href="#MappingModeler_dataSourcesTab" style="padding: 15px;" >Data Sources</a></li>
+        <li class="mappingModeler-tabDiv"><a href="#MappingModeler_mappingsTab" style="padding: 15px;">Mappings</a></li>
+        <li class="mappingModeler-tabDiv"><a href="#MappingModeler_tripleFactoryTab" style="padding: 15px;">Triples</a></li>
     </ul>
 
     <!-- <div style="display: flex; flex-direction: row">-->
-    <div id="MappingModeler_dataSourcesTab">
+    <div id="MappingModeler_dataSourcesTab" class="coloredContainerImportant" style="margin-top: 0px!important;">
         <div id="mappingModeler_jstreeDiv"></div>
     </div>
 
-    <div id="MappingModeler_mappingsTab" style="display: flex; flex-direction: column">
+    <div id="MappingModeler_mappingsTab" style="display: flex; flex-direction: column" class="coloredContainerImportant">
         <!--   <button class="w3-button slsv-button-2" onclick="mappingModeler.newAxiom()">New axiom</button>-->
-        <div id="nodeInfosAxioms_activeLegendDiv" style="width: 400px; height: 50px; background-color: #ddd"></div>
+        <div id="nodeInfosAxioms_activeLegendDiv" style="width: 400px; height: 50px; " ></div>
 
         <div style="display: flex; flex-direction: row" id="mappingModeler_newAxiomPanel">
             <!--  <button onclick="mappingModeler.actions.setLayout('randomlayout')">Random Layout</button>-->
@@ -38,9 +40,9 @@
                 <div id="suggestionsSelectJstreeDiv" style="width: 450px; height: 500px; overflow: auto"></div>
             </div>
         </div>
-        >
+        
     </div>
-    <div id="MappingModeler_tripleFactoryTab">
+    <div id="MappingModeler_tripleFactoryTab" class="coloredContainerImportant">
         <div>
             <div class="w3-panel w3-border w3-round-small ">
                 <button class="w3-button slsv-button-3" onclick="MappingTransform.generateSLSmappings()">view SLS
@@ -87,3 +89,4 @@
         </div>
     </div>
 </div>
+

@@ -99,7 +99,7 @@ var Lineage_similars = (function () {
                 slices,
                 function (words, callbackEach) {
                     currentWordsCount += words.length;
-                    SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, {}, function (err, result) {
+                    SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, 10000, {}, function (err, result) {
                         if (err) {
                             return callbackEach(err);
                         }

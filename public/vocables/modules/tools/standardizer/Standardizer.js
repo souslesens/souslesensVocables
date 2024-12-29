@@ -376,7 +376,7 @@ var Standardizer = (function () {
                 var indexes = self.getSelectedIndexes();
 
                 self.currentWordsCount += words.length;
-                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, {}, function (err, result) {
+                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, 10000, {}, function (err, result) {
                     var html = self.processMatrixResult(words, result, indexes);
                     UI.message(" processed items: " + totalProcessed);
                     $("#KGmapping_matrixContainer").append(html);

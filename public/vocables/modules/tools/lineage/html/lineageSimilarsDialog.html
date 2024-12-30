@@ -5,6 +5,8 @@
             <div class="lineageSimilars_div">
                 Of <br /><select id="lineageSimilars_fromSelect" size="3">
                     <option value="AllWhiteboardNodes" selected="selected">All whiteboard nodes</option>
+                <option value="SelectedNodes" >Selected Nodes</option>
+
                     <!--   <option value="ActiveSource">Active source</option>
                     <option value="AllCurrentSources">All Current sources</option>-->
                 </select>
@@ -12,9 +14,10 @@
 
             <div class="lineageSimilars_div">
                 In <br />
-                <select id="lineageSimilars_modeSelect" onchange="Lineage_similars.onChangeSelection($(this).val())" size="3">
+                <select id="lineageSimilars_toModeSelect" onchange="Lineage_similars.onChangeSelection($(this).val())" size="3">
                     <option value="whiteboard" selected="selected">Whiteboard nodes</option>
                     <option value="chooseSource">Select source</option>
+                    <option value="allSources">All sources</option>
                 </select>
             </div>
             <div>

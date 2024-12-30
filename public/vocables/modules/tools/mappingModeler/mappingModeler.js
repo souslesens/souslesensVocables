@@ -1100,6 +1100,7 @@ var MappingModeler = (function () {
                 };
                 self.loadSuggestionSelectJstree(columns, "Columns");
                 MappingModeler.switchLeftPanel("mappings");
+                $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
 
 
             });
@@ -1116,6 +1117,7 @@ var MappingModeler = (function () {
             self.loadSuggestionSelectJstree(self.currentTable.columns, "Columns");
             MappingModeler.switchLeftPanel("mappings");
             //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
+            $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
         }
 
         $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);

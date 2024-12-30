@@ -7,6 +7,7 @@ import TripleFactory from "./tripleFactory.js";
 
 var MappingsDetails = (function () {
     var self = {};
+    var filterMappingIsSample;
 
     self.showDetailsDialog = function (divId) {
         if (!divId) {
@@ -268,7 +269,11 @@ var MappingsDetails = (function () {
         }
     };
 
-    self.showDetailedMappingsList = function (column, divId) {
+    self.showDetailedMappingsList = function (column, divId, options) {
+        if (!options) {
+            options = {};
+        }
+
         if (!divId) {
             divId = "detailedMappings_mappingsListDiv";
         }
@@ -280,19 +285,24 @@ var MappingsDetails = (function () {
                 return mapping.s.replaceAll("_$", "").replaceAll("_£","").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£",'').replaceAll("@", "") == column;
             });
         }
-        var deleteButton = '<button class="slsv-invisible-button deleteIcon" style="margin-left: 10px" onclick="MappingsDetails.deleteTripleMapping(event)"></button>';
+        
+        if (options.isFilterMapping) {
+            var button = '<input type="checkbox" checked />'
+        } else {
+            var button = '<button class="slsv-invisible-button deleteIcon" style="margin-left: 10px" onclick="MappingsDetails.deleteTripleMapping(event)"></button>';
+        }
         var data = mappings.map(function (mapping) {
             if(MappingModeler.allResourcesMap[mapping.o]){
                 mapping.o=MappingModeler.allResourcesMap[mapping.o].label;
             }
            
-            return [deleteButton,mapping.s, mapping.p, mapping.o];
+            return [button, mapping.s, mapping.p, mapping.o];
         });
         // add Transform to list so they can be showed and deleted
         var transform=MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentTable.name].transform;
         if(transform){
             for(var key in transform){
-                data.push([deleteButton,key,'Transform',transform[key]]);
+                data.push([button, key,'Transform',transform[key]]);
             }
             
         }
@@ -300,14 +310,14 @@ var MappingsDetails = (function () {
 
 
         var columns= [
-            { title: "Delete", defaultContent: "", width: "10%" },
+            { title: options.isFilterMapping ? "Select" : "Delete", defaultContent: "", width: "10%" },
             { title: "Subject", defaultContent: "", width: "30%"},
             { title: "Predicate", defaultContent: "", width: "30%" },
             { title: "Object" , defaultContent: "", width: "30%"}
             
         ];
 
-        Export.showDataTable(divId,  columns,data,null,{divId:divId},function(err,result){
+        Export.showDataTable(divId, columns, data, null, {divId:divId}, function(err,result){
             self.currentMappingsList=result;
             $('#dataTableDivExport_wrapper').css('overflow','unset');
         });
@@ -323,6 +333,9 @@ var MappingsDetails = (function () {
 
 
     };
+
+
+    
 
     self.drawDetailedMappingsGraph = function (column) {
         //datatypeMappingGraph
@@ -721,6 +734,48 @@ var MappingsDetails = (function () {
             MappingModeler.saveVisjsGraph();
             MappingsDetails.showDatatypeGraph(MappingModeler.currentGraphNode.label);
         },
+    };
+
+    self.showFilterMappingDialog = function (isSample) {
+
+        self.filterMappingIsSample = isSample;
+        
+        $("#mainDialogDiv").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
+            $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
+            $("#mainDialogDiv").dialog("open");
+            self.showDetailedMappingsList(null, null, {isFilterMapping: true});
+        });
+
+    };
+
+    self.validateFilterMapping = function () {
+        var checkedRows = [];
+        $('#detailedMappings_mappingsListDiv tbody tr').each(function() {
+            if ($(this).find('input[type="checkbox"]').is(':checked')) {
+                checkedRows.push($(this)); // Ajoute la ligne à la liste
+            }
+        });
+        console.log(checkedRows);
+        var triples = [];
+        checkedRows.forEach(element => {
+            let data = self.currentMappingsList.row(element).data();
+            let triple = {
+                s: data[1], // Assuming subject is at index 1
+                p: data[2], // Assuming predicate is at index 2
+                o: data[3]  // Assuming object is at index 3
+            };
+            triples.push(triple);        
+        });
+
+        var currentMappingsList = {}
+        currentMappingsList[MappingModeler.currentTable.name] = {
+            tripleModels: triples
+        }
+
+        if (self.filterMappingIsSample == undefined) {
+            self.filterMappingIsSample = true;
+        }
+        TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {mappingsFilterOption: currentMappingsList}, function (err, result) {});
     };
 
     return self;

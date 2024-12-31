@@ -462,7 +462,7 @@ var MappingsDetails = (function () {
                         label: label,
                         shape: attrs.shape,
                         color: attrs.color,
-                        font: attrs.shape == "box" ? {color: "white"} : {color: attrs.color},
+                        font: attrs.shape == "box" ? {color: "white"} : {color: 'black'},
                         size: Lineage_whiteboard.defaultShapeSize,
                         data: {
                             id: item.o,

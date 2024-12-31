@@ -26,6 +26,10 @@ var DataSourceManager = (function () {
 
     self.createApp = null;
     self.getSlsvSourceConfig = function (source, callback) {
+        // Transfer Config main.json to visjsgraph for firstTime and if already transfered skip 
+        if(self?.rawConfig?.isConfigInMappingGraph){
+            return callback(null,self.rawConfig);
+        }
         var payload = {
             dir: mappingsDir + "/" + source,
             fileName: "main.json",
@@ -42,21 +46,41 @@ var DataSourceManager = (function () {
                 } catch (e) {
                     return callback(e);
                 }
-                self.currentConfig=JSON.parse(result)
+                self.currentConfig=JSON.parse(result);
+                self.currentConfig.isConfigInMappingGraph = true;
                 self.rawConfig= self.currentConfig;
+                
+                MappingModeler.saveVisjsGraphWithConfig();
+                
+
                 return callback(null, json);
             },
             error: function (err) {
+                self.initNewSlsvSource(source,function(err,json){
+                    self.currentConfig=json
+                    if(callback){
+                        callback(null, json);
+                    }
+                });
+                /*
                 self.initNewSlsvSource(source, function (err, json) {
                     self.currentConfig=json
                     return callback(null, json);
-                });
+                });*/
             },
         });
     };
 
     // create dir and main.json
+    // Initialisation of configuration 
     self.initNewSlsvSource = function (source, callback) {
+        MappingModeler.saveVisjsGraphWithConfig(function(){
+            self.currentConfig=self.rawConfig;
+            if(callback){
+                callback(null,self.currentConfig);
+            }
+        });
+        /*
         var newJson = {
             sparqlServerUrl: Config.sources[self.currentSlsvSource].sparql_server.url,
             graphUri: Config.sources[self.currentSlsvSource].graphUri,
@@ -66,11 +90,16 @@ var DataSourceManager = (function () {
             csvSources: {},
         };
 
+        // Write Config in source_ALL.json of mappings
+        self.rawConfig = newJson;
+        */
+        // Write in main.json 
+        /*
         var payload = {
             dir: mappingsDir,
             newDirName: source,
         };
-        $.ajax({
+            $.ajax({
             type: "POST",
             url: Config.apiUrl + "/data/dir",
             data: payload,
@@ -83,7 +112,7 @@ var DataSourceManager = (function () {
                 self.rawConfig = newJson;
                 return callback(null, newJson);
             },
-        });
+        });*/
     };
 
     
@@ -115,16 +144,29 @@ var DataSourceManager = (function () {
                     };
                     return items;
                 }
-             else if (true) {
-            items.csvSources = {
-                label: "show SampleData",
-                action: function (_e) {
-                    MappingModeler.showSampleData();
+                else if (true) {
+                    if(node.data.type!='databaseSource'){
+                        items.showSampleData = {
+                            label: "show SampleData",
+                            action: function (_e) {
+                                MappingModeler.showSampleData();
 
-                },
-            };
-            return items;
-        }
+                            },
+                        }
+                    }
+                    if(node.data.type!='table'){
+                        items.deleteDataSource = {
+                            label: "delete DataSource",
+                            action: function (_e) {
+                                DataSourceManager.deleteDataSource(node);
+    
+                            },
+                        }
+                        
+                    }
+                    
+                    return items;
+                }
             },
         };
         self.dataSourcejstreeDivId = "mappingModeler_jstreeDiv";
@@ -367,9 +409,14 @@ var DataSourceManager = (function () {
         });
     };
  
-
+    // Config save made on visjsGraph
     self.saveSlsvSourceConfig = function (callback) {
-        var data = DataSourceManager.rawConfig;
+        MappingModeler.saveVisjsGraphWithConfig(function(){
+            if(callback){
+                callback();
+            }
+        });
+        /*var data = DataSourceManager.rawConfig;
         var source = DataSourceManager.currentSlsvSource;
 
         var payload = {
@@ -389,7 +436,8 @@ var DataSourceManager = (function () {
             error: function (err) {
                 callback(err);
             },
-        });
+        });*/
+
     };
     
     /*********************************************************************************/
@@ -481,7 +529,57 @@ self.createCsvSourceMappings = function () {
     });
 };
 
+self.deleteDataSource = function(jstreeNode){
+    var datasourceName=jstreeNode.id;
+    // Delete from config
+    if(jstreeNode.data.type=="databaseSource"){
+        
+        if(DataSourceManager.rawConfig.databaseSources[datasourceName]){
+            delete DataSourceManager.rawConfig.databaseSources[datasourceName]
+        }
+    }else if(jstreeNode.data.type=="csvSource"){
+        if(DataSourceManager.rawConfig.csvSources[datasourceName]){
+            delete DataSourceManager.rawConfig.csvSources[datasourceName]
+        }
 
+    }else{
+        return;
+    }
+    
+    DataSourceManager.saveSlsvSourceConfig(function (err, result) {
+        if (err) {
+            return alert(err);
+        }
+        // Delete all nodes/edges from this DataSource 
+        
+        var newNodes=[];
+        MappingModeler.visjsGraph.data.nodes.get().forEach(function(node){
+
+            if( node.data.datasource!=datasourceName){
+                newNodes.push(node)
+            }else{
+                // to not save n times
+                MappingModeler.visjsGraph.data.nodes.remove(node);
+                //MappingModeler.removeNode(node);
+            }
+        });
+        var newNodesIds=newNodes.map(function(node){return node.id});
+        MappingModeler.visjsGraph.data.edges.get().forEach(function(edge){ 
+            if(( newNodesIds.includes(edge.from)) && (newNodesIds.includes(edge.to))){
+                // node to keep
+            }else{
+                MappingModeler.visjsGraph.data.edges.remove(edge);
+                
+            }
+        });
+        MappingModeler.saveVisjsGraphWithConfig(function(){
+            MappingModeler.onLoaded();
+        });
+        // Delete File from CSV if it's a CSV
+        // Not done because road don't exist
+       
+    });
+}   
 
     return self;
 

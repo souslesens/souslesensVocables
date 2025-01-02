@@ -30,14 +30,19 @@ var TripleFactory = (function () {
     self.showTripleSample = function () {
         if (!self.checkCurrentTable()) return;
 
-        var options = { table: MappingModeler.currentTable.name };
-        self.createTriples(true, MappingModeler.currentTable.name, options, function (err, result) {});
+        MappingsDetails.showFilterMappingDialog(true);
+
+        //var options = { table: MappingModeler.currentTable.name, isSample: true };
+        //self.createTriples(true, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 
     self.writeTriples = function () {
         if (!self.checkCurrentTable()) return;
-        var options = { table: MappingModeler.currentTable.name };
-        self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
+
+        MappingsDetails.showFilterMappingDialog(false);
+
+        //var options = { table: MappingModeler.currentTable.name };
+        //self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 
     self.createAllMappingsTriples = function () {

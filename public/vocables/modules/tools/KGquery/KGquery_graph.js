@@ -295,27 +295,32 @@ var KGquery_graph = (function () {
                 var visjsGraphFileName = source + "_KGmodelGraph.json";
 
                 KGquery_graph.message("loading graph display");
-                self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
-                    if (!err && result.nodes) {
-                        result.nodes.forEach(function (node) {
-                            if (!uniqueNodes[node.id]) {
-                                uniqueNodes[node.id] = 1;
-                                node.x = null;
-                                node.y = null;
-                                //node.fixed = false;
-                                visjsData.nodes.push(node);
-                            }
-                        });
-                        result.edges.forEach(function (edge) {
-                            if (!uniqueNodes[edge.id]) {
-                                uniqueNodes[edge.id] = 1;
-                                visjsData.edges.push(edge);
-                            }
-                        });
-                    }
+                self.KGqueryGraph.loadGraph(
+                    visjsGraphFileName,
+                    null,
+                    function (err, result) {
+                        if (!err && result.nodes) {
+                            result.nodes.forEach(function (node) {
+                                if (!uniqueNodes[node.id]) {
+                                    uniqueNodes[node.id] = 1;
+                                    node.x = null;
+                                    node.y = null;
+                                    //node.fixed = false;
+                                    visjsData.nodes.push(node);
+                                }
+                            });
+                            result.edges.forEach(function (edge) {
+                                if (!uniqueNodes[edge.id]) {
+                                    uniqueNodes[edge.id] = 1;
+                                    visjsData.edges.push(edge);
+                                }
+                            });
+                        }
 
-                    callbackEach();
-                },true);
+                        callbackEach();
+                    },
+                    true
+                );
             },
             function (err) {
                 if (err) {

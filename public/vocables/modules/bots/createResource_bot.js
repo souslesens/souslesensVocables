@@ -50,7 +50,7 @@ var CreateResource_bot = (function () {
                 // "owl:ObjectProperty": { promptResourceLabelFn: { listVocabsFn: { listObjectPropertiesfn: self.workflow_saveResource } } },
 
                 "owl:NamedIndividual": { promptResourceLabelFn: { listVocabsFn: { listClassTypesFn: self.workflow_saveResource } } },
-                DatatypeProperty:{ promptDatatypePropertyLabelFn:{listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } }} },
+                DatatypeProperty: { promptDatatypePropertyLabelFn: { listDatatypePropertyDomainFn: { listDatatypePropertyRangeFn: { createDataTypePropertyFn: {} } } } },
                 ImportClass: { listVocabsFn: { listSuperClassesFn: self.workflow_saveResource } },
                 ImportSource: { listImportsFn: { saveImportSource: self.workflow_end } },
             },

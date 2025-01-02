@@ -79,7 +79,7 @@ var Containers_graph = (function () {
                             shadow: self.nodeShadow,
                             shape: Containers_graph.containerStyle.shape,
                             size: Containers_graph.containerStyle.size,
-                           // font: { color: self.containerStyle.color },
+                            // font: { color: self.containerStyle.color },
                             color: color,
                             data: {
                                 type: "Container",
@@ -101,7 +101,7 @@ var Containers_graph = (function () {
                         shadow: self.nodeShadow,
                         shape: Containers_graph.containerStyle.shape,
                         size: Containers_graph.containerStyle.size,
-                      //  font: { color: self.containerStyle.color },
+                        //  font: { color: self.containerStyle.color },
                         color: color,
                         data: {
                             type: "Container",

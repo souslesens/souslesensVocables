@@ -3,7 +3,7 @@ import KGcreator from "../KGcreator/KGcreator.js";
 
 var MappingTransform = (function () {
     var self = {};
-    
+
     self.generateSLSmappings = function () {
         var json = MappingTransform.getSLSmappingsFromVisjsGraph();
 
@@ -52,7 +52,7 @@ var MappingTransform = (function () {
             colname = data.id + "_$";
         } else if (data.uriType == "randomIdentifier") {
             colname = data.id + "_£";
-        } else{
+        } else {
             colname = data.id;
         }
         /*

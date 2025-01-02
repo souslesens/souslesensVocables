@@ -372,34 +372,23 @@ indexes.push(source.toLowerCase());
         //  word=word.toLowerCase()
         var queryObj;
         if (!mode || mode == "exactMatch") {
-
             queryObj = {
                 bool: {
                     must: [
                         {
-                          //  match: {
-                                term: {
+                            //  match: {
+                            term: {
                                 [field]: word,
                             },
                         },
                     ],
                 },
             };
-
-        }
-
-        else if (word=="*") {
-
+        } else if (word == "*") {
             queryObj = {
-
-                    "match_all": {}
-
-                }
-
-
-        }
-
-        else if (word.indexOf("*") > -1) {
+                match_all: {},
+            };
+        } else if (word.indexOf("*") > -1) {
             queryObj = {
                 bool: {
                     must: {
@@ -472,7 +461,7 @@ indexes.push(source.toLowerCase());
                     var query = {
                         query: queryObj,
                         from: from,
-                      size: size,
+                        size: size,
                         _source: {
                             excludes: ["attachment.content"],
                         },
@@ -485,7 +474,7 @@ indexes.push(source.toLowerCase());
                         return callbackEach(err);
                     }
 
-                    from+=size
+                    from += size;
 
                     allResults = allResults.concat(result);
                     callbackEach();
@@ -610,7 +599,7 @@ indexes.push(source.toLowerCase());
                                         parents = taxonomyClassesIdsMap[item.type2.value].parents.concat(item.type2.value);
                                     } else {
                                         parent = item.type2.value;
-                                        parents = [ sourceLabel,item.type2.value];
+                                        parents = [sourceLabel, item.type2.value];
                                     }
 
                                     var skosLabel = item.skosPrefLabel ? item.skosPrefLabel.value : null;

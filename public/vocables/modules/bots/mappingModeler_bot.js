@@ -86,7 +86,7 @@ var MappingModeler_bot = (function () {
         createSubPropertyFn: "Enter subProperty label",
         listTableColumnsFn: "Choose a  a column for predicate object ",
         listDatatypePropertyRangeFn: "Choose a datatype",
-        choosedateTypeFn:'Choose date format',
+        choosedateTypeFn: "Choose date format",
         addTransformFn: "add Transformation Function",
 
         /*  listVocabsFn: "Choose a source",

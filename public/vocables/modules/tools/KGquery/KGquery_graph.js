@@ -315,7 +315,7 @@ var KGquery_graph = (function () {
                     }
 
                     callbackEach();
-                });
+                },true);
             },
             function (err) {
                 if (err) {

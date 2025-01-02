@@ -276,6 +276,7 @@ var KGbuilder_triplesMaker = {
             }
         } else if (typeof mapping.o === "string" && mapping.o.indexOf("http") == 0) {
             objectStr = "<" + mapping.o + ">";
+            return callback(null, objectStr);
         } else if (typeof mapping.o === "string" && mapping.o.match(/.+:.+/)) {
             objectStr = mapping.o;
         } else if ((typeof mapping.o === "string" && mapping.o.endsWith("_$")) || mapping.isObjectBlankNode) {
@@ -422,14 +423,14 @@ var KGbuilder_triplesMaker = {
             }
 
 
-            else if (mapping.dataType) {
-                //pass
-            }
 
           //  else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
                 else if(KGbuilder_triplesMaker.isPrefixedUri(objectStr)){
                 // pass
                 }
+            else if (mapping.dataType) {
+                //pass
+            }
 
 
 

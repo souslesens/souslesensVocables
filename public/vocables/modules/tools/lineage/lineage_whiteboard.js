@@ -1433,7 +1433,7 @@ var Lineage_whiteboard = (function () {
         options.skipRestrictions = 1;
         options.selectGraph = 1;
 
-        options.filter=" FILTER (regex(str(?child1),\"http\"))"
+        options.filter = ' FILTER (regex(str(?child1),"http"))';
 
         Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function (err, result) {
             if (err) {
@@ -2634,7 +2634,7 @@ restrictionSource = Config.predicatesSource;
                 html += ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>';
             } else {
                 html +=
-                    '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
+                    // '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
                     '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' +
                     // '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +

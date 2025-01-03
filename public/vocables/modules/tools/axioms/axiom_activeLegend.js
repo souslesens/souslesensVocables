@@ -513,7 +513,7 @@ var Axiom_activeLegend = (function () {
         $("#smallDialogDiv").dialog("open");
     };
 
-    self.drawLegend = function (graphLegendDiv, legendItems, options,callback) {
+    self.drawLegend = function (graphLegendDiv, legendItems, options, callback) {
         if (!options) {
             options = {};
         }
@@ -543,7 +543,7 @@ var Axiom_activeLegend = (function () {
                 label: item.label,
                 shape: "box",
                 color: item.color,
-                size:item.size || 8,
+                size: item.size || 8,
                 level: -1,
                 font: {
                     bold: true,
@@ -578,7 +578,7 @@ var Axiom_activeLegend = (function () {
 
         self.axiomsLegendVisjsGraph = new VisjsGraphClass(graphLegendDiv || self.graphLegendDiv, visjsData, options);
         self.axiomsLegendVisjsGraph.draw(function () {
-            if(callback){
+            if (callback) {
                 return callback();
             }
         });
@@ -848,9 +848,9 @@ var Axiom_activeLegend = (function () {
         var newNodes = [];
         Axioms_graph.axiomsVisjsGraph.data.nodes.forEach(function (node) {
             if (node.id != self.newAxiomNode.id) {
-                var color = common.colorToRgba(node.color,1);
+                var color = common.colorToRgba(node.color, 1);
                 var fontColor = common.colorToRgba(Lineage_whiteboard.defaultNodeFontColor, 1);
-                var opacity =  Lineage_whiteboard.defaultLowOpacity;
+                var opacity = Lineage_whiteboard.defaultLowOpacity;
 
                 newNodes.push({
                     id: node.id,

@@ -170,8 +170,7 @@ var NodeInfosWidget = (function () {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        if(result.length==0)
-                            return callbackSeries();
+                        if (result.length == 0) return callbackSeries();
                         var item = result[0];
                         self.currentNode = {
                             id: item.subject.value,

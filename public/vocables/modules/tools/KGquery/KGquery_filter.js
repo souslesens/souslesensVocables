@@ -111,27 +111,26 @@ var KGquery_filter = (function () {
                     });
                 });
                 // Check properties with filter
-                var jstreeDataLabels=jstreeData.map(function(node){return node.id});
-                KGquery.querySets.sets.forEach(function(set){
-                    for (var key in set.classFiltersMap){
-                        var filter=set.classFiltersMap[key].filter;
-                        var regex=/\?(\w+?)[^\w]/gm
-                        var matches=filter.matchAll(regex)
+                var jstreeDataLabels = jstreeData.map(function (node) {
+                    return node.id;
+                });
+                KGquery.querySets.sets.forEach(function (set) {
+                    for (var key in set.classFiltersMap) {
+                        var filter = set.classFiltersMap[key].filter;
+                        var regex = /\?(\w+?)[^\w]/gm;
+                        var matches = filter.matchAll(regex);
                         for (const match of matches) {
-                            if(match){
-                                var property=match[1];
+                            if (match) {
+                                var property = match[1];
                             }
                         }
-                        
-                        if(property && jstreeDataLabels.includes(property)){
+
+                        if (property && jstreeDataLabels.includes(property)) {
                             preCheckedOptions.push(property);
                         }
                     }
                 });
                 jstreeWidget.setjsTreeCheckedNodes(null, preCheckedOptions);
-                
-                
-                
             }
 
             if (false && options && options.output != "table") {

@@ -44,6 +44,7 @@ var KGquery = (function () {
         if (Config.clientCache.KGquery) {
             KGquery_myQueries.load(null, Config.clientCache.KGquery);
         }
+        self.clearAll();
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
     };

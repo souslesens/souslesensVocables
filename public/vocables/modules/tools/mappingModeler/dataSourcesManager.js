@@ -1,21 +1,13 @@
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import MappingModeler from "./mappingModeler.js";
 
-
-
-
-
-
-
 var DataSourceManager = (function () {
-    var self = {}
+    var self = {};
     self.currentConfig = {};
     self.currentSlsvSource = {};
 
-
     var mappingsDir = "mappings";
     self.umountKGUploadApp = null;
-
 
     self.uploadFormData = {
         displayForm: "", // can be database, file or ""
@@ -26,9 +18,9 @@ var DataSourceManager = (function () {
 
     self.createApp = null;
     self.getSlsvSourceConfig = function (source, callback) {
-        // Transfer Config main.json to visjsgraph for firstTime and if already transfered skip 
-        if(self?.rawConfig?.isConfigInMappingGraph){
-            return callback(null,self.rawConfig);
+        // Transfer Config main.json to visjsgraph for firstTime and if already transfered skip
+        if (self?.rawConfig?.isConfigInMappingGraph) {
+            return callback(null, self.rawConfig);
         }
         var payload = {
             dir: mappingsDir + "/" + source,
@@ -46,19 +38,18 @@ var DataSourceManager = (function () {
                 } catch (e) {
                     return callback(e);
                 }
-                self.currentConfig=JSON.parse(result);
+                self.currentConfig = JSON.parse(result);
                 self.currentConfig.isConfigInMappingGraph = true;
-                self.rawConfig= self.currentConfig;
-                
+                self.rawConfig = self.currentConfig;
+
                 MappingModeler.saveVisjsGraphWithConfig();
-                
 
                 return callback(null, json);
             },
             error: function (err) {
-                self.initNewSlsvSource(source,function(err,json){
-                    self.currentConfig=json
-                    if(callback){
+                self.initNewSlsvSource(source, function (err, json) {
+                    self.currentConfig = json;
+                    if (callback) {
                         callback(null, json);
                     }
                 });
@@ -72,12 +63,12 @@ var DataSourceManager = (function () {
     };
 
     // create dir and main.json
-    // Initialisation of configuration 
+    // Initialisation of configuration
     self.initNewSlsvSource = function (source, callback) {
-        MappingModeler.saveVisjsGraphWithConfig(function(){
-            self.currentConfig=self.rawConfig;
-            if(callback){
-                callback(null,self.currentConfig);
+        MappingModeler.saveVisjsGraphWithConfig(function () {
+            self.currentConfig = self.rawConfig;
+            if (callback) {
+                callback(null, self.currentConfig);
             }
         });
         /*
@@ -93,7 +84,7 @@ var DataSourceManager = (function () {
         // Write Config in source_ALL.json of mappings
         self.rawConfig = newJson;
         */
-        // Write in main.json 
+        // Write in main.json
         /*
         var payload = {
             dir: mappingsDir,
@@ -115,10 +106,7 @@ var DataSourceManager = (function () {
         });*/
     };
 
-    
-    self.loaDataSourcesJstree=function(jstreeDiv,callback){
-   
-
+    self.loaDataSourcesJstree = function (jstreeDiv, callback) {
         var options = {
             openAll: true,
             selectTreeNodeFn: MappingModeler.onDataSourcesJstreeSelect,
@@ -129,7 +117,6 @@ var DataSourceManager = (function () {
                         label: "addDatabaseSources",
                         action: function (_e) {
                             self.displayUploadApp("database");
-
                         },
                     };
                     return items;
@@ -139,32 +126,27 @@ var DataSourceManager = (function () {
                         action: function (_e) {
                             // pb avec source
                             self.displayUploadApp("file");
-
                         },
                     };
                     return items;
-                }
-                else if (true) {
-                    if(node.data.type!='databaseSource'){
+                } else if (true) {
+                    if (node.data.type != "databaseSource") {
                         items.showSampleData = {
                             label: "show SampleData",
                             action: function (_e) {
                                 MappingModeler.showSampleData();
-
                             },
-                        }
+                        };
                     }
-                    if(node.data.type!='table'){
+                    if (node.data.type != "table") {
                         items.deleteDataSource = {
                             label: "delete DataSource",
                             action: function (_e) {
                                 DataSourceManager.deleteDataSource(node);
-    
                             },
-                        }
-                        
+                        };
                     }
-                    
+
                     return items;
                 }
             },
@@ -220,49 +202,46 @@ var DataSourceManager = (function () {
                 });
             },
             function (err) {
-                var dataTables=MappingModeler.getDataTablesFromVisjsGraph();
+                var dataTables = MappingModeler.getDataTablesFromVisjsGraph();
                 for (var datasource in self.currentConfig.csvSources) {
-                    var jstreeNode={
+                    var jstreeNode = {
                         id: datasource,
                         text: datasource,
                         parent: "csvSources",
                         type: "CSV",
                         data: { id: datasource, type: "csvSource" },
                     };
-                    if(dataTables.includes(datasource)){
-                        jstreeNode.text="<span style='color:blue'>"+datasource+"</span>";
+                    if (dataTables.includes(datasource)) {
+                        jstreeNode.text = "<span style='color:blue'>" + datasource + "</span>";
                     }
                     jstreeData.push(jstreeNode);
                 }
 
                 //underline CSV with mappings
-                var dataSources=MappingModeler.visjsGraph.data.nodes.get().map(function (node) {return node?.data?.datasource;});
-                if(dataSources.length>0){
-                    dataSources=common.array.distinctValues(dataSources);
-                    dataSources=dataSources.filter(function (item) {return item!=undefined});
+                var dataSources = MappingModeler.visjsGraph.data.nodes.get().map(function (node) {
+                    return node?.data?.datasource;
+                });
+                if (dataSources.length > 0) {
+                    dataSources = common.array.distinctValues(dataSources);
+                    dataSources = dataSources.filter(function (item) {
+                        return item != undefined;
+                    });
                 }
                 for (var node in jstreeData) {
-                    if(dataSources.includes(jstreeData[node].id)){
-                        jstreeData[node].text="<span style='color:blue'>"+jstreeData[node].text+"</span>";
+                    if (dataSources.includes(jstreeData[node].id)) {
+                        jstreeData[node].text = "<span style='color:blue'>" + jstreeData[node].text + "</span>";
                     }
                 }
-              
 
-
-                JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options,function(){
-                    $('#MappingModeler_dataSourcesTab').css('margin-top','0px');
+                JstreeWidget.loadJsTree(jstreeDiv, jstreeData, options, function () {
+                    $("#MappingModeler_dataSourcesTab").css("margin-top", "0px");
                 });
                 if (callback) {
                     return callback(err, self.currentConfig);
                 }
-                
-                
             }
         );
-
-
-    }
-
+    };
 
     self.initNewDataSource = function (name, type, sqlType, table) {
         //close Previous DataSource
@@ -273,16 +252,18 @@ var DataSourceManager = (function () {
                 .delete_node(parent_node.children);
         }
         var id;
-        if(type!='csvSource'){
-            var node = $("#" + self.dataSourcejstreeDivId).jstree(true).get_node(name);
-            id=name;
-            name=node.text;
-        }else{
-            id=name;
+        if (type != "csvSource") {
+            var node = $("#" + self.dataSourcejstreeDivId)
+                .jstree(true)
+                .get_node(name);
+            id = name;
+            name = node.text;
+        } else {
+            id = name;
         }
         self.currentConfig.currentDataSource = {
             name: name,
-            id:id,
+            id: id,
             tables: [],
             type: type,
             sqlType: sqlType,
@@ -316,7 +297,6 @@ var DataSourceManager = (function () {
                         },
                     });
                 },
-
 
                 function (callbackSeries) {
                     callbackSeries();
@@ -361,19 +341,16 @@ var DataSourceManager = (function () {
                                     return callback(err);
                                 },
                             });
-
                         },
 
                         function (callbackSeries) {
-
-                                callbackSeries();
-
+                            callbackSeries();
                         },
 
                         function (callbackSeries) {
                             var jstreeData = [];
-                            var dataTables=MappingModeler.getDataTablesFromVisjsGraph();
-                            for (var table in   self.currentConfig.currentDataSource.tables) {
+                            var dataTables = MappingModeler.getDataTablesFromVisjsGraph();
+                            for (var table in self.currentConfig.currentDataSource.tables) {
                                 var label = table;
                                 if (dataTables.includes(table)) {
                                     label = "<span style='color:blue'>" + table + "</span>";
@@ -382,7 +359,7 @@ var DataSourceManager = (function () {
                                     id: table,
                                     text: label,
                                     type: "Table",
-                                    parent:  self.currentConfig.dataSource,
+                                    parent: self.currentConfig.dataSource,
                                     data: {
                                         id: table,
                                         label: table,
@@ -393,8 +370,6 @@ var DataSourceManager = (function () {
                             JstreeWidget.addNodesToJstree(self.dataSourcejstreeDivId, self.currentConfig.currentDataSource.id, jstreeData);
                             callbackSeries();
                         },
-
-
                     ],
                     function (err) {
                         if (err) {
@@ -408,11 +383,11 @@ var DataSourceManager = (function () {
             });
         });
     };
- 
+
     // Config save made on visjsGraph
     self.saveSlsvSourceConfig = function (callback) {
-        MappingModeler.saveVisjsGraphWithConfig(function(){
-            if(callback){
+        MappingModeler.saveVisjsGraphWithConfig(function () {
+            if (callback) {
                 callback();
             }
         });
@@ -437,153 +412,146 @@ var DataSourceManager = (function () {
                 callback(err);
             },
         });*/
-
     };
-    
+
     /*********************************************************************************/
     /***functions linked to REACT**/
     // see assets/mappingModeler_upload_app.js
     /***********************************************************************************/
-// imports React app
-import("/assets/mappingModeler_upload_app.js");
+    // imports React app
+    import("/assets/mappingModeler_upload_app.js");
 
+    self.displayUploadApp = function (displayForm) {
+        self.uploadFormData.displayForm = displayForm;
+        //   return   $.getScript("/kg_upload_app.js");
+        if (!displayForm) {
+            return;
+        }
+        if (displayForm == "database") {
+            self.uploadFormData.selectedFiles = null;
+        }
+        var html = ' <div style="width:500px;height: 400px" id="mount-mappingModeler-upload-app-here"></div>';
+        $("#smallDialogDiv").html(html);
 
-self.displayUploadApp = function (displayForm) {
-    self.uploadFormData.displayForm = displayForm;
-    //   return   $.getScript("/kg_upload_app.js");
-    if (!displayForm) {
-        return;
-    }
-    if (displayForm == "database") {
-        self.uploadFormData.selectedFiles = null
-    }
-    var html = ' <div style="width:500px;height: 400px" id="mount-mappingModeler-upload-app-here"></div>';
-    $("#smallDialogDiv").html(html);
-
-    $("#smallDialogDiv").dialog({
-        open: function (event, ui) {
-            if (self.createApp === null) {
-                throw new Error("React app is not initialized see assets/mappingModeler_upload_app.js");
-            }
-
-            self.uploadFormData.currentSource = MappingModeler.currentSource;
-
-            self.umountKGUploadApp = self.createApp(self.uploadFormData);
-        },
-        beforeClose: function () {
-            self.umountKGUploadApp();
-            DataSourceManager.currentSlsvSource = MappingModeler.currentSource;
-            DataSourceManager.getSlsvSourceConfig(MappingModeler.currentSource, function (err, result) {
-                if (err) {
-                    return err;
+        $("#smallDialogDiv").dialog({
+            open: function (event, ui) {
+                if (self.createApp === null) {
+                    throw new Error("React app is not initialized see assets/mappingModeler_upload_app.js");
                 }
 
-                DataSourceManager.currentConfig = result;
-            });
-        },
-    });
-    $("#smallDialogDiv").dialog("open");
-};
+                self.uploadFormData.currentSource = MappingModeler.currentSource;
 
+                self.umountKGUploadApp = self.createApp(self.uploadFormData);
+            },
+            beforeClose: function () {
+                self.umountKGUploadApp();
+                DataSourceManager.currentSlsvSource = MappingModeler.currentSource;
+                DataSourceManager.getSlsvSourceConfig(MappingModeler.currentSource, function (err, result) {
+                    if (err) {
+                        return err;
+                    }
 
-self.createDataBaseSourceMappings = function () {
-    // hide uploadApp
-    self.displayUploadApp("");
-    $("#smallDialogDiv").dialog("close");
-
-    var datasource = self.uploadFormData.selectedDatabase;
-    if (!datasource) {
-        return;
-    }
-    if (!datasource.id) {
-        datasource = {id: datasource, name: datasource}
-    }
-    DataSourceManager.currentConfig.databaseSources[datasource.id] = {name: datasource.name};
-    DataSourceManager.rawConfig.databaseSources[datasource.id] = {name: datasource.name};
-    DataSourceManager.saveSlsvSourceConfig(function (err, result) {
-        if (err) {
-            return alert(err);
-        }
-        MappingModeler.onLoaded();
-        // self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
-    });
-};
-
-self.createCsvSourceMappings = function () {
-    // hide uploadApp
-    self.displayUploadApp("");
-    $("#smallDialogDiv").dialog("close");
-    var datasourceName = self.uploadFormData.selectedFiles[0];
-    if (!datasourceName) {
-        return;
-    }
-
-    DataSourceManager.currentConfig.csvSources[datasourceName] = {};
-    DataSourceManager.rawConfig = DataSourceManager.currentConfig;
-
-    DataSourceManager.saveSlsvSourceConfig(function (err, result) {
-        if (err) {
-            return alert(err);
-        }
-        MappingModeler.onLoaded();
-    });
-};
-
-self.deleteDataSource = function(jstreeNode){
-    var datasourceName=jstreeNode.id;
-    // Delete from config
-    if(jstreeNode.data.type=="databaseSource"){
-        
-        if(DataSourceManager.rawConfig.databaseSources[datasourceName]){
-            delete DataSourceManager.rawConfig.databaseSources[datasourceName]
-        }
-    }else if(jstreeNode.data.type=="csvSource"){
-        if(DataSourceManager.rawConfig.csvSources[datasourceName]){
-            delete DataSourceManager.rawConfig.csvSources[datasourceName]
-        }
-
-    }else{
-        return;
-    }
-    
-    DataSourceManager.saveSlsvSourceConfig(function (err, result) {
-        if (err) {
-            return alert(err);
-        }
-        // Delete all nodes/edges from this DataSource 
-        
-        var newNodes=[];
-        MappingModeler.visjsGraph.data.nodes.get().forEach(function(node){
-
-            if( node.data.datasource!=datasourceName){
-                newNodes.push(node)
-            }else{
-                // to not save n times
-                MappingModeler.visjsGraph.data.nodes.remove(node);
-                //MappingModeler.removeNode(node);
-            }
+                    DataSourceManager.currentConfig = result;
+                });
+            },
         });
-        var newNodesIds=newNodes.map(function(node){return node.id});
-        MappingModeler.visjsGraph.data.edges.get().forEach(function(edge){ 
-            if(( newNodesIds.includes(edge.from)) && (newNodesIds.includes(edge.to))){
-                // node to keep
-            }else{
-                MappingModeler.visjsGraph.data.edges.remove(edge);
-                
+        $("#smallDialogDiv").dialog("open");
+    };
+
+    self.createDataBaseSourceMappings = function () {
+        // hide uploadApp
+        self.displayUploadApp("");
+        $("#smallDialogDiv").dialog("close");
+
+        var datasource = self.uploadFormData.selectedDatabase;
+        if (!datasource) {
+            return;
+        }
+        if (!datasource.id) {
+            datasource = { id: datasource, name: datasource };
+        }
+        DataSourceManager.currentConfig.databaseSources[datasource.id] = { name: datasource.name };
+        DataSourceManager.rawConfig.databaseSources[datasource.id] = { name: datasource.name };
+        DataSourceManager.saveSlsvSourceConfig(function (err, result) {
+            if (err) {
+                return alert(err);
             }
+            MappingModeler.onLoaded();
+            // self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
         });
-        MappingModeler.saveVisjsGraphWithConfig(function(){
+    };
+
+    self.createCsvSourceMappings = function () {
+        // hide uploadApp
+        self.displayUploadApp("");
+        $("#smallDialogDiv").dialog("close");
+        var datasourceName = self.uploadFormData.selectedFiles[0];
+        if (!datasourceName) {
+            return;
+        }
+
+        DataSourceManager.currentConfig.csvSources[datasourceName] = {};
+        DataSourceManager.rawConfig = DataSourceManager.currentConfig;
+
+        DataSourceManager.saveSlsvSourceConfig(function (err, result) {
+            if (err) {
+                return alert(err);
+            }
             MappingModeler.onLoaded();
         });
-        // Delete File from CSV if it's a CSV
-        // Not done because road don't exist
-       
-    });
-}   
+    };
+
+    self.deleteDataSource = function (jstreeNode) {
+        var datasourceName = jstreeNode.id;
+        // Delete from config
+        if (jstreeNode.data.type == "databaseSource") {
+            if (DataSourceManager.rawConfig.databaseSources[datasourceName]) {
+                delete DataSourceManager.rawConfig.databaseSources[datasourceName];
+            }
+        } else if (jstreeNode.data.type == "csvSource") {
+            if (DataSourceManager.rawConfig.csvSources[datasourceName]) {
+                delete DataSourceManager.rawConfig.csvSources[datasourceName];
+            }
+        } else {
+            return;
+        }
+
+        DataSourceManager.saveSlsvSourceConfig(function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            // Delete all nodes/edges from this DataSource
+
+            var newNodes = [];
+            MappingModeler.visjsGraph.data.nodes.get().forEach(function (node) {
+                if (node.data.datasource != datasourceName) {
+                    newNodes.push(node);
+                } else {
+                    // to not save n times
+                    MappingModeler.visjsGraph.data.nodes.remove(node);
+                    //MappingModeler.removeNode(node);
+                }
+            });
+            var newNodesIds = newNodes.map(function (node) {
+                return node.id;
+            });
+            MappingModeler.visjsGraph.data.edges.get().forEach(function (edge) {
+                if (newNodesIds.includes(edge.from) && newNodesIds.includes(edge.to)) {
+                    // node to keep
+                } else {
+                    MappingModeler.visjsGraph.data.edges.remove(edge);
+                }
+            });
+            MappingModeler.saveVisjsGraphWithConfig(function () {
+                MappingModeler.onLoaded();
+            });
+            // Delete File from CSV if it's a CSV
+            // Not done because road don't exist
+        });
+    };
 
     return self;
+})();
 
-})()
-
-export default DataSourceManager
-window.DataSourceManager = DataSourceManager
+export default DataSourceManager;
+window.DataSourceManager = DataSourceManager;

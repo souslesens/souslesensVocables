@@ -68,8 +68,8 @@ var GraphMlExport = (function () {
             if (!node.label) {
                 node.label = "?";
             }
-            node.label=node.label.replace("&","&amp;")
-          var color=common.RGBtoHexColor(node.color)
+            node.label = node.label.replace("&", "&amp;");
+            var color = common.RGBtoHexColor(node.color);
             xml +=
                 ' \n<node id="' +
                 node.id +
@@ -82,7 +82,7 @@ var GraphMlExport = (function () {
                 ".0" +
                 '" x="0.0" y="0.0"/> <!-- position and size -->\n' +
                 '          <y:Fill color="' +
-               color +
+                color +
                 '" transparent="false"/>            <!-- fill color -->\n' +
                 '          <y:BorderStyle color="#000000" type="line" width="1.0"/> <!-- border -->\n' +
                 "          <y:NodeLabel>" +
@@ -94,9 +94,8 @@ var GraphMlExport = (function () {
         });
 
         visjsData.edges.forEach(function (edge) {
-            if( !edge.label)
-                edge.label=""
-            edge.label=edge.label.replace("&","&amp;")
+            if (!edge.label) edge.label = "";
+            edge.label = edge.label.replace("&", "&amp;");
             xml +=
                 '     <edge source="' +
                 edge.from +

@@ -759,17 +759,25 @@ var MappingsDetails = (function () {
         var triples = [];
         checkedRows.forEach(element => {
             let data = self.currentMappingsList.row(element).data();
-            let triple = {
-                s: data[1], // Assuming subject is at index 1
-                p: data[2], // Assuming predicate is at index 2
-                o: data[3]  // Assuming object is at index 3
-            };
-            triples.push(triple);        
+            if (data[2] != 'Transform') {
+                let triple = {
+                    s: data[1], // Assuming subject is at index 1
+                    p: data[2], // Assuming predicate is at index 2
+                    o: data[3]  // Assuming object is at index 3
+                };
+                triples.push(triple);
+            }
         });
 
         var currentMappingsList = {}
         currentMappingsList[MappingModeler.currentTable.name] = {
             tripleModels: triples
+        }
+
+        var transform = MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable.name)[MappingModeler.currentTable.name].transform; // self.getSelectedMappingTriplesOption(); 
+
+        if(transform) {
+            currentMappingsList[MappingModeler.currentTable.name].transform = transform;
         }
 
         if (self.filterMappingIsSample == undefined) {

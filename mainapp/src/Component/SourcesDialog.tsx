@@ -89,11 +89,13 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                 });
             }
             if (sourcesPrefixes.includes(value.prefix)) {
-                context.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "This prefix is already used by another source",
-                    path: ["prefix"],
-                });
+                if (!edit || value.prefix !== source.prefix) {
+                    context.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: "This prefix is already used by another source",
+                        path: ["prefix"],
+                    });
+                }
             }
             if (value.group.trim().length < 3) {
                 context.addIssue({
@@ -233,8 +235,6 @@ export const SourcesDialog = ({ edit, me, onClose, onSubmit, open, selectedSourc
                         value={source.prefix}
                     />
                     <Autocomplete
-                        autoSelect
-                        disableCloseOnSelect
                         freeSolo
                         id="group"
                         onChange={(_e, value) => handleField("group", value)}

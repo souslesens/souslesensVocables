@@ -1,7 +1,7 @@
 services:
     vocables:
         restart: unless-stopped
-        image: souslesensvocables:${TAG:-latest}
+        image: souslesensvocables:${VOCABLES_TAG:-latest}
         build:
             context: .
             dockerfile: Dockerfile
@@ -20,15 +20,9 @@ services:
             VOCABLES__sparql_server__user: dba
             VOCABLES__sparql_server__password: ${DBA_PASSWORD}
             VOCABLES__formalOntologySourceLabel: ${FORMAL_ONTOLOGY_SOURCE_LABEL}
-            VOCABLES__SQLserver__user: SA
-            VOCABLES__SQLserver__password: ${SA_PASSWORD}
-            VOCABLES__SQLserver__server: sqlserver
-            VOCABLES__SQLserver__database: master
             VOCABLES__ElasticSearch__url: http://elasticsearch:9200/
-            VOCABLES__annotator__spacyServerUrl: http://spacyserver:8000/pos
             VOCABLES__jowlServer__url: http://jowl:9170
-            VOCABLES__slsApi__url: http://sls-api:8008
-            VOCABLES__wiki__url: ""
+            VOCABLES__slsPyApi__url: http://sls-py-api:8000
         networks:
             - backend
 
@@ -56,17 +50,6 @@ services:
         networks:
             - backend
 
-    sqlserver:
-        image: mcr.microsoft.com/mssql/server:2019-latest
-        environment:
-            ACCEPT_EULA: "Y"
-            SA_PASSWORD: ${SA_PASSWORD}
-        volumes:
-            - "${DATA_ROOT_DIR:-/tmp}/souslesens/sqlserver:\
-              /var/opt/mssql"
-        networks:
-            - backend
-
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.17.26
         environment:
@@ -89,20 +72,29 @@ services:
         restart: always
         ports:
             - ${JOWL_LISTEN_PORT:-9170}:9170
+        environment:
+            VIRTUOSO_ENDPOINT: http://virtuoso:8890/sparql
+            VIRTUOSO_USER: dba
+            VIRTUOSO_PASSWORD: ${DBA_PASSWORD}
         networks:
             - backend
 
-    sls-api:
-        image: sls-api:latest
+    sls-py-api:
+        image: sls-py-api:latest
         build:
-            context: ${SLS_API_PATH}
+            context: ${SLSPYAPI_PATH}
             dockerfile: Dockerfile
         restart: always
         ports:
-            - ${SLS_API_LISTEN_PORT:-8008}:8000
+            - ${SLSPYAPI_LISTEN_PORT:-8008}:8000
         environment:
             MAIN_SOUSLESENS_CONFIG_DIR: /souslesens_config
+            MAIN_API_URL_FOR_VIRTUOSO: http://sls-py-api:8000
             MAIN_LOG_LEVEL: debug
+            MAIN_GET_RDF_GRAPH_METHOD: isql
+            MAIN_POST_RDF_GRAPH_METHOD: sparql_load
+            VIRTUOSO_HOST: virtuoso
+            VIRTUOSO_PASSWORD: ${DBA_PASSWORD}
             CORS_ORIGINS: "*"
             RDF_BATCH_SIZE: 100000
         volumes:

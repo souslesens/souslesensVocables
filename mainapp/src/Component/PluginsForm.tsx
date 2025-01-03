@@ -542,7 +542,7 @@ const PluginsRepositories = (props: DispatcherProps) => {
                 const handleFetchRepository = (repositoryId: string) => {
                     fetchRepository(repositoryId)
                         .then((response) => {
-                            if (response.status == "success") {
+                            if (response.status == 200) {
                                 snack("The repository have been successfully updated", "success");
                             } else {
                                 snack(`An error occurs during fetching: ${response.message as string}`, "error");
@@ -573,6 +573,7 @@ const PluginsRepositories = (props: DispatcherProps) => {
                     <Stack spacing={{ xs: 2 }} useFlexGap>
                         <Stack spacing={{ xs: 2 }} sx={{ height: 400 }} useFlexGap>
                             <TextField
+                                inputProps={{ autocomplete: "off" }}
                                 label="Filter repositories by URL"
                                 id="filter-repositories"
                                 onChange={(event) => {

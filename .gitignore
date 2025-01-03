@@ -1,3 +1,6 @@
+docs/_build
+docs/docs/_build
+
 plugins/*
 plugins.available/*
 !plugins

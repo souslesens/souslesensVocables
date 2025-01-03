@@ -12,10 +12,24 @@ Both buttons calls the function MappingDetails.showFilterMappingDialog that will
 
 ![alt text](image.png)
 
-This function calls MappingDetails.showDetailledMappingList (section below) to display Table with all the mappings 
+This function calls MappingDetails.showDetailedMappingsList (section below) to display Table with all the mappings 
 
 Then We use MappingDetails.validateFilterMapping to process the selected mappings by the user.
 
 This function get all checkedRows of the DataTable with html id #detailedMappings_mappingsListDiv,
 Retrieve their data 
-Then reconsti
+Then reconstitute the mapping object that is present on console by tapping:
+MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable.name)[MappingModeler.currentTable.name]
+but only with mappings selected in checkedRows
+
+### showDetailedMappingsList 
+
+This function is able to Draw a DataTable with all currentTable mappings on a specific divId (parameter of a function),
+we can also draw only mapping relative to a column with column parameter.
+An options object can also be passed as parameter 
+if options = {isFilterMapping:true}
+The first column of the DataTable will be checked box to select mappings --> called in drawDetailedMappingsGraph on 'Details' button
+else it will be deleteButtons to delete a specific mapping. --> And in showFilterMappingDialog (filterMappings section above)
+
+
+

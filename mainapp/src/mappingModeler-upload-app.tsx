@@ -6,10 +6,15 @@ import { Done, Folder } from "@mui/icons-material";
 
 import { VisuallyHiddenInput } from "./Utils";
 
+interface Database {
+    id?: string;
+    name: string;
+}
+
 interface UploadFormData {
     displayForm: "database" | "file" | "";
     currentSource: string;
-    selectedDatabase: string;
+    selectedDatabase: Database;
     selectedFiles: string[];
 }
 

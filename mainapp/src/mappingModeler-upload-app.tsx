@@ -5,7 +5,6 @@ import { Alert, Button, MenuItem, Select, Stack } from "@mui/material";
 import { Done, Folder } from "@mui/icons-material";
 
 import { VisuallyHiddenInput } from "./Utils";
-import { data } from "jquery";
 
 interface UploadFormData {
     displayForm: "database" | "file" | "";

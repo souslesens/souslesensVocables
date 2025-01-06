@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.99.0](https://github.com/souslesens/souslesensVocables/compare/1.98.2...1.99.0) (2025-01-06)
+
+
+### Bug Fixes
+
+* **mainapp:** avoid to raise a ZodError when starting the application ([155c314](https://github.com/souslesens/souslesensVocables/commit/155c3140cb31f69ff99aa13c2e7880f13f46ea34))
+* **mainapp:** typing ([4848622](https://github.com/souslesens/souslesensVocables/commit/4848622465726ad552a70c129ab1569263ce51eb))
+
 ### [1.98.2](https://github.com/souslesens/souslesensVocables/compare/1.98.1...1.98.2) (2024-12-20)
 
 ### [1.98.1](https://github.com/souslesens/souslesensVocables/compare/1.98.0...1.98.1) (2024-12-20)

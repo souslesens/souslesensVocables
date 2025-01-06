@@ -188,7 +188,7 @@ export const ServerSourceSchema = z.object({
     published: z.boolean().default(false),
     imports: z.array(z.string()).default([]),
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
-    accessControl: z.string(),
+    accessControl: z.string().default(""),
 });
 
 const InputSourceSchemaBase = {

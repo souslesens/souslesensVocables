@@ -163,13 +163,14 @@ var NodeInfosWidget = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    if (self.currentNode) {
+                    if (false && self.currentNode) {
                         return callbackSeries();
                     }
                     Sparql_generic.getNodeParents(sourceLabel, null, nodeId, 0, null, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
+                        if (result.length == 0) return callbackSeries();
                         var item = result[0];
                         self.currentNode = {
                             id: item.subject.value,

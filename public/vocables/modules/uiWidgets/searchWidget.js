@@ -435,6 +435,15 @@ var SearchWidget = (function () {
             },
         };
 
+        if (false && Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+            items.axioms = {
+                label: "Import Class in source " + Lineage_sources.activeSource,
+                action: function (e) {
+                    alert("to implement"); // Sparql_OWL.copyUriTriplesFromSourceToSource(Lineage_sources.activeSource, self.currentTreeNode.data.source, self.currentTreeNode.data.id, function (err, result) {});
+                },
+            };
+        }
+
         /*  items.descendantsAxioms = {
             label: "Descendants axioms",
             action: function (e) {

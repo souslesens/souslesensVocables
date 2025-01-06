@@ -1,24 +1,48 @@
 import KGcreator_run from "../KGcreator/KGcreator_run.js";
-import KGcreator from "../KGcreator/KGcreator.js";
+import MappingsDetails from "./mappingsDetails.js";
+
 import MappingTransform from "./mappingTransform.js";
 
 var TripleFactory = (function () {
     var self = {};
 
     self.checkCurrentTable = function () {
-        if (!MappingModeler.currentTable) return alert("select a table or a csv source");
+        var check = false;
+        if (!MappingModeler.currentTable) {
+            alert("select a table or a csv source");
+        }
+        var mappingsDetailsIsLoaded = false;
+        MappingModeler.visjsGraph.data.nodes.get().forEach(function (node) {
+            if (node?.data?.dataTable === MappingModeler.currentTable.name) {
+                if (node.data.uriType) {
+                    mappingsDetailsIsLoaded = true;
+                }
+            }
+        });
+        if (mappingsDetailsIsLoaded) {
+            check = true;
+        } else {
+            alert("Mappings details are not loaded for this table. Please load mappings details first");
+            MappingsDetails.showDetailsDialog();
+        }
+        return check;
     };
     self.showTripleSample = function () {
-        if (!self.checkCurrentTable) return;
+        if (!self.checkCurrentTable()) return;
 
-        var options = { table: MappingModeler.currentTable.name };
-        self.createTriples(true, MappingModeler.currentTable.name, options, function (err, result) {});
+        MappingsDetails.showFilterMappingDialog(true);
+
+        //var options = { table: MappingModeler.currentTable.name, isSample: true };
+        //self.createTriples(true, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 
     self.writeTriples = function () {
-        if (!self.checkCurrentTable) return;
-        var options = { table: MappingModeler.currentTable.name };
-        self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
+        if (!self.checkCurrentTable()) return;
+
+        MappingsDetails.showFilterMappingDialog(false);
+
+        //var options = { table: MappingModeler.currentTable.name };
+        //self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 
     self.createAllMappingsTriples = function () {
@@ -33,15 +57,19 @@ var TripleFactory = (function () {
         var tables = [];
         if (!all) {
             if (!self.checkCurrentTable) return;
-            if (!confirm("Do you really want to delete  triples created with KGCreator in datasource " + KGcreator.currentConfig.currentDataSource.name)) {
+            if (!confirm("Do you really want to delete  triples created with KGCreator in datasource " + DataSourceManager.currentConfig.currentDataSource.name)) {
                 return;
             }
 
             tables.push(MappingModeler.currentTable.name);
+        } else {
+            if (!confirm("Do you really want to delete  triples created with KGCreator in SLS source " + DataSourceManager.currentSlsvSource)) {
+                return;
+            }
         }
 
         var payload = {
-            source: KGcreator.currentSlsvSource,
+            source: DataSourceManager.currentSlsvSource,
             tables: JSON.stringify(tables),
         };
         UI.message("deleting KGcreator  triples...");
@@ -72,7 +100,7 @@ var TripleFactory = (function () {
             options = {};
         }
         if (!sampleData && table !== "*") {
-            if (!confirm("create triples for " + KGcreator.currentConfig.currentDataSource.name + " " + table || "")) {
+            if (!confirm("create triples for " + DataSourceManager.currentConfig.currentDataSource.name + " " + table || "")) {
                 return;
             }
         }
@@ -95,10 +123,12 @@ var TripleFactory = (function () {
         if (mappingsFilterOption) {
             options.mappingsFilter = mappingsFilterOption;
         }
-
+        if (options.mappingsFilterOption) {
+            options.mappingsFilter = options.mappingsFilterOption;
+        }
         var payload = {
-            source: KGcreator.currentSlsvSource,
-            datasource: KGcreator.currentConfig.currentDataSource.name,
+            source: DataSourceManager.currentSlsvSource,
+            datasource: DataSourceManager.currentConfig.currentDataSource.id,
             table: table,
             options: JSON.stringify(options),
         };
@@ -118,9 +148,8 @@ var TripleFactory = (function () {
                         $("#KGcreator_infosDiv").val(result.result);
                         UI.message(result.result, true);
                     } else {
-                        var message = result.result + " triples created in graph " + KGcreator.currentConfig.graphUri;
+                        var message = result.result + " triples created in graph " + DataSourceManager.currentConfig.graphUri;
                         alert(message);
-                        //  $("#KGcreator_infosDiv").val(result.result + " triples created in graph " + KGcreator.currentConfig.graphUri);
                         UI.message(message, true);
                     }
                 }
@@ -138,10 +167,10 @@ var TripleFactory = (function () {
     };
 
     self.createAllMappingsTriples = function () {
-        if (!confirm("generate KGcreator triples of datasource " + KGcreator.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
+        if (!confirm("generate KGcreator triples of datasource " + DataSourceManager.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
             return;
         }
-        //UI.openTab("lineage-tab", "KGcreator_source_tab", KGcreator.initRunTab, "#RunButton");
+
         $("#KGcreator_infosDiv").val("generating KGcreator triples form all mappings ");
         async.series(
             [

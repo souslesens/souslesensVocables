@@ -73,11 +73,11 @@ var MappingModeler_bot = (function () {
 
     self.functionTitles = {
         _OR: "Select an option",
-
+        startFn: "choose mapping action",
         URItypeFn: "select UriType for Node",
         labelFn: "select a column for node label",
         otherFn: "choose next operation",
-
+        rdfTypeFn: "select type to add",
         listNonObjectPropertiesVocabsFn: " Choose annnotation property vocabulary",
         listNonObjectPropertiesFn: " Choose annnotation property ",
         promptTargetColumnVocabularyFn: "Choose ontology for predicate column",
@@ -85,8 +85,9 @@ var MappingModeler_bot = (function () {
         listLitteralFormatFn: "choose date format",
         createSubPropertyFn: "Enter subProperty label",
         listTableColumnsFn: "Choose a  a column for predicate object ",
-
-        addTransformFn: "",
+        listDatatypePropertyRangeFn: "Choose a datatype",
+        choosedateTypeFn: "Choose date format",
+        addTransformFn: "add Transformation Function",
 
         /*  listVocabsFn: "Choose a source",
         listResourceTypesFn: "Choose a resource type",
@@ -100,7 +101,7 @@ var MappingModeler_bot = (function () {
             _botEngine.nextStep();
         },
         URItypeFn: function () {
-            var choices = ["fromColumnTitle", "blankNode", "randomIdentifier"];
+            var choices = ["fromLabel", "blankNode", "randomIdentifier"];
             _botEngine.showList(choices, "URItype");
         },
         rdfTypeFn: function () {

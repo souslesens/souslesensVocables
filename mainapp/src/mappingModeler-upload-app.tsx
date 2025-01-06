@@ -6,16 +6,21 @@ import { Done, Folder } from "@mui/icons-material";
 
 import { VisuallyHiddenInput } from "./Utils";
 
+interface Database {
+    id?: string;
+    name: string;
+}
+
 interface UploadFormData {
     displayForm: "database" | "file" | "";
     currentSource: string;
-    selectedDatabase: string;
+    selectedDatabase: Database;
     selectedFiles: string[];
 }
 
 declare global {
     interface Window {
-        MappingModeler: {
+        DataSourceManager: {
             uploadFormData: UploadFormData;
             createDataBaseSourceMappings: () => void;
             createCsvSourceMappings: () => void;
@@ -58,8 +63,8 @@ export default function App(uploadFormData: UploadFormData) {
         if (response.status === 201) {
             setError(false);
             // reload
-            window.MappingModeler.uploadFormData.selectedFiles = files.map((file) => file.name);
-            window.MappingModeler.createCsvSourceMappings();
+            window.DataSourceManager.uploadFormData.selectedFiles = files.map((file) => file.name);
+            window.DataSourceManager.createCsvSourceMappings();
         } else {
             setError(true);
             setErrorMessage("The upload did not works…");
@@ -78,10 +83,11 @@ export default function App(uploadFormData: UploadFormData) {
                 <Select
                     label="Select database"
                     onChange={(event) => {
-                        const value = event.target.value;
-                        setSelectedDatabase(value);
-                        window.MappingModeler.uploadFormData.selectedDatabase = value;
-                        window.MappingModeler.createDataBaseSourceMappings();
+                        const label = event.target.value;
+                        const id = databases.find((database) => database.name === label)?.id;
+                        setSelectedDatabase(label);
+                        window.DataSourceManager.uploadFormData.selectedDatabase = { id: id, name: label };
+                        window.DataSourceManager.createDataBaseSourceMappings();
                     }}
                     value={selectedDatabase}
                 >
@@ -89,7 +95,7 @@ export default function App(uploadFormData: UploadFormData) {
                         Select database
                     </MenuItem>
                     {databases.map((database) => (
-                        <MenuItem key={database.id} value={database.id}>
+                        <MenuItem key={database.id} value={database.name}>
                             {database.name}
                         </MenuItem>
                     ))}
@@ -121,12 +127,12 @@ export default function App(uploadFormData: UploadFormData) {
                     {errorMessage}
                 </Alert>
             ) : null}
-            {widget(window.MappingModeler.uploadFormData.displayForm)}
+            {widget(window.DataSourceManager.uploadFormData.displayForm)}
         </Stack>
     );
 }
 
-window.MappingModeler.createApp = function createApp(uploadFormData: UploadFormData) {
+window.DataSourceManager.createApp = function createApp(uploadFormData: UploadFormData) {
     const container = document.getElementById("mount-mappingModeler-upload-app-here");
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const root = createRoot(container!);

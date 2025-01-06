@@ -25,3 +25,11 @@ contribute/contribute-to-development.md
 ```
 
 ## Administration
+
+
+## Code documentation
+
+```{toctree}
+:maxdepth: 1
+code documentation/codeDocumentation.md
+```

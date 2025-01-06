@@ -54,10 +54,7 @@ var KGbuilder_triplesMaker = {
                         } else {
                             line[key] = "" + line[key];
                         }
-                        if (line[key] && !KGbuilder_triplesMaker.isUri(line[key])) {
-                            //applied two times
-                            //line[key] = util.formatStringForTriple(line[key]);
-                        }
+
                     }
                 }
 
@@ -230,15 +227,26 @@ var KGbuilder_triplesMaker = {
         }
 
         //format subject
-        {
+
             subjectStr = subjectStr.trim();
-            if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) {
+           /* if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) {
                 subjectStr = "<" + subjectStr + ">";
             } else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) {
                 //pass
-            } else {
+            }else {
                 subjectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(subjectStr, true) + ">";
             }
+        }*/
+        if(KGbuilder_triplesMaker.isPrefixedUri(subjectStr)){
+
+               //pass
+        }else  if(KGbuilder_triplesMaker.isUri(subjectStr)) {
+            subjectStr = "<" + subjectStr + ">";
+
+
+        }else{
+            subjectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+
         }
         return callback(null, subjectStr);
     },
@@ -268,6 +276,7 @@ var KGbuilder_triplesMaker = {
             }
         } else if (typeof mapping.o === "string" && mapping.o.indexOf("http") == 0) {
             objectStr = "<" + mapping.o + ">";
+            return callback(null, objectStr);
         } else if (typeof mapping.o === "string" && mapping.o.match(/.+:.+/)) {
             objectStr = mapping.o;
         } else if ((typeof mapping.o === "string" && mapping.o.endsWith("_$")) || mapping.isObjectBlankNode) {
@@ -408,13 +417,24 @@ var KGbuilder_triplesMaker = {
         //format object
         {
             objectStr = objectStr.trim();
-            if (objectStr.indexOf && objectStr.indexOf("http") == 0) {
+           // if (objectStr.indexOf && objectStr.indexOf("http") == 0) {
+            if (objectStr.indexOf && KGbuilder_triplesMaker.isUri(objectStr)) {
                 objectStr = "<" + objectStr + ">";
-            } else if (mapping.dataType) {
-                //pass
-            } else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
+            }
+
+
+
+          //  else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
+                else if(KGbuilder_triplesMaker.isPrefixedUri(objectStr)){
                 // pass
-            } else if (mapping.isString) {
+                }
+            else if (mapping.dataType) {
+                //pass
+            }
+
+
+
+            else if (mapping.isString) {
                 objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
             } else {
                 /* if(!mapping.isString)
@@ -563,12 +583,30 @@ var KGbuilder_triplesMaker = {
         if (!str) {
             return false;
         }
-        var prefixesArray = Object.keys(KGbuilder_triplesWriter.sparqlPrefixes);
+       return str.indexOf("http")==0
+
+    /*    var prefixesArray = Object.keys(KGbuilder_triplesWriter.sparqlPrefixes);
         var array = str.split(":");
         if (array.length == 0) {
             return false;
         } else {
             if (prefixesArray.indexOf(array[0]) > -1 || array[0].indexOf("http") == 0) {
+                return true;
+            }
+            return false;
+        }*/
+    },
+
+    isPrefixedUri:function (str) {
+        if (!str) {
+            return false;
+        }
+        var prefixesArray = Object.keys(KGbuilder_triplesWriter.sparqlPrefixes);
+        var array = str.split(":");
+        if (array.length == 0) {
+            return false;
+        } else {
+            if (prefixesArray.indexOf(array[0]) > -1 ) {
                 return true;
             }
             return false;

@@ -38,7 +38,11 @@ var SparqlQuery_bot = (function () {
                 },
                 Individuals: {
                     choosePredicateFilterFn: {
-                        setPredicateFilterFn: {},
+                        setPredicateFilterFn: {
+                            chooseIndividualsOutputTypeFn: {
+                                queryIndiviudalsFn: {},
+                            },
+                        },
                     },
                 },
                 Class: {
@@ -113,6 +117,13 @@ var SparqlQuery_bot = (function () {
 
         chooseOutputTypeFn: function () {
             var choices = ["Tree", "Table", "Graph"];
+            _botEngine.showList(choices, "outputType");
+        },
+        chooseIndividualsOutputTypeFn: function () {
+            var choices = ["Table", "New Graph"];
+            if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                choices.push("Add to Graph");
+            }
             _botEngine.showList(choices, "outputType");
         },
 
@@ -261,12 +272,16 @@ var SparqlQuery_bot = (function () {
                             if (err) {
                                 return alert(err.responseText || err);
                             }
-                            self.processIndividualsQuery();
+                            _botEngine.nextStep();
+
                             // _botEngine.end()
                         }
                     );
                 }
             });
+        },
+        queryIndiviudalsFn: function () {
+            self.processIndividualsQuery();
         },
     };
 
@@ -860,24 +875,145 @@ var SparqlQuery_bot = (function () {
         var IndividualObjectPropertyFilter = self.params.IndividualObjectPropertyFilter;
         var IndividualSubjectFilter = self.params.IndividualSubjectFilter;
         var IndividualObjectFilter = self.params.IndividualObjectFilter;
+        var outputType = self.params.outputType;
 
-        var filter = "";
-        if (IndividualSubjectClass) {
-            filter += "FILTER (?subjectType=<" + IndividualSubjectClass + ">) ";
-        }
-        if (IndividualObjectClass) {
-            filter += "FILTER (?objectType=<" + IndividualObjectClass + ">) ";
-        }
+        var data = [];
 
-        if (IndividualSubjectFilter) {
-            filter += IndividualSubjectFilter;
-        }
-        if (IndividualObjectFilter) {
-            filter += IndividualObjectFilter;
-        }
+        async.series(
+            [
+                function (callbackSeries) {
+                    var filter = "";
+                    if (IndividualSubjectClass) {
+                        filter += "FILTER (?subjectType=<" + IndividualSubjectClass + ">) ";
+                    }
+                    if (IndividualObjectClass) {
+                        filter += "FILTER (?objectType=<" + IndividualObjectClass + ">) ";
+                    }
 
-        var options = { filter: filter };
-        Sparql_OWL.getFilteredTriples(self.params.source, null, IndividualObjectPropertyFilter, null, options, function (err, result) {});
+                    if (IndividualSubjectFilter) {
+                        filter += IndividualSubjectFilter;
+                    }
+                    if (IndividualObjectFilter) {
+                        filter += IndividualObjectFilter;
+                    }
+
+                    var options = {
+                        filter: filter,
+                        distinct: "?subject ?subjectLabel ?prop ?propLabel ?object ?objectLabel",
+                    };
+                    Sparql_OWL.getFilteredTriples(self.params.source, null, IndividualObjectPropertyFilter, null, options, function (err, result) {
+                        data = result;
+                        callbackSeries(err);
+                    });
+                },
+
+                function (callbackSeries) {
+                    if (outputType.indexOf("Graph") < 0) {
+                        return callbackSeries();
+                    }
+                    self.maxGraphDisplay = 10000;
+                    if (data.length > self.maxGraphDisplay) {
+                        return _botEngine.abort("too many nodes to display a usable graph");
+                    }
+                    var visjsData = { nodes: [], edges: [] };
+                    var existingNodes = {};
+                    if (outputType != "New Graph") {
+                        existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+                    }
+                    var color = Lineage_whiteboard.getSourceColor(self.params.source);
+                    var shape = Lineage_whiteboard.namedIndividualShape;
+                    var size = Lineage_whiteboard.defaultShapeSize;
+                    data.forEach(function (item) {
+                        color = common.getResourceColor("prop", item.propLabel.value);
+                        if (!existingNodes[item.subject.value]) {
+                            existingNodes[item.subject.value] = 1;
+
+                            var label = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
+                            visjsData.nodes.push({
+                                id: item.subject.value,
+                                label: label,
+                                shape: shape,
+                                color: color,
+                                size: size,
+                                data: {
+                                    id: item.subject.value,
+                                    label: label,
+                                    source: self.params.source,
+                                },
+                            });
+                        }
+
+                        if (!existingNodes[item.object.value]) {
+                            existingNodes[item.object.value] = 1;
+                            var label = item.objectLabel ? item.objectLabel.value : Sparql_common.getLabelFromURI(item.object.value);
+                            visjsData.nodes.push({
+                                id: item.object.value,
+                                label: label,
+                                shape: shape,
+                                color: color,
+                                data: {
+                                    id: item.object.value,
+                                    label: label,
+                                    source: self.params.source,
+                                },
+                            });
+                        }
+                        visjsData.edges.push({
+                            id: common.getRandomHexaId(10),
+                            label: item.propLabel.value,
+                            from: item.subject.value,
+                            to: item.object.value,
+                            data: {},
+                            arrows: "to",
+                        });
+                    });
+
+                    if (outputType == "New Graph") {
+                        Lineage_whiteboard.drawNewGraph(visjsData);
+                    } else {
+                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                    }
+                    callbackSeries();
+                },
+                function (callbackSeries) {
+                    if (outputType != "Table") {
+                        return callbackSeries();
+                    }
+
+                    var cols = [];
+                    var dataset = [];
+                    cols.push(
+                        { title: "subject", defaultContent: "" },
+                        { title: "Predicate", defaultContent: "" },
+                        { title: "Object", defaultContent: "" },
+                        { title: "subjectURI", defaultContent: "" },
+                        { title: "PredicateURI", defaultContent: "" },
+                        { title: "ObjectURI", defaultContent: "" }
+                    );
+
+                    data.forEach(function (item) {
+                        dataset.push([
+                            item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value),
+                            item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                            item.objectLabel ? item.objectLabel.value : Sparql_common.getLabelFromURI(item.object.value),
+                            item.subject.value,
+                            item.prop.value,
+                            item.object.value,
+                        ]);
+                    });
+
+                    Export.showDataTable("mainDialogDiv", cols, dataset);
+                    callbackSeries();
+                },
+            ],
+            function (err) {
+                if (err) {
+                    alert(err.responseText || err);
+                }
+                _botEngine.end();
+            }
+        );
     };
 
     self.loadIndiviualsModel = function (sources, callback) {

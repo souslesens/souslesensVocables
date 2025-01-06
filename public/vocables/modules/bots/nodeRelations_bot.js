@@ -42,6 +42,9 @@ var NodeRelations_bot = (function () {
                 listRestrictions: { drawRestrictions: {} },
             },
             "Inverse Restrictions": { listInverseRestrictions: { drawInverseRestrictions: {} } },
+            "Similars (same label)": {
+                similarsFn: {},
+            },
         },
     };
 
@@ -56,6 +59,10 @@ var NodeRelations_bot = (function () {
     };
 
     self.functions = {
+        similarsFn: function () {
+            Lineage_similars.showDialog(true);
+            _botEngine.nextStep();
+        },
         listVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);
         },

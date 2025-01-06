@@ -40,7 +40,7 @@ var Containers_widget = (function () {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
-        self.currentSource = source;
+        //  self.currentSource = source;
         Containers_graph.getContainerTypes(source, null, function (err, types) {
             if (err) {
                 return alert(err.responseText);
@@ -67,19 +67,19 @@ var Containers_widget = (function () {
         if (type && type != "all") {
             filter = " ?container rdf:type <" + type + ">. ";
         }
-        Containers_graph.graphParentContainers(self.currentSource, null, { filter: filter });
+        Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, { filter: filter });
     };
     self.search = function () {
         var term = $("#containerWidget_searchInput").val();
         if (term) {
-            Containers_tree.drawContainerAndAncestorsJsTree(KGquery.currentSource, term, {}, function (err, result) {
+            Containers_tree.drawContainerAndAncestorsJsTree(Lineage_sources.activeSource, term, {}, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
             });
         } else {
-            Containers_query.getTopContainer(KGquery.currentSource, {}, function (err, result) {
-                Containers_tree.drawTree(self.jstreeDivId, KGquery.currentSource, "#", result.results.bindings, {});
+            Containers_query.getTopContainer(Lineage_sources.activeSource, {}, function (err, result) {
+                Containers_tree.drawTree(self.jstreeDivId, Lineage_sources.activeSource, "#", result.results.bindings, {});
             });
         }
     };

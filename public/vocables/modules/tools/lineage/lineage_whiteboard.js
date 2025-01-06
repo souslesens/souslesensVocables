@@ -50,13 +50,13 @@ var Lineage_whiteboard = (function () {
     self.defaultEdgeColor = "#aaa";
     self.defaultPredicateEdgeColor = "#266264";
     self.restrictionColor = "#efbf00"; //"#fdbf01";
-    self.restrictionFontSize = 12;
+    self.restrictionFontSize = 8;
     self.restrictionEdgeWidth = 1;
     self.namedIndividualShape = "triangle";
     self.namedIndividualColor = "#0067bb";
     self.defaultNodeFontColor = "#343434";
     self.defaultEdgeFontColor = "#343434";
-    self.defaultLowOpacity = 0.5;
+    self.defaultLowOpacity = 1.0;
     self.decorationData = {};
     self.arrowTypes = {
         subClassOf: {
@@ -1433,6 +1433,8 @@ var Lineage_whiteboard = (function () {
         options.skipRestrictions = 1;
         options.selectGraph = 1;
 
+        options.filter = ' FILTER (regex(str(?child1),"http"))';
+
         Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function (err, result) {
             if (err) {
                 return UI.message(err);
@@ -2632,7 +2634,7 @@ restrictionSource = Config.predicatesSource;
                 html += ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeFromGraph();">Remove from graph</span>';
             } else {
                 html +=
-                    '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
+                    // '    <span class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.drawSimilars();"> Similars</span>' +
                     '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.collapse();">Collapse</span>' +
                     '    <span  class="popupMenuItem" onclick="NodeRelations_bot.start();">Relations...</span>' +
                     // '    <span  class="popupMenuItem" onclick="Lineage_relations.showDrawRelationsDialog(\'Graph\');">Relations...</span>' +

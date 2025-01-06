@@ -1,5 +1,5 @@
 import Axiom_activeLegend from "../axioms/axiom_activeLegend.js";
-import KGcreator from "../KGcreator/KGcreator.js";
+
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import Axioms_graph from "../axioms/axioms_graph.js";
@@ -8,24 +8,23 @@ import CommonBotFunctions from "../../bots/_commonBotFunctions.js";
 import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Clipboard from "../../shared/clipboard.js";
-import KGcreator_graph from "../KGcreator/KGcreator_graph.js";
+
 import SimpleListFilterWidget from "../../uiWidgets/simpleListFilterWidget.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import MappingsDetails from "./mappingsDetails.js";
-
-// imports React app
-import("/assets/mappingModeler_upload_app.js");
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import DataSourceManager from "./dataSourcesManager.js";
 
 var MappingModeler = (function () {
     var self = {};
-    self.currentSource = null;
-    self.currentDataSource = null;
+
     self.graphDiv = "mappingModeler_graphDiv";
+    self.jstreeDivId = "mappingModeler_jstreeDiv";
     self.legendGraphDivId = "nodeInfosAxioms_activeLegendDiv";
     self.legendItemsArray = [
         //{ label: "Table", color: "#a8da83", shape: "ellipse" },
-        { label: "Column", color: "#cb9801", shape: "ellipse" },
+        { label: "Column", color: "#cb9801", shape: "ellipse", size: 14 },
         { label: "RowIndex", color: "#cb9801", shape: "triangle" },
         { label: "VirtualColumn", color: "#cb9801", shape: "square" },
         { label: "URI", color: "#bc7dec", shape: "square" },
@@ -33,52 +32,15 @@ var MappingModeler = (function () {
         { label: "Class", color: "#00afef", shape: "box" },
     ];
 
-    self.umountKGUploadApp = null;
-    self.createApp = null;
-
-    self.uploadFormData = {
-        displayForm: "", // can be database, file or ""
-        currentSource: "",
-        selectedDatabase: "",
-        selectedFiles: [],
-    };
-
-    self.displayUploadApp = function (displayForm) {
-        self.uploadFormData.displayForm = displayForm;
-        //   return   $.getScript("/kg_upload_app.js");
-        if (!displayForm) {
-            return;
-        }
-        var html = ' <div style="width:500px;height: 400px" id="mount-mappingModeler-upload-app-here"></div>';
-        $("#smallDialogDiv").html(html);
-
-        $("#smallDialogDiv").dialog({
-            open: function (event, ui) {
-                if (self.createApp === null) {
-                    throw new Error("React app is not ready");
-                }
-
-                self.uploadFormData.currentSource = self.currentSource;
-
-                self.umountKGUploadApp = self.createApp(self.uploadFormData);
-            },
-            beforeClose: function () {
-                self.umountKGUploadApp();
-                KGcreator.currentSlsvSource = self.currentSource;
-                KGcreator.getSlsvSourceConfig(self.currentSource, function (err, result) {
-                    if (err) {
-                        return err;
-                    }
-
-                    KGcreator.currentConfig = result;
-                });
-            },
-        });
-        $("#smallDialogDiv").dialog("open");
-    };
     self.onLoaded = function () {
         async.series(
             [
+                function (callbackSeries) {
+                    //reinitialize config (Change Source and reload after modification)
+                    DataSourceManager.currentConfig = {};
+                    DataSourceManager.rawConfig = {};
+                    return callbackSeries();
+                },
                 function (callbackSeries) {
                     self.currentSource = MainController.currentSource;
                     UI.initMenuBar(function () {
@@ -88,75 +50,53 @@ var MappingModeler = (function () {
                         });
                     });
                 },
-                function (callbackSeries) {
-                    KGcreator.currentSlsvSource = self.currentSource;
-                    KGcreator.getSlsvSourceConfig(self.currentSource, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
 
-                        KGcreator.currentConfig = result;
-                        return callbackSeries();
-                    });
-                },
-
-                function (callbackSeries) {
-                    $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
-                        $("#MappingModeler_leftTabs").tabs({});
-                    });
-
-                    return callbackSeries();
-                },
                 function (callbackSeries) {
                     $("#graphDiv").load("./modules/tools/mappingModeler/html/mappingModeler_graphDiv.html", function (err) {
                         //$("#mainDialogDiv").dialog("open");
                         return callbackSeries();
                     });
                 },
-                // load jstree
-                function (callbackSeries) {
-                    var options = {
-                        openAll: true,
-                        selectTreeNodeFn: self.onDataSourcesJstreeSelect,
-                        contextMenu: function (node, x) {
-                            var items = {};
-                            if (node.id == "databaseSources") {
-                                items.addDatabaseSource = {
-                                    label: "addDatabaseSources",
-                                    action: function (_e) {
-                                        self.displayUploadApp("database");
-                                        // KGcreator.createDataBaseSourceMappings();
-                                    },
-                                };
-                                return items;
-                            } else if (node.id == "csvSources") {
-                                items.csvSources = {
-                                    label: "add Csv Sources",
-                                    action: function (_e) {
-                                        // pb avec source
-                                        self.displayUploadApp("file");
-                                        // KGcreator.createCsvSourceMappings();
-                                    },
-                                };
-                                return items;
-                            }
-                        },
-                    };
-                    KGcreator.loadDataSourcesJstree("mappingModeler_jstreeDiv", options, function (err, result) {
-                        self.dataSourcesConfig = result;
-                        return callbackSeries(err);
-                    });
-                },
-                //initDataSource
-                function (callbackSeries) {
-                    return callbackSeries();
-                },
-
                 //init visjsGraph
                 function (callbackSeries) {
                     var visjsData = { nodes: [], edges: [] };
                     self.drawGraphCanvas(self.graphDiv, visjsData, function () {
                         callbackSeries();
+                    });
+                },
+                //load visjs mapping graph
+                function (callbackSeries) {
+                    self.loadVisjsGraph(function (err) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        return callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    DataSourceManager.currentSlsvSource = self.currentSource;
+                    DataSourceManager.getSlsvSourceConfig(self.currentSource, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+
+                        return callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
+                        $("#MappingModeler_leftTabs").tabs({});
+                        $($("#MappingModeler_leftTabs").children()[0]).css("border-radius", "0px");
+
+                        /*
+                        $($('#MappingModeler_leftTabs').children()[0]).find("*").removeAttr("class");
+                        
+                       
+                        $($('#MappingModeler_leftTabs').children()[0]).find("li").addClass('lineage-tabDiv');
+                        $($('#MappingModeler_leftTabs').children()[0]).find("a").css('text-decoration','none');*/
+                        DataSourceManager.loaDataSourcesJstree(self.jstreeDivId, function (err) {
+                            return callbackSeries();
+                        });
                     });
                 },
             ],
@@ -167,6 +107,7 @@ var MappingModeler = (function () {
             }
         );
     };
+
     self.loadSuggestionSelectJstree = function (objects, parentName) {
         if ($("#suggestionsSelectJstreeDiv").jstree()) {
             try {
@@ -184,7 +125,7 @@ var MappingModeler = (function () {
                     items.showSampleData = {
                         label: "showSampleData",
                         action: function (_e) {
-                            KGcreator.showSampleData();
+                            MappingModeler.showSampleData();
                         },
                     };
                 }
@@ -259,58 +200,14 @@ var MappingModeler = (function () {
         }
         var sourceIndex = jstreeData.findIndex((obj) => obj.id == self.currentSource);
         if (sourceIndex > -1) {
-            common.array.moveItem(jstreeData, sourceIndex, 2);
+            if (parentName == "Properties") {
+                common.array.moveItem(jstreeData, sourceIndex, 5);
+            } else {
+                common.array.moveItem(jstreeData, sourceIndex, 2);
+            }
         }
 
         JstreeWidget.loadJsTree("suggestionsSelectJstreeDiv", jstreeData, options, function () {});
-    };
-    self.onDataSourcesJstreeSelect = function (event, obj) {
-        self.currentTreeNode = obj.node;
-
-        //  KGcreator_run.getTableAndShowMappings();
-
-        if (obj.node.data.type == "databaseSource") {
-            KGcreator.initDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
-
-            KGcreator.loadDataBaseSource(KGcreator.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
-        } else if (obj.node.data.type == "csvSource") {
-            KGcreator.initDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
-            KGcreator.loadCsvSource(KGcreator.currentSlsvSource, obj.node.id, false, function (err, jstreeData) {
-                if (err) {
-                    return alert("file not found");
-                }
-                var columns = [];
-                jstreeData.forEach(function (item) {
-                    columns.push(item.data.id);
-                });
-                //self.hideForbiddenResources("Table");
-                self.currentResourceType = "Column";
-                self.currentTable = {
-                    name: obj.node.id,
-                    columns: columns,
-                };
-                self.loadSuggestionSelectJstree(columns, "Columns");
-                MappingModeler.switchLeftPanel("mappings");
-                $("#mappingModeler_newAxiomPanel").show();
-                //common.fillSelectOptions("axioms_legend_suggestionsSelect", columns, false);
-            });
-        } else if (obj.node.data.type == "table") {
-            self.currentTable = {
-                name: obj.node.data.label,
-                columns: KGcreator.currentConfig.currentDataSource.tables[obj.node.data.id],
-            };
-            var table = obj.node.data.id;
-            KGcreator.currentConfig.currentDataSource.currentTable = table;
-
-            self.hideForbiddenResources("Table");
-            self.currentResourceType = "Column";
-            self.loadSuggestionSelectJstree(self.currentTable.columns, "Columns");
-            MappingModeler.switchLeftPanel("mappings");
-            //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
-        }
-        self.currentDataSource = KGcreator.currentConfig.currentDataSource?.name;
-        self.currentDataSource = KGcreator.currentConfig.currentDataSource?.name;
-        $("#MappingModeler_currentDataSource").html(self.currentDataSource);
     };
 
     self.initActiveLegend = function (divId) {
@@ -326,7 +223,9 @@ var MappingModeler = (function () {
             self.legendItems[item.label] = item;
         });
 
-        Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", self.legendItemsArray, options);
+        Axiom_activeLegend.drawLegend("nodeInfosAxioms_activeLegendDiv", self.legendItemsArray, options, function () {
+            $("#nodeInfosAxioms_activeLegendDiv").find("canvas").addClass("coloredContainerImportant");
+        });
     };
 
     self.hideForbiddenResources = function (resourceType) {
@@ -350,6 +249,14 @@ var MappingModeler = (function () {
         } else if (resourceUri == "function") {
             return self.predicateFunctionShowDialog();
         } else if (self.currentResourceType == "Column") {
+            // Verify that he not already exists
+            var nodeInVisjsGraph = self.visjsGraph.data.nodes.get().filter(function (node) {
+                return node.data.dataTable == self.currentTable.name && resourceUri == node.label;
+            });
+            if (nodeInVisjsGraph.length > 0) {
+                return alert("Column already exists in the graph");
+            }
+
             newResource = {
                 id: id,
                 label: resourceUri,
@@ -361,7 +268,7 @@ var MappingModeler = (function () {
                     label: resourceUri,
                     type: self.currentResourceType,
                     dataTable: self.currentTable.name,
-                    datasource: self.currentDataSource,
+                    datasource: DataSourceManager.currentConfig.currentDataSource.id,
                 },
             };
             self.drawResource(newResource);
@@ -458,7 +365,8 @@ var MappingModeler = (function () {
                     },
                     color: color,
                 };
-                self.visjsGraph.data.edges.add([edge]);
+                self.addEdge([edge]);
+
                 self.currentRelation = null;
                 //$("#axioms_legend_suggestionsSelect").empty();
                 JstreeWidget.empty("suggestionsSelectJstreeDiv");
@@ -501,7 +409,7 @@ var MappingModeler = (function () {
         }
 
         if (self.visjsGraph) {
-            self.visjsGraph.data.nodes.add(visjsData.nodes);
+            self.addNode(visjsData.nodes);
 
             if (newResource.data.type == "Class" && self.currentGraphNode) {
                 var label, type;
@@ -526,7 +434,7 @@ var MappingModeler = (function () {
                 });
 
                 //  self.updateCurrentGraphNode(visjsNode);
-                self.visjsGraph.data.edges.add(visjsData.edges);
+                self.addEdge(visjsData.edges);
             }
 
             //
@@ -600,7 +508,7 @@ var MappingModeler = (function () {
 
                 var classId = null;
                 connections.forEach(function (connection) {
-                    if ((connection.edge.data.type = "rdf:type") && connection.edge.label == "a") {
+                    if (connection.edge.data.type == "rdf:type" && connection.edge.label == "a") {
                         classId = connection.toNode.data.id;
                     }
                 });
@@ -672,14 +580,14 @@ var MappingModeler = (function () {
         removeNodeFromGraph: function () {
             if (confirm("delete node")) {
                 var edges = self.visjsGraph.network.getConnectedEdges(self.currentGraphNode.id);
-                self.visjsGraph.data.edges.remove(edges);
-                self.visjsGraph.data.nodes.remove(self.currentGraphNode.id);
+                self.removeEdge(edges);
+                self.removeNode(self.currentGraphNode.id);
             }
         },
 
         removeNodeEdgeGraph: function () {
             if (confirm("delete edge")) {
-                self.visjsGraph.data.edges.remove(self.currentGraphNode.id);
+                self.removeEdge(self.currentGraphNode.id);
             }
         },
         addSuperClassToGraph: function () {
@@ -733,26 +641,30 @@ var MappingModeler = (function () {
                 },
             ];
 
-            self.visjsGraph.data.edges.add(edges);
+            self.addEdge(edges);
             self.currentRelation = null;
         },
 
         showNodeInfos: function () {
             if (self.currentGraphNode.data.type == "URI") {
             } else if (["Column", "RowIndex", "VirtualColumn"].indexOf(self.currentGraphNode.data.type) > -1) {
+                MappingsDetails.mappingColumnInfo.editColumnInfos();
+                MappingsDetails.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);
+                return;
+                /*
                 return $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/mappingColumnInfos.html", function () {
                     $("#smallDialogDiv").dialog("open");
                     MappingsDetails.mappingColumnInfo.editColumnInfos();
                     MappingsDetails.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);
-                    MappingsDetails.showDatatypeGraph(self.currentGraphNode.label);
-                });
+                    //MappingsDetails.drawDetailedMappingsGraph(self.currentGraphNode.label);
+                });*/
             } else {
                 NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "smallDialogDiv");
             }
         },
 
         showSampledata: function () {
-            KGcreator.showSampleData();
+            MappingModeler.showSampleData();
         },
     };
 
@@ -843,6 +755,9 @@ var MappingModeler = (function () {
                 properties = common.array.distinctValues(properties, "id");
                 properties = common.array.sort(properties, "label");
                 properties.forEach(function (item) {
+                    if (!item.label) {
+                        item.label = Sparql_common.getLabelFromURI(item.id);
+                    }
                     item.label = item.source.substring(0, 3) + ":" + item.label;
                 });
                 properties = common.array.sort(properties, "label");
@@ -868,7 +783,7 @@ var MappingModeler = (function () {
         var tabsArray = ["dataSource", "mappings", "triples"];
         if (target == "mappings") {
             MappingModeler.initActiveLegend(self.legendGraphDivId);
-            MappingModeler.loadVisjsGraph();
+            //MappingModeler.loadVisjsGraph();
         }
         if (target == "triples") {
         }
@@ -955,7 +870,7 @@ var MappingModeler = (function () {
             var hidden = !hiddenNodes || hiddenNodes.indexOf(nodeId) > -1;
             newNodes.push({ id: nodeId, hidden: hidden });
         });
-        self.visjsGraph.data.nodes.update(newNodes);
+        self.updateNode(newNodes);
     };
 
     /*
@@ -1088,13 +1003,80 @@ var MappingModeler = (function () {
 
     self.saveVisjsGraph = function () {
         self.visjsGraph.saveGraph("mappings_" + self.currentSource + "_" + self.currentDataSource + "_" + self.currentTable.name, true);
-        self.visjsGraph.saveGraph("mappings_" + self.currentSource + "_ALL" + ".json", true);
+        //self.visjsGraph.saveGraph("mappings_" + self.currentSource + "_ALL" + ".json", true);
+        self.saveVisjsGraphWithConfig();
     };
+    self.saveVisjsGraphWithConfig = function (callback) {
+        var fileName = "mappings_" + self.currentSource + "_ALL" + ".json";
+        var graph = MappingModeler.visjsGraph;
+        var nodes = graph.data.nodes.get();
+        var positions = graph.network.getPositions();
+        // Initialisation of Config if there isn't
+        if (!DataSourceManager.rawConfig || Object.keys(DataSourceManager.rawConfig).length == 0) {
+            var newJson = {
+                sparqlServerUrl: Config.sources[self.currentSource].sparql_server.url,
+                graphUri: Config.sources[self.currentSource].graphUri,
+                prefixes: {},
+                lookups: {},
+                databaseSources: {},
+                csvSources: {},
+                isConfigInMappingGraph: true,
+            };
+            DataSourceManager.rawConfig = newJson;
+        }
+        var config = JSON.parse(JSON.stringify(DataSourceManager.rawConfig));
+        delete config.currentDataSource;
+        var data = {
+            nodes: nodes,
+            edges: graph.data.edges.get(),
+            context: graph.currentContext,
+            positions: positions,
+            options: { config: config },
+        };
+        if (!fileName) {
+            fileName = prompt("graph name");
+        }
+        if (!fileName || fileName == "") {
+            return;
+        }
+        if (fileName.indexOf(".json") < 0) {
+            fileName = fileName + ".json";
+        }
+        var payload = {
+            fileName: fileName,
+            data: data,
+        };
+        var payload = {
+            dir: "graphs/",
+            fileName: fileName,
+            data: JSON.stringify(data, null, 2),
+        };
 
-    self.loadVisjsGraph = function () {
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (_result, _textStatus, _jqXHR) {
+                $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
+                UI.message("graph saved");
+                if (callback) {
+                    callback();
+                }
+            },
+            error(err) {
+                return alert(err);
+            },
+        });
+    };
+    self.loadVisjsGraph = function (callback) {
         self.clearMappings();
         setTimeout(function () {
             self.visjsGraph.loadGraph("mappings_" + self.currentSource + "_ALL" + ".json", false, function (err, result) {
+                if (result?.options?.config) {
+                    DataSourceManager.rawConfig = result.options.config;
+                    DataSourceManager.currentConfig = result.options.config;
+                }
                 if (!self.visjsGraph.data.nodes.get(table)) {
                     self.addDataSourceNode();
                     self.visjsGraph.network.fit();
@@ -1110,10 +1092,13 @@ var MappingModeler = (function () {
                 var tables = [];
                 var map = {};
                 var index = 0;
-                for (var table in self.dataSourcesConfig.csvSources) {
+                var dataTables = self.getDataTablesFromVisjsGraph();
+
+                for (var tableIndex in dataTables) {
+                    var table = dataTables[tableIndex];
                     var clusterOptionsByData = {
                         joinCondition: function (node) {
-                            if (node.data && node.data.dataTable == table && table != self.dataSourcesConfig.currentDataSource.name) {
+                            if (node.data && node.data.dataTable == table && table != MappingModeler?.currentTable?.name) {
                                 if (!map[node.id]) {
                                     map[node.id] = 1;
                                     return true;
@@ -1136,8 +1121,65 @@ var MappingModeler = (function () {
 
                     self.visjsGraph.network.clustering.cluster(clusterOptionsByData);
                 }
+                if (callback) {
+                    return callback();
+                }
             });
         }, 500);
+    };
+
+    self.onDataSourcesJstreeSelect = function (event, obj) {
+        self.currentTreeNode = obj.node;
+        var isRightClick = false;
+        if (obj.event.which == 3) {
+            isRightClick = true;
+        }
+
+        if (obj.node.data.type == "databaseSource") {
+            DataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
+            //MappingModeler.switchLeftPanel("mappings");
+            DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
+        } else if (obj.node.data.type == "csvSource") {
+            DataSourceManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
+            var fileName = DataSourceManager.currentSlsvSource;
+            DataSourceManager.loadCsvSource(DataSourceManager.currentSlsvSource, obj.node.id, false, function (err, columns) {
+                if (err) {
+                    return alert("file not found");
+                }
+
+                self.currentResourceType = "Column";
+                self.currentTable = {
+                    name: obj.node.id,
+                    columns: columns,
+                };
+                self.loadSuggestionSelectJstree(columns, "Columns");
+                if (!isRightClick) {
+                    MappingModeler.switchLeftPanel("mappings");
+                }
+                $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
+            });
+        } else if (obj.node.data.type == "table") {
+            self.currentTable = {
+                name: obj.node.data.label,
+                columns: DataSourceManager.currentConfig.currentDataSource.tables[obj.node.data.id],
+            };
+            var table = obj.node.data.id;
+            DataSourceManager.currentConfig.currentDataSource.currentTable = table;
+
+            //self.hideForbiddenResources("Table");
+            self.currentResourceType = "Column";
+            self.loadSuggestionSelectJstree(self.currentTable.columns, "Columns");
+            if (!isRightClick) {
+                MappingModeler.switchLeftPanel("mappings");
+            }
+            //common.fillSelectOptions("axioms_legend_suggestionsSelect", self.currentTable.columns, false);
+            $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
+        }
+
+        $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
+        if (obj.node.data.type == "table") {
+            $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.currentTable);
+        }
     };
 
     self.addDataSourceNode = function () {
@@ -1199,52 +1241,13 @@ var MappingModeler = (function () {
             }
         });
         if (dataTablesNodes.length > 0) {
-            self.visjsGraph.data.nodes.add(dataTablesNodes);
+            self.addNode(dataTablesNodes);
         }
         if (dataTablesEdges.length > 0) {
-            self.visjsGraph.data.edges.add(dataTablesEdges);
+            self.addEdge(dataTablesEdges);
         }
         //  MappingModeler.saveVisjsGraph();
         return;
-    };
-
-    self.createDataBaseSourceMappings = function () {
-        // hide uploadApp
-        self.displayUploadApp("");
-        $("#smallDialogDiv").dialog("close");
-
-        var datasource = self.uploadFormData.selectedDatabase;
-        if (!datasource) {
-            return;
-        }
-        self.currentConfig.databaseSources[datasource.id] = { name: datasource.name };
-        self.rawConfig.databaseSources[datasource.id] = { name: datasource.name };
-        self.saveSlsvSourceConfig(function (err, result) {
-            if (err) {
-                return alert(err);
-            }
-            self.addDataSourceToJstree("databaseSource", datasource, "sql.sqlserver");
-        });
-    };
-
-    self.createCsvSourceMappings = function () {
-        // hide uploadApp
-        self.displayUploadApp("");
-        $("#smallDialogDiv").dialog("close");
-        var datasourceName = self.uploadFormData.selectedFiles[0];
-        if (!datasourceName) {
-            return;
-        }
-
-        KGcreator.currentConfig.csvSources[datasourceName] = {};
-        KGcreator.rawConfig = KGcreator.currentConfig;
-
-        KGcreator.saveSlsvSourceConfig(function (err, result) {
-            if (err) {
-                return alert(err);
-            }
-            MappingModeler.onLoaded();
-        });
     };
 
     self.viewSampleTriples = function (mappings) {
@@ -1268,10 +1271,7 @@ var MappingModeler = (function () {
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-                // var str = JSON.stringify(result, null, 2);
-
-                //   $("#KGcreator_infosDiv").val(str);
-                KGcreator_run.showTriplesInDataTable(result);
+                TripleFactory.showTriplesInDataTable(result);
                 $("#mainDialogDiv").parent().css("z-index", 1);
                 $("#mainDialogDiv").dialog({
                     close: function (event, ui) {
@@ -1338,13 +1338,13 @@ var MappingModeler = (function () {
             },
             smooth: { type: "curvedCW" },
             data: {
-                id: "function{" + $("#KGcreator_fnBody").val() + "}",
+                id: "function{" + $("#MappingModeler_fnBody").val() + "}",
                 type: "function",
                 source: "function",
             },
             color: "#375521",
         };
-        self.visjsGraph.data.edges.add([edge]);
+        self.addEdge([edge]);
         $("#smallDialogDiv").dialog("close");
     };
     self.loadSource = function (callback) {
@@ -1356,6 +1356,149 @@ var MappingModeler = (function () {
             return callback();
         });
     };
+    self.showSampleData = function (node, columns, callback) {
+        // alert("coming soon");
+        if (!columns) {
+            var hasColumn = false;
+        } else {
+            if (Array.isArray(columns) && columns.length > 0) {
+                var hasColumn = true;
+            } else {
+                if (columns != "") {
+                    var hasColumn = true;
+                    columns = [columns];
+                }
+            }
+        }
+
+        function showTable(data) {
+            var headers = [];
+            var tableCols = [];
+            data.forEach(function (item) {
+                for (var key in item)
+                    if (headers.indexOf(key) < 0) {
+                        headers.push(key);
+                        tableCols.push({ title: key, defaultContent: "", width: "15%" });
+                    }
+            });
+            if (hasColumn) {
+                tableCols = tableCols.filter(function (col) {
+                    return columns.includes(col.title);
+                });
+            }
+
+            var lines = [];
+            data.forEach(function (item) {
+                var line = [];
+                headers.forEach(function (column) {
+                    if (!hasColumn) {
+                        line.push(item[column] || "");
+                    } else {
+                        if (columns.includes(column)) {
+                            line.push(item[column] || "");
+                        }
+                    }
+                });
+                lines.push(line);
+            });
+
+            Export.showDataTable("smallDialogDiv", tableCols, lines);
+            return;
+        }
+
+        if (DataSourceManager.currentConfig.currentDataSource.sampleData) {
+            showTable(DataSourceManager.currentConfig.currentDataSource.sampleData);
+        } else if (DataSourceManager.currentConfig.currentDataSource.type == "databaseSource") {
+            if (!node || !node.data) {
+                node = MappingModeler.currentTreeNode;
+                if (!node.data) {
+                    return alert("no Table  selected");
+                }
+            }
+            var size = 200;
+            var sqlQuery = "select top  " + size + "* from " + node.data.id;
+            if (DataSourceManager.currentConfig.currentDataSource.sqlType == "postgres") {
+                sqlQuery = "select   " + "* from public." + node.data.id + " LIMIT " + size;
+            }
+            const params = new URLSearchParams({
+                type: DataSourceManager.currentConfig.currentDataSource.sqlType,
+                dbName: DataSourceManager.currentConfig.currentDataSource.id,
+                sqlQuery: sqlQuery,
+            });
+
+            $.ajax({
+                type: "GET",
+                url: Config.apiUrl + "/kg/data?" + params.toString(),
+                dataType: "json",
+
+                success: function (data, _textStatus, _jqXHR) {
+                    showTable(data.rows);
+                },
+                error(err) {
+                    return alert(err.responseText);
+                },
+            });
+        } else if (DataSourceManager.currentConfig.currentDataSource.type == "csvSource") {
+            alert("Comming Soon...");
+        }
+    };
+    self.getDataTablesFromVisjsGraph = function () {
+        var dataTables = self.visjsGraph.data.nodes.get().map(function (node) {
+            return node?.data?.dataTable;
+        });
+        if (dataTables.length > 0) {
+            dataTables = common.array.distinctValues(dataTables);
+            dataTables = dataTables.filter(function (item) {
+                return item != undefined;
+            });
+        } else {
+            dataTables = [];
+        }
+        return dataTables;
+    };
+    self.updateNode = function (node) {
+        if (!node) {
+            return;
+        }
+        self.visjsGraph.data.nodes.update(node);
+        self.saveVisjsGraph();
+    };
+    self.removeNode = function (node) {
+        if (!node) {
+            return;
+        }
+        self.visjsGraph.data.nodes.remove(node);
+        self.saveVisjsGraph();
+    };
+    self.addNode = function (node) {
+        if (!node) {
+            return;
+        }
+        self.visjsGraph.data.nodes.add(node);
+        self.saveVisjsGraph();
+    };
+    self.updateEdge = function (edge) {
+        if (!edge) {
+            return;
+        }
+        self.visjsGraph.data.edges.update(edge);
+        self.saveVisjsGraph();
+    };
+    self.removeEdge = function (edge) {
+        if (!edge) {
+            return;
+        }
+        self.visjsGraph.data.edges.remove(edge);
+        self.saveVisjsGraph();
+    };
+    self.addEdge = function (edge) {
+        if (!edge) {
+            return;
+        }
+        self.visjsGraph.data.edges.add(edge);
+        self.saveVisjsGraph();
+    };
+
     return self;
 })();
 

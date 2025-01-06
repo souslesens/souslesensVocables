@@ -21,6 +21,8 @@ export default defineConfig({
                 entryFileNames: `assets/[name].js`,
             },
         },
+        minify: false,
+        sourcemap: true,
     },
     server: {
         proxy: {

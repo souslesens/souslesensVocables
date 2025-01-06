@@ -86,7 +86,7 @@ export default function App(uploadFormData: UploadFormData) {
                         const label = event.target.value;
                         const id = databases.find((database) => database.name === label)?.id;
                         setSelectedDatabase(label);
-                        window.DataSourceManager.uploadFormData.selectedDatabase = {id:id,name:label};
+                        window.DataSourceManager.uploadFormData.selectedDatabase = { id: id, name: label };
                         window.DataSourceManager.createDataBaseSourceMappings();
                     }}
                     value={selectedDatabase}
@@ -95,7 +95,7 @@ export default function App(uploadFormData: UploadFormData) {
                         Select database
                     </MenuItem>
                     {databases.map((database) => (
-                        <MenuItem key={database.id} value={database.name}> 
+                        <MenuItem key={database.id} value={database.name}>
                             {database.name}
                         </MenuItem>
                     ))}

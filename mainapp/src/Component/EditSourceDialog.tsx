@@ -43,6 +43,7 @@ export const EditSourceDialog = ({ onClose, onEditSuccess, open, sources: source
 
             if (response.status == 200) {
                 window.Config.sources = data.resources;
+                window.Config.userTools.lineage.controller.onLoaded(); // FIXME: don't work as expected, reload the tool without the source
 
                 setError(undefined);
                 if (onEditSuccess) {

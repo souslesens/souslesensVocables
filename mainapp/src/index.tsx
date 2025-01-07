@@ -11,6 +11,7 @@ declare global {
         Config: {
             slsvColorThemes: Array<Record<string, string>>;
             sources: Record<string, ServerSource>;
+            userTools: any;
             // There are more config properties but we only use this one in mainapp
         };
     }

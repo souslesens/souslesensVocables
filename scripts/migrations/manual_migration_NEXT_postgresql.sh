@@ -37,3 +37,4 @@ psql ${ADMIN_ARGS} -c "alter role ${DATABASE_USER} with password '${DATABASE_PAS
 export PGPASSWORD=${DATABASE_PASSWORD}
 psql ${USER_ARGS} -d ${DATABASE_NAME} < ./scripts/sql/001-profiles.sql
 psql ${USER_ARGS} -d ${DATABASE_NAME} < ./scripts/sql/002-users.sql
+psql ${USER_ARGS} -d ${DATABASE_NAME} < ./scripts/sql/003-user-data.sql

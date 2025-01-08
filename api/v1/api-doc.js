@@ -407,6 +407,77 @@ const apiDoc = {
                 },
             },
         },
+        UserData: {
+            type: "object",
+            properties: {
+                id: {
+                    type: "number",
+                    minimum: 1,
+                },
+                data_path: {
+                    type: "string",
+                },
+                data_type: {
+                    type: "string",
+                },
+                data_label: {
+                    type: "string",
+                    default: "",
+                },
+                data_comment: {
+                    type: "string",
+                    default: "",
+                },
+                data_group: {
+                    type: "string",
+                    default: "",
+                },
+                data_content: {
+                    $ref: "#/definitions/UserDataContent",
+                },
+                is_shared: {
+                    type: "boolean",
+                    default: false,
+                },
+                shared_profiles: {
+                    type: "array",
+                    default: [],
+                    items: { type: "string" },
+                },
+                shared_users: {
+                    type: "array",
+                    default: [],
+                    items: { type: "string" },
+                },
+                owned_by: {
+                    type: "string",
+                },
+            },
+            required: ["data_path", "data_type", "owned_by"],
+        },
+        UserDataContent: {
+            type: "object",
+            properties: {
+                sparqlServerUrl: {
+                    type: "string",
+                },
+                graphUri: {
+                    type: "string",
+                },
+                prefixes: {
+                    type: "object",
+                },
+                lookups: {
+                    type: "object",
+                },
+                databaseSources: {
+                    type: "object",
+                },
+                cvsSources: {
+                    type: "object",
+                },
+            },
+        },
     },
 };
 

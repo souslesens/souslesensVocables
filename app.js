@@ -181,17 +181,24 @@ openapi.initialize({
             return Promise.resolve(true);
         },
         restrictAdmin: async function (req, _scopes, _definition) {
-            const currentUser = await userManager.getUser(req.user);
+            const token = req.headers.authorization;
+            if (token !== undefined) {
+                const output = util.parseAuthorizationFromHeader(token);
 
+                // Only accept the Bearer scheme from the Authorization header
+                if (output !== null && output[0] === "Bearer") {
+                    req.user = await userModel.findUserAccountFromToken(output[1]);
+                }
+            }
 
-            if (!currentUser.logged) {
+            if (!req.isAuthenticated || !req.isAuthenticated()) {
                 throw {
                     status: 401,
                     message: "You must authenticate to access this resource.",
                 };
             }
 
-            if (!currentUser.user.groups.includes("admin")) {
+            if (!req.user[1].groups.includes("admin")) {
                 throw {
                     status: 401,
                     message: "You must be admin to access this resource.",

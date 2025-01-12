@@ -69,7 +69,8 @@ var GraphMlExport = (function () {
                 node.label = "?";
             }
             node.label = node.label.replace("&", "&amp;");
-            var color = common.RGBtoHexColor(node.color);
+
+            var color = common.RGBtoHexColor(node.color.background || node.color);
             xml +=
                 ' \n<node id="' +
                 node.id +

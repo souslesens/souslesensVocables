@@ -76,6 +76,9 @@ Edit the `.env` file:
 | `SA_PASSWORD`                  | Password of the sql server                                                               | `Sup3rSecretP@ssword` |
 | `DBA_PASSWORD`                 | Password of the virtuoso server                                                          | `dba`                 |
 | `POSTGRES_PASSWORD`            | Password for the `postgres` admin account of PostgresQL                                  | `mysecretpassword`    |
+| `DATABASE_NAME`                | Database name of used to store SousLeSens users, profiles and usersData                  | `souslesens`          |
+| `DATABASE_USER`                | Database role used to connect to Postgresql database                                     | `souslesens`          |
+| `DATABASE_PASSWORD`            | Database password used to connect to Postgresql database                                 | `changeme`            |
 
 ## Build the container images
 

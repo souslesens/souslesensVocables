@@ -95,6 +95,15 @@ const MainConfigObject = z
                 url: z.string().url().optional(),
             })
             .strict(),
+        database: z
+            .object({
+                host: z.string(),
+                port: z.number().positive().max(65535),
+                database: z.string(),
+                user: z.string(),
+                password: z.string(),
+            })
+            .strict(),
         authenticationDatabase: z
             .object({
                 user: z.string(),

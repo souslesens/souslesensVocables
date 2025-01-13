@@ -71,6 +71,13 @@
         "passwordColumn": "password",
         "groupsColumn": "groups"
     },
+    "database": {
+        "host": "localhost",
+        "port": 5432,
+        "database": "slsv",
+        "user": "slsv",
+        "password": "slsv"
+    },
     "jowlServer": {
         "enabled": false
     },

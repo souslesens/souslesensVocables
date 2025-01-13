@@ -18,7 +18,6 @@ const insertData = async (connection, datas, table, column) => {
                 await conn.insert(datas[index]).into(table);
                 migrated.push(datas[index][column]);
             }
-
         } catch (error) {
             if (error.routine === "auth_failed") {
                 console.error("  ❌ Cannot authenticate with the database");
@@ -28,13 +27,13 @@ const insertData = async (connection, datas, table, column) => {
             }
         }
     }
-    conn.destroy()
+    conn.destroy();
 
     return migrated;
 };
 
 const migrateConfig = (configDirectory, writeMode) => {
-    console.info(" - Main configuration")
+    console.info(" - Main configuration");
     const configPath = path.resolve(configDirectory, "mainConfig.json");
     const configJSON = JSON.parse(fs.readFileSync(configPath, { encoding: "utf-8" }));
 
@@ -85,7 +84,7 @@ const migrateProfiles = async (configDirectory, writeMode) => {
             }
         }
     }
-}
+};
 
 const migrateUsers = async (configDirectory, writeMode) => {
     console.info(" - Users");
@@ -96,8 +95,7 @@ const migrateUsers = async (configDirectory, writeMode) => {
     if (fs.existsSync(usersPath)) {
         const usersJSON = JSON.parse(fs.readFileSync(usersPath, { encoding: "utf-8" }));
 
-        const results = await knex({ client: "pg", connection: configJSON.database })
-            .select("label").from("profiles");
+        const results = await knex({ client: "pg", connection: configJSON.database }).select("label").from("profiles");
         const profiles = results.map((profile) => profile.label);
 
         const users = Object.values(usersJSON).map((user) => {
@@ -117,7 +115,7 @@ const migrateUsers = async (configDirectory, writeMode) => {
                 maximum_source: user.maxNumberCreatedSource,
                 profiles: user.groups.filter((group) => profiles.includes(group)),
                 auth: user.source,
-            }
+            };
         });
 
         if (writeMode) {
@@ -133,9 +131,13 @@ const migrateUsers = async (configDirectory, writeMode) => {
 
 const main = async () => {
     const argv = yargs
-        .alias("c", "config").describe("c", "Path to the config directory")
-        .alias("w", "write").describe("w", "Write the migration in the file").boolean("w")
-        .demandOption(["config"]).help().argv;
+        .alias("c", "config")
+        .describe("c", "Path to the config directory")
+        .alias("w", "write")
+        .describe("w", "Write the migration in the file")
+        .boolean("w")
+        .demandOption(["config"])
+        .help().argv;
 
     console.info(argv.write ? "🚧 Prepare the migration…" : "🔧 Dry run mode…");
     migrateConfig(argv.config, argv.write);

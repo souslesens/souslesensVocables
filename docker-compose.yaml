@@ -45,8 +45,13 @@ services:
             - ${POSTGRES_LISTEN_PORT:-5432}:5432
         environment:
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            DATABASE_USER: ${DATABASE_USER}
+            DATABASE_NAME: ${DATABASE_NAME}
+            DATABASE_PASSWORD: ${DATABASE_PASSWORD}
         volumes:
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/postgres:/var/lib/postgresql/data"
+            - ./scripts/sql:/sql:ro
+            - ./scripts/docker-init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
         networks:
             - backend
 

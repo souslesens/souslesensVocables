@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.100.0](https://github.com/souslesens/souslesensVocables/compare/1.99.0...1.100.0) (2025-01-13)
+
+> [!IMPORTANT]
+> Updating to 1.100.0 require a data migration. Execute the following script after upgrade.
+
+```bash
+npm run migrate
+```
+
+
+### Various Changes
+
+* **postgresql:** prepare v2 migration by adding database config to mainConfig.json ([b4ba32c2](https://github.com/souslesens/souslesensVocables/commit/b4ba32c283e57ba6e225295c2faf0e70fc76329a))
+
 ## [1.99.0](https://github.com/souslesens/souslesensVocables/compare/1.98.2...1.99.0) (2025-01-06)
 
 

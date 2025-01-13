@@ -101,10 +101,10 @@ const migrateUsers = async (configDirectory, writeMode) => {
         const users = Object.values(usersJSON).map((user) => {
             if (user.source === "json") {
                 user.source = "database";
-            }
 
-            if (!user.password.startsWith("$2b$")) {
-                user.password = bcrypt.hashSync(user.password, 10);
+                if (!user.password.startsWith("$2b$")) {
+                    user.password = bcrypt.hashSync(user.password, 10);
+                }
             }
 
             return {

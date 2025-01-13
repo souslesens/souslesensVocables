@@ -141,6 +141,9 @@ class UserModel {
      * @returns {Promise<UserAccount | undefined>} a user account
      */
     findUserAccount = async (login) => {
+        if (login === undefined) {
+            return undefined;
+        }
         const conn = this._getConnection();
         const user = await conn.select("*").from("users").where("login", login).first();
         conn.destroy();

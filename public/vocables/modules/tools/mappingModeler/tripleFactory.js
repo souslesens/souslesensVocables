@@ -32,17 +32,15 @@ var TripleFactory = (function () {
 
         MappingsDetails.showFilterMappingDialog(true);
 
-        //var options = { table: MappingModeler.currentTable.name, isSample: true };
-        //self.createTriples(true, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 
     self.writeTriples = function () {
         if (!self.checkCurrentTable()) return;
 
-        MappingsDetails.showFilterMappingDialog(false);
+      // MappingsDetails.showFilterMappingDialog(false);
 
-        //var options = { table: MappingModeler.currentTable.name };
-        //self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
+       var options = { table: MappingModeler.currentTable.name };
+       self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 
     self.createAllMappingsTriples = function () {

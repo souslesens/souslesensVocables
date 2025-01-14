@@ -32,8 +32,6 @@ var TripleFactory = (function () {
 
         MappingsDetails.showFilterMappingDialog(true);
 
-        //var options = { table: MappingModeler.currentTable.name, isSample: true };
-        //self.createTriples(true, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 
     self.writeTriples = function () {

@@ -760,6 +760,9 @@ var MappingsDetails = (function () {
         if (self.filterMappingIsSample == undefined) {
             self.filterMappingIsSample = true;
         }
+
+        currentMappingsList=MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable.name)
+
         TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, { mappingsFilterOption: currentMappingsList }, function (err, result) {});
     };
 

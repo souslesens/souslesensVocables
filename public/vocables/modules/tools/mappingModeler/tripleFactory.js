@@ -37,9 +37,11 @@ var TripleFactory = (function () {
     self.writeTriples = function () {
         if (!self.checkCurrentTable()) return;
 
-      // MappingsDetails.showFilterMappingDialog(false);
+       MappingsDetails.showFilterMappingDialog(false);
+return;
 
-       var options = { table: MappingModeler.currentTable.name };
+        var mappingsFilter=MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable)
+       var options = { table: MappingModeler.currentTable.name,mappingsFilter:mappingsFilter };
        self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 

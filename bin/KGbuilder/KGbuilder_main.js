@@ -288,10 +288,14 @@ var KGbuilder_main = {
     ,
 
     getSourceConfig: function(source, callback) {
-        var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
+       // var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
+
+
         try {
-            var mainJsonPath = sourceMappingsDir + "main.json";
-            var sourceMainJson = JSON.parse("" + fs.readFileSync(mainJsonPath));
+           // var mainJsonPath = sourceMappingsDir + "main.json";
+            var mainJsonPath= path.join(__dirname,"../../data/graphs/mappings_" + source + "_ALL" + ".json")
+            var visjsMappingsJson = JSON.parse("" + fs.readFileSync(mainJsonPath));
+            var sourceMainJson =visjsMappingsJson.options.config
             if (sourceMainJson.sparqlServerUrl == "_default") {
                 sourceMainJson.sparqlServerUrl = ConfigManager.config.sparql_server.url;
             }
@@ -327,12 +331,13 @@ var KGbuilder_main = {
                 // read datasourceMappings
                 function(callbackSeries) {
                     try {
-                        var dataSourceMappingsPath = sourceMappingsDir + datasource + ".json";
+
                         var mappings;
                         if (options.mappingsFilter) {
                           //  mappings = JSON.parse(options.mappingsFilter);
                             mappings = options.mappingsFilter;
                         } else {
+                            var dataSourceMappingsPath = sourceMappingsDir + datasource + ".json";
                             mappings = JSON.parse("" + fs.readFileSync(dataSourceMappingsPath));
                         }
                         dataSourceMappings.mappings = mappings;
@@ -380,7 +385,7 @@ var KGbuilder_main = {
                 }
             ],
             function(err) {
-                return callback(null, tableMappingsToProcess);
+                return callback(err, tableMappingsToProcess);
             }
         );
     }

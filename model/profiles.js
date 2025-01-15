@@ -98,9 +98,9 @@ class ProfileModel {
             profiles["admin"] = {
                 id: "admin",
                 name: "admin",
-                theme: config.theme.defaultTheme,
+                theme: this._mainConfig.theme.defaultTheme,
                 allowedSourceSchemas: ["OWL", "SKOS"],
-                allowedTools: config.tools_available,
+                allowedTools: this._mainConfig.tools_available,
                 sourcesAccessControl: {},
                 defaultSourceAccessControl: "readwrite",
             }

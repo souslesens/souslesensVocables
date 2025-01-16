@@ -262,7 +262,7 @@ $("#sourceDivControlPanelDiv").html(html);*/
             source: source,
         });
 
-        var x = params.toString();
+
         $.ajax({
             type: "DELETE",
             url: Config.apiUrl + "/ontologyModels?" + params.toString(),

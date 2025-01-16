@@ -3,6 +3,9 @@ const { userDataModel } = require("../../../../../model/userData");
 module.exports = () => {
     DELETE = async (req, res, _next) => {
         try {
+            // ------------temporaire CF//
+            if(typeof req.params.id=="string")
+                req.params.id=parseInt( req.params.id)
             await userDataModel.remove(req.params.id);
             res.status(200).json({ message: "The resource has been removed successfully" });
         } catch (error) {
@@ -17,7 +20,9 @@ module.exports = () => {
     DELETE.apiDoc = {
         parameters: [
             {
-                type: "number",
+                // ------------temporaire CF//
+              // type: "number",
+                type: "string",
                 in: "path",
                 name: "id",
                 required: true,

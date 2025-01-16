@@ -40,6 +40,16 @@ module.exports = () => {
 
     POST = async (req, res, _next) => {
         try {
+
+            // ------------temporaire CF//
+            if(typeof req.body.id=="string")
+                req.body.id=parseInt( req.body.id)
+            var str=req.body["is_shared"]
+            if(str=="false")
+                req.body.is_shared=false
+            else
+                req.body.is_shared=true
+
             await userDataModel.insert(req.body);
             res.status(200).json({ message: "The resource has been inserted successfully" });
         } catch (error) {
@@ -58,7 +68,8 @@ module.exports = () => {
                 in: "body",
                 name: "body",
                 schema: {
-                    $ref: "#/definitions/UserData",
+                    // ------------temporaire CF//
+                   // $ref: "#/definitions/UserData",
                 },
             }
         ],

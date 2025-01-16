@@ -1176,7 +1176,7 @@ var MappingModeler = (function () {
             $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
         }
 
-        $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
+
         if (obj.node.data.type == "table") {
             $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.currentTable);
         }

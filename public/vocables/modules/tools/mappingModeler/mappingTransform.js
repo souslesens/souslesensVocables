@@ -61,7 +61,7 @@ var MappingTransform = (function () {
         }*/
 
         if (colname && data.type == "VirtualColumn") {
-            colname = "@" + colname;
+            colname = "@" + colname;//+ "_$";
         }
         if (data.type == "URI") {
             colname = data.id + "_#";

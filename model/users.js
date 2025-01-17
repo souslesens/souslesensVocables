@@ -255,7 +255,7 @@ class UserModel {
      */
     isAdmin = async (login) => {
         const conn = this._getConnection();
-        const user = await conn.select("login", "profiles").from("public_users_list").where("login", login);
+        const user = await conn.select("login", "profiles").from("public_users_list").where("login", login).first();
         conn.destroy();
 
         if (user === undefined) {

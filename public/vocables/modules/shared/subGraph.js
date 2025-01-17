@@ -52,7 +52,7 @@ var SubGraph = (function () {
                                     if (!item.type) {
                                         return;
                                     }
-                                  /*  console.log(
+                                    /*  console.log(
                                         Sparql_common.getLabelFromURI(item.s.value) +
                                             "-->" +
                                             Sparql_common.getLabelFromURI(item.o.value) +

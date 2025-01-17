@@ -175,19 +175,14 @@ var MappingsDetails = (function () {
                 });
                 MappingModeler.updateNode({ id: MappingModeler.currentGraphNode.id, data: data });
                 MappingModeler.saveVisjsGraph();
-            }
-         else if (params.addingSubClassOf) {
-            data.otherPredicates.push({
-                property: "rdfs:subClassOf",
-                object: params.addingSubClassOf,
-            });
-            MappingModeler.updateNode({ id: MappingModeler.currentGraphNode.id, data: data });
-            MappingModeler.saveVisjsGraph();
-        }
-
-
-
-            else if (params.nonObjectPropertyId) {
+            } else if (params.addingSubClassOf) {
+                data.otherPredicates.push({
+                    property: "rdfs:subClassOf",
+                    object: params.addingSubClassOf,
+                });
+                MappingModeler.updateNode({ id: MappingModeler.currentGraphNode.id, data: data });
+                MappingModeler.saveVisjsGraph();
+            } else if (params.nonObjectPropertyId) {
                 data.otherPredicates.push({
                     property: params.nonObjectPropertyId,
                     object: params.predicateObjectColumn,
@@ -773,7 +768,7 @@ var MappingsDetails = (function () {
             self.filterMappingIsSample = true;
         }
 
-        currentMappingsList=MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable.name)
+        currentMappingsList = MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable.name);
 
         TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, { mappingsFilterOption: currentMappingsList }, function (err, result) {});
     };

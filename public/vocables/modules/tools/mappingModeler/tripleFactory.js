@@ -31,18 +31,17 @@ var TripleFactory = (function () {
         if (!self.checkCurrentTable()) return;
 
         MappingsDetails.showFilterMappingDialog(true);
-
     };
 
     self.writeTriples = function () {
         if (!self.checkCurrentTable()) return;
 
-       MappingsDetails.showFilterMappingDialog(false);
-return;
+        MappingsDetails.showFilterMappingDialog(false);
+        return;
 
-        var mappingsFilter=MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable)
-       var options = { table: MappingModeler.currentTable.name,mappingsFilter:mappingsFilter };
-       self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
+        var mappingsFilter = MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable);
+        var options = { table: MappingModeler.currentTable.name, mappingsFilter: mappingsFilter };
+        self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 
     self.createAllMappingsTriples = function () {

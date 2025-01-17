@@ -427,8 +427,7 @@ str = str.replace(/%2F/gm, "/");*/
     };
 
     self.getRandomInt = function () {
-        return  Math.floor(Math.random() * 100000);
-
+        return Math.floor(Math.random() * 100000);
     };
     self.getItemLabel = function (item, varName, _lang) {
         if (item[varName + "Label"]) {

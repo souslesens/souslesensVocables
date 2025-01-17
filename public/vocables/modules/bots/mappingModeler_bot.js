@@ -32,11 +32,9 @@ var MappingModeler_bot = (function () {
                 "add rdfs:subClassOf": {
                     listVocabsFn: {
                         listSuperClassesFn: {
-                            setSubClassOfFn:
-                                {},
-                        }
-                    }
-
+                            setSubClassOfFn: {},
+                        },
+                    },
                 },
                 "add transform": {
                     addTransformFn: {},
@@ -53,7 +51,7 @@ var MappingModeler_bot = (function () {
                     },
                 },
                 "set column as datatypeProperty": {
-                    listTableColumnsFn: {listDatatypePropertyRangeFn: {labelFn: {}}},
+                    listTableColumnsFn: { listDatatypePropertyRangeFn: { labelFn: {} } },
                 },
                 "create  datatypeProperty": {
                     createDatatypePropertyFn: {},
@@ -97,7 +95,7 @@ var MappingModeler_bot = (function () {
         listDatatypePropertyRangeFn: "Choose a datatype",
         choosedateTypeFn: "Choose date format",
         addTransformFn: "add Transformation Function",
-        setSubClassOfFn: "add rdfs:subClassOf predicate"
+        setSubClassOfFn: "add rdfs:subClassOf predicate",
 
         /*  listVocabsFn: "Choose a source",
         listResourceTypesFn: "Choose a resource type",
@@ -151,13 +149,13 @@ var MappingModeler_bot = (function () {
                 return _botEngine.nextStep();
             } else {
                 var choices = [
-                    {id: "FR", label: "FR : DD/MM/YYYY"},
-                    {id: "ISO", label: "ISO : YYYY-MM-DD"},
-                    {id: "USA", label: "USA : MM/DD/YYYY"},
-                    {id: "EUR", label: "EUR : DD. MM. YYYY"},
-                    {id: "JIS", label: "JIS : YYYY-MM-DD"},
-                    {id: "ISO-time", label: "ISO-time : 2022-09-27 18:00:00.000"},
-                    {id: "other", label: "other"},
+                    { id: "FR", label: "FR : DD/MM/YYYY" },
+                    { id: "ISO", label: "ISO : YYYY-MM-DD" },
+                    { id: "USA", label: "USA : MM/DD/YYYY" },
+                    { id: "EUR", label: "EUR : DD. MM. YYYY" },
+                    { id: "JIS", label: "JIS : YYYY-MM-DD" },
+                    { id: "ISO-time", label: "ISO-time : 2022-09-27 18:00:00.000" },
+                    { id: "other", label: "other" },
                 ];
                 _botEngine.showList(choices, "nonObjectPropertyDateFormat", null, false, function (result) {
                     if (result == "other") {
@@ -201,12 +199,16 @@ var MappingModeler_bot = (function () {
 
         createDatatypePropertyFn: function () {
             var classId = self.params.columnClass;
-            CreateResource_bot.start(CreateResource_bot.workFlowDatatypeProperty, {
-                source: self.params.source,
-                datatypePropertyDomain: classId
-            }, function (err, result) {
-                MappingModeler.mappingColumnInfo.startOtherPredicatesBot();
-            });
+            CreateResource_bot.start(
+                CreateResource_bot.workFlowDatatypeProperty,
+                {
+                    source: self.params.source,
+                    datatypePropertyDomain: classId,
+                },
+                function (err, result) {
+                    MappingModeler.mappingColumnInfo.startOtherPredicatesBot();
+                }
+            );
         },
         listDatatypePropertyRangeFn: function () {
             var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
@@ -221,15 +223,11 @@ var MappingModeler_bot = (function () {
         },
 
         listSuperClassesFn: function () {
-
             CommonBotFunctions.listVocabClasses(self.params.currentVocab, "superClassId", true);
-
         },
-        setSubClassOfFn:function () {
+        setSubClassOfFn: function () {
             self.params.addingSubClassOf = self.params.superClassId;
             _botEngine.nextStep();
-
-
         },
     };
 

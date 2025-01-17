@@ -976,8 +976,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
-
-
     self.message = function (/** @type {string | JQuery.Node | ((this: HTMLElement, index: number, oldhtml: string) => string | JQuery.Node)} */ message) {
         $("#VisJsGraph_message").html(message);
     };

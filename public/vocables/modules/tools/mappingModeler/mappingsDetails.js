@@ -10,6 +10,8 @@ var MappingsDetails = (function () {
     var filterMappingIsSample;
 
     self.showDetailsDialog = function (divId) {
+        if(!MappingModeler.currentTable)
+            return alert("Select a table")
         if (!divId) {
             divId = "mainDialogDiv";
         }
@@ -276,6 +278,87 @@ var MappingsDetails = (function () {
     };
 
     self.showDetailedMappingsList = function (column, divId, options) {
+        if (!options) {
+            options = {};
+        }
+
+        if (!divId) {
+            divId = "detailedMappings_mappingsListDiv";
+        }
+        //datatypeMappingGraph
+        var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentTable.name].tripleModels;
+
+
+        var jstreeData=[];
+
+
+        var uniqueSubjects={}
+        mappings.forEach(function(mapping){
+            var parent="#"
+            if(!uniqueSubjects[mapping.s]){
+                uniqueSubjects[mapping.s]=1
+                jstreeData.push({
+                    id:mapping.s,
+                    text:"<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>"+mapping.s+"</span>" ,
+                    data:mapping,
+                    parent:"#"
+                })
+
+            }
+            parent=mapping.s;
+            jstreeData.push({
+                id:mapping.p+"/"+mapping.o,
+                text:"<span style='color: blue'>"+mapping.p+"</span>  "+mapping.o,
+                parent:parent,
+                data:mapping
+            })
+        })
+        var options={
+            openAll:true,
+            contextMenu: function (node) {
+                var items = {};
+
+                if(node.parent="#") {
+                    items["technical mappings"] = {
+                        label: "technicalMappings",
+                        action: function (_e) {
+                            MappingsDetails.showSpecificMappingsBot(node.data.s)
+                        },
+                    };
+                    items["moreMappings"] = {
+                        label: "moreMappings",
+                        action: function (_e) {
+
+                        },
+                    };
+                }
+                else{
+                items["deletemapping"] = {
+                    label: "delete",
+                    action: function (_e) {
+
+                    },
+                };
+                items["isRestriction"] = {
+                    label: "isRestriction",
+                    action: function (_e) {
+
+                    },
+                }
+                };
+                return items;
+            }
+
+        }
+        JstreeWidget.loadJsTree("detailedMappings_jsTreeDiv", jstreeData, options)
+
+
+
+
+
+    }
+
+    self.showDetailedMappingsListKarim = function (column, divId, options) {
         if (!options) {
             options = {};
         }

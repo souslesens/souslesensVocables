@@ -154,6 +154,7 @@ var UserDataWidget = (function () {
                                 items.open = {
                                     label: "Open",
                                     action: function (_e) {
+                                        self.currentTreeNode = node;
                                         $("#" + self.divId).dialog("close");
                                         callbackFn(null, node.data);
                                     },

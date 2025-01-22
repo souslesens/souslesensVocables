@@ -11,7 +11,7 @@ const UserDataObject = z
         data_label: z.string().default(""),
         data_comment: z.string().default(""),
         data_group: z.string().default(""),
-        data_content: z.record(z.string(), z.string()).default({}),
+        data_content: z.record(z.string(), z.any()).default({}),
         is_shared: z.boolean().default(false),
         shared_profiles: z.string().array().default([]),
         shared_users: z.string().array().default([]),

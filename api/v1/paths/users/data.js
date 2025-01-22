@@ -60,7 +60,7 @@ module.exports = () => {
                 schema: {
                     $ref: "#/definitions/UserData",
                 },
-            }
+            },
         ],
         responses: {
             200: {

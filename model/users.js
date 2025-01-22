@@ -13,17 +13,19 @@ const z = require("zod");
  * @typedef {import("./UserTypes").SqlConfig} SqlConfig
  */
 
-const UserObject = z.object({
-    id: z.string().default(""),  // Support for the ULID legacy system
-    login: z.string(),
-    password: z.string().optional(),
-    groups: z.string().array().optional(),
-    token: z.string().optional(),
-    source: z.string().default("database"),
-    allowSourceCreation: z.boolean().default(false),
-    maxNumberCreatedSource: z.number().default(5),
-    _type: z.string().default("user"),
-}).strict();
+const UserObject = z
+    .object({
+        id: z.string().default(""), // Support for the ULID legacy system
+        login: z.string(),
+        password: z.string().optional(),
+        groups: z.string().array().optional(),
+        token: z.string().optional(),
+        source: z.string().default("database"),
+        allowSourceCreation: z.boolean().default(false),
+        maxNumberCreatedSource: z.number().default(5),
+        _type: z.string().default("user"),
+    })
+    .strict();
 
 /**
  * UserModel provides add/get/update/remove operations on the
@@ -71,16 +73,19 @@ class UserModel {
      * @param {User} user - the user to convert
      * @returns {User} - the converted object with the correct fields
      */
-    _convertToLegacy = (user) => [ user.login, {
-        id: `${user.id}`,
-        login: user.login,
-        password: user.password || "",
-        token: user.token || "",
-        groups: user.profiles || [],
-        allowSourceCreation: user.create_source || false,
-        maxNumberCreatedSource: user.maximum_source || 5,
-        source: user.auth || "database",
-    }];
+    _convertToLegacy = (user) => [
+        user.login,
+        {
+            id: `${user.id}`,
+            login: user.login,
+            password: user.password || "",
+            token: user.token || "",
+            groups: user.profiles || [],
+            allowSourceCreation: user.create_source || false,
+            maxNumberCreatedSource: user.maximum_source || 5,
+            source: user.auth || "database",
+        },
+    ];
 
     /**
      * Retrieve the Postgres connection from the configuration information
@@ -123,9 +128,7 @@ class UserModel {
         const results = await conn.select("*").from("public_users_list");
         conn.destroy();
 
-        return Object.fromEntries(
-            results.map((user) => this._convertToLegacy(user))
-        );
+        return Object.fromEntries(results.map((user) => this._convertToLegacy(user)));
     };
 
     getUserAccount = async (login) => {
@@ -133,7 +136,7 @@ class UserModel {
         const user = await conn.select("*").from("users").where("login", login).first();
         conn.destroy();
 
-        return (user !== undefined) ? this._convertToLegacy(user) : undefined;
+        return user !== undefined ? this._convertToLegacy(user) : undefined;
     };
 
     /**
@@ -148,7 +151,7 @@ class UserModel {
         const user = await conn.select("*").from("users").where("login", login).first();
         conn.destroy();
 
-        return (user !== undefined) ? this._convertToLegacy(user) : undefined;
+        return user !== undefined ? this._convertToLegacy(user) : undefined;
     };
 
     /**
@@ -160,7 +163,7 @@ class UserModel {
         const user = await conn.select("*").from("users").where("token", token).first();
         conn.destroy();
 
-        return (user !== undefined) ? this._convertToLegacy(user) : undefined;
+        return user !== undefined ? this._convertToLegacy(user) : undefined;
     };
 
     /**
@@ -174,10 +177,10 @@ class UserModel {
         conn.destroy();
 
         if (user.auth === "database" || user.auth === "local") {
-            return this._comparePasswords(user.password, password)
+            return this._comparePasswords(user.password, password);
         }
 
-        return false;  // This is not managed by the SLS authenticator
+        return false; // This is not managed by the SLS authenticator
     };
 
     /**

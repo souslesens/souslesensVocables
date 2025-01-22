@@ -10,15 +10,17 @@ const { toolModel } = require("./tools");
  * @typedef {import("./ProfileTypes").Profile} Profile
  */
 
-const ProfileObject = z.object({
-    id: z.string(),
-    name: z.string(),
-    theme: z.string().default(""),
-    allowedSourceSchemas: z.enum(["OWL", "SKOS"]).array().optional(),
-    sourcesAccessControl: z.record(z.string(), z.string()).optional(),
-    allowedTools: z.string().array().optional(),
-    _type: z.string().default("profile"),
-}).strict();
+const ProfileObject = z
+    .object({
+        id: z.string(),
+        name: z.string(),
+        theme: z.string().default(""),
+        allowedSourceSchemas: z.enum(["OWL", "SKOS"]).array().optional(),
+        sourcesAccessControl: z.record(z.string(), z.string()).optional(),
+        allowedTools: z.string().array().optional(),
+        _type: z.string().default("profile"),
+    })
+    .strict();
 
 class ProfileModel {
     /**
@@ -64,14 +66,17 @@ class ProfileModel {
      * @param {Profile} profile - the profile to convert
      * @returns {Profile} - the converted object with the correct fields
      */
-    _convertToLegacy = (profile) => [ profile.label, {
-        id: profile.label,
-        name: profile.label,
-        theme: profile.theme,
-        allowedSourceSchemas: profile.schema_types,
-        allowedTools: profile.allowed_tools,
-        sourcesAccessControl: profile.access_control,
-    }];
+    _convertToLegacy = (profile) => [
+        profile.label,
+        {
+            id: profile.label,
+            name: profile.label,
+            theme: profile.theme,
+            allowedSourceSchemas: profile.schema_types,
+            allowedTools: profile.allowed_tools,
+            sourcesAccessControl: profile.access_control,
+        },
+    ];
 
     /**
      * Retrieve the Postgres connection from the configuration information
@@ -90,9 +95,7 @@ class ProfileModel {
         const results = await conn.select("*").from("profiles_list");
         conn.destroy();
 
-        const profiles = Object.fromEntries(
-            results.map((profile) => this._convertToLegacy(profile))
-        );
+        const profiles = Object.fromEntries(results.map((profile) => this._convertToLegacy(profile)));
 
         if (profiles["admin"] === undefined) {
             profiles["admin"] = {
@@ -103,7 +106,7 @@ class ProfileModel {
                 allowedTools: this._mainConfig.tools_available,
                 sourcesAccessControl: {},
                 defaultSourceAccessControl: "readwrite",
-            }
+            };
         }
 
         return profiles;
@@ -119,11 +122,7 @@ class ProfileModel {
             return allProfiles;
         }
 
-        return Object.fromEntries(
-            Object.entries(allProfiles).filter(
-                ([profileName, _profile]) => user.groups.includes(profileName)
-            )
-        );
+        return Object.fromEntries(Object.entries(allProfiles).filter(([profileName, _profile]) => user.groups.includes(profileName)));
     };
 
     /**

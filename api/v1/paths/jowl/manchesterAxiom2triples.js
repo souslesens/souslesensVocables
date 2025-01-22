@@ -13,7 +13,7 @@ module.exports = function () {
     function GET(req, res, next) {
         const jowlServerConfig = ConfigManager.config.jowlServer;
         if (!jowlServerConfig.enabled) {
-            res.status(500).json({ message: "Jowl Server is disable"});
+            res.status(500).json({ message: "Jowl Server is disable" });
         }
 
         let jowlConfigUrl = jowlServerConfig.url;
@@ -25,11 +25,11 @@ module.exports = function () {
         const payload = {
             input: req.query.manchesterContent,
             graphName: req.query.graphUri,
-            "classUri": req.query.classUri,
-            "axiomType":  req.query.axiomType,
-            "saveTriples": (req.query.saveTriples=="true") ? true : false,
-            "checkConsistency": (req.query.checkConsistency=="true") ? true : false,
-        }
+            classUri: req.query.classUri,
+            axiomType: req.query.axiomType,
+            saveTriples: req.query.saveTriples == "true" ? true : false,
+            checkConsistency: req.query.checkConsistency == "true" ? true : false,
+        };
         const options = {
             method: "POST",
             json: payload,
@@ -63,7 +63,6 @@ module.exports = function () {
                 type: "string",
                 required: true,
             },
-
 
             {
                 name: "classUri",

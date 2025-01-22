@@ -25,7 +25,7 @@ module.exports = function () {
                 (error) => {
                     console.error(error);
                     res.status(503).json({
-                        message: "The connection to the database was refused"
+                        message: "The connection to the database was refused",
                     });
                 }
             );

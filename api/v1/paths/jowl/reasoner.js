@@ -3,20 +3,17 @@ const ConfigManager = require("../../../../bin/configManager.");
 const GraphStore = require("../../../../bin/graphStore.");
 const Util = require("../../../../bin/util.");
 const fs = require("fs");
-const {processResponse} = require("../utils");
+const { processResponse } = require("../utils");
 const request = require("request");
 const async = require("async");
 const httpProxy = require("../../../../bin/httpProxy..js");
-
 
 //https://jena.apache.org/documentation/inference/
 
 module.exports = function () {
     let operations = {
-        GET
-
+        GET,
     };
-
 
     function GET(req, res, next) {
         let options = null;
@@ -24,21 +21,18 @@ module.exports = function () {
             options = JSON.parse(req.query.options);
         }
 
-
         var payload = {
             graphName: req.query.graphName,
             operation: req.query.operation,
-            predicates: JSON.parse(req.query.predicates)
+            predicates: JSON.parse(req.query.predicates),
         };
-
 
         var headers = {
             "Content-Type": "application/json",
         };
         var jowlConfig = ConfigManager.config.jowlServer;
-        var url = jowlConfig.url + "reasoner/" + req.query.operation
+        var url = jowlConfig.url + "reasoner/" + req.query.operation;
         httpProxy.post(url, headers, payload, function (err, result) {
-
             //    HttpProxy.post(jowlConfig.url, {}, function (err, result) {
             if (err) {
                 next(err);
@@ -46,13 +40,12 @@ module.exports = function () {
                 return processResponse(res, err, result);
             }
         });
-        return
-
+        return;
 
         if (req.query.graphName) {
             var url = jowlConfig.url + "reasoner/" + req.query.operation + "?graphName=" + encodeURIComponent(req.query.graphName);
-            console.log(url)
-            req.query.url
+            console.log(url);
+            req.query.url;
             HttpProxy.get(url, {}, function (err, result) {
                 // var url = jowlConfig.url + "reasoner/" + req.query.operation + "?filePath=" + req.query.url;
                 //    HttpProxy.post(jowlConfig.url, {}, function (err, result) {
@@ -64,7 +57,7 @@ module.exports = function () {
             });
         } else if (req.query.type == "externalUrl") {
             var url = jowlConfig.url + "hermit/" + req.query.operation + "?url=" + req.query.url;
-            req.query.url
+            req.query.url;
             HttpProxy.get(url, {}, function (err, result) {
                 // var url = jowlConfig.url + "reasoner/" + req.query.operation + "?filePath=" + req.query.url;
                 //    HttpProxy.post(jowlConfig.url, {}, function (err, result) {
@@ -157,7 +150,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{restrictLoggedUser: []}],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Query Jowl server",
         description: "Query Jowl server",
         operationId: "Query Jowl server",

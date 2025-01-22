@@ -58,7 +58,7 @@ module.exports = () => {
                 in: "body",
                 name: "body",
                 schema: {
-                    $ref: "#/definitions/UserData",
+                    $ref: "#/definitions/UserDataWithoutID",
                 },
             },
         ],

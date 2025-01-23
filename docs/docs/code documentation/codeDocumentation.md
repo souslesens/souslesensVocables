@@ -12,7 +12,7 @@ Both buttons calls the function MappingDetails.showFilterMappingDialog that will
 
 ![alt text](image.png)
 
-This function calls MappingDetails.showDetailedMappingsList (section below) to display Table with all the mappings 
+This function calls MappingDetails.showDetailedMappingsTree (section below) to display Table with all the mappings 
 
 Then We use MappingDetails.validateFilterMapping to process the selected mappings by the user.
 
@@ -22,7 +22,7 @@ Then reconstitute the mapping object that is present on console by tapping:
 MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable.name)[MappingModeler.currentTable.name]
 but only with mappings selected in checkedRows
 
-### showDetailedMappingsList 
+### showDetailedMappingsTree 
 
 This function is able to Draw a DataTable with all currentTable mappings on a specific divId (parameter of a function),
 we can also draw only mapping relative to a column with column parameter.

@@ -280,7 +280,7 @@ var common = (function () {
             });
             return map;
         },
-        insertFirstArray: function (array, first) {
+        moveItemToFirst: function (array, first) {
             let index = array.indexOf(first);
             if (index > -1) {
                 array.splice(index, 1);

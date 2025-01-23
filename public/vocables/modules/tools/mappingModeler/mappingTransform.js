@@ -9,7 +9,7 @@ var MappingTransform = (function () {
 
         $("#smallDialogDiv").html(
             '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
-                ' <textarea id="mappingModeler_infosTA" style="display: block;width:800px;height: 500px;overflow: auto;"> </textarea>'
+            ' <textarea id="mappingModeler_infosTA" style="display: block;width:800px;height: 500px;overflow: auto;"> </textarea>'
         );
         $("#smallDialogDiv").dialog("open");
         $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
@@ -20,7 +20,9 @@ var MappingTransform = (function () {
     };
 
     self.getSLSmappingsFromVisjsGraph = function (table) {
-        if (!table) table = MappingModeler.currentTable.name;
+        if (!table) {
+            table = MappingModeler.currentTable.name;
+        }
         var nodesMap = {};
         var nodes = MappingModeler.visjsGraph.data.nodes.get();
 
@@ -30,7 +32,9 @@ var MappingTransform = (function () {
 
         var columnsMap = {};
         nodes.forEach(function (node, callbackEach) {
-            if (node.data.dataTable !== table) return;
+            if (node.data.dataTable !== table) {
+                return;
+            }
             if (node.data.type == "Class") {
                 return;
             }
@@ -61,7 +65,7 @@ var MappingTransform = (function () {
         }*/
 
         if (colname && data.type == "VirtualColumn") {
-            colname = "@" + colname;//+ "_$";
+            colname = "@" + colname + "_$";
         }
         if (data.type == "URI") {
             colname = data.id + "_#";
@@ -82,7 +86,7 @@ var MappingTransform = (function () {
             }
 
             if (!allMappings[data.dataTable]) {
-                allMappings[data.dataTable] = { tripleModels: [] };
+                allMappings[data.dataTable] = {tripleModels: []};
             }
             if (data.rdfType) {
                 var predicate = "rdf:type";
@@ -115,7 +119,9 @@ var MappingTransform = (function () {
             var connections = MappingModeler.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
-                if (connection.edge.data.type == "tableToColumn") return;
+                if (connection.edge.data.type == "tableToColumn") {
+                    return;
+                }
                 var property = connection.edge.data.id;
                 if (!property) {
                     property = connection.edge.data.type;
@@ -165,6 +171,9 @@ var MappingTransform = (function () {
 
         return json;
     };
+
+
+
 
     self.copyKGcreatorMappings = function () {
         var text = $("#mappingModeler_infosTA").val();

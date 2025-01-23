@@ -36,8 +36,8 @@ var TripleFactory = (function () {
     self.writeTriples = function () {
         if (!self.checkCurrentTable()) return;
 
-        MappingsDetails.showFilterMappingDialog(false);
-        return;
+       MappingsDetails.showFilterMappingDialog(false);
+       return;
 
         var mappingsFilter = MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable);
         var options = { table: MappingModeler.currentTable.name, mappingsFilter: mappingsFilter };

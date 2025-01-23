@@ -250,7 +250,7 @@ var MappingsDetails = (function () {
         }
 
         if (!divId) {
-            divId = "detailedMappings_mappingsListDiv";
+            divId = "detailedMappings_jsTreeDiv";
         }
         //datatypeMappingGraph
         var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentTable.name].tripleModels;
@@ -328,8 +328,9 @@ var MappingsDetails = (function () {
         }
 
         options.withCheckboxes = _options.withCheckboxes
+        options.openAll = _options.openAll || true
 
-        JstreeWidget.loadJsTree("detailedMappings_jsTreeDiv", jstreeData, options)
+        JstreeWidget.loadJsTree(divId, jstreeData, options)
 
 
     }
@@ -710,7 +711,7 @@ var MappingsDetails = (function () {
         mappingWithTransform[MappingModeler.currentTable.name] = {tripleModels: filteredMapping, transform: {}};
         mappingWithTransform[MappingModeler.currentTable.name].transform[self.transformColumn] = transformFn;
         TripleFactory.createTriples(true, MappingModeler.currentTable.name, {
-            mappingsFilterOption: mappingWithTransform,
+            filteredMappings: mappingWithTransform,
             table: MappingModeler.currentTable.name
         }, function (err, result) {
         });
@@ -779,49 +780,23 @@ var MappingsDetails = (function () {
         $("#mainDialogDiv").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
             $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
             $("#mainDialogDiv").dialog("open");
-            self.showDetailedMappingsTree(null, "detailedMappings_mappingsListDiv", {withCheckboxes: true,withoutContextMenu:true });
+            var options={withCheckboxes: true,withoutContextMenu:true,openAll:true }
+            self.showDetailedMappingsTree(null, "detailedMappings_filterMappingsTree", options);
         });
     };
 
     self.validateFilterMapping = function () {
-        var checkedRows = [];
-        $("#detailedMappings_mappingsListDiv tbody tr").each(function () {
-            if ($(this).find('input[type="checkbox"]').is(":checked")) {
-                checkedRows.push($(this)); // Ajoute la ligne à la liste
-            }
-        });
-        console.log(checkedRows);
-        var triples = [];
-        checkedRows.forEach((element) => {
-            let data = self.currentMappingsList.row(element).data();
-            if (data[2] != "Transform") {
-                let triple = {
-                    s: data[1], // Assuming subject is at index 1
-                    p: data[2], // Assuming predicate is at index 2
-                    o: data[3], // Assuming object is at index 3
-                };
-                triples.push(triple);
-            }
-        });
+  var checkedNodes=JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree")
+        var filteredMappings=[];
+        checkedNodes.forEach(function(node){
+            if(node.parent=="#")
+                return;
 
-        var currentMappingsList = {};
-        currentMappingsList[MappingModeler.currentTable.name] = {
-            tripleModels: triples,
-        };
+            filteredMappings.push(node.data)
+        })
 
-        var transform = MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable.name)[MappingModeler.currentTable.name].transform; // self.getSelectedMappingTriplesOption();
 
-        if (transform) {
-            currentMappingsList[MappingModeler.currentTable.name].transform = transform;
-        }
-
-        if (self.filterMappingIsSample == undefined) {
-            self.filterMappingIsSample = true;
-        }
-
-        currentMappingsList = MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable.name);
-
-        TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {mappingsFilterOption: currentMappingsList}, function (err, result) {
+        TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, result) {
         });
     };
 

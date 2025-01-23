@@ -93,7 +93,7 @@ var TripleFactory = (function () {
     };
 
     self.createTriples = function (sampleData, table, options, callback) {
-        var mappingsFilterOption = MappingTransform.getSLSmappingsFromVisjsGraph(table); // self.getSelectedMappingTriplesOption();
+        var allTableMappings = MappingTransform.getSLSmappingsFromVisjsGraph(table); // self.getSelectedMappingTriplesOption();
 
         if (!options) {
             options = {};
@@ -119,11 +119,11 @@ var TripleFactory = (function () {
             table = null;
         }
 
-        if (mappingsFilterOption) {
-            options.mappingsFilter = mappingsFilterOption;
+        if (allTableMappings) {
+            options.mappingsFilter = allTableMappings;
         }
-        if (options.mappingsFilterOption) {
-            options.mappingsFilter = options.mappingsFilterOption;
+        if (options.filteredMappings) {
+            options.mappingsFilter[MappingModeler.currentTable.name].tripleModels = options.filteredMappings;
         }
         var payload = {
             source: DataSourceManager.currentSlsvSource,

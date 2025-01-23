@@ -16,7 +16,7 @@ This function calls MappingDetails.showDetailedMappingsTree (section below) to d
 
 Then We use MappingDetails.validateFilterMapping to process the selected mappings by the user.
 
-This function get all checkedRows of the DataTable with html id #detailedMappings_mappingsListDiv,
+This function get all checkedRows of the DataTable with html id #detailedMappings_filterMappingsTree,
 Retrieve their data 
 Then reconstitute the mapping object that is present on console by tapping:
 MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable.name)[MappingModeler.currentTable.name]

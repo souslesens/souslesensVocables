@@ -37,15 +37,15 @@ var MappingsDetails = (function () {
                     .search(value);
             });
             $("#mainDialogDiv").dialog("open");
-            $("#mainDialogDiv").dialog({
+          /*  $("#mainDialogDiv").dialog({
                 beforeClose: function () {
-                    MappingsDetails.saveMappingsDetailsToVisjsGraph();
+                  //  MappingsDetails.saveMappingsDetailsToVisjsGraph();
                     $("#mainDialogDiv").dialog({
                         beforeClose: function () {
                         },
                     });
                 },
-            });
+            });*/
         });
     };
 
@@ -373,21 +373,8 @@ var MappingsDetails = (function () {
 
         if (nodeIdToDelete) {
             JstreeWidget.deleteNode("detailedMappings_jsTreeDiv", self.currentTreeNode.id)
+            self.drawDetailedMappingsGraph()
         } else {
-            /*   var edges = MappingModeler.visjsGraph.data.edges.get()
-
-               edges.forEach(function (edge) {
-                   var nodeFrom = MappingModeler.visjsGraph.data.nodes.get(edge.from)
-                   var nodeTo = MappingModeler.visjsGraph.data.nodes.get(edge.to)
-                   if (!nodeFrom || !nodeTo)
-                       return
-                   if (nodeFrom.data && nodeFrom.data.id == mapping.s) {
-                       if (edge.data.type == mapping.p && nodeTo.data.id == mapping.o) {
-                           MappingModeler.removeEdge(edge)
-                           nodeIdToDelete = true
-                       }
-                   }
-               })*/
 
             if (!nodeIdToDelete) {
                 alert("cannot delete node here")

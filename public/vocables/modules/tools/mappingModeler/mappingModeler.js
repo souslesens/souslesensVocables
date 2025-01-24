@@ -85,7 +85,13 @@ var MappingModeler = (function () {
                 },
                 function (callbackSeries) {
                     $("#lateralPanelDiv").load("./modules/tools/mappingModeler/html/mappingModelerLeftPanel.html", function (err) {
-                        $("#MappingModeler_leftTabs").tabs({});
+                        $("#MappingModeler_leftTabs").tabs({
+
+                            activate: function(event,ui){
+                                self.activateRightPanel($(ui.newTab).text())
+                            }
+
+                        });
                         $($("#MappingModeler_leftTabs").children()[0]).css("border-radius", "0px");
 
                         /*
@@ -107,7 +113,24 @@ var MappingModeler = (function () {
             }
         );
     };
+self.activateRightPanel=function(PanelLabel){
+    $(".mappingModeler_rightPanel").css("display","none")
 
+
+    if (PanelLabel== "Data Sources") {
+        $("#mappingModeler_structuralPanel").css("display","block")
+    }
+    else if (PanelLabel== "Mappings") {
+       // $("#mappingModeler_mappingsPanel").css("display","block")
+        $("#mappingModeler_structuralPanel").css("display","block")
+    }
+    else if (PanelLabel== "Triples") {
+        $("#mappingModeler_genericPanel").css("display","block")
+    }else{
+        $("#mappingModeler_genericPanel").css("display","block")
+
+    }
+}
     self.loadSuggestionSelectJstree = function (objects, parentName) {
         if ($("#suggestionsSelectJstreeDiv").jstree()) {
             try {

@@ -1,17 +1,19 @@
 import common from "../../shared/common.js";
 import KGcreator from "../KGcreator/KGcreator.js";
+import MappingModeler from "./mappingModeler.js";
 
 var MappingTransform = (function () {
     var self = {};
 
     self.generateSLSmappings = function () {
         var json = MappingTransform.getSLSmappingsFromVisjsGraph();
+        MappingModeler.activateRightPanel("generic")
 
-        $("#smallDialogDiv").html(
+      $("#mappingModeler_genericPanel").html(
             '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
-            ' <textarea id="mappingModeler_infosTA" style="display: block;width:800px;height: 500px;overflow: auto;"> </textarea>'
-        );
-        $("#smallDialogDiv").dialog("open");
+            ' <textarea id="mappingModeler_infosTA" style="display: block;width:80%;height: 700px;overflow: auto;"> </textarea>'
+       );
+    //    $("#smallDialogDiv").dialog("open");
         $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
     };
 

@@ -17,15 +17,16 @@ var MappingsDetails = (function () {
         if (!divId) {
             divId = "mainDialogDiv";
         }
-        $("#mainDialogDiv").load("./modules/tools/mappingModeler/html/detailsDialog.html", function () {
-            $("#mainDialogDiv").dialog("option", "title", "Detailed mappings : table " + MappingModeler.currentTable.name);
+        MappingModeler.activateRightPanel("generic")
+        $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/detailsDialog.html", function () {
+           // $("#mainDialogDiv").dialog("option", "title", "Detailed mappings : table " + MappingModeler.currentTable.name);
 
             //self.addRowClass();
             /*    self.calculateColumnMappingsFromGraph();
                 Object.keys(self.detailledDataMap).forEach(function (column) {
                     self.addRowClass(column);
                 });*/
-
+            self.showDetailedMappingsTree();
             self.drawDetailedMappingsGraph();
             $("#detailedMappings_searchInput").bind("keydown", null, function () {
                 if (event.keyCode != 13 && event.keyCode != 9) {
@@ -36,80 +37,12 @@ var MappingsDetails = (function () {
                     .jstree(true)
                     .search(value);
             });
-            $("#mainDialogDiv").dialog("open");
-          /*  $("#mainDialogDiv").dialog({
-                beforeClose: function () {
-                  //  MappingsDetails.saveMappingsDetailsToVisjsGraph();
-                    $("#mainDialogDiv").dialog({
-                        beforeClose: function () {
-                        },
-                    });
-                },
-            });*/
+           // $("#mainDialogDiv").dialog("open");
+
         });
     };
 
 
-    /*   self.addRowClass = function (column) {
-           var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
-           var currentGraphNode = graphNodes.filter(function (node) {
-               return node.data.label == column && node.data.dataTable == MappingModeler.currentTable.name;
-           })[0];
-
-           if (currentGraphNode.data.type == "table") {
-               return;
-           }
-
-           if (currentGraphNode.data.type == "URI") {
-               return;
-           }
-
-           var html = `<tr><td><span id='class-column-${column}'> ${column} </span> </td>`;
-           html += `<td><span id='class-type-${column}' >${self.detailledDataMap[column].type ? MappingModeler.allResourcesMap[self.detailledDataMap[column].type.id]?.label : "No Type"} </span></td>  `;
-           html += `<td><select id='columnDetails-rdfType${column}' style='padding:6px 6px'> </select> </td> `;
-
-           html += `<td><select id='columnDetails-rdfsLabel${column}' style='padding:6px 6px'> </select> </td>`;
-           html += `<td><select id='columnDetails-UriType${column}' style='padding:6px 6px'> </select>  </td>`;
-           html += `<td><button class='slsv-button-1' id='class-datatype-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingsDetails.showSpecificMappingsBot("${column}")'> More mappings... </button> </td>  `;
-           /*  html += `<td><button class='slsv-button-1' id='class-sample-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.sampleData("${column}")'> Sample</button> </td>`
-             html += `<td><button class='slsv-button-1' id='class-transform-${column}' style='padding:6px 6px;margin:0px;' onclick='MappingModeler.transformDialog("${column}")'> Fn</button> </td> `*/
-    /*  html += `<td><span id='class-column-${column}'> ${self.detailledDataMap[column].dataTable} </span> </tr> </td>`;
-
-      $("#classesDefineTable").append(html);
-
-      var URITType = ["fromLabel", "blankNode", "randomIdentifier"];
-      //var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
-      var rdfObjectsType = ["owl:NamedIndividual", "rdf:Bag", "owl:Class"];
-      //  sort by similarity for others than rowIndex
-
-      var columns = JSON.parse(JSON.stringify(MappingModeler.currentTable.columns));
-
-      common.array.moveItemToFirst(columns, column);
-      if (currentGraphNode.data.rdfType) {
-          common.array.moveItemToFirst(rdfObjectsType, currentGraphNode.data.rdfType);
-      }
-      if (currentGraphNode.data.rdfType == "") {
-          rdfObjectsType.unshift("");
-      } else {
-          rdfObjectsType.push("");
-      }
-
-      if (currentGraphNode.data.uriType) {
-          common.array.moveItemToFirst(URITType, currentGraphNode.data.uriType);
-      }
-      if (currentGraphNode.data.rdfsLabel) {
-          common.array.moveItemToFirst(columns, currentGraphNode.data.rdfsLabel);
-      }
-      if (currentGraphNode.data.rdfsLabel == "") {
-          columns.unshift("");
-      } else {
-          columns.push("");
-      }
-
-      common.fillSelectOptions(`columnDetails-rdfsLabel${column}`, columns, false);
-      common.fillSelectOptions(`columnDetails-rdfType${column}`, rdfObjectsType, false);
-      common.fillSelectOptions(`columnDetails-UriType${column}`, URITType, false);
-  };*/
 
     self.showSpecificMappingsBot = function (column) {
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
@@ -159,23 +92,7 @@ var MappingsDetails = (function () {
                 MappingModeler.saveVisjsGraph();
             }
             self.showDetailsDialog();
-            //self.drawDetailedMappingsGraph(column);
-            /*    var data = self.mappingColumnEditor.get();
-                   if (params.nonObjectPropertyId) {
-                       if (!data.otherPredicates) {
-                           data.otherPredicates = [];
-                       }
-                       data.otherPredicates.push({
-                           property: params.nonObjectPropertyId,
-                           object: params.predicateObjectColumn,
-                           range: Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range,
-                           dateFormat: params.nonObjectPropertyDateFormat || null, //if any
-                       });
-                       MappingModeler.visjsGraph.data.nodes.update({id: MappingModeler.currentGraphNode.id, data: data});
-                       //  self.mappingColumnInfo.editColumnInfos()
-                       self.mappingColumnEditor = new JsonEditor("#mappingColumnJonEditor", data);
-                       MappingsDetails.showDatatypeGraph(MappingModeler.currentGraphNode.label);
-                   }*/
+
         });
     };
     self.sampleData = function (column) {
@@ -327,8 +244,11 @@ var MappingsDetails = (function () {
 
         }
 
-        options.withCheckboxes = _options.withCheckboxes
-        options.openAll = _options.openAll || true
+        for(var key in _options){
+            options[key]=_options[key]
+        }
+
+
 
         JstreeWidget.loadJsTree(divId, jstreeData, options)
 
@@ -643,7 +563,7 @@ var MappingsDetails = (function () {
         self.datatypeVisjsGraph = new VisjsGraphClass(divId, visjsData, options);
         self.datatypeVisjsGraph.draw();
 
-        self.showDetailedMappingsTree(column);
+       // self.showDetailedMappingsTree(column);
     };
 
 
@@ -764,10 +684,10 @@ var MappingsDetails = (function () {
     self.showFilterMappingDialog = function (isSample) {
         self.filterMappingIsSample = isSample;
 
-        $("#mainDialogDiv").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
-            $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
-            $("#mainDialogDiv").dialog("open");
-            var options={withCheckboxes: true,withoutContextMenu:true,openAll:true }
+        $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
+          //  $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
+           // $("#mainDialogDiv").dialog("open");
+            var options={withCheckboxes: true,withoutContextMenu:true,openAll:true,check_all:true }
             self.showDetailedMappingsTree(null, "detailedMappings_filterMappingsTree", options);
         });
     };

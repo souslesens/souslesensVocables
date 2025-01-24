@@ -2,9 +2,18 @@
     .jstreelabelButton{
 
     }
+    .mappingModeler_rightPanel{
+        width:100%;
+        height: 100%;
+        padding:5px
+
+    }
 </style>
 
-<div style="display: flex; flex-direction: row; align-items: center">
+
+
+<div id="mappingModeler_structuralPanel" class="mappingModeler_rightPanel">
+<div  style="display: flex; flex-direction: row; align-items: center">
     <span style="font-weight: bold; font-size: 13px" id="MappingModeler_currentDataSource"></span>&nbsp;
     <button class="w3-button slsv-button-3" onclick="MappingModeler.saveVisjsGraph()">Save</button>
     <button class="w3-button slsv-button-3" onclick="MappingModeler.clearMappings()">Clear</button>
@@ -14,3 +23,10 @@
 </div>
 
 <div id="mappingModeler_graphDiv" style="height: 95%; background-color: #ddd; margin: 5px; padding: 5px; overflow: auto"></div>
+</div>
+
+
+
+<div id="mappingModeler_genericPanel"  class="mappingModeler_rightPanel">
+</div>
+

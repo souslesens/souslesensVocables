@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.100.1](https://github.com/souslesens/souslesensVocables/compare/1.100.0...1.100.1) (2025-01-14)
+
+
+### Bug Fixes
+
+* tripleFactory mappingModeler ([c24d609](https://github.com/souslesens/souslesensVocables/commit/c24d6096caac17acc6f31890a8acdd56b71e3638))
+
 ## [1.100.0](https://github.com/souslesens/souslesensVocables/compare/1.99.0...1.100.0) (2025-01-13)
 
 > [!IMPORTANT]

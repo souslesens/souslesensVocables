@@ -7,11 +7,11 @@ var MappingTransform = (function () {
 
     self.generateSLSmappings = function () {
         var json = MappingTransform.getSLSmappingsFromVisjsGraph();
-        MappingModeler.activateRightPanel("generic")
+        MappingModeler.activateRightPanel("generic");
 
         $("#mappingModeler_genericPanel").html(
             '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
-            ' <textarea id="mappingModeler_infosTA" style="display: block;width:80%;height: 700px;overflow: auto;"> </textarea>'
+                ' <textarea id="mappingModeler_infosTA" style="display: block;width:80%;height: 700px;overflow: auto;"> </textarea>'
         );
         //    $("#smallDialogDiv").dialog("open");
         $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
@@ -88,7 +88,7 @@ var MappingTransform = (function () {
             }
 
             if (!allMappings[data.dataTable]) {
-                allMappings[data.dataTable] = {tripleModels: []};
+                allMappings[data.dataTable] = { tripleModels: [] };
             }
             if (data.rdfType) {
                 var predicate = "rdf:type";
@@ -111,7 +111,6 @@ var MappingTransform = (function () {
                     dataType: "xsd:string",
                 });
             }
-
 
             if (data.transform) {
                 if (!allMappings[data.dataTable].transform) {
@@ -139,15 +138,13 @@ var MappingTransform = (function () {
                     );
                 }
 
-
                 var mapping = {
                     s: subject,
                     p: property,
                     o: object,
                 };
 
-
-                allMappings[data.dataTable].tripleModels.push(mapping)
+                allMappings[data.dataTable].tripleModels.push(mapping);
             });
             if (data.otherPredicates) {
                 data.otherPredicates.forEach(function (predicate) {
@@ -156,7 +153,6 @@ var MappingTransform = (function () {
                         p: predicate.property,
                         o: predicate.object,
                     };
-
 
                     if (predicate.range) {
                         if (predicate.range.indexOf("Resource") > -1) {
@@ -177,7 +173,7 @@ var MappingTransform = (function () {
         }
 
         for (var dataTable in allMappings) {
-            allMappings[data.dataTable].tripleModels = self.addMappingsRestrictions(allMappings[data.dataTable].tripleModels)
+            allMappings[data.dataTable].tripleModels = self.addMappingsRestrictions(allMappings[data.dataTable].tripleModels);
         }
 
         var json = allMappings;
@@ -185,35 +181,29 @@ var MappingTransform = (function () {
         return json;
     };
 
-
     self.addMappingsRestrictions = function (allMappings) {
-
-
         var isClass = function (nodeId) {
-            var isClass = false
+            var isClass = false;
             allMappings.forEach(function (mapping) {
                 if (mapping.s == nodeId) {
                     if (mapping.p == "rdf:type" && mapping.o == "owl:Class") {
-                        isClass = true
+                        isClass = true;
                     }
                 }
-            })
-            return isClass
-        }
+            });
+            return isClass;
+        };
         allMappings.forEach(function (mapping) {
-            if(!mapping.p.startsWith("http"))
-                return
+            if (!mapping.p.startsWith("http")) return;
             if (isClass(mapping.s) && isClass(mapping.o)) {
                 if (mapping.s != mapping.o) {
-                    mapping.isRestriction = true
+                    mapping.isRestriction = true;
                 }
             }
-        })
+        });
 
-        return allMappings
-
-    }
-
+        return allMappings;
+    };
 
     self.copyKGcreatorMappings = function () {
         var text = $("#mappingModeler_infosTA").val();

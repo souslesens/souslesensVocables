@@ -38,8 +38,8 @@ var TripleFactory = (function () {
     self.writeTriples = function () {
         if (!self.checkCurrentTable()) return;
 
-       MappingsDetails.showFilterMappingDialog(false);
-       return;
+        MappingsDetails.showFilterMappingDialog(false);
+        return;
 
         var mappingsFilter = MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable);
         var options = { table: MappingModeler.currentTable.name, mappingsFilter: mappingsFilter };
@@ -142,8 +142,8 @@ var TripleFactory = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 if (sampleData) {
-                    MappingModeler.activateRightPanel("generic")
-                    self.showTriplesInDataTable(result,"mappingModeler_genericPanel");
+                    MappingModeler.activateRightPanel("generic");
+                    self.showTriplesInDataTable(result, "mappingModeler_genericPanel");
                     UI.message("", true);
                 } else {
                     if (options.deleteTriples) {
@@ -205,7 +205,7 @@ var TripleFactory = (function () {
         );
     };
 
-    self.showTriplesInDataTable = function (data,div) {
+    self.showTriplesInDataTable = function (data, div) {
         var escapeMarkup = function (str) {
             var str2 = str.replace(/</g, "&lt;");
             var str2 = str2.replace(/>/g, "&gt;");
@@ -231,7 +231,7 @@ var TripleFactory = (function () {
 
         /*  $("#KGcreator_triplesDataTableDiv").html(str)
           return;*/
-        Export.showDataTable(div, tableCols, tableData, null, { paging: true,divId:div }, function (err, datatable) {});
+        Export.showDataTable(div, tableCols, tableData, null, { paging: true, divId: div }, function (err, datatable) {});
     };
 
     return self;

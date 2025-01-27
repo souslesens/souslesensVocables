@@ -610,35 +610,30 @@ var Containers_tree = (function () {
         items["GraphContainerDescendantAndLeaves"] = {
             label: "Graph  all descendants",
             action: function (_e) {
-                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, {leaves: true});
-            }
+                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });
+            },
         };
 
         items["GraphParentContainers"] = {
             label: "Graph  parent container",
             action: function (_e) {
-var rootContainer=null;
-if(self.currentContainer.parent=="#")
-    rootContainer=self.currentContainer.data.id
-                else
-    rootContainer=self.currentContainer.parents[self.currentContainer.parents.length]
-                var filter = " ?root rdfs:member+ ?ancestorChild  filter (?root=<"+rootContainer+")";//" ?container rdf:type <" + type + ">. ";
+                var rootContainer = null;
+                if (self.currentContainer.parent == "#") rootContainer = self.currentContainer.data.id;
+                else rootContainer = self.currentContainer.parents[self.currentContainer.parents.length];
+                var filter = " ?root rdfs:member+ ?ancestorChild  filter (?root=<" + rootContainer + ")"; //" ?container rdf:type <" + type + ">. ";
                 Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, { filter: filter });
-                   },
+            },
         };
-       /* items["GraphContainerDescendant"] = {
+        /* items["GraphContainerDescendant"] = {
             label: "Graph  descendants",
             action: function (_e) {
                 Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { descendants: true });
             },
         };*/
 
-
         items["----"] = {
             label: "-----------------------",
-            action: function (_e) {
-
-            },
+            action: function (_e) {},
         };
         items.copyNodes = {
             label: "Copy Node(s)",
@@ -673,8 +668,6 @@ if(self.currentContainer.parent=="#")
                 Containers_tree.menuActions.deleteContainer(self.currentSource, self.currentContainer);
             },
         };
-
-
 
         return items;
     };

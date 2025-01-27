@@ -54,11 +54,19 @@ class UserDataModel {
         return knex({ client: "pg", connection: this._mainConfig.database });
     };
 
-    all = async () => {
+    all = async (currentUser) => {
         const connection = this._getConnection();
-        const results = await connection.select("*").from("user_data_list");
+        if ((currentUser === undefined) & (this._mainConfig.auth === "disabled")) {
+            currentUser = { login: "admin", groups: ["admin"] };
+        }
+        const currentUserData = await connection
+            .select("*")
+            .from("user_data_list")
+            .where("owned_by", currentUser.login)
+            .orWhereRaw("is_shared=true AND ? = ANY(shared_users)", currentUser.login)
+            .orWhereRaw("is_shared=true AND ? = ANY(shared_profiles)", currentUser.groups);
         connection.destroy();
-        return results;
+        return currentUserData;
     };
 
     find = async (identifier) => {

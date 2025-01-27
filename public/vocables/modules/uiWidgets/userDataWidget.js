@@ -51,7 +51,8 @@ var UserDataWidget = (function () {
             type: type,
             url: `${Config.apiUrl}/users/data`,
             data: payload,
-            dataType: "json",
+           // dataType: "json",
+          contentType:"application/json",
             success: function (_result, _textStatus, _jqXHR) {
                 callback(null, "graph saved");
             },

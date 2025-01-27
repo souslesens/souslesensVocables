@@ -41,22 +41,36 @@ var Containers_widget = (function () {
             source = Lineage_sources.activeSource;
         }
         //  self.currentSource = source;
-        Containers_graph.getContainerTypes(source, null, function (err, types) {
+
+
+        var rootNodes=JstreeWidget.getjsTreeNodes("lineage_containers_containersJstree", false, "#").
+
+
+
+
+     /*   Containers_graph.getContainerTypes(source, null, function (err, types) {
             if (err) {
                 return alert(err.responseText);
-            }
+            }*/
 
-            types.splice(0, 0, { id: "all", label: "all" });
-            $("#containerSearchWidget_typesSelect").css("display", "block");
+
+            //$("#containerSearchWidget_typesSelect").css("display", "block");
             $("#smallDialogDiv").dialog("open");
             $("#smallDialogDiv").dialog("option", "title", "Parent Containers Type");
             $("#smallDialogDiv").load("./modules/tools/lineage/html/parentContainers.html", function () {
+
+                rootNodes
+                var types=[];
+                types.splice(0, 0, { id: "all", label: "all" });
+                rootNodes.forEach(function(item){
+                    types.push({id:item.id, label :item.text})
+                })
                 common.fillSelectOptions("containerSearchWidget_typesSelect", types, true, "label", "id");
                 $("#containerSearchWidget_typesSelect").val("all");
                 //$("#containerSearchWidget_typesSelect").hide();
                 //self.execParentContainersSearch();
             });
-        });
+       // });
     };
 
     self.execParentContainersSearch = function () {

@@ -69,7 +69,7 @@ module.exports = () => {
                 name: "body",
                 schema: {
                     // ------------temporaire CF//
-                   // $ref: "#/definitions/UserData",
+                  $ref: "#/definitions/UserData",
                 },
             }
         ],

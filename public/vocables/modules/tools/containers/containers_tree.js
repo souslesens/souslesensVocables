@@ -6,6 +6,7 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Containers_graph from "./containers_graph.js";
+import Lineage_sources from "../lineage/lineage_sources.js";
 
 var Containers_tree = (function () {
     var self = {};
@@ -606,11 +607,37 @@ var Containers_tree = (function () {
                 }
             },
         };
-        items["Open node"] = {
-            label: "Open node",
+        items["GraphContainerDescendantAndLeaves"] = {
+            label: "Graph  all descendants",
             action: function (_e) {
-                // $("#lineage_containers_containersJstree").jstree().open_all(self.currentContainer.id);
-                Containers_tree.menuActions.listContainerResources(self.currentSource, self.currentContainer, { onlyOneLevel: true, leaves: true });
+                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, {leaves: true});
+            }
+        };
+
+        items["GraphParentContainers"] = {
+            label: "Graph  parent container",
+            action: function (_e) {
+var rootContainer=null;
+if(self.currentContainer.parent=="#")
+    rootContainer=self.currentContainer.data.id
+                else
+    rootContainer=self.currentContainer.parents[self.currentContainer.parents.length]
+                var filter = " ?root rdfs:member+ ?ancestorChild  filter (?root=<"+rootContainer+")";//" ?container rdf:type <" + type + ">. ";
+                Containers_graph.graphParentContainers(Lineage_sources.activeSource, null, { filter: filter });
+                   },
+        };
+       /* items["GraphContainerDescendant"] = {
+            label: "Graph  descendants",
+            action: function (_e) {
+                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { descendants: true });
+            },
+        };*/
+
+
+        items["----"] = {
+            label: "-----------------------",
+            action: function (_e) {
+
             },
         };
         items.copyNodes = {
@@ -647,18 +674,7 @@ var Containers_tree = (function () {
             },
         };
 
-        items["GraphContainerDescendant"] = {
-            label: "Graph  descendants",
-            action: function (_e) {
-                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { descendants: true });
-            },
-        };
-        items["GraphContainerDescendantAndLeaves"] = {
-            label: "Graph  descendants + leaves",
-            action: function (_e) {
-                Containers_graph.graphResources(self.currentSource, self.currentContainer.data, { leaves: true });
-            },
-        };
+
 
         return items;
     };

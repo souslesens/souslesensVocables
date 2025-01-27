@@ -1,5 +1,5 @@
-const { userModel } = require("../../../model/users");
-const { sortObjectByKey, responseSchema, successfullyUpdated, successfullyCreated, successfullyFetched } = require("./utils");
+const { userModel } = require("../../../../model/users");
+const { sortObjectByKey, responseSchema, successfullyUpdated, successfullyCreated, successfullyFetched } = require("../utils");
 
 module.exports = function () {
     let operations = {
@@ -8,7 +8,7 @@ module.exports = function () {
         PUT,
     };
 
-    ///// GET api/v1/users
+    ///// GET api/v1/admin/users
     async function GET(req, res, next) {
         try {
             const users = await userModel.getUserAccounts();

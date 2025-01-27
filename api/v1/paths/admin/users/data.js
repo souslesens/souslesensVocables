@@ -1,4 +1,4 @@
-const { userDataModel } = require("../../../../model/userData");
+const { userDataModel } = require("../../../../../model/userData");
 
 module.exports = () => {
     GET = async (_req, res, _next) => {

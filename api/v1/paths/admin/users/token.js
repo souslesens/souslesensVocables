@@ -1,5 +1,5 @@
-const userManager = require("../../../../bin/user.");
-const { userModel } = require("../../../../model/users");
+const userManager = require("../../../../../bin/user.");
+const { userModel } = require("../../../../../model/users");
 
 module.exports = function () {
     let operations = {

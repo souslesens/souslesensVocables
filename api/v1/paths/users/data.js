@@ -1,9 +1,9 @@
 const { userDataModel } = require("../../../../model/userData");
 
 module.exports = () => {
-    GET = async (_req, res, _next) => {
+    GET = async (req, res, _next) => {
         try {
-            const data = await userDataModel.all();
+            const data = await userDataModel.all(req.user);
             res.status(200).json(data);
         } catch (error) {
             console.error(error);

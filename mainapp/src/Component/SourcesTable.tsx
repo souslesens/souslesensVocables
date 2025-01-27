@@ -9,6 +9,7 @@ import {
     Link,
     Paper,
     Stack,
+    styled,
     Table,
     TableBody,
     TableCell,
@@ -40,6 +41,9 @@ const SourcesTable = () => {
     const [filteringChars, setFilteringChars] = useState("");
     const [orderBy, setOrderBy] = useState<OrderBy>("name");
     const [order, setOrder] = useState<Order>("asc");
+
+    const [importSrcMsgSeverity, setImportSrcMsgSeverity] = useState<"warning" | "error" | undefined>(undefined);
+    const [importSrcMsg, setImportSrcMsg] = useState(new Set());
 
     const [openModal, setOpenModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
@@ -94,6 +98,36 @@ const SourcesTable = () => {
         setOpenModal(true);
     };
 
+    const closeAlert = () => {
+        setImportSrcMsgSeverity(undefined);
+        setImportSrcMsg(new Set());
+    };
+
+    const handleUploadSource = async (sourceFiles: FileList | null) => {
+        if (sourceFiles && sourceFiles !== undefined && sourceFiles?.length > 0) {
+            const source = JSON.parse(await sourceFiles[0].text()) as ServerSource;
+            // check name
+            const existingSourcesName: string[] = SRD.withDefault([], model.sources).map((source) => source.name);
+            if (existingSourcesName.includes(source.name)) {
+                setImportSrcMsgSeverity("error");
+                setImportSrcMsg((msg) => new Set(msg).add(`La source ${source.name} existe déjà`));
+                return;
+            }
+            // remove unknown imports
+            const imports: string[] = [];
+            source.imports.forEach((imp) => {
+                if (existingSourcesName.includes(imp)) {
+                    imports.push(imp);
+                } else {
+                    setImportSrcMsgSeverity("warning");
+                    setImportSrcMsg((msg) => new Set(msg).add(`L'import ${imp} n'existe pas`));
+                }
+            });
+            source.imports = imports;
+            await handleUpdateSource(source);
+        }
+    };
+
     const renderSources = SRD.match(
         {
             notAsked: () => <p>Let&apos;s fetch some data!</p>,
@@ -144,6 +178,16 @@ const SourcesTable = () => {
 
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
+                        {importSrcMsg.size > 0 && (
+                            <Alert variant="filled" severity={importSrcMsgSeverity} sx={{ m: 1 }} onClose={closeAlert}>
+                                {Array.from(importSrcMsg).map((msg: string) => (
+                                    <>
+                                        {msg}
+                                        <br />
+                                    </>
+                                ))}
+                            </Alert>
+                        )}
                         <TextField
                             inputProps={{ autocomplete: "off" }}
                             label="Search Sources by name"
@@ -270,6 +314,10 @@ const SourcesTable = () => {
                                 selectedSource={selectedSource}
                                 sources={sortedSources}
                             />
+                            <Button component="label" variant="contained" tabIndex={-1}>
+                                Upload Source file
+                                <VisuallyHiddenInput type="file" onChange={(event) => handleUploadSource(event.target.files)} multiple />
+                            </Button>
                         </Stack>
                     </Stack>
                 );
@@ -280,6 +328,18 @@ const SourcesTable = () => {
 
     return renderSources;
 };
+
+const VisuallyHiddenInput = styled("input")({
+    clip: "rect(0 0 0 0)",
+    clipPath: "inset(50%)",
+    height: 1,
+    overflow: "hidden",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    whiteSpace: "nowrap",
+    width: 1,
+});
 
 function createSourcesDownloadUrl(sources: ServerSource[]): string {
     const sourcesObject: Record<string, ServerSource> = {};

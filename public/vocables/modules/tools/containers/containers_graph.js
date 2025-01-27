@@ -231,33 +231,12 @@ var Containers_graph = (function () {
                     }
 
                     data.forEach(function (item) {
-                        if (false && !existingNodes[item.parent.value]) {
-                            var type = "container";
-
-                            var label = item.parentLabel ? item.parentLabel.value : Sparql_common.getLabelFromURI(item.parent);
-                            existingNodes[item.parent.value] = 1;
-                            visjsData.nodes.push({
-                                id: item.parent.value,
-                                label: label,
-                                shadow: self.nodeShadow,
-                                shape: type == "container" ? Containers_graph.containerStyle.shape : shape,
-                                size: size,
-                                font: type == "container" ? { color: color2, size: 10 } : null,
-                                color: Containers_graph.containerStyle.color,
-                                data: {
-                                    type: type,
-                                    source: source,
-                                    id: item.parent.value,
-                                    label: label,
-                                },
-                            });
-                        }
-
                         if (!existingNodes[item.member.value]) {
                             var color = Containers_graph.containerStyle.color;
                             var shape = Containers_graph.containerStyle.shape;
                             var type = "container";
-                            if (item.memberTypes.value.indexOf("Bag") < 0) {
+                            if (!item.subMember) {
+                                //when it is a leaf
                                 color = Lineage_whiteboard.getSourceColor(Lineage_sources.activeSource);
                                 if (item.memberTypes.value.indexOf("Individual") > -1) {
                                     type = "individual";
@@ -277,7 +256,7 @@ var Containers_graph = (function () {
                                 shadow: self.nodeShadow,
                                 shape: shape,
                                 size: size,
-                                font: type == "container" ? { color: color2, size: 10 } : null,
+                                font: type == "container" ? { color: color2, bold: true } : null,
                                 color: color,
 
                                 data: {
@@ -296,7 +275,7 @@ var Containers_graph = (function () {
                             if (!existingNodes[edgeId]) {
                                 existingNodes[edgeId] = 1;
                                 var type = "container";
-                                if (item.memberTypes.value.indexOf("Bag") < 0) {
+                                if (!item.subMember) {
                                     type = "class";
                                 }
                                 visjsData.edges.push({

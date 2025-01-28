@@ -1,17 +1,19 @@
 import common from "../../shared/common.js";
 import KGcreator from "../KGcreator/KGcreator.js";
+import MappingModeler from "./mappingModeler.js";
 
 var MappingTransform = (function () {
     var self = {};
 
     self.generateSLSmappings = function () {
         var json = MappingTransform.getSLSmappingsFromVisjsGraph();
+        MappingModeler.activateRightPanel("generic");
 
-        $("#smallDialogDiv").html(
+        $("#mappingModeler_genericPanel").html(
             '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
-                ' <textarea id="mappingModeler_infosTA" style="display: block;width:800px;height: 500px;overflow: auto;"> </textarea>'
+                ' <textarea id="mappingModeler_infosTA" style="display: block;width:80%;height: 700px;overflow: auto;"> </textarea>'
         );
-        $("#smallDialogDiv").dialog("open");
+        //    $("#smallDialogDiv").dialog("open");
         $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
     };
 
@@ -20,7 +22,9 @@ var MappingTransform = (function () {
     };
 
     self.getSLSmappingsFromVisjsGraph = function (table) {
-        if (!table) table = MappingModeler.currentTable.name;
+        if (!table) {
+            table = MappingModeler.currentTable.name;
+        }
         var nodesMap = {};
         var nodes = MappingModeler.visjsGraph.data.nodes.get();
 
@@ -30,7 +34,9 @@ var MappingTransform = (function () {
 
         var columnsMap = {};
         nodes.forEach(function (node, callbackEach) {
-            if (node.data.dataTable !== table) return;
+            if (node.data.dataTable !== table) {
+                return;
+            }
             if (node.data.type == "Class") {
                 return;
             }
@@ -61,7 +67,7 @@ var MappingTransform = (function () {
         }*/
 
         if (colname && data.type == "VirtualColumn") {
-            colname = "@" + colname;
+            colname = "@" + colname + "_$";
         }
         if (data.type == "URI") {
             colname = data.id + "_#";
@@ -105,6 +111,7 @@ var MappingTransform = (function () {
                     dataType: "xsd:string",
                 });
             }
+
             if (data.transform) {
                 if (!allMappings[data.dataTable].transform) {
                     allMappings[data.dataTable].transform = {};
@@ -115,7 +122,9 @@ var MappingTransform = (function () {
             var connections = MappingModeler.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
-                if (connection.edge.data.type == "tableToColumn") return;
+                if (connection.edge.data.type == "tableToColumn") {
+                    return;
+                }
                 var property = connection.edge.data.id;
                 if (!property) {
                     property = connection.edge.data.type;
@@ -129,11 +138,13 @@ var MappingTransform = (function () {
                     );
                 }
 
-                allMappings[data.dataTable].tripleModels.push({
+                var mapping = {
                     s: subject,
                     p: property,
                     o: object,
-                });
+                };
+
+                allMappings[data.dataTable].tripleModels.push(mapping);
             });
             if (data.otherPredicates) {
                 data.otherPredicates.forEach(function (predicate) {
@@ -150,7 +161,7 @@ var MappingTransform = (function () {
                             triple.dataType = predicate.range;
                         }
                     } else {
-                        triple.dataType = "xsd:string";
+                        // triple.dataType = "xsd:string";
                     }
                     if (predicate.dateFormat) {
                         triple.dateFormat = predicate.dateFormat;
@@ -161,9 +172,37 @@ var MappingTransform = (function () {
             }
         }
 
+        for (var dataTable in allMappings) {
+            allMappings[data.dataTable].tripleModels = self.addMappingsRestrictions(allMappings[data.dataTable].tripleModels);
+        }
+
         var json = allMappings;
 
         return json;
+    };
+
+    self.addMappingsRestrictions = function (allMappings) {
+        var isClass = function (nodeId) {
+            var isClass = false;
+            allMappings.forEach(function (mapping) {
+                if (mapping.s == nodeId) {
+                    if (mapping.p == "rdf:type" && mapping.o == "owl:Class") {
+                        isClass = true;
+                    }
+                }
+            });
+            return isClass;
+        };
+        allMappings.forEach(function (mapping) {
+            if (!mapping.p.startsWith("http")) return;
+            if (isClass(mapping.s) && isClass(mapping.o)) {
+                if (mapping.s != mapping.o) {
+                    mapping.isRestriction = true;
+                }
+            }
+        });
+
+        return allMappings;
     };
 
     self.copyKGcreatorMappings = function () {

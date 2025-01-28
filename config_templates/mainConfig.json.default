@@ -70,15 +70,11 @@
         "enabled": true,
         "url": "http://localhost:8008"
     },
-    "authenticationDatabase": {
-        "user": "",
-        "password": "",
-        "host": "",
-        "port": 3306,
-        "database": "",
-        "table": "",
-        "loginColumn": "",
-        "passwordColumn": "",
-        "groupsColumn": ""
+    "database": {
+        "host": "localhost",
+        "port": 5432,
+        "database": "slsv",
+        "user": "slsv",
+        "password": "slsv"
     }
 }

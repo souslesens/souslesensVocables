@@ -1,6 +1,8 @@
 const fs = require("fs");
-const { Lock } = require("async-await-mutex-lock");
-const { configProfilesPath, readMainConfig } = require("./config");
+const knex = require("knex");
+const z = require("zod");
+
+const { readMainConfig } = require("./config");
 const { toolModel } = require("./tools");
 
 /**
@@ -8,71 +10,103 @@ const { toolModel } = require("./tools");
  * @typedef {import("./ProfileTypes").Profile} Profile
  */
 
-const lock = new Lock();
+const ProfileObject = z.object({
+    id: z.string(),
+    name: z.string(),
+    theme: z.string().default(""),
+    allowedSourceSchemas: z.enum(["OWL", "SKOS"]).array().optional(),
+    sourcesAccessControl: z.record(z.string(), z.string()).optional(),
+    allowedTools: z.string().array().optional(),
+    _type: z.string().default("profile"),
+}).strict();
 
 class ProfileModel {
     /**
      * @param {import("./tools").ToolModel} toolModel
      * @param {string} configProfilesPath - path of the profiles.json file
      */
-    constructor(toolModel, configProfilesPath) {
+    constructor(toolModel) {
         this._toolModel = toolModel;
-        this.configProfilesPath = configProfilesPath;
+        this._mainConfig = readMainConfig();
     }
 
     /**
-     * @returns {Promise<Record<string, Profile>>} a collection of profiles
+     * Run zod to validate the received profile
+     *
+     * @param {Profile} profile - the profile to validate
+     * @returns {Profile} - the response from the zod parser if success
      */
-    _read = async () => {
-        return fs.promises.readFile(this.configProfilesPath).then((data) => JSON.parse(data.toString()));
+    _checkProfile = (profile) => {
+        const check = ProfileObject.safeParse(profile);
+        if (!check.success) {
+            throw Error(`The profile do not follow the standard: ${JSON.stringify(check.error.issues)}`);
+        }
+        return check.data;
     };
 
     /**
-     * @param {Record<string, Profile>} profiles - a collection of profiles
+     * Convert the profile to follow the database schema
+     *
+     * @param {Profile} profile - the profile to convert
+     * @returns {ProfileDatabase} - the converted object with the correct fields
      */
-    _write = async (profiles) => {
-        await fs.promises.writeFile(this.configProfilesPath, JSON.stringify(profiles, null, 2));
+    _convertToDatabase = (profile) => ({
+        label: profile.name,
+        theme: profile.theme || "",
+        allowed_tools: profile.allowedTools || [],
+        access_control: JSON.stringify(profile.sourcesAccessControl || {}),
+        schema_types: profile.allowedSourceSchemas || [],
+    });
+
+    /**
+     * Convert the profile to restore the legacy JSON schema
+     *
+     * @param {Profile} profile - the profile to convert
+     * @returns {Profile} - the converted object with the correct fields
+     */
+    _convertToLegacy = (profile) => [ profile.label, {
+        id: profile.label,
+        name: profile.label,
+        theme: profile.theme,
+        allowedSourceSchemas: profile.schema_types,
+        allowedTools: profile.allowed_tools,
+        sourcesAccessControl: profile.access_control,
+    }];
+
+    /**
+     * Retrieve the Postgres connection from the configuration information
+     *
+     * @returns {knex} - the knex connection instance configure to use Postgres
+     */
+    _getConnection = () => {
+        return knex({ client: "pg", connection: this._mainConfig.database });
     };
 
     /**
      * @returns {Promise<Record<string, Profile>>} a collection of profiles
      */
     getAllProfiles = async () => {
-        return await this._read();
-    };
+        const conn = this._getConnection();
+        const results = await conn.select("*").from("profiles_list");
+        conn.destroy();
 
-    /**
-     * @param {Record<string, Profile>} profiles - a collection of profiles
-     * @returns {Promise<Record<string, Profile>>} a collection of profiles
-     */
-    _getAdminProfiles = async (profiles) => {
-        const config = readMainConfig();
-        const adminProfile = {
-            name: "admin",
-            _type: "profile",
-            id: "admin",
-            allowedSourceSchemas: ["OWL", "SKOS"],
-            defaultSourceAccessControl: "readwrite",
-            sourcesAccessControl: {},
-            allowedTools: config.tools_available,
-            theme: config.theme.defaultTheme,
-        };
-
-        return { ...profiles, admin: adminProfile };
-    };
-
-    /**
-     * @param {Record<string, Profile>} profiles - a collection of profiles
-     * @param {UserAccount} user -  a user account
-     * @returns {Promise<Record<string, Profile>>} a collection of profiles
-     */
-    _getAllowedProfiles = async (profiles, user) => {
-        const userProfiles = Object.fromEntries(
-            Object.entries(profiles).filter(([profileName, _profile]) => {
-                return user.groups.includes(profileName);
-            })
+        const profiles = Object.fromEntries(
+            results.map((profile) => this._convertToLegacy(profile))
         );
-        return userProfiles;
+
+        if (profiles["admin"] === undefined) {
+            profiles["admin"] = {
+                id: "admin",
+                name: "admin",
+                theme: this._mainConfig.theme.defaultTheme,
+                allowedSourceSchemas: ["OWL", "SKOS"],
+                allowedTools: this._mainConfig.tools_available,
+                sourcesAccessControl: {},
+                defaultSourceAccessControl: "readwrite",
+            }
+        }
+
+        return profiles;
     };
 
     /**
@@ -80,11 +114,16 @@ class ProfileModel {
      * @returns {Promise<Record<string, Profile>>} a collection of profiles
      */
     getUserProfiles = async (user) => {
-        const allProfiles = await this._read();
+        const allProfiles = await this.getAllProfiles();
         if (user.login === "admin" || user.groups.includes("admin")) {
-            return await this._getAdminProfiles(allProfiles);
+            return allProfiles;
         }
-        return await this._getAllowedProfiles(allProfiles, user);
+
+        return Object.fromEntries(
+            Object.entries(allProfiles).filter(
+                ([profileName, _profile]) => user.groups.includes(profileName)
+            )
+        );
     };
 
     /**
@@ -93,8 +132,7 @@ class ProfileModel {
      */
     getUserTools = async (user) => {
         try {
-            const config = readMainConfig();
-            const availableToolsNames = new Set(config.tools_available);
+            const availableToolsNames = new Set(this._mainConfig.tools_available);
             if (user.login === "admin" || user?.groups.includes("admin")) {
                 return this._toolModel.allTools.filter((tool) => availableToolsNames.has(tool.name));
             }
@@ -109,51 +147,28 @@ class ProfileModel {
 
     /**
      * @param {UserAccount} user -  a user account
-     * @param {string} profileName -  a profile nameou
+     * @param {string} profileName -  a profile name
      * @returns {Promise<Profile>} a collection of profiles
      */
-    getOneUSerProfile = async (user, profileName) => {
+    getOneUserProfile = async (user, profileName) => {
         const userProfiles = await this.getUserProfiles(user);
         return userProfiles[profileName];
-    };
-
-    /**
-     * @param {string} profileName -  a profile name
-     */
-    _deleteProfileByName = async (profileName) => {
-        await lock.acquire("ProfilesThread");
-        try {
-            const profiles = await this._read();
-            const { [profileName]: profileToDelete, ...remainingProfiles } = profiles;
-            if (!profileToDelete) {
-                return false;
-            }
-            await this._write(remainingProfiles);
-            return true;
-        } finally {
-            lock.release("ProfilesThread");
-        }
     };
 
     /**
      * @param {string} profileNameId -  a profile name or Id
      */
     deleteProfile = async (profileNameId) => {
-        const profiles = await this._read();
-        let { [profileNameId]: profileToDelete, ..._remainingProfiles } = profiles;
-        if (profileToDelete) {
-            return this._deleteProfileByName(profileNameId);
-        } else {
-            // no profile found. Try with id
-            const profilesList = Object.entries(profiles);
-            const profileToDeleteWithId = profilesList.find(([_name, profile]) => {
-                return profile.id === profileNameId;
-            });
-            if (profileToDeleteWithId) {
-                return this._deleteProfileByName(profileToDeleteWithId[0]);
-            }
+        const conn = this._getConnection();
+        const results = await conn.select("label").from("profiles").where("label", profileNameId).first();
+        if (results === undefined) {
+            conn.destroy();
+            return false;
         }
-        return false;
+
+        await conn("profiles").where("label", profileNameId).del();
+        conn.destroy();
+        return true;
     };
 
     /**
@@ -161,40 +176,35 @@ class ProfileModel {
      * @returns {Promise<boolean>} true if profile exists
      */
     updateProfile = async (profile) => {
-        await lock.acquire("ProfilesThread");
-        try {
-            const profiles = await this._read();
-            const updatedProfiles = { ...profiles };
-            if (profile.id in profiles) {
-                updatedProfiles[profile.id] = profile;
-            } else if (profile.name in profiles) {
-                updatedProfiles[profile.name] = profile;
-            } else {
-                return false;
-            }
-            await this._write(updatedProfiles);
-            return true;
-        } finally {
-            lock.release("ProfilesThread");
+        const data = this._checkProfile(profile);
+
+        const conn = this._getConnection();
+        const results = await conn.select("label").from("profiles").where("label", data.name).first();
+        if (results === undefined) {
+            conn.destroy();
+            return false;
         }
+
+        await conn.update(this._convertToDatabase(data)).into("profiles").where("label", data.name);
+        conn.destroy();
+        return true;
     };
 
     /**
-     * @param {Profile} newProfile - a profile
+     * @param {Profile} profile - a profile
      */
-    addProfile = async (newProfile) => {
-        await lock.acquire("ProfilesThread");
-        try {
-            const profiles = await this._read();
-            newProfile.id = newProfile.name;
-            if (Object.keys(profiles).includes(newProfile.id)) {
-                throw Error("Profile already exists, try updating it.");
-            }
-            profiles[newProfile.id] = newProfile;
-            await this._write(profiles);
-        } finally {
-            lock.release("ProfilesThread");
+    addProfile = async (profile) => {
+        const data = this._checkProfile(profile);
+
+        const conn = this._getConnection();
+        const results = await conn.select("label").from("profiles").where("label", data.name).first();
+        if (results !== undefined) {
+            conn.destroy();
+            throw Error("The profile already exists, try updating it");
         }
+
+        await conn.insert(this._convertToDatabase(data)).into("profiles");
+        conn.destroy();
     };
 
     /**
@@ -202,24 +212,17 @@ class ProfileModel {
      * @returns {string} the theme currently defined for this profile
      */
     getThemeFromProfile = async (profileName) => {
-        const config = readMainConfig();
-        try {
-            const profiles = await this._read();
-
-            const firstProfile = Object.values(profiles).find((profile) => {
-                if (profile.name === profileName) {
-                    return profile.theme;
-                }
-            });
-
-            const findTheme = firstProfile.theme;
-            return findTheme !== undefined ? findTheme : config.theme.defaultTheme;
-        } catch {
-            return config.theme.defaultTheme;
+        const conn = this._getConnection();
+        const results = await conn.select("theme").from("profiles").where("label", profileName).first();
+        conn.destroy();
+        if (results === undefined) {
+            return this._mainConfig.theme.defaultTheme;
         }
+
+        return results.theme;
     };
 }
 
-const profileModel = new ProfileModel(toolModel, configProfilesPath);
+const profileModel = new ProfileModel(toolModel);
 
 module.exports = { ProfileModel, profileModel };

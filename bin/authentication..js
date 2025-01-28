@@ -24,7 +24,7 @@ const { readMainConfig } = require("../model/config");
 const config = readMainConfig();
 
 const getUserAccount = async (source, username) => {
-    let account = await userModel.findUserAccount(username);
+    let [_name, account] = await userModel.findUserAccount(username);
 
     // create a new account if the username was not found in the database
     if (!account) {
@@ -153,7 +153,7 @@ if (config.auth == "keycloak") {
                 if (!checkOK) {
                     return cb(null, false, { message: "Incorrect username or password." });
                 }
-                userModel.findUserAccount(username).then((userAccount) => {
+                userModel.findUserAccount(username).then(([_name, userAccount]) => {
                     cb(null, userAccount);
                 });
             });

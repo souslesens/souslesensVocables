@@ -280,7 +280,7 @@ var common = (function () {
             });
             return map;
         },
-        insertFirstArray: function (array, first) {
+        moveItemToFirst: function (array, first) {
             let index = array.indexOf(first);
             if (index > -1) {
                 array.splice(index, 1);
@@ -426,6 +426,9 @@ str = str.replace(/%2F/gm, "/");*/
         return "0".repeat(length - str.length) + str;
     };
 
+    self.getRandomInt = function () {
+        return Math.floor(Math.random() * 100000);
+    };
     self.getItemLabel = function (item, varName, _lang) {
         if (item[varName + "Label"]) {
             return item[varName + "Label"].value;

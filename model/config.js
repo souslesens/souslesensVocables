@@ -26,7 +26,7 @@ const MainConfigObject = z
                 defaultTheme: z.string(),
             })
             .strict(),
-        auth: z.enum(["local", "disabled", "keycloak", "auth0"]),
+        auth: z.enum(["local", "database", "disabled", "keycloak", "auth0"]),
         cookieSameSite: z.string(),
         cookieSecure: z.boolean(),
         cookieSecureTrustProxy: z.boolean(),
@@ -95,17 +95,13 @@ const MainConfigObject = z
                 url: z.string().url().optional(),
             })
             .strict(),
-        authenticationDatabase: z
+        database: z
             .object({
                 user: z.string(),
                 password: z.string(),
                 host: z.string(),
                 database: z.string(),
                 port: z.number().positive().max(65535),
-                table: z.string(),
-                loginColumn: z.string(),
-                passwordColumn: z.string(),
-                groupsColumn: z.string(),
             })
             .strict(),
         annotator: z

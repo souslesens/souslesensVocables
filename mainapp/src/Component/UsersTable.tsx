@@ -99,6 +99,7 @@ const UsersTable = () => {
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         <TextField
+                            inputProps={{ autocomplete: "off" }}
                             label="Search Users by login"
                             id="search-users"
                             onChange={(event) => {
@@ -250,7 +251,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
 
     const config = SRD.unwrap(
         {
-            auth: "json",
+            auth: "database",
             tools_available: [],
             defaultGroups: [],
             theme: {
@@ -279,13 +280,12 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
                             <OutlinedInput fullWidth onChange={handleFieldUpdate("login")} value={userModel.userForm.login} id={`login`} label={"Login"} disabled={create ? false : true} />
                         </FormControl>
 
-                        <PasswordField
-                            disabled={user.source != "keycloak" ? false : true}
+                        {user.source === "database" && (<PasswordField
                             id={`password`}
-                            label={"Password"}
+                            label={"New Password"}
                             onChange={handleFieldUpdate("password")}
                             value={userModel.userForm.password}
-                        />
+                        />)}
 
                         <FormControl>
                             <InputLabel id="select-groups-label">Profiles</InputLabel>

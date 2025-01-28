@@ -52,7 +52,7 @@ var SubGraph = (function () {
                                     if (!item.type) {
                                         return;
                                     }
-                                    console.log(
+                                    /*  console.log(
                                         Sparql_common.getLabelFromURI(item.s.value) +
                                             "-->" +
                                             Sparql_common.getLabelFromURI(item.o.value) +
@@ -60,7 +60,7 @@ var SubGraph = (function () {
                                             (item.property ? Sparql_common.getLabelFromURI(item.property.value) : "") +
                                             "--" +
                                             (item.targetClass ? Sparql_common.getLabelFromURI(item.targetClass.value) : "")
-                                    );
+                                    );*/
 
                                     if (item.type.value.endsWith("Class")) {
                                         if (!allClasses[item.s.value]) {

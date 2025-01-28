@@ -2,6 +2,8 @@ import KGcreator_run from "../KGcreator/KGcreator_run.js";
 import MappingsDetails from "./mappingsDetails.js";
 
 import MappingTransform from "./mappingTransform.js";
+import MappingModeler from "./mappingModeler.js";
+import Export from "../../shared/export.js";
 
 var TripleFactory = (function () {
     var self = {};
@@ -31,18 +33,17 @@ var TripleFactory = (function () {
         if (!self.checkCurrentTable()) return;
 
         MappingsDetails.showFilterMappingDialog(true);
-
-        //var options = { table: MappingModeler.currentTable.name, isSample: true };
-        //self.createTriples(true, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 
     self.writeTriples = function () {
         if (!self.checkCurrentTable()) return;
 
         MappingsDetails.showFilterMappingDialog(false);
+        return;
 
-        //var options = { table: MappingModeler.currentTable.name };
-        //self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
+        var mappingsFilter = MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable);
+        var options = { table: MappingModeler.currentTable.name, mappingsFilter: mappingsFilter };
+        self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
     };
 
     self.createAllMappingsTriples = function () {
@@ -62,6 +63,10 @@ var TripleFactory = (function () {
             }
 
             tables.push(MappingModeler.currentTable.name);
+        } else {
+            if (!confirm("Do you really want to delete  triples created with KGCreator in SLS source " + DataSourceManager.currentSlsvSource)) {
+                return;
+            }
         }
 
         var payload = {
@@ -90,7 +95,7 @@ var TripleFactory = (function () {
     };
 
     self.createTriples = function (sampleData, table, options, callback) {
-        var mappingsFilterOption = MappingTransform.getSLSmappingsFromVisjsGraph(table); // self.getSelectedMappingTriplesOption();
+        var allTableMappings = MappingTransform.getSLSmappingsFromVisjsGraph(table); // self.getSelectedMappingTriplesOption();
 
         if (!options) {
             options = {};
@@ -116,11 +121,11 @@ var TripleFactory = (function () {
             table = null;
         }
 
-        if (mappingsFilterOption) {
-            options.mappingsFilter = mappingsFilterOption;
+        if (allTableMappings) {
+            options.mappingsFilter = allTableMappings;
         }
-        if (options.mappingsFilterOption) {
-            options.mappingsFilter = options.mappingsFilterOption;
+        if (options.filteredMappings) {
+            options.mappingsFilter[MappingModeler.currentTable.name].tripleModels = options.filteredMappings;
         }
         var payload = {
             source: DataSourceManager.currentSlsvSource,
@@ -137,7 +142,8 @@ var TripleFactory = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 if (sampleData) {
-                    KGcreator_run.showTriplesInDataTable(result);
+                    MappingModeler.activateRightPanel("generic");
+                    self.showTriplesInDataTable(result, "mappingModeler_genericPanel");
                     UI.message("", true);
                 } else {
                     if (options.deleteTriples) {
@@ -197,6 +203,35 @@ var TripleFactory = (function () {
                 }
             }
         );
+    };
+
+    self.showTriplesInDataTable = function (data, div) {
+        var escapeMarkup = function (str) {
+            var str2 = str.replace(/</g, "&lt;");
+            var str2 = str2.replace(/>/g, "&gt;");
+            return str2;
+        };
+
+        var tableCols = [];
+        var hearders = ["subject", "predicate", "object"];
+        hearders.forEach(function (item) {
+            tableCols.push({ title: item, defaultContent: "", width: "30%" });
+        });
+
+        var tableData = [];
+        data.forEach(function (item, index) {
+            tableData.push([escapeMarkup(item.s), escapeMarkup(item.p), escapeMarkup(item.o)]);
+        });
+
+        var str = "<table><tr><td>subject</td><td>predicate</td><td>object</td></tr>";
+        data.forEach(function (item, index) {
+            str += "<tr><td>" + escapeMarkup(item.s) + "</td><td>" + escapeMarkup(item.p) + "</td><td>" + escapeMarkup(item.o) + "</td></tr>";
+        });
+        str += "</table>";
+
+        /*  $("#KGcreator_triplesDataTableDiv").html(str)
+          return;*/
+        Export.showDataTable(div, tableCols, tableData, null, { paging: true, divId: div }, function (err, datatable) {});
     };
 
     return self;

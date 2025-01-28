@@ -30,7 +30,7 @@ var KGquery = (function () {
     self.classeMap = {};
     self.allPathEdges = {};
     self.isLoaded = false;
-    self.maxResultSizeforLineageViz = 1000;
+    self.maxResultSizeforLineageViz = 3000;
     self.maxOptionalPredicatesInQuery = 10;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
@@ -44,6 +44,7 @@ var KGquery = (function () {
         if (Config.clientCache.KGquery) {
             KGquery_myQueries.load(null, Config.clientCache.KGquery);
         }
+        self.clearAll();
         $("#messageDiv").attr("id", "KGquery_messageDiv");
         $("#waitImg").attr("id", "KGquery_waitImg");
     };

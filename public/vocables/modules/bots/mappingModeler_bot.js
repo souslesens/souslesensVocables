@@ -29,6 +29,13 @@ var MappingModeler_bot = (function () {
                 "add rdf:Type": {
                     rdfTypeFn: {},
                 },
+                "add rdfs:subClassOf": {
+                    listVocabsFn: {
+                        listSuperClassesFn: {
+                            setSubClassOfFn: {},
+                        },
+                    },
+                },
                 "add transform": {
                     addTransformFn: {},
                 },
@@ -88,6 +95,7 @@ var MappingModeler_bot = (function () {
         listDatatypePropertyRangeFn: "Choose a datatype",
         choosedateTypeFn: "Choose date format",
         addTransformFn: "add Transformation Function",
+        setSubClassOfFn: "add rdfs:subClassOf predicate",
 
         /*  listVocabsFn: "Choose a source",
         listResourceTypesFn: "Choose a resource type",
@@ -191,13 +199,35 @@ var MappingModeler_bot = (function () {
 
         createDatatypePropertyFn: function () {
             var classId = self.params.columnClass;
-            CreateResource_bot.start(CreateResource_bot.workFlowDatatypeProperty, { source: self.params.source, datatypePropertyDomain: classId }, function (err, result) {
-                MappingModeler.mappingColumnInfo.startOtherPredicatesBot();
-            });
+            CreateResource_bot.start(
+                CreateResource_bot.workFlowDatatypeProperty,
+                {
+                    source: self.params.source,
+                    datatypePropertyDomain: classId,
+                },
+                function (err, result) {
+                    MappingModeler.mappingColumnInfo.startOtherPredicatesBot();
+                }
+            );
         },
         listDatatypePropertyRangeFn: function () {
             var choices = ["", "xsd:string", "xsd:int", "xsd:float", "xsd:dateTime"];
             _botEngine.showList(choices, "datatypePropertyRange");
+        },
+        listVocabsFn: function () {
+            if (self.params.filteredUris && self.params.filteredUris.length > 0) {
+                _botEngine.nextStep();
+            } else {
+                CommonBotFunctions.listVocabsFn(self.params.source, "currentVocab");
+            }
+        },
+
+        listSuperClassesFn: function () {
+            CommonBotFunctions.listVocabClasses(self.params.currentVocab, "superClassId", true);
+        },
+        setSubClassOfFn: function () {
+            self.params.addingSubClassOf = self.params.superClassId;
+            _botEngine.nextStep();
         },
     };
 

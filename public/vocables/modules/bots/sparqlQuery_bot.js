@@ -39,7 +39,7 @@ var SparqlQuery_bot = (function () {
                 Individuals: {
                     choosePredicateFilterFn: {
                         setPredicateFilterFn: {
-                            chooseOutputTypeFn: {
+                            chooseIndividualsOutputTypeFn: {
                                 queryIndiviudalsFn: {},
                             },
                         },
@@ -117,6 +117,13 @@ var SparqlQuery_bot = (function () {
 
         chooseOutputTypeFn: function () {
             var choices = ["Tree", "Table", "Graph"];
+            _botEngine.showList(choices, "outputType");
+        },
+        chooseIndividualsOutputTypeFn: function () {
+            var choices = ["Table", "New Graph"];
+            if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                choices.push("Add to Graph");
+            }
             _botEngine.showList(choices, "outputType");
         },
 
@@ -901,7 +908,7 @@ var SparqlQuery_bot = (function () {
                 },
 
                 function (callbackSeries) {
-                    if (outputType != "Graph") {
+                    if (outputType.indexOf("Graph") < 0) {
                         return callbackSeries();
                     }
                     self.maxGraphDisplay = 10000;
@@ -910,9 +917,14 @@ var SparqlQuery_bot = (function () {
                     }
                     var visjsData = { nodes: [], edges: [] };
                     var existingNodes = {};
+                    if (outputType != "New Graph") {
+                        existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+                    }
                     var color = Lineage_whiteboard.getSourceColor(self.params.source);
                     var shape = Lineage_whiteboard.namedIndividualShape;
+                    var size = Lineage_whiteboard.defaultShapeSize;
                     data.forEach(function (item) {
+                        color = common.getResourceColor("prop", item.propLabel.value);
                         if (!existingNodes[item.subject.value]) {
                             existingNodes[item.subject.value] = 1;
 
@@ -922,6 +934,7 @@ var SparqlQuery_bot = (function () {
                                 label: label,
                                 shape: shape,
                                 color: color,
+                                size: size,
                                 data: {
                                     id: item.subject.value,
                                     label: label,
@@ -954,7 +967,13 @@ var SparqlQuery_bot = (function () {
                             arrows: "to",
                         });
                     });
-                    Lineage_whiteboard.drawNewGraph(visjsData);
+
+                    if (outputType == "New Graph") {
+                        Lineage_whiteboard.drawNewGraph(visjsData);
+                    } else {
+                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                    }
                     callbackSeries();
                 },
                 function (callbackSeries) {
@@ -964,73 +983,35 @@ var SparqlQuery_bot = (function () {
 
                     var cols = [];
                     var dataset = [];
-                    cols.push({ title: "source", defaultContent: "" }, { title: "label", defaultContent: "" });
-                    var constraints;
-                    var edgeDomainLabel;
-                    var edgeRangeLabel;
-                    var propertyColor;
-                    var arrowDir = "to";
-                    if (objectPropertyResourceType == "RangeAndDomain") {
-                        cols.push(
-                            { title: "domainLabel", defaultContent: "" },
-                            { title: "rangeLabel", defaultContent: "" },
-                            { title: "domainUri", defaultContent: "" },
-                            { title: "rangeUri", defaultContent: "" }
-                        );
-
-                        edgeDomainLabel = "domain";
-                        edgeRangeLabel = "range";
-                    } else if (objectPropertyResourceType == "Restriction") {
-                        cols.push(
-                            { title: "subClassLabel", defaultContent: "" },
-                            { title: "propertyLabel", defaultContent: "" },
-                            { title: "subClassUri", defaultContent: "" },
-                            { title: "propertyUri", defaultContent: "" }
-                        );
-
-                        edgeDomainLabel = "subClassOf";
-                        edgeRangeLabel = "targetClass";
-                    }
-
                     cols.push(
-                        { title: "Propertyuri", defaultContent: "" },
-                        {
-                            title: "superProperty",
-                            defaultContent: "",
-                        },
-                        { title: "inverseProperty", defaultContent: "" }
+                        { title: "subject", defaultContent: "" },
+                        { title: "Predicate", defaultContent: "" },
+                        { title: "Object", defaultContent: "" },
+                        { title: "subjectURI", defaultContent: "" },
+                        { title: "PredicateURI", defaultContent: "" },
+                        { title: "ObjectURI", defaultContent: "" }
                     );
 
-                    for (var property in properties) {
-                        if (objectPropertyResourceType == "RangeAndDomain") {
-                            constraints = properties[property].constraints;
-                        } else if (objectPropertyResourceType == "Restriction") {
-                            constraints = properties[property].restrictions;
-                        }
-                        if (!Array.isArray(constraints)) {
-                            constraints = [constraints];
-                        }
-                        constraints.forEach(function (constraint) {
-                            dataset.push([
-                                properties[property].source,
-                                properties[property].label,
-                                constraint.domainLabel,
-                                constraint.rangeLabel,
-                                properties[property].id,
-                                constraint.domain,
-                                constraint.range,
-                                properties[property].superProp || "",
-                                properties[property].inverseProp || "",
-                            ]);
-                        });
-                    }
+                    data.forEach(function (item) {
+                        dataset.push([
+                            item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value),
+                            item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                            item.objectLabel ? item.objectLabel.value : Sparql_common.getLabelFromURI(item.object.value),
+                            item.subject.value,
+                            item.prop.value,
+                            item.object.value,
+                        ]);
+                    });
 
                     Export.showDataTable("mainDialogDiv", cols, dataset);
                     callbackSeries();
                 },
             ],
             function (err) {
-                if (err) return alert(err.responseText || err);
+                if (err) {
+                    alert(err.responseText || err);
+                }
+                _botEngine.end();
             }
         );
     };

@@ -60,16 +60,19 @@
         "selector": false,
         "defaultTheme": "Sea Breeze"
     },
-    "authenticationDatabase": {
+    "database": {
         "host": "localhost",
         "port": 3306,
         "user": "slsv",
         "password": "slsv",
+        "database": "slsv"
+    },
+    "database": {
+        "host": "localhost",
+        "port": 5432,
         "database": "slsv",
-        "table": "user",
-        "loginColumn": "login",
-        "passwordColumn": "password",
-        "groupsColumn": "groups"
+        "user": "slsv",
+        "password": "slsv"
     },
     "jowlServer": {
         "enabled": false

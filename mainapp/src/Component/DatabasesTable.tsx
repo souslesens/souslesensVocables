@@ -301,6 +301,7 @@ const DatabasesTable = () => {
                             </Alert>
                         </Snackbar>
                         <TextField
+                            inputProps={{ autocomplete: "off" }}
                             label="Search Databases by name"
                             id="filter databases"
                             onChange={(event) => {

@@ -71,8 +71,7 @@ var CommonBotFunctions = (function () {
 
             for (var key in Config.ontologiesVocabularyModels[vocab].classes) {
                 var obj = Config.ontologiesVocabularyModels[vocab].classes[key];
-                if(obj && obj.id.indexOf("http")==0)
-                classes.push({ id: obj.id, label: obj.label, source: vocab });
+                if (obj && obj.id.indexOf("http") == 0) classes.push({ id: obj.id, label: obj.label, source: vocab });
             }
 
             self.sortList(classes);

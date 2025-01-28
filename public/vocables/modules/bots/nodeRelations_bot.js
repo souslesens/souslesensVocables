@@ -41,10 +41,10 @@ var NodeRelations_bot = (function () {
             Restrictions: {
                 listRestrictions: { drawRestrictions: {} },
             },
-            "Inverse Restrictions": { listInverseRestrictions: { drawInverseRestrictions: {} } }
-            ,"Similars (same label)": {
-                similarsFn: {}
-            }
+            "Inverse Restrictions": { listInverseRestrictions: { drawInverseRestrictions: {} } },
+            "Similars (same label)": {
+                similarsFn: {},
+            },
         },
     };
 
@@ -56,16 +56,12 @@ var NodeRelations_bot = (function () {
         listAnnotationPropertiesFn: "Choose a property",
         promptAnnotationPropertyValue: "Filter value ",
         listWhiteBoardFilterType: "Choose a scope",
-
-
     };
 
     self.functions = {
-
-        similarsFn:function(){
-
+        similarsFn: function () {
             Lineage_similars.showDialog(true);
-            _botEngine.nextStep()
+            _botEngine.nextStep();
         },
         listVocabsFn: function () {
             CommonBotFunctions.listVocabsFn(Lineage_sources.activeSource, "currentVocab", true);

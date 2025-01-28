@@ -40,7 +40,7 @@ var Containers_widget = (function () {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
-      //  self.currentSource = source;
+        //  self.currentSource = source;
         Containers_graph.getContainerTypes(source, null, function (err, types) {
             if (err) {
                 return alert(err.responseText);
@@ -79,7 +79,7 @@ var Containers_widget = (function () {
             });
         } else {
             Containers_query.getTopContainer(Lineage_sources.activeSource, {}, function (err, result) {
-                Containers_tree.drawTree(self.jstreeDivId,Lineage_sources.activeSource, "#", result.results.bindings, {});
+                Containers_tree.drawTree(self.jstreeDivId, Lineage_sources.activeSource, "#", result.results.bindings, {});
             });
         }
     };

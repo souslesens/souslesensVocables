@@ -7,6 +7,8 @@ core
 cypress/screenshots/
 cypress/videos/
 
+docs
+out
 
 # Logs
 logs/*.log*

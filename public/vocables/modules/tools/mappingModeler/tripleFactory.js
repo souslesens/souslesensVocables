@@ -7,22 +7,21 @@ var TripleFactory = (function () {
     var self = {};
 
     self.checkCurrentTable = function () {
-        var check=false;
+        var check = false;
         if (!MappingModeler.currentTable) {
-             alert("select a table or a csv source");
-             
+            alert("select a table or a csv source");
         }
-        var mappingsDetailsIsLoaded=false;
-        MappingModeler.visjsGraph.data.nodes.get().forEach(function(node){
-            if(node?.data?.dataTable===MappingModeler.currentTable.name){
-                if(node.data.uriType){
-                    mappingsDetailsIsLoaded=true;
+        var mappingsDetailsIsLoaded = false;
+        MappingModeler.visjsGraph.data.nodes.get().forEach(function (node) {
+            if (node?.data?.dataTable === MappingModeler.currentTable.name) {
+                if (node.data.uriType) {
+                    mappingsDetailsIsLoaded = true;
                 }
             }
         });
-        if(mappingsDetailsIsLoaded){
-            check=true;
-        }else{
+        if (mappingsDetailsIsLoaded) {
+            check = true;
+        } else {
             alert("Mappings details are not loaded for this table. Please load mappings details first");
             MappingsDetails.showDetailsDialog();
         }
@@ -120,7 +119,7 @@ var TripleFactory = (function () {
         if (mappingsFilterOption) {
             options.mappingsFilter = mappingsFilterOption;
         }
-        if(options.mappingsFilterOption){
+        if (options.mappingsFilterOption) {
             options.mappingsFilter = options.mappingsFilterOption;
         }
         var payload = {

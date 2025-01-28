@@ -198,15 +198,15 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 if (!nodeId) {
                     return;
                 }
-                
-                if(self.network.clustering.isCluster(nodeId)){
+
+                if (self.network.clustering.isCluster(nodeId)) {
                     return;
                 }
                 self.movingNodeStartPosition = self.network.getPosition(nodeId);
                 //   var nodes = self.data.nodes.getIds();
                 var newNodes = [];
                 var fixed = false;
-                
+
                 newNodes.push({ id: nodeId, fixed: fixed });
                 self.data.nodes.update(newNodes);
                 /*self.network.setOptions({ physics: {enabled: true,

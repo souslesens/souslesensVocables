@@ -846,28 +846,22 @@ if (callback) return callback(err);
         return hex;
     };
 
-    self.RGBtoHexColor=function(color){
-
+    self.RGBtoHexColor = function (color) {
         function rgbToHex(r, g, b) {
-            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+            return "#" + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
         }
 
-
-
-        var rgbColor=/\((\d+),(\d+),(\d+)/.exec(color)
-        if(rgbColor){
-            var r=rgbColor[1]
-            var g=rgbColor[2]
-            var b=rgbColor[3]
-          var hexColor=  rgbToHex (r, g, b)
-            return hexColor
-        }else{
-            return color
+        var rgbColor = /\((\d+),(\d+),(\d+)/.exec(color);
+        if (rgbColor) {
+            var r = rgbColor[1];
+            var g = rgbColor[2];
+            var b = rgbColor[3];
+            var hexColor = rgbToHex(r, g, b);
+            return hexColor;
+        } else {
+            return color;
         }
-
-
-
-    }
+    };
 
     self.getResourceColor = function (resourceType, resourceId, palette) {
         if (!palette) {

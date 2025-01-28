@@ -1,20 +1,18 @@
-
-
-<div id="MappingModeler_leftTabs" style="width: 100%; overflow: auto;padding: 0px;border-radius: 0px;">
+<div id="MappingModeler_leftTabs" style="width: 100%; overflow: auto; padding: 0px; border-radius: 0px">
     <ul>
-        <li class="mappingModeler-tabDiv"><a href="#MappingModeler_dataSourcesTab" style="padding: 15px;" >Data Sources</a></li>
-        <li class="mappingModeler-tabDiv"><a href="#MappingModeler_mappingsTab" style="padding: 15px;">Mappings</a></li>
-        <li class="mappingModeler-tabDiv"><a href="#MappingModeler_tripleFactoryTab" style="padding: 15px;">Triples</a></li>
+        <li class="mappingModeler-tabDiv"><a href="#MappingModeler_dataSourcesTab" style="padding: 15px">Data Sources</a></li>
+        <li class="mappingModeler-tabDiv"><a href="#MappingModeler_mappingsTab" style="padding: 15px">Mappings</a></li>
+        <li class="mappingModeler-tabDiv"><a href="#MappingModeler_tripleFactoryTab" style="padding: 15px">Triples</a></li>
     </ul>
 
     <!-- <div style="display: flex; flex-direction: row">-->
-    <div id="MappingModeler_dataSourcesTab" class="coloredContainerImportant" style="margin-top: 0px!important;">
+    <div id="MappingModeler_dataSourcesTab" class="coloredContainerImportant" style="margin-top: 0px !important">
         <div id="mappingModeler_jstreeDiv"></div>
     </div>
 
     <div id="MappingModeler_mappingsTab" style="display: flex; flex-direction: column" class="coloredContainerImportant">
         <!--   <button class="w3-button slsv-button-2" onclick="mappingModeler.newAxiom()">New axiom</button>-->
-        <div id="nodeInfosAxioms_activeLegendDiv" style="width: 400px; height: 50px; " ></div>
+        <div id="nodeInfosAxioms_activeLegendDiv" style="width: 400px; height: 50px"></div>
 
         <div style="display: flex; flex-direction: row" id="mappingModeler_newAxiomPanel">
             <!--  <button onclick="mappingModeler.actions.setLayout('randomlayout')">Random Layout</button>-->
@@ -23,60 +21,41 @@
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <input
-                                id="mappingModeler_suggestionsnput"
-                                onkeyup="MappingModeler.filterSuggestionTree()"
-                                style="width: 300px; height: 33.5px; border-bottom-left-radius: 14px; border-top-left-radius: 14px"
+                            id="mappingModeler_suggestionsnput"
+                            onkeyup="MappingModeler.filterSuggestionTree()"
+                            style="width: 300px; height: 33.5px; border-bottom-left-radius: 14px; border-top-left-radius: 14px"
                         />
                     </div>
-                    <div class="SearchButtonIconRight border-without-raduis-theme1"
-                         style="height: 33.5px; padding-left: 7px; padding-right: 5px">
-                        <button class="search-icon slsv-invisible-button"
-                                onclick="MappingModeler.filterSuggestionTree()"
-                                style="margin-top: 4px; height: 20px; width: 20px"></button>
+                    <div class="SearchButtonIconRight border-without-raduis-theme1" style="height: 33.5px; padding-left: 7px; padding-right: 5px">
+                        <button class="search-icon slsv-invisible-button" onclick="MappingModeler.filterSuggestionTree()" style="margin-top: 4px; height: 20px; width: 20px"></button>
                     </div>
                 </div>
 
-                <br/>
+                <br />
                 <div id="suggestionsSelectJstreeDiv" style="width: 450px; height: 500px; overflow: auto"></div>
             </div>
         </div>
-        
     </div>
     <div id="MappingModeler_tripleFactoryTab" class="coloredContainerImportant">
         <div>
-            <div class="w3-panel w3-border w3-round-small ">
-                <button class="w3-button slsv-button-3" onclick="MappingTransform.generateSLSmappings()">view SLS
-                    mappings
-                </button>
-                <button class="w3-button slsv-button-3" onclick="MappingTransform.generateR2MLmappings()">view R2ML
-                    mappings
-                </button>
+            <div class="w3-panel w3-border w3-round-small">
+                <button class="w3-button slsv-button-3" onclick="MappingTransform.generateSLSmappings()">view SLS mappings</button>
+                <button class="w3-button slsv-button-3" onclick="MappingTransform.generateR2MLmappings()">view R2ML mappings</button>
             </div>
-            
-            <div class="w3-panel w3-border w3-round-small ">
-                <button class="w3-button slsv-button-1" onclick="TripleFactory.showTripleSample()">show Sample
-                    triples
-                </button>
-                <button class="w3-button slsv-button-1" onclick="TripleFactory.writeTriples()"
-                        title="Create triples">Create triples
-                </button>
+
+            <div class="w3-panel w3-border w3-round-small">
+                <button class="w3-button slsv-button-1" onclick="TripleFactory.showTripleSample()">show Sample triples</button>
+                <button class="w3-button slsv-button-1" onclick="TripleFactory.writeTriples()" title="Create triples">Create triples</button>
             </div>
-            <div class="w3-panel w3-border w3-round-small ">
-                <button class="w3-button slsv-button-3" onclick="TripleFactory.deleteTriples()"
-                        title="delete current file triples">delete current file triples
-                </button>
-                <button class="w3-button slsv-button-3" id="KGcreator_deleteKGcreatorTriplesBtn"
-                        onclick="TripleFactory.deleteTriples('all')" title="delete ALL KGreator triples">
+            <div class="w3-panel w3-border w3-round-small">
+                <button class="w3-button slsv-button-3" onclick="TripleFactory.deleteTriples()" title="delete current file triples">delete current file triples</button>
+                <button class="w3-button slsv-button-3" id="KGcreator_deleteKGcreatorTriplesBtn" onclick="TripleFactory.deleteTriples('all')" title="delete ALL KGreator triples">
                     delete ALL mapped triples
                 </button>
             </div>
-            <div class="w3-panel w3-border w3-round-small ">
-                <button class="w3-button slsv-button-2" onclick="TripleFactory.createAllMappingsTriples()"
-                        title="Recreate graph">Recreate graph
-                </button>
-                <button class="w3-button slsv-button-2" onclick="TripleFactory.indexGraph()"
-                        title="Index graph">Index graph
-                </button>
+            <div class="w3-panel w3-border w3-round-small">
+                <button class="w3-button slsv-button-2" onclick="TripleFactory.createAllMappingsTriples()" title="Recreate graph">Recreate graph</button>
+                <button class="w3-button slsv-button-2" onclick="TripleFactory.indexGraph()" title="Index graph">Index graph</button>
             </div>
 
             &nbsp; &nbsp;
@@ -89,4 +68,3 @@
         </div>
     </div>
 </div>
-

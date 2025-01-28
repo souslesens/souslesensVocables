@@ -280,12 +280,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
                             <OutlinedInput fullWidth onChange={handleFieldUpdate("login")} value={userModel.userForm.login} id={`login`} label={"Login"} disabled={create ? false : true} />
                         </FormControl>
 
-                        {user.source === "database" && (<PasswordField
-                            id={`password`}
-                            label={"New Password"}
-                            onChange={handleFieldUpdate("password")}
-                            value={userModel.userForm.password}
-                        />)}
+                        {user.source === "database" && <PasswordField id={`password`} label={"New Password"} onChange={handleFieldUpdate("password")} value={userModel.userForm.password} />}
 
                         <FormControl>
                             <InputLabel id="select-groups-label">Profiles</InputLabel>

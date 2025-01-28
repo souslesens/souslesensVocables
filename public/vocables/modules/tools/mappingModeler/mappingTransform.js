@@ -79,10 +79,12 @@ var MappingTransform = (function () {
             return column.label;
         });
         var allMappings = {};
-
+        allMappings.idsMap={}
         for (var nodeId in columnsMap) {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
+            allMappings.idsMap[subject]=nodeId
+
             if (!subject) {
                 return alert("Error in column " + nodeId);
             }

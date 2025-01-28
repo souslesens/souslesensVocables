@@ -163,33 +163,93 @@ var MappingsDetails = (function () {
             divId = "detailedMappings_jsTreeDiv";
         }
         //datatypeMappingGraph
-        var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentTable.name].tripleModels;
+        if( false){
 
+        var table = MappingModeler.currentTable.name
+
+        if (!table) {
+            table = MappingModeler.currentTable.name;
+        }
+
+        var nodes = MappingModeler.visjsGraph.data.nodes.get();
+
+        var columnsMap = {};
         var jstreeData = [];
         var uniqueSubjects = {};
-        mappings.forEach(function (mapping) {
-            var parent = "#";
-            var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
-            // var buttonStr="<button class='jstreelabelButton' onClick='MappingDetails.showTechnicalMappingsDialog()'>+</button>"
-            if (!uniqueSubjects[mapping.s]) {
-                uniqueSubjects[mapping.s] = 1;
+        var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
+        nodes.forEach(function (node) {
+
+            if (node.data.dataTable !== table) {
+                return;
+            }
+            if (node.data.type == "Class") {
+                return;
+            }
+            if (node.data.type == "table") {
+                return;
+            }
+
+
+            if (!uniqueSubjects[node.label]) {
+                uniqueSubjects[node.label] = 1;
                 jstreeData.push({
-                    id: mapping.s,
-                    text: "<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>" + mapping.s + "</span>&nbsp;" + buttonStr,
-                    data: mapping,
+                    id: node.id,
+                    text: "<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>" + node.label + "</span>&nbsp;" + buttonStr,
+                    data: node.data,
                     parent: "#",
                 });
+
+                for (var key in node.data) {
+                    jstreeData.push({
+                        id: node.id + "_" + key,
+                        text: "<span style='color: blue'>" + key + "</span>  " + node.data[key],
+                        parent: "#",
+                    });
+
+
+                }
             }
-            var mappingOstr = mapping.o;
-            //mappingOstr="<select id=\"columnDetails-UriTypeFailureConsequence\" style=\"padding:6px 6px\"> <option value=\"fromLabel\">fromLabel</option><option value=\"blankNode\">blankNode</option><option value=\"randomIdentifier\">randomIdentifier</option></select>"
-            parent = mapping.s;
+
+
+        })
+
+    }
+
+
+if( true){
+    var idsMap = MappingTransform.getSLSmappingsFromVisjsGraph().idsMap
+
+    var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentTable.name].tripleModels;
+
+    var jstreeData = [];
+    var uniqueSubjects = {};
+    mappings.forEach(function (mapping) {
+        mappings.columnId = idsMap[mapping.s]
+        var parent = "#";
+        var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
+        // var buttonStr="<button class='jstreelabelButton' onClick='MappingDetails.showTechnicalMappingsDialog()'>+</button>"
+        if (!uniqueSubjects[mapping.s]) {
+            uniqueSubjects[mapping.s] = 1;
             jstreeData.push({
-                id: common.getRandomHexaId(5),
-                text: "<span style='color: blue'>" + mapping.p + "</span>  " + mappingOstr,
-                parent: parent,
+                id: mapping.s,
+                text: "<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>" + mapping.s + "</span>&nbsp;" + buttonStr,
                 data: mapping,
+                parent: "#",
             });
+        }
+        var mappingOstr = mapping.o;
+        //mappingOstr="<select id=\"columnDetails-UriTypeFailureConsequence\" style=\"padding:6px 6px\"> <option value=\"fromLabel\">fromLabel</option><option value=\"blankNode\">blankNode</option><option value=\"randomIdentifier\">randomIdentifier</option></select>"
+        parent = mapping.s;
+        jstreeData.push({
+            id: common.getRandomHexaId(5),
+            text: "<span style='color: blue'>" + mapping.p + "</span>  " + mappingOstr,
+            parent: parent,
+            data: mapping,
         });
+    });
+
+
+}
         var options = {
             searchPlugin: true,
             openAll: true,

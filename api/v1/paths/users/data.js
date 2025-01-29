@@ -1,4 +1,5 @@
 const { userDataModel } = require("../../../../model/userData");
+const userManager = require("../../../../bin/user.");
 
 module.exports = () => {
     GET = async (req, res, _next) => {
@@ -107,6 +108,12 @@ module.exports = () => {
 
     PUT = async (req, res, _next) => {
         try {
+            // users can only update their own data
+            const userInfo = await userManager.getUser(req.user);
+            if (userInfo.user.login != req.body.owned_by) {
+                res.status(403).json({ message: `The resources is not owned by ${userInfo.user.login}` });
+            }
+
             await userDataModel.update(req.body);
             res.status(200).json({ message: "The resource has been updated successfully" });
         } catch (error) {

@@ -258,7 +258,7 @@ var NodeInfosWidget = (function () {
                 if (err) {
                     return UI.message(err.responseText || err, true);
                 }
-            }
+            },
         );
     };
 
@@ -615,7 +615,7 @@ defaultLang = 'en';*/
                 if (callback) {
                     return callback(null, { types: types, blankNodes: blankNodes });
                 }
-            }
+            },
         );
     };
 
@@ -1189,7 +1189,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     if (callback) {
                         callback();
                     }
-                }
+                },
             );
         }
     };
@@ -1306,7 +1306,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     }
                     $("#" + self.divId).dialog("close");
                     UI.message("node deleted");
-                }
+                },
             );
         }
     };

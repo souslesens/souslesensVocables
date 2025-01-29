@@ -487,7 +487,7 @@ var OntologyModels = (function () {
                     ],
                     function (err) {
                         callbackEach(err);
-                    }
+                    },
                 );
             },
             function (err) {
@@ -495,7 +495,7 @@ var OntologyModels = (function () {
                 if (callback) {
                     return callback(err, Config.ontologiesVocabularyModels);
                 }
-            }
+            },
         );
     };
 
@@ -629,7 +629,7 @@ var OntologyModels = (function () {
                 function (err, result) {
                     callback(err);
                 },
-                options
+                options,
             );
         } else {
             callback(done);
@@ -682,7 +682,7 @@ var OntologyModels = (function () {
             },
             function (err) {
                 callback(err);
-            }
+            },
         );
 
         return;
@@ -761,7 +761,7 @@ var OntologyModels = (function () {
                             }
                             hierarchies = result.hierarchies;
                             callbackSeries();
-                        }
+                        },
                     );
                 },
                 function (callbackSeries) {
@@ -785,7 +785,7 @@ var OntologyModels = (function () {
                             }
 
                             callbackSeries();
-                        }
+                        },
                     );
                 }, //get matching properties
                 function (callbackSeries) {
@@ -981,7 +981,7 @@ var OntologyModels = (function () {
                     constraints: validConstraints,
                     nodes: { startNode: startNodeAncestorIds, endNode: endNodeAncestorIds },
                 });
-            }
+            },
         );
     };
 
@@ -1099,7 +1099,7 @@ var OntologyModels = (function () {
                     ],
                     function (err) {
                         callbackEach(err);
-                    }
+                    },
                 );
             },
             function (err) {
@@ -1109,7 +1109,7 @@ var OntologyModels = (function () {
                     anyRange: anyRange,
                     anyDomain: anyDomain,
                 });
-            }
+            },
         );
     };
 
@@ -1307,7 +1307,7 @@ var OntologyModels = (function () {
                 Config.ontologiesVocabularyModels[source].KGnonObjectProperties = nonObjectPropertiesmap;
                 UI.message("", true);
                 return callback(null, nonObjectPropertiesmap);
-            }
+            },
         );
     };
 

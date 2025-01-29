@@ -31,7 +31,7 @@ module.exports = function () {
             await Promise.all(
                 Object.entries(req.body).map(async function ([_key, value]) {
                     await userModel.updateUserAccount(value);
-                })
+                }),
             );
             const users = await userModel.getUserAccounts();
             res.status(200).json(successfullyUpdated(users));
@@ -53,7 +53,7 @@ module.exports = function () {
             await Promise.all(
                 Object.entries(req.body).map(async function ([_key, value]) {
                     await userModel.addUserAccount(value);
-                })
+                }),
             );
             const users = await userModel.getUserAccounts();
             res.status(200).json(successfullyCreated(users));

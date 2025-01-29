@@ -174,7 +174,7 @@ var Axioms_manager = (function () {
                         },
                         function (err) {
                             return callbackSeries();
-                        }
+                        },
                     );
                 },
                 function (callbackSeries) {
@@ -211,7 +211,7 @@ var Axioms_manager = (function () {
             ],
             function (err) {
                 return callback(err, sourceAxiomsMap);
-            }
+            },
         );
     };
 
@@ -354,7 +354,7 @@ var Axioms_manager = (function () {
                 if (callback) {
                     return callback(null, axiomText);
                 }
-            }
+            },
         );
     };
 
@@ -415,7 +415,7 @@ var Axioms_manager = (function () {
                 if (callback) {
                     return callback(null, triples);
                 }
-            }
+            },
         );
     };
 
@@ -491,7 +491,7 @@ var Axioms_manager = (function () {
                     });
                 },
             ],
-            function (err) {}
+            function (err) {},
         );
     };
 

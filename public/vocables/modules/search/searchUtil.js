@@ -256,12 +256,12 @@ indexes.push(source.toLowerCase());
 
                     function (err) {
                         return callbackWhilst(err);
-                    }
+                    },
                 );
             },
             function (err) {
                 callback(err, allClassesArray);
-            }
+            },
         );
     };
 
@@ -320,7 +320,7 @@ indexes.push(source.toLowerCase());
                 },
                 function (err) {
                     return callback(null, allHits);
-                }
+                },
             );
         } else {
             var queryObj = { match_all: {} };
@@ -482,7 +482,7 @@ indexes.push(source.toLowerCase());
             },
             function (err) {
                 callback(err, allResults);
-            }
+            },
         );
     };
 
@@ -573,7 +573,7 @@ indexes.push(source.toLowerCase());
                                     function (err) {
                                         // UI.message("DONE " + sourceLabel + " total indexed : " + totalLinesAllsources, true);
                                         return callbackSeries(err);
-                                    }
+                                    },
                                 );
                             });
                         },
@@ -678,7 +678,7 @@ indexes.push(source.toLowerCase());
                                     },
                                     function (err) {
                                         return callbackSeries(err);
-                                    }
+                                    },
                                 );
                             });
                         },
@@ -689,7 +689,7 @@ indexes.push(source.toLowerCase());
                         // UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
 
                         return callbackEachSource(err);
-                    }
+                    },
                 );
 
                 // }
@@ -703,7 +703,7 @@ indexes.push(source.toLowerCase());
                 if (callback) {
                     return callback(err);
                 }
-            }
+            },
         );
     };
 
@@ -743,7 +743,7 @@ indexes.push(source.toLowerCase());
                 },
                 function (err) {
                     return callback(err, "DONE");
-                }
+                },
             );
         });
     };
@@ -799,7 +799,7 @@ indexes.push(source.toLowerCase());
                         },
                         function (err) {
                             return callbackSeries(err);
-                        }
+                        },
                     );
                 },
                 function (callbackSeries) {
@@ -827,13 +827,13 @@ indexes.push(source.toLowerCase());
                         },
                         function (err) {
                             return callbackSeries(err);
-                        }
+                        },
                     );
                 },
             ],
             function (err) {
                 return callback(err, { data: allData, labelsMap: allLabelsMap });
-            }
+            },
         );
     };
 

@@ -159,13 +159,13 @@ var Weaver = (function () {
                         function (err) {
                             Lineage_whiteboard.currentExpandLevel += options.startLevel;
                             callbackSeries();
-                        }
+                        },
                     );
                 },
             ],
             function (err) {
                 self.search("Whiteboard");
-            }
+            },
         );
     };
 

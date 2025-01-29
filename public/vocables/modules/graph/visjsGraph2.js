@@ -49,7 +49,7 @@ var visjsGraph = (function () {
         /** @type {string} */ divId,
         /** @type {{ labels: any; nodes: any; edges: any; }} */ visjsData,
         /** @type {{ [x: string]: any; onAddNodeToGraph?: any; layoutHierarchical?: any; onRightClickFn?: any; onHoverNodeFn?: any; }} */ _options,
-        /** @type {() => void} */ callback
+        /** @type {() => void} */ callback,
     ) {
         self.drawingDone = false;
         self.currentContext = { divId: divId, options: _options, callback: callback };
@@ -547,7 +547,7 @@ var visjsGraph = (function () {
     self.processClicks = function (
         /** @type {{ edges: string | any[]; nodes: string | any[]; event: { srcEvent: { ctrlKey: any; altKey: any; shiftKey: any; }; }; pointer: { DOM: any; }; }} */ params,
         /** @type {{ fixedLayout: any; onclickFn: (arg0: null, arg1: any, arg2: { dbleClick?: any; ctrlKey?: number; altKey?: number; shiftKey?: number; }) => void; onClusterClickFn: (arg0: any, arg1: any, arg2: { dbleClick: any; ctrlKey: number; altKey: number; shiftKey: number; }) => any; }} */ _options,
-        /** @type {any} */ isDbleClick
+        /** @type {any} */ isDbleClick,
     ) {
         var now = new Date();
         if (now - lastClickTime < dbleClickIntervalDuration) {
@@ -746,7 +746,7 @@ var visjsGraph = (function () {
 
     self.saveGraph = function (
         /** @type {string | number | boolean | string[] | ((this: HTMLElement, index: number, attr: string) => string | number | void | undefined) | ((this: HTMLElement, index: number, text: string) => string | number | boolean) | null} */ fileName,
-        /** @type {any} */ raw
+        /** @type {any} */ raw,
     ) {
         if (!self.currentContext) return;
         var positions = self.network.getPositions();
@@ -794,7 +794,7 @@ var visjsGraph = (function () {
     self.loadGraph = function (
         /** @type {string | number | string[] | undefined} */ fileName,
         /** @type {any} */ add,
-        /** @type {(arg0: null, arg1: { nodes: never[]; edges: never[]; }) => void} */ callback
+        /** @type {(arg0: null, arg1: { nodes: never[]; edges: never[]; }) => void} */ callback,
     ) {
         if (!fileName) fileName = $("#visjsGraph_savedGraphsSelect").val();
         var addToCurrentGraph = $("#visjsGraph_addToCurrentGraphCBX").prop("checked");
@@ -897,7 +897,7 @@ var visjsGraph = (function () {
                 "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
                 "<option>white</option>" +
                 "<option>dark</option>" +
-                "</select></div>"
+                "</select></div>",
         );
         // these are all options in full.
         var options = {

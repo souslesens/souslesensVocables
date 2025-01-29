@@ -1,6 +1,6 @@
-const { profileModel } = require("../../../model/profiles");
-const { resourceFetched, responseSchema, resourceCreated } = require("./utils");
-const userManager = require("../../../bin/user.");
+const { profileModel } = require("../../../../model/profiles");
+const { resourceFetched, responseSchema, resourceCreated } = require("../utils");
+const userManager = require("../../../../bin/user.");
 
 module.exports = function () {
     let operations = {

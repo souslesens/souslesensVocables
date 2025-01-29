@@ -6,10 +6,23 @@ import MappingModeler from "./mappingModeler.js";
 import TripleFactory from "./tripleFactory.js";
 import MappingTransform from "./mappingTransform.js";
 
+
+/**
+ * Mappingdetails module.
+ * The MappingModeler tool helps creating new mappings from sources, and visualising and editing these mappings.
+ * @module MappingsDetails
+ */
+
 var MappingsDetails = (function () {
     var self = {};
     var filterMappingIsSample;
 
+
+    /**
+     *
+     * @param divId
+     * @memberof module:MappingsDetails
+     */
     self.showDetailsDialog = function (divId) {
         if (!MappingModeler.currentTable) {
             return alert("Select a table");
@@ -39,6 +52,12 @@ var MappingsDetails = (function () {
         });
     };
 
+
+    /**
+     *
+      * @param column
+     * @memberof module:MappingsDetails
+     */
     self.showSpecificMappingsBot = function (column) {
         var graphNodes = MappingModeler.visjsGraph.data.nodes.get();
         MappingModeler.currentGraphNode = graphNodes.filter(function (node) {

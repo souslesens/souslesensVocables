@@ -6,7 +6,7 @@ import React from "react";
 import { z } from "zod";
 
 type Response = { message: string; resources: ProfileJson[] };
-const endpoint = "/api/v1/profiles";
+const endpoint = "/api/v1/admin/profiles";
 async function getProfiles(): Promise<Profile[]> {
     const response = await fetch(endpoint);
     const json = (await response.json()) as Response;

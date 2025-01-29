@@ -153,7 +153,7 @@ var MappingModeler = (function () {
         var jstreeData = [];
         jstreeData.push({
             id: parentName,
-            parent: "#",
+            parent: MappingModeler.currentTable,
             text: parentName,
             data: {
                 id: parentName,
@@ -1515,16 +1515,6 @@ var MappingModeler = (function () {
         self.saveVisjsGraph();
     };
 
-    self.getVisjsTreeNodeById = function (id) {
-        var currentNode = null;
-        var visjsNodes = MappingModeler.visjsGraph.data.nodes.get();
-        visjsNodes.forEach(function (node) {
-            if (node.data.id == id && node.data.dataTable == MappingModeler.currentTable.name) {
-                currentNode = node;
-            }
-        });
-        return currentNode;
-    };
 
     return self;
 })();

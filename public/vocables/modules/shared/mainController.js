@@ -194,7 +194,7 @@ var MainController = (function () {
                         });
                     },
                 ],
-                function (_err) {}
+                function (_err) {},
             );
             callback(_err);
         });

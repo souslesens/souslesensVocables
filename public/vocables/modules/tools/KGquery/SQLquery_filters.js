@@ -41,7 +41,7 @@ var SQLquery_filters = (function () {
                         },
                         function (err) {
                             callbackSeries(err);
-                        }
+                        },
                     );
                 },
             ],
@@ -51,7 +51,7 @@ var SQLquery_filters = (function () {
                     var options = {};
                     JstreeWidget.loadJsTree("SQLqueryFilter_jstree", jstreeData, options);
                 });
-            }
+            },
         );
     };
 
@@ -148,7 +148,7 @@ var SQLquery_filters = (function () {
             ],
             function (err) {
                 return callback(err, jstreeData);
-            }
+            },
         );
     };
 

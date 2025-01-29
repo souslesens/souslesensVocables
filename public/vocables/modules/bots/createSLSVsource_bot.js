@@ -120,7 +120,7 @@ var CreateSLSVsource_bot = (function () {
                         return _botEngine.reset();
                     }
                     return _botEngine.nextStep();
-                }
+                },
             );
         },
 

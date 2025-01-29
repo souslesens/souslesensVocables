@@ -103,7 +103,7 @@ module.exports = function () {
                     request(options, function (error, response, body) {
                         return processResponse(res, error, body);
                     });
-                }
+                },
             );
         }
     }

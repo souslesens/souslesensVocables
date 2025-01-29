@@ -29,7 +29,7 @@ var LegendWidget = (function () {
         };
         $("#Lineage_classes_graphDecoration_legendDiv").jstree("destroy").empty();
         $("#Lineage_classes_graphDecoration_legendDiv").html(
-            "<div  class='jstreeContainer' style='height: 350px;width:90%;max-height:22dvh;'>" + "<div id='legendJstreeDivId' style='height: 25px;width:100%'></div></div>"
+            "<div  class='jstreeContainer' style='height: 350px;width:90%;max-height:22dvh;'>" + "<div id='legendJstreeDivId' style='height: 25px;width:100%'></div></div>",
         );
         JstreeWidget.loadJsTree(legendDivId, jstreeData, options, function () {
             self.legendDivId = legendDivId;

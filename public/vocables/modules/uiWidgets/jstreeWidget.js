@@ -280,7 +280,7 @@ var JstreeWidget = (function () {
             .delete_node(
                 $("#" + jstreeDiv)
                     .jstree(true)
-                    .get_node("#").children
+                    .get_node("#").children,
             );
     };
     self.addNodesToJstree = function (jstreeDiv, parentNodeId_, jstreeData, options, callback) {

@@ -264,7 +264,7 @@ self.graphTable(KGcreator.currentTreeNode);
                 });
               });*/
                 });
-            }
+            },
         );
     };
 
@@ -603,7 +603,7 @@ self.graphTable(KGcreator.currentTreeNode);
             ],
             function (err) {
                 return callback(null, joinsMap);
-            }
+            },
         );
     };
 
@@ -879,7 +879,7 @@ self.graphTable(KGcreator.currentTreeNode);
 
                 if (mappingIds.length == 0) $("#Lineage_mappingsTreeDiv").jstree().delete_node(mappingIds[0]);
                 return alert("mappings deleted");
-            }
+            },
         );
     };
 

@@ -312,7 +312,7 @@ var KGquery = (function () {
             function (err, aggregateClauses) {
                 self.queryKG("table", { aggregate: aggregateClauses });
             },
-            message
+            message,
         );
     };
 
@@ -557,7 +557,7 @@ var KGquery = (function () {
             ],
             function (err) {
                 callback(err, data);
-            }
+            },
         );
     };
 

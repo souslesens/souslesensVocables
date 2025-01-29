@@ -93,7 +93,7 @@ var KGquery_graph = (function () {
 
                             return callbackSeries();
                         },
-                        true
+                        true,
                     );
                 },
                 //inferred
@@ -264,7 +264,7 @@ var KGquery_graph = (function () {
                 });
 
                 //  KGquery.clearAll();
-            }
+            },
         );
     };
 
@@ -319,7 +319,7 @@ var KGquery_graph = (function () {
 
                         callbackEach();
                     },
-                    true
+                    true,
                 );
             },
             function (err) {
@@ -339,7 +339,7 @@ var KGquery_graph = (function () {
                     //  self.KGqueryGraph.data.nodes.update(visjsData.nodes);
                 });
                 KGquery_graph.message("xx3", true);
-            }
+            },
         );
     };
 
@@ -430,7 +430,7 @@ var KGquery_graph = (function () {
                         }
 
                         return callbackEach(null);
-                    }
+                    },
                 );
             },
             function (err) {
@@ -507,7 +507,7 @@ var KGquery_graph = (function () {
                 });
                 KGquery_graph.message("xx4", true);
                 return callback(null, visjsData);
-            }
+            },
         );
     };
 
@@ -697,7 +697,7 @@ var KGquery_graph = (function () {
                         return callbackSeries(err);
                     },
                 });
-            }
+            },
         );
     };
     return self;

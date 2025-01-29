@@ -32,7 +32,7 @@ module.exports = function () {
             await Promise.all(
                 Object.entries(newProfile).map(async ([_k, profile]) => {
                     await profileModel.addProfile(profile);
-                })
+                }),
             );
             const profiles = await profileModel.getAllProfiles();
             resourceCreated(res, profiles);

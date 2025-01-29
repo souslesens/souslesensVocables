@@ -33,7 +33,7 @@ module.exports = () => {
                 },
             },
         },
-        security: [{ restrictAdmin: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Retrieve the entire list of User Data",
         tags: ["UserData"],
     };

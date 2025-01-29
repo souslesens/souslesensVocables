@@ -1,6 +1,6 @@
 const fs = require("fs");
-const { userModel } = require("../../../../model/users");
-const { configUsersPath } = require("../../../../model/config");
+const { userModel } = require("../../../../../model/users");
+const { configUsersPath } = require("../../../../../model/config");
 const util = require("util");
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);

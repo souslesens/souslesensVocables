@@ -239,7 +239,7 @@ var Lineage_properties = (function () {
             ],
             function (err) {
                 callback(null, jstreeData);
-            }
+            },
         );
     };
 
@@ -968,7 +968,7 @@ var Lineage_properties = (function () {
                         }
 
                         callbackEach();
-                    }
+                    },
                 );
             },
             function (err) {
@@ -989,7 +989,7 @@ var Lineage_properties = (function () {
                 options.contextMenu = self.jstreeContextMenu();
 
                 JstreeWidget.loadJsTree("Lineage_propertiesTree", jstreeData, options);
-            }
+            },
         );
     };
 
@@ -1079,7 +1079,7 @@ var Lineage_properties = (function () {
                 },
             ],
 
-            function (err) {}
+            function (err) {},
         );
     };
 

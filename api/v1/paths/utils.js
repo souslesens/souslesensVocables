@@ -149,7 +149,7 @@ function filterSources(allowedSources, sources) {
                 source["accessControl"] = allowedSources[sourceId];
                 return [sourceId, source];
             }
-        })
+        }),
     );
 }
 

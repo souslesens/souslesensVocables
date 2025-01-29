@@ -59,7 +59,7 @@ var SubGraph = (function () {
                                             "--" +
                                             (item.property ? Sparql_common.getLabelFromURI(item.property.value) : "") +
                                             "--" +
-                                            (item.targetClass ? Sparql_common.getLabelFromURI(item.targetClass.value) : "")
+                                            (item.targetClass ? Sparql_common.getLabelFromURI(item.targetClass.value) : ""),
                                     );
 
                                     if (item.type.value.endsWith("Class")) {
@@ -122,7 +122,7 @@ var SubGraph = (function () {
                         },
                         function (err) {
                             callbackSeries();
-                        }
+                        },
                     );
                 },
 
@@ -151,7 +151,7 @@ var SubGraph = (function () {
             ],
             function (err) {
                 return callback(err, { classes: allClasses, restrictions: allRestrictions });
-            }
+            },
         );
     };
 
@@ -383,7 +383,7 @@ var SubGraph = (function () {
                 }
 
                 return callback(null, result);
-            }
+            },
         );
     };
 

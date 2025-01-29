@@ -321,7 +321,7 @@ var Lineage_selection = (function () {
                     if (err) {
                         return err;
                     }
-                }
+                },
             );
         },
         deleteDecorate: function () {

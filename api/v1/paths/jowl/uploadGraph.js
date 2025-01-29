@@ -92,7 +92,7 @@ module.exports = function () {
             },
             function (err) {
                 return callback(err, totalImportedTriples);
-            }
+            },
         );
     }
 
@@ -198,7 +198,7 @@ module.exports = function () {
                     ],
                     function (err) {
                         processResponse(res, err, { result: totalImportedTriples });
-                    }
+                    },
                 );
             });
 
@@ -300,7 +300,7 @@ module.exports = function () {
                     function (err) {
                         console.log("--------------8---------");
                         processResponse(res, err, { result: totalImportedTriples });
-                    }
+                    },
                 );
             });
         }

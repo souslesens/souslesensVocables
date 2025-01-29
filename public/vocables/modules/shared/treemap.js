@@ -1841,7 +1841,7 @@ var TreeMap = (function () {
             root.children.forEach(collapse);
             update(root);*/
             },
-            500
+            500,
         );
     };
 
@@ -1873,7 +1873,7 @@ var TreeMap = (function () {
                     height: 1152,
                 });
             },
-            3000
+            3000,
         );
     };
 

@@ -117,7 +117,7 @@ var Standardizer = (function () {
             function (err) {
                 if (err) return callback(err);
                 return callback(null, classesMap);
-            }
+            },
         );
     };
 
@@ -399,7 +399,7 @@ var Standardizer = (function () {
                         // pass
                     });
                 }, 500);
-            }
+            },
         );
     };
 
@@ -503,7 +503,7 @@ var Standardizer = (function () {
                         // pass
                     });
                 }, 500);
-            }
+            },
         );
     };
 
@@ -765,7 +765,7 @@ var Standardizer = (function () {
                     }),
                         500;
                 });
-            }
+            },
         );
     };
 
@@ -1124,7 +1124,7 @@ var Standardizer = (function () {
 
             function (_err) {
                 // pass
-            }
+            },
         );
     };
 
@@ -1490,7 +1490,7 @@ sortMethod: "hubsize",
             ],
             function (_err) {
                 return "DONE";
-            }
+            },
         );
     };
     self.bestMatches = {
@@ -1650,7 +1650,7 @@ sortMethod: "hubsize",
                     });
                 }, 200);
                 //   Export.showDataTable(resultDiv, cols, dataSet,'Bi')
-            }
+            },
         );
     };
 
@@ -1731,7 +1731,7 @@ sortMethod: "hubsize",
                 }
 
                 $("#Standardizer_wordsTA").val(str);
-            }
+            },
         );
     };
 
@@ -1779,7 +1779,7 @@ sortMethod: "hubsize",
                 });
                 html += "</table>";
                 $("#Standardizer_connectionsDiv").html(html);
-            }
+            },
         );
     };
 
@@ -1955,7 +1955,7 @@ sortMethod: "hubsize",
                         },
                         function (_err) {
                             callbackSeries();
-                        }
+                        },
                     );
                 },
             ],
@@ -1963,7 +1963,7 @@ sortMethod: "hubsize",
                 if (err) return alert(err);
 
                 UI.message(totalCreated + " relations created in " + dictionarySourceLabel, true);
-            }
+            },
         );
     };
 

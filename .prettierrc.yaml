@@ -1,2 +1,6 @@
 tabWidth: 4
 printWidth: 200
+overrides:
+  - files: "*.css"
+    options:
+      parser: less

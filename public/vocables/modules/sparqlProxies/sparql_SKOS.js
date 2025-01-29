@@ -444,7 +444,7 @@ var Sparql_SKOS = (function () {
             },
             function (err) {
                 return callback(err, triples);
-            }
+            },
         );
     };
 

@@ -176,7 +176,7 @@ var NodeInfosAxioms = (function () {
             },
             function (err, result) {
                 return callback(err, result);
-            }
+            },
         );
     };
 
@@ -215,7 +215,7 @@ var NodeInfosAxioms = (function () {
                 node.data.triples,
                 "nodeInfosAxioms_graphDiv",
                 { onNodeClick: NodeInfosAxioms.onNodeGraphClick, axiomType: node.parent },
-                function (err) {}
+                function (err) {},
             );
 
             //  $("#nodeInfosAxioms_axiomText").html(node.data.manchester);
@@ -310,7 +310,7 @@ var NodeInfosAxioms = (function () {
                                 callbackEach(null);
                             });
                         },
-                        function (err) {}
+                        function (err) {},
                     );
                 });
             });

@@ -111,7 +111,7 @@ class ToolModel {
             Object.entries(plugins).map(([key, config]) => {
                 const converted = Object.fromEntries(Object.entries(config).map(([label, option]) => [label, convertType(option)]));
                 return [key, converted];
-            })
+            }),
         );
     };
 

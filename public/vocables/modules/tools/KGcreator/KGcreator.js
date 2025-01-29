@@ -464,7 +464,7 @@ var KGcreator = (function () {
                 if (callback) {
                     return callback(err, self.currentConfig);
                 }
-            }
+            },
         );
     };
 
@@ -596,7 +596,7 @@ var KGcreator = (function () {
                         if (callback) {
                             callback();
                         }
-                    }
+                    },
                 );
             });
         });
@@ -699,7 +699,7 @@ var KGcreator = (function () {
                 if (callback) {
                     return callback(null, jstreeData);
                 }
-            }
+            },
         );
     };
 

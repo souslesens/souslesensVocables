@@ -46,10 +46,10 @@ var KGquery_myQueries = (function () {
                     },
                     function (err2) {
                         return callbackEach1(err2);
-                    }
+                    },
                 );
             },
-            function (err1) {}
+            function (err1) {},
         );
 
         return;

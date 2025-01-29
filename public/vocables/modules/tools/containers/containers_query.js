@@ -186,7 +186,7 @@ var Containers_query = (function () {
                 },
                 function (err) {
                     return callback(err, allResults);
-                }
+                },
             );
         } else {
             // search label

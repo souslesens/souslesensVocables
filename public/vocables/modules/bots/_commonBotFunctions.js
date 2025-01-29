@@ -34,7 +34,7 @@ var CommonBotFunctions = (function () {
             },
             function (err) {
                 return callback(err);
-            }
+            },
         );
     };
 
@@ -143,7 +143,7 @@ var CommonBotFunctions = (function () {
                     return callback(null, props);
                 }
                 _botEngine.showList(props, varToFill);
-            }
+            },
         );
     };
 
@@ -163,7 +163,7 @@ var CommonBotFunctions = (function () {
             },
             function (err) {
                 return callback(err, allClasses);
-            }
+            },
         );
     };
     self.listSourceAllObjectProperties = function (source, varToFill, props, callback) {
@@ -182,7 +182,7 @@ var CommonBotFunctions = (function () {
             },
             function (err) {
                 return callback(err, allProps);
-            }
+            },
         );
     };
     self.listSourceAllObjectPropertiesConstraints = function (source, varToFill, callback) {
@@ -204,7 +204,7 @@ var CommonBotFunctions = (function () {
 
             function (err) {
                 return callback(err, allConstraints);
-            }
+            },
         );
     };
 

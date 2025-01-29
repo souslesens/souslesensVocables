@@ -68,7 +68,7 @@ module.exports = function () {
                         value.published = false;
                     }
                     await sourceModel.addSource(value);
-                })
+                }),
             );
             const sources = await sourceModel.getAllSources();
             res.status(200).json(successfullyCreated(sources));

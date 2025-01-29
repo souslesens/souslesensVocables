@@ -59,12 +59,15 @@ class UserDataModel {
         if ((currentUser === undefined) & (this._mainConfig.auth === "disabled")) {
             currentUser = { login: "admin", groups: ["admin"] };
         }
-        const currentUserData = await connection
-            .select("*")
-            .from("user_data_list")
-            .where("owned_by", currentUser.login)
-            .orWhereRaw("is_shared=true AND ? = ANY(shared_users)", currentUser.login)
-            .orWhereRaw("is_shared=true AND ? = ANY(shared_profiles)", currentUser.groups);
+        let currentUserData = await connection.select("*").from("user_data_list").where("owned_by", currentUser.login).orWhere("is_shared", true);
+
+        currentUserData = currentUserData.filter((data) => {
+            const isOwner = data.owned_by === currentUser.login;
+            const isSharedWithUser = data.is_shared && data.shared_users.includes(currentUser.login);
+            const isSharedWithGroup = data.is_shared && new Set(currentUser.groups.filter((grp) => new Set(data.shared_profiles).has(grp))).size;
+            return isOwner || isSharedWithUser || isSharedWithGroup;
+        });
+
         connection.destroy();
         return currentUserData;
     };

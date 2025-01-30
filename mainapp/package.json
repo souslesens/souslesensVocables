@@ -9,7 +9,6 @@
         "build": "vite build",
         "build:watch": "vite build --watch",
         "dev": "vite",
-        "cypress:open": "cypress open",
         "ncu": "npx npm-check-updates"
     },
     "author": "Logilab",

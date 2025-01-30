@@ -64,24 +64,36 @@ const migrateProfiles = async (configDirectory, writeMode) => {
     const configJSON = JSON.parse(fs.readFileSync(configPath, { encoding: "utf-8" }));
 
     const profilesPath = path.resolve(configDirectory, "profiles.json");
+    // Add profiles "admin" if not exited
+    let profiles = [];
     if (fs.existsSync(profilesPath)) {
         const profilesJSON = JSON.parse(fs.readFileSync(profilesPath, { encoding: "utf-8" }));
 
-        const profiles = Object.values(profilesJSON).map((profile) => ({
+        profiles = Object.values(profilesJSON).map((profile) => ({
             label: profile.name,
             theme: profile.theme,
             allowed_tools: profile.allowedTools,
             access_control: JSON.stringify(profile.sourcesAccessControl),
             schema_types: profile.allowedSourceSchemas.filter((schema) => ["OWL", "SKOS"].includes(schema)),
         }));
+    }
+    const isFoundAdmin = profiles.some((el) => el.label === "admin");
+    if (!isFoundAdmin) {
+        profiles.push({
+            label: "admin",
+            theme: "Sea Breeze",
+            allowedTools: ["admin", "ConfigEditor", "GraphManagement", "lineage", "KGcreator", "KGquery", "OntoCreator", "SourcesManagement", "Standardizer", "UserManagement"],
+            sourcesAccessControl: {},
+            schema_types: ["OWL", "SKOS"],
+        });
+    }
 
-        if (writeMode) {
-            const migrated_profiles = await insertData(configJSON.database, profiles, "profiles", "label");
-            if (migrated_profiles.length > 0) {
-                console.info(`  ✅ the following profiles were migrated: ${migrated_profiles}`);
-            } else {
-                console.info("  👍 Nothing to do");
-            }
+    if (writeMode) {
+        const migrated_profiles = await insertData(configJSON.database, profiles, "profiles", "label");
+        if (migrated_profiles.length > 0) {
+            console.info(`  ✅ the following profiles were migrated: ${migrated_profiles}`);
+        } else {
+            console.info("  👍 Nothing to do");
         }
     }
 };

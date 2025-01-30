@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { SyntheticEvent, useState } from "react";
 import {
     Alert,
     Box,
@@ -8,6 +8,7 @@ import {
     IconButton,
     Link,
     Paper,
+    Snackbar,
     Stack,
     styled,
     Table,
@@ -42,8 +43,9 @@ const SourcesTable = () => {
     const [orderBy, setOrderBy] = useState<OrderBy>("name");
     const [order, setOrder] = useState<Order>("asc");
 
-    const [importSrcMsgSeverity, setImportSrcMsgSeverity] = useState<"warning" | "error" | undefined>(undefined);
-    const [importSrcMsg, setImportSrcMsg] = useState(new Set());
+    const [snackOpen, setSnackOpen] = useState(false);
+    const [snackMessages, setSnackMessages] = useState(new Set());
+    const [snackSeverity, setSnackSeverity] = useState<"warning" | "error" | undefined>(undefined);
 
     const [openModal, setOpenModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
@@ -98,9 +100,12 @@ const SourcesTable = () => {
         setOpenModal(true);
     };
 
-    const closeAlert = () => {
-        setImportSrcMsgSeverity(undefined);
-        setImportSrcMsg(new Set());
+    const handleSnackbarClose = (_event: SyntheticEvent | Event, reason?: string) => {
+        if (reason === "clickaway") {
+            return;
+        }
+        setSnackOpen(false);
+        setSnackMessages(new Set());
     };
 
     const handleUploadSource = async (sourceFiles: FileList | null) => {
@@ -109,8 +114,9 @@ const SourcesTable = () => {
             // check name
             const existingSourcesName: string[] = SRD.withDefault([], model.sources).map((source) => source.name);
             if (existingSourcesName.includes(source.name)) {
-                setImportSrcMsgSeverity("error");
-                setImportSrcMsg((msg) => new Set(msg).add(`La source ${source.name} existe déjà`));
+                setSnackOpen(true);
+                setSnackSeverity("error");
+                setSnackMessages((msg) => new Set(msg).add(`La source ${source.name} existe déjà`));
                 return;
             }
             // remove unknown imports
@@ -119,8 +125,9 @@ const SourcesTable = () => {
                 if (existingSourcesName.includes(imp)) {
                     imports.push(imp);
                 } else {
-                    setImportSrcMsgSeverity("warning");
-                    setImportSrcMsg((msg) => new Set(msg).add(`L'import ${imp} n'existe pas`));
+                    setSnackOpen(true);
+                    setSnackSeverity("warning");
+                    setSnackMessages((msg) => new Set(msg).add(`L'import ${imp} n'existe pas`));
                 }
             });
             source.imports = imports;
@@ -178,16 +185,16 @@ const SourcesTable = () => {
 
                 return (
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
-                        {importSrcMsg.size > 0 && (
-                            <Alert variant="filled" severity={importSrcMsgSeverity} sx={{ m: 1 }} onClose={closeAlert}>
-                                {Array.from(importSrcMsg).map((msg) => (
+                        <Snackbar autoHideDuration={5000} open={snackOpen} onClose={handleSnackbarClose}>
+                            <Alert onClose={handleSnackbarClose} severity={snackSeverity} sx={{ width: "100%" }}>
+                                {Array.from(snackMessages).map((msg) => (
                                     <>
                                         {msg}
                                         <br />
                                     </>
                                 ))}
                             </Alert>
-                        )}
+                        </Snackbar>
                         <TextField
                             inputProps={{ autocomplete: "off" }}
                             label="Search Sources by name"

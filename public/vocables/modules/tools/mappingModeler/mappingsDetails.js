@@ -5,7 +5,15 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import MappingModeler from "./mappingModeler.js";
 import TripleFactory from "./tripleFactory.js";
 import MappingTransform from "./mappingTransform.js";
+import UIcontroller from "./uiController.js";
 
+/**
+ * MappingsDetails manages technical mappings (non structural mappings)
+ *
+ *
+ * @module MappingsDetails
+ * @type {{}}
+ */
 var MappingsDetails = (function () {
         var self = {};
         var filterMappingIsSample;
@@ -17,15 +25,8 @@ var MappingsDetails = (function () {
             if (!divId) {
                 divId = "mainDialogDiv";
             }
-            MappingModeler.activateRightPanel("generic");
+            UIcontroller.activateRightPanel("generic");
             $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/detailsDialog.html", function () {
-                // $("#mainDialogDiv").dialog("option", "title", "Detailed mappings : table " + MappingModeler.currentTable.name);
-
-                //self.addRowClass();
-                /*    self.calculateColumnMappingsFromGraph();
-                    Object.keys(self.detailledDataMap).forEach(function (column) {
-                        self.addRowClass(column);
-                    });*/
                 self.showDetailedMappingsTree();
                 self.drawDetailedMappingsGraph();
                 $("#detailedMappings_searchInput").bind("keydown", null, function () {
@@ -680,52 +681,7 @@ var MappingsDetails = (function () {
             },
         };
 
-        self.showFilterMappingDialog = function (isSample) {
-            self.filterMappingIsSample = isSample;
 
-            $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
-                //  $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
-                // $("#mainDialogDiv").dialog("open");
-                var options = {withCheckboxes: true, withoutContextMenu: true, openAll: true, check_all: true};
-                self.showDetailedMappingsTree(null, "detailedMappings_filterMappingsTree", options);
-            });
-        };
-
-        self.runSlsFliteredMappings = function () {
-            var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
-            var filteredMappings = [];
-            var columnsSelection = {};
-            var checkedNodeAttrs = []
-            checkedNodes.forEach(function (node) {
-                if (node.parents.length == 3){// attrs
-                    checkedNodeAttrs.push(node.id)
-                    columnsSelection[node.id] = MappingModeler.visjsGraph.data.nodes.get(node.parent)
-                }
-                else if (node.data && node.data.type == "Column") {// filter only mapping nodes
-                    columnsSelection[node.id] = MappingModeler.visjsGraph.data.nodes.get(node.id)
-                }
-
-
-
-            });
-            var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection)
-
-            mappings[MappingModeler.currentTable.name].tripleModels.forEach(function (mapping) {
-                checkedNodeAttrs.forEach(function (treeNodeId) {
-                    if (treeNodeId.indexOf(mapping.o) > -1) {
-                        filteredMappings.push(mapping)
-                    }
-                })
-
-
-            })
-
-
-            //  filteredMappings.push(node.data);
-
-            TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, result) {
-            });
-        };
 
         return self;
     }

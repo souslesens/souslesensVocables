@@ -4,9 +4,74 @@ import MappingsDetails from "./mappingsDetails.js";
 import MappingTransform from "./mappingTransform.js";
 import MappingModeler from "./mappingModeler.js";
 import Export from "../../shared/export.js";
+import UIcontroller from "./uiController.js";
 
 var TripleFactory = (function () {
     var self = {};
+
+    self.showTripleSample = function () {
+        if (!self.checkCurrentTable()) return;
+
+        self.showFilterMappingDialog(true);
+    };
+
+    self.writeTriples = function () {
+        if (!self.checkCurrentTable()) return;
+        self.showFilterMappingDialog(false);
+    };
+
+    self.createAllMappingsTriples = function () {
+        KGcreator_run.createAllMappingsTriples();
+    };
+
+    self.indexGraph = function () {
+        KGcreator_run.indexGraph();
+    };
+
+
+    self.showFilterMappingDialog = function (isSample) {
+        self.filterMappingIsSample = isSample;
+        UIcontroller.activateRightPanel("generic");
+        $("#mappingModeler_genericPanel").load("./modules/tools/mappingModeler/html/filterMappingDialog.html", function () {
+            //  $("#mainDialogDiv").dialog("option", "title", "Filter mappings : table " + MappingModeler.currentTable.name);
+            // $("#mainDialogDiv").dialog("open");
+            var options = {withCheckboxes: true, withoutContextMenu: true, openAll: true, check_all: true};
+            MappingsDetails.showDetailedMappingsTree(null, "detailedMappings_filterMappingsTree", options);
+        });
+    };
+
+    self.runSlsFilteredMappings = function () {
+        var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
+        var filteredMappings = [];
+        var columnsSelection = {};
+        var checkedNodeAttrs = []
+        checkedNodes.forEach(function (node) {
+            if (node.parents.length == 3){// attrs
+                checkedNodeAttrs.push(node.id)
+                columnsSelection[node.id] = MappingModeler.visjsGraph.data.nodes.get(node.parent)
+            }
+            else if (node.data && node.data.type == "Column") {// filter only mapping nodes
+                columnsSelection[node.id] = MappingModeler.visjsGraph.data.nodes.get(node.id)
+            }
+
+
+
+        });
+        var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection)
+
+        mappings[MappingModeler.currentTable.name].tripleModels.forEach(function (mapping) {
+            checkedNodeAttrs.forEach(function (treeNodeId) {
+                if (treeNodeId.indexOf(mapping.o) > -1) {
+                    filteredMappings.push(mapping)
+                }
+            })
+
+
+        })
+
+        TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, result) {
+        });
+    };
 
     self.checkCurrentTable = function () {
         var check = false;
@@ -29,30 +94,7 @@ var TripleFactory = (function () {
         }
         return check;
     };
-    self.showTripleSample = function () {
-        if (!self.checkCurrentTable()) return;
 
-        MappingsDetails.showFilterMappingDialog(true);
-    };
-
-    self.writeTriples = function () {
-        if (!self.checkCurrentTable()) return;
-
-        MappingsDetails.showFilterMappingDialog(false);
-        return;
-
-        var mappingsFilter = MappingTransform.getSLSmappingsFromVisjsGraph(MappingModeler.currentTable);
-        var options = { table: MappingModeler.currentTable.name, mappingsFilter: mappingsFilter };
-        self.createTriples(false, MappingModeler.currentTable.name, options, function (err, result) {});
-    };
-
-    self.createAllMappingsTriples = function () {
-        KGcreator_run.createAllMappingsTriples();
-    };
-
-    self.indexGraph = function () {
-        KGcreator_run.indexGraph();
-    };
 
     self.deleteTriples = function (all, callback) {
         var tables = [];
@@ -142,7 +184,7 @@ var TripleFactory = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 if (sampleData) {
-                    MappingModeler.activateRightPanel("generic");
+                    UIcontroller.activateRightPanel("generic");
                     self.showTriplesInDataTable(result, "mappingModeler_genericPanel");
                     UI.message("", true);
                 } else {

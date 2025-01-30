@@ -1,5 +1,6 @@
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import MappingModeler from "./mappingModeler.js";
+import UIcontroller from "./uiController.js";
 
 var DataSourceManager = (function () {
     var self = {};
@@ -71,45 +72,13 @@ var DataSourceManager = (function () {
                 callback(null, self.currentConfig);
             }
         });
-        /*
-        var newJson = {
-            sparqlServerUrl: Config.sources[self.currentSlsvSource].sparql_server.url,
-            graphUri: Config.sources[self.currentSlsvSource].graphUri,
-            prefixes: {},
-            lookups: {},
-            databaseSources: {},
-            csvSources: {},
-        };
 
-        // Write Config in source_ALL.json of mappings
-        self.rawConfig = newJson;
-        */
-        // Write in main.json
-        /*
-        var payload = {
-            dir: mappingsDir,
-            newDirName: source,
-        };
-            $.ajax({
-            type: "POST",
-            url: Config.apiUrl + "/data/dir",
-            data: payload,
-            dataType: "json",
-            success: function (result, _textStatus, _jqXHR) {
-                self.rawConfig = newJson;
-                return callback(null, newJson);
-            },
-            error: function (err) {
-                self.rawConfig = newJson;
-                return callback(null, newJson);
-            },
-        });*/
     };
 
     self.loaDataSourcesJstree = function (jstreeDiv, callback) {
         var options = {
             openAll: true,
-            selectTreeNodeFn: MappingModeler.onDataSourcesJstreeSelect,
+            selectTreeNodeFn: self.onDataSourcesJstreeSelect,
             contextMenu: function (node, x) {
                 var items = {};
                 if (node.id == "databaseSources") {
@@ -383,6 +352,61 @@ var DataSourceManager = (function () {
             });
         });
     };
+
+
+
+    self.onDataSourcesJstreeSelect = function (event, obj) {
+        MappingModeler.currentTreeNode = obj.node;
+        var isRightClick = false;
+        if (obj.event.which == 3) {
+            isRightClick = true;
+        }
+
+        if (obj.node.data.type == "databaseSource") {
+            DataSourceManager.initNewDataSource(obj.node.id, "databaseSource", obj.node.data.sqlType, obj.node.data.table);
+            //UIcontroller.switchLeftPanel("mappings");
+            DataSourceManager.loadDataBaseSource(DataSourceManager.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
+        } else if (obj.node.data.type == "csvSource") {
+            DataSourceManager.initNewDataSource(obj.node.id, "csvSource", obj.node.data.sqlType, obj.node.id);
+            var fileName = DataSourceManager.currentSlsvSource;
+            DataSourceManager.loadCsvSource(DataSourceManager.currentSlsvSource, obj.node.id, false, function (err, columns) {
+                if (err) {
+                    return alert("file not found");
+                }
+
+                MappingModeler.currentResourceType = "Column";
+                MappingModeler.currentTable = {
+                    name: obj.node.id,
+                    columns: columns,
+                };
+                $("#MappingModeler_leftTabs").tabs("option", "active",1);
+                UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab")
+
+
+
+            });
+        } else if (obj.node.data.type == "table") {
+            MappingModeler.currentTable = {
+                name: obj.node.data.label,
+                columns: DataSourceManager.currentConfig.currentDataSource.tables[obj.node.data.id],
+            };
+            var table = obj.node.data.id;
+            DataSourceManager.currentConfig.currentDataSource.currentTable = table;
+
+            //self.hideForbiddenResources("Table");
+            MappingModeler.currentResourceType = "Column";
+            $("#MappingModeler_leftTabs").tabs("option", "active",1);
+            UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab")
+
+        }
+
+        if (obj.node.data.type == "table") {
+            $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.currentTable);
+        }
+    };
+
+
+
 
     // Config save made on visjsGraph
     self.saveSlsvSourceConfig = function (callback) {

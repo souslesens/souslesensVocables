@@ -1,13 +1,13 @@
 import common from "../../shared/common.js";
-import KGcreator from "../KGcreator/KGcreator.js";
 import MappingModeler from "./mappingModeler.js";
+import UIcontroller from "./uiController.js";
 
 var MappingTransform = (function () {
     var self = {};
 
     self.generateSLSmappings = function () {
         var json = MappingTransform.getSLSmappingsFromVisjsGraph();
-        MappingModeler.activateRightPanel("generic");
+        UIcontroller.activateRightPanel("generic");
 
         $("#mappingModeler_genericPanel").html(
             '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +

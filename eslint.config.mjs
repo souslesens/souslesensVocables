@@ -22,7 +22,6 @@ export default [{
         "public/vocables/js/external",
     ],
 }, ...compat.extends(
-    "plugin:cypress/recommended",
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",

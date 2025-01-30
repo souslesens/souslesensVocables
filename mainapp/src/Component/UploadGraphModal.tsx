@@ -249,7 +249,7 @@ declare global {
 window.UploadGraphModal = {
     createApp: (props: Omit<UploadGraphModalProps, "open">) => {
         const container = document.getElementById("mount-edit-upload-graph-modal-here");
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         const root = createRoot(container!);
         root.render(<UploadGraphModal open={true} {...props} />);
         return root;

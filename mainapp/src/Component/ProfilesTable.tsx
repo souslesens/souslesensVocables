@@ -70,7 +70,6 @@ const ProfilesTable = () => {
 
     const renderProfiles = SRD.match(
         {
-            // eslint-disable-next-line react/no-unescaped-entities
             notAsked: () => <p>Let’s fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
@@ -97,7 +96,7 @@ const ProfilesTable = () => {
                                 return [key, value.replace("\n", " ")];
                             }
                             return [key, value];
-                        })
+                        }),
                     );
                     return { ...dataWithoutCarriageReturns };
                 });
@@ -105,7 +104,7 @@ const ProfilesTable = () => {
                     let left = "";
                     let right = "";
 
-                    if (a[orderBy] instanceof Array) {
+                    if (a[orderBy] instanceof Array && b[orderBy] instanceof Array) {
                         left = a[orderBy]?.toString() ?? "";
                         right = b[orderBy]?.toString() ?? "";
                     } else {
@@ -197,7 +196,7 @@ const ProfilesTable = () => {
                 );
             },
         },
-        model.profiles
+        model.profiles,
     );
 
     return renderProfiles;
@@ -296,7 +295,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false, me = ""
                 selector: false,
             },
         },
-        model.config
+        model.config,
     );
     const [profileModel, update] = useReducer(updateProfile, { modal: false, profileForm: profile });
 

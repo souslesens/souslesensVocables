@@ -88,7 +88,7 @@ export function DownloadGraphModal({ onClose, open, sourceName }: DownloadGraphM
             `${slsPyApiBaseUrl}api/v1/rdf/graph?source=${name}&offset=${offset}&format=${format}&identifier=${identifier}&skipNamedIndividuals=${String(skipNamedIndividuals)}`,
             {
                 headers: { Authorization: `Bearer ${currentUser?.token ?? ""}` },
-            }
+            },
         );
         const json = (await response.json()) as ApiServerResponse;
         if (response.status !== 200) {
@@ -300,7 +300,7 @@ declare global {
 window.DownloadGraphModal = {
     createApp: (props: Omit<DownloadGraphModalProps, "open">) => {
         const container = document.getElementById("mount-download-graph-modal-here");
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         const root = createRoot(container!);
         root.render(<DownloadGraphModal open={true} {...props} />);
         return root;

@@ -159,7 +159,7 @@ const SourcesTable = () => {
                                 return [key, value.replace("\n", " ")];
                             }
                             return [key, value];
-                        })
+                        }),
                     );
 
                     return { ...dataWithoutCarriageReturns };
@@ -180,7 +180,7 @@ const SourcesTable = () => {
                     <Stack direction="column" spacing={{ xs: 2 }} sx={{ m: 4 }} useFlexGap>
                         {importSrcMsg.size > 0 && (
                             <Alert variant="filled" severity={importSrcMsgSeverity} sx={{ m: 1 }} onClose={closeAlert}>
-                                {Array.from(importSrcMsg).map((msg: string) => (
+                                {Array.from(importSrcMsg).map((msg) => (
                                     <>
                                         {msg}
                                         <br />
@@ -266,7 +266,7 @@ const SourcesTable = () => {
                                                                 href={createSingleSourceDownloadUrl(
                                                                     // TODO fix typing
                                                                     (model.sources as unknown as Record<string, ServerSource[]>)["data"],
-                                                                    source.name
+                                                                    source.name,
                                                                 )}
                                                                 download={`source${source.name}.json`}
                                                             >
@@ -293,7 +293,7 @@ const SourcesTable = () => {
                                 }}
                                 href={createSourcesDownloadUrl(
                                     // TODO fix typing
-                                    (model.sources as unknown as Record<string, ServerSource[]>)["data"]
+                                    (model.sources as unknown as Record<string, ServerSource[]>)["data"],
                                 )}
                                 download={"sources.json"}
                             >
@@ -323,7 +323,7 @@ const SourcesTable = () => {
                 );
             },
         },
-        model.sources
+        model.sources,
     );
 
     return renderSources;

@@ -126,7 +126,7 @@ export const ProfileSchemaCreate = ProfileSchema.merge(
             .string()
             .refine((val) => val !== "admin", { message: "Name can't be admin" })
             .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
-    })
+    }),
 );
 
 export type SourceAccessControl = z.infer<typeof SourceAccessControlSchema>;

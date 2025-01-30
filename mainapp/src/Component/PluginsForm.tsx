@@ -293,7 +293,7 @@ const PluginsConfiguration = ({ me, snack }: DispatcherProps) => {
                 );
             },
         },
-        model.pluginsEnabled
+        model.pluginsEnabled,
     );
 
     return renderPlugins;
@@ -669,7 +669,7 @@ const PluginsRepositories = (props: DispatcherProps) => {
                 );
             },
         },
-        model.repositories
+        model.repositories,
     );
 
     return renderRepositories;
@@ -738,13 +738,13 @@ const PluginsForm = () => {
             const response1 = await readRepositories();
             updateModel({ type: "repositories", payload: success(response1) });
         } catch (e) {
-            console.error("Error reading repositories.");
+            console.error("Error reading repositories. ", e);
         }
         try {
             const response2 = await getEnabledPlugins();
             updateModel({ type: "pluginsEnabled", payload: success(response2) });
         } catch (e) {
-            console.error("Error getting enabled plugins.");
+            console.error("Error getting enabled plugins. ", e);
         }
     };
 
@@ -778,7 +778,7 @@ const PluginsForm = () => {
                 </Alert>
             ),
         },
-        model.repositories
+        model.repositories,
     );
 };
 

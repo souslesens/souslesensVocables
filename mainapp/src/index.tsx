@@ -17,7 +17,7 @@ declare global {
 }
 window.ConfigEditor.createApp = function createApp() {
     const container = document.getElementById("mount-app-here");
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const root = createRoot(container!);
     root.render(<Admin />);
     return root.unmount.bind(root);

@@ -1,39 +1,32 @@
-{
-    "admin": {
-        "id": "admin",
-        "login": "admin",
-        "password": "$2b$10$LhdaXF3tHrvA8b8fKMvNmeOSyogCBgN/L9XLN/vqjz6tgN5rSxMyy",
-        "groups": ["admin"],
-        "source": "json",
-        "_type": "user",
-        "name": "admin",
-        "token": "admin-token",
-        "allowSourceCreation": false,
-        "maxNumberCreatedSource": 5
-    },
-    "owl_user": {
-        "id": "owl_user",
-        "login": "owl_user",
-        "password": "$2b$10$ed6ZDHUbN7NfOGrufiDniudK9EMLCFg9qFgJ0N/T.nRTBPlA5Mm9C",
-        "groups": ["owl_only"],
-        "source": "json",
-        "_type": "user",
-        "name": "owl_user",
-        "token": "owl-token",
-        "allowSourceCreation": false,
-        "maxNumberCreatedSource": 5
-    },
-    "skos_user": {
-        "id": "skos_user",
-        "login": "skos_user",
-        "password": "",
-        "groups": ["skos_only"],
-        "source": "json",
-        "_type": "user",
-        "name": "skos_user",
-        "token": "skos-token",
-        "allowSourceCreation": false,
-        "maxNumberCreatedSource": 5
-    }
-}
-
+[
+  {
+    "id": "1",
+    "login": "admin",
+    "password": "$2b$10$LhdaXF3tHrvA8b8fKMvNmeOSyogCBgN/L9XLN/vqjz6tgN5rSxMyy",
+    "profiles": ["admin"],
+    "auth": "database",
+    "token": "admin-token",
+    "create_source": false,
+    "maximum_source": 5
+  },
+  {
+    "id": "2",
+    "login": "owl_user",
+    "password": "$2b$10$ed6ZDHUbN7NfOGrufiDniudK9EMLCFg9qFgJ0N/T.nRTBPlA5Mm9C",
+    "profiles": ["owl_only"],
+    "auth": "database",
+    "token": "owl-token",
+    "create_source": false,
+    "maximum_source": 5
+  },
+  {
+    "id": "3",
+    "login": "skos_user",
+    "password": "",
+    "profiles": ["skos_only"],
+    "auth": "database",
+    "token": "skos-token",
+    "create_source": false,
+    "maximum_source": 5
+  }
+]

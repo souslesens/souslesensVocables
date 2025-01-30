@@ -1,10 +1,10 @@
 const fs = require("fs");
 const bcrypt = require("bcrypt");
 const { readMainConfig, configUsersPath } = require("./config");
+const { cleanupConnection, getKnexConnection } = require("./utils");
 const { Lock } = require("async-await-mutex-lock");
 const ULID = require("ulid");
 const { createHash } = require("crypto");
-const knex = require("knex");
 const z = require("zod");
 
 /**
@@ -88,15 +88,6 @@ class UserModel {
     ];
 
     /**
-     * Retrieve the Postgres connection from the configuration information
-     *
-     * @returns {knex} - the knex connection instance configure to use Postgres
-     */
-    _getConnection = () => {
-        return knex({ client: "pg", connection: this._mainConfig.database });
-    };
-
-    /**
      * @param {string} login - the user login
      * @returns {string} a token
      */
@@ -124,17 +115,17 @@ class UserModel {
      * @returns {Promise<Record<string,UserAccount>>} a collection of UserAccount
      */
     getUserAccounts = async () => {
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("*").from("public_users_list");
-        conn.destroy();
+        cleanupConnection(conn);
 
         return Object.fromEntries(results.map((user) => this._convertToLegacy(user)));
     };
 
     getUserAccount = async (login) => {
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const user = await conn.select("*").from("users").where("login", login).first();
-        conn.destroy();
+        cleanupConnection(conn);
 
         return user !== undefined ? this._convertToLegacy(user) : undefined;
     };
@@ -147,9 +138,9 @@ class UserModel {
         if (login === undefined) {
             return undefined;
         }
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const user = await conn.select("*").from("users").where("login", login).first();
-        conn.destroy();
+        cleanupConnection(conn);
 
         return user !== undefined ? this._convertToLegacy(user) : undefined;
     };
@@ -159,9 +150,9 @@ class UserModel {
      * @returns {Promise<UserAccount | undefined>} a user account
      */
     findUserAccountFromToken = async (token) => {
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const user = await conn.select("*").from("users").where("token", token).first();
-        conn.destroy();
+        cleanupConnection(conn);
 
         return user !== undefined ? this._convertToLegacy(user) : undefined;
     };
@@ -172,9 +163,13 @@ class UserModel {
      * @returns {boolean} true if login and password match, otherwise false
      */
     checkUserPassword = async (login, password) => {
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const user = await conn.select("password", "auth").from("users").where("login", login).first();
-        conn.destroy();
+        cleanupConnection(conn);
+
+        if (user === undefined) {
+            return false; // The login do not exists in the database
+        }
 
         if (user.auth === "database" || user.auth === "local") {
             return this._comparePasswords(user.password, password);
@@ -191,15 +186,15 @@ class UserModel {
         data.password = this._hashPassword(data.password);
         data.token = this._genToken(data.login);
 
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("login").from("users").where("login", data.login).first();
         if (results !== undefined) {
-            conn.destroy();
+            cleanupConnection(conn);
             throw Error("The user already exists, try updating it");
         }
 
         await conn.insert(this._convertToDatabase(data)).into("users");
-        conn.destroy();
+        cleanupConnection(conn);
     };
 
     /**
@@ -225,30 +220,30 @@ class UserModel {
         const data = this._checkUser(user);
         data.password = this._hashPassword(data.password);
 
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("login").from("users").where("login", data.login).first();
         if (results === undefined) {
-            conn.destroy();
+            cleanupConnection(conn);
             throw Error("UserAccount does not exist, try adding it.");
         }
 
         await conn.update(this._convertToDatabase(data)).into("users").where("login", data.login);
-        conn.destroy();
+        cleanupConnection(conn);
     };
 
     /**
      * @param {string} login - the user login
      */
     deleteUserAccount = async (login) => {
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("login").from("users").where("login", login).first();
         if (results === undefined) {
-            conn.destroy();
+            cleanupConnection(conn);
             return false;
         }
 
         await conn("users").where("login", login).del();
-        conn.destroy();
+        cleanupConnection(conn);
         return true;
     };
 
@@ -257,9 +252,9 @@ class UserModel {
      * @returns {boolean} the administrator status of the user
      */
     isAdmin = async (login) => {
-        const conn = this._getConnection();
+        const conn = getKnexConnection(this._mainConfig.database);
         const user = await conn.select("login", "profiles").from("public_users_list").where("login", login).first();
-        conn.destroy();
+        cleanupConnection(conn);
 
         if (user === undefined) {
             throw Error("UserAccount does not exist");

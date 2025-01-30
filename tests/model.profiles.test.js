@@ -1,66 +1,100 @@
 const fs = require("fs");
 const path = require("path");
-const { ProfileModel } = require("../model/profiles");
-const { ToolModel } = require("../model/tools");
-const { config } = require("../model/config");
 
-const TOOL_MODEL = new ToolModel(path.join(__dirname, "data/plugins"));
+const { createTracker, MockClient } = require("knex-mock-client");
+
+const { config } = require("../model/config");
+const { profileModel, ProfileModel } = require("../model/profiles");
+const { ToolModel } = require("../model/tools");
+const { cleanupConnection, getKnexConnection } = require("../model/utils");
+
+
+jest.mock("../model/utils", () => {
+    const knex = require("knex");
+    return {
+        cleanupConnection: jest.fn().mockReturnThis(),
+        getKnexConnection: knex({ client: MockClient, dialect: "pg" }),
+    };
+});
+
 
 describe("ProfileModel", () => {
-    /**
-     * @type {ProfileModel}
-     */
+    let tracker;
+    let dbProfiles;
 
-    let profileModel;
-    /**
-     * @type {Record<string, import("../model/ProfileTypes").Profile>}
-     */
-    let profilesFromFiles;
-    beforeAll(async () => {
-        profileModel = new ProfileModel(TOOL_MODEL, path.join(__dirname, "data/config/profiles.json"));
-        profilesFromFiles = await fs.promises.readFile(path.join(__dirname, "data/config/profiles.json")).then((data) => JSON.parse(data.toString()));
+    beforeAll(() => {
+        tracker = createTracker(getKnexConnection);
+
+        dbProfiles = JSON.parse(fs.readFileSync(
+            path.join(__dirname, "data", "config", "profiles.json")
+        ));
+    });
+
+    afterEach(() => {
+        tracker.reset();
     });
 
     test("Can create instance", async () => {
-        new ProfileModel(TOOL_MODEL, path.join(__dirname, "data/config/profiles.json"));
+        new ProfileModel(
+            new ToolModel(path.join(__dirname, "data", "plugins")),
+            path.join(__dirname, "data", "config", "profiles.json"),
+        );
     });
 
     test("Can get all profiles if user is admin", async () => {
-        const admin = {
-            login: "admin",
-        };
-        const profiles = await profileModel.getUserProfiles(admin);
-        const expectedResult = {
-            ...profilesFromFiles,
-            admin: {
-                name: "admin",
-                _type: "profile",
-                id: "admin",
-                allowedSourceSchemas: ["OWL", "SKOS"],
-                defaultSourceAccessControl: "readwrite",
-                sourcesAccessControl: {},
-                allowedTools: config.tools_available,
-                theme: config.theme.defaultTheme,
-            },
-        };
-        expect(profiles).toStrictEqual(expectedResult);
+        tracker.on.select("profiles_list").response(dbProfiles);
+
+        const profiles = await profileModel.getUserProfiles({ login: "admin" });
+        expect(Object.keys(profiles).length).toBe(4);
+        expect(profiles.all_forbidden).toStrictEqual({
+            "allowedSourceSchemas": [
+                "OWL",
+            ],
+            "allowedTools": [
+                "lineage",
+                "KGcreator",
+                "KGquery",
+            ],
+            "id": "all_forbidden",
+            "name": "all_forbidden",
+            "sourcesAccessControl": {},
+            "theme": "default",
+        });
     });
 
     test("User with no profile get no profile", async () => {
-        const jdoe = {
+        tracker.on.select("profiles_list").response(dbProfiles);
+
+        const profiles = await profileModel.getUserProfiles({
             login: "jdoe",
             groups: [],
-        };
-        const profiles = await profileModel.getUserProfiles(jdoe);
+        });
         expect(profiles).toStrictEqual({});
     });
 
     test("User in read_folder_1 profile can get his profile", async () => {
-        const jdoe = {
+        tracker.on.select("profiles_list").response(dbProfiles);
+
+        const profiles = await profileModel.getUserProfiles({
             login: "jdoe",
             groups: ["read_folder_1"],
-        };
-        const profiles = await profileModel.getUserProfiles(jdoe);
-        expect(profiles).toStrictEqual({ read_folder_1: profilesFromFiles["read_folder_1"] });
+        });
+        expect(Object.keys(profiles).length).toBe(1);
+        expect(profiles.read_folder_1).toStrictEqual({
+            "allowedSourceSchemas": [
+                "OWL",
+            ],
+            "allowedTools": [
+                "lineage",
+                "KGcreator",
+                "KGquery",
+            ],
+            "id": "read_folder_1",
+            "name": "read_folder_1",
+            "sourcesAccessControl": {
+                "OWL/FOLDER_1": "read",
+            },
+            "theme": undefined,
+        });
     });
 });

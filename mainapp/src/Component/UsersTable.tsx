@@ -167,7 +167,7 @@ const UsersTable = () => {
                 );
             },
         },
-        model.users
+        model.users,
     );
 
     return renderUsers;
@@ -260,7 +260,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id, me = "" }: UserFor
             },
         },
         identity,
-        model.config
+        model.config,
     );
     const createEditButton = (
         <Button id={id} color="primary" variant="contained" onClick={handleOpen}>

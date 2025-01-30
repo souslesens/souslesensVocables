@@ -29,7 +29,7 @@ type SnackInfo = {
 
 interface DispatcherProps {
     handleSnackbar: (msg: string, severity?: Severity) => void;
-    selectedTab: string;
+    selectedTab: Sections.Profile | Sections.Sources;
 }
 
 const Dispatcher = ({ handleSnackbar, selectedTab }: DispatcherProps) => {
@@ -93,7 +93,7 @@ export default function UserManagement() {
 
 window.UserManagement.createApp = function createApp() {
     const container = document.getElementById("mount-user-management-here");
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const root = createRoot(container!);
     root.render(<UserManagement />);
     return root.unmount.bind(root);

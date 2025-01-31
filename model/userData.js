@@ -1,6 +1,6 @@
 const { knex } = require("knex");
 const { z } = require("zod");
-
+const { cleanupConnection, getKnexConnection } = require("./utils");
 const { readMainConfig } = require("./config");
 
 const UserDataObject = z
@@ -45,17 +45,8 @@ class UserDataModel {
         }
     };
 
-    /**
-     * Retrieve the Postgres connection from the configuration information
-     *
-     * @returns {knex} - the knex connection instance configure to use Postgres
-     */
-    _getConnection = () => {
-        return knex({ client: "pg", connection: this._mainConfig.database });
-    };
-
     all = async (currentUser) => {
-        const connection = this._getConnection();
+        const connection = getKnexConnection(this._mainConfig.database);
         if ((currentUser === undefined) & (this._mainConfig.auth === "disabled")) {
             currentUser = { login: "admin", groups: ["admin"] };
         }
@@ -68,72 +59,72 @@ class UserDataModel {
             return isOwner || isSharedWithUser || isSharedWithGroup;
         });
 
-        connection.destroy();
+        cleanupConnection(connection);
         return currentUserData;
     };
 
     find = async (identifier) => {
         this._checkIdentifier(identifier);
 
-        const connection = this._getConnection();
+        const connection = getKnexConnection(this._mainConfig.database);
         const results = await connection.select("*").from("user_data_list").where("id", identifier).first();
         if (results === undefined) {
-            connection.destroy();
+            cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });
         }
 
-        connection.destroy();
+        cleanupConnection(connection);
         return results;
     };
 
     insert = async (userData) => {
         const data = this._check(userData);
 
-        const connection = this._getConnection();
+        const connection = getKnexConnection(this._mainConfig.database);
         const results = await connection.select("id").from("users").where("login", data.owned_by).first();
         if (results === undefined) {
-            connection.destroy();
+            cleanupConnection(connection);
             throw Error("The specified owned_by username do not exists", { cause: 404 });
         }
 
         data.owned_by = results.id;
         await connection.insert(data).into("user_data");
-        connection.destroy();
+        cleanupConnection(connection);
     };
 
     remove = async (identifier) => {
         this._checkIdentifier(identifier);
 
-        const connection = this._getConnection();
+        const connection = getKnexConnection(this._mainConfig.database);
         const results = await connection.select("id").from("user_data").where("id", identifier).first();
         if (results === undefined) {
-            connection.destroy();
+            cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });
         }
 
         await connection("user_data").where("id", identifier).del();
-        connection.destroy();
+        cleanupConnection(connection);
     };
 
     update = async (userData) => {
         const data = this._check(userData);
 
-        const connection = this._getConnection();
+        const connection = getKnexConnection(this._mainConfig.database);
         let results = await connection.select("id").from("user_data").where("id", data.id).first();
         if (results === undefined) {
-            connection.destroy();
+            cleanupConnection(connection);
             throw Error("The specified identifier do not exists", { cause: 404 });
         }
 
         results = await connection.select("id").from("users").where("login", data.owned_by).first();
         if (results === undefined) {
-            connection.destroy();
+            cleanupConnection(connection);
             throw Error("The specified owned_by do not exists", { cause: 404 });
         }
 
         data.owned_by = results.id;
         await connection.update(data).into("user_data").where("id", data.id);
-        connection.destroy();
+        cleanupConnection(connection);
     };
 }
 

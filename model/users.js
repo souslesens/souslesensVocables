@@ -150,6 +150,10 @@ class UserModel {
      * @returns {Promise<UserAccount | undefined>} a user account
      */
     findUserAccountFromToken = async (token) => {
+        if (token.trim().length === 0) {
+            throw Error("The token cannot be empty or set with space only");
+        }
+
         const conn = getKnexConnection(this._mainConfig.database);
         const user = await conn.select("*").from("users").where("token", token).first();
         cleanupConnection(conn);
@@ -202,15 +206,20 @@ class UserModel {
      * @returns {Promise<string>} the new user token
      */
     generateUserToken = async (login) => {
-        const user = await this.findUserAccount(login);
-        if (user === undefined) {
+        const conn = getKnexConnection(this._mainConfig.database);
+
+        const results = await conn.select("login").from("users").where("login", login).first();
+        if (results === undefined) {
+            cleanupConnection(conn);
             throw Error("UserAccount does not exist");
         }
 
-        user.token = this._genToken(login);
-        await this.updateUserAccount(user);
+        const token = this._genToken(login);
 
-        return user.token;
+        await conn.update({ token: token }).into("users").where("login", login);
+        cleanupConnection(conn);
+
+        return token;
     };
 
     /**

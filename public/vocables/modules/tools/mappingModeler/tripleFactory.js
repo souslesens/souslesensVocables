@@ -68,6 +68,7 @@ var TripleFactory = (function () {
 
 
         })
+        filteredMappings= mappings[MappingModeler.currentTable.name].tripleModels
 
         TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, result) {
         });

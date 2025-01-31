@@ -21,7 +21,7 @@ var MappingModeler = (function () {
     var self = {};
 
     self.graphDiv = "mappingModeler_graphDiv";
-    self.jstreeDivId = "mappingModeler_jstreeDiv";
+    self.jstreeDivId = "mappingModeler_dataSourcesJstreeDiv";
     self.legendGraphDivId = "nodeInfosAxioms_activeLegendDiv";
     self.legendItemsArray = [
         //{ label: "Table", color: "#a8da83", shape: "ellipse" },
@@ -1445,6 +1445,9 @@ var MappingModeler = (function () {
         self.visjsGraph.data.edges.add(edge);
         self.saveVisjsGraph();
     };
+    self.saveVisjsGraphWithConfig = function () {
+        MappingModeler.saveVisjsGraph()
+    }
 
 
     return self;

@@ -120,7 +120,7 @@ var DataSourceManager = (function () {
                 }
             },
         };
-        self.dataSourcejstreeDivId = "mappingModeler_jstreeDiv";
+        self.dataSourcejstreeDivId = "mappingModeler_dataSourcesJstreeDiv";
         var jstreeData = [];
         jstreeData.push({
             id: "databaseSources",
@@ -155,7 +155,7 @@ var DataSourceManager = (function () {
                             id: key,
                             text: datasource.name || key,
                             parent: "databaseSources",
-                            data: { id: datasource.name, type: "databaseSource", sqlType: result.driver },
+                            data: {id: datasource.name, type: "databaseSource", sqlType: result.driver},
                         });
                         return callbackEach();
                     },
@@ -164,7 +164,7 @@ var DataSourceManager = (function () {
                             id: key,
                             text: datasource.name || key,
                             parent: "databaseSources",
-                            data: { id: datasource.name, type: "databaseSource" },
+                            data: {id: datasource.name, type: "databaseSource"},
                         });
                         return callbackEach();
                     },
@@ -178,7 +178,7 @@ var DataSourceManager = (function () {
                         text: datasource,
                         parent: "csvSources",
                         type: "CSV",
-                        data: { id: datasource, type: "csvSource" },
+                        data: {id: datasource, type: "csvSource"},
                     };
                     if (dataTables.includes(datasource)) {
                         jstreeNode.text = "<span style='color:blue'>" + datasource + "</span>";
@@ -256,7 +256,7 @@ var DataSourceManager = (function () {
                         dataType: "json",
                         success: function (result, _textStatus, _jqXHR) {
                             columns = result.headers;
-                            var tableObj = { [fileName]: columns };
+                            var tableObj = {[fileName]: columns};
                             self.currentConfig.currentDataSource.tables = tableObj;
                             self.currentConfig.currentDataSource.sampleData = result.data[0];
                             callbackSeries();
@@ -302,7 +302,7 @@ var DataSourceManager = (function () {
                                 success: function (data, _textStatus, _jqXHR) {
                                     self.currentDataSourceModel = data;
                                     self.currentSource = self.dataSource;
-                                    self.currentdabase = { type: sqlType, dbName: self.dataSource };
+                                    self.currentdabase = {type: sqlType, dbName: self.dataSource};
                                     self.currentConfig.currentDataSource.tables = data;
                                     callbackSeries();
                                 },
@@ -354,7 +354,6 @@ var DataSourceManager = (function () {
     };
 
 
-
     self.onDataSourcesJstreeSelect = function (event, obj) {
         MappingModeler.currentTreeNode = obj.node;
         var isRightClick = false;
@@ -379,9 +378,8 @@ var DataSourceManager = (function () {
                     name: obj.node.id,
                     columns: columns,
                 };
-                $("#MappingModeler_leftTabs").tabs("option", "active",1);
+                $("#MappingModeler_leftTabs").tabs("option", "active", 1);
                 UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab")
-
 
 
             });
@@ -395,7 +393,7 @@ var DataSourceManager = (function () {
 
             //self.hideForbiddenResources("Table");
             MappingModeler.currentResourceType = "Column";
-            $("#MappingModeler_leftTabs").tabs("option", "active",1);
+            $("#MappingModeler_leftTabs").tabs("option", "active", 1);
             UIcontroller.onActivateLeftPanelTab("MappingModeler_columnsTab")
 
         }
@@ -404,8 +402,6 @@ var DataSourceManager = (function () {
             $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.currentTable);
         }
     };
-
-
 
 
     // Config save made on visjsGraph
@@ -492,10 +488,10 @@ var DataSourceManager = (function () {
             return;
         }
         if (!datasource.id) {
-            datasource = { id: datasource, name: datasource };
+            datasource = {id: datasource, name: datasource};
         }
-        DataSourceManager.currentConfig.databaseSources[datasource.id] = { name: datasource.name };
-        DataSourceManager.rawConfig.databaseSources[datasource.id] = { name: datasource.name };
+        DataSourceManager.currentConfig.databaseSources[datasource.id] = {name: datasource.name};
+        DataSourceManager.rawConfig.databaseSources[datasource.id] = {name: datasource.name};
         DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
                 return alert(err);
@@ -531,6 +527,7 @@ var DataSourceManager = (function () {
         if (jstreeNode.data.type == "databaseSource") {
             if (DataSourceManager.rawConfig.databaseSources[datasourceName]) {
                 delete DataSourceManager.rawConfig.databaseSources[datasourceName];
+                JstreeWidget.deleteNode("mappingModeler_dataSourcesJstreeDiv",jstreeNode.id  )
             }
         } else if (jstreeNode.data.type == "csvSource") {
             if (DataSourceManager.rawConfig.csvSources[datasourceName]) {
@@ -573,6 +570,8 @@ var DataSourceManager = (function () {
             // Not done because road don't exist
         });
     };
+
+
 
     return self;
 })();

@@ -2,6 +2,8 @@ const { knex } = require("knex");
 const { z } = require("zod");
 
 const { readMainConfig } = require("./config");
+const { userModel } = require("./users");
+const { profileModel } = require("./profiles");
 
 const UserDataObject = z
     .object({
@@ -36,6 +38,28 @@ class UserDataModel {
             throw Error(`The user data do not follow the standard: ${JSON.stringify(check.error.issues)}`, { cause: 400 });
         }
         return check.data;
+    };
+
+    _remove_not_existing_users_from_shared_users = async (shared_users) => {
+        const all_users = await userModel.getUserAccounts();
+        const existing_login = Object.values(all_users).map((u) => u.login);
+        const results = shared_users.filter((shared_user) => {
+            if (existing_login.includes(shared_user)) {
+                return true;
+            }
+        });
+        return results;
+    };
+
+    _remove_not_existing_profiles_from_shared_profiles = async (shared_profiles) => {
+        const all_profiles = await profileModel.getAllProfiles();
+        const existing_profiles = Object.values(all_profiles).map((p) => p.name);
+        const results = shared_profiles.filter((shared_profile) => {
+            if (existing_profiles.includes(shared_profile)) {
+                return true;
+            }
+        });
+        return results;
     };
 
     _checkIdentifier = (identifier) => {
@@ -95,7 +119,8 @@ class UserDataModel {
             connection.destroy();
             throw Error("The specified owned_by username do not exists", { cause: 404 });
         }
-
+        data.shared_users = await this._remove_not_existing_users_from_shared_users(data.shared_users);
+        data.shared_profiles = await this._remove_not_existing_profiles_from_shared_profiles(data.shared_profiles);
         data.owned_by = results.id;
         await connection.insert(data).into("user_data");
         connection.destroy();
@@ -130,7 +155,8 @@ class UserDataModel {
             connection.destroy();
             throw Error("The specified owned_by do not exists", { cause: 404 });
         }
-
+        data.shared_users = await this._remove_not_existing_users_from_shared_users(data.shared_users);
+        data.shared_profiles = await this._remove_not_existing_profiles_from_shared_profiles(data.shared_profiles);
         data.owned_by = results.id;
         await connection.update(data).into("user_data").where("id", data.id);
         connection.destroy();

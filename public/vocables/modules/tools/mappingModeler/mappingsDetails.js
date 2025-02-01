@@ -47,86 +47,83 @@ var MappingsDetails = (function () {
             if (!divId) {
                 divId = "detailedMappings_jsTreeDiv";
             }
-            //datatypeMappingGraph
-            if (true) {
-
-                var table = MappingModeler.currentTable.name
-
-                if (!table) {
-                    table = MappingModeler.currentTable.name;
-                }
-
-                var nodes = MappingModeler.visjsGraph.data.nodes.get();
-
-                var columnsMap = {};
-                var jstreeData = [];
-                var uniqueSubjects = {};
-                var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
 
 
-                jstreeData.push({
-                    id: MappingModeler.currentTable.name,
-                    text: "<b>" + MappingModeler.currentTable.name + "</b>",
-                    data: {},
-                    parent: "#",
-                });
+            var table = MappingModeler.currentTable.name
 
-
-                nodes.forEach(function (node) {
-
-                        if (node.data.dataTable !== table) {
-                            return;
-                        }
-                        if (node.data.type == "Class") {
-                            return;
-                        }
-                        if (node.data.type == "table") {
-                            return;
-                        }
-
-
-                        if (!uniqueSubjects[node.label]) {
-                            uniqueSubjects[node.label] = 1;
-                            jstreeData.push({
-                                id: node.id,
-                                text: "<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>" + node.label + "</span>&nbsp;" + buttonStr,
-                                data: node.data,
-                                parent: MappingModeler.currentTable.name,
-                            });
-
-                            var predicates = {
-                                "rdfType": "rdf:type",
-                                rdfsLabel: "rdfs:label",
-                                uriType: "uri Type"
-                            }
-                            for (var key in node.data) {
-                                if (predicates[key]) {
-                                    jstreeData.push({
-                                        id: node.id + "|" + key + "|" + node.data[key],
-                                        text: "<span style='color: blue'>" + key + "</span>  " + node.data[key],
-                                        parent: node.id,
-                                    });
-                                }
-                            }
-
-                            if (node.data.otherPredicates) {
-                                node.data.otherPredicates.forEach(function (item) {
-                                    jstreeData.push({
-                                        id: node.id + "|" + "otherPredicates" + "|" + item.property + "|" + item.object,
-                                        text: "<span style='color: blue'>" + item.property + "</span>  " + item.object,
-                                        parent: node.id,
-                                    });
-
-
-                                })
-                            }
-                        }
-
-
-                    }
-                )
-
+            if (!table) {
+                table = MappingModeler.currentTable.name;
             }
+
+            var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+
+            var columnsMap = {};
+            var jstreeData = [];
+            var uniqueSubjects = {};
+            var buttonStr = "<img src='icons\\KGA\\MoreOptionsIcon-KGA.png' onClick=''>";
+
+
+            jstreeData.push({
+                id: MappingModeler.currentTable.name,
+                text: "<b>" + MappingModeler.currentTable.name + "</b>",
+                data: {},
+                parent: "#",
+            });
+
+
+            nodes.forEach(function (node) {
+
+                    if (node.data.dataTable !== table) {
+                        return;
+                    }
+                    if (node.data.type == "Class") {
+                        return;
+                    }
+                    if (node.data.type == "table") {
+                        return;
+                    }
+
+
+                    if (!uniqueSubjects[node.label]) {
+                        uniqueSubjects[node.label] = 1;
+                        jstreeData.push({
+                            id: node.id,
+                            text: "<span style='background-color: #cb9801;padding: 3px;border-radius: 7px;'>" + node.label + "</span>&nbsp;" + buttonStr,
+                            data: node.data,
+                            parent: MappingModeler.currentTable.name,
+                        });
+
+                        var predicates = {
+                            "rdfType": "rdf:type",
+                            rdfsLabel: "rdfs:label",
+                            uriType: "uri Type"
+                        }
+                        for (var key in node.data) {
+                            if (predicates[key]) {
+                                jstreeData.push({
+                                    id: node.id + "|" + key + "|" + node.data[key],
+                                    text: "<span style='color: blue'>" + key + "</span>  " + node.data[key],
+                                    parent: node.id,
+                                });
+                            }
+                        }
+
+                        if (node.data.otherPredicates) {
+                            node.data.otherPredicates.forEach(function (item) {
+                                jstreeData.push({
+                                    id: node.id + "|" + "otherPredicates" + "|" + item.property + "|" + item.object,
+                                    text: "<span style='color: blue'>" + item.property + "</span>  " + item.object,
+                                    parent: node.id,
+                                });
+
+
+                            })
+                        }
+                    }
+
+
+                }
+            )
 
 
             var options = {
@@ -145,11 +142,7 @@ var MappingsDetails = (function () {
                                 var node = MappingsDetails.deleteMappingInVisjsNode(self.currentTreeNode);
                             },
                         };
-                       /* items["isRestriction"] = {
-                            label: "isRestriction",
-                            action: function (_e) {
-                            },
-                        };*/
+
                     }
                     return items;
                 },
@@ -163,9 +156,7 @@ var MappingsDetails = (function () {
         }
 
         self.showSpecificMappingsBot = function (column) {
-
-
-            MappingModeler.currentGraphNode = MappingModeler.visjsGraph.data.nodes.get(MappingsDetails.currentTreeNode.id)
+            MappingColumnsGraph.currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(MappingsDetails.currentTreeNode.id)
 
             var params = {
                 source: MappingModeler.currentSource,
@@ -177,7 +168,7 @@ var MappingsDetails = (function () {
             MappingModeler_bot.start(MappingModeler_bot.workflowColumnmMappingOther, params, function (err, result) {
                 var params = MappingModeler_bot.params;
 
-                var data = MappingModeler.currentGraphNode.data;
+                var data = MappingColumnsGraph.currentGraphNode.data;
                 if (!data.otherPredicates) {
                     data.otherPredicates = [];
                 }
@@ -189,102 +180,54 @@ var MappingsDetails = (function () {
                         property: "rdf:type",
                         object: params.rdfType,
                     });
-                    MappingModeler.updateNode({id: MappingModeler.currentGraphNode.id, data: data});
-                    MappingModeler.saveVisjsGraph();
+                    MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
+                    MappingColumnsGraph.saveVisjsGraph();
                 } else if (params.addingSubClassOf) {
                     data.otherPredicates.push({
                         property: "rdfs:subClassOf",
                         object: params.addingSubClassOf,
                     });
-                    MappingModeler.updateNode({id: MappingModeler.currentGraphNode.id, data: data});
-                    MappingModeler.saveVisjsGraph();
+                    MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
+                    MappingColumnsGraph.saveVisjsGraph();
                 } else if (params.nonObjectPropertyId) {
-                    var range=params.datatypePropertyRange|| Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range;
+                    var range = params.datatypePropertyRange || Config.ontologiesVocabularyModels[params.nonObjectPropertyVocab].nonObjectProperties[params.nonObjectPropertyId].range;
                     data.otherPredicates.push({
                         property: params.nonObjectPropertyId,
                         object: params.predicateObjectColumn,
-                        range:range,
+                        range: range,
                         dateFormat: params.nonObjectPropertyDateFormat || null, //if any
                     });
-                    MappingModeler.updateNode({id: MappingModeler.currentGraphNode.id, data: data});
-                    MappingModeler.saveVisjsGraph();
+                    MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
+                    MappingColumnsGraph.saveVisjsGraph();
                 }
                 self.showDetailsDialog();
             });
-        };
-        self.sampleData = function (column) {
-            if (!column) {
-                return;
-            }
-            var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentDataSource][MappingModeler.currentTable.name].tripleModels;
-
-            var filteredMapping = mappings.filter(function (mapping) {
-                return mapping.s.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "") == column;
-            });
-            //rajouter toutes les colonnes en lien avec celle la et mettre celle qui nous intéresse en premier
-
-            MappingModeler.showSampleData(self.currentTreeNode, column);
         };
 
         self.saveMappingsDetailsToVisjsGraph = function () {
             if (!MappingsDetails.currentTreeNode) {
                 return;
             }
-            var currentGraphNode = MappingModeler.visjsGraph.data.nodes.get(MappingsDetails.currentTreeNode.id)
+            var currentGraphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(MappingsDetails.currentTreeNode.id)
             if (!currentGraphNode) {
                 return alert("no current graphNode ");
             }
             currentGraphNode.data.uriType = $("#columnDetails-UriType").val();
             currentGraphNode.data.rdfsLabel = $("#columnDetails-rdfsLabel").val();
             currentGraphNode.data.rdfType = $("#columnDetails-rdfType").val();
-            MappingModeler.updateNode(currentGraphNode);
+            MappingColumnsGraph.updateNode(currentGraphNode);
             self.switchTypeToSubclass(currentGraphNode);
             // });
-            MappingModeler.saveVisjsGraph();
-        };
-
-        self.switchTypeToSubclass = function (node) {
-            var nodes = MappingModeler.visjsGraph.data.nodes.get();
-            var edges = MappingModeler.visjsGraph.data.edges.get();
-            if (node.data.rdfType == "owl:Class") {
-                var typeEdge = edges.filter(function (edge) {
-                    return edge.from == node.id && edge.label == "a";
-                });
-                if (typeEdge.length > 0) {
-                    typeEdge[0].label = "rdfs:subClassOf";
-                    typeEdge[0].data.type = "rdfs:subClassOf";
-                    typeEdge[0].data.id = "rdfs:subClassOf";
-                    MappingModeler.updateEdge(typeEdge[0]);
-                }
-            } else {
-                var typeEdge = edges.filter(function (edge) {
-                    return edge.from == node.id && edge.label == "rdfs:subClassOf";
-                });
-                if (typeEdge.length > 0) {
-                    // care to rdfs:subclassOf between two columns don't switch
-                    var edgeFrom = nodes.filter(function (node) {
-                        return typeEdge[0].to == node.id;
-                    });
-                    if (edgeFrom.length > 0) {
-                        if (edgeFrom[0].data.type != "Column") {
-                            typeEdge[0].label = "a";
-                            typeEdge[0].data.type = "rdf:type";
-                            typeEdge[0].data.id = "rdf:type";
-                            MappingModeler.updateEdge(typeEdge[0]);
-                        }
-                    }
-                }
-            }
+            MappingColumnsGraph.saveVisjsGraph();
         };
 
 
-        ;
         self.deleteMappingInVisjsNode = function (treeNode) {
 
 
             var array = treeNode.id.split("|")
 
-            var graphNode = MappingModeler.visjsGraph.data.nodes.get(array[0]);
+            var graphNode = MappingColumnsGraph.visjsGraph.data.nodes.get(array[0]);
 
             if (array.length == 3) {
                 for (var key in graphNode.data) {
@@ -314,7 +257,7 @@ var MappingsDetails = (function () {
 
             if (obj.node.parent == MappingModeler.currentTable.name) {//column node
                 self.showTechnicalMappingsDialog(obj.node.id);
-                MappingModeler.currentTreeNode = MappingModeler.visjsGraph.data.nodes.get(obj.node.id);
+                MappingModeler.currentTreeNode = MappingColumnsGraph.visjsGraph.data.nodes.get(obj.node.id);
             } else {
                 MappingModeler.currentTreeNode = null;
             }
@@ -340,6 +283,7 @@ var MappingsDetails = (function () {
             //  sort by similarity for others than rowIndex
 
             var columns = JSON.parse(JSON.stringify(MappingModeler.currentTable.columns));
+            columns.unshift("");
             common.array.moveItemToFirst(columns, column);
             if (currentTreeNode.data.rdfType) {
                 common.array.moveItemToFirst(rdfObjectsType, currentTreeNode.data.rdfType);
@@ -356,11 +300,11 @@ var MappingsDetails = (function () {
             if (currentTreeNode.data.rdfsLabel) {
                 common.array.moveItemToFirst(columns, currentTreeNode.data.rdfsLabel);
             }
-            if (currentTreeNode.data.rdfsLabel == "") {
-                columns.unshift("");
-            } else {
-                columns.push("");
-            }
+            /* if (currentTreeNode.data.rdfsLabel == "") {
+                 columns.unshift("");
+             } else {
+                 columns.push("");
+             }*/
             common.fillSelectOptions(`columnDetails-rdfsLabel`, columns, false);
             common.fillSelectOptions(`columnDetails-rdfType`, rdfObjectsType, false);
             common.fillSelectOptions(`columnDetails-UriType`, URITType, false);
@@ -568,7 +512,7 @@ var MappingsDetails = (function () {
         self.showTansformDialog = function (column) {
             // return if  virtuals and rowIndex
             if (!column) {
-                column = MappingModeler.currentGraphNode.label;
+                column = MappingColumnsGraph.currentGraphNode.label;
             }
             $("#smallDialogDiv").load("./modules/tools/mappingModeler/html/transformColumnDialog.html", function (err) {
                 $("#smallDialogDiv").dialog("open");
@@ -634,18 +578,18 @@ var MappingsDetails = (function () {
                 return alert("error in function code " + err.message);
             }
             var transformFn = "function{" + transformFnStr + "}";
-            var nodes = MappingModeler.visjsGraph.data.nodes.get();
+            var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
             var currentNode = nodes.filter(function (node) {
                 return node.label == self.transformColumn && node.data.dataTable == MappingModeler.currentTable.name;
             })[0];
             currentNode.data.transform = transformFn;
-            MappingModeler.updateNode(currentNode);
-            MappingModeler.saveVisjsGraph();
+            MappingColumnsGraph.updateNode(currentNode);
+            MappingColumnsGraph.saveVisjsGraph();
         };
 
         self.mappingColumnInfo = {
             editColumnInfos: function () {
-                var data = MappingModeler.currentGraphNode.data;
+                var data = MappingColumnsGraph.currentGraphNode.data;
 
                 if (!data.uriType) {
                     // showBot
@@ -659,12 +603,12 @@ var MappingsDetails = (function () {
                         data.uriType = params.URItype;
                         data.rdfType = params.rdfType;
                         (data.rdfsLabel = params.rdfsLabel),
-                            MappingModeler.updateNode({
-                                id: MappingModeler.currentGraphNode.id,
+                            MappingColumnsGraph.updateNode({
+                                id: MappingColumnsGraph.currentGraphNode.id,
                                 data: data,
                             });
                         self.mappingColumnInfo.editColumnInfos();
-                        MappingsDetails.showDatatypeGraph(MappingModeler.currentGraphNode.label);
+                        MappingsDetails.showDatatypeGraph(MappingColumnsGraph.currentGraphNode.label);
                     });
                 }
 
@@ -672,15 +616,49 @@ var MappingsDetails = (function () {
             },
             save: function () {
                 var data = self.mappingColumnEditor.get();
-                MappingModeler.currentGraphNode.data = data;
-                MappingModeler.updateNode({id: MappingModeler.currentGraphNode.id, data: data});
-                MappingsDetails.switchTypeToSubclass(MappingModeler.currentGraphNode);
+                MappingColumnsGraph.currentGraphNode.data = data;
+                MappingColumnsGraph.updateNode({id: MappingColumnsGraph.currentGraphNode.id, data: data});
+                MappingsDetails.switchTypeToSubclass(MappingColumnsGraph.currentGraphNode);
                 $("#smallDialogDiv").dialog("close");
-                MappingModeler.saveVisjsGraph();
-                MappingsDetails.showDatatypeGraph(MappingModeler.currentGraphNode.label);
+                MappingColumnsGraph.saveVisjsGraph();
+                MappingsDetails.showDatatypeGraph(MappingColumnsGraph.currentGraphNode.label);
             },
         };
 
+
+        self.switchTypeToSubclass = function (node) {
+            var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
+            var edges = MappingColumnsGraph.visjsGraph.data.edges.get();
+            if (node.data.rdfType == "owl:Class") {
+                var typeEdge = edges.filter(function (edge) {
+                    return edge.from == node.id && edge.label == "a";
+                });
+                if (typeEdge.length > 0) {
+                    typeEdge[0].label = "rdfs:subClassOf";
+                    typeEdge[0].data.type = "rdfs:subClassOf";
+                    typeEdge[0].data.id = "rdfs:subClassOf";
+                    MappingColumnsGraph.updateEdge(typeEdge[0]);
+                }
+            } else {
+                var typeEdge = edges.filter(function (edge) {
+                    return edge.from == node.id && edge.label == "rdfs:subClassOf";
+                });
+                if (typeEdge.length > 0) {
+                    // care to rdfs:subclassOf between two columns don't switch
+                    var edgeFrom = nodes.filter(function (node) {
+                        return typeEdge[0].to == node.id;
+                    });
+                    if (edgeFrom.length > 0) {
+                        if (edgeFrom[0].data.type != "Column") {
+                            typeEdge[0].label = "a";
+                            typeEdge[0].data.type = "rdf:type";
+                            typeEdge[0].data.id = "rdf:type";
+                            MappingColumnsGraph.updateEdge(typeEdge[0]);
+                        }
+                    }
+                }
+            }
+        };
 
 
         return self;

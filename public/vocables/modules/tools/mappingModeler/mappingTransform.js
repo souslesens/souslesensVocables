@@ -26,7 +26,7 @@ var MappingTransform = (function () {
             table = MappingModeler.currentTable.name;
         }
         var nodesMap = {};
-        var nodes = MappingModeler.visjsGraph.data.nodes.get();
+        var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
 
         nodes.forEach(function (node) {
             nodesMap[node.id] = node;
@@ -121,7 +121,7 @@ var MappingTransform = (function () {
                 allMappings[data.dataTable].transform[data.label] = data.transform;
             }
 
-            var connections = MappingModeler.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
+            var connections = MappingColumnsGraph.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
                 if (connection.edge.data.type == "tableToColumn") {

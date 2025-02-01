@@ -48,10 +48,10 @@ var TripleFactory = (function () {
         checkedNodes.forEach(function (node) {
             if (node.parents.length == 3){// attrs
                 checkedNodeAttrs.push(node.id)
-                columnsSelection[node.id] = MappingModeler.visjsGraph.data.nodes.get(node.parent)
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent)
             }
             else if (node.data && node.data.type == "Column") {// filter only mapping nodes
-                columnsSelection[node.id] = MappingModeler.visjsGraph.data.nodes.get(node.id)
+                columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id)
             }
 
 
@@ -80,7 +80,7 @@ var TripleFactory = (function () {
             alert("select a table or a csv source");
         }
         var mappingsDetailsIsLoaded = false;
-        MappingModeler.visjsGraph.data.nodes.get().forEach(function (node) {
+        MappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
             if (node?.data?.dataTable === MappingModeler.currentTable.name) {
                 if (node.data.uriType) {
                     mappingsDetailsIsLoaded = true;

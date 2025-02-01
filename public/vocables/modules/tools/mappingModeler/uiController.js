@@ -19,7 +19,7 @@ var UIcontroller=(function(){
          MappingModeler.loadSuggestionSelectJstree(MappingModeler.currentTable.columns, "Columns");
          $("#MappingModeler_currentDataSource").html(DataSourceManager.currentConfig.currentDataSource.name);
          try {
-             MappingModeler.visjsGraph.network.openCluster("cluster_" + MappingModeler.currentTable.name);
+             MappingColumnsGraph.visjsGraph.network.openCluster("cluster_" + MappingModeler.currentTable.name);
          }
          catch(e){
 
@@ -44,7 +44,7 @@ var UIcontroller=(function(){
         var tabsArray = ["dataSource", "mappings", "triples"];
         if (target == "Column Mappings") {
             MappingModeler.initActiveLegend(self.legendGraphDivId);
-            //MappingModeler.loadVisjsGraph();
+
         }
         else if (target == "Technical Mappings") {
             MappingsDetails.showDetailsDialog()

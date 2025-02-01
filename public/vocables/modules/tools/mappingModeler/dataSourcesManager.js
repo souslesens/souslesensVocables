@@ -20,9 +20,11 @@ var DataSourceManager = (function () {
     self.createApp = null;
     self.getSlsvSourceConfig = function (source, callback) {
         // Transfer Config main.json to visjsgraph for firstTime and if already transfered skip
-        if (self?.rawConfig?.isConfigInMappingGraph) {
+      if (self?.rawConfig?.isConfigInMappingGraph) {
             return callback(null, self.rawConfig);
         }
+
+      //obslolete here for old mappings migration
         var payload = {
             dir: mappingsDir + "/" + source,
             fileName: "main.json",
@@ -43,7 +45,7 @@ var DataSourceManager = (function () {
                 self.currentConfig.isConfigInMappingGraph = true;
                 self.rawConfig = self.currentConfig;
 
-                MappingModeler.saveVisjsGraphWithConfig();
+               MappingColumnsGraph.saveVisjsGraphWithConfig();
 
                 return callback(null, json);
             },
@@ -66,7 +68,7 @@ var DataSourceManager = (function () {
     // create dir and main.json
     // Initialisation of configuration
     self.initNewSlsvSource = function (source, callback) {
-        MappingModeler.saveVisjsGraphWithConfig(function () {
+       MappingColumnsGraph.saveVisjsGraphWithConfig(function () {
             self.currentConfig = self.rawConfig;
             if (callback) {
                 callback(null, self.currentConfig);
@@ -171,7 +173,7 @@ var DataSourceManager = (function () {
                 });
             },
             function (err) {
-                var dataTables = MappingModeler.getDataTablesFromVisjsGraph();
+                var dataTables = MappingColumnsGraph.getDatasourceTablesFromVisjsGraph();
                 for (var datasource in self.currentConfig.csvSources) {
                     var jstreeNode = {
                         id: datasource,
@@ -187,7 +189,7 @@ var DataSourceManager = (function () {
                 }
 
                 //underline CSV with mappings
-                var dataSources = MappingModeler.visjsGraph.data.nodes.get().map(function (node) {
+                var dataSources = MappingColumnsGraph.visjsGraph.data.nodes.get().map(function (node) {
                     return node?.data?.datasource;
                 });
                 if (dataSources.length > 0) {
@@ -318,7 +320,7 @@ var DataSourceManager = (function () {
 
                         function (callbackSeries) {
                             var jstreeData = [];
-                            var dataTables = MappingModeler.getDataTablesFromVisjsGraph();
+                            var dataTables = MappingColumnsGraph.getDatasourceTablesFromVisjsGraph();
                             for (var table in self.currentConfig.currentDataSource.tables) {
                                 var label = table;
                                 if (dataTables.includes(table)) {
@@ -406,32 +408,10 @@ var DataSourceManager = (function () {
 
     // Config save made on visjsGraph
     self.saveSlsvSourceConfig = function (callback) {
-        MappingModeler.saveVisjsGraphWithConfig(function () {
-            if (callback) {
-                callback();
-            }
-        });
-        /*var data = DataSourceManager.rawConfig;
-        var source = DataSourceManager.currentSlsvSource;
+       MappingColumnsGraph.saveVisjsGraphWithConfig(callback)
 
-        var payload = {
-            dir: mappingsDir + "/" + source,
-            fileName: "main.json",
-            data: JSON.stringify(data, null, 2),
-        };
-        $.ajax({
-            type: "POST",
-            url: Config.apiUrl + "/data/file",
-            data: payload,
-            dataType: "json",
-            success: function (result, _textStatus, _jqXHR) {
-                UI.message(mappingsDir + "/" + source + "config saved");
-                callback();
-            },
-            error: function (err) {
-                callback(err);
-            },
-        });*/
+
+
     };
 
     /*********************************************************************************/
@@ -466,6 +446,7 @@ var DataSourceManager = (function () {
             beforeClose: function () {
                 self.umountKGUploadApp();
                 DataSourceManager.currentSlsvSource = MappingModeler.currentSource;
+
                 DataSourceManager.getSlsvSourceConfig(MappingModeler.currentSource, function (err, result) {
                     if (err) {
                         return err;
@@ -513,12 +494,15 @@ var DataSourceManager = (function () {
         DataSourceManager.currentConfig.csvSources[datasourceName] = {};
         DataSourceManager.rawConfig = DataSourceManager.currentConfig;
 
+
         DataSourceManager.saveSlsvSourceConfig(function (err, result) {
             if (err) {
                 return alert(err);
             }
             MappingModeler.onLoaded();
         });
+
+
     };
 
     self.deleteDataSource = function (jstreeNode) {
@@ -532,6 +516,8 @@ var DataSourceManager = (function () {
         } else if (jstreeNode.data.type == "csvSource") {
             if (DataSourceManager.rawConfig.csvSources[datasourceName]) {
                 delete DataSourceManager.rawConfig.csvSources[datasourceName];
+                JstreeWidget.deleteNode("mappingModeler_dataSourcesJstreeDiv",jstreeNode.id  )
+
             }
         } else {
             return;
@@ -544,26 +530,26 @@ var DataSourceManager = (function () {
             // Delete all nodes/edges from this DataSource
 
             var newNodes = [];
-            MappingModeler.visjsGraph.data.nodes.get().forEach(function (node) {
+            MappingColumnsGraph.visjsGraph.data.nodes.get().forEach(function (node) {
                 if (node.data.datasource != datasourceName) {
                     newNodes.push(node);
                 } else {
                     // to not save n times
-                    MappingModeler.visjsGraph.data.nodes.remove(node);
-                    //MappingModeler.removeNode(node);
+                    MappingColumnsGraph.visjsGraph.data.nodes.remove(node);
                 }
+
             });
             var newNodesIds = newNodes.map(function (node) {
                 return node.id;
             });
-            MappingModeler.visjsGraph.data.edges.get().forEach(function (edge) {
+            MappingColumnsGraph.visjsGraph.data.edges.get().forEach(function (edge) {
                 if (newNodesIds.includes(edge.from) && newNodesIds.includes(edge.to)) {
                     // node to keep
                 } else {
-                    MappingModeler.visjsGraph.data.edges.remove(edge);
+                    MappingColumnsGraph.visjsGraph.data.edges.remove(edge);
                 }
             });
-            MappingModeler.saveVisjsGraphWithConfig(function () {
+           MappingColumnsGraph.saveVisjsGraphWithConfig(function () {
                 MappingModeler.onLoaded();
             });
             // Delete File from CSV if it's a CSV

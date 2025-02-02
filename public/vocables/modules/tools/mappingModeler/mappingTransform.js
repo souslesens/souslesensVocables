@@ -78,27 +78,23 @@ var MappingTransform = (function () {
         var columnsMapLabels = Object.values(columnsMap).map(function (column) {
             return column.label;
         });
-        var allMappings = {};
-        allMappings.idsMap={}
+        var allMappings = [];
+
         for (var nodeId in columnsMap) {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
-            allMappings.idsMap[subject]=nodeId
+        
 
             if (!subject) {
                 return alert("Error in column " + nodeId);
             }
 
-            if (!allMappings[data.dataTable]) {
-                allMappings[data.dataTable] = { tripleModels: [] };
-            }
+          
             if (data.rdfType) {
                 var predicate = "rdf:type";
-                /*  if (data.rdfType == "owl:Class") {
-                    predicate = "rdfs:subClassOf";
-                }*/
+               
 
-                allMappings[data.dataTable].tripleModels.push({
+                allMappings.push({
                     s: subject,
                     p: predicate,
                     o: data.rdfType,
@@ -106,7 +102,7 @@ var MappingTransform = (function () {
             }
 
             if (data.rdfsLabel) {
-                allMappings[data.dataTable].tripleModels.push({
+                allMappings.push({
                     s: subject,
                     p: "rdfs:label",
                     o: data.rdfsLabel,
@@ -146,7 +142,7 @@ var MappingTransform = (function () {
                     o: object,
                 };
 
-                allMappings[data.dataTable].tripleModels.push(mapping);
+                allMappings.push(mapping);
             });
             if (data.otherPredicates) {
                 data.otherPredicates.forEach(function (predicate) {
@@ -169,18 +165,18 @@ var MappingTransform = (function () {
                         triple.dateFormat = predicate.dateFormat;
                     }
 
-                    allMappings[data.dataTable].tripleModels.push(triple);
+                    allMappings.push(triple);
                 });
             }
         }
 
-        for (var dataTable in allMappings) {
-            allMappings[data.dataTable].tripleModels = self.addMappingsRestrictions(allMappings[data.dataTable].tripleModels);
-        }
 
-        var json = allMappings;
+            allMappings = self.addMappingsRestrictions(allMappings);
 
-        return json;
+
+
+
+        return allMappings;
     };
 
     self.addMappingsRestrictions = function (allMappings) {

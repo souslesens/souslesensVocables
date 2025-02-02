@@ -301,7 +301,7 @@ var MappingsDetails = (function () {
             self.currentTreeNode = obj.node;
 
             if (obj.node.parent == MappingModeler.currentTable.name) {//column node
-                self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv",obj.node.id,function(){
+                self.showColumnTechnicalMappingsDialog("detailedMappings_techDetailsDiv",obj.node,function(){
                     MappingsDetails.showDetailsDialog()
                     MappingModeler.currentTreeNode = MappingColumnsGraph.visjsGraph.data.nodes.get(obj.node.id);
                 });
@@ -320,8 +320,7 @@ var MappingsDetails = (function () {
 
         self.drawDetailedMappingsGraph = function (column) {
             //datatypeMappingGraph
-            var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()[MappingModeler.currentTable.name].tripleModels;
-
+            var mappings = MappingTransform.getSLSmappingsFromVisjsGraph()
             if (column) {
                 mappings = mappings.filter(function (mapping) {
                     return mapping.s.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "") == column || mapping.o.replaceAll("_$", "").replaceAll("_£", "").replaceAll("@", "") == column;
@@ -570,7 +569,7 @@ var MappingsDetails = (function () {
                 }
                 var transformFn = "function{" + transformFnStr + "}";
                 var table = MappingModeler.currentTable.name;
-                var mappings = MappingTransform.getSLSmappingsFromVisjsGraph(table)[table].tripleModels;
+                var mappings = MappingTransform.getSLSmappingsFromVisjsGraph(table);
 
                 var filteredMapping = mappings.filter(function (mapping) {
                     return mapping.s.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn || mapping.o.replace("@", "").replace("_$", "").replace("_£", "") == self.transformColumn;

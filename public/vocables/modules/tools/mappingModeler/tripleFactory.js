@@ -10,13 +10,17 @@ var TripleFactory = (function () {
     var self = {};
 
     self.showTripleSample = function () {
-        if (!self.checkCurrentTable()) return;
+        if (!self.checkCurrentTable()) {
+            return;
+        }
 
         self.showFilterMappingDialog(true);
     };
 
     self.writeTriples = function () {
-        if (!self.checkCurrentTable()) return;
+        if (!self.checkCurrentTable()) {
+            return;
+        }
         self.showFilterMappingDialog(false);
     };
 
@@ -45,32 +49,41 @@ var TripleFactory = (function () {
         var filteredMappings = [];
         var columnsSelection = {};
         var checkedNodeAttrs = []
+
         checkedNodes.forEach(function (node) {
-            if (node.parents.length == 3){// attrs
+            if (node.parents.length == 3) {// attrs
                 checkedNodeAttrs.push(node.id)
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.parent)
-            }
-            else if (node.data && node.data.type == "Column") {// filter only mapping nodes
+            } else if (node.data && node.data.type == "Column") {// filter only mapping nodes
                 columnsSelection[node.id] = MappingColumnsGraph.visjsGraph.data.nodes.get(node.id)
             }
 
 
-
         });
         var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection)
-var uniqueFilteredMappings={}
-        mappings[MappingModeler.currentTable.name].tripleModels.forEach(function (mapping) {
+        var uniqueFilteredMappings = {}
+        mappings.forEach(function (mapping) {
             checkedNodeAttrs.forEach(function (treeNodeId) {
                 if (treeNodeId.indexOf(mapping.o) > -1) {
-                    filteredMappings.push(mapping)
+                   if(! uniqueFilteredMappings[mapping.s+"|"+mapping.o]){
+                       uniqueFilteredMappings[mapping.s+"|"+mapping.o]=1
+                       filteredMappings.push(mapping)
+                   }
+
                 }
             })
 
 
         })
-        filteredMappings= mappings[MappingModeler.currentTable.name].tripleModels
+        var table=MappingModeler.currentTable.name
+     filteredMappings ={[table]:{tripleModels:filteredMappings}}
 
         TripleFactory.createTriples(self.filterMappingIsSample, MappingModeler.currentTable.name, {filteredMappings: filteredMappings}, function (err, result) {
+            if (err) {
+                return alert(err.responseText);
+            } else {
+                UI.message("Done", true)
+            }
         });
     };
 
@@ -100,7 +113,9 @@ var uniqueFilteredMappings={}
     self.deleteTriples = function (all, callback) {
         var tables = [];
         if (!all) {
-            if (!self.checkCurrentTable) return;
+            if (!self.checkCurrentTable) {
+                return;
+            }
             if (!confirm("Do you really want to delete  triples created with KGCreator in datasource " + DataSourceManager.currentConfig.currentDataSource.name)) {
                 return;
             }
@@ -168,7 +183,7 @@ var uniqueFilteredMappings={}
             options.mappingsFilter = allTableMappings;
         }
         if (options.filteredMappings) {
-            options.mappingsFilter[MappingModeler.currentTable.name].tripleModels = options.filteredMappings;
+            options.mappingsFilter = options.filteredMappings;
         }
         var payload = {
             source: DataSourceManager.currentSlsvSource,
@@ -258,7 +273,7 @@ var uniqueFilteredMappings={}
         var tableCols = [];
         var hearders = ["subject", "predicate", "object"];
         hearders.forEach(function (item) {
-            tableCols.push({ title: item, defaultContent: "", width: "30%" });
+            tableCols.push({title: item, defaultContent: "", width: "30%"});
         });
 
         var tableData = [];
@@ -274,7 +289,8 @@ var uniqueFilteredMappings={}
 
         /*  $("#KGcreator_triplesDataTableDiv").html(str)
           return;*/
-        Export.showDataTable(div, tableCols, tableData, null, { paging: true, divId: div }, function (err, datatable) {});
+        Export.showDataTable(div, tableCols, tableData, null, {paging: true, divId: div}, function (err, datatable) {
+        });
     };
 
     return self;

@@ -58,7 +58,7 @@ var TripleFactory = (function () {
 
         });
         var mappings = MappingTransform.mappingsToKGcreatorJson(columnsSelection)
-
+var uniqueFilteredMappings={}
         mappings[MappingModeler.currentTable.name].tripleModels.forEach(function (mapping) {
             checkedNodeAttrs.forEach(function (treeNodeId) {
                 if (treeNodeId.indexOf(mapping.o) > -1) {

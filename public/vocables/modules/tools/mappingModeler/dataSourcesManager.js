@@ -439,15 +439,15 @@ var DataSourceManager = (function () {
                     throw new Error("React app is not initialized see assets/mappingModeler_upload_app.js");
                 }
 
-                self.uploadFormData.currentSource = MappingModeler.currentSource;
+                self.uploadFormData.currentSource = MappingModeler.currentSLSsource;
 
                 self.umountKGUploadApp = self.createApp(self.uploadFormData);
             },
             beforeClose: function () {
                 self.umountKGUploadApp();
-                DataSourceManager.currentSlsvSource = MappingModeler.currentSource;
+                DataSourceManager.currentSlsvSource = MappingModeler.currentSLSsource;
 
-                DataSourceManager.getSlsvSourceConfig(MappingModeler.currentSource, function (err, result) {
+                DataSourceManager.getSlsvSourceConfig(MappingModeler.currentSLSsource, function (err, result) {
                     if (err) {
                         return err;
                     }

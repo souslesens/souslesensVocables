@@ -31,7 +31,9 @@ var MappingModeler = (function () {
         {label: "URI", color: "#bc7dec", shape: "square"},
 
         {label: "Class", color: "#00afef", shape: "box"},
+
     ];
+    self.propertyColor="#409304"
 
     self.onLoaded = function () {
         async.series(
@@ -149,7 +151,7 @@ var MappingModeler = (function () {
         } else if (parentName == "Classes") {
             color = "#00afef"
         } else if (parentName == "Properties") {
-            color = "#375521"
+            color = self.propertyColor
         }
         jstreeData.push({
             id: parentName,
@@ -181,7 +183,7 @@ var MappingModeler = (function () {
                     jstreeData.push({
                         id: item.id,
                         parent: item.source,
-                        text:  "<span color:"+color+"'>"+item.label.split(":")[1]+"</span>",
+                        text:  "<span  style='color:"+color+"'>"+item.label.split(":")[1]+"</span>",
                         data: {
                             id: item.id,
                             text: item.label.split(":")[1],
@@ -192,7 +194,7 @@ var MappingModeler = (function () {
                     jstreeData.push({
                         id: item.id,
                         parent: parentName,
-                        text: item.label,
+                        text:  "<span  style='color:"+color+"'>"+item.label+"</span>",
                         data: {
                             id: item.id,
                             text: item.label,
@@ -206,7 +208,7 @@ var MappingModeler = (function () {
                     jstreeData.push({
                         id: item,
                         parent: parentName,
-                        text: item,
+                        text:  "<span  style='color:"+color+"'>"+item+"</span>",
                         data: {
                             id: item,
                             label: item,
@@ -262,6 +264,8 @@ var MappingModeler = (function () {
     };
 
     self.onSuggestionsSelect = function (event, obj) {
+        if(!DataSourceManager.currentConfig.  currentDataSource )
+            return alert("Select a data source")
         var resourceUri = obj.node.id;
         var newResource = null;
         var id = common.getRandomHexaId(8);
@@ -314,6 +318,7 @@ var MappingModeler = (function () {
             };
 
             MappingColumnsGraph.drawResource(newResource);
+             MappingColumnsGraph.graphActions. showColumnDetails(newResource)
             setTimeout(function () {
                 self.onLegendNodeClick({id: "Column"});
             }, 500);
@@ -363,15 +368,17 @@ var MappingModeler = (function () {
             if (self.currentRelation) {
                 self.currentRelation.data = {type: "Objectproperty", propId: resourceUri};
 
-                var color = "#1244e8";
+                var color = self.propertyColor;
+                var arrowType=null
                 // ObjectProperty
                 if (self.allResourcesMap[resourceUri]) {
                     self.currentRelation.label = self.allResourcesMap[resourceUri].label;
+                    arrowType="diamond"
                 } else {
                     //other
                     smooth = {type: "curvedCW"};
                     self.currentRelation.label = resourceUri;
-                    color = "#375521";
+                    color = "#333";
                 }
                 var edge = {
                     from: self.currentRelation.from.id,
@@ -380,7 +387,7 @@ var MappingModeler = (function () {
                     arrows: {
                         to: {
                             enabled: true,
-                            type: "diamond",
+                            type: arrowType,
                         },
                     },
                     smooth: smooth,
@@ -450,12 +457,7 @@ var MappingModeler = (function () {
                 if (err) {
                     return alert(err);
                 }
-                /*
-                if(classes[0].id!='createClass'){
-                    self.setSuggestionsSelect(classes, false, newObject);
-                }else{
-                    self.setSuggestionsSelect(classes, false);
-                }*/
+
                 var classesCopy = JSON.parse(JSON.stringify(classes));
                 classesCopy.unshift(newObject);
                 self.loadSuggestionSelectJstree(classesCopy, "Classes");

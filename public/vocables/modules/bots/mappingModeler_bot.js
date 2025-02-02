@@ -26,6 +26,17 @@ var MappingModeler_bot = (function () {
     self.workflowColumnmMappingOther = {
         startFn: {
             _OR: {
+                "add predicate": {
+                    listNonObjectPropertiesVocabsFn: {
+                        listNonObjectPropertiesFn: {
+                            listDatatypePropertyRangeFn: {
+                                choosedateTypeFn: {
+                                    listTableColumnsFn: {},
+                                },
+                            },
+                        },
+                    },
+                },
                 "add rdf:Type": {
                     rdfTypeFn: {},
                 },
@@ -39,17 +50,7 @@ var MappingModeler_bot = (function () {
                 "add transform": {
                     addTransformFn: {},
                 },
-                "add other predicate": {
-                    listNonObjectPropertiesVocabsFn: {
-                        listNonObjectPropertiesFn: {
-                            listDatatypePropertyRangeFn: {
-                                choosedateTypeFn: {
-                                    listTableColumnsFn: {},
-                                },
-                            },
-                        },
-                    },
-                },
+
                 "set column as datatypeProperty": {
                     listTableColumnsFn: { listDatatypePropertyRangeFn: { labelFn: {} } },
                 },
@@ -118,7 +119,7 @@ var MappingModeler_bot = (function () {
             _botEngine.showList(choices, "rdfType");
         },
         addTransformFn: function () {
-            MappingsDetails.showTansformDialog();
+            MappingsDetails.transform.showTansformDialog();
 
             self.params.addingTransform = true;
             _botEngine.end();
@@ -206,6 +207,7 @@ var MappingModeler_bot = (function () {
                     datatypePropertyDomain: classId,
                 },
                 function (err, result) {
+                    alert("under development")
                     MappingModeler.mappingColumnInfo.startOtherPredicatesBot();
                 }
             );

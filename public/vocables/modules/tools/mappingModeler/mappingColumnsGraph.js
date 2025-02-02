@@ -14,13 +14,13 @@ var MappingColumnsGraph = (function () {
     self.visjsGraph = {}
     self.graphDiv = "mappingModeler_graphDiv";
 
-    var stepX=200;
-    var stepY=150;
-    var minX=0
+    var stepX = 200;
+    var stepY = 150;
+    var minX = 0
 
     self.drawResource = function (newResource) {
         self.graphDivWidth = $("#mappingModeler_graphDiv").width();
-        minX=(-self.graphDivWidth/2)+stepX
+        minX = (-self.graphDivWidth / 2) + stepX
         var arrows = {
             to: {
                 enabled: true,
@@ -28,9 +28,7 @@ var MappingColumnsGraph = (function () {
             },
         };
         var edgeColor = "#ccc";
-        if (!self.currentOffset) {
-            self.currentOffset = {x: -self.graphDivWidth / 2, y: 0};
-        }
+       self.initOffsets()
         if (self.currentGraphNode && newResource.data.type == "Class") {
             newResource.x = self.currentGraphNode.x;
             newResource.y = self.currentGraphNode.y - 100;
@@ -56,6 +54,7 @@ var MappingColumnsGraph = (function () {
 
         if (self.visjsGraph) {
             self.addNode(visjsData.nodes);
+            self.visjsGraph.network.fit();
 
             if (self.currentGraphNode && self.currentGraphNode.data) {
                 if (newResource.data.type == "Class" && self.currentGraphNode) {
@@ -64,7 +63,7 @@ var MappingColumnsGraph = (function () {
                         label = "";
                         type = "rdfs:subClassOf";
                     } else {
-                        label = "a";
+                        label = "";
                         type = "rdf:type";
                     }
 
@@ -97,6 +96,12 @@ var MappingColumnsGraph = (function () {
 
         self.currentGraphNode = newResource;
     };
+
+    self.initOffsets=function(){
+        if (!self.currentOffset) {
+            self.currentOffset = {x: -self.graphDivWidth / 2, y: 0};
+        }
+    }
 
     self.objectIdExistsInGraph = function (id) {
         var items = self.visjsGraph.data.nodes.get();
@@ -204,13 +209,17 @@ var MappingColumnsGraph = (function () {
         } else {
             html = '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.removeNodeFromGraph();"> Remove Node</span>';
         }
+        html+="--------------<br>"
         if (node.data) {
-            html += '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.showNodeInfos()">Node Infos</span>';
-            if (node.data.type == "Class") {
-                html += '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.addSuperClassToGraph()">draw superClass</span>';
+               if (node.data.type == "Class") {
+                   html += '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.showNodeInfos()">Node Infos</span>';
+                   html += '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.addSuperClassToGraph()">draw superClass</span>';
             }
             if (node.data.type == "Column") {
+                html += '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.showColumnDetails()">Detailed mappings</span>';
                 html += '    <span class="popupMenuItem" onclick="MappingColumnsGraph.graphActions.showSampledata()">show sample data</span>';
+
+
             }
         }
 
@@ -276,7 +285,7 @@ var MappingColumnsGraph = (function () {
                 {
                     from: MappingModeler.currentRelation.from.id,
                     to: MappingModeler.currentRelation.to.id,
-                    label: "a",
+                    label: "",
                     color: "ddd",
                     width: 2,
                     arrows: {
@@ -296,8 +305,9 @@ var MappingColumnsGraph = (function () {
         showNodeInfos: function () {
             if (self.currentGraphNode.data.type == "URI") {
             } else if (["Column", "RowIndex", "VirtualColumn"].indexOf(self.currentGraphNode.data.type) > -1) {
-                MappingsDetails.mappingColumnInfo.editColumnInfos();
-                MappingsDetails.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);
+                return;
+                /*  MappingsDetails.mappingColumnInfo.editColumnInfos();
+                  MappingsDetails.mappingColumnInfo.columnClass = self.getColumnType(self.currentGraphNode.id);*/
 
 
             } else {
@@ -308,6 +318,17 @@ var MappingColumnsGraph = (function () {
         showSampledata: function () {
             MappingModeler.showSampleData();
         },
+
+        showColumnDetails: function (node) {
+            var divId = "columnMappingDetailsDiv"
+            $("#smallDialogDiv").html("<div id='" + divId + "'></div>")
+            $("#smallDialogDiv").dialog("option","title","Column Technical Mappings")
+            $("#smallDialogDiv").dialog("open")
+            MappingsDetails.showColumnTechnicalMappingsDialog(divId,node || self.currentGraphNode, function(){
+                $("#smallDialogDiv").dialog("close")
+            })
+
+        }
     };
 
     self.loadVisjsGraph = function (callback) {
@@ -319,7 +340,7 @@ var MappingColumnsGraph = (function () {
                     DataSourceManager.currentConfig = result.options.config;
                 }
                 if (true) {
-                  //  self.addDataSourceNode();
+                    //  self.addDataSourceNode();
                     self.visjsGraph.network.fit();
                     var maxX = 0;
                     var maxY = 0;
@@ -327,13 +348,14 @@ var MappingColumnsGraph = (function () {
                         maxX = Math.max(node.x, maxX);
                         maxY = Math.max(node.y, maxY);
                     });
-                    if(maxX+stepX>self.graphDivWidth){
+                    if (maxX + stepX > self.graphDivWidth) {
                         self.currentOffset = {
-                            x:minX ,
-                            y: maxY+stepY};
-                    }else{
+                            x: minX,
+                            y: maxY + stepY
+                        };
+                    } else {
                         self.currentOffset = {
-                            x:maxX+stepX ,
+                            x: maxX + stepX,
                             y: maxY
                         };
                     }
@@ -383,18 +405,6 @@ var MappingColumnsGraph = (function () {
     };
 
 
-
-    self.getColumnType = function (nodeId) {
-        var connections = self.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
-        var type = null;
-        connections.forEach(function (connection) {
-            if (connection.edge.data.type == "rdf:type" && connection.toNode.data.id.indexOf("http") > -1) {
-                type = connection.toNode.data.id;
-            }
-        });
-        return type;
-    };
-
     self.saveVisjsGraph = function (callback) {
 
 
@@ -422,7 +432,7 @@ var MappingColumnsGraph = (function () {
             edges: graph.data.edges.get(),
             context: graph.currentContext,
             positions: positions,
-            options: { config: config },
+            options: {config: config},
         };
         if (!fileName) {
             fileName = prompt("graph name");
@@ -591,10 +601,14 @@ var MappingColumnsGraph = (function () {
     }
 
     self.clearGraph = function () {
+        var currentDataSource=DataSourceManager.currentConfig.currentDataSource
         MappingColumnsGraph.visjsGraph.clearGraph();
         MappingColumnsGraph.visjsGraph = null;
-        var visjsData = { nodes: [], edges: [] };
-        MappingColumnsGraph.drawGraphCanvas(MappingColumnsGraph.graphDiv, visjsData, function () {});
+        var visjsData = {nodes: [], edges: []};
+        MappingColumnsGraph.drawGraphCanvas(MappingColumnsGraph.graphDiv, visjsData, function () {
+            DataSourceManager.currentConfig.currentDataSource=currentDataSource
+        });
+        self.initOffsets()
     };
 
 

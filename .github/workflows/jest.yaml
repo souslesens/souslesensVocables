@@ -26,4 +26,12 @@ jobs:
                   node-version: ${{ matrix.node-version }}
                   cache: "npm"
             - run: npm ci
-            - run: npm run test:jest
+            - run: mkdir -p ./tests/coverage
+            - run: npx jest --coverage --rootDir tests --coverageReporters json-summary text --all | tee ./tests/coverage/coverage.txt && exit ${PIPESTATUS[0]}
+            - name: Jest Coverage Comment
+              uses: MishaKav/jest-coverage-comment@main
+              with:
+                  coverage-summary-path: ./tests/coverage/coverage-summary.json
+                  summary-title: Summary
+                  title: Jest Coverage Comment
+                  coverage-path: ./tests/coverage/coverage.txt

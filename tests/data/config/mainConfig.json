@@ -3,7 +3,7 @@
     "souslesensUrlForVirtuoso": "http://localhost:3011",
     "listenPort": 3011,
     "serverUrl": "../slsv",
-    "auth": "local",
+    "auth": "database",
     "defaultGroups": [],
     "logDir": "logs",
     "default_lang": "en",

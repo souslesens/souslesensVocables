@@ -2,9 +2,25 @@ import common from "../../shared/common.js";
 import MappingModeler from "./mappingModeler.js";
 import UIcontroller from "./uiController.js";
 
+
+/**
+ * Module responsible for generating and managing mappings for the MappingTransform process.
+ * It interacts with the Vis.js graph to retrieve mappings and formats them as JSON for use in the application.
+ * It also provides functionality for generating SLS mappings and R2ML mappings (coming soon).
+ * @module MappingTransform
+ */
 var MappingTransform = (function () {
     var self = {};
 
+    /**
+     * Generates the SLS mappings from the Vis.js graph and displays them in the right panel of the UI.
+     * The mappings are formatted as JSON and placed inside a textarea for easy access and copying.
+     * 
+     * @function
+     * @name generateSLSmappings
+     * @memberof module:MappingTransform
+     * @returns {void}
+     */
     self.generateSLSmappings = function () {
         var json = MappingTransform.getSLSmappingsFromVisjsGraph();
         UIcontroller.activateRightPanel("generic");
@@ -17,10 +33,28 @@ var MappingTransform = (function () {
         $("#mappingModeler_infosTA").val(JSON.stringify(json, null, 2));
     };
 
+
+    /**
+     * Placeholder function for generating R2ML mappings. Currently displays an alert.
+     * 
+     * @function
+     * @name generateR2MLmappings
+     * @memberof module:MappingTransform
+     * @returns {void}
+     */
     self.generateR2MLmappings = function () {
         alert("coming soon...");
     };
 
+    /**
+     * Retrieves the SLS mappings for the current table from the Vis.js graph.
+     * Filters nodes that belong to the specified table and exclude those with type "Class" or "table".
+     * @function
+     * @name getSLSmappingsFromVisjsGraph
+     * @memberof module:MappingTransform
+     * @param {string} [table] - The name of the table for which to retrieve the mappings. Defaults to the current table if not provided.
+     * @returns {Object} The generated JSON object containing the SLS mappings for the specified table.
+     */
     self.getSLSmappingsFromVisjsGraph = function (table) {
         if (!table) {
             table = MappingModeler.currentTable.name;
@@ -51,6 +85,17 @@ var MappingTransform = (function () {
         return json;
     };
 
+
+    /**
+     * Converts a node's data to a KGcreator-compatible column name based on its URI type and data type.
+     * It generates column names based on different conditions such as blankNode, randomIdentifier, or URI.
+     * Virtual columns and URI columns have specific suffixes added to the column name
+     * @function
+     * @name nodeToKGcreatorColumnName
+     * @memberof module:MappingTransform
+     * @param {Object} data - The node's data containing the URI type and other properties.
+     * @returns {string} The generated column name in KGcreator format.
+     */
     self.nodeToKGcreatorColumnName = function (data) {
         var colname = null;
         // if (data.uriType == "blankNode" || !data.rdfsLabel) {
@@ -74,6 +119,18 @@ var MappingTransform = (function () {
         }
         return colname;
     };
+
+
+    /**
+     * Transforms a columns map into KGcreator-compatible JSON format, generating mappings between columns, predicates, and objects.
+     * This function handles RDF types, labels, transformations, and other predicates for each column.
+     * It also processes connections between nodes and generates appropriate triples for each mapping
+     * @function
+     * @name mappingsToKGcreatorJson
+     * @memberof module:MappingTransform
+     * @param {Object} columnsMap - A map of nodes containing columns to be transformed.
+     * @returns {Array} An array of mapping objects in KGcreator JSON format.
+     */
     self.mappingsToKGcreatorJson = function (columnsMap) {
         var columnsMapLabels = Object.values(columnsMap).map(function (column) {
             return column.label;
@@ -170,15 +227,20 @@ var MappingTransform = (function () {
             }
         }
 
-
-            allMappings = self.addMappingsRestrictions(allMappings);
-
-
-
+        allMappings = self.addMappingsRestrictions(allMappings);
 
         return allMappings;
     };
 
+    /**
+     * Adds restrictions to the mappings if both subject and object are classes and are different from each other.
+     * This function checks if the subject and object in a mapping are RDF classes, and if they are, it marks the mapping as a restriction.
+     * @function
+     * @name addMappingsRestrictions
+     * @memberof module:MappingTransform
+     * @param {Array} allMappings - The array of mappings to which restrictions will be added.
+     * @returns {Array} The modified array of mappings with restrictions added where applicable.
+     */
     self.addMappingsRestrictions = function (allMappings) {
         var isClass = function (nodeId) {
             var isClass = false;
@@ -203,6 +265,14 @@ var MappingTransform = (function () {
         return allMappings;
     };
 
+    /**
+     * Copies the KGcreator mappings from the textarea to the clipboard.
+     * It retrieves the current mappings as text from the UI and uses a common utility to copy the content to the clipboard.
+     * 
+     * @function
+     * @name copyKGcreatorMappings
+     * @memberof module:MappingTransform
+     */
     self.copyKGcreatorMappings = function () {
         var text = $("#mappingModeler_infosTA").val();
         $("#mappingModeler_infosTA").focus();

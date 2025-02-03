@@ -2,6 +2,12 @@ import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import MappingModeler from "./mappingModeler.js";
 import UIcontroller from "./uiController.js";
 
+
+/**
+ * DataSourceManager module
+ * Responsible for managing data source configurations and operations.
+ * @module DataSourceManager
+ */
 var DataSourceManager = (function () {
     var self = {};
     self.currentConfig = {};
@@ -18,6 +24,18 @@ var DataSourceManager = (function () {
     };
 
     self.createApp = null;
+
+
+    /**
+     * Retrieves the configuration for a given data source.
+     * Transfers the "main.json" configuration to the Vis.js graph if not already transferred.
+     * @function
+     * @name getSlsvSourceConfig
+     * @memberof module:DataSourceManager
+     * @param {string} source - The source name.
+     * @param {Function} callback - The callback function to be executed after the operation.
+     * @returns {void}
+     */
     self.getSlsvSourceConfig = function (source, callback) {
         // Transfer Config main.json to visjsgraph for firstTime and if already transfered skip
       if (self?.rawConfig?.isConfigInMappingGraph) {
@@ -65,8 +83,15 @@ var DataSourceManager = (function () {
         });
     };
 
-    // create dir and main.json
-    // Initialisation of configuration
+    /**
+     * Initializes a new data source and sets the current configuration.
+     * @function
+     * @name initNewSlsvSource
+     * @memberof module:DataSourceManager
+     * @param {string} source - The source name.
+     * @param {Function} callback - The callback function to be executed after the initialization.
+     * @returns {void}
+     */
     self.initNewSlsvSource = function (source, callback) {
        MappingColumnsGraph.saveVisjsGraphWithConfig(function () {
             self.currentConfig = self.rawConfig;
@@ -77,6 +102,15 @@ var DataSourceManager = (function () {
 
     };
 
+    /**
+     * Loads data sources into a Jstree widget for visualization and interaction.
+     * @function
+     * @name loaDataSourcesJstree
+     * @memberof module:DataSourceManager
+     * @param {string} jstreeDiv - The DOM element where the tree should be loaded.
+     * @param {Function} callback - The callback function to be executed after loading the data sources.
+     * @returns {void}
+     */
     self.loaDataSourcesJstree = function (jstreeDiv, callback) {
         var options = {
             openAll: true,
@@ -214,6 +248,19 @@ var DataSourceManager = (function () {
         );
     };
 
+
+    /**
+     * Initializes a new data source, updating the current configuration.
+     * This function handles both CSV and non-CSV sources by adding them to the Jstree and updating the current data source configuration.
+     * @function
+     * @name initNewDataSource
+     * @memberof module:DataSourceManager
+     * @param {string} name - The name of the data source.
+     * @param {string} type - The type of the data source (e.g., "csvSource" or other types).
+     * @param {string} sqlType - The SQL type of the data source, relevant for non-CSV sources.
+     * @param {string} table - The initial table to be set for the data source.
+     * @returns {void}
+     */
     self.initNewDataSource = function (name, type, sqlType, table) {
         //close Previous DataSource
         var parent_node = $("#" + self.dataSourcejstreeDivId).jstree()._model.data[self.currentConfig?.currentDataSource?.id];
@@ -241,6 +288,20 @@ var DataSourceManager = (function () {
             currentTable: table,
         };
     };
+
+
+    /**
+     * Loads a CSV source by fetching data from the server, including headers and sample data.
+     * This function updates the current configuration with the columns of the CSV source and its sample data.
+     * @function
+     * @name loadCsvSource
+     * @memberof module:DataSourceManager
+     * @param {string} slsvSource - The name of the CSV source.
+     * @param {string} fileName - The name of the CSV file to load.
+     * @param {boolean} loadJstree - A flag indicating whether to reload the Jstree.
+     * @param {Function} callback - A callback function to be executed after loading the CSV source.
+     * @returns {void}
+     */
     self.loadCsvSource = function (slsvSource, fileName, loadJstree, callback) {
         var columns = [];
         async.series(
@@ -287,6 +348,20 @@ var DataSourceManager = (function () {
         );
     };
 
+
+    /**
+     * Loads a database source and its associated model by fetching data from the server.
+     * This function retrieves the model for a given data source and updates the configuration with its tables.
+     * It also updates the Jstree with the available tables for the data source.
+     * @function
+     * @name loadDataBaseSource
+     * @memberof module:DataSourceManager
+     * @param {string} slsvSource - The name of the source.
+     * @param {string} dataSource - The name of the database source to load.
+     * @param {string} sqlType - The SQL type of the database source.
+     * @param {Function} callback - A callback function to be executed after the source is loaded.
+     * @returns {void}
+     */
     self.loadDataBaseSource = function (slsvSource, dataSource, sqlType, callback) {
         fetch(`${Config.apiUrl}/databases/${dataSource}`).then((response) => {
             response.json().then((data) => {
@@ -355,7 +430,17 @@ var DataSourceManager = (function () {
         });
     };
 
-
+    /**
+     * Handles the selection of a node in the Jstree, which represents different types of data sources, including databases, CSVs, and tables.
+     * It updates the configuration and loads the corresponding data source or table based on the selection.
+     * Also handles UI updates for the mapping modeler and left panel tabs.
+     * @function
+     * @name onDataSourcesJstreeSelect
+     * @memberof module:DataSourceManager
+     * @param {Object} event - The event object triggered by the selection.
+     * @param {Object} obj - The Jstree node object containing details about the selected node.
+     * @returns {void}
+     */
     self.onDataSourcesJstreeSelect = function (event, obj) {
         MappingModeler.currentTreeNode = obj.node;
         var isRightClick = false;
@@ -406,7 +491,15 @@ var DataSourceManager = (function () {
     };
 
 
-    // Config save made on visjsGraph
+    /**
+     * Saves the current configuration of the SlsvSource by using the MappingColumnsGraph save function.
+     * Calls the provided callback once the saving operation is complete.
+     * @function
+     * @name saveSlsvSourceConfig
+     * @memberof module:DataSourceManager
+     * @param {Function} callback - The callback to invoke after saving the configuration.
+     * @returns {void}
+     */
     self.saveSlsvSourceConfig = function (callback) {
        MappingColumnsGraph.saveVisjsGraphWithConfig(callback)
 
@@ -421,6 +514,15 @@ var DataSourceManager = (function () {
     // imports React app
     import("/assets/mappingModeler_upload_app.js");
 
+    /**
+     * Displays the upload form app for uploading database or CSV sources.
+     * Depending on the form type, it loads the appropriate form and handles initialization of the React app.
+     * @function
+     * @name displayUploadApp
+     * @memberof module:DataSourceManager
+     * @param {string} displayForm - The type of form to display ("database" or "file").
+     * @returns {void}
+     */
     self.displayUploadApp = function (displayForm) {
         self.uploadFormData.displayForm = displayForm;
         //   return   $.getScript("/kg_upload_app.js");
@@ -459,6 +561,16 @@ var DataSourceManager = (function () {
         $("#smallDialogDiv").dialog("open");
     };
 
+
+    /**
+     * Creates mappings for a selected database source.
+     * Closes the upload app dialog, adds the selected database source to the current configuration,
+     * and saves the updated configuration. Calls the provided callback once the operation is complete.
+     * @function
+     * @name createDataBaseSourceMappings
+     * @memberof module:DataSourceManager
+     * @returns {void}
+     */
     self.createDataBaseSourceMappings = function () {
         // hide uploadApp
         self.displayUploadApp("");
@@ -482,6 +594,16 @@ var DataSourceManager = (function () {
         });
     };
 
+
+    /**
+     * Creates mappings for a selected CSV source.
+     * Closes the upload app dialog, adds the selected CSV source to the current configuration,
+     * and saves the updated configuration. Calls the provided callback once the operation is complete.
+     * @function
+     * @name createCsvSourceMappings
+     * @memberof module:DataSourceManager
+     * @returns {void}
+     */
     self.createCsvSourceMappings = function () {
         // hide uploadApp
         self.displayUploadApp("");
@@ -505,6 +627,18 @@ var DataSourceManager = (function () {
 
     };
 
+
+    /**
+     * Deletes a data source (either database or CSV) from the configuration.
+     * Removes the data source from the raw configuration, updates the JSTree, 
+     * and removes related nodes and edges from the graph. The updated configuration 
+     * is then saved. If the source is a CSV, additional steps would be taken to remove the file.
+     * @function
+     * @name deleteDataSource
+     * @memberof module:DataSourceManager
+     * @param {Object} jstreeNode - The JSTree node representing the data source to be deleted.
+     * @returns {void}
+     */
     self.deleteDataSource = function (jstreeNode) {
         var datasourceName = jstreeNode.id;
         // Delete from config

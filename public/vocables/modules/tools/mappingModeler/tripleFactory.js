@@ -6,9 +6,22 @@ import MappingModeler from "./mappingModeler.js";
 import Export from "../../shared/export.js";
 import UIcontroller from "./uiController.js";
 
+
+/**
+ * The TripleFactory module handles the creation, filtering, and writing of RDF triples.
+ * It includes functions for generating sample triples, creating all mappings triples, and indexing the graph.
+ * @module TripleFactory
+ */
 var TripleFactory = (function () {
     var self = {};
 
+    /**
+     * Displays a dialog with sample triples for the current table.
+     * It checks if the current table is valid before proceeding to show the sample triples.
+     * @function
+     * @name showTripleSample
+     * @memberof module:TripleFactory
+     */
     self.showTripleSample = function () {
         if (!self.checkCurrentTable()) {
             return;
@@ -17,6 +30,13 @@ var TripleFactory = (function () {
         self.showFilterMappingDialog(true);
     };
 
+    /**
+     * Writes the RDF triples for the current table after filtering them based on the user-defined criteria.
+     * It checks if the current table is valid before proceeding to write the triples.
+     * @function
+     * @name writeTriples
+     * @memberof module:TripleFactory
+     */
     self.writeTriples = function () {
         if (!self.checkCurrentTable()) {
             return;
@@ -24,15 +44,34 @@ var TripleFactory = (function () {
         self.showFilterMappingDialog(false);
     };
 
+    /**
+     * Creates all RDF mappings triples using the KGcreator_run module.
+     * @function
+     * @name createAllMappingsTriples
+     * @memberof module:TripleFactory
+     */
     self.createAllMappingsTriples = function () {
         KGcreator_run.createAllMappingsTriples();
     };
 
+    /**
+     * Indexes the RDF graph using the KGcreator_run module.
+     * @function
+     * @name indexGraph
+     * @memberof module:TripleFactory
+     */
     self.indexGraph = function () {
         KGcreator_run.indexGraph();
     };
 
-
+    /**
+     * Displays a dialog for filtering mappings, allowing the user to choose between sample and actual triples.
+     * The dialog is populated with a tree view of detailed mappings that can be filtered by the user.
+     * @function
+     * @name showFilterMappingDialog
+     * @memberof module:TripleFactory
+     * @param {boolean} isSample - If true, the dialog is for displaying sample mappings; if false, for writing actual triples.
+     */
     self.showFilterMappingDialog = function (isSample) {
         self.filterMappingIsSample = isSample;
         UIcontroller.activateRightPanel("generic");
@@ -44,6 +83,13 @@ var TripleFactory = (function () {
         });
     };
 
+    /**
+     * Runs the filtered mappings for the SLS (Semantic Linked Set) based on the selected nodes in the tree view.
+     * It filters and creates unique mappings by checking the selected attributes and mapping nodes.
+     * @function
+     * @name runSlsFilteredMappings
+     * @memberof module:TripleFactory
+     */
     self.runSlsFilteredMappings = function () {
         var checkedNodes = JstreeWidget.getjsTreeCheckedNodes("detailedMappings_filterMappingsTree");
         var filteredMappings = [];
@@ -87,6 +133,15 @@ var TripleFactory = (function () {
         });
     };
 
+
+    /**
+     * Checks if the current table is valid and if its mappings details are loaded.
+     * Prompts the user to select a table or load the mappings details if they are not available.
+     * @function
+     * @name checkCurrentTable
+     * @memberof module:TripleFactory
+     * @returns {boolean} - Returns true if the current table is valid and its mappings details are loaded, otherwise false.
+     */
     self.checkCurrentTable = function () {
         var check = false;
         if (!MappingModeler.currentTable) {
@@ -109,7 +164,15 @@ var TripleFactory = (function () {
         return check;
     };
 
-
+    /**
+     * Deletes triples created by KGCreator from the datasource.
+     * Confirms with the user before deleting triples, and sends a DELETE request to the API.
+     * @function
+     * @name deleteTriples
+     * @memberof module:TripleFactory
+     * @param {boolean} all - Indicates whether to delete all triples or just for the current table.
+     * @param {function} [callback] - A callback function to be executed after the deletion process.
+     */
     self.deleteTriples = function (all, callback) {
         var tables = [];
         if (!all) {
@@ -152,6 +215,18 @@ var TripleFactory = (function () {
         });
     };
 
+
+    /**
+     * Creates triples for a given table using the selected mappings.
+     * Confirms with the user before creating triples, and sends a POST request to the API.
+     * @function
+     * @name createTriples
+     * @memberof module:TripleFactory
+     * @param {boolean} sampleData - Indicates whether to create sample data triples or full triples.
+     * @param {string} table - The table for which to create triples.
+     * @param {Object} options - Options for creating triples, such as sample size and filter options.
+     * @param {function} callback - A callback function to be executed after the triples creation process.
+     */
     self.createTriples = function (sampleData, table, options, callback) {
         var allTableMappings = MappingTransform.getSLSmappingsFromVisjsGraph(table); // self.getSelectedMappingTriplesOption();
 
@@ -226,6 +301,14 @@ var TripleFactory = (function () {
         });
     };
 
+    /**
+     * Generates KGcreator triples for the entire datasource, deleting any previous triples before creating new ones.
+     * It proceeds with a series of steps: deleting old triples, creating new triples, and reindexing the graph.
+     * 
+     * @function
+     * @name createAllMappingsTriples
+     * @memberof module:TripleFactory
+     */
     self.createAllMappingsTriples = function () {
         if (!confirm("generate KGcreator triples of datasource " + DataSourceManager.currentConfig.currentDataSource.name + ". this  will delete all triples created with KGcreator  ")) {
             return;
@@ -241,13 +324,14 @@ var TripleFactory = (function () {
                         return callbackSeries(err);
                     });
                 },
+                // Create new triples
                 function (callbackSeries) {
                     $("#KGcreator_infosDiv").val("creating new triples (can take long...)");
                     self.createTriples(false, null, function (err, result) {
                         return callbackSeries(err);
                     });
                 },
-
+                // Reindex graph
                 function (callbackSeries) {
                     $("#KGcreator_infosDiv").val("reindexing graph)");
                     self.indexGraph(function (err, result) {
@@ -263,6 +347,16 @@ var TripleFactory = (function () {
         );
     };
 
+    /**
+     * Displays the triples data in a table format within the specified div element.
+     * The table includes columns for subject, predicate, and object, and the data is escaped to prevent HTML injection.
+     * 
+     * @function
+     * @name showTriplesInDataTable
+     * @param {Array} data - The triples data to display, each item should contain 's', 'p', and 'o' properties.
+     * @param {string} div - The ID of the div element where the table should be displayed.
+     * @memberof module:TripleFactory
+     */
     self.showTriplesInDataTable = function (data, div) {
         var escapeMarkup = function (str) {
             var str2 = str.replace(/</g, "&lt;");

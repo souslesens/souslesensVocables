@@ -5,19 +5,73 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import MappingsDetails from "./mappingsDetails.js";
 import DataSourceManager from "./dataSourcesManager.js";
 
-
+/**
+ * MappingColumnsGraph module.
+ * Handles the visualization and management of mapping columns in a graph.
+ * @module MappingColumnsGraph
+ */
 var MappingColumnsGraph = (function () {
 
+
     var self = {}
+
+    /**
+     * Current graph node being manipulated.
+     * @type {Object}
+     * @memberof module:MappingColumnsGraph
+     */
     self.currentOffset = null
+
+    /**
+     * Stores the currently selected graph node.
+     * @memberof module:MappingColumnsGraph
+     */
     self.currentGraphNode = {}
+
+    /**
+     * Instance of the Vis.js graph.
+     * @type {Object}
+     * @memberof module:MappingColumnsGraph
+     */
     self.visjsGraph = {}
+
+    /**
+     * ID of the HTML container where the graph is rendered.
+     * @memberof module:MappingColumnsGraph
+     */
     self.graphDiv = "mappingModeler_graphDiv";
 
+    /**
+     * X-axis step size for node positioning.
+     * @type {number}
+     * @memberof module:MappingColumnsGraph
+     */
     var stepX = 200;
-    var stepY = 150;
-    var minX = 0
 
+    /**
+     * Y-axis step size for node positioning.
+     * @type {number}
+     * @memberof module:MappingColumnsGraph
+     */
+    var stepY = 150;
+
+    /**
+     * Minimum X position for graph layout adjustments.
+     * @type {number}
+     * @memberof module:MappingColumnsGraph
+     */
+    var minX = 0;
+
+
+    /**
+     * Draws a new resource node in the Vis.js graph.
+     * Positions the node dynamically and links it with existing nodes if necessary.
+     * @function 
+     * @name drawResource
+     * @memberof module:MappingColumnsGraph
+     * @param {Object} newResource - The resource to be added to the graph.
+     * @returns {void}   
+     */ 
     self.drawResource = function (newResource) {
         self.graphDivWidth = $("#mappingModeler_graphDiv").width();
         minX = (-self.graphDivWidth / 2) + stepX
@@ -97,12 +151,31 @@ var MappingColumnsGraph = (function () {
         self.currentGraphNode = newResource;
     };
 
+
+    /**
+     * Initializes the offset values for positioning nodes in the graph.
+     * Ensures that the offset is set correctly before adding new nodes.
+     * @function 
+     * @name initOffsets
+     * @memberof module:MappingColumnsGraph
+     * @returns {void}   
+     */  
     self.initOffsets=function(){
         if (!self.currentOffset) {
             self.currentOffset = {x: -self.graphDivWidth / 2, y: 0};
         }
     }
 
+
+    /**
+     * Checks if a given object ID already exists in the Vis.js graph.
+     * Iterates through existing nodes to determine if the ID is present.
+     * @function 
+     * @name objectIdExistsInGraph
+     * @memberof module:MappingColumnsGraph
+     * @param {string} id - The ID of the object to check.
+     * @returns {boolean} True if the object exists, otherwise false.   
+     */  
     self.objectIdExistsInGraph = function (id) {
         var items = self.visjsGraph.data.nodes.get();
         var exists = false;
@@ -114,6 +187,18 @@ var MappingColumnsGraph = (function () {
         return exists;
     };
 
+
+    /**
+     * Draws the graph canvas using Vis.js with specified options.
+     * Configures the graph's visual settings and event handlers.
+     * @function 
+     * @name drawGraphCanvas
+     * @memberof module:MappingColumnsGraph
+     * @param {string} graphDiv - The ID of the div container for the graph.
+     * @param {Object} visjsData - Data containing nodes and edges for the graph.
+     * @param {Function} [callback] - Optional callback function to execute after drawing.
+     * @returns {void}   
+     */  
     self.drawGraphCanvas = function (graphDiv, visjsData, callback) {
         self.graphOptions = {
             keepNodePositionOnDrag: true,
@@ -143,6 +228,18 @@ var MappingColumnsGraph = (function () {
         });
     };
 
+
+    /**
+     * Handles click events on the Vis.js graph.
+     * Updates the current selected node and manages relations between columns.
+     * @function 
+     * @name onVisjsGraphClick
+     * @memberof module:MappingColumnsGraph
+     * @param {Object} node - The clicked node object.
+     * @param {Object} event - The click event object.
+     * @param {Object} options - Additional event options, including key modifiers.
+     * @returns {void}   
+     */
     self.onVisjsGraphClick = function (node, event, options) {
         if (!node) {
             PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
@@ -191,6 +288,18 @@ var MappingColumnsGraph = (function () {
         }
     };
 
+
+    /**
+     * Displays the context menu for a graph node.
+     * Shows relevant options based on the node type (Class, Column, or Edge).
+     * @function 
+     * @name showGraphPopupMenu
+     * @memberof module:MappingColumnsGraph
+     * @param {Object} node - The node where the menu should appear.
+     * @param {Object} point - The coordinates for the popup menu.
+     * @param {Object} event - The event triggering the menu.
+     * @returns {void}   
+     */  
     self.showGraphPopupMenu = function (node, point, event) {
         if (!node) {
             return;
@@ -230,10 +339,30 @@ var MappingColumnsGraph = (function () {
     };
 
     self.graphActions = {
+
+
+
+        /**
+         * Outlines a selected node by increasing its border width.
+         * @function 
+         * @name outlineNode
+         * @memberof module:MappingColumnsGraph
+         * @param {string} nodeId - The ID of the node to highlight.
+         * @returns {void}   
+         */
         outlineNode: function (nodeId) {
             self.visjsGraph.decorateNodes(null, {borderWidth: 1});
             self.visjsGraph.decorateNodes(nodeId, {borderWidth: 5});
         },
+
+        /**
+         * Removes a node from the graph after user confirmation.
+         * Also removes its connected edges.
+         * @function 
+         * @name removeNodeFromGraph
+         * @memberof module:MappingColumnsGraph
+         * @returns {void}   
+         */
         removeNodeFromGraph: function () {
             if (confirm("delete node")) {
                 var edges = self.visjsGraph.network.getConnectedEdges(self.currentGraphNode.id);
@@ -242,11 +371,27 @@ var MappingColumnsGraph = (function () {
             }
         },
 
+        /**
+         * Removes an edge from the graph after user confirmation.
+         * @function 
+         * @name removeNodeEdgeGraph
+         * @memberof module:MappingColumnsGraph
+         * @returns {void}   
+         */
         removeNodeEdgeGraph: function () {
             if (confirm("delete edge")) {
                 self.removeEdge(self.currentGraphNode.id);
             }
         },
+
+        /**
+         * Adds a superclass to the graph for the selected node.
+         * Queries the ontology for superclass relationships.
+         * @function 
+         * @name addSuperClassToGraph
+         * @memberof module:MappingColumnsGraph
+         * @returns {void}   
+         */
         addSuperClassToGraph: function () {
             var options = {
                 filter: " ?object rdf:type owl:Class",
@@ -277,6 +422,13 @@ var MappingColumnsGraph = (function () {
             });
         },
 
+        /**
+         * Draws an edge between a column and a class in the graph.
+         * @function 
+         * @name drawColumnToClassEdge
+         * @memberof module:MappingColumnsGraph
+         * @returns {void}   
+         */
         drawColumnToClassEdge: function () {
             if (!MappingModeler.currentRelation) {
                 return;
@@ -302,6 +454,14 @@ var MappingColumnsGraph = (function () {
             MappingModeler.currentRelation = null;
         },
 
+
+        /**
+         * Displays detailed information about the selected node.
+         * @function 
+         * @name showNodeInfos
+         * @memberof module:MappingColumnsGraph
+         * @returns {void}   
+         */
         showNodeInfos: function () {
             if (self.currentGraphNode.data.type == "URI") {
             } else if (["Column", "RowIndex", "VirtualColumn"].indexOf(self.currentGraphNode.data.type) > -1) {
@@ -315,10 +475,25 @@ var MappingColumnsGraph = (function () {
             }
         },
 
+        /**
+         * Displays sample data related to the selected column.
+         * @function 
+         * @name showSampledata
+         * @memberof module:MappingColumnsGraph
+         * @returns {void}   
+         */
         showSampledata: function () {
             MappingModeler.showSampleData();
         },
 
+        /**
+         * Shows detailed mappings for the selected column in a dialog.
+         * @function 
+         * @name showColumnDetails
+         * @memberof module:MappingColumnsGraph
+         * @param {Object} [node] - The node for which details should be displayed. Defaults to the currently selected node.
+         * @returns {void}   
+         */
         showColumnDetails: function (node) {
             var divId = "columnMappingDetailsDiv"
             $("#smallDialogDiv").html("<div id='" + divId + "'></div>")
@@ -331,6 +506,16 @@ var MappingColumnsGraph = (function () {
         }
     };
 
+    /**
+     * Loads the Vis.js graph for the current mapping source.
+     * Retrieves graph data from a JSON file and adjusts layout positioning.
+     * Clusters nodes based on data tables for better visualization.
+     * @function 
+     * @name loadVisjsGraph
+     * @memberof module:MappingColumnsGraph
+     * @param {function} [callback] - Optional callback function executed after loading the graph.
+     * @returns {void}   
+     */
     self.loadVisjsGraph = function (callback) {
         MappingModeler.clearMappings();
         setTimeout(function () {
@@ -404,7 +589,15 @@ var MappingColumnsGraph = (function () {
         }, 500);
     };
 
-
+    /**
+     * Saves the current Vis.js graph to a JSON file.
+     * Captures nodes, edges, positions, and configuration data before sending it to the backend for storage.
+     * @function 
+     * @name saveVisjsGraph
+     * @memberof module:MappingColumnsGraph
+     * @param {function} [callback] - Optional callback function executed after saving the graph.
+     * @returns {void}   
+     */
     self.saveVisjsGraph = function (callback) {
 
 
@@ -471,6 +664,16 @@ var MappingColumnsGraph = (function () {
         });
     };
 
+
+    /**
+     * Adds data source nodes and edges to the Vis.js graph, representing data tables and their relationships.
+     * Checks for existing nodes and edges, adding new ones if necessary. 
+     * Links data tables to columns based on their associations.
+     * @function 
+     * @name addDataSourceNode
+     * @memberof module:MappingColumnsGraph
+     * @returns {void}   
+     */
     self.addDataSourceNode = function () {
         return
         var nodes = self.visjsGraph.data.nodes.get();
@@ -540,6 +743,14 @@ var MappingColumnsGraph = (function () {
         return;
     };
 
+    /**
+     * Retrieves distinct data tables from the Vis.js graph nodes.
+     * Filters out undefined values and returns a list of unique data tables.
+     * @function 
+     * @name getDatasourceTablesFromVisjsGraph
+     * @memberof module:MappingColumnsGraph
+     * @returns {Array<string>} List of unique data table names.
+     */
     self.getDatasourceTablesFromVisjsGraph = function () {
         var tables = self.visjsGraph.data.nodes.get().map(function (node) {
             return node?.data?.dataTable;
@@ -554,6 +765,15 @@ var MappingColumnsGraph = (function () {
         }
         return tables;
     };
+
+    /**
+     * Updates a node in the Vis.js graph and saves the updated graph.
+     * @function 
+     * @name updateNode
+     * @memberof module:MappingColumnsGraph
+     * @param {Object} node - The node to be updated.
+     * @returns {void}
+     */
     self.updateNode = function (node) {
         if (!node) {
             return;
@@ -561,6 +781,15 @@ var MappingColumnsGraph = (function () {
         self.visjsGraph.data.nodes.update(node);
         self.saveVisjsGraph();
     };
+
+    /**
+     * Removes a node from the Vis.js graph and saves the updated graph.
+     * @function 
+     * @name removeNode
+     * @memberof module:MappingColumnsGraph
+     * @param {Object} node - The node to be removed.
+     * @returns {void}
+     */
     self.removeNode = function (node) {
         if (!node) {
             return;
@@ -568,6 +797,15 @@ var MappingColumnsGraph = (function () {
         self.visjsGraph.data.nodes.remove(node);
         self.saveVisjsGraph();
     };
+
+    /**
+     * Adds a new node to the Vis.js graph and saves the updated graph.
+     * @function 
+     * @name addNode
+     * @memberof module:MappingColumnsGraph
+     * @param {Object} node - The node to be added.
+     * @returns {void}
+     */
     self.addNode = function (node) {
         if (!node) {
             return;
@@ -575,6 +813,15 @@ var MappingColumnsGraph = (function () {
         self.visjsGraph.data.nodes.add(node);
         self.saveVisjsGraph();
     };
+
+    /**
+     * Updates an edge in the Vis.js graph and saves the updated graph.
+     * @function 
+     * @name updateEdge
+     * @memberof module:MappingColumnsGraph
+     * @param {Object} edge - The edge to be updated.
+     * @returns {void}
+     */
     self.updateEdge = function (edge) {
         if (!edge) {
             return;
@@ -582,6 +829,15 @@ var MappingColumnsGraph = (function () {
         self.visjsGraph.data.edges.update(edge);
         self.saveVisjsGraph();
     };
+
+    /**
+     * Removes an edge from the Vis.js graph and saves the updated graph.
+     * @function 
+     * @name removeEdge
+     * @memberof module:MappingColumnsGraph
+     * @param {Object} edge - The edge to be removed.
+     * @returns {void}
+     */
     self.removeEdge = function (edge) {
         if (!edge) {
             return;
@@ -589,6 +845,15 @@ var MappingColumnsGraph = (function () {
         self.visjsGraph.data.edges.remove(edge);
         self.saveVisjsGraph();
     };
+
+    /**
+     * Adds a new edge to the Vis.js graph and saves the updated graph.
+     * @function 
+     * @name addEdge
+     * @memberof module:MappingColumnsGraph
+     * @param {Object} edge - The edge to be added.
+     * @returns {void}
+     */
     self.addEdge = function (edge) {
         if (!edge) {
             return;
@@ -596,10 +861,26 @@ var MappingColumnsGraph = (function () {
         self.visjsGraph.data.edges.add(edge);
         self.saveVisjsGraph();
     };
+
+    /**
+     * Saves the Vis.js graph with the current configuration.
+     * @function 
+     * @name saveVisjsGraphWithConfig
+     * @memberof module:MappingColumnsGraph
+     * @param {Function} callback - Optional callback to execute after saving.
+     * @returns {void}
+     */
     self.saveVisjsGraphWithConfig = function (callback) {
         self.saveVisjsGraph(callback)
     }
 
+    /**
+     * Clears the current graph, resets offsets, and reinitializes the graph canvas.
+     * @function 
+     * @name clearGraph
+     * @memberof module:MappingColumnsGraph
+     * @returns {void}
+     */
     self.clearGraph = function () {
         var currentDataSource=DataSourceManager.currentConfig.currentDataSource
         MappingColumnsGraph.visjsGraph.clearGraph();

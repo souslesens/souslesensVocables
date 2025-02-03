@@ -26,7 +26,7 @@ describe("ProfileModel", () => {
         tracker = createTracker(getKnexConnection);
 
         dbProfiles = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "profiles.json")));
-
+        dbUserDataList = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "config", "users", "userData.list.json")));
         toolsModel = new ToolModel(path.join(__dirname, "data", "plugins"));
         allTools = toolsModel.allTools.filter((tool) => profileModel._mainConfig.tools_available.includes(tool.name));
     });
@@ -233,6 +233,7 @@ describe("ProfileModel", () => {
     test("delete an existing profile", async () => {
         tracker.on.select("profiles").response(dbProfiles[2]);
         tracker.on.delete("profiles").response();
+        tracker.on.select("user_data_list").response([dbUserDataList]);
 
         const result = await profileModel.deleteProfile("readwrite_folder_1");
         expect(result).toBeTruthy();

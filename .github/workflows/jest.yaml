@@ -27,3 +27,8 @@ jobs:
                   cache: "npm"
             - run: npm ci
             - run: npm run test:jest
+            - name: coverage
+              uses: ArtiomTr/jest-coverage-report-action@v2
+              with:
+                  test-script: npm run test:jest
+                  coverage-file: ./tests/report.json

@@ -41,6 +41,9 @@ coverage
 # nyc test coverage
 .nyc_output
 
+# jest test coverage
+tests/report.json
+
 # Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
 

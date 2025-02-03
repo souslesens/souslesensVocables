@@ -134,6 +134,9 @@ class UserDataModel {
     };
 
     update = async (userData) => {
+        if (userData.hasOwnProperty("created_at")) {
+            delete userData.created_at;
+        }
         const data = this._check(userData);
 
         let connection = getKnexConnection(this._mainConfig.database);
@@ -146,7 +149,7 @@ class UserDataModel {
         // We need to reinitialize connection for tests
         connection = getKnexConnection(this._mainConfig.database);
 
-        results = await connection.select("id").from("users").where("login", data.owned_by).first();
+        results = await connection.select("*").from("users").where("login", data.owned_by).first();
         if (results === undefined) {
             cleanupConnection(connection);
             throw Error("The specified owned_by do not exists", { cause: 404 });

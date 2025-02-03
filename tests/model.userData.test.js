@@ -42,7 +42,7 @@ describe("UserDataModel", () => {
 
     test("get unshared userData", async () => {
         tracker.on.select("user_data_list").response(dbUserDataList);
-        const adminUser = {login: "test", groups: []};
+        const adminUser = {login: "admin", groups: []};
         const userData = await userDataModel.all(adminUser);
         expect(Array.from(userData).length).toBe(2);
         expect(userData).toStrictEqual([
@@ -65,7 +65,7 @@ describe("UserDataModel", () => {
                 "shared_profiles": [],
                 "shared_users": [],
                 "created_at": "2025-01-24T14:16:41.111Z",
-                "owned_by": "test"
+                "owned_by": "admin"
             },
             {
                 "id": 5,
@@ -89,7 +89,7 @@ describe("UserDataModel", () => {
                     "skos_user"
                 ],
                 "created_at": "2025-01-27T08:05:51.750Z",
-                "owned_by": "test"
+                "owned_by": "admin"
             }
         ])
     });

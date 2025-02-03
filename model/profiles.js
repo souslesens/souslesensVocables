@@ -206,7 +206,7 @@ class ProfileModel {
         const conn = getKnexConnection(this._mainConfig.database);
         const results = await conn.select("theme").from("profiles").where("label", profileName).first();
         cleanupConnection(conn);
-        if (results === undefined) {
+        if (results === undefined || results.theme === undefined) {
             return this._mainConfig.theme.defaultTheme;
         }
 

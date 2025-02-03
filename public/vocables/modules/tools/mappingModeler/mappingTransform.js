@@ -1,13 +1,13 @@
 import common from "../../shared/common.js";
-import KGcreator from "../KGcreator/KGcreator.js";
 import MappingModeler from "./mappingModeler.js";
+import UIcontroller from "./uiController.js";
 
 var MappingTransform = (function () {
     var self = {};
 
     self.generateSLSmappings = function () {
         var json = MappingTransform.getSLSmappingsFromVisjsGraph();
-        MappingModeler.activateRightPanel("generic");
+        UIcontroller.activateRightPanel("generic");
 
         $("#mappingModeler_genericPanel").html(
             '<button class="w3-button nodesInfos-iconsButtons " style="font-size: 10px;margin-left:7px;" onclick=" MappingModeler.copyKGcreatorMappings()"><input type="image" src="./icons/CommonIcons/CopyIcon.png"></button>' +
@@ -26,7 +26,7 @@ var MappingTransform = (function () {
             table = MappingModeler.currentTable.name;
         }
         var nodesMap = {};
-        var nodes = MappingModeler.visjsGraph.data.nodes.get();
+        var nodes = MappingColumnsGraph.visjsGraph.data.nodes.get();
 
         nodes.forEach(function (node) {
             nodesMap[node.id] = node;
@@ -78,25 +78,23 @@ var MappingTransform = (function () {
         var columnsMapLabels = Object.values(columnsMap).map(function (column) {
             return column.label;
         });
-        var allMappings = {};
+        var allMappings = [];
 
         for (var nodeId in columnsMap) {
             var data = columnsMap[nodeId].data;
             var subject = self.nodeToKGcreatorColumnName(data);
+        
+
             if (!subject) {
                 return alert("Error in column " + nodeId);
             }
 
-            if (!allMappings[data.dataTable]) {
-                allMappings[data.dataTable] = { tripleModels: [] };
-            }
+          
             if (data.rdfType) {
                 var predicate = "rdf:type";
-                /*  if (data.rdfType == "owl:Class") {
-                    predicate = "rdfs:subClassOf";
-                }*/
+               
 
-                allMappings[data.dataTable].tripleModels.push({
+                allMappings.push({
                     s: subject,
                     p: predicate,
                     o: data.rdfType,
@@ -104,7 +102,7 @@ var MappingTransform = (function () {
             }
 
             if (data.rdfsLabel) {
-                allMappings[data.dataTable].tripleModels.push({
+                allMappings.push({
                     s: subject,
                     p: "rdfs:label",
                     o: data.rdfsLabel,
@@ -119,7 +117,7 @@ var MappingTransform = (function () {
                 allMappings[data.dataTable].transform[data.label] = data.transform;
             }
 
-            var connections = MappingModeler.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
+            var connections = MappingColumnsGraph.visjsGraph.getFromNodeEdgesAndToNodes(nodeId);
 
             connections.forEach(function (connection) {
                 if (connection.edge.data.type == "tableToColumn") {
@@ -144,7 +142,7 @@ var MappingTransform = (function () {
                     o: object,
                 };
 
-                allMappings[data.dataTable].tripleModels.push(mapping);
+                allMappings.push(mapping);
             });
             if (data.otherPredicates) {
                 data.otherPredicates.forEach(function (predicate) {
@@ -167,18 +165,18 @@ var MappingTransform = (function () {
                         triple.dateFormat = predicate.dateFormat;
                     }
 
-                    allMappings[data.dataTable].tripleModels.push(triple);
+                    allMappings.push(triple);
                 });
             }
         }
 
-        for (var dataTable in allMappings) {
-            allMappings[data.dataTable].tripleModels = self.addMappingsRestrictions(allMappings[data.dataTable].tripleModels);
-        }
 
-        var json = allMappings;
+            allMappings = self.addMappingsRestrictions(allMappings);
 
-        return json;
+
+
+
+        return allMappings;
     };
 
     self.addMappingsRestrictions = function (allMappings) {

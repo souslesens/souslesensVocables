@@ -299,6 +299,7 @@ var MappingModeler = (function () {
                 },
             };
             MappingColumnsGraph.drawResource(newResource);
+          //  MappingColumnsGraph.graphActions. showColumnDetails(newResource)
             setTimeout(function () {
                 self.onLegendNodeClick({id: "Class"});
             }, 500);
@@ -318,7 +319,7 @@ var MappingModeler = (function () {
             };
 
             MappingColumnsGraph.drawResource(newResource);
-             MappingColumnsGraph.graphActions. showColumnDetails(newResource)
+
             setTimeout(function () {
                 self.onLegendNodeClick({id: "Column"});
             }, 500);
